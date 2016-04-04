@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-04-04 09:40:10"
+	"lastUpdated": "2016-04-04 13:06:56"
 }
 
 /*
@@ -31,12 +31,12 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/result\?/) || url.match(/\/newspaper\/page/)) {
+	if (url.indexOf('/result?') != -1 || url.indexOf('/newspaper/page') != -1) {
 		return "multiple";
-	} else if (url.match(/\/newspaper\/article\//i)) {
+	} else if (url.indexOf('/newspaper/article') != -1) {
 		return "newspaperArticle";
-	} else if (url.match(/\/work\//i)) {
-		return "book";
+	} else if (url.indexOf('/work/') != -1) {
+		return "document";
 	}
 }
 
@@ -104,7 +104,7 @@ function scrapeNewspaper(doc, url) {
 		// First you need to tell the service to start generating the PDF.
 		// You get back a hash id to include in the PDF url.
 
-		var renditionURL = "http://trove.nla.gov.au/newspaper/rendition/"
+		var renditionURL = "/newspaper/rendition/"
 		var prepURL = renditionURL + articleID + '/level/3/prep'
 
 		ZU.HTTP.doGet(prepURL, function(hashID) {
@@ -118,7 +118,7 @@ function scrapeNewspaper(doc, url) {
 
 			var timeout = Date.now() + 5000;
 			while (Date.now() < timeout){}
-			item.attachments.push({url: renditionURL + articleID + '.3.pdf?followup=' + hashID, title: item.publicationTitle + ', ' + item.date + ', p. ' + item.pages, mimeType:'application/pdf'});
+			item.attachments.push({url: renditionURL + articleID + '.3.pdf?followup=' + hashID, title: 'Trove Newspaper PDF', mimeType:'application/pdf'});
 
 			// Get the OCRd text and save in a note.
 			var textURL = renditionURL + articleID + '.txt';
@@ -176,11 +176,24 @@ function checkType(string) {
 	return "book";
 }
 
+function cleanCreators(creators) {
+	newCreators = [];
+	for (var i = 0; i < creators.length; i++) {
+		var creator = creators[i];
+		var dates = creator.firstName.match(/\(?\d{4}-\d{0,4}\)?,?/);
+		if (dates !== null) {
+			creator.firstName = creator.firstName.replace(dates[0], "").trim()
+		}
+		newCreators.push(creator);
+	}
+	return newCreators
+}
+
 function scrapeWork(doc, url) {
 	var thumbnailURL;
 
 	// Remove all params from url
-	var workURL = url.match(/http.*\/work\/\d+/)[0];
+	var workURL = url.slice(0, url.indexOf('?'));
 	var bibtexURL = workURL + '?citationFormat=BibTeX';
 
 	// Need to get version identifier for the BibText url
@@ -200,6 +213,7 @@ function scrapeWork(doc, url) {
 		translator.setString(bibtex);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = checkType(item.type);
+			item.creators = cleanCreators(item.creators);
 
 			// This gives a better version-aware url.
 			item.url = ZU.xpathText(doc, "//meta[@property='og:url']/@content");
@@ -226,7 +240,7 @@ var testCases = [
 				"title": "THIRROUL - Hotels - Rex Hotel",
 				"creators": [
 					{
-						"firstName": "1910-1981, William A. (William Alan)",
+						"firstName": "William A. (William Alan)",
 						"lastName": "Bayley",
 						"creatorType": "author"
 					}
@@ -293,7 +307,7 @@ var testCases = [
 				"url": "http://nla.gov.au/nla.news-article70068753",
 				"attachments": [
 					{
-						"title": "Sunbury News, 07 Feb 1903, p. 4",
+						"title": "Trove Newspaper PDF",
 						"mimeType": "application/pdf"
 					}
 				],
