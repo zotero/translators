@@ -43,9 +43,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, url) {
 	var items = {};
 	var results;
-	if (url.match(/\/result\?/)) {
+	if (url.indexOf('/result?') != -1) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
-	} else if (url.match(/\/newspaper\/page/)) {
+	} else if (url.indexOf('/newspaper/page') != -1) {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
 	}
 	for (var i=0; i<results.length; i++) {
@@ -75,7 +75,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	if (url.match(/\/newspaper\/article\//i)) {
+	if (url.indexOf('/newspaper/article/') != -1) {
 		scrapeNewspaper(doc, url);
 	} else {
 		scrapeWork(doc, url);
@@ -118,7 +118,7 @@ function scrapeNewspaper(doc, url) {
 
 			var timeout = Date.now() + 5000;
 			while (Date.now() < timeout){}
-			item.attachments.push({url: renditionURL + articleID + '.3.pdf?followup=' + hashID, title: 'Trove Newspaper PDF', mimeType:'application/pdf'});
+			item.attachments.push({url: renditionURL + articleID + '.3.pdf?followup=' + hashID, title: 'Trove newspaper PDF', mimeType:'application/pdf'});
 
 			// Get the OCRd text and save in a note.
 			var textURL = renditionURL + articleID + '.txt';
@@ -180,10 +180,7 @@ function cleanCreators(creators) {
 	newCreators = [];
 	for (var i = 0; i < creators.length; i++) {
 		var creator = creators[i];
-		var dates = creator.firstName.match(/\(?\d{4}-\d{0,4}\)?,?/);
-		if (dates !== null) {
-			creator.firstName = creator.firstName.replace(dates[0], "").trim()
-		}
+		creator.firstName = creator.firstName.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim()
 		newCreators.push(creator);
 	}
 	return newCreators
@@ -221,7 +218,7 @@ function scrapeWork(doc, url) {
 			delete item.itemID;
 			delete item.type;
 			if (thumbnailURL !== null) {
-				item.attachments.push({url: thumbnailURL, title: item.title, mimeType:'image/jpeg'});
+				item.attachments.push({url: thumbnailURL, title: 'Trove thumbnail image', mimeType:'image/jpeg'});
 			}
 			item.complete();
 		});
@@ -251,7 +248,7 @@ var testCases = [
 				"url": "http://trove.nla.gov.au/version/208674371",
 				"attachments": [
 					{
-						"title": "THIRROUL - Hotels - Rex Hotel",
+						"title": "Trove thumbnail image",
 						"mimeType": "image/jpeg"
 					}
 				],
@@ -307,7 +304,7 @@ var testCases = [
 				"url": "http://nla.gov.au/nla.news-article70068753",
 				"attachments": [
 					{
-						"title": "Trove Newspaper PDF",
+						"title": "Trove newspaper PDF",
 						"mimeType": "application/pdf"
 					}
 				],
