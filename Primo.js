@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-03 22:15:00"
+	"lastUpdated": "2016-04-05 04:56:07"
 }
 
 /*
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
 			}
 			fetchPNX(urls);
-		})
+		});
 	} else {
 		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
 	}
@@ -280,7 +280,7 @@ function importPNX(text) {
 	item.title = ZU.xpathText(doc, '//display/title');
 	if(item.title) {
 		item.title = ZU.unescapeHTML(item.title);
-	    item.title = item.title.replace(/\s*:/, ":");
+		item.title = item.title.replace(/\s*:/, ":");
 	}
 	var creators = ZU.xpath(doc, '//display/creator');
 	var contributors = ZU.xpath(doc, '//display/contributor');
@@ -300,7 +300,7 @@ function importPNX(text) {
 			var splitAu = author.split(',');
 			if (splitAu.length > 2) continue;
 			var name = splitAu[1].trim().toLowerCase() + ' '
-				+ splitAu[0].trim().toLowerCase()
+				+ splitAu[0].trim().toLowerCase();
 			splitGuidance[name] = author;
 		}
 	}
@@ -316,7 +316,7 @@ function importPNX(text) {
 			.replace(/^\s*"|,?"\s*$/g, '');
 	} else if(pubplace) {
 		item.publisher = pubplace[0].replace(/,\s*c?\d+(\-\d+)?|[\(\[].+[\)\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
+			.replace(/^\s*"|,?"?\s*$/g, '');
 	}
 	
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
@@ -413,6 +413,8 @@ function importPNX(text) {
 		}
 	}
 	if (callArray.length) {
+		//remove duplicate call numbers
+		callArray = dedupeArray(callArray);
 		item.callNumber = callArray.join(", ");
 	}
 	else {
@@ -420,10 +422,10 @@ function importPNX(text) {
 	}
 	
 	//Harvard specific code, requested by Harvard Library:
-	var library = ZU.xpathText(doc, '//browse/institution')
+	var library = ZU.xpathText(doc, '//browse/institution');
 	if (library && library == "HVD") {
 		if (ZU.xpathText(doc, '//display/lds01')) {
-		    item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
+			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
 		}
 		if (ZU.xpathText(doc, '//display/lds03')) {
 			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
@@ -476,6 +478,16 @@ function extractNumPages(str) {
 		);
 	}
 	return numPages.join('; ');
+}
+
+function dedupeArray(names) {
+	//via http://stackoverflow.com/a/15868720/1483360
+	return names.reduce(function(a,b){
+		if(a.indexOf(b)<0) {
+			a.push(b);
+		}
+		return a;
+	},[]);
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -511,7 +523,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PURDUE&search_scope=everything&docId=PURDUE_ALMA21505315560001081&fn=permalink",
+		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/default:default_scope:PURDUE_ALMA21505315560001081",
 		"items": [
 			{
 				"itemType": "book",
@@ -567,7 +579,7 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"numPages": "252",
-				"publisher": "Hamlyn,",
+				"publisher": "Hamlyn",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
