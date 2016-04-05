@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-01-11 14:20:46"
+	"lastUpdated": "2016-04-05 04:56:07"
 }
 
 /*
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
 			}
 			fetchPNX(urls);
-		})
+		});
 	} else {
 		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
 	}
@@ -220,15 +220,20 @@ function importPNX(text) {
 		case 'ebook':
 		case 'pbook' :
 		case 'books':
+		case 'score':
 		case 'journal':		//as long as we don't have a periodical item type;
  			item.itemType = "book";
 			break;
 		case 'audio':
+		case 'sound_recording':
 			item.itemType = "audioRecording";
 			break;
 		case 'video':
 		case 'dvd':
 			item.itemType = "videoRecording";
+			break;
+		case 'computer_file':
+			item.itemType = "computerProgram";
 			break;
 		case 'report':
 			item.itemType = "report";
@@ -241,10 +246,18 @@ function importPNX(text) {
 			item.itemType = "journalArticle";
 			break;
 		case 'thesis':
+		case 'dissertation':
 			item.itemType = "thesis";
+			break;
+		case 'archive_manuscript':
+		case 'object':
+			item.itemType = "manuscript";
 			break;
 		case 'map':
 			item.itemType = "map";
+			break;
+		case 'reference_entry':
+			item.itemType = "encyclopediaArticle";
 			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
@@ -265,8 +278,10 @@ function importPNX(text) {
 	}
 	
 	item.title = ZU.xpathText(doc, '//display/title');
-	if(item.title) item.title = ZU.unescapeHTML(item.title);
-	
+	if(item.title) {
+		item.title = ZU.unescapeHTML(item.title);
+		item.title = item.title.replace(/\s*:/, ":");
+	}
 	var creators = ZU.xpath(doc, '//display/creator');
 	var contributors = ZU.xpath(doc, '//display/contributor');
 	if(!creators.length && contributors.length) {
@@ -285,7 +300,7 @@ function importPNX(text) {
 			var splitAu = author.split(',');
 			if (splitAu.length > 2) continue;
 			var name = splitAu[1].trim().toLowerCase() + ' '
-				+ splitAu[0].trim().toLowerCase()
+				+ splitAu[0].trim().toLowerCase();
 			splitGuidance[name] = author;
 		}
 	}
@@ -296,12 +311,12 @@ function importPNX(text) {
 	var publisher = ZU.xpathText(doc, '//display/publisher');
 	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 	if(pubplace && pubplace[1]) {
-		item.place = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
-		item.publisher = pubplace[1].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
+		item.place = pubplace[0].replace(/,\s*c?\d+(\-\d+)?|[\(\)\[\]]|(\.\s*)?/g, "");
+		item.publisher = pubplace[1].replace(/,\s*c?\d+(\-\d+)?|[\(\)\[\]]|(\.\s*)?/g, "")
 			.replace(/^\s*"|,?"\s*$/g, '');
 	} else if(pubplace) {
-		item.publisher = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
+		item.publisher = pubplace[0].replace(/,\s*c?\d+(\-\d+)?|[\(\[].+[\)\]]|(\.\s*)?/g, "")
+			.replace(/^\s*"|,?"?\s*$/g, '');
 	}
 	
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
@@ -369,9 +384,53 @@ function importPNX(text) {
 		item.pages = endPage;
 	}
 	
-	// does callNumber get stored anywhere else in the xml?
-	item.callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc');
+	//these are actual local full text links (e.g. to google-scanned books)
+	//e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
+	var URL = ZU.xpathText(doc, '//links/linktorsrc');
+	if (URL && URL.search(/\$\$U.+\$\$/) != -1) {
+		item.url = URL.match(/\$\$U(.+?)\$\$/)[1];
+	}
+
+	//add finding aids as links
+	var findingAid = ZU.xpathText(doc, '//links/linktofa');
+	if (findingAid && findingAid.search(/\$\$U.+\$\$/) != -1) {
+		item.attachments.push({url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false});
+	}
+	// get the best call Number; sequence recommended by Harvard University Library
+	var callNumber = ZU.xpath(doc, '//browse/callnumber');
+	var callArray = [];
+	for (var i = 0; i<callNumber.length; i++) {
+		if (callNumber[i].textContent.search(/\$\$D.+\$/) != -1) {
+			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
+		}
+	}
+	if (!callArray.length) {
+		callNumber = ZU.xpath(doc, '//display/availlibrary');
+		for (var i = 0; i<callNumber.length; i++) {
+			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
+				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
+			}
+		}
+	}
+	if (callArray.length) {
+		//remove duplicate call numbers
+		callArray = dedupeArray(callArray);
+		item.callNumber = callArray.join(", ");
+	}
+	else {
+		ZU.xpathText(doc, '//enrichment/classificationlcc');
+	}
 	
+	//Harvard specific code, requested by Harvard Library:
+	var library = ZU.xpathText(doc, '//browse/institution');
+	if (library && library == "HVD") {
+		if (ZU.xpathText(doc, '//display/lds01')) {
+			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
+		}
+		if (ZU.xpathText(doc, '//display/lds03')) {
+			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
+		}
+	}
 	item.complete();
 }
 
@@ -380,7 +439,7 @@ function stripAuthor(str) {
 		// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
 		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*\([^()]*\)$/, '');
+		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -419,11 +478,21 @@ function extractNumPages(str) {
 		);
 	}
 	return numPages.join('; ');
+}
+
+function dedupeArray(names) {
+	//via http://stackoverflow.com/a/15868720/1483360
+	return names.reduce(function(a,b){
+		if(a.indexOf(b)<0) {
+			a.push(b);
+		}
+		return a;
+	},[]);
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN&showPNX=true",
+		"url": "http://princeton-primo.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PRINCETON&search_scope=All%20Princeton%20Libraries&docId=PRN_VOYAGER2778598&fn=permalink",
 		"items": [
 			{
 				"itemType": "book",
@@ -436,6 +505,7 @@ var testCases = [
 					}
 				],
 				"date": "1860",
+				"callNumber": "5552.406",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"publisher": "London",
@@ -453,7 +523,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PURDUE&docId=PURDUE_ALMA21505315560001081&fn=permalink",
+		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/default:default_scope:PURDUE_ALMA21505315560001081",
 		"items": [
 			{
 				"itemType": "book",
@@ -466,9 +536,9 @@ var testCases = [
 					}
 				],
 				"date": "1994",
-				"ISBN": "0192892541",
+				"ISBN": "9780192892546",
 				"abstractNote": "Experience of war -- Causes of war -- War and the military establishment -- Ethics of war -- Strategy -- Total war and the great powers -- Limited war and developing countries., \"War makes headlines and history books. It has shaped the international system, prompted social change, and inspired literature, art, and music. It engenders some of the most intense as well as the most brutal human experiences, and it raises fundamental questions of human ethics.\" \"The ubiquitous, contradictory, and many-sided character of war is fully reflected in this reader. It addresses a wide range of questions: What are the causes of war? Which strategic as well as moral principles guide its conduct, and how have these changed? Has total war become unthinkable? What is the nature of contemporary conflict? How is war experienced by those on the front line?\" \"These and other key issues are examined through a variety of writings. Drawing on sources from numerous countries and disciplines, this reader includes accounts by generals, soldiers, historians, strategists, and poets, who consider conflicts from the Napoleonic Wars to Vietnam and Bosnia. The writing not only of great strategic thinkers but also of ordinary soldiers illustrates both the theory and the experience of war in its many guises.\"--BOOK JACKET.",
-				"callNumber": "U21.2",
+				"callNumber": "355.02 W1945 1994",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"numPages": "xi+385",
@@ -486,7 +556,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
+		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&search_scope=default_scope&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
 		"items": [
 			{
 				"itemType": "book",
@@ -504,7 +574,8 @@ var testCases = [
 					}
 				],
 				"date": "1973",
-				"ISBN": "0600393046",
+				"ISBN": "9780600393047",
+				"callNumber": "9B6655",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"numPages": "252",
@@ -541,6 +612,7 @@ var testCases = [
 					}
 				],
 				"date": "1970",
+				"callNumber": "NX650G8B38, NX650G8 B38",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"publisher": "Boston Boston Book and Art Chop",
@@ -605,6 +677,66 @@ var testCases = [
 					"Normalisation",
 					"Prisme",
 					"Publicisation"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://hollis.harvard.edu/primo_library/libweb/action/dlDisplay.do?vid=HVD&search_scope=default_scope&docId=HVD_ALEPH002208563&fn=permalink",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Mastering the art of French cooking",
+				"creators": [
+					{
+						"firstName": "Simone",
+						"lastName": "Beck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Louisette",
+						"lastName": "Bertholle",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Julia",
+						"lastName": "Child",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Barbara Ketcham",
+						"lastName": "Wheaton",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Avis",
+						"lastName": "DeVoto",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1961",
+				"abstractNote": "Illustrates the ways in which classic French dishes may be created with American foodstuffs and appliances.",
+				"callNumber": "641.64 C53m, c.1, 641.64 C53m, c. 3, 641.64 C53m, c.4, 641.64 C53m, c.5, 641.64 C53m, c.6, 641.64 C53m, c. 7, 641.64 C53m, c. 8, 641.64 C53m, c.2",
+				"edition": "[1st ed.]",
+				"extra": "HOLLIS number: 002208563",
+				"language": "eng",
+				"libraryCatalog": "Primo",
+				"place": "New York",
+				"publisher": "Knopf",
+				"attachments": [
+					{
+						"title": "HOLLIS Permalink",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Authors' inscriptions (Provenance)",
+					"Cookery, French",
+					"Cooking, French.",
+					"French cooking"
 				],
 				"notes": [],
 				"seeAlso": []
