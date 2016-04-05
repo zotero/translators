@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-25 06:51:40"
+	"lastUpdated": "2016-04-05 11:11:08"
 }
 
 /*
@@ -207,14 +207,10 @@ function scrapeSeries(doc, url) {
 	item.date = meta['contents dates'];
 	item.medium = meta['predominant physical format'];
 	item.abstractNote = meta['series note'];
+	item.archiveLocation = meta['series number'];
 	
 	var seriesNumber = encodeURIComponent(meta['series number']);
-	item.attachments.push({
-		title: "National Archives of Australia Record",
-		url: 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber,
-		mimeType: 'text/html',
-		snapshot: false
-	})
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber;
 	
 	// Agencies recording into this series
 	var agencies = ZU.xpath(doc, '//div[@id="provenanceRecording"]//div[@class="linkagesInfo"]');
