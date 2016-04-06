@@ -180,10 +180,10 @@ function cleanCreators(creators) {
 	newCreators = [];
 	for (var i = 0; i < creators.length; i++) {
 		var creator = creators[i];
-		creator.firstName = creator.firstName.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim()
+		creator.firstName = creator.firstName.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
 		newCreators.push(creator);
 	}
-	return newCreators
+	return newCreators;
 }
 
 function scrapeWork(doc, url) {
