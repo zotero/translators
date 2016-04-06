@@ -49,9 +49,9 @@ function getSearchResults(doc, url) {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
 	}
 	for (var i=0; i<results.length; i++) {
-		var url = results[i].href;
+		var link = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
-		items[url] = title;
+		items[link] = title;
 	}
 	return items;
 }
@@ -104,8 +104,8 @@ function scrapeNewspaper(doc, url) {
 		// First you need to tell the service to start generating the PDF.
 		// You get back a hash id to include in the PDF url.
 
-		var renditionURL = "/newspaper/rendition/"
-		var prepURL = renditionURL + articleID + '/level/3/prep'
+		var renditionURL = "/newspaper/rendition/";
+		var prepURL = renditionURL + articleID + '/level/3/prep';
 
 		ZU.HTTP.doGet(prepURL, function(hashID) {
 
@@ -155,7 +155,7 @@ var troveTypes = {
 	"Map": "map",
 	"Unpublished": "manuscript",
 	"Published": "document"
-}
+};
 	
 
 function checkType(string) {
