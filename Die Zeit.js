@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-09 06:45:07"
+	"lastUpdated": "2016-04-07 03:18:26"
 }
 
 /*
@@ -95,11 +95,16 @@ function scrape(doc, url){
 	newItem.url = url;
 	newItem.title = ZU.xpathText(doc, './/title').replace(/\s\|\sZEIT\sONLINE$/, '');
 	newItem.abstractNote = ZU.xpathText(articleNode, './/*[@itemprop="description"]');
-	newItem.date = ZU.xpathText(articleNode, './/*[@itemprop="datePublished"]/@content');
-
+	var date = ZU.xpathText(doc, '//meta[@name="date"]/@content');
+	if (date) {
+		newItem.date = date.replace(/T.+/, "");
+	}
 	var authorNode = ZU.xpath(articleNode, './/*[@itemprop="author"]//*[@itemprop="name"]');
 	if (authorNode.length == 0) {
 		authorNode = ZU.xpath(articleNode, './/*[@itemprop="author"]');
+	}
+	if (authorNode.length == 0) {
+		authorNode = ZU.xpath(articleNode, './/div[@class="byline"]');
 	}
 	for (var i=0; i<authorNode.length; i++) {
 		var authorName = authorNode[i].textContent;
@@ -162,7 +167,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2011-09-04T14:55:40+02:00",
+				"date": "2011-09-04",
 				"ISSN": "0044-2070",
 				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
 				"libraryCatalog": "Die Zeit",
@@ -179,6 +184,7 @@ var testCases = [
 				],
 				"tags": [
 					"Ausland",
+					"Libyen",
 					"Politik"
 				],
 				"notes": [],
@@ -200,7 +206,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-09-01T08:00:00+02:00",
+				"date": "2011-09-01",
 				"ISSN": "0044-2070",
 				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke",
 				"libraryCatalog": "Die Zeit",
@@ -237,6 +243,7 @@ var testCases = [
 					"Robert Enke",
 					"SV Werder Bremen",
 					"Schriftsteller",
+					"Sport",
 					"Stadion",
 					"Trainer",
 					"Türkei"
@@ -265,7 +272,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2009-03-05T07:00:00+01:00",
+				"date": "2009-03-05",
 				"ISSN": "0044-2070",
 				"abstractNote": "Ein Iraner in Wien. Der Fotograf  Daniel Shaked, 31, gibt Österreichs einziges Hip-Hop-Magazin heraus",
 				"libraryCatalog": "Die Zeit",
@@ -282,6 +289,7 @@ var testCases = [
 				],
 				"tags": [
 					"Band",
+					"DRINNEN",
 					"Eltern",
 					"Familie",
 					"Geschwister",
@@ -291,6 +299,7 @@ var testCases = [
 					"Israel",
 					"Musik",
 					"Offenheit",
+					"Politik",
 					"Reise",
 					"Revolution",
 					"Salzburg",
