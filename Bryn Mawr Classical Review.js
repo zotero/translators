@@ -59,6 +59,8 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
 		var title = doc.evaluate('//h3/i', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.publicationTitle = "Bryn Mawr Classical Review";
+		item.journalAbbreviation = "BMCR";
 		item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
 		var data = doc.evaluate('//h3[i]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var title = title.replace("(", "\\(").replace(")", "\\)");
