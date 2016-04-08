@@ -114,14 +114,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
 						"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 						"mimeType": "text/html"
 					}
 				],
+				"publicationTitle": "Bryn Mawr Classical Review",
+				"journalAbbreviation": "BMCR",
 				"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 				"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
-				"date": "2010/01/02",
+				"date": "2010/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Review of"
@@ -136,23 +137,13 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
-						"firstName": "Christina S.",
-						"lastName": "Kraus",
-						"creatorType": "author"
+ 						"firstName": "Keely Elizabeth"
+ 						"lastName": "Heuer"
+ 						"creatorType": "author"
 					},
 					{
-						"firstName": "Anthony",
-						"lastName": "Grafton",
-						"creatorType": "reviewedAuthor"
-					},
-					{
-						"firstName": "Glenn W.",
-						"lastName": "Most",
-						"creatorType": "reviewedAuthor"
-					},
-					{
-						"firstName": "Salvatore",
-						"lastName": "Settis",
+						"firstName": "Rolf",
+						"lastName": "Hurschmann",
 						"creatorType": "reviewedAuthor"
 					}
 				],
@@ -161,13 +152,15 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Review of: The Classical Tradition",
+						"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2"
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Review of: The Classical Tradition",
+				"publicationTitle": "Bryn Mawr Classical Review",
+				"journalAbbreviation": "BMCR"
+				"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
 				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
-				"date": "2013/01/44",
+				"date": "2013/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Review of"
