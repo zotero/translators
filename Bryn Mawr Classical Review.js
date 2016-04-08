@@ -152,12 +152,12 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2"
+						"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
 						"mimeType": "text/html"
 					}
 				],
 				"publicationTitle": "Bryn Mawr Classical Review",
-				"journalAbbreviation": "BMCR"
+				"journalAbbreviation": "BMCR",
 				"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
 				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
 				"date": "2013/01",
