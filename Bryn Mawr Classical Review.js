@@ -154,8 +154,8 @@ var testCases = [
 				"itemType": "journalArticle",
 				"creators": [
 					{
- 						"firstName": "Keely Elizabeth"
- 						"lastName": "Heuer"
+ 						"firstName": "Keely Elizabeth",
+ 						"lastName": "Heuer",
  						"creatorType": "author"
 					},
 					{
