@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-10 10:08:56"
+	"lastUpdated": "2016-04-10 14:26:02"
 }
 
 /*
@@ -108,15 +108,17 @@ function scrape(doc, url) {
 		
 		var coins = ZU.xpathText(doc, '//span[@class="Z3988"]/@title');
 		if (coins) {
-			coins = coins.replace(/%26%238208%3B/g, '-')
-				.replace(/%C2%82/g, '‚').replace(/%C2%91/g, '‘');
-			//Z.debug(coins);
+			coins = transcodeURIEncoding(coins, 'Windows-1252');
 			if (coins.indexOf('rft.genre=article') > -1
 				|| coins.indexOf('rft.genre=bookitem') > -1) {
 				coins = coins.replace('rft.title', 'rft.atitle');
 			}
 			var item = new Zotero.Item();
 			ZU.parseContextObject(coins, item);
+			
+			if (item.abstractNote) {
+				item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+			}
 			
 			if (pdfUrl) {
 				item.attachments.push({
@@ -143,7 +145,91 @@ function finalize(doc, item) {
 		item.numPages = item.numPages.replace(/\D/g, '');
 	}
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+
+/**
+ * Credit for this function: Aurimas Vinckevicius
+ * 
+ * Transcodes non-UTF-8-encoded text that was passed through encodeURIComponent
+ * (which assumed that it was UTF-8) into the UTF-8 equivalent. This makes decodeURIComponent
+ * correctly decode the encoded text into UTF-8.
+ *
+ * E.g. 0x82 (SINGLE LOW-9 QUOTATION MARK) in Windows-1252 is treated as UTF-8 and encoded
+ * as %C2%82. This would transcode it to %E2%80%9A and decodeURIComponent would then
+ * decode it to "\u201A" (the same symbol)
+ *
+ * @param {String} s String to transcode
+ * @param {String} fromEncoding String specifying source encoding. Only "Windows-1252" is
+ *     currently supported.
+ * @return {String} Transcoded string. Unaltered string is returned if the encoding is not recognized.
+ * 
+ * Examples:
+ * transcodeURIEncoding("%C2%82", "Windows-1252") => "%E2%80%9A"
+ * transcodeURIEncoding("%26%238208%3B", "Windows-1252") => "%26%238208%3B"
+ */
+function transcodeURIEncoding(s, fromEncoding) {
+	// Only differing code points need to be specified
+	var map = {
+		// http://unicode.org/Public/MAPPINGS/VENDORS/MICSFT/WINDOWS/CP1252.TXT
+		'Windows-1252': {
+			0x80: 0x20AC,
+			0x81: null,
+			0x82: 0x201A,
+			0x83: 0x0192,
+			0x84: 0x201E,
+			0x85: 0x2026,
+			0x86: 0x2020,
+			0x87: 0x2021,
+			0x88: 0x02C6,
+			0x89: 0x2030,
+			0x8A: 0x0160,
+			0x8B: 0x2039,
+			0x8C: 0x0152,
+			0x8D: null,
+			0x8E: 0x017D,
+			0x8F: null,
+			0x90: null,
+			0x91: 0x2018,
+			0x92: 0x2019,
+			0x93: 0x201C,
+			0x94: 0x201D,
+			0x95: 0x2022,
+			0x96: 0x2013,
+			0x97: 0x2014,
+			0x98: 0x02DC,
+			0x99: 0x2122,
+			0x9A: 0x0161,
+			0x9B: 0x203A,
+			0x9C: 0x0153,
+			0x9D: null,
+			0x9E: 0x017E,
+			0x9F: 0x0178
+		}
+	}[fromEncoding];
+
+	if (!map) return s;
+
+	// Match two-byte UTF-8 patterns from 0x80 (%C2%80) to 0xFF (%C3%BF) code point, since
+	// that would cover all 8-bit encodings. Note that in UTF-8 the two bytes are always in the 
+	// 0b110xxxxx 0b10xxxxxx format, so the second byte is limited to [89AB][0-9A-F] hex codes
+	return s.replace(/%C[23]%[89AB][0-9A-F]/g, function(m) {
+		var codePoint = decodeURIComponent(m).codePointAt(0);
+
+		if (!(codePoint in map)) return m;
+
+		codePoint = map[codePoint];
+		if (codePoint === null) {
+			// Code point was not defined. Shouldn't really happen, unless
+			// an incorrect fromEncoding was specified.
+			return '';
+		}
+
+		return encodeURIComponent(String.fromCodePoint(codePoint));
+	});
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -425,7 +511,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs- und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von ‚guter Kindheit‘ (und damit verbunden richtiger  Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten ‚Bildungskindheit‘ (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh-) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs- und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen ‚guter Kindheit‘ mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
+				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs‐ und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von ‚guter Kindheit‘ (und damit verbunden richtiger Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten ‚Bildungskindheit‘ (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh‐) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs‐ und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen ‚guter Kindheit‘ mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
 				"language": "Deutsch",
 				"libraryCatalog": "Fachportal Pädagogik",
 				"numPages": "49",
