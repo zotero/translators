@@ -2,14 +2,14 @@
 	"translatorID": "4b0b42df-76b7-4a61-91aa-b15bc553b77d",
 	"label": "Fachportal Pädagogik",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.fachportal-paedagogik\\.de/fis_bildung/|^https?://www?\\.pedocs\\.de/",
+	"target": "^https?://(www\\.fachportal-paedagogik\\.de/fis_bildung/|www\\.pedocs\\.de/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-09 21:49:30"
+	"lastUpdated": "2016-04-10 10:08:56"
 }
 
 /*
@@ -36,7 +36,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/suche/fis_set.html?FId=')>-1 || url.indexOf('/suche/fis_set_e.html?FId=')>-1 || url.indexOf('source_opus=')>-1) {
+	if (url.indexOf('/suche/fis_set.html?FId=')>-1
+		|| url.indexOf('/suche/fis_set_e.html?FId=')>-1
+		|| url.indexOf('source_opus=')>-1) {
 		var coins = doc.getElementsByClassName("Z3988");
 		if (coins.length > 0) {
 			var info = coins[0].title;
@@ -91,9 +93,9 @@ function scrape(doc, url) {
 	if (m) {
 		//e.g. http://www.fachportal-paedagogik.de/fis_bildung/suche/fis_ausg.html?FId=A18196&lart=BibTeX
 		var bibUrl = "/fis_bildung/suche/fis_ausg.html?FId=" + m[1] + "&lart=BibTeX";
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");//BibTex translator
 		ZU.doGet(bibUrl, function(text){
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");//BibTex translator
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				finalize(doc, item);
@@ -102,31 +104,15 @@ function scrape(doc, url) {
 		});
 	} else {
 		var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-		Z.debug(pdfUrl);
-
-		/*
-		//fails on http://www.pedocs.de/frontdoor.php?source_opus=9491&la=de
-		Z.debug(ZU.xpathText(doc, '//span[@class="Z3988"]/@title'));
-		var translator = Zotero.loadTranslator("web");
-		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");//COinS translator
-		translator.setDocument(doc);//TODO encoding is normally Western and not utf8
-		translator.setHandler("itemDone", function (obj, item) {
-			if (pdfUrl) {
-				item.attachments.push({
-					url: pdfUrl,
-					title: "Full Text PDF",
-				});
-			}
-			
-			finalize(doc, item);
-		});
-		translator.translate();
-		*/
+		//Z.debug(pdfUrl);
 		
 		var coins = ZU.xpathText(doc, '//span[@class="Z3988"]/@title');
 		if (coins) {
+			coins = coins.replace(/%26%238208%3B/g, '-')
+				.replace(/%C2%82/g, '‚').replace(/%C2%91/g, '‘');
 			//Z.debug(coins);
-			if (coins.indexOf('rft.genre=article') > -1 || coins.indexOf('rft.genre=bookitem') > -1) {//TODO condition here
+			if (coins.indexOf('rft.genre=article') > -1
+				|| coins.indexOf('rft.genre=bookitem') > -1) {
 				coins = coins.replace('rft.title', 'rft.atitle');
 			}
 			var item = new Zotero.Item();
@@ -136,6 +122,7 @@ function scrape(doc, url) {
 				item.attachments.push({
 					url: pdfUrl,
 					title: "Full Text PDF",
+					mimeType: "application/pdf"
 				});
 			}
 			finalize(doc, item);
@@ -144,20 +131,16 @@ function scrape(doc, url) {
 }
 
 function finalize(doc, item) {
-	item.attachments.push({
-		title: "Snapshot",
-		document: doc
-	});
 	if (item.url) {
 		item.attachments.push({
 			url: item.url,
-			title: "Link",
+			title: "Entry in the German Education Index",
 			snapshot: false
 		});
 		delete item.url;
 	}
 	if (item.numPages) {
-		item.numPages = parseInt(item.numPages);
+		item.numPages = item.numPages.replace(/\D/g, '');
 	}
 	item.complete();
 }/** BEGIN TEST CASES **/
@@ -207,10 +190,7 @@ var testCases = [
 				"volume": "7",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
@@ -267,15 +247,12 @@ var testCases = [
 				"abstractNote": "\"Regelmäßige Schulleistungsstudien erfassen Stärken und Schwächen des Bildungswesens und geben Hinweise für gezielte Maßnahmen zur Qualitätsverbesserung. Die Internationale Grundschul-Lese-Untersuchung (IGLU) findet seit 2001 alle fünf Jahre statt und richtet den Fokus auf die Lesekompetenz von Schülerinnen und Schülern am Ende der Grundschulzeit. An der Trends in International Mathematics and Science Study (TIMSS) im Grundschulbereich, die alle vier Jahre die Mathematik- sowie die Naturwissenschaftskompetenz beleuchtet, beteiligt sich Deutschland seit 2007. 2011 wurden IGLU und TIMSS erstmals parallel durchgeführt, daher können hier vertiefende Analysen beider Studien zusammengeführt werden. Zudem liegen mit der dritten Beteiligung an IGLU Trenddaten vor, die es erlauben, Entwicklungen der Grundschule in Deutschland der letzten zehn Jahre nachzuzeichnen.\" [Zusammenfassung: Angaben des Autors der Webseite].;;;This book analyses 10 years (2001-2011) of international assessment studies with TIMSS (Trends in International Mathematics and Science Study) and PIRLS (Progress in International Reading Literacy Study) with focus on Germany and Europe. [Abstract: Editors of Education Worldwide]",
 				"itemID": "book",
 				"libraryCatalog": "Fachportal Pädagogik",
-				"numPages": 262,
+				"numPages": "262",
 				"place": "Münster",
 				"publisher": "Waxmann",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
@@ -352,10 +329,7 @@ var testCases = [
 				"series": "Medien in der Wissenschaft. 68",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
@@ -404,13 +378,11 @@ var testCases = [
 				"volume": "38",
 				"attachments": [
 					{
-						"title": "Full Text PDF"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
@@ -453,21 +425,19 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs&#8208; und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von guter Kindheit (und damit verbunden richtiger  Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten Bildungskindheit (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh&#8208;) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs&#8208; und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen guter Kindheit mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
+				"abstractNote": "Ziel der diskursanalytischen Betrachtung von politischen Dokumenten (hierzu gehören: Pläne, Programme und Berichte in bildungs- und kindheitsrelevanten Politikfeldern) und des darin auftretenden Diskurses zum Thema gute Kindheit und Bildung ist es, sie daraufhin zu untersuchen, welche Vorstellungen/Wissensbestände von ‚guter Kindheit‘ (und damit verbunden richtiger  Erziehung und Bildung, guter Elternschaft, guter pädagogischer Arbeit in Bildungsinstitutionen) transportiert werden. Das Projekt beabsichtigt daher, die politisch hervorgebrachten Leitbilder einer frühen und öffentlich verantworteten ‚Bildungskindheit‘ (vgl. Betz 2010) und ihre Konnotationen zu rekonstruieren. Ein Ausgangspunkt ist, dass die in den Dokumenten erzeugten Annahmen, Strategien und Maßnahmen einen weitreichenden Einfluss auf bildungspolitische Veränderungen und die Ausgestaltung der öffentlich verantworteten (Früh-) Erziehung/Bildung haben, also soziale Prozesse aktiv mitgestalten, wie dies beispielhaft an der Implementierung der Bildungs- und Erziehungspläne oder der Initiierung von Elternbildungsprogrammen veranschaulicht werden kann (siehe auch Kapitel 4.3.2)). Weiter wird davon ausgegangen, dass diese wirkmächtigen Annahmen auch Einfluss auf die Strukturierung der Vorstellungen, Haltungen und Praktiken der sozialen Akteure haben, was es empirisch einzufangen gilt. Der Frage, ob und in welcher Art und Weise dies der Fall ist, inwieweit hier die sozial situierten im Sinne von milieuspezifisch unterschiedlich geprägten Vorstellungen ‚guter Kindheit‘ mit den Vorstellungen in politischen Berichten korrespondieren und welche Bedeutung dies wiederum für die Reproduktion von Bildungsungleichheiten hat, soll [hier] explorativ nachgegangen werden. (DIPF/Orig.)",
 				"language": "Deutsch",
 				"libraryCatalog": "Fachportal Pädagogik",
-				"numPages": 49,
+				"numPages": "49",
 				"place": "Frankfurt",
 				"publisher": "pedocs",
 				"attachments": [
 					{
-						"title": "Full Text PDF"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
@@ -519,13 +489,11 @@ var testCases = [
 				"publisher": "pedocs",
 				"attachments": [
 					{
-						"title": "Full Text PDF"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Link",
+						"title": "Entry in the German Education Index",
 						"snapshot": false
 					}
 				],
