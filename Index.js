@@ -49,6 +49,7 @@ function scrape(doc, url) {
 				break;
 			case 'i:publication':
 				newItem.date = content;
+				break;
 			case 'author':
 				newItem.creators.push({
 					"lastName": content,
