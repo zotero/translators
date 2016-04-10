@@ -148,7 +148,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
+		"url": "http://bmcr.brynmawr.edu/2013/2013-01-04.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -176,7 +176,7 @@ var testCases = [
 				"publicationTitle": "Bryn Mawr Classical Review",
 				"journalAbbreviation": "BMCR",
 				"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
-				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
+				"url": "http://bmcr.brynmawr.edu/2013/2013-01-04.html",
 				"date": "2013/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
