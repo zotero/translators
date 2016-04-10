@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-09 17:08:00"
+	"lastUpdated": "2016-04-10 14:58:41"
 }
 
 /*
@@ -148,19 +148,29 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://bmcr.brynmawr.edu/2013/2013-01-04.html",
+		"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"creators": [
 					{
- 						"firstName": "Keely Elizabeth",
- 						"lastName": "Heuer",
- 						"creatorType": "author"
+						"firstName": "Christina S.",
+						"lastName": "Kraus",
+						"creatorType": "author"
 					},
 					{
-						"firstName": "Rolf",
-						"lastName": "Hurschmann",
+						"firstName": "Anthony",
+						"lastName": "Grafton",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Glenn W.",
+						"lastName": "Most",
+						"creatorType": "reviewedAuthor"
+					},
+					{
+						"firstName": "Salvatore",
+						"lastName": "Settis",
 						"creatorType": "reviewedAuthor"
 					}
 				],
@@ -169,14 +179,14 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
+						"title": "Review of: The Classical Tradition",
 						"mimeType": "text/html"
 					}
 				],
 				"publicationTitle": "Bryn Mawr Classical Review",
 				"journalAbbreviation": "BMCR",
-				"title": "Review of: Hamburg, Museum für Kunst und Gewerbe, Band 2: Unteritalisch rotfigure Keramik. Corpus vasorum antiquorum. Deutschland, Bd. 91; Hamburg Bd. 2",
-				"url": "http://bmcr.brynmawr.edu/2013/2013-01-04.html",
+				"title": "Review of: The Classical Tradition",
+				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
 				"date": "2013/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
