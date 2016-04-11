@@ -5,7 +5,7 @@
 	"target": "^https?://en\\.wikisource\\.org/w",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 99,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
