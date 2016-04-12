@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-05 04:56:07"
+	"lastUpdated": "2016-04-12 03:30:36"
 }
 
 /*
@@ -259,6 +259,9 @@ function importPNX(text) {
 		case 'reference_entry':
 			item.itemType = "encyclopediaArticle";
 			break;
+		case 'image':
+			item.itemType = "artwork";
+			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
 			break;
@@ -420,9 +423,17 @@ function importPNX(text) {
 	else {
 		ZU.xpathText(doc, '//enrichment/classificationlcc');
 	}
-	
+
 	//Harvard specific code, requested by Harvard Library:
-	var library = ZU.xpathText(doc, '//browse/institution');
+	//Getting the library abbreviation properly,
+	//so it's easy to implement custom code for other libraries, either locally or globally should we want to.
+	var library;
+	var source = ZU.xpathText(doc, '//control/sourceid');
+	if (source) {
+		library = source.match(/^(.+?)_/);
+		if (library) library = library[1];
+	}
+	//Z.debug(library)
 	if (library && library == "HVD") {
 		if (ZU.xpathText(doc, '//display/lds01')) {
 			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
@@ -556,7 +567,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&search_scope=default_scope&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
+		"url": "http://limo.libis.be/LIBISnet:default_scope:32LIBIS_ALMA_DS71166851730001471",
 		"items": [
 			{
 				"itemType": "book",
