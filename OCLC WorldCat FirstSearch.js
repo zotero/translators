@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-25 18:54:22"
+	"lastUpdated": "2016-04-12 04:13:45"
 }
 
 function detectWeb(doc, url) {
@@ -31,10 +31,6 @@ function processURLs(urls, url) {
 	}
 	var newUrl = urls.shift();
 
-	//if non-roman characters are shown, shift the charset to utf-8,
-	//else move it to iso8859 so that accented roman letters work
-	if (url.match(/dfltcharset\=UTF\-8/)) var charset="utf-8";
-	else var charset="iso-8859-1"
 	Zotero.Utilities.HTTP.doPost(newUrl,
 	'exportselect=record&exporttype=wc-endnote', function(text) {
 		Z.debug(text)
@@ -156,7 +152,7 @@ function processURLs(urls, url) {
 
 		newItem.complete();
 		processURLs(urls, url);
-	}, false, charset);
+	});
 }
 
 function doWeb(doc, url) {
