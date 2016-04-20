@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-12 03:30:36"
+	"lastUpdated": "2016-04-20 21:14:30"
 }
 
 /*
@@ -178,7 +178,7 @@ function fetchPNX(itemData) {
 				PNXUrlGenerator.confirmed = true;
 			}
 			
-			importPNX(text);
+			importPNX(text, url);
 		},
 		function() {
 			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
@@ -193,8 +193,9 @@ function fetchPNX(itemData) {
 }
 
 //import PNX record
-function importPNX(text) {
+function importPNX(text, url) {
 	//Note that if the session times out, PNX record will just contain a "null" entry
+	//Z.debug(url)
 	Z.debug(text);
 	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
 	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
@@ -424,6 +425,10 @@ function importPNX(text) {
 		ZU.xpathText(doc, '//enrichment/classificationlcc');
 	}
 
+	if (url) {
+		item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
+	}
+
 	//Harvard specific code, requested by Harvard Library:
 	//Getting the library abbreviation properly,
 	//so it's easy to implement custom code for other libraries, either locally or globally should we want to.
@@ -442,6 +447,7 @@ function importPNX(text) {
 			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
 		}
 	}
+	//End Harvard-specific code
 	item.complete();
 }
 
