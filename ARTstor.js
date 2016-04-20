@@ -1,8 +1,8 @@
 {
-	"translatorID": "7a690951-ed76-43f5-b761-707fef0345d4",
+	"translatorID": "5278b20c-7c2c-4599-a785-12198ea648bf",
 	"label": "ARTstor",
-	"creator": "John Justin, Charles Zeng",
-	"target": "\\.artstor|\\.sscommons\\.org:?\\w*\\/(open)*library",
+	"creator": "Charles Zeng & John Justin",
+	"target": "^https?://([^/]+\.)?(artstor|sscommons)\.org\/(open)?library",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -12,6 +12,23 @@
 	"lastUpdated": "2016-03-31 21:07:27"
 }
 
+/*
+	Artstor Translator
+	Copyright (C) Charles Zeng & John Justin
+
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU General Public License for more details.
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /**
     detectWeb is run to determine whether item metadata can indeed be retrieved from the webpage. 
     The return value of this function should be the detected item type (e.g. “journalArticle”, 
@@ -19,10 +36,11 @@
 **/
 function detectWeb(doc, url) {
     var itemType = false; // default - ignore
-    if (url.match(/\/iv2\.|ExternalIV.jsp/)) {
+
+    if (url.search(/\/iv2\.|ExternalIV\.jsp/) != -1) {
         // Image viewer window
         itemType = "artwork";
-    } else if (url.match(/\#3\|/)) {
+    } else if (url.search(/\#3\|/) != -1) {
         // Thumbnail window page
         if ((doc.getElementsByClassName('MetaDataWidgetRoot') != null) &&
             (doc.getElementsByClassName('MetaDataWidgetRoot').length > 0)) {
@@ -71,7 +89,6 @@ function detectWeb(doc, url) {
         - get the resource link url from id: :[domain]/[approot]/secure/metadata/id?_method=FpHtml
             - fetch the resource from resource url
             - set the item title and item mine type.
-
     doWeb is run when a user, wishing to save one or more items, activates the selected translator. 
     Sidestepping the retrieval of item metadata, we'll first focus on how doWeb can be used to save 
     retrieved item metadata (as well as attachments and notes) to your Zotero library.
@@ -202,15 +219,7 @@ function htmlDecode(doc, input) {
     var fieldValue = input.replace(/<wbr\/>/g, "");
     fieldValue = fieldValue.replace(/<br\/>/g, "");
 
-    var decodedValue;
-    if (fieldValue.match(/&(?:[a-z\d]+|#\d+|#x[a-f\d]+);/i)) {
-        var e = doc.createElement('div');
-        e.innerHTML = fieldValue;
-        decodedValue = e.childNodes.length === 0 ? "" : e.childNodes[0].nodeValue;
-    } else {
-        decodedValue = fieldValue;
-    }
-    return decodedValue;
+    return ZU.unescapeHTML(fieldValue);
 }
 
 /**
@@ -244,7 +253,6 @@ function getMetaDataItem(doc, url, objItem, dataItem) {
             'Artifact Title': 'title',
             'Artifact Description': 'abstractNote',
             'Artifact Repository': 'archive',
-            'Rights': 'rights',
             'Site Date': 'date',
             'Artifact Materials/Techniques': 'artworkMedium',
             'Artifact Dimensions': 'artworkSize',
@@ -335,7 +343,7 @@ function processPortalData(doc, dataItem, json, fieldMap, portal) {
 function setItemCreator(dataItem, fieldValue) {
     var names = [];
     if (fieldValue.indexOf(';') > 0) {
-        names = fieldValue.split(';')
+        names = fieldValue.split(';');
     } else {
         names.push(fieldValue);
     }
@@ -349,7 +357,7 @@ function setItemCreator(dataItem, fieldValue) {
 }
 
 function cleanStringValue(str) {
-    var cleanValue = str.replace(/\<wbr\/>/g, "");
+    var cleanValue = str.replace(/\<wbr\/\>/g, "");
     cleanValue = cleanValue.replace(/<\/?[^>]+(>|$)/g, " ");
     return cleanValue;
 }
@@ -432,8 +440,8 @@ function getPortal(url) {
 
 function getServerUrl(url) {
     var serverUrl;
-    if (url.indexOf('/iv2\.') > 0) {
-        serverUrl = url.substring(0, url.indexOf('iv2\.'));
+    if (url.indexOf('/iv2.') > 0) {
+        serverUrl = url.substring(0, url.indexOf('iv2.'));
     } else if (url.indexOf('/ExternalIV.jsp') > 0) {
         serverUrl = url.substring(0, url.indexOf('ExternalIV.jsp'));
     } else {
@@ -447,7 +455,9 @@ function getServiceUrlRoot(url) {
     var serviceRoot = getServerUrl(url) + "/secure/";
     return serviceRoot;
 
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
     {
         "type": "artwork",
