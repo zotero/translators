@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-04-19 21:15:00"
+	"lastUpdated": "2016-04-21 07:38:11"
 }
 
 /*
@@ -130,10 +130,10 @@ function scrapeKommentar(doc, url) {
 	
 	//e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	//e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
-	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
+	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	var pos = citationFirst.lastIndexOf(",");
 	if (pos > 0) {
-		item.publicationTitle = citationFirst.substr(0, pos);
+		item.publicationTitle = ZU.trimInternal(citationFirst.substr(0, pos));
 		var editorString = citationFirst.substr(pos+1);
 		
 		if (editorString.indexOf("/") == -1 && item.publicationTitle.indexOf("/") > 0) {
@@ -147,6 +147,10 @@ function scrapeKommentar(doc, url) {
 		for (var i=0; i<editors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
 		}
+	} else {
+		//e.g. Münchener Kommentar zum BGB
+		//from https://beck-online.beck.de/?vpath=bibdata%2fkomm%2fmuekobgb_7_band2%2fbgb%2fcont%2fmuekobgb.bgb.p305.htm
+		item.publicationTitle = ZU.trimInternal(citationFirst);
 	}
 	
 	var editionText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[preceding-sibling::br]');
@@ -567,7 +571,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.898.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -575,15 +579,18 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Boris",
-						"lastName": "Scholtka"
+						"lastName": "Scholtka",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Antje",
-						"lastName": "Baumbach"
+						"lastName": "Baumbach",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Marike",
-						"lastName": "Pietrowicz"
+						"lastName": "Pietrowicz",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -611,7 +618,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?words=njw+2014%2C+3329&btsearch.x=42&source=default&filter=spub1%3A%22Die+Leitsatzkartei+des+deutschen+Rechts+-+2014%22%7C&btsearch.x=0&btsearch.y=0",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.3329.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -619,11 +626,13 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Christoph",
-						"lastName": "Basler"
+						"lastName": "Basler",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Klaus",
-						"lastName": "Meßerschmidt"
+						"lastName": "Meßerschmidt",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -654,11 +663,13 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Stephanie",
-						"lastName": "Zöllner"
+						"lastName": "Zöllner",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Philipp",
-						"lastName": "Lehmann"
+						"lastName": "Lehmann",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -681,7 +692,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?typ=reference&y=300&b=2014&n=1&s=2261&z=DSTR",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fdstr%2f2014%2fcont%2fdstr.2014.2261.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -689,7 +700,8 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Wolfgang",
-						"lastName": "Joecks"
+						"lastName": "Joecks",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -743,7 +755,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?words=njw+2014%2C+3329&btsearch.x=42&source=default&filter=spub1%3A%22Die+Leitsatzkartei+des+deutschen+Rechts+-+2014%22%7C&btsearch.x=0&btsearch.y=0",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.3329.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -751,11 +763,13 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Christoph",
-						"lastName": "Basler"
+						"lastName": "Basler",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Klaus",
-						"lastName": "Meßerschmidt"
+						"lastName": "Meßerschmidt",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -808,7 +822,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.898.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -816,15 +830,18 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Boris",
-						"lastName": "Scholtka"
+						"lastName": "Scholtka",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Antje",
-						"lastName": "Baumbach"
+						"lastName": "Baumbach",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Marike",
-						"lastName": "Pietrowicz"
+						"lastName": "Pietrowicz",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
