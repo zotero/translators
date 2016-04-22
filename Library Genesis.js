@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-04-22 21:51:32"
+	"lastUpdated": "2016-04-22 21:55:59"
 }
 
 var MIME_TYPES = {
@@ -54,11 +54,13 @@ function doWeb(doc, url) {
 	  }
 
 	  // It also messes up multiple ISBNs, so we just pick the first one
-	  [' ', ','].forEach(function(splitChar) {
-		if (item.ISBN.indexOf(splitChar) != -1) {
-		  item.ISBN = item.ISBN.split(splitChar)[0];
-		}
-	  });
+	  if (item.ISBN) {
+	  	[' ', ','].forEach(function(splitChar) {
+			if (item.ISBN.indexOf(splitChar) != -1) {
+		  	item.ISBN = item.ISBN.split(splitChar)[0];
+			}
+	  	});
+	  }
 
 	  // Add the full text attachment
 	  var extension = ZU.xpathText(doc, "//tbody/tr[11]/td[4]");
@@ -185,6 +187,47 @@ var testCases = [
 				"libraryCatalog": "Library Genesis",
 				"publisher": "Plume",
 				"url": "http://gen.lib.rus.ec/book/index.php?md5=16C402F4F9B737EA33C4EA5D938331A0",
+				"attachments": [
+					{
+						"title": "Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://libgen.io/book/index.php?md5=A05BE4942325AEA362E2AFF8C305B0DE",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Deep Learning [pre-pub version]",
+				"creators": [
+					{
+						"firstName": "Ian",
+						"lastName": "Goodfellow",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yoshua",
+						"lastName": "Bengio",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Aaron",
+						"lastName": "Courville",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"itemID": "book:1491328",
+				"libraryCatalog": "Library Genesis",
+				"publisher": "MIT Press",
+				"url": "http://gen.lib.rus.ec/book/index.php?md5=a05be4942325aea362e2aff8c305b0de",
 				"attachments": [
 					{
 						"title": "Full Text",
