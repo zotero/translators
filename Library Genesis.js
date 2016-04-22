@@ -55,7 +55,6 @@ function doWeb(doc, url) {
 
       // Add the full text attachment
       var extension = ZU.xpathText(doc, "//tbody/tr[11]/td[4]");
-      var elem = ZU.xpath(doc, "//tbody/tr[11]/td[4]");
       var downloadUrl = (
         "http://libgen.io/get/" + md5Hash + "/" + md5Hash + "." + extension);
       item.attachments.push({
