@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-20 21:14:30"
+	"lastUpdated": "2016-04-22 09:32:07"
 }
 
 /*
@@ -524,7 +524,7 @@ var testCases = [
 				"date": "1860",
 				"callNumber": "5552.406",
 				"language": "eng",
-				"libraryCatalog": "Primo",
+				"libraryCatalog": "princeton-primo.com",
 				"publisher": "London",
 				"attachments": [],
 				"tags": [
@@ -631,7 +631,7 @@ var testCases = [
 				"date": "1970",
 				"callNumber": "NX650G8B38, NX650G8 B38",
 				"language": "eng",
-				"libraryCatalog": "Primo",
+				"libraryCatalog": "virtuose.uqam.ca",
 				"publisher": "Boston Boston Book and Art Chop",
 				"series": "Art and society 1",
 				"attachments": [],
@@ -740,7 +740,7 @@ var testCases = [
 				"edition": "[1st ed.]",
 				"extra": "HOLLIS number: 002208563",
 				"language": "eng",
-				"libraryCatalog": "Primo",
+				"libraryCatalog": "hollis.harvard.edu",
 				"place": "New York",
 				"publisher": "Knopf",
 				"attachments": [
