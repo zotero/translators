@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-04-22 21:55:59"
+	"lastUpdated": "2016-04-22 22:11:28"
 }
 
 var MIME_TYPES = {
@@ -43,9 +43,10 @@ function doWeb(doc, url) {
 	  // The bibtex messes up multiple authors, so we set them ourselves
 	  var authorStr = ZU.xpathText(doc, "//tbody/tr[3]/td[2]/b");
 	  if (authorStr.indexOf(';') != -1) {
-	  	// Multiple authors in "last, first" format separated with a semicolon
 	  	item.creators = authorStr.split(";").map(function(author) {
-	  		return ZU.cleanAuthor(author, "author", true);
+	  		// Are we dealing with "last, first" formatting?
+	  		var useCommas = (author.indexOf(",") != -1);
+	  		return ZU.cleanAuthor(author, "author", useCommas);
 	  	});
 	  } else {
 	  	item.creators = authorStr.split(",").map(function(author) {
