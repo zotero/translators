@@ -41,7 +41,8 @@ var BnfClass = function() {
 		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
 	*/
 	function getCreatorType(aut) {
-		typeAut = aut['4'].replace(/\s/g,"");
+		//typeAut = aut['4'].replace(/\s/g,"");
+		typeAut = aut['4'].trim();
 		switch(typeAut) {
 		case "005":
 		case "250":
@@ -463,38 +464,7 @@ var BnfClass = function() {
 		return undefined;
 	};
 
-	/* Get the DC type from the web page. Returns the first DC.type from meta tags. 
-		2010-10-01: No DC meta tags any more... simply test for //td[@class="texteNotice"] cells and return "printed text".
-		2016-01-26: we are using the same solution with the new website but should test more to have a correct icon.
-	*/
-	this.getDCType = function(doc, url) {
-		try {
-			// var xPath = '//div[@class="notice-detail"]//div[@id="type"]';
-			var xPath= './/*[@id="corps"]/div[1]/div[3]/div/h1';
-			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			// return xPathObject ? "printed text" : undefined;
-		 return xPathObject.textContent;
-		} catch(x) {
-			Zotero.debug(x.lineNumber + " " + x.message);
-		}
-		return undefined;
-	};
-
-	/* Translate a DC type to a corresponding Zotero item type. Currently obsolete. */
-	this.translateDCType = function(type) {
-		
-		switch(type) {
-		case "Notice bibliographique":
-		case "Notice d'ensemble éditorial":
-		case "Notice de recueil":
-			return "book";
-		case "Notice de périodique":
-			return "computerProgram";
-		default:
-			return type;
-		} 
-		
-	};
+	
 
 	
 	/* Get selectable search items from a list page. 
@@ -624,9 +594,8 @@ function detectWeb(doc, url) {
 	var resultRegexp = /ark:\/12148\/cb[0-9]+/i;
 	//Single result ?
 	if(resultRegexp.test(url)) {
-		var type = Bnf.getDCType(doc, url);
-		Zotero.debug(type);
-		return Bnf.translateDCType(type);
+		
+		return "single";
 		
 	} 
 	//Muliple result ?
@@ -642,7 +611,7 @@ function doWeb(doc, url) {
 	/* Check type. */
 	var type = detectWeb(doc, url);
 	
-	// Zotero.debug("type "+type);
+	 Zotero.debug("type "+type);
 	if(!type) {
 		return;
 	}
