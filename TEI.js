@@ -220,14 +220,14 @@ function generateItem(item, teiDoc) {
         }
         // book title
         if(item.bookTitle){
-			var bookTitle = teiDoc.createElementNS(ns.tei, "title");
+	    var bookTitle = teiDoc.createElementNS(ns.tei, "title");
             bookTitle.setAttribute("level", "m");
             bookTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.bookTitle)));
             monogr.appendChild(bookTitle);
         }
         // proceedings title
         if(item.proceedingsTitle){
-		 	var proTitle = teiDoc.createElementNS(ns.tei, "title");
+	    var proTitle = teiDoc.createElementNS(ns.tei, "title");
             proTitle.setAttribute("level", "m");
             proTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.proceedingsTitle)));
             monogr.appendChild(proTitle);
