@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2016-03-23 10:19:00"
+	"lastUpdated":"2016-04-27 15:08:00"
 }
 
 // ********************************************************************
@@ -121,7 +121,11 @@ function genXMLId (item){
         xmlid = xmlid.replace(/[^-A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF.0-9\u00B7\u0300-\u036F\u203F-\u2040]/g, "");
     }
     else{
-        xmlid += 'zoteroItem_' + item.uri;
+        // "zoteroItem_item.key" as value for entries without creator     
+        var str = item.uri;
+        var n = str.lastIndexOf('/');
+        var result = str.substring(n + 1);
+        xmlid += 'zoteroItem_' + result;
     }
     // this is really inefficient
     var curXmlId = xmlid;
@@ -214,12 +218,20 @@ function generateItem(item, teiDoc) {
             pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.publicationTitle)));
             monogr.appendChild(pubTitle);
         }
-        // nonetheless if the user pleases this has to be possible
-        else if(!item.conferenceName){
-            var pubTitle = teiDoc.createElementNS(ns.tei, "title");
-            pubTitle.setAttribute("level", "m");
-            monogr.appendChild(pubTitle);
+        // book title
+        if(item.bookTitle){
+	    var bookTitle = teiDoc.createElementNS(ns.tei, "title");
+            bookTitle.setAttribute("level", "m");
+            bookTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.bookTitle)));
+            monogr.appendChild(bookTitle);
         }
+        // proceedings title
+        if(item.proceedingsTitle){
+	    var proTitle = teiDoc.createElementNS(ns.tei, "title");
+            proTitle.setAttribute("level", "m");
+            proTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.proceedingsTitle)));
+            monogr.appendChild(proTitle);
+         } 		 
         // short title
         if(item.shortTitle){
             var shortTitle = teiDoc.createElementNS(ns.tei, "title");
@@ -600,4 +612,3 @@ function doExport() {
     var serializer = new XMLSerializer();
     Zotero.write(serializer.serializeToString(outputElement));
 }
-
