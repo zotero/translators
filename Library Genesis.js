@@ -18,7 +18,7 @@ var MIME_TYPES = {
   'mobi': 'application/x-mobipocket-ebook',
   'djvu': 'image/vnd.djvu'
 };
-var MD5_REGEX = /md5=([0-9A-F]+)/;
+var MD5_REGEX = /md5=([0-9a-fA-F]+)/;
 
 
 function detectWeb(doc, url) {
