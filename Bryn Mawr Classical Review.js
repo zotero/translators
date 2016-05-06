@@ -78,6 +78,7 @@ function doWeb(doc, url) {
 		var title = doc.evaluate('//h3/i', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		item.publicationTitle = "Bryn Mawr Classical Review";
 		item.journalAbbreviation = "BMCR";
+		item.ISSN = "1055-7660";
 		item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
 		var data = doc.evaluate('//h3[i]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var title = title.replace("(", "\\(").replace(")", "\\)");
@@ -137,6 +138,7 @@ var testCases = [
 				],
 				"publicationTitle": "Bryn Mawr Classical Review",
 				"journalAbbreviation": "BMCR",
+				"ISSN": "1055-7660",
 				"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 				"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
 				"date": "2010/01",
@@ -185,6 +187,7 @@ var testCases = [
 				],
 				"publicationTitle": "Bryn Mawr Classical Review",
 				"journalAbbreviation": "BMCR",
+				"ISSN": "1055-7660",
 				"title": "Review of: The Classical Tradition",
 				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
 				"date": "2013/01",
