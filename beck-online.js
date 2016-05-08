@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-03-29 09:11:30"
+	"lastUpdated": "2016-05-06 18:43:49"
 }
 
 /*
@@ -34,10 +34,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-//Disclaimer:
-//This is written mainly for articles/cases in the journals in beck-online
-//Probably, it might work further on other material (e.g. ebooks) in beck-online.
-
 
 var mappingClassNameToItemType = {
 	'ZAUFSATZ' : 'journalArticle',
@@ -48,7 +44,8 @@ var mappingClassNameToItemType = {
 	'ZBUCHB' : 'journalArticle',//Buchbesprechung
 	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
 	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
-	'ZINHALTVERZ' : 'multiple'//Inhaltsverzeichnis
+	'ZINHALTVERZ' : 'multiple',//Inhaltsverzeichnis
+	'KOMMENTAR' : 'encyclopediaArticle'
 }
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
@@ -118,6 +115,61 @@ function authorRemoveTitlesEtc(authorStr) {
 	return ZU.trimInternal(ZU.trimInternal(authorStr).replace(authorRegEx, ""));
 }
 
+function scrapeKommentar(doc, url) {
+	var item = new Zotero.Item("encyclopediaArticle");
+	
+	item.title = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="ueber"]');
+	
+	var authorText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="autor"]');
+	if (authorText) {
+		var authors = authorText.split("/");
+		for (var i=0; i<authors.length; i++) {
+			item.creators.push(ZU.cleanAuthor(authors[i], 'author', false));
+		}
+	}
+	
+	//e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
+	//e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
+	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
+	var pos = citationFirst.lastIndexOf(",");
+	if (pos > 0) {
+		item.publicationTitle = ZU.trimInternal(citationFirst.substr(0, pos));
+		var editorString = citationFirst.substr(pos+1);
+		
+		if (editorString.indexOf("/") == -1 && item.publicationTitle.indexOf("/") > 0) {
+			var temp = item.publicationTitle;
+			item.publicationTitle = editorString;
+			editorString = temp;
+		}
+		editorString = editorString.replace(/, /g, '');
+		
+		var editors = editorString.trim().split("/");
+		for (var i=0; i<editors.length; i++) {
+			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
+		}
+	} else {
+		//e.g. Münchener Kommentar zum BGB
+		//from https://beck-online.beck.de/?vpath=bibdata%2fkomm%2fmuekobgb_7_band2%2fbgb%2fcont%2fmuekobgb.bgb.p305.htm
+		item.publicationTitle = ZU.trimInternal(citationFirst);
+	}
+	
+	var editionText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[preceding-sibling::br]');
+	if (editionText) {
+		if (editionText.search(/\d+/)>-1 ) {
+			item.edition = editionText.match(/\d+/)[0];
+		} else {
+			item.edition = editionText;
+		}
+	}
+	item.date = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="stand"]');
+	if (!item.date && editionText.match(/\d{4}$/)) {
+		item.date = editionText.match(/\d{4}$/)[0];
+	}
+
+	finalize(doc, url, item);
+}
+
+
 // scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
 // where only information about the article, not the article itself is in beck-online
 function scrapeLSK(doc, url) {
@@ -126,7 +178,7 @@ function scrapeLSK(doc, url) {
 	// description example 1: "Marco Ganzhorn: Ist ein E-Book ein Buch?"
 	// description example 2: "Michael Fricke/Dr. Martin Gerecke: Informantenschutz und Informantenhaftung"
 	// description example 3: "Sara Sun Beale: Die Entwicklung des US-amerikanischen Rechts der strafrechtlichen Verantwortlichkeit von Unternehmen"
-	var description = ZU.xpathText(doc, "//*[@id='dokument']/h1");
+	var description = ZU.xpathText(doc, "//*[@id='doktoccontent']/h1");
 	var descriptionItems = description.split(':');
 
 	//authors
@@ -163,12 +215,7 @@ function scrapeLSK(doc, url) {
 		}
 	}
 
-	item.attachments = [{
-		title: "Snapshot",
-		document:doc
-	}];
-
-	item.complete();
+	finalize(doc, url, item);
 }
 
 function addNote(originalNote, newNote) {
@@ -310,14 +357,14 @@ function scrapeCase(doc, url) {
 	// there is additional information if the case is published in a journal
 	if (documentClassName == 'ZRSPR') {
 		// short title of publication
-		item.reporter = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/a[2]');
+		item.reporter = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/a[2]');
 		// long title of publication
 		var publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
 		if (publicationTitle) {
 			note = addNote(note, "<h3>Zeitschrift Titel</h3><p>" + ZU.trimInternal(publicationTitle) + "</p>");
 		}
 		
-		item.date = ZU.trimInternal(ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/ul/li/a[2]'));
+		item.date = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/a[2]');
 		
 		//e.g. ArbrAktuell 2014, 150
 		var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
@@ -336,12 +383,7 @@ function scrapeCase(doc, url) {
 		item.notes.push( {note: note} );
 	}
 	
-	item.attachments = [{
-		title: "Snapshot",
-		document:doc
-	}];
-
-	item.complete();		
+	finalize(doc, url, item);
 }
 
 
@@ -355,14 +397,18 @@ function scrape(doc, url) {
 
 	// use different scraping function for documents in LSK
 	if (documentClassName == 'LSK') {
-			scrapeLSK(doc, url);
-			return;
+		scrapeLSK(doc, url);
+		return;
 	}
 	if (mappingClassNameToItemType[documentClassName] == 'case') {
-			scrapeCase(doc, url);
-			return;
+		scrapeCase(doc, url);
+		return;
 	}
-	
+	if (mappingClassNameToItemType[documentClassName] == 'encyclopediaArticle') {
+		scrapeKommentar(doc, url);
+		return;
+	}
+
 	var item;
 	if (mappingClassNameToItemType[documentClassName]) {
 		item = new Zotero.Item(mappingClassNameToItemType[documentClassName]);
@@ -414,18 +460,25 @@ function scrape(doc, url) {
 			authorArray = authorString.split(/und|,/);
 			for (var k=0; k<authorArray.length; k++) {
 				var authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
-				item.creators.push(ZU.cleanAuthor(authorString));
+				item.creators.push(ZU.cleanAuthor(authorString, "author"));
 			}
 		}
 	}
 	
 	item.publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
-	item.journalAbbreviation = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/a[2]');
+	item.journalAbbreviation = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/a[2]');
 	
-	item.date = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/ul/li/a[2]');
+	item.date = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/a[2]');
 	
 	//e.g. Heft 6 (Seite 141-162)
-	item.issue = ZU.xpathText(doc, '//div[@id="doktoc"]/ul/li/ul/li/ul/li/a[2]').replace(/\([^\)]*\)/,"").match(/\d+/)[0];
+	var issueText = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/ul/li/a[2]');
+
+	if (issueText) {
+		item.issue = issueText.replace(/\([^\)]*\)/,"");
+		if (item.issue.search(/\d+/)>-1) {
+			item.issue = item.issue.match(/\d+/)[0];
+		}
+	}
 	
 	//e.g. ArbrAktuell 2014, 150
 	var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
@@ -446,9 +499,15 @@ function scrape(doc, url) {
 		item.extra = ZU.xpathText(doc, '//div[@class="biblio"]');
 	}
 	
+	finalize(doc, url, item);
+
+}
+
+function finalize(doc, url, item) {
+	
 	item.attachments = [{
 		title: "Snapshot",
-		document:doc
+		document: doc
 	}];
 	
 	item.complete();
@@ -487,20 +546,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=BKR&b=2001&s=99&n=1",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fbkr%2f2001%2fcont%2fbkr.2001.99.1.htm",
 		"items": [
 			{
 				"itemType": "case",
-				"title": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
+				"caseName": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
 				"creators": [],
-				"date": "2001",
-				"dateDecided": "2001-9-24",
+				"dateDecided": "2001",
 				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
 				"court": "LG Augsburg",
 				"docketNumber": "3 O 4995/00",
 				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
-				"libraryCatalog": "beck-online",
-				"pages": "99-101",
+				"firstPage": "99-101",
 				"reporter": "BKR",
 				"reporterVolume": "2001",
 				"shortTitle": "Infomatec",
@@ -512,7 +569,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; DB 2001, 2334 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WPM 2001, 1944 ; ZIP 2001, 1881 ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.)</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; BeckRS 9998, 03964 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer... ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; EWiR 2001, 1049 ; WPM 2001, 1944 ; WuB 2001, 1269 ; ZIP 2001, 1881</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -521,7 +578,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.898.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -529,15 +586,18 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Boris",
-						"lastName": "Scholtka"
+						"lastName": "Scholtka",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Antje",
-						"lastName": "Baumbach"
+						"lastName": "Baumbach",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Marike",
-						"lastName": "Pietrowicz"
+						"lastName": "Pietrowicz",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -565,7 +625,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?words=njw+2014%2C+3329&btsearch.x=42&source=default&filter=spub1%3A%22Die+Leitsatzkartei+des+deutschen+Rechts+-+2014%22%7C&btsearch.x=0&btsearch.y=0",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.3329.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -573,15 +633,17 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Christoph",
-						"lastName": "Basler"
+						"lastName": "Basler",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Klaus",
-						"lastName": "Meßerschmidt"
+						"lastName": "Meßerschmidt",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
 				"issue": "46",
 				"journalAbbreviation": "NJW",
 				"libraryCatalog": "beck-online",
@@ -608,11 +670,13 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Stephanie",
-						"lastName": "Zöllner"
+						"lastName": "Zöllner",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Philipp",
-						"lastName": "Lehmann"
+						"lastName": "Lehmann",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -620,7 +684,7 @@ var testCases = [
 				"issue": "5",
 				"journalAbbreviation": "GRUR",
 				"libraryCatalog": "beck-online",
-				"pages": "431-437",
+				"pages": "431-436",
 				"publicationTitle": "Gewerblicher Rechtsschutz und Urheberrecht",
 				"attachments": [
 					{
@@ -635,7 +699,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?typ=reference&y=300&b=2014&n=1&s=2261&z=DSTR",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fdstr%2f2014%2fcont%2fdstr.2014.2261.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -643,11 +707,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Wolfgang",
-						"lastName": "Joecks"
+						"lastName": "Joecks",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
+				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
 				"issue": "46",
 				"journalAbbreviation": "DStR",
 				"libraryCatalog": "beck-online",
@@ -697,7 +762,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?words=njw+2014%2C+3329&btsearch.x=42&source=default&filter=spub1%3A%22Die+Leitsatzkartei+des+deutschen+Rechts+-+2014%22%7C&btsearch.x=0&btsearch.y=0",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.3329.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -705,15 +770,17 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Christoph",
-						"lastName": "Basler"
+						"lastName": "Basler",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Klaus",
-						"lastName": "Meßerschmidt"
+						"lastName": "Meßerschmidt",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
 				"issue": "46",
 				"journalAbbreviation": "NJW",
 				"libraryCatalog": "beck-online",
@@ -762,7 +829,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/default.aspx?typ=reference&y=300&z=NJW&b=2014&s=898&n=1",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fzeits%2fnjw%2f2014%2fcont%2fnjw.2014.898.1.htm",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -770,15 +837,18 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Boris",
-						"lastName": "Scholtka"
+						"lastName": "Scholtka",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Antje",
-						"lastName": "Baumbach"
+						"lastName": "Baumbach",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Marike",
-						"lastName": "Pietrowicz"
+						"lastName": "Pietrowicz",
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
@@ -805,13 +875,12 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"title": "OLG Köln, 23.03.2012 - 6 U 67/11",
+				"caseName": "OLG Köln, 23.03.2012 - 6 U 67/11",
 				"creators": [],
 				"dateDecided": "2012-03-23",
 				"court": "OLG Köln",
 				"docketNumber": "6 U 67/11",
 				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
-				"libraryCatalog": "beck-online",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -820,7 +889,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; WRP 2012, 1007 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.)</p>"
+						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. A... ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; WRP 2012, 1007</p>"
 					}
 				],
 				"seeAlso": []
@@ -833,15 +902,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"title": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
+				"caseName": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
 				"creators": [],
-				"date": "2014",
-				"dateDecided": "2014-3-27",
+				"dateDecided": "2014",
 				"court": "EuGH",
 				"docketNumber": "C-314/12",
 				"extra": "{:jurisdiction: europa.eu}\n{:genre: Urt.}",
-				"libraryCatalog": "beck-online",
-				"pages": "468-473",
+				"firstPage": "468-473",
 				"reporter": "GRUR",
 				"reporterVolume": "2014",
 				"shortTitle": "UPC Telekabel/Constantin Film ua [kino.to]",
@@ -853,7 +920,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckRS 2014, 80615 ; EWS 2014, 225 ; EuGRZ 2014, 301 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; K & R 2014, 329 ; MMR 2014, 397 (m. Anm. Ro... ; MittdtPatA 2014, 335 L ; NJW 2014, 1577 ; RiW 2014, 373 ; WRP 2014, 540 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.)</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckEuRS 2014, 754042 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. A... ; MMR 2014, 397 (m. Anm. Ro... ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; EWS 2014, 225 ; EuGRZ 2014, 301 ; K & R 2014, 329 ; MittdtPatA 2014, 335 L ; RiW 2014, 373 ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -885,9 +952,92 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BVerfGE 83, 130 ; NStZ 1991, 188 ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.)</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; BeckRS 9998, 169076 ; NStZ 1991, 188 ; BeckRS 9998, 170068 (Ls.) ; FHOeffR 42 Nr. 13711 (Ls.... ; FHOeffR 42 Nr. 13713 (Ls.... ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; BVerfGE 83, 130 ; Bespr.: , JZ 1991, 470 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata/komm/beckok_38_BandBGB/BGB/cont/beckok.BGB.p489.htm",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "BGB § 489 Ordentliches Kündigungsrecht des Darlehensnehmers",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Rohe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Bamberger",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "",
+						"lastName": "Roth",
+						"creatorType": "editor"
+					}
+				],
+				"date": "01.02.2016",
+				"edition": "38",
+				"encyclopediaTitle": "Beck'scher Online-Kommentar BGB",
+				"libraryCatalog": "beck-online",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata%2fkomm%2fdaulankobgb_2%2fbgb%2fcont%2fdaulankobgb.bgb.p489.htm",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "BGB § 489 Ordentliches Kündigungsrecht des Darlehensnehmers",
+				"creators": [
+					{
+						"firstName": "Gerd",
+						"lastName": "Krämer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Miriam",
+						"lastName": "Müller",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Dauner-Lieb",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "",
+						"lastName": "Langen",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2012",
+				"edition": "2",
+				"encyclopediaTitle": "BGB | Schuldrecht",
+				"libraryCatalog": "beck-online",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
