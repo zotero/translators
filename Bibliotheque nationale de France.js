@@ -41,8 +41,8 @@ var BnfClass = function() {
 		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
 	*/
 	function getCreatorType(aut) {
-		//typeAut = aut['4'].replace(/\s/g,"");
-		typeAut = aut['4'].trim();
+		
+		var typeAut = aut['4'].trim();
 		switch(typeAut) {
 		case "005":
 		case "250":
