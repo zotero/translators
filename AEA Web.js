@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-05-09 06:39:41"
+	"lastUpdated": "2016-05-09 20:00:35"
 }
 
 /*
@@ -81,8 +81,8 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
 		//Correct pages format, e.g. 1467-96 or 625-63
-		var m = item.pages.match(/^(\d+)(\d\d)[\--](\d\d)$/);
-		if (m.length > 0) {
+		var m = item.pages.match(/^(\d+)(\d\d)[\--](\d\d)$|^(\d+)(\d)[\--](\d)$|^(\d+)(\d\d\d)[\--](\d\d\d)$/);
+		if (m) {
 			item.pages = m[1]+m[2]+"-"+m[1]+m[3];
 		}
 		
@@ -91,13 +91,6 @@ function scrape(doc, url) {
 		//and another text node with the actual abstract.
 		var abstract = ZU.xpathText(doc, '//section[contains(@class,"abstract")]/text()[last()]');
 		item.abstractNote = abstract;
-		
-		var pdfURL = "https://www.aeaweb.org/atypon.php?doi=" + item.DOI;
-		item.attachments.push({
-			url: pdfURL,
-			title: "AEAweb Full Text PDF",
-			mimeType: "application/pdf"
-		});
 		
 		item.complete();
 	});
@@ -148,10 +141,6 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "AEAweb Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -196,10 +185,6 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "AEAweb Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
