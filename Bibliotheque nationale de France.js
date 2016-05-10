@@ -476,7 +476,7 @@ var BnfClass = function() {
 		var cellPath = '//div[@class="liste-notices"]/div[@class="notice-item"]';
 		var cells = doc.evaluate(cellPath, doc, null, XPathResult.ANY_TYPE, null);
 		while(cell = cells.iterateNext()) {
-			var link = doc.evaluate('./div[@class="notice-contenu"]/a', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('./div[@class="notice-contenu"]/div[@class="notice-synthese"]/a', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
 			
 			var title = doc.evaluate('./h2', link, null, XPathResult.ANY_TYPE, null).iterateNext(); 
 			if (title) {
@@ -634,9 +634,13 @@ function doWeb(doc, url) {
 				}	
 			});
 			break;
-		default:
+		case "single":
 			urls = [Bnf.reformURL(url)];
 			Zotero.Utilities.processDocuments(urls, function(doc) {Bnf.processMarcUrl.call(Bnf, doc)});
+			break;
+		default:	
+		       // nothing to do 
+		break;
 	}
 }
 /** BEGIN TEST CASES **/
