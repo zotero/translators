@@ -2,14 +2,14 @@
 	"translatorID": "6044b16f-2452-4ce8-ad02-fab69ef04f13",
 	"label": "AEA Web",
 	"creator": "Sebatian Karcher",
-	"target": "^https?://www\\.aeaweb\\.org/articles\\.php",
+	"target": "^https?://www\\.aeaweb\\.org/(articles|journals|issues)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-02-26 10:57:53"
+	"lastUpdated": "2016-05-09 20:00:35"
 }
 
 /*
@@ -36,29 +36,39 @@
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//a[@title="Export Citation"]')) return "journalArticle";
-	else if (ZU.xpath(doc, '//a[contains(@href, "articles.php?doi") and @style="font-weight:bold;"]').length) return "multiple";
+	if (url.indexOf('/articles?id=')>-1) {
+		return "journalArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//article//a[contains(@href, "/articles?id=")]|//li[@class="article"]//a[contains(@href, "/articles?id=")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var title;
-
-		var titles = doc.evaluate('//a[contains(@href, "articles.php?doi") and @style="font-weight:bold;"]', doc, null, XPathResult.ANY_TYPE, null);
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent;
-		}
-
-		Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = new Array();
 			for (var i in items) {
-				arts.push(i);
+				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(arts, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -66,71 +76,115 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-		var risURL = url.replace(/articles\.php\?/, "content/articles/include/file_export.php?") + "&format=ris";
-		Z.debug(risURL)
-		var abstract = ZU.xpathText(doc, '//div[@class="sub_head_dialog" and contains(text(), "Abstract")]/following-sibling::div[1]');
-		//Z.debug(abstract)
-		ZU.HTTP.doGet(risURL, function(text) {
-			//Z.debug(text)
-			text = text.trim()
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function(obj, item) {
-				item.abstractNote = abstract;
-				var pdfURL = "https://www.aeaweb.org/atypon.php?return_to=/doi/pdfplus/" + item.DOI;
-				//Z.debug(pdfURL)
-				//Remove period at end of title
-				item.attachments.push({
-					url: pdfURL,
-					title: "AEAweb Full Text PDF",
-					mimeType: "application/pdf"
-				});
-				item.complete();
-			});
-			translator.translate();
-		});
-	}
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');//Embedded Metadata
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function(obj, item) {
+		//Correct pages format, e.g. 1467-96 or 625-63
+		var m = item.pages.match(/^(\d+)(\d\d)[\--](\d\d)$|^(\d+)(\d)[\--](\d)$|^(\d+)(\d\d\d)[\--](\d\d\d)$/);
+		if (m) {
+			item.pages = m[1]+m[2]+"-"+m[1]+m[3];
+		}
+		
+		//The abstract is contained in the section-node of class abstract,
+		//but this node consists of an (empty) text node, a h2 node
+		//and another text node with the actual abstract.
+		var abstract = ZU.xpathText(doc, '//section[contains(@class,"abstract")]/text()[last()]');
+		item.abstractNote = abstract;
+		
+		item.complete();
+	});
+	translator.translate();
+
+}
+
 	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.aeaweb.org/articles.php?search_mode=t&search_box=labor+market&realsearchbx=labor+market&phrase=&search_title=title&search_abstract=abstract&search_author=author&cs_primary_JEL=0&order=1&limit_per_page=10&search%5B%5D=app&search%5B%5D=mac&search%5B%5D=mic&search%5B%5D=pol&search%5B%5D=jep&search%5B%5D=jel&search%5B%5D=aer&hidden_session=",
+		"url": "https://www.aeaweb.org/journals/search-results?within%5Btitle%5D=on&within%5Babstract%5D=on&within%5Bauthor%5D=on&journal=&from=a&q=labor+market",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.aeaweb.org/articles.php?doi=10.1257/jep.28.4",
+		"url": "https://www.aeaweb.org/issues/356",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.aeaweb.org/articles.php?doi=10.1257/jep.28.4.3",
+		"url": "https://www.aeaweb.org/articles?id=10.1257/jep.28.4.3",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Networks in the Understanding of Economic Behaviors",
 				"creators": [
 					{
-						"lastName": "Jackson",
 						"firstName": "Matthew O.",
+						"lastName": "Jackson",
 						"creatorType": "author"
 					}
 				],
-				"date": "2014",
+				"date": "2014/11",
 				"DOI": "10.1257/jep.28.4.3",
+				"ISSN": "0895-3309",
 				"abstractNote": "As economists endeavor to build better models of human behavior, they cannot ignore that humans are fundamentally a social species with interaction patterns that shape their behaviors. People's opinions, which products they buy, whether they invest in education, become criminals, and so forth, are all influenced by friends and acquaintances. Ultimately, the full network of relationships—how dense it is, whether some groups are segregated, who sits in central positions—affects how information spreads and how people behave. Increased availability of data coupled with increased computing power allows us to analyze networks in economic settings in ways not previously possible. In this paper, I describe some of the ways in which networks are helping economists to model and understand behavior. I begin with an example that demonstrates the sorts of things that researchers can miss if they do not account for network patterns of interaction. Next I discuss a taxonomy of network properties and how they impact behaviors. Finally, I discuss the problem of developing tractable models of network formation.",
 				"issue": "4",
-				"journalAbbreviation": "Journal of Economic Perspectives",
-				"libraryCatalog": "AEA Web",
+				"libraryCatalog": "www.aeaweb.org",
 				"pages": "3-22",
 				"publicationTitle": "Journal of Economic Perspectives",
-				"url": "http://www.aeaweb.org/articles.php?doi=10.1257/jep.28.4.3",
+				"url": "https://www.aeaweb.org/articles?id=10.1257/jep.28.4.3",
 				"volume": "28",
 				"attachments": [
 					{
-						"title": "AEAweb Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.aeaweb.org/articles?id=10.1257/aer.101.4.1467",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Education and Labor Market Discrimination",
+				"creators": [
+					{
+						"firstName": "Kevin",
+						"lastName": "Lang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Manove",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011/06",
+				"DOI": "10.1257/aer.101.4.1467",
+				"ISSN": "0002-8282",
+				"abstractNote": "Using a model of statistical discrimination and educational sorting,\nwe explain why blacks get more education than whites of similar\ncognitive ability, and we explore how the Armed Forces Qualification\nTest (AFQT), wages, and education are related. The model suggests\nthat one should control for both AFQT and education when comparing\nthe earnings of blacks and whites, in which case a substantial\nblack-white wage differential emerges. We reject the hypothesis that\ndifferences in school quality between blacks and whites explain the\nwage and education differentials. Our findings support the view that\nsome of the black-white wage differential reflects the operation of the\nlabor market. (JEL I21, J15, J24, J31, J71)",
+				"issue": "4",
+				"libraryCatalog": "www.aeaweb.org",
+				"pages": "1467-1496",
+				"publicationTitle": "American Economic Review",
+				"url": "https://www.aeaweb.org/articles?id=10.1257/aer.101.4.1467",
+				"volume": "101",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
