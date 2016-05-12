@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated":"2016-04-27 15:08:00"
+	"lastUpdated":"2016-05-12 13:25:00"
 }
 
 // ********************************************************************
@@ -206,8 +206,22 @@ function generateItem(item, teiDoc) {
             analyticTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
         }
 
-        // there should be a publication title!
-        if(item.publicationTitle){
+        // book title
+        if(item.bookTitle){
+	    var bookTitle = teiDoc.createElementNS(ns.tei, "title");
+            bookTitle.setAttribute("level", "m");
+            bookTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.bookTitle)));
+            monogr.appendChild(bookTitle);
+        }
+        // proceedings title
+        else if(item.proceedingsTitle){
+            var proTitle = teiDoc.createElementNS(ns.tei, "title");
+            proTitle.setAttribute("level", "m");
+            proTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.proceedingsTitle)));
+            monogr.appendChild(proTitle);
+        }
+        // other publication titles
+        else if(item.publicationTitle){
             var pubTitle = teiDoc.createElementNS(ns.tei, "title");
             if(item.itemType == "journalArticle"){
                 pubTitle.setAttribute("level", "j");
@@ -217,21 +231,7 @@ function generateItem(item, teiDoc) {
             }
             pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.publicationTitle)));
             monogr.appendChild(pubTitle);
-        }
-        // book title
-        if(item.bookTitle){
-	    var bookTitle = teiDoc.createElementNS(ns.tei, "title");
-            bookTitle.setAttribute("level", "m");
-            bookTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.bookTitle)));
-            monogr.appendChild(bookTitle);
-        }
-        // proceedings title
-        if(item.proceedingsTitle){
-	    var proTitle = teiDoc.createElementNS(ns.tei, "title");
-            proTitle.setAttribute("level", "m");
-            proTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.proceedingsTitle)));
-            monogr.appendChild(proTitle);
-         } 		 
+        }		 
         // short title
         if(item.shortTitle){
             var shortTitle = teiDoc.createElementNS(ns.tei, "title");
