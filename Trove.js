@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-04-04 13:06:56"
+	"lastUpdated": "2016-05-14 03:57:41"
 }
 
 /*
@@ -32,17 +32,18 @@
 
 function detectWeb(doc, url) {
 	if (url.indexOf('/result?') != -1 || url.indexOf('/newspaper/page') != -1) {
-		return "multiple";
+		return getSearchResults(doc, url, true) ? 'multiple' : false;
 	} else if (url.indexOf('/newspaper/article') != -1) {
 		return "newspaperArticle";
 	} else if (url.indexOf('/work/') != -1) {
-		return "document";
+		return "book";
 	}
 }
 
-function getSearchResults(doc, url) {
+function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var results;
+	var found = false;
 	if (url.indexOf('/result?') != -1) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
 	} else if (url.indexOf('/newspaper/page') != -1) {
@@ -51,9 +52,12 @@ function getSearchResults(doc, url) {
 	for (var i=0; i<results.length; i++) {
 		var link = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
+		if (!title || !link) continue;
+		if (checkOnly) return true;
+		found = true;
 		items[link] = title;
 	}
-	return items;
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
@@ -83,53 +87,52 @@ function scrape(doc, url) {
 }
 
 function scrapeNewspaper(doc, url) {
-	// There's a BibTex citation embedded in the page, seems like the easiest way to get the details.
 
-	var bibtex = ZU.xpathText(doc, "//textarea[@id='bibtex-citation']");
+	var articleID = url.match(/newspaper\/article\/(\d+)/)[1];
+	var bibtexURL = "http://trove.nla.gov.au/newspaper/citations/bibtex-article-" + articleID + ".bibtex";
 
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(bibtex);
+	ZU.HTTP.doGet(bibtexURL, function(bibtex) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(bibtex);
 
-	// Clean up the BibTex results and add some extra stuff.
+		// Clean up the BibTex results and add some extra stuff.
+		translator.setHandler("itemDone", function (obj, item) {
+			item.itemType = 'newspaperArticle';
+			item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
+			item.pages = item.numPages;
+			delete item.numPages;
+			delete item.type;
+			delete item.itemID;
 
-	translator.setHandler("itemDone", function (obj, item) {
-		var articleID = item.url.match(/nla\.news-article\d+/)[0];
-		item.itemType = 'newspaperArticle';
-		item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
-		delete item.type;
-		delete item.itemID;
+			// Add tags
+			var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
+			for (var i = 0; i < tags.length; i++) {
+				tag = ZU.xpathText(tags[i], "a");
+				item.tags.push(tag);
+			}
 
-		// Attaching a PDF is a 2 stage process.
-		// First you need to tell the service to start generating the PDF.
-		// You get back a hash id to include in the PDF url.
+			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
+			var proxyURL = "http://trove-proxy.herokuapp.com/pdf/" + articleID;
+			ZU.HTTP.doGet(proxyURL, function(pdfURL) {
+				item.attachments.push({
+					url: pdfURL, 
+					title: 'Trove newspaper PDF', 
+					mimeType:'application/pdf'});
 
-		var renditionURL = "/newspaper/rendition/";
-		var prepURL = renditionURL + articleID + '/level/3/prep';
+				// Get the OCRd text and save in a note.
+				var textURL = "http://trove.nla.gov.au/newspaper/rendition/nla.news-article" + articleID + ".txt";
+				ZU.HTTP.doGet(textURL, function(text) {
+					item.notes.push({
+						note: text.trim()
+					});
+					item.complete();
+				});
 
-		ZU.HTTP.doGet(prepURL, function(hashID) {
-
-			// It takes some time to generate the pdfs after the prep call.
-			// You can ping the service to see if the PDF is ready,
-			// but when I tried this I was denied permission to the statusText of the response object 
-			// which is necessary because statusText == 'Locked' if the PDF isn't ready.
-			// So I took out the ping call completely and just put in a 5 second pause which seems to work ok.
-			// Note that the service itself uses a 5 second delay if the ping fails.
-
-			var timeout = Date.now() + 5000;
-			while (Date.now() < timeout){}
-			item.attachments.push({url: renditionURL + articleID + '.3.pdf?followup=' + hashID, title: 'Trove newspaper PDF', mimeType:'application/pdf'});
-
-			// Get the OCRd text and save in a note.
-			var textURL = renditionURL + articleID + '.txt';
-			ZU.HTTP.doGet(textURL, function(text) {
-				item.notes.push({note: text.trim()});
-				item.complete();
 			});
-
 		});
-	});
 	translator.translate();	
+	});
 }
 
 var troveTypes = {
@@ -159,15 +162,15 @@ var troveTypes = {
 	
 
 function checkType(string) {
-	types = string.split("; ");
-	newString = types.join(" ");
-	if (newString in troveTypes) {
+	var types = string.split("; ");
+	var newString = types.join(" ");
+	if (troveTypes.hasOwnProperty(newString)) {
 		return troveTypes[newString];
 	} else {
 		while (types.length > 0) {
 			types.pop();
 			newString = types.join(" ");
-			if (newString in troveTypes) {
+			if (troveTypes.hasOwnProperty(newString)) {
 				return troveTypes[newString];
 			}
 
@@ -190,7 +193,7 @@ function scrapeWork(doc, url) {
 	var thumbnailURL;
 
 	// Remove all params from url
-	var workURL = url.slice(0, url.indexOf('?'));
+	var workURL = url.replace(/[?#].*/, '');
 	var bibtexURL = workURL + '?citationFormat=BibTeX';
 
 	// Need to get version identifier for the BibText url
@@ -212,13 +215,35 @@ function scrapeWork(doc, url) {
 			item.itemType = checkType(item.type);
 			item.creators = cleanCreators(item.creators);
 
+			// Attach a link to the contributing repository if available
+			if (item.hasOwnProperty('url')) {
+				item.attachments.push({
+					title: "Record from contributing repository",
+					url: item.url,
+					mimeType: 'text/html',
+					snapshot: false
+				})
+			}
+
 			// This gives a better version-aware url.
 			item.url = ZU.xpathText(doc, "//meta[@property='og:url']/@content");
 			item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 			delete item.itemID;
 			delete item.type;
+
+			// Add tags
+			tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
+			for (var i = 0; i < tags.length; i++) {
+				tag = ZU.xpathText(tags[i], "a");
+				item.tags.push(tag);
+			}
+
 			if (thumbnailURL !== null) {
-				item.attachments.push({url: thumbnailURL, title: 'Trove thumbnail image', mimeType:'image/jpeg'});
+				item.attachments.push({
+					url: thumbnailURL, 
+					title: 'Trove thumbnail image', 
+					mimeType:'image/jpeg'
+				});
 			}
 			item.complete();
 		});
@@ -228,36 +253,6 @@ function scrapeWork(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://trove.nla.gov.au/version/208674371",
-		"items": [
-			{
-				"itemType": "artwork",
-				"title": "THIRROUL - Hotels - Rex Hotel",
-				"creators": [
-					{
-						"firstName": "William A. (William Alan)",
-						"lastName": "Bayley",
-						"creatorType": "author"
-					}
-				],
-				"date": "1960",
-				"abstractNote": "Thirroul Hotels REX HOTEL ca. 1956 1950-1960 Illawarra Region",
-				"libraryCatalog": "Trove",
-				"url": "http://trove.nla.gov.au/version/208674371",
-				"attachments": [
-					{
-						"title": "Trove thumbnail image",
-						"mimeType": "image/jpeg"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://trove.nla.gov.au/version/11567057",
@@ -289,18 +284,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://nla.gov.au/nla.news-article70068753",
+		"url": "http://trove.nla.gov.au/newspaper/article/70068753",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "'WRAGGE.'",
 				"creators": [],
-				"date": "07 Feb 1903",
+				"date": "7 Feb 1903",
 				"abstractNote": "We have received a copy of the above which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement ...",
 				"libraryCatalog": "Trove",
 				"pages": "4",
-				"place": "Victoria, Australia",
-				"publicationTitle": "Sunbury News",
+				"place": "Vic.",
+				"publicationTitle": "Sunbury News (Vic. : 1900 - 1910)",
 				"url": "http://nla.gov.au/nla.news-article70068753",
 				"attachments": [
 					{
@@ -308,7 +303,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Meteorology Journal - Clement Wragge"
+				],
 				"notes": [
 					{
 						"note": "'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge."
