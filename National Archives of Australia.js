@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-05 11:11:08"
+	"lastUpdated": "2016-05-14 04:30:12"
 }
 
 /*
@@ -502,14 +502,10 @@ var testCases = [
 				"date": "14 Aug 1944 - 31 Oct 1944",
 				"abstractNote": "This series consists of one volume bound in black with the title 'A report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' embossed on the front cover in gold.\n\nBackground\n\nThe United Nations War Crimes Commission had two stated objectives (1) to hear evidence of war crimes brought to it by member governments and to list the perpetrator for arrest and (2) to make recommendations to member governments on how war criminals could be brought to trial. It held its first meeting on 20 October 1943 and in reporting to Dr Evatt the Secretary of the Department of External Affairs recommended that a Commission be given to Sir William Webb to investigate war crimes against Australians and to bring to the government such cases as could be forwarded to the UNWCC. \n\nOn 9 February Dr Evatt approached Sir William with an invitation and this was accepted on 24 February. The new commission was issued on 8 June 1944 with prime responsibility for administrative matters held by the Department of External Affairs though the report was to be submitted also to the Attorney Generals Department.\n\nThe hearings commenced on 14 August and concluded on 20 October 1944. The report was tendered to the Minister on 31 October 1944.",
 				"archive": "National Archives of Australia",
+				"archiveLocation": "A10950",
 				"libraryCatalog": "National Archives of Australia",
-				"attachments": [
-					{
-						"title": "National Archives of Australia Record",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://www.naa.gov.au/cgi-bin/Search?O=S&Number=A10950",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
