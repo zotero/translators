@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-01-03 17:28:36"
+	"lastUpdated": "2016-05-13 22:51:52"
 }
 
 function detectWeb(doc, url) {
@@ -41,7 +41,7 @@ function getSearchResults(doc, checkOnly) {
 	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
-		//li//div[(@class="title" or @class="rw") and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
+		//li//div[(@class="title" or @class="rw") and not(.//a[@class="title"]) and .//a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
 	var items = {}, found = false;
 	for (var i=0; i<titles.length; i++) {
 		var title = ZU.trimInternal(titles[i].textContent);
@@ -50,7 +50,7 @@ function getSearchResults(doc, checkOnly) {
 			jid = getJID(titles[i].href);
 		} else {
 			//this looks like it's the default now. Not sure how common the others are.
-			jid = ZU.xpathText(titles[i], './a[1]/@href');
+			jid = ZU.xpathText(titles[i], './/a[1]/@href');
 			if (jid) jid = getJID(jid);
 		}
 		
