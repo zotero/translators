@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-01-06 01:12:48"
+	"lastUpdated": "2016-05-17 15:44:00"
 }
 
 function detectImport() {
@@ -2197,6 +2197,8 @@ var mappingTable = {
 	"\u016B":"{\\=u}", // LATIN SMALL LETTER U WITH MACRON
 	"\u016C":"{\\u U}", // LATIN CAPITAL LETTER U WITH BREVE
 	"\u016D":"{\\u u}", // LATIN SMALL LETTER U WITH BREVE
+	"\u016E":"{\\r U}", // LATIN CAPITAL U WITH A RING ABOVE
+	"\u016F":"{\\r u}", // LATIN SMALL U WITH A RING ABOVE
 	"\u0170":"{\\H U}", // LATIN CAPITAL LETTER U WITH DOUBLE ACUTE
 	"\u0171":"{\\H u}", // LATIN SMALL LETTER U WITH DOUBLE ACUTE
 	"\u0172":"{\\k U}", // LATIN CAPITAL LETTER U WITH OGONEK
@@ -2325,6 +2327,8 @@ var mappingTable = {
 	"\u1E95":"{\\b z}", // LATIN SMALL LETTER Z WITH LINE BELOW
 	"\u1E96":"{\\b h}", // LATIN SMALL LETTER H WITH LINE BELOW
 	"\u1E97":"{\\\"t}", // LATIN SMALL LETTER T WITH DIAERESIS
+	"\u1E98":"{\\r w}", // LATIN SMALL W WITH A RING ABOVE
+	"\u1E99":"{\\r y}", // LATIN SMALL Y WITH A RING ABOVE
 	"\u1EA0":"{\\d A}", // LATIN CAPITAL LETTER A WITH DOT BELOW
 	"\u1EA1":"{\\d a}", // LATIN SMALL LETTER A WITH DOT BELOW
 	"\u1EB8":"{\\d E}", // LATIN CAPITAL LETTER E WITH DOT BELOW
@@ -2716,6 +2720,8 @@ var reversemappingTable = {
 	"{\\=u}"                          : "\u016B", // LATIN SMALL LETTER U WITH MACRON
 	"{\\u U}"                          : "\u016C", // LATIN CAPITAL LETTER U WITH BREVE
 	"{\\u u}"                          : "\u016D", // LATIN SMALL LETTER U WITH BREVE
+	"{\\r U}"                          : "\u016E", // LATIN CAPITAL LETTER U WITH RING ABOVE
+	"{\\r u}"                          : "\u016F", // LATIN SMALL LETTER U WITH RING ABOVE
 	"{\\H U}"                          : "\u0170", // LATIN CAPITAL LETTER U WITH DOUBLE ACUTE
 	"{\\H u}"                          : "\u0171", // LATIN SMALL LETTER U WITH DOUBLE ACUTE
 	"{\\k U}"                          : "\u0172", // LATIN CAPITAL LETTER U WITH OGONEK
@@ -2844,6 +2850,8 @@ var reversemappingTable = {
 	"{\\b z}"                          : "\u1E95", // LATIN SMALL LETTER Z WITH LINE BELOW
 	"{\\b h}"                          : "\u1E96", // LATIN SMALL LETTER H WITH LINE BELOW
 	"{\\\"t}"                         : "\u1E97", // LATIN SMALL LETTER T WITH DIAERESIS
+	"{\\r w}"                          : "\u1E98", // LATIN SMALL LETTER W WITH RING ABOVE
+	"{\\r y}"                          : "\u1e99", // LATIN SMALL LETTER Y WITH RING ABOVE
 	"{\\d A}"                          : "\u1EA0", // LATIN CAPITAL LETTER A WITH DOT BELOW
 	"{\\d a}"                          : "\u1EA1", // LATIN SMALL LETTER A WITH DOT BELOW
 	"{\\d E}"                          : "\u1EB8", // LATIN CAPITAL LETTER E WITH DOT BELOW
