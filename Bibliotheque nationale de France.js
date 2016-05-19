@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2016-01-26 22:29:34"
+	"lastUpdated": "2016-02-18 11:28:15"
 }
 
 /*
@@ -41,7 +41,9 @@ var BnfClass = function() {
 		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
 	*/
 	function getCreatorType(aut) {
-		switch(aut['4']) {
+		
+		var typeAut = aut['4'].trim();
+		switch(typeAut) {
 		case "005":
 		case "250":
 		case "275":
@@ -138,6 +140,7 @@ var BnfClass = function() {
 				}
 				var type = getCreatorType(aut);
 				if(type) {
+				
 					item.creators.push(Zotero.Utilities.cleanAuthor(authorText, type, true));
 				}
 			}
@@ -160,31 +163,7 @@ var BnfClass = function() {
 	};
 
 
-	//Translate BnF types to Zotero item types.
-	function getItemType(type) {
-		switch(type) {
-		case "Enregistrement sonore":
-			return "audioRecording";
-		case "Image fixe":
-		case "Image fixe numérisée":
-			return "artwork";
-		case "Images animées":
-			return "film";
-		case "Ressource électronique":
-			return "computerProgram";
-		case "Document cartographique":
-			return "map";
-		case "Document d'archives":
-			return "document";
-		case "Texte manuscrit":
-			return "manuscript";
-		case "Multimédia multisupport":
-		case "Musique imprimé":
-		case "Texte imprimé":
-		default:
-			return "book";	
-		}	
-	};
+	
 
 	//Add tag, if not present yet
 	function addTag(item, tag) {
@@ -206,6 +185,9 @@ var BnfClass = function() {
 				tagText = person.a;
 				if(person.b) {
 					tagText += ", " + person.b;
+				}
+				if(person.c) {
+					tagText += ", " + person.c;
 				}
 				if(person.f) {
 					tagText += " (" + person.f + ")";
@@ -411,12 +393,7 @@ var BnfClass = function() {
 
 	//Do BnF specific Unimarc postprocessing
 	function postprocessMarc(record, newItem) {
-		//Type
-		var t = record.getFieldSubfields("200");
-		if(t && t[0] && t[0].b) {
-			newItem.itemType = getItemType(t[0].b);
-		}
-
+		
 		//Title
 		getTitle(record, newItem);
 
@@ -424,17 +401,9 @@ var BnfClass = function() {
 		getCreators(record, newItem);
 
 		//Store perennial url from 009 as attachment and accession number
-		var url = record.getField("009");
+		var url = record.getField("003");
 		if(url && url.length > 0 && url[0][1]) {
-			newItem.accessionNumber = url[0][1];
-			newItem.attachments = [
-				{
-					url: url[0][1],
-					title: "Bnf catalogue entry", 
-					mimeType: "text/html", 
-					snapshot:false
-				}
-			];
+			newItem.url = url[0][1];
 		}
 
 		//Country (102a)
@@ -468,16 +437,18 @@ var BnfClass = function() {
 		getTags(record, newItem);
 		
 		//Repository
-		newItem.libraryCatalog = "French National Library Online Catalog (http://catalogue.bnf.fr)";
+		newItem.libraryCatalog = "BnF Catalogue général (http://catalogue.bnf.fr)";
 	};
 
 
 	//Public members
-
+	
+	
 	/* Get the UNIMARC URL for a given single result page. */
-	this.reformURL = function(url) {
-		url = url.replace(".public", ""); // Not sure that would happen as there is no reason user switching to unimarc view before going back to normal
-		return url + ".unimarc";
+	this.reformURL = function(url) {		
+		url = url.replace(/(^.*\/ark:\/12148\/cb[0-9]+[a-z]*)(.*$)/, "$1.unimarc");
+		// Zotero.debug("URL1 "+ url);
+		return url;
 	};
 
 	
@@ -493,33 +464,7 @@ var BnfClass = function() {
 		return undefined;
 	};
 
-	/* Get the DC type from the web page. Returns the first DC.type from meta tags. 
-		2010-10-01: No DC meta tags any more... simply test for //td[@class="texteNotice"] cells and return "printed text".
-		2016-01-26: we are using the same solution with the new website but should test more to have a correct icon.
-	*/
-	this.getDCType = function(doc, url) {
-		try {
-			var xPath = '//div[@class="notice-detail"]//div[@id="type"]';
-			var xPathObject = doc.evaluate(xPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			return xPathObject ? "printed text" : undefined;
-		} catch(x) {
-			Zotero.debug(x.lineNumber + " " + x.message);
-		}
-		return undefined;
-	};
-
-	/* Translate a DC type to a corresponding Zotero item type. Currently obsolete. */
-	this.translateDCType = function(type) {
-		switch(type) {
-		case "printed text":
-		case "text":
-			return "book";
-		case "sound recording":
-			return "audioRecording";
-		default:
-			return type;
-		}
-	};
+	
 
 	
 	/* Get selectable search items from a list page. 
@@ -531,7 +476,7 @@ var BnfClass = function() {
 		var cellPath = '//div[@class="liste-notices"]/div[@class="notice-item"]';
 		var cells = doc.evaluate(cellPath, doc, null, XPathResult.ANY_TYPE, null);
 		while(cell = cells.iterateNext()) {
-			var link = doc.evaluate('./div[@class="notice-contenu"]/a', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
+			var link = doc.evaluate('./div[@class="notice-contenu"]/div[@class="notice-synthese"]/a', cell, null, XPathResult.ANY_TYPE, null).iterateNext();
 			
 			var title = doc.evaluate('./h2', link, null, XPathResult.ANY_TYPE, null).iterateNext(); 
 			if (title) {
@@ -555,24 +500,23 @@ var BnfClass = function() {
 
 	
 	//Check for Gallica URL (digital version available), if found, set item.url
-	function checkGallica(doc, item) {
+	function checkGallica(record, item) {
 	
-		var url = false;
-		//Check for links containing the "Visualiser" img
-		var elmts = doc.evaluate('//a[img[@src="/images/boutons/bouton_visualiser.gif"]]',
-				doc, null, XPathResult.ANY_TYPE, null);
-		if(elmts) {
-			var link;
-			while(link = elmts.iterateNext()) {
-				url = link.href;
-				break;
-			}
-		}
 		
-		if(url) {
-			item.url = url;
+        var url = record.getFieldSubfields("856");
+		
+		if(url && url.length > 0 && url[0].u) {		
+		 item.attachments = [
+				{
+					url: url[0].u,
+					title: "Bnf Gallica entry", 
+					mimeType: "text/html", 
+					snapshot:false
+				}
+			];
+			}
+		
 		}
-	}
 	
 	
 	/* Process UNIMARC URL. */
@@ -609,10 +553,13 @@ var BnfClass = function() {
 					ind = line.substr(3, 2);
 					content = line.substr(5).replace(/\$([a-z]|[0-9])/g, obj.subfieldDelimiter+"$1");
 					content = content.replace(/ˆ([^‰]+)‰/g, "$1");
+					
 				} else {
 					if(tag == "000") {
 						tag = undefined;
-						record.leader = "00000"+line.substr(8);
+						 
+						record.leader = "0000"+line.substr(8);
+						
 					} else {
 						content = line.substr(3);
 					}
@@ -622,12 +569,14 @@ var BnfClass = function() {
 			//Create item
 			var newItem = new Zotero.Item();
 			record.translate(newItem);
+			
+			
 				
 			//Do specific Unimarc postprocessing
 			postprocessMarc(record, newItem);
 			
 			//Check for Gallica URL
-			checkGallica(newDoc, newItem);
+			checkGallica(record, newItem);
 				
 			newItem.complete();
 		});
@@ -645,8 +594,9 @@ function detectWeb(doc, url) {
 	var resultRegexp = /ark:\/12148\/cb[0-9]+/i;
 	//Single result ?
 	if(resultRegexp.test(url)) {
-		var type = Bnf.getDCType(doc, url);
-		return Bnf.translateDCType(type);
+		
+		return "single";
+		
 	} 
 	//Muliple result ?
 	else if(Bnf.getResultsTable(doc)) {
@@ -660,6 +610,8 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	/* Check type. */
 	var type = detectWeb(doc, url);
+	
+	 Zotero.debug("type "+type);
 	if(!type) {
 		return;
 	}
@@ -682,9 +634,13 @@ function doWeb(doc, url) {
 				}	
 			});
 			break;
-		default:
+		case "single":
 			urls = [Bnf.reformURL(url)];
 			Zotero.Utilities.processDocuments(urls, function(doc) {Bnf.processMarcUrl.call(Bnf, doc)});
+			break;
+		default:	
+		       // nothing to do 
+		break;
 	}
 }
 /** BEGIN TEST CASES **/
