@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-04-16 18:18:06"
+	"lastUpdated": "2016-05-26 11:34:16"
 }
 
 function detectImport() {
@@ -608,6 +608,11 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
+		//OCLC numbers are useful info to save in extra
+		var controlNumber = this.getFieldSubfields("035")[0];
+		if (controlNumber && controlNumber["a"] && controlNumber["a"].indexOf("(OCoLC)") == 0) {
+			item.extra = "OCLC: " + controlNumber["a"].substring(7);
+		}
 		// Extract URL for electronic resources
 		this._associateDBField(item, "245", "h", "medium")
 		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
@@ -816,6 +821,7 @@ var testCases = [
 				],
 				"date": "1687",
 				"callNumber": "VAULT Ayer 1343 .J515 P211 X2 1687",
+				"extra": "OCLC: ocm29051663",
 				"numPages": "24",
 				"place": "En Pamplona",
 				"publisher": "Por Juan Micòn, Impressor",
@@ -823,10 +829,8 @@ var testCases = [
 				"tags": [
 					"Cuellar y Mosquera, Gabriel de",
 					"Jesuits",
-					"Jesuits",
 					"Masseta, Simon",
 					"Missions",
-					"Paraguay",
 					"Paraguay"
 				],
 				"notes": [
@@ -856,6 +860,7 @@ var testCases = [
 				"ISBN": "9783642002304 9783642002298",
 				"abstractNote": "Die weltweite Finanzkrise ist Anlass, an Funktion und Wirkweise des privaten Eigentums in einer freiheitlichen Gesellschafts- und Wirtschaftsordnung zu erinnern. Privates Eigentum muss es geben, damit Verantwortung zugerechnet und Haftung realisiert, Gewinn und Verlust einem konkreten Verantwortungsträger persönlich zugerechnet werden können. Die Verletzung dieser konstitutiven Regeln einer auf privatem Eigentum basierenden Wirtschaftsordnung ist wesentlich ursächlich für das eingetretene Desaster auf den Finanzmärkten. Wie alle kulturellen Errungenschaften muss auch die Idee des privaten Eigentums, insbesondere die ihr immanente Bereitschaft zur Übernahme persönlicher Verantwortung des Eigentümers, jeder Generation erneut wieder in Erinnerung gerufen, überzeugend um sie geworben und vor allem vorbildhaft von den Akteuren in Politik und Wirtschaft vorgelebt werden. Nur so kann strukturelles Vertrauen in das Finanzsystem wieder gewonnen werden. Denn in ihrer vertrauensbildenden Kraft liegt die ordnungspolitische Funktion der Gewährleistung privaten Eigentums",
 				"callNumber": "KK7058",
+				"extra": "OCLC: 699070134",
 				"language": "ger",
 				"place": "Berlin ;Heidelberg",
 				"publisher": "Springer",
@@ -866,11 +871,9 @@ var testCases = [
 				"tags": [
 					"Aufsatzsammlung",
 					"Constitutional law",
-					"Constitutional law",
 					"Eigentum",
 					"Finanzkrise",
 					"Haftung",
-					"Law",
 					"Law",
 					"Online-Publikation",
 					"Ordnungspolitik"
