@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2016-04-12 04:13:45"
+	"lastUpdated": "2016-05-26 09:52:41"
 }
 
 function detectWeb(doc, url) {
@@ -123,8 +123,8 @@ function processURLs(urls, url) {
 				}
 				else if(match[1] == "Abstract") {
 					newItem.abstractNote = match[2];
-				} else if(match[1] == "Accession No") {
-					newItem.accessionNumber = ZU.trimInternal(match[2]);
+				} else if(match[1] == "Accession No" && match[2].indexOf("OCLC") != -1) {
+					newItem.extra = ZU.trimInternal(match[2]);
 				} else if(match[1] == "Degree") {
 					newItem.itemType = "thesis";
 					newItem.thesisType = match[2];
