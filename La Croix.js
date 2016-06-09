@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-30 06:21:13"
+	"lastUpdated": "2016-06-09 05:53:08"
 }
 
 /*
@@ -92,7 +92,7 @@ function scrape(doc, url) {
 			//e.g. Séverin Husson et Emmanuelle Réju, le 19/01/2016 à 10h08
 			//e.g. François d’Alançon (envoyé spécial à Damas)
 			var authorPart = authorPart.replace(/\([^\)]*\)/, "").trim();
-			Z.debug(authorPart);
+			//Z.debug(authorPart);
 			var authors = authorPart.split(/, | et /);
 			for (var i=0; i<authors.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
@@ -100,6 +100,7 @@ function scrape(doc, url) {
 		}
 		item.section = ZU.xpathText(doc, '//nav[contains(@class, "category-menu")]/div[contains(@class, "active-category")]/a[2]');
 		item.language = "fr-FR";
+		item.ISSN = "0242-6056";
 		item.complete();
 	});
 
@@ -125,6 +126,7 @@ var testCases = [
 					}
 				],
 				"date": "2016-05-27T17:31:45+02:00",
+				"ISSN": "0242-6056",
 				"abstractNote": "Dimanche 29 mai, François Hollande et Angela Merkel célèbrent le rapprochement entre leurs peuples à l’occasion de la commémoration du centenaire de la bataille de Verdun, « La Croix » revient sur les amitiés entre citoyens qui naissent des jumelages franco-allemands.",
 				"language": "fr-FR",
 				"libraryCatalog": "www.la-croix.com",
@@ -172,6 +174,7 @@ var testCases = [
 					}
 				],
 				"date": "2016-01-19T10:08:37+01:00",
+				"ISSN": "0242-6056",
 				"abstractNote": "Mardi 19 janvier, le Sénat examine en première lecture le projet de loi sur la « reconquête de la biodiversité ».Les sénateurs écologistes entendent à cette occasion demander à nouveau l’interdiction totale des insecticides appartenant à la famille des néonicotinoïdes.",
 				"language": "fr-FR",
 				"libraryCatalog": "www.la-croix.com",
@@ -210,6 +213,7 @@ var testCases = [
 					}
 				],
 				"date": "2016-05-29T17:32:54+02:00",
+				"ISSN": "0242-6056",
 				"abstractNote": "À Damas, une minorité prospère dans l’économie de guerre, le marché noir, la contrebande et les trafics. La grande majorité s’épuise chaque jour dans les petites batailles de la survie. Le récit de notre envoyé spécial.",
 				"language": "fr-FR",
 				"libraryCatalog": "www.la-croix.com",
