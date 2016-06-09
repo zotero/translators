@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-06-04 20:25:23"
+	"lastUpdated": "2016-06-09 05:59:15"
 }
 
 /*
@@ -107,7 +107,7 @@ function scrape(doc, url) {
 		}
 		
 		item.ISSN = "0376-6829";
-		item.language = "de";
+		item.language = "de-CH";
 		item.libraryCatalog = "NZZ";
 		
 		item.section = ZU.xpathText(doc, '//meta[@itemprop="articleSection"]/@content');
@@ -141,7 +141,7 @@ var testCases = [
 				"date": "2011-11-10T06:55:41+00:00",
 				"ISSN": "0376-6829",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "Neue Zürcher Zeitung",
 				"section": "Wirtschaft",
@@ -175,7 +175,7 @@ var testCases = [
 				"date": "2012-05-30T09:00:00+00:00, 2012-05-14T22:00:00+00:00",
 				"ISSN": "0376-6829",
 				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "Neue Zürcher Zeitung",
 				"shortTitle": "Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
@@ -213,7 +213,7 @@ var testCases = [
 				"date": "2016-05-31T07:45:25.872Z",
 				"ISSN": "1660-0851",
 				"abstractNote": "Im Kanton Zürich werden pro Jahr bis zu 400 Schüler weniger den Sprung ans Langgymnasium schaffen Aus Spargründen sollen künftig",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "NZZ am Sonntag",
 				"shortTitle": "Bildung",
@@ -251,7 +251,7 @@ var testCases = [
 				"date": "2016-05-28T23:00:00.000Z,",
 				"ISSN": "1660-0851",
 				"abstractNote": "Im Gesundheitswesen wird heftig über den Sinn von teuren Tests zur Krebs-Früherkennung gestritten.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "NZZ",
 				"publicationTitle": "NZZ am Sonntag",
 				"shortTitle": "Manipulation mit Risiken",
