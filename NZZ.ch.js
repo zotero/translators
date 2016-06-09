@@ -1,190 +1,170 @@
 {
 	"translatorID": "61ffe600-55e0-11df-bed9-0002a5d5c51b",
-	"label": "NZZ",
-	"creator": "ibex, Sebastian Karcher",
-	"target": "^https?://(www\\.)?nzz\\.ch/.",
+	"label": "NZZ.ch",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://(www\\.)?nzz\\.ch/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-01 23:06:06"
+	"lastUpdated": "2016-06-09 05:59:15"
 }
 
 /*
-	NZZ Translator - Parses NZZ articles and creates Zotero-based metadata.
-	Copyright (C) 2010&2012 ibex and Sebastian Karcher
+	***** BEGIN LICENSE BLOCK *****
 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
+	Copyright © 2016 Philipp Zumstein
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
+	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
+	GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
-/* Get the first xpath element from doc, if not found return null. */
-function getXPath(xpath, doc) {
-	return doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-}
 
-/* Zotero API */
 function detectWeb(doc, url) {
-	//Zotero.debug("ibex detectWeb URL= " + url);
-	if (url.match(/search\?form/)) {
-		return "multiple";
-	} else if (getXPath('//article[@class = "article-full"]', doc)) {
+	var type = doc.getElementsByTagName('body')[0];
+	if (type.classList.contains('page--article')) {
 		return "newspaperArticle";
+	}
+	if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
 }
 
-/* Zotero API */
-function doWeb(doc, url) {
-	//Zotero.debug("ibex doWeb URL= " + url);
-	var articles = new Array();
-	var urls = new Array();
-	if (detectWeb(doc, url) == "multiple") {
+
+function getSearchResults(doc, checkOnly) {
 	var items = {};
-		var titles = doc.evaluate('//hgroup/h2/a', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			//ignore topic pages;
-			if (title.href.search(/\d$/)==-1) continue;
-			items[title.href] = title.textContent;
-		}
-		Zotero.selectItems(items, function (items) {
+	var found = false;
+	var rows = ZU.xpath(doc, '//article/a|//div[contains(@class, "teaser")]/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = new Array();
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape, function () {
-				Zotero.done();
-			});
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc, url);
+ 		scrape(doc, url);
 	}
 }
 
-/* Three types of articles: "Neue Zürcher Zeitung", "NZZ Online" and "NZZ am Sonntag" */
-function scrape(doc) {
-	//Zotero.debug("ibex scrape URL = " + doc.location.href);
-	var newItem = new Zotero.Item('newspaperArticle');
-	newItem.url = doc.location.href;
-	newItem.title = Zotero.Utilities.trimInternal(getXPath('//hgroup/h1', doc).textContent);
-	var date = ZU.xpathText(doc, '//hgroup/time/@datetime');
-	if (date) newItem.date = date.replace(/\d\d\:\d\d:\d\d/, "").trim();
-	newItem.publicationTitle = "Neue Zürcher Zeitung";
-	newItem.ISSN = "0376-6829";
-	newItem.language = "de";
 
-	var titleprefix = getXPath('//hgroup/h5', doc);
-	if ((titleprefix != null) && (Zotero.Utilities.trimInternal(titleprefix.textContent) != "")) {
-		newItem.shortTitle = newItem.title;
-		newItem.title = Zotero.Utilities.trimInternal(titleprefix.textContent) + ": " + newItem.title;
-	}
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) {
 
-	var subtitle = getXPath('//hgroup/h2', doc);
-	if ((subtitle != null) && (Zotero.Utilities.trimInternal(subtitle.textContent) != "")) {
-		newItem.shortTitle = newItem.title;
-		newItem.title += ": " + Zotero.Utilities.trimInternal(subtitle.textContent);
-	}
-
-	var teaser = getXPath('//article/h5', doc);
-	if ((teaser != null) && (Zotero.Utilities.trimInternal(teaser.textContent) != "")) {
-		newItem.abstractNote = Zotero.Utilities.trimInternal(teaser.textContent);
-	}
-
-	var authorline = getXPath('//article/address/span', doc);
-	if (!authorline) authorline = getXPath('//h6//span[@class="author"]', doc)
-	if (authorline != null) {
-		authorline = Zotero.Utilities.trimInternal(authorline.textContent);
-		//assumption of authorline: "[Interview:|Von ]name1[, name2] [und Name3][, location]"
-		authorline = authorline.replace(/^Von /, "");
-		authorline = authorline.replace(/^Interview: /, "");
-		authorline = authorline.replace(/vor Ort /i, "");
-		//remove ", location"
-		authorline = Zotero.Utilities.trim(authorline.replace(/, \S*$/, ""));
-
-		var authors = authorline.split(/,|und/);
-		for (var i = 0; i < authors.length && authorline.length > 0; i++) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
-			if (!newItem.creators[i].firstName){
-				newItem.creators[i].fieldMode = 1;
+		item.date = ZU.xpathText(doc, '//article[contains(@class, "content")]//time/@datetime');
+		
+		// Problem: also the place will be taken as part of the autor name
+		// e.g. <meta name="author" content="Matthias Müller, Peking">
+		// e.g. <meta name="author" content="Marco Metzler und Birgit Voigt" />
+		var authorString = ZU.xpathText(doc, '//meta[@name="author"]/@content');
+		if (authorString) {
+			item.creators = [];
+			var authors = authorString.split("und");
+			for (var i=0; i<authors.length; i++) {
+				if (i == authors.length-1) {
+					authors[i] = authors[i].split(",")[0];
+				}
+				item.creators.push( ZU.cleanAuthor(authors[i] , "author") );
 			}
 		}
-	}
-
-	var section = getXPath('//hgroup/h6/a', doc);
-	if (!section) section = getXPath('//h1/a[@class="link-info"]', doc);
-	if (section != null) {
-		var sectionText = Zotero.Utilities.trimInternal(section.textContent);
-		if (sectionText.indexOf("NZZ am Sonntag") > -1 ) {
-			newItem.publicationTitle = "NZZ am Sonntag";
-			newItem.ISSN = "1660-0851";
-			newItem.section = "";
-		} else {
-			newItem.section = sectionText;
+		
+		item.ISSN = "0376-6829";
+		item.language = "de-CH";
+		item.libraryCatalog = "NZZ";
+		
+		item.section = ZU.xpathText(doc, '//meta[@itemprop="articleSection"]/@content');
+		if (item.section == "NZZ am Sonntag") {
+			item.publicationTitle = "NZZ am Sonntag";
+			item.ISSN = "1660-0851";
+			item.section = "";
 		}
-	}
-
-	var source = getXPath('//div[@id = "content"]//span[@class="quelle"]', doc);
-	if (source != null) {
-		newItem.extra = Zotero.Utilities.trimInternal(source.textContent).replace(/^\(/,"").replace(/\)$/,"");
-	}
-
-	newItem.attachments.push({title:"NZZ Online Article Snapshot", mimeType:"text/html", url:doc.location.href, snapshot:true});
-
-	newItem.complete();
+		if (!item.section || item.section == "") {
+			item.section = ZU.xpathText(doc, '//li[@class="mainmenu__item"]/a[contains(@class, "mainmenu__link--active")]');
+		}
+		
+		item.complete();
+	});
+	
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = "newspaperArticle";
+		trans.doWeb(doc, url);
+	});
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/nachrichten/wirtschaft/aktuell/kuoni-gta-uebernahme-1.13276960",
+		"url": "http://www.nzz.ch/kuoni-gta-uebernahme-1.13276960",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Deutliches Umsatzplus in den ersten neun Monaten: Kuoni profitiert von der GTA-Übernahme",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-11-10T06:55:41+00:00",
+				"ISSN": "0376-6829",
+				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert.",
+				"language": "de-CH",
+				"libraryCatalog": "NZZ",
+				"publicationTitle": "Neue Zürcher Zeitung",
+				"section": "Wirtschaft",
+				"shortTitle": "Deutliches Umsatzplus in den ersten neun Monaten",
+				"url": "http://www.nzz.ch/kuoni-gta-uebernahme-1.13276960",
 				"attachments": [
 					{
-						"title": "NZZ Online Article Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://www.nzz.ch/aktuell/wirtschaft/uebersicht/kuoni-gta-uebernahme-1.13276960",
-				"title": "Kuoni profitiert von der GTA-Übernahme: Deutliches Umsatzplus in den ersten neun Monaten",
-				"date": "2011-11-10",
-				"publicationTitle": "Neue Zürcher Zeitung",
-				"ISSN": "0376-6829",
-				"language": "de",
-				"shortTitle": "Kuoni profitiert von der GTA-Übernahme",
-				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert. Der Umsatz stieg, und der Konzern machte Gewinn.",
-				"section": "Nachrichten",
-				"libraryCatalog": "NZZ"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzz.ch/aktuell/international/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
+		"url": "http://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden: Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
 				"creators": [
 					{
 						"firstName": "Matthias",
@@ -192,26 +172,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-05-30T09:00:00+00:00, 2012-05-14T22:00:00+00:00",
+				"ISSN": "0376-6829",
+				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben.",
+				"language": "de-CH",
+				"libraryCatalog": "NZZ",
+				"publicationTitle": "Neue Zürcher Zeitung",
+				"shortTitle": "Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
+				"url": "http://www.nzz.ch/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
 				"attachments": [
 					{
-						"title": "NZZ Online Article Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://www.nzz.ch/aktuell/international/uebersicht/wie-ein-mexikanisches-staedtchen-die-boesewichte-vertrieb-1.17091747",
-				"title": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb: Landsgemeinde als Mittel gegen das organisierte Verbrechen und korrupte Behörden",
-				"date": "2012-05-30",
-				"publicationTitle": "Neue Zürcher Zeitung",
-				"ISSN": "0376-6829",
-				"language": "de",
-				"shortTitle": "Wie ein mexikanisches Städtchen die Bösewichte vertrieb",
-				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben. Sie haben eine Landsgemeinde gegründet und entdeckt, dass direktdemokratische Institutionen Korruption verhindern.",
-				"section": "International",
-				"libraryCatalog": "NZZ"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -219,6 +195,77 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.nzz.ch/search?form%5Bq%5D=arbeitsmarkt",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602?reduced=true",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Bildung: Der Weg ans Gymnasium wird steiniger",
+				"creators": [
+					{
+						"firstName": "René",
+						"lastName": "Donzé",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-05-31T07:45:25.872Z",
+				"ISSN": "1660-0851",
+				"abstractNote": "Im Kanton Zürich werden pro Jahr bis zu 400 Schüler weniger den Sprung ans Langgymnasium schaffen Aus Spargründen sollen künftig",
+				"language": "de-CH",
+				"libraryCatalog": "NZZ",
+				"publicationTitle": "NZZ am Sonntag",
+				"shortTitle": "Bildung",
+				"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/bildung-der-weg-ans-gymnasium-wird-steiniger-ld.85602",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/manipulation-mit-risiken-wir-haben-zu-viel-desinformation-ld.85314",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Manipulation mit Risiken: «Wir haben zu viel Desinformation»",
+				"creators": [
+					{
+						"firstName": "Marco",
+						"lastName": "Metzler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Birgit",
+						"lastName": "Voigt",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-05-28T23:00:00.000Z,",
+				"ISSN": "1660-0851",
+				"abstractNote": "Im Gesundheitswesen wird heftig über den Sinn von teuren Tests zur Krebs-Früherkennung gestritten.",
+				"language": "de-CH",
+				"libraryCatalog": "NZZ",
+				"publicationTitle": "NZZ am Sonntag",
+				"shortTitle": "Manipulation mit Risiken",
+				"url": "http://www.nzz.ch/nzzas/nzz-am-sonntag/manipulation-mit-risiken-wir-haben-zu-viel-desinformation-ld.85314",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
