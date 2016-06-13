@@ -138,7 +138,7 @@ function scrape(doc, url) {
 			item.extra = "DOI: " + item.DOI;
 		}
 		if (schemaType == "http://schema.org/Dataset") {
-			item.extra = "itemType: Dataset\n" + "DOI: " + item.DOI;
+			item.extra = "itemType: dataset\n" + "DOI: " + item.DOI;
 		}
 		item.complete();
 	});
@@ -364,7 +364,7 @@ var testCases = [
 				"date": "2016/02/10",
 				"DOI": "10.5281/zenodo.45756",
 				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images.\n\nPlease find below the content of an input file XDS.INP for the program&nbsp;XDS&nbsp;(Kabsch, 2010), which&nbsp;may be used for data reduction. The &quot;NAME_TEMPLATE_OF_DATA_FRAMES=&quot; item inside&nbsp;XDS.INP may need to be edited to point to the location of the downloaded and untarred images.\n\n!!! Paste lines below in to a file named XDS.INP\n\nDETECTOR=ADSC &nbsp;MINIMUM_VALID_PIXEL_VALUE=1 &nbsp;OVERLOAD= 65000\nDIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0\nDIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0\nTRUSTED_REGION=0.0 1.05\nMAXIMUM_NUMBER_OF_JOBS=10\nORGX= &nbsp; 1582.82 &nbsp;ORGY= &nbsp; 1485.54\nDETECTOR_DISTANCE= 150\nROTATION_AXIS= -1.0 0.0 0.0\nOSCILLATION_RANGE=1\nX-RAY_WAVELENGTH= 1.2821511\nINCIDENT_BEAM_DIRECTION=0.0 0.0 1.0\nFRACTION_OF_POLARIZATION=0.90\nPOLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0\nSPACE_GROUP_NUMBER=20\nUNIT_CELL_CONSTANTS= 100.030 &nbsp; 121.697 &nbsp; &nbsp;56.554 &nbsp; &nbsp;90.000 &nbsp; &nbsp;90.000 &nbsp; &nbsp;90.000\nDATA_RANGE=1 &nbsp;180\nBACKGROUND_RANGE=1 6\nSPOT_RANGE=1 3\nSPOT_RANGE=31 33\nMAX_CELL_AXIS_ERROR=0.03\nMAX_CELL_ANGLE_ERROR=2.0\nTEST_RESOLUTION_RANGE=8.0 3.8\nMIN_RFL_Rmeas= 50\nMAX_FAC_Rmeas=2.0\nVALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000\nINCLUDE_RESOLUTION_RANGE=50.0 1.7\nFRIEDEL&#39;S_LAW= FALSE\nSTARTING_ANGLE= -100 &nbsp; &nbsp; &nbsp;STARTING_FRAME=1\nNAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img\n\n!!! End of XDS.INP\n\n&nbsp;\n\n&nbsp;",
-				"extra": "itemType: Dataset\nDOI: 10.5281/zenodo.45756",
+				"extra": "itemType: dataset\nDOI: 10.5281/zenodo.45756",
 				"libraryCatalog": "zenodo.org",
 				"publicationTitle": "Zenodo",
 				"url": "http://zenodo.org/record/45756",
