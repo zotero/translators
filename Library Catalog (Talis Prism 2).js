@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:11:00"
+	"lastUpdated": "2016-06-20 11:26:54"
 }
 
 /*
@@ -95,84 +95,68 @@ function referURL(url){
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://capitadiscovery.co.uk/cityoflondon/items/169754?outdated=true&query=mahoney&resultsUri=items%3Fquery%3Dmahoney",
+		"url": "https://capitadiscovery.co.uk/bcu/items/324179?query=mannheim&resultsUri=items%3Fquery%3Dmannheim",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Mannheim and Vienna",
 				"creators": [
 					{
-						"firstName": "John William",
-						"lastName": "Mahoney",
+						"firstName": "Wolfgang Amadeus",
+						"lastName": "Mozart",
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "by Luke Bayard (pseud. i.e. John Mahoney)"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "The compact wine guide",
-				"place": "(London",
-				"publisher": "Wine and Spirit Publications",
-				"date": "1969",
-				"url": "http://capitadiscovery.co.uk/cityoflondon/items/169754",
 				"language": "English",
 				"libraryCatalog": "Library Catalog (Talis Prism 2)",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publisher": "Archiv",
+				"url": "http://capitadiscovery.co.uk/bcu/items/324179",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://capitadiscovery.co.uk/surrey-ac/items/199580?outdated=true&query=borges&resultsUri=items%3Fquery%3Dborges",
+		"url": "https://capitadiscovery.co.uk/bradford/items?query=shakespeare",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://capitadiscovery.co.uk/worcs/items/693096",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Not quite Nice",
 				"creators": [
 					{
-						"firstName": "Jorge Luis",
-						"lastName": "Borges",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anthony",
-						"lastName": "Kerrigan",
+						"firstName": "Celia",
+						"lastName": "Imrie",
 						"creatorType": "author"
 					}
+				],
+				"date": "2016",
+				"ISBN": "9781408846896",
+				"language": "English",
+				"libraryCatalog": "Library Catalog (Talis Prism 2)",
+				"place": "London",
+				"publisher": "Bloomsbury",
+				"url": "http://capitadiscovery.co.uk/worcs/items/693096",
+				"attachments": [],
+				"tags": [
+					"General.",
+					"Riviera (France) Fiction."
 				],
 				"notes": [
 					{
-						"note": "Jorge Luis Borges ; edited and with an introduction by Anthony Kerrigan"
+						"note": "Celia Imrie"
 					}
 				],
-				"tags": [
-					"Short stories in Spanish Argentinian writers 1910-1945 English texts"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Fictions",
-				"place": "London",
-				"publisher": "Calder",
-				"date": "1965 1985",
-				"ISBN": "9780714540832",
-				"url": "http://capitadiscovery.co.uk/surrey-ac/items/199580",
-				"language": "English",
-				"libraryCatalog": "Library Catalog (Talis Prism 2)"
+				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://capitadiscovery.co.uk/surrey-ac/items?query=borges",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://capitadiscovery.co.uk/cityoflondon/items?query=argentina",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
