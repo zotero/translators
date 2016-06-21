@@ -3,7 +3,7 @@
 	"label": "RefWorks Tagged",
 	"creator": "Simon Kornblith, Aurimas Vinckevicius, and Sebastian Karcher",
 	"target": "txt",
-	"minVersion": "4.0.27",
+	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2015-03-24 02:55:12"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator
@@ -262,7 +262,7 @@ var fieldMap = {
 	ED: {
 		"__default":"edition",
 		session:["bill", "hearing", "statute"],
-		versionNumber:["computerProgram"]
+		version:["computerProgram"]
 	},
 	LA: {
 		"__default":"language",
