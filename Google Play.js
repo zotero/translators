@@ -3,13 +3,13 @@
 	"label": "Google Play",
 	"creator": "Avram Lyon",
 	"target": "^https?://play\\.google\\.com/",
-	"minVersion": "4.0.27",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 /*
@@ -119,7 +119,7 @@ function saveIndividual(doc, url) {
 	var version = findProperty(doc, "softwareVersion");
 	// We exlide "Varies with device"
 	if (/\d/.test(version)) {
-		item.versionNumber = version;
+		item.version = version;
 	}
 	
 	item.company = author;
@@ -143,7 +143,7 @@ var testCases = [
 				"libraryCatalog": "Google Play",
 				"system": "Android 2.1 and up",
 				"url": "https://play.google.com/store/apps/details?id=com.gimranov.zandy.app",
-				"versionNumber": "1.4.4",
+				"version": "1.4.4",
 				"attachments": [
 					{
 						"title": "App Screenshot"

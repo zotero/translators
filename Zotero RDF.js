@@ -4,13 +4,13 @@
 	"label":"Zotero RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"4.0.27",
+	"minVersion":"1.0.0b4.r1",
 	"maxVersion":"",
 	"priority":25,
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true, "exportFileData":false},
 	"inRepository":true,
-	"lastUpdated":"2016-06-20 20:00:00"
+	"lastUpdated":"2016-06-21 08:45:20"
 }
 
 var item;
@@ -379,7 +379,7 @@ function generateItem(item, zoteroType, resource) {
 		} else if(property == "rights") {			// rights
 			Zotero.RDF.addStatement(resource, n.dc+"rights", value, true);
 		} else if(property == "edition" ||			// edition
-		          property == "versionNumber") {			// version
+		          property == "version") {			// version
 			Zotero.RDF.addStatement(resource, n.prism+"edition", value, true);
 		} else if(property == "date") {				// date
 			if(item.dateSent) {

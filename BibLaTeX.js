@@ -4,7 +4,7 @@
 	"label": "BibLaTeX",
 	"creator": "Simon Kornblith, Richard Karnesky and Anders Johansson",
 	"target": "bib",
-	"minVersion": "4.0.27",
+	"minVersion": "2.1.9",
 	"maxVersion": "null",
 	"priority": 100,
 	"inRepository": true,
@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 
@@ -40,7 +40,7 @@ var fieldMap = {
 	shorttitle: "shortTitle",
 	abstract: "abstractNote",
 	volumes: "numberOfVolumes",
-	version: "versionNumber",
+	version: "version",
 	eventtitle: "conferenceName",
 	pages: "pages",
 	pagetotal: "numPages"

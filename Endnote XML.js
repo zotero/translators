@@ -3,7 +3,7 @@
 	"label": "Endnote XML",
 	"creator": "Sebastian Karcher",
 	"target": "xml",
-	"minVersion": "4.0.27",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcv",
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 function detectImport() {
@@ -371,7 +371,7 @@ var fieldMap = {
 		"__default": "edition",
 		//		"__ignore":["journalArticle"], //EPubDate.
 		session: ["bill", "hearing", "statute"],
-		versionNumber: ["computerProgram"]
+		version: ["computerProgram"]
 	},
 	issue: {
 		"__default": "issue",
