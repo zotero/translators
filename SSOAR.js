@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-18 16:51:35"
+	"lastUpdated": "2016-06-15 21:48:00"
 }
 
 /*
@@ -100,6 +100,18 @@ function scrape(doc, url) {
 		trans.setHandler('itemDone', function (obj, item) {
 			//for debugging
 			//item.notes.push({note:bibTexContent});
+			
+			//add doi
+			var identfiers = ZU.xpath(doc, '//meta[contains(@name, "DC.identifier")]');
+			if (!item.DOI) {
+				for (var i=0; i<identfiers.length; i++) {
+					var extractedId = identfiers[i].getAttribute("content");
+					var start = extractedId.indexOf("10.");
+					if (start > -1) {
+						item.DOI = extractedId.substring(start);
+					}
+				}
+			}
 			
 			//clean ISSN
 			if (item.ISSN) {
@@ -340,6 +352,44 @@ var testCases = [
 					{
 						"title": "SSOAR Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ssoar.info/ssoar/handle/document/46968",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Convention Theory, classification and quantification",
+				"creators": [
+					{
+						"firstName": "Rainer",
+						"lastName": "Diaz-Bone",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"DOI": "10.12759/hsr.41.2016.2.48-71",
+				"ISSN": "0172-6404",
+				"abstractNote": "The article presents the main contributions of the French approach of economics of convention (EC) to the analysis of classifications and quantifications. Here, Alain Desrosières has delivered many outstanding contributions. The article shortly presents the approach of EC. Conventions are socio-cognitive resources actors rely on to achieve shared interpretations, evaluations and valuations of situations and the value of objects, persons and actions. Also, the interpretation of institutions has to apply conventions. Conventions with semantic content and without semantic content are compared, and the different scopes of convention-based coordination (in time and space) are discussed. Also the conception of a political economy of classification and quantification is presented. At the end of the article, a typology of situations of classifications and quantifications is introduced.",
+				"issue": "2",
+				"itemID": "Diaz-Bone2016",
+				"language": "en",
+				"libraryCatalog": "SSOAR",
+				"pages": "48-71",
+				"publicationTitle": "Historical Social Research",
+				"rights": "Creative Commons - Namensnennung, Nicht-kommerz., Weitergabe unter gleichen Bedingungen cf. http://creativecommons.org/licenses/by-nc-sa/3.0/de/",
+				"url": "http://nbn-resolving.de/urn:nbn:de:0168-ssoar-46968-6",
+				"volume": "41",
+				"attachments": [
+					{
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
