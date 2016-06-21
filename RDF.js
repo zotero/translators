@@ -3,7 +3,7 @@
 	"label": "RDF",
 	"creator": "Simon Kornblith",
 	"target": "rdf",
-	"minVersion": "2.1.9",
+	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-01-16 21:09:00"
+	"lastUpdated": "2016-06-20 20:00:00"
 }
 
 /*
@@ -830,7 +830,7 @@ function importItem(newItem, node) {
 	// edition
 	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition", n.prism2_1+"edition", n.bibo+"edition"], true);
 	// these fields mean the same thing
-	newItem.version = newItem.edition;
+	newItem.versionNumber = newItem.edition;
 	
 	// pages
 	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange", n.bibo+"pages"], true);
