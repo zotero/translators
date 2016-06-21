@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2016-01-05 23:10:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 /*
