@@ -4,14 +4,14 @@
 	"label":"Bibliontology RDF",
 	"creator":"Simon Kornblith",
 	"target":"rdf",
-	"minVersion":"4.0.27",
+	"minVersion":"2.0",
 	"maxVersion":"",
 	"priority":50,
 	"browserSupport":"gcs",
 	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
 	"displayOptions":{"exportNotes":true},
 	"inRepository":false,
-	"lastUpdated":"2016-06-20 20:00:00"
+	"lastUpdated":"2016-06-21 08:45:20"
 }
 
 var n = {
@@ -260,7 +260,7 @@ var FIELDS = {
 	"scale":				[ITEM,			n.z+"scale"],
 	"meetingName":			[ITEM,			[n.bibo+"presentedAt", [[n.rdf+"type", n.bibo+"Conference"]], n.dcterms+"title"]],
 	"runningTime":			[ITEM,			n.po+"duration"],
-	"versionNumber":		[ITEM,			n.doap+"revision"],
+	"version":				[ITEM,			n.doap+"revision"],
 	"system":				[ITEM, 			n.doap+"os"],
 	"conferenceName":		[ITEM,			[n.bibo+"presentedAt", [[n.rdf+"type", n.bibo+"Conference"]], n.dcterms+"title"]],
 	"language":				[ITEM,			n.dcterms+"language"],

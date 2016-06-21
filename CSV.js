@@ -3,7 +3,7 @@
 	"label": "CSV",
 	"creator": "Philipp Zumstein and Aurimas Vinckevicius",
 	"target": "csv",
-	"minVersion": "4.0.27",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "g",
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 /*
@@ -73,7 +73,7 @@ var exportedFields = [
 	"number","edition","runningTime","scale","medium","artworkSize",
 	"filingDate","applicationNumber","assignee","issuingAuthority","country",
 	"meetingName","conferenceName","court","references","reporter",
-	"legalStatus","priorityNumbers","programmingLanguage","versionNumber","system",
+	"legalStatus","priorityNumbers","programmingLanguage","version","system",
 	"code","codeNumber","section","session","committee","history",
 	"legislativeBody"
 ];

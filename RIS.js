@@ -3,7 +3,7 @@
 	"label": "RIS",
 	"creator": "Simon Kornblith and Aurimas Vinckevicius",
 	"target": "ris",
-	"minVersion": "4.0.27",
+	"minVersion": "3.0.4",
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-20 20:00:00"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 function detectImport() {
@@ -298,7 +298,7 @@ var fieldMap = {
 		"__default":"edition",
 //		"__ignore":["journalArticle"], //EPubDate
 		session:["bill", "hearing", "statute"],
-		versionNumber:["computerProgram"]
+		version:["computerProgram"]
 	},
 	IS: {
 		"__default":"issue",
@@ -2621,7 +2621,7 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"versionNumber": "Version",
+				"version": "Version",
 				"attachments": [],
 				"tags": [
 					"Keyword1, Keyword2, Keyword3",
@@ -4873,7 +4873,7 @@ var testCases = [
 				"company": "Publisher Name",
 				"place": "Place of Publication",
 				"url": "Location/URL",
-				"versionNumber": "Version",
+				"version": "Version",
 				"attachments": [],
 				"tags": [
 					"Keywords1, Keywords2, Keywords3",
