@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-06-21 08:45:20"
+	"lastUpdated": "2016-06-22 21:09:00"
 }
 
 /*
@@ -413,6 +413,8 @@ function detectType(newItem, node, ret) {
 				case 'conferenceposter':
 					t.dc = 'conferencePaper';
 					break;
+				case 'article':  //from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
+				case 'dataset':  //until dataset gets implemented
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
@@ -444,9 +446,6 @@ function detectType(newItem, node, ret) {
 
 				//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
 				//some are the same as eprints and are handled above
-				case 'article':
-					t.dcGuess = 'journalArticle';
-					break;
 				case 'electronicbook':
 					t.dc = 'book';
 					break;
@@ -521,6 +520,8 @@ function detectType(newItem, node, ret) {
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
+				case 'dataset':
+				//map to dataset once we have it as item type
 				case 'article':
 					t.eprints = 'journalArticle';
 					break;
@@ -535,8 +536,6 @@ function detectType(newItem, node, ret) {
 					break;
 				//from  samples at http://oro.open.ac.uk, http://eprints.soton.ac.uk/, http://eprints.biblio.unitn.it
 				case 'techreport':
-				case 'dataset':  
-				//map to dataset once we have it as item type
 					t.eprints = 'report';
 					break;
 				case 'bookedit':
