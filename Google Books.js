@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
+	"browserSupport": "gcsbv",
 	"lastUpdated": "2015-09-24 15:24:15"
 }
 
@@ -116,17 +116,22 @@ function parseXML(text) {
 	}
 	
 	var ISBN;
-	const ISBN10Re = /(ISBN:)(\w{10})$/;
-	const ISBN13Re = /(ISBN:)(\w{13})$/;
+	const ISBN10Re = /(?:ISBN:)(\w{10})$/;
+	const ISBN13Re = /(?:ISBN:)(\w{13})$/;
+	const booksIDRe = /^(\w{12})$/;
 	var identifiers = ZU.xpath(xml, "dc:identifier", ns);
 	for (var i in identifiers) {
 		var ISBN10Match = ISBN10Re.exec(identifiers[i].textContent);
 		var ISBN13Match = ISBN13Re.exec(identifiers[i].textContent);
+		var booksIDMatch = booksIDRe.exec(identifiers[i].textContent);
 		if (ISBN10Match != null) {
-			ISBN = ISBN10Match[2];
+			ISBN = ISBN10Match[1];
 		}
 		if (ISBN13Match != null) {
-			ISBN = ISBN13Match[2];
+			ISBN = ISBN13Match[1];
+		}
+		if (booksIDMatch != null) {
+			newItem.url = 'https://books.google.com/books?id=' + booksIDMatch[1];
 		}
 	}
 	newItem.ISBN = ISBN;
