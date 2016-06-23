@@ -394,7 +394,7 @@ function detectType(newItem, node, ret) {
 			t.dc = type;
 		} else {
 			//on eprints the type fields are often in the form "Journal Article", "Conference Item" etc.
-			type = type.toLowerCase().replace(/\s/g, "")
+			type = type.toLowerCase().replace(/\s/g, "");
 			switch (type) {
 				//eprints
 				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
@@ -682,7 +682,7 @@ function detectType(newItem, node, ret) {
 
 	var itemType = t.zotero || t.bib || t.prism ||t.eprints|| t.og || t.dc || 
 		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
-		t.prismGuess || t.ogGuess || t.dcGuess 
+		t.prismGuess || t.ogGuess || t.dcGuess ;
 
 	//in case we still don't have a container, double-check
 	//some are copied from above
