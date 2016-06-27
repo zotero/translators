@@ -2,14 +2,14 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(?:LuceneSearch|Page|IFLPMetaData)\\?",
+	"target": "^https?://(www\.)?heinonline\.org/HOL/(?:LuceneSearch|Page|IFLPMetaData)\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-02-22 23:08:21"
+	"lastUpdated": "2016-06-26 23:08:21"
 }
 
 /*
@@ -67,7 +67,7 @@ function getXPathStr(attr, elem, path) {
 // Extract query values to keys on an object
 function extractQueryValues(url) {
 	var ret = {};
-	ret.base = url.replace(/(.*?)[a-zA-Z]+\?.*/, "$1");
+	ret.base = url.replace(/[a-zA-Z]+\?.*/, "");
 	var query = url.replace(/.*?\?/, "");
 	query = query.split("&");
 	for (var i=0,ilen=query.length;i<ilen;i++) {
@@ -79,11 +79,7 @@ function extractQueryValues(url) {
 
 // Remangle HeinOnline RIS to form expected by translator
 function fixRIS (ris) {
-	var lines = ris.split("\n");
-	for (var i=0,ilen=lines.length;i<ilen;i++) {
-		lines[i] = lines[i].replace(/^([A-Z0-9][A-Z0-9]) /, "$1  - ").replace(/^VO  /, "VL  ").replace(/^YR  /, "DA  ").replace(/^OP  /, "EP  ");
-	}
-	ris = lines.join("\n");
+	ris=ris.replace(/^([A-Z0-9][A-Z0-9]) /mg, "$1  - ").replace(/^VO  /mg, "VL  ").replace(/^YR  /mg, "DA  ").replace(/^OP  /mg, "EP  ");
 	return ris;
 }
 
@@ -96,10 +92,9 @@ function translateRIS(ris, pdfURL) {
 		if (pdfURL) {
 			item.attachments = [{
 				title: "Full Text PDF",
-				url: pdfURL,
+				url: ""+pdfURL,
 				mimeType: "application/pdf"
 			}];
-			
 		}
 		item.complete();
 	});
@@ -119,23 +114,29 @@ function scrapePage(doc, url) {
 		// If page has RIS, use that
 		var docParams = extractQueryValues(risPopupURL);
 		var risURL = docParams.base 
-			+ "CitationFile?kind=ris&handle=" + docParams.handle 
+			+ "CitationFile?handle=" + docParams.handle 
 			+ "&div=" + docParams.div 
 			+ "&id=" + docParams.id 
 			+ "&base=js";
-		var pdfPageURL = doc.getElementsByClassName("updatediv");
+		var pdfPageURLs = doc.getElementsByClassName("updatediv");
 		ZU.doGet(risURL, function(ris) {
 			ris = fixRIS(ris);
-			if (pdfPageURL) {
-				ZU.doGet(pdfPageURL, function(pdfPage) {
-					// Call to pdfPageURL prepares PDF for download via META refresh URL
-					var pdfURL = null;
-					var m = pdfPage.match(/<META.*URL=([^"]+)/);
-					if (m) {
-						var pdfURL = m[1];
+			if (pdfPageURLs) {
+				Array.prototype.filter.call(pdfPageURLs, function(pdfPageURL){
+					if (pdfPageURL){
+						// force string instead of object
+						pdfPageURL=""+pdfPageURL;
+						ZU.doGet(pdfPageURL, function(pdfPage) {
+							// Call to pdfPageURL prepares PDF for download via META refresh URL
+							var pdfURL = null;
+							var m = pdfPage.match(/<META.*URL=([^"]+)/);
+							if (m) {
+								pdfURL = m[1];
+							}
+							translateRIS(ris, pdfURL);
+						} , null );
 					}
-					translateRIS(ris, pdfURL);
-				} , null );
+				});
 			} else {
 				translateRIS(ris);
 			}
@@ -156,18 +157,20 @@ function scrapePage(doc, url) {
 */
 
 function detectWeb (doc, url) {
+	var COinS = getXPathStr("title", doc, '//span[contains(@class, "Z3988")]');
+	var RIS = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
 	if (url.indexOf("/LuceneSearch?") > -1) {
 		if (getSearchResults(doc)) {
 			return "multiple";
 		}
-	} else {
-		return "journalArticle";
+	} else if (COinS || RIS) {
+		return "journalArticle"
 	}
 	return false;
 }
 
-function doWeb (doc) {
-	if (detectWeb(doc) === "multiple") {
+function doWeb (doc,url) {
+	if (detectWeb(doc,url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 
 			if (!items) {
@@ -177,11 +180,10 @@ function doWeb (doc) {
 			for (var i in items) {
 				urls.push(i);
 			}
-
 			ZU.processDocuments(urls, scrapePage);
 		});
 	} else {
-		scrapePage(doc, url);
+		scrapePage(doc);
 	}
 }
 
@@ -189,28 +191,60 @@ function doWeb (doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://heinonline.org/HOL/Page?handle=hein.journals/howlj3&div=8&collection=journals&set_as_cursor=1&men_tab=srchresults",
+		"url": "http://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp&men_tab=srchresults&set_as_cursor=8",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Law, Logic and Experience Leading Article",
+				"title": "Initiative test.",
 				"creators": [
 					{
-						"lastName": "Gilmore",
-						"firstName": "Grant",
+						"firstName": "D.",
+						"lastName": "Andrews",
 						"creatorType": "author"
 					}
 				],
-				"date": "1957",
-				"journalAbbreviation": "Howard L.J.",
+				"date": "2007",
+				"libraryCatalog": "HeinOnline",
+				"pages": "38",
+				"publicationTitle": "International Financial Law Review",
+				"url": "http://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp",
+				"volume": "26",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://heinonline.org/HOL/LuceneSearch?terms=test&collection=all&searchtype=advanced&typea=text&tabfrom=&submit=Go&all=true",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://heinonline.org/HOL/Page?handle=hein.journals/alterlj18&div=22&start_page=76&collection=journals&set_as_cursor=4&men_tab=srchresults",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Means Test or Mean Test Pension Entitlements for Farmers",
+				"creators": [
+					{
+						"lastName": "Voyce",
+						"firstName": "Malcolm",
+						"creatorType": "author"
+					}
+				],
+				"date": "1993",
+				"journalAbbreviation": "Alternative L.J.",
 				"language": "eng",
 				"libraryCatalog": "HeinOnline",
-				"pages": "26-41",
-				"publicationTitle": "Howard Law Journal",
-				"volume": "3",
+				"pages": "76-85",
+				"publicationTitle": "Alternative Law Journal",
+				"volume": "18",
 				"attachments": [
 					{
-						"title": "HeinOnline PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
