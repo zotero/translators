@@ -1,6 +1,6 @@
 {
 	"translatorID": "fc3ac6f7-b461-49fe-879c-dd234f9c101c",
-	"label": "LIbrary Catalog (SLIMS)",
+	"label": "Library Catalog (SLIMS)",
 	"creator": "Sebastian Karcher",
 	"target": "(^https?://makassarlib\\.net|^https?://kit\\.ft\\.ugm\\.ac\\.id/ucs|/libsenayan)/index\\.php",
 	"minVersion": "2.1",
@@ -132,7 +132,7 @@ var testCases = [
 				"callNumber": "331.880973",
 				"archiveLocation": "Perpustakaan Kemendikbud Pusat Informasi dan Humas, Kemendikbud",
 				"language": "English",
-				"libraryCatalog": "LIbrary Catalog (SLIMS)",
+				"libraryCatalog": "Library Catalog (SLIMS)",
 				"shortTitle": "Labor relations"
 			}
 		]
