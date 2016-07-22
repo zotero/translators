@@ -96,7 +96,6 @@ attachments      : [{ url: FW.Url(),
 creators         : FW.Xpath('//span[@itemprop="name"]').text().cleanAuthor("author"),
 date             : FW.Xpath('//span[@itemprop="datePublished"]').text(),
 language		 : "en-US",
-abstractNote	 : FW.Xpath('//meta[@name="description"]/@content').text(),
 ISSN			 : "0190-8286",
 publicationTitle : "The Washington Post"
 });
@@ -232,7 +231,6 @@ var testCases = [
 				],
 				"date": "April 7, 1991",
 				"ISSN": "0190-8286",
-				"abstractNote": "[object Attr]",
 				"language": "en-US",
 				"libraryCatalog": "washingtonpost.com",
 				"publicationTitle": "The Washington Post",
