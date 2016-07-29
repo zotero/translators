@@ -131,7 +131,7 @@ function parseXML(text) {
 			ISBN = ISBN13Match[1];
 		}
 		if (booksIDMatch != null) {
-			newItem.url = 'https://books.google.com/books?id=' + booksIDMatch[1];
+			newItem.note = 'https://books.google.com/books?id=' + booksIDMatch[1];
 		}
 	}
 	newItem.ISBN = ISBN;
