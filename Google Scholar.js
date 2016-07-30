@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-30 15:25:13"
+	"lastUpdated": "2016-07-29 23:09:08"
 }
 
 /*
@@ -535,7 +535,7 @@ function scrapeAll(doc, itemObjs) {
 	
 	if (item.citeUrl) {
 		ZU.doGet(item.citeUrl, function(text) {
-			var m = text.match(/href="(\/scholar.bib\?[^"]+)/);
+			var m = text.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
 				Zotero.debug(text);
 				var msg = "Could not find BibTeX URL"
