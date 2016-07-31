@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-13 20:17:44"
+	"lastUpdated": "2016-07-31 15:34:03"
 }
 
 /*
@@ -58,14 +58,16 @@ function detectWeb(doc, url) {
 
 function lookupWork(workid, orcid) {
 	var callApi = 'https://pub.orcid.org/v2.0_rc2/' + orcid + '/work/' + workid;
-	ZU.doGet(callApi, "", function(text){
-		Z.debug(callApi);
-		Z.debug(text);
+	ZU.doGet(callApi, function(text){
+		//Z.debug(callApi);
+		//Z.debug(text);
+		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7");//CSL JSON
 		translator.setString(text);
 		translator.translate();
-	}, { "Accept" : "application/vnd.citationstyles.csl+json" } );
+	}, undefined, undefined, {"Accept" : "application/vnd.citationstyles.csl+json"});
+	
 }
 
 
@@ -87,5 +89,11 @@ function doWeb(doc, url) {
 		});
 	}
 }/** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://orcid.org/0000-0003-0902-4386",
+		"items": "multiple"
+	}
+]
 /** END TEST CASES **/
