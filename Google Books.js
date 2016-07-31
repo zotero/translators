@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-07-31 16:47:09"
+	"lastUpdated": "2016-07-31 17:08:28"
 }
 
 /*
@@ -169,7 +169,7 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 
 	//quick check for new format
 	//As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
-	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li|//ol[@id="rso"]/div/li|//ol[@id="rso"]/div/div[@class="g"]');
+	var bookList = ZU.xpath(doc, '//*[@id="rso"]/li|//*[@id="rso"]/div/li|//*[@id="rso"]/div/div[@class="g"]');
 	if(bookList.length) {
 		Z.debug("newFormat")
 		for(var i=0, n=bookList.length; i<n; i++) {
@@ -286,11 +286,6 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.google.com/search?tbo=p&tbm=bks&q=asimov",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "https://www.google.com/search?tbo=p&tbm=bks&q=asimov",
