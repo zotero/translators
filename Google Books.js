@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2015-09-24 15:24:15"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2016-07-31 17:08:28"
 }
 
 /*
@@ -116,17 +116,22 @@ function parseXML(text) {
 	}
 	
 	var ISBN;
-	const ISBN10Re = /(ISBN:)(\w{10})$/;
-	const ISBN13Re = /(ISBN:)(\w{13})$/;
+	const ISBN10Re = /(?:ISBN:)(\w{10})$/;
+	const ISBN13Re = /(?:ISBN:)(\w{13})$/;
+	const booksIDRe = /^(\w{12})$/;
 	var identifiers = ZU.xpath(xml, "dc:identifier", ns);
 	for (var i in identifiers) {
 		var ISBN10Match = ISBN10Re.exec(identifiers[i].textContent);
 		var ISBN13Match = ISBN13Re.exec(identifiers[i].textContent);
+		var booksIDMatch = booksIDRe.exec(identifiers[i].textContent);
 		if (ISBN10Match != null) {
-			ISBN = ISBN10Match[2];
+			ISBN = ISBN10Match[1];
 		}
 		if (ISBN13Match != null) {
-			ISBN = ISBN13Match[2];
+			ISBN = ISBN13Match[1];
+		}
+		if (booksIDMatch != null) {
+			newItem.extra = "Google-Books-ID: " + booksIDMatch[1];
 		}
 	}
 	newItem.ISBN = ISBN;
@@ -164,7 +169,7 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 
 	//quick check for new format
 	//As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
-	var bookList = ZU.xpath(doc, '//ol[@id="rso"]/li|//ol[@id="rso"]/div/li|//ol[@id="rso"]/div/div[@class="g"]');
+	var bookList = ZU.xpath(doc, '//*[@id="rso"]/li|//*[@id="rso"]/div/li|//*[@id="rso"]/div/div[@class="g"]');
 	if(bookList.length) {
 		Z.debug("newFormat")
 		for(var i=0, n=bookList.length; i<n; i++) {
@@ -288,15 +293,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.google.com/search?tbo=p&tbm=bks&q=asimov",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://books.google.de/books/about/The_Cambridge_companion_to_electronic_mu.html?id=AJbdPZv1DjgC&redir_esc=y",
+		"url": "https://books.google.de/books/about/The_Cambridge_companion_to_electronic_mu.html?id=AJbdPZv1DjgC&redir_esc=y",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Cambridge Companion to Electronic Music",
 				"creators": [
 					{
 						"firstName": "Nicholas",
@@ -309,13 +310,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Music / General",
-					"Music / Genres & Styles / Electronic",
-					"Music / Instruction & Study / Techniques"
-				],
-				"seeAlso": [],
+				"date": "2007-12-13",
+				"ISBN": "9780521868617",
+				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
+				"extra": "Google-Books-ID: AJbdPZv1DjgC",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "260",
+				"publisher": "Cambridge University Press",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -323,23 +325,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "260",
-				"ISBN": "9780521868617",
-				"publisher": "Cambridge University Press",
-				"title": "The Cambridge Companion to Electronic Music",
-				"language": "en",
-				"abstractNote": "Musicians are always quick to adopt and explore new technologies. The fast-paced changes wrought by electrification, from the microphone via the analogue synthesiser to the laptop computer, have led to a wide diversity of new musical styles and techniques. Electronic music has grown to a broad field of investigation, taking in historical movements such as musique concrète and elektronische musik, and contemporary trends such as electronic dance music and electronica. A fascinating array of composers and inventors have contributed to a diverse set of technologies, practices and music. This book brings together some novel threads through this scene, from the viewpoint of researchers at the forefront of the sonic explorations empowered by electronic technology. The chapters provide accessible and insightful overviews of core topic areas and uncover some hitherto less publicised corners of worldwide movements. Recent areas of intense activity such as audiovisuals, live electronic music, interactivity and network music are actively promoted.",
-				"date": "2007-12-13",
-				"libraryCatalog": "Google Books"
+				"tags": [
+					"Music / General",
+					"Music / Genres & Styles / Electronic",
+					"Music / Instruction & Study / Techniques"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.de/books?id=skf3LSyV_kEC&source=gbs_navlinks_s&redir_esc=y",
+		"url": "https://books.google.de/books?id=skf3LSyV_kEC&source=gbs_navlinks_s&redir_esc=y",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Gabriel García Márquez: A Critical Companion",
 				"creators": [
 					{
 						"firstName": "Rubén",
@@ -347,12 +349,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Literary Criticism / Caribbean & Latin American",
-					"Literary Criticism / European / Spanish & Portuguese"
-				],
-				"seeAlso": [],
+				"date": "2001",
+				"ISBN": "9780313312601",
+				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece \"One Hundred Years of Solitude,\" Gabriel Garc DEGREESD'ia M DEGREESD'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc DEGREESD'ia M DEGREESD'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc DEGREESD'ia M DEGREESD'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for \"One Hundred Years of Solitude,\" as well as \"Chronicle of a Death Foretold\" (1981), \"Love in the Time of Cholera\" (1985), two additional novels, and five of Garc DEGREESD'ia M DEGREESD'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc DEGREESD'ia M DEGREESD'arquez.",
+				"extra": "Google-Books-ID: skf3LSyV_kEC",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "208",
+				"publisher": "Greenwood Publishing Group",
+				"shortTitle": "Gabriel García Márquez",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -360,24 +365,22 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "208",
-				"ISBN": "9780313312601",
-				"publisher": "Greenwood Publishing Group",
-				"title": "Gabriel García Márquez: A Critical Companion",
-				"language": "en",
-				"abstractNote": "Winner of the Nobel Prize for Literature in 1982 for his masterpiece \"One Hundred Years of Solitude,\" Gabriel Garc DEGREESD'ia M DEGREESD'arquez had already earned tremendous respect and popularity in the years leading up to that honor, and remains, to date, an active and prolific writer. Readers are introduced to Garc DEGREESD'ia M DEGREESD'arquez with a vivid account of his fascinating life; from his friendships with poets and presidents, to his distinguished career as a journalist, novelist, and chronicler of the quintessential Latin American experience. This companion also helps students situate Garc DEGREESD'ia M DEGREESD'arquez within the canon of Western literature, exploring his contributions to the modern novel in general, and his forging of literary techniques, particularly magic realism, that have come to distinguish Latin American fiction. Full literary analysis is given for \"One Hundred Years of Solitude,\" as well as \"Chronicle of a Death Foretold\" (1981), \"Love in the Time of Cholera\" (1985), two additional novels, and five of Garc DEGREESD'ia M DEGREESD'arquez's best short stories. Students are given guidance in understanding the historical contexts, as well as the characters and themes that recur in these interrelated works. Narrative technique and alternative critical perspectives are also explored for each work, helping readers fully appreciate the literary accomplishments of Gabriel Garc DEGREESD'ia M DEGREESD'arquez.",
-				"date": "2001-01-01",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Gabriel García Márquez"
+				"tags": [
+					"Literary Criticism / Caribbean & Latin American",
+					"Literary Criticism / European / Spanish & Portuguese"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.de/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Peggy+Eaton%22&ots=KN-Z0-HAcv&sig=snBNf7bilHi9GFH4-6-3s1ySI9Q&redir_esc=y#v=onepage&q=%22Peggy%20Eaton%22&f=false",
+		"url": "https://books.google.de/books?hl=en&lr=&id=Ct6FKwHhBSQC&oi=fnd&pg=PP9&dq=%22Peggy+Eaton%22&ots=KN-Z0-HAcv&sig=snBNf7bilHi9GFH4-6-3s1ySI9Q&redir_esc=y#v=onepage&q=%22Peggy%20Eaton%22&f=false",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Some American Ladies: Seven Informal Biographies ...",
 				"creators": [
 					{
 						"firstName": "Meade",
@@ -385,11 +388,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Biography & Autobiography / Women"
-				],
-				"seeAlso": [],
+				"date": "1926",
+				"ISBN": "9780836913620",
+				"extra": "Google-Books-ID: Ct6FKwHhBSQC",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "332",
+				"publisher": "G.P. Putnam's Sons",
+				"shortTitle": "Some American Ladies",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -397,23 +403,21 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "332",
-				"ISBN": "9780836913620",
-				"publisher": "G.P. Putnam's Sons",
-				"title": "Some American Ladies: Seven Informal Biographies ...",
-				"language": "en",
-				"date": "1926",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Some American Ladies"
+				"tags": [
+					"Biography & Autobiography / Women"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://books.google.de/books?printsec=frontcover&vid=LCCN84026715&redir_esc=y#v=onepage&q&f=false",
+		"url": "https://books.google.de/books?printsec=frontcover&vid=LCCN84026715&redir_esc=y#v=onepage&q&f=false",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
 				"creators": [
 					{
 						"firstName": "Thomas B.",
@@ -426,11 +430,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Music / Genres & Styles / New Age"
-				],
-				"seeAlso": [],
+				"date": "2002",
+				"ISBN": "9780415936446",
+				"abstractNote": "Annotation Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
+				"extra": "Google-Books-ID: ILkquoGXEq0C",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "332",
+				"publisher": "Psychology Press",
+				"shortTitle": "Electronic and Experimental Music",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -438,15 +446,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "340",
-				"ISBN": "9780415936446",
-				"publisher": "Psychology Press",
-				"title": "Electronic and Experimental Music: Pioneers in Technology and Composition",
-				"language": "en",
-				"abstractNote": "Annotation Electronic and Experimental Music details the history of electronic music throughout the world, and the people who created it. From the theory of sound production to key composers and instrument designers, this is a complete introduction to the genre from its early roots to the present technological explosion. Every major figure is covered including: Thaddeus Cahill, Peire Henry, Gorden Mumma, Pauline Oliveros, Brian Eno, and D.J. Spooky. The vast array of forms and instruments that these innovators introduced and expanded are also included--tape composition, the synthesizer, \"live\" electronic performance, the ONCE festivals, ambient music, and turntablism. This new edition, includes a thoroughly updated and enlarged theoretical and historical sections and includes new material on using home computers (PCs) and the many resources now available in software and the Internet.",
-				"date": "2002",
-				"libraryCatalog": "Google Books",
-				"shortTitle": "Electronic and Experimental Music"
+				"tags": [
+					"Music / Genres & Styles / New Age"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -466,6 +470,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "The Wealth of Nations",
 				"creators": [
 					{
 						"firstName": "Adam",
@@ -473,9 +478,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1902",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "458",
+				"publisher": "Collier",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -483,12 +490,9 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"numPages": "458",
-				"publisher": "Collier",
-				"title": "The Wealth of Nations",
-				"language": "en",
-				"date": "1902",
-				"libraryCatalog": "Google Books"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
