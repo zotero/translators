@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-01-21 21:22:38"
+	"lastUpdated": "2016-08-02 07:54:49"
 }
 
 /*
@@ -66,7 +66,7 @@ function getSearchResults(doc, url) {
 					title = ZU.xpath(results[i], './h2[contains(@class,"itemTitle")]/a')[0];
 			}
 		} else {//view issue
-			title = ZU.xpath(results[i],'./h3/a')[0];
+			title = ZU.xpath(results[i],'.//h3/a')[0];
 		}
 
 		if(!title || !title.href) continue;
