@@ -1,6 +1,6 @@
 {
 	"translatorID": "dc024bfc-2252-4257-b10e-cb95a0f213aa",
-	"label": "Library Catalog (Talis Prism 2)",
+	"label": "Library Catalog (Capita Prism)",
 	"creator": "Sebastian Karcher",
 	"target": "/items(/\\d+|\\?query=)",
 	"minVersion": "2.1.9",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-06-20 11:26:54"
+	"lastUpdated": "2016-07-02 21:37:30"
 }
 
 /*
@@ -108,7 +108,7 @@ var testCases = [
 					}
 				],
 				"language": "English",
-				"libraryCatalog": "Library Catalog (Talis Prism 2)",
+				"libraryCatalog": "Library Catalog (Capita Prism)",
 				"publisher": "Archiv",
 				"url": "http://capitadiscovery.co.uk/bcu/items/324179",
 				"attachments": [],
@@ -140,7 +140,7 @@ var testCases = [
 				"date": "2016",
 				"ISBN": "9781408846896",
 				"language": "English",
-				"libraryCatalog": "Library Catalog (Talis Prism 2)",
+				"libraryCatalog": "Library Catalog (Capita Prism)",
 				"place": "London",
 				"publisher": "Bloomsbury",
 				"url": "http://capitadiscovery.co.uk/worcs/items/693096",
