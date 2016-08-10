@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 13:26:00"
+	"lastUpdated": "2016-08-10 13:45:00"
 }
 
 /*
@@ -84,7 +84,8 @@ function scrape(doc) {
 		newArticle.language =  "Swedish";
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
-		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
+		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()');
+		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]')
 		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
 	newArticle.complete();
 }
@@ -107,7 +108,7 @@ var testCases = [
 				],
 				"date": "2016-08-09",
 				"ISSN": "1103-9000",
-				"abstractNote": "Tjuven stal 81-åriga Ingrid Höglunds kreditkort och tog ut 14 000 kronor.\nCoop, som är kortgivare, vägrar att ge tillbaka pengarna.\n– Jag är pensionär. För mig är det mycket pengar. Dessutom ska de ha ränta. Jag är så ledsen, säger hon",
+				"abstractNote": "Tjuven stal 81-åriga Ingrid Höglunds kreditkort och tog ut 14 000 kronor., Coop, som är kortgivare, vägrar att ge tillbaka pengarna., – Jag är pensionär. För mig är det mycket pengar. Dessutom ska de ha ränta. Jag är så ledsen, säger hon",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
