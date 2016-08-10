@@ -140,6 +140,33 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/nyheter/article23310631.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Putin och Erdogan i möte: ”Ännu starkare relationer”",
+				"creators": [
+					{
+						"firstName": "Niklas",
+						"lastName": "Eriksson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-09",
+				"ISSN": "1103-9000",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"shortTitle": "Putin och Erdogan i möte",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
