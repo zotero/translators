@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 20:07:00"
+	"lastUpdated": "2016-08-10 20:31:00"
 }
 
 /*
@@ -99,39 +99,11 @@
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.aftonbladet.se/nyheter/article23310631.ab",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Putin och Erdogan i möte: ”Ännu starkare relationer”",
-				"creators": [
-					{
-						"firstName": "Niklas",
-						"lastName": "Eriksson",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016-08-09",
-				"ISSN": "1103-9000",
-				"abstractNote": "För första gången sedan Turkiet sköt ner ett ryskt stridsplan har ländernas presidenter möts., Både Erdogan och Putin uppger att mötet har stärkt banden mellan länderna., – Jag tror att våra relationer har blivit ännu starkare än vad de var tidigare, säger Turkiets president.",
-				"language": "Swedish",
-				"libraryCatalog": "Aftonbladet",
-				"publicationTitle": "Aftonbladet",
-				"shortTitle": "Putin och Erdogan i möte",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.aftonbladet.se/sportbladet/trav365/article23314110.ab",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "”Kan förstöra\nhela karriären”",
+				"title": "”Kan förstöra hela karriären”",
 				"creators": [
 					{
 						"firstName": "Erik",
@@ -145,7 +117,7 @@ var testCases = [
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
-				"section": "Sportbladet/Trav 365",
+				"section": "Sportbladet",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -224,7 +196,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Okända historierna –\ndrev bordell i OS-byn",
+				"title": "Okända historierna – drev bordell i OS-byn",
 				"creators": [],
 				"date": "2016-08-03",
 				"ISSN": "1103-9000",
@@ -232,7 +204,101 @@ var testCases = [
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
-				"section": "Sportbladet/OS 2016",
+				"section": "Sportbladet",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/nyheter/kolumnister/wolfganghansson/article23315853.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Trumps taktik fungerar inte i det riktiga valet",
+				"creators": [
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Hansson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-10",
+				"ISSN": "1103-9000",
+				"abstractNote": "Donald Trump driver sin valkampanj som en dokusåpaskådis. Det gäller att ständigt lägga beslag på så mycket uppmärksamhet som möjligt. All publicitet är bra. Även den dåliga., Taktiken fungerade under primärvalen men mycket tyder på att verkligheten är på väg att komma ikapp honom i den riktiga valrörelsen.",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"section": "Kolumnister",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/kultur/article23314559.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "SD hotar den svenska kulturen",
+				"creators": [
+					{
+						"firstName": "Mattias",
+						"lastName": "Svensson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-10",
+				"ISSN": "1103-9000",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"section": "Kultur",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/debatt/article23309432.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Kör inte över folket – säkra kontanterna",
+				"creators": [],
+				"ISSN": "1103-9000",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://tv.aftonbladet.se/abtv/articles/125960",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Bilen exploderar - med föraren i",
+				"creators": [],
+				"ISSN": "1103-9000",
+				"abstractNote": "Otäcka bilder när tävlingen avgörs",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
