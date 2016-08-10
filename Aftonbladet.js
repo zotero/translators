@@ -92,7 +92,7 @@
 	           }
 	        }
 	          var possibleSections =["Debatt"];
-			var breadcrumbs = ZU.xpath(doc, '//a[@href="/debatt/"]');
+			var breadcrumbs = ZU.xpath(doc, '//a[contains(@href, "debatt")]');
 	        for (var i=breadcrumbs.length-1; i>0; i--) {
 	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
 	               newArticle.section = breadcrumbs[i].textContent;
