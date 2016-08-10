@@ -28,9 +28,6 @@
 
 */
 
-
-/* Zotero API */
-
 function detectWeb(doc, url) {
     //TODO: adjust the logic here
     if (url.indexOf('/article')>-1) {
