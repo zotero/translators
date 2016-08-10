@@ -78,9 +78,11 @@ function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 		newArticle.title = ZU.xpathText(doc, "//h1");	
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
-		var author = ZU.xpathText(doc, '//address[@class="abByline"]');
-		newArticle.creators.push(ZU.cleanAuthor(author, "author"));
-		Z.debug(author);
+		var authors = ZU.xpath(doc, '//address[contains(@class, "abByline")]/div[contains(@class, "abAuthor")]');
+		for (var i=0; i<authors.length; i++) {
+			newArticle.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+		}
+		Z.debug(authors);
 		newArticle.language =  "Swedish";
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
@@ -92,33 +94,6 @@ function scrape(doc) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.aftonbladet.se/nyheter/article23305202.ab",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Coop ersätter inte Ingrid, 81, efter kortstölden",
-				"creators": [
-					{
-						"firstName": "Julia",
-						"lastName": "Wågenberg",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016-08-09",
-				"ISSN": "1103-9000",
-				"abstractNote": "Tjuven stal 81-åriga Ingrid Höglunds kreditkort och tog ut 14 000 kronor., Coop, som är kortgivare, vägrar att ge tillbaka pengarna., – Jag är pensionär. För mig är det mycket pengar. Dessutom ska de ha ränta. Jag är så ledsen, säger hon",
-				"language": "Swedish",
-				"libraryCatalog": "Aftonbladet",
-				"publicationTitle": "Aftonbladet",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://www.aftonbladet.se/nyheter/article23310631.ab",
@@ -135,7 +110,7 @@ var testCases = [
 				],
 				"date": "2016-08-09",
 				"ISSN": "1103-9000",
-				"abstractNote": "För första gången sedan Turkiet sköt ner ett ryskt stridsplan har ländernas presidenter möts.\nBåde Erdogan och Putin uppger att mötet har stärkt banden mellan länderna.\n– Jag tror att våra relationer har blivit ännu starkare än vad de var tidigare, säger Turkiets president.",
+				"abstractNote": "För första gången sedan Turkiet sköt ner ett ryskt stridsplan har ländernas presidenter möts., Både Erdogan och Putin uppger att mötet har stärkt banden mellan länderna., – Jag tror att våra relationer har blivit ännu starkare än vad de var tidigare, säger Turkiets president.",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -163,7 +138,7 @@ var testCases = [
 				],
 				"date": "2016-08-10",
 				"ISSN": "1103-9000",
-				"abstractNote": "Minnestads Dubai galopperade som favorit i Sommartravets final med 300 000 kronor i förstapris.\nNu är färske proffstränaren Mattias Djuses stjärna allvarligt skadad – och blir borta året ut.\n– Vi blev påkörda i loppet och det kan mycket väl ha hänt i den situationen, säger Djuse till Trav365.",
+				"abstractNote": "Minnestads Dubai galopperade som favorit i Sommartravets final med 300 000 kronor i förstapris., Nu är färske proffstränaren Mattias Djuses stjärna allvarligt skadad – och blir borta året ut., – Vi blev påkörda i loppet och det kan mycket väl ha hänt i den situationen, säger Djuse till Trav365.",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -191,7 +166,7 @@ var testCases = [
 				],
 				"date": "2016-08-10",
 				"ISSN": "1103-9000",
-				"abstractNote": "I många år gick Kristin Kaspersen runt och undrade vad det var som inte stämde.\nNu öppnar programledaren upp om den nya adhd-diagnosen.\n– Jag önskar verkligen att jag hade förstått det tidigare, säger hon i en intervju i ”Framgångspodden”",
+				"abstractNote": "I många år gick Kristin Kaspersen runt och undrade vad det var som inte stämde., Nu öppnar programledaren upp om den nya adhd-diagnosen., – Jag önskar verkligen att jag hade förstått det tidigare, säger hon i en intervju i ”Framgångspodden”",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -207,6 +182,60 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.aftonbladet.se/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/nyheter/article23115602.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Explosion i Göteborg – en skadad",
+				"creators": [
+					{
+						"firstName": "Linnea",
+						"lastName": "Järkstig",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joakim",
+						"lastName": "Magnå",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-07-04",
+				"ISSN": "1103-9000",
+				"abstractNote": "En kraftig explosion har skett i stadsdelen Angered i Göteborg., En person skadades – och en hund dog., – Det är en gastankningsstation som har exploderat, säger Peter Engström vid räddningstjänsten.",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/sportbladet/os2016/article23273380.ab?teaser=true",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Okända historierna –\ndrev bordell i OS-byn",
+				"creators": [],
+				"date": "2016-08-03",
+				"ISSN": "1103-9000",
+				"abstractNote": "I en av byggnaderna serveras gratis öl. På andra sidan hålls en bordell., Däremellan går Usain Bolt och skriver utvalda autografer och allt slutar i ett sjujäkla party. , Välkomna till livet i OS-byn – där det mesta avslöjas., – Jag borde egentligen inte berätta det här, men...",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"section": "Sportbladet/OS 2016",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
