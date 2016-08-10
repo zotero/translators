@@ -85,7 +85,7 @@ function scrape(doc) {
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()') || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]')
 		// TODO: This following line needs to be fixed. The replace's causes error on e.g. http://tv.aftonbladet.se/abtv/articles/125960/
-		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
+		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "").replace("\n/ ", "/");
 	newArticle.complete();
 }
 
