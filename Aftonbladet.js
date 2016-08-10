@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 02:14:00"
+	"lastUpdated": "2016-08-10 02:42:00"
 }
 
 /*
@@ -77,7 +77,7 @@ function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
 		newArticle.title = ZU.xpathText(doc, "//h1")
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]')
-		var author = ZU.xpathText(doc, '//div[@class="abAuthor abThemeBorder abAuthorWithImage"]/a/text()').replace("\,", "")
+		var author = ZU.xpathText(doc, '//div[@class="abItem"]//div/a/text()').replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "")
 		newArticle.creators.push(ZU.cleanAuthor(author, "author"));
 		Z.debug(author);
 		newArticle.language =  "Swedish"
