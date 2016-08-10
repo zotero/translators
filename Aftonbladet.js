@@ -83,8 +83,16 @@
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()') || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
-	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
-	       var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
+	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
+			var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
+	        for (var i=breadcrumbs.length-1; i>0; i--) {
+	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
+	               newArticle.section = breadcrumbs[i].textContent;
+	                break;
+	           }
+	        }
+	          var possibleSections =["Debatt"];
+			var breadcrumbs = ZU.xpath(doc, '//a[@href="/debatt/"]');
 	        for (var i=breadcrumbs.length-1; i>0; i--) {
 	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
 	               newArticle.section = breadcrumbs[i].textContent;
