@@ -25,19 +25,6 @@
 	GNU General Public License for more details.
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
----------------------
-	With elements from FAZ Translator.
-	(C) 2010-2012 ibex and Sebastian Karcher
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU General Public License for more details.
-	You should have received a copy of the GNU General Public License
-	along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 */
 
@@ -45,34 +32,49 @@
 /* Zotero API */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("article")>-1) {
-		return "newspaperArticle";
-	}
+    //TODO: adjust the logic here
+    if (url.indexOf('/article')>-1) {
+        return "newspaperArticle";
+    } else if (getSearchResults(doc, true)) {
+        return "multiple";
+    }
+}
+
+
+function getSearchResults(doc, checkOnly) {
+    var items = {};
+    var found = false;
+    //TODO: adjust the xpath
+    var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
+    for (var i=0; i<rows.length; i++) {
+        //TODO: check and maybe adjust
+        var href = rows[i].href;
+        //TODO: check and maybe adjust
+        var title = ZU.trimInternal(rows[i].textContent);
+        if (!href || !title) continue;
+        if (checkOnly) return true;
+        found = true;
+        items[href] = title;
+    }
+    return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-	var arts = new Array();
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object;
-		//make sure we don't get media objects
-		var titles = doc.evaluate('//div[not(div[contains(@class, "MediaLink")])]/a[@class="TeaserHeadLink"]', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent.trim();
-		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var itemurl in items) {
-				arts.push(itemurl);
-			}
-			ZU.processDocuments(arts, scrape);
-		});
-	} else {
-		scrape(doc);
-	}
+    if (detectWeb(doc, url) == "multiple") {
+        Zotero.selectItems(getSearchResults(doc, false), function (items) {
+            if (!items) {
+                return true;
+            }
+            var articles = new Array();
+            for (var i in items) {
+                articles.push(i);
+            }
+            ZU.processDocuments(articles, scrape);
+        });
+    } else {
+        scrape(doc, url);
+    }
 }
 
 function scrape(doc) {
@@ -87,7 +89,7 @@ function scrape(doc) {
 		newArticle.ISSN = "1103-9000";
 		newArticle.AbstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
 	newArticle.complete();
-};	
+};		
 
 /** BEGIN TEST CASES **/
 var testCases = [
