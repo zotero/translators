@@ -75,15 +75,15 @@ function doWeb(doc, url) {
 
 function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
-		newArticle.title = ZU.xpathText(doc, "//h1")
-		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]')
-		var author = ZU.xpathText(doc, '//div[@class="abItem"]//div/a/text()').replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "").replace("\,", "")
-		newArticle.creators.push(ZU.cleanAuthor(author, "author"));
-		Z.debug(author);
-		newArticle.language =  "Swedish"
-		newArticle.publicationTitle = "Aftonbladet"
-		newArticle.ISSN = "1103-9000"
-		newArticle.AbstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]')
+		newArticle.title = ZU.xpathText(doc, "//h1");
+		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
+		var author = ZU.xpathText(doc, '//address[@class="abByline"]');
+			newArticle.creators.push(ZU.cleanAuthor(author, "author"));
+				Z.debug(author);
+		newArticle.language =  "Swedish";
+		newArticle.publicationTitle = "Aftonbladet";
+		newArticle.ISSN = "1103-9000";
+		newArticle.AbstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
 	newArticle.complete();
 };	
 
