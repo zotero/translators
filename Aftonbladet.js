@@ -29,7 +29,6 @@
 */
 
 function detectWeb(doc, url) {
-	//TODO: adjust the logic here
 	if (url.indexOf('/article')>-1) {
 		return "newspaperArticle";
 	} else if (getSearchResults(doc, true)) {
@@ -41,12 +40,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//TODO: adjust the xpath
 	var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
 	for (var i=0; i<rows.length; i++) {
-		//TODO: check and maybe adjust
 		var href = rows[i].href;
-		//TODO: check and maybe adjust
 		var title = ZU.xpathText(rows[i], './/h2');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
