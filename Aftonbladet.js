@@ -76,7 +76,7 @@ function doWeb(doc, url) {
 
 function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
-		newArticle.title = ZU.xpathText(doc, "//h1");	
+		newArticle.title = ZU.xpathText(doc, "//h1").replace("\n", " ");	
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
 		var authors = ZU.xpath(doc, '//address[contains(@class, "abByline")]/div[contains(@class, "abAuthor")]');
 		for (var i=0; i<authors.length; i++) {
