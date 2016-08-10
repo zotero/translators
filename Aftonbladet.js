@@ -201,6 +201,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
