@@ -29,6 +29,7 @@
 */
 
 function detectWeb(doc, url) {
+	//TODO: adjust the logic here
 	if (url.indexOf('/article')>-1) {
 		return "newspaperArticle";
 	} else if (getSearchResults(doc, true)) {
@@ -40,9 +41,12 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
+	//TODO: adjust the xpath
 	var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
 	for (var i=0; i<rows.length; i++) {
+		//TODO: check and maybe adjust
 		var href = rows[i].href;
+		//TODO: check and maybe adjust
 		var title = ZU.xpathText(rows[i], './/h2');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -84,11 +88,8 @@ function scrape(doc) {
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]')
-		/* TODO: This following line needs to be fixed. The replace's causes erroor on e.g. http://tv.aftonbladet.se/abtv/articles/125960 */
-		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
-		/* Following lines are for tv.aftonbladet.se */
-//		newArticle.date = ZU.xpathText(doc, '//div[@class="channel-info-metadata abLabelThin"]/span/text()');
-//		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text() ');`
+		/* TODO: This following line needs to be fixed. The replace's causes error on e.g. http://tv.aftonbladet.se/abtv/articles/125960 */
+		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "") || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
 	newArticle.complete();
 }
 
