@@ -77,12 +77,6 @@ function extractQueryValues(url) {
 	return ret;
 }
 
-// Remangle HeinOnline RIS to form expected by translator
-function fixRIS (ris) {
-	ris=ris.replace(/^([A-Z0-9][A-Z0-9]) /mg, "$1  - ").replace(/^VO  /mg, "VL  ").replace(/^YR  /mg, "DA  ").replace(/^OP  /mg, "EP  ");
-	return ris;
-}
-
 // Not all pages have a downloadable PDF
 function translateRIS(ris, pdfURL) {
 	var trans = Zotero.loadTranslator('import');
@@ -120,7 +114,6 @@ function scrapePage(doc, url) {
 			+ "&base=js";
 		var pdfPageURLs = doc.getElementsByClassName("updatediv");
 		ZU.doGet(risURL, function(ris) {
-			ris = fixRIS(ris);
 			if (pdfPageURLs) {
 				Array.prototype.filter.call(pdfPageURLs, function(pdfPageURL){
 					if (pdfPageURL){
