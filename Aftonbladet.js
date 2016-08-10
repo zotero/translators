@@ -2,14 +2,14 @@
 	"translatorID": "235c5c47-0c04-4d77-9afe-e22265a017a9",
 	"label": "Aftonbladet",
 	"creator": "Jonatan Svensson Glad",
-	"target": "^https?://ww*\.aftonbladet\.se",
+	"target": "^https?://(ww(w|c)\\.)?aftonbladet\\.se",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 13:22:00"
+	"lastUpdated": "2016-08-10 13:26:00"
 }
 
 /*
