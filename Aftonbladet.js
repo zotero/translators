@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 12:35:00"
+	"lastUpdated": "2016-08-10 12:53:00"
 }
 
 /*
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 
 function scrape(doc) {
 	var newArticle = new Zotero.Item('newspaperArticle');
-		newArticle.title = ZU.xpathText(doc, "//h1");
+		newArticle.title = ZU.xpathText(doc, "//h1");	
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
 		var author = ZU.xpathText(doc, '//address[@class="abByline"]');
 			newArticle.creators.push(ZU.cleanAuthor(author, "author"));
@@ -88,6 +88,7 @@ function scrape(doc) {
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
+		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
 	newArticle.complete();
 };		
 
@@ -168,6 +169,7 @@ var testCases = [
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
+				"section": "Sportbladet/Trav 365",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -195,6 +197,7 @@ var testCases = [
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
+				"section": "Nöjesbladet",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
