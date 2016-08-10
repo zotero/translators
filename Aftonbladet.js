@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 20:31:00"
+	"lastUpdated": "2016-08-10 20:37:00"
 }
 
 /*
@@ -73,7 +73,7 @@
 	function scrape(doc) {
 		var newArticle = new Zotero.Item('newspaperArticle');
 		newArticle.title = ZU.xpathText(doc, "//h1").replace("\n", " ");	
-		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]'); 	// TODO: Fix date for tv.aftonbaldet.se
+		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]') || ZU.xpathText(doc, '//div[@class="channel-info-metadata abLabelThin"]/span/text()'); 	// TODO:  Fix date for tv.aftonbaldet.se (xpath looks fragile and the result cannot be normalized)
 		var authors = ZU.xpath(doc, '//address[contains(@class, "abByline")]/div[contains(@class, "abAuthor")]');
 		for (var i=0; i<authors.length; i++) {
 			newArticle.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
