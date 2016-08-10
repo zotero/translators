@@ -13,7 +13,7 @@
 }
 
 /*
-	Aftonbladet Translator - Parses Atonbladet articles and creates Zotero-based metadata.
+	Aftonbladet Translator - Parses Aftonbladet articles and creates Zotero-based metadata.
 	Copyright (C) 2016 Jonatan Svensson Glad
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
