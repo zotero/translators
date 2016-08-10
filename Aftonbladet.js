@@ -28,66 +28,72 @@
 
 */
 
-function detectWeb(doc, url) {
-	if (url.indexOf('/article')>-1) {
-		return "newspaperArticle";
-	} else if (getSearchResults(doc, true)) {
-		return "multiple";
+	function detectWeb(doc, url) {
+		if (url.indexOf('/article')>-1) {
+			return "newspaperArticle";
+		} else if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
 	}
-}
-
-
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.xpathText(rows[i], './/h2');
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+	
+	
+	function getSearchResults(doc, checkOnly) {
+		var items = {};
+		var found = false;
+		var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
+		for (var i=0; i<rows.length; i++) {
+			var href = rows[i].href;
+			var title = ZU.xpathText(rows[i], './/h2');
+			if (!href || !title) continue;
+			if (checkOnly) return true;
+			found = true;
+			items[href] = title;
+		}
+		return found ? items : false;
 	}
-	return found ? items : false;
-}
-
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = new Array();
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
+	
+	
+	function doWeb(doc, url) {
+		if (detectWeb(doc, url) == "multiple") {
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) {
+					return true;
+				}
+				var articles = new Array();
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
+			});
+		} else {
+			scrape(doc, url);
+		}
 	}
-}
-
-function scrape(doc) {
-	var newArticle = new Zotero.Item('newspaperArticle');
+	
+	function scrape(doc) {
+		var newArticle = new Zotero.Item('newspaperArticle');
 		newArticle.title = ZU.xpathText(doc, "//h1").replace("\n", " ");	
-		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
+		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]'); 	// TODO: Fix date for tv.aftonbaldet.se
 		var authors = ZU.xpath(doc, '//address[contains(@class, "abByline")]/div[contains(@class, "abAuthor")]');
 		for (var i=0; i<authors.length; i++) {
 			newArticle.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
-		}
-		Z.debug(authors);
+		} //TODO Fix authors for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab
 		newArticle.language =  "Swedish";
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()') || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
-		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]')
+		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
 		// TODO: This following line needs to be fixed. The replace's causes error on e.g. http://tv.aftonbladet.se/abtv/articles/125960/
-		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "").replace("\n/ ", "/");
-	newArticle.complete();
-}
+	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
+	       var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
+	        for (var i=breadcrumbs.length-1; i>0; i--) {
+	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
+	               newArticle.section = breadcrumbs[i].textContent;
+	                break;
+	           }
+	        }
+		newArticle.complete();
+	}
 
 /** BEGIN TEST CASES **/
 var testCases = [
