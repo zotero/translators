@@ -45,8 +45,10 @@
 /* Zotero API */
 
 function detectWeb(doc, url) {
-	return "newspaperArticle";
+	if (url.indexOf("article")>-1) {
+		return "newspaperArticle";
 	}
+}
 
 
 function doWeb(doc, url) {
