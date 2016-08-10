@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 13:13:00"
+	"lastUpdated": "2016-08-10 13:22:00"
 }
 
 /*
@@ -79,15 +79,15 @@ function scrape(doc) {
 		newArticle.title = ZU.xpathText(doc, "//h1");	
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]');
 		var author = ZU.xpathText(doc, '//address[@class="abByline"]');
-			newArticle.creators.push(ZU.cleanAuthor(author, "author"));
-				Z.debug(author);
+		newArticle.creators.push(ZU.cleanAuthor(author, "author"));
+		Z.debug(author);
 		newArticle.language =  "Swedish";
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
 		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
 	newArticle.complete();
-};	
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
