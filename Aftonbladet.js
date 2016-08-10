@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 12:53:00"
+	"lastUpdated": "2016-08-10 13:13:00"
 }
 
 /*
@@ -29,49 +29,49 @@
 */
 
 function detectWeb(doc, url) {
-    //TODO: adjust the logic here
-    if (url.indexOf('/article')>-1) {
-        return "newspaperArticle";
-    } else if (getSearchResults(doc, true)) {
-        return "multiple";
-    }
+	//TODO: adjust the logic here
+	if (url.indexOf('/article')>-1) {
+		return "newspaperArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
 
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    //TODO: adjust the xpath
-    var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
-    for (var i=0; i<rows.length; i++) {
-        //TODO: check and maybe adjust
-        var href = rows[i].href;
-        //TODO: check and maybe adjust
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	//TODO: adjust the xpath
+	var rows = ZU.xpath(doc, '//a[contains(@href, "/article")]');
+	for (var i=0; i<rows.length; i++) {
+		//TODO: check and maybe adjust
+		var href = rows[i].href;
+		//TODO: check and maybe adjust
+		var title = ZU.xpathText(rows[i], './/h2');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = new Array();
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, scrape);
-        });
-    } else {
-        scrape(doc, url);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc) {
@@ -87,7 +87,7 @@ function scrape(doc) {
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
 		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
 	newArticle.complete();
-};		
+};	
 
 /** BEGIN TEST CASES **/
 var testCases = [
