@@ -87,7 +87,7 @@ function scrape(doc) {
 		newArticle.language =  "Swedish";
 		newArticle.publicationTitle = "Aftonbladet";
 		newArticle.ISSN = "1103-9000";
-		newArticle.AbstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
+		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]');
 	newArticle.complete();
 };		
 
