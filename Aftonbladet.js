@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 02:42:00"
+	"lastUpdated": "2016-08-10 12:35:00"
 }
 
 /*
@@ -109,6 +109,7 @@ var testCases = [
 				],
 				"date": "2016-08-09",
 				"ISSN": "1103-9000",
+				"abstractNote": "Tjuven stal 81-åriga Ingrid Höglunds kreditkort och tog ut 14 000 kronor.\nCoop, som är kortgivare, vägrar att ge tillbaka pengarna.\n– Jag är pensionär. För mig är det mycket pengar. Dessutom ska de ha ränta. Jag är så ledsen, säger hon",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -135,6 +136,7 @@ var testCases = [
 				],
 				"date": "2016-08-09",
 				"ISSN": "1103-9000",
+				"abstractNote": "För första gången sedan Turkiet sköt ner ett ryskt stridsplan har ländernas presidenter möts.\nBåde Erdogan och Putin uppger att mötet har stärkt banden mellan länderna.\n– Jag tror att våra relationer har blivit ännu starkare än vad de var tidigare, säger Turkiets president.",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -162,6 +164,7 @@ var testCases = [
 				],
 				"date": "2016-08-10",
 				"ISSN": "1103-9000",
+				"abstractNote": "Minnestads Dubai galopperade som favorit i Sommartravets final med 300 000 kronor i förstapris.\nNu är färske proffstränaren Mattias Djuses stjärna allvarligt skadad – och blir borta året ut.\n– Vi blev påkörda i loppet och det kan mycket väl ha hänt i den situationen, säger Djuse till Trav365.",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
@@ -188,6 +191,7 @@ var testCases = [
 				],
 				"date": "2016-08-10",
 				"ISSN": "1103-9000",
+				"abstractNote": "I många år gick Kristin Kaspersen runt och undrade vad det var som inte stämde.\nNu öppnar programledaren upp om den nya adhd-diagnosen.\n– Jag önskar verkligen att jag hade förstått det tidigare, säger hon i en intervju i ”Framgångspodden”",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
