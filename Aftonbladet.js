@@ -88,7 +88,11 @@ function scrape(doc) {
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]')
+		/* TODO: This following line needs to be fixed Te replace's causes erroor on e.g. http://tv.aftonbladet.se/abtv/articles/125960 */
 		newArticle.section = ZU.xpathText(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]').replace("Startsidan\n/", "").replace("\n/", " /").replace(" / ", "/").replace("Nyheter/", "").replace("Nyheter", "");
+		/* Following lines are for tv.aftonbladet.se */
+		newArticle.date = ZU.xpathText(doc, '//div[@class="channel-info-metadata abLabelThin"]/span/text()');
+		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text() ');`
 	newArticle.complete();
 }
 
