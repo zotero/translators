@@ -83,7 +83,6 @@
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()') || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
-		// TODO: This following line needs to be fixed. The replace's causes error on e.g. http://tv.aftonbladet.se/abtv/articles/125960/
 	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
 	       var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
 	        for (var i=breadcrumbs.length-1; i>0; i--) {
