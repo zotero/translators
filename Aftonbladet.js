@@ -119,32 +119,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.aftonbladet.se/nyheter/article23311903.ab",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Skottlossning i Göteborg",
-				"creators": [
-					{
-						"firstName": "Linnea",
-						"lastName": "Carlén",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016-08-10",
-				"ISSN": "1103-9000",
-				"language": "Swedish",
-				"libraryCatalog": "Aftonbladet",
-				"publicationTitle": "Aftonbladet",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.aftonbladet.se/nyheter/article23310631.ab",
 		"items": [
 			{
@@ -163,6 +137,58 @@ var testCases = [
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
 				"shortTitle": "Putin och Erdogan i möte",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/sportbladet/trav365/article23314110.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "”Kan förstöra\nhela karriären”",
+				"creators": [
+					{
+						"firstName": "Erik",
+						"lastName": "Pettersson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-10",
+				"ISSN": "1103-9000",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aftonbladet.se/nojesbladet/article23309011.ab",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Kaspersen talar ut om nya diagnosen",
+				"creators": [
+					{
+						"firstName": "Felicia",
+						"lastName": "Nordlund",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-10",
+				"ISSN": "1103-9000",
+				"language": "Swedish",
+				"libraryCatalog": "Aftonbladet",
+				"publicationTitle": "Aftonbladet",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
