@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-10 21:38:00"
+	"lastUpdated": "2016-08-10 20:38:00"
 }
 
 /*
@@ -25,7 +25,6 @@
 	GNU General Public License for more details.
 	You should have received a copy of the GNU General Public License
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 */
 
 	function detectWeb(doc, url) {
@@ -83,16 +82,8 @@
 		newArticle.ISSN = "1103-9000";
 		newArticle.abstractNote = ZU.xpathText(doc, '//div[@class="abLeadText"]/p/text()') || ZU.xpathText(doc, '//div[@class="expandable-info-description"]/text()');
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
-	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
-			var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
-	        for (var i=breadcrumbs.length-1; i>0; i--) {
-	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
-	               newArticle.section = breadcrumbs[i].textContent;
-	                break;
-	           }
-	        }
-	          var possibleSections =["Debatt"];
-			var breadcrumbs = ZU.xpath(doc, '//a[contains(@href, "debatt")]');
+	        var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
+	       var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
 	        for (var i=breadcrumbs.length-1; i>0; i--) {
 	           if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
 	               newArticle.section = breadcrumbs[i].textContent;
@@ -207,7 +198,7 @@ var testCases = [
 				"creators": [],
 				"date": "2016-08-03",
 				"ISSN": "1103-9000",
-				"abstractNote": "I en av byggnaderna serveras gratis öl. På andra sidan hålls en bordell., Däremellan går Usain Bolt och skriver utvalda autografer och allt slutar i ett sjujäkla party. , Välkomna till livet i OS-byn – där det mesta avslöjas., – Jag borde egentligen inte berätta det här, men...",
+				"abstractNote": "I en av byggnaderna serveras gratis öl. På andra sidan hålls en bordell., Däremellan går Usain Bolt och skriver utvalda autografer och allt slutar i ett sjujäkla party. , Välkomna till livet i OS-byn – där det mesta avslöjas., – Jag borde egentligen inte berätta det här, men...",
 				"language": "Swedish",
 				"libraryCatalog": "Aftonbladet",
 				"publicationTitle": "Aftonbladet",
