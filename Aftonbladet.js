@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-12 01:10:00"
+	"lastUpdated": "2016-08-12 07:55:00"
 }
 
 /*
@@ -69,7 +69,7 @@
 		}
 	}
 	
-	function scrape(doc) {
+	function scrape(doc, url) {
 		var newArticle = new Zotero.Item('newspaperArticle');
 		newArticle.title = ZU.xpathText(doc, "//h1").replace("\n", " ");	
 		newArticle.date = ZU.xpathText(doc, '//time[@pubdate]') || ZU.xpathText(doc, '//div[@class="channel-info-metadata abLabelThin"]/span/text()'); 	// TODO:  Fix date for tv.aftonbaldet.se (xpath looks fragile and the result cannot be normalized)
@@ -84,15 +84,15 @@
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
 		var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
 		var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
-			for (var i=breadcrumbs.length-1; i>0; i--) {
-				if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
-					newArticle.section = breadcrumbs[i].textContent;
-					break;
-				}
-	        }
-	     	if (!newArticle.section && ZU.xpath(doc, '//div/div/a[contains(@href, "debatt")]')) { //TODO Replace with something like url.indexOf("debatt")
-				 newArticle.section = "Debatt";
+     	if (!newArticle.section && url.indexOf("debatt")>-1) {
+			 newArticle.section = "Debatt";
+		}
+		for (var i=breadcrumbs.length-1; i>0; i--) {
+			if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
+				newArticle.section = breadcrumbs[i].textContent;
+				break;
 			}
+        }
 		newArticle.complete();
 	}
 
