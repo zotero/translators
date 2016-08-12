@@ -84,8 +84,8 @@
 		newArticle.location = ZU.xpathText(doc, '//span[@class="abCity"]');
 		var possibleSections =["Nöjesbladet", "Sportbladet", "Kolumnister", "Ledare", "Kultur", "Debatt"]; //TODO extend the possible values here & Fix section for /debatt/ e.g. http://www.aftonbladet.se/debatt/article23309432.ab //
 		var breadcrumbs = ZU.xpath(doc, '//div[@class="abBreadcrumbs clearfix"]/span[@class="abLeft"]/a');
-     	if (!newArticle.section && url.indexOf("debatt")>-1) {
-			 newArticle.section = "Debatt";
+	 	if (!newArticle.section && url.indexOf("debatt")>-1) {
+			newArticle.section = "Debatt";
 		}
 		for (var i=breadcrumbs.length-1; i>0; i--) {
 			if (possibleSections.indexOf(breadcrumbs[i].textContent) > -1) {
