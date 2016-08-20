@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-13 13:19:11"
+	"lastUpdated": "2016-08-20 19:58:56"
 }
 
 /*
@@ -118,8 +118,23 @@ function scrape(doc, url) {
 		//delete wrongly attached creators like
 		//"firstName": "B. B. C.", "lastName": "News"
 		item.creators = [];
+		//add authors from byline__name but only if they
+		//are real authors and not just part of the webpage title
+		//like By BBC Trending, By News from Elsewhere... or By Who, What Why
+		var authorString = ZU.xpathText(doc, '//span[@class="byline__name"]');
+		var webpageTitle = ZU.xpathText(doc, '//h1');
+		if (authorString) {
+			authorString = authorString.replace('By', '').replace('...', '');
+			var authors = authorString.split('&');
+			for (var i=0; i<authors.length; i++) {
+				if (webpageTitle.toLowerCase().indexOf(authors[i].trim().toLowerCase())>-1) {
+					continue;
+				}
+				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+			}
+		}
 		
-		item.language = "eng";
+		item.language = "en-GB";
 		
 		item.complete();
 	});
@@ -138,10 +153,16 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Spain's stolen babies and the families who lived a lie",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Katya",
+						"lastName": "Adler",
+						"creatorType": "author"
+					}
+				],
 				"date": "2011-10-18T10:31:45+01:00",
 				"abstractNote": "Spanish society has been shaken by revelations of the mass trafficking of babies, dating back to the Franco era but continuing until the 1990s involving respected doctors, nuns and priests.",
-				"language": "eng",
+				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
@@ -167,7 +188,7 @@ var testCases = [
 				"creators": [],
 				"date": "2016-08-12T23:57:42.000Z",
 				"abstractNote": "Photographer Johnny Miller has been documenting the disparity between South Africa's rich and poor using a drone.",
-				"language": "eng",
+				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
 				"url": "http://www.bbc.com/news/world-africa-37066738",
 				"attachments": [
@@ -191,7 +212,7 @@ var testCases = [
 				"creators": [],
 				"date": "2016/08/13 1:43:21",
 				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
-				"language": "eng",
+				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC Sport",
 				"section": "Olympics",
@@ -212,6 +233,69 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.bbc.com/news/world/asia/india",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "China staff fined for not liking boss's Weibo posts",
+				"creators": [],
+				"date": "2016-08-18T12:55:52+01:00",
+				"abstractNote": "Company in China punishes employees who don't comment on manager's social media posts.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News",
+				"section": "News from Elsewhere",
+				"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/magazine-36287752",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "'I found my dad on Facebook'",
+				"creators": [
+					{
+						"firstName": "Abdirahim",
+						"lastName": "Saeed",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Deirdre",
+						"lastName": "Finnerty",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-17T00:49:43+01:00",
+				"abstractNote": "How a simple post on social media ended a Russian woman's 40-year search for her father.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News",
+				"section": "Magazine",
+				"url": "http://www.bbc.com/news/magazine-36287752",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
