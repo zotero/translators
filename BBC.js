@@ -1,146 +1,299 @@
 {
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
-	"creator": "Ben Parr",
-	"target": "^https?://(?:www|news?)\\.bbc\\.co\\.uk",
-	"minVersion": "1.0.0b4.r1",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://(?:www|news?)\\.bbc\\.(co\\.uk|com)",
+	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,
-	"browserSupport": "gcsibv",
 	"inRepository": true,
 	"translatorType": 4,
-	"lastUpdated": "2012-08-06 19:23:07"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-08-20 19:58:56"
 }
 
-function detectWeb(doc, url)
-{
+/*
+	***** BEGIN LICENSE BLOCK *****
 
-	   var namespace = doc.documentElement.namespaceURI;
-	  var nsResolver = namespace ? function(prefix) {
-	  if (prefix == 'x') return namespace; else return null;
-	  } : null;
+	Copyright © 2016 Philipp Zumstein
 
-	var xpath;
-	  
-	 xpath='//meta[@name="Headline"]';
-	 if(content=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext())
-	 { return "newspaperArticle";  }
-	 
-	 xpath='//font[@class="poshead"]/b';
-	 if(doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext())
-	{ return "newspaperArticle";  }
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+function detectWeb(doc, url) {
+	if (/\d{8}$/.test(url)) {
+		var pageNode = doc.getElementById("page");;
+		if (pageNode) {
+			//Z.debug(pageNode.className);
+			if (pageNode.className.indexOf("media-asset-page")>-1 || pageNode.className.indexOf("vxp-headlines")>-1) {
+				return "videoRecording";
+			}
+		}
+		return "newspaperArticle";
+	}
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	
-	  return null;
-}
-
-function scrape(doc,url,title)
-{
-		  var namespace = doc.documentElement.namespaceURI;
-	 		  var nsResolver = namespace ? function(prefix) {
-	  		  if (prefix == 'x') return namespace; else return null;
-	  		  } : null;
-		 
-		 var newItem = new Zotero.Item("newspaperArticle");
+	var itemType = detectWeb(doc, url);
 	
- 		 newItem.url=url;
-		 newItem.repository="bbc.co.uk";
-		 newItem.publicationTitle="BBC";
-		 newItem.title=title;
-		 
-		 xpath='//meta[@name="OriginalPublicationDate"]/@content';
-		 var temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext();
-		 if(temp)
-		 {
-		temp=temp.value;
-		 	temp=temp.split(" ")[0];
-		 	newItem.date=temp;
-		 }
-		 else
-		 {
-			 xpath='//font[@class="postxt"][@size="1"]';
-			 var rows=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null);
-			 var row;
-			 while(row=rows.iterateNext())
-			 {
-				 temp=row.textContent;
-				 if(temp.substr(0,9)=="Created: ")
-				 {
-					 newItem.date=temp.substr(9);
-					 break;
-				 }
-			 }
-		 }
-		 
-		 xpath='//meta[@name="Section"]/@content';
-		temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext();
-		 if(temp)
-		 { 	newItem.section=temp.value;     }
-		 
-		 xpath='//meta[@name="Description"]/@content';
-		 temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext();
-		 if(temp)
-		 { 	newItem.abstractNote=temp.value;     }
-		 else
-		 {
-			 xpath='//meta[@name="description"]/@content';
-		 		 temp=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext();
-				 if(temp)
-				 { 	newItem.abstractNote=temp.value;     }
-		 }
-		 
-		 newItem.attachments.push({url:url, title:"BBC News Snapshot",mimeType:"text/html"});
-		 
-		 newItem.complete();
-}
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) {
+		
+		//add date and time if missing by one of three attempts:
+		// 1. look at the json-ld data
+		// 2. calculate it from the data-seconds attribute
+		// 3. extract it from a nonstandard meta field
+		var jsonld = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
+		var data = JSON.parse(jsonld);
+		//Z.debug(data);
+		if (data && data.datePublished) {
+			item.date = data.datePublished;
+		} else {
+			var seconds = ZU.xpathText(doc, '(//div[h1 or h2]//*[contains(@class, "date")]/@data-seconds)[1]');
+			if (!item.date && seconds) {
+				//Z.debug(seconds);
+				var date = new Date(1000*seconds);
+				item.date = date.toISOString();
+			} else {
+				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
+			}
+		}
+		
+		//delete wrongly attached creators like
+		//"firstName": "B. B. C.", "lastName": "News"
+		item.creators = [];
+		//add authors from byline__name but only if they
+		//are real authors and not just part of the webpage title
+		//like By BBC Trending, By News from Elsewhere... or By Who, What Why
+		var authorString = ZU.xpathText(doc, '//span[@class="byline__name"]');
+		var webpageTitle = ZU.xpathText(doc, '//h1');
+		if (authorString) {
+			authorString = authorString.replace('By', '').replace('...', '');
+			var authors = authorString.split('&');
+			for (var i=0; i<authors.length; i++) {
+				if (webpageTitle.toLowerCase().indexOf(authors[i].trim().toLowerCase())>-1) {
+					continue;
+				}
+				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+			}
+		}
+		
+		item.language = "en-GB";
+		
+		item.complete();
+	});
+	
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = itemType;
+		trans.doWeb(doc, url);
+	});
 
-
-
-function doWeb(doc,url)
-{
-	   var namespace = doc.documentElement.namespaceURI;
-	  var nsResolver = namespace ? function(prefix) {
-	  if (prefix == 'x') return namespace; else return null;
-	  } : null;
-	  
-	  var xpath='//meta[@name="Headline"]/@content';
-	  var title;
-	 if(title=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext())
-	 	{  scrape(doc,url,title.value) }
-	 else
-	 {
-		 xpath='//font[@class="poshead"]/b';
-		 if(title=doc.evaluate(xpath, doc, nsResolver,XPathResult.ANY_TYPE, null).iterateNext())
-			 	{   scrape(doc,url,title.textContent)  }
-	 }
-
-	 
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.bbc.co.uk/news/magazine-15335899",
+		"url": "http://www.bbc.com/news/magazine-15335899",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
+				"title": "Spain's stolen babies and the families who lived a lie",
+				"creators": [
 					{
-						"url": "http://www.bbc.co.uk/news/magazine-15335899",
-						"title": "BBC News Snapshot",
-						"mimeType": "text/html"
+						"firstName": "Katya",
+						"lastName": "Adler",
+						"creatorType": "author"
 					}
 				],
-				"url": "http://www.bbc.co.uk/news/magazine-15335899",
-				"publicationTitle": "BBC",
-				"title": "Spain's stolen babies",
-				"date": "2011/10/18",
-				"section": "Magazine",
+				"date": "2011-10-18T10:31:45+01:00",
 				"abstractNote": "Spanish society has been shaken by revelations of the mass trafficking of babies, dating back to the Franco era but continuing until the 1990s involving respected doctors, nuns and priests.",
-				"libraryCatalog": "bbc.co.uk",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News",
+				"section": "Magazine",
+				"url": "http://www.bbc.com/news/magazine-15335899",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/world-africa-37066738",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Drone photography captures South Africa inequality",
+				"creators": [],
+				"date": "2016-08-12T23:57:42.000Z",
+				"abstractNote": "Photographer Johnny Miller has been documenting the disparity between South Africa's rich and poor using a drone.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"url": "http://www.bbc.com/news/world-africa-37066738",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/sport/olympics/37068610",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rio Olympics 2016: Joseph Schooling beats Michael Phelps in 100m butterfly",
+				"creators": [],
+				"date": "2016/08/13 1:43:21",
+				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC Sport",
+				"section": "Olympics",
+				"shortTitle": "Rio Olympics 2016",
+				"url": "http://www.bbc.com/sport/olympics/37068610",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/world/asia/india",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "China staff fined for not liking boss's Weibo posts",
+				"creators": [],
+				"date": "2016-08-18T12:55:52+01:00",
+				"abstractNote": "Company in China punishes employees who don't comment on manager's social media posts.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News",
+				"section": "News from Elsewhere",
+				"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/news/magazine-36287752",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "'I found my dad on Facebook'",
+				"creators": [
+					{
+						"firstName": "Abdirahim",
+						"lastName": "Saeed",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Deirdre",
+						"lastName": "Finnerty",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-08-17T00:49:43+01:00",
+				"abstractNote": "How a simple post on social media ended a Russian woman's 40-year search for her father.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News",
+				"section": "Magazine",
+				"url": "http://www.bbc.com/news/magazine-36287752",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
