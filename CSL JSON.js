@@ -56,7 +56,7 @@ function detectImport() {
 function doImport() {
 	var parsedData = parseInput();
 	if(!parsedData) return;
-	if(!parsedData.length) parsedData = [parsedData];
+	if(!Array.isArray(parsedData)) parsedData = [parsedData];
 	
 	for(var i=0; i<parsedData.length; i++) {
 		var item = new Z.Item();
