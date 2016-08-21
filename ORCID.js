@@ -3,13 +3,13 @@
 	"label": "ORCID",
 	"creator": "Philipp Zumstein",
 	"target": "https?://orcid\\.org/",
-	"minVersion": "3.0",
+	"minVersion": "4.0.29.11",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-31 15:34:03"
+	"lastUpdated": "2016-08-21 08:54:34"
 }
 
 /*
@@ -50,6 +50,13 @@ function getIds(doc,  url) {
 
 
 function detectWeb(doc, url) {
+	//check that orcid can be found
+	var orcid = doc.getElementById("orcid-id");
+	if (!orcid) {
+		Z.debug("Error: No ORCID found in this page");
+		return false;
+	}
+	//check that work ids can be found
 	if (getIds(doc, url) != null) {
 		return "multiple";
 	}
@@ -72,22 +79,16 @@ function lookupWork(workid, orcid) {
 
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		var orcid = doc.getElementById("orcid-id");
-		if (!orcid) {
-			Z.debug("Error: No ORCID found in this page");
-			return false;
+	var orcid = doc.getElementById("orcid-id");
+	orcid = orcid.textContent.replace('orcid.org/', '');
+	Zotero.selectItems(getIds(doc, url), function (items) {
+		if (!items) {
+			return true;
 		}
-		orcid = orcid.textContent.replace('orcid.org/', '');
-		Zotero.selectItems(getIds(doc, url), function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				lookupWork(i, orcid);
-			}
-		});
-	}
+		for (var i in items) {
+			lookupWork(i, orcid);
+		}
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
