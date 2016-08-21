@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-29 23:09:08"
+	"lastUpdated": "2016-08-21 22:32:04"
 }
 
 /*
@@ -144,7 +144,7 @@ function getHTMLTitle(text) {
 
 function getViableResults(doc) {
 	 return ZU.xpath(doc, '//div[@class="gs_r"]\
-		[.//div[@class="gs_fl"]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
+		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
 			and .//h3[@class="gs_rt"]]');
 }
 
@@ -430,7 +430,7 @@ function doWeb(doc, url) {
 		var resultDivs = new Object();
 		var citeUrl;
 		for(var i=0, n=results.length; i<n; i++) {
-			var onclick = ZU.xpathText(results[i], './/div[@class="gs_fl"]/a[@aria-controls="gs_cit"]/@onclick');
+			var onclick = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"]/@onclick');
 			if (!onclick) {
 				// Should never hit this, since we check it in getViableResults
 				Zotero.debug(results[i].innerHTML);
@@ -496,7 +496,7 @@ function scrapeAll(doc, itemObjs) {
 		if(attachmentFrag.indexOf('/citations?') != -1) {
 			attachmentFrag = null;
 			//build attachment link when importing from saved citations
-			var caseId = ZU.xpathText(item.result, '(.//div[@class="gs_fl"]\
+			var caseId = ZU.xpathText(item.result, '(.//div[contains(@class, "gs_fl")]\
 				/a[contains(@href,"cites=") or contains(@href,"about=")]/@href)[1]');
 			if(caseId) caseId = caseId.match(/\b(?:cites|about)=(\d+)/);
 			if(caseId) caseId = caseId[1];
