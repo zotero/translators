@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-29 23:09:08"
+	"lastUpdated": "2016-08-21 18:37:20"
 }
 
 /*
@@ -144,7 +144,7 @@ function getHTMLTitle(text) {
 
 function getViableResults(doc) {
 	 return ZU.xpath(doc, '//div[@class="gs_r"]\
-		[.//div[@class="gs_fl"]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
+		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
 			and .//h3[@class="gs_rt"]]');
 }
 
@@ -425,12 +425,11 @@ function doWeb(doc, url) {
 		scrapeCase(doc, url);
 	} else {
 		var results = getViableResults(doc);
-
 		var items = new Object();
 		var resultDivs = new Object();
 		var citeUrl;
 		for(var i=0, n=results.length; i<n; i++) {
-			var onclick = ZU.xpathText(results[i], './/div[@class="gs_fl"]/a[@aria-controls="gs_cit"]/@onclick');
+			var onclick = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"]/@onclick');
 			if (!onclick) {
 				// Should never hit this, since we check it in getViableResults
 				Zotero.debug(results[i].innerHTML);
@@ -537,7 +536,12 @@ function scrapeAll(doc, itemObjs) {
 		ZU.doGet(item.citeUrl, function(text) {
 			var m = text.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
+				//Saved lists and possibly other places have different formats for BibTeX URLs
+				//Trying to catch them here (can't add test bc lists are tied to google accounts)
 				Zotero.debug(text);
+				m = text.match(/href="(.+?)">BibTeX<\/a>/);
+			}
+			if (!m) {
 				var msg = "Could not find BibTeX URL"
 				var title = getHTMLTitle(text);
 				if (title) msg += ' Got page with title "' + title +'"';
@@ -1215,51 +1219,6 @@ var testCases = [
 					{
 						"title": "Google Scholar Judgement",
 						"type": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/citations?view_op=view_citation&hl=fr&user=6dUTpTYAAAAJ&cstart=20&sortby=pubdate&citation_for_view=6dUTpTYAAAAJ:kO05sadLmrgC",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The value of research data metrics for datasets from a cultural and technical point of view. A knowledge exchange report",
-				"creators": [
-					{
-						"firstName": "R. Meijer I.",
-						"lastName": "Costas",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Z.",
-						"lastName": "Zahedi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "P. F.",
-						"lastName": "Wouters",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "others",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "2013",
-				"itemID": "costas2013value",
-				"libraryCatalog": "Google Scholar",
-				"url": "https://openaccess.leidenuniv.nl/handle/1887/23586",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
