@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-13 15:22:51"
+	"lastUpdated": "2016-08-21 09:47:34"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('source_opus')>-1) {
+	if (url.indexOf('source_opus')>-1 || url.indexOf('volltexte')>-1) {
 		var bibtexEntry = ZU.xpathText(doc, '//pre/tt');
 		if (bibtexEntry.indexOf("@InCollection")>-1) {
 			return "bookSection";
@@ -84,20 +84,35 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-    var bibtexEntry = ZU.xpathText(doc, '//pre/tt');
-    //Z.debug(bibtexEntry);
+	var bibtexEntry = ZU.xpathText(doc, '//pre/tt');
+	//Z.debug(bibtexEntry);
 
-    var translator = Zotero.loadTranslator("import");
-    translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-    translator.setString(bibtexEntry);
-    translator.setHandler("itemDone", function(obj, item) {
-        item.attachments.push({
-            title: "Snapshot",
-            document: doc
-        });
-        item.complete();
-    });
-    translator.translate();         
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtexEntry);
+	translator.setHandler("itemDone", function(obj, item) {
+		
+		//if a note is just a list of keywords, then save them as tags
+		//and delete this note
+		for (var i=0; i<item.notes.length; i++) {
+			var note = item.notes[i].note;
+			if (note.indexOf('Keywords:')) {
+				note = note.replace('<p>', '').replace('</p>', '').replace('Keywords:', '');
+				var keywords = note.split(',');
+				for (var j=0; j<keywords.length; j++) {
+					item.tags.push(keywords[j].trim());
+				}
+				item.notes.splice(i, 1);
+			}
+		}
+		
+		item.attachments.push({
+			title: "Snapshot",
+			document: doc
+		});
+		item.complete();
+	});
+	translator.translate();
 
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -142,12 +157,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "<p>Keywords: machine learning, unsupervised learning, intractability, NP-hardness</p>"
-					}
+				"tags": [
+					"NP-hardness",
+					"intractability",
+					"machine learning",
+					"unsupervised learning"
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -161,6 +177,78 @@ var testCases = [
 		"type": "web",
 		"url": "http://drops.dagstuhl.de/opus/ergebnis.php?wer=opus&suchart=teil&Lines_Displayed=10&sort=o.date_year+DESC%2C+o.title&suchfeld1=freitext&suchwert1=&opt1=AND&opt2=AND&suchfeld3=date_year&suchwert3=&startindex=0&page=0&dir=2&suche=&suchfeld2=oa.person&suchwert2=Hauzar%2C%20David",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://drops.dagstuhl.de/opus/volltexte/2016/5933/",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "The Planar Tree Packing Theorem",
+				"creators": [
+					{
+						"firstName": "Markus",
+						"lastName": "Geyer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Hoffmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Kaufmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vincent",
+						"lastName": "Kusters",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Csaba",
+						"lastName": "Tóth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sándor",
+						"lastName": "Fekete",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Anna",
+						"lastName": "Lubiw",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"DOI": "http://dx.doi.org/10.4230/LIPIcs.SoCG.2016.41",
+				"ISBN": "9783959770095",
+				"itemID": "geyer_et_al:LIPIcs:2016:5933",
+				"libraryCatalog": "Dagstuhl Research Online Publication Server",
+				"pages": "41:1–41:15",
+				"place": "Dagstuhl, Germany",
+				"proceedingsTitle": "32nd International Symposium on Computational Geometry (SoCG 2016)",
+				"publisher": "Schloss Dagstuhl–Leibniz-Zentrum fuer Informatik",
+				"series": "Leibniz International Proceedings in Informatics (LIPIcs)",
+				"url": "http://drops.dagstuhl.de/opus/volltexte/2016/5933",
+				"volume": "51",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"graph drawing",
+					"graph packin",
+					"planar graph",
+					"simultaneous embedding"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
