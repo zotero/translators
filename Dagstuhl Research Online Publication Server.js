@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-21 09:47:34"
+	"lastUpdated": "2016-08-21 17:22:38"
 }
 
 /*
@@ -96,7 +96,7 @@ function scrape(doc, url) {
 		//and delete this note
 		for (var i=0; i<item.notes.length; i++) {
 			var note = item.notes[i].note;
-			if (note.indexOf('Keywords:')) {
+			if (note.indexOf('Keywords:')>-1) {
 				note = note.replace('<p>', '').replace('</p>', '').replace('Keywords:', '');
 				var keywords = note.split(',');
 				for (var j=0; j<keywords.length; j++) {
