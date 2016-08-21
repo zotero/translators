@@ -539,8 +539,7 @@ function scrapeAll(doc, itemObjs) {
 				//Saved lists and possibly other places have different formats for BibTeX URLs
 				//Trying to catch them here (can't add test bc lists are tied to google accounts)
 				Zotero.debug(text);
-				m = text. match(/href="(.+?)">BibTeX<\/a>/);
-				//Z.debug(ZU.unescapeHTML(m[1]))
+				m = text.match(/href="(.+?)">BibTeX<\/a>/);
 			}
 			if (!m) {
 				var msg = "Could not find BibTeX URL"
