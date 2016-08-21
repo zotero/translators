@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-29 23:09:08"
+	"lastUpdated": "2016-08-21 18:37:20"
 }
 
 /*
@@ -425,7 +425,6 @@ function doWeb(doc, url) {
 		scrapeCase(doc, url);
 	} else {
 		var results = getViableResults(doc);
-
 		var items = new Object();
 		var resultDivs = new Object();
 		var citeUrl;
@@ -537,7 +536,13 @@ function scrapeAll(doc, itemObjs) {
 		ZU.doGet(item.citeUrl, function(text) {
 			var m = text.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
+				//Saved lists and possibly other places have different formats for BibTeX URLs
+				//Trying to catch them here (can't add test bc lists are tied to google accounts)
 				Zotero.debug(text);
+				m = text. match(/href="(.+?)">BibTeX<\/a>/);
+				//Z.debug(ZU.unescapeHTML(m[1]))
+			}
+			if (!m) {
 				var msg = "Could not find BibTeX URL"
 				var title = getHTMLTitle(text);
 				if (title) msg += ' Got page with title "' + title +'"';
@@ -1215,51 +1220,6 @@ var testCases = [
 					{
 						"title": "Google Scholar Judgement",
 						"type": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://scholar.google.com/citations?view_op=view_citation&hl=fr&user=6dUTpTYAAAAJ&cstart=20&sortby=pubdate&citation_for_view=6dUTpTYAAAAJ:kO05sadLmrgC",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The value of research data metrics for datasets from a cultural and technical point of view. A knowledge exchange report",
-				"creators": [
-					{
-						"firstName": "R. Meijer I.",
-						"lastName": "Costas",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Z.",
-						"lastName": "Zahedi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "P. F.",
-						"lastName": "Wouters",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "others",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
-				"date": "2013",
-				"itemID": "costas2013value",
-				"libraryCatalog": "Google Scholar",
-				"url": "https://openaccess.leidenuniv.nl/handle/1887/23586",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
