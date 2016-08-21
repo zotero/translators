@@ -144,7 +144,7 @@ function getHTMLTitle(text) {
 
 function getViableResults(doc) {
 	 return ZU.xpath(doc, '//div[@class="gs_r"]\
-		[.//div[@class="gs_fl"]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
+		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
 			and .//h3[@class="gs_rt"]]');
 }
 
@@ -429,7 +429,7 @@ function doWeb(doc, url) {
 		var resultDivs = new Object();
 		var citeUrl;
 		for(var i=0, n=results.length; i<n; i++) {
-			var onclick = ZU.xpathText(results[i], './/div[@class="gs_fl"]/a[@aria-controls="gs_cit"]/@onclick');
+			var onclick = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"]/@onclick');
 			if (!onclick) {
 				// Should never hit this, since we check it in getViableResults
 				Zotero.debug(results[i].innerHTML);
