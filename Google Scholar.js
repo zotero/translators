@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-21 18:37:20"
+	"lastUpdated": "2016-08-22 07:17:20"
 }
 
 /*
@@ -495,7 +495,7 @@ function scrapeAll(doc, itemObjs) {
 		if(attachmentFrag.indexOf('/citations?') != -1) {
 			attachmentFrag = null;
 			//build attachment link when importing from saved citations
-			var caseId = ZU.xpathText(item.result, '(.//div[@class="gs_fl"]\
+			var caseId = ZU.xpathText(item.result, '(.//div[contains(@class, "gs_fl")]\
 				/a[contains(@href,"cites=") or contains(@href,"about=")]/@href)[1]');
 			if(caseId) caseId = caseId.match(/\b(?:cites|about)=(\d+)/);
 			if(caseId) caseId = caseId[1];
