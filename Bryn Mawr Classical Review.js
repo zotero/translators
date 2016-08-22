@@ -9,8 +9,25 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 10:52:41"
+	"lastUpdated": "2016-04-10 14:58:41"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+	Copyright © 2016 Michael Berkowitz and John Muccigrosso
+	This file is part of Zotero.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 	if (url.match(/by_reviewer/) || url.match(/by_author/) || url.match(/recent.html/) || url.match(/\/\d{4}\/$/)) {
@@ -59,6 +76,9 @@ function doWeb(doc, url) {
 	Zotero.Utilities.processDocuments(arts, function(doc) {
 		var item = new Zotero.Item("journalArticle");
 		var title = doc.evaluate('//h3/i', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+		item.publicationTitle = "Bryn Mawr Classical Review";
+		item.journalAbbreviation = "BMCR";
+		item.ISSN = "1055-7660";
 		item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
 		var data = doc.evaluate('//h3[i]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 		var title = title.replace("(", "\\(").replace(")", "\\)");
@@ -76,9 +96,9 @@ function doWeb(doc, url) {
 		item.url = doc.location.href;
 		item.attachments = [{url:item.url, title:item.title, mimeType:"text/html"}];
 		if (doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td//font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td//font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"));
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/center/table/tbody/tr/td/center/table/tbody/tr/td//font', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/")).substring(0,7);
 		} else {
-			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/h3', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/"))
+			item.date = Zotero.Utilities.trimInternal(doc.evaluate('/html/body/h3', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace("Bryn Mawr Classical Review ", "").replace(/\./g, "/")).substring(0,7)
 		}
 		item.complete();
 	});
@@ -112,14 +132,16 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
 						"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 						"mimeType": "text/html"
 					}
 				],
+				"publicationTitle": "Bryn Mawr Classical Review",
+				"journalAbbreviation": "BMCR",
+				"ISSN": "1055-7660",
 				"title": "Review of: Sallust: The War Against Jugurtha. Aris and Phillips Classical Texts",
 				"url": "http://bmcr.brynmawr.edu/2010/2010-01-02.html",
-				"date": "2010/01/02",
+				"date": "2010/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Review of"
@@ -163,9 +185,12 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
+				"publicationTitle": "Bryn Mawr Classical Review",
+				"journalAbbreviation": "BMCR",
+				"ISSN": "1055-7660",
 				"title": "Review of: The Classical Tradition",
 				"url": "http://bmcr.brynmawr.edu/2013/2013-01-44.html",
-				"date": "2013/01/44",
+				"date": "2013/01",
 				"libraryCatalog": "Bryn Mawr Classical Review",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"shortTitle": "Review of"
