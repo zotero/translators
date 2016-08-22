@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-22 13:37:21"
+	"lastUpdated": "2016-08-22 17:38:09"
 }
 
 /*
@@ -30,7 +30,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/by_reviewer|by_author|recent\.html|\/\d{4}\/(index\.html)?$/) != -1) {
+	if (url.search(/by_reviewer|by_author|recent\.html|\/\d{4}\/(indexb?\.html)?$/) != -1) {
 		return "multiple";
 	} else if (url.match(/[\d\-]+\.html$/) && ZU.xpathText(doc, '//h3/i')) {
 		return "journalArticle";
@@ -41,8 +41,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[@id="indexcontent"]//li//a');
-	Z.debug(rows.length);
+	var rows = ZU.xpath(doc, '//*[@id="indexcontent" or @id="twocol-mainContent"]//li//a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -78,7 +77,6 @@ function scrape(doc, url) {
 	
 	var title = ZU.xpathText(doc, '//h3/i');
 	item.title = "Review of: " + Zotero.Utilities.trimInternal(title);
-	var title = title.replace("(", "\\(").replace(")", "\\)");
 	
 	var author = ZU.xpathText(doc, '//b[contains(text(), "Reviewed by")]');
 	if (author) {
@@ -107,11 +105,24 @@ function scrape(doc, url) {
 		}
 	}
 
-	//The BMCR ID contains the 4-digit year, 2 digit month and a increasing number
-	var m = url.match(/(\d{4})-(\d{2})-(\d{2})/);//this should work for 1999f
+	//The BMCR ID for 1998ff contains the 4-digit year, 2-digit month and an increasing number.
+	//The BMCR ID for 1994-1998 contains the 2-digit year, 1- or 2-digit month and an increasing number.
+	//The BMCR ID for 1990-1993 is different.
+	var m = url.match(/(\d{4})\/(\d{2,4})[\-\.](\d{1,2})[\-\.](\d{2})/);
 	if (m) {
-		item.extra = "BMCR ID: " + m[1] + "." + m[2] + "." + m[3];
-		item.date = m[1] + "-" + m[2];
+		item.extra = "BMCR ID: " + m[2] + "." + m[3] + "." + m[4];
+		if (m[1]>=1994) {
+			if (m[2].length==2) {
+				m[2] = "19" + m[2];
+			}
+			if (m[3].length==1) {
+				m[3] = "0" + m[3];
+			}
+			item.date = m[2] + "-" + m[3];
+		}
+		if (m[1]<=1993) {
+			item.date = m[1];
+		}
 	}
 	
 	item.publicationTitle = "Bryn Mawr Classical Review";
@@ -258,6 +269,40 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Review of: Epic Traditions in the Contemporary World. The Poetics of Community",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bmcr.brynmawr.edu/1998/98.1.04.html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Review of: Athens and Persians in the Fifth Century BC: A Study in Cultural Receptivity.",
+				"creators": [
+					{
+						"firstName": "Margaret C.",
+						"lastName": "Miller",
+						"creatorType": "reviewedAuthor"
+					}
+				],
+				"date": "1998-01",
+				"ISSN": "1055-7660",
+				"extra": "BMCR ID: 98.1.04",
+				"journalAbbreviation": "BMCR",
+				"libraryCatalog": "Bryn Mawr Classical Review",
+				"publicationTitle": "Bryn Mawr Classical Review",
+				"shortTitle": "Review of",
+				"url": "http://bmcr.brynmawr.edu/1998/98.1.04.html",
+				"attachments": [
+					{
+						"title": "Review of: Athens and Persians in the Fifth Century BC: A Study in Cultural Receptivity.",
 						"mimeType": "text/html"
 					}
 				],
