@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-22 11:05:06"
+	"lastUpdated": "2016-08-22 22:03:15"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
@@ -183,7 +183,8 @@ function scrape(items, opts){
 	//get citation export page's source code;
 	for(var i=0, n=items.length; i<n; i++) {
 		(function(item) {
-			var url = '/action/showCitFormats?doi=' + encodeURIComponent(item.doi);
+			processCallback(item, opts);
+/*			var url = '/action/showCitFormats?doi=' + encodeURIComponent(item.doi);
 			//Z.debug(url);
 			ZU.doGet(url, function(text){
 				//Z.debug(text)
@@ -193,16 +194,17 @@ function scrape(items, opts){
 				Zotero.debug("downloadfilename= "+downloadFileName);
 				processCallback(item, opts, downloadFileName);
 			});
-		})(items[i]);
+*/		})(items[i]);
 	}
 }
 
 function processCallback(fetchItem, opts, downloadFileName) {
 		var baseurl = "/action/downloadCitation";
 		var doi = fetchItem.doi;
-		var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + encodeURIComponent(downloadFileName)
+/*		var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + encodeURIComponent(downloadFileName)
 			+ "&include=abs&format=refman&direct=on"
 			+ "&submit=Download+article+citation+data";
+*/		var post = "pubs.acs.org/action/downloadCitation?direct=true&doi="+encodeURIComponent(fetchItem.doi)+"&format=ris&include=cit&submit=Download+Citation"
 		ZU.doPost(baseurl, post, function(text){
 			// Fix the RIS doi mapping
 			text = text.replace("\nN1  - doi:", "\nDO  - ");
