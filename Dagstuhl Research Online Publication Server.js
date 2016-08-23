@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-21 17:22:38"
+	"lastUpdated": "2016-08-23 06:54:08"
 }
 
 /*
@@ -86,6 +86,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var bibtexEntry = ZU.xpathText(doc, '//pre/tt');
 	//Z.debug(bibtexEntry);
+	var pdfurl = ZU.xpathText(doc, '//td//a[contains(@href, "pdf")]/@href');
 
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -110,6 +111,15 @@ function scrape(doc, url) {
 			title: "Snapshot",
 			document: doc
 		});
+		
+		if (pdfurl) {
+			item.attachments.push({
+				url: pdfurl,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
+			});
+		}
+		
 		item.complete();
 	});
 	translator.translate();
@@ -155,6 +165,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -237,6 +251,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
