@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-22 17:38:09"
+	"lastUpdated": "2016-08-23 05:51:18"
 }
 
 /*
@@ -32,7 +32,7 @@
 function detectWeb(doc, url) {
 	if (url.search(/by_reviewer|by_author|recent\.html|\/\d{4}\/(indexb?\.html)?$/) != -1) {
 		return "multiple";
-	} else if (url.match(/[\d\-]+\.html$/) && ZU.xpathText(doc, '//h3/i')) {
+	} else if (url.search(/\d\.html$/)>-1 && ZU.xpathText(doc, '//h3/i')) {
 		return "journalArticle";
 	}
 }
