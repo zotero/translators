@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-23 17:27:20"
+	"lastUpdated": "2016-08-23 18:35:28"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
@@ -188,7 +188,7 @@ function scrape(items, opts){
 function processCallback(fetchItem, opts, downloadFileName) {
 		var baseurl = "/action/downloadCitation";
 		var doi = fetchItem.doi;
-		var post = "//pubs.acs.org/action/downloadCitation?direct=true&doi="+encodeURIComponent(fetchItem.doi)+"&format=ris&include=abs&submit=Download+Citation"
+		var post = "https//pubs.acs.org/action/downloadCitation?direct=true&doi="+encodeURIComponent(fetchItem.doi)+"&format=ris&include=abs&submit=Download+Citation"
 		ZU.doPost(baseurl, post, function(text){
 			// Fix the RIS doi mapping
 			text = text.replace("\nN1  - doi:", "\nDO  - ");
