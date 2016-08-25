@@ -9,103 +9,103 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-23 03:49:35"
+	"lastUpdated": "2016-08-25 03:58:18"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Sebastian Karcher
+	Copyright © 2016 Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
-    if (url.indexOf('/article/')>-1) {
-        return "journalArticle";
-    } else if (url.indexOf('/book/') >-1) {
-    	return "book";
-    } else if (getSearchResults(doc, true)) {
-        return "multiple";
-    }
+	if (url.indexOf('/article/')>-1) {
+		return "journalArticle";
+	} else if (url.indexOf('/book/') >-1) {
+		return "book";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    var rows = ZU.xpath(doc, '//div[@class="single_result"]//h1/a[contains(@href, "/article/") or contains(@href, "/book/")]');
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[@class="single_result"]//h1/a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	if (!rows.length) {
+		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	}
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = [];
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, scrape);
-        });
-    } else {
-        scrape(doc, url);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
-	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]/text()');
+	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 	var translator = Zotero.loadTranslator('web');
-    // Embedded Metadata
-    translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-    translator.setDocument(doc);
-    translator.setHandler('itemDone', function (obj, item) {
-        if (abstract) {
-        	item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/,\s*$/, "").trim();
-        }
-        if (url.indexOf("/article/") != -1) {
-       		var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
-       		Z.debug(pdfurl)
-       		item.attachments = [{
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function (obj, item) {
+		if (abstract) {
+			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
+		}
+		if (url.indexOf("/article/") != -1) {
+	   		var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
+	   		//Z.debug(pdfurl);
+	   		//overwriting attachments: Snapshot isn't very useful, PDF link from EM is wrong
+	   		item.attachments = [{
 						"url": pdfurl,
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}]
-        }
-        item.libraryCatalog = "Project MUSE";
-        item.complete();
-    });
-
-    translator.getTranslatorObject(function(trans) {
-        trans.doWeb(doc, url);
-    });
-	
+		}
+		item.libraryCatalog = "Project MUSE";
+		item.complete();
+	});
+	translator.translate();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -128,7 +128,7 @@ var testCases = [
 				"libraryCatalog": "Project MUSE",
 				"pages": "121-164",
 				"publicationTitle": "Past & Present",
-				"url": "https://use.jhu.edu/article/200965",
+				"url": "https://muse.jhu.edu/article/200965",
 				"volume": "191",
 				"attachments": [
 					{
@@ -163,7 +163,7 @@ var testCases = [
 				],
 				"date": "2009",
 				"ISBN": "9780820705057",
-				"abstractNote": ", , Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.”",
+				"abstractNote": "In Writing the Forest in Early Modern England: A Sylvan Pastoral Nation, Jeffrey S. Theis focuses on pastoral literature in early modern England as an emerging form of nature writing. In particular, Theis analyzes what happens when pastoral writing is set in forests — what he terms “sylvan pastoral.”\nDuring the sixteenth and seventeenth centuries, forests and woodlands played an instrumental role in the formation of individual and national identities in England. Although environmentalism as we know it did not yet exist, persistent fears of timber shortages led to a larger anxiety about the status of forests. Perhaps more important, forests were dynamic and contested sites of largely undeveloped spaces where the poor would migrate in a time of rising population when land became scarce. And in addition to being a place where the poor would go, the forest also was a playground for monarchs and aristocrats where they indulged in the symbolically rich sport of hunting.\nConventional pastoral literature, then, transforms when writers use it to represent and define forests and the multiple ways in which English society saw these places. In exploring these themes, authors expose national concerns regarding deforestation and forest law and present views relating to land ownership, nationhood, and the individual’s relationship to nature. Of particular interest are the ways in which cultures turn confusing spaces into known places and how this process is shaped by nature, history, gender, and class.\nTheis examines the playing out of these issues in familiar works by Shakespeare, such as A Midsummer Night’s Dream, The Merry Wives of Windsor, and As You Like It, Andrew Marvell’s “Upon Appleton House,” John Milton’s Mask and Paradise Lost, as well as in lesser known prose works of the English Revolution, such as James Howell’s Dendrologia>/i> and John Evelyn’s Sylva.\nAs a unique ecocritical study of forests in early modern English literature, Writing the Forest makes an important contribution to the growing field of the history of environmentalism, and will be of interest to those working in literary and cultural history as well as philosophers concerned with nature and space theory.",
 				"language": "English",
 				"libraryCatalog": "Project MUSE",
 				"publisher": "Duquesne University Press",
@@ -202,7 +202,7 @@ var testCases = [
 				"pages": "735-745",
 				"publicationTitle": "Technology and Culture",
 				"shortTitle": "The Pill at Fifty",
-				"url": "https://use.jhu.edu/article/530509",
+				"url": "https://muse.jhu.edu/article/530509",
 				"volume": "54",
 				"attachments": [
 					{
@@ -238,7 +238,7 @@ var testCases = [
 				"libraryCatalog": "Project MUSE",
 				"pages": "173-195",
 				"publicationTitle": "Latin American Research Review",
-				"url": "https://use.jhu.edu/article/551992",
+				"url": "https://muse.jhu.edu/article/551992",
 				"volume": "49",
 				"attachments": [
 					{
