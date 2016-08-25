@@ -2,20 +2,20 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
-	"minVersion": "3.0.9",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|document\\/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-16 03:42:26"
+	"lastUpdated": "2016-08-25 20:21:49"
 }
 
 function detectWeb(doc, url) {
 	if(doc.defaultView !== doc.defaultView.top) return;
 	
-	if (/[?&]arnumber=(\d+)/i.test(url)) {
+	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		return "journalArticle";
 	}
 	
@@ -45,21 +45,9 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var articleList = doc.getElementsByClassName('article-list')[0],
-		rows;
-	if (!articleList) {
-		articleList = doc.getElementById('results-blk');
-		if (articleList) {
-			rows = articleList.getElementsByClassName('art-abs-url');
-		}
-	} else {
-		rows = ZU.xpath(articleList, './/a[@ng-bind-html="::record.title"]')
-	}
-	
-	if (!articleList || !rows) return checkOnly ? false : {};
-	
-	var items = {},
-		found = false;
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[contains(@ng-bind-html, "::record.title")]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -79,8 +67,12 @@ function getSearchResults(doc, checkOnly) {
 // URL like http://ieeexplore.ieee.org/ielx4/78/2655/00080767.pdf?tp=&arnumber=80767&isnumber=2655
 // Or: http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=1575188&tag=1
 function fixUrl(url) {
-	var arnumber = url.match(/arnumber=(\d+)/)[1];
-	return url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber);
+	var arnumber = url.match(/arnumber=(\d+)/);
+	if (arnumber) {
+		return url.replace(/\/(?:search|stamp|ielx[45])\/.*$/, "/xpls/abs_all.jsp?arnumber=" + arnumber[1]);
+	} else {
+		return url;
+	}
 }
 
 function doWeb(doc, url) {
@@ -105,10 +97,10 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
-	var arnumber = url.match(/arnumber=(\d+)/)[1];
-	var pdf = ZU.xpathText(doc, '//span[contains(@class, "button")]/a[@class="pdf"]/@href')
-	Z.debug(pdf);
-	Z.debug("arNumber = " + arnumber);
+	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)\//))[1];
+	var pdf = ZU.xpathText(doc, '//a[i[contains(@class, "doc-act-icon-pdf")]]/@href');
+	//Z.debug(pdf);
+	//Z.debug("arNumber = " + arnumber);
 	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
 	ZU.doPost('/xpl/downloadCitations', post, function(text) {
 		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
@@ -489,6 +481,67 @@ var testCases = [
 					"provenance",
 					"security of data",
 					"sensitive information"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/document/80767/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "An eigenanalysis interference canceler",
+				"creators": [
+					{
+						"firstName": "A. M.",
+						"lastName": "Haimovich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Bar-Ness",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 1991",
+				"DOI": "10.1109/78.80767",
+				"ISSN": "1053-587X",
+				"abstractNote": "Eigenanalysis methods are applied to interference cancellation problems. While with common array processing methods the cancellation is effected by global optimization procedures that include the interferences and the background noise, the proposed technique focuses on the interferences only, resulting in superior cancellation performance. Furthermore, the method achieves full effectiveness even for short observation times, when the number of samples used for processing is of the the order of the number of interferences. Adaptive implementation is obtained with a simple, fast converging algorithm",
+				"issue": "1",
+				"itemID": "80767",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "76-84",
+				"publicationTitle": "IEEE Transactions on Signal Processing",
+				"volume": "39",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Abstract Record"
+					}
+				],
+				"tags": [
+					"Array signal processing",
+					"Background noise",
+					"Direction of arrival estimation",
+					"Interference cancellation",
+					"Jamming",
+					"Noise cancellation",
+					"Optimization methods",
+					"Sensor arrays",
+					"Signal to noise ratio",
+					"Steady-state",
+					"adaptive filters",
+					"adaptive implementation",
+					"array processing",
+					"eigenanalysis methods",
+					"eigenvalues and eigenfunctions",
+					"fast converging algorithm",
+					"filtering and prediction theory",
+					"interference cancellation",
+					"interference suppression",
+					"signal processing"
 				],
 				"notes": [],
 				"seeAlso": []
