@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|document\\/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|document/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-25 20:21:49"
+	"lastUpdated": "2016-08-26 05:42:00"
 }
 
 function detectWeb(doc, url) {
@@ -176,7 +176,7 @@ var testCases = [
 				"title": "Fuzzy Turing Machines: Variants and Universality",
 				"creators": [
 					{
-						"firstName": "Yongming",
+						"firstName": "Y.",
 						"lastName": "Li",
 						"creatorType": "author"
 					}
@@ -224,7 +224,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6221978",
+		"url": "http://ieeexplore.ieee.org/document/6221978/?arnumber=6221978",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -262,6 +262,10 @@ var testCases = [
 				"publicationTitle": "IEEE Transactions on Geoscience and Remote Sensing",
 				"volume": "51",
 				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "IEEE Xplore Abstract Record"
 					}
@@ -322,19 +326,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=1397982",
+		"url": "http://ieeexplore.ieee.org/document/1397982/?tp=&arnumber=1397982",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Analysis and circuit modeling of waveguide-separated absorption charge multiplication-avalanche photodetector (WG-SACM-APD)",
 				"creators": [
 					{
-						"firstName": "Yasser M.",
+						"firstName": "Y. M.",
 						"lastName": "El-Batawy",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "M.J.",
+						"firstName": "M. J.",
 						"lastName": "Deen",
 						"creatorType": "author"
 					}
@@ -350,6 +354,10 @@ var testCases = [
 				"publicationTitle": "IEEE Transactions on Electron Devices",
 				"volume": "52",
 				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "IEEE Xplore Abstract Record"
 					}
@@ -400,34 +408,34 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ieeexplore.ieee.org/xpl/articleDetails.jsp?arnumber=6919256&punumber%3D6287639",
+		"url": "http://ieeexplore.ieee.org/document/6919256/?arnumber=6919256&punumber%3D6287639",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Information Security in Big Data: Privacy and Data Mining",
 				"creators": [
 					{
-						"firstName": "Lei",
+						"firstName": "L.",
 						"lastName": "Xu",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Chunxiao",
+						"firstName": "C.",
 						"lastName": "Jiang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jian",
+						"firstName": "J.",
 						"lastName": "Wang",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jian",
+						"firstName": "J.",
 						"lastName": "Yuan",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yong",
+						"firstName": "Y.",
 						"lastName": "Ren",
 						"creatorType": "author"
 					}
@@ -517,6 +525,10 @@ var testCases = [
 				"publicationTitle": "IEEE Transactions on Signal Processing",
 				"volume": "39",
 				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "IEEE Xplore Abstract Record"
 					}
