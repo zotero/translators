@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-25 03:58:18"
+	"lastUpdated": "2016-08-27 02:45:11"
 }
 
 /*
@@ -87,7 +87,6 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setDocument(doc);
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
 			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
@@ -105,7 +104,9 @@ function scrape(doc, url) {
 		item.libraryCatalog = "Project MUSE";
 		item.complete();
 	});
-	translator.translate();
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
