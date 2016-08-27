@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2016-05-09 20:00:35"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-08-27 10:23:44"
 }
 
 /*
@@ -78,8 +78,10 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');//Embedded Metadata
-	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
+		//Decode HTML entities in title, e.g. &#039;
+		item.title = ZU.unescapeHTML(item.title);
+		
 		//Correct pages format, e.g. 1467-96 or 625-63
 		var m = item.pages.match(/^(\d+)(\d\d)[\--](\d\d)$|^(\d+)(\d)[\--](\d)$|^(\d+)(\d\d\d)[\--](\d\d\d)$/);
 		if (m) {
@@ -94,7 +96,9 @@ function scrape(doc, url) {
 		
 		item.complete();
 	});
-	translator.translate();
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
 
 }
 
@@ -178,6 +182,50 @@ var testCases = [
 				"publicationTitle": "American Economic Review",
 				"url": "https://www.aeaweb.org/articles?id=10.1257/aer.101.4.1467",
 				"volume": "101",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.aeaweb.org/articles?id=10.1257/jep.30.3.235",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Skeptical View of the National Science Foundation's Role in Economic Research",
+				"creators": [
+					{
+						"firstName": "Tyler",
+						"lastName": "Cowen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alex",
+						"lastName": "Tabarrok",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016/08",
+				"DOI": "10.1257/jep.30.3.235",
+				"ISSN": "0895-3309",
+				"abstractNote": "We can imagine a plausible case for government support of science based on traditional economic reasons of externalities and public goods. Yet when it comes to government support of grants from the National Science Foundation (NSF) for economic research, our sense is that many economists avoid critical questions, skimp on analysis, and move straight to advocacy. In this essay, we take a more skeptical attitude toward the efforts of the NSF to subsidize economic research. We offer two main sets of arguments. First, a key question is not whether NSF funding is justified relative to laissez-faire, but rather, what is the marginal value of NSF funding given already existing government and nongovernment support for economic research? Second, we consider whether NSF funding might more productively be shifted in various directions that remain within the legal and traditional purview of the NSF. Such alternative focuses might include data availability, prizes rather than grants, broader dissemination of economic insights, and more. Given these critiques, we suggest some possible ways in which the pattern of NSF funding, and the arguments for such funding, might be improved.",
+				"issue": "3",
+				"libraryCatalog": "www.aeaweb.org",
+				"pages": "235-248",
+				"publicationTitle": "Journal of Economic Perspectives",
+				"url": "https://www.aeaweb.org/articles?id=10.1257/jep.30.3.235",
+				"volume": "30",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
