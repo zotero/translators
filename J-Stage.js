@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-27 13:37:00"
+	"lastUpdated": "2016-08-27 21:45:11"
 }
 
 /*
@@ -85,7 +85,7 @@ function scrape(doc, url) {
 	var tags = ZU.xpathText(doc, '//p[contains(@class, "keywords")]');
 	if (tags){
 		tags = tags.replace(/Keywords:/, "").split(/\s*,\s*/);
-		for (var i in tags) {
+		for (var i=0; i<tags.length; i++) {
 			tags[i] = ZU.trimInternal(tags[i]);
 		}
 	}
@@ -101,7 +101,7 @@ function scrape(doc, url) {
 		translator.setHandler("itemDone", function (obj, item) {
 			if (abs) item.abstractNote = abs;
 			if (tags) item.tags = tags;
-			for (var i in item.creators) {
+			for (var i=0; i<item.creators.length; i++) {
 				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
 				}
@@ -117,7 +117,7 @@ function scrape(doc, url) {
 			}
 			item.attachments.push({
 				url: url,
-				title: "Jstage - Snapshot",
+				title: "J-Stage - Snapshot",
 				mimeType: "text/html"
 			});
 			
@@ -126,7 +126,7 @@ function scrape(doc, url) {
 				pdfurl = "https://www.jstage.jst.go.jp" + pdfurl[1].textContent;
 				item.attachments.push({
 					url: pdfurl,
-					title: "Jstage - Full Text PDF",
+					title: "J-Stage - Full Text PDF",
 					mimeType: "application/pdf"
 				});
 			}
@@ -180,11 +180,11 @@ var testCases = [
 				"volume": "45",
 				"attachments": [
 					{
-						"title": "Jstage - Snapshot",
+						"title": "J-Stage - Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Jstage - Full Text PDF",
+						"title": "J-Stage - Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -240,7 +240,7 @@ var testCases = [
 				"volume": "114",
 				"attachments": [
 					{
-						"title": "Jstage - Snapshot",
+						"title": "J-Stage - Snapshot",
 						"mimeType": "text/html"
 					}
 				],
