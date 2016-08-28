@@ -1,5 +1,5 @@
 {
-	"translatorID": "edba98e3-45a6-41af-8374-590437b35ac7",
+	"translatorID": "a9f7b277-e134-4d1d-ada6-8f7942be71a6",
 	"label": "newshub.co.nz",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://www\\.newshub\\.co\\.nz/",
