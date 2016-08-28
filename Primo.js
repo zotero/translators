@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-08-27 04:43:48"
+	"lastUpdated": "2016-08-28 15:36:29"
 }
 
 /*
@@ -211,15 +211,9 @@ function importPNX(text, url) {
 	
 	var item = new Zotero.Item();
 	
-	var itemType = ZU.xpathText(doc, '//display/type');
+	var itemType = ZU.xpathText(doc, '//display/type')  || ZU.xpathText(doc, '//facets/rsrctype') || ZU.xpathText(doc, '//search/rsrctype');
 	if(!itemType) {
-		if ( ZU.xpathText(doc, '//facets/rsrctype') ) {
-			var itemType = ZU.xpathText(doc, '//facets/rsrctype');
-		} else if ( ZU.xpathText(doc, '//search/rsrctype') ) {
-			var itemType = ZU.xpathText(doc, '//search/rsrctype');
-		} else {
-			throw new Error('Could not locate item type');
-		}
+		throw new Error('Could not locate item type');
 	}
 	
 	switch(itemType.toLowerCase()) {
@@ -322,20 +316,20 @@ function importPNX(text, url) {
 	var publisher = ZU.xpathText(doc, '//addata/pub');
 	if(!publisher) publisher = ZU.xpathText(doc, '//display/publisher');
 	if(publisher) {
-    	publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
-	    item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
-	    var pubplace = ZU.unescapeHTML(publisher).split(" : ");
+		publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
+		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 
-	    if(pubplace && pubplace[1]) {
-	        var possibleplace = pubplace[0];
-	        if(!item.place ) {
-	            item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
-	            item.place = possibleplace;
-	        }
-	        if(item.place && item.place == possibleplace) {
-	            item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
-	        }
-	    }
+		if(pubplace && pubplace[1]) {
+			var possibleplace = pubplace[0];
+			if(!item.place ) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+				item.place = possibleplace;
+			}
+			if(item.place && item.place == possibleplace) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+			}
+		}
 	}
 	
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
@@ -376,7 +370,7 @@ function importPNX(text, url) {
 
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
-	var subjects = ""//ZU.xpath(doc, '//search/subject');
+	var subjects = ZU.xpath(doc, '//search/subject');
 	if(!subjects.length) {
 		subjects = ZU.xpath(doc, '//display/subject');
 	}
@@ -478,7 +472,7 @@ function stripAuthor(str) {
 		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
-		.replace(/ :/, "");
+		.replace(/\s*:\s+/, " ");
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -778,6 +772,34 @@ var testCases = [
 					"Cookery, French",
 					"Cooking, French.",
 					"French cooking"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Grida per i Milanesi che avevano seguito Ludovico il Moro",
+				"creators": [
+					{
+						"lastName": "Milano",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1500",
+				"language": "ita",
+				"libraryCatalog": "digitale.beic.it",
+				"place": "Milano",
+				"publisher": "Ambrogio : da Caponago",
+				"attachments": [],
+				"tags": [
+					"LEGGI;ITALIA - STORIA MEDIOEVALE"
 				],
 				"notes": [],
 				"seeAlso": []
