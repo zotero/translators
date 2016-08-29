@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-28 17:34:55"
+	"lastUpdated": "2016-08-29 06:06:01"
 }
 
 /*
@@ -100,6 +100,8 @@ function scrape(doc, url) {
 			item.tags.push(tags[i].textContent);
 		}
 		
+		item.publicationTitle = "Newshub";
+		
 		item.complete();
 	});
 
@@ -126,6 +128,7 @@ var testCases = [
 				"date": "2011-08-16",
 				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
 				"libraryCatalog": "www.newshub.co.nz",
+				"publicationTitle": "Newshub",
 				"url": "http://www.newshub.co.nz/opinion/duncan-garner/unemployed-youth-would-fill-eden-park--blog-2011081612",
 				"attachments": [
 					{
@@ -158,6 +161,7 @@ var testCases = [
 				"date": "2011-10-19",
 				"abstractNote": "President Barack Obama said he wanted to use his bus trip through rural North Carolina and Virginia to hear directly from the American people.",
 				"libraryCatalog": "www.newshub.co.nz",
+				"publicationTitle": "Newshub",
 				"shortTitle": "Obama bus tour",
 				"url": "http://www.newshub.co.nz/world/obama-bus-tour-barbecue-to-bieber-2011101914",
 				"attachments": [
@@ -193,6 +197,7 @@ var testCases = [
 				"date": "2016-08-26",
 				"abstractNote": "A Wellington intersection that's confounded drivers for years is to have a $200,000 set of traffic lights installed.",
 				"libraryCatalog": "www.newshub.co.nz",
+				"publicationTitle": "Newshub",
 				"url": "http://www.newshub.co.nz/nznews/council-puts-stop-to-confusing-cuba-st-intersection-2016082614",
 				"attachments": [
 					{
