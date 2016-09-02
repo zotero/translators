@@ -65,6 +65,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "Which Bank Is the Worst for America? 5 Behemoths That Hold Our Political System Hostage",
 				"creators": [
 					{
 						"firstName": "Sarah",
@@ -77,32 +78,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"economy",
-					"obama",
-					"morgan stanley",
-					"bank of america",
-					"summers",
-					"geithner",
-					"collapse",
-					"occupy wall street"
-				],
-				"seeAlso": [],
+				"date": "October 19, 2011",
+				"abstractNote": "We've ranked the banks based on how shamelessly they game the political process through lobbying, revolving door politics and campaign donations.",
+				"libraryCatalog": "AlterNet",
+				"publicationTitle": "AlterNet",
+				"shortTitle": "Which Bank Is the Worst for America?",
+				"url": "http://www.alternet.org/story/152686/which_bank_is_the_worst_for_america_5_behemoths_that_hold_our_political_system_hostage",
 				"attachments": [
 					{
 						"title": "AlterNet Article Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.alternet.org/story/152686/which_bank_is_the_worst_for_america_5_behemoths_that_hold_our_political_system_hostage",
-				"abstractNote": "We've ranked the banks based on how shamelessly they game the political process through lobbying, revolving door politics and campaign donations.",
-				"date": "October 19, 2011",
-				"publicationTitle": "AlterNet",
-				"title": "Which Bank Is the Worst for America? 5 Behemoths That Hold Our Political System Hostage",
-				"libraryCatalog": "AlterNet",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Which Bank Is the Worst for America?"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -112,6 +102,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Does Romney Think the Pentagon Needs More Marching Bands, NASCAR Sponsorships?",
 				"creators": [
 					{
 						"firstName": "Robert",
@@ -119,21 +110,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "August 24, 2012",
+				"blogTitle": "AlterNet",
+				"url": "http://www.alternet.org/speakeasy/robert-greenwald/does-romney-think-pentagon-needs-more-marching-bands-nascar-sponsorship-1",
 				"attachments": [
 					{
 						"title": "AlterNet Article Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.alternet.org/speakeasy/robert-greenwald/does-romney-think-pentagon-needs-more-marching-bands-nascar-sponsorship-1",
-				"date": "August 24, 2012",
-				"publicationTitle": "AlterNet",
-				"title": "Does Romney Think the Pentagon Needs More Marching Bands, NASCAR Sponsorships?",
-				"libraryCatalog": "AlterNet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
