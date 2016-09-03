@@ -71,6 +71,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Smith, Robert Burdett (1837–1895)",
 				"creators": [
 					{
 						"firstName": "Chris",
@@ -78,22 +79,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"bookTitle": "Australian Dictionary of Biography",
+				"libraryCatalog": "Australian Dictionary of Biography",
+				"place": "Canberra",
+				"publisher": "National Centre of Biography, Australian National University",
+				"url": "http://adb.anu.edu.au/biography/smith-robert-burdett-4613",
 				"attachments": [
 					{
 						"title": "Australian Dictionary of Biography Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://adb.anu.edu.au/biography/smith-robert-burdett-4613",
-				"place": "Canberra",
-				"publicationTitle": "Australian Dictionary of Biography",
-				"publisher": "National Centre of Biography, Australian National University",
-				"title": "Smith, Robert Burdett (1837–1895)",
-				"libraryCatalog": "Australian Dictionary of Biography",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
