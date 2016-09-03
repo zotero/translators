@@ -1,15 +1,15 @@
 {
-	"translatorID": "1d1a51d4-60bf-44b8-ae28-8b154d1ed721",
+	"translatorID": "386d63c0-e038-4fdb-ae29-786264b9d3f5",
 	"label": "Justpaste.it",
 	"creator": "febrezo",
-	"target": "https?://justpaste.it",
+	"target": "https?://justpaste\\.it/.+",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 1,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-02 20:00:29"
+	"lastUpdated": "2016-09-03 11:20:37"
 }
 
 /*
@@ -65,7 +65,7 @@ function detectWeb(doc, url) {
 */
 
 function doWeb(doc, url) {
-	resourceType = detectWeb(doc, url);
+	var resourceType = detectWeb(doc, url);
 
 	// Creating the item
 	var newItem = new Zotero.Item(resourceType);
@@ -75,21 +75,19 @@ function doWeb(doc, url) {
 	newItem.url = url;
 	var auxTitle = ZU.xpathText(doc, '//title');	
 	newItem.title = auxTitle.substring(0, auxTitle.lastIndexOf(" - justpaste.it"));
-	newItem.websiteType = "paste";
-
+	newItem.websiteType = "Paste Site";
 
 	var auxDate = ZU.xpathText(doc, '//div[@class="col-md-3 col-xs-4 noteBottomFooter"]');
 	if (auxDate.indexOf("ago")>=0) {
 		var today = new Date(Date.now());
-		newItem.date = today.getFullYear() + "/" + today.getMonth() + "/" + today.getDay() ;		
+		newItem.date = today.getFullYear() + "/" + today.getMonth() + "/" + today.getDay();		
 	} else {
 		newItem.date = auxDate.substring(9);		
 	}
 
 	// Adding the attachment
 	newItem.attachments.push({
-		//title: newItem.title,
-		title: newItem.title,		
+		title: "Justpaste.it Snapshot",		
 		mimeType: "text/html",
 		url: url
 	});	
