@@ -9,49 +9,53 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-03 11:08:35"
+	"lastUpdated": "2016-09-03 20:50:31"
 }
 
 function detectWeb(doc, url) {
 	if (url.match(/home\.html|\d{4}[^\/]*\/.+/)) {
 		return "journalArticle";
-	} else if (url.match(/jour(nals|search)/)) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	} 
 }
 
-//TODO rewrite with a function getSearchResults which can also been used in detectWeb
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	//This is tailored for the issue pages and may need
+	//adjusted for search (when this works again).
+	var rows = ZU.xpath(doc, '//div[@class="contentList"]/dl');
+	for (var i=0; i<rows.length; i++) {
+		var href = ZU.xpathText(rows[i], './/a[contains(text(), "Abstract") or contains(text(), "Review information") or contains(text(), "Review Information")]/@href');
+		var title = ZU.trimInternal(ZU.xpathText(rows[i], './/*[@class="articleTitleInAbstract" or @class="bookTitleInAbstract"]'));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 
 function doWeb(doc, url) {
-	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		if (url.match(/joursearch/)) {
-			var titlex = '//table/tbody/tr/td/span[@class="searchResultsArticleTitle"]';
-			var linkx = '//a[@class="searchResultsAbstractLink"]';
-		} else {
-			var titlex = '//div[@class="contentList"]/dl/dt[@class="articleTitleInAbstract"]';
-			var linkx = '//div[@class="contentList"]/dl/dd/a[contains(text(), "Abstract")]'
-		}
-		var titles = doc.evaluate(titlex, doc, null, XPathResult.ANY_TYPE, null);
-		var links = doc.evaluate(linkx, doc, null, XPathResult.ANY_TYPE, null);
-		var title, link;
-		while ((title = titles.iterateNext()) && (link = links.iterateNext())) {
-			items[link.href] = Zotero.Utilities.trimInternal(title.textContent);
-		}
-	Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
-	});
+		});
 	} else {
-	scrape(doc, url)
+		scrape(doc, url);
 	}
 }
+
 
 function scrape(doc, url){
 	//Z.debug(url)		
@@ -60,9 +64,9 @@ function scrape(doc, url){
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
-			var abstract = ZU.xpathText(doc, '//p[a[contains(@id, "Abstract")]]');
-			if (abstract) item.abstractNote = ZU.trimInternal(abstract).replace(/^Abstract:\s/, "");
-			item.complete();
+		var abstract = ZU.xpathText(doc, '//p[a[contains(@id, "Abstract")]]');
+		if (abstract) item.abstractNote = ZU.trimInternal(abstract).replace(/^Abstract:\s/, "");
+		item.complete();
 	});
 	translator.translate();
 }/** BEGIN TEST CASES **/
