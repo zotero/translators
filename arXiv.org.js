@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-09-26 22:41:56"
+	"lastUpdated": "2016-09-03 17:27:02"
 }
 
 function detectWeb(doc, url) {
@@ -31,7 +31,7 @@ function doWeb(doc, url) {
 			getTitleId = function(row) {
 				var id = ZU.xpathText(row, './/a[@title="Abstract"]').trim().substr(6); // Trim off arXiv:
 				var title = ZU.trimInternal(
-					ZU.xpathText(row, './following-sibling::dd[1]//div[@class="list-title"]/text()[last()]'));
+					ZU.xpathText(row, './following-sibling::dd[1]//div[contains(@class, "list-title")]/text()[last()]'));
 				return {
 					title: title,
 					id: id
