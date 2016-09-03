@@ -130,6 +130,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Extrapolation of stable random fields",
 				"creators": [
 					{
 						"firstName": "Wolfgang",
@@ -147,26 +148,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013",
+				"DOI": "10.1016/j.jmva.2012.11.004",
+				"ISSN": "0047-259X",
+				"extra": "MR: 3004573",
+				"itemID": "MR3004573",
+				"journalAbbreviation": "J. Multivariate Anal.",
+				"libraryCatalog": "AMS MathSciNet",
+				"pages": "516–536",
+				"publicationTitle": "Journal of Multivariate Analysis",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
+				"volume": "115",
 				"attachments": [
 					{
 						"title": "MathSciNet Snapshot"
 					}
 				],
-				"itemID": "MR3004573",
-				"journalAbbreviation": "J. Multivariate Anal.",
-				"ISSN": "0047-259X",
-				"DOI": "10.1016/j.jmva.2012.11.004",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=3004573",
-				"extra": "MR: 3004573",
-				"libraryCatalog": "AMS MathSciNet",
-				"title": "Extrapolation of stable random fields",
-				"publicationTitle": "Journal of Multivariate Analysis",
-				"volume": "115",
-				"date": "2013",
-				"pages": "516–536"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -181,6 +181,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "On implementation of the Markov chain Monte Carlo stochastic approximation algorithm",
 				"creators": [
 					{
 						"firstName": "Yihua",
@@ -198,23 +199,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"bookTitle": "Advances in directional and linear statistics",
+				"extra": "MR: 2767535",
+				"itemID": "MR2767535",
+				"libraryCatalog": "AMS MathSciNet",
+				"pages": "97–111",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=2767535",
 				"attachments": [
 					{
 						"title": "MathSciNet Snapshot"
 					}
 				],
-				"itemID": "MR2767535",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=2767535",
-				"extra": "MR: 2767535",
-				"libraryCatalog": "AMS MathSciNet",
-				"title": "On implementation of the Markov chain Monte Carlo stochastic approximation algorithm",
-				"bookTitle": "Advances in directional and linear statistics",
-				"pages": "97–111",
-				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"date": "2011"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -224,6 +224,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Advances in directional and linear statistics",
 				"creators": [
 					{
 						"firstName": "Martin T.",
@@ -236,23 +237,22 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"ISBN": "9783790826272",
+				"extra": "A Festschrift for Sreenivasa Rao Jammalamadaka\nMR: 2663710",
+				"itemID": "MR2663710",
+				"libraryCatalog": "AMS MathSciNet",
+				"numPages": "xiv+321",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=2663710",
 				"attachments": [
 					{
 						"title": "MathSciNet Snapshot"
 					}
 				],
-				"itemID": "MR2663710",
-				"numPages": "xiv+321",
-				"ISBN": "978-3-7908-2627-2",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=2663710",
-				"extra": "A Festschrift for Sreenivasa Rao Jammalamadaka\nMR: 2663710",
-				"libraryCatalog": "AMS MathSciNet",
-				"title": "Advances in directional and linear statistics",
-				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"date": "2011"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -262,6 +262,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Sommation des séries divergentes",
 				"creators": [
 					{
 						"firstName": "Bernard",
@@ -269,26 +270,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1995",
+				"ISSN": "0723-0869",
+				"extra": "MR: 1346201",
+				"issue": "2-3",
+				"itemID": "MR1346201",
+				"journalAbbreviation": "Exposition. Math.",
+				"libraryCatalog": "AMS MathSciNet",
+				"pages": "163–222",
+				"publicationTitle": "Expositiones Mathematicae. International Journal",
+				"url": "http://www.ams.org/mathscinet-getitem?mr=1346201",
+				"volume": "13",
 				"attachments": [
 					{
 						"title": "MathSciNet Snapshot"
 					}
 				],
-				"itemID": "MR1346201",
-				"journalAbbreviation": "Exposition. Math.",
-				"issue": "2-3",
-				"ISSN": "0723-0869",
-				"extra": "MR: 1346201",
-				"url": "http://www.ams.org/mathscinet-getitem?mr=1346201",
-				"libraryCatalog": "AMS MathSciNet",
-				"title": "Sommation des séries divergentes",
-				"publicationTitle": "Expositiones Mathematicae. International Journal",
-				"volume": "13",
-				"date": "1995",
-				"pages": "163–222"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
