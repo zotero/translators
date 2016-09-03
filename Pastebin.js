@@ -2,14 +2,14 @@
 	"translatorID": "1d1a51d4-60bf-44b8-ae28-8b154d1ed721",
 	"label": "Pastebin",
 	"creator": "febrezo",
-	"target": "https?://(www.)?pastebin.com",
+	"target": "https?://pastebin\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 1,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-02 19:15:59"
+	"lastUpdated": "2016-09-03 10:13:52"
 }
 
 /*
@@ -32,19 +32,7 @@
 
 
 function detectWeb(doc, url) {
-	Zotero.debug("Starting detectWeb...");
 	return "webpage";
-}
-
-// Detecting the type of URL
-function getType(url) {
-	if ( url.indexOf('/u/')>-1 ) {
-		Zotero.debug("This is a profile...");
-		return "profile";
-	} else  	{
-		Zotero.debug("This is a paste");
-		return "paste";
-	} 
 }
 
 // More item types available at: <http://gsl-nagoya-u.net/http/pub/csl-fields/index.html>
@@ -77,42 +65,54 @@ function getType(url) {
 */
 
 function doWeb(doc, url) {
-	Zotero.debug("=================================");
-	
-	resourceType = detectWeb(doc, url);
+	var resourceType = detectWeb(doc, url);
 
 	// Creating the item
 	var newItem = new Zotero.Item(resourceType);
 
 	//Setting common data:
 	newItem.websiteTitle = "Pastebin.com";
+	newItem.websiteType = "Paste Site";
 	newItem.url = url;
 	var title = ZU.xpathText(doc, '//h1');	
-	newItem.title  = title;
-	newItem.websiteType = getType(url);
+	if (title != null) {
+		newItem.title  = title;
+	}
+	else {
+		newItem.title = ZU.xpathText(doc, '//title');
+	}
+	
+	var urlType = "general";
+	if ( url.indexOf('pastebin.com/u/')>-1 ) {
+		urlType = "profile";
+	}	
 
-	if (newItem.websiteType == "paste") {
+	// Settingspecific metadata
+	if (urlType == "general") {
 		var author = ZU.xpathText(doc, '//div[@class="paste_box_line2"]//a');	
-		newItem.creators = [Zotero.Utilities.cleanAuthor(author, "author", false)];
-
+		if (author != null) {
+			newItem.creators = [Zotero.Utilities.cleanAuthor(author, "author", false)];
+		}
+		
 		var date = ZU.xpathText(doc, '//div[@class="paste_box_line2"]//span/@title');
 		newItem.date = date;	
 	} 
-	else if (newItem.websiteType == "profile")  {
+	else if (urlType == "profile")  {
 		var author = url.substring(url.lastIndexOf('/'));	
 		newItem.creators = [Zotero.Utilities.cleanAuthor(author, "author", false)];
+		
+		var date = ZU.xpathText(doc, '//div[@class="paste_box_line_u2"]//span/@title');
+		newItem.date = date;
 	}
 	
 	// Adding the attachment
 	newItem.attachments.push({
-		title: title,
+		title: "Pastebin Snapshot",
 		mimeType: "text/html",
 		url: url
 	});	
 	
 	newItem.complete();
- 
-	Zotero.debug("=================================");
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -166,6 +166,53 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Bash, basic parameters processing",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://pastebin.com/cCkDi5ZA",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Untitled",
+				"creators": [],
+				"date": "Saturday 3rd of September 2016 02:59:22 AM CDT",
+				"url": "http://pastebin.com/cCkDi5ZA",
+				"websiteTitle": "Pastebin.com",
+				"websiteType": "paste",
+				"attachments": [
+					{
+						"title": "Pastebin Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://pastebin.com/trends",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Trending Pastes at Pastebin.com",
+				"creators": [],
+				"url": "http://pastebin.com/trends",
+				"websiteTitle": "Pastebin.com",
+				"websiteType": "Paste Site",
+				"attachments": [
+					{
+						"title": "Pastebin Snapshot",
 						"mimeType": "text/html"
 					}
 				],
