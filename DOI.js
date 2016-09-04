@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-01-18 22:06:26"
+	"lastUpdated": "2016-09-02 21:12:51"
 }
 
 // The variables items and selectArray will be filled during the first
@@ -151,6 +151,10 @@ function doWeb(doc, url) {
 	var dois = getDOIs(doc);
 	Z.debug(dois);
 	var providers = [
+		{
+			id : "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
+			name : "DOI.org"
+		},
 		{
 			id : "11645bd1-0420-45c1-badb-53fb41eeb753",
 			name : "CrossRef"
