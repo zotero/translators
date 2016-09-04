@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-15 22:24:05"
+	"lastUpdated": "2016-09-04 09:34:44"
 }
 
 /*
@@ -234,7 +234,7 @@ function scrape(doc, url, extras) {
 					// This is not excellent, since some abstracts could
 					// conceivably begin with the word "abstract"
 					item.abstractNote = abstract.textContent
-						.replace(/^\s*abstract\s*/i, '');
+						.replace(/^[^\w\d]*abstract\s*/i, '');
 				}
 				
 				item.attachments = [];
@@ -541,7 +541,7 @@ var testCases = [
 				"date": "August 1, 2001",
 				"DOI": "10.1146/annurev.matsci.31.1.323",
 				"ISSN": "1531-7331",
-				"abstractNote": "▪ Abstract A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
+				"abstractNote": "A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
 				"issue": "1",
 				"journalAbbreviation": "Annu. Rev. Mater. Res.",
 				"libraryCatalog": "annualreviews.org (Atypon)",
