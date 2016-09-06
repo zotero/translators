@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-15 22:24:05"
+	"lastUpdated": "2016-09-04 09:34:44"
 }
 
 /*
@@ -234,7 +234,7 @@ function scrape(doc, url, extras) {
 					// This is not excellent, since some abstracts could
 					// conceivably begin with the word "abstract"
 					item.abstractNote = abstract.textContent
-						.replace(/^\s*abstract\s*/i, '');
+						.replace(/^[^\w\d]*abstract\s*/i, '');
 				}
 				
 				item.attachments = [];
@@ -262,84 +262,6 @@ function scrape(doc, url, extras) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
-				"creators": [
-					{
-						"lastName": "Gao",
-						"firstName": "Chao",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Wang",
-						"firstName": "Han",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Weng",
-						"firstName": "Ensheng",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Lakshmivarahan",
-						"firstName": "S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zhang",
-						"firstName": "Yanfen",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Luo",
-						"firstName": "Yiqi",
-						"creatorType": "author"
-					}
-				],
-				"date": "February 22, 2011",
-				"DOI": "10.1890/09-1234.1",
-				"ISSN": "1051-0761",
-				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
-				"issue": "5",
-				"journalAbbreviation": "Ecological Applications",
-				"libraryCatalog": "esajournals.org (Atypon)",
-				"pages": "1461-1473",
-				"publicationTitle": "Ecological Applications",
-				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-				"volume": "21",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					"carbon cycle",
-					"data assimilation",
-					"ecological forecast",
-					"ensemble Kalman filter (EnKF)",
-					"parameter estimation",
-					"uncertainty analysis"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.esajournals.org/toc/ecap/21/5",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://pubs.rsna.org/toc/radiographics/toc/33/7",
@@ -603,7 +525,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "BLOCK COPOLYMER THIN FILMS: Physics and Applications",
+				"title": "Block Copolymer Thin Films: Physics and Applications",
 				"creators": [
 					{
 						"lastName": "Fasolka",
@@ -619,13 +541,13 @@ var testCases = [
 				"date": "August 1, 2001",
 				"DOI": "10.1146/annurev.matsci.31.1.323",
 				"ISSN": "1531-7331",
-				"abstractNote": "▪ Abstract  A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
+				"abstractNote": "A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
 				"issue": "1",
 				"journalAbbreviation": "Annu. Rev. Mater. Res.",
 				"libraryCatalog": "annualreviews.org (Atypon)",
 				"pages": "323-355",
 				"publicationTitle": "Annual Review of Materials Research",
-				"shortTitle": "BLOCK COPOLYMER THIN FILMS",
+				"shortTitle": "Block Copolymer Thin Films",
 				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 				"volume": "31",
 				"attachments": [
@@ -740,14 +662,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					"Cloud microphysics",
-					"Cloud retrieval",
-					"Cloud water/phase",
-					"Ice crystals",
-					"Ice particles",
-					"In situ atmospheric observations"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -807,7 +722,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "August 1, 2015",
+				"date": "January 1, 2015",
 				"DOI": "10.3141/2503-12",
 				"ISSN": "0361-1981",
 				"abstractNote": "To assess vehicle performance on criteria compounds, carbon dioxide emissions, and fuel energy consumption, laboratory tests are generally carried out. During these tests, a vehicle is driven on a chassis dynamometer (which simulates the resistances the vehicle encounters during its motion) to follow a predefined test cycle. In addition, all conditions for running a test must strictly adhere to a predefined test procedure. The procedure is necessary to ensure that all tests are carried out in a comparable way, following the requirements set by the relevant legislation. Test results are used to assess vehicle compliance with emissions limits or to evaluate the fuel consumption that will be communicated to customers. Every region in the world follows its own approach in carrying out these types of tests. The variations in approaches have resulted in a series of drawbacks for vehicle manufacturers and regulating authorities, leading to a plethora of different conditions and results. As a step toward the harmonization of the test procedures, the United Nations Economic Commission for Europe launched a project in 2009 for the development of a worldwide harmonized light-duty test procedure (WLTP), including a new test cycle. The objective of the study reported here was to provide a brief description of WLTP and outline the plausible pathway for its introduction in European legislation.",

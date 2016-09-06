@@ -1,4 +1,4 @@
-40  # Increment number when modifying file
+41  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -79,3 +79,4 @@ f880bf79-d42f-4337-b0d2-7a7de4a48b7d # X-OPAC - no more instances of this lib ca
 0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f # Physical Society of Japan - journals moved to IOP or Atypon system
 63c25c45-6257-4985-9169-35b785a2995e # InfoTrac OneFile - merged into Galegroup (see #482)
 79f6f9ed-537a-4d4f-8270-c4fbaafdf327 # Emerald; covered by Atypon
+9d822257-2eec-4674-b6d0-2504f54c8890 # African Journals Online; covered by Open Journal Systems
