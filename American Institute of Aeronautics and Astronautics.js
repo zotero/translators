@@ -149,7 +149,7 @@ function scrape(doc, url, dois) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://arc.aiaa.org/action/doSearch?searchText=titanium",
+		"url": "http://arc.aiaa.org/action/doSearch?AllField=titanium",
 		"items": "multiple"
 	},
 	{
@@ -158,6 +158,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Solidification Characteristics of Titania Nanofluids",
 				"creators": [
 					{
 						"firstName": "Songping",
@@ -180,9 +181,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"DOI": "10.2514/1.T3744",
+				"ISSN": "0887-8722",
+				"issue": "1",
+				"itemID": "doi:10.2514/1.T3744",
+				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
+				"pages": "192-196",
+				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
+				"url": "http://dx.doi.org/10.2514/1.T3744",
+				"volume": "26",
 				"attachments": [
 					{
 						"title": "AIAA Full Text PDF",
@@ -192,20 +200,9 @@ var testCases = [
 						"title": "AIAA Snapshot"
 					}
 				],
-				"itemID": "doi:10.2514/1.T3744",
-				"title": "Solidification Characteristics of Titania Nanofluids",
-				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
-				"volume": "26",
-				"issue": "1",
-				"pages": "192-196",
-				"date": "2012",
-				"DOI": "10.2514/1.T3744",
-				"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744",
-				"bookTitle": "Journal of Thermophysics and Heat Transfer",
-				"publisher": "American Institute of Aeronautics and Astronautics",
-				"ISSN": "0887-8722",
-				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

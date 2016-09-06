@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-03-12 17:57:05"
+	"lastUpdated": "2016-09-03 10:43:32"
 }
 
 function detectWeb(doc, url) {
@@ -125,7 +125,7 @@ var i15dFields = {
 	'Publisher': ['Publisher', 'Verlag', '出版社'],
 	'Hardcover': ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
 	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
-	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
+	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Poche', 'Broché', 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
 	'Language' : ['Language', 'Sprache', '语种', '言語', 'Langue', 'Lingua', 'Idioma'],
 	'Author' : ['Author', '著', '作者'],
 	'Actor' : ['Actors', 'Actor', 'Darsteller', 'Acteurs', 'Attori', 'Attore', 'Actores', '出演'],
@@ -385,11 +385,12 @@ function scrape(doc, url) {
 	
 }
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/Test-William-Sleator/dp/0810989891/ref=sr_1_1?ie=UTF8&qid=1308010556&sr=8-1",
+		"url": "https://www.amazon.com/Test-William-Sleator/dp/0810989891/ref=sr_1_1?ie=UTF8&qid=1308010556&sr=8-1",
 		"items": [
 			{
 				"itemType": "book",
@@ -409,7 +410,7 @@ var testCases = [
 				"libraryCatalog": "Amazon",
 				"numPages": 320,
 				"place": "New York",
-				"publisher": "Amulet Paperbacks",
+				"publisher": "Harry N. Abrams",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -573,7 +574,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
+		"url": "https://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
 		"items": [
 			{
 				"itemType": "book",
@@ -592,6 +593,7 @@ var testCases = [
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon",
 				"numPages": 192,
+				"place": "Frankfurt a.M",
 				"publisher": "FISCHER Taschenbuch",
 				"shortTitle": "Fiktionen",
 				"attachments": [
@@ -688,7 +690,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.cn/%E5%9B%BE%E4%B9%A6/dp/B007CUSP3A",
+		"url": "https://www.amazon.cn/%E5%9B%BE%E4%B9%A6/dp/B007CUSP3A",
 		"items": [
 			{
 				"itemType": "book",
@@ -721,7 +723,7 @@ var testCases = [
 				"edition": "第1版",
 				"libraryCatalog": "Amazon",
 				"numPages": 373,
-				"place": "北京",
+				"place": "Beijing",
 				"publisher": "科学出版社",
 				"shortTitle": "汉语语音合成",
 				"attachments": [
@@ -820,7 +822,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.co.jp/gp/product/0099578077/",
+		"url": "https://www.amazon.co.jp/gp/product/0099578077/",
 		"items": [
 			{
 				"itemType": "book",
@@ -838,7 +840,7 @@ var testCases = [
 				"language": "英語",
 				"libraryCatalog": "Amazon",
 				"numPages": 1328,
-				"place": "New York",
+				"place": "London",
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
 				"attachments": [

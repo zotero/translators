@@ -1,6 +1,6 @@
 {
 	"translatorID": "f6717cbb-2771-4043-bde9-dbae19129bb3",
-	"label": "Archeion - MemoryBC - Aberta on Record",
+	"label": "Archeion",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://www\\.(archeion|memorybc|albertaonrecord)\\.ca",
 	"minVersion": "2.1.9",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-27 22:58:40"
+	"lastUpdated": "2016-09-03 12:04:29"
 }
 
 /*
@@ -70,6 +70,7 @@ function scrape(doc, url) {
 			var loc = ZU.xpathText(doc, '//section[@id="titleAndStatementOfResponsibilityArea"]//div[@class="field"]/h3[contains(text(), "Reference code")]/following-sibling::div');
 			Z.debug(loc)
 			item.archiveLocation = loc;
+			item.libraryCatalog = "Archeion - MemoryBC - Aberta on Record";
 			if (item.extra) item.notes.push(item.extra);
 			item.extra = "";
 			item.itemID = "";
@@ -119,6 +120,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
 				"creators": [
 					{
 						"firstName": "Quebec)",
@@ -161,18 +163,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					"Fonds consists of registers, minutes and other records of Kydd Memorial Presbyterian Church (Montreal, Quebec) and of the records of the amalgamated Fairmount-Taylor Presbyterian Church (Montreal, Quebec) and of Outremont-Mount Royal Presbyterian Church (Montreal, Quebec). Records of Kydd Presbyterian Church consist of: Registers including Baptisms, Marriages and Burials (1927-1982); Court Orders (1982-1990); Session minutes (1928-1982); Congregational meetings (1948-1975); Communion Rolls (1927-1942, 1946-1978); Orders of Service (1928-1982); Annual Reports (1963-1981); Board of Managers Meeting minutes (1944-1978); a history (1975) and other records. Records of Fairmount Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1910-1925); Session minutes (1910-1925); Communion Rolls (1910-1923) and Board of Managers Meeting minutes (1908-1922). Records of Fairmount-Taylor Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1925-1969); Session minutes (1934-1962); Session Reports (1965-1968); Session Correspondence (1948-1970); Communion Rolls (1923-1966); Membership Lists (1967); Orders of Service (1967); Congregational minutes (1909-1969); Annual reports (1939); Board of Managers Reports (1964-1969); Auditor&#039;s Reports and Financial Statements (1932, 1950, 1966, 1969) and other records."
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Kydd Memorial Presbyterian Church (Montreal, Quebec) fonds",
-				"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
 				"date": "1908-1990",
+				"abstractNote": "Fonds consists of registers, minutes and other records of Kydd Memorial Presbyterian Church (Montreal, Quebec) and of the records of the amalgamated Fairmount-Taylor Presbyterian Church (Montreal, Quebec) and of Outremont-Mount Royal Presbyterian Church (Montreal, Quebec). Records of Kydd Presbyterian Church consist of: Registers including Baptisms, Marriages and Burials (1927-1982); Court Orders (1982-1990); Session minutes (1928-1982); Congregational meetings (1948-1975); Communion Rolls (1927-1942, 1946-1978); Orders of Service (1928-1982); Annual Reports (1963-1981); Board of Managers Meeting minutes (1944-1978); a history (1975) and other records. Records of Fairmount Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1910-1925); Session minutes (1910-1925); Communion Rolls (1910-1923) and Board of Managers Meeting minutes (1908-1922). Records of Fairmount-Taylor Presbyterian Church consist of: Registers of Baptisms, Marriages and Burials (1925-1969); Session minutes (1934-1962); Session Reports (1965-1968); Session Correspondence (1948-1970); Communion Rolls (1923-1966); Membership Lists (1967); Orders of Service (1967); Congregational minutes (1909-1969); Annual reports (1939); Board of Managers Reports (1964-1969); Auditor&#039;s Reports and Financial Statements (1932, 1950, 1966, 1969) and other records.",
 				"archive": "The Presbyterian Church in Canada",
 				"archiveLocation": "CA ON00313 CONG-147",
-				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record"
+				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record",
+				"rights": "Notes Session minutes are restricted for a period of 50 years from the date they were written.",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -187,6 +187,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Northwest Mennonite Conference fonds",
 				"creators": [
 					{
 						"firstName": "Northwest Mennonite",
@@ -204,24 +205,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					"The fonds consists of four series: A) Alphabet Files, B) Congregations, C) Conferences, and D) Northwest Mennonite Conference Centennial Anniversary"
-				],
-				"tags": [
-					"Religions",
-					"Northwest Mennonite Conference",
-					"Alberta-Saskatchewan Mennonite Conference",
-					"Mennonite Church. Northwest Conference"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Northwest Mennonite Conference fonds",
-				"rights": "Access to personal information in financial or medical records is subject to relevant legislation and MHSA privacy policy",
 				"date": "1949-2003",
-				"language": "the material is in english.",
+				"abstractNote": "The fonds consists of four series: A) Alphabet Files, B) Congregations, C) Conferences, and D) Northwest Mennonite Conference Centennial Anniversary",
 				"archive": "Mennonite Historical Society of Alberta",
 				"archiveLocation": "MENN menn-22",
-				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record"
+				"language": "the material is in english.",
+				"libraryCatalog": "Archeion - MemoryBC - Aberta on Record",
+				"rights": "Access to personal information in financial or medical records is subject to relevant legislation and MHSA privacy policy",
+				"attachments": [],
+				"tags": [
+					"Alberta-Saskatchewan Mennonite Conference",
+					"Mennonite Church. Northwest Conference",
+					"Northwest Mennonite Conference",
+					"Religions"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

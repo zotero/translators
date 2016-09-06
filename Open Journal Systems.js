@@ -674,6 +674,83 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Knowledge, treatment seeking and preventive practices in respect of malaria among patients with HIV at the Lagos University Teaching Hospital",
+				"creators": [
+					{
+						"firstName": "Akinwumi A.",
+						"lastName": "Akinyede",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alade",
+						"lastName": "Akintonwa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charles",
+						"lastName": "Okany",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olufunsho",
+						"lastName": "Awodele",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Duro C.",
+						"lastName": "Dolapo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adebimpe",
+						"lastName": "Adeyinka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ademola",
+						"lastName": "Yusuf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-01-01",
+				"DOI": "10.4314/thrb.v13i4.63347",
+				"ISSN": "1821-9241",
+				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.  Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio – demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio – demographic or socio – economic factors.  However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p < 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
+				"issue": "4",
+				"language": "en",
+				"libraryCatalog": "www.ajol.info",
+				"publicationTitle": "Tanzania Journal of Health Research",
+				"rights": "Copyright for articles published in this journal is retained by the journal.",
+				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+				"volume": "13",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"HIV patients",
+					"Nigeria",
+					"knowledge",
+					"malaria",
+					"prevention",
+					"treatment"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
