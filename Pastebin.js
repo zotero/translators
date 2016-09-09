@@ -2,14 +2,14 @@
 	"translatorID": "1d1a51d4-60bf-44b8-ae28-8b154d1ed721",
 	"label": "Pastebin",
 	"creator": "febrezo",
-	"target": "https?://pastebin\\.com",
+	"target": "^https?://pastebin\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-03 10:13:52"
+	"lastUpdated": "2016-09-09 20:45:12"
 }
 
 /*
@@ -34,35 +34,6 @@
 function detectWeb(doc, url) {
 	return "webpage";
 }
-
-// More item types available at: <http://gsl-nagoya-u.net/http/pub/csl-fields/index.html>
-// Sample report found at: https://api.zotero.org/items/new?itemType=webpage
-/* 
-	{
-		"itemType": "webpage",
-		"title": "",
-		"creators": [
-			{
-				"creatorType": "author",
-				"firstName": "",
-				"lastName": ""
-			}
-		],
-		"abstractNote": "",
-		"websiteTitle": "",
-		"websiteType": "",
-		"date": "",
-		"shortTitle": "",
-		"url": "",
-		"accessDate": "",
-		"language": "",
-		"rights": "",
-		"extra": "",
-		"tags": [],
-		"collections": [],
-		"relations": {}
-	}
-*/
 
 function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
