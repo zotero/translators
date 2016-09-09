@@ -94,7 +94,7 @@ function scrape(doc) {
 	associateMeta(newItem, metaTags, "abstract", "abstractNote");
 	associateMeta(newItem, metaTags, "DC.Language", "language");
 	// Other potentially usful meta data: DC.keywords
-	
+
 	newItem.ISSN = "1661-7444";
 
 	var authorline = ZU.xpath(doc, '//div[' + containingClass('mediaarticleSingleView') + ']//dl/dt[. = "Autor:"]');
