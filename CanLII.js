@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-11 01:31:00"
+	"lastUpdated": "2016-09-09 20:00:57"
 }
 
 var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^\/]*\/(?:en|fr)\/[^\/]+\/[^\/]+\/doc\/.+/;
@@ -57,13 +57,11 @@ function scrape(doc, url) {
 	if (reporterpg) newItem.firstPage = reporterpg[1];
 	//Z.debug("reporterpg: ("+reporterpg+")");
 	
-	var dateDocket = doc.getElementsByClassName('canlii-label')[0];
-	if (dateDocket && dateDocket.nextElementSibling) {
-		dateDocket = ZU.trimInternal(dateDocket.nextElementSibling.textContent);
-		var date = dateDocket.match(/\d{4}-\d{2}-\d{2}/);
-		if (date) newItem.dateDecided = date[0];
-		var docket = ZU.trimInternal(dateDocket).match(/\(\s*(?:Docket|Dossier)\s*:\s*(.+?)\s*\)/);
-		if (docket) newItem.docketNumber = docket[1];
+	newItem.dateDecided = ZU.xpathText(doc, '//table[contains(@class, "documentMeta")]//tr/td[contains(@class, "canlii-label") and contains(text(), "Date")]/following-sibling::td');
+	newItem.docketNumber = ZU.xpathText(doc, '//table[contains(@class, "documentMeta")]//tr/td[contains(@class, "canlii-label") and (contains(text(), "Docket") or contains(text(), "Dossier"))]/following-sibling::td');
+	var otherCitations = ZU.xpathText(doc, '//table[contains(@class, "documentMeta")]//tr/td[contains(@class, "canlii-label") and contains(text(), "Other citations")]/following-sibling::td');
+	if (otherCitations) {
+		newItem.notes.push({"note" : "Other Citations: " + ZU.trimInternal(otherCitations)});
 	}
 	
 	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
@@ -116,10 +114,15 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "MiningWatch Canada v. Canada (Fisheries and Oceans)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2010-01-21",
+				"court": "SCC",
+				"docketNumber": "32797",
+				"firstPage": "6",
+				"reporter": "SCR",
+				"reporterVolume": "1",
+				"url": "http://canlii.ca/t/27jmr",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -129,14 +132,13 @@ var testCases = [
 						"title": "CanLII Snapshot"
 					}
 				],
-				"caseName": "MiningWatch Canada v. Canada (Fisheries and Oceans)",
-				"court": "SCC",
-				"reporterVolume": "1",
-				"reporter": "SCR",
-				"firstPage": "6",
-				"dateDecided": "2010-01-21",
-				"docketNumber": "32797",
-				"url": "http://canlii.ca/t/27jmr"
+				"tags": [],
+				"notes": [
+					{
+						"note": "Other Citations: 397 NR 232; [2010] SCJ No 2 (QL); [2010] ACS no 2"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -146,10 +148,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Suttie v. Canada (Attorney General)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2011-02-02",
+				"court": "FC",
+				"docketNumber": "T-1089-10",
+				"firstPage": "119",
+				"url": "http://canlii.ca/t/2flrk",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -159,12 +164,9 @@ var testCases = [
 						"title": "CanLII Snapshot"
 					}
 				],
-				"caseName": "Suttie v. Canada (Attorney General)",
-				"court": "FC",
-				"firstPage": "119",
-				"dateDecided": "2011-02-02",
-				"docketNumber": "T-1089-10",
-				"url": "http://canlii.ca/t/2flrk"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -179,10 +181,15 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Mines Alerte Canada c. Canada (Pêches et Océans)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2010-01-21",
+				"court": "CSC",
+				"docketNumber": "32797",
+				"firstPage": "6",
+				"reporter": "RCS",
+				"reporterVolume": "1",
+				"url": "http://canlii.ca/t/27jms",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -192,14 +199,9 @@ var testCases = [
 						"title": "CanLII Snapshot"
 					}
 				],
-				"caseName": "Mines Alerte Canada c. Canada (Pêches et Océans)",
-				"court": "CSC",
-				"reporterVolume": "1",
-				"reporter": "RCS",
-				"firstPage": "6",
-				"dateDecided": "2010-01-21",
-				"docketNumber": "32797",
-				"url": "http://canlii.ca/t/27jms"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -209,10 +211,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Suttie c. Canada (Procureur Général)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"dateDecided": "2011-02-02",
+				"court": "CF",
+				"docketNumber": "T-1089-10",
+				"firstPage": "119",
+				"url": "http://canlii.ca/t/fks9z",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -222,12 +227,9 @@ var testCases = [
 						"title": "CanLII Snapshot"
 					}
 				],
-				"caseName": "Suttie c. Canada (Procureur Général)",
-				"court": "CF",
-				"firstPage": "119",
-				"dateDecided": "2011-02-02",
-				"docketNumber": "T-1089-10",
-				"url": "http://canlii.ca/t/fks9z"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
