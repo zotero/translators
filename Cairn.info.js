@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-02-01 13:35:07"
+	"lastUpdated": "2016-09-07 21:03:55"
 }
 
 /*
@@ -104,16 +104,18 @@ function scrape(doc) {
 		}
 
 		// Correct volume and issue information
-		if (item.volume.search(/^n°/i) != -1) {
-			item.issue = item.volume.split(/n°/i)[1].trim();
-			item.volume = '';
-		} else if (item.volume.search(/^Vol./i) != -1) {
-			item.volume = item.volume.split(/Vol./i)[1].trim();
-		}
-		if (item.volume.search(/^\d+-\d+$/) != -1) {
-			var volume = item.volume.split('-')
-			item.volume = volume[0];
-			item.issue = volume[1];
+		if (item.volume) {
+			if (item.volume.search(/^n°/i) != -1) {
+				item.issue = item.volume.split(/n°/i)[1].trim();
+				item.volume = '';
+			} else if (item.volume.search(/^Vol./i) != -1) {
+				item.volume = item.volume.split(/Vol./i)[1].trim();
+			}
+			if (item.volume.search(/^\d+-\d+$/) != -1) {
+				var volume = item.volume.split('-')
+				item.volume = volume[0];
+				item.issue = volume[1];
+			}
 		}
 
 		// Other fixes
@@ -123,6 +125,7 @@ function scrape(doc) {
 	});
 	translator.translate();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -248,7 +251,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-10-01",
+				"date": "2011-10-26",
 				"ISSN": "0035-2969",
 				"issue": "3",
 				"language": "fr",
