@@ -2,7 +2,7 @@
 	"translatorID": "3a4c6510-8082-4c99-9fa4-458a9cb29795",
 	"label": "Slexy",
 	"creator": "febrezo",
-	"target": "https?://slexy\\.org/view/.+",
+	"target": "^https?://slexy\\.org/view/.+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -30,60 +30,12 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 function detectWeb(doc, url) {
 	return "webpage";
 }
 
-// More item types available at: <http://gsl-nagoya-u.net/http/pub/csl-fields/index.html>
-// Sample report found at: https://api.zotero.org/items/new?itemType=webpage
-/* 
-	{
-		"itemType": "webpage",
-		"title": "",
-		"creators": [
-			{
-				"creatorType": "author",
-				"firstName": "",
-				"lastName": ""
-			}
-		],
-		"abstractNote": "",
-		"websiteTitle": "",
-		"websiteType": "",
-		"date": "",
-		"shortTitle": "",
-		"url": "",
-		"accessDate": "",
-		"language": "",
-		"rights": "",
-		"extra": "",
-		"tags": [],
-		"collections": [],
-		"relations": {}
-	}
-*/
-
-
-
-
-
 function doWeb(doc, url) {
-
-
-// create Date object for current location
-	/*var targetTime = new Date("2016-09-03 12:50:34Z");
-	var timeZoneFromDB = -4.00; //time zone value from database
-	//get the timezone offset from local time in minutes
-	var tzDifference = -(timeZoneFromDB * 60 + targetTime.getTimezoneOffset());
-	//convert the offset to milliseconds, add to targetTime, and make a new Date
-	var offsetTime = new Date(targetTime.getTime() + tzDifference * 60 * 1000);
-	Zotero.debug(targetTime.toString());
-	Zotero.debug(offsetTime.toString());
-
-targetTime.setTime( targetTime.getTime() + d.getTimezoneOffset()*60*1000 );
-	aaaaaaaaa
-	*/
+    // Creating Date object for current location
 	var resourceType = detectWeb(doc, url);
 
 	// Creating the item
