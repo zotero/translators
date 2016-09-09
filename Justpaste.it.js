@@ -2,7 +2,7 @@
 	"translatorID": "386d63c0-e038-4fdb-ae29-786264b9d3f5",
 	"label": "Justpaste.it",
 	"creator": "febrezo",
-	"target": "https?://justpaste\\.it/.+",
+	"target": "^https?://justpaste\\.it/.+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -34,35 +34,6 @@
 function detectWeb(doc, url) {
 	return "webpage";
 }
-
-// More item types available at: <http://gsl-nagoya-u.net/http/pub/csl-fields/index.html>
-// Sample report found at: https://api.zotero.org/items/new?itemType=webpage
-/* 
-	{
-		"itemType": "webpage",
-		"title": "",
-		"creators": [
-			{
-				"creatorType": "author",
-				"firstName": "",
-				"lastName": ""
-			}
-		],
-		"abstractNote": "",
-		"websiteTitle": "",
-		"websiteType": "",
-		"date": "",
-		"shortTitle": "",
-		"url": "",
-		"accessDate": "",
-		"language": "",
-		"rights": "",
-		"extra": "",
-		"tags": [],
-		"collections": [],
-		"relations": {}
-	}
-*/
 
 function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
