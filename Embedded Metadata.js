@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-01-17 17:54:53"
+	"lastUpdated": "2016-09-08 07:14:24"
 }
 
 /*
@@ -578,6 +578,8 @@ function addLowQualityMetadata(doc, newItem) {
 		var w3authors = ZU.xpath(doc, '//meta[@name="author"]');
 		if (w3authors.length>0){
 			for (var i = 0; i<w3authors.length; i++){
+				//skip empty authors. Try to match something other than punctuation
+				if(!w3authors[i].content || !w3authors[i].content.match(/[^\s,-.;]/)) continue;
 				newItem.creators.push(ZU.cleanAuthor(w3authors[i].content, "author"));
 			}
 		}
@@ -807,51 +809,6 @@ var exports = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
-				"creators": [
-					{
-						"firstName": "Verónica",
-						"lastName": "Norando",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ludmila",
-						"lastName": "Scheinkman",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011/10/10",
-				"ISSN": "1548-7083",
-				"abstractNote": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "acontracorriente.chass.ncsu.edu",
-				"pages": "1-37",
-				"publicationTitle": "A Contracorriente",
-				"rights": "Copyright (c)",
-				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-				"volume": "9",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
 		"items": [
 			{
@@ -894,7 +851,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "2011-01-01",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
@@ -1070,6 +1027,10 @@ var testCases = [
 				"volume": "41",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1223,38 +1184,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://books.upress.virginia.edu/title/4539",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "The Papers of George Washington : 1 August–21 October 1779",
-				"creators": [
-					{
-						"firstName": "George",
-						"lastName": "Washington",
-						"creatorType": "author"
-					}
-				],
-				"date": "2013",
-				"ISBN": "9780813933665",
-				"language": "eng",
-				"libraryCatalog": "books.upress.virginia.edu",
-				"publisher": "University of Virginia Press",
-				"shortTitle": "The Papers of George Washington",
-				"url": "http://books.upress.virginia.edu/title/4539",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
 		"items": [
 			{
@@ -1267,7 +1196,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Chris",
+						"firstName": "Christopher",
 						"lastName": "Thomas",
 						"creatorType": "author"
 					},

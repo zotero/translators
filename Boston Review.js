@@ -105,7 +105,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Boston Review Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -130,7 +130,6 @@ var testCases = [
 				],
 				"date": "2013-05-21T00:00:00-04:00",
 				"ISSN": "0734-2306",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
 				"publicationTitle": "Boston Review",
@@ -138,7 +137,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Boston Review Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -164,7 +163,6 @@ var testCases = [
 				"date": "2013-06-07T00:00:00-04:00",
 				"ISSN": "0734-2306",
 				"abstractNote": "An Update on the Student-Debt Crisis",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"language": "en-US",
 				"libraryCatalog": "Boston Review",
 				"publicationTitle": "Boston Review",
@@ -172,7 +170,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Boston Review Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],

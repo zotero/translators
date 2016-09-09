@@ -69,57 +69,57 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "IS - Charges financières afférentes à l'acquisition de certains titres de participation",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "BOFiP PDF",
-						"type": "application/pdf"
-					}
-				],
-				"url": "http://bofip.impots.gouv.fr/bofip/8000-PGP?branch=2",
 				"date": "2012-11-30",
 				"ISSN": "2262-1954",
+				"libraryCatalog": "BOFiP-Impôts",
 				"publicationTitle": "Bulletin Officiel des Finances Publiques-Impôts",
 				"rights": "public",
-				"title": "IS - Charges financières afférentes à l'acquisition de certains titres de participation",
-				"libraryCatalog": "BOFiP-Impôts",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://bofip.impots.gouv.fr/bofip/8000-PGP?branch=2",
+				"attachments": [
+					{
+						"url": false,
+						"title": "BOFiP PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP/version/15",
+		"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP.html?identifiant=BOI-IS-BASE-30-50-20121130",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "IS – Base d'imposition – Charges financières afférentes à l'acquisition de certains titres de participation",
 				"creators": [
 					{
 						"lastName": "Ministère de l'Économie et des Finances",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "BOFiP PDF",
-						"type": "application/pdf"
-					}
-				],
-				"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP.html?identifiant=BOI-IS-BASE-30-50-20121130",
-				"callNumber": "BOI-IS-BASE-30-50-20121130",
 				"date": "2012-11-30",
 				"ISSN": "2262-1954",
+				"callNumber": "BOI-IS-BASE-30-50-20121130",
+				"libraryCatalog": "BOFiP-Impôts",
 				"publicationTitle": "Bulletin Officiel des Finances Publiques-Impôts",
 				"rights": "public",
-				"title": "IS – Base d'imposition – Charges financières afférentes à l'acquisition de certains titres de participation",
-				"libraryCatalog": "BOFiP-Impôts",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://bofip.impots.gouv.fr/bofip/7999-PGP.html?identifiant=BOI-IS-BASE-30-50-20121130",
+				"attachments": [
+					{
+						"url": false,
+						"title": "BOFiP PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

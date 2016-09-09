@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-05-06 18:43:49"
+	"lastUpdated": "2016-09-09 13:18:27"
 }
 
 /*
@@ -45,7 +45,8 @@ var mappingClassNameToItemType = {
 	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
 	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
 	'ZINHALTVERZ' : 'multiple',//Inhaltsverzeichnis
-	'KOMMENTAR' : 'encyclopediaArticle'
+	'KOMMENTAR' : 'encyclopediaArticle',
+	'ALTEVERSION' : 'encyclopediaArticle'
 }
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
@@ -62,7 +63,7 @@ function detectWeb(doc, url) {
 	if (!dokument) return;
 	
 	var type = mappingClassNameToItemType[dokument.className.toUpperCase()];
-	
+	//Z.debug(dokument.className.toUpperCase());
 	if (type == 'multiple') {
 		return getSearchResults(doc, true) ? type : false;
 	}
@@ -340,9 +341,12 @@ function scrapeCase(doc, url) {
 		item.pages = beckRSsrc[3];*/
 	}
 
-	var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]')[0];
+	var otherCitations = ZU.xpath(doc, '//li[a[@title="Parallelfundstellen"]]')[0];
 	if (otherCitations) {
-		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + ZU.xpathText(otherCitations, './ul/li',  null, " ; ") + "</p>");
+		var otherCitationsText = ZU.xpathText(otherCitations, './following-sibling::li/ul/li',  null, " ; ");
+		if (otherCitationsText) {
+			note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + otherCitationsText.replace(/\n/g, "").replace(/\s+/g, ' ').trim() + "</p>");
+		}
 	}
 	var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
 	if (basedOnRegulations) {
@@ -569,7 +573,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; BeckRS 9998, 03964 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer... ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; EWiR 2001, 1049 ; WPM 2001, 1944 ; WuB 2001, 1269 ; ZIP 2001, 1881</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; BeckRS 9998, 03964 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WuB I G 7. - 8.01 Schäfer... ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; WPM 2001, 1944 ; WuB 2001, 1269 ; ZIP 2001, 1881</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -920,7 +924,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckEuRS 2014, 754042 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. A... ; MMR 2014, 397 (m. Anm. Ro... ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; EWS 2014, 225 ; EuGRZ 2014, 301 ; K & R 2014, 329 ; MittdtPatA 2014, 335 L ; RiW 2014, 373 ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckEuRS 2014, 754042 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. A... ; MMR 2014, 397 (m. Anm. Ro... ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; EuGRZ 2014, 301 ; EWS 2014, 225 ; K & R 2014, 329 ; MittdtPatA 2014, 335 L ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -952,7 +956,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; BeckRS 9998, 169076 ; NStZ 1991, 188 ; BeckRS 9998, 170068 (Ls.) ; FHOeffR 42 Nr. 13711 (Ls.... ; FHOeffR 42 Nr. 13713 (Ls.... ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; BVerfGE 83, 130 ; Bespr.: , JZ 1991, 470 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; BeckRS 9998, 169076 ; NStZ 1991, 188 ; BeckRS 9998, 170068 (Ls.) ; FHOeffR 42 Nr. 13711 (Ls.... ; FHOeffR 42 Nr. 13713 (Ls.... ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; Bespr.: , JZ 1991, 470 ; BVerfGE 83, 130 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
 					}
 				],
 				"seeAlso": []
