@@ -83,6 +83,11 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setHandler('itemDone', function (obj, item) {
+		//add date from microdata if not in header	
+        	if (!item.date) item.date = ZU.xpathText(doc, '//main//time[@itemprop="datePublished"]/@datetime');
+        	item.complete();
+	});
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = type;
 		trans.doWeb(doc, url);
@@ -113,6 +118,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012-01-04T00:00:00.001Z",				
 				"abstractNote": "Analysts’ failure to foresee declining earnings per share for the biggest U.S. banks last year hasn’t stopped them from predicting an even bigger profit surge for 2012.",
 				"libraryCatalog": "www.bloomberg.com",
 				"publicationTitle": "Bloomberg.com",
