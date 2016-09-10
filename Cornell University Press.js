@@ -3,13 +3,13 @@
 	"label": "Cornell University Press",
 	"creator": "Sebastian Karcer",
 	"target": "^https?://www\\.cornellpress\\.cornell\\.edu/",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-10 10:24:00"
+	"lastUpdated": "2016-09-10 11:32:31"
 }
 
 /*
@@ -64,12 +64,6 @@ function doWeb(doc, url) {
 		});
 	} else {
 		scrape(doc, url);
-	}
-}
-
-function associateData(newItem, dataTags, field, zoteroField) {
-	if (dataTags[field]) {
-		newItem[zoteroField] = dataTags[field];
 	}
 }
 

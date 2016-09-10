@@ -1,7 +1,7 @@
 {
 	"translatorID": "a75e0594-a9e8-466e-9ce8-c10560ea59fd",
 	"label": "Columbia University Press",
-	"creator": "Michael Berkowitz",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://(www\\.)?cup\\.columbia\\.edu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-09 23:48:30"
+	"lastUpdated": "2016-09-10 11:35:07"
 }
 
 /*
@@ -47,12 +47,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//TODO: adjust the xpath
 	var rows = ZU.xpath(doc, '//div[contains(@class, "search-list")]//h2/a');
 	for (var i=0; i<rows.length; i++) {
-		//TODO: check and maybe adjust
 		var href = rows[i].href;
-		//TODO: check and maybe adjust
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -60,10 +57,6 @@ function getSearchResults(doc, checkOnly) {
 		items[href] = title;
 	}
 	return found ? items : false;
-}
-
-function addTag(item, tag, xpath) {
-	item[tag] = Zotero.Utilities.trimInternal(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 }
 
 
@@ -121,32 +114,6 @@ function scrape(doc, url) {
 					if (tra[k].trim() == "") continue;
 					item.creators.push(Zotero.Utilities.cleanAuthor(tra[k], "translator"));
 				}
-				
-				/*
-				{
-					var authorString = creatorString.substr(0, posEditors);
-					Z.debug(authorString);
-					var editorString = creatorString.substr(posEditors);
-					Z.debug(editorString);
-				}*/
-				/*
-				var auts = authorString.split('.');
-				for (var j=0; j<auts.length; j++) {
-					var aut = auts[j];
-					if (aut.match(/Edited/)) {
-						var autType = "editor";
-						aut = aut.replace(/Edited (by)?/, "");
-					} else if (aut.match(/Translated/)) {
-						var autType = "translator";
-						aut = aut.replace(/Translated (by)?/, "");
-					} else {
-						var autType = "author";
-					}
-					aut = aut.split(/\band\b|,/);
-					for (var k=0; k<aut.length; k++) {
-						item.creators.push(Zotero.Utilities.cleanAuthor(aut[k], autType));
-					}
-				}*/
 				break;
 			case "pubdate":
 				item.date = ZU.strToISO(bookDetails[i].textContent);
@@ -160,32 +127,9 @@ function scrape(doc, url) {
 			case "pages":
 				item.pages = bookDetails[i].textContent;
 				break;
-			//case "format":case "prices":
 		}
 		
 	}
-	
-	var authors = ZU.xpathText(doc, '//p[@id="_authors"]');
-	//we parse the author string - first assign roles and then split multiple authors in those groups.
-	/*var auts = ZU.trimInternal(authors).split(/;/);
-	for (var i=0; i<auts.length; i++) {
-		var aut = auts[i];
-		if (aut.match(/Edited/)) {
-			var autType = "editor";
-			aut = aut.replace(/Edited (by)?/, "");
-		} else if (aut.match(/Translated/)) {
-			var autType = "translator";
-			aut = aut.replace(/Translated (by)?/, "");
-		} else {
-			var autType = "author";
-		}
-		aut = aut.split(/\band\b|,/);
-		for (var j=0; j<aut.length; j++) {
-			var aut2 = aut[j];
-			item.creators.push(Zotero.Utilities.cleanAuthor(aut2, autType));
-		}
-	}*/
-	//item.publisher = ZU.xpathText(doc, '//div[contains(@class, "book-header")]/p[@class="publisher"]');
 	
 	//if there is no publisher field, assume it's published by CUP
 	if (!item.publisher) {
@@ -193,9 +137,7 @@ function scrape(doc, url) {
 	}
 	
 	item.abstractNote = ZU.xpathText(doc, '//div[contains(@class, "sp__the-description")]');
-	//item.date = ZU.xpathText(doc, '//span[@id="_publishDate"]');
-	//item.ISBN = ZU.xpathText(doc, '//span[@id="_isbn"]');
-	
+
 	item.complete();
 }
 
