@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-09-07 13:07:37"
+	"lastUpdated": "2016-09-11 19:30:48"
 }
 
 /*
@@ -39,40 +39,37 @@
 function detectWeb(doc, url) {
 	//return "bookSection"; // activate for testing
 	//return "journalArticle"; // activate for testing
-	if (url.indexOf("/#book") != -1 ) {//book, journalArticle or bookSection --> will be improved during scraping
+	if (url.indexOf("/Record") != -1 ) {//book, journalArticle or bookSection --> will be improved during scraping
 		return "book";
-	} else if (getSearchResults(doc).length>0) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
 
-function getSearchResults(doc) {
-	return ZU.xpath(doc, '//tr[contains(@class, "search-result")]/td/h5|//div[@id="user-favorites-listing"]//tr/td/a');
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "row")]//a[contains(@class, "title")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = {};
-		var titles = getSearchResults(doc);
-		for (var i=0; i<titles.length; i++) {
-			var href;
-			var id = titles[i].parentNode.parentNode.id;
-			if (id != null) {
-				href = "/#book/"+encodeURIComponent(id);
-			} else {//favourites
-				href = titles[i].href;
-			}
-			var title = ZU.trimInternal(titles[i].textContent);
-			if (title != "") {
-				items[href] = title;
-			}
-		}
-		
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
@@ -84,53 +81,42 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	//e.g. url = "http://zenon.dainst.org/#book/000300287"
+	
+	//e.g. url = "http://zenon.dainst.org/Record/000300287"
 	var urlParts = url.split("/");
 	var id = urlParts[urlParts.length-1];
-	var jsonUrl = "http://zenon.dainst.org:8080/elwms-zenon/resource/" + encodeURIComponent(id) + "?format=marc21";
 	
-	ZU.doGet(jsonUrl, function(text) {
-		var json = JSON.parse( text );
-		var rootElement = "data";
-		var fields = json[rootElement]["marc:datafield"];
-		//Z.debug(fields);
-
-		//call MARC translator
+	//call MARC translator
+	ZU.doPost('http://zenon.dainst.org/Record/' + id + '/AjaxTab', 'tab=details', function(text) {
+		var parser = new DOMParser();
+		var xml = parser.parseFromString(text, "text/xml");
+		
 		var translator = Zotero.loadTranslator("import");
 		
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.getTranslatorObject(function (marc) {
-
+			var details = ZU.xpath(xml, '//tr');
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
 			
-			record.leader = json[rootElement]["marc:leader"];
-			//the control fields are not anyhow used in MARC translator, thus we do not import them
-			
-			for (var j in fields) {
-				var fieldTag = fields[j]["@tag"];
-				var ind1 = fields[j]["@ind1"];
-				var ind2 = fields[j]["@ind2"];
-				//set fieldContent to an empty string (start value):
-				var fieldContent = "";
-				var subfields = fields[j]["marc:subfield"];
-				//force array always (also if there is only one subfield):
-				if ( Object.prototype.toString.call( subfields ) !== '[object Array]') {
-					subfields = [ subfields ];
+			for (var i=0; i<details.length; i++) {
+				var fieldTag = ZU.xpathText(details[i], './th');
+				//skip empty lines
+				if (!fieldTag) continue;
+	
+				var values = ZU.xpath(details[i], './td');
+				if (values.length == 1) {
+					if (fieldTag == "LEADER") {
+						record.leader = ZU.xpathText(details[i], './td');
+					}
+					//the control fields are not anyhow used in MARC translator, thus we do not import them
 				}
-				for (var k in subfields) {
-					//Z.debug(subfields[0]);
-					
-					var code = subfields[k]["@code"];
-					var subfieldContent = subfields[k]["#text"];
-					
-					//concat all subfields in one datafield, with subfield delimiter and code between them
-					fieldContent = fieldContent + marc.subfieldDelimiter + code + subfieldContent;
-									
+				if (values.length == 3) {
+					var ind1 = ZU.xpathText(details[i], './td[1]');
+					var ind2 = ZU.xpathText(details[i], './td[2]');
+					var fieldContent = ZU.xpathText(details[i], './td[3]', null, '').replace(/[\r\n\s]*\|/g, marc.subfieldDelimiter);
+					record.addField( fieldTag, ind1 + ind2, fieldContent);
 				}
-				
-				//Z.debug(j + ";" +fieldTag + ";" + ind1 + ";" + ind2 + ";" + fieldContent);
-				record.addField( fieldTag, ind1 + ind2, fieldContent);
 				
 			}
 			
@@ -146,7 +132,7 @@ function scrape(doc, url) {
 			record._associateDBField(newItem, 995, "n", "bookTitle");
 			if (newItem.bookTitle) {
 				//Z.debug(newItem.bookTitle);
-				if( json.data["marc:leader"].substr(6,2) == "as") {//This seems to work good, but I don't know if is always working.
+				if( record.leader.substr(6,2) == "as") {//This seems to work good, but I don't know if is always working.
 					newItem.itemType = "journalArticle";
 					var regularExpression1 = /^(.*),\s?(\d+),\s?(\d+)\s?\(\d\d\d\d\)/; // e.g. Bulletin du Cercle d'Études Numismatiques, 44,2 (2007)
 					var regularExpression2 = /^(.*),\s?(\d+)\s?\(\d\d\d\d\)/; // e.g Mannheimer Geschichtsblätter, Neue Folge, 16 (2008)
@@ -165,7 +151,7 @@ function scrape(doc, url) {
 				record._associateDBField(newItem, 300, "a", "pages");
 				delete newItem.numPages;
 			}
-
+	
 			newItem.attachments.push({
 				url: url,
 				title: "DAI Zenon Entry",
@@ -174,51 +160,54 @@ function scrape(doc, url) {
 			});
 			
 			newItem.complete();
-
 			
 		});
 	});
-
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://zenon.dainst.org/#book/000269027",
+		"url": "http://zenon.dainst.org/Record/000269027",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Die aufnahme fremder Kultureinflüsse in Etrurien und das Problem des Retardierens in der etruskischen Kunst: Referate vom Symposion des Deutschen Archäologen-Verbandes: Mannheim 8.-10.2. 1980",
+				"title": "Die Aufnahme fremder Kultureinflüsse in Etrurien und das Problem des Retardierens in der etruskischen Kunst: Referate vom Symposion des Deutschen Archäologen-Verbandes: Mannheim 8.-10.2. 1980",
 				"creators": [
 					{
 						"lastName": "Deutscher Archäologen-Verband",
+						"creatorType": "editor",
 						"fieldMode": true
 					},
 					{
 						"lastName": "Universität Mannheim",
+						"creatorType": "editor",
 						"fieldMode": true
 					},
 					{
 						"lastName": "Archäologisches Seminar der Universität Mannheim",
+						"creatorType": "editor",
 						"fieldMode": true
 					},
 					{
 						"lastName": "Deutscher Archäologen-Verband",
+						"creatorType": "editor",
 						"fieldMode": true
 					},
 					{
 						"lastName": "Deutscher Archäologen-Verband",
+						"creatorType": "editor",
 						"fieldMode": true
 					}
 				],
 				"date": "1981",
-				"callNumber": "DG223 .A8 1981",
+				"callNumber": "DG223  .A8 1981",
 				"libraryCatalog": "DAI-Zenon",
 				"numPages": "197",
 				"place": "Mannheim",
-				"publisher": "Vorstand : Das Seminar",
+				"publisher": "Vorstand :  Das Seminar",
 				"series": "Schriften des Deutschen Archäologen-Verbandes",
 				"seriesNumber": "5",
-				"shortTitle": "Die aufnahme fremder Kultureinflüsse in Etrurien und das Problem des Retardierens in der etruskischen Kunst",
+				"shortTitle": "Die Aufnahme fremder Kultureinflüsse in Etrurien und das Problem des Retardierens in der etruskischen Kunst",
 				"attachments": [
 					{
 						"title": "DAI Zenon Entry",
@@ -239,7 +228,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zenon.dainst.org/#book/000300287",
+		"url": "http://zenon.dainst.org/Record/000300287",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -263,7 +252,8 @@ var testCases = [
 				],
 				"tags": [
 					"Alpenländer (bis 1997)",
-					"Beziehungen"
+					"Beziehungen",
+					"Culture in contatto. Etruschi, liguri, romani nella Valle del Serchio fra IV e II secolo a.C"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -272,7 +262,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zenon.dainst.org/#book/001286369",
+		"url": "http://zenon.dainst.org/Record/001286369",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -311,12 +301,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zenon.dainst.org/#search?q=mannheim",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://zenon.dainst.org/#book/001279328",
+		"url": "http://zenon.dainst.org/Record/001279328",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -354,7 +339,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://zenon.dainst.org/#book/000251127",
+		"url": "http://zenon.dainst.org/Record/000251127",
 		"items": [
 			{
 				"itemType": "book",
@@ -367,6 +352,7 @@ var testCases = [
 					}
 				],
 				"date": "1981",
+				"language": "ger",
 				"libraryCatalog": "DAI-Zenon",
 				"numPages": "248",
 				"place": "Speyer",
@@ -382,7 +368,10 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"Die kultische Verehrung des römischen Herrschers",
+					"Diva Faustina : coinage and cult in Rome and the provinces",
 					"Divine kings and sacred spaces : power and religion in Hellenistic Syria (301-64 BC)",
+					"Du prêtre du roi au prêtre de Rome et au grand prêtre d’Auguste : lamise en place du culte impérial civique",
 					"Ein Miniaturaltar der Arsinoë II",
 					"Emperor Worship",
 					"Herrscher",
@@ -391,13 +380,20 @@ var testCases = [
 					"Imperial Cult",
 					"Imperial cult and imperial representation in Roman Cyprus",
 					"Kaiserverehrung und Kaiserkult in Alexandria und Ägypten von Augustus bis Caracalla",
+					"Les cultes des souverains hellénistiques",
+					"Les cultes des souverains hellénistiques après la disparition des dynasties : formes de survie et d’extinction d’une institution dans un contexte civique",
 					"Münzen als Zeugnis",
 					"Prêtres des empereurs",
 					"The Emperor Cult",
+					"The Near Eastern origins of Hellenistic ruler cult",
 					"The imperial Cult",
+					"Theoi sebastoi",
+					"Un culto imperiale \"provinciale\" in Achaia",
 					"benannte Porträts",
 					"culte impérial civique",
 					"domus divina",
+					"il culto degli imperatori romani",
+					"il culto degli imperatori romani in Grecia (Provincia Achaia) nel secondo secolo D.C",
 					"sul culto imperiale",
 					"the Cult of Ptolemaic Queens",
 					"the Roman imperial cult"
