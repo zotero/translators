@@ -73,25 +73,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Haïti: Sean Penn reçoit un prix pour son engagement",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "25 avril 2012",
+				"abstractNote": "L'acteur américain Sean Penn a reçu mercredi un prix récompensant son engagement humanitaire en faveur d'Haïti, à l'occasion du Sommet mondial des Lauréats du Prix Nobel de la Paix qui se tient à Chicago.",
+				"language": "fr_CA",
+				"libraryCatalog": "Cyberpresse",
+				"publicationTitle": "La Presse",
+				"shortTitle": "Haïti",
+				"url": "http://www.lapresse.ca/international/dossiers/seisme-en-haiti/201204/25/01-4518986-haiti-sean-penn-recoit-un-prix-pour-son-engagement.php",
 				"attachments": [
 					{
 						"title": "CyberPresse.ca Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.lapresse.ca/international/dossiers/seisme-en-haiti/201204/25/01-4518986-haiti-sean-penn-recoit-un-prix-pour-son-engagement.php",
-				"abstractNote": "L'acteur américain Sean Penn a reçu mercredi un prix récompensant son engagement humanitaire en faveur d'Haïti, à l'occasion du Sommet mondial des Lauréats du Prix Nobel de la Paix qui se tient à Chicago.",
-				"date": "25 avril 2012",
-				"language": "fr_CA",
-				"publicationTitle": "La Presse",
-				"title": "Haïti: Sean Penn reçoit un prix pour son engagement",
-				"libraryCatalog": "Cyberpresse",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Haïti"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -101,6 +100,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Norah Jones: la belle et la souris ****",
 				"creators": [
 					{
 						"firstName": "Alain de",
@@ -108,24 +108,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "28 avril 2012",
+				"abstractNote": "Ce nouvel album de Norah Jones, pertinemment intitulé ... Little Broken Hearts, étonnera même ceux qui croyaient tout savoir de la célèbre fille de Ravi Shankar.",
+				"language": "fr_CA",
+				"libraryCatalog": "Cyberpresse",
+				"publicationTitle": "La Presse",
+				"shortTitle": "Norah Jones",
+				"url": "http://www.lapresse.ca/arts/musique/critiques-cd/201204/27/01-4519537-norah-jones-la-belle-et-la-souris-.php",
 				"attachments": [
 					{
 						"title": "CyberPresse.ca Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.lapresse.ca/arts/musique/critiques-cd/201204/27/01-4519537-norah-jones-la-belle-et-la-souris-.php",
-				"abstractNote": "Ce nouvel album de Norah Jones, pertinemment intitulé ... Little Broken Hearts, étonnera même ceux qui croyaient tout savoir de la célèbre fille de Ravi Shankar.",
-				"date": "28 avril 2012",
-				"language": "fr_CA",
-				"publicationTitle": "La Presse",
-				"title": "Norah Jones: la belle et la souris ****",
-				"libraryCatalog": "Cyberpresse",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Norah Jones"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
