@@ -69,15 +69,16 @@ choices          : {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.freitag.de/search?modus=articles&SearchableText=Gaddafi*",
+		"url": "https://www.freitag.de/@@search?SearchableText=Gaddafi",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.freitag.de/autoren/der-freitag/201evolksverdummung-ist-nicht-links201c",
+		"url": "https://www.freitag.de/autoren/der-freitag/201evolksverdummung-ist-nicht-links201c",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "„Volksverdummung ist nicht links“",
 				"creators": [
 					{
 						"firstName": "Philip",
@@ -90,30 +91,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"inland",
-					"spd",
-					"sigmar gabriel",
-					"piraten"
-				],
-				"seeAlso": [],
+				"date": "15.06.2012",
+				"ISSN": "0945-2095",
+				"abstractNote": "Im Gespräch: Sigmar Gabriel attackiert im Freitag-Interview den griechischen Linken Alexis Tsipras. Die Piratenpartei hält der SPD-Chef für ein Zeitgeist-Phänomen",
+				"language": "de-DE",
+				"libraryCatalog": "Der Freitag",
+				"publicationTitle": "Der Freitag",
+				"section": "Politik",
+				"url": "https://www.freitag.de/autoren/der-freitag/201evolksverdummung-ist-nicht-links201c",
 				"attachments": [
 					{
 						"title": "Der Freitag Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.freitag.de/autoren/der-freitag/201evolksverdummung-ist-nicht-links201c",
-				"abstractNote": "Im Gespräch: Sigmar Gabriel attackiert im Freitag-Interview den griechischen Linken Alexis Tsipras. Die Piratenpartei hält der SPD-Chef für ein Zeitgeist-Phänomen",
-				"date": "15.06.2012",
-				"ISSN": "0945-2095",
-				"language": "de-DE",
-				"publicationTitle": "Der Freitag",
-				"section": "Politik",
-				"title": "„Volksverdummung ist nicht links“",
-				"libraryCatalog": "Der Freitag",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"inland",
+					"piraten",
+					"sigmar gabriel",
+					"spd"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
