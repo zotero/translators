@@ -91,6 +91,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
+				"title": "Dynamic Across-Time Measurement Interpretation: Maintaining Qualitative Understandings of Physical System Behavior",
 				"creators": [
 					{
 						"firstName": "Dennis M.",
@@ -98,31 +99,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Cybernetics",
-					"*ARTIFICIAL INTELLIGENCE",
-					"*SYSTEMS ANALYSIS",
-					"*QUALITATIVE ANALYSIS",
-					"MONITORING",
-					"THESES",
-					"*QUALITATIVE REASONING",
-					"MEASUREMENT INTERPRETATION",
-					"EXPLANATION",
-					"*QUALITATIVE PHYSICS",
-					"SYSTEMS BEHAVIOR",
-					"PINTERP SPACE",
-					"PINTERPS",
-					"QUALITATIVE STATES",
-					"ENVISIONMENTS",
-					"FAULTY DATA",
-					"INTERPRETATION CREDIBILITIES",
-					"DURATION CONSTRAINTS",
-					"DEPENDENCY PATHS",
-					"COMPLEXITY ANALYSIS",
-					"DATMI(DYNAMIC ACROSS-TIME MEASUREMENT INTERPRETATION)"
-				],
-				"seeAlso": [],
+				"date": "1990-02",
+				"language": "en",
+				"libraryCatalog": "Defense Technical Information Center",
+				"rights": "Approved for public release; distribution is unlimited.",
+				"shortTitle": "Dynamic Across-Time Measurement Interpretation",
 				"attachments": [
 					{
 						"title": "DTIC Snapshot",
@@ -133,22 +114,31 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Dynamic Across-Time Measurement Interpretation: Maintaining Qualitative Understandings of Physical System Behavior",
-				"publicationTitle": "DTIC",
-				"rights": "Approved for public release; distribution is unlimited.",
-				"date": "1990-02",
-				"letterType": "Text",
-				"manuscriptType": "Text",
-				"mapType": "Text",
-				"thesisType": "Text",
-				"websiteType": "Text",
-				"presentationType": "Text",
-				"postType": "Text",
-				"audioFileType": "Text",
-				"language": "en",
-				"abstractNote": "Incrementally maintaining a qualitative understanding of physical system behavior based on observations is crucial to real-time process monitoring, control, and diagnosis . This paper describes the DATMI theory for dynamically maintaining a pinterp-space, a concise representation of local and global interpretations consistent with the observations over time. Each interpretation signifies alternative paths of states in a qualitative envisionment . Representing a space of interpretations, instead of just a \"current best\" one, avoids the need for extensive backtracking to handle incomplete or faulty data. Domain-specific knowledge about state and transition probabilities can be used to maintain the best working interpretation as well. Domain-specific knowledge about durations of states and paths of states can also be used to further constrain the interpretation space. When all these constraints lead to inconsistencies, faulty-data hypotheses are generated and then tested by adjusting the pinterp-space. The time and space complexity of maintaining the pinterp-space is polynomial in the number of measurements and envisionment states.",
-				"libraryCatalog": "Defense Technical Information Center",
-				"shortTitle": "Dynamic Across-Time Measurement Interpretation"
+				"tags": [
+					"*ARTIFICIAL INTELLIGENCE",
+					"*QUALITATIVE ANALYSIS",
+					"*QUALITATIVE PHYSICS",
+					"*QUALITATIVE REASONING",
+					"*SYSTEMS ANALYSIS",
+					"COMPLEXITY ANALYSIS",
+					"Cybernetics",
+					"DATMI(DYNAMIC ACROSS-TIME MEASUREMENT INTERPRETATION)",
+					"DEPENDENCY PATHS",
+					"DURATION CONSTRAINTS",
+					"ENVISIONMENTS",
+					"EXPLANATION",
+					"FAULTY DATA",
+					"INTERPRETATION CREDIBILITIES",
+					"MEASUREMENT INTERPRETATION",
+					"MONITORING",
+					"PINTERP SPACE",
+					"PINTERPS",
+					"QUALITATIVE STATES",
+					"SYSTEMS BEHAVIOR",
+					"THESES"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
