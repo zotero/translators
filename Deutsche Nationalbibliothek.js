@@ -256,32 +256,52 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://d-nb.info/1048581292",
+		"url": "https://portal.dnb.de/opac.htm?method=simpleSearch&cqlMode=true&query=idn%3D1048581292",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Effiziente Entwurfsverfahren zur hardwarebasierten Signalverarbeitung elementarer Funktionen für die drahtlose Kommunikation / Jochen Rust",
+				"title": "Effiziente Entwurfsverfahren zur hardwarebasierten Signalverarbeitung elementarer Funktionen für die drahtlose Kommunikation",
 				"creators": [
 					{
+						"firstName": "Jochen",
 						"lastName": "Rust",
-						"creatorType": "author",
-						"firstName": "Jochen"
+						"creatorType": "author"
 					}
 				],
 				"date": "2014",
-				"ISBN": "978-3-8440-2706-8",
+				"ISBN": "9783844027068",
+				"language": "ger",
 				"libraryCatalog": "Deutsche Nationalbibliothek",
+				"numPages": "151",
 				"place": "Aachen",
 				"publisher": "Shaker",
+				"series": "Forschungsberichte aus dem Institut für Theoretische Elektrotechnik und Mikroelektronik, Arbeitsbereich Kommunikationselektronik, Universität Bremen",
+				"seriesNumber": "Bd. 2",
 				"attachments": [
-					{},
 					{
 						"title": "Table of Contents PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
-				"notes": [],
+				"tags": [
+					"(Produktform (spezifisch))Unsewn / adhesive bound",
+					"(Produktform)Paperback / softback",
+					"(VLB-WN)1684: Hardcover, Softcover / Technik/Elektronik, Elektrotechnik, Nachrichtentechnik",
+					"(Zielgruppe)Fachpublikum/ Wissenschaft",
+					"Approximationsalgorithmus",
+					"Digitale Signalverarbeitung",
+					"Drahtloses Sensorsystem",
+					"Elementare Funktion",
+					"Hardwareentwurf",
+					"Kundenspezifische Schaltung",
+					"Mikroelektronik",
+					"Mobilfunk"
+				],
+				"notes": [
+					{
+						"note": "Zugl.: Bremen, Univ., Diss., 2014"
+					}
+				],
 				"seeAlso": []
 			}
 		]
