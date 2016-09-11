@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-ZU.processDocuments(articles, scrape);
+		ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
