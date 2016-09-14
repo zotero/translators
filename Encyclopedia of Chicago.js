@@ -102,6 +102,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "Fire Limits",
 				"creators": [
 					{
 						"firstName": "Robin",
@@ -109,23 +110,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": false,
-						"title": "Encyclopedia of Chicago Entry URL",
-						"type": "text/html"
-					}
-				],
-				"url": "http://encyclopedia.chicagohistory.org/pages/457.html",
 				"date": "2005",
 				"encyclopediaTitle": "Encyclopedia of Chicago",
+				"libraryCatalog": "Encyclopedia of Chicago",
 				"place": "Chicago",
 				"publisher": "Chicago History Museum and the Newberry Library",
-				"title": "Fire Limits",
-				"libraryCatalog": "Encyclopedia of Chicago"
+				"url": "http://encyclopedia.chicagohistory.org/pages/457.html",
+				"attachments": [
+					{
+						"title": "Encyclopedia of Chicago Entry URL",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -135,6 +134,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "map",
+				"title": "Annexations and Additions to the City of Chicago",
 				"creators": [
 					{
 						"firstName": "Ann Durkin",
@@ -142,21 +142,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2005",
+				"archive": "Newberry Library",
+				"libraryCatalog": "Encyclopedia of Chicago",
+				"url": "http://encyclopedia.chicagohistory.org/pages/3716.html",
 				"attachments": [
 					{
-						"url": false,
 						"title": "Encyclopedia of Chicago Map URL",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://encyclopedia.chicagohistory.org/pages/3716.html",
-				"archive": "Newberry Library",
-				"date": "2005",
-				"title": "Annexations and Additions to the City of Chicago",
-				"libraryCatalog": "Encyclopedia of Chicago"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
