@@ -9,30 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-02-21 00:10:52"
+	"lastUpdated": "2016-09-14 04:54:44"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2014-2016 Aurimas Vinckevicius and Sebastian Karcher
+	Copyright © 2014-2016 Aurimas Vinckevicius and Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -77,12 +77,19 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
 		//make sure there is no PMID in extra. Only then use extra as abstract when we have none.
-		if(item.extra) {
+		if (item.extra) {
 			
 			var PMID = item.extra.match(/PMID:\s*\d+/);
 			if(!item.abstractNote) item.abstractNote = item.extra.replace(/PMID:\s*\d+/, "");
 			delete item.extra;
 			if (PMID) item.extra = PMID[0];
+		}
+		//abstractNote may contain the title in the beginning, separated by a |
+		if (item.abstractNote) {
+			var pos = item.abstractNote.indexOf('|');
+			if (pos>-1) {
+				item.abstractNote = item.abstractNote.substr(pos+1);
+			}
 		}
 		//the journal abbreviation field just repeates the journal title;
 		item.journalAbbreviation = "";
@@ -92,7 +99,7 @@ function scrape(doc, url) {
 			item.tags = [];
 			keywords = ZU.unescapeHTML(keywords).split(/\s*,\s*/);
 			for (var i = 0; i<keywords.length; i++) {
-			    item.tags.push(keywords[i]);
+				item.tags.push(keywords[i]);
 			}
 
 		}
@@ -105,13 +112,17 @@ function scrape(doc, url) {
 	});
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = 'journalArticle';
+		trans.addCustomFields({
+			'description': 'abstractNote'
+		});
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://elifesciences.org/content/2/e00799v1",
+		"url": "https://elifesciences.org/content/2/e00799",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -143,7 +154,7 @@ var testCases = [
 				"pages": "e00799",
 				"publicationTitle": "eLife",
 				"rights": "© 2013, Schekman et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
-				"url": "http://elifesciences.org/content/2/e00799v1",
+				"url": "https://elifesciences.org/content/2/e00799v1",
 				"volume": "2",
 				"attachments": [
 					{
@@ -172,7 +183,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://elifesciences.org/content/2/e00767v1",
+		"url": "https://elifesciences.org/content/2/e00767",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -199,7 +210,7 @@ var testCases = [
 				"pages": "e00767",
 				"publicationTitle": "eLife",
 				"rights": "© 2013, Avirutnan and Matangkasombut. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
-				"url": "http://elifesciences.org/content/2/e00767v1",
+				"url": "https://elifesciences.org/content/2/e00767v1",
 				"volume": "2",
 				"attachments": [
 					{
@@ -233,7 +244,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://elifesciences.org/content/2/e00473v1",
+		"url": "https://elifesciences.org/content/2/e00473",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -258,14 +269,14 @@ var testCases = [
 				"date": "2013/04/30",
 				"DOI": "10.7554/eLife.00473",
 				"ISSN": "2050-084X",
-				"abstractNote": "We live in a world with a 24-hr cycle in which day follows night follows day with complete predictability. Life on earth has evolved to take advantage of this predictability by using circadian clocks to prepare for the coming of night (or day), and plants are no exception. Even in constant darkness, characteristics such as leaf movements show a constant cycle of around 24 hr. Most circadian clocks rely on negative feedback loops involving various genes and proteins to keep track of time. In one of these feedback loops, certain genes—called morning-phased genes—are expressed as proteins during the day, and these proteins prevent other genes—called evening-phased genes—from producing proteins. As night approaches, however, a second feedback loop acts to stop the morning-phased genes being expressed, thus allowing the evening-phased genes to produce proteins. And as day approaches, expression of these genes is stopped and the whole cycle starts again. Many of the genes and proteins involved in the circadian system of Arabidopsis thaliana, a small flowering plant that is widely used as a model organism, have been identified, and its circadian clock was thought to rely almost entirely on proteins called repressors that block the transcription of genes. Now, Hsu et al. have shown that the Arabidopsis clock also involves proteins that increase the expression of certain genes at specific times of the day. Hsu et al. focused on the promoter regions of evening-phased genes: these regions are stretches of DNA that proteins called transcription factors bind to and either encourage the expression of a gene (if the protein is a transcriptional activator) or block its expression (as a transcriptional repressor). In particular, they focused on a protein called RVE8 that is most strongly expressed in the afternoon and, based on previous research, is thought to activate the transcription of genes. Using genetically modified plants in which the gene for RVE8 can be turned on and off, they found that this protein led to increases in the expression of some genes, and reductions in the expression of others. Further analysis showed that RVE8 was able to activate the expression of evening-phased genes directly, without requiring that new proteins be made first. By contrast, morning-expressed genes were likely to be suppressed by RVE8 via an indirect mechanism that involved other proteins that had previously been activated by RVE8. The expression of RVE8 itself is regulated by other clock genes and also by an undefined post-transcriptional process. Therefore rather than consisting of a morning feedback loop coupled to an evening feedback loop, with both loops being based on repressors, the plant clock is instead better viewed as a highly connected network of activators and repressors. Further research is clearly necessary to understand this unexpected complexity in the circadian clock of Arabidopsis.",
+				"abstractNote": "The circadian clock in the model plant organism Arabidopsis thaliana is best described as a highly connected network made up of clock-regulated activators and repressors of transcription, rather than two coupled, repressor-based feedback loops.",
 				"extra": "PMID: 23638299",
 				"language": "en",
 				"libraryCatalog": "elifesciences.org",
 				"pages": "e00473",
 				"publicationTitle": "eLife",
 				"rights": "© 2013, Hsu et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
-				"url": "http://elifesciences.org/content/2/e00473v1",
+				"url": "https://elifesciences.org/content/2/e00473v1",
 				"volume": "2",
 				"attachments": [
 					{
@@ -295,7 +306,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://elifesciences.org/content/2/e00639v1",
+		"url": "https://elifesciences.org/content/2/e00639",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -317,7 +328,7 @@ var testCases = [
 				"pages": "e00639",
 				"publicationTitle": "eLife",
 				"rights": "© 2013, Bishai. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
-				"url": "http://elifesciences.org/content/2/e00639v1",
+				"url": "https://elifesciences.org/content/2/e00639v1",
 				"volume": "2",
 				"attachments": [
 					{
@@ -348,29 +359,50 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://elifesciences.org/content/2/e00565v1",
+		"url": "https://elifesciences.org/content/2/e00565",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "César S.",
+						"lastName": "Mendes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Imre",
+						"lastName": "Bartos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Turgay",
+						"lastName": "Akay",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Szabolcs",
+						"lastName": "Márka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard S.",
+						"lastName": "Mann",
+						"creatorType": "author"
+					}
+				],
 				"date": "2013/02/11",
 				"DOI": "10.7554/eLife.00565",
 				"ISSN": "2050-084X",
-				"abstractNote": "Correction: Quantification of gait parameters in freely walking wild type and sensory deprived Drosophila melanogaster |",
 				"language": "en",
 				"libraryCatalog": "elifesciences.org",
 				"pages": "e00565",
 				"publicationTitle": "eLife",
 				"rights": "© 2013, Mendes et al. This article is distributed under the terms of the Creative Commons Attribution License, which permits unrestricted use and redistribution provided that the original author and source are credited.",
 				"shortTitle": "Correction",
-				"url": "http://elifesciences.org/content/2/e00565v1",
+				"url": "https://elifesciences.org/content/2/e00565v1",
 				"volume": "2",
 				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot"
 					}
