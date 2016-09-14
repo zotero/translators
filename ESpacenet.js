@@ -240,7 +240,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?DB=worldwide.espacenet.com&II=2&ND=3&adjacent=true&locale=en_EP&FT=D&date=20120426&CC=WO&NR=2012054443A1&KC=A1",
+		"url": "https://worldwide.espacenet.com/publicationDetails/biblio?DB=worldwide.espacenet.com&II=2&ND=3&adjacent=true&locale=en_EP&FT=D&date=20120426&CC=WO&NR=2012054443A1&KC=A1",
 		"items": [
 			{
 				"itemType": "patent",
@@ -259,7 +259,7 @@ var testCases = [
 				"extra": "CIB: G06F3/033; G09G5/08",
 				"patentNumber": "WO2012054443 (A1)",
 				"priorityNumbers": "US20100394879P 20101020 ; US20100394013P 20101018",
-				"url": "http://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=20120426&DB=worldwide.espacenet.com&locale=en_EP&CC=WO&NR=2012054443A1&KC=A1&ND=4",
+				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=20120426&DB=worldwide.espacenet.com&locale=en_EP&CC=WO&NR=2012054443A1&KC=A1&ND=4",
 				"attachments": [
 					{
 						"title": "Espacenet patent record"
@@ -273,7 +273,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?DB=worldwide.espacenet.com&II=4&ND=3&adjacent=true&locale=en_EP&FT=D&date=20120426&CC=US&NR=2012101951A1&KC=A1#",
+		"url": "https://worldwide.espacenet.com/publicationDetails/biblio?DB=worldwide.espacenet.com&II=4&ND=3&adjacent=true&locale=en_EP&FT=D&date=20120426&CC=US&NR=2012101951A1&KC=A1",
 		"items": [
 			{
 				"itemType": "patent",
@@ -302,7 +302,7 @@ var testCases = [
 				"extra": "CIB: G06Q20/00",
 				"patentNumber": "US2012101951 (A1)",
 				"priorityNumbers": "US201113172170 20110629 ; US20100406097P 20101022",
-				"url": "http://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=20120426&DB=worldwide.espacenet.com&locale=en_EP&CC=US&NR=2012101951A1&KC=A1&ND=4",
+				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=20120426&DB=worldwide.espacenet.com&locale=en_EP&CC=US&NR=2012101951A1&KC=A1&ND=4",
 				"attachments": [
 					{
 						"title": "Espacenet patent record"
@@ -316,7 +316,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?locale=de_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
+		"url": "https://worldwide.espacenet.com/publicationDetails/biblio?locale=de_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
 		"items": [
 			{
 				"itemType": "patent",
@@ -329,12 +329,13 @@ var testCases = [
 					}
 				],
 				"issueDate": "1989-06-01",
+				"abstractNote": "Un tube de choc de secteur conique (202) génère un secteur d'ondes de choc sphériques, divergentes, classiques qui émanent radialement d'une source ponctuelle effective d'une manière non focalisante mais hautement directionnelle. Un front de compression (208) ayant un rayon de courbure égal à sa séparation par rapport au sommet du tube de choc de secteur définit le bord d'attaque d'un ''choc de coiffe'' (306) d'une intensité que l'on peut prédire et commander de manière précise. Un front de raréfaction de fuite (314) du choc de coiffe (306) est défini par la diffraction provoquée par le bord (312) du tube (202) de choc de secteur. Le front de raréfaction (314) érode progressivement le choc de coiffe (306) lorsque celui-ci est projeté vers le calcul cible (128) définissant la largeur et la durée du choc de coiffe de propagation (306).; Le choc de coiffe (306) pulvérise uniformément le calcul cible (128) en appliquant une quantité relativement petite d'ondes de choc par rapport au nombre plus grand (d'un ordre de grandeur deux fois plus grand) de chocs utilisés dans des procédés connus par ondes de choc ellipsoïdales focalisées.",
 				"applicationNumber": "AU19890028143D 19891108",
 				"assignee": "William S. Filler",
 				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
-				"patentNumber": "AU2814389 (A)",
+				"patentNumber": "AU2814389 (A) Zusammenfassung der korrespondierenden Patentschrift WO8904147 (A1)",
 				"priorityNumbers": "US19870118325 19871109",
-				"url": "http://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=de_EP&CC=AU&NR=2814389A&KC=A&ND=4",
+				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=de_EP&CC=AU&NR=2814389A&KC=A&ND=4",
 				"attachments": [
 					{
 						"title": "Espacenet patent record"
@@ -348,7 +349,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://worldwide.espacenet.com/publicationDetails/biblio?locale=fr_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
+		"url": "https://worldwide.espacenet.com/publicationDetails/biblio?locale=fr_EP&II=9&FT=D&CC=AU&DB=EPODOC&NR=2814389A&date=19890601&ND=3&KC=A&adjacent=true",
 		"items": [
 			{
 				"itemType": "patent",
@@ -361,12 +362,13 @@ var testCases = [
 					}
 				],
 				"issueDate": "1989-06-01",
+				"abstractNote": "Un tube de choc de secteur conique (202) génère un secteur d'ondes de choc sphériques, divergentes, classiques qui émanent radialement d'une source ponctuelle effective d'une manière non focalisante mais hautement directionnelle. Un front de compression (208) ayant un rayon de courbure égal à sa séparation par rapport au sommet du tube de choc de secteur définit le bord d'attaque d'un ''choc de coiffe'' (306) d'une intensité que l'on peut prédire et commander de manière précise. Un front de raréfaction de fuite (314) du choc de coiffe (306) est défini par la diffraction provoquée par le bord (312) du tube (202) de choc de secteur. Le front de raréfaction (314) érode progressivement le choc de coiffe (306) lorsque celui-ci est projeté vers le calcul cible (128) définissant la largeur et la durée du choc de coiffe de propagation (306).; Le choc de coiffe (306) pulvérise uniformément le calcul cible (128) en appliquant une quantité relativement petite d'ondes de choc par rapport au nombre plus grand (d'un ordre de grandeur deux fois plus grand) de chocs utilisés dans des procédés connus par ondes de choc ellipsoïdales focalisées.",
 				"applicationNumber": "AU19890028143D 19891108",
 				"assignee": "William S. Filler",
 				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
-				"patentNumber": "AU2814389 (A)",
+				"patentNumber": "AU2814389 (A) Abrégé du document correspondant WO8904147 (A1)",
 				"priorityNumbers": "US19870118325 19871109",
-				"url": "http://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=fr_EP&CC=AU&NR=2814389A&KC=A&ND=4",
+				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=fr_EP&CC=AU&NR=2814389A&KC=A&ND=4",
 				"attachments": [
 					{
 						"title": "Espacenet patent record"
