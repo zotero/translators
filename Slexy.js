@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-03 18:33:28"
+	"lastUpdated": "2016-09-15 22:19:16"
 }
 
 /*
@@ -35,7 +35,6 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-    // Creating Date object for current location
 	var resourceType = detectWeb(doc, url);
 
 	// Creating the item
@@ -75,101 +74,25 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://pastebin.com/u/febrezo",
+		"url": "http://slexy.org/view/s201CHC8jq",
 		"items": [
 			{
 				"itemType": "webpage",
-				"title": "Febrezo's Pastebin",
+				"title": "SMU VS NORTH TEXAS LIVE",
 				"creators": [
 					{
 						"firstName": "",
-						"lastName": "febrezo",
+						"lastName": "live",
 						"creatorType": "author"
 					}
 				],
-				"url": "http://pastebin.com/u/febrezo",
-				"websiteTitle": "Pastebin.com",
-				"websiteType": "profile",
-				"attachments": [
-					{
-						"title": "Febrezo's Pastebin",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://pastebin.com/FuzVdRiJ",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Bash, basic parameters processing",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "febrezo",
-						"creatorType": "author"
-					}
-				],
-				"date": "Sunday 27th of May 2012 11:01:02 AM CDT",
-				"url": "http://pastebin.com/FuzVdRiJ",
-				"websiteTitle": "Pastebin.com",
-				"websiteType": "paste",
-				"attachments": [
-					{
-						"title": "Bash, basic parameters processing",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://pastebin.com/cCkDi5ZA",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Untitled",
-				"creators": [],
-				"date": "Saturday 3rd of September 2016 02:59:22 AM CDT",
-				"url": "http://pastebin.com/cCkDi5ZA",
-				"websiteTitle": "Pastebin.com",
-				"websiteType": "paste",
-				"attachments": [
-					{
-						"title": "Pastebin Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://pastebin.com/trends",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Trending Pastes at Pastebin.com",
-				"creators": [],
-				"url": "http://pastebin.com/trends",
-				"websiteTitle": "Pastebin.com",
+				"date": "Sat Sep 03 2016 18:50:34 GMT+0200 (CEST)",
+				"url": "http://slexy.org/view/s201CHC8jq",
+				"websiteTitle": "Slexy",
 				"websiteType": "Paste Site",
 				"attachments": [
 					{
-						"title": "Pastebin Snapshot",
+						"title": "Slexy Snapshot",
 						"mimeType": "text/html"
 					}
 				],
