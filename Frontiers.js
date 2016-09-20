@@ -206,7 +206,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
+		"url": "http://journal.frontiersin.org/article/10.3389/fpsyg.2011.00326/full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -226,12 +226,11 @@ var testCases = [
 				"date": "2011",
 				"DOI": "10.3389/fpsyg.2011.00326",
 				"abstractNote": "Research progress in machine vision has been very significant in recent years. Robust face detection and identification algorithms are already readily available to consumers, and modern computer vision algorithms for generic object recognition are now coping with the richness and complexity of natural visual scenes. Unlike early vision models of object recognition that emphasized the role of figure-ground segmentation and spatial information between parts, recent successful approaches are based on the computation of loose collections of image features without prior segmentation or any explicit encoding of spatial relations. While these models remain simplistic models of visual processing, they suggest that, in principle, bottom-up activation of a loose collection of image features could support the rapid recognition of natural object categories and provide an initial coarse visual representation before more complex visual routines and attentional mechanisms take place. Focusing on biologically plausible computational models of (bottom-up) pre-attentive visual recognition, we review some of the key visual features that have been described in the literature. We discuss the consistency of these feature-based representations with classical theories from visual psychology and test their ability to account for human performance on a rapid object categorization task.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"journalAbbreviation": "Front. Psychology",
 				"libraryCatalog": "Frontiers",
 				"pages": "326",
 				"publicationTitle": "Perception Science",
-				"url": "http://journal.frontiersin.org/Journal/10.3389/fpsyg.2011.00326/abstract",
+				"url": "http://journal.frontiersin.org/article/10.3389/fpsyg.2011.00326/full",
 				"volume": "2",
 				"attachments": [
 					{
@@ -253,7 +252,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journal.frontiersin.org/Journal/10.3389/fmicb.2014.00402/abstract",
+		"url": "http://journal.frontiersin.org/article/10.3389/fmicb.2014.00402/full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -285,7 +284,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jeff A.",
+						"firstName": "Jeffrey A.",
 						"lastName": "Grass",
 						"creatorType": "author"
 					},
@@ -310,7 +309,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Allison",
+						"firstName": "Allison J.",
 						"lastName": "Balloon",
 						"creatorType": "author"
 					},
@@ -320,7 +319,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joshua",
+						"firstName": "Josh",
 						"lastName": "Aldrich",
 						"creatorType": "author"
 					},
@@ -335,7 +334,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Oleg",
+						"firstName": "Oleg V.",
 						"lastName": "Moskvin",
 						"creatorType": "author"
 					},
@@ -345,7 +344,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joshua",
+						"firstName": "Joshua J.",
 						"lastName": "Coon",
 						"creatorType": "author"
 					},
@@ -367,22 +366,28 @@ var testCases = [
 				],
 				"date": "2014",
 				"DOI": "10.3389/fmicb.2014.00402",
-				"journalAbbreviation": "Front. Microbiol.",
+				"abstractNote": "Efficient microbial conversion of lignocellulosic hydrolysates to biofuels is a key barrier to the economically viable deployment of lignocellulosic biofuels. A chief contributor to this barrier is the impact on microbial processes and energy metabolism of lignocellulose-derived inhibitors, including phenolic carboxylates, phenolic amides (for ammonia-pretreated biomass), phenolic aldehydes, and furfurals. To understand the bacterial pathways induced by inhibitors present in ammonia-pretreated biomass hydrolysates, which are less well studied than acid-pretreated biomass hydrolysates, we developed and exploited synthetic mimics of ammonia-pretreated corn stover hydrolysate (ACSH). To determine regulatory responses to the inhibitors normally present in ACSH, we measured transcript and protein levels in an Escherichia coli ethanologen using RNA-seq and quantitative proteomics during fermentation to ethanol of synthetic hydrolysates containing or lacking the inhibitors. Our study identified four major regulators mediating these responses, the MarA/SoxS/Rob network, AaeR, FrmR, and YqhC. Induction of these regulons was correlated with a reduced rate of ethanol production, buildup of pyruvate, depletion of ATP and NAD(P)H, and an inhibition of xylose conversion. The aromatic aldehyde inhibitor 5-hydroxymethylfurfural appeared to be reduced to its alcohol form by the ethanologen during fermentation, whereas phenolic acid and amide inhibitors were not metabolized. Together, our findings establish that the major regulatory responses to lignocellulose-derived inhibitors are mediated by transcriptional rather than translational regulators, suggest that energy consumed for inhibitor efflux and detoxification may limit biofuel production, and identify a network of regulators for future synthetic biology efforts.",
+				"journalAbbreviation": "Front. Microbiol",
 				"libraryCatalog": "Frontiers",
 				"pages": "402",
 				"publicationTitle": "Microbial Physiology and Metabolism",
-				"url": "http://journal.frontiersin.org/Journal/10.3389/fmicb.2014.00402/abstract",
+				"url": "http://journal.frontiersin.org/article/10.3389/fmicb.2014.00402/full",
 				"volume": "5",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
-					"Biofuels",
 					"Escherichia coli",
-					"Ethanol",
-					"Proteomics",
 					"RNAseq",
-					"Transcriptomics",
 					"aromatic inhibitors",
-					"lignocellulosic hydrolysate"
+					"biofuels",
+					"ethanol",
+					"lignocellulosic hydrolysate",
+					"proteomics",
+					"transcriptomics"
 				],
 				"notes": [],
 				"seeAlso": []
