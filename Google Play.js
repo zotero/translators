@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-06-21 08:45:20"
+	"lastUpdated": "2016-09-21 18:53:33"
 }
 
 /*
@@ -81,7 +81,7 @@ function cardList(doc) {
 }
 
 function cardListFindCards(doc) {
-	return ZU.xpath(doc, '//div[contains(@class,"card-list")]/div[contains(@class, "card")]//h2/a[contains(@class, "title")]');
+	return ZU.xpath(doc, '//div[contains(@class,"card-list")]//div[contains(@class, "card-content")]//a[@class="title"]');
 }
 
 function findProperty(doc, propertyKey) {
@@ -89,22 +89,24 @@ function findProperty(doc, propertyKey) {
 }
 
 function saveIndividual(doc, url) {
-	var title = findProperty(doc, "name");
-	var author = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
-
-	var date = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//div[contains(@class, "document-subtitle")]');
-	date = date.replace(/\s*-\s*/, '');
-
-	var description = findProperty(doc, "description");
-
-	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
-
 	var item = new Zotero.Item("computerProgram");
-	item.title = title;
-	item.url = url;
-	item.date = date;
-	item.abstractNote = description;
+	
+	item.title = ZU.xpathText(doc, '//h1[contains(@class, "document-title")]');
+	
+	var author = ZU.xpathText(doc, '//div[contains(@itemprop, "author")]//span[contains(@itemprop, "name")]');
+	if (author) {
+		item.creators.push(ZU.cleanAuthor(author, "author"));
+	}
 
+	item.url = url;
+	
+	var date = ZU.xpathText(doc, '//div[contains(@itemprop, "datePublished")]');
+	if (date) {
+		item.date = date.replace(/\s*-\s*/, '');
+	}
+	item.abstractNote = findProperty(doc, "description");
+	
+	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
 	for (var index = 0; index < screenshots.length; index++) {
 		item.attachments.push({
 			url: screenshots[index].src,
@@ -122,10 +124,11 @@ function saveIndividual(doc, url) {
 		item.version = version;
 	}
 	
-	item.company = author;
+	item.company = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
 	
 	item.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
