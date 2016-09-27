@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-20 20:10:13"
+	"lastUpdated": "2016-09-27 06:02:24"
 }
 
 /*
@@ -134,7 +134,7 @@ function scrape(doc, url) {
 			case "contributor":
 				var authors = values.split("|");
 				for (var j=0; j<authors.length; j++) {
-					newItem.creators.push(ZU.cleanAuthor(authors[j], "author", true));
+					newItem.creators.push(ZU.cleanAuthor(authors[j], "contributor", true));
 				}
 				break;
 			case "publisher":
@@ -153,10 +153,10 @@ function scrape(doc, url) {
 				newItem.rights = values;
 				break;
 			case "collection":
-				newItem.collection = values;
+				newItem.series = values;
 				break;
 			case "repository":
-				//newItem.extra = values;
+				newItem.archive = values;
 				break;
 			case "source":
 				//newItem.extra = values;
@@ -192,6 +192,7 @@ var testCases = [
 					}
 				],
 				"date": "1968-12-13",
+				"archive": "World Council of Churches",
 				"language": "English",
 				"libraryCatalog": "Aluka",
 				"rights": "By kind permission of the World Council of Churches (WCC).",
@@ -226,11 +227,11 @@ var testCases = [
 					},
 					{
 						"lastName": "Africa Fund",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					},
 					{
 						"lastName": "National Union of Mineworkers",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "1991-04",
