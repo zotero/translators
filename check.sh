@@ -20,27 +20,47 @@ if [[ -n "$noduplicate" ]];then
   exit 1
 fi
 
-echo "CHECK that deleted translator are added to deleted.txt and number is increased"
-deleted=$(git diff --cached --name-only --diff-filter=D -- '*.js*')
-if [[ -n "$deleted" ]];then
-  # number increased
-  oldrevision=$(git show HEAD:deleted.txt | awk 'NR<2 { print $1 }')
-  newrevision=$(awk 'NR<2 { print $1 }' deleted.txt)
-  if [ $newrevision -ne $(($oldrevision + 1)) ];then
-    echo "Error: translators are deleted but the number in deleted.txt is not increased by 1."
-    echo "$newrevision (newrevision) =/= $oldrevision (oldrevision) + 1"
-    exit 1
+
+#list all commits where files are deleted
+commits=$(git --no-pager log --diff-filter=D --pretty="%H")
+first=true
+for c in $commits; do
+  echo "$c"
+  #check that a JavaScript file (i.e. a translator) is deleted
+  jsdeleted=$(git show --name-status $c | grep ^D.*\.js | sed 's/^D\s*//')
+  if [[ -n "$jsdeleted" ]];then
+    if [ "$first" = true ];then
+      before=$(git log -n 2 $c --pretty=format:"%H" | tail -1)
+      # number increased
+      oldrevision=$(git show "$before":deleted.txt | awk 'NR<2 { print $1 }')
+      newrevision=$(awk 'NR<2 { print $1 }' deleted.txt)
+      if [ $newrevision -ne $(($oldrevision + 1)) ];then
+        echo "Error: translators are deleted but the number in deleted.txt is not increased by 1 (compared to commit $before)."
+        echo "$newrevision (newrevision) =/= $oldrevision (oldrevision) + 1"
+        exit 1
+      fi
+      first=false
+    fi
+    
+    # all deleted translator ids must be listed in deleted.txt
+    #echo $jsdeleted
+    #git show "$c" --diff-filter=D | grep '"translatorID"'
+    delids=$(git show "$c" --diff-filter=D | grep '"translatorID"' | awk -F: '{print $2}' | sed 's/[", ]//g')
+    listed=$(echo $delids | xargs -i grep -c {} deleted.txt | awk '$1!="1" {print "Error"}')
+    rename=$(cat *.js | grep -c $delids | awk '$1!="1" {print "Error"}')
+    if [[ (-n "$listed") && (-n "$rename") ]];then
+      echo "Error: translators are deleted but not listed in deleted.txt."
+      echo "Commit: $c"
+      echo "Deleted translator: $jsdeleted ; with id $delids"
+      echo $delids | xargs -i grep -c {} *.js
+      exit 1
+    fi
+    
   fi
-  # all deleted translator ids must be now listed in deleted.txt
-  listed=$(git diff --cached --diff-filter=D -- '*.js*' | grep '"translatorID"' | awk -F: '{print $2}' | sed 's/[", ]//g' | xargs -i grep -c {} deleted.txt | awk '$1!="1" {print "Error"}')
-  if [[ -n "$listed" ]];then
-    echo "Error: translators are deleted but not listed in deleted.txt."
-    exit 1
-  fi
-fi
+done
 
 
-staged=$(git diff --cached --name-only --diff-filter=ACM -- '*.js*')
+staged=$(git diff origin/master --name-only --diff-filter=ACM -- '*.js*')
 if [[ -n "$staged" ]];then
   echo "Staged"
   echo "$staged"
