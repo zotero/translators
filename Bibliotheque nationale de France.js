@@ -390,7 +390,24 @@ var BnfClass = function() {
 		}
 	};
 
-
+	function getCote(record, item) {
+		item.callNumber="";		
+		 var coteTag = record.getFieldSubfields("930");
+		
+		if(coteTag.length) {
+								
+			/*
+			var i;
+			for(i=0; i<coteTag.length-1; i++) {
+				item.callNumber += coteTag[i]['a'] + ";";
+			}	
+			item.callNumber += coteTag[i]['a'];
+			*/
+			item.callNumber += coteTag[0]['c'] + "-" + coteTag[0]['a'];
+						
+		}
+	};
+	
 	//Do BnF specific Unimarc postprocessing
 	function postprocessMarc(record, newItem) {
 		
@@ -399,11 +416,27 @@ var BnfClass = function() {
 
 		//Fix creators
 		getCreators(record, newItem);
-
-		//Store perennial url from 009 as attachment and accession number
+		
+		//Fix callNumber
+		getCote(record, newItem) ;
+		 
+		//Store perennial url from 003 as attachment and accession number
+		
 		var url = record.getField("003");
 		if(url && url.length > 0 && url[0][1]) {
-			newItem.url = url[0][1];
+			newItem.attachments.push({
+			title: 'Lien vers la notice du catalogue',
+			url: url[0][1],
+			mimeType: 'text/html',
+			snapshot: false
+		});
+		//also add snapshot using permalink so that right-click -> View Online works
+		newItem.attachments.push({
+			title: 'Lien vers la notice du catalogue Snapshot',
+			url: url[0][1],
+			mimeType: 'text/html',
+			snapshot: true
+		});
 		}
 
 		//Country (102a)
@@ -506,14 +539,8 @@ var BnfClass = function() {
         var url = record.getFieldSubfields("856");
 		
 		if(url && url.length > 0 && url[0].u) {		
-		 item.attachments = [
-				{
-					url: url[0].u,
-					title: "Bnf Gallica entry", 
-					mimeType: "text/html", 
-					snapshot:false
-				}
-			];
+		 item.url = url[0].u;
+		 
 			}
 		
 		}
@@ -565,7 +592,10 @@ var BnfClass = function() {
 					}
 				}
 			}
-				
+			// case last zone
+			if(tag) {
+						record.addField(tag, ind, content);
+					}	
 			//Create item
 			var newItem = new Zotero.Item();
 			record.translate(newItem);
