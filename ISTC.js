@@ -3,7 +3,7 @@
 	"label": "ISTC",
 	"creator": "Maike Kittelmann",
 	"target": "^https?://data\\.cerl\\.org/istc/(_search|i[a-z]\\d{8})",
-	"minVersion": "1",
+	"minVersion": "",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
@@ -11,7 +11,6 @@
 	"browserSupport": "gcs",
 	"lastUpdated": "2016-09-28 13:09:43"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -151,6 +150,7 @@ function scrape_old( items ) {
 
 
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -197,4 +197,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
-
