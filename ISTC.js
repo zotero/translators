@@ -3,7 +3,7 @@
 	"label": "ISTC",
 	"creator": "Maike Kittelmann",
 	"target": "^https?://data\\.cerl\\.org/istc/(_search|i[a-z]\\d{8})",
-	"minVersion": "",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
