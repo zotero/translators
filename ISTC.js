@@ -1,3 +1,18 @@
+{
+	"translatorID": "29051e64-8eba-4b26-bbf1-0c224bc59497",
+	"label": "ISTC",
+	"creator": "Maike Kittelmann",
+	"target": "^https?://data\\.cerl\\.org/istc/(_search|i[a-z]\\d{8})",
+	"minVersion": "1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcs",
+	"lastUpdated": "2016-09-28 13:09:43"
+}
+
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
