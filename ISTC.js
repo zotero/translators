@@ -49,22 +49,14 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly, url) {
 	var items = { };
 	var found = false;
-	if (url.match('_search?')){
-		var rows = ZU.xpath(doc, '//p[contains(@class, "ample-shortlist-item-entry")]/a[contains(@href, "/istc/i")]' );
-		for (i=0; i<rows.length; i++) {
-			var title = ZU.trimInternal(rows[i].textContent);
-			var href = rows[i].href + '?format=json';
-			if (!href || !title) continue;
-			if (checkOnly) return true;
-			found = true;
-			items[href] = title;
-		}
-	}
-	else {
-		var title = ZU.trimInternal( ZU.xpath(doc, '//div[contains(@class, "ample-record")]/h3' )[0].textContent );
-		if (!title) return false;
+	var rows = ZU.xpath(doc, '//p[contains(@class, "ample-shortlist-item-entry")]/a[contains(@href, "/istc/i")]' );
+	for (i=0; i<rows.length; i++) {
+		var title = ZU.trimInternal(rows[i].textContent);
+		var href = rows[i].href + '?format=json';
+		if (!href || !title) continue;
 		if (checkOnly) return true;
-		items[url] = title;
+		found = true;
+		items[href] = title;
 	}
 	return found ? items : false;
 }
