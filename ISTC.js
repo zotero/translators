@@ -36,13 +36,12 @@
 
 
 function detectWeb(doc, url) {
-	if ( getSearchResults(doc, true, url) ) {
-		if (url.match('_search?')){
+	if ( url.indexOf('_search?') != -1 && getSearchResults(doc, true, url) ) {
 			return "multiple";
-		}
-		else if (url.match(/i[a-z]\d{8}/)){
-			return 'book';
-		}
+	}
+	else if (url.search(/i[a-z]\d{8}/) != -1){
+		var title = ZU.trimInternal( ZU.xpath(doc, '//div[contains(@class, "ample-record")]/h3' )[0].textContent );
+		if (title){	return 'book'; }
 	}
 }
 
