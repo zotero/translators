@@ -112,36 +112,6 @@ function scrape( response, obj, url ) {
 }
 
 
-function scrape_old( items ) {
-	for each (url in Object.keys( items ) ){
-		var response = httpGet( url );
-		var jsonObject = JSON.parse(response);
-		var item = new Zotero.Item();
-		var name =  jsonObject.data.author;
-		var cleanNameObj = Zotero.Utilities.cleanAuthor(name, "author", true);
-		item.url = url.replace('?format=json', '');
-		item.creators[0] = cleanNameObj;
-		item.title = jsonObject.data.title;
-		item.place = jsonObject.data.imprint[0].imprint_place;
-		item.publisher = jsonObject.data.imprint[0].imprint_name;
-		item.date = jsonObject.data.imprint[0].imprint_date;
-		item.notes += [ jsonObject.data.imprint[0].geo_info.geonames_id || '' ] ;
-		item.callNumber = 'ISTC' + jsonObject._id;
-		item.extra = jsonObject.data.notes[0];
-		item.language = jsonObject.data.language_of_item;
-		item.seeAlso = [ jsonObject.data.references[0].reference_name + ' ' + jsonObject.data.references[0].reference_location_in_source ];
-		item.libraryCatalog = 'Incunabula Short Title Catalogue (ISTC)';
-		item.tags = ['incunabula', 'istc'] ;
-		item.accessed = new Date().toString();
-		item.itemType = "book";
-		item.complete();
-	}
-}
-
-
-
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
