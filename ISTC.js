@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-09-28 13:09:43"
+	"lastUpdated": "2016-09-30 11:04:52"
 }
 
 /*
@@ -83,26 +83,42 @@ function doWeb(doc, url) {
 
 function scrape( response, obj, url ) {
 		var jsonObject = JSON.parse( response );
-		var item = new Zotero.Item();
-		var name =  jsonObject.data.author;
-		var cleanNameObj = Zotero.Utilities.cleanAuthor(name, "author", true);
-		item.creators[0] = cleanNameObj;
-		item.title = jsonObject.data.title;
+		var data = jsonObject.data;
+		var item = new Zotero.Item('book');
+
+		var name = data.author;
+		item.creators.push( Zotero.Utilities.cleanAuthor(name, "author", true) )
+		
+		item.title = data.title;
 		item.url = url.replace('?format=json', '');
-		item.place = jsonObject.data.imprint[0].imprint_place;
-		item.publisher = jsonObject.data.imprint[0].imprint_name;
-		item.date = jsonObject.data.imprint[0].imprint_date;
-		item.notes = [ jsonObject.data.imprint[0].geo_info.geonames_id || '' ] ;
-		item.callNumber = 'ISTC' + jsonObject._id;
-		item.extra = jsonObject.data.notes[0];
-		item.language = jsonObject.data.language_of_item;
-		item.seeAlso = [ jsonObject.data.references[0].reference_name + ' ' + jsonObject.data.references[0].reference_location_in_source ];
+
+		var imprint = data.imprint[0];
+		item.place = ( imprint.imprint_place || '');
+		item.publisher = ( imprint.imprint_name || '');
+		item.date = ( imprint.imprint_date || '');
+		
+		if (data.notes) { item.notes.push( data.notes[0]); }
+
+		if (imprint.geo_info && imprint.geo_info[0].geonames_id) { item.notes.push( 'Geonames identifier of printing place: ' + imprint.geo_info[0].geonames_id ); }
+		
+		if (data.references){
+			var concatRef = '';
+			for each (var ref in data.references){
+				var refName = (ref.reference_name || '');
+				var refLoc = (ref.reference_location_in_source || '');
+				concatRef += ( refName + ' ' + refLoc  + '; ' );
+			}
+			concatRef = concatRef.replace(/; $/, '');
+			item.notes.push( 'References: ' + concatRef );
+		}
+
+		item.callNumber = 'ISTC ' + jsonObject._id;
+		item.language = ( data.language_of_item || '');
 		item.libraryCatalog = 'Incunabula Short Title Catalogue (ISTC)';
 		item.tags = ['incunabula', 'istc'] ;
 		item.accessed = new Date().toString();
-		item.itemType = "book";
 		// // Uncomment the following if you always want to save the page as attachment:
-		// item.attachments = [{
+		//  item.attachments = [{
 		//	url: url.replace('?format=json', ''),
 		//	title: "ISTC",
 		//	mimeType: "text/html",
