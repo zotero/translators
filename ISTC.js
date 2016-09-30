@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-09-30 11:04:52"
+	"lastUpdated": "2016-09-30 11:22:17"
 }
 
 /*
@@ -145,8 +145,7 @@ var testCases = [
 					}
 				],
 				"date": "3 Aug. 1493",
-				"callNumber": "ISTCif00117000",
-				"extra": "Contains extracts from Latin translations of Aristotle by Leonardus Brunus Aretinus, etc. The translation of De mirabilibus auscultationibus by Antonius Beccaria is given entire (ff.113-128v)",
+				"callNumber": "ISTC if00117000",
 				"language": "lat",
 				"libraryCatalog": "Incunabula Short Title Catalogue (ISTC)",
 				"place": "Venice",
@@ -159,17 +158,17 @@ var testCases = [
 					"istc"
 				],
 				"notes": [
-					""
+					"Contains extracts from Latin translations of Aristotle by Leonardus Brunus Aretinus, etc. The translation of De mirabilibus auscultationibus by Antonius Beccaria is given entire (ff.113-128v)",
+					"Geonames identifier of printing place: 3164603",
+					"References: Goff F117; HC(+Add) 6997* ; Klebs 395.1; Pell 4777; Buffévent 199; Fernillot 239; Parguez 426; Zehnacker 878; Polain(B) 1475; IGI 3840; IBP 2172; IBPort 705; IBE 2419; SI 1519; CCIR F-6; IJL2 170; Badalić(Croatia) 444; Madsen 1571; Mendes 524; Martín Abad F-17; Sallander 1716; Coll(S) 1233; Sack(Freiburg) 1426; Hubay(Augsburg) 802; Voull(Trier) 1915; Schlechter-Ries 1707; Voull(B) 3875; Günt(L) 3226; Walsh 1986, 1987; Bod-inc F-022; Sheppard 3898; Rhodes(Oxford Colleges) 768; Pr 4531; BMC V 344; BSB-Ink F-82; GW 9826"
 				],
-				"seeAlso": [
-					"Goff F117"
-				]
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://data.cerl.org/istc/_search?query=aristotle",
+		"url": "http://data.cerl.org/istc/_search?query=aristotle&from=0&size=10&mode=default&sort=default",
 		"items": "multiple"
 	}
 ]
