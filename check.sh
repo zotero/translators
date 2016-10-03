@@ -20,6 +20,10 @@ if [[ -n "$noduplicate" ]];then
   exit 1
 fi
 
+echo "CHECK that all translators have correct file mode (644)"
+# e.g. https://github.com/zotero/translators/commit/48d929051ffa3b91aa8385dc0ab7a81166cf96cf
+# stat -c "%a" *.js
+
 
 #list all commits where files are deleted
 commits=$(git --no-pager log --diff-filter=D --pretty="%H")
@@ -67,6 +71,7 @@ if [[ -n "$staged" ]];then
   # Metadata must be parsable JSON
   # Javascript
   # JSON.parse
+  # e.g. https://github.com/zotero/translators/commit/a150383352caebb892720098175dbc958149be43
 
   # Javascript must be parsable Javascript
   # https://github.com/UB-Mannheim/zotkat/blob/master/jshint.sh
