@@ -107,11 +107,6 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.eurogamer.net/games/earthbound-beginnings",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.eurogamer.net/search.php",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

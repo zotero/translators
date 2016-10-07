@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-12-14 16:36:31"
+	"lastUpdated": "2016-09-14 05:28:16"
 }
 
 /*
@@ -84,7 +84,7 @@ function doWeb(doc,url) {
 				var ISSN = item.ISSN.match(/[0-9Xx]{4}\-[0-9Xx]{4}/);
 				if (ISSN) item.ISSN = ISSN[0]
 			}
-			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
+			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN.replace('ISBN', ''));
 			if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
 			if (DOI){
 				DOImatch = decodeURIComponent(DOI).match(/doi\.org\/(10\..+)/);
