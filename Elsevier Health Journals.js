@@ -102,6 +102,10 @@ function doWeb(doc,url)
 					if(kw) item.tags.push(kw);		
 				}
 			}
+			//remove duplicate PMIDs
+			if (item.extra) {
+				item.extra = item.extra.replace(/(^PMID: \d+),.+/, "$1");
+			}
 			item.abstractNote = abstract;
 			item.complete();
 		});
@@ -265,7 +269,7 @@ var testCases = [
 				"DOI": "10.3109/14653249.2011.634404",
 				"ISSN": "1465-3249",
 				"abstractNote": "Background aims\nUmbilical cord blood (UCB) is a source of hematopoietic stem cells that initially was used exclusively for the hematopoietic reconstitution of pediatric patients. It is now suggested for use for adults as well, a fact that increases the pressure to obtain units with high cellularity. Therefore, the optimization of UCB processing is a priority.\nMethods\nThe present study focused on parameters influencing total nucleated cell (TNC), mononucleated cell (MNC) and CD34 + cell (CD34C) recovery after routine volume reduction of 1553 UCB units using hydroxyethyl starch-induced sedimentation with an automated device, under routine laboratory conditions.\nResults\nWe show that the unit volume rather than the TNC count significantly affects TNC, MNC and CD34C processing efficiency (PEf), and this in a non-linear fashion: when units were sampled according to the collection volume, including pre-loaded anticoagulant (gross volume), PEf increased up to a unit volume of 110–150 mL and decreased thereafter. Thus units with initial gross volumes < 90 mL and > 170 mL similarly exhibited a poor PEf.\nConclusions\nThese data identify unit gross volume as a major parameter influencing PEf and suggest that fractionation of large units should be contemplated only when the resulting volume of split units is > 90 mL.",
-				"extra": "PMID: 22136296, 22136296",
+				"extra": "PMID: 22136296",
 				"issue": "2",
 				"journalAbbreviation": "Cytotherapy",
 				"language": "English",
