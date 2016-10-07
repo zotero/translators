@@ -93,7 +93,7 @@ function scrape(doc, url) {
 			//additional data from metadata side
 			item.publisher = extractField("Verlag", text );
 			item.place = extractField("Erscheinungsort", text );
-			item.issn = extractField("ISSN", text );
+			item.ISSN = extractField("ISSN", text );
 			//finalize
 			item.libraryCatalog = "DigiZeitschriften";
 			item.url = url;
