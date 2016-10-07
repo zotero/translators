@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-05-08 23:06:53"
+	"lastUpdated": "2016-09-12 20:57:07"
 }
 
 /*
@@ -34,9 +34,13 @@
 	***** END LICENSE BLOCK *****
 */
 
+
 function detectWeb(doc, url) {
 	if (url.indexOf("/img/") != -1 || url.indexOf("index.php?id=274") != -1 ) {//e.g. http://www.digizeitschriften.de/index.php?id=274&PPN=PPN342672002_0020&DMDID=dmdlog84&L=2
-		return "journalArticle";
+		var title = ZU.xpathText(doc, '//div[contains(@class, "goobit3-image__title")]');
+		if (title != "Zeitschriftenheft" && title != "Inhaltsverzeichnis" && title != "Impressum" && title != "Titelseite") {
+			return "journalArticle";
+		}
 	} else if ( (url.indexOf("/toc/") != -1 || url.indexOf("index.php?id=272")) && getSearchResults(doc).length>0) {
 		return "multiple";
 	}
@@ -44,8 +48,9 @@ function detectWeb(doc, url) {
 
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//span[contains(@class, "sitetitle") and ./parent::a/following-sibling::div]');
+	return ZU.xpath(doc, '//div/a[contains(@class, "goobit3-toc-item__site-title")]');
 }
+
 
 function doWeb(doc, url) {
 	var articles = new Array();
@@ -53,7 +58,7 @@ function doWeb(doc, url) {
 		var items = {};
 		var titles = getSearchResults(doc);
 		for (var i=0; i<titles.length; i++) {
-			items[titles[i].parentNode.href] = titles[i].textContent;
+			items[titles[i].href] = titles[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -70,84 +75,52 @@ function doWeb(doc, url) {
 }
 
 
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+
+	translator.setHandler('itemDone', function (obj, item) {
+		var metadataUrl = ZU.xpathText(doc, '//ul[contains(@class, "subnav")]/li[2]/a/@href');
+		//fix relative urls which don't start with a backslash
+		if (metadataUrl.indexOf('http') != 0 && metadataUrl[0] != "/") {
+			metadataUrl = "/" + metadataUrl;
+		}
+		//redirect metadata lookup such that labels are always German 
+		metadataUrl = metadataUrl.replace('/en/', '/');
+		//Z.debug(metadataUrl);
+		ZU.doGet(metadataUrl, function(text) {
+			//additional data from metadata side
+			item.publisher = extractField("Verlag", text );
+			item.place = extractField("Erscheinungsort", text );
+			item.ISSN = extractField("ISSN", text );
+			//finalize
+			item.libraryCatalog = "DigiZeitschriften";
+			item.url = url;
+			item.tags = [];
+			delete item.abstractNote; 
+			item.complete();
+		});
+		
+		
+	});
+	
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
+}
+
+
 function extractField(fieldName, text) {
 	//extracts the value of the field with the name 'fieldName'
 	//in the text 'text' and returns it
-	var expression = new RegExp("<span>\\s*<strong>\\s*"+fieldName+":?\\s*</strong>\\s*</span>\\s*<span>([^<]*)</span>");
+	var expression = new RegExp('<span[^>]*>\\s*'+fieldName+":?\\s*</span>\\s*<span>([^<]*)</span>");
 	var extraction = text.match(expression);
 	if (extraction) {
 		return extraction[1];
 	} else {
 		return false;
 	}
-}
-
-
-function scrape(doc, url) {
-	var metadataUrl = ZU.xpath(doc, '//ul[@id="submenu"]/li[2]/a')[0].href.replace("/en/", "/");
-	var item = new Zotero.Item("journalArticle");
-	ZU.doGet(metadataUrl, function(text) {
-		var structure = {};
-		var type;
-		var posBefore = text.indexOf('<ul xmlns:mods="http://www.loc.gov/mods/v3">');
-		var posAfter = text.indexOf('<ul xmlns:mods="http://www.loc.gov/mods/v3">', posBefore+1);
-		while (posAfter>-1) {
-			type = extractField("Strukturtyp", text.substring(posBefore, posAfter) );
-			structure[type] = [posBefore, posAfter];
-			posBefore = posAfter;
-			posAfter = text.indexOf('<ul xmlns:mods="http://www.loc.gov/mods/v3">', posBefore+1);
-		}
-		type = extractField("Strukturtyp", text.substring(posBefore) );
-		structure[type] = [posBefore, text.length];
-		//Z.debug(structure);
-		
-		var articleData;
-		//check whether last type was article or something similar
-		if (type != "Zeitschrift" && type != "Zeitschriftenband" && type != "Zeitschriftheft" && type != "Zeitschriftenteil") {
-			articleData = text.substring(structure[type][0], structure[type][1]);
-		} else {
-			Z.debug(structure);
-			throw new Error('Unsupported item type.');
-		}
-		
-		item.title = extractField("Titel", articleData );
-		
-		var author = extractField("Autor", articleData );
-		if (author) {
-			item.creators.push( ZU.cleanAuthor( author, "author") );
-		}
-		
-		if (structure["Zeitschriftenheft"]) {
-			var issueData = text.substring(structure["Zeitschriftenheft"][0], structure["Zeitschriftenheft"][1]);
-			item.issue = extractField("Titel", issueData);
-		}
-		
-		if (structure["Zeitschriftenband"]) {
-			var volumeData = text.substring(structure["Zeitschriftenband"][0], structure["Zeitschriftenband"][1]);
-			item.publication = extractField("Titel", volumeData );
-			item.volume = extractField("Band", volumeData );
-			item.date = extractField("Erscheinungsjahr", volumeData );
-			item.publisher = extractField("Verlag", volumeData );
-		}
-		
-		if (structure["Zeitschrift"]) {
-			var journalData = text.substring(structure["Zeitschrift"][0], structure["Zeitschrift"][1]);
-			item.place = extractField("Erscheinungsort", journalData );
-			item.issn = extractField("ISSN", journalData );
-		}
-		
-		var pages = ZU.xpathText(doc, '(//span[contains(@class, "struct")])[last()]');
-		pages = pages.match(/(?:\d+\s*-\s*)?\d+\s*$/);
-		if (pages) item.pages = pages[0].replace(/\s+/g, '');
-		
-		item.attachments = [{
-			title: "Snapshot",
-			document:doc
-		}];
-		
-		item.complete();
-	});
-	
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -157,6 +130,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Quadratische Identitäten bei Polygonen.",
 				"creators": [
 					{
 						"firstName": "Wolfgang",
@@ -164,23 +138,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1997",
+				"libraryCatalog": "DigiZeitschriften",
+				"pages": "117-143",
+				"ISSN": "0001-9054",
+				"publicationTitle": "Aequationes Mathematicae",
+				"url": "http://www.digizeitschriften.de/dms/img/?PPN=PPN356261603_0054&DMDID=dmdlog15",
+				"volume": "54",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Quadratische Identitäten bei Polygonen.",
-				"publication": "Aequationes Mathematicae",
-				"volume": "54",
-				"date": "1997",
-				"publisher": "Birkhäuser",
-				"place": "Basel",
-				"issn": "0001-9054",
-				"pages": "117-143",
-				"libraryCatalog": "DigiZeitschriften"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -190,6 +162,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Quadratische Identitäten bei Polygonen.",
 				"creators": [
 					{
 						"firstName": "Wolfgang",
@@ -197,23 +170,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1997",
+				"libraryCatalog": "DigiZeitschriften",
+				"pages": "117-143",
+				"ISSN": "0001-9054",
+				"publicationTitle": "Aequationes Mathematicae",
+				"url": "http://www.digizeitschriften.de/en/dms/img/?PPN=GDZPPN002612097",
+				"volume": "54",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Quadratische Identitäten bei Polygonen.",
-				"publication": "Aequationes Mathematicae",
-				"volume": "54",
-				"date": "1997",
-				"publisher": "Birkhäuser",
-				"place": "Basel",
-				"issn": "0001-9054",
-				"pages": "117-143",
-				"libraryCatalog": "DigiZeitschriften"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -223,30 +194,33 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Die Soundness des Prädikatenkalküls auf der Basis der Quineschen Regeln.",
 				"creators": [
 					{
 						"firstName": "Hans",
 						"lastName": "Hermes",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Heinz",
+						"lastName": "Gumin",
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"libraryCatalog": "DigiZeitschriften",
+				"pages": "68-77",
+				"ISSN": "0003-9268",
+				"publicationTitle": "Archiv für mathematische Logik und Grundlagenforschung",
+				"url": "http://www.digizeitschriften.de/dms/img/?PPN=PPN379931524_0002&DMDID=dmdlog10",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Die Soundness des Prädikatenkalküls auf der Basis der Quineschen Regeln.",
-				"publication": "Archiv für mathematische Logik und Grundlagenforschung",
-				"volume": "2",
-				"date": "1954/56",
-				"publisher": "Kohlhammer",
-				"place": "Berlin",
-				"issn": "0003-9268",
-				"pages": "68-77",
-				"libraryCatalog": "DigiZeitschriften"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -256,6 +230,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Quadratische Identitäten bei Polygonen.",
 				"creators": [
 					{
 						"firstName": "Wolfgang",
@@ -263,23 +238,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1997",
+				"libraryCatalog": "DigiZeitschriften",
+				"pages": "117-143",
+				"ISSN": "0001-9054",
+				"publicationTitle": "Aequationes Mathematicae",
+				"url": "http://www.digizeitschriften.de/dms/img/?PPN=GDZPPN002612097",
+				"volume": "54",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Quadratische Identitäten bei Polygonen.",
-				"publication": "Aequationes Mathematicae",
-				"volume": "54",
-				"date": "1997",
-				"publisher": "Birkhäuser",
-				"place": "Basel",
-				"issn": "0001-9054",
-				"pages": "117-143",
-				"libraryCatalog": "DigiZeitschriften"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
