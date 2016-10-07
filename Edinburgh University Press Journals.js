@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-01-22 02:43:55"
+	"lastUpdated": "2016-09-13 21:55:09"
 }
 
 /*
@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	return ZU.xpath(doc,
 		'//div[@class="articleInfo"]/p[@class="title"]/a[contains(@href, "/doi/abs/")][1]|\
-		//div[@class="art_title"]/a[contains(@href, "/doi/abs/")][1]');
+		//div[contains(@class, "art_title")]/a[contains(@href, "/doi/abs/")][1]');
 }
 
 function doWeb(doc, url) {
@@ -132,6 +132,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Influence of Western Qur'anic Scholarship in Turkey",
 				"creators": [
 					{
 						"lastName": "Koç",
@@ -139,15 +140,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Tafsir",
-					"Exegesis",
-					"Orientalist studies",
-					"Turkish higher education",
-					"Divinity Faculties in Turkey"
-				],
-				"seeAlso": [],
+				"date": "April 1, 2012",
+				"DOI": "10.3366/jqs.2012.0036",
+				"ISSN": "1465-3591",
+				"abstractNote": "After first surveying the development of academic studies of Islam within the modern Turkish higher education system, this essay provides an inventory of material that has been translated from Western languages into Turkish. It is inevitable that orientalist studies will have a place of tremendous importance in this analysis. However, approaches to the Qur'an and its exegesis which have been developed under the influence of the Western scientific and cultural world encompass a larger range of literature that includes not only the orientalist studies themselves but also the criticisms directed against these studies. Particular attention is paid to the work of Fazlur Rahman and Arab scholars influenced by Western methods, and an assessment of the various issues related to the critique of orientalist works is provided.",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"issue": "1",
+				"journalAbbreviation": "J Qur'anic Studies",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "9-44",
+				"publicationTitle": "Journal of Qur'anic Studies",
+				"publisher": "Edinburgh University Press",
+				"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
+				"volume": "14",
 				"attachments": [
 					{
 						"title": "EUP Snapshot",
@@ -158,26 +163,21 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "The Influence of Western Qur'anic Scholarship in Turkey",
-				"date": "April 1, 2012",
-				"DOI": "10.3366/jqs.2012.0036",
-				"publicationTitle": "Journal of Qur'anic Studies",
-				"journalAbbreviation": "J Qur'anic Studies",
-				"pages": "9-44",
-				"volume": "14",
-				"issue": "1",
-				"publisher": "Edinburgh University Press",
-				"ISSN": "1465-3591",
-				"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
-				"abstractNote": "After first surveying the development of academic studies of Islam within the modern Turkish higher education system, this essay provides an inventory of material that has been translated from Western languages into Turkish. It is inevitable that orientalist studies will have a place of tremendous importance in this analysis. However, approaches to the Qur'an and its exegesis which have been developed under the influence of the Western scientific and cultural world encompass a larger range of literature that includes not only the orientalist studies themselves but also the criticisms directed against these studies. Particular attention is paid to the work of Fazlur Rahman and Arab scholars influenced by Western methods, and an assessment of the various issues related to the critique of orientalist works is provided.",
-				"libraryCatalog": "Edinburgh University Press Journals",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Divinity Faculties in Turkey",
+					"Exegesis",
+					"Orientalist studies",
+					"Tafsir",
+					"Turkish higher education"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.euppublishing.com/action/doSearch?allowEmptyTermQuery=true&title=labour&author=&pubidspan=&pubType=journal&fulltext=labour&pageSize=10&sortBy=false&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=&categoryId=all",
+		"url": "http://www.euppublishing.com/action/doSearch?AllField=labour",
 		"items": "multiple"
 	}
 ]

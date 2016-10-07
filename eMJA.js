@@ -54,7 +54,7 @@ attachments      : [{
   }],
 // here, we use the replace(..) to break names on &nbsp;
 creators         : FW.Xpath('//div[@id="authors_list"]')
-                    .text().split(/\s*,\s*|\sand\s/," ").cleanAuthor("author"),
+					.text().split(/\s*,\s*|\sand\s/," ").cleanAuthor("author"),
 volume           : FW.Xpath('//div[@id="meta-container"]/div/div[@class="field-items"]/div').text().match(/;\s*\d+\s*\(/).replace(/\(|;\s*/g, ""),
 date			 : FW.Xpath('//div[@id="meta-container"]/div/div[@class="field-items"]/div').text().match(/\d{4};/).replace(/;/, ""),
 issue            : FW.Xpath('//div[@id="meta-container"]/div/div[@class="field-items"]/div').text().match(/\(\d+\)/).replace(/\(|\)/g, ""),
@@ -80,6 +80,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Socioeconomic disparities in stroke rates and outcome: pooled analysis of stroke incidence studies in Australia and New Zealand",
 				"creators": [
 					{
 						"firstName": "Emma L.",
@@ -122,31 +123,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"ISSN": "0025-729X",
+				"abstractNote": "Abstract Objective:   To assess the influence of area-level socioeconomic status (SES) on incidence and case-fatality rates for stroke.Design, setting and participants:   Analysis of pooled data for 3077 patients with incident stroke from three population-based studies in Perth, Melbourne, and Auckland between 1995 and 2003.Main outcome measures:   Incidence and 12-month case-fatality rates for stroke.Results:   Annual age-standardised stroke incidence rates ranged from 77 per 100 000 person-years (95% CI, 72–83) in the least deprived areas to 131 per 100 000 person-years (95% CI, 120–141) in the most deprived areas (rate ratio, 1.70; 95% CI, 1.47–1.95; P < 0.001). The population attributable risk of stroke was 19% (95% CI, 12%–27%) for those living in the most deprived areas compared with the least deprived areas. Compared with people in the least deprived areas, those in the most deprived areas tended to be younger (mean age, 68 v 77 years; P < 0.001), had more comorbidities such as hypertension (58% v 51%; P < 0.001) and diabetes (22% v 12%; P < 0.001), and were more likely to smoke (23% v 8%; P < 0.001). After adjustment for age, area-level SES was not associated with 12-month case-fatality rate.Conclusions:   Our analysis provides evidence that people living in areas that are relatively more deprived in socioeconomic terms experience higher rates of stroke. This may be explained by a higher prevalence of risk factors among these populations, such as hypertension, diabetes and cigarette smoking. Effective preventive measures in the more deprived areas of the community could substantially reduce rates of stroke.",
+				"issue": "1",
+				"journalAbbreviation": "Med. J. Aust.",
+				"libraryCatalog": "eMJA",
+				"publicationTitle": "Medical Journal of Australia",
+				"shortTitle": "Socioeconomic disparities in stroke rates and outcome",
+				"url": "https://www.mja.com.au/journal/2011/195/1/socioeconomic-disparities-stroke-rates-and-outcome-pooled-analysis-stroke",
+				"volume": "195",
 				"attachments": [
 					{
 						"title": "eMJA - Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					},
 					{
 						"title": "eMJA - Full Text PDF",
-						"type": "application/pdf"
+						"mimeType": "application/pdf"
 					}
 				],
-				"url": "https://www.mja.com.au/journal/2011/195/1/socioeconomic-disparities-stroke-rates-and-outcome-pooled-analysis-stroke",
-				"abstractNote": "Abstract Objective:   To assess the influence of area-level socioeconomic status (SES) on incidence and case-fatality rates for stroke.Design, setting and participants:   Analysis of pooled data for 3077 patients with incident stroke from three population-based studies in Perth, Melbourne, and Auckland between 1995 and 2003.Main outcome measures:   Incidence and 12-month case-fatality rates for stroke.Results:   Annual age-standardised stroke incidence rates ranged from 77 per 100 000 person-years (95% CI, 72–83) in the least deprived areas to 131 per 100 000 person-years (95% CI, 120–141) in the most deprived areas (rate ratio, 1.70; 95% CI, 1.47–1.95; P < 0.001). The population attributable risk of stroke was 19% (95% CI, 12%–27%) for those living in the most deprived areas compared with the least deprived areas. Compared with people in the least deprived areas, those in the most deprived areas tended to be younger (mean age, 68 v 77 years; P < 0.001), had more comorbidities such as hypertension (58% v 51%; P < 0.001) and diabetes (22% v 12%; P < 0.001), and were more likely to smoke (23% v 8%; P < 0.001). After adjustment for age, area-level SES was not associated with 12-month case-fatality rate.Conclusions:   Our analysis provides evidence that people living in areas that are relatively more deprived in socioeconomic terms experience higher rates of stroke. This may be explained by a higher prevalence of risk factors among these populations, such as hypertension, diabetes and cigarette smoking. Effective preventive measures in the more deprived areas of the community could substantially reduce rates of stroke.",
-				"date": "2011",
-				"ISSN": "0025-729X",
-				"issue": "1",
-				"journalAbbreviation": "Med. J. Aust.",
-				"publicationTitle": "Medical Journal of Australia",
-				"title": "Socioeconomic disparities in stroke rates and outcome: pooled analysis of stroke incidence studies in Australia and New Zealand",
-				"volume": "195",
-				"libraryCatalog": "eMJA",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Socioeconomic disparities in stroke rates and outcome"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

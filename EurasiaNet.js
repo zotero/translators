@@ -71,6 +71,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Central Asia: Can Expanded Trade Pacify an Unsettled Region?",
 				"creators": [
 					{
 						"firstName": "Joshua",
@@ -78,27 +79,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "October 31, 2011",
+				"libraryCatalog": "EurasiaNet",
+				"publicationTitle": "EurasiaNet",
+				"shortTitle": "Central Asia",
+				"url": "http://www.eurasianet.org/node/64419",
+				"attachments": [
+					{
+						"title": "EurasiaNet Printable",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Central Asia",
 					"EurasiaNet's Weekly Digest",
 					"Trade"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.eurasianet.org/print/64419",
-						"title": "EurasiaNet Printable",
-						"type": "text/html"
-					}
-				],
-				"url": "http://www.eurasianet.org/node/64419",
-				"date": "October 31, 2011",
-				"publicationTitle": "EurasiaNet",
-				"title": "Central Asia: Can Expanded Trade Pacify an Unsettled Region?",
-				"libraryCatalog": "EurasiaNet",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Central Asia"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
