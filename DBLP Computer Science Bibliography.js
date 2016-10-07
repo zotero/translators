@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-04-03 16:48:03"
+	"lastUpdated": "2016-09-11 19:41:55"
 }
 
 function detectWeb(doc, url) {
@@ -130,10 +130,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.dblp.org/rec/bibtex/journals/cssc/XuY12",
+		"url": "http://dblp.org/rec/bibtex/journals/cssc/XuY12",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "On the Preliminary Test Backfitting and Speckman Estimators in Partially Linear Models and Numerical Comparisons",
 				"creators": [
 					{
 						"firstName": "Jianwen",
@@ -146,28 +147,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2012",
+				"DOI": "10.1080/03610918.2011.588356",
+				"issue": "3",
 				"itemID": "DBLP:journals/cssc/XuY12",
-				"title": "On the Preliminary Test Backfitting and Speckman Estimators in Partially Linear Models and Numerical Comparisons",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"pages": "327–341",
 				"publicationTitle": "Communications in Statistics - Simulation and Computation",
 				"volume": "41",
-				"issue": "3",
-				"date": "2012",
-				"pages": "327-341",
-				"DOI": "10.1080/03610918.2011.588356",
-				"libraryCatalog": "DBLP Computer Science Bibliography"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.dblp.org/rec/bibtex/conf/ats/KochteZBIWHCP10",
+		"url": "http://dblp.org/rec/bibtex/conf/ats/KochteZBIWHCP10",
 		"items": [
 			{
 				"itemType": "conferencePaper",
+				"title": "Efficient Simulation of Structural Faults for the Reliability Evaluation at System-Level",
 				"creators": [
 					{
 						"firstName": "Michael A.",
@@ -210,20 +211,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "DBLP:conf/ats/KochteZBIWHCP10",
-				"title": "Efficient Simulation of Structural Faults for the Reliability Evaluation at System-Level",
-				"publicationTitle": "Asian Test Symposium",
 				"date": "2010",
-				"pages": "3-8",
+				"DOI": "10.1109/ATS.2010.10",
+				"ISBN": "9780769542485",
+				"itemID": "DBLP:conf/ats/KochteZBIWHCP10",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"pages": "3–8",
 				"proceedingsTitle": "Proceedings of the 19th IEEE Asian Test Symposium, ATS 2010, 1-4 December 2010, Shanghai, China",
 				"publisher": "IEEE Computer Society",
-				"ISBN": "978-0-7695-4248-5",
-				"DOI": "10.1109/ATS.2010.10",
-				"libraryCatalog": "DBLP Computer Science Bibliography"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -248,6 +247,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "conferencePaper",
+				"title": "On the Average Sensitivity and Density of k-CNF Formulas",
 				"creators": [
 					{
 						"firstName": "Dominik",
@@ -280,22 +280,20 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "DBLP:conf/approx/SchederT13",
-				"title": "On the Average Sensitivity and Density of k-CNF Formulas",
-				"publicationTitle": "APPROX-RANDOM",
 				"date": "2013",
-				"pages": "683-698",
+				"DOI": "10.1007/978-3-642-40328-6_47",
+				"ISBN": "9783642403279",
+				"itemID": "DBLP:conf/approx/SchederT13",
+				"libraryCatalog": "DBLP Computer Science Bibliography",
+				"pages": "683–698",
 				"proceedingsTitle": "Approximation, Randomization, and Combinatorial Optimization. Algorithms and Techniques - 16th International Workshop, APPROX 2013, and 17th International Workshop, RANDOM 2013, Berkeley, CA, USA, August 21-23, 2013. Proceedings",
 				"publisher": "Springer",
 				"series": "Lecture Notes in Computer Science",
 				"volume": "8096",
-				"ISBN": "978-3-642-40327-9",
-				"DOI": "10.1007/978-3-642-40328-6_47",
-				"libraryCatalog": "DBLP Computer Science Bibliography"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
