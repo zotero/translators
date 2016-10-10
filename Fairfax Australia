@@ -3,7 +3,7 @@
 	"label": "Fairfax Australia",
 	"creator": "Martin Lewis",
 	"target": "^https?://www\\.(theage|smh|brisbanetimes|watoday)\\.com\\.au/",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
