@@ -17,8 +17,9 @@ function scrape(doc) {
 	item.title = ZU.xpathText(doc, '(//meta[@name="title" or @property="og:title"]/@content)[1]') ||
 				ZU.xpathText(doc, '/html/head/title');
 
-	var creator = ZU.xpathText(doc, '//meta[@name="dc_creator"]/@content') ||
-					ZU.xpathText(doc, '//a[contains(@class,"h-author-name")]');
+	var creator = ZU.xpathText(doc, '//div[@itemprop="author"]//span[@itemprop="name"]') ||
+				ZU.xpathText(doc, 'meta[@name="dc_creator"]/@content') ||
+				ZU.xpathText(doc, '//a[contains(@class,"h-author-name")]');
 	if(creator && creator.trim())
 		item.creators.push({lastName:creator.trim(), creatorType:'author'});
 
