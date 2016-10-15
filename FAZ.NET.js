@@ -115,7 +115,8 @@ function scrape(doc, url) {
 	//language
 	var language = ZU.xpathText(doc, '//meta[@name="language"]/@content');
 	if (language != null) newArticle.language = language;
-
+	else newArticle.language = "de-DE";
+	
 	newArticle.ISSN = "0174-4909";
 	newArticle.attachments.push({
 		title: "FAZ.NET Article Snapshot",
@@ -160,6 +161,7 @@ var testCases = [
 				"date": "2011-06-13",
 				"ISSN": "0174-4909",
 				"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+				"language": "de-DE",
 				"libraryCatalog": "FAZ.NET",
 				"publicationTitle": "Frankfurter Allgemeine Zeitung",
 				"shortTitle": "Wissenschaftsphilosophie",
