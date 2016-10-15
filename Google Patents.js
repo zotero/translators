@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-15 02:22:24"
+	"lastUpdated": "2016-09-21 18:59:28"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//div[@id="ires"]//li[@class="g"]//h3/a');
+	return ZU.xpath(doc, '//div[@id="ires"]//div[@class="g"]//h3/a');
 }
 
 function fixAuthorCase(name) {
