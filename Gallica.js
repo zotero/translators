@@ -1,259 +1,157 @@
 {
 	"translatorID": "58ab2618-4a25-4b9b-83a7-80cd0259f896",
 	"label": "Gallica",
-	"creator": "Sylvain Machefert",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://gallica\\.bnf\\.fr",
-	"minVersion": "1.0.0b3.r1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-04 10:09:18"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-09-21 09:49:15"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2016 Philipp Zumstein
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 
 function detectWeb(doc, url) {
-	var indexSearch = url.toString().indexOf('http://gallica.bnf.fr/Search');
-	var indexArk = url.toString().indexOf('http://gallica.bnf.fr/ark:');
-	var indexSNE = url.toString().indexOf('http://gallica.bnf.fr/VisuSNE');
-	
-	if (indexSearch == 0)
-	{
-		var errorXpath = '//div[@class="errorMessage"]';
-		if  (elt = doc.evaluate(errorXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			// We are on a search page result but it can be an empty result page.
-			// Nothing to return;
+	if (url.indexOf('/search/')>-1 && getSearchResults(doc, true)) {
+		return "multiple";
+	} else if (url.indexOf('http://gallica.bnf.fr/ark:')>-1) {
+		var icon = ZU.xpathText(doc, '(//li[contains(@class, "typeDoc")]//span[contains(@class, "pictos")]/@class)[1]');
+		if (icon) {
+			icon = icon.replace("pictos", "").trim();
+			var type = getDoctypeGallica(icon);
+			if (type) {
+				return type;
+			} else {
+				return "book";//default
+			}
 		}
-		else
-		{
-			return "multiple";
-		}
-	}
-	else if (indexArk == 0)
-	{
-		var iconxpath = '//div[@class="contenu1"]/img';
-		if (elt = doc.evaluate(iconxpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext())
-		{
-			var icon = elt.getAttribute('src');
-			return getDoctypeGallica(icon);
-		}
-		
-		// For some biblio, the icon picture is located in another div ...
-		var iconxpath = '//div[@class="titrePeriodiqueGauche"]/img';
-		if  (elt = doc.evaluate(iconxpath, doc, null,
-		XPathResult.ANY_TYPE, null).iterateNext())
-		{
-			var icon = elt.getAttribute('src');
-			return getDoctypeGallica(icon);
-		}
-	}
-	else if (indexSNE == 0)
-	{
-		return "book";
+		return;
 	}
 }
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "result-item")]//h2/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 
 // This function takes the name of the icon, and returns the Zotero item name
-function getDoctypeGallica(img)
-{
-	var iconname = img.substring(img.lastIndexOf('/') + 1);
-	
-	if (iconname =='livre_a.png') 
-	{
-		return "book";
-	}
-	else if (iconname == 'carte.png')
-	{
+function getDoctypeGallica(iconname) {
+	if (iconname.indexOf("carte")>-1) {
 		return "map";
-	}
-	else if (iconname == 'images.png')
-	{
+	} else if (iconname.indexOf("image")>-1) {
 		return "artwork";
-	}
-	else if (iconname == 'docsonore.png')
-	{
+	} else if (iconname.indexOf("sonore")>-1) {
 		return "audioRecording";
-	}
-	else if (iconname == 'musiquenotee.png')
-	{
-		// This icon is for Sheet music type. But no Zotero type matches
-		// as of today (2010-02)
+	} else {
+		//default for e.g. "livre", "manuscrit", "partition", "fascicule"
+		//or any unrecognized icon
 		return "book";
 	}
-	else if ( (iconname == 'picto_type_document1.png') || (iconname == 'perio_vol_ocr.png') )
-	{
-		return "book";
-	}
-	else
-	{
-		Zotero.debug("Undefined icon : " + iconname);
-		return "book";
-	}
-	
 }
+
 
 function doWeb(doc, url) {
-		if (detectWeb(doc, url) == "multiple") 
-		{
-			var availableItems = {};
-			var xpath = '//div[@class="resultats_line"]';
-			
-			var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-			var elmt = elmts.iterateNext();
-			
-			var itemsId = new Array();
-			
-			var i = 1;
-			do {
-				var id = doc.evaluate('.//div[@class="resultat_id"]', elmt, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-				var this_result = doc.evaluate('div[@class="resultat_desc"]/div[@class="titre"]/a', elmt, null, XPathResult.ANY_TYPE, null).iterateNext();
-				availableItems[i] = Zotero.Utilities.cleanTags(this_result.getAttribute('title'));
-				
-				i++;
-			} while (elmt = elmts.iterateNext());
-
-			Z.selectItems(availableItems, function(items) {
-				for (var i in items) {
-					// All informations are available on search result page. We don't need to query 
-					// every subpage with scrape. We'are going to call the special Gallica scrape function
-					// This function (scrapeGallica) is reused in scrape.
-					var fullpath = '//div[@class="resultats_line"][' + i + ']';
-					
-					var item_element = doc.evaluate(fullpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-					if (item_element != undefined)
-					{
-						var detail = doc.evaluate('.//div[@class="notice"]', item_element, null, XPathResult.ANY_TYPE, null).iterateNext();
-		
-						var iconType = doc.evaluate('.//span[@class="picto"]/img', item_element, null, XPathResult.ANY_TYPE, null).iterateNext();
-						var docType = getDoctypeGallica(iconType.getAttribute('src'));
-						
-						var docUrl = doc.evaluate('.//div[@class="liens"]/a', item_element, null, XPathResult.ANY_TYPE, null).iterateNext();
-						docUrl = docUrl.getAttribute("href");
-						
-						scrapeGallica(doc,  detail, docType, docUrl);
-					}
-				}
-			})	
-		}
-		else
-		{
-			var docType = detectWeb(doc, url);
-			var xpath = '//div[@class="notice"]';
-			var detail = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			scrapeGallica(doc,  detail, docType, "");
-		}
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
-function scrapeGallica(doc, div, type, direct_url)
-{
-	var item = new Zotero.Item;
-	item.itemType = type;
-	
-	var elmts = doc.evaluate('p', div, null, XPathResult.ANY_TYPE, null);
-	
-	var elmt = elmts.iterateNext();
 
-	do {
-		var text = Zotero.Utilities.trimInternal(elmt.textContent);
-		var contenu = '';
-		if (contenu = text.split(/^(Titre|Title|Título) : /)[2])
-		{
-			item.title = Zotero.Utilities.trimInternal(contenu);
-		}
-		else if ( contenu = text.split(/^(Auteur|Author|Autor) : /)[2])
-		{
-			contenu = contenu.replace(/(See only the results matching this author|Ne voir que les résultats de cet auteur)/, '').replace(/\(.+?\)/, "");
-			if (type == 'artwork')
-			{
-				 item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "artist", true));	
-			}
-			else
-			{
-				item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "author", true));	
-			}
-		}
-		else if ( contenu = text.split(/^(Publisher|Éditeur|Editor) : /)[2])
-		{
-			item.publisher = Zotero.Utilities.trimInternal(contenu);
-		}
-		else if ( contenu = text.split(/^(Date of publication|Date d'édition|Data de publicação|Fecha de publicación) : /)[2])
-		{
-			item.date = Zotero.Utilities.trimInternal(contenu);
-		}
-		else if ( contenu = text.split(/^(Contributeur|Contributor|Contribuidor) : /)[2])
-		{
-			item.creators.push(Zotero.Utilities.cleanAuthor(contenu, "contributor", true));
-		}
-		else if ( contenu = text.split(/^(Language|Langue|Língua|Idioma) : /)[2])
-		{
-			item.language = Zotero.Utilities.trimInternal(contenu);
-		}
-		else if ( contenu = text.split(/^(Format|Formato) : /)[2])
-		{
-			// This field contains : application/pdf for example.
-		}
-		else if ( contenu = text.split(/^(Copyright|Droits|Direitos) : /)[2])
-		{
-			item.rights = Zotero.Utilities.trimInternal(contenu);
-		}
-		else if (contenu = text.split(/^(Identifier|Identifiant|Senha) : /)[2])
-		{
-			var temp = '';
-			if (temp = contenu.split(/^ISSN /)[1])
-			{
-				item.ISSN = temp;	
-			}
-			else if (contenu.match(/^https?:\/\//))
-			{
-				// If identifier starts with http it is the url of the document
-				item.url = contenu;
-			}
-			else if (contenu.match(/^ark:/))
-			{
-				item.url = "http://gallica.bnf.fr/" + contenu;
-			}
-		}
-		else if (contenu = text.split(/^(Description|Descrição) : /)[2])
-		{
-			var temp = '';
-			if (temp = contenu.split(/^Variante\(s\) de titre : /)[1])
-			{
-		// Alternative title : no field in zotero ? 
-		//		Zotero.debug("Titre : " + temp);
-			}
-			else if (temp = contenu.split(/^Collection : /)[1])
-			{
-				item.collection = temp;
-			}
-			else
-			{
-//				Zotero.debug(contenu);
-			}
-		}
-		else if (contenu = text.split(/^(Sujet|Assunto|Tema|Subject) : /)[2])
-		{
-			
-			var tagList = contenu.split(/; ?/);
-			for (var tag in tagList) 
-			{
-				item.tags.push(Zotero.Utilities.trimInternal(tagList[tag]));
-			}
-		}
-
-	} while (elmt = elmts.iterateNext());
+function scrape(doc, url) {
+	var type = detectWeb(doc, url);
 	
-	if ( (item.url == "") || (item.url == undefined) )
-	{
-		if (direct_url != "")
-		{
-			item.url = "http://gallica.bnf.fr" + direct_url;
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+
+	translator.setHandler('itemDone', function (obj, item) {
+		//additional data from the "notice" field
+		var notice = {};
+		var labels = ZU.xpath(doc, '//div[@id="noticeId"]/dl/dt');
+		for (var i=0; i<labels.length; i++) {
+			var label = labels[i].textContent;
+			var value = ZU.xpathText(labels[i], './following-sibling::dd[1]');
+			if (label && value) {
+				//Z.debug(label);Z.debug(value);
+				if (label.indexOf('Éditeur')>-1 || label.indexOf('Publisher')>-1 || label.indexOf('Editor')>-1) {
+					var m = value.match(/^(.*)\((.*)\)/);
+					if (m) {
+						item.publisher = m[1];
+						item.place = m[2];
+					} else {
+						item.publisher = value;
+					}
+				}
+				if (label.indexOf('Language')>-1 || label.indexOf('Langue')>-1 || label.indexOf('Língua')>-1 || label.indexOf('Idioma')>-1) {
+					item.language = value;
+				}
+				if (label.indexOf('Identifier')>-1 || label.indexOf('Identifiant')>-1 || label.indexOf('Senha')>-1) {
+					if (value.trim().indexOf('ISSN')==0) {
+						item.ISSN = value.trim().substring(4);
+					} else if (value.trim().indexOf('ark:')==0) {
+						item.extra = value;
+					} else {
+						Z.debug("Unrecoginized identifier: " + value);
+					}
+				}
+				
+			}
 		}
-		else
-		{
-			item.url = doc.location.href; 
-		}
-	}
-	item.complete();
+		item.complete();
+	});
+	
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = type;
+		trans.doWeb(doc, url);
+	});
 }
 /** BEGIN TEST CASES **/
 var testCases = [
