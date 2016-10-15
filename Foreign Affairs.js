@@ -36,7 +36,6 @@
 */
 
 function detectWeb(doc, url) {
-	//TODO: adjust the logic here
 	if (url.indexOf('/articles/')>-1 || url.indexOf('/reviews/')>-1) {
 		return "magazineArticle";
 	} else if (getSearchResults(doc, true)) {
@@ -70,7 +69,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -84,15 +83,15 @@ function scrape(doc, url) {
     translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
     translator.setHandler('itemDone', function (obj, item) {
-		var creators = ZU.xpath(doc, '//div[@class="article-header__byline-container"]/span/a');
-		for (var i=0; i<creators.length; i++) {
-			item.creators.push(ZU.cleanAuthor(creators[i].textContent, "author"));
-		}
-		var issue = ZU.xpathText(doc, '//span[@class="article-header__metadata-date"]/a');
-		if (!item.issue && issue) {
-			item.issue = issue.replace('Issue', '');
-		}
-		item.ISSN = "0015-7120";
+	var creators = ZU.xpath(doc, '//div[@class="article-header__byline-container"]/span/a');
+	for (var i=0; i<creators.length; i++) {
+		item.creators.push(ZU.cleanAuthor(creators[i].textContent, "author"));
+	}
+	var issue = ZU.xpathText(doc, '//span[@class="article-header__metadata-date"]/a');
+	if (!item.issue && issue) {
+		item.issue = issue.replace('Issue', '');
+	}
+	item.ISSN = "0015-7120";
         item.complete();
     });
 
