@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-05 04:14:23"
+	"lastUpdated": "2016-09-19 21:47:31"
 }
 
 /*
@@ -47,7 +47,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 		var items = new Object();
 		var found = false;
-		var titles = ZU.xpath(doc, '//div[@class="item-title"]');
+		//skip collections here
+		var titles = ZU.xpath(doc, '//div[@class="item-title" and not(contains(@href, "/collections/"))]');
 		//Z.debug(titles.length)
 		for (var i = 0; i<titles.length; i++) {
 			//.href does not work -- can't quite follow why but appears related to path depths
@@ -60,6 +61,7 @@ function getSearchResults(doc, checkOnly) {
 		}
 	return found ? items : false;
 }
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
@@ -120,6 +122,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -164,14 +167,10 @@ var testCases = [
 				],
 				"date": "October 4, 2013",
 				"abstractNote": "Pertussis cases are shown by the black line, with each value representing a week of the year. The percentage of adolescent and adult cases (≥15 years old) per year is shown in red circles. The data were obtained from the Ministry of Health, Labor and Welfare of Japan Infectious Disease Surveillance data. Data regarding the number of adolescent and adult cases in 2012 were not available.",
-				"extra": "DOI: 10.1371/journal.pone.0077165.g001",
+				"extra": "DOI:10.1371/journal.pone.0077165.g001",
 				"libraryCatalog": "Figshare",
 				"url": "https://figshare.com/articles/_Number_of_reported_pertussis_cases_per_week_in_Japan_from_2002_to_2012_/815480",
 				"attachments": [
-					{
-						"title": "Full Text (HTML)",
-						"mimeType": "text/html"
-					},
 					{
 						"title": "Figshare Snapshot",
 						"mimeType": "text/html"
