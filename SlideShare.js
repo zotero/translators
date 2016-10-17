@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-12-12 13:47:36"
+	"lastUpdated": "2016-10-17 14:24:36"
 }
 
 function scrape(doc) {
@@ -37,7 +37,7 @@ function scrape(doc) {
 	var date = ZU.xpathText(doc, '//meta[@property = "slideshare:created_at"]/@content');
 	if(date) item.date = date;
 	item.url = doc.location.href;
-	item.repository = "SlideShare";
+	item.libraryCatalog = "SlideShare";
 
 	var loggedin = !doc.getElementById('login_link');
 	var pdfurl = ZU.xpathText(doc, '//li[@class="action-download"]/a/@href');
@@ -60,11 +60,10 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var shows = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var links = ZU.xpath(doc,'//ol[contains(@class, "searchResults")]\
-					//div[./a[@class="slideshow-title"]]');
-		Zotero.selectItems( ZU.getItemArray(doc, links, null,'from_search='),
+		var links = ZU.xpath(doc,'//div[contains(@class, "searchResults")]\
+					//div[./a[contains(@class, "title-link")]]');
+		Zotero.selectItems( ZU.getItemArray(doc, links, 'from_search=', null),
 			function(items) {
 				if (!items) return true;
 	
