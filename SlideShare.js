@@ -17,15 +17,11 @@ function scrape(doc) {
 	item.title = ZU.xpathText(doc, '(//meta[@name="title" or @property="og:title"]/@content)[1]') ||
 				ZU.xpathText(doc, '/html/head/title');
 
-	var creator = ZU.xpathText(doc, '//div[@itemprop="author"]//span[@itemprop="name"]') ||
-				ZU.xpathText(doc, 'meta[@name="dc_creator"]/@content') ||
-				ZU.xpathText(doc, '//a[contains(@class,"h-author-name")]');
+	var creator = ZU.xpathText(doc, '//div[@itemprop="author"]//span[@itemprop="name"]');
 	if(creator && creator.trim())
 		item.creators.push({lastName:creator.trim(), creatorType:'author'});
 
-	item.abstractNote = ZU.xpathText(doc, '(//p[contains(@class, "descriptionExpanded")] |\
-					//p[contains(@class, "description") and\
-					not(following-sibling::p[contains(@class, "descriptionExpanded")])])');
+	item.abstractNote = ZU.xpathText(doc, '//p[@id="slideshow-description-paragraph"]');
 
 	var tags = ZU.xpathText(doc, '//meta[contains(@name, "slideshow_tag")]/@content');
 	if (tags) tags = tags.split(/\s*,\s*/);
@@ -33,13 +29,14 @@ function scrape(doc) {
 		item.tags.push(tags[i].trim());
 	}
 
-	item.rights = ZU.xpathText(doc, '//p[@class="license"]');
+	var rights = ZU.xpathText(doc, '//div[@class="license-container"]');
+	if (rights && rights.trim()) item.rights = rights.trim()
 
-	item.type = ZU.xpathText(doc, '//ul[@class="h-slideshow-categories"]/li[1]');
+	item.type = ZU.xpathText(doc, '//div[@class="categories-container"]//a[1]');
 
-	var date = ZU.xpathText(doc, '//meta[contains(@property, "updated_at")]/@content');
-	if(date) item.date = date.replace(/\d{2}:\d{2}:\d{2}\s+[+-]\d{4}/, "")
-	item.url = doc.location.href
+	var date = ZU.xpathText(doc, '//meta[@property = "slideshare:created_at"]/@content');
+	if(date) item.date = date;
+	item.url = doc.location.href;
 	item.repository = "SlideShare";
 
 	var loggedin = !doc.getElementById('login_link');
