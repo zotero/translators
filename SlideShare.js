@@ -51,8 +51,8 @@ function scrape(doc) {
 
 function detectWeb(doc, url) {
 	if (url.indexOf("/search/") != -1 &&
-		ZU.xpath(doc, '//ol[contains(@class, "searchResults")]\
-					//div[./a[@class="slideshow-title"]]').length) {
+		ZU.xpath(doc, '//div[contains(@class, "searchResults")]\
+					//div[./a[contains(@class, "slideshow-title")]]').length) {
 		return "multiple";
 	} else if ((ZU.xpathText(doc, '//meta[@name="og_type"]/@content') && ZU.xpathText(doc, '//meta[@name="og_type"]/@content') == 'article') || (ZU.xpathText(doc, '//meta[@name="og_type"]/@content') && ZU.xpathText(doc, '//meta[@name="og_type"]/@content').search(/presentation/)!=-1)) {
 		return "presentation";
