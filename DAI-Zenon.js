@@ -2,14 +2,14 @@
 	"translatorID": "16199bf0-a365-4aad-baeb-225019ae32dc",
 	"label": "DAI-Zenon",
 	"creator": "Philipp Zumstein",
-	"target": "https?://zenon\\.dainst\\.org/#(book|search|extendedSearch|bibliography|favorites)",
+	"target": "https?://zenon\\.dainst\\.org/(Record/|Search/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-09-11 19:30:48"
+	"lastUpdated": "2016-10-21 18:52:26"
 }
 
 /*
