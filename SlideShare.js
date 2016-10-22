@@ -12,7 +12,7 @@
 	"lastUpdated": "2016-10-17 14:24:36"
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 	var item = new Zotero.Item("presentation");
 	item.title = ZU.xpathText(doc, '(//meta[@name="title" or @property="og:title"]/@content)[1]') ||
 				ZU.xpathText(doc, '/html/head/title');
@@ -36,7 +36,7 @@ function scrape(doc) {
 
 	var date = ZU.xpathText(doc, '//meta[@property = "slideshare:created_at"]/@content');
 	if(date) item.date = date;
-	item.url = doc.location.href;
+	item.url = url;
 	item.libraryCatalog = "SlideShare";
 
 	var loggedin = !doc.getElementById('login_link');
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 				ZU.processDocuments(shows, scrape)
 			});
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
