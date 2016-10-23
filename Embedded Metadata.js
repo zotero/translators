@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-08 07:14:24"
+	"lastUpdated": "2016-10-23 15:17:12"
 }
 
 /*
@@ -479,15 +479,15 @@ function addHighwireMetadata(doc, newItem) {
 		pdfURL = pdfURL[0].textContent;
 		//delete any pdf attachments if present
 		//would it be ok to just delete all attachments??
-		for(var i=0, n=newItem.attachments.length; i<n; i++) {
+		for(var i=newItem.attachments.length-1; i>=0; i--) {
 			if(newItem.attachments[i].mimeType == 'application/pdf') {
-				delete newItem.attachments[i];
+				newItem.attachments.splice(i, 1);
 			}
 		}
 
 		newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
-	
+
 	//add snapshot
 	newItem.attachments.push({document:doc, title:"Snapshot"});
 	
