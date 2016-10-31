@@ -113,6 +113,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "Labor’s Last Stand",
 				"creators": [
 					{
 						"firstName": "Ken",
@@ -120,7 +121,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "July 2009",
+				"ISSN": "0017-789X",
+				"abstractNote": "The corporate campaign to kill the Employee Free Choice Act",
+				"libraryCatalog": "Harpers",
+				"publicationTitle": "Harper's Magazine",
+				"url": "http://harpers.org/archive/2009/07/labors-last-stand/?single=1",
+				"attachments": [
+					{
+						"title": "Harper's PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Harper's Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"2009-",
 					"21st century",
@@ -140,24 +156,8 @@ var testCases = [
 					"United States",
 					"United StatesNational Labor Relations Board"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Harper's PDF",
-						"type": "application/pdf"
-					},
-					{
-						"title": "Harper's Snapshot",
-						"type": "text/html"
-					}
-				],
-				"url": "http://harpers.org/archive/2009/07/labors-last-stand/?single=1",
-				"abstractNote": "The corporate campaign to kill the Employee Free Choice Act",
-				"date": "July 2009",
-				"ISSN": "0017-789X",
-				"publicationTitle": "Harper's Magazine",
-				"title": "Labor’s Last Stand",
-				"libraryCatalog": "Harpers"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -167,6 +167,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "A Beautiful Truth",
 				"creators": [
 					{
 						"firstName": "Stephanie",
@@ -174,24 +175,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "October 28, 2013",
+				"blogTitle": "The Stream - Harper's Magazine Blog",
+				"url": "http://harpers.org/blog/2013/10/a-beautiful-truth/",
+				"attachments": [
+					{
+						"title": "Harper's Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					"Apes",
 					"Chimpanzees",
 					"Colin McAdam",
 					"Fiction"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Harper's Snapshot",
-						"type": "text/html"
-					}
-				],
-				"url": "http://harpers.org/blog/2013/10/a-beautiful-truth/",
-				"blogTitle": "The Stream - Harper's Magazine Blog",
-				"date": "October 28, 2013",
-				"title": "A Beautiful Truth"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
