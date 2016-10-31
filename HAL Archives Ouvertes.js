@@ -147,7 +147,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "J.-P.",
+						"firstName": "Jean-Pierre",
 						"lastName": "Cammas",
 						"creatorType": "author"
 					},
@@ -268,14 +268,13 @@ var testCases = [
 				"url": "https://hal.archives-ouvertes.fr/hal-00973502",
 				"attachments": [
 					{
-						"title": "HAL PDF Full Text",
-						"mimeType": "application/pdf"
+						"title": "HAL Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					" ICT appropriation",
 					"Bibliothèque universitaire",
-					"Innovation",
+					"ICT appropriation",
 					"Learning Centre",
 					"Pedagogy",
 					"University Library",
@@ -303,7 +302,7 @@ var testCases = [
 					}
 				],
 				"date": "March 2012",
-				"abstractNote": "Children performing for a crowd of passersby in a park in Kunming. (Enfants jouant dans un parc à Kunming Photo d'enfants jouant dans un parc à Kunming",
+				"abstractNote": "Description : Children performing for a crowd of passersby in a park in Kunming. (Enfants jouant dans un parc à Kunming Photo d'enfants jouant dans un parc à Kunming",
 				"itemID": "gipouloux:medihal-00772952",
 				"libraryCatalog": "HAL Archives Ouvertes",
 				"url": "https://medihal.archives-ouvertes.fr/medihal-00772952",
