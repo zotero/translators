@@ -68,6 +68,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "DPJ reinstates Noda tax foe Ozawa",
 				"creators": [
 					{
 						"firstName": "Natsuko",
@@ -75,24 +76,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "May 9, 2012",
+				"ISSN": "0447-5763",
+				"abstractNote": "The ruling Democratic Party of Japan reinstated the party membership of Ichiro Ozawa on Tuesday, a move that intensifies the power struggle over a proposed",
+				"language": "en-US",
+				"libraryCatalog": "Japan Times Online",
+				"publicationTitle": "The Japan Times Online",
+				"url": "http://www.japantimes.co.jp/news/2012/05/09/news/dpj-reinstates-noda-tax-foe-ozawa/",
 				"attachments": [
 					{
 						"title": "Japan Times Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.japantimes.co.jp/news/2012/05/09/news/dpj-reinstates-noda-tax-foe-ozawa/",
-				"abstractNote": "The ruling Democratic Party of Japan reinstated the party membership of Ichiro Ozawa on Tuesday, a move that intensifies the power struggle over a proposed",
-				"date": "May 9, 2012",
-				"ISSN": "0447-5763",
-				"language": "en-US",
-				"publicationTitle": "The Japan Times Online",
-				"title": "DPJ reinstates Noda tax foe Ozawa",
-				"libraryCatalog": "Japan Times Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -102,6 +101,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Expat game developers have an unfair advantage in Japan",
 				"creators": [
 					{
 						"firstName": "Brian",
@@ -109,31 +109,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "Feb 5, 2013",
+				"ISSN": "0447-5763",
+				"abstractNote": "There is an option for budding game-developers, however — a less expensive one that allows for more freedom and, if they’re lucky, more exposure than they could ever imagine.",
+				"language": "en-US",
+				"libraryCatalog": "Japan Times Online",
+				"publicationTitle": "The Japan Times Online",
+				"url": "http://www.japantimes.co.jp/life/2013/02/05/digital/expat-game-developers-have-an-unfair-advantage-in-japan/",
 				"attachments": [
 					{
 						"title": "Japan Times Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://www.japantimes.co.jp/life/2013/02/05/digital/expat-game-developers-have-an-unfair-advantage-in-japan/",
-				"abstractNote": "There is an option for budding game-developers, however — a less expensive one that allows for more freedom and, if they’re lucky, more exposure than they could ever imagine.",
-				"date": "Feb 5, 2013",
-				"ISSN": "0447-5763",
-				"language": "en-US",
-				"publicationTitle": "The Japan Times Online",
-				"title": "Expat game developers have an unfair advantage in Japan",
-				"libraryCatalog": "Japan Times Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.japantimes.co.jp/search-results/?q=labor&submit=Search",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
