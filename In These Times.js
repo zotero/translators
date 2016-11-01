@@ -117,6 +117,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Ft. Hood Hero Sues Army for Benefits; Trumka Calls Out White House; NYC Stadium Creates Bad Jobs",
 				"creators": [
 					{
 						"firstName": "Mike",
@@ -124,20 +125,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "Saturday, Feb 16, 2013, 3:40 pm",
+				"url": "http://inthesetimes.com/working/entry/14610/fort_hood_hero_sues_army_for_benefits_trumka_calls_out_white_house_nyc_stad",
 				"attachments": [
 					{
 						"title": "In These Times Blog Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://inthesetimes.com/working/entry/14610/fort_hood_hero_sues_army_for_benefits_trumka_calls_out_white_house_nyc_stad",
-				"date": "Saturday, Feb 16, 2013, 4:40 pm",
-				"title": "Ft. Hood Hero Sues Army for Benefits; Trumka Calls Out White House; NYC Stadium Creates Bad Jobs",
-				"libraryCatalog": "In These Times",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -147,6 +145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
+				"title": "Time to Move Beyond the Board",
 				"creators": [
 					{
 						"firstName": "Richard D.",
@@ -159,24 +158,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "January 25, 2013",
+				"ISSN": "0160-5992",
+				"abstractNote": "If a year’s work can be undone in a day, is the NLRB simply too weak?",
+				"language": "en-US",
+				"libraryCatalog": "In These Times",
+				"publicationTitle": "In These Times",
+				"url": "http://inthesetimes.com/article/14491/time_to_move_beyond_the_board",
 				"attachments": [
 					{
 						"title": "In These Times Snapshot",
-						"type": "text/html"
+						"mimeType": "text/html"
 					}
 				],
-				"url": "http://inthesetimes.com/article/14491/time_to_move_beyond_the_board",
-				"abstractNote": "If a year’s work can be undone in a day, is the NLRB simply too weak?",
-				"date": "January 25, 2013",
-				"ISSN": "0160-5992",
-				"language": "en-US",
-				"publicationTitle": "In These Times",
-				"title": "Time to Move Beyond the Board",
-				"libraryCatalog": "In These Times",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
