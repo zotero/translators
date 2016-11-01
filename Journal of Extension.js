@@ -79,7 +79,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.joe.org/joe/1983january/a3.php",
+		"url": "https://www.joe.org/joe/1983january/a3.php",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -98,7 +98,7 @@ var testCases = [
 				"libraryCatalog": "Journal of Extension",
 				"publicationTitle": "Journal of Extension",
 				"shortTitle": "A Way To Fight Inflation",
-				"url": "http://www.joe.org/joe/1983january/a3.php",
+				"url": "https://www.joe.org/joe/1983january/a3.php",
 				"volume": "21",
 				"attachments": [
 					{
@@ -120,7 +120,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.joe.org/joe/1993winter/tp1.php",
+		"url": "https://www.joe.org/joe/1993winter/tp1.php",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -144,7 +144,7 @@ var testCases = [
 				"libraryCatalog": "Journal of Extension",
 				"publicationTitle": "Journal of Extension",
 				"shortTitle": "Public Policy Education",
-				"url": "http://www.joe.org/joe/1993winter/tp1.php",
+				"url": "https://www.joe.org/joe/1993winter/tp1.php",
 				"volume": "31",
 				"attachments": [
 					{
@@ -166,7 +166,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.joe.org/joe/2014december/a2.php",
+		"url": "https://www.joe.org/joe/2014december/a2.php",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -205,7 +205,7 @@ var testCases = [
 				"libraryCatalog": "Journal of Extension",
 				"publicationTitle": "Journal of Extension",
 				"shortTitle": "Putting a Face on Hunger",
-				"url": "http://www.joe.org/joe/2014december/a2.php",
+				"url": "https://www.joe.org/joe/2014december/a2.php",
 				"volume": "52",
 				"attachments": [
 					{
@@ -231,7 +231,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.joe.org/joe/2012december/iw2.php",
+		"url": "https://www.joe.org/joe/2012december/iw2.php",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -259,7 +259,7 @@ var testCases = [
 				"issue": "6",
 				"libraryCatalog": "Journal of Extension",
 				"publicationTitle": "Journal of Extension",
-				"url": "http://www.joe.org/joe/2012december/iw2.php",
+				"url": "https://www.joe.org/joe/2012december/iw2.php",
 				"volume": "50",
 				"attachments": [
 					{
