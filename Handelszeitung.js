@@ -76,7 +76,7 @@ function doWeb(doc, url) {
 			var articles = [];
 			for (var i in items) {
 				// Bildergalerien are not supported - don't show them in the results
-				if (i.match(/\/bildergalerie\//)) {
+				if (i.search(/\/bildergalerie\//) != -1) {
 					continue;
 				}
 				articles.push(i);
@@ -90,11 +90,11 @@ function doWeb(doc, url) {
 
 
 /* Zotero API */
-function scrape(doc) {
+function scrape(doc, url) {
 	//Z.debug("ibex scrape URL = " + doc.location.href);
 
 	var newItem = new Z.Item('newspaperArticle');
-	newItem.url = doc.location.href;
+	newItem.url = url;
 	var title = ZU.xpathText(doc, '//div[contains(@class, "field field-title")]/h1');
 	if (title) {
 		newItem.title = ZU.trimInternal(title);
@@ -111,18 +111,18 @@ function scrape(doc) {
 		newItem.date = ZU.strToISO(date.replace(/\|.*$/, ''));
 	}
 
-	if (doc.location.href.match('handelszeitung.ch')) {
+	if (url.indexOf('handelszeitung.ch') != -1) {
 		newItem.publicationTitle = 'Handelszeitung';
 		newItem.ISSN = "1422-8971";
-	} else if (doc.location.href.match('bilanz.ch')) {
+	} else if (url.indexOf('bilanz.ch') != -1) {
 		newItem.publicationTitle = 'Bilanz';
 		newItem.ISSN = "1022-3487";
-	} else if (doc.location.href.match('stocks.ch')) {
+	} else if (url.indexOf('stocks.ch') != -1) {
 		newItem.publicationTitle = 'Stocks';
 		newItem.ISSN = "1424-7739";
 	}
 
-	newItem.language = "de";
+	newItem.language = "de-CH";
 
 	var section = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('channel') + ']');
 	if (section.length > 0) {
@@ -184,7 +184,7 @@ var testCases = [
 				"date": "2011-09-19",
 				"ISSN": "1022-3487",
 				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "Handelszeitung",
 				"publicationTitle": "Bilanz",
 				"section": "Unternehmen",
@@ -211,7 +211,7 @@ var testCases = [
 				"date": "2011-09-19",
 				"ISSN": "1422-8971",
 				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "Handelszeitung",
 				"publicationTitle": "Handelszeitung",
 				"section": "Unternehmen",
@@ -238,7 +238,7 @@ var testCases = [
 				"date": "2012-04-24",
 				"ISSN": "1422-8971",
 				"abstractNote": "Lange erwartet, jetzt da: Google hat sein virtuelles Laufwerk vorgestellt. Drive tritt in Konkurrenz mit Systemen wie Dropbox, iCloud und SkyDrive, kommt jedoch reichlich spät.",
-				"language": "de",
+				"language": "de-CH",
 				"libraryCatalog": "Handelszeitung",
 				"publicationTitle": "Handelszeitung",
 				"section": "Unternehmen",
