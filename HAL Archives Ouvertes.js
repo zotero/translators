@@ -98,7 +98,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var bibtexUrl = url.replace(/#.+|\/$/, "") + "/bibtex";
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract-content"]');
-	var pdfUrl = url.replace(/#.+|\/$/, "") + "/document";
+	var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content'); 
 	//Z.debug(pdfUrl)
 	ZU.doGet(bibtexUrl, function (bibtex) {
 		//Z.debug(bibtex)
@@ -109,7 +109,7 @@ function scrape(doc, url) {
 			if (abstract){
 				item.abstractNote=abstract.replace(/(Abstract|Résumé)\s*:/, "");
 			}
-			if (ZU.xpathText(doc, '//div/a[contains(@data-original-title, ".pdf")]')){	
+			if (pdfUrl){	
 				item.attachments = [{
 					url: pdfUrl,
 					title: "HAL PDF Full Text",
