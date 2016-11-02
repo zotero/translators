@@ -3,13 +3,13 @@
 	"label": "ESpacenet",
 	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
 	"target": "^https?://worldwide\\.espacenet\\.com/",
-	"minVersion": "3.0",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-15 02:07:20"
+	"lastUpdated": "2016-10-31 16:26:28"
 }
 
 /*
@@ -40,7 +40,9 @@ function detectWeb(doc, url) {
 		&& getSearchResults(doc).length) {
 			return "multiple";
 	}
-
+	
+	Z.monitorDOMChanges(doc.getElementById("pagebody"), {childList: true});
+	
 	if (url.indexOf("biblio") !== -1
 		&& getTitle(doc)) {
 		return "patent";
