@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-08 21:46:36"
+	"lastUpdated": "2016-11-02 21:46:36"
 }
 
 /*
@@ -268,8 +268,8 @@ var testCases = [
 				"url": "https://hal.archives-ouvertes.fr/hal-00973502",
 				"attachments": [
 					{
-						"title": "HAL Snapshot",
-						"mimeType": "text/html"
+						"title": "HAL PDF Full Text",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
