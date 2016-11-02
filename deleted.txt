@@ -1,4 +1,4 @@
-44  # Increment number when modifying file
+45  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -84,3 +84,4 @@ fb342bae-7727-483b-a871-c64c663c2fae # BusinessWeek; acquired/covered by Bloombe
 2e304579-dd7b-4770-85e9-0d724c9b49a5 # European Educational Research Journal; moved to SAGE
 19120a71-17a8-4629-936a-ccdf899b9861 # Sydney Morning Herald; replaced by generic Fairfax Australia
 f94bad2d-0c76-4e8f-a0d3-970810093c6c # The Age; replaced by generic Fairfax Australia
+9418dcc2-cc1e-432b-b7a6-7b00b7402d2f # Hurricane Digital Memory Bank; covered with COinS
