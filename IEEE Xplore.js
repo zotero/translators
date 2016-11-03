@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|document/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-26 05:42:00"
+	"lastUpdated": "2016-11-03 13:47:22"
 }
 
 function detectWeb(doc, url) {
@@ -554,6 +554,74 @@ var testCases = [
 					"interference cancellation",
 					"interference suppression",
 					"signal processing"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/abstract/document/7696113/?reload=true",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "3D flexible antenna realization process using liquid metal and additive technology",
+				"creators": [
+					{
+						"firstName": "M.",
+						"lastName": "Cosker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Ferrero",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L.",
+						"lastName": "Lizzi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Staraj",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. M.",
+						"lastName": "Ribero",
+						"creatorType": "author"
+					}
+				],
+				"date": "June 2016",
+				"DOI": "10.1109/APS.2016.7696113",
+				"abstractNote": "This paper presents a method to design 3D flexible antennas using liquid metal and additive technology (3D printer based on Fused Deposition Modeling (FDM) technology). The fabricated antennas present flexible properties. The design method is first presented and validated using the example of a simple inverted F antenna (IFA) in Ultra High Frequency (UHF) band. The design, the fabrication and the obtained measured results are discussed.",
+				"conferenceName": "2016 IEEE International Symposium on Antennas and Propagation (APSURSI)",
+				"itemID": "7696113",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "809-810",
+				"proceedingsTitle": "2016 IEEE International Symposium on Antennas and Propagation (APSURSI)",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record"
+					}
+				],
+				"tags": [
+					"3D printer",
+					"Antenna measurements",
+					"Antenna radiation patterns",
+					"IFA antenna",
+					"Liquids",
+					"Metals",
+					"Printers",
+					"Three-dimensional displays",
+					"additive technology",
+					"liquid metal"
 				],
 				"notes": [],
 				"seeAlso": []
