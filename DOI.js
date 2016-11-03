@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 320,
+	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-01-18 22:06:26"
+	"lastUpdated": "2016-10-31 02:54:35"
 }
 
 // The variables items and selectArray will be filled during the first
