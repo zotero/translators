@@ -54,7 +54,8 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	} else if (url.indexOf("/portal/web/csdl/doi/") > 1) {
 		var refWork = ZU.xpathText(doc, '//div[@id="refWorksText-content"]');
-		refWork = refWork.substr(0, 9);
+		if (refWork) refWork = refWork.substr(0, 9);
+		else return false;
 		if (refWork.indexOf("JOUR") > 1) return "journalArticle";
 		else if (refWork.indexOf("MGZN") > 1) return "magazineArticle";
 		else if (refWork.indexOf("CONF") > 1) return "conferencePaper";
