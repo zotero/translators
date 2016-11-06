@@ -191,6 +191,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Your iPhone and iPad App Marketing Strategy: Grand Slam or Base Hits?",
 				"creators": [
 					{
 						"firstName": "Jeffrey",
@@ -198,16 +199,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"date": "Nov 3, 2011",
-				"title": "Your iPhone and iPad App Marketing Strategy: Grand Slam or Base Hits?",
-				"url": "http://www.informit.com/articles/article.aspx?p=1756412",
-				"libraryCatalog": "informIT database",
 				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Your iPhone and iPad App Marketing Strategy"
+				"libraryCatalog": "informIT database",
+				"shortTitle": "Your iPhone and iPad App Marketing Strategy",
+				"url": "http://www.informit.com/articles/article.aspx?p=1756412",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -217,6 +217,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Marketing Your New Business",
 				"creators": [
 					{
 						"firstName": "Bruce",
@@ -224,19 +225,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"date": "Aug 12, 2010",
-				"publisher": "FT Press. Part of the FT Press Delivers Elements series.",
-				"numPages": "8",
+				"ISBN": "9780132371780",
 				"edition": "1st",
-				"ISBN": "0-13-237178-2, 978-0-13-237178-0",
-				"title": "Marketing Your New Business",
-				"url": "http://www.informit.com/store/marketing-your-new-business-9780132371780",
 				"libraryCatalog": "informIT database",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"numPages": "8",
+				"publisher": "FT Press. Part of the FT Press Delivers Elements series.",
+				"url": "http://www.informit.com/store/marketing-your-new-business-9780132371780",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
