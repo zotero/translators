@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-28 17:17:19"
+	"lastUpdated": "2016-11-07 05:17:35"
 }
 
 /*
@@ -40,6 +40,7 @@
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
 	"citation_publication_date":"date",	//perhaps this is still used in some old implementations
+	"citation_cover_date": "date", //used e.g. by Springer http://link.springer.com/article/10.1023/A:1021669308832
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
@@ -603,8 +604,12 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	
 	if(!newItem.url) {
+		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href');
+	}
+	if(!newItem.url) {
 		newItem.url = doc.location.href;
 	}
+
 	
 	newItem.libraryCatalog = doc.location.host;
 	
@@ -1280,11 +1285,143 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-01-09T21:20:00Z",
+				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
 				"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=2797",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Mobility modeling for transport efficiency : Analysis of travel characteristics based on mobile phone data",
+				"creators": [
+					{
+						"firstName": "Vangelis",
+						"lastName": "Angelakis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Gundlegård",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clas",
+						"lastName": "Rydergren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Botond",
+						"lastName": "Rajna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katerina",
+						"lastName": "Vrotsou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Carlsson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julien",
+						"lastName": "Forgeat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tracy H.",
+						"lastName": "Hu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Evan L.",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simon",
+						"lastName": "Moritz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sky",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yaotian",
+						"lastName": "Zheng",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"abstractNote": "Signaling data from the cellular networks can provide a means of analyzing the efficiency of a deployed transportation system and assisting in the formulation of transport models to predict its fut ...",
+				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
+				"language": "eng",
+				"libraryCatalog": "www.diva-portal.org",
+				"shortTitle": "Mobility modeling for transport efficiency",
+				"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2:766397",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Why Bohm's Quantum Theory?",
+				"creators": [
+					{
+						"firstName": "H. D.",
+						"lastName": "Zeh",
+						"creatorType": "author"
+					}
+				],
+				"date": "1999/04/01",
+				"DOI": "10.1023/A:1021669308832",
+				"ISSN": "0894-9875, 1572-9524",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (",
+				"issue": "2",
+				"journalAbbreviation": "Found Phys Lett",
+				"language": "en",
+				"libraryCatalog": "link.springer.com",
+				"pages": "197-200",
+				"publicationTitle": "Foundations of Physics Letters",
+				"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}

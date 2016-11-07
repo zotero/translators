@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-10-11 19:37:31"
+	"lastUpdated": "2016-11-07 05:15:03"
 }
 
 function detectWeb(doc, url) {
@@ -270,7 +270,7 @@ var testCases = [
 				"libraryCatalog": "link.springer.com",
 				"pages": "1-1",
 				"publisher": "Springer Berlin Heidelberg",
-				"rights": "©2008 Springer Berlin Heidelberg",
+				"rights": "©2008 Springer-Verlag Berlin Heidelberg",
 				"series": "Lecture Notes in Computer Science",
 				"seriesNumber": "5302",
 				"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
@@ -338,7 +338,7 @@ var testCases = [
 				"tags": [
 					"Child and School Psychology",
 					"Developmental Psychology",
-					"Education (general)",
+					"Education, general",
 					"Learning & Instruction"
 				],
 				"notes": [],
@@ -374,7 +374,7 @@ var testCases = [
 				"libraryCatalog": "Springer Link",
 				"pages": "531-581",
 				"publisher": "Humana Press",
-				"rights": "©2011 Springer Science+Business Media, LLC",
+				"rights": "©2011 Humana Press",
 				"series": "Methods in Molecular Biology",
 				"seriesNumber": "672",
 				"shortTitle": "What Do We Know?",
@@ -457,7 +457,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2009/02/17",
+				"date": "2009/07/01",
 				"DOI": "10.1007/s10040-009-0439-x",
 				"ISSN": "1431-2174, 1435-0157",
 				"abstractNote": "This paper considers the tidal head fluctuations in a single coastal confined aquifer which extends under the sea for a certain distance. Its submarine outlet is covered by a silt-layer with properties dissimilar to the aquifer. Recently, Li et al. (2007) gave an analytical solution for such a system which neglected the effect of the elastic storage (specific storage) of the outlet-capping. This article presents an analytical solution which generalizes their work by incorporating the elastic storage of the outlet-capping. It is found that if the outlet-capping is thick enough in the horizontal direction, its elastic storage has a significant enhancing effect on the tidal head fluctuation. Ignoring this elastic storage will lead to significant errors in predicting the relationship of the head fluctuation and the aquifer hydrogeological properties. Quantitative analysis shows the effect of the elastic storage of the outlet-capping on the groundwater head fluctuation. Quantitative conditions are given under which the effect of this elastic storage on the aquifer’s tide-induced head fluctuation is negligible. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724",
@@ -479,16 +479,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Analytical solutions",
-					"Coastal aquifers",
-					"Elastic storage",
-					"Geology",
-					"Hydrogeology",
-					"Submarine outlet-capping",
-					"Tidal loading efficiency",
-					"Waste Water Technology / Water Pollution Control / Water Management / Aquatic Pollution"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
