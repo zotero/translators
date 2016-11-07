@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-13 22:51:52"
+	"lastUpdated": "2016-11-01 21:26:32"
 }
 
 function detectWeb(doc, url) {
@@ -25,7 +25,7 @@ function detectWeb(doc, url) {
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ( (favLink && getJID(favLink.href)) || getJID(url) ) {
-		if (ZU.xpathText(doc, '//div[@class="book-title"]')){
+		if (ZU.xpathText(doc, '//li[@class="book_info_button"]')) {
 			return "book"
 		}
 		else {
@@ -38,7 +38,7 @@ function getSearchResults(doc, checkOnly) {
 	// We have multiple results
 	var resultsBlock = doc.getElementsByClassName('list-searchResults')[0];
 	if (!resultsBlock) resultsBlock = doc.getElementById('results');
-	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
+	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('toc-view')[0];
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
 		//li//div[(@class="title" or @class="rw") and not(.//a[@class="title"]) and .//a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
