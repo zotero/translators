@@ -107,16 +107,6 @@ choices          : {
 }
 });
 
- 
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/\/search\//),
-choices          : {
-  titles :  FW.Xpath('//div/a[@class="trb_search_result_title"]').text().trim(),
-  urls    :  FW.Xpath('//div/a[@class="trb_search_result_title"]').key("href")
-}
-});
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
