@@ -130,9 +130,9 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"A la Une",
 					"Celtes",
 					"Culture",
+					"Diaporama",
 					"Pays de Galles"
 				],
 				"notes": [],
