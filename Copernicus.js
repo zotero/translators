@@ -9,53 +9,53 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-03-11 04:16:27"
+	"lastUpdated": "2016-11-09 06:47:28"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Sebastian Karcher
+	Copyright © 2016 Sebastian Karcher
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
 	if (url.search(/\/search\.php|\.net\/$|issue\d+\.html/)!=-1 && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (doc.title.search(/Abstract|Peer review|Metrics|Relations/) != -1) {
+	} else if (doc.getElementById("copernicus_publications")) {
 		return "journalArticle";
 	}
 }
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    var rows = doc.getElementsByClassName("article-title");
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = doc.getElementsByClassName("article-title");
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function scrape (doc, url){
@@ -330,6 +330,77 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.atmos-chem-phys.net/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.atmos-chem-phys-discuss.net/acp-2016-880/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Global anthropogenic emissions of particulate matter including black carbon",
+				"creators": [
+					{
+						"lastName": "Klimont",
+						"firstName": "Z.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kupiainen",
+						"firstName": "K.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Heyes",
+						"firstName": "C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Purohit",
+						"firstName": "P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cofala",
+						"firstName": "J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Rafaj",
+						"firstName": "P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Borken-Kleefeld",
+						"firstName": "J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Schöpp",
+						"firstName": "W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 20, 2016",
+				"DOI": "10.5194/acp-2016-880",
+				"ISSN": "1680-7375",
+				"abstractNote": "This paper presents the first comprehensive assessment of historical (1990–2010) global anthropogenic particulate matter (PM) emissions including consistent and harmonized calculation of mass-based size distribution (PM1, PM2.5, PM10) as well as primary carbonaceous aerosols including black carbon (BC) and organic carbon (OC). The estimates were developed with the integrated assessment model GAINS, where source- and region-specific technology characteristics are explicitly included. This assessment includes a number of previously unaccounted or often misallocated emission sources, i.e., kerosene lamps, gas flaring, diesel generators, trash burning; some of them were reported in the past for selected regions or in the context of a particular pollutant or sector but not included as part of a total estimate. Spatially, emissions were calculated for 170 source regions (as well as international shipping), presented for 25 global regions, and allocated to 0.5° x 0.5° longitude-latitude grids. No independent estimates of emissions from forest fires and savannah burning are provided and neither windblown dust nor unpaved roads emissions are included.  We estimate that global emissions of PM have not changed significantly between 1990 and 2010, showing a strong decoupling from the global increase in energy consumption and consequently, CO2 emissions but there are significantly different regional trends, with a particularly strong increase in East Asia and Africa and a strong decline in Europe, North America and Pacific. This in turn resulted in important changes in the spatial pattern of PM burden, e.g., European, North American, and Pacific contributions to global emissions dropped from nearly 30 % in 1990 to well below 15 % in 2010, while Asia's contribution grew from just over 50 % to nearly 2/3 of the global total in 2010. For all considered PM species, Asian sources represented over 60 % of the global anthropogenic total, and residential combustion was the most important sector contributing about 60 % for BC and OC, 45 % for PM2.5 and less than 40 % for PM10 where large combustion sources and industrial processes are equally important. Global anthropogenic emissions of BC were estimated at about 6.6 and 7.2 Tg in 2000 and 2010, respectively, and represent about 15 % of PM2.5 but for some sources reach nearly 50 %, i.e., transport sector. Our global BC numbers are higher than previously published owing primarily to inclusion of new sources.  This PM estimate fills the gap in emission data and emission source characterization required in air quality and climate modelling studies and health impact assessments at a regional and global level, as it includes both carbonaceous and non-carbonaceous constituents of primary particulate matter emissions. The developed emission data set has been used in several regional and global atmospheric transport and climate model simulations within the ECLIPSE (Evaluating the Climate and Air Quality Impacts of Short-Lived Pollutants) project and beyond, serves better parameterization of the global integrated assessment models with respect to representation of black carbon and organic carbon emissions, and built a basis for recently published global particulate number estimates.",
+				"journalAbbreviation": "Atmos. Chem. Phys. Discuss.",
+				"libraryCatalog": "Copernicus Online Journals",
+				"pages": "1-72",
+				"publicationTitle": "Atmos. Chem. Phys. Discuss.",
+				"url": "http://www.atmos-chem-phys-discuss.net/acp-2016-880/",
+				"volume": "2016",
+				"attachments": [
+					{
+						"title": "Atmos. Chem. Phys. Discuss. PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
