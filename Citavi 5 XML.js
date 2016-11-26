@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-11-26 13:12:50"
+	"lastUpdated": "2016-11-26 19:23:37"
 }
 
 /*
@@ -91,7 +91,6 @@ function doImport() {
 	var references = ZU.xpath(doc, '//References/Reference');
 	for (var i=0, n=references.length; i<n; i++) {
 		var type = ZU.xpathText(references[i], 'ReferenceType');
-		Z.debug(type);
 		if (type && typeMapping[type]) {
 			item = new Zotero.Item(typeMapping[type]);
 		} else {
@@ -108,6 +107,9 @@ function doImport() {
 		item.volume = ZU.xpathText(references[i], './Volume');
 		item.issue = ZU.xpathText(references[i], './Number');
 		item.DOI = ZU.xpathText(references[i], './DOI');
+		item.ISBN = ZU.xpathText(references[i], './ISBN');
+		item.edition = ZU.xpathText(references[i], './Edition');
+		item.place = ZU.xpathText(references[i], './PlaceOfPublication');
 		
 		var pageRange = ZU.xpathText(references[i], './PageRange');
 		if (pageRange) {
@@ -115,15 +117,19 @@ function doImport() {
 			item.pages = parts[parts.length-1].replace(/[^0-9\-–]/g, '');
 		}
 		
-		item.date = ZU.xpathText(references[i], './DateForSorting') || ZU.xpathText(references[i], './Date');
-		//ZU.xpathText(references[i], './AccessDate');
+		item.date = ZU.xpathText(references[i], './DateForSorting') ||
+			ZU.xpathText(references[i], './Date') ||
+			ZU.xpathText(references[i], './Year');
+		item.accessDate = ZU.xpathText(references[i], './AccessDate');
 		//ZU.xpathText(references[i], './ModifiedOn');
 		//ZU.xpathText(references[i], './CreatedOn');
 		
-		//item.notes.push({note : ...
-		//ZU.xpathText(references[i], './Notes');
-		//ZU.xpathText(references[i], './TableOfContents');
-		//ZU.xpathText(references[i], './Evaluation');
+		for (var field of ['Notes', 'TableOfContents', 'Evaluation']) {
+			var note = ZU.xpathText(references[i], './'+field);
+			if (note) {
+				item.notes.push({ note : note });
+			}
+		}
 		
 		var seriesID = ZU.xpathText(references[i], './SeriesTitleID');
 		if (seriesID) {
@@ -144,7 +150,20 @@ function doImport() {
 		attachPersons(doc, item, authors, "author");
 		var editors = ZU.xpathText(doc, '//ReferenceEditors/OnetoN[starts-with(text(), "'+id+'")]');
 		attachPersons(doc, item, editors, "editor");
+		var editors = ZU.xpathText(doc, '//ReferenceCollaborators/OnetoN[starts-with(text(), "'+id+'")]');
+		attachPersons(doc, item, editors, "contributor");
+		var organizations = ZU.xpathText(doc, '//ReferenceOrganizations/OnetoN[starts-with(text(), "'+id+'")]');
+		attachPersons(doc, item, organizations, "contributor");
 		
+		var publishers = ZU.xpathText(doc, '//ReferencePublishers/OnetoN[starts-with(text(), "'+id+'")]');
+		if (publishers && publishers.length>0) {
+			item.publisher = attachName(doc, publishers).join('; ');
+		}
+		
+		var keywords = ZU.xpathText(doc, '//ReferenceKeywords/OnetoN[starts-with(text(), "'+id+'")]');
+		if (keywords && keywords.length>0) {
+			item.tags = attachName(doc, keywords);
+		}
 		
 		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="'+id+'"]');
 		for (var j=0; j<citations.length; j++) {
@@ -162,6 +181,20 @@ function doImport() {
 	}
 }
 
+function attachName(doc, ids) {
+	if (!ids || !ids.length || ids.length<=0) {
+		return ;
+	}
+	var valueList = [];
+	var idList = ids.split(';');
+	//skip the first element which is the id of reference
+	for (var j=1; j<idList.length; j++) {
+		var author = doc.getElementById(idList[j]);
+		valueList.push(ZU.xpathText(author, 'Name'));
+	}
+	return valueList;
+}
+
 //For each id in the list of ids, find the 
 //corresponding node in the document and 
 //attach the data to the creators array.
@@ -172,7 +205,6 @@ function attachPersons(doc, item, ids, type) {
 	var authorIds = ids.split(';');
 	//skip the first element which is the id of reference
 	for (var j=1; j<authorIds.length; j++) {
-		//Z.debug(authorIds[j]);
 		var author = doc.getElementById(authorIds[j]);
 		var lastName = ZU.xpathText(author, 'LastName');
 		var firstName = ZU.xpathText(author, 'FirstName');
@@ -181,10 +213,11 @@ function attachPersons(doc, item, ids, type) {
 			if (middleName) {
 				firstName += ' ' + middleName;
 			}
-			item.creators.push(ZU.cleanAuthor(lastName + ', ' + firstName, type, true));
+			item.creators.push({ lastName : lastName, firstName : firstName, creatorType : type });
 		}
-		//TODO other cases
-
+		if(!firstName && lastName) {
+			item.creators.push({ lastName : lastName, creatorType : type , fieldMode : true});
+		}
 	}
 	
 }/** BEGIN TEST CASES **/
@@ -198,8 +231,8 @@ var testCases = [
 				"title": "Evaluating Internet Research Sources",
 				"creators": [
 					{
-						"firstName": "Robert",
 						"lastName": "Harris",
+						"firstName": "Robert",
 						"creatorType": "author"
 					}
 				],
@@ -207,8 +240,20 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"url": "http://www.virtualsalt.com/evalu8it.htm",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					"CARS",
+					"information quality"
+				],
 				"notes": [
+					{
+						"note": "Notiz"
+					},
+					{
+						"note": "TOC"
+					},
+					{
+						"note": "Super!"
+					},
 					{
 						"note": "<h1>Criteria for assessing the trustworthiness of a source</h1>\"Credibility:trustworthy source, author’s credentials, evidence of quality control, known or respected authority, organizational support. Goal: an authoritative source, a source that supplies some good evidence that allows you to trust it. \r\nAccuracy: up to date, factual, detailed, exact, comprehensive, audience and purpose reflect intentions of completeness and accuracy. Goal: a source that is correct today (not yesterday), a source that gives the whole truth. \r\nReasonableness:fair, balanced, objective, reasoned, no conflict of interest, absence of fallacies or slanted tone. Goal: a source that engages the subject thoughtfully and reasonably, concerned with the truth. \r\nSupport: listed sources, contact information, available corroboration, claims supported, documentation supplied. Goal: a source that provides convincing evidence for the claims made, a source you can triangulate (find at least two other sources that support it). \""
 					}
@@ -223,7 +268,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Gerichtsentscheidung",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -231,7 +282,13 @@ var testCases = [
 			},
 			{
 				"itemType": "patent",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Patentschrift",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -239,7 +296,13 @@ var testCases = [
 			},
 			{
 				"itemType": "document",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Unklarer Dokumententyp",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -247,7 +310,13 @@ var testCases = [
 			},
 			{
 				"itemType": "newspaperArticle",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Zeitungsartikel",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -257,8 +326,8 @@ var testCases = [
 				"itemType": "book",
 				"creators": [
 					{
-						"firstName": "Beiheft",
 						"lastName": "Sonderheft",
+						"firstName": "Beiheft",
 						"creatorType": "editor"
 					}
 				],
@@ -269,7 +338,13 @@ var testCases = [
 			},
 			{
 				"itemType": "report",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Norm",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -277,7 +352,13 @@ var testCases = [
 			},
 			{
 				"itemType": "statute",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Gesetz / Verordnung",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -285,7 +366,13 @@ var testCases = [
 			},
 			{
 				"itemType": "manuscript",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Archivgut",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -293,7 +380,13 @@ var testCases = [
 			},
 			{
 				"itemType": "book",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Tagungsband",
+						"creatorType": "editor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -301,7 +394,13 @@ var testCases = [
 			},
 			{
 				"itemType": "book",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Schriften eines Autors",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -309,7 +408,13 @@ var testCases = [
 			},
 			{
 				"itemType": "book",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Gesetzeskommentar",
+						"creatorType": "editor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -317,7 +422,13 @@ var testCases = [
 			},
 			{
 				"itemType": "bookSection",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Beitrag im Gesetzeskommentar",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -325,7 +436,13 @@ var testCases = [
 			},
 			{
 				"itemType": "tvBroadcast",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Radio- oder Fernsehsendung",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -333,7 +450,13 @@ var testCases = [
 			},
 			{
 				"itemType": "bookSection",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Beitrag in ...",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -341,7 +464,13 @@ var testCases = [
 			},
 			{
 				"itemType": "webpage",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Internetdokument",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -349,7 +478,13 @@ var testCases = [
 			},
 			{
 				"itemType": "audioRecording",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Musiktitle in ...",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -357,7 +492,13 @@ var testCases = [
 			},
 			{
 				"itemType": "report",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Graue Literatur / Bericht / Report",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -365,7 +506,13 @@ var testCases = [
 			},
 			{
 				"itemType": "manuscript",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Akte",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -373,7 +520,13 @@ var testCases = [
 			},
 			{
 				"itemType": "podcast",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Hörspiel",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -381,7 +534,13 @@ var testCases = [
 			},
 			{
 				"itemType": "interview",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Inverviewmaterial",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -389,7 +548,13 @@ var testCases = [
 			},
 			{
 				"itemType": "email",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Persönliche Mitteilung",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -398,6 +563,7 @@ var testCases = [
 			{
 				"itemType": "computerProgram",
 				"creators": [],
+				"company": "Software",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -405,7 +571,13 @@ var testCases = [
 			},
 			{
 				"itemType": "document",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Ton- oder Filmdokument",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -413,7 +585,13 @@ var testCases = [
 			},
 			{
 				"itemType": "presentation",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Vortrag",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -421,7 +599,13 @@ var testCases = [
 			},
 			{
 				"itemType": "videoRecording",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Spielfilm",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -429,7 +613,13 @@ var testCases = [
 			},
 			{
 				"itemType": "report",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Pressemitteilung",
+						"creatorType": "contributor",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -437,7 +627,13 @@ var testCases = [
 			},
 			{
 				"itemType": "audioRecording",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Musikwerk / Musikalbum",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -445,7 +641,13 @@ var testCases = [
 			},
 			{
 				"itemType": "manuscript",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Manuskript",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -453,7 +655,13 @@ var testCases = [
 			},
 			{
 				"itemType": "book",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Hörbuch",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -461,7 +669,13 @@ var testCases = [
 			},
 			{
 				"itemType": "thesis",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Hochschulschrift",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -470,6 +684,7 @@ var testCases = [
 			{
 				"itemType": "map",
 				"creators": [],
+				"publisher": "Geographische Karte",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -478,6 +693,7 @@ var testCases = [
 			{
 				"itemType": "report",
 				"creators": [],
+				"institution": "Agentur",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
