@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-11-26 19:23:37"
+	"lastUpdated": "2016-11-28 09:06:45"
 }
 
 /*
@@ -89,6 +89,8 @@ function doImport() {
 	var item;
 	var doc = Zotero.getXML();
 	var references = ZU.xpath(doc, '//References/Reference');
+	var unfinishedReferences = [];
+	var itemIdList = {};
 	for (var i=0, n=references.length; i<n; i++) {
 		var type = ZU.xpathText(references[i], 'ReferenceType');
 		if (type && typeMapping[type]) {
@@ -98,8 +100,9 @@ function doImport() {
 			Z.debug("Therefore use default type 'journalArticle'");
 			item = new Zotero.Item("journalArticle");
 		}
-		var id = ZU.xpathText(references[i], './@id');
-		Z.debug(id);
+		item.itemID = ZU.xpathText(references[i], './@id');
+		item.type = type;
+		Z.debug(item.itemID);
 		
 		item.title = ZU.xpathText(references[i], './Title');
 		item.abstractNote = ZU.xpathText(references[i], './Abstract');
@@ -146,26 +149,26 @@ function doImport() {
 				ZU.xpathText(periodical, './UserAbbreviation2');
 		}
 		
-		var authors = ZU.xpathText(doc, '//ReferenceAuthors/OnetoN[starts-with(text(), "'+id+'")]');
+		var authors = ZU.xpathText(doc, '//ReferenceAuthors/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, authors, "author");
-		var editors = ZU.xpathText(doc, '//ReferenceEditors/OnetoN[starts-with(text(), "'+id+'")]');
+		var editors = ZU.xpathText(doc, '//ReferenceEditors/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, editors, "editor");
-		var editors = ZU.xpathText(doc, '//ReferenceCollaborators/OnetoN[starts-with(text(), "'+id+'")]');
+		var editors = ZU.xpathText(doc, '//ReferenceCollaborators/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, editors, "contributor");
-		var organizations = ZU.xpathText(doc, '//ReferenceOrganizations/OnetoN[starts-with(text(), "'+id+'")]');
+		var organizations = ZU.xpathText(doc, '//ReferenceOrganizations/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, organizations, "contributor");
 		
-		var publishers = ZU.xpathText(doc, '//ReferencePublishers/OnetoN[starts-with(text(), "'+id+'")]');
+		var publishers = ZU.xpathText(doc, '//ReferencePublishers/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		if (publishers && publishers.length>0) {
 			item.publisher = attachName(doc, publishers).join('; ');
 		}
 		
-		var keywords = ZU.xpathText(doc, '//ReferenceKeywords/OnetoN[starts-with(text(), "'+id+'")]');
+		var keywords = ZU.xpathText(doc, '//ReferenceKeywords/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		if (keywords && keywords.length>0) {
 			item.tags = attachName(doc, keywords);
 		}
 		
-		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="'+id+'"]');
+		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="'+item.itemID+'"]');
 		for (var j=0; j<citations.length; j++) {
 			var title = ZU.xpathText(citations[j], 'CoreStatement');
 			var text = ZU.xpathText(citations[j], 'Text');
@@ -176,9 +179,77 @@ function doImport() {
 				item.notes.push({note : text});
 			}
 		}
-
+		
+		itemIdList[item.itemID] = item;
+		if (type == "Contribution") {
+			unfinishedReferences.push(item);
+		} else {
+			item.complete();
+		}
+	}
+	
+	//
+	for (var i=0; i< unfinishedReferences.length; i++) {
+		var item = unfinishedReferences[i];
+		var containerString = ZU.xpathText(doc, '//ReferenceReferences/OnetoN[contains(text(), "'+item.itemID+'")]');
+		if (containerString) {
+			var containerId = containerString.split(';')[0];
+			var containerItem = itemIdList[containerId];
+			if (containerItem.type == "ConferenceProceedings") {
+				item.itemType = "conferencePaper";
+			}
+			item.publicationTitle = containerItem.title;
+			item.place = containerItem.place;
+			item.puslisher = containerItem.publisher;
+			item.ISBN = containerItem.ISBN;
+			//TODO editors and maybe more
+			
+		}
 		item.complete();
 	}
+	
+	var categories = ZU.xpath(doc, '//Categories/Category');
+	var collectionList = [];
+	for (var i=0, n=categories.length; i<n; i++) {
+		var collection = new Zotero.Collection();
+		collection.name = ZU.xpathText(categories[i], './Name');Z.debug(collection.name);
+		collection.id = ZU.xpathText(categories[i], './@id');
+		collection.type = 'collection';
+		collection.children = [];
+		var referenceCategories = ZU.xpath(doc, '//ReferenceCategories/OnetoN[contains(text(), "'+collection.id+'")]');
+		for (var j=0; j<referenceCategories.length; j++) {
+			var refid = referenceCategories[j].textContent.split(';')[0];
+			collection.children.push({ type: 'item', id: refid });
+		}
+		collectionList.push(collection);
+		collection.complete();//Change if subcollection work...
+	}
+	/* TODO fix this, but how?
+	var openCollections = [];
+	for (var i=0; i<collectionList.length; i++) {
+		var collection = collectionList[i];
+		var categoryCategories = ZU.xpathText(doc, '//CategoryCatgories/OnetoN[starts-with(text(), "'+collection.id+'")]');
+		if (categoryCategories) {
+			var subcategories = categoryCategories.split(';');
+			Z.debug(collection.id);
+			Z.debug(subcategories);
+			for (var j=1; j<subcategories.length; j++) {
+				collection.children.push({ type: 'collection', id: subcategories[j] });
+			}
+			openCollections.push(collection);
+		} else {
+			Z.debug(collectionList[i].name);
+			collectionList[i].complete();
+		}
+	}
+	
+	for (var i=0; i<openCollections.length; i++) {
+		Z.debug(openCollections[i].name);
+		openCollections[i].complete();
+	}
+	*/
+	
+	
 }
 
 function attachName(doc, ids) {
