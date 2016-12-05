@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-11-28 09:06:45"
+	"lastUpdated": "2016-12-05 17:59:47"
 }
 
 /*
@@ -86,8 +86,28 @@ var typeMapping = {
 
 
 function doImport() {
-	var item;
 	var doc = Zotero.getXML();
+	
+	//Groups will also be mapped to tags which can be assigned to
+	//items or notes.
+	var groups = ZU.xpath(doc, '//Groups/Group');
+	var rememberTags = {};
+	for (var i=0; i<groups.length; i++) {
+		var id = ZU.xpathText(groups[i], './@id');
+		var name = ZU.xpathText(groups[i], './Name');
+		var referenceGroups = ZU.xpath(doc, '//ReferenceGroups/OnetoN[contains(text(), "'+id+'")]|//KnowledgeItemGroups/OnetoN[contains(text(), "'+id+'")]');
+		for (var j=0; j<referenceGroups.length; j++) {
+			var refid = referenceGroups[j].textContent.split(';')[0];
+			if (rememberTags[refid]) {
+				rememberTags[refid].push(name);
+			} else {
+				rememberTags[refid] = [name];
+			}
+		}
+	}
+	
+	//Main information for each reference.
+	var item;
 	var references = ZU.xpath(doc, '//References/Reference');
 	var unfinishedReferences = [];
 	var itemIdList = {};
@@ -102,9 +122,13 @@ function doImport() {
 		}
 		item.itemID = ZU.xpathText(references[i], './@id');
 		item.type = type;
-		Z.debug(item.itemID);
+		//Z.debug(item.itemID);
 		
 		item.title = ZU.xpathText(references[i], './Title');
+		var subtitle = ZU.xpathText(references[i], './Subtitle');
+		if (subtitle) {
+			item.title += ": " + subtitle;
+		}
 		item.abstractNote = ZU.xpathText(references[i], './Abstract');
 		item.url = ZU.xpathText(references[i], './OnlineAddress');
 		item.volume = ZU.xpathText(references[i], './Volume');
@@ -113,24 +137,22 @@ function doImport() {
 		item.ISBN = ZU.xpathText(references[i], './ISBN');
 		item.edition = ZU.xpathText(references[i], './Edition');
 		item.place = ZU.xpathText(references[i], './PlaceOfPublication');
+		item.numberOfVolumes = ZU.xpathText(references[i], './NumberOfVolumes');
 		
-		var pageRange = ZU.xpathText(references[i], './PageRange');
-		if (pageRange) {
-			var parts = pageRange.split("\n");
-			item.pages = parts[parts.length-1].replace(/[^0-9\-–]/g, '');
-		}
+		addExtraLine(item, "PMID", ZU.xpathText(references[i], './PubMedID'));
+		
+		item.pages = extractPages(ZU.xpathText(references[i], './PageRange'));
+		item.numPages = extractPages(ZU.xpathText(references[i], './PageCount'));
 		
 		item.date = ZU.xpathText(references[i], './DateForSorting') ||
 			ZU.xpathText(references[i], './Date') ||
 			ZU.xpathText(references[i], './Year');
 		item.accessDate = ZU.xpathText(references[i], './AccessDate');
-		//ZU.xpathText(references[i], './ModifiedOn');
-		//ZU.xpathText(references[i], './CreatedOn');
 		
 		for (var field of ['Notes', 'TableOfContents', 'Evaluation']) {
 			var note = ZU.xpathText(references[i], './'+field);
 			if (note) {
-				item.notes.push({ note : note });
+				item.notes.push({ note : note , tags : ["#" + field] });
 			}
 		}
 		
@@ -153,8 +175,8 @@ function doImport() {
 		attachPersons(doc, item, authors, "author");
 		var editors = ZU.xpathText(doc, '//ReferenceEditors/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, editors, "editor");
-		var editors = ZU.xpathText(doc, '//ReferenceCollaborators/OnetoN[starts-with(text(), "'+item.itemID+'")]');
-		attachPersons(doc, item, editors, "contributor");
+		var collaborators = ZU.xpathText(doc, '//ReferenceCollaborators/OnetoN[starts-with(text(), "'+item.itemID+'")]');
+		attachPersons(doc, item, collaborators, "contributor");
 		var organizations = ZU.xpathText(doc, '//ReferenceOrganizations/OnetoN[starts-with(text(), "'+item.itemID+'")]');
 		attachPersons(doc, item, organizations, "contributor");
 		
@@ -167,19 +189,67 @@ function doImport() {
 		if (keywords && keywords.length>0) {
 			item.tags = attachName(doc, keywords);
 		}
-		
-		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="'+item.itemID+'"]');
-		for (var j=0; j<citations.length; j++) {
-			var title = ZU.xpathText(citations[j], 'CoreStatement');
-			var text = ZU.xpathText(citations[j], 'Text');
-			if (title) {
-				text = '<h1>' + title + '</h1>' + text;
-			}
-			if (text) {
-				item.notes.push({note : text});
+		if (rememberTags[item.itemID]) {
+			for (var j=0; j<rememberTags[item.itemID].length; j++) {
+				item.tags.push(rememberTags[item.itemID][j]);
 			}
 		}
 		
+		//For all corresponding knowledge items attach a note containing
+		//the information of it.
+		var citations = ZU.xpath(doc, '//KnowledgeItem[ReferenceID="'+item.itemID+'"]');
+		for (var j=0; j<citations.length; j++) {
+			var noteObject = {};
+			noteObject.id = ZU.xpathText(citations[j], '@id');
+			var title = ZU.xpathText(citations[j], 'CoreStatement');
+			var text = ZU.xpathText(citations[j], 'Text');
+			var pages = extractPages(ZU.xpathText(citations[j], 'PageRange'));
+			noteObject.note = '';
+			if (title) {
+				noteObject.note += '<h1>' + title + "</h1>\n";
+			}
+			if (text) { 
+				noteObject.note += "<p>" + ZU.xpathText(citations[j], 'Text') + "</p>\n";
+			}
+			if (pages) {
+				noteObject.note += "<i>" + pages + "</i>";
+			}
+			if (rememberTags[noteObject.id]) {
+				noteObject.tags = rememberTags[noteObject.id];
+			}
+			if (noteObject.note != "") {
+				item.notes.push(noteObject);
+			}
+		}
+		
+		//Locations will be saved as URIs in attachments etc.
+		var locations = ZU.xpath(doc, '//Locations/Location[ReferenceID="'+item.itemID+'"]');
+		for (var j=0; j<locations.length; j++) {
+			var address = ZU.xpathText(locations[j], 'Address');
+			var addressType = ZU.xpathText(locations[j], 'MirrorsReferencePropertyId');
+			if (address) {
+				if (addressType == "Doi" && !item.DOI) {
+					item.DOI = address;
+				} else if (addressType == "PubMedId" && item.extra.indexOf("PMID") == -1) {
+					addExtraLine(item, "PMID", address);
+				} else {
+					item.attachments.push({
+						url: address,
+						title:"Location"
+					});
+				}
+			}
+			var callNumber = ZU.xpathText(locations[j], 'CallNumber');
+			var libraryId = ZU.xpathText(locations[j], 'LibraryID');
+			if (callNumber) {
+				item.callNumber = callNumber;
+				item.libraryCatalog = ZU.xpathText(doc.getElementById(libraryId), "Name");
+			}
+		}
+		
+		//The items of type contribution need more data from their container
+		//element and are therefore not yet finished. The other items can
+		//be completed here.
 		itemIdList[item.itemID] = item;
 		if (type == "Contribution") {
 			unfinishedReferences.push(item);
@@ -188,7 +258,9 @@ function doImport() {
 		}
 	}
 	
-	//
+	
+	//For unfinished references we add additional data from the
+	//container item and save the relation between them as well.
 	for (var i=0; i< unfinishedReferences.length; i++) {
 		var item = unfinishedReferences[i];
 		var containerString = ZU.xpathText(doc, '//ReferenceReferences/OnetoN[contains(text(), "'+item.itemID+'")]');
@@ -200,20 +272,52 @@ function doImport() {
 			}
 			item.publicationTitle = containerItem.title;
 			item.place = containerItem.place;
-			item.puslisher = containerItem.publisher;
+			item.publisher = containerItem.publisher;
 			item.ISBN = containerItem.ISBN;
-			//TODO editors and maybe more
+			item.volume = containerItem.volume;
+			item.edition = containerItem.edition;
+			item.series = containerItem.series;
+
+			for (var j=0; j<containerItem.creators.length; j++) {
+				var creatorObject = containerItem.creators[j];
+				var role = creatorObject.creatorType;
+				if (role == "author") {
+					creatorObject.creatorType = "bookAuthor";
+				}
+				item.creators.push(creatorObject);
+			}
+			
+			item.seeAlso.push(containerItem.itemID);
 			
 		}
 		item.complete();
 	}
 	
+	//Categories will be mapped to collections where the name contains
+	//also the hierarchy number which we first calculate from the
+	//CategoryCategories list.
 	var categories = ZU.xpath(doc, '//Categories/Category');
+	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN');
+	var numbering = { "00000000-0000-0000-0000-000000000000" : "$" };
+	//we will have fixed prefix "$." for all collections (see below),
+	//such that only the substring starting form index 2 is relevant.
+	for (var i=0, n=hierarchy.length; i<n; i++) {
+		var categoryLists = hierarchy[i].textContent.split(";");
+		var referencePoint = categoryLists[0];
+		if (!numbering[referencePoint]) {
+			Z.debug("Warning: Reference point for categorization hierarchy not yet found");
+			Z.debug(categoryLists);
+			continue;
+		}
+		for (var j=1; j<categoryLists.length; j++) {
+			numbering[categoryLists[j]] = numbering[referencePoint] + "." + j;
+		}
+	}
 	var collectionList = [];
 	for (var i=0, n=categories.length; i<n; i++) {
 		var collection = new Zotero.Collection();
-		collection.name = ZU.xpathText(categories[i], './Name');Z.debug(collection.name);
 		collection.id = ZU.xpathText(categories[i], './@id');
+		collection.name = numbering[collection.id].substr(2) + ' ' + ZU.xpathText(categories[i], './Name');
 		collection.type = 'collection';
 		collection.children = [];
 		var referenceCategories = ZU.xpath(doc, '//ReferenceCategories/OnetoN[contains(text(), "'+collection.id+'")]');
@@ -222,32 +326,31 @@ function doImport() {
 			collection.children.push({ type: 'item', id: refid });
 		}
 		collectionList.push(collection);
-		collection.complete();//Change if subcollection work...
-	}
-	/* TODO fix this, but how?
-	var openCollections = [];
-	for (var i=0; i<collectionList.length; i++) {
-		var collection = collectionList[i];
-		var categoryCategories = ZU.xpathText(doc, '//CategoryCatgories/OnetoN[starts-with(text(), "'+collection.id+'")]');
-		if (categoryCategories) {
-			var subcategories = categoryCategories.split(';');
-			Z.debug(collection.id);
-			Z.debug(subcategories);
-			for (var j=1; j<subcategories.length; j++) {
-				collection.children.push({ type: 'collection', id: subcategories[j] });
-			}
-			openCollections.push(collection);
-		} else {
-			Z.debug(collectionList[i].name);
-			collectionList[i].complete();
-		}
+		collection.complete();
 	}
 	
-	for (var i=0; i<openCollections.length; i++) {
-		Z.debug(openCollections[i].name);
-		openCollections[i].complete();
+	
+	//Task items will be mapped to new standalone note
+	var tasks = ZU.xpath(doc, '//TaskItems/TaskItem');
+	for (var i=0, n=tasks.length; i<n; i++) {
+		item = new Zotero.Item("note");
+		
+		var dueDate = ZU.xpathText(tasks[i], './DueDate');
+		if (dueDate) {
+			item.note = "<h1>" + ZU.xpathText(tasks[i], './Name') + " until " + dueDate + "</h1>";
+		} else {
+			item.note = "<h1>" + ZU.xpathText(tasks[i], './Name') + "</h1>";
+		}
+		var noteText = ZU.xpathText(tasks[i], './Notes');
+		if (noteText) {
+			item.note += "\n" + noteText;
+		}
+		
+		item.seeAlso.push(ZU.xpathText(tasks[i], './ReferenceID'));
+		
+		item.tags.push("#todo");
+		item.complete();
 	}
-	*/
 	
 	
 }
@@ -291,6 +394,22 @@ function attachPersons(doc, item, ids, type) {
 		}
 	}
 	
+}
+
+function addExtraLine(item, prefix, text) {
+	if (text) {
+		if (!item.extra) {
+			item.extra = '';
+		}
+		item.extra += prefix + ': ' + text + "\n"; 
+	}
+}
+
+function extractPages(multilineText) {
+	if (multilineText) {
+		var parts = multilineText.split("\n");
+		return parts[parts.length-1].replace(/[^0-9\-–]/g, '');
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -309,27 +428,69 @@ var testCases = [
 				],
 				"date": "1997-11-17T00:00:00",
 				"abstractNote": "Abstract",
+				"itemID": "0781d673-88c9-4c66-8eda-e3a6877cde78",
 				"url": "http://www.virtualsalt.com/evalu8it.htm",
-				"attachments": [],
+				"websiteType": "InternetDocument",
+				"attachments": [
+					{
+						"title": "Location"
+					}
+				],
 				"tags": [
 					"CARS",
 					"information quality"
 				],
 				"notes": [
 					{
-						"note": "Notiz"
+						"note": "Notiz",
+						"tags": [
+							"#Notes"
+						]
 					},
 					{
-						"note": "TOC"
+						"note": "TOC",
+						"tags": [
+							"#TableOfContents"
+						]
 					},
 					{
-						"note": "Super!"
+						"note": "Super!",
+						"tags": [
+							"#Evaluation"
+						]
 					},
 					{
-						"note": "<h1>Criteria for assessing the trustworthiness of a source</h1>\"Credibility:trustworthy source, author’s credentials, evidence of quality control, known or respected authority, organizational support. Goal: an authoritative source, a source that supplies some good evidence that allows you to trust it. \r\nAccuracy: up to date, factual, detailed, exact, comprehensive, audience and purpose reflect intentions of completeness and accuracy. Goal: a source that is correct today (not yesterday), a source that gives the whole truth. \r\nReasonableness:fair, balanced, objective, reasoned, no conflict of interest, absence of fallacies or slanted tone. Goal: a source that engages the subject thoughtfully and reasonably, concerned with the truth. \r\nSupport: listed sources, contact information, available corroboration, claims supported, documentation supplied. Goal: a source that provides convincing evidence for the claims made, a source you can triangulate (find at least two other sources that support it). \""
+						"id": "64926ce4-fc5c-4b4e-a180-8fc578ce4e38",
+						"note": "<h1>Criteria for assessing the trustworthiness of a source</h1>\n<p>\"Credibility:trustworthy source, author’s credentials, evidence of quality control, known or respected authority, organizational support. Goal: an authoritative source, a source that supplies some good evidence that allows you to trust it. \r\nAccuracy: up to date, factual, detailed, exact, comprehensive, audience and purpose reflect intentions of completeness and accuracy. Goal: a source that is correct today (not yesterday), a source that gives the whole truth. \r\nReasonableness:fair, balanced, objective, reasoned, no conflict of interest, absence of fallacies or slanted tone. Goal: a source that engages the subject thoughtfully and reasonably, concerned with the truth. \r\nSupport: listed sources, contact information, available corroboration, claims supported, documentation supplied. Goal: a source that provides convincing evidence for the claims made, a source you can triangulate (find at least two other sources that support it). \"</p>\n"
 					}
 				],
 				"seeAlso": []
+			},
+			{
+				"itemType": "note",
+				"creators": [],
+				"note": "<h1>Deadline: master thesis until 2016-11-27T00:00:00</h1>",
+				"attachments": [],
+				"tags": [
+					"#todo"
+				],
+				"notes": [],
+				"seeAlso": [
+					undefined
+				]
+			},
+			{
+				"itemType": "note",
+				"creators": [],
+				"note": "<h1>Todo</h1>",
+				"attachments": [],
+				"tags": [
+					"#todo"
+				],
+				"notes": [],
+				"seeAlso": [
+					"0781d673-88c9-4c66-8eda-e3a6877cde78"
+				]
 			}
 		]
 	},
@@ -346,6 +507,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "b5976ba8-881f-4eb1-952c-de8c71dafd3c",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -360,6 +522,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "f3b1d571-9397-4390-a136-bd076cff3386",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -374,6 +537,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "ec8990a2-78ac-4f7c-82c2-a82b921e4bd4",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -388,6 +552,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "ae1ab9c1-faeb-4fe7-90de-1dfc2129aaae",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -402,6 +567,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
+				"itemID": "d156a90b-7a18-4e7e-996e-83fee6f7a411",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -416,6 +582,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "f5392e99-e101-4d53-bdc0-b71407bcca4f",
+				"reportType": "Standard",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -430,6 +598,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "d115d5dc-745f-4b77-a90b-801898637088",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -444,6 +613,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "f3362116-0581-4c52-a377-dd2df1036045",
+				"manuscriptType": "ArchiveMaterial",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -458,6 +629,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "30b385f0-74d8-431f-8049-561f4504088f",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -472,6 +644,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "e86ebdb1-9ff2-46c6-8ce7-028fa0c57b7f",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -486,6 +659,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "0aeedb2e-2f58-4cb5-ad52-764b418be010",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -500,6 +674,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "56ea04a5-ea97-48d7-bc06-f588312e75cb",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -514,20 +689,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			},
-			{
-				"itemType": "bookSection",
-				"creators": [
-					{
-						"lastName": "Beitrag in ...",
-						"creatorType": "author",
-						"fieldMode": true
-					}
-				],
+				"itemID": "39a2e01b-fbca-47c4-aef6-0f840aedbaff",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -542,6 +704,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "a9747694-4671-48d9-8925-4c43b4d1baa8",
+				"websiteType": "InternetDocument",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -556,6 +720,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "77645de0-90ff-4105-8e91-cd2bc47437ee",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -570,6 +735,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "194eced0-1857-4e9e-94a6-82be54d0ca09",
+				"reportType": "UnpublishedWork",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -584,6 +751,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "30b56cc3-a3f8-4c03-b6dc-c0331ed6ad02",
+				"manuscriptType": "File",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -598,6 +767,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "0b63ee01-3f4c-4c10-9dea-19b787558892",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -612,6 +782,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "e922017c-e92d-45f0-9483-e14d9514a2fe",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -626,6 +797,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "9cf69108-e772-437f-b1f6-c73595b1748e",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -635,6 +807,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"creators": [],
 				"company": "Software",
+				"itemID": "d6bf3308-8e77-4f69-b63b-39cd1cd65cd2",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -649,6 +822,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "c976c57e-370f-43ed-9060-991c11e93216",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -663,6 +837,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "e5676a0f-0f5d-4a68-9e93-714bbd9be9d7",
+				"presentationType": "Lecture",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -677,6 +853,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "733717d3-30a7-4d14-8e8e-88c4cd6d5e85",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -691,6 +868,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "a83897d0-0ba8-434a-971c-0c6e7e960035",
+				"reportType": "PressRelease",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -705,6 +884,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "342d9451-672b-49b6-bb7c-f0f64b4b3fd0",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -719,6 +899,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "990bb792-8046-46af-a8b9-4eab3871cb47",
+				"manuscriptType": "Manuscript",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -733,6 +915,7 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "05a2ec3d-3272-44ec-b68b-d0d621f9ff5c",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -747,6 +930,8 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
+				"itemID": "ef2de28c-b713-491f-8d96-fec2b7a8e4b9",
+				"thesisType": "Thesis",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -755,6 +940,8 @@ var testCases = [
 			{
 				"itemType": "map",
 				"creators": [],
+				"itemID": "4bf0926f-ebda-4804-8820-b25099ad35e5",
+				"mapType": "Map",
 				"publisher": "Geographische Karte",
 				"attachments": [],
 				"tags": [],
@@ -765,6 +952,23 @@ var testCases = [
 				"itemType": "report",
 				"creators": [],
 				"institution": "Agentur",
+				"itemID": "1872d527-d044-422d-9a7c-90325e00ea65",
+				"reportType": "NewsAgencyReport",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "bookSection",
+				"creators": [
+					{
+						"lastName": "Beitrag in ...",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
+				"itemID": "62924595-402a-4381-8ee5-08ad0cb0b35b",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
