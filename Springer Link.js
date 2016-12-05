@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-11-07 05:15:03"
+	"lastUpdated": "2016-12-05 22:45:53"
 }
 
 function detectWeb(doc, url) {
@@ -36,8 +36,13 @@ function detectWeb(doc, url) {
 		case "chapter":
 		case "referenceworkentry":
 		case "protocol":
-			return "bookSection";
-			break;
+			if (ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content')) {
+				return "conferencePaper";
+				break;
+			} else {
+				return "bookSection";
+				break;
+			}
 	}
 }
 
@@ -108,7 +113,7 @@ function complementItem(doc, item) {
 					@id="abstract-about-electronic-issn"]'
 		);
 	}
-	if(itemType == 'bookSection') {
+	if(itemType == 'bookSection' || itemType == "conferencePaper") {
 		//look for editors
 		var editors = ZU.xpath(doc,
 			'//ul[@class="editors"]/li[@itemprop="editor"]\
@@ -202,7 +207,7 @@ function scrape(doc, url) {
 		});
 		translator.getTranslatorObject(function(trans) {
 			trans.addCustomFields({
-				"citation_inbook_title": "bookTitle"
+				"citation_inbook_title": "publicationTitle" //we use here the generic field to make sure to overwrite any other content
 			});
 			if(itemType) trans.itemType = itemType;
 			trans.doWeb(doc, doc.location.href);
@@ -237,7 +242,7 @@ var testCases = [
 		"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
 		"items": [
 			{
-				"itemType": "bookSection",
+				"itemType": "conferencePaper",
 				"title": "Something Old, Something New, Something Borrowed, Something Blue",
 				"creators": [
 					{
@@ -264,15 +269,15 @@ var testCases = [
 				"date": "2008/10/12",
 				"ISBN": "9783540886815 9783540886822",
 				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
-				"bookTitle": "Computer Vision – ECCV 2008",
+				"conferenceName": "European Conference on Computer Vision",
 				"extra": "DOI: 10.1007/978-3-540-88682-2_1",
 				"language": "en",
 				"libraryCatalog": "link.springer.com",
 				"pages": "1-1",
+				"proceedingsTitle": "Computer Vision – ECCV 2008",
 				"publisher": "Springer Berlin Heidelberg",
 				"rights": "©2008 Springer-Verlag Berlin Heidelberg",
 				"series": "Lecture Notes in Computer Science",
-				"seriesNumber": "5302",
 				"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
 				"attachments": [
 					{
