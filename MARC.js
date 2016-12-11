@@ -469,8 +469,10 @@ record.prototype.translate = function(item) {
 			"ctb" : "contributor",
 			"drt" : "director",
 			"edt" : "editor",
+			"pbl" : "SKIP", //publisher
 			"prf" : "performer",
 			"pro" : "producer",
+			"pub" : "SKIP", //publication place
 			"trl" : "translator"
 		};
 		
@@ -478,6 +480,9 @@ record.prototype.translate = function(item) {
 		for (var i = 0; i < creatorFields.length; i++) {
 			var authorTab = this.getFieldSubfields(creatorFields[i]);
 			for (var j in authorTab) {
+				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
+					continue;
+				}
 				var creatorObject = {};
 				if (authorTab[j]['a']) {
 					if (creatorFields[i] == "100" || creatorFields[i] == "700" ) {
