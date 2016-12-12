@@ -86,3 +86,4 @@ fb342bae-7727-483b-a871-c64c663c2fae # BusinessWeek; acquired/covered by Bloombe
 f94bad2d-0c76-4e8f-a0d3-970810093c6c # The Age; replaced by generic Fairfax Australia
 9418dcc2-cc1e-432b-b7a6-7b00b7402d2f # Hurricane Digital Memory Bank; covered with COinS
 58641ca2-d324-445b-a618-4e7c4631726f # Google Blog is discontinued
+74af9c75-dc14-4cdb-bb0b-1bbb13ba2e22 # Landes Publishers; moved to T&F
