@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 			//Here we need first to go to another website which will then also
 			//create a session to continue.
 			if (marclink) {
-				url = "http://" + doc.location.host + marclink;
+				url = "//" + doc.location.host + marclink;
 			} else {
 				var pos = metalink.indexOf("URL=");
 				var link = metalink.substring(pos+4).replace('/log_out/', '/see_record/');
