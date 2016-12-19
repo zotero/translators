@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-10-11 17:07:44"
+	"lastUpdated": "2016-12-19 05:02:00"
 }
 
 /*
@@ -356,7 +356,7 @@ function addEmbMeta(doc, url) {
 
 	translator.getTranslatorObject(function(trans) {
 		trans.doWeb(doc, url);
-	});
+   	});
 }
 
 function detectWeb(doc, url) {
@@ -414,92 +414,6 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://rer.sagepub.com/content/52/2/201.abstract",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
-				"creators": [
-					{
-						"firstName": "Avi",
-						"lastName": "Hofstein",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Vincent N.",
-						"lastName": "Lunetta",
-						"creatorType": "author"
-					}
-				],
-				"date": "06/01/1982",
-				"DOI": "10.3102/00346543052002201",
-				"ISSN": "0034-6543, 1935-1046",
-				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
-				"issue": "2",
-				"journalAbbreviation": "REVIEW OF EDUCATIONAL RESEARCH",
-				"language": "en",
-				"libraryCatalog": "rer.sagepub.com",
-				"pages": "201-217",
-				"publicationTitle": "Review of Educational Research",
-				"shortTitle": "The Role of the Laboratory in Science Teaching",
-				"url": "http://rer.sagepub.com/content/52/2/201",
-				"volume": "52",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
-				"creators": [
-					{
-						"firstName": "Trevor",
-						"lastName": "Owens",
-						"creatorType": "author"
-					}
-				],
-				"date": "2010-05-27",
-				"DOI": "10.1177/1046878110366277",
-				"ISSN": "1046-8781, 1552-826X",
-				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
-				"journalAbbreviation": "Simulation Gaming",
-				"language": "en",
-				"libraryCatalog": "sag.sagepub.com",
-				"publicationTitle": "Simulation & Gaming",
-				"shortTitle": "Modding the History of Science",
-				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://bjaesthetics.oxfordjournals.org/search?fulltext=art&submit=yes&x=0&y=0",
 		"items": "multiple"
 	},
@@ -511,6 +425,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://jcb.rupress.org/content/early/by/section",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://rsbl.royalsocietypublishing.org/content/early/recent",
 		"items": "multiple"
 	},
 	{
@@ -871,7 +790,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10.abstract",
+		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -901,7 +820,7 @@ var testCases = [
 				"date": "2012/01/01",
 				"DOI": "10.1302/0301-620X.94B1.28047",
 				"ISSN": "0301-620X, 2044-5377",
-				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\n\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
+				"abstractNote": "Skip to Next Section\nThe most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
 				"extra": "PMID: 22219240",
 				"issue": "1",
 				"journalAbbreviation": "J Bone Joint Surg Br",
@@ -1063,11 +982,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://oss.sagepub.com/search/results?fulltext=labor&x=0&y=0&submit=yes&journal_set=sposs&src=selected&andorexactfulltext=and",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
