@@ -2,7 +2,7 @@
 	"translatorID": "60e55b65-08cb-4a8f-8a61-c36338ec8754",
 	"label": "Access Medicine",
 	"creator": "Jaret M. Karnuta",
-	"target": "^https?://.*accessmedicine\\.mhmedical\\.com.*",
+	"target": "^https?://(0-)?accessmedicine\\.mhmedical\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
