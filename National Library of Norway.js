@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-20 04:28:12"
+	"lastUpdated": "2016-12-28 12:25:50"
 }
 
 /*
@@ -127,6 +127,8 @@ function scrape(doc, url) {
 		if (item.numPages) {
 			item.numPages = extractNumPages(item.numPages);
 		}
+		
+		item.date = ZU.strToISO(item.date);
 
 		// Add permalink
 		var container = doc.getElementById('preview_metadata');
@@ -147,7 +149,7 @@ var testCases = [
 				"itemType": "videoRecording",
 				"title": "Sammenslåing av BP og Amoco - Dagsrevyen 1998.12.31 (6: 9)",
 				"creators": [],
-				"date": "Desember 31, 1996",
+				"date": "1996-12-31",
 				"libraryCatalog": "National Library of Norway",
 				"shortTitle": "Sammenslåing av BP og Amoco - Dagsrevyen 1998.12.31 (6",
 				"url": "http://urn.nb.no/URN:NBN:no-nb_video_11201",
