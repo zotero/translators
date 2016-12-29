@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-29 07:23:32"
+	"lastUpdated": "2016-12-29 16:41:01"
 }
 
 /*
@@ -78,7 +78,7 @@ function doWeb(doc, url){
 			title = title+" ("+bookTitle+")";
 			sectionId = sectionId.substring(beginCut+1, endCut);
 			var link = baseCitation+sectionId;
-			//prevent overriding, keep most relevant title
+			//prevent overriding, keep most relevant (i.e. first occurence) title
 			if(!sectionDict[link]){
 				sectionDict[link]=title;
 			}
@@ -126,6 +126,7 @@ function risTranslate(doc, link, bookSection){
 				});
 			}
 			//parse out edition from title
+			//typical book title looks like this: Book Title, 19e (where 19e is edition no)
 			var bookTitle = item.bookTitle;
 			if(bookTitle.includes(",")){
 				//get last substring (book title might have commas in it)
@@ -148,6 +149,9 @@ function risTranslate(doc, link, bookSection){
 			if (item.abstractNote) {
   				item.abstractNote = item.abstractNote.replace(/\s+/g, ' ');
 			}
+
+			//remove numberOfVolumes, incorrectly set in RIS
+			item.numberOfVolumes="";
 
 			//remove authors if they dont have a first and last name
 			for (var i=0;i<item.creators.length;i++){
@@ -212,7 +216,6 @@ var testCases = [
 				"bookTitle": "Strange and Schafermeyer's Pediatric Emergency Medicine",
 				"edition": "4",
 				"libraryCatalog": "Access Medicine",
-				"numberOfVolumes": "Book, Section",
 				"place": "New York, NY",
 				"publisher": "McGraw-Hill Education",
 				"url": "http://mhmedical.com/content.aspx?aid=1105680244",
@@ -274,7 +277,6 @@ var testCases = [
 				"bookTitle": "Harrison's Principles of Internal Medicine",
 				"edition": "19",
 				"libraryCatalog": "Access Medicine",
-				"numberOfVolumes": "Book, Section",
 				"place": "New York, NY",
 				"publisher": "McGraw-Hill Education",
 				"url": "http://mhmedical.com/content.aspx?aid=1120785046",
