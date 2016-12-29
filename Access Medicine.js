@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-29 06:44:55"
+	"lastUpdated": "2016-12-29 06:51:18"
 }
 
 /*
@@ -142,7 +142,17 @@ function risTranslate(doc, link, bookSection){
 				var newBookTitle=splitOnComma.join(",");
 				item.bookTitle=newBookTitle;
 			}
+
+			//remove long and unnecessary abstractNote
 			item.abstractNote = "";
+
+			//remove authors if they dont have a first and last name
+			for (var i=0;i<item.creators.length;i++){
+				var author = item.creators[i];
+				if(!author.lastName || !author.firstName){
+					item.creators.splice(i,1);
+				}
+			}
 			item.complete();
 		});
 		translator.translate();
