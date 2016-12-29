@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-01 14:02:29"
+	"lastUpdated": "2016-12-28 14:39:45"
 }
 
 /*
@@ -107,7 +107,8 @@ function scrape(response, obj, url) {
 
 	if (data.references) {
 		var concatRef = '';
-		for each(var ref in data.references) {
+		for (var i in data.references) {
+			var ref = data.references[i];
 			var refName = (ref.reference_name || '');
 			var refLoc = (ref.reference_location_in_source || '');
 			concatRef += (refName + ' ' + refLoc + '; ');
