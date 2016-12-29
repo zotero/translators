@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-12-05 17:59:47"
+	"lastUpdated": "2016-12-29 13:33:53"
 }
 
 /*
@@ -222,8 +222,14 @@ function doImport() {
 			}
 		}
 		
-		//Locations will be saved as URIs in attachments etc.
+		//Locations will be saved as URIs in attachments, DOI, extra etc.
 		var locations = ZU.xpath(doc, '//Locations/Location[ReferenceID="'+item.itemID+'"]');
+		//If we only have partial information about the callnumber or
+		//library location, then we save this info in these two arrays
+		//which will then processed after the for loop if no other info
+		//was found.
+		var onlyLibraryInfo = [];
+		var onlyCallNumber = [];
 		for (var j=0; j<locations.length; j++) {
 			var address = ZU.xpathText(locations[j], 'Address');
 			var addressType = ZU.xpathText(locations[j], 'MirrorsReferencePropertyId');
@@ -241,10 +247,28 @@ function doImport() {
 			}
 			var callNumber = ZU.xpathText(locations[j], 'CallNumber');
 			var libraryId = ZU.xpathText(locations[j], 'LibraryID');
-			if (callNumber) {
+			if (callNumber && libraryId) {
 				item.callNumber = callNumber;
 				item.libraryCatalog = ZU.xpathText(doc.getElementById(libraryId), "Name");
+			} else if (callNumber) {
+				onlyCallNumber.push(callNumber);
+			} else if (libraryId) {
+				onlyLibraryInfo.push(ZU.xpathText(doc.getElementById(libraryId), "Name"));
 			}
+		}
+		if (!item.callNumber) {
+			if (onlyCallNumber.length>0) {
+				item.callNumber = onlyCallNumber[0];
+			} else if (onlyLibraryInfo.length>0) {
+				item.libraryCatalog = onlyLibraryInfo[0];
+			}
+		}
+		
+		//Only for journalArticle and conferencePaper the DOI field is
+		//currently established and therefore we need to add the info for
+		//all other itemTypes in the extra field.
+		if (item.DOI && item.itemType != "journalArticle" && item.itemType != "conferencePaper") {
+			addExtraLine(item, "DOI", item.DOI);
 		}
 		
 		//The items of type contribution need more data from their container
