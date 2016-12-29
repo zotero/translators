@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-29 06:51:18"
+	"lastUpdated": "2016-12-29 06:59:44"
 }
 
 /*
@@ -116,8 +116,9 @@ function risTranslate(doc, link, bookSection){
 				var chapterSpan = doc.getElementById('pageContent_lblChapterTitle1');
 				if (chapterSpan) {
 					//remove 'chapter' text if present
-					var chapterText = chapterSpan.innerHTML.toLowerCase().replace("chapter",'').trim();
-					item.notes.push('Chapter: '+chapterText);
+					var chapterText = chapterSpan.innerHTML.trim();
+					//item.notes.push('Chapter: '+chapterText);
+					item.notes.push({note:chapterText});
 				}
 				item.attachments.push({
 					title: "Snapshot",
