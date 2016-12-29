@@ -2,92 +2,113 @@
 	"translatorID": "91c7b393-af05-476c-ae72-ae244d2347f4",
 	"label": "Microsoft Academic",
 	"creator": "Philipp Zumstein",
-	"target": "https?://academic\\.microsoft\\.com",
+	"target": "^https?://academic\\.microsoft\\.com/#/(search|detail)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-27 18:13:50"
+	"lastUpdated": "2016-12-29 18:19:23"
 }
 
-
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Philipp Zumstein
+	Copyright © 2016 Philipp Zumstein
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//paper-detail-entity[contains(@class, "full-page-entity")]')) {
-		var conf = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Conference")]');
-		if (conf) {
-			return 'conferencePaper';
+	//The entity-detail DIV has all template code as SCRIPT childrens with some @id
+	//and one other (active) child, which will determine the websiteType,
+	//i.e. PAPER-DETAIL-ENTITY,  JOURNAL-DETAIL-ENTITY, AUTHOR-DETAIL-ENTITY,
+	//AFFILIATION-DETAIL-ENTITY, or, FOS-DETAIL-ENTITY
+	var child = ZU.xpath(doc, '//div[contains(@class, "entity-detail")]/*[not(@id)]');
+	if (child && child.length>0) {
+		var websiteType = child[0].tagName;
+		//Z.debug(websiteType);
+		if (websiteType == 'PAPER-DETAIL-ENTITY') {
+			Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+			var conf = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Conference")]');
+			if (conf) {
+				return 'conferencePaper';
+			}
+			var jour = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Journal")]');
+			if (!jour) {
+				return 'book';
+			}
+			return 'journalArticle';
+		} else if (getSearchResults(doc, true)) {
+			Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+			return 'multiple';
 		}
-		var jour = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Journal")]');
-		if (!jour) {
-			return 'book';
-		}
-		return 'journalArticle';
-	} else if (getSearchResults(doc, true)) {
+	}
+	if (url.indexOf('#/search')>-1 && getSearchResults(doc, true)) {
+		Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
 		return 'multiple';
 	}
-	Z.debug("Somehow during automatic testing this does not work");
-	Z.debug("Setting the correct type therefore here manually for the test cases")
-	return 'journalArticle';
+
+	//The page can change from a search page to a single item page
+	//without loading the whole content as a new website and therfore
+	//we need to monitor these DOM changes all the time (here and in
+	//all other cases).
+	Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+
+	//Somehow during automatic testing this does not work
+	//Setting the correct type therefore here manually for the test cases
+	//return 'journalArticle';
 }
 
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    var rows = ZU.xpath(doc, '//paper-tile/article//div[contains(@class, "title-bar")]//a');
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//paper-tile/article//div[contains(@class, "title-bar")]//a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = [];
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, scrape);
-        });
-    } else {
-        scrape(doc, url);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
 
@@ -127,19 +148,14 @@ function scrape(doc, url) {
 			}
 		}
 		
-		item.attachments.push({
-			title: "Snapshot",
-			document: doc
-		});
+		//Save all links to the source in one HTML note.
+		var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
 		if (data.sources) {
 			for (var i=0; i<data.sources.length; i++) {
-				item.attachments.push({
-					title: "Source",
-					url: data.sources[i].u,
-					snapshot: false
-				});
+				sourcesNote += '<a href="' +data.sources[i].u+ '">'+data.sources[i].u+'</a><br/>';
 			}
 		}
+		item.notes.push({note: sourcesNote});
 		
 		/*
 		delete data.references;
@@ -180,35 +196,7 @@ var testCases = [
 				"pages": "167–172",
 				"publicationTitle": "PS Political Science & Politics",
 				"volume": 42,
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					"daylight saving time",
 					"multimedia",
@@ -216,7 +204,11 @@ var testCases = [
 					"social science",
 					"sociology"
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://www.jstor.org/stable/20452393\">http://www.jstor.org/stable/20452393</a><br/><a href=\"http://www.journals.cambridge.org/abstract_S1049096509090337\">http://www.journals.cambridge.org/abstract_S1049096509090337</a><br/><a href=\"http://eric.ed.gov/?id=EJ867276\">http://eric.ed.gov/?id=EJ867276</a><br/><a href=\"http://www.editlib.org/p/70972/share/\">http://www.editlib.org/p/70972/share/</a><br/><a href=\"http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true\">http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true</a><br/><a href=\"https://www.learntechlib.org/p/70972\">https://www.learntechlib.org/p/70972</a><br/>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -243,51 +235,7 @@ var testCases = [
 				"date": "2001-01-01",
 				"itemID": "1479863711",
 				"libraryCatalog": "Microsoft Academic",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					"butterfly graph",
 					"clique width",
@@ -310,7 +258,11 @@ var testCases = [
 					"voltage graph",
 					"windmill graph"
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://home.ku.edu.tr/mudogan/public_html/Introduction%20to%20Graph%20Theory%202E%20-%20West.pdf\">http://home.ku.edu.tr/mudogan/public_html/Introduction%20to%20Graph%20Theory%202E%20-%20West.pdf</a><br/><a href=\"http://people.math.gatech.edu/~tetali/MATH4022/intro.pdf\">http://people.math.gatech.edu/~tetali/MATH4022/intro.pdf</a><br/><a href=\"http://pdfdirff.com/download/introduction-to-graph-theory.pdf\">http://pdfdirff.com/download/introduction-to-graph-theory.pdf</a><br/><a href=\"http://www.math.uri.edu/~adamgilbert/Documents/MathRigor/GamesOnGraphs.pdf\">http://www.math.uri.edu/~adamgilbert/Documents/MathRigor/GamesOnGraphs.pdf</a><br/><a href=\"http://bayanbox.ir/view/2051120523710881534/Introduction-to-graph-theory-solution-manual.pdf\">http://bayanbox.ir/view/2051120523710881534/Introduction-to-graph-theory-solution-manual.pdf</a><br/><a href=\"http://dehdarpour1.persiangig.com/document/pdf/Introduction%20to%20Graph%20Theory%202E%20-%20WestSolution%20Manual.pdf\">http://dehdarpour1.persiangig.com/document/pdf/Introduction%20to%20Graph%20Theory%202E%20-%20WestSolution%20Manual.pdf</a><br/><a href=\"http://www.math.uiuc.edu/~kostochk/math412/412F15.pdf\">http://www.math.uiuc.edu/~kostochk/math412/412F15.pdf</a><br/><a href=\"http://ehsanmoradi.ir/upload/m/moradiehsan/file/west_solution.pdf\">http://ehsanmoradi.ir/upload/m/moradiehsan/file/west_solution.pdf</a><br/><a href=\"https://math.la.asu.edu/~andrzej/teach/mat416/syllabus.pdf\">https://math.la.asu.edu/~andrzej/teach/mat416/syllabus.pdf</a><br/><a href=\"http://ci.nii.ac.jp/ncid/BA27008641\">http://ci.nii.ac.jp/ncid/BA27008641</a><br/>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -345,55 +297,7 @@ var testCases = [
 				"itemID": "2093027094",
 				"libraryCatalog": "Microsoft Academic",
 				"proceedingsTitle": "Symposium on Computational Geometry",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					},
-					{
-						"title": "Source",
-						"snapshot": false
-					}
-				],
+				"attachments": [],
 				"tags": [
 					"combinatorics",
 					"constant mean curvature surface",
@@ -412,7 +316,11 @@ var testCases = [
 					"sectional curvature",
 					"topology"
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"https://formaurbis.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">https://formaurbis.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf\">http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf</a><br/><a href=\"http://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">http://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf\">http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf</a><br/><a href=\"http://www.ann.jussieu.fr/~frey/papers/meshing/Cohen-Steiner%20D.,%20Restricted%20Delaunay%20triangulations%20and%20normal%20cycles.pdf\">http://www.ann.jussieu.fr/~frey/papers/meshing/Cohen-Steiner%20D.,%20Restricted%20Delaunay%20triangulations%20and%20normal%20cycles.pdf</a><br/><a href=\"https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf\">https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf</a><br/><a href=\"http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf&coll=portal&dl=ACM\">http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf&coll=portal&dl=ACM</a><br/><a href=\"http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#HASH#Cohen-SteinerM03\">http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#HASH#Cohen-SteinerM03</a><br/><a href=\"http://dl.acm.org/citation.cfm?id=777839&dl=ACM&coll=DL\">http://dl.acm.org/citation.cfm?id=777839&dl=ACM&coll=DL</a><br/><a href=\"http://portal.acm.org/citation.cfm?doid=777792.777839\">http://portal.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"http://doi.acm.org/10.1145/777792.777839\">http://doi.acm.org/10.1145/777792.777839</a><br/>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
