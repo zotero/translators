@@ -1,3 +1,17 @@
+{
+	"translatorID": "a55463ba-e403-415b-80d4-284d5f9b4b15",
+	"label": "Clinical Key",
+	"creator": "Jaret M. Karnuta",
+	"target": "^https://(www\\.|www-)clinicalkey(\\.|-)com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-12-26 21:15:27"
+}
+
 /*
     ***** BEGIN LICENSE BLOCK *****
 
@@ -21,23 +35,9 @@
     ***** END LICENSE BLOCK *****
 */
 
-{
-	"translatorID": "a55463ba-e403-415b-80d4-284d5f9b4b15",
-	"label": "Clinical Key",
-	"creator": "Jaret M. Karnuta",
-	"target": "^https://(www\\.|www-)clinicalkey(\\.|-)com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-26 21:15:27"
-}
-
 /*
-This translator is designed specifically for use on book section portions of
-ClinicalKey. It will not work on journal articles and book overview pages.
+This translator is designed specifically for use on book portions of
+ClinicalKey. It will not work on journal articles.
 
 NB: url and doc.location.href are different. I think it is because of the way clinicalkey redirects.
 Replicate by going to a content page (/content/book/...) and then going to a broswing page (/browse/book/...).
