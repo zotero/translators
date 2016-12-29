@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-09 06:47:28"
+	"lastUpdated": "2016-11-09 14:16:59"
 }
 
 /*
@@ -36,9 +36,10 @@
 */
 
 function detectWeb(doc, url) {
+	//if (doc.getElementById("copernicus_publications"))
 	if (url.search(/\/search\.php|\.net\/$|issue\d+\.html/)!=-1 && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (doc.getElementById("copernicus_publications")) {
+	} else if (ZU.xpathText(doc, '//span[@class="pb_article_title"]')) {
 		return "journalArticle";
 	}
 }
