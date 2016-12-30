@@ -9,35 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-26 21:15:27"
+	"lastUpdated": "2016-12-30 02:48:35"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2016 Jaret M. Karnuta
+	Copyright © 2016 Jaret M. Karnuta
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 /*
-This translator is designed specifically for use on book portions of
-ClinicalKey. It will not work on journal articles.
+This translator is designed specifically for use on book section portions of
+ClinicalKey. It will not work on journal articles and book overview pages.
 
 NB: url and doc.location.href are different. I think it is because of the way clinicalkey redirects.
 Replicate by going to a content page (/content/book/...) and then going to a broswing page (/browse/book/...).
@@ -53,7 +53,6 @@ function detectWeb(doc, url) {
 	//contentType depends on url, which is present, but rest of site is loaded via ajax (I think)
 	//monitor dom and reset if changes
 	var jsession = doc.getElementById('jsessionid');
-	Z.debug(jsession.value);
 	if(jsession){
 		Zotero.monitorDOMChanges(jsession, {attributes:true});
 		if(!jsession.value){
@@ -78,10 +77,6 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url){
 	var contentType = detectWeb(doc, url);
-	//if contentType null or not equal to bookSection or book
-	if(!contentType || !(contentType == 'bookSection' || contentType == 'book')){
-		return;
-	}
 
 	//if book section
 	if (contentType == 'bookSection'){
@@ -104,8 +99,12 @@ function doWeb(doc, url){
 	//if book, use ISBN translator
 	//borrowed from amazon translator
 	else if (contentType == 'book'){
-		var isbn = getElementsByAttr(doc, "data-metadata-isbn", "")[0].getAttribute('data-metadata-isbn');
-		isbn = ZU.cleanISBN(isbn);
+		var isbn = ZU.xpath(doc, "//button/@data-metadata-isbn");
+		if(!isbn){
+			return;
+		}
+		isbn = ZU.cleanISBN(isbn[0].value);
+		Z.debug(isbn);
 		//use search translator to get metadata from isbn
 		var search = Zotero.loadTranslator("search");
 		//set translators and search
@@ -115,6 +114,8 @@ function doWeb(doc, url){
 				newItem=lookupItem;
 				//update ISBN
 				newItem.ISBN = ZU.cleanISBN(isbn);
+				//Override library catalog
+				newItem.libraryCatalog = "Clinical Key";
 				//update url, see NB for rationale why url not used
 				newItem.url = doc.location.href;
 			});
@@ -132,13 +133,13 @@ function doWeb(doc, url){
 
 function scrapeBookSection(doc, item){
 	//book title
-	var bookTitle = getElementsByAttr(doc, 'data-once-text','XocsCtrl.title')[0].innerHTML;
+	var bookTitle = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.title"]');
 	item.bookTitle = bookTitle;
 	//section title
-	var title  = getElementsByAttr(doc, 'ng-bind-html','ContentCtrl.title')[0].innerHTML;
+	var title  = ZU.xpathText(doc, '//*[@ng-bind-html="ContentCtrl.title"]');
 	item.title = title;
 	//authors
-	var authorsList  = getElementsByAttr(doc, 'ng-bind-html','XocsCtrl.authorsHtml')[0].getElementsByTagName("a");
+	var authorsList  = ZU.xpath(doc, '//ul[@ng-bind-html="XocsCtrl.authorsHtml"]/li/a');
 	for (var i = 0;i<authorsList.length;i++){
 		var author = authorsList[i].innerHTML;
 		if(author.includes("<")){
@@ -147,67 +148,73 @@ function scrapeBookSection(doc, item){
 		item.creators.push(Zotero.Utilities.cleanAuthor(author, 'author'));
 	}
 
-	//page metadata
-	var chapterAndPages = doc.getElementsByClassName("source ng-binding")[0].innerHTML.split("</a>,")[1].trim();
-	//includes both chapter and pages
-	if(chapterAndPages.includes(",")){
-		var chapter = chapterAndPages.split(",")[0].trim();
-		//remove word "chapter"
-		chapter = chapter.toLowerCase();
-		if(chapter.includes("chapter")){
-			chapter = chapter.replace("chapter","").trim();
-		}
-		item.notes.push("Chapter: "+chapter);
-		item.pages = chapterAndPages.split(",")[1].trim();
+	//chapter and page metadata
+	var chapterAndPages = ZU.xpathText(doc,'//p[@class="source ng-binding"]');
+	//make pattern that should capter pages if present
+	//matches both xxx-xxx (length of #s not important)
+	//and xxx-xxx.eY
+	var pagesPattern = /\s\d+-\d+(\.e\d+)?/;
+	var pagesMatch = chapterAndPages.match(pagesPattern);
+	if(pagesMatch){
+		//get whole regex match
+		item.pages = pagesMatch[0];
 	}
-	//only includes pages
-	else{
-		item.pages = chapterAndPages.trim();
+	//make pattern that will match to the chapter number
+	var chapterPattern = /chapter\s(\d+)/i
+	var chapterMatch = chapterAndPages.match(chapterPattern);
+	if(chapterMatch){
+		//get match within first group
+		var chapterNumber = chapterMatch[1];
+		item.notes.push({note:"Chapter: "+chapterNumber});
 	}
 
 
 	//ISBN metadata
-	var isbn = getElementsByAttr(doc, "data-metadata-isbn", "")[0].getAttribute('data-metadata-isbn');
-	item.ISBN = isbn;
-
+	var isbn = ZU.xpath(doc, "//button/@data-metadata-isbn");
+	if(isbn){
+		var isbnNo = isbn[0].value;
+		item.ISBN = isbn;
+	}
 	//edition metadata
-	var edition = getElementsByAttr(doc, 'data-once-text','XocsCtrl.edition')[0].innerHTML.split("Edition")[0].trim();
+	var edition = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.edition"]').split(/edition/i)[0].trim();
 	item.edition = edition;
 
 	//publisher metadata
-	var datePub = getElementsByAttr(doc, 'data-once-text','XocsCtrl.copyright')[0].innerHTML;
-	var splitDate = datePub.split(',')[0];
-	var date = splitDate.replace(/\D/g, '');
-	var pub;
-	if (datePub.includes("imprint")){
-		var imprint = datePub.split("by")[1].split(", an")[0].trim();
-		var parent = datePub.split("imprint of")[1].split("Inc.")[0].trim();
-		pub = parent+"/"+imprint;
+	var datePub = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.copyright"]');
+	var datePattern = /\d{4}/g;
+	var dateMatch = datePub.match(datePattern);
+	if(dateMatch){
+		item.date = dateMatch[0];
+	}
+
+	if(datePub.includes("imprint")){
+		var imprintPattern = /by\s(.*),.*imprint\sof\s(.*)\sInc/i;
+		var imprintMatch = datePub.match(imprintPattern);
+		if(imprintMatch){
+			//expected number of matches
+			if(imprintMatch.length == 3){
+				item.publisher = imprintMatch[2]+"/"+imprintMatch[1];
+			}
+			//added for robustness
+			else{
+				var imprintPublisher=imprintMatch[0].replace("by","").trim();
+				item.publisher=imprintPublisher;
+			}
+		}
 	}
 	else{
-		pub = datePub.split("by")[1].split(", Inc")[0].trim();
+		Z.debug(datePub);
+		var publisherPattern = /by\s(.*?)(,)?\s/;
+		var publisherMatch = datePub.match(publisherPattern);
+		Z.debug(publisherMatch);
+		if(publisherMatch){
+			//get first matched group, between by and , or whitespace
+			item.publisher=publisherMatch[1];
+		}
 	}
-	item.date = date;
-	item.publisher = pub;
-	if(pub.includes("Elsevier")){
+	if(datePub.match(/elsevier/i)){
 		item.place = "Philadelphia, PA";
 	}
 
 	return item;
-}
-
-/**
-* Return list of elements that have attr containing content
-*/
-function getElementsByAttr(doc, attr, content){
-	var matching = [];
-	var allElements = doc.getElementsByTagName("*");
-	for (var i =0; i<allElements.length;i++){
-		if(allElements[i].hasAttribute(attr)){
-			if(allElements[i].getAttribute(attr).includes(content)){
-				matching.push(allElements[i]);
-			}
-		}
-	}
-	return matching;
 }
