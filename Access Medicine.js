@@ -147,7 +147,7 @@ function risTranslate(doc, link, bookSection){
 			
 			if (item.abstractNote) {
 				//make sure abstract text has spaces after periods
-				var	adjustedAbstract = item.abstractNote.replace('.','. ');
+				var adjustedAbstract = item.abstractNote.replace('.','. ');
 				//remove extra spaces from abstract notes field (common throughout)
   				adjustedAbstract = adjustedAbstract.replace(/\s+/g, ' ');
   				item.abstractNote = adjustedAbstract;
