@@ -3,13 +3,13 @@
 	"label": "Trove",
 	"creator": "Tim Sherratt",
 	"target": "^https?://trove\\.nla\\.gov\\.au/(?:newspaper|gazette|work|book|article|picture|music|map|collection)/",
-	"minVersion": "2.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-05-14 03:57:41"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-12-30 15:48:00"
 }
 
 /*
@@ -30,6 +30,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
 function detectWeb(doc, url) {
 	if (url.indexOf('/result?') != -1 || url.indexOf('/newspaper/page') != -1) {
 		return getSearchResults(doc, url, true) ? 'multiple' : false;
@@ -40,13 +41,14 @@ function detectWeb(doc, url) {
 	}
 }
 
+
 function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var results;
 	var found = false;
 	if (url.indexOf('/result?') != -1) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
-	} else if (url.indexOf('/newspaper/page') != -1) {
+	} else {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
 	}
 	for (var i=0; i<results.length; i++) {
@@ -59,6 +61,7 @@ function getSearchResults(doc, url, checkOnly) {
 	}
 	return found ? items : false;
 }
+
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -78,6 +81,7 @@ function doWeb(doc, url) {
 
 }
 
+
 function scrape(doc, url) {
 	if (url.indexOf('/newspaper/article/') != -1) {
 		scrapeNewspaper(doc, url);
@@ -85,6 +89,7 @@ function scrape(doc, url) {
 		scrapeWork(doc, url);
 	}
 }
+
 
 function scrapeNewspaper(doc, url) {
 
@@ -118,7 +123,8 @@ function scrapeNewspaper(doc, url) {
 				item.attachments.push({
 					url: pdfURL, 
 					title: 'Trove newspaper PDF', 
-					mimeType:'application/pdf'});
+					mimeType:'application/pdf'
+				});
 
 				// Get the OCRd text and save in a note.
 				var textURL = "http://trove.nla.gov.au/newspaper/rendition/nla.news-article" + articleID + ".txt";
@@ -134,6 +140,7 @@ function scrapeNewspaper(doc, url) {
 	translator.translate();	
 	});
 }
+
 
 var troveTypes = {
 	"Book": "book",
@@ -159,35 +166,48 @@ var troveTypes = {
 	"Unpublished": "manuscript",
 	"Published": "document"
 };
-	
 
+
+//The function ...
 function checkType(string) {
 	var types = string.split("; ");
-	var newString = types.join(" ");
-	if (troveTypes.hasOwnProperty(newString)) {
-		return troveTypes[newString];
-	} else {
-		while (types.length > 0) {
-			types.pop();
-			newString = types.join(" ");
-			if (troveTypes.hasOwnProperty(newString)) {
-				return troveTypes[newString];
-			}
-
+	var newString;
+	while (types.length > 0) {
+		newString = types.join(" ");
+		if (troveTypes.hasOwnProperty(newString)) {
+			return troveTypes[newString];
 		}
+		types.pop();
+
 	}
 	return "book";
 }
 
+
+//Sometimes authors are a little messy and we need to clean them
+//e.g. author = { Bayley, William A. (William Alan), 1910-1981 },
+//results in
+//   "firstName": "1910-1981, William A. (William Alan)",
+//   "lastName": "Bayley"
 function cleanCreators(creators) {
-	newCreators = [];
 	for (var i = 0; i < creators.length; i++) {
-		var creator = creators[i];
-		creator.firstName = creator.firstName.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
-		newCreators.push(creator);
+		var name = creators[i].firstName
+		name = name.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
+		var posParenthesis = name.indexOf("(");
+		if (posParenthesis>-1) {
+			var first = name.substr(0, posParenthesis);
+			var second = name.substr(posParenthesis+1, name.length-posParenthesis-2);
+			if (second.indexOf( first.replace('.', '').trim() )>-1) {
+				name = second;
+			} else {
+				name = first;
+			}
+		}
+		creators[i].firstName = name.trim();
 	}
-	return newCreators;
+	return creators;
 }
+
 
 function scrapeWork(doc, url) {
 	var thumbnailURL;
@@ -228,8 +248,6 @@ function scrapeWork(doc, url) {
 			// This gives a better version-aware url.
 			item.url = ZU.xpathText(doc, "//meta[@property='og:url']/@content");
 			item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
-			delete item.itemID;
-			delete item.type;
 
 			// Add tags
 			tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
@@ -255,14 +273,14 @@ function scrapeWork(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://trove.nla.gov.au/version/11567057",
+		"url": "http://trove.nla.gov.au/work/9958833?q&versionId=11567057",
 		"items": [
 			{
 				"itemType": "book",
 				"title": "Experiences of a meteorologist in South Australia",
 				"creators": [
 					{
-						"firstName": "Clement L. (Clement Lindley)",
+						"firstName": "Clement Lindley",
 						"lastName": "Wragge",
 						"creatorType": "author"
 					}
@@ -270,14 +288,18 @@ var testCases = [
 				"date": "1980",
 				"ISBN": "9780908065073",
 				"abstractNote": "In 14 libraries. 24 p. : ill. ; 22 cm. Wragge, Clement L. (Clement Lindley), 1852-1922. South Australia. Climate, 1883-1884. Meteorologists -- South Australia -- Biography. South Australia -- Climate -- History.",
-				"extra": "Reprinted from Good words for 1887/ edited by Donald Macleod, published: London: Isbister and Co",
+				"itemID": "trove.nla.gov.au/work/9958833",
 				"language": "English",
 				"libraryCatalog": "Trove",
 				"publisher": "Warradale, S.Aust. : Pioneer Books",
 				"url": "http://trove.nla.gov.au/version/11567057",
 				"attachments": [],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p> Reprinted from Good words for 1887/ edited by Donald Macleod, published: London: Isbister and Co </p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -308,7 +330,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge."
+						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1910), Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
 					}
 				],
 				"seeAlso": []
@@ -329,6 +351,38 @@ var testCases = [
 		"type": "web",
 		"url": "http://trove.nla.gov.au/newspaper/page/7013947",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://trove.nla.gov.au/work/9531118?q&sort=holdings+desc&_=1483112824975&versionId=14744047",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Lithgow zig zag railway, Blue Mountains, New South Wales",
+				"creators": [
+					{
+						"firstName": "William Alan",
+						"lastName": "Bayley",
+						"creatorType": "author"
+					}
+				],
+				"date": "1969",
+				"abstractNote": "In 19 libraries. 40 p. : ill., map ; 22 cm. Great Zig Zag Railway (Lithgow, N.S.W.) Railroads -- Blue Mountains (N.S.W. : Mountains) Zig Zag Railway -- Lithgow, Australia. Railroads -- New South Wales -- Blue Mountains. Blue Mountains (N.S.W.)",
+				"itemID": "trove.nla.gov.au/work/9531118",
+				"language": "English",
+				"libraryCatalog": "Trove",
+				"publisher": "[Bulli, N.S.W. : Zig Zag Press",
+				"url": "http://trove.nla.gov.au/version/14744047",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p> Cover title </p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
