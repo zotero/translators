@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-29 16:41:01"
+	"lastUpdated": "2016-12-30 03:12:02"
 }
 
 /*
@@ -78,7 +78,7 @@ function doWeb(doc, url){
 			title = title+" ("+bookTitle+")";
 			sectionId = sectionId.substring(beginCut+1, endCut);
 			var link = baseCitation+sectionId;
-			//prevent overriding, keep most relevant (i.e. first occurence) title
+			//prevent overriding, keep most relevant title
 			if(!sectionDict[link]){
 				sectionDict[link]=title;
 			}
@@ -126,15 +126,14 @@ function risTranslate(doc, link, bookSection){
 				});
 			}
 			//parse out edition from title
-			//typical book title looks like this: Book Title, 19e (where 19e is edition no)
 			var bookTitle = item.bookTitle;
-			if(bookTitle.includes(",")){
+			if(bookTitle.indexOf(",") != -1){
 				//get last substring (book title might have commas in it)
 				var splitOnComma = bookTitle.split(",");
 				var len = splitOnComma.length;
 				var edition = splitOnComma[len-1];
 				//remove e
-				if(edition.includes("e")){
+				if(edition.indexOf("e") != -1){
 					edition = edition.replace("e","");
 				}
 				edition = edition.trim();
@@ -145,9 +144,13 @@ function risTranslate(doc, link, bookSection){
 				item.bookTitle=newBookTitle;
 			}
 
-			//remove extra spaces from abstract notes field
+			
 			if (item.abstractNote) {
-  				item.abstractNote = item.abstractNote.replace(/\s+/g, ' ');
+				//make sure abstract text has spaces after periods
+				var	adjustedAbstract = item.abstractNote.replace('.','. ');
+				//remove extra spaces from abstract notes field (common throughout)
+  				adjustedAbstract = adjustedAbstract.replace(/\s+/g, ' ');
+  				item.abstractNote = adjustedAbstract;
 			}
 
 			//remove numberOfVolumes, incorrectly set in RIS
@@ -212,7 +215,7 @@ var testCases = [
 					}
 				],
 				"date": "2015",
-				"abstractNote": "Endobronchial and esophageal foreign bodies are marked by three clinical stages—an initial symptomatic stage of coughing, choking, and discomfort; a stage of relative amelioration of symptoms; followed by a stage of complications due to obstruction and infection.The gold standard for the diagnosis of an endobronchial foreign body is bronchoscopy.An asymptomatic or mildly symptomatic child with a coin in the esophagus can be observed for 8 to 16 hours because the coin will spontaneously pass into the stomach in 25% to 30% of these children.A useful method for removal of most intranasal foreign bodies is a positive-pressure technique such as the parent's kiss or a bag-valve-mask resuscitator.A useful initial method for removal of most foreign bodies from the external auditory canal is irrigation. This technique requires very little patient cooperation.An immobile battery, for example, in the esophagus, nose or ear, requires emergent removal to prevent perforation at the site of impaction and subsequent infection.Two or more rare-earth magnets in the gastrointestinal tract or on both sides of the nasal septum require emergent removal because of the potential of erosion and perforation of the tissue between the two adherent magnets.",
+				"abstractNote": "Endobronchial and esophageal foreign bodies are marked by three clinical stages—an initial symptomatic stage of coughing, choking, and discomfort; a stage of relative amelioration of symptoms; followed by a stage of complications due to obstruction and infection. The gold standard for the diagnosis of an endobronchial foreign body is bronchoscopy.An asymptomatic or mildly symptomatic child with a coin in the esophagus can be observed for 8 to 16 hours because the coin will spontaneously pass into the stomach in 25% to 30% of these children.A useful method for removal of most intranasal foreign bodies is a positive-pressure technique such as the parent's kiss or a bag-valve-mask resuscitator.A useful initial method for removal of most foreign bodies from the external auditory canal is irrigation. This technique requires very little patient cooperation.An immobile battery, for example, in the esophagus, nose or ear, requires emergent removal to prevent perforation at the site of impaction and subsequent infection.Two or more rare-earth magnets in the gastrointestinal tract or on both sides of the nasal septum require emergent removal because of the potential of erosion and perforation of the tissue between the two adherent magnets.",
 				"bookTitle": "Strange and Schafermeyer's Pediatric Emergency Medicine",
 				"edition": "4",
 				"libraryCatalog": "Access Medicine",
@@ -236,50 +239,91 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://accessmedicine.mhmedical.com/content.aspx?bookid=1130&sectionid=63651344",
+		"url": "http://accessmedicine.mhmedical.com/content.aspx?sectionid=59610885&bookid=980&jumpsectionID=100405209&Resultclick=2",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "The Practice of Medicine",
+				"title": "Orthopedic Surgery",
 				"creators": [
 					{
-						"lastName": "Kasper",
-						"firstName": "Dennis",
+						"lastName": "Thomas",
+						"firstName": "Bert J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fu",
+						"firstName": "Freddie H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Muller",
+						"firstName": "Bart",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Vyas",
+						"firstName": "Dharmesh",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Niesen",
+						"firstName": "Matt",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pribaz",
+						"firstName": "Jonathan",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Draenert",
+						"firstName": "Klaus",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Brunicardi",
+						"firstName": "F. Charles",
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Fauci",
-						"firstName": "Anthony",
+						"lastName": "Andersen",
+						"firstName": "Dana K.",
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Hauser",
-						"firstName": "Stephen",
+						"lastName": "Billiar",
+						"firstName": "Timothy R.",
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Longo",
-						"firstName": "Dan",
+						"lastName": "Dunn",
+						"firstName": "David L.",
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Jameson",
-						"firstName": "J. Larry",
+						"lastName": "Hunter",
+						"firstName": "John G.",
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Loscalzo",
-						"firstName": "Joseph",
+						"lastName": "Matthews",
+						"firstName": "Jeffrey B.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Pollock",
+						"firstName": "Raphael E.",
 						"creatorType": "editor"
 					}
 				],
-				"date": "2015",
-				"bookTitle": "Harrison's Principles of Internal Medicine",
-				"edition": "19",
+				"date": "2014",
+				"abstractNote": "The main principle of internal fixation for fracture care (most commonly intramedullary nails or plate and screw fixation) is to create a stable construct that will allow the fracture to heal in proper alignment. Often, in open fractures, definitive treatment of the fracture is delayed until the wound is sufficiently cleaned and healthy soft tissue is available to cover the fracture.When compartment syndrome is suspected, emergent fasciotomy must be performed in which the overlying tight fascia is released through long incisions. These must be done as soon as possible because the damage to muscles and nerves will result in irreversible necrosis and contractures causing severe loss of function.Fractures of the scapula often result from significant trauma and can be associated with injuries to the head, lungs, ribs, and spine.The shoulder is one of the most commonly dislocated joints and most dislocations are anterior. Posterior dislocations are associated with seizures or electric shock.Humeral shaft fractures occur from direct trauma to the arm or from a fall on an outstretched arm, especially in elderly patients. The radial nerve spirals around the humeral shaft and is at risk for injury, therefore a careful neurovascular exam is important.Hemorrhage from pelvic trauma can be life threatening. An important first line treatment in the emergency room is the application of a pelvic binder or sheet that is wrapped tightly around the pelvis to control bleeding.In spinal injury spinal stability must be assessed, and the patient immobilized until his spine is cleared. CT scan is more reliable in assessing spine injury than plain radiographs.Spinal cord injuries should be triaged to trauma centers since trauma center care is associated with reduced paralysis.According to the CDC and the National Health Interview Survey approximately 50 million adults (22% of the US population) have been diagnosed with some form of arthritis. This number is projected to grow to an astounding 67 million adults by 2030 (or 25% of the U.S. population).Weight loss of as little as 11 pounds has been shown to decrease the risk of developing knee osteoarthritis in women by 50%. Similarly, patients who engage in regular physical activity have been found to have lower incidence of arthritis.Smaller incisions come with the disadvantage of decreased visualization intra-operatively and associated risks of component malposition, intraoperative fracture and nerve or vascular injury. The only documented benefit of minimally invasive techniques appears to be improved cosmesis.",
+				"bookTitle": "Schwartz's Principles of Surgery",
+				"edition": "10",
 				"libraryCatalog": "Access Medicine",
 				"place": "New York, NY",
 				"publisher": "McGraw-Hill Education",
-				"url": "http://mhmedical.com/content.aspx?aid=1120785046",
+				"url": "http://mhmedical.com/content.aspx?aid=1117754305",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -288,7 +332,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Chapter 1"
+						"note": "Chapter 43"
 					}
 				],
 				"seeAlso": []

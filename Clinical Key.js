@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 02:48:35"
+	"lastUpdated": "2016-12-30 03:13:52"
 }
 
 /*
@@ -61,10 +61,12 @@ function detectWeb(doc, url) {
 	}
 
 	var contentType;
-	if(url.includes("/content/book/") && !url.includes("login?")){
+	//contains /content/book/ and does not contain login?
+	if(url.indexOf("/content/book/") != -1 && url.indexOf("login?") == -1){
 		contentType = "bookSection";
 	}
-	else if (url.includes('/browse/book/') && !url.includes("login?")){
+	//similar structure to above
+	else if (url.indexOf('/browse/book/') != -1 && url.indexOf("login?") == -1){
 		contentType = "book";
 	}
 
@@ -104,7 +106,6 @@ function doWeb(doc, url){
 			return;
 		}
 		isbn = ZU.cleanISBN(isbn[0].value);
-		Z.debug(isbn);
 		//use search translator to get metadata from isbn
 		var search = Zotero.loadTranslator("search");
 		//set translators and search
@@ -142,7 +143,7 @@ function scrapeBookSection(doc, item){
 	var authorsList  = ZU.xpath(doc, '//ul[@ng-bind-html="XocsCtrl.authorsHtml"]/li/a');
 	for (var i = 0;i<authorsList.length;i++){
 		var author = authorsList[i].innerHTML;
-		if(author.includes("<")){
+		if(author.indexOf("<") != -1){
 			author = author.split("<")[0];
 		}
 		item.creators.push(Zotero.Utilities.cleanAuthor(author, 'author'));
@@ -187,7 +188,7 @@ function scrapeBookSection(doc, item){
 		item.date = dateMatch[0];
 	}
 
-	if(datePub.includes("imprint")){
+	if(datePub.indexOf("imprint") != -1){
 		var imprintPattern = /by\s(.*),.*imprint\sof\s(.*)\sInc/i;
 		var imprintMatch = datePub.match(imprintPattern);
 		if(imprintMatch){
@@ -203,10 +204,8 @@ function scrapeBookSection(doc, item){
 		}
 	}
 	else{
-		Z.debug(datePub);
 		var publisherPattern = /by\s(.*?)(,)?\s/;
 		var publisherMatch = datePub.match(publisherPattern);
-		Z.debug(publisherMatch);
 		if(publisherMatch){
 			//get first matched group, between by and , or whitespace
 			item.publisher=publisherMatch[1];
