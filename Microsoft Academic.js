@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-29 18:19:23"
+	"lastUpdated": "2016-12-31 17:07:11"
 }
 
 /*
@@ -37,39 +37,50 @@
 
 
 function detectWeb(doc, url) {
-	//The entity-detail DIV has all template code as SCRIPT childrens with some @id
-	//and one other (active) child, which will determine the websiteType,
-	//i.e. PAPER-DETAIL-ENTITY,  JOURNAL-DETAIL-ENTITY, AUTHOR-DETAIL-ENTITY,
-	//AFFILIATION-DETAIL-ENTITY, or, FOS-DETAIL-ENTITY
-	var child = ZU.xpath(doc, '//div[contains(@class, "entity-detail")]/*[not(@id)]');
-	if (child && child.length>0) {
-		var websiteType = child[0].tagName;
-		//Z.debug(websiteType);
-		if (websiteType == 'PAPER-DETAIL-ENTITY') {
-			Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
-			var conf = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Conference")]');
-			if (conf) {
-				return 'conferencePaper';
-			}
-			var jour = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Journal")]');
-			if (!jour) {
-				return 'book';
-			}
-			return 'journalArticle';
-		} else if (getSearchResults(doc, true)) {
-			Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
-			return 'multiple';
-		}
-	}
-	if (url.indexOf('#/search')>-1 && getSearchResults(doc, true)) {
+	var visibility = ZU.xpathText(doc, '//article[contains(@class, "author-page")]/@style');
+
+	if (visibility && visibility.indexOf("none")>-1 && getSearchResults(doc, url, true)) {
 		Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
 		return 'multiple';
+	} else {
+		//The entity-detail DIV has all template code as SCRIPT childrens with some @id
+		//and one other (active) child, which will determine the websiteType,
+		//i.e. PAPER-DETAIL-ENTITY,  JOURNAL-DETAIL-ENTITY, AUTHOR-DETAIL-ENTITY,
+		//AFFILIATION-DETAIL-ENTITY, or, FOS-DETAIL-ENTITY
+		var child = ZU.xpath(doc, '//div[contains(@class, "entity-detail")]/*[not(@id)]');
+		if (child && child.length>0) {
+			var websiteType = child[0].tagName;
+			Z.debug(websiteType);
+			if (websiteType == 'PAPER-DETAIL-ENTITY') {
+				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+				//When we are on a single page and search for something, then
+				//the content will not vanish, but just set to invisible by
+				//the style element of a parent node. Thus, we need to monitor
+				//for that as well.
+				Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {attributes: true, attributeFilter: ['style']});
+				var conf = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Conference")]');
+				if (conf) {
+					return 'conferencePaper';
+				}
+				var jour = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Journal")]');
+				if (!jour) {
+					return 'book';
+				}
+				return 'journalArticle';
+			} else if (getSearchResults(doc, url, true)) {
+				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+				return 'multiple';
+			}
+		}
+
 	}
+	
 
 	//The page can change from a search page to a single item page
 	//without loading the whole content as a new website and therfore
 	//we need to monitor these DOM changes all the time (here and in
 	//all other cases).
+	Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {attributes: true, attributeFilter: ['style']});
 	Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
 
 	//Somehow during automatic testing this does not work
@@ -78,10 +89,17 @@ function detectWeb(doc, url) {
 }
 
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//paper-tile/article//div[contains(@class, "title-bar")]//a');
+	var rows;
+	//The search results will sometimes stay invisible when switched to another
+	//page, and therefore we have to differentiate the xpath accordingly.
+	if (url.indexOf("#/search")>-1) {
+		rows = ZU.xpath(doc, '//div[contains(@class, "search-page")//paper-tile/article//div[contains(@class, "title-bar")]//a');
+	} else {
+		rows = ZU.xpath(doc, '//article[contains(@class, "author-page")]//paper-tile/article//div[contains(@class, "title-bar")]//a');
+	}
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -96,7 +114,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+		Zotero.selectItems(getSearchResults(doc, url, false), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -104,68 +122,85 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape);
+			scrape(articles);
 		});
 	} else {
-		scrape(doc, url);
+		scrape([url]);
 	}
 }
 
 
-function scrape(doc, url) {
-	var pubID = url.match(/\/detail\/(\d+)/)[1];
-	
-	var apiUrl = "https://academic.microsoft.com/api/browse/GetEntityDetails?entityId=" +
-		pubID + "&correlationId=undefined";
-	
-	ZU.doGet(apiUrl, function(text) {
-		var data = JSON.parse(text);
-		var type = detectWeb(doc, url);
-		var item = new Zotero.Item(type);
-		item.itemID = pubID;
-		item.title = data.entityTitle;
-		item.date = data.entity.d;//alternatively ZU.strToISO(data.date);
-		item.abstractNote = data.abstract;
+//Scrape a list of urls by extracting the pubID in each url, call the
+//API to receive the data and create an item in Zotero out of this.
+function scrape(urlList) {
+	for (index in urlList) {
+		var url = urlList[index];
+		var pubID = url.match(/\/detail\/(\d+)/)[1];
 		
-		if (data.authors) {
-			for (var i=0; i<data.authors.length; i++) {
-				item.creators.push(ZU.cleanAuthor(data.authors[i].lt, "author"));
+		var apiUrl = "https://academic.microsoft.com/api/browse/GetEntityDetails?entityId=" +
+			pubID + "&correlationId=undefined";
+		
+		ZU.doGet(apiUrl, function(text) {
+			var data = JSON.parse(text);
+			var type;
+			if (data.entity.c) {
+				type = "conferencePaper";
+			} else if (data.entity.j) {
+				type = "journalArticle";
+			} else {
+				type = "book";
 			}
-		}
-
-		item.publicationTitle = data.entity.extended.vfn;
-		item.volume = data.entity.extended.v;
-		item.issue = data.entity.extended.i;
-		item.pages = data.entity.extended.fp;
-		if (data.entity.extended.lp) {
-			item.pages += "–" + data.entity.extended.lp;
-		}
-		item.DOI = data.entity.extended.doi;
-		
-		if (data.fieldsOfStudy) {
-			for (var i=0; i<data.fieldsOfStudy.length; i++) {
-				item.tags.push(data.fieldsOfStudy[i].lt);
+			var item = new Zotero.Item(type);
+			item.itemID = pubID;
+			item.title = data.entityTitle;
+			item.date = data.entity.d;//alternatively ZU.strToISO(data.date);
+			item.abstractNote = data.abstract;
+			
+			if (data.authors) {
+				for (var i=0; i<data.authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(data.authors[i].lt, "author"));
+				}
 			}
-		}
-		
-		//Save all links to the source in one HTML note.
-		var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
-		if (data.sources) {
-			for (var i=0; i<data.sources.length; i++) {
-				sourcesNote += '<a href="' +data.sources[i].u+ '">'+data.sources[i].u+'</a><br/>';
-			}
-		}
-		item.notes.push({note: sourcesNote});
-		
-		/*
-		delete data.references;
-		delete data.citations;
-		Z.debug(data);
-		*/
-		
-		item.complete();
-	});
 	
+			item.publicationTitle = data.entity.extended.vfn;
+			item.journalAbbreviation = data.entity.extended.vsn;
+			item.volume = data.entity.extended.v;
+			item.issue = data.entity.extended.i;
+			item.pages = data.entity.extended.fp;
+			if (data.entity.extended.lp) {
+				item.pages += "–" + data.entity.extended.lp;
+			}
+			item.DOI = data.entity.extended.doi;
+			
+			if (data.fieldsOfStudy) {
+				for (var i=0; i<data.fieldsOfStudy.length; i++) {
+					item.tags.push(data.fieldsOfStudy[i].lt);
+				}
+			}
+			
+			//Save all links to the source in one HTML note.
+			var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
+			if (data.sources) {
+				for (var i=0; i<data.sources.length; i++) {
+					sourcesNote += '<a href="' +data.sources[i].u+ '">'+data.sources[i].u+'</a><br/>';
+				}
+			}
+			item.notes.push({note: sourcesNote});
+			
+			item.attachments.push({
+				url: "https://academic.microsoft.com/#/detail/"+data.entity.id,	
+				snapshot: false
+			});
+			
+			/*
+			delete data.references;
+			delete data.citations;
+			Z.debug(data);
+			*/
+			
+			item.complete();
+		});
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -196,7 +231,11 @@ var testCases = [
 				"pages": "167–172",
 				"publicationTitle": "PS Political Science & Politics",
 				"volume": 42,
-				"attachments": [],
+				"attachments": [
+					{
+						"snapshot": false
+					}
+				],
 				"tags": [
 					"daylight saving time",
 					"multimedia",
@@ -235,7 +274,11 @@ var testCases = [
 				"date": "2001-01-01",
 				"itemID": "1479863711",
 				"libraryCatalog": "Microsoft Academic",
-				"attachments": [],
+				"attachments": [
+					{
+						"snapshot": false
+					}
+				],
 				"tags": [
 					"butterfly graph",
 					"clique width",
@@ -297,7 +340,11 @@ var testCases = [
 				"itemID": "2093027094",
 				"libraryCatalog": "Microsoft Academic",
 				"proceedingsTitle": "Symposium on Computational Geometry",
-				"attachments": [],
+				"attachments": [
+					{
+						"snapshot": false
+					}
+				],
 				"tags": [
 					"combinatorics",
 					"constant mean curvature surface",
