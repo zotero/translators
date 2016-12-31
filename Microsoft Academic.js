@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-31 17:07:11"
+	"lastUpdated": "2016-12-31 21:54:28"
 }
 
 /*
@@ -38,7 +38,8 @@
 
 function detectWeb(doc, url) {
 	var visibility = ZU.xpathText(doc, '//article[contains(@class, "author-page")]/@style');
-
+	//TODO add
+	//, {childList: true}
 	if (visibility && visibility.indexOf("none")>-1 && getSearchResults(doc, url, true)) {
 		Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
 		return 'multiple';
@@ -96,7 +97,7 @@ function getSearchResults(doc, url, checkOnly) {
 	//The search results will sometimes stay invisible when switched to another
 	//page, and therefore we have to differentiate the xpath accordingly.
 	if (url.indexOf("#/search")>-1) {
-		rows = ZU.xpath(doc, '//div[contains(@class, "search-page")//paper-tile/article//div[contains(@class, "title-bar")]//a');
+		rows = ZU.xpath(doc, '//div[contains(@class, "search-page")]//paper-tile/article//div[contains(@class, "title-bar")]//a');
 	} else {
 		rows = ZU.xpath(doc, '//article[contains(@class, "author-page")]//paper-tile/article//div[contains(@class, "title-bar")]//a');
 	}
