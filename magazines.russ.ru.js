@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 20:35:49"
+	"lastUpdated": "2016-12-31 10:22:19"
 }
 
 /*
@@ -70,11 +70,13 @@ function doWeb(doc, url) {
 	for (var i=0; i<authors.length; i++) {
 		item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 	}
+	
+	item.libraryCatalog = "Журнальный зал";
 
 	item.url = url;
 	item.attachments.push({
 		url:url,
-		title: " Snapshot", 
+		title: "Snapshot", 
 		mimeType:"text/html"
 	});
 
@@ -98,13 +100,13 @@ var testCases = [
 				],
 				"date": "2012",
 				"issue": "89",
-				"libraryCatalog": "magazines.russ.ru",
+				"libraryCatalog": "Журнальный зал",
 				"publicationTitle": "Дети Ра",
 				"url": "http://magazines.russ.ru/ra/2012/3/s11.html",
 				"volume": "3",
 				"attachments": [
 					{
-						"title": " Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
