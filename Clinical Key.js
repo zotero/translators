@@ -178,7 +178,8 @@ function scrapeBookSection(doc, item){
 	}
 	//edition metadata
 	var edition = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.edition"]').split(/edition/i)[0].trim();
-	item.edition = edition;
+	//convert to number for correct zotero citation handling
+	item.edition = textToNumber(edition);
 
 	//publisher metadata
 	var datePub = ZU.xpathText(doc, '//*[@data-once-text="XocsCtrl.copyright"]');
@@ -216,4 +217,47 @@ function scrapeBookSection(doc, item){
 	}
 
 	return item;
+}
+
+//Converts ordinal text to number
+//Only converting up to 31
+//E.g., text=first -> 1
+//E.g., Twenty-Second -> 22
+function textToNumber(text){
+	textarr = [
+		"first",
+		"second",
+		"third",
+		"fourth",
+		"fifth",
+		"sixth",
+		"seventh",
+		"eighth",
+		"ninth",
+		"tenth",
+		"eleventh",
+		"twelfth",
+		"thirteenth",
+		"fourteenth",
+		"fifteenth",
+		"sixteenth",
+		"seventeenth",
+		"eighteenth",
+		"nineteenth",
+		"twentieth",
+		"twenty-first",
+		"twenty-second",
+		"twenty-third",
+		"twenty-fourth",
+		"twenty-fifth",
+		"twenty-sixth",
+		"twenty-seventh",
+		"twenty-eighth",
+		"twenty-ninth",
+		"thirtieth",
+		"thirty-first"
+	];
+	var number = textarr.indexOf(text.toLowerCase());
+	//shift from 0 to 1 based indexing
+	return (number != -1)? number + 1 : text;
 }
