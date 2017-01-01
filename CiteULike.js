@@ -2,7 +2,7 @@
 	"translatorID": "8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd",
 	"label": "CiteULike",
 	"creator": "Sean Takats",
-	"target": "^https?://(?:www\\.)?citeulike\\.org(?:.*/tag/[^/]*$|/search/|/journal/|/user/|/group/[0-9]+/library$|/\\?page=[0-9]+$|/.*article/[0-9]+$|/$)",
+	"target": "^https?://(www\\.)?citeulike\\.org(.*/tag/[^/]*$|/search/|/journal/|/user/|/group/[0-9]+/library$|/\\?page=[0-9]+$|/.*article/[0-9]+$|/$)",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

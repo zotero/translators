@@ -2,7 +2,7 @@
 	"translatorID": "7500180d-ca99-4ef7-a9a9-3e58bba91d28",
 	"label": "Bezneng Gajit",
 	"creator": "Avram Lyon",
-	"target": "^https?://(?:www\\.)?beznen\\.ru",
+	"target": "^https?://(www\\.)?beznen\\.ru",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,

@@ -2,7 +2,7 @@
 	"translatorID": "f318ab1e-71c6-4f67-8ac3-4b1144e5bf4e",
 	"label": "APS-Physics",
 	"creator": "Will Shanks",
-	"target": "^https?://(?:www\\.)?(physics)\\.aps\\.org([^/]*/(articles|story)/?|/browse(\\?|$))",
+	"target": "^https?://(www\\.)?(physics)\\.aps\\.org([^/]*/(articles|story)/?|/browse(\\?|$))",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

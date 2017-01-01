@@ -2,7 +2,7 @@
 	"translatorID": "98ad3ad1-9d43-4b2e-bc36-172cbf00ba1d",
 	"label": "eLife",
 	"creator": "Aurimas Vinckevicius, Sebastian Karcher",
-	"target": "^https?://(elife\\.)?elifesciences\\.org/(?:content/|search|category/|browse|archive)",
+	"target": "^https?://(elife\\.)?elifesciences\\.org/(content/|search|category/|browse|archive)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,

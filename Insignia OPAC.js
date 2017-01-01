@@ -2,7 +2,7 @@
 	"translatorID": "abd7c626-6913-42d4-a05f-acc6683c69da",
 	"label": "Insignia OPAC",
 	"creator": "Niko",
-	"target": "^https?://[^/]+/(?:library|crts)/[^/?#]+\\.aspx",
+	"target": "^https?://[^/]+/(library|crts)/[^/?#]+\\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

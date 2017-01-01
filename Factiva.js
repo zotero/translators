@@ -2,7 +2,7 @@
 	"translatorID": "7bdb79e-a47f-4e3d-b317-ccd5a0a74456",
 	"label": "Factiva",
 	"creator": "Philipp Zumstein and Aurimas Vinckevicius",
-	"target": "^https?://(?:global\\.factiva\\.com|[^/]*\\bglobal-factiva-com\\b[^/]+)/(?:[gh]a|redir|np)/default\\.aspx",
+	"target": "^https?://(global\\.factiva\\.com|[^/]*\\bglobal-factiva-com\\b[^/]+)/([gh]a|redir|np)/default\\.aspx",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,

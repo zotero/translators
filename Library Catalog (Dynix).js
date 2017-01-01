@@ -2,7 +2,7 @@
 	"translatorID": "774d7dc2-3474-2684-392c-f787789ec63d",
 	"label": "Library Catalog (Dynix)",
 	"creator": "Simon Kornblith and Sylvain Machefert",
-	"target": "ipac\\.jsp\\?.*(?:uri=(?:link|full)=[0-9]|menu=search|term=)",
+	"target": "ipac\\.jsp\\?.*(uri=(link|full)=[0-9]|menu=search|term=)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 260,

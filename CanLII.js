@@ -2,7 +2,7 @@
 	"translatorID": "84799379-7bc5-4e55-9817-baf297d129fe",
 	"label": "CanLII",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?canlii\\.org/(?:en|fr)/",
+	"target": "^https?://(www\\.)?canlii\\.org/(en|fr)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

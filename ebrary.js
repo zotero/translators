@@ -2,7 +2,7 @@
 	"translatorID": "2abe2519-2f0a-48c0-ad3a-b87b9c059459",
 	"label": "ebrary",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://site\\.ebrary\\.com/.+(?:docDetail|search|detail)\\.action\\?",
+	"target": "^https?://site\\.ebrary\\.com/.+(docDetail|search|detail)\\.action\\?",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,

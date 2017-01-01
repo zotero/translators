@@ -2,7 +2,7 @@
 	"translatorID": "3e684d82-73a3-9a34-095f-19b112d88bbf",
 	"label": "Google Books",
 	"creator": "Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(?:/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?(btnG=Search\\+Books|tbm=bks))|^https?://play\\.google\\.[a-z]+(\\.[a-z]+)?/(store/)?(books|search\\?.+&c=books)",
+	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?(btnG=Search\\+Books|tbm=bks))|^https?://play\\.google\\.[a-z]+(\\.[a-z]+)?/(store/)?(books|search\\?.+&c=books)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

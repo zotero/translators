@@ -2,7 +2,7 @@
 	"translatorID": "f3e31f93-c18d-4ba3-9aa6-1963702b5762",
 	"label": "Ab Imperio",
 	"creator": "Avram Lyon",
-	"target": "^https?://(?:www\\.)?abimperio\\.net/",
+	"target": "^https?://(www\\.)?abimperio\\.net/",
 	"minVersion": "2.0",
 	"maxVersion": "",
 	"priority": 100,

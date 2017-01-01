@@ -2,7 +2,7 @@
 	"translatorID": "31659710-d04e-45d0-84ba-8e3f5afc4a54",
 	"label": "Twitter",
 	"creator": "Avram Lyon",
-	"target": "^https?://(?:[^/]+\\.)?twitter\\.com/",
+	"target": "^https?://([^/]+\\.)?twitter\\.com/",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,

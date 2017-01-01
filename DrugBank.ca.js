@@ -2,7 +2,7 @@
 	"translatorID": "b2a735f3-11ac-4e9f-b22b-00e1b1d3c9f6",
 	"label": "DrugBank.ca",
 	"creator": "Tom Hodder <tom@limepepper.co.uk>",
-	"target": "^https?://(?:www\\.)?drugbank\\.ca/drugs/",
+	"target": "^https?://(www\\.)?drugbank\\.ca/drugs/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
