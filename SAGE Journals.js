@@ -83,7 +83,7 @@ function scrape(doc, url) {
 	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
 	var filename = ZU.xpathText(doc, '//input[@name="downloadFileName"]/@value');
 	var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + filename + "&include=abs&format=ris&direct=false&submit=Download+Citation";
-	var pdfurl = "//" + doc.location.host + "/pdf/" + doi;
+	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function(text) {
