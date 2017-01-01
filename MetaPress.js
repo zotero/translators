@@ -2,7 +2,7 @@
 	"translatorID": "62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba",
 	"label": "MetaPress",
 	"creator": "Michael Berkowitz, Sebastian Karcher",
-	"target": "https?://(.*)metapress\\.com/",
+	"target": "^https?://(.*)metapress\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

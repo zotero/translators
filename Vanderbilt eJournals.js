@@ -2,7 +2,7 @@
 	"translatorID": "882f70a8-b8ad-403e-bd76-cb160224999d",
 	"label": "Vanderbilt eJournals",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "http://ejournals.library.vanderbilt.edu/",
+	"target": "^http://ejournals.library.vanderbilt.edu/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

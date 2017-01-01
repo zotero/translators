@@ -2,7 +2,7 @@
 	"translatorID": "948df957-439a-4ac3-bc48-2c6edb069521",
 	"label": "ProQuest PolicyFile",
 	"creator": "Sebastian Karcher",
-	"target": "https?://www\\.policyfile\\.com",
+	"target": "^https?://www\\.policyfile\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
