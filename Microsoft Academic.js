@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-31 21:54:28"
+	"lastUpdated": "2017-01-01 00:22:28"
 }
 
 /*
@@ -38,10 +38,9 @@
 
 function detectWeb(doc, url) {
 	var visibility = ZU.xpathText(doc, '//article[contains(@class, "author-page")]/@style');
-	//TODO add
-	//, {childList: true}
+
 	if (visibility && visibility.indexOf("none")>-1 && getSearchResults(doc, url, true)) {
-		Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+		Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0], {childList: true});
 		return 'multiple';
 	} else {
 		//The entity-detail DIV has all template code as SCRIPT childrens with some @id
@@ -53,7 +52,7 @@ function detectWeb(doc, url) {
 			var websiteType = child[0].tagName;
 			Z.debug(websiteType);
 			if (websiteType == 'PAPER-DETAIL-ENTITY') {
-				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0], {childList: true});
 				//When we are on a single page and search for something, then
 				//the content will not vanish, but just set to invisible by
 				//the style element of a parent node. Thus, we need to monitor
@@ -69,7 +68,7 @@ function detectWeb(doc, url) {
 				}
 				return 'journalArticle';
 			} else if (getSearchResults(doc, url, true)) {
-				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+				Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0], {childList: true});
 				return 'multiple';
 			}
 		}
@@ -82,7 +81,7 @@ function detectWeb(doc, url) {
 	//we need to monitor these DOM changes all the time (here and in
 	//all other cases).
 	Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {attributes: true, attributeFilter: ['style']});
-	Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0]);
+	Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0], {childList: true});
 
 	//Somehow during automatic testing this does not work
 	//Setting the correct type therefore here manually for the test cases
