@@ -2,14 +2,14 @@
 	"translatorID": "6cb92652-6a2b-473e-b976-434f50b15069",
 	"label": "Mailman",
 	"creator": "Robin Paulson",
-	"target": "/(pipermail|archives)/[A-Za-z0-9_-]*/[0-9]{4}-(January|February|March|April|May|June|July|August|September|October|November|December)/[0-9]{6}.html",
+	"target": "/(pipermail|archives)/[A-Za-z0-9_-]*/[0-9]{4}-(January|February|March|April|May|June|July|August|September|October|November|December)/[0-9]{6}\\.html",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 260,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 04:15:58"
+	"lastUpdated": "2017-01-01 16:55:04"
 }
 
 /*
