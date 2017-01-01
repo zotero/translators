@@ -2,7 +2,7 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "\\/(article|volume|proceeding|searchresults|issue)\\.aspx",
+	"target": "/(article|volume|proceeding|searchresults|issue)\\.aspx",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

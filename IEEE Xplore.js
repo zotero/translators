@@ -2,7 +2,7 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult).jsp\\?)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
