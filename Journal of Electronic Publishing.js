@@ -2,7 +2,7 @@
 	"translatorID": "d93c14fb-d327-4540-b60a-327309ea512b",
 	"label": "Journal of Electronic Publishing",
 	"creator": "Sebastian Karcher",
-	"target": "^http://quod.lib.umich.edu/.*c=jep",
+	"target": "^https?://quod.lib.umich.edu/.*c=jep",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

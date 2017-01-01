@@ -2,7 +2,7 @@
 	"translatorID": "b33af0e1-d122-45b2-b144-4b4eedd12d5d",
 	"label": "Wildlife Biology in Practice",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^http://[^/]*socpvs\\.org/journals/index\\.php/wbp",
+	"target": "^https?://[^/]*socpvs\\.org/journals/index\\.php/wbp",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
