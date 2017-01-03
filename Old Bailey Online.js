@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:51:06"
+	"lastUpdated": "2017-01-03 07:49:34"
 }
 
 function detectWeb(doc, url) {
@@ -56,7 +56,7 @@ function scrape(doc, url) {
 			contents = contents.substr(0, fieldIndex);
 			fieldTitle = headersArray[i].replace(/\s+/g, '');
 			
-			if (fieldTitle != "ReferenceNumber:") {
+			if (fieldTitle != "ReferenceNumber:" && fieldTitle != "Navigation:") {
 				tagsContent.push(contentsArray[j]);
 			} else {
 				refNum = contentsArray[j];
@@ -176,23 +176,21 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Theft > animal theft, 28th August 1678.",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Verdict: Guilty",
-					"Offence: Theft > animal theft"
-				],
-				"seeAlso": [],
-				"attachments": [],
 				"extra": "Reference Number: t16780828-12",
-				"title": "Theft > animal theft, 28th August 1678.",
-				"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
-				"libraryCatalog": "Old Bailey Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+				"attachments": [],
+				"tags": [
+					"Offence: Theft > animal theft",
+					"Verdict: Guilty"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
