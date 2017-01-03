@@ -2,14 +2,14 @@
 	"translatorID": "cf87eca8-041d-b954-795a-2d86348999d5",
 	"label": "Library Catalog (Aleph)",
 	"creator": "Simon Kornblith, Michael Berkowitz, Ming Yeung Cheung",
-	"target": "^https?://[^/]+/F(/[A-Z0-9\\-]*(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short|\\?local_base=)",
+	"target": "^https?://[^/]+/F(/?[A-Z0-9\\-]*(\\?.*)?$|\\?func=find|\\?func=scan|\\?func=short|\\?local_base=)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-01-06 15:10:06"
+	"lastUpdated": "2016-12-17 23:52:01"
 }
 
 /*
@@ -23,7 +23,6 @@ http://brenet.ens-lyon.fr
 http://bu-pau.univ-pau.fr/
 http://babel.bu.univ-paris5.fr
 http://inti.univ-paris4.fr/
-http://aleph.u-paris10.fr/
 http://servaleph.univ-catholyon.fr/
 http://armada.scd.univ-paris12.fr/
 http://catalogue.univ-angers.fr/
@@ -46,10 +45,13 @@ https://aleph.mpg.de
 
 Mexico:
 iibiblio.unam.mx
+
+Poland:
+https://aleph.bg.pwr.wroc.pl/F
 */
 
 function detectWeb(doc, url) {
-	var singleRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full.*)");
+	var singleRe = new RegExp("^https?://[^/]+/F/?[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full.*)");
 	
 	if(singleRe.test(doc.location.href)) {
 		return "book";
@@ -64,7 +66,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var detailRe = new RegExp("^https?://[^/]+/F/[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
+	var detailRe = new RegExp("^https?://[^/]+/F/?[A-Z0-9\-]*\?.*(?:func=full-set-set|func=direct|func=myshelf-full|func=myself_full.*)");
 	var mab2Opac = new RegExp("^https?://(?!alephdai)[^/]+berlin|193\.30\.112\.134|duisburg-essen/F/[A-Z0-9\-]+\?.*|^https?://katalog\.ub\.uni-duesseldorf\.de/F/|^https?://aleph\.mpg\.de/F/");
 	var uri = doc.location.href;
 	var newUris = new Array();
@@ -101,7 +103,7 @@ function doWeb(doc, url) {
 		});
 		
 	} else {
-		var itemRegexp = '^https?://[^/]+/F/[A-Z0-9\-]+\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
+		var itemRegexp = '^https?://[^/]+/F/?[A-Z0-9\-]*\?.*(?:func=full-set-set.*\&format=999|func=direct|func=myshelf-full.*)'
 		var items = Zotero.Utilities.getItemArray(doc, doc, itemRegexp, '^[0-9]+$');
 		// ugly hack to see if we have any items
 		var haveItems = false;
@@ -162,6 +164,7 @@ function scrape(newDoc, marc, url) {
 		var th = false;
 		var ndl = false;
 		var xpath;
+		//Z.debug(uri)
 		if (newDoc.evaluate('//*[tr[td/text()="LDR"]]/tr[td[2]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 			xpath = '//*[tr[td/text()="LDR"]]/tr[td[2]]';
 		}	else if (newDoc.evaluate('//tbody[tr/td[@scope="row"]/strong[contains(text(), "LDR")]]', newDoc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
@@ -185,7 +188,7 @@ function scrape(newDoc, marc, url) {
 			nonstandard = true;
 		}
  	
-
+		//Z.debug(xpath)
 		var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 		var elmt;
 		var record = new marc.record();

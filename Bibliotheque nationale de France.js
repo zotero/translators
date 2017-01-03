@@ -416,6 +416,7 @@ var BnfClass = function() {
 
 		//Fix creators
 		getCreators(record, newItem);
+
 		
 		//Fix callNumber
 		getCote(record, newItem) ;
@@ -437,6 +438,7 @@ var BnfClass = function() {
 			mimeType: 'text/html',
 			snapshot: true
 		});
+
 		}
 
 		//Country (102a)
@@ -539,8 +541,10 @@ var BnfClass = function() {
         var url = record.getFieldSubfields("856");
 		
 		if(url && url.length > 0 && url[0].u) {		
+
 		 item.url = url[0].u;
 		 
+
 			}
 		
 		}

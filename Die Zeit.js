@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-04-07 03:18:26"
+	"lastUpdated": "2016-09-12 05:37:03"
 }
 
 /*
@@ -61,7 +61,7 @@ function getSearchResults(doc, checkOnly) {
 		rows = doc.getElementsByClassName('teaser-small__container');
 	}
 	for (var i=0; i<rows.length; i++) {
-		var href = ZU.xpathText(rows[i], './/a/@href');
+		var href = ZU.xpathText(rows[i], '(.//a/@href)[1]');
 		var title = ZU.trimInternal( ZU.xpathText(rows[i], './/a/h4|.//a[span]') );
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -119,7 +119,7 @@ function scrape(doc, url){
 		}
 	}
 	
-	var section = doc.getElementsByClassName("primary-nav__link--current");
+	var section = doc.getElementsByClassName("nav__ressorts-link--current");
 	if (section.length > 0) {
 		newItem.section = section[0].textContent;
 	}

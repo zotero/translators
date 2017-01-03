@@ -9,71 +9,71 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-30 13:26:44"
+	"lastUpdated": "2016-09-08 06:17:39"
 }
 
 /*
-    ***** BEGIN LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
 
-    Copyright © 2015 Philipp Zumstein
+	Copyright © 2015 Philipp Zumstein
 
-    This file is part of Zotero.
+	This file is part of Zotero.
 
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-    ***** END LICENSE BLOCK *****
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
-    if (url.indexOf('biomedcentral.com/articles/10.1186/')>-1) {
-        return "journalArticle";
-    } else if (getSearchResults(doc, true)) {
-        return "multiple";
-    }
+	if (url.indexOf('biomedcentral.com/articles/10.1186/')>-1) {
+		return "journalArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    var rows = ZU.xpath(doc, '//div[@id="search-container"]//article//h3[contains(@class,"ResultsList_title")]/a');
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[@id="search-container"]//article//h3[contains(@class,"ResultsList_title")]/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = new Array();
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, scrape);
-        });
-    } else {
-        scrape(doc, url);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = new Array();
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {
@@ -234,7 +234,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "Parasites & Vectors",
 				"libraryCatalog": "BioMed Central",
-				"pages": "S1",
+				"pages": "1-8",
 				"publicationTitle": "Parasites & Vectors",
 				"url": "http://dx.doi.org/10.1186/1756-3305-2-S1-S1",
 				"volume": "2",
@@ -248,11 +248,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "Pages 1-8 in PDF"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

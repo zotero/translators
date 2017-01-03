@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-01-18 22:04:27"
+	"lastUpdated": "2016-07-31 15:24:21"
 }
 
 function parseInput() {
@@ -56,6 +56,7 @@ function detectImport() {
 function doImport() {
 	var parsedData = parseInput();
 	if(!parsedData) return;
+	if(!Array.isArray(parsedData)) parsedData = [parsedData];
 	
 	for(var i=0; i<parsedData.length; i++) {
 		var item = new Z.Item();

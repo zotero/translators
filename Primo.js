@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-05 04:56:07"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2016-08-28 15:36:29"
 }
 
 /*
@@ -178,7 +178,7 @@ function fetchPNX(itemData) {
 				PNXUrlGenerator.confirmed = true;
 			}
 			
-			importPNX(text);
+			importPNX(text, url);
 		},
 		function() {
 			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
@@ -193,8 +193,9 @@ function fetchPNX(itemData) {
 }
 
 //import PNX record
-function importPNX(text) {
+function importPNX(text, url) {
 	//Note that if the session times out, PNX record will just contain a "null" entry
+	//Z.debug(url)
 	Z.debug(text);
 	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
 	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
@@ -210,7 +211,7 @@ function importPNX(text) {
 	
 	var item = new Zotero.Item();
 	
-	var itemType = ZU.xpathText(doc, '//display/type');
+	var itemType = ZU.xpathText(doc, '//display/type')  || ZU.xpathText(doc, '//facets/rsrctype') || ZU.xpathText(doc, '//search/rsrctype');
 	if(!itemType) {
 		throw new Error('Could not locate item type');
 	}
@@ -258,6 +259,9 @@ function importPNX(text) {
 			break;
 		case 'reference_entry':
 			item.itemType = "encyclopediaArticle";
+			break;
+		case 'image':
+			item.itemType = "artwork";
 			break;
 		case 'newspaper_article':
 			item.itemType = "newspaperArticle";
@@ -308,15 +312,24 @@ function importPNX(text) {
 	fetchCreators(item, creators, 'author', splitGuidance);
 	fetchCreators(item, contributors, 'contributor', splitGuidance);
 	
-	var publisher = ZU.xpathText(doc, '//display/publisher');
-	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
-	if(pubplace && pubplace[1]) {
-		item.place = pubplace[0].replace(/,\s*c?\d+(\-\d+)?|[\(\)\[\]]|(\.\s*)?/g, "");
-		item.publisher = pubplace[1].replace(/,\s*c?\d+(\-\d+)?|[\(\)\[\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
-	} else if(pubplace) {
-		item.publisher = pubplace[0].replace(/,\s*c?\d+(\-\d+)?|[\(\[].+[\)\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"?\s*$/g, '');
+	item.place = ZU.xpathText(doc, '//addata/cop');
+	var publisher = ZU.xpathText(doc, '//addata/pub');
+	if(!publisher) publisher = ZU.xpathText(doc, '//display/publisher');
+	if(publisher) {
+		publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
+		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
+
+		if(pubplace && pubplace[1]) {
+			var possibleplace = pubplace[0];
+			if(!item.place ) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+				item.place = possibleplace;
+			}
+			if(item.place && item.place == possibleplace) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+			}
+		}
 	}
 	
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
@@ -358,6 +371,10 @@ function importPNX(text) {
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
 	var subjects = ZU.xpath(doc, '//search/subject');
+	if(!subjects.length) {
+		subjects = ZU.xpath(doc, '//display/subject');
+	}
+
 	for(var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
@@ -420,9 +437,21 @@ function importPNX(text) {
 	else {
 		ZU.xpathText(doc, '//enrichment/classificationlcc');
 	}
-	
+
+	if (url) {
+		item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
+	}
+
 	//Harvard specific code, requested by Harvard Library:
-	var library = ZU.xpathText(doc, '//browse/institution');
+	//Getting the library abbreviation properly,
+	//so it's easy to implement custom code for other libraries, either locally or globally should we want to.
+	var library;
+	var source = ZU.xpathText(doc, '//control/sourceid');
+	if (source) {
+		library = source.match(/^(.+?)_/);
+		if (library) library = library[1];
+	}
+	//Z.debug(library)
 	if (library && library == "HVD") {
 		if (ZU.xpathText(doc, '//display/lds01')) {
 			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
@@ -431,6 +460,7 @@ function importPNX(text) {
 			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
 		}
 	}
+	//End Harvard-specific code
 	item.complete();
 }
 
@@ -439,7 +469,10 @@ function stripAuthor(str) {
 		// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
 		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '');
+		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '')
+		// The full "continuous" name uses no separators, which need be removed
+		// cf. "Luc, Jean André : de (1727-1817)"
+		.replace(/\s*:\s+/, " ");
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -507,8 +540,9 @@ var testCases = [
 				"date": "1860",
 				"callNumber": "5552.406",
 				"language": "eng",
-				"libraryCatalog": "Primo",
-				"publisher": "London",
+				"libraryCatalog": "princeton-primo.com",
+				"place": "London",
+				"publisher": "London 1860-1912",
 				"attachments": [],
 				"tags": [
 					"China Foreign relations Great Britain.",
@@ -556,7 +590,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&search_scope=default_scope&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
+		"url": "http://limo.libis.be/LIBISnet:default_scope:32LIBIS_ALMA_DS71166851730001471",
 		"items": [
 			{
 				"itemType": "book",
@@ -612,10 +646,11 @@ var testCases = [
 					}
 				],
 				"date": "1970",
-				"callNumber": "NX650G8B38, NX650G8 B38",
+				"callNumber": "NX650G8B38",
 				"language": "eng",
-				"libraryCatalog": "Primo",
-				"publisher": "Boston Boston Book and Art Chop",
+				"libraryCatalog": "virtuose.uqam.ca",
+				"place": "Boston",
+				"publisher": "Boston Book and Art Chop",
 				"series": "Art and society 1",
 				"attachments": [],
 				"tags": [
@@ -723,7 +758,7 @@ var testCases = [
 				"edition": "[1st ed.]",
 				"extra": "HOLLIS number: 002208563",
 				"language": "eng",
-				"libraryCatalog": "Primo",
+				"libraryCatalog": "hollis.harvard.edu",
 				"place": "New York",
 				"publisher": "Knopf",
 				"attachments": [
@@ -737,6 +772,34 @@ var testCases = [
 					"Cookery, French",
 					"Cooking, French.",
 					"French cooking"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Grida per i Milanesi che avevano seguito Ludovico il Moro",
+				"creators": [
+					{
+						"lastName": "Milano",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1500",
+				"language": "ita",
+				"libraryCatalog": "digitale.beic.it",
+				"place": "Milano",
+				"publisher": "Ambrogio : da Caponago",
+				"attachments": [],
+				"tags": [
+					"LEGGI;ITALIA - STORIA MEDIOEVALE"
 				],
 				"notes": [],
 				"seeAlso": []

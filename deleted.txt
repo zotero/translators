@@ -1,4 +1,4 @@
-40  # Increment number when modifying file
+46  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -79,3 +79,13 @@ f880bf79-d42f-4337-b0d2-7a7de4a48b7d # X-OPAC - no more instances of this lib ca
 0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f # Physical Society of Japan - journals moved to IOP or Atypon system
 63c25c45-6257-4985-9169-35b785a2995e # InfoTrac OneFile - merged into Galegroup (see #482)
 79f6f9ed-537a-4d4f-8270-c4fbaafdf327 # Emerald; covered by Atypon
+9d822257-2eec-4674-b6d0-2504f54c8890 # African Journals Online; covered by Open Journal Systems
+fb342bae-7727-483b-a871-c64c663c2fae # BusinessWeek; acquired/covered by Bloomberg
+2e304579-dd7b-4770-85e9-0d724c9b49a5 # European Educational Research Journal; moved to SAGE
+19120a71-17a8-4629-936a-ccdf899b9861 # Sydney Morning Herald; replaced by generic Fairfax Australia
+f94bad2d-0c76-4e8f-a0d3-970810093c6c # The Age; replaced by generic Fairfax Australia
+9418dcc2-cc1e-432b-b7a6-7b00b7402d2f # Hurricane Digital Memory Bank; covered with COinS
+58641ca2-d324-445b-a618-4e7c4631726f # Google Blog is discontinued
+74af9c75-dc14-4cdb-bb0b-1bbb13ba2e22 # Landes Publishers; moved to T&F
+d8873d23-d874-4b62-b081-1db12ff5a5de # ILO Labordoc; covered by EM and Primo now
+ac721d14-f081-4613-91e8-255c22ad05eb # IASSIST Quarterly

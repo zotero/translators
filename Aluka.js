@@ -1,29 +1,51 @@
 {
 	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
 	"label": "Aluka",
-	"creator": "Sean Takats, Sebastian Karcher",
-	"target": "^https?://(?:www\\.)aluka\\.org/action/(?:showMetadata\\?doi=[^&]+|doSearch\\?|doBrowseResults\\?)",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://(?:www\\.)aluka\\.org/(?:stable/|struggles/search\\?|struggles/collection/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-06 19:23:07"
+	"lastUpdated": "2016-09-27 06:02:24"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2016 Philipp Zumstein
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
+
 function detectWeb(doc, url){
-	var xpath = '//a[@class="title"]';
-	var type = ZU.xpathText(doc, '//tr/td[contains(text(), "Resource type")]/following-sibling::td');
-	Z.debug(type);
+	var type = ZU.xpathText(doc, '//div[contains(@class, "resource-type")]//div[contains(@class, "metadata-value")]');
 	var itemType = typeMap[type]
-	if (itemType){
+	if (itemType) {
 		return itemType
-	}
-	else if (url.match(/showMetadata\?doi=[^&]+/)){
-		return "document";
-	} else if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
+	} else {
+		Z.debug("Unrecognized type: " + type);
+		return "report";
 	}
 }
 
@@ -43,156 +65,120 @@ var typeMap = {
 	"Correspondence":"letter",
 	"Letters (Correspondence)" : "letter",
 	"Interviews":"interview",
-	"Reports":"report"
+	"Reports":"report",
+	"Transcripts":"presentation",
+	"Memorandums":"report"
 }
 
-function doWeb(doc, url){
-	var urlString = "http://www.aluka.org/action/showPrimeXML?doi=" ;
-	var uris = new Array();
-	var m = url.match(/showMetadata\?doi=([^&]+)/);
-	if (m) { //single page
-		scrape(urlString+ m[1]);
-	} else { //search results page
-	
-		var xpath = '//a[@class="title"]';
-		var items = new Object();
-		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var elmt;
-		while (elmt = elmts.iterateNext()) {
-			var title = elmt.textContent;
-			var link = elmt.href;
-			var m = link.match(/showMetadata\?doi=([^&]+)/);
-			if (title && m){
-				items[m[1]] = title;
-			}
-		}
-		Zotero.selectItems(items, function (items) {
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//h3[@class="title"]/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
-				uris.push(urlString + i);
+				articles.push(i);
 			}
-			scrape(uris, function () {
-				Zotero.done();
-			});
+			ZU.processDocuments(articles, scrape);
 		});
+	} else {
+		scrape(doc, url);
 	}
 }
 
-function xpathTextTrimmed(contextElement, xpath) {
-    var text = ZU.xpathText(contextElement, xpath);
-    return text ? ZU.trimInternal(text) : undefined;
-}
-	
-function scrape(uris){
-	// http://www.aluka.org/action/showPrimeXML?doi=10.5555/AL.SFF.DOCUMENT.cbp1008
-	Zotero.Utilities.HTTP.doGet(uris, function(text) {
-		//Z.debug(text)
-		var parser = new DOMParser();
-		var xml = parser.parseFromString(text, "text/xml");
-		//var xml = new XML(text);
-		var metadata = ZU.xpath(xml, '//MetadataDC');
-		var itemType = "Unknown";
-		if (metadata.length){
-			itemType = "document";
-			var value = ZU.xpathText(metadata[0], 'Type');
-			if (value){
-				if(typeMap[value]) {
-					itemType = typeMap[value];
-				} else {
-					Zotero.debug("Unmapped Aluka Type: " + value);
-				}		
-			}
-			var newItem = new Zotero.Item(itemType);
-			var title = ZU.xpathText(metadata[0], 'Title');
-			if (title){
-				var title = Zotero.Utilities.trimInternal(title);}
-			else {
-					title = " ";
-				}
-			newItem.title = title;
-			
-			var subjects = ZU.xpath(metadata[0], 'Subject.Enriched');
-			for(var i in subjects) {
-			newItem.tags.push(Zotero.Utilities.trimInternal(subjects[i].textContent));
-			}
-			var coverage = ZU.xpath(metadata[0], 'Coverage.Spatial');
-			for(var i in coverage) {
-				newItem.tags.push(Zotero.Utilities.trimInternal(coverage[i].textContent));
-			}
-			var coverage_temp = ZU.xpath(metadata[0], 'Coverage.Temporal');
-			for(var i in coverage_temp) {
-				newItem.tags.push(Zotero.Utilities.trimInternal(coverage_temp[i].textContent));
-			}
 
-			var date = ZU.xpathText(metadata[0], 'Date[1]');
-			if (date){
-			 	if (date.match(/^\d{8}$/)){
-					date = date.substr(0, 4) + "-" + date.substr(4, 2) + "-" + date.substr(6, 2);
+function scrape(doc, url) {
+	var itemType = detectWeb(doc, url);
+	var newItem = new Zotero.Item(itemType);
+	newItem.title = ZU.xpathText(doc, '//h1[contains(@class, "title")]');
+	var rows = ZU.xpath(doc, '//section[contains(@class, "metadata-section")]/div[contains(@class, "row")]');
+	for (var i=0; i<rows.length; i++) {
+		var label = rows[i].className.replace("row", "").trim();
+		var values = ZU.xpathText(rows[i], './/div[contains(@class, "metadata-value")]', null, "|");
+		//Z.debug(label); Z.debug(values);
+		switch (label) {
+			case "date":
+				newItem.date = values;
+				break;
+			case "topic":
+			case "coverage-spatial":
+			case "coverage-temporal":
+				var tags = values.split("|");
+				for (var j=0; j<tags.length; j++) {
+					newItem.tags.push(ZU.cleanTags(tags[j]));
 				}
-				newItem.date = date;
-			}
-			
-			var authors = ZU.xpath(metadata[0], 'Creator');
-			var type = "author";
-			for(var i in authors) {
-				Zotero.debug("author: " + authors[i].textContent);
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
-			}
-			var authors = ZU.xpath(metadata[0], 'Contributor');
-			var type = "contributor";
-			for(var i in authors) {
-				Zotero.debug("author: " + authors[i].textContent);
-				newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent,type,true));
-			}
-			
-		
-			newItem.extra = xpathTextTrimmed(metadata[0], 'Title.Alternative[1]');
-			newItem.publisher = xpathTextTrimmed(metadata[0], 'Publisher[1]');
-			newItem.medium =xpathTextTrimmed(metadata[0], 'Format.Medium[1]');
-			newItem.language = xpathTextTrimmed(metadata[0], 'Language[1]');
-			newItem.abstractNote = xpathTextTrimmed(metadata[0], 'Description[1]');
-			newItem.numPages = xpathTextTrimmed(metadata[0], 'Format.Extent[1]');
-			newItem.rights = xpathTextTrimmed(metadata[0], 'Rights[1]');
-			newItem.repository = "Aluka: " + xpathTextTrimmed(metadata[0], 'Source[1]');
-			newItem.callNumber = xpathTextTrimmed(metadata[0], 'Relation[1]');
-			
-			//If the rights aren't in the DC metadata try to get them otherwise
-			var rights =   ZU.xpathText(xml, '//Rights/Attribution[1]');
-			if (rights && !newItem.rights){
-				newItem.rights = rights;
-			}
-			
-			var doi = ZU.xpathText(xml, '//DOI[1]');
-			if (doi){
-				newItem.DOI = doi;
-				var newUrl = "http://www.aluka.org/action/showMetadata?doi=" + doi;
-				newItem.attachments.push({title:"Aluka Link", snapshot:false, mimeType:"text/html", url:newUrl});
-				var pdfUrl = "http://ts-den.aluka.org/delivery/aluka-contentdelivery/pdf/" + doi + "?type=img&q=high";
-				newItem.attachments.push({title: "Aluka PDF", url:pdfUrl});
-				newItem.url = newUrl;
-			}
-			
-			newItem.complete();
-		} else {
-			Zotero.debug("No Dublin Core XML data");
-			return false;
+				break;
+			case "author":
+				var authors = values.split("|");
+				for (var j=0; j<authors.length; j++) {
+					newItem.creators.push(ZU.cleanAuthor(authors[j], "author", true));
+				}
+				break;
+			case "contributor":
+				var authors = values.split("|");
+				for (var j=0; j<authors.length; j++) {
+					newItem.creators.push(ZU.cleanAuthor(authors[j], "contributor", true));
+				}
+				break;
+			case "publisher":
+				newItem.publisher = values;
+				break;
+			case "description":
+				newItem.abstractNote = values;
+				break;
+			case "language":
+				newItem.language = values;
+				break;
+			case "format-extent-lenghtsize":
+				newItem.numPages = values;
+				break;
+			case "attribution":
+				newItem.rights = values;
+				break;
+			case "collection":
+				newItem.series = values;
+				break;
+			case "repository":
+				newItem.archive = values;
+				break;
+			case "source":
+				//newItem.extra = values;
+				break;
 		}
-	});
+	}
+	newItem.url = url;
+	newItem.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.aluka.org/action/doSearch?sa=4&sa=xst&sa=xhr&searchText=argentina&submit=Search",
+		"url": "http://www.aluka.org/struggles/search?so=ps_collection_name_str+asc&Query=argentina",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
+		"url": "http://www.aluka.org/stable/10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
 		"items": [
 			{
 				"itemType": "letter",
+				"title": "[Letter from P. Abrecht (WCC, Geneva) to L. Nillus, Buenos Aires]",
 				"creators": [
 					{
 						"firstName": "Programme to Combat Racism",
@@ -205,37 +191,69 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "1968-12-13",
+				"archive": "World Council of Churches",
+				"language": "English",
+				"libraryCatalog": "Aluka",
+				"rights": "By kind permission of the World Council of Churches (WCC).",
+				"url": "http://www.aluka.org/stable/10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
+				"attachments": [],
 				"tags": [
-					"Regional And International Contexts",
-					"Global",
-					"Brazil",
+					"1969",
 					"Argentina",
-					"United Kingdom",
+					"Brazil",
 					"Colombia",
-					"1969"
+					"Global",
+					"Regional And International Contexts",
+					"United Kingdom"
 				],
-				"seeAlso": [],
-				"attachments": [
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.aluka.org/stable/10.5555/al.sff.document.af000284?searchUri=so%3Dps_collection_name_str%2Basc%26Query%3Dstruggle",
+		"items": [
+			{
+				"itemType": "presentation",
+				"title": "Nelson Mandela Speaks to Workers About the Struggle for Freedom in South Africa",
+				"creators": [
 					{
-						"title": "Aluka Link",
-						"snapshot": false,
-						"mimeType": "text/html"
+						"firstName": "Nelson",
+						"lastName": "Mandela",
+						"creatorType": "author"
 					},
 					{
-						"title": "Aluka PDF"
+						"lastName": "Africa Fund",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "National Union of Mineworkers",
+						"creatorType": "contributor"
 					}
 				],
-				"title": "[Letter from P. Abrecht (WCC, Geneva) to L. Nillus, Buenos Aires]",
-				"date": "1968-12-13",
-				"medium": "image/tiff",
+				"date": "1991-04",
+				"abstractNote": "Struggle for Freedom. African National Congress. Nelson Mandela. National Union of Mineworkers. Political violence. Negotiations. F. W. de Klerk. Adriaan Vlok. NUM. ANC. Inkatha. Political Prisoners. Apartheid. Resolution on Sanctions. White domination. Anti-apartheid movement. Death squads. Police. Soweto. COSATU. Gold. Human rights. Goldstone. Investment code. General Van der Merwe. Sebokeng. Interim government. Constituent Assembly. Democratic government.",
 				"language": "English",
-				"numPages": "1 page(s)",
-				"DOI": "10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
-				"url": "http://www.aluka.org/action/showMetadata?doi=10.5555/AL.SFF.DOCUMENT.ydlwcc0342",
-				"rights": "By kind permission of the World Council of Churches (WCC).",
-				"libraryCatalog": "Aluka: World Council of Churches Library and Archives: Programme to Combat Racism; microfilm created by the Yale University Divinity Library with funding from the Kenneth Scott Latourette Initiative for the Documentation of World Christianity.",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"rights": "By kind permission of Africa Action, incorporating the American Committee on Africa, The Africa Fund, and the Africa Policy Information Center.",
+				"url": "http://www.aluka.org/stable/10.5555/al.sff.document.af000284?searchUri=so%3Dps_collection_name_str%2Basc%26Query%3Dstruggle",
+				"attachments": [],
+				"tags": [
+					"1990 - 1991",
+					"Economic Systems",
+					"Internal Conflicts",
+					"Judicial Systems",
+					"North America",
+					"Popular Resistance",
+					"Regional And International Contexts",
+					"South Africa",
+					"The Colonial System And Its Consequences",
+					"Wars Of Liberation, Internal Conflicts, And Destabilization"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

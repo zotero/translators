@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-02-04 08:08:19"
+	"lastUpdated": "2016-06-26 18:54:53"
 }
 
 /*
@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var address = ZU.xpathText(doc, '//pre[strong and contains(text(), "https://www.wiso-net.de/document/")]');
+	var address = ZU.xpathText(doc, '//pre[strong]/a[contains(text(), "https://www.wiso-net.de/document/")]');
 	var docUid = address.substr(address.lastIndexOf('/')+1);
 	var risUrl = "/stream/exportDocuments?docUids="
 		+ docUid + "&dbShortcut=&query=&source=Document&format=Citavi";

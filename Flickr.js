@@ -9,10 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-12-18 04:44:52"
+	"lastUpdated": "2016-09-20 06:21:01"
 }
 
 function detectWeb(doc, url) {
+	/*
 	if (ZU.xpath(doc,'//h1[@property="dc:title" and starts-with(@id, "title_div")]').length) {
 		return getPhotoId(doc) ? "artwork" : null;
 	}
@@ -20,10 +21,14 @@ function detectWeb(doc, url) {
 	var type = ZU.xpathText(doc,'//meta[@name="og:type"]/@content');
 	if ( type && type.substr(type.length - 5) == 'photo') {
 		return getPhotoId(doc) ? "artwork" : null;
-	}
+	}*/
+
 	
 	if (getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	if (getPhotoId(doc)) {
+		return "artwork";
 	}
 }
 
@@ -34,7 +39,7 @@ function getSearchResults(doc, checkOnly) {
 		/*/span[contains(@class, "photo_container")]/a[1]');
 	if (!elmts.length){
 		elmts = ZU.xpath(doc, '//div[not(contains(@style, "display: none"))]\
-			/*/span[@class="title"]/a[1]');
+			/*/a[@class="title"]');
 	}
 	
 	var items = {}, found = false;
@@ -42,7 +47,8 @@ function getSearchResults(doc, checkOnly) {
 		var title = elmts[i].title;
 		//in photostreams, the <a> element doesn't have a title attribute
 		if (title == "") {
-			title = elmts[i].getElementsByTagName("img")[0].alt;
+			title = elmts[i].textContent;
+			//title = elmts[i].getElementsByTagName("img")[0].alt;
 		}
 		title = ZU.trimInternal(title);
 		if (!title) continue;
@@ -60,8 +66,11 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function getPhotoId(doc) {
+	var photoId = false;
 	var elmt = ZU.xpathText(doc, '//meta[@property="og:image" or @name="og:image"]/@content');
-	var photoId = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
+	if (elmt) {
+		photoId = elmt.substr(elmt.lastIndexOf('/')+1).match(/^[0-9]+/);
+	}
 	return photoId ? photoId[0] : false;
 }
 
@@ -193,7 +202,7 @@ function parseResponse(text) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.flickr.com/photos/doug88888/3122503680/in/set-72157624194059533",
+		"url": "https://www.flickr.com/photos/doug88888/3122503680/in/set-72157624194059533",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -206,7 +215,7 @@ var testCases = [
 					}
 				],
 				"date": "2008-12-07",
-				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\">blog</a> if you like.",
+				"abstractNote": "More xmas shopping today - gulp.\n\nCheck out my  <a href=\"http://doug88888.blogspot.com/\" rel=\"nofollow\">blog</a> if you like.",
 				"artworkMedium": "photo",
 				"libraryCatalog": "Flickr",
 				"rights": "Attribution-NonCommercial-ShareAlike License",
@@ -289,11 +298,6 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.flickr.com/photos/lomokev/galleries/72157623433999749/",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.flickr.com/photos/lomokev/archives/date-taken/2003/12/04/",
 		"items": "multiple"
 	},
 	{

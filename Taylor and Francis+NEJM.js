@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-02-12 22:42:23"
+	"lastUpdated": "2016-09-21 20:31:33"
 }
 
 /*
@@ -43,7 +43,7 @@ function getTitles(doc) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\.|\/doi\/figure\/10\./)) {
 		return "journalArticle";
 	} else if(url.match(/\/action\/doSearch\?|\/toc\//) &&
 		getTitles(doc).length) {
@@ -58,7 +58,7 @@ function doWeb(doc, url) {
 		var titles = getTitles(doc);
 		var doi;
 		for(var i=0, n=titles.length; i<n; i++) {
-			doi = titles[i].href.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+			doi = titles[i].href.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 			if(doi) {
 				items[doi[1]] = titles[i].textContent;
 			}
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 			scrape(null, url,dois);
 		});
 	} else {
-		var doi = url.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
+		var doi = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 		scrape(doc, url,[doi[1]]);
 	}
 }
@@ -82,6 +82,13 @@ function doWeb(doc, url) {
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
+	
+	//add keywords
+	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
+	for (var i=0; i<keywords.length; i++) {
+		item.tags.push(keywords[i].textContent);
+	}
+	
 
 	//add attachments
 	item.attachments = [{
@@ -214,7 +221,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Peru",
+					"employment",
+					"informality",
+					"labor costs",
+					"training"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -269,7 +282,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Peru",
+					"employment",
+					"informality",
+					"labor costs",
+					"training"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -314,7 +333,15 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"D12",
+					"D81",
+					"M31",
+					"adjustment mechanism",
+					"contigent valuation method",
+					"purchase decisions",
+					"willingness to pay"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -357,7 +384,7 @@ var testCases = [
 				"date": "September 27, 2012",
 				"DOI": "10.1056/NEJMp1207920",
 				"ISSN": "0028-4793",
-				"abstractNote": "Four fundamental principles drive public funding for family planning. First, unintended pregnancy is associated with negative health consequences, including reduced use of prenatal care, lower breast-feeding rates, and poor maternal and neonatal outcomes.1,2 Second, governments realize substantial cost savings by investing in family planning, which reduces the rate of unintended pregnancies and the costs of prenatal, delivery, postpartum, and infant care.3 Third, all Americans have the right to choose the timing and number of their children. And fourth, family planning enables women to attain their educational and career goals and families to provide for their children. These principles led . . .",
+				"abstractNote": "In 2011, Texas slashed funding for family planning services and imposed new restrictions on abortion care, affecting the health care of many low-income women. For demographically similar states, Texas's experience may be a harbinger of public health effects to come.",
 				"extra": "PMID: 23013071",
 				"issue": "13",
 				"itemID": "doi:10.1056/NEJMp1207920",
@@ -387,7 +414,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "<no title>",
+				"title": "Multicriteria Evaluation of High-speed Rail, Transrapid Maglev and Air Passenger Transport in Europe",
 				"creators": [
 					{
 						"firstName": "Milan",
@@ -415,7 +442,13 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Entropy method; ",
+					"Europe; ",
+					"High-speed transport systems; ",
+					"Interest groups ",
+					"Multicriteria analysis; "
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -465,7 +498,67 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"CO2 diffusion",
+					"CO2 evolution",
+					"CO2 sorption",
+					"concentration dependence"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.tandfonline.com/doi/figure/10.1080/00014788.2016.1157680?scroll=top&needAccess=true",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Stakeholder perceptions of performance audit credibility",
+				"creators": [
+					{
+						"firstName": "Warwick",
+						"lastName": "Funnell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Margaret",
+						"lastName": "Wade",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Jupe",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 18, 2016",
+				"DOI": "10.1080/00014788.2016.1157680",
+				"ISSN": "0001-4788",
+				"abstractNote": "This paper examines the credibility of performance audit at the micro-level of practice using the general framework of Birnbaum and Stegner's theory of source credibility in which credibility is dependent upon perceptions of the independence of the auditors, their technical competence and the usefulness of audit findings. It reports the results of a field study of a performance audit by the Australian National Audit Office conducted in a major government department. The paper establishes that problems of auditor independence, technical competence and perceived audit usefulness continue to limit the credibility of performance auditing.",
+				"issue": "6",
+				"itemID": "doi:10.1080/00014788.2016.1157680",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "601-619",
+				"publicationTitle": "Accounting and Business Research",
+				"url": "http://dx.doi.org/10.1080/00014788.2016.1157680",
+				"volume": "46",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Australian National Audit Office",
+					"credibility",
+					"performance auditing",
+					"source"
+				],
 				"notes": [],
 				"seeAlso": []
 			}

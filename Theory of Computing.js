@@ -2,14 +2,14 @@
 	"translatorID": "558babe7-5fca-47ea-af0f-2d9bb5bc5e53",
 	"label": "Theory of Computing",
 	"creator": "Piyush Srivastava",
-	"target": "^https?://(theoryofcomputing\\.org|toc\\.cse\\.iitk\\.ac\\.in|cs\\.anu\\.edu\\.au/publications/toc|toc\\.ilab\\.sztaki\\.hu|toc\\.nada\\.kth\\.se|tocmirror\\.cs\\.tau\\.ac\\.il)/articles/[vg].*(/|html?)$",
+	"target": "^https?://(theoryofcomputing\\.org|toc\\.cse\\.iitk\\.ac\\.in|www\\.cims\\.nyu\\.edu/~regev/toc|toc\\.ilab\\.sztaki\\.hu|toc\\.nada\\.kth\\.se|tocmirror\\.cs\\.tau\\.ac\\.il)/articles/[vg].*(/|html?)$",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-11-19 08:23:18"
+	"lastUpdated": "2016-03-23 16:47:35"
 }
 
 /*****
@@ -46,7 +46,7 @@
  3) toc.nada.kth.se
  4) toc.ilab.sztaki.hu
  5) tocmirror.cs.tau.ac.il
- 6) cs.anu.edu.au
+ 6) www.cims.nyu.edu/~regev/toc/
 
  It has two kinds of articles, "Graduate Surveys", which their provided BibTeX
  classes regard as "books" and regular "Journal Articles".  The structure of the
@@ -267,7 +267,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Srinkath",
+						"firstName": "Srikanth",
 						"lastName": "Srinivasan",
 						"creatorType": "author"
 					}
@@ -454,7 +454,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://cs.anu.edu.au/publications/toc/articles/gs003/",
+		"url": "http://www.cims.nyu.edu/~regev/toc/articles/gs003/",
 		"items": [
 			{
 				"itemType": "book",
@@ -482,7 +482,7 @@ var testCases = [
 				],
 				"title": "Selected Results in Additive Combinatorics: An Exposition",
 				"DOI": "10.4086/toc.gs.2011.003",
-				"url": "http://cs.anu.edu.au/publications/toc/articles/gs003/",
+				"url": "http://www.cims.nyu.edu/~regev/toc/articles/gs003/",
 				"date": "May 15, 2011",
 				"numPages": "15",
 				"seriesNumber": "3",

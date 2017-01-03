@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-22 11:05:06"
+	"lastUpdated": "2016-08-23 18:35:28"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
@@ -180,29 +180,15 @@ function doWeb(doc, url){
 }
 
 function scrape(items, opts){
-	//get citation export page's source code;
 	for(var i=0, n=items.length; i<n; i++) {
-		(function(item) {
-			var url = '/action/showCitFormats?doi=' + encodeURIComponent(item.doi);
-			//Z.debug(url);
-			ZU.doGet(url, function(text){
-				//Z.debug(text)
-				//get the exported RIS file name;
-				var downloadFileName = text.match(
-					/name=\"downloadFileName\" value=\"([A-Za-z0-9_\-\.]+)\"/)[1];
-				Zotero.debug("downloadfilename= "+downloadFileName);
-				processCallback(item, opts, downloadFileName);
-			});
-		})(items[i]);
+		processCallback(items[i], opts);
 	}
 }
 
 function processCallback(fetchItem, opts, downloadFileName) {
 		var baseurl = "/action/downloadCitation";
 		var doi = fetchItem.doi;
-		var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + encodeURIComponent(downloadFileName)
-			+ "&include=abs&format=refman&direct=on"
-			+ "&submit=Download+article+citation+data";
+		var post = "https//pubs.acs.org/action/downloadCitation?direct=true&doi="+encodeURIComponent(fetchItem.doi)+"&format=ris&include=abs&submit=Download+Citation"
 		ZU.doPost(baseurl, post, function(text){
 			// Fix the RIS doi mapping
 			text = text.replace("\nN1  - doi:", "\nDO  - ");
@@ -367,17 +353,17 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists? Dream, Analytical Chemists? Nightmare",
+				"title": "Redox Chemistry and Natural Organic Matter (NOM): Geochemists’ Dream, Analytical Chemists’ Nightmare",
 				"creators": [
 					{
-						"lastName": "Donald L. Macalady",
-						"creatorType": "author",
-						"fieldMode": 1
+						"lastName": "Macalady",
+						"firstName": "Donald L.",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Katherine Walton-Day",
-						"creatorType": "author",
-						"fieldMode": 1
+						"lastName": "Walton-Day",
+						"firstName": "Katherine",
+						"creatorType": "author"
 					}
 				],
 				"date": "January 1, 2011",

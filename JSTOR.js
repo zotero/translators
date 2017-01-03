@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2016-01-03 17:28:36"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-12-24 10:31:43"
 }
 
 function detectWeb(doc, url) {
@@ -25,7 +25,7 @@ function detectWeb(doc, url) {
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ( (favLink && getJID(favLink.href)) || getJID(url) ) {
-		if (ZU.xpathText(doc, '//div[@class="book-title"]')){
+		if (ZU.xpathText(doc, '//li[@class="book_info_button"]')) {
 			return "book"
 		}
 		else {
@@ -38,10 +38,10 @@ function getSearchResults(doc, checkOnly) {
 	// We have multiple results
 	var resultsBlock = doc.getElementsByClassName('list-searchResults')[0];
 	if (!resultsBlock) resultsBlock = doc.getElementById('results');
-	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('no-bullet mll');
+	if (!resultsBlock) resultsBlock = doc.getElementsByClassName('toc-view')[0];
 	if (!resultsBlock) return false;
 	var titles = ZU.xpath(resultsBlock, '//li//a[@class="title"]|\
-		//li//div[(@class="title" or @class="rw") and not(a[@class="title"]) and a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
+		//li//div[(@class="title" or @class="rw") and not(.//a[@class="title"]) and .//a[contains(@href, "10.2307") or contains(@href, "/stable/")]]');
 	var items = {}, found = false;
 	for (var i=0; i<titles.length; i++) {
 		var title = ZU.trimInternal(titles[i].textContent);
@@ -50,7 +50,7 @@ function getSearchResults(doc, checkOnly) {
 			jid = getJID(titles[i].href);
 		} else {
 			//this looks like it's the default now. Not sure how common the others are.
-			jid = ZU.xpathText(titles[i], './a[1]/@href');
+			jid = ZU.xpathText(titles[i], './/a[1]/@href');
 			if (jid) jid = getJID(jid);
 		}
 		
@@ -72,10 +72,13 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
-	var m = url.match(/(?:discover|pss|stable(?:\/info)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
+	var m = url.match(/(?:discover|pss|stable(?:\/info|\/pdf)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
 		if (jid.search(/10\.\d+\//) != 0) {
+			if (jid.substr(-4) == ".pdf") {
+				jid = jid.substr(0,jid.length-4);
+			}
 			Zotero.debug("Converting JID " + jid + " to JSTOR DOI");
 			jid = '10.2307/' + jid;
 		}
@@ -591,6 +594,43 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.jstor.org/action/doAdvancedSearch?q3=&re=on&q4=&f3=all&c3=AND&group=none&q1=&f5=all&c5=AND&la=&q2=&c6=AND&sd=&c2=AND&c1=AND&pt=&acc=off&q6=&q5=&c4=AND&f6=all&f0=all&q0=%22Reading+Rousseau+in+the+nuclear+age%22&f4=all&ed=&f2=all&f1=all&isbn=",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.jstor.org/stable/pdf/4308405.pdf",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Errors in Bibliographic Citations: A Continuing Problem",
+				"creators": [
+					{
+						"lastName": "Sweetland",
+						"firstName": "James H.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1989",
+				"ISSN": "0024-2519",
+				"abstractNote": "Bibliographic references are an accepted part of scholarly publication. As such, they have been used for information retrieval, studies of scientific communication, collection development decisions, and even determination of salary raises, as well as for their primary purpose of documentation of authors' claims. However, there appears to be a high percentage of errors in these citations, seen in evidence from the mid-nineteenth century to the present. Such errors can be traced to a lack of standardization in citation formats, misunderstanding of foreign languages, general human inabilities to reproduce long strings of information correctly, and failure to examine the document cited, combined with a general lack of training in the norms of citation. The real problem, the failure to detect and correct citation errors, is due to a diffusion of responsibility in the publishing process.",
+				"issue": "4",
+				"journalAbbreviation": "The Library Quarterly: Information, Community, Policy",
+				"libraryCatalog": "JSTOR",
+				"pages": "291-304",
+				"publicationTitle": "The Library Quarterly: Information, Community, Policy",
+				"shortTitle": "Errors in Bibliographic Citations",
+				"url": "http://www.jstor.org/stable/4308405",
+				"volume": "59",
+				"attachments": [
+					{
+						"title": "JSTOR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
