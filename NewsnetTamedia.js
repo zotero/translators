@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-28 19:35:57"
+	"lastUpdated": "2017-01-07 09:02:05"
 }
 
 
@@ -115,10 +115,12 @@ function scrape(doc, url) {
 			item.language = "de";
 		}
 		
-		var tags = ZU.xpath(doc, '//div[contains(@class, "keywordBox")]//li/a');
+		item.ISSN = issnMapping(url);
+		
+		var tags = ZU.xpath(doc, '//span[contains(@class, "tagWrapper")]');
 		if (tags) {
 			for (var i=0; i<tags.length; i++) {
-				item.tags.push(tags[i].textContent);
+				item.tags.push(tags[i].textContent.trim());
 			}
 		}
 		
@@ -130,7 +132,16 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-/** BEGIN TEST CASES **/
+
+
+function issnMapping(url) {
+	if (url.indexOf("tagesanzeiger.ch")>-1) return "1422-9994";
+	if (url.indexOf("bernerzeitung.ch")>-1) return "1424-1021";
+	if (url.indexOf("bazonline.ch")>-1) return "1420-3006";
+	if (url.indexOf("derbund.ch")>-1) return "0774-6156";
+	if (url.indexOf("lematin.ch")>-1) return "1018-3736";
+	if (url.indexOf("24heures.ch")>-1) return "1424-4039";
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -141,6 +152,7 @@ var testCases = [
 				"title": "Düstere Fakten zum Klimawandel",
 				"creators": [],
 				"date": "2011-10-11",
+				"ISSN": "1422-9994",
 				"abstractNote": "Der neueste Bericht der Internationalen Energieagentur ist besorgniserregend. Das Klima könnte sich noch viel stärker erwärmen als bisher erwartet.",
 				"language": "de",
 				"libraryCatalog": "www.tagesanzeiger.ch",
@@ -154,7 +166,6 @@ var testCases = [
 				],
 				"tags": [
 					"IEA",
-					"Klima",
 					"Klimaschutz"
 				],
 				"notes": [],
@@ -181,6 +192,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2016-12-28",
+				"ISSN": "1424-1021",
 				"abstractNote": "Vor bald 500 Jahren ging ein Ruck durch Europa. Martin Luthers Thesen erschütterten die Kirchenwelt. Nun sucht die reformierte Kirche der Schweiz im Jubiläumsjahr neue Thesen, die sie heute voranbringen.",
 				"language": "de",
 				"libraryCatalog": "www.bernerzeitung.ch",
@@ -212,6 +225,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2016-12-28",
+				"ISSN": "1420-3006",
 				"abstractNote": "Devisen-Berg und Negativzinsen: Hat der Notenbanker-Albtraum der letzten Jahre den Tiefpunkt überwunden?",
 				"language": "de",
 				"libraryCatalog": "bazonline.ch",
@@ -224,8 +239,7 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Franken",
-					"Schweizerische Nationalbank"
+					"Franken"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -246,6 +260,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2016-12-28",
+				"ISSN": "0774-6156",
 				"abstractNote": "Ob Wyss oder von Graffenried: Mit dem Rücktritt von Alexander Tschäppät geht in Bern – ja, in der Schweiz – eine Ära zu Ende. Die neue Generation von Stadtpräsidenten zählt mehr Manager als Charismatiker.",
 				"language": "de",
 				"libraryCatalog": "www.derbund.ch",
@@ -260,8 +276,6 @@ var testCases = [
 				"tags": [
 					"Alec von Graffenried",
 					"Alexander Tschäppät",
-					"GFL Bern",
-					"SP",
 					"Ursula Wyss"
 				],
 				"notes": [],
@@ -278,6 +292,7 @@ var testCases = [
 				"title": "Alep se prépare à une reconstruction titanesque",
 				"creators": [],
 				"date": "2016-12-28",
+				"ISSN": "1018-3736",
 				"abstractNote": "Les habitants attendent avec impatience les travaux de reconstruction dans ce qui était l'une des plus belles villes de Syrie avant la guerre.",
 				"language": "fr",
 				"libraryCatalog": "www.lematin.ch",
@@ -308,7 +323,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-12-27",
+				"date": "2016-12-28",
 				"abstractNote": "Die Zürcher Kantonalbank beendet den Steuerstreit mit Deutschland durch eine einmalige Zahlung von 5,7 Millionen Euro.",
 				"language": "de",
 				"libraryCatalog": "www.zuonline.ch",
@@ -351,9 +366,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Hütten"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
