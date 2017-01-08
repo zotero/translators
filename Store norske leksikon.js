@@ -2,7 +2,7 @@
 	"translatorID": "439c869c-c605-47b4-b330-157a23a4b4f3",
 	"label": "Store norske leksikon",
 	"creator": "Håkon Malmedal",
-	"target": "^https?://(?:(?:sml|nbl|nkl)\\.)?snl\\.no/[^.]",
+	"target": "^https?://((sml|nbl|nkl)\\.)?snl\\.no/[^.]",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

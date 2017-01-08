@@ -2,7 +2,7 @@
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"label": "Library Catalog (PICA)",
 	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
-	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
+	"target": "^https?://[^/]+(/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 248,

@@ -2,7 +2,7 @@
 	"translatorID": "99f958ab-0732-483d-833f-6bd8e42f6277",
 	"label": "National Bureau of Economic Research",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(?:papers\\.|www\\.)?nber\\.org/(papers|s|new|custom)",
+	"target": "^https?://(papers\\.|www\\.)?nber\\.org/(papers|s|new|custom)",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,

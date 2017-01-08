@@ -2,14 +2,14 @@
 	"translatorID": "03df2575-dbd9-49aa-9e58-1e6edd86d562",
 	"label": "JRC Publications Repository",
 	"creator": "Philipp Zumstein",
-	"target": "https?://(www\\.)?publications\\.jrc\\.ec\\.europa\\.eu/repository/(handle/|simple-search\\?|browse\\?)",
+	"target": "^https?://(www\\.)?publications\\.jrc\\.ec\\.europa\\.eu/repository/(handle/|simple-search\\?|browse\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-04 16:20:41"
+	"lastUpdated": "2017-01-01 15:24:49"
 }
 
 /*

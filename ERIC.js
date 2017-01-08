@@ -2,7 +2,7 @@
 	"translatorID": "e4660e05-a935-43ec-8eec-df0347362e4c",
 	"label": "ERIC",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?eric\\.ed\\.gov/",
+	"target": "^https?://(www\\.)?eric\\.ed\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

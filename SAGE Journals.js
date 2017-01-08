@@ -2,7 +2,7 @@
 	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
 	"label": "SAGE Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://journals\\.sagepub\\.com(?:/doi/((?:abs|full)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

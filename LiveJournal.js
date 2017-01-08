@@ -2,7 +2,7 @@
 	"translatorID": "d49e3a67-e2c1-4217-825c-2b22cffd332a",
 	"label": "LiveJournal",
 	"creator": "Avram Lyon",
-	"target": "^https?://.*\\.livejournal\\.com/(?:$|[0-9]+\\.html)",
+	"target": "^https?://.*\\.livejournal\\.com/($|[0-9]+\\.html)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

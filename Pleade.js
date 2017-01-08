@@ -2,7 +2,7 @@
 	"translatorID": "ce68b0ed-3137-4e38-b691-f3bc49bc1497",
 	"label": "Pleade",
 	"creator": "DIA Modou",
-	"target": "(?:list-results|results|ead)\\.html\\?.*(?:base=ead|mode=|id=)",
+	"target": "(list-results|results|ead)\\.html\\?.*(base=ead|mode=|id=)",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
