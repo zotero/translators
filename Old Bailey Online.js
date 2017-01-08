@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-08 15:53:22"
+	"lastUpdated": "2017-01-08 16:37:54"
 }
 
 function detectWeb(doc, url) {
@@ -40,7 +40,7 @@ function scrape(doc, url) {
 		
 		label = label.replace(/\s+/g, '');
 		if (label == "ReferenceNumber:") {
-			var startValue = text.indexOf(":");
+			var startValue = text.indexOf(":")+2;
 			newItem.docketNumber = text.substr(startValue);
 		} else if (label != "Navigation:") {
 			newItem.tags.push(text);
@@ -150,7 +150,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "Theft > animal theft, 28th August 1678.",
 				"creators": [],
-				"docketNumber": ": t16780828-12",
+				"docketNumber": "t16780828-12",
 				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
 				"attachments": [],
 				"tags": [
