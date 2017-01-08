@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-04 16:47:36"
+	"lastUpdated": "2016-08-27 22:30:47"
 }
 
 /*
@@ -229,7 +229,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				'&fileFormat=REFERENCE_MANAGER' +
 				'&hasAbstract=CITATION_AND_ABSTRACT';
 	ZU.doPost(postUrl, body, function(text) {
-		//Z.debug(text)
+		//on at least one occasion, Wiley puts RIS within RIS, thus causing havoc.
+		//This is trying to prevent this (see last test).
+		textClean = text.split(/Related Articles\r/);
+		if (textClean.length>1) {
+			Z.debug("cleaning RIS");
+			text = textClean[0] + "ER  -";
+		}
+		//Z.debug(text);
 		var translator = Zotero.loadTranslator('import');
 		//use RIS
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -1211,6 +1218,66 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://onlinelibrary.wiley.com.libezproxy2.syr.edu/doi/10.1111/polp.12144/full",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "To Rural Proof or Not to Rural Proof: A Comparative Analysis",
+				"creators": [
+					{
+						"lastName": "Shortall",
+						"firstName": "Sally",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alston",
+						"firstName": "Margaret",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 1, 2016",
+				"DOI": "10.1111/polp.12144",
+				"ISSN": "1747-1346",
+				"abstractNote": "Rural mainstreaming reviews policies to ensure people in all parts of a country receive comparable policy treatment. Rural proofing is the method used to ensure that rural mainstreaming is correctly carried out. This article offers a critical analysis of rural proofing. It examines English policies in this area and questions how applicable similar policies might be in an Australian context. We argue that while rural proofing intuitively feels like a positive development for a country rich in rural and remote areas, there are many complexities to importing a policy designed for a different social and spatial context. In Australia, this is almost certain to render attempts to implement the English rural proofing concept futile. Indeed, we contend that this concept can potentially lead to the marginalization of rural issues. We conclude by identifying some of the complex questions our argument identifies which should be addressed by Australian policy makers before designing specific policies.",
+				"issue": "1",
+				"journalAbbreviation": "Politics and Policy",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "35-55",
+				"publicationTitle": "Politics & Policy",
+				"shortTitle": "To Rural Proof or Not to Rural Proof",
+				"url": "http://onlinelibrary.wiley.com/doi/10.1111/polp.12144/abstract",
+				"volume": "44",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Agricultural Policy",
+					"Australia",
+					"England",
+					"International Comparative Policy",
+					"Policy Analysis",
+					"Policy Learning",
+					"Policy Transfer",
+					"Rural Development Program",
+					"Rural Mainstreaming",
+					"Rural Proofing",
+					"United Kingdom"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
