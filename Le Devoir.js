@@ -2,14 +2,14 @@
 	"translatorID": "d1605270-d7dc-459f-9875-74ad8dde1f7d",
 	"label": "Le Devoir",
 	"creator": "Philipp Zumstein",
-	"target": "https?://www\\.ledevoir\\.com",
+	"target": "^https?://www\\.ledevoir\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-04 07:35:05"
+	"lastUpdated": "2017-01-01 15:26:06"
 }
 
 /*

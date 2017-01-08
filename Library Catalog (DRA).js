@@ -2,7 +2,7 @@
 	"translatorID": "fb12ae9e-f473-cab4-0546-27ab88c64101",
 	"label": "Library Catalog (DRA)",
 	"creator": "Simon Kornblith",
-	"target": "/web2/tramp2\\.exe/(?:see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
+	"target": "/web2/tramp2\\.exe/(see\\_record/|authority\\_hits/|do_keyword_search|form/|goto/.*\\?.*screen=(MARC)?Record\\.html)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 260,

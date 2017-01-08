@@ -2,14 +2,14 @@
 	"translatorID": "0c661209-5ec8-402b-8f18-7dec6ae37d95",
 	"label": "The Free Dictionary",
 	"creator": "Michael Berkowitz",
-	"target": "http://(.*\\.)?thefreedictionary.com/\\w+$",
+	"target": "^https?://(.*\\.)?thefreedictionary\\.com/\\w+$",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-03-05 03:44:25"
+	"lastUpdated": "2017-01-01 16:56:03"
 }
 
 function detectWeb(doc, url) {

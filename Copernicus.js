@@ -2,7 +2,7 @@
 	"translatorID": "8082115d-5bc6-4517-a4e8-abed1b2a784a",
 	"label": "Copernicus",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://(www\\.(?:adv-sci-res|earth-syst-dynam|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys|atmos-meas-tech|biogeosciences|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere|geosci-model-dev)(?:-discuss)?\\.net/|editor\\.copernicus\\.org/search\\.php)",
+	"target": "^https?://(www\\.(adv-sci-res|earth-syst-dynam|adv-geosci|adv-radio-sci|ann-geophys|astrophys-space-sci-trans|atmos-chem-phys|atmos-meas-tech|biogeosciences|clim-past|electronic-earth|hydrol-earth-syst-sci|nat-hazards-earth-syst-sci|nonlin-processes-geophys|ocean-sci|soc-geogr|surv-perspect-integr-environ-soc|the-cryosphere|geosci-model-dev)(-discuss)?\\.net/|editor\\.copernicus\\.org/search\\.php)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

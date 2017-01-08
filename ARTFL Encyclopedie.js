@@ -2,14 +2,14 @@
 	"translatorID": "72cb2536-3211-41e0-ae8b-974c0385e085",
 	"label": "ARTFL Encyclopedie",
 	"creator": "Sean Takats, Sebastian Karcher",
-	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/cgi-bin/philologic/(getobject\\.pl\\?[cp]\\.[0-9]+:[0-9]+(:[0-9]+)?\\.encyclopedie|navigate.pl\\?encyclopedie|search3t\\?dbname=encyclopedie)",
+	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/cgi-bin/philologic/(getobject\\.pl\\?[cp]\\.[0-9]+:[0-9]+(:[0-9]+)?\\.encyclopedie|navigate\\.pl\\?encyclopedie|search3t\\?dbname=encyclopedie)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-03-12 04:43:57"
+	"lastUpdated": "2017-01-01 16:50:31"
 }
 
 function detectWeb(doc, url) {

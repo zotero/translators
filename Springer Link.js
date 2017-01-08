@@ -2,14 +2,14 @@
 	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
 	"label": "Springer Link",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://link\\.springer\\.com/(search(?:/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
+	"target": "^https?://link\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-12-05 22:45:53"
+	"lastUpdated": "2017-01-01 15:33:55"
 }
 
 function detectWeb(doc, url) {

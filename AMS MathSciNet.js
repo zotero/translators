@@ -2,7 +2,7 @@
 	"translatorID": "a354331-981b-43de-a61-bc26dd1be3a9",
 	"label": "AMS MathSciNet",
 	"creator": "Simon Kornblith",
-	"target": "^https?://(www\\.)?ams\\.[^/]*/mathscinet(\\-getitem\\?|/search/(?:publications\\.html|publdoc\\.html))",
+	"target": "^https?://(www\\.)?ams\\.[^/]*/mathscinet(\\-getitem\\?|/search/(publications\\.html|publdoc\\.html))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

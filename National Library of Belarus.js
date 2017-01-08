@@ -2,14 +2,14 @@
 	"translatorID": "89592f50-6ae8-491e-8988-969002012b1b",
 	"label": "National Library of Belarus",
 	"creator": "Philipp Zumstein",
-	"target": "https?://www\\.nlb\\.by/portal/page/portal/index/resources/(basicsearch|expandedsearch|anothersearch|authoritet|newdoc|top100)",
+	"target": "^https?://www\\.nlb\\.by/portal/page/portal/index/resources/(basicsearch|expandedsearch|anothersearch|authoritet|newdoc|top100)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-25 20:54:14"
+	"lastUpdated": "2017-01-01 15:28:10"
 }
 
 /*

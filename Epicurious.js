@@ -2,7 +2,7 @@
 	"translatorID": "aee2323e-ce00-4fcc-a949-06eb1becc98f",
 	"label": "Epicurious",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.epicurious\\.com/(?:tools/searchresults|recipes/food/views)",
+	"target": "^https?://www\\.epicurious\\.com/(tools/searchresults|recipes/food/views)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

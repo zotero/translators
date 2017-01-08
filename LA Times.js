@@ -2,7 +2,7 @@
 	"translatorID": "e4fe1596-a8c4-4d09-945f-120c4d83e580",
 	"label": "LA Times",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(?:www\\.|travel\\.|articles\\.|latimesblogs\\.)?latimes\\.com",
+	"target": "^https?://(www\\.|travel\\.|articles\\.|latimesblogs\\.)?latimes\\.com",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

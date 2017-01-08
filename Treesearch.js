@@ -2,14 +2,14 @@
 	"translatorID": "4ee9dc8f-66d3-4c18-984b-6335408a24af",
 	"label": "Treesearch",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://([^/]+\\.)?treesearch\\.fs\\.fed\\.us/(pubs/\\d+$|search.php)",
+	"target": "^https?://([^/]+\\.)?treesearch\\.fs\\.fed\\.us/(pubs/\\d+$|search\\.php)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-04 04:02:47"
+	"lastUpdated": "2017-01-01 16:56:46"
 }
 
 /**

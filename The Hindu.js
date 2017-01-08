@@ -2,7 +2,7 @@
     "translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
     "label": "The Hindu",
     "creator": "Piyush Srivastava",
-    "target": "https?://www\\.thehindu\\.com/.*ece",
+    "target": "^https?://www\\.thehindu\\.com/.*ece",
     "minVersion": "1.0",
     "maxVersion": "",
     "priority": 100,

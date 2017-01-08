@@ -2,7 +2,7 @@
 	"translatorID": "e5dc9733-f8fc-4c00-8c40-e53e0bb14664",
 	"label": "Wikipedia",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*wikipedia\\.org/",
+	"target": "^https?://[^/]*wikipedia\\.org/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

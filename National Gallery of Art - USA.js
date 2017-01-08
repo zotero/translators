@@ -2,7 +2,7 @@
 	"translatorID": "ed28758b-9c39-4e1c-af89-ce1c9202b70f",
 	"label": "National Gallery of Art - USA",
 	"creator": "Adam Crymble",
-	"target": "^https?://www\\.nga\\.gov/content\\/ngaweb",
+	"target": "^https?://www\\.nga\\.gov/content/ngaweb",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,

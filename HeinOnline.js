@@ -2,7 +2,7 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(?:LuceneSearch|Page|IFLPMetaData)\\?",
+	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(LuceneSearch|Page|IFLPMetaData)\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
