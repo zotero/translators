@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-03 19:13:32"
+	"lastUpdated": "2017-01-08 15:58:04"
 }
 
 /*
@@ -124,6 +124,7 @@ function scrape(doc, url) {
 	item.series = ZU.xpathText(doc, '(//h3[contains(@class, "product_biblio_series_heading")])[1]');
 
 	item.publisher = "Oxford University Press";
+	item.place = "Oxford, New York";
 
 	var abs = ZU.xpathText(doc, '//div[@id="description_tab"]//div[contains(@class, "expanding_content_container_inner_narrow")]');
 	if (abs) {
@@ -159,6 +160,7 @@ var testCases = [
 				"abstractNote": "Piano accompaniments to selected pieces in Flute Time 1",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "32",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
 				"series": "Flute Time",
 				"attachments": [
@@ -196,6 +198,7 @@ var testCases = [
 				"abstractNote": "An overview of form-focused instruction as an option for second language grammar teaching. It combines theoretical concerns, classroom practices, and teacher education.",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "296",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
 				"series": "Oxford Applied Linguistics",
 				"shortTitle": "Form-focused Instruction and Teacher Education",
@@ -244,6 +247,7 @@ var testCases = [
 				"abstractNote": "Education: Culture, Economy, and Society is a book for everyone concerned with the social study of education: students studying the sociology of education, foundations of education, educational policy, and other related courses. It aims to establish the social study of education at the centre stage of political and sociological debate about post-industrial societies. In examining major changes which have taken place in the late twentieth century, it gives students a comprehensive introduction to both the nature of these changes and to their interpretation in relation to long-standing debates within education, sociology, and cultural studies.   The extensive editorial introduction outlines the major theoretical approaches within the sociology of education, assesses their contribution to an adequate understanding of the changing educational context, and sets out the key issues and areas for future research. The 52 papers in this wide-ranging thematic reader bring together the most powerful work in education into an international dialogue which is sure to become a classic text.",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "848",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
 				"shortTitle": "Education",
 				"attachments": [
@@ -277,6 +281,7 @@ var testCases = [
 				"edition": "Seventh Edition",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "800",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
 				"attachments": [
 					{
