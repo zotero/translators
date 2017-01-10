@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-16 05:50:52"
+	"lastUpdated": "2017-01-10 22:34:30"
 }
 
 function detectWeb(doc, url) {
@@ -177,7 +177,8 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 					if (firstName || lastName) {
 						newItem.creators.push({
 							lastName: lastName,
-							firstName: firstName
+							firstName: firstName,
+							creatorType: "author"
 						});
 					}
 				}
