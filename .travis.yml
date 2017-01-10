@@ -3,5 +3,6 @@ node_js:
   - "0.12"
 before_script:
   - npm install -g jshint
+  - npm install -g jsonlint
 script:
   - bash check.sh
