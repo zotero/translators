@@ -48,23 +48,34 @@ echo "...DONE"
 
 
 echo -e "\nTEST output \$TRAVIS_COMMIT_RANGE  $TRAVIS_COMMIT_RANGE"
+echo -e "TEST output \$TRAVIS_BRANCH  $TRAVIS_BRANCH"
+echo -e "TEST output \$TRAVIS_PULL_REQUEST  $TRAVIS_PULL_REQUEST"
 
-echo -e "\nCHECK added/modified files (AGPL license, JS parsable, JSON parasable)..."
-#list all added, copied or modified files compared to origin/master
+# The Internal Field Separator (IFS) is used for word splitting.
+# Change default value <space><tab><newline> to newline only.
+IFS=$'\n' 
+echo -e "\nCHECK added/modified files (AGPL license, JS parsable, JSON parsable)..."
+#list all added, copied or modified files compared to $TRAVIS_COMMIT_RANGE.
 STAGED=$(git diff --name-only --diff-filter=ACM "$TRAVIS_COMMIT_RANGE" -- '*.js*')
 if [[ -n "$STAGED" ]];then
-  #check for AGPL license text
-  NOAGPL=$(grep -L "GNU Affero General Public License" "$STAGED")
+  echo "...check for AGPL license text..."
+  NOAGPL=$(echo "$STAGED" | xargs -d '\n' grep -L "GNU Affero General Public License")
   if [[ -n "$NOAGPL" ]];then
     echo "Warning: found translator without AGPL license text:"
     echo "$NOAGPL"
     #This is only a warning and not an error currently.
   fi
-  for f in "$STAGED"; do
-    #check that JSON part is parsable
+  for f in $(echo -e "$STAGED"); do
+    echo "...check that JSON part is parsable..."
     # e.g. https://github.com/zotero/translators/commit/a150383352caebb892720098175dbc958149be43
-    sed -ne  '1,/^}/p' "$f" | jsonlint -q 
-    #check that JavaScript part is parsable
+    jsonpart=$(sed -ne  '1,/^}/p' "$f")
+    jsonerror=$(echo "$jsonpart" | jsonlint | grep -F "Parse error")
+    if [[ -n "$jsonerror"  ]];then
+      echo "ERROR: Parse error in JSON part of $f"
+      echo "$jsonpart" | jsonlint
+      exitcode=1
+    fi
+    echo "...check that JavaScript part is parsable..."
     # cf. https://github.com/UB-Mannheim/zotkat/blob/master/jshint.sh
     sed '1,/^}/ s/.*//' "$f" \
     | sed 's,/\*\* BEGIN TEST,\n\0,' \
@@ -121,6 +132,7 @@ echo "...DONE"
 # done
 # echo "...DONE"
 
-
-echo -e "\nOKAY, all tests passed!"
+if [[ "$exitcode" -eq 0 ]];then
+  echo -e "\nOKAY, all tests passed!"
+fi
 exit "$exitcode"
