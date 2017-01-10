@@ -26,11 +26,11 @@ fi
 echo "...DONE"
 
 
-echo -e "\nCHECK on all translators (file mode 644, file ending, deprecated JS for each)..."
+echo -e "\nCHECK on all translators (files not executable, file ending, deprecated JS for each)..."
 for file in *.js; do
-  filemode=$(stat -c "%a" "$file")
-  if [[ "$filemode" != "644" ]];then
-    echo "Error: file mode is $filemode =/= 644 in $file"
+  executable=$(stat -c "%A" "$file" | grep x )
+  if [[ -n "$executable"  ]];then
+    echo "Error: $file is executable, but should not"
     exitcode=1
   fi
   dosfilending=$(dos2unix < "$file" | cmp -s - "$file")
