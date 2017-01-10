@@ -2,13 +2,14 @@
 #
 # LICENSE: Public Domain
 
+exitcode=0
 
 echo -e "\nCHECK that all translator have a translatorID..."
 HAVEID=$(grep -c '"translatorID"' *.js | awk -F: '$2!="1" {print $1,"found",$2,"translatorID"}')
 if [[ -n "$HAVEID" ]];then
   echo "Error: no translatorID or multiple translatorIDs"
   echo "$HAVEID"
-  exit 1
+  exitcode=1
 fi
 echo "...DONE"
 
@@ -20,7 +21,7 @@ NODUPLICATE=$(echo -e "${USEDID}\n${DELETEDID}" | sed 's/[", ]//g' | sort | uniq
 if [[ -n "$NODUPLICATE" ]];then
   echo "Error: duplicate translatorID found"
   echo "$NODUPLICATE"
-  exit 1
+  exitcode=1
 fi
 echo "...DONE"
 
@@ -30,17 +31,17 @@ for file in *.js; do
   filemode=$(stat -c "%a" "$file")
   if [[ "$filemode" != "644" ]];then
     echo "Error: file mode is $filemode =/= 644 in $file"
-    exit 1
+    exitcode=1
   fi
   dosfilending=$(dos2unix < "$file" | cmp -s - "$file")
   if [[ -n "$dosfilending" ]];then
     echo "Error: wrong file ending in $file"
-    exit 1
+    exitcode=1
   fi
   foreach=$(grep -E 'for each *\(' *.js)
   if [[ -n "$foreach" ]];then
     echo "Error: Deprecated JavaScript for each is used in $file"
-    exit 1
+    exitcode=1
   fi
 done
 echo "...DONE"
@@ -97,7 +98,7 @@ echo "...DONE"
       # if [ $newrevision -ne $(($oldrevision + 1)) ];then
         # echo "Error: translators are deleted but the number in deleted.txt is not increased by 1 (compared to commit $before)."
         # echo "$newrevision (newrevision) =/= $oldrevision (oldrevision) + 1"
-        # exit 1
+        # exitcode=1
       # fi
       # first=false
     # fi
@@ -113,7 +114,7 @@ echo "...DONE"
       # echo "Commit: $c"
       # echo "Deleted translator: $jsdeleted ; with id $delids"
       # echo $delids | xargs -i grep -c {} *.js
-      # exit 1
+      # exitcode=1
     # fi
     
   # fi
@@ -122,4 +123,4 @@ echo "...DONE"
 
 
 echo -e "\nOKAY, all tests passed!"
-exit 0
+exit "$exitcode"
