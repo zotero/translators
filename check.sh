@@ -3,87 +3,123 @@
 # LICENSE: Public Domain
 
 
-echo "CHECK that All translator have a translatorID"
-haveid=$(grep -c '"translatorID"' *.js | awk -F: '$2!="1" {print $1,"found",$2,"translatorID"}')
-if [[ -n "$haveid" ]];then
+echo -e "\nCHECK that all translator have a translatorID..."
+HAVEID=$(grep -c '"translatorID"' *.js | awk -F: '$2!="1" {print $1,"found",$2,"translatorID"}')
+if [[ -n "$HAVEID" ]];then
   echo "Error: no translatorID or multiple translatorIDs"
-  echo "$haveid"
+  echo "$HAVEID"
   exit 1
 fi
+echo "...DONE"
 
-echo "CHECK that all translatorIDs are unique"
-noduplicate=$( { (grep '"translatorID"' *.js | awk -F: '{print $3}') & (awk -F# 'NR>2 { print $1 }' deleted.txt) } | sed 's/[", ]//g' | sort | uniq -cd)
-echo "$noduplicate"
-if [[ -n "$noduplicate" ]];then
+
+echo -e "\nCHECK that all translatorIDs are unique..."
+USEDID=$(grep '"translatorID"' *.js | cut -d: -f3)
+DELETEDID=$(tail -n +3 deleted.txt | cut -d# -f1)
+NODUPLICATE=$(echo -e "${USEDID}\n${DELETEDID}" | sed 's/[", ]//g' | sort | uniq -d)
+if [[ -n "$NODUPLICATE" ]];then
   echo "Error: duplicate translatorID found"
-  echo "$noduplicate"
+  echo "$NODUPLICATE"
   exit 1
 fi
-
-echo "CHECK that all translators have correct file mode (644)"
-# e.g. https://github.com/zotero/translators/commit/48d929051ffa3b91aa8385dc0ab7a81166cf96cf
-# stat -c "%a" *.js
+echo "...DONE"
 
 
-#list all commits where files are deleted
-commits=$(git --no-pager log --diff-filter=D --pretty="%H")
-first=true
-for c in $commits; do
-  echo "$c"
-  #check that a JavaScript file (i.e. a translator) is deleted
-  jsdeleted=$(git show --name-status $c | grep ^D.*\.js | sed 's/^D\s*//')
-  if [[ -n "$jsdeleted" ]];then
-    if [ "$first" = true ];then
-      before=$(git log -n 2 $c --pretty=format:"%H" | tail -1)
-      # number increased
-      oldrevision=$(git show "$before":deleted.txt | awk 'NR<2 { print $1 }')
-      newrevision=$(awk 'NR<2 { print $1 }' deleted.txt)
-      if [ $newrevision -ne $(($oldrevision + 1)) ];then
-        echo "Error: translators are deleted but the number in deleted.txt is not increased by 1 (compared to commit $before)."
-        echo "$newrevision (newrevision) =/= $oldrevision (oldrevision) + 1"
-        exit 1
-      fi
-      first=false
-    fi
-    
-    # all deleted translator ids must be listed in deleted.txt
-    #echo $jsdeleted
-    #git show "$c" --diff-filter=D | grep '"translatorID"'
-    delids=$(git show "$c" --diff-filter=D | grep '"translatorID"' | awk -F: '{print $2}' | sed 's/[", ]//g')
-    listed=$(echo $delids | xargs -i grep -c {} deleted.txt | awk '$1!="1" {print "Error"}')
-    rename=$(cat *.js | grep -c $delids | awk '$1!="1" {print "Error"}')
-    if [[ (-n "$listed") && (-n "$rename") ]];then
-      echo "Error: translators are deleted but not listed in deleted.txt."
-      echo "Commit: $c"
-      echo "Deleted translator: $jsdeleted ; with id $delids"
-      echo $delids | xargs -i grep -c {} *.js
-      exit 1
-    fi
-    
+echo -e "\nCHECK on all translators (file mode 644, file ending, deprecated JS for each)..."
+for file in *.js; do
+  filemode=$(stat -c "%a" "$file")
+  if [[ "$filemode" != "644" ]];then
+    echo "Error: file mode is $filemode =/= 644 in $file"
+    exit 1
+  fi
+  dosfilending=$(dos2unix < "$file" | cmp -s - "$file")
+  if [[ -n "$dosfilending" ]];then
+    echo "Error: wrong file ending in $file"
+    exit 1
+  fi
+  foreach=$(grep -E 'for each *\(' *.js)
+  if [[ -n "$foreach" ]];then
+    echo "Error: Deprecated JavaScript for each is used in $file"
+    exit 1
   fi
 done
+echo "...DONE"
 
 
-staged=$(git diff origin/master --name-only --diff-filter=ACM -- '*.js*')
-if [[ -n "$staged" ]];then
-  echo "Staged"
-  echo "$staged"
-  # Metadata must be parsable JSON
-  # Javascript
-  # JSON.parse
-  # e.g. https://github.com/zotero/translators/commit/a150383352caebb892720098175dbc958149be43
+echo -e "\nTEST output \$TRAVIS_COMMIT_RANGE  $TRAVIS_COMMIT_RANGE"
 
-  # Javascript must be parsable Javascript
-  # https://github.com/UB-Mannheim/zotkat/blob/master/jshint.sh
-  for f in "$staged"; do
-    sed '1,/^}/ s/.*//' $f \
+echo -e "\nCHECK added/modified files (AGPL license, JS parsable, JSON parasable)..."
+#list all added, copied or modified files compared to origin/master
+STAGED=$(git diff --name-only --diff-filter=ACM "$TRAVIS_COMMIT_RANGE" -- '*.js*')
+if [[ -n "$STAGED" ]];then
+  #check for AGPL license text
+  NOAGPL=$(grep -L "GNU Affero General Public License" "$STAGED")
+  if [[ -n "$NOAGPL" ]];then
+    echo "Warning: found translator without AGPL license text:"
+    echo "$NOAGPL"
+    #This is only a warning and not an error currently.
+  fi
+  for f in "$STAGED"; do
+    #check that JSON part is parsable
+    # e.g. https://github.com/zotero/translators/commit/a150383352caebb892720098175dbc958149be43
+    sed -ne  '1,/^}/p' "$f" | jsonlint -q 
+    #check that JavaScript part is parsable
+    # cf. https://github.com/UB-Mannheim/zotkat/blob/master/jshint.sh
+    sed '1,/^}/ s/.*//' "$f" \
     | sed 's,/\*\* BEGIN TEST,\n\0,' \
     | sed '/BEGIN TEST/,$ d' \
-    | jshint --filename=$f - 
+    | jshint --filename="$f" - 
   done;
 fi
+echo "...DONE"
 
 
+# echo -e "\nCHECK deleted files..."
+# #list all commits where files are deleted
+# DELCOMMITS=$(git --no-pager log --diff-filter=D --pretty="%H")
 
-# If we pass all test so far, then we exit with success code.
+# DELETEDFILES=$(git diff --name-only --diff-filter=D "$TRAVIS_COMMIT_RANGE" -- '*.js*')
+# DIFF=$(git diff "$TRAVIS_COMMIT_RANGE" -- 'deleted.txt')
+
+# #$TRAVIS_COMMIT_RANGE = The range of commits that were included in the push or pull request
+# #####################
+# first=true
+# for c in "$TRAVIS_COMMIT_RANGE"; do
+  # echo "$c"
+  # #check that a JavaScript file (i.e. a translator) is deleted
+  # jsdeleted=$(git show --name-status $c | grep ^D.*\.js | sed 's/^D\s*//')
+  # if [[ -n "$jsdeleted" ]];then
+    # if [ "$first" = true ];then
+      # before=$(git log -n 2 $c --pretty=format:"%H" | tail -1)
+      # # number increased
+      # oldrevision=$(git show "$before":deleted.txt | awk 'NR<2 { print $1 }')
+      # newrevision=$(awk 'NR<2 { print $1 }' deleted.txt)
+      # if [ $newrevision -ne $(($oldrevision + 1)) ];then
+        # echo "Error: translators are deleted but the number in deleted.txt is not increased by 1 (compared to commit $before)."
+        # echo "$newrevision (newrevision) =/= $oldrevision (oldrevision) + 1"
+        # exit 1
+      # fi
+      # first=false
+    # fi
+    
+    # # all deleted translator ids must be listed in deleted.txt
+    # #echo $jsdeleted
+    # #git show "$c" --diff-filter=D | grep '"translatorID"'
+    # delids=$(git show "$c" --diff-filter=D | grep '"translatorID"' | awk -F: '{print $2}' | sed 's/[", ]//g')
+    # listed=$(echo $delids | xargs -i grep -c {} deleted.txt | awk '$1!="1" {print "Error"}')
+    # rename=$(cat *.js | grep -c $delids | awk '$1!="1" {print "Error"}')
+    # if [[ (-n "$listed") && (-n "$rename") ]];then
+      # echo "Error: translators are deleted but not listed in deleted.txt."
+      # echo "Commit: $c"
+      # echo "Deleted translator: $jsdeleted ; with id $delids"
+      # echo $delids | xargs -i grep -c {} *.js
+      # exit 1
+    # fi
+    
+  # fi
+# done
+# echo "...DONE"
+
+
+echo -e "\nOKAY, all tests passed!"
 exit 0
