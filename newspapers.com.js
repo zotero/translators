@@ -98,11 +98,11 @@ function doWeb(doc, url) {
 	var publication = citation[0].innerHTML;
 	var start = publication.indexOf("(");
 	if (start>-1) {
-		newItem.publication = publication.substr(0, start-1);
+		newItem.publicationTitle = publication.substr(0, start-1);
 		newItem.place = publication.substr(start+1,publication.length-start-2);
 	}
 	else { // no location given
-		newItem.publication = publication;
+		newItem.publicationTitle = publication;
 	}
 	
 	var date = citation[1].innerHTML;
@@ -146,8 +146,8 @@ var testCases = [
 			 ],
 			 "title": "My Day",
 			 "url": "https://www.newspapers.com/clip/7960447/my_day_eleanor_roosevelt/",
-			 "publication": "The Akron Beacon Journal",
-			 "place": "Akron, Ohio",
+			 "publicationTitle": "The Akron Beacon Journal",
+                         "place": "Akron, Ohio",
 			 "date": "1939-10-30",
 			 "pages": "15",
 			 "edition": "Main Edition",
