@@ -1,11 +1,5 @@
 language: node_js
 node_js:
-  - "0.12"
-before_install:
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq dos2unix
-before_script:
-  - npm install -g jshint
-  - npm install -g jsonlint
+  - "6"
 script:
-  - bash check.sh
+  - cd .ci && npm install && npm test
