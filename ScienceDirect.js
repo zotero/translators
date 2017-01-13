@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-08 05:47:08"
+	"lastUpdated": "2017-01-13 20:03:14"
 }
 
 function detectWeb(doc, url) {
@@ -355,11 +355,25 @@ function scrape(doc) {
 		return;
 	}
 	
+	
+	// On newer pages, there is an GET formular which is only there if
+	// the user click on the export button, but we know how the url
+	// in the end will be built.
+	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//a[contains(@class, "ExportCitationButton")]')[0];
+	if (form) {
+		Z.debug("Fetching RIS via GET form (new)");
+		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
+		var url = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
+		ZU.doGet(url, function(text) { processRIS(doc, text) });
+		return;
+	}
+	
+	
 	// On some older article pages, there seems to be a different form
 	// that uses GET
 	form = doc.getElementById('export-form');
 	if (form) {
-		Z.debug("Fetching RIS via GET form");
+		Z.debug("Fetching RIS via GET form (old)");
 		var url = form.action
 			+ '?export-format=RIS&export-content=cite-abs';
 		ZU.doGet(url, function(text) { processRIS(doc, text) });
@@ -768,14 +782,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.sciencedirect.com/science/journal/22126716",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -785,8 +799,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -829,6 +843,42 @@ var testCases = [
 				"publicationTitle": "Spectrochimica Acta Part A: Molecular Spectroscopy",
 				"url": "http://www.sciencedirect.com/science/article/pii/0584853976801316",
 				"volume": "32",
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The modal density for flexural vibration of thick plates and bars",
+				"creators": [
+					{
+						"lastName": "Nelson",
+						"firstName": "H. M.",
+						"creatorType": "author"
+					}
+				],
+				"date": "November 22, 1972",
+				"DOI": "10.1016/0022-460X(72)90434-8",
+				"ISSN": "0022-460X",
+				"abstractNote": "The problem of estimating the modal density for flexurally vibrating plates and bars is approached by way of a travelling wave, rather than normal mode, decomposition. This viewpoint leads to simple expressions for modal densities in terms of the system geometry, surface wave velocity and a factor which is a function of the frequency-thickness product. Values of the multiplying factor are presented together with correction factors for existing thin-plate and thin-bar estimates. These factors are shown to involve only Poisson's ratio as a parameter, and to vary only slightly for a Poisson's ratio range of 0·25 to 0·35. The correction curve for plates is shown to be in general agreement with one proposed by Bolotin.",
+				"issue": "2",
+				"journalAbbreviation": "Journal of Sound and Vibration",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "255-261",
+				"publicationTitle": "Journal of Sound and Vibration",
+				"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+				"volume": "25",
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
