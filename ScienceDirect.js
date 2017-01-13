@@ -2,7 +2,7 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(?:/article/|\\?.*\\b_ob=ArticleListURL|/(?:journal|bookseries|book|handbooks|referenceworks)/\\d)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(/article/|\\?.*\\b_ob=ArticleListURL|/(journal|bookseries|book|handbooks|referenceworks)/\\d)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

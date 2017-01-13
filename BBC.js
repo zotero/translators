@@ -2,7 +2,7 @@
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(?:www|news?)\\.bbc\\.(co\\.uk|com)",
+	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

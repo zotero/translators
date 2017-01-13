@@ -2,7 +2,7 @@
 	"translatorID": "63a0a351-3131-18f4-21aa-f46b9ac51d87",
 	"label": "Library Catalog (VTLS)",
 	"creator": "Simon Kornblith",
-	"target": "/chameleon(?:\\?|$)",
+	"target": "/chameleon(\\?|$)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 250,

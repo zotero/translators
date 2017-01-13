@@ -2,7 +2,7 @@
 	"translatorID": "5aabfa6e-79e6-4791-a9d2-46c9cb137561",
 	"label": "Stanford Encyclopedia of Philosophy",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://plato\\.stanford\\.edu/(?:entries|search)",
+	"target": "^https?://plato\\.stanford\\.edu/(entries|search)",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

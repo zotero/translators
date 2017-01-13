@@ -2,7 +2,7 @@
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://(www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)",
+	"target": "^https?://(www\\.)?google\\.[^/]+/(patents|[^/]*[&?#]tbm=pts)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

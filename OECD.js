@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-01-05 11:58:51"
+	"lastUpdated": "2017-01-03 07:41:53"
 }
 
 /*
@@ -35,15 +35,15 @@
 */
 
 function detectWeb(doc, url) {
-	var menuitem = ZU.xpathText(doc, '//li[@class="menuitem"]/a[@class="on"]');
+	var bodyId = doc.body.getAttribute("id");
 	if (ZU.xpathText(doc, '//ul[@class="sidebar-list"]//a[contains(@title, "Cite this")]')){		
 		if (ZU.xpathText(doc, '//li[@class="editorial-board"]')){
 			return "journalArticle";
-		}
-		else if (menuitem && menuitem.indexOf("BOOK")!=-1) {
+		} else if (bodyId && bodyId=="bookpage") {
 			return "book";
+		} else {
+			return "report";
 		}
-		else return "report"
 	}
 	if (ZU.xpath(doc, '//table[contains (@class, "search-results")]').length>0){
 		return "multiple";
@@ -81,31 +81,31 @@ function scrape(doc, url){
 	var RWurl = url + "?fmt=txt";
 	Zotero.Utilities.HTTP.doGet(RWurl, function (text) {
 	
-	text = text.replace(/\nK\d+\s/g, "\nK1 ");
-	if(text.search(/RT Generic/)!=-1){
-		text = text.replace(/RT Generic/, "RT Report");
-		text = text.replace(/JF (.+)/, "CL $1");
-	}		
+		text = text.replace(/\nK\d+\s/g, "\nK1 ");
+		if(text.search(/RT Generic/)!=-1){
+			text = text.replace(/RT Generic/, "RT Report");
+			text = text.replace(/JF (.+)/, "CL $1");
+		}		
 		//Zotero.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("1a3506da-a303-4b0a-a1cd-f216e6138d86");
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
-		if (language) item.language = language[1];
-		if (item.itemType =="report" || item.itemType =="book"){
-			if (!item.place) item.place="Paris";
-		}
-		for (var i in item.creators){
-			if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;	
-		}
-		//we need to run through this to get the PDF because of redirect.
-		if (pdfurl){	
-			ZU.processDocuments(pdfurl.replace(/,\s.+/, ""), function(newdoc){
-				item.attachments = [{document: newdoc, title: "OECD Fulltext", }];
-				item.complete();
-			})
-		}
-		else item.complete();
+			if (language) item.language = language[1];
+			if (item.itemType =="report" || item.itemType =="book"){
+				if (!item.place) item.place="Paris";
+			}
+			for (var i in item.creators){
+				if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;	
+			}
+			//we need to run through this to get the PDF because of redirect.
+			if (pdfurl){	
+				ZU.processDocuments(pdfurl.replace(/,\s.+/, ""), function(newdoc){
+					item.attachments = [{document: newdoc, title: "OECD Fulltext", }];
+					item.complete();
+				})
+			}
+			else item.complete();
 		});	
 		translator.translate();
 	});

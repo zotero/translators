@@ -2,14 +2,14 @@
 	"translatorID": "d93c14fb-d327-4540-b60a-327309ea512b",
 	"label": "Journal of Electronic Publishing",
 	"creator": "Sebastian Karcher",
-	"target": "http://quod.lib.umich.edu/.*c=jep",
+	"target": "^https?://quod\\.lib\\.umich\\.edu/.*c=jep",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-08 23:17:32"
+	"lastUpdated": "2017-01-01 16:54:45"
 }
 
 /*
@@ -121,7 +121,7 @@ var testCases = [
 				"libraryCatalog": "quod.lib.umich.edu",
 				"publicationTitle": "The Journal of Electronic Publishing",
 				"shortTitle": "The Upright Script",
-				"url": "http://quod.lib.umich.edu/j/jep/3336451.0014.212?rgn=main;view=fulltext;q1=zotero",
+				"url": "http://dx.doi.org/10.3998/3336451.0014.212",
 				"volume": "14",
 				"attachments": [
 					{

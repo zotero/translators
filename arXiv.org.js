@@ -2,7 +2,7 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://(?:[^\\.]+\\.)?(?:arxiv\\.org|xxx\\.lanl\\.gov)/(?:find|catchup|list/\\w|abs/)",
+	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(find|catchup|list/\\w|abs/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

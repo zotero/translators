@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-06-09 05:59:15"
+	"lastUpdated": "2016-12-28 20:01:06"
 }
 
 /*
@@ -88,8 +88,6 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-
-		item.date = ZU.xpathText(doc, '//article[contains(@class, "content")]//time/@datetime');
 		
 		// Problem: also the place will be taken as part of the autor name
 		// e.g. <meta name="author" content="Matthias Müller, Peking">
@@ -125,6 +123,9 @@ function scrape(doc, url) {
 	
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = "newspaperArticle";
+		trans.addCustomFields({
+			'date': 'date'
+		});
 		trans.doWeb(doc, url);
 	});
 }
@@ -138,7 +139,7 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "Deutliches Umsatzplus in den ersten neun Monaten: Kuoni profitiert von der GTA-Übernahme",
 				"creators": [],
-				"date": "2011-11-10T06:55:41+00:00",
+				"date": "2011-11-10 07:55:41",
 				"ISSN": "0376-6829",
 				"abstractNote": "Der Reisekonzern Kuoni hat in den ersten neun Monaten von der Übernahme des Reisekonzerns Gullivers Travel Associates (GTA) profitiert.",
 				"language": "de-CH",
@@ -172,7 +173,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-05-30T09:00:00+00:00, 2012-05-14T22:00:00+00:00",
+				"date": "2012-05-30 11:00:00",
 				"ISSN": "0376-6829",
 				"abstractNote": "Mit einem Aufstand haben die Einwohner der mexikanischen Gemeinde Cherán die Holzfällermafia vertrieben.",
 				"language": "de-CH",
@@ -248,7 +249,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-05-28T23:00:00.000Z,",
+				"date": "2016-05-28T23:00:00.000Z",
 				"ISSN": "1660-0851",
 				"abstractNote": "Im Gesundheitswesen wird heftig über den Sinn von teuren Tests zur Krebs-Früherkennung gestritten.",
 				"language": "de-CH",

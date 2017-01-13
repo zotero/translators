@@ -2,7 +2,7 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^?#]+(?:/doi/((?:abs|abstract|full|figure|ref|citedby|book)/)?10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"target": "^https?://[^?#]+(/doi/((abs|abstract|full|figure|ref|citedby|book)/)?10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 270,
