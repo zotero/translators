@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2017-01-13 19:39:16"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-01-13 20:03:14"
 }
 
 function detectWeb(doc, url) {
@@ -359,7 +359,7 @@ function scrape(doc) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//a[contains(@class, "ExportCitattionButton")]');
+	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//a[contains(@class, "ExportCitationButton")]')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
@@ -856,7 +856,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348?via%3Dihub",
+		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
 		"items": [
 			{
 				"itemType": "journalArticle",
