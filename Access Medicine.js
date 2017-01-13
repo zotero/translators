@@ -99,7 +99,7 @@ function doWeb(doc, url){
 		var pattern = /\/content.*/i;
 		var baseUrl = url.replace(pattern,'');
 		var baseCitation = baseUrl + "/downloadCitation.aspx?format=ris&sectionid=";
-		var sectionId = url.split("sectionid=")[1];
+		var sectionId = url.toLowerCase().split("sectionid=")[1];
 		var link = baseCitation + sectionId;
 		risTranslate(doc, link, true);
 	}
