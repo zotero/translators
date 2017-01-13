@@ -2,7 +2,7 @@
 	"translatorID": "fcfcfe9c-f6dd-48c6-aef9-61adbba31a4e",
 	"label": "National Library of Australia - Australian Newspapers",
 	"creator": "Tim Sherratt",
-	"target": "^https?://trove\\.nla\\.gov\\.au/(?:newspaper|ndp)/",
+	"target": "^https?://trove\\.nla\\.gov\\.au/(newspaper|ndp)/",
 	"minVersion": "2.0",
 	"maxVersion": "",
 	"priority": 100,

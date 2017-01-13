@@ -2,7 +2,7 @@
 	"translatorID": "ea531652-cdeb-4ec2-940e-627d4b107263",
 	"label": "AlterNet",
 	"creator": "Jesse Johnson, BBUCommander",
-	"target": "^https?://(?:www\\.)alternet\\.org",
+	"target": "^https?://(www\\.)alternet\\.org",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

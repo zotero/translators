@@ -2,7 +2,7 @@
 	"translatorID": "e8fc7ebc-b63d-4eb3-a16c-91da232f7220",
 	"label": "Aluka",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(?:www\\.)aluka\\.org/(?:stable/|struggles/search\\?|struggles/collection/)",
+	"target": "^https?://(www\\.)aluka\\.org/(stable/|struggles/search\\?|struggles/collection/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-18 20:06:17"
+	"lastUpdated": "2017-01-03 08:46:13"
 }
 
 function detectWeb(doc, url) {
@@ -212,51 +212,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
-				"creators": [
-					{
-						"firstName": "Verónica",
-						"lastName": "Norando",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ludmila",
-						"lastName": "Scheinkman",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011",
-				"ISSN": "1548-7083",
-				"abstractNote": "Este trabajo se propone realizar un análisis de las relaciones de género y clase a través de un estudio de caso: la “Huelga de los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por más de tres meses, pasando casi inadvertida, sin embargo, para la investigación histórica. Siendo la textil una rama de industria con una mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de los 800 obreros eran mujeres, aparece como ejemplar para la observación de la actividad de las mujeres en conflicto. En el trabajo se analiza el rol de las trabajadoras en la huelga, su participación política, sus formas de organización y resistencia, haciendo eje en las determinaciones de género y de clase que son abordadas de manera complementaria e interrelacionada, así como el complejo entramado de tensiones y solidaridades que éstas generan. De éste modo, se pretende ahondar en la compleja conformación de una identidad obrera femenina, a la vez que se discute con aquella mirada historiográfica tradicional que ha restado importancia a la participación de la mujer en el conflicto social. Esto se realizará a través de la exploración de una serie de variables: las relaciones inter-género e inter-clase (fundamentalmente el vínculo entre las trabajadoras y la patronal masculina), inter-género e intra-clase (la relación entre trabajadoras y trabajadores), intra-género e inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del barrio), intra-género e intra-clase (relaciones de solidaridad entre trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”). Para ello se trabajó un corpus documental que incluye información de tipo cuantitativa (las estadísticas del Boletín Informativo del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros –fundamentalmente El Obrero Textil, órgano gremial de la Unión Obrera Textil, Semanario de la CGT-Independencia (órgano de la Confederación General del Trabajo (CGT)-Independencia) y La Vanguardia (periódico del Partido Socialista), entre otros, y entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el cruce de estas fuentes.",
-				"issue": "1",
-				"itemID": "AC174",
-				"libraryCatalog": "Open Journal Systems",
-				"pages": "1–37",
-				"publicationTitle": "A Contracorriente",
-				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-				"volume": "9",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"huelga",
-					"relaciones de género",
-					"trabajadores",
-					"trabajadroras"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://journals.ub.uni-heidelberg.de/index.php/ip/article/view/31976/26301",
 		"items": [
 			{
@@ -333,15 +288,15 @@ var testCases = [
 					}
 				],
 				"date": "2016/06/23",
-				"abstractNote": "This study deals with the question of genre cinema in terms of an aesthetic experience that also accounts for a shared experience. The focus will be on the historical framework that constituted the emotional mobilization of the American public during World War II when newsreels and fictional war films were screened together as part of the staple program in movie theaters. Drawing on existing concepts of cinema and public sphere as well as on a phenomenological theory of spectator engagement this study sets out to propose a definition of the term moviegoing experience. On these grounds a historiographical account of the institutional practice of staple programming shall be explored together with a theoretical conceptualization of the spectator within in the realm of genre cinema.Diese Studie befragt das Genrekino als Modus ästhetischer Erfahrung in Hinblick auf die konkrete geteilten Erfahrung des Kinosaals. Der Fokus liegt auf den historischen Rahmenbedingen der emotionalen Mobilisierung der US-amerikanischen Öffentlichkeit während des Zweiten Weltkriegs und der gemeinsamen Vorführung von Kriegsnachrichten und fiktionalen Kriegsfilmen in Kinoprogrammen. Dabei wird auf Konzepte des Kinos als öffentlichem Raum und auf phänomenologische Theorien der Zuschaueradressierung Bezug genommen und ein integrative Definition der moviegoing experience entworfen. Dadurch ist es möglich, historiographische Schilderungen der institutionalisierten Praktiken der Kinoprogrammierung mit theoretischen Konzeptualisierungen der Zuschauererfahrung und des Genrekinos ins Verhältnis zu setzen.David Gaertner, M.A. is currently writing his dissertation on the cinematic experience of World War II and is a lecturer at the division of Film Studies at Freie Universität Berlin. From 2011 to 2014 he was research associate in the project “Staging images of war as a mediated experience of community“. He is co-editor of the book “Mobilisierung der Sinne. Der Hollywood-Kriegsfilm zwischen Genrekino und Historie” (Berlin 2013). // David Gaertner, M.A. arbeitet an einer Dissertation zur Kinoerfahrung im Zweiten Weltkrieg und lehrt am Seminar für Filmwissenschaft an der Freien Universität Berlin. 2011 bis 2014 war er wissenschaftlicher Mitarbeiter im DFG-Projekt „Inszenierungen des Bildes vom Krieg als Medialität des Gemeinschaftserlebens“. Er ist Mitherausgeber des Sammelbands “Mobilisierung der Sinne. Der Hollywood-Kriegsfilm zwischen Genrekino und Historie” (Berlin 2013).",
+				"abstractNote": "to the article / zum BeitragThis study deals with the question of genre cinema in terms of an aesthetic experience that also accounts for a shared experience. The focus will be on the historical framework that constituted the emotional mobilization of the American public during World War II when newsreels and fictional war films were screened together as part of the staple program in movie theaters. Drawing on existing concepts of cinema and public sphere as well as on a phenomenological theory of spectator engagement this study sets out to propose a definition of the term moviegoing experience. On these grounds a historiographical account of the institutional practice of staple programming shall be explored together with a theoretical conceptualization of the spectator within in the realm of genre cinema.Diese Studie befragt das Genrekino als Modus ästhetischer Erfahrung in Hinblick auf die konkrete geteilten Erfahrung des Kinosaals. Der Fokus liegt auf den historischen Rahmenbedingen der emotionalen Mobilisierung der US-amerikanischen Öffentlichkeit während des Zweiten Weltkriegs und der gemeinsamen Vorführung von Kriegsnachrichten und fiktionalen Kriegsfilmen in Kinoprogrammen. Dabei wird auf Konzepte des Kinos als öffentlichem Raum und auf phänomenologische Theorien der Zuschaueradressierung Bezug genommen und ein integrative Definition der moviegoing experience entworfen. Dadurch ist es möglich, historiographische Schilderungen der institutionalisierten Praktiken der Kinoprogrammierung mit theoretischen Konzeptualisierungen der Zuschauererfahrung und des Genrekinos ins Verhältnis zu setzen.David Gaertner, M.A. is currently writing his dissertation on the cinematic experience of World War II and is a lecturer at the division of Film Studies at Freie Universität Berlin. From 2011 to 2014 he was research associate in the project “Staging images of war as a mediated experience of community“. He is co-editor of the book “Mobilisierung der Sinne. Der Hollywood-Kriegsfilm zwischen Genrekino und Historie” (Berlin 2013). // David Gaertner, M.A. arbeitet an einer Dissertation zur Kinoerfahrung im Zweiten Weltkrieg und lehrt am Seminar für Filmwissenschaft an der Freien Universität Berlin. 2011 bis 2014 war er wissenschaftlicher Mitarbeiter im DFG-Projekt „Inszenierungen des Bildes vom Krieg als Medialität des Gemeinschaftserlebens“. Er ist Mitherausgeber des Sammelbands “Mobilisierung der Sinne. Der Hollywood-Kriegsfilm zwischen Genrekino und Historie” (Berlin 2013).",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "www.mediaesthetics.org",
-				"publicationTitle": "mediaesthetics - Journal of Poetics of Audiovisual Images",
+				"publicationTitle": "mediaesthetics – Journal of Poetics of Audiovisual Images",
 				"rights": "Copyright (c) 2016 David Gaertner",
 				"shortTitle": "World War II in American Movie Theatres from 1942-45",
 				"url": "http://www.mediaesthetics.org/index.php/mae/article/view/50",
-				"volume": "0",
+				"volume": "1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -374,6 +329,7 @@ var testCases = [
 				"issue": "1",
 				"language": "de",
 				"libraryCatalog": "0277.ch",
+				"pages": "11-17",
 				"publicationTitle": "027.7 Zeitschrift für Bibliothekskultur / Journal for Library Culture",
 				"rights": "Copyright (c) 2016 027.7 Zeitschrift für Bibliothekskultur / Journal for Library Culture",
 				"url": "http://0277.ch/ojs/index.php/cdrs_0277/article/view/101",

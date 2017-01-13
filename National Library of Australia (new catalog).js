@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-03-14 15:46:49"
+	"lastUpdated": "2016-12-28 12:19:19"
 }
 
 function detectWeb(doc, url) {
@@ -87,7 +87,7 @@ function load_item(responseText, url, format) {
 
 	/* and everything else */
 	for (var attr in metadata) {
-		if (!newItem[attr]) {
+		if (!newItem[attr] && attr!="authors") {
 			newItem[attr] = metadata[attr];
 		}
 	}
@@ -137,6 +137,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
 				"creators": [
 					{
 						"firstName": "Richard Allen",
@@ -144,23 +145,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Working class",
-					"United States.",
-					"Labor unions"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
-				"publisher": "Random House",
-				"callNumber": "331.082 L642",
-				"place": "New York",
 				"date": "New York : Random House, [1967]",
-				"authors": "Lester, Richard Allen, 1908-",
+				"callNumber": "331.082 L642",
 				"extra": "Bibliographical footnotes.",
 				"libraryCatalog": "National Library of Australia",
-				"shortTitle": "Labor"
+				"place": "New York",
+				"publisher": "Random House",
+				"shortTitle": "Labor",
+				"attachments": [],
+				"tags": [
+					"Labor unions -- United States.",
+					"Working class -- United States."
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

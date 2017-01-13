@@ -2,14 +2,14 @@
 	"translatorID": "58a778cc-25e2-4884-95b3-6b22d7571183",
 	"label": "Gmail",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://mail.google.com/",
+	"target": "^https?://mail\\.google\\.com/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-04-08 01:50:09"
+	"lastUpdated": "2017-01-01 16:53:13"
 }
 
 function detectWeb(doc, url) {

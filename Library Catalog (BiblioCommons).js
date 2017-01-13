@@ -2,7 +2,7 @@
 	"translatorID": "5d506fe3-dbde-4424-90e8-d219c63faf72",
 	"label": "Library Catalog (BiblioCommons)",
 	"creator": "Avram Lyon",
-	"target": "^https?://[^/]+\\.bibliocommons\\.com\\/",
+	"target": "^https?://[^/]+\\.bibliocommons\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 250,

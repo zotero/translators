@@ -2,7 +2,7 @@
 	"translatorID": "946ddf3a-74ca-4309-9917-85aa30297f4c",
 	"label": "dhistory",
 	"creator": "Tim Sherratt",
-	"target": "http://(www\\.)?dhistory\\.org/archives/naa/items/\\d+",
+	"target": "^https?://(www\\.)?dhistory\\.org/archives/naa/items/\\d+",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

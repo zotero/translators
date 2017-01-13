@@ -2,7 +2,7 @@
 	"translatorID": "9d8fb229-a563-489b-b36d-3bdaa69ddf1f",
 	"label": "etatar.ru",
 	"creator": "Avram Lyon",
-	"target": "^https?://(?:www\\.)?etatar\\.ru/",
+	"target": "^https?://(www\\.)?etatar\\.ru/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 100,

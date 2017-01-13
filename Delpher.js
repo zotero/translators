@@ -2,7 +2,7 @@
 	"translatorID": "c4008cc5-9243-4d13-8b35-562cdd184558",
 	"label": "Delpher",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^\\/]+\\.delpher\\.nl",
+	"target": "^https?://[^/]+\\.delpher\\.nl",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

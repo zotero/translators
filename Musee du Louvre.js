@@ -2,20 +2,20 @@
 	"translatorID": "22d17fb9-ae32-412e-bcc4-7650ed3359bc",
 	"label": "Musee du Louvre",
 	"creator": "Adam Crymble",
-	"target": "^https?://www\\.louvre\\.fr/llv",
-	"minVersion": "1.0.0b4.r5",
+	"target": "^https?://www\\.louvre\\.fr/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2011-11-09 00:13:03"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-12-27 14:54:34"
 }
 
 function detectWeb(doc, url) {
 	if (doc.location.href.match("recherche")) {
 		return "multiple";
-	} else if (doc.evaluate('//div[@class="alignRight"]/a/img', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+	} else if (url.indexOf('oeuvre')>-1) {
 		return "artwork";
 	}
 	
@@ -164,81 +164,56 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.louvre.fr/llv/activite/detail_evenement.jsp?CONTENT%3C%3Ecnt_id=10134198673390879&CURRENT_LLV_ACTIVITE%3C%3Ecnt_id=10134198673390879&FOLDER%3C%3Efolder_id=9852723696500927",
+		"url": "http://www.louvre.fr/oeuvre-notices/stele-figurant-la-deesse-ishtar",
 		"items": [
 			{
 				"itemType": "artwork",
+				"title": "Stèle figurant la déesse Ishtar",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					",Activité ",
-					"Musée du Louvre",
-					"Musée",
-					"Louvre "
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Présentation centrée sur l'étude d'une oeuvre",
-				"title": "Détails des activités <i>La Dentellière</i> de Vermeer",
-				"extra": "Visites guidées",
-				"url": "http://www.louvre.fr/llv/activite/detail_evenement.jsp?CONTENT%3C%3Ecnt_id=10134198673390879&CURRENT_LLV_ACTIVITE%3C%3Ecnt_id=10134198673390879&FOLDER%3C%3Efolder_id=9852723696500927",
+				"abstractNote": "Stèle : déesse Ishtar . Provenance : Tell Ahmar, antique Til Barsip. Epoque néo-assyrienne, VIIIe siècle av. J.-C. - Département des Antiquités orientales",
+				"extra": "Œuvre Stèle figurant la déesse Ishtar",
 				"libraryCatalog": "Musée du Louvre",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://www.louvre.fr/oeuvre-notices/stele-figurant-la-deesse-ishtar",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.louvre.fr/llv/oeuvres/detail_notice.jsp?CONTENT%3C%3Ecnt_id=10134198673225228&CURRENT_LLV_NOTICE%3C%3Ecnt_id=10134198673225228&FOLDER%3C%3Efolder_id=9852723696500800&fromDept=true&baseIndex=4",
+		"url": "http://www.louvre.fr/en/oeuvre-notices/stele-warrior-god",
 		"items": [
 			{
 				"itemType": "artwork",
-				"creators": [
-					{
-						"firstName": "",
-						"lastName": "",
-						"creatorType": "artist"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"stèle ",
-					"monument",
-					"Ishtar",
-					"déesse",
-					"déesse de l'amour",
-					"amour",
-					"guerrière",
-					"guerre",
-					"lion",
-					"animal",
-					"épée",
-					"carquois",
-					"tiare",
-					"astral",
-					"reliefs",
-					"inscription",
-					"Assyriens",
-					"Tell Ahmar",
-					"Til Barsip",
-					"Bît Adini",
-					"Syrie",
-					"Assyrie",
-					"Euphrate",
-					"VIIIe siècle avant J.-C.,Oeuvres ",
-					"Musée du Louvre",
-					"Musée",
-					"Louvre "
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"abstractNote": "Stèle : déesse Ishtar . Provenance : Tell Ahmar, antique Til Barsip. Epoque néo-assyrienne, VIIIe siècle av. J.-C. - Département des Antiquités orientales",
-				"date": "Epoque néo-assyrienne, VIIIe siècle av. J.-C.",
-				"title": "Stèle figurant la déesse Ishtar – <br /> – Antiquités orientales",
-				"extra": "Antiquités orientales : Mésopotamie",
-				"url": "http://www.louvre.fr/llv/oeuvres/detail_notice.jsp?CONTENT%3C%3Ecnt_id=10134198673225228&CURRENT_LLV_NOTICE%3C%3Ecnt_id=10134198673225228&FOLDER%3C%3Efolder_id=9852723696500800&fromDept=true&baseIndex=4",
+				"title": "Stele with warrior god",
+				"creators": [],
+				"extra": "Work Stele with warrior god",
 				"libraryCatalog": "Musée du Louvre",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://www.louvre.fr/en/oeuvre-notices/stele-warrior-god",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.louvre.fr/en/oeuvre-notices/mona-lisa-portrait-lisa-gherardini-wife-francesco-del-giocondo?sous_dept=1",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Mona Lisa – Portrait of Lisa Gherardini, wife of Francesco del Giocondo",
+				"creators": [],
+				"extra": "Work Mona Lisa – Portrait of Lisa Gherardini, wife of Francesco del Giocondo",
+				"libraryCatalog": "Musée du Louvre",
+				"url": "http://www.louvre.fr/en/oeuvre-notices/mona-lisa-portrait-lisa-gherardini-wife-francesco-del-giocondo?sous_dept=1",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

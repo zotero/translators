@@ -205,11 +205,13 @@ var testCases = [
 				],
 				"date": "2016",
 				"DOI": "10.1099/ijsem.0.000872",
-				"ISSN": "1466-5026",
-				"abstractNote": "A repeat multilocus sequence analysis (MLSA) of concatenated nusA, eno, rpoB, gltB, lepA, nuoL and nrdA sequences of strains classified as Achromobacter marplatensis revealed that earlier reported sequence data of the proposed type strain were erroneous and that the corrected concatenated sequence divergence between the A. marplatensis LMG 26219T (= CCUG 56371T) sequence type and that of Achromobacter spiritinus strains was well below the 2.1% threshold level that delineates Achromobacter species. These results therefore demonstrated that strains that were classified as A. spiritinus should be reclassified as A. marplatensis and that the name Achromobacter spiritinus should no longer be used. An emendation of the A. marplatensis species description is warranted.",
+				"abstractNote": "A repeat multi-locus sequence analysis (MLSA) of concatenated nusA, eno, rpoB, gltB, lepA, nuoL and nrdA sequences of strains classified as Achromobacter marplatensis was performed. The results revealed that earlier reported sequence data of the proposed type strain were erroneous, and that the corrected concatenated sequence divergence between the A. marplatensis LMG 26219T ( = CCUG 56371T) sequence type and that of strains of Achromobacter spiritinus was well below the 2.1 % threshold value that delineates species of the genus Achromobacter. These results therefore demonstrated that strains which were classified as A. spiritinus should be reclassified as A. marplatensis and that the name Achromobacter spiritinus should no longer be used. An emendation of the description of Achromobacter marplatensis is warranted.",
+				"issue": "4",
 				"libraryCatalog": "Microbiology Society Journals",
+				"pages": "1641-1644",
 				"publicationTitle": "International Journal of Systematic and Evolutionary Microbiology",
-				"url": "http://ijs.microbiologyresearch.org/content/journal/ijsem/10.1099/ijsem.0.000872.v1",
+				"url": "http://ijs.microbiologyresearch.org/content/journal/ijsem/10.1099/ijsem.0.000872",
+				"volume": "66",
 				"attachments": [
 					{
 						"title": "Snapshot"

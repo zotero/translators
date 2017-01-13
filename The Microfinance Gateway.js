@@ -2,7 +2,7 @@
 	"translatorID": "2cd7d362-5fba-423a-887f-579ed343e751",
 	"label": "The Microfinance Gateway",
 	"creator": "Sebastian Karcher",
-	"target": "http://(www\\.)?microfinancegateway\\.org/p/site/m/",
+	"target": "^https?://(www\\.)?microfinancegateway\\.org/p/site/m/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

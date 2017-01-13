@@ -2,7 +2,7 @@
 	"translatorID": "d84574f1-e4d6-4337-934f-bf9d01173bf0",
 	"label": "taz.de",
 	"creator": "Martin Meyerhoff",
-	"target": "^https?://(?:www\\.)?taz\\.de",
+	"target": "^https?://(www\\.)?taz\\.de",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,

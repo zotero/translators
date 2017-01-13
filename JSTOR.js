@@ -2,14 +2,14 @@
 	"translatorID": "d921155f-0186-1684-615c-ca57682ced9b",
 	"label": "JSTOR",
 	"creator": "Simon Kornblith, Sean Takats, Michael Berkowitz, and Eli Osherovich",
-	"target": "https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
+	"target": "^https?://([^/]+\\.)?jstor\\.org/(discover/|action/(showArticle|doBasicSearch|doAdvancedSearch|doLocatorSearch|doAdvancedResults|doBasicResults)|stable/|pss/|openurl\\?|sici\\?)",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-24 10:31:43"
+	"lastUpdated": "2017-01-01 15:25:02"
 }
 
 function detectWeb(doc, url) {

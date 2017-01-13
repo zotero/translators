@@ -2,14 +2,14 @@
 	"translatorID": "838d8849-4ffb-9f44-3d0d-aa8a0a079afe",
 	"label": "OCLC WorldCat FirstSearch",
 	"creator": "Simon Kornblith",
-	"target": "https?://[^/]*firstsearch\\.oclc\\.org[^/]*/WebZ/",
+	"target": "^https?://[^/]*firstsearch\\.oclc\\.org[^/]*/WebZ/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2016-05-26 09:52:41"
+	"lastUpdated": "2017-01-01 15:28:35"
 }
 
 function detectWeb(doc, url) {
