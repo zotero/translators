@@ -9,6 +9,7 @@ declare -a ERROR_CHECKS=(
     "notOneTranslatorID"
     "nonUniqueTranslatorID"
     "executableFile"
+    "invalidJSON"
     "withCarriageReturn"
     "deprecatedForEach"
 )
@@ -16,7 +17,6 @@ declare -a ERROR_CHECKS=(
 # These checks will emit warnings but still pass
 declare -a WARN_CHECKS=(
     "badLicense"
-    "invalidJSON"
     "problematicJS"
 )
 
@@ -42,12 +42,14 @@ nonUniqueTranslatorID () {
     dir=$(dirname "$TRANSLATOR")
     id=$(grep -r '"translatorID"' "$TRANSLATOR" \
         | sed -e 's/[" ,]//g' -e 's/^.*://g')
-    duplicateIds=$(grep -r '"translatorID"' "$dir"/*.js \
-            | sed -e 's/[" ,]//g' -e 's/^.*://g' \
-            | sort | uniq -d)
-    if [[ $duplicateIds = *"$id"* ]];then
-        err "Non unique ID $id"
-        return 1
+    if [[ -n "$id" ]];then
+      duplicateIds=$(grep -r '"translatorID"' "$dir"/*.js \
+              | sed -e 's/[" ,]//g' -e 's/^.*://g' \
+              | sort | uniq -d)
+      if [[ $duplicateIds = *"$id"* ]];then
+          err "Non unique ID $id"
+          return 1
+      fi
     fi
 }
 
@@ -143,8 +145,10 @@ main() {
     else
         if (( ${#warnings[@]} == 0 ));then
             echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Failed checks: ${errors[*]})"
+            exit 1
         else
             echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Failed checks: ${errors[*]}; Warnings: ${warnings[*]})"
+            exit 1
         fi
     fi
 }
