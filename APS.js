@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-03 11:53:29"
+	"lastUpdated": "2017-01-14 21:44:41"
 }
 
 function detectWeb(doc, url) {
 	var title = doc.getElementById('title');
-	if(title && ZU.xpath(title, './/a[@data-reveal-id="export-article"]').length) {
+	if(title && ZU.xpath(title, './/a[@id="export-article-link"]').length) {
 		return "journalArticle";
 	} else if(getSearchResults(doc, true)){
 		return "multiple";
