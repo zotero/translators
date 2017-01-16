@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-16 19:44:41"
+	"lastUpdated": "2017-01-16 20:00:51"
 }
 
 /*
@@ -109,7 +109,7 @@ function scrape(doc, url, type) {
 		item.title = headline;
 		
 		var previousDecisions = ZU.xpath(doc, './/div[h4[contains(., "Verfahrensgang")]]/ul/li');
-		item.history = previousDecisions.map(li => li.textContent).join("; ");
+		item.history = previousDecisions.map(function(li) { return li.textContent; } ).join("; ");
 		
 	}
 	if (type == "statute") {
