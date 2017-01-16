@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-14 14:59:56"
+	"lastUpdated": "2017-01-16 19:44:41"
 }
 
 /*
@@ -111,7 +111,6 @@ function scrape(doc, url, type) {
 		var previousDecisions = ZU.xpath(doc, './/div[h4[contains(., "Verfahrensgang")]]/ul/li');
 		item.history = previousDecisions.map(li => li.textContent).join("; ");
 		
-		item.extra = "jurisdiction: de\ngenre: Beschl.";
 	}
 	if (type == "statute") {
 		var headings = ZU.xpath(doc, "//h1/text()");
@@ -154,7 +153,6 @@ var testCases = [
 				"dateDecided": "2003-07-17",
 				"court": "BGH",
 				"docketNumber": "I ZR 259/00",
-				"extra": "jurisdiction: de\ngenre: Beschl.",
 				"history": "LG Köln, 12.01.2000 - 28 O 347/99; OLG Köln, 27.10.2000 - 6 U 71/00; BGH, 17.07.2003 - I ZR 259/00",
 				"attachments": [
 					{
