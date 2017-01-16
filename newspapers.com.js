@@ -60,13 +60,9 @@ function doWeb(doc, url) {
 		var author = tokens[1];
 		newItem.title = tokens[0].trim();
 		// multiple authors are separated with semicolons
-		if (author.match("; ")) {
-		  var authors = author.split("; ");
-		  for (var i in authors) {
+		var authors = author.split("; ");
+		for (var i=0; i<authors.length; i++) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
-		  }
-		} else {
-		  newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 		}
 	}
 
@@ -81,8 +77,7 @@ function doWeb(doc, url) {
 	newItem.attachments = [{
 		url: metaArr["og:image"],
 		title: "Image",
-		mimeType: "image/jpeg",
-		downloadable: true
+		mimeType: "image/jpeg"
 	}];
 	
 	/*
@@ -140,8 +135,7 @@ var testCases = [
 			 "attachments": [
 			   {
 				 "title": "Image",
-				 "mimeType": "image/jpeg",
-				 "downloadable": true
+				 "mimeType": "image/jpeg"
 			   }
 			 ],
 			 "title": "My Day",
