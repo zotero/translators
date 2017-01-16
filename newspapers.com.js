@@ -2,14 +2,14 @@
 	"translatorID": "22dd8e35-02da-4968-b306-6efe0779a48d",
 	"label": "newspapers.com",
 	"creator": "Peter Binkley",
-	"target": "https?://www\\.newspapers\\.com/clip/",
+	"target": "^https?://www\\.newspapers\\.com/clip/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-11 03:07:54"
+	"lastUpdated": "2017-01-11 10:44:00"
 }
 
 /*
