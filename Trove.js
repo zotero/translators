@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 15:48:00"
+	"lastUpdated": "2017-01-17 09:36:08"
 }
 
 /*
@@ -69,11 +69,13 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			var urls = [];
 			for (var i in items) {
-				urls.push(i);
+				ZU.doGet(i, function(text) {
+					var parser = new DOMParser();
+					var xml = parser.parseFromString(text, "text/html");
+					scrape(xml, i);
+				})
 			}
-			ZU.processDocuments(urls, scrape);
 		});
 	} else {
 		scrape(doc, url);
@@ -191,7 +193,7 @@ function checkType(string) {
 //   "lastName": "Bayley"
 function cleanCreators(creators) {
 	for (var i = 0; i < creators.length; i++) {
-		var name = creators[i].firstName
+		var name = creators[i].firstName;
 		name = name.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
 		var posParenthesis = name.indexOf("(");
 		if (posParenthesis>-1) {
@@ -242,7 +244,7 @@ function scrapeWork(doc, url) {
 					url: item.url,
 					mimeType: 'text/html',
 					snapshot: false
-				})
+				});
 			}
 
 			// This gives a better version-aware url.
