@@ -3,15 +3,39 @@
 	"translatorID": "dd2d7c63-0c4b-4da4-b1d8-e72c7445c1e0",
 	"label": "Tesis Doctorals en Xarxa",
 	"creator": "CSUC",
-	"target": "^https?://(www\.)?(tdx\.cat|tesisenred\.net)",
+	"target": "^https?://(www\\.)?(tdx\\.cat|tesisenred\\.net)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2016-09-22 15:33:33"
 }
+
+/*
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Tesis Doctorals en Xarxa Translator
+    Copyright © 2017 CSUC
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
 
 
 function detectWeb(doc, url) {
