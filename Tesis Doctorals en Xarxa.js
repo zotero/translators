@@ -89,7 +89,11 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-			var item = new Zotero.Item("thesis");
+			
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');//https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function (obj, item) {
 			//title
 			var titles = ZU.xpath(doc, '//meta[@name="citation_title"]');
 			if (titles) {
@@ -204,7 +208,11 @@ function scrape(doc, url) {
 			item.thesisType="Ph.D. Thesis";
 			
 		item.complete();
-
+	});
+	translator.getTranslatorObject(function(trans) {
+       		trans.itemType = "thesis";
+       		trans.doWeb(doc, url);
+    	});
 }
 
 /** BEGIN TEST CASES **/
