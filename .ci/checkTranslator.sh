@@ -123,8 +123,12 @@ usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 <translator.js>"; }
 main() {
 
     # Add './node_modules/.bin to PATH for jsonlint
-    PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/node_modules/.bin:"$PATH"
+    PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/node_modules/.bin:"$PATH"
 
+    if [[ "$1" = "--skip-warn" ]];then
+        SKIP_WARN=true
+        shift
+    fi
     TRANSLATOR="$1"
     TRANSLATOR_BASENAME="$(basename "$TRANSLATOR")"
     [[ -z $TRANSLATOR ]]   && { usage; exit 1; }
