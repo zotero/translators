@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-. "$SCRIPT_DIR/helper.sh"
+source "$SCRIPT_DIR/helper.sh"
 cd "$SCRIPT_DIR"
 
 MASTER="master"
@@ -21,17 +21,22 @@ main() {
     if (( ${#deletions[@]} > 0 ));then
         for f in "${deletions[@]}";do
             local id=$(git show $MASTER:"$f"|grepTranslatorId)
-            if ! grep -F "$id" '../deleted.txt';then
-                echo "not ok - $id ($f) should be added to deleted.txt"
-                (( failed += 1))
+            if [[ -n "$id" ]];then
+                if ! grep -qF "$id" '../deleted.txt';then
+                    echo "${color_notok}not ok${color_reset} - $id ($f) should be added to deleted.txt"
+                    (( failed += 1))
+                fi
             fi
         done
         curVersion=$(head -n1 "../deleted.txt"|grep -o '[0-9]\+')
         origVersion=$(git show "$MASTER:deleted.txt"|head -n1|grep -o '[0-9]\+')
         if (( curVersion <= origVersion ));then
-            echo "not ok - version in deleted.txt needs to be increased"
+            echo "${color_notok}not ok${color_reset} - version in deleted.txt needs to be increased"
             (( failed += 1))
         fi
+    fi
+    if [[ "$failed" = 0 ]];then
+        echo "${color_ok}ok${color_reset} - deleted.txt"
     fi
     exit $failed
 }

@@ -59,8 +59,7 @@ nonUniqueTranslatorID () {
 reusingDeletedID () {
     local dir id duplicateIds
     dir=$(dirname "$TRANSLATOR")
-    id=$(grep -r '"translatorID"' "$TRANSLATOR" \
-        | sed -e 's/[" ,]//g' -e 's/^.*://g')
+    id=$(grepTranslatorId "$TRANSLATOR")
     if grep -qF "$id" "$dir/deleted.txt";then
         err "Is reusing an earlier deleted ID"
         return 1
