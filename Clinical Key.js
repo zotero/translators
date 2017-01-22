@@ -1,21 +1,7 @@
-{
-	"translatorID": "a55463ba-e403-415b-80d4-284d5f9b4b15",
-	"label": "Clinical Key",
-	"creator": "Jaret M. Karnuta",
-	"target": "^https?://(www\\.|www-)clinicalkey(\\.|-)com",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 03:13:52"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Jaret M. Karnuta
+	Copyright © 2017 Jaret M. Karnuta & Mike Davidson
 
 	This file is part of Zotero.
 
@@ -36,14 +22,21 @@
 */
 
 /*
-This translator is designed specifically for use on book section portions of
-ClinicalKey. It will not work on journal articles and book overview pages.
+This translator is designed specifically for use on book section portions and journal articles of
+ClinicalKey. It will not work on book overview pages or journal table of contents pages.
 
 NB: url and doc.location.href are different. I think it is because of the way clinicalkey redirects.
 Replicate by going to a content page (/content/book/...) and then going to a broswing page (/browse/book/...).
 URL remains the page of the previous page (content page) and doc.location.href is the current page (as it should be).
 
 Hence, I never use url and change its content to doc.location.href in detectWeb, the only function that uses the url
+
+To get journal article metadata, Publisher Item Identifier (PIIs) are extracted from the Scopus EID
+and queried using the CrossRef REST API. 
+Documentation at:
+https://github.com/CrossRef/rest-api-doc
+CrossReff REST API Return Values at:
+https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
 */
 
 function detectWeb(doc, url) {
@@ -68,6 +61,10 @@ function detectWeb(doc, url) {
 	//similar structure to above
 	else if (url.indexOf('/browse/book/') != -1 && url.indexOf("login?") == -1){
 		contentType = "book";
+	}
+	// similar structure to above, for journal articles
+	else if (url.indexOf('/content/journal/') != -1 && url.indexOf("login?") == -1){
+		contentType = "journalArticle";
 	}
 
 	//contentType not set
@@ -130,6 +127,117 @@ function doWeb(doc, url){
 		search.setSearch({ ISBN: isbn });
 		search.getTranslators();
 	}
+	else if (contentType == 'journalArticle') {
+		eid = url.split('/');
+		pii = eid.pop().slice(7);
+		
+		/* can use xpath to get pii; guessing the url is faster
+		var eid = ZU.xpathText(doc, "//ul/@data-eid");
+		pii = eid.slice(7);*/
+		
+		if(!/^S(\d{15}X|\d{16})/.test(pii)){
+			throw new Error('PII incorrectly formatted');
+			return;
+		}
+		
+		doSearch(pii, doc);
+	}
+	
+}
+
+//Search & Processing based on CrossRef.js translator
+function doSearch(pii, doc){
+	crossRefQuery = 'http://api.crossref.org/works?query=' + pii
+	Zotero.Utilities.HTTP.doGet(crossRefQuery, function(responseText) {
+		processCrossRefREST(responseText, doc);
+		Zotero.done();
+	});
+	
+	Zotero.wait();
+}
+
+function processCrossRefREST(jsonOutput, doc){
+	try {
+		jsonParsed = JSON.parse(jsonOutput);
+		ref = jsonParsed['message']['items'][0];
+	} catch (e) {
+		Zotero.debug(e);
+		return false;
+	}
+	
+	if (jsonParsed['message']['total-results'] > 1) {
+		//Not sure what to do with multiple results 
+		//Should only return 1 item
+		throw new Error('Returned multiple results');
+		return;
+	}
+	
+	if (ref['type'] != 'journal-article') {
+		//redundency check to ensure proper citation 
+		throw new Error('Returned unexpected reference type')
+		return;
+	}
+	//Populate fields
+	var newItem = new Zotero.Item('journalArticle');
+	newItem.libraryCatalog = 'CrossRef';
+	newItem.title = ref['title'][0];
+	newItem.publicationTitle = ref['container-title'][0];
+	newItem.volume = ref['volume'];
+	newItem.issue = ref['issue'];
+	newItem.pages = ref['page'];
+	newItem.DOI = ref['DOI'];
+	newItem.ISSN = ref['ISSN'][0];
+	newItem.url = ref['URL'];
+	
+	//If article was published online only
+	if (ref['published-print']) {
+		dateArray = ref['published-print'];
+	}
+	else {
+		dateArray = ref['published-online'];
+	}	
+	//Handle Partial Dates
+	var year = dateArray['date-parts'][0][0];
+	var month = dateArray['date-parts'][0][1];
+	var day = dateArray['date-parts'][0][2];
+	
+	if (year) {
+		if (month) {
+			if (day) {
+				newItem.date = year+"-"+month+"-"+day;
+			} else {
+				newItem.date = month+"/"+year;
+			}
+		} else {
+			newItem.date = year;
+		}
+	}	
+	
+	//Parse authors
+	for (var i = 0; i < ref['author']['length']-1; i++) {
+		var creator = {};
+		creator.creatorType = 'author';	//Current API doesn't specify roles
+		creator.firstName = ref['author'][i]['given'];
+		creator.lastName = ref['author'][i]['family'];
+		newItem.creators.push(creator);
+	}
+	
+	//Attempt to download fulltext PDF
+	var pdfUrl = doc.getElementsByClassName('x-pdf')[0].href;
+	if (pdfUrl) {
+		newItem.attachments.push({
+			url:pdfUrl,
+			title:"Full Text PDF",
+			mimeType:"application/pdf"
+		});
+	}
+	
+	//Get Tags (doesn't work)
+	for (var i = 0; i < ref['subject']['length']-1; i++) {
+		newItem.tags.push(ref['subject'][i])
+	}
+	
+	newItem.complete();
 }
 
 function scrapeBookSection(doc, item){
