@@ -1,3 +1,16 @@
+{
+	"translatorID": "a55463ba-e403-415b-80d4-284d5f9b4b15",
+	"label": "Clinical Key",
+	"creator": "Jaret M. Karnuta, Mike Davidson",
+	"target": "^https?://(www\\.|www-)clinicalkey(\\.|-)com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-01-22 18:25:52"
+}
 /*
 	***** BEGIN LICENSE BLOCK *****
 
