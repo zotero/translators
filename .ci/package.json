@@ -4,7 +4,7 @@
   "description": "Continuous integration of Zotero translators",
   "main": "index.js",
   "scripts": {
-    "test": "export SKIP_WARN=true ; find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P8 ./checkTranslator.sh 2>/dev/null",
+    "test": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P8 ./checkTranslator.sh --skip-warn",
     "start": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P1 ./checkTranslator.sh"
   },
   "author": "kba+pz",
