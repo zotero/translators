@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-06-21 08:45:20"
+	"lastUpdated": "2017-01-22 20:06:21"
 }
 
 function detectImport() {
@@ -1423,6 +1423,7 @@ function applyValue(item, zField, value, rawLine) {
 	if(!Zotero.parentTranslator //cannot use this in connectors, plus we drop notes in most cases anyway
 		&& zField != 'creators' && zField != 'tags'
 		&& zField != 'notes' && zField != 'attachments'
+		&& zField != 'DOI'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
 		if(!ignoreUnknown && !Zotero.parentTranslator) {
@@ -1449,6 +1450,19 @@ function applyValue(item, zField, value, rawLine) {
 				item.extra += '\n' + value;
 			} else {
 				item.extra = value;
+			}
+		break;
+		case 'DOI':
+			if (!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
+				value = ZU.cleanDOI(value);
+				if(item.extra) {
+					item.extra += '\nDOI: ' + value;
+				} else {
+					item.extra = 'DOI: ' + value;
+				}
+			}
+			else {
+				item[zField] = value;
 			}
 		break;
 		default:
@@ -6326,6 +6340,7 @@ var testCases = [
 				"ISBN": "9783642002304",
 				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
 				"callNumber": "300 QN 100 D419",
+				"extra": "DOI: 10.1007/978-3-642-00230-4",
 				"language": "ger",
 				"libraryCatalog": "UB Mannheim",
 				"place": "Berlin, Heidelberg",
