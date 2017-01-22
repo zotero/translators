@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 19:29:47"
+	"lastUpdated": "2017-01-22 22:31:49"
 }
 
 function detectWeb(doc, url) {
@@ -215,11 +215,11 @@ function processRIS(doc, text) {
 			return pre + name;
 		}
 	);
-	//Z.debug(text)
 	//The RIS sometimes has spaces at the beginning of lines, which break things
 	//as of 20170121 e.g. on http://www.sciencedirect.com/science/article/pii/B9780123706263000508 for A2
 	//remove them
-	text = text.replace(/\n\s+([A-Z][A-Z0-9])\s{2}\-\s/, "\n$1  - ");
+	text = text.replace(/\n\s+/g, "\n");
+	//Z.debug(text)
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
@@ -637,6 +637,7 @@ var testCases = [
 				"ISBN": "9780123706263",
 				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
 				"bookTitle": "Encyclopedia of Inland Waters",
+				"extra": "DOI: 10.1016/B978-012370626-3.00050-8",
 				"libraryCatalog": "ScienceDirect",
 				"pages": "295-305",
 				"place": "Oxford",
