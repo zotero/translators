@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-09-09 20:05:00"
+	"lastUpdated": "2017-01-22 20:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -372,6 +372,7 @@ var testCases = [
 				"publisher": "Cambridge University Press",
 				"pages": "201-207",
 				"date": "2007",
+				"extra": "DOI: 10.1017/CCOL0521858429.016",
 				"DOI": "10.1017/CCOL0521858429.016",
 				"url": "http://universitypublishingonline.org/ref/id/companions/CBO9781139001472A019",
 				"title": "Why Orwell still matters",
@@ -413,7 +414,8 @@ var testCases = [
 				"publisher": "Palgrave Macmillan",
 				"language": "en",
 				"date": "2012-10-17",
-				"DOI": "10.1017/CCOL0521858429.016",
+				"extra": "DOI: 10.1057/9780230391116",
+				"DOI": "10.1057/9780230391116",
 				"url": "http://www.palgraveconnect.com/doifinder/10.1057/9780230391116.0016",
 				"title": "Conceptions, Competences and Limits of German Regional Planning during the Four Year Plan, 1936–1940",
 				"libraryCatalog": "CrossRef"
