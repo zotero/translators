@@ -9,35 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-13 20:03:14"
+	"lastUpdated": "2017-01-22 22:31:49"
 }
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
-	
-	if ((url.indexOf("_ob=DownloadURL") !== -1) 
-		|| doc.title == "ScienceDirect Login" 
-		|| doc.title == "ScienceDirect - Dummy"
-		|| (url.indexOf("/science/advertisement/") !== -1)) { 
+
+	if ((url.indexOf("_ob=DownloadURL") !== -1) ||
+		doc.title == "ScienceDirect Login" ||
+		doc.title == "ScienceDirect - Dummy" ||
+		(url.indexOf("/science/advertisement/") !== -1)) {
 		return false;
 	}
 
-	if((url.indexOf("pdf") !== -1
-			&& url.indexOf("_ob=ArticleURL") === -1
-			&& url.indexOf("/article/") === -1)
-		|| url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1
-		|| url.indexOf("_ob=ArticleListURL") !== -1) {
+	if ((url.indexOf("pdf") !== -1 &&
+			url.indexOf("_ob=ArticleURL") === -1 &&
+			url.indexOf("/article/") === -1) ||
+		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 ||
+		url.indexOf("_ob=ArticleListURL") !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
 			return false;
 		}
-	} else if(url.indexOf("pdf") === -1) {
+	} else if (url.indexOf("pdf") === -1) {
 		// Book sections have the ISBN in the URL
 		if (url.indexOf("/B978") !== -1) {
 			return "bookSection";
-		} else if(getISBN(doc)) {
-			if(getArticleList(doc).length) {
+		} else if (getISBN(doc)) {
+			if (getArticleList(doc).length) {
 				return "multiple";
 			} else {
 				return "book";
@@ -45,37 +45,37 @@ function detectWeb(doc, url) {
 		} else {
 			return "journalArticle";
 		}
-	} 
+	}
 }
 
 function getPDFLink(doc) {
 	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
-	if (!pdfLink){
+	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	}
-	return pdfLink
+	return pdfLink;
 }
 
 function getISBN(doc) {
 	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
 		//span[@class="txtSmall"]');
-	if(!isbn) return;
+	if (!isbn) return;
 
 	isbn = isbn.match(/ISBN:\s*([-\d]+)/);
-	if(!isbn) return;
+	if (!isbn) return;
 
 	return isbn[1].replace(/[-\s]/g, '');
 }
 
 function getFormValues(text, inputs) {
-	var re = new RegExp("<input[^>]+name=(['\"]?)("
-			+ inputs.join('|')
-			+ ")\\1[^>]*>", 'g');
+	var re = new RegExp("<input[^>]+name=(['\"]?)(" +
+		inputs.join('|') +
+		")\\1[^>]*>", 'g');
 
 	var input, val, params = {};
-	while(input = re.exec(text)) {
+	while (input = re.exec(text)) {
 		val = input[0].match(/value=(['"]?)(.*?)\1[\s>]/);
-		if(!val) continue;
+		if (!val) continue;
 
 		params[encodeURIComponent(input[2])] = encodeURIComponent(val[2]);
 	}
@@ -86,7 +86,7 @@ function getFormValues(text, inputs) {
 function getAbstract(doc) {
 	var p = ZU.xpath(doc, '//div[contains(@class, "abstract") and not(contains(@class, "abstractHighlights"))]/p');
 	var paragraphs = [];
-	for(var i=0; i<p.length; i++) {
+	for (var i = 0; i < p.length; i++) {
 		paragraphs.push(ZU.trimInternal(p[i].textContent));
 	}
 	return paragraphs.join('\n');
@@ -96,7 +96,7 @@ function getAbstract(doc) {
 //intentionally excluding potentially large files like videos and zip files
 var suppTypeMap = {
 	'pdf': 'application/pdf',
-//	'zip': 'application/zip',
+	//	'zip': 'application/zip',
 	'doc': 'application/msword',
 	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 	'xls': 'application/vnd.ms-excel',
@@ -108,31 +108,31 @@ function attachSupplementary(doc, item) {
 	var links = ZU.xpath(doc, './/span[starts-with(@class, "MMCvLABEL_SRC")]');
 	var link, title, url, type, snapshot;
 	var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
-	for(var i=0, n=links.length; i<n; i++) {
+	for (var i = 0, n = links.length; i < n; i++) {
 		link = links[i].firstElementChild;
-		if(!link || link.nodeName.toUpperCase() !== 'A') continue;
-		
+		if (!link || link.nodeName.toUpperCase() !== 'A') continue;
+
 		url = link.href;
-		if(!url) continue;
-		
+		if (!url) continue;
+
 		title = ZU.trimInternal(link.textContent);
-		if(!title) title = 'Supplementary Data';
-		
-		type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
+		if (!title) title = 'Supplementary Data';
+
+		type = suppTypeMap[url.substr(url.lastIndexOf('.') + 1).toLowerCase()];
 		snapshot = !attachAsLink && type;
-		
+
 		var attachment = {
 			title: title,
 			url: url,
 			mimeType: type,
 			snapshot: !!snapshot
 		};
-		
+
 		var replaced = false;
-		if(snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
+		if (snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
 			//replace full text PDF
-			for(var j=0, m=item.attachments.length; j<m; j++) {
-				if(item.attachments[j].title == "ScienceDirect Full Text PDF") {
+			for (var j = 0, m = item.attachments.length; j < m; j++) {
+				if (item.attachments[j].title == "ScienceDirect Full Text PDF") {
 					attachment.title = "Article plus Supplemental Information";
 					item.attachments[j] = attachment;
 					replaced = true;
@@ -140,8 +140,8 @@ function attachSupplementary(doc, item) {
 				}
 			}
 		}
-		
-		if(!replaced) {
+
+		if (!replaced) {
 			item.attachments.push(attachment);
 		}
 	}
@@ -152,11 +152,11 @@ function scrapeByExport(doc) {
 	ZU.doGet(url, function(text) {
 		//select the correct form
 		var form = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/);
-		if(form) {
+		if (form) {
 			form = form[0];
 		} else {
 			form = text.match(/<form[^>]*>/g);
-			if(!form) {
+			if (!form) {
 				Z.debug('No forms found on page.');
 			} else {
 				Z.debug(form.join('\n*********\n'));
@@ -165,20 +165,22 @@ function scrapeByExport(doc) {
 		}
 
 		var postParams = getFormValues(form, [
-						//'_ArticleListID',	//do we still need this?
-						'_acct', '_docType', '_eidkey',
-						'_method', '_ob', '_uoikey', '_userid', 'count',
-						'Export', 'JAVASCRIPT_ON', 'md5'
-						]);
+			//'_ArticleListID',	//do we still need this?
+			'_acct', '_docType', '_eidkey',
+			'_method', '_ob', '_uoikey', '_userid', 'count',
+			'Export', 'JAVASCRIPT_ON', 'md5'
+		]);
 		postParams["format"] = "cite-abs";
 		postParams["citation-type"] = "RIS";
 
 		var post = '';
-		for(var key in postParams) {
+		for (var key in postParams) {
 			post += key + '=' + postParams[key] + "&";
 		}
 
-		ZU.doPost('/science', post, function(text) { processRIS(doc, text) });
+		ZU.doPost('/science', post, function(text) {
+			processRIS(doc, text)
+		});
 	});
 }
 
@@ -187,13 +189,13 @@ function processRIS(doc, text) {
 	//Sometimes has series title, so I'm mapping this to T3,
 	// although we currently don't recognize that in RIS
 	text = text.replace(/^T2\s/mg, 'T3 ');
-	
+
 	//Sometimes PY has some nonsensical value. Y2 contains the correct
 	// date in that case.
-	if(text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
+	if (text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
 		text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
-			if(m.search(/^PY\s+-\s+\d{4}\b/m) === -1
-				&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
+			if (m.search(/^PY\s+-\s+\d{4}\b/m) === -1 &&
+				m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
 			) {
 				return m.replace(/^PY\s+-.*\r?\n/mg, '')
 					.replace(/^Y2\s+-/mg, 'PY  -');
@@ -209,31 +211,36 @@ function processRIS(doc, text) {
 			if (name.indexOf(',') == -1) {
 				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
 			}
-			
+
 			return pre + name;
 		}
 	);
+	//The RIS sometimes has spaces at the beginning of lines, which break things
+	//as of 20170121 e.g. on http://www.sciencedirect.com/science/article/pii/B9780123706263000508 for A2
+	//remove them
+	text = text.replace(/\n\s+/g, "\n");
+	//Z.debug(text)
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function(obj, item) {
 		//issue sometimes is set to 0 for single issue volumes (?)
-		if(item.issue == 0) delete item.issue;
-		
+		if (item.issue === 0) delete item.issue;
+
 		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
-		
+
 		//add spaces after initials
-		for(var i=0, n=item.creators.length; i<n; i++) {
-			if(item.creators[i].firstName) {
+		for (var i = 0, n = item.creators.length; i < n; i++) {
+			if (item.creators[i].firstName) {
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
 			}
 		}
-		
+
 		//abstract is not included with the new export form. Scrape from page
-		if(!item.abstractNote) {
+		if (!item.abstractNote) {
 			item.abstractNote = getAbstract(doc);
 		}
-		if (item.abstractNote){
+		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^Abstract[\s:\n]*/, "");
 		}
 		item.attachments.push({
@@ -242,35 +249,36 @@ function processRIS(doc, text) {
 		});
 
 		var pdfLink = getPDFLink(doc);
-		if(pdfLink) item.attachments.push({
+		if (pdfLink) item.attachments.push({
 			title: 'ScienceDirect Full Text PDF',
 			url: pdfLink,
 			mimeType: 'application/pdf'
 		});
-		
+
 		//attach supplementary data
-		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
-			try {	//don't fail if we can't attach supplementary data
+		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			try { //don't fail if we can't attach supplementary data
 				attachSupplementary(doc, item);
-			} catch(e) {
-				Z.debug("Error attaching supplementary information.")
+			} catch (e) {
+				Z.debug("Error attaching supplementary information.");
 				Z.debug(e);
 			}
 		}
 
-		if(item.notes[0]) {
+		if (item.notes[0]) {
 			item.abstractNote = item.notes[0].note;
-			item.notes = new Array();
+			item.notes = [];
 		}
-		if(item.abstractNote) {
+		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
 		}
-		
-		if (item.DOI) item.DOI = item.DOI.replace(/^doi:\s+/i, '');
-		
+
+		if (item.DOI) {
+			item.DOI = item.DOI.replace(/^doi:\s+/i, '');
+		}
 		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
-		
+
 		item.complete();
 	});
 	translator.translate();
@@ -280,7 +288,9 @@ function scrapeByISBN(doc) {
 	var isbn = getISBN(doc);
 	var translator = Zotero.loadTranslator("search");
 	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
-	translator.setSearch({ISBN: isbn});
+	translator.setSearch({
+		ISBN: isbn
+	});
 	translator.translate();
 }
 
@@ -294,36 +304,36 @@ function getArticleList(doc) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		//search page
 		var itemList = getArticleList(doc);
 		var items = {};
-		for(var i=0, n=itemList.length; i<n; i++) {
+		for (var i = 0, n = itemList.length; i < n; i++) {
 			items[itemList[i].href] = itemList[i].textContent;
 		}
 
 		Zotero.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var articles = [];
 			for (var i in selectedItems) {
 				//articles.push(i);
-				ZU.processDocuments(i, scrape);	//move this out of the loop when ZU.processDocuments is fixed
+				ZU.processDocuments(i, scrape); //move this out of the loop when ZU.processDocuments is fixed
 			}
 		});
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
 function getFormInput(form) {
 	var inputs = form.elements;
-	var values = {}
-	for (var i=0; i<inputs.length; i++) {
+	var values = {};
+	for (var i = 0; i < inputs.length; i++) {
 		if (!inputs[i].name) continue;
 		values[inputs[i].name] = inputs[i].value;
 	}
-	
+
 	return values;
 }
 
@@ -332,16 +342,16 @@ function formValuesToPostData(values) {
 	for (var v in values) {
 		s += '&' + encodeURIComponent(v) + '=' + encodeURIComponent(values[v]);
 	}
-	
+
 	if (!s) {
 		Zotero.debug("No values provided for POST string");
 		return false;
 	}
-	
+
 	return s.substr(1);
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 	// On most page the export form uses the POST method
 	var form = ZU.xpath(doc, '//form[@name="exportCite"]')[0];
 	if (form) {
@@ -354,8 +364,8 @@ function scrape(doc) {
 		});
 		return;
 	}
-	
-	
+
+
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
@@ -363,26 +373,42 @@ function scrape(doc) {
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
-		var url = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
-		ZU.doGet(url, function(text) { processRIS(doc, text) });
-		return;
+		if (!pii) {
+			Z.debug("not finding pii in metatag; attempting to parse URL");
+			pii = url.match(/\/pii\/([^#\?]+)/);
+			if (pii) {
+				pii = pii[1];
+			} else {
+				Z.debug("cannot find pii");
+			}
+		}
+		if (pii) {
+			var risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
+			//Z.debug(risUrl)
+			ZU.doGet(risUrl, function(text) {
+				processRIS(doc, text)
+			});
+			return;
+		}
 	}
-	
-	
+
+
 	// On some older article pages, there seems to be a different form
 	// that uses GET
 	form = doc.getElementById('export-form');
 	if (form) {
 		Z.debug("Fetching RIS via GET form (old)");
-		var url = form.action
-			+ '?export-format=RIS&export-content=cite-abs';
-		ZU.doGet(url, function(text) { processRIS(doc, text) });
+		var risUrl = form.action +
+			'?export-format=RIS&export-content=cite-abs';
+		ZU.doGet(risUrl, function(text) {
+			processRIS(doc, text)
+		});
 		return;
 	}
-	
+
 	/***
 	 * Probably deprecated. Let's see if we break anything
-	 * 
+	 *
 	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a')[0];
 	if (link) {
 		Z.debug("Fetching RIS via intermediate page");
@@ -390,20 +416,19 @@ function scrape(doc) {
 		return;
 	}
 	*/
-	
+
 	/***
 	 * Also probably no longer necessary, since fetching via POST seems to cover
 	 * all test cases
-	 * 
+	 *
 	if(getISBN(doc)) {
 		Z.debug("Scraping by ISBN");
 		scrapeByISBN(doc);
 	}
 	*/
-	
-	throw new Error("Could not scrape metadata via known methods")
-}
-/** BEGIN TEST CASES **/
+
+	throw new Error("Could not scrape metadata via known methods");
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -612,6 +637,7 @@ var testCases = [
 				"ISBN": "9780123706263",
 				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
 				"bookTitle": "Encyclopedia of Inland Waters",
+				"extra": "DOI: 10.1016/B978-012370626-3.00050-8",
 				"libraryCatalog": "ScienceDirect",
 				"pages": "295-305",
 				"place": "Oxford",
