@@ -59,8 +59,7 @@ nonUniqueTranslatorID () {
 reusingDeletedID () {
     local dir id duplicateIds
     dir=$(dirname "$TRANSLATOR")
-    id=$(grep -r '"translatorID"' "$TRANSLATOR" \
-        | sed -e 's/[" ,]//g' -e 's/^.*://g')
+    id=$(grepTranslatorId "$TRANSLATOR")
     if grep -qF "$id" "$dir/deleted.txt";then
         err "Is reusing an earlier deleted ID"
         return 1
@@ -132,6 +131,10 @@ main() {
     # Add './node_modules/.bin to PATH for jsonlint
     PATH=$SCRIPT_DIR/node_modules/.bin:"$PATH"
 
+    if [[ "$1" = "--skip-warn" ]];then
+        SKIP_WARN=true
+        shift
+    fi
     TRANSLATOR="$1"
     TRANSLATOR_BASENAME="$(basename "$TRANSLATOR")"
     [[ -z $TRANSLATOR ]]   && { usage; exit 1; }
