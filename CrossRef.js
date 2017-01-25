@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-22 20:05:00"
+	"lastUpdated": "2017-01-23 10:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -293,7 +293,12 @@ function processCrossRef(xmlOutput) {
 	item.DOI = ZU.xpathText(refXML, 'c:doi_data/c:doi', ns);
 	//add DOI to extra for unsupprted items
 	if (item.DOI && item.itemType != "journalArticle" && item.itemType != "conferencePaper") {
-		item.extra = "DOI: " + item.DOI;
+		if (item.extra){
+			item.extra += "\nDOI: " + item.DOI;
+		}
+		else {
+			item.extra = "DOI: " + item.DOI;
+		}
 	}
 	item.url = ZU.xpathText(refXML, 'c:doi_data/c:resource', ns);
 	var title = ZU.xpath(refXML, 'c:titles[1]/c:title[1]', ns)[0];
@@ -336,7 +341,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 
-	Zotero.Utilities.HTTP.doGet("http://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
+	ZU.doGet("http://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
 		processCrossRef(responseText);
 	});
 }

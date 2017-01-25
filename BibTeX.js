@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-22 21:51:16"
+	"lastUpdated": "2017-01-25 13:39:28"
 }
 
 function detectImport() {
@@ -103,8 +103,7 @@ var extraIdentifiers = {
 	mrnumber: 'MR',
 	zmnumber: 'Zbl',
 	pmid: 'PMID',
-	pmcid: 'PMCID',
-	doi: 'DOI'
+	pmcid: 'PMCID'
 	
 	//Mostly from Wikipedia citation templates
 	//asin - Amazon ID
@@ -264,9 +263,8 @@ function processField(item, field, value, rawValue) {
 	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
 		//map DOIs + Label to Extra for unsupported item types
-		if (field == "doi" && item.itemType != "journalArticle" && item.itemType != "conferencePaper") {
-			var label = extraIdentifiers[field];
-			item._extraFields.push({field: label, value: value.trim()});
+		if (field == "doi" &&!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
+			item._extraFields.push({field: "DOI", value: ZU.cleanDOI(value)});
 		}
 		else {
 			item[fieldMap[field]] = value;
@@ -3481,6 +3479,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"DOI": "10.12345/123456",
 				"extra": "LCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
 				"itemID": "smith_testing_????",
 				"attachments": [],
