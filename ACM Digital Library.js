@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-01-21 13:29:55"
+	"lastUpdated": "2017-01-26 12:12:58"
 }
 
 /*
@@ -125,6 +125,16 @@ function scrape(doc) {
 			// some bibtext contains odd </kwd> tags - remove them
 			for(var i=0; i<item.tags.length; i++) {
 				item.tags[i] = item.tags[i].replace("</kwd>", "");
+			}
+			
+			//full issues of journals/magazines don't have a title
+			if (!item.title && text.indexOf("issue_date")>-1) {
+				var m = text.match(/issue_date\s*=\s*{(.*)},?/);
+				item.itemType = "book";
+				item.title = item.publicationTitle;
+				if (m) {
+					item.title = item.title + ", " + m[1];
+				}
 			}
 			
 			item.complete();
@@ -377,6 +387,38 @@ var testCases = [
 		"type": "web",
 		"url": "http://dl.acm.org/author_page.cfm?id=81100246710",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org/citation.cfm?id=3029062",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "interactions, January - February 2017",
+				"creators": [
+					{
+						"firstName": "Ron",
+						"lastName": "Wakkary",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Erik",
+						"lastName": "Stolterman",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"itemID": "Wakkary:2016:3029062",
+				"libraryCatalog": "ACM Digital Library",
+				"place": "New York, NY, USA",
+				"publisher": "ACM",
+				"volume": "24",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
