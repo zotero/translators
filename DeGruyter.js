@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-08-02 07:54:49"
+	"lastUpdated": "2017-01-26 07:54:49"
 }
 
 /*
@@ -98,7 +98,7 @@ function scrapeRIS(doc, url) {
 	var abstract = doc.getElementById('overviewContent') || 
 					ZU.xpath(doc,'//div[@class="articleBody_abstract"]/p')[0] || 
 					ZU.xpath(doc,'//div[@class="articleBody_transAbstract"]/p')[0];
-	var pdfUrl = ZU.xpathText(doc,'//div[@class="fullContentLink"]/a[@class="pdf-link"]/@href');
+	var pdfUrl = ZU.xpathText(doc,'//div[contains(@class, "fullContentLink")]/a[@class="pdf-link"]/@href');
 
 	var biblRemark = doc.getElementById('biblRemark');
 
