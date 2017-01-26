@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-23 10:05:00"
+	"lastUpdated": "2017-01-25 10:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -292,7 +292,7 @@ function processCrossRef(xmlOutput) {
 
 	item.DOI = ZU.xpathText(refXML, 'c:doi_data/c:doi', ns);
 	//add DOI to extra for unsupprted items
-	if (item.DOI && item.itemType != "journalArticle" && item.itemType != "conferencePaper") {
+	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
 		if (item.extra){
 			item.extra += "\nDOI: " + item.DOI;
 		}

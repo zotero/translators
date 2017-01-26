@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-23 14:10:26"
+	"lastUpdated": "2017-01-25 14:10:26"
 }
 
 function detectImport() {
@@ -1460,6 +1460,7 @@ function applyValue(item, zField, value, rawLine) {
 				} else {
 					item.extra = 'DOI: ' + value;
 				}
+				break;
 			}
 		default:
 			//check if value already exists. Don't overwrite existing values
