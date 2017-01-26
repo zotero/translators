@@ -280,7 +280,7 @@ function processRIS(doc, text) {
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
 		
 		if (item.url && item.url.substr(0,2) == "//") {
-			item.url = "http:" + item.url;
+			item.url = "https:" + item.url;
 		}
 
 		item.complete();
