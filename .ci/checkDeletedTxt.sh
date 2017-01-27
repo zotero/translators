@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "$SCRIPT_DIR/helper.sh"
@@ -8,13 +7,13 @@ cd "$SCRIPT_DIR"
 MASTER="master"
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-if ! git branch |grep "$MASTER"; then
-    git fetch origin $MASTER
-    git checkout -b $MASTER origin/$MASTER
+if [[ "$BRANCH" = "$MASTER" ]];then
+    echo "${color_warn}skip${color_reset} - Can only check deleted.txt when not on '$MASTER' branch"
+    exit 0
 fi
 
-if [[ "$BRANCH" = "$MASTER" ]];then
-    echo "ok - Can only check deleted.txt when not on '$MASTER' branch"
+if ! git branch |grep -q "$MASTER"; then
+    echo "${color_warn}skip${color_reset} - Can only check deleted.txt when '$MASTER' branch is also available for comparison"
     exit 0
 fi
 
