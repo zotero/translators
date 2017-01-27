@@ -109,7 +109,7 @@ function scrape(doc, url) {
 				if (firstName && lastName) {
 					item.creators.push({'firstName': firstName, 'lastName': lastName, 'creatorType': "author"});
 				} else if (lastName && lastName.trim() !== "") {
-					item.creators.push({'lastName': lastName, 'creatorType': "author"});
+					item.creators.push({'lastName': lastName, 'fieldMode': 1, 'creatorType': "author"});
 				}
 			}
 		}
