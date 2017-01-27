@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 22:31:49"
+	"lastUpdated": "2017-01-25 18:29:16"
 }
 
 function detectWeb(doc, url) {
@@ -278,6 +278,10 @@ function processRIS(doc, text) {
 		}
 		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
+		
+		if (item.url && item.url.substr(0,2) == "//") {
+			item.url = "https:" + item.url;
+		}
 
 		item.complete();
 	});
