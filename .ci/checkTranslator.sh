@@ -110,7 +110,7 @@ problematicJS () {
     jshint_error=$(sed '1,/^}/ s/.*//' "$TRANSLATOR" \
         | sed 's,/\*\* BEGIN TEST,\n\0,' \
         | sed '/BEGIN TEST/,$ d' \
-        | jshint --config=jshintrc --reporter=unix -)
+        | jshint --config="$SCRIPT_DIR"/jshintrc --reporter=unix -)
     if (( $? > 0 ));then
         warn "JSHint shows issues with this code"
         warn "$jshint_error"
