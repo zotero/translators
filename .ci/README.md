@@ -27,12 +27,16 @@ You can use the npm bindings to run tests on all translators:
 You can use the bash script `checkTranslator.sh` directly to
 run tests on a single translator, e.g.
 ```
+# in .ci directory:
 ./checkTranslator.sh ../Amazon.js
+
+# in translators directory:
+.ci/checkTranslator.sh Amazon.js
 ```
 Moreover, you can skip the warnings by using the `--skip-warn`
-option:
+option and reference the translators just by their label, e.g.
 ```
-./checkTranslator.sh --skip-warn ../Amazon.com
+./checkTranslator.sh --skip-warn Amazon
 ```
 
 You can also check the `deleted.txt` when deleting translators by

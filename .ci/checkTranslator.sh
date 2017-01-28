@@ -124,7 +124,7 @@ problematicJS () {
 
 err () { echo -e "$*" | sed "s/^/# ${color_err}ERROR:${color_reset} $TRANSLATOR_BASENAME :/" >&2; }
 warn () { echo -e "$*" | sed "s/^/# ${color_warn}WARN: ${color_reset} $TRANSLATOR_BASENAME :/" >&2; }
-usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 <translator.js>"; }
+usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 [--skip-warn] <translator.js>"; }
 
 main() {
 
@@ -138,7 +138,11 @@ main() {
     TRANSLATOR="$1"
     TRANSLATOR_BASENAME="$(basename "$TRANSLATOR")"
     [[ -z $TRANSLATOR ]]   && { usage; exit 1; }
-    [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found."; exit 2; }
+    if [[ ! -e $TRANSLATOR ]];then
+        # Construct filename and path if $TRANSLATOR is only used as label
+        TRANSLATOR="$(dirname $SCRIPT_DIR)/${TRANSLATOR}.js"
+    fi
+    [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found.\n$TRANSLATOR"; exit 2; }
     [[ -d $TRANSLATOR ]]   && { usage "Must be a file not a directory."; exit 3; }
 
     declare -a errors=() warnings=()
