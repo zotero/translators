@@ -22,20 +22,28 @@ You can use the npm bindings to run tests on all translators:
 (faster, because up to 8 cores are used, such that output will not stay in alphabetical order)
 
 
-## Using the script directly
+## Using the scripts directly
 
 You can use the bash script `checkTranslator.sh` directly to
 run tests on a single translator, e.g.
 ```
+# in .ci directory:
 ./checkTranslator.sh ../Amazon.js
+
+# in translators directory:
+.ci/checkTranslator.sh Amazon.js
 ```
-Moreover, you can skip the warnings by setting the environment
-variable `SKIP_WARN` to `true`:
+Moreover, you can skip the warnings by using the `--skip-warn`
+option and reference the translators just by their label, e.g.
 ```
-export SKIP_WARN=true
-./checkTranslator.sh ../Amazon.com
+./checkTranslator.sh --skip-warn Amazon
 ```
 
-To switch back just set the variable to the empty string.
+You can also check the `deleted.txt` when deleting translators by
+```
+./checkDeletedTxt.sh
+```
 
+(This does a comparison with the master branch, which must be there but
+currently not checked out. Otherwise the test is skipped.)
 
