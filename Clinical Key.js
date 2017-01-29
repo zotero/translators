@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 18:25:52"
+	"lastUpdated": "2017-01-28 19:25:52"
 }
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -95,10 +95,10 @@ function doWeb(doc, url){
 		var newItem = new Zotero.Item(contentType);
 		newItem = scrapeBookSection(doc, newItem);
 		//pdf (if present)
-		var pdfUrl = doc.getElementsByClassName('x-pdf')[0].href;
-		if(pdfUrl){
+		var pdfLink = getPDFLink(doc);
+		if (pdfLink) {
 			newItem.attachments.push({
-				url:pdfUrl,
+				url:pdfLink,
 				title:"Book Section PDF",
 				mimeType:"application/pdf"
 			});
@@ -141,18 +141,20 @@ function doWeb(doc, url){
 		search.getTranslators();
 	}
 	else if (contentType == 'journalArticle') {
-		eid = url.split('/');
-		pii = eid.pop().slice(7);
-		
-		/* can use xpath to get pii; guessing the url is faster
-		var eid = ZU.xpathText(doc, "//ul/@data-eid");
-		pii = eid.slice(7);*/
-		
-		if(!/^S(\d{15}X|\d{16})/.test(pii)){
-			throw new Error('PII incorrectly formatted');
-			return;
-		}
-		
+		try {
+			eid = url.split('/');
+			pii = eid.pop().slice(7);
+			if (!/^S(\d{15}X|\d{16})/.test(pii)){
+				throw new Error('PII from url failed. Trying Xpath');
+			}
+			} catch(e) {
+				Zotero.debug(e);
+				eid = ZU.xpathText(doc, "//ul/@data-eid");
+				pii = eid.slice(7);
+				if (!/^S(\d{15}X|\d{16})/.test(pii)){
+					throw new Error('PII from Xpath failed');
+				}
+			}
 		doSearch(pii, doc);
 	}
 	
@@ -160,97 +162,74 @@ function doWeb(doc, url){
 
 //Search & Processing based on CrossRef.js translator
 function doSearch(pii, doc){
-	crossRefQuery = 'http://api.crossref.org/works?query=' + pii
+	crossRefQuery = 'http://api.crossref.org/works?query=' + pii;
+	//acceptHeader = {'Accept': 'application/vnd.crossref-api-message+json; version=1.0'}
 	Zotero.Utilities.HTTP.doGet(crossRefQuery, function(responseText) {
 		processCrossRefREST(responseText, doc);
-		Zotero.done();
-	});
-	
-	Zotero.wait();
+		});
 }
 
 function processCrossRefREST(jsonOutput, doc){
-	try {
-		jsonParsed = JSON.parse(jsonOutput);
-		ref = jsonParsed['message']['items'][0];
-	} catch (e) {
-		Zotero.debug(e);
-		return false;
-	}
+	jsonParsed = JSON.parse(jsonOutput);
 	
 	if (jsonParsed['message']['total-results'] > 1) {
-		//Not sure what to do with multiple results 
-		//Should only return 1 item
-		throw new Error('Returned multiple results');
+		// Multiple results shouldn't occur as pii is unique
+		// handle only first returned object just in case
+		Zotero.debug('Returned multiple results. Continue processing first');
+	}
+	else if (jsonParsed['message']['total-results'] == 0) {
+		// If the search failed to find results
+		Zotero.debug('Crossref API failed to find query match');
 		return;
 	}
 	
-	if (ref['type'] != 'journal-article') {
-		//redundency check to ensure proper citation 
-		throw new Error('Returned unexpected reference type')
-		return;
+	if (!/^1/.test(jsonParsed['message-version'])){
+		// check that the API version is compatible with this translator
+		// translator currently written according to v1
+		Zotero.debug('Request returned wrong API version');
 	}
-	//Populate fields
-	var newItem = new Zotero.Item('journalArticle');
-	newItem.libraryCatalog = 'CrossRef';
-	newItem.title = ref['title'][0];
-	newItem.publicationTitle = ref['container-title'][0];
-	newItem.volume = ref['volume'];
-	newItem.issue = ref['issue'];
-	newItem.pages = ref['page'];
-	newItem.DOI = ref['DOI'];
-	newItem.ISSN = ref['ISSN'][0];
-	newItem.url = ref['URL'];
 	
-	//If article was published online only
-	if (ref['published-print']) {
-		dateArray = ref['published-print'];
+	// shorten JSON to the single reference
+	ref = jsonParsed['message']['items'][0];
+	
+	if (ref['type'] == 'journal-article') {
+		// prep for CSL JSON translator
+		ref['type'] = 'article-journal';
+	} else if (ref['type'] != 'journal-article') {
+		// log the unexpected
+		Zotero.debug('Returned unexpected reference type');
 	}
-	else {
-		dateArray = ref['published-online'];
-	}	
-	//Handle Partial Dates
-	var year = dateArray['date-parts'][0][0];
-	var month = dateArray['date-parts'][0][1];
-	var day = dateArray['date-parts'][0][2];
 	
-	if (year) {
-		if (month) {
-			if (day) {
-				newItem.date = year+"-"+month+"-"+day;
-			} else {
-				newItem.date = month+"/"+year;
-			}
-		} else {
-			newItem.date = year;
-		}
-	}	
-	
-	//Parse authors
-	for (var i = 0; i < ref['author']['length']-1; i++) {
-		var creator = {};
-		creator.creatorType = 'author';	//Current API doesn't specify roles
-		creator.firstName = ref['author'][i]['given'];
-		creator.lastName = ref['author'][i]['family'];
-		newItem.creators.push(creator);
-	}
+	// use CSL JSON translator
+	text = JSON.stringify(ref);
+	var trans = Zotero.loadTranslator('import');
+	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+	trans.setString(text);
 	
 	//Attempt to download fulltext PDF
-	var pdfUrl = doc.getElementsByClassName('x-pdf')[0].href;
-	if (pdfUrl) {
-		newItem.attachments.push({
-			url:pdfUrl,
-			title:"Full Text PDF",
-			mimeType:"application/pdf"
-		});
-	}
+	var pdfLink = getPDFLink(doc);
+		
+	trans.setHandler('itemDone', function(obj, item) {
+		if (pdfLink)
+			item.attachments.push({
+				url:pdfLink,
+				title:"Full Text PDF",
+				mimeType:"application/pdf"
+			});
+		item.complete();
+	});
 	
-	//Get Tags (doesn't work)
-	for (var i = 0; i < ref['subject']['length']-1; i++) {
-		newItem.tags.push(ref['subject'][i])
+	trans.translate();
+}
+
+function getPDFLink(doc) {
+	var pdfLink = doc.getElementsByClassName('x-pdf')[0].href;
+	if (!pdfLink) {
+		pdfLink = ZU.xpathText(doc, './/*[@data-action="pdfDownload"]/@href');
+	} else if (!pdfLink) {
+		pdfLink = ZU.xpathText(doc, './/*[@action="download"]/@href');
 	}
-	
-	newItem.complete();
+	return pdfLink;
 }
 
 function scrapeBookSection(doc, item){
