@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-14 04:30:12"
+	"lastUpdated": "2017-01-29 10:18:58"
 }
 
 /*
@@ -155,6 +155,12 @@ function parseItemTable(table) {
 				data = notes.textContent;
 			} else {
 				data = ZU.trimInternal(td[1].textContent);
+			}
+		} else if (label == 'related searches') {
+			var childrens = td[1].getElementsByTagName('a');
+			data = [];
+			for (var j=0; j<childrens.length; j++) {
+				data.push(childrens[j].textContent.trim());
 			}
 		} else {
 			data = ZU.trimInternal(td[1].textContent);
@@ -327,10 +333,10 @@ function parsePhotoTitle(title) {
 }
 
 function scrapePhoto(doc, url) {
-	table = ZU.xpath(doc, '(//table[@id="PhotoDetailTable"]//tr)[1]/td[last()]')[0];
+	table = ZU.xpath(doc, '//table[@id="PhotoDetailTable"]//table[@id="Table1"]/tbody')[0];
 	if (!table) return;
 	
-	var meta = parseMeta(table);
+	var meta = parseItemTable(table);
 	
 	var item = new Zotero.Item('manuscript'); // Transition to artwork or similar when fields become available
 	
@@ -348,28 +354,24 @@ function scrapePhoto(doc, url) {
 		item.type = 'photograph'
 	}
 	
-	item.date = meta.date;
-	item.place = meta.location;
+	item.date = meta.date || meta['date range'];
+	item.place = meta.location || meta['item location'];
 	
 	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
 		+ encodeURIComponent(meta.barcode);
 	
 	item.archiveLocation = meta['image no.'];
 	
-	// Save subjects as tags
-	if (meta['primary subject']) {
-		item.tags.push(meta['primary subject']);
-	}
-	if (meta['secondary subject']) {
-		item.tags.push(meta['secondary subject']);
+	if (meta['related searches']) {
+		item.tags = meta['related searches'];
 	}
 	
-	var image = table.parentElement.getElementsByTagName('img')[0];
-	if (image) {
-		var url = image.src.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
+	var imageurl = ZU.xpathText(doc, '//table[@id="PhotoDetailTable"]//img/@src');
+	if (imageurl) {
+		imageurl = imageurl.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
 		item.attachments.push({
 			title: 'Digital image of NAA: ' + item.archiveLocation,
-			url: url,
+			url: imageurl,
 			mimeType: 'image/jpeg' // Seems like that is generally the case
 		});
 	}
@@ -380,13 +382,13 @@ function scrapePhoto(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
+		"url": "http://recordsearch.naa.gov.au/scripts/PhotoSearchItemDetail.asp?M=0&B=1646857&SE=1",
 		"items": [
 			{
 				"itemType": "manuscript",
 				"title": "Ford V8 three ton lorry loaded with mail [rear view]",
 				"creators": [],
-				"date": "1937",
+				"date": "1937 - 1937",
 				"archive": "National Archives of Australia",
 				"archiveLocation": "C4078, N1005B",
 				"libraryCatalog": "National Archives of Australia",
@@ -401,6 +403,7 @@ var testCases = [
 				],
 				"tags": [
 					"Communications",
+					"Photographs in series C4078",
 					"Postal"
 				],
 				"notes": [],
@@ -504,8 +507,13 @@ var testCases = [
 				"archive": "National Archives of Australia",
 				"archiveLocation": "A10950",
 				"libraryCatalog": "National Archives of Australia",
-				"url": "http://www.naa.gov.au/cgi-bin/Search?O=S&Number=A10950",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "National Archives of Australia Record",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
