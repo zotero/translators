@@ -3,3 +3,4 @@ node_js:
   - "6"
 script:
   - cd .ci && npm install && npm test
+  - ./checkDeletedTxt.sh

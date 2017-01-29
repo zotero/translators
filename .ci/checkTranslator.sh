@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Load colors and such
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+source "$SCRIPT_DIR/helper.sh"
+
 # Global variable holding the currently checked file
 TRANSLATOR=
 TRANSLATOR_BASENAME=
@@ -8,6 +12,7 @@ TRANSLATOR_BASENAME=
 declare -a ERROR_CHECKS=(
     "notOneTranslatorID"
     "nonUniqueTranslatorID"
+    "reusingDeletedID"
     "executableFile"
     "invalidJSON"
     "withCarriageReturn"
@@ -40,16 +45,24 @@ notOneTranslatorID () {
 nonUniqueTranslatorID () {
     local dir id duplicateIds
     dir=$(dirname "$TRANSLATOR")
-    id=$(grep -r '"translatorID"' "$TRANSLATOR" \
-        | sed -e 's/[" ,]//g' -e 's/^.*://g')
+    id=$(grepTranslatorId "$TRANSLATOR")
     if [[ -n "$id" ]];then
-      duplicateIds=$(grep -r '"translatorID"' "$dir"/*.js \
-              | sed -e 's/[" ,]//g' -e 's/^.*://g' \
-              | sort | uniq -d)
+      duplicateIds=$(grepTranslatorId "$dir"/*.js | sort | uniq -d)
       if [[ $duplicateIds = *"$id"* ]];then
           err "Non unique ID $id"
           return 1
       fi
+    fi
+}
+
+# IDs must not reuse deleted IDs
+reusingDeletedID () {
+    local dir id duplicateIds
+    dir=$(dirname "$TRANSLATOR")
+    id=$(grepTranslatorId "$TRANSLATOR")
+    if grep -qF "$id" "$dir/deleted.txt";then
+        err "Is reusing an earlier deleted ID"
+        return 1
     fi
 }
 
@@ -97,7 +110,7 @@ problematicJS () {
     jshint_error=$(sed '1,/^}/ s/.*//' "$TRANSLATOR" \
         | sed 's,/\*\* BEGIN TEST,\n\0,' \
         | sed '/BEGIN TEST/,$ d' \
-        | jshint --config=jshintrc --reporter=unix -)
+        | jshint --config="$SCRIPT_DIR"/jshintrc --reporter=unix -)
     if (( $? > 0 ));then
         warn "JSHint shows issues with this code"
         warn "$jshint_error"
@@ -109,21 +122,14 @@ problematicJS () {
 # Helpers and main
 #-----------------------------------------------------------------------
 
-if [[ -t 1 && "$(tput colors)" -gt 0 ]]; then
-    color_ok=$'\e[32;1m'
-    color_notok=$'\e[31;1m'
-    color_warn=$'\e[33m'
-    color_err=$'\e[31m'
-    color_reset=$'\e[0m'
-fi
 err () { echo -e "$*" | sed "s/^/# ${color_err}ERROR:${color_reset} $TRANSLATOR_BASENAME :/" >&2; }
 warn () { echo -e "$*" | sed "s/^/# ${color_warn}WARN: ${color_reset} $TRANSLATOR_BASENAME :/" >&2; }
-usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 <translator.js>"; }
+usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 [--skip-warn] <translator.js>"; }
 
 main() {
 
     # Add './node_modules/.bin to PATH for jsonlint
-    PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/node_modules/.bin:"$PATH"
+    PATH=$SCRIPT_DIR/node_modules/.bin:"$PATH"
 
     if [[ "$1" = "--skip-warn" ]];then
         SKIP_WARN=true
@@ -132,7 +138,11 @@ main() {
     TRANSLATOR="$1"
     TRANSLATOR_BASENAME="$(basename "$TRANSLATOR")"
     [[ -z $TRANSLATOR ]]   && { usage; exit 1; }
-    [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found."; exit 2; }
+    if [[ ! -e $TRANSLATOR ]];then
+        # Construct filename and path if $TRANSLATOR is only used as label
+        TRANSLATOR="$(dirname $SCRIPT_DIR)/${TRANSLATOR}.js"
+    fi
+    [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found.\n$TRANSLATOR"; exit 2; }
     [[ -d $TRANSLATOR ]]   && { usage "Must be a file not a directory."; exit 3; }
 
     declare -a errors=() warnings=()
@@ -148,10 +158,10 @@ main() {
         fi
     else
         if (( ${#warnings[@]} == 0 ));then
-            echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Failed checks: ${errors[*]})"
+            echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Errors: ${errors[*]})"
             exit 1
         else
-            echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Failed checks: ${errors[*]}; Warnings: ${warnings[*]})"
+            echo "${color_notok}not ok${color_reset} - $TRANSLATOR (Errors: ${errors[*]}; Warnings: ${warnings[*]})"
             exit 1
         fi
     fi
