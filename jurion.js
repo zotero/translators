@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-28 11:12:53"
+	"lastUpdated": "2017-01-30 20:15:34"
 }
 
 /*
@@ -106,7 +106,7 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
 	
-	item.title = ZU.xpathText(doc, '//div[@id="middle-column"]//h1[div[contains(@class, "addToList")]]');// [contains(@class, "artikel_titel") or contains(@class, "gesetz_ev_titel")]
+	item.title = ZU.xpathText(doc, '//div[@id="middle-column"]//h1[div[contains(@class, "addToList")]]');
 	var subtitle = ZU.xpathText(doc, '//div[contains(@class, "artikel_untertitel_thema")]');
 	if (subtitle) {
 		item.title += ' ' + subtitle;
@@ -114,7 +114,7 @@ function scrape(doc, url) {
 	
 	var author = getValueToLabel(doc, "Autor") || getValueToLabel(doc, "Verfasst von");
 	if (author) {
-		author = author.replace(/Dr\.?|Prof\.?|RA\.?/g, '');
+		author = author.replace(/(Dr|Prof|RA)\.?\s/g, '');
 		item.creators.push(ZU.cleanAuthor(author, "author"));
 	}
 	
@@ -131,14 +131,14 @@ function scrape(doc, url) {
 	
 	var ref = getValueToLabel(doc, "Referenz");
 	if (ref) {
-		var m = ref.match(/(\d\d\d\d),\s+([\d\s\-IVX]*)\((.*)\)/);
+		var m = ref.match(/(\d{4}),\s+([\d\s\-IVX]*)\((.*)\)/);
 		if (m) {
 			//e.g. ZInsO 2010, 1959 - 1961 (Ausgabe 44 v. 28.10.2010)
 			// ZJJ 2010, 403 - 405 (Heft 4)
 			item.date = m[1];
 			item.pages = m[2].replace(/\s/g, '');
 			var parenthesis = m[3];
-			var d = parenthesis.match(/(\d\d?\.\d\d?\.\d\d\d\d)/);
+			var d = parenthesis.match(/(\d\d?\.\d\d?\.\d{4})/);
 			if (d) {
 				item.date = ZU.strToISO(d[1]);
 				parenthesis = parenthesis.substring(0, d.index);
@@ -169,17 +169,11 @@ function scrape(doc, url) {
 	if (date) {
 		item.date = ZU.strToISO(date);
 	}
-	var court = getValueToLabel(doc, "Gericht");
-	if (court) {
-		item.court = court;
-	}
-	var az = getValueToLabel(doc, "Aktenzeichen");
-	if (az) {
-		item.docketNumber = az;
-	}
+	item.court = getValueToLabel(doc, "Gericht");;
+	item.docketNumber = getValueToLabel(doc, "Aktenzeichen");;
 	var form = getValueToLabel(doc, "Entscheidungsform");
 	if (form) {
-		item.extra = form;
+		item.extra = "genre: " + form;
 	}
 	var caseName = ZU.xpathText(doc, '//div[contains(@class, "urteil_schlagworte")]');
 	if (caseName && type == "case") {
@@ -315,7 +309,7 @@ var testCases = [
 				"dateDecided": "2012-11-21",
 				"court": "BKartA",
 				"docketNumber": "VK 3 - 126/12",
-				"extra": "Beschluss",
+				"extra": "genre: Beschluss",
 				"firstPage": "28843",
 				"reporter": "JurionRS",
 				"reporterVolume": "2012",
