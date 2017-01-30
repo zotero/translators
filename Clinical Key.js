@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-28 19:25:52"
+	"lastUpdated": "2017-01-30 08:08:52"
 }
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -163,8 +163,9 @@ function doWeb(doc, url){
 //Search & Processing based on CrossRef.js translator
 function doSearch(pii, doc){
 	crossRefQuery = 'http://api.crossref.org/works?query=' + pii;
+	//TODO: implement API version request
 	//acceptHeader = {'Accept': 'application/vnd.crossref-api-message+json; version=1.0'}
-	Zotero.Utilities.HTTP.doGet(crossRefQuery, function(responseText) {
+	ZU.doGet(crossRefQuery, function(responseText) {
 		processCrossRefREST(responseText, doc);
 		});
 }
