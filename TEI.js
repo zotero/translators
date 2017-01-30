@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2016-05-25 15:08:00"
+	"lastUpdated": "2017-01-22 20:45:00"
 }
 
 // ********************************************************************
@@ -207,6 +207,13 @@ function generateItem(item, teiDoc) {
 		if (item.title) {
 			analyticTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.title)));
 		}
+		//A DOI is presumably for the article, not the journal.
+		if (item.DOI) {
+			var idno = teiDoc.createElementNS(ns.tei, "idno");
+			idno.setAttribute("type", "DOI");
+			idno.appendChild(teiDoc.createTextNode(item.DOI));
+			analytic.appendChild(idno);
+		}
 
 		// book title
 		if (item.bookTitle) {
@@ -260,7 +267,15 @@ function generateItem(item, teiDoc) {
 			shortTitle.appendChild(teiDoc.createTextNode(item.shortTitle));
 			monogr.appendChild(shortTitle);
 		}
+		//A DOI where there's no analytic must be for the monogr.
+		if (item.DOI) {
+			var idno = teiDoc.createElementNS(ns.tei, "idno");
+			idno.setAttribute("type", "DOI");
+			idno.appendChild(teiDoc.createTextNode(item.DOI));
+			analytic.appendChild(idno);
+		}
 	}
+
 
 	// add name of conference
 	if (item.conferenceName) {
@@ -301,6 +316,28 @@ function generateItem(item, teiDoc) {
 			seriesNumber.appendChild(teiDoc.createTextNode(item.seriesNumber));
 			series.appendChild(seriesNumber);
 		}
+	}
+
+
+	//Other canonical ref nos come right after the title(s) in monogr.
+	if (item.ISBN) {
+		var idno = teiDoc.createElementNS(ns.tei, "idno");
+		idno.setAttribute("type", "ISBN");
+		idno.appendChild(teiDoc.createTextNode(item.ISBN));
+		monogr.appendChild(idno);
+	}
+	if (item.ISSN) {
+		var idno = teiDoc.createElementNS(ns.tei, "idno");
+		idno.setAttribute("type", "ISSN");
+		idno.appendChild(teiDoc.createTextNode(item.ISSN));
+		monogr.appendChild(idno);
+	}
+
+	if (item.callNumber) {
+		var idno = teiDoc.createElementNS(ns.tei, "idno");
+		idno.setAttribute("type", "callNumber");
+		idno.appendChild(teiDoc.createTextNode(item.callNumber));
+		monogr.appendChild(idno);
 	}
 
 	// creators are all people only remotely involved into the creation of
@@ -470,32 +507,6 @@ function generateItem(item, teiDoc) {
 			tags.appendChild(tag);
 		}
 		bibl.appendChild(tags);
-	}
-
-	// the canonical reference numbers
-	if (item.ISBN) {
-		var idno = teiDoc.createElementNS(ns.tei, "idno");
-		idno.setAttribute("type", "ISBN");
-		idno.appendChild(teiDoc.createTextNode(item.ISBN));
-		bibl.appendChild(idno);
-	}
-	if (item.ISSN) {
-		var idno = teiDoc.createElementNS(ns.tei, "idno");
-		idno.setAttribute("type", "ISSN");
-		idno.appendChild(teiDoc.createTextNode(item.ISSN));
-		bibl.appendChild(idno);
-	}
-	if (item.DOI) {
-		var idno = teiDoc.createElementNS(ns.tei, "idno");
-		idno.setAttribute("type", "DOI");
-		idno.appendChild(teiDoc.createTextNode(item.DOI));
-		bibl.appendChild(idno);
-	}
-	if (item.callNumber) {
-		var idno = teiDoc.createElementNS(ns.tei, "idno");
-		idno.setAttribute("type", "callNumber");
-		idno.appendChild(teiDoc.createTextNode(item.callNumber));
-		bibl.appendChild(idno);
 	}
 	return bibl;
 }
