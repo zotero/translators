@@ -1,3 +1,4 @@
+ {
  "translatorID": "47533cd7-ccaa-47a7-81bb-71c45e68a74d",
     "label": "Bibliothèque nationale de France",
     "creator": "Florian Ziche, Sylvain Machefert",
@@ -9,7 +10,7 @@
     "translatorType": 4,
     "browserSupport": "g",
     "lastUpdated": "2016-02-18 11:28:15"
-    }
+     }
 
     /*
      *  Bibliothèque nationale de France Translator
