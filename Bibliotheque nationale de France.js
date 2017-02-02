@@ -10,7 +10,7 @@
     "translatorType": 4,
     "browserSupport": "g",
     "lastUpdated": "2016-02-18 11:28:15"
-     }
+ }
 
     /*
      *  Bibliothèque nationale de France Translator
