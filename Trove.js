@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-17 09:36:08"
+	"lastUpdated": "2017-02-04 19:41:04"
 }
 
 /*
@@ -70,11 +70,7 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				ZU.doGet(i, function(text) {
-					var parser = new DOMParser();
-					var xml = parser.parseFromString(text, "text/html");
-					scrape(xml, i);
-				})
+				scrape(null, i);
 			}
 		});
 	} else {
@@ -106,17 +102,20 @@ function scrapeNewspaper(doc, url) {
 		// Clean up the BibTex results and add some extra stuff.
 		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = 'newspaperArticle';
-			item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 			item.pages = item.numPages;
 			delete item.numPages;
 			delete item.type;
 			delete item.itemID;
 
-			// Add tags
-			var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
-			for (var i = 0; i < tags.length; i++) {
-				tag = ZU.xpathText(tags[i], "a");
-				item.tags.push(tag);
+			// doc is null during multiple call
+			if (doc) {
+				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
+				// Add tags
+				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
+				for (var i = 0; i < tags.length; i++) {
+					tag = ZU.xpathText(tags[i], "a");
+					item.tags.push(tag);
+				}
 			}
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
@@ -217,15 +216,17 @@ function scrapeWork(doc, url) {
 	// Remove all params from url
 	var workURL = url.replace(/[?#].*/, '');
 	var bibtexURL = workURL + '?citationFormat=BibTeX';
-
-	// Need to get version identifier for the BibText url
-	var versionID = doc.body.innerHTML.match(/displayCiteDialog\(\'(.+?)\'/);
-	if (versionID !== null) {
-		bibtexURL += '&selectedversion=' + versionID[1];
-		thumbnailURL = ZU.xpathText(doc, "//a/img[@class='mosaic ui-shdw']/@src");
-	} else {
-		// It's a work -- so thumbnails are different
-		thumbnailURL = ZU.xpathText(doc, "//li[@class='imgfirst']//img/@src");
+	
+	if (doc) {
+		// Need to get version identifier for the BibText url
+		var versionID = doc.body.innerHTML.match(/displayCiteDialog\(\'(.+?)\'/);
+		if (versionID !== null) {
+			bibtexURL += '&selectedversion=' + versionID[1];
+			thumbnailURL = ZU.xpathText(doc, "//a/img[@class='mosaic ui-shdw']/@src");
+		} else {
+			// It's a work -- so thumbnails are different
+			thumbnailURL = ZU.xpathText(doc, "//li[@class='imgfirst']//img/@src");
+		}
 	}
 
 	// Get the BibTex and feed it to the translator.
@@ -247,15 +248,17 @@ function scrapeWork(doc, url) {
 				});
 			}
 
-			// This gives a better version-aware url.
-			item.url = ZU.xpathText(doc, "//meta[@property='og:url']/@content");
-			item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
-
-			// Add tags
-			tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
-			for (var i = 0; i < tags.length; i++) {
-				tag = ZU.xpathText(tags[i], "a");
-				item.tags.push(tag);
+			if (doc) {
+				// This gives a better version-aware url.
+				item.url = ZU.xpathText(doc, "//meta[@property='og:url']/@content");
+				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
+				
+				// Add tags
+				tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
+				for (var i = 0; i < tags.length; i++) {
+					tag = ZU.xpathText(tags[i], "a");
+					item.tags.push(tag);
+				}
 			}
 
 			if (thumbnailURL !== null) {
