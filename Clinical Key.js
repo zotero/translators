@@ -141,6 +141,8 @@ function doWeb(doc, url){
 		search.getTranslators();
 	}
 	else if (contentType == 'journalArticle') {
+		var eid; 
+		var pii;
 		try {
 			eid = url.split('/');
 			pii = eid.pop().slice(7);
@@ -155,13 +157,13 @@ function doWeb(doc, url){
 					throw new Error('PII from Xpath failed');
 				}
 			}
-		doSearch(pii, doc);
+		queryCrossRef(pii, doc);
 	}
 	
 }
 
 //Search & Processing based on CrossRef.js translator
-function doSearch(pii, doc){
+function queryCrossRef (pii, doc){
 	crossRefQuery = 'http://api.crossref.org/works?query=' + pii;
 	//TODO: implement API version request
 	//acceptHeader = {'Accept': 'application/vnd.crossref-api-message+json; version=1.0'}
@@ -171,7 +173,7 @@ function doSearch(pii, doc){
 }
 
 function processCrossRefREST(jsonOutput, doc){
-	jsonParsed = JSON.parse(jsonOutput);
+	var jsonParsed = JSON.parse(jsonOutput);
 	
 	if (jsonParsed['message']['total-results'] > 1) {
 		// Multiple results shouldn't occur as pii is unique
@@ -191,7 +193,7 @@ function processCrossRefREST(jsonOutput, doc){
 	}
 	
 	// shorten JSON to the single reference
-	ref = jsonParsed['message']['items'][0];
+	var ref = jsonParsed['message']['items'][0];
 	
 	if (ref['type'] == 'journal-article') {
 		// prep for CSL JSON translator
@@ -202,7 +204,7 @@ function processCrossRefREST(jsonOutput, doc){
 	}
 	
 	// use CSL JSON translator
-	text = JSON.stringify(ref);
+	var text = JSON.stringify(ref);
 	var trans = Zotero.loadTranslator('import');
 	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 	trans.setString(text);
@@ -325,7 +327,7 @@ function scrapeBookSection(doc, item){
 //E.g., text=first -> 1
 //E.g., Twenty-Second -> 22
 function textToNumber(text){
-	textarr = [
+	var textarr = [
 		"first",
 		"second",
 		"third",
