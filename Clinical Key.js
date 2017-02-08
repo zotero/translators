@@ -1,7 +1,7 @@
 {
 	"translatorID": "a55463ba-e403-415b-80d4-284d5f9b4b15",
 	"label": "Clinical Key",
-	"creator": "Jaret M. Karnuta",
+	"creator": "Jaret M. Karnuta, Mike Davidson",
 	"target": "^https?://(www\\.|www-)clinicalkey(\\.|-)com",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 03:13:52"
+	"lastUpdated": "2017-01-30 08:08:52"
 }
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Jaret M. Karnuta
+	Copyright © 2017 Jaret M. Karnuta & Mike Davidson
 
 	This file is part of Zotero.
 
@@ -36,14 +35,21 @@
 */
 
 /*
-This translator is designed specifically for use on book section portions of
-ClinicalKey. It will not work on journal articles and book overview pages.
+This translator is designed specifically for use on book section portions and journal articles of
+ClinicalKey. It will not work on book overview pages or journal table of contents pages.
 
 NB: url and doc.location.href are different. I think it is because of the way clinicalkey redirects.
 Replicate by going to a content page (/content/book/...) and then going to a broswing page (/browse/book/...).
 URL remains the page of the previous page (content page) and doc.location.href is the current page (as it should be).
 
 Hence, I never use url and change its content to doc.location.href in detectWeb, the only function that uses the url
+
+To get journal article metadata, Publisher Item Identifier (PIIs) are extracted from the Scopus EID
+and queried using the CrossRef REST API. 
+Documentation at:
+https://github.com/CrossRef/rest-api-doc
+CrossReff REST API Return Values at:
+https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
 */
 
 function detectWeb(doc, url) {
@@ -69,6 +75,10 @@ function detectWeb(doc, url) {
 	else if (url.indexOf('/browse/book/') != -1 && url.indexOf("login?") == -1){
 		contentType = "book";
 	}
+	// similar structure to above, for journal articles
+	else if (url.indexOf('/content/journal/') != -1 && url.indexOf("login?") == -1){
+		contentType = "journalArticle";
+	}
 
 	//contentType not set
 	if(!contentType){
@@ -85,10 +95,10 @@ function doWeb(doc, url){
 		var newItem = new Zotero.Item(contentType);
 		newItem = scrapeBookSection(doc, newItem);
 		//pdf (if present)
-		var pdfUrl = doc.getElementsByClassName('x-pdf')[0].href;
-		if(pdfUrl){
+		var pdfLink = getPDFLink(doc);
+		if (pdfLink) {
 			newItem.attachments.push({
-				url:pdfUrl,
+				url:pdfLink,
 				title:"Book Section PDF",
 				mimeType:"application/pdf"
 			});
@@ -130,6 +140,99 @@ function doWeb(doc, url){
 		search.setSearch({ ISBN: isbn });
 		search.getTranslators();
 	}
+	else if (contentType == 'journalArticle') {
+		var eid; 
+		var pii;
+		try {
+			eid = url.split('/');
+			pii = eid.pop().slice(7);
+			if (!/^S(\d{15}X|\d{16})/.test(pii)){
+				throw new Error('PII from url failed. Trying Xpath');
+			}
+			} catch(e) {
+				Zotero.debug(e);
+				eid = ZU.xpathText(doc, "//ul/@data-eid");
+				pii = eid.slice(7);
+				if (!/^S(\d{15}X|\d{16})/.test(pii)){
+					throw new Error('PII from Xpath failed');
+				}
+			}
+		queryCrossRef(pii, doc);
+	}
+	
+}
+
+//Search & Processing based on CrossRef.js translator
+function queryCrossRef (pii, doc){
+	crossRefQuery = 'http://api.crossref.org/works?query=' + pii;
+	//TODO: implement API version request
+	//acceptHeader = {'Accept': 'application/vnd.crossref-api-message+json; version=1.0'}
+	ZU.doGet(crossRefQuery, function(responseText) {
+		processCrossRefREST(responseText, doc);
+		});
+}
+
+function processCrossRefREST(jsonOutput, doc){
+	var jsonParsed = JSON.parse(jsonOutput);
+	
+	if (jsonParsed['message']['total-results'] > 1) {
+		// Multiple results shouldn't occur as pii is unique
+		// handle only first returned object just in case
+		Zotero.debug('Returned multiple results. Continue processing first');
+	}
+	else if (jsonParsed['message']['total-results'] == 0) {
+		// If the search failed to find results
+		Zotero.debug('Crossref API failed to find query match');
+		return;
+	}
+	
+	if (!/^1/.test(jsonParsed['message-version'])){
+		// check that the API version is compatible with this translator
+		// translator currently written according to v1
+		Zotero.debug('Request returned wrong API version');
+	}
+	
+	// shorten JSON to the single reference
+	var ref = jsonParsed['message']['items'][0];
+	
+	if (ref['type'] == 'journal-article') {
+		// prep for CSL JSON translator
+		ref['type'] = 'article-journal';
+	} else if (ref['type'] != 'journal-article') {
+		// log the unexpected
+		Zotero.debug('Returned unexpected reference type');
+	}
+	
+	// use CSL JSON translator
+	var text = JSON.stringify(ref);
+	var trans = Zotero.loadTranslator('import');
+	trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+	trans.setString(text);
+	
+	//Attempt to download fulltext PDF
+	var pdfLink = getPDFLink(doc);
+		
+	trans.setHandler('itemDone', function(obj, item) {
+		if (pdfLink)
+			item.attachments.push({
+				url:pdfLink,
+				title:"Full Text PDF",
+				mimeType:"application/pdf"
+			});
+		item.complete();
+	});
+	
+	trans.translate();
+}
+
+function getPDFLink(doc) {
+	var pdfLink = doc.getElementsByClassName('x-pdf')[0].href;
+	if (!pdfLink) {
+		pdfLink = ZU.xpathText(doc, './/*[@data-action="pdfDownload"]/@href');
+	} else if (!pdfLink) {
+		pdfLink = ZU.xpathText(doc, './/*[@action="download"]/@href');
+	}
+	return pdfLink;
 }
 
 function scrapeBookSection(doc, item){
@@ -224,7 +327,7 @@ function scrapeBookSection(doc, item){
 //E.g., text=first -> 1
 //E.g., Twenty-Second -> 22
 function textToNumber(text){
-	textarr = [
+	var textarr = [
 		"first",
 		"second",
 		"third",
