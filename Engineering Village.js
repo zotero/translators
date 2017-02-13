@@ -9,10 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-09-10 22:42:33"
+	"lastUpdated": "2017-02-12 17:40:59"
 }
 
 function detectWeb(doc, url) {
+	Z.monitorDOMChanges(doc.getElementById("resultsarea"), {childList: true});
 	var downloadLink = doc.getElementById('oneclickDL');
 	if(downloadLink && getDocIDs(downloadLink.href)) {
 		return "journalArticle";
