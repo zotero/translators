@@ -1022,7 +1022,7 @@ function importItem(newItem, node) {
 	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
 
 	//running Time
-	newItem.runningTime == getFirstResults(node, [n.video+"duration", n.song+"duration"], true);
+	newItem.runningTime = getFirstResults(node, [n.video+"duration", n.song+"duration"], true);
 
 	// address
 	var adr = getFirstResults(node, [n.vcard2+"adr"]);
