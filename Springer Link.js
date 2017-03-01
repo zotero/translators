@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-01-01 15:33:55"
+	"lastUpdated": "2017-03-01 20:19:14"
 }
 
 function detectWeb(doc, url) {
@@ -26,22 +26,17 @@ function detectWeb(doc, url) {
 		case "referencework":
 			if(getResultList(doc).length > 0) {
 				return "multiple";
-			} else {
-				return false;
 			}
-			break;
+			return false;
 		case "article":
 			return "journalArticle";
-			break;
 		case "chapter":
 		case "referenceworkentry":
 		case "protocol":
 			if (ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content')) {
 				return "conferencePaper";
-				break;
 			} else {
 				return "bookSection";
-				break;
 			}
 	}
 }
@@ -75,9 +70,9 @@ function doWeb(doc, url) {
 			for(var i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
-		})
+		});
 	} else {
-		scrape(doc, url)
+		scrape(doc, url);
 	}
 }
 
@@ -155,7 +150,7 @@ function complementItem(doc, item) {
 		}
 	}
 	//add the DOI to extra for non journal articles
-	if(item.itemType != "journalArticle" && item.DOI) {
+	if(item.itemType != "journalArticle" && item.itemType != "conferencePaper" && item.DOI) {
 		item.extra = "DOI: " + item.DOI;
 		item.DOI = "";
 	}
@@ -166,7 +161,7 @@ function complementItem(doc, item) {
 	//add abstract
 	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
 	if(!abs) {
-		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]')
+		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
 	}
 	if(abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
 	return item;
@@ -200,7 +195,7 @@ function scrape(doc, url) {
 			/li'
 			);
 			keywords = keywords.map(function(node) {
-				return node.textContent.trim()
+				return node.textContent.trim();
 			});
 			item.tags = keywords;
 			item.complete();
@@ -214,11 +209,11 @@ function scrape(doc, url) {
 		});
 	} else {
 		var risURL = url.replace(/springer\.com/, "springer.com/export-citation/").replace(
-				/[#?].*/, "") + ".ris"
+				/[#?].*/, "") + ".ris";
 			//Z.debug(risURL)
 		var DOI = url.match(/\/(10\.[^#?]+)/)[1];
-		var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf"
-		Z.debug("pdfURL: " + pdfURL)
+		var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf";
+		Z.debug("pdfURL: " + pdfURL);
 		ZU.doGet(risURL, function(text) {
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -229,11 +224,11 @@ function scrape(doc, url) {
 					url: pdfURL,
 					title: "Springer Full Text PDF",
 					mimeType: "application/pdf"
-				})
+				});
 				item.complete();
-			})
+			});
 			translator.translate();
-		})
+		});
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -267,10 +262,10 @@ var testCases = [
 					}
 				],
 				"date": "2008/10/12",
+				"DOI": "10.1007/978-3-540-88682-2_1",
 				"ISBN": "9783540886815 9783540886822",
 				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
 				"conferenceName": "European Conference on Computer Vision",
-				"extra": "DOI: 10.1007/978-3-540-88682-2_1",
 				"language": "en",
 				"libraryCatalog": "link.springer.com",
 				"pages": "1-1",
@@ -473,7 +468,7 @@ var testCases = [
 				"pages": "1289-1296",
 				"publicationTitle": "Hydrogeology Journal",
 				"shortTitle": "Tide-induced head fluctuations in a coastal aquifer",
-				"url": "http://link.springer.com/article/10.1007/s10040-009-0439-x",
+				"url": "https://link.springer.com/article/10.1007/s10040-009-0439-x",
 				"volume": "17",
 				"attachments": [
 					{
