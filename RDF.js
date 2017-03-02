@@ -71,7 +71,8 @@ var n = {
 	eprints:"http://purl.org/eprint/terms/",
 	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article:"http://ogp.me/ns/article#",
-	book:"http://ogp.me/ns/book#"
+	book:"http://ogp.me/ns/book#",
+	so:"http://schema.org/"
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
@@ -111,42 +112,37 @@ function handleCreators(newItem, creators, creatorType) {
 		} catch(e) {}
 		if(c && c.length) {
 			creators = c;
+		}
 	}
+
+	for (let c of creators){
+		c = handleCreator(c)
+		Z.debug(c)
+		if (c) newItem.creators.push(c)
 	}
 	
-	if(typeof(creators[0]) == "string") {	// support creators encoded as strings
-		for(var i in creators) {
-			if(typeof(creators[i]) != "object") {
-				// Use comma to split if present
-				if (creators[i].indexOf(',') !== -1) {
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(creators[i], creatorType, true));
-				} else {
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(creators[i], creatorType, false));
-				}
-			}
-		}
-	} else {								// also support foaf
-		for(var i in creators) {
-			var type = Zotero.RDF.getTargets(creators[i], rdf+"type");
-			if(type) {
-				type = Zotero.RDF.getResourceURI(type[0]);
-				if(type == n.foaf+"Person") {	// author is FOAF type person
-					var creator = new Object();
-					creator.lastName = getFirstResults(creators[i],
-						[n.foaf+"familyName", n.foaf+"lastName",
-						n.foaf+"surname", n.foaf+"family_name"], true); //unofficial
-					creator.firstName = getFirstResults(creators[i],
-						[n.foaf+"givenName", n.foaf+"firstName",
-						n.foaf+"givenname"], true);	//unofficial
-				   	 if (!creator.firstName){
-						creator.fieldMode=1;
-					}
-					creator.creatorType = creatorType;
-					newItem.creators.push(creator);
-				}
-			}
+	function handleCreator(obj){
+		if (typeof obj == "string") {
+			// Use comma to split if present
+			return ZU.cleanAuthor(obj, creatorType, (obj.indexOf(',') !== -1))
+		} else {
+			let c = { creatorType: creatorType }
+			c.lastName = getFirstResults(obj,
+										 [ n.foaf+"familyName", n.foaf+"lastName",
+										   n.foaf+"surname", n.foaf+"family_name",
+										   n.so+"familyName" ], true)
+			c.firstName = getFirstResults(obj,
+										  [ n.foaf+"givenName", n.foaf+"firstName",
+											n.foaf+"givenname",
+											n.so+"givenName" ], true)
+			if (!c.firstName) c.fieldMode = 1
+			if (c.firstName || c.lastName) return c
+
+			c = getFirstResults(obj, [n.so+"name"], true)
+			if (c) return ZU.cleanAuthor(c, creatorType)
 		}
 	}
+
 }
 
 // processes collections recursively
@@ -681,10 +677,12 @@ function detectType(newItem, node, ret) {
 		break;
 	}
 
-	var itemType = t.zotero || t.bib || t.prism ||t.eprints|| t.og || t.dc || 
-		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
-		t.prismGuess || t.ogGuess || t.dcGuess ;
+	var itemType = t.zotero || t.bib || t.prism || t.eprints || t.og || t.dc ||
+		getSOType(node, t) ||
+		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess ||
+		t.prismGuess || t.ogGuess || t.dcGuess || t.soGuess
 
+	Z.debug([itemType, getSOType(node, t), exports.defaultUnknownType, t])
 	//in case we still don't have a container, double-check
 	//some are copied from above
 	if(!container) {
@@ -722,6 +720,141 @@ function detectType(newItem, node, ret) {
 	return 	itemType;
 }
 	
+
+/**
+ * Tentative mapping of subtypes of http://schema.org/CreativeWork
+ * May return a zotero item type and set t.soGuess
+ */
+function getSOType(node, t){
+	for (const type of Z.RDF.getTargets(node, rdf+"type") || []){
+		const m = Z.RDF.getResourceURI(type).match("^https?://schema.org/(.*)$")
+		if (m){
+			switch (m[1]){
+				case 'CreativeWork':
+					t.soGuess = 'document'; break
+				case 'Article':
+					t.soGuess = 'magazineArticle'; break
+				case 'NewsArticle':
+					return (t.so = 'newspaperArticle')
+				case 'Report':
+					return (t.so = 'report')
+				case 'ScholarlyArticle':
+					return (t.so = 'journalArticle')
+				case 'SocialMediaPosting':
+				case 'BlogPosting':
+				case 'LiveBlogPosting':
+					return (t.so = 'blogPost')
+				case 'DiscussionForumPosting':
+					return (t.so = 'forumPost')
+
+				case 'TechArticle':
+				case 'APIReference':
+					t.soGuess = 'document'; break
+
+					// case 'Blog':
+				case 'Book':
+					return (t.so = 'book')
+				case 'Clip':
+				case 'MovieClip':
+				case 'RadioClip':
+				case 'TVClip':
+				case 'VideoGameClip':
+
+				case 'Comment':
+				case 'Answer':
+
+				case 'Conversation':
+
+				case 'CreativeWorkSeason':
+				case 'RadioSeason':
+				case 'TVSeason':
+
+				case 'CreativeWorkSeries':
+				case 'BookSeries':
+				case 'MovieSeries':
+				case 'Periodical':
+				case 'RadioSeries':
+				case 'TVSeries':
+				case 'VideoGameSeries':
+				case 'DataCatalog':
+				case 'Dataset':
+				case 'DataFeed':
+				case 'DigitalDocument':
+				case 'NoteDigitalDocument':
+				case 'PresentationDigitalDocument':
+				case 'SpreadsheetDigitalDocument':
+				case 'TextDigitalDocument':
+				case 'Episode':
+				case 'RadioEpisode':
+				case 'TVEpisode':
+				case 'Game':
+				case 'VideoGame':
+					t.soGuess = 'document'; break
+
+				case 'Map':
+					return (t.so = 'map')
+
+				case 'Message':
+					t.soGuess = 'email'; break
+				case 'EmailMessage':
+					return (t.so = 'email')
+
+				case 'Movie':
+					return (t.so = 'film')
+
+				case 'MusicComposition':
+				case 'MusicPlaylist':
+				case 'MusicAlbum':
+				case 'MusicRelease':
+					t.soGuess = 'document'; break
+				case 'MusicRecording':
+					return (t.so = 'audioRecording')
+
+				case 'Painting':
+				case 'Photograph':
+					return (t.so = 'artwork')
+				case 'PublicationIssue':
+				case 'PublicationVolume':
+				case 'Question':
+				case 'Recipe':
+				case 'Review':
+					t.soGuess = 'document'; break
+				case 'Sculpture':
+					return (t.so = 'artwork')
+					// case 'Series':
+
+				case 'SoftwareApplication':
+				case 'MobileApplication':
+				case 'VideoGame':
+				case 'WebApplication':
+				case 'SoftwareSourceCode':
+					return (t.so = 'computerProgram')
+
+					// case 'TVSeason':
+					// case 'TVSeries':
+				case 'VisualArtwork':
+					return (t.so = 'artwork')
+
+				case 'WebPage':
+				case 'AboutPage':
+				case 'CheckoutPage':
+				case 'CollectionPage':
+				case 'ImageGallery':
+				case 'VideoGallery':
+				case 'ContactPage':
+				case 'ItemPage':
+				case 'ProfilePage':
+				case 'QAPage':
+				case 'SearchResultsPage':
+					return (t.so = 'webpage')
+
+					// case 'WebSite':
+			}
+		}
+	}
+}
+
+
 function importItem(newItem, node) {
 	var ret = new Object();
 	var itemType = detectType(newItem, node, ret);
@@ -735,7 +868,8 @@ function importItem(newItem, node) {
 
 	// title
 	newItem.title = getFirstResults(node, [n.dc+"title", n.dc1_0+"title", n.dcterms+"title",
-		n.eprints+"title", n.vcard2+"fn", n.og+"title"], true);
+		n.eprints+"title", n.vcard2+"fn", n.og+"title",
+		n.so+"headline"], true);
 	if(!newItem.itemType) {
 		if(!newItem.title) {	// require the title
 								// (if not a known type)
@@ -754,9 +888,11 @@ function importItem(newItem, node) {
 		if(creatorType == "author") {
 			creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator", n.dc1_0+"creator",
 				n.dcterms+"creator", n.eprints+"creators_name",
-				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor"]);
+				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor",
+				n.so+"author"]);
 		} else if(creatorType == "editor" || creatorType == "contributor") {
-			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name"]);
+			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name",
+				n.so+"editor"]);
 		//get presenters in unpublished conference papers on eprints
 		} else if(creatorType == "presenter") {
 			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
@@ -766,6 +902,9 @@ function importItem(newItem, node) {
 
 		} else if(creatorType == "scriptwriter") {
 			creators = getFirstResults(node, [n.video+"writer"]);
+
+		} else if(creatorType == "producer") {
+			creators = getFirstResults(node, [n.so+"producer"]);
 
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
@@ -894,11 +1033,13 @@ function importItem(newItem, node) {
 	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate",
 		n.og+"published_time", n.article+"published_time", n.book+"release_date", n.music+"release_date", n.video+"release_date",
 		n.dc+"date.issued", n.dcterms+"date.issued", n.dcterms+"issued", n.dc+"date", n.dc1_0+"date", n.dcterms+"date",
-		n.dcterms+"dateSubmitted", n.eprints+"datestamp"], true);
+		n.dcterms+"dateSubmitted", n.eprints+"datestamp",
+		n.so+"datePublished"], true);
 	// accessDate
 	newItem.accessDate = getFirstResults(node, [n.dcterms+"dateSubmitted"], true);
 	// lastModified
-	newItem.lastModified = getFirstResults(node, [n.dcterms+"modified"], true);
+	newItem.lastModified = getFirstResults(node, [n.dcterms+"modified",
+		n.so+"dateModified"], true);
 	
 	// identifier
 	var identifiers = getFirstResults(node, [n.dc+"identifier", n.dc1_0+"identifier", n.dcterms+"identifier"]);
@@ -957,7 +1098,8 @@ function importItem(newItem, node) {
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 	
 	if(!newItem.url) {
-		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url", n.bibo+"uri"]);
+		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url", n.bibo+"uri",
+										 n.so+"url"]);
 		if(url) {
 			newItem.url = Zotero.RDF.getResourceURI(url[0]);
 		}
@@ -1090,7 +1232,8 @@ function importItem(newItem, node) {
 	/** TAGS **/
 	
 	var subjects = getFirstResults(node, [n.dc+"subject", n.dc1_0+"subject", n.dcterms+"subject", n.article+"tag",
-		n.prism2_0+"keyword", n.prism2_1+"keyword", n.prism2_0+"object", n.prism2_1+"object", n.prism2_0+"organization", n.prism2_1+"organization", n.prism2_0+"person", n.prism2_1+"person"]);
+		n.prism2_0+"keyword", n.prism2_1+"keyword", n.prism2_0+"object", n.prism2_1+"object", n.prism2_0+"organization", n.prism2_1+"organization", n.prism2_0+"person", n.prism2_1+"person",
+		n.so+"keywords", n.so+"about"]);
 	if (subjects) {
 		for (var i=0; i<subjects.length; i++) {
 			var subject = subjects[i];
