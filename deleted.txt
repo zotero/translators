@@ -1,4 +1,4 @@
-46  # Increment number when modifying file
+47  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -89,3 +89,4 @@ f94bad2d-0c76-4e8f-a0d3-970810093c6c # The Age; replaced by generic Fairfax Aust
 74af9c75-dc14-4cdb-bb0b-1bbb13ba2e22 # Landes Publishers; moved to T&F
 d8873d23-d874-4b62-b081-1db12ff5a5de # ILO Labordoc; covered by EM and Primo now
 ac721d14-f081-4613-91e8-255c22ad05eb # IASSIST Quarterly
+62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba # MetaPress
