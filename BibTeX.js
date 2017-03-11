@@ -1089,7 +1089,7 @@ var citeKeyConversions = {
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
-		return "anonymous";
+		return "noauthor";
 	},
 	"t":function (flags, item) {
 		if (item["title"]) {
