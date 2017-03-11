@@ -16,7 +16,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015–2017 czar
+	Copyright © 2017 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
