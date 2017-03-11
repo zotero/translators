@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2017-03-11 09:22:15"
+	"lastUpdated": "2017-03-11 19:59:48"
 }
 
 /*
@@ -238,6 +238,32 @@ var testCases = [
 				"libraryCatalog": "Library Genesis",
 				"publisher": "MIT Press",
 				"url": "http://gen.lib.rus.ec/book/index.php?md5=a05be4942325aea362e2aff8c305b0de",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gen.lib.rus.ec/book/index.php?md5=A2560CC676A29BD4B289A2034894AF69",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "African ivories",
+				"creators": [
+					{
+						"firstName": "Ezra",
+						"lastName": "Kate",
+						"creatorType": "author"
+					}
+				],
+				"date": "1984",
+				"itemID": "book:882539",
+				"libraryCatalog": "Library Genesis",
+				"publisher": "The Metropolitan Museum of Art",
+				"url": "http://gen.lib.rus.ec/book/index.php?md5=a2560cc676a29bd4b289a2034894af69",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
