@@ -2,14 +2,14 @@
 	"translatorID": "11614156-f421-4e89-8ce0-a5e69ce3ebed",
 	"label": "Library Genesis",
 	"creator": "Reverend Wicks Cherrycoke",
-	"target": "^https?://(libgen\\.io|lib\\.gen\\.rus\\.ec)/",
+	"target": "^https?://(libgen\\.io|gen\\.lib\\.rus\\.ec)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-05-07 08:21:47"
+	"lastUpdated": "2017-03-11 09:22:15"
 }
 
 /*
