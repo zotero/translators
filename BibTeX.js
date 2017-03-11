@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-25 13:39:28"
+	"lastUpdated": "2017-03-11 13:39:28"
 }
 
 function detectImport() {
@@ -1089,13 +1089,13 @@ var citeKeyConversions = {
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
-		return "";
+		return "noauthor";
 	},
 	"t":function (flags, item) {
 		if (item["title"]) {
 			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
-		return "";
+		return "notitle";
 	},
 	"y":function (flags, item) {
 		if(item.date) {
@@ -1104,7 +1104,7 @@ var citeKeyConversions = {
 				return date.year;
 			}
 		}
-		return "????";
+		return "nodate";
 	}
 }
 
