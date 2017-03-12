@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-25 18:29:16"
+	"lastUpdated": "2017-03-10 05:15:05"
 }
 
 function detectWeb(doc, url) {
@@ -49,9 +49,13 @@ function detectWeb(doc, url) {
 }
 
 function getPDFLink(doc) {
+	Z.debug(ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data'));
 	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+	}
+	if (!pdfLink) {
+		pdfLink = ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data');
 	}
 	return pdfLink;
 }
@@ -179,7 +183,7 @@ function scrapeByExport(doc) {
 		}
 
 		ZU.doPost('/science', post, function(text) {
-			processRIS(doc, text)
+			processRIS(doc, text);
 		});
 	});
 }
@@ -278,7 +282,7 @@ function processRIS(doc, text) {
 		}
 		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
-		
+
 		if (item.url && item.url.substr(0,2) == "//") {
 			item.url = "https:" + item.url;
 		}
@@ -373,7 +377,7 @@ function scrape(doc, url) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//a[contains(@class, "ExportCitationButton")]')[0];
+	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button[contains(@class, "ExportCitationButton")]')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
@@ -390,7 +394,7 @@ function scrape(doc, url) {
 			var risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
 			//Z.debug(risUrl)
 			ZU.doGet(risUrl, function(text) {
-				processRIS(doc, text)
+				processRIS(doc, text);
 			});
 			return;
 		}
@@ -405,7 +409,7 @@ function scrape(doc, url) {
 		var risUrl = form.action +
 			'?export-format=RIS&export-content=cite-abs';
 		ZU.doGet(risUrl, function(text) {
-			processRIS(doc, text)
+			processRIS(doc, text);
 		});
 		return;
 	}
@@ -886,7 +890,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+		"url": "http://www.sciencedirect.com.libezproxy2.syr.edu/science/article/pii/0022460X72904348",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -912,6 +916,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],

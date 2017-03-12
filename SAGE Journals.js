@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-30 11:03:08"
+	"lastUpdated": "2017-03-02 21:10:56"
 }
 
 /*
@@ -81,6 +81,9 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var risURL = "//journals.sagepub.com/action/downloadCitation";
 	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
+	if (!doi) {
+		doi = url.match(/10\.[^?#]+/)[0];
+	}
 	var filename = ZU.xpathText(doc, '//input[@name="downloadFileName"]/@value');
 	var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + filename + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
@@ -128,6 +131,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -154,7 +158,7 @@ var testCases = [
 				"libraryCatalog": "SAGE Journals",
 				"pages": "17-25",
 				"publicationTitle": "Emotion Review",
-				"url": "http://journals.sagepub.com/doi/abs/10.1177/1754073910380971",
+				"url": "http://dx.doi.org/10.1177/1754073910380971",
 				"volume": "3",
 				"attachments": [
 					{
@@ -203,7 +207,6 @@ var testCases = [
 				"abstractNote": "A low cost powder flowability tester for industry has been developed at The Wolfson Centre for Bulk Solids Handling Technology, University of Greenwich in collaboration with Brookfield Engineering and four food manufacturers: Cadbury, Kerry Ingredients, GSK and United Biscuits. Anticipated uses of the tester are primarily for quality control and new product development, but it can also be used for storage vessel design., This paper presents the preliminary results from ‘round robin’ trials undertaken with the powder flow tester using the BCR limestone (CRM-116) standard test material. The mean flow properties have been compared to published data found in the literature for the other shear testers.",
 				"issue": "3",
 				"journalAbbreviation": "Proceedings of the IMechE",
-				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "215-230",
 				"publicationTitle": "Proceedings of the Institution of Mechanical Engineers, Part E: Journal of Process Mechanical Engineering",
@@ -261,7 +264,6 @@ var testCases = [
 				"abstractNote": "Moffitt’s taxonomy remains an influential theoretical framework within criminology. Despite much empirical scrutiny, comparatively less time has been spent testing the snares component of Moffitt’s work. Specifically, are there factors that might engender continued criminal involvement for individuals otherwise likely to desist? The current study tested whether gang membership increased the odds of contact with the justice system for each of the offender groups specified in Moffitt’s original developmental taxonomy. Our findings provided little evidence that gang membership increased the odds of either adolescence-limited or life-course persistent offenders being processed through the criminal justice system. Moving forward, scholars may wish to shift attention to alternative variables—beyond gang membership—when testing the snares hypothesis.",
 				"issue": "4",
 				"journalAbbreviation": "Youth Violence and Juvenile Justice",
-				"language": "en",
 				"libraryCatalog": "SAGE Journals",
 				"pages": "335-349",
 				"publicationTitle": "Youth Violence and Juvenile Justice",
