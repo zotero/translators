@@ -101,7 +101,7 @@ function getSearchResults(doc, url, checkOnly) {
 }
 
 function getHost(url) {
-	return url.match(/^http:\/\/[^\/]+/)[0];
+	return url.match(/^https?:\/\/[^\/]+/)[0];
 }
 
 function scrape(doc, url) {
