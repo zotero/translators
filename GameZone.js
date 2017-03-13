@@ -42,7 +42,7 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 FW.Scraper({
 itemType         : 'blogPost',
-detect           : FW.Url().match(/(\/news\/)|(\/reviews\/)/), // news
+detect           : FW.Url().match(/(\/news\/)|(\/reviews\/)/), // news and reviews
 title            : FW.Xpath('//meta[@property="og:title"]/@content').text(),
 attachments      : [{ url: FW.Url(),
   title:  "GameZone snapshot",
@@ -53,8 +53,6 @@ blogTitle        : "GameZone",
 language         : "en-US",
 abstractNote     : FW.Xpath('//meta[@name="description"]/@content').text()
 });
-
-
 
 FW.MultiScraper({
 itemType         : 'multiple',
@@ -73,6 +71,7 @@ choices          : {
   urls    :  FW.Xpath('//div[@class="article-content"]/h4/a').key("href")
   }
 });
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
