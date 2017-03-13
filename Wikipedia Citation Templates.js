@@ -354,23 +354,23 @@ function doExport() {
 		}
 		
 		// write out properties
-		Zotero.write((first ? "" : "\r\n") + "<ref>{{"+type);
+		Zotero.write((first ? "" : "\r\n") + "{{"+type);
 		for(var key in properties) {
 			if (!properties[key]) continue;
 			
 			if (key == 'authors') {
 				var index = properties.authors.length > 1;
 				for (var i=0; i<properties.authors.length; i++) {
-					Zotero.write('\r\n| last' + (i|| index ? i+1 : '') + ' = ' + properties.authors[i].last);
+					Zotero.write('| last' + (i|| index ? i+1 : '') + ' = ' + properties.authors[i].last);
 					if (properties.authors[i].first) {
-						Zotero.write('\r\n| first' + (i || index ? i+1 : '') + ' = ' + properties.authors[i].first);
+						Zotero.write('| first' + (i || index ? i+1 : '') + ' = ' + properties.authors[i].first);
 					}
 				}
 			} else {
-				Zotero.write("\r\n| "+key+" = "+ escapeWiki(properties[key]));
+				Zotero.write("| "+key+" = "+ escapeWiki(properties[key]));
 			}
 		}
-		Zotero.write("\r\n}}</ref>");
+		Zotero.write("}}");
 		
 		first = false;
 	}
