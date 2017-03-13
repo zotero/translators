@@ -2,7 +2,7 @@
 	"translatorID": "c1d7fbc6-d2c9-4056-b132-f82c42509c6a",
 	"label": "Kotaku",
 	"creator": "czar",
-	"target": "^https?://(www\\.)?kotaku\\.com",
+	"target": "^https?://(www\\.|thebests\\.|steamed\\.|cosplay\\.|compete\\.)?kotaku\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
