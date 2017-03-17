@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-08-31 16:05:29"
+	"lastUpdated": "2017-03-17 15:15:57"
 }
 
 /*
@@ -97,6 +97,7 @@ function scrape(doc, url) {
 			item.itemType= "book";
 			//the DC doesn't distinguish between personal and institutional authors - get them from the page and parse
 			//var authors = ZU.xpath(doc, '//div[@id="archivalDescriptionArea"]//div[@class="field"]/h3[contains(text(), "Name of creator")]/following-sibling::div/a');
+			while(item.creators.pop());
 			for (var i in authors) {
 				item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 				//if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;
