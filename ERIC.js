@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-16 21:30:19"
+	"lastUpdated": "2017-03-17 05:58:32"
 }
 
 /*
@@ -33,8 +33,8 @@
 
 function detectWeb(doc, url) {
 	var hasTitle = doc.querySelector("meta[name=citation_title]");
-	var type = doc.querySelector("meta[name=source][content]");
 	if (hasTitle) {
+		var type = doc.querySelector("meta[name=source][content]");
 		if (type && type.content.indexOf("Non-Journal")!=-1) {
 			return "book";
 		} else {
@@ -105,13 +105,13 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author", true));
 			}
 		}
-		if (item.ISSN){ 
+		if (item.ISSN) { 
 			var ISSN = item.ISSN.match(/[0-9Xx]{4}\-[0-9Xx]{4}/);
-			if (ISSN) item.ISSN = ISSN[0]
+			if (ISSN) item.ISSN = ISSN[0];
 		}
 		if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN.replace('ISBN', ''));
 		if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
-		if (DOI){
+		if (DOI) {
 			DOImatch = decodeURIComponent(DOI).match(/doi\.org\/(10\..+)/);
 			if (DOImatch) item.DOI = DOImatch[1];
 		}
