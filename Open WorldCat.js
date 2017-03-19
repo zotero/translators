@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-01-03 11:14:23"
+	"lastUpdated": "2017-03-19 23:26:57"
 }
 
 /**
@@ -246,7 +246,6 @@ function doWeb(doc, url) {
 				oclcID = extractOCLCID(canonicalURL.href);
 			}
 		}
-		
 		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		scrape([oclcID]);
 	}
@@ -327,11 +326,11 @@ function fetchIDs(isbns, ids, callback) {
 	}
 	
 	var isbn = isbns.shift();
-	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+	var url = "http://www.worldcat.org/search?qt=results_page&q=isbn%3A"
 		+ encodeURIComponent(isbn);
 	ZU.processDocuments(url,
 		function (doc) {
-			//we take the first search result
+			//mostly these are search results; for those, we take the first search result
 			var results = getSearchResults(doc);
 			if (results.length) {
 				var title = getTitleNode(results[0]);
@@ -341,7 +340,17 @@ function fetchIDs(isbns, ids, callback) {
 				} else {
 					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
 				}
-			} else {
+			}
+			//but sometimes we have single items
+			else if (getFirstContextObj(doc)) {
+				var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
+				if (canonicalURL) {
+					oclcID = extractOCLCID(canonicalURL.href);
+				}
+				if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+				scrape([oclcID]);
+			}
+			else {
 				Z.debug("No search results found for ISBN " + isbn);
 			}
 		},
@@ -685,9 +694,9 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2004",
+				"date": "2005",
 				"ISBN": "9787112062317",
-				"extra": "OCLC: 56290538",
+				"extra": "OCLC: 77641948",
 				"language": "Chinese",
 				"libraryCatalog": "Open WorldCat",
 				"place": "北京",
