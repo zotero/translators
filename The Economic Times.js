@@ -62,7 +62,6 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (var i in items) {
-				Zotero.debug(i);
 				articles.push(i);
 			}
 			Zotero.Utilities.processDocuments(articles, scrape);
@@ -94,7 +93,6 @@ function scrape(doc, url) {
 	date = date.substring(date.indexOf("|") + 1);
 	var date_day = date.replace('Updated:','');
 	newItem.date = date_day;
-	Zotero.debug(newItem.date);
 	
 	//get author or organization
 	var authors = ZU.xpath(doc, '//a[@rel="author"]');
