@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-19 08:42:35"
+	"lastUpdated": "2017-03-19 15:14:59"
 }
 
 /*
@@ -44,30 +44,35 @@ function detectWeb(doc, url) {
 	}
 }
 
-function doWeb(doc, url) {
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//main//a[(h2 or h3) and contains(@href, "/articleshow")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
 
-	//srcaping titles of search results
+
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var myXPath = '//main/descendant::h3';
-		var myXPathObject = ZU.xpathText(doc, '//main/div[1]/div[2]/a/h2',',','*');
-		myXPathObject = myXPathObject.concat(ZU.xpathText(doc, myXPath,',','*'));
-		var array = myXPathObject.split('*')
-		var items = new Object();
-		var articles = new Array();
-		for (var i in array){
-			items[i]=array[i];
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
-	}	
-	else{
+	} else {
 		scrape(doc, url);
 	}
 }
@@ -87,20 +92,20 @@ function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	newItem.abstractNote = abstract;
 	
-	//get date and day
-	var date = ZU.xpathText(doc, '//article/div[4]/div[1]');
-	if(!date) date = ZU.xpathText(doc, '//article/div[1]/div[2]');
-	date = date.substring(date.indexOf("|") + 1);
-	var date_day = date.replace('Updated:','');
-	newItem.date = date_day;
-	
+	//get date
+	var xpathdate_author = '//article/div/div[contains(@class, "publish_on") or contains(@class, "byline")]';
+	var date = ZU.xpathText(doc, xpathdate_author);
+	if (date) {
+		newItem.date = ZU.strToISO(date);
+	}
+
 	//get author or organization
 	var authors = ZU.xpath(doc, '//a[@rel="author"]');
 	for (var i in authors){
 		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 	}
 	if(!authors.length){
-		authors = ZU.xpathText(doc, '//article/div[4]/div[1]');
+		authors = ZU.xpathText(doc, xpathdate_author);
 		if(authors){
 			authors_org=authors.substring(0,authors.lastIndexOf("|")-1);
 			var regex = /(.*By\s+)(.*)/;
@@ -119,25 +124,25 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+		"url": "http://economictimes.indiatimes.com/news/economy/policy/cabinet-may-tomorrow-consider-gst-supplementary-legislations/articleshow/57716927.cms",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Is Narendra Modi's victory in 2019 a done deal?",
+				"title": "Cabinet may tomorrow consider GST supplementary legislations",
 				"creators": [
 					{
-						"firstName": "Chetan",
-						"lastName": "Bhagat",
-						"creatorType": "author"
+						"lastName": "PTI",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
-				"date": "Mar 18, 2017, 11.30 AM IST",
-				"abstractNote": "No matter how much Rahul Gandhi acolytes try to sweeten the news to him by claiming Congress didnt do so badly, the fact is simple: BJP did spectacularly well.",
+				"date": "2017-03-19",
+				"abstractNote": "Sources said the Cabinet meeting has been called for Monday morning and the agenda list may not be very long.",
 				"libraryCatalog": "The Economic Times",
 				"publicationTitle": "The Economic Times",
-				"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+				"url": "http://economictimes.indiatimes.com/news/economy/policy/cabinet-may-tomorrow-consider-gst-supplementary-legislations/articleshow/57716927.cms",
 				"attachments": {
-					"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+					"url": "http://economictimes.indiatimes.com/news/economy/policy/cabinet-may-tomorrow-consider-gst-supplementary-legislations/articleshow/57716927.cms",
 					"title": "The Economic Times Snapshot",
 					"mimeType": "text/html"
 				},
@@ -149,20 +154,26 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+		"url": "http://economictimes.indiatimes.com/news/economy/foreign-trade/vat-in-uae-will-not-affect-trade-dubai-chamber-chairman/articleshow/57671214.cms",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Rs 1 lakh in 1984 is worth just Rs 7,451 now: Are you saving enough to beat inflation?",
-				"creators": [],
-				"date": "Mar 18, 2017, 11.15 AM IST",
-				"abstractNote": "People relying on deposit-type savings that yield very low real rates of return need to save a lot more in order to avoid old age hardship.",
+				"title": "VAT in UAE will not affect trade: Dubai Chamber chairman",
+				"creators": [
+					{
+						"firstName": "Kirtika",
+						"lastName": "Suneja",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-03-16",
+				"abstractNote": "\"The discussion is to have VAT between 4-5%. It is an excellent step to collect information, businesses' capacity and gauge their condition,\" said Al Ghurair.",
 				"libraryCatalog": "The Economic Times",
 				"publicationTitle": "The Economic Times",
-				"shortTitle": "Rs 1 lakh in 1984 is worth just Rs 7,451 now",
-				"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+				"shortTitle": "VAT in UAE will not affect trade",
+				"url": "http://economictimes.indiatimes.com/news/economy/foreign-trade/vat-in-uae-will-not-affect-trade-dubai-chamber-chairman/articleshow/57671214.cms",
 				"attachments": {
-					"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+					"url": "http://economictimes.indiatimes.com/news/economy/foreign-trade/vat-in-uae-will-not-affect-trade-dubai-chamber-chairman/articleshow/57671214.cms",
 					"title": "The Economic Times Snapshot",
 					"mimeType": "text/html"
 				},
@@ -171,6 +182,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://economictimes.indiatimes.com/topic/nuclear",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
