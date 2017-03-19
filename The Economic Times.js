@@ -1,5 +1,21 @@
+{
+	"translatorID": "1a9a7ecf-01e9-4d5d-aa19-a7aa4010da83",
+	"label": "The Economic Times",
+	"creator": "Sonali Gupta",
+	"target": "http://economictimes.indiatimes.com",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-03-19 08:42:35"
+}
+
 /*
 	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017 Sonali Gupta
 	
 	This file is part of Zotero.
 
@@ -20,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (doc.location.href.indexOf("/topic/") != -1) {
+	if (url.indexOf("/topic/") != -1) {
 		return "multiple";
 	}
 	else if (ZU.xpathText(doc, '//article')) {
@@ -29,21 +45,17 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == 'x') return namespace; else return null;
-	} : null; 
 
 	//srcaping titles of search results
 	if (detectWeb(doc, url) == "multiple") {
 		var myXPath = '//main/descendant::h3';
-		var myXPathObject = doc.evaluate(myXPath, doc, nsResolver, XPathResult.ANY_TYPE, null); 
-		var items = {};
-		var headers;
+		var myXPathObject = ZU.xpathText(doc, '//main/div[1]/div[2]/a/h2',',','*');
+		myXPathObject = myXPathObject.concat(ZU.xpathText(doc, myXPath,',','*'));
+		var array = myXPathObject.split('*')
+		var items = new Object();
 		var articles = new Array();
-		var k=0;
-		while (headers = myXPathObject.iterateNext()) {
-			items[k++] = headers.textContent;
+		for (var i in array){
+			items[i]=array[i];
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -53,7 +65,7 @@ function doWeb(doc, url) {
 				Zotero.debug(i);
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, getEdition);
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	}	
 	else{
@@ -62,8 +74,9 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
+	
 	newItem = new Zotero.Item("newspaperArticle");
-	newItem.url = doc.location.href;
+	newItem.url = url;
 	newItem.publicationTitle = "The Economic Times";
 
 	//get headline
@@ -81,6 +94,7 @@ function scrape(doc, url) {
 	date = date.substring(date.indexOf("|") + 1);
 	var date_day = date.replace('Updated:','');
 	newItem.date = date_day;
+	Zotero.debug(newItem.date);
 	
 	//get author or organization
 	var authors = ZU.xpath(doc, '//a[@rel="author"]');
@@ -89,17 +103,76 @@ function scrape(doc, url) {
 	}
 	if(!authors.length){
 		authors = ZU.xpathText(doc, '//article/div[4]/div[1]');
-		authors_org=authors.substring(0,authors.lastIndexOf("|")-1);
-		var regex = /(.*By\s+)(.*)/;
-		authors = authors_org.replace(regex, "$2");
-		newItem.creators.push({lastName:authors,  creatorType: "author",fieldMode: 1});
+		if(authors){
+			authors_org=authors.substring(0,authors.lastIndexOf("|")-1);
+			var regex = /(.*By\s+)(.*)/;
+			authors = authors_org.replace(regex, "$2");
+			newItem.creators.push({lastName:authors,  creatorType: "author",fieldMode: 1})
+		}
 	}
-
-	var url = doc.location.href;
-	newItem.attachments = [{
-		document: doc,
+	
+	newItem.attachments = ({
+		url: url,
 		title: "The Economic Times Snapshot",
 		mimeType: "text/html"
-	}];
+	});
 	newItem.complete();
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Is Narendra Modi's victory in 2019 a done deal?",
+				"creators": [
+					{
+						"firstName": "Chetan",
+						"lastName": "Bhagat",
+						"creatorType": "author"
+					}
+				],
+				"date": "Mar 18, 2017, 11.30 AM IST",
+				"abstractNote": "No matter how much Rahul Gandhi acolytes try to sweeten the news to him by claiming Congress didnt do so badly, the fact is simple: BJP did spectacularly well.",
+				"libraryCatalog": "The Economic Times",
+				"publicationTitle": "The Economic Times",
+				"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+				"attachments": {
+					"url": "http://economictimes.indiatimes.com/news/politics-and-nation/is-narendra-modis-victory-in-2019-a-done-deal/articleshow/57700772.cms",
+					"title": "The Economic Times Snapshot",
+					"mimeType": "text/html"
+				},
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rs 1 lakh in 1984 is worth just Rs 7,451 now: Are you saving enough to beat inflation?",
+				"creators": [],
+				"date": "Mar 18, 2017, 11.15 AM IST",
+				"abstractNote": "People relying on deposit-type savings that yield very low real rates of return need to save a lot more in order to avoid old age hardship.",
+				"libraryCatalog": "The Economic Times",
+				"publicationTitle": "The Economic Times",
+				"shortTitle": "Rs 1 lakh in 1984 is worth just Rs 7,451 now",
+				"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+				"attachments": {
+					"url": "http://economictimes.indiatimes.com/wealth/plan/how-can-inflation-affect-our-retirement-planning/articleshow/57451629.cms",
+					"title": "The Economic Times Snapshot",
+					"mimeType": "text/html"
+				},
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
