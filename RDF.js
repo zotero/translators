@@ -999,22 +999,40 @@ function importItem(newItem, node) {
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
 	
 	// publisher
-	var publisher = getFirstResults(node, [n.dc+"publisher", n.dc1_0+"publisher", n.dcterms+"publisher", n.vcard2+"org", n.eprints+"institution"]);
-	if(publisher) {
-		if(typeof(publisher[0]) == "string") {
+	var publisher = getFirstResults(node, [ n.dc+"publisher", n.dc1_0+"publisher",
+		n.dcterms+"publisher", n.vcard2+"org", n.eprints+"institution",
+		n.so+"publisher" ]);
+	if (publisher) {
+		if (typeof(publisher[0]) == "string") {
 			newItem.publisher = publisher[0];
 		} else {
 			var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
-			if(type) {
+			if (type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
-				if(type == n.foaf+"Organization" || type == n.foaf+"Agent") {	// handle foaf organizational publishers
-					newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
-					var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
-					if(place) {
-						newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
-					}
-				} else if(type == n.vcard2+"Organization") {
-					newItem.publisher = getFirstResults(publisher[0], [n.vcard2+"organization-name"], true);
+				switch (type){
+					case n.foaf+"Organization":
+					case n.foaf+"Agent":
+						newItem.publisher = getFirstResults(publisher[0], [n.foaf+"name"], true);
+						var place = getFirstResults(publisher[0], [n.vcard+"adr"]);
+						if (place) {
+							newItem.place = getFirstResults(place[0], [n.vcard+"locality"]);
+						}
+						break;
+					case n.vcard2+"Organization":
+						newItem.publisher = getFirstResults(publisher[0], [n.vcard2+"organization-name"], true);
+						break;
+					case n.so+"Organization":
+					case n.so+"Airline":
+					case n.so+"Corporation":
+					case n.so+"EducationalOrganization":
+					case n.so+"GovernmentOrganization":
+					case n.so+"LocalBusiness":
+					case n.so+"MedicalOrganization":
+					case n.so+"NGO":
+					case n.so+"PerformingGroup":
+					case n.so+"SportsOrganization":
+						newItem.publisher = getFirstResults(publisher[0], [n.so+"name"], true)
+						break
 				}
 			}
 		}
