@@ -2,14 +2,14 @@
 	"translatorID": "ecddda2e-4fc6-4aea-9f17-ef3b56d7377a",
 	"label": "arXiv.org",
 	"creator": "Sean Takats and Michael Berkowitz",
-	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(find|catchup|list/\\w|abs/)",
+	"target": "^https?://([^\\.]+\\.)?(arxiv\\.org|xxx\\.lanl\\.gov)/(find|catchup|list/\\w|abs/|pdf/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-09-03 17:27:02"
+	"lastUpdated": "2017-03-22 21:23:25"
 }
 
 function detectWeb(doc, url) {
@@ -71,8 +71,14 @@ function doWeb(doc, url) {
 			ZU.doGet(urls, parseXML);
 		})
 	} else {
-		var id = ZU.xpathText(doc, '//td[contains(@class,"arxivid")]/a')
-			|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
+		var id;
+		var p = url.indexOf("/pdf/");
+		if (p>-1) {
+			id = url.substring(p+5, url.length-4);
+		} else {
+			id = ZU.xpathText(doc, '//td[contains(@class,"arxivid")]/a')
+				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
+		}
 		if(!id) throw new Error('Could not find arXiv ID on page.');
 		
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
@@ -488,6 +494,54 @@ var testCases = [
 		"type": "web",
 		"url": "http://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/pdf/1402.1516.pdf",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A dual pair for free boundary fluids",
+				"creators": [
+					{
+						"firstName": "Francois",
+						"lastName": "Gay-Balmaz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cornelia",
+						"lastName": "Vizman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-02-06",
+				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
+				"extra": "arXiv: 1402.1516",
+				"libraryCatalog": "arXiv.org",
+				"publicationTitle": "arXiv:1402.1516 [math-ph]",
+				"url": "http://arxiv.org/abs/1402.1516",
+				"attachments": [
+					{
+						"title": "arXiv:1402.1516 PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"Mathematical Physics",
+					"Mathematics - Symplectic Geometry"
+				],
+				"notes": [
+					{
+						"note": "Comment: 17 pages"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
