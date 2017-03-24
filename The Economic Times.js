@@ -2,7 +2,7 @@
 	"translatorID": "1a9a7ecf-01e9-4d5d-aa19-a7aa4010da83",
 	"label": "The Economic Times",
 	"creator": "Sonali Gupta",
-	"target": "http://economictimes.indiatimes.com",
+	"target": "^https?://economictimes\\.indiatimes\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/topic/") != -1) {
+	if (url.indexOf("/topic/") != -1 && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else if (ZU.xpathText(doc, '//article')) {
@@ -89,8 +89,7 @@ function scrape(doc, url) {
 	newItem.title = title;
 
 	//get abstract
-	var abstract = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
-	newItem.abstractNote = abstract;
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	
 	//get date
 	var xpathdate_author = '//article/div/div[contains(@class, "publish_on") or contains(@class, "byline")]';
@@ -110,7 +109,7 @@ function scrape(doc, url) {
 			authors_org=authors.substring(0,authors.lastIndexOf("|")-1);
 			var regex = /(.*By\s+)(.*)/;
 			authors = authors_org.replace(regex, "$2");
-			newItem.creators.push({lastName:authors,  creatorType: "author",fieldMode: 1})
+			newItem.creators.push({lastName:authors, creatorType: "author", fieldMode: 1})
 		}
 	}
 	
