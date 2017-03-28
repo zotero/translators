@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-07 05:17:35"
+	"lastUpdated": "2017-03-28 03:09:01"
 }
 
 /*
@@ -576,7 +576,7 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(!newItem.creators.length) {
 		//the authors in the standard W3 author tag are safer than byline guessing
-		var w3authors = ZU.xpath(doc, '//meta[@name="author"]');
+		var w3authors = ZU.xpath(doc, '//meta[@name="author" or @property="author"]' );
 		if (w3authors.length>0){
 			for (var i = 0; i<w3authors.length; i++){
 				//skip empty authors. Try to match something other than punctuation
