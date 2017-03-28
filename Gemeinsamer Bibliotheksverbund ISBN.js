@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-14 17:06:00"
+	"lastUpdated": "2017-03-28 03:56:11"
 }
 
 /*
@@ -60,7 +60,7 @@ function doSearch(item) {
 			</datafield>
 			*/
 			var parser = new DOMParser();
-			var xml = parser.parseFromString(text);
+			var xml = parser.parseFromString(text, "application/xml");
 			var ns = {
 				"marc": "http://www.loc.gov/MARC21/slim"
 			};
