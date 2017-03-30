@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-06-01 22:04:46"
+	"lastUpdated": "2017-03-30 04:27:42"
 }
 
 /*
@@ -64,37 +64,21 @@ function detectWeb(doc, url) {
 function scrape(doc, type) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	
-	// temporary hack: move meta tags to the head (reported to RSC 2014-04-30)
-	var meta = doc.body.getElementsByTagName('meta');
-	while(meta.length) {
-		doc.head.appendChild(meta[0]);
-	}
-	
 	translator.setDocument(doc);
-
 	translator.setHandler('itemDone', function(obj, item) {
 		item.itemType = type;
 
-		if(type == 'bookSection') {
-			//fix title for book chapters
-			var title = ZU.xpathText(doc, '//label[@id="lblTitle"]/node()',
-				null, ' ');
-			if(title) item.title = ZU.trimInternal(title);
-
-			//add bookTitle
-			item.bookTitle = ZU.xpathText(doc, '//h1[@class="sub_title"]');
-			if (item.bookTitle){
-				item.bookTitle = item.bookTitle.replace(/\s*:/, ":");
-			}
-		} else if(type == 'journalArticle') {
-			//journal title is abbreviated. We can fetch full title from the page
-			item.publicationTitle = ZU.xpathText(doc, '//div[contains(@class, "hg_title")]//h1');
-		}
 
 		//keywords is frequently an empty string
 		if(item.tags.length == 1 && !item.tags[0]) {
 			item.tags = [];
+		}
+
+		if (item.itemType == "bookSection") {
+			if (item.DOI){
+				if (item.extra) item.extra += "\nDOI: " + item.DOI;
+				else item.extra = "DOI: " + item.DOI;
+			}
 		}
 
 		item.complete();
