@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-20 19:58:56"
+	"lastUpdated": "2017-04-02 07:33:14"
 }
 
 /*
@@ -112,6 +112,12 @@ function scrape(doc, url) {
 				item.date = date.toISOString();
 			} else {
 				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
+				if(!item.date) {
+					item.date = ZU.xpathText(doc, '//p[@class="timestamp"]');
+					if (item.date) {
+						item.date = ZU.strToISO(item.date);
+					}
+				}
 			}
 		}
 		
@@ -132,6 +138,18 @@ function scrape(doc, url) {
 				}
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
+		}
+		else
+		{
+			var authorString = ZU.xpathText(doc, '//p[@class="byline"]');
+			var title = ZU.xpathText(doc, '//em[@class="title"]');
+			if (authorString) {
+				authorString = authorString.replace(title, '').replace('By', '');
+				var authors = authorString.split('&');
+				for (var i=0; i<authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+				}
+			}	
 		}
 		
 		item.language = "en-GB";
