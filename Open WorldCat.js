@@ -342,16 +342,15 @@ function fetchIDs(isbns, ids, callback) {
 				}
 			}
 			//but sometimes we have single items
-			else if (getFirstContextObj(doc)) {
-				var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
-				if (canonicalURL) {
-					oclcID = extractOCLCID(canonicalURL.href);
-				}
-				if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-				scrape([oclcID]);
-			}
-			else {
-				Z.debug("No search results found for ISBN " + isbn);
+			else  {
+				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
+   				if (canonicalURL) {
+      					oclcID = extractOCLCID(canonicalURL);
+      					if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+         				scrape([oclcID]);
+   				} else {
+     					 Z.debug("No search results found for ISBN " + isbn);
+   				}
 			}
 		},
 		function() {
