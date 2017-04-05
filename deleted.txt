@@ -1,4 +1,4 @@
-48  # Increment number when modifying file
+49  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -91,3 +91,4 @@ d8873d23-d874-4b62-b081-1db12ff5a5de # ILO Labordoc; covered by EM and Primo now
 ac721d14-f081-4613-91e8-255c22ad05eb # IASSIST Quarterly
 62c0e36a-ee2f-4aa0-b111-5e2cbd7bb5ba # MetaPress
 fcfcfe9c-f6dd-48c6-aef9-61adbba31a4e # National Library of Australia - Australian Newspapers covered by Trove now
+a77690cf-c5d1-8fc4-110f-d1fc765dcf88 # ProQuest Legacy.js, see issue #660
