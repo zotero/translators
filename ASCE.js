@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-24 14:22:53"
+	"lastUpdated": "2017-04-01 14:22:53"
 }
 
 
@@ -44,12 +44,14 @@ function getTitles(doc) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+/*	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
 		return "journalArticle";
 	} else if(url.match(/\/action\/doSearch\?|\/toc\//))
 		{
 		return "multiple";
-	}
+		} */
+    //currently this triggers a massive download that shuts down Zotero for a significant time; turning it off until I have a fix (which should be shortly)
+    return false;
 }
 
 
