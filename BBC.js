@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-02 07:33:14"
+	"lastUpdated": "2017-04-06 11:12:55"
 }
 
 /*
@@ -46,6 +46,8 @@ function detectWeb(doc, url) {
 		}
 		return "newspaperArticle";
 	}
+	if(url.indexOf("/newsbeat/article") != -1)
+		return "blogPost";
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -151,6 +153,8 @@ function scrape(doc, url) {
 				}
 			}	
 		}
+		if(!item.section)
+			item.section = ZU.xpathText(doc, '//p[@class="topic"]/a//text()[not(parent::span)]');
 		
 		item.language = "en-GB";
 		
@@ -304,6 +308,40 @@ var testCases = [
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
 				"url": "http://www.bbc.com/news/magazine-36287752",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/search?q=harry+potter",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Will new music streaming service Tidal make the waves artists want?",
+				"creators": [
+					{
+						"firstName": "Chi Chi",
+						"lastName": "Izundu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03-31",
+				"abstractNote": "Big names in the world of music made it known that they wanted a change when they all stood on stage on Monday and announced the relaunch of streaming service Tidal.",
+				"language": "en-GB",
+				"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
 				"attachments": [
 					{
 						"title": "Snapshot"
