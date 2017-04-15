@@ -1,16 +1,40 @@
 {
 	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
 	"label": "The Globe and Mail",
-	"creator": "Adam Crymble",
+	"creator": "Sonali Gupta",
 	"target": "^https?://www\\.theglobeandmail\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-14 08:24:05"
+	"lastUpdated": "2017-04-15 09:23:41"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017 Sonali Gupta
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 
 function detectWeb(doc, url) {
 	if (url.indexOf("/search/") != -1 && getSearchResults(doc, true)) {
@@ -75,20 +99,13 @@ function scrape(doc, url) {
 	}
 
 	//get author or organization
+	//get author or organization
 	var authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
 	for (var i in authors){
 		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+		newItem.creators[i].publisher = ZU.xpathText(doc, '//article/header//div[@itemprop="publisher"]//p').replace("\n",'');
 	}
-	if(!authors.length){//need to change
-		authors = ZU.xpathText(doc, xpathdate_author);
-		if(authors){
-			authors_org=authors.substring(0,authors.lastIndexOf("|")-1);
-			var regex = /(.*By\s+)(.*)/;
-			authors = authors_org.replace(regex, "$2");
-			newItem.creators.push({lastName:authors, creatorType: "author", fieldMode: 1})
-		}
-	}
-	
+
 	newItem.language = ZU.xpathText(doc, '//meta[@http-equiv="Content-Language"]/@content');
 	
 	newItem.section = ZU.xpathText(doc, '//meta[@name="article:type"]/@content');
@@ -103,26 +120,32 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.theglobeandmail.com/news/national/sharp-differences-in-career-paths-of-phd-grads-across-fields-ubc-study-finds/article34694435/?reqid=443820d7-b187-4ede-a28a-2d075ac4bd80",
+		"url": "http://www.theglobeandmail.com/search/?q=nuclear",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Sharp differences in career paths of PhD grads across fields, UBC study finds",
+				"title": "Doug Ford to decide provincial Tory leadership run in 'a couple weeks'",
 				"creators": [
 					{
-						"firstName": "SIMONA",
-						"lastName": "CHIOSE",
-						"creatorType": "author"
+						"firstName": "Ann",
+						"lastName": "Hui",
+						"creatorType": "author",
+						"publisher": "The Globe and Mail"
 					}
 				],
-				"date": "2017-04-13",
-				"abstractNote": "Multiple studies over the past two years have found that a minority of PhDs become professors",
+				"date": "2014-11-03",
+				"abstractNote": "He says he will decide soon about whether to run for Ontario Tory leadership and does not rule out another attempt at the Toronto mayoralty",
 				"language": "en-ca",
 				"libraryCatalog": "The Globe and Mail",
 				"section": "news",
-				"url": "http://www.theglobeandmail.com/news/national/sharp-differences-in-career-paths-of-phd-grads-across-fields-ubc-study-finds/article34694435/?reqid=443820d7-b187-4ede-a28a-2d075ac4bd80",
+				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 				"attachments": {
-					"url": "http://www.theglobeandmail.com/news/national/sharp-differences-in-career-paths-of-phd-grads-across-fields-ubc-study-finds/article34694435/?reqid=443820d7-b187-4ede-a28a-2d075ac4bd80",
+					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 					"title": "The Globe and Mail Snapshot",
 					"mimeType": "text/html"
 				},
@@ -131,11 +154,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.theglobeandmail.com/search/?q=nuclear",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
