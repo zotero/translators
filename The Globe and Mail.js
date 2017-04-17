@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-15 09:23:41"
+	"lastUpdated": "2017-04-17 06:09:10"
 }
 
 /*
@@ -99,17 +99,20 @@ function scrape(doc, url) {
 	}
 
 	//get author or organization
-	//get author or organization
 	var authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
 	for (var i in authors){
 		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
-		newItem.creators[i].publisher = ZU.xpathText(doc, '//article/header//div[@itemprop="publisher"]//p').replace("\n",'');
 	}
+
+	newItem.publisher = ZU.xpathText(doc, '//article/header//div[@itemprop="publisher"]//p');
 
 	newItem.language = ZU.xpathText(doc, '//meta[@http-equiv="Content-Language"]/@content');
 	
 	newItem.section = ZU.xpathText(doc, '//meta[@name="article:type"]/@content');
-	
+
+	var xpathtags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	newItem.tags = xpathtags.split(";").filter(function(tag) {return tag.length != 0});
+
 	newItem.attachments = ({
 		url: url,
 		title: "The Globe and Mail Snapshot",
@@ -120,12 +123,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.theglobeandmail.com/search/?q=nuclear",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+		"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -134,8 +132,7 @@ var testCases = [
 					{
 						"firstName": "Ann",
 						"lastName": "Hui",
-						"creatorType": "author",
-						"publisher": "The Globe and Mail"
+						"creatorType": "author"
 					}
 				],
 				"date": "2014-11-03",
@@ -143,17 +140,30 @@ var testCases = [
 				"language": "en-ca",
 				"libraryCatalog": "The Globe and Mail",
 				"section": "news",
-				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
 				"attachments": {
-					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
 					"title": "The Globe and Mail Snapshot",
 					"mimeType": "text/html"
 				},
-				"tags": [],
+				"tags": [
+					"Christine Elliott",
+					"Doug Ford",
+					"Jim Flaherty",
+					"John Tory",
+					"Ontario Progressive Conservative",
+					"Rob Ford",
+					"leadership"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.theglobeandmail.com/search/?q=nuclear",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
