@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-17 06:09:10"
+	"lastUpdated": "2017-04-22 13:49:53"
 }
 
 /*
@@ -92,19 +92,26 @@ function scrape(doc, url) {
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	
 	//get date
-	var xpathdate_author = '//time[@itemprop="datePublished"]';
-	var date = ZU.xpathText(doc, xpathdate_author);
+	var xpathdate = '//time[@itemprop="datePublished"]';
+	var date = ZU.xpathText(doc, xpathdate);
 	if (date) {
 		newItem.date = ZU.strToISO(date);
 	}
 
-	//get author or organization
+	//get author
 	var authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
 	for (var i in authors){
 		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 	}
 
-	newItem.publisher = ZU.xpathText(doc, '//article/header//div[@itemprop="publisher"]//p');
+	var publishers = ZU.xpath(doc, '//article/header//div[@itemprop="publisher"]//p');
+	for (var i in publishers ){
+		newItem.creators.push( {
+		"lastName" : publishers[i].innerText,
+		"creatorType" : "contributor",
+		"fieldmode" : 1
+		});
+	}
 
 	newItem.language = ZU.xpathText(doc, '//meta[@http-equiv="Content-Language"]/@content');
 	
@@ -112,6 +119,10 @@ function scrape(doc, url) {
 
 	var xpathtags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
 	newItem.tags = xpathtags.split(";").filter(function(tag) {return tag.length != 0});
+
+	var related_links = ZU.xpathText(doc, '//article//li/p/a/@href');
+	if(related_links)
+		newItem.notes = related_links.split(",").filter(function(tag) {return tag.length != 0});
 
 	newItem.attachments = ({
 		url: url,
@@ -123,7 +134,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
+		"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -133,6 +144,11 @@ var testCases = [
 						"firstName": "Ann",
 						"lastName": "Hui",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "The Globe and Mail",
+						"creatorType": "contributor",
+						"fieldmode": 1
 					}
 				],
 				"date": "2014-11-03",
@@ -140,9 +156,9 @@ var testCases = [
 				"language": "en-ca",
 				"libraryCatalog": "The Globe and Mail",
 				"section": "news",
-				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
+				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 				"attachments": {
-					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180//",
+					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 					"title": "The Globe and Mail Snapshot",
 					"mimeType": "text/html"
 				},
@@ -155,7 +171,11 @@ var testCases = [
 					"Rob Ford",
 					"leadership"
 				],
-				"notes": [],
+				"notes": [
+					"http://www.theglobeandmail.com/news/toronto/doug-ford-says-ontario-pc-leadership-bid-is-on-the-table/article21358827/",
+					" http://www.theglobeandmail.com/news/toronto/uniting-a-divided-toronto-will-be-a-key-task-for-torys-transition-team/article21359883/",
+					" http://www.theglobeandmail.com/news/toronto/a-chuckling-ford-on-his-mayoralty-it-will-definitely-be-remembered/article21414526/"
+				],
 				"seeAlso": []
 			}
 		]
