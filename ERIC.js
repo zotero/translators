@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-14 05:28:16"
+	"lastUpdated": "2017-03-17 05:58:32"
 }
 
 /*
@@ -30,77 +30,102 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc,url) {
-	var xpath='//meta[@name="citation_journal_title"]';
-	var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');	
-	if (ZU.xpath(doc, xpath).length > 0) {
-		if (type && type.indexOf("Non-Journal")!=-1) return "book"
-		else return "journalArticle";
+
+function detectWeb(doc, url) {
+	var hasTitle = doc.querySelector("meta[name=citation_title]");
+	if (hasTitle) {
+		var type = doc.querySelector("meta[name=source][content]");
+		if (type && type.content.indexOf("Non-Journal")!=-1) {
+			return "book";
+		} else {
+			return "journalArticle";
+		}
+	} else if (getSearchResults(doc, false)) {
+		return "multiple";
 	}
-			
-	else if (getMultiples(doc).length>0) return "multiple";
 	return false;
 }
 
-function getMultiples(doc) {
-	return ZU.xpath(doc, '//div[@class="r_t"]/a[contains(@href, "id=")]');
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll("div.r_t > a[href*='id=']");
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
- 
-function doWeb(doc,url) {
+
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		var results = getMultiples(doc)
-		var link;
-		for (var i in results) {
-			
-			hits[results[i].href] = results[i].textContent.trim();
-		}
-		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
-			for (var j in items) {
-				urls.push(j);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
 			}
-		ZU.processDocuments(urls, doWeb);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
-		//Z.debug(abstract)
-		var DOI = ZU.xpathText(doc, '//a[contains(text(), "Direct link")]/@href');
-		Z.debug(DOI)
-		var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');
-		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator('web');
-		//use Embedded Metadata
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler('itemDone', function(obj, item) {
-			if (abstract) item.abstractNote = abstract.replace(/^\|/, "");
-			//the metadata isn't good enough to properly distinguish item types. Anything that's non journal we treat as a book
-			if (type && type.indexOf("Non-Journal")!=-1) item.itemType = "book";
-			item.title = item.title.replace(/.\s*$/, "");
-			if (item.ISSN){ 
-				var ISSN = item.ISSN.match(/[0-9Xx]{4}\-[0-9Xx]{4}/);
-				if (ISSN) item.ISSN = ISSN[0]
-			}
-			if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN.replace('ISBN', ''));
-			if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
-			if (DOI){
-				DOImatch = decodeURIComponent(DOI).match(/doi\.org\/(10\..+)/);
-				if (DOImatch) item.DOI = DOImatch[1];
-			}
-			// Only include URL if full text is hosted on ERIC
-			if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
-				delete item.url;
-			}
-			
-			item.libraryCatalog = "ERIC";
-			item.complete();
-		});
-		translator.translate();
+		scrape(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+
+function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+	var DOI = ZU.xpathText(doc, '//a[contains(text(), "Direct link")]/@href');
+	var type = ZU.xpathText(doc, '//meta[@name="source"]/@content');
+	var authorString = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
+	// We call the Embedded Metadata translator to do the actual work
+	var translator = Zotero.loadTranslator('web');
+	//use Embedded Metadata
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function(obj, item) {
+		if (abstract) item.abstractNote = abstract.replace(/^\|/, "");
+		//the metadata isn't good enough to properly distinguish item types. Anything that's non journal we treat as a book
+		if (type && type.indexOf("Non-Journal")!=-1) {
+			item.itemType = "book";
+		}
+		item.title = item.title.replace(/.\s*$/, "");
+		if (authorString.indexOf("|")>-1) {
+			item.creators = [];
+			var authors = authorString.split("|");
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(ZU.cleanAuthor(authors[i], "author", true));
+			}
+		}
+		if (item.ISSN) { 
+			var ISSN = item.ISSN.match(/[0-9Xx]{4}\-[0-9Xx]{4}/);
+			if (ISSN) item.ISSN = ISSN[0];
+		}
+		if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN.replace('ISBN', ''));
+		if (item.publisher) item.publisher = item.publisher.replace(/\..+/, "");
+		if (DOI) {
+			DOImatch = decodeURIComponent(DOI).match(/doi\.org\/(10\..+)/);
+			if (DOImatch) item.DOI = DOImatch[1];
+		}
+		// Only include URL if full text is hosted on ERIC
+		if (!ZU.xpath(doc, '//div[@id="r_colR"]//img[@alt="PDF on ERIC"]').length) {
+			delete item.url;
+		}
+		item.libraryCatalog = "ERIC";
+		item.complete();
+	});
+	
+	translator.translate();
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -230,7 +255,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://eric.ed.gov/?id=EJ906692",
+		"url": "https://eric.ed.gov/?id=EJ906692",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -249,7 +274,7 @@ var testCases = [
 				"libraryCatalog": "ERIC",
 				"pages": "185-196",
 				"publicationTitle": "Journal of Postsecondary Education and Disability",
-				"url": "http://eric.ed.gov/?id=EJ906692",
+				"url": "https://eric.ed.gov/?id=EJ906692",
 				"volume": "22",
 				"attachments": [
 					{

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-07 05:17:35"
+	"lastUpdated": "2017-04-04 04:24:04"
 }
 
 /*
@@ -44,6 +44,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
+	"citation_inbook_title": "bookTitle", //used on RSC, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
@@ -576,7 +577,7 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(!newItem.creators.length) {
 		//the authors in the standard W3 author tag are safer than byline guessing
-		var w3authors = ZU.xpath(doc, '//meta[@name="author"]');
+		var w3authors = ZU.xpath(doc, '//meta[@name="author" or @property="author"]' );
 		if (w3authors.length>0){
 			for (var i = 0; i<w3authors.length; i++){
 				//skip empty authors. Try to match something other than punctuation

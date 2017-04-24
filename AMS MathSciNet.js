@@ -9,15 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-06 18:23:10"
+	"lastUpdated": "2017-03-20 03:33:32"
 }
 
 function detectWeb(doc, url) {
 	
-	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, null,
-			XPathResult.ANY_TYPE, null);
 	var itemType;
-	if(tableRows.iterateNext()) {
+	if(getSearchResults(doc, true)) {
 		return "multiple"
 	} else if(itemType = ZU.xpathText(doc, '//div[@class="headlineMenu"]/*[last()-1]')) {
 		switch(itemType.trim().toLowerCase()) {
@@ -31,49 +29,50 @@ function detectWeb(doc, url) {
 	}
 }
 
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	//TODO: adjust the xpath
+	var rows = ZU.xpath(doc, '//div[@class="headlineText"]');
+	for (var i=0; i<rows.length; i++) {
+		//TODO: check and maybe adjust
+		var href = ZU.xpathText(rows[i], './a[@class="mrnum"]/@href')
+		//TODO: check and maybe adjust
+		var title = ZU.xpathText(rows[i], './span[@class="title"]')
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
-	//for some reason proxy redirection is sometimes "too slow" - so construct the initial part of the URL
-	var host = url.match(/^(.+)\/mathscinet/)
-	var pub = host[0] + "/search/publications.html?fmt=bibtex";
-	var tableRows = doc.evaluate('//form/div[contains(@class,"headline")]', doc, null,
-			XPathResult.ANY_TYPE, null);
-	var tableRow = tableRows.iterateNext();
-	var docLinks = new Array();
-	if(tableRow) {
-		// search page
-		var items = new Object();
-		var links = new Object();
-		
-		do {
-			var id = doc.evaluate('.//input[@type="checkbox"]', tableRow, null,
-				XPathResult.ANY_TYPE, null).iterateNext().value;
-			items[id] = doc.evaluate('./div[@class="headlineText"]/span[@class="title"]', tableRow, null,
-				XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			links[id] = tableRow.getElementsByTagName('a')[0].href;
-		} while(tableRow = tableRows.iterateNext())
-		
-		
-		Zotero.selectItems(items, function (items) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
-			
-			for(var id in items) {
-				pub += "&b="+id;
-				docLinks.push(links[id]);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
 			}
-			scrape(pub, docLinks);
+			ZU.processDocuments(articles, scrape);
 		});
-		
 	} else {
-		var MR = ZU.xpathText(doc, '//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong[1]');
-		pub += "&b="+MR.replace(/^MR0*/, "");
-		scrape(pub, docLinks, doc);
+		scrape(doc, url);
 	}
 }
 
-function scrape(pub, docLinks, doc) {
-	Zotero.Utilities.HTTP.doGet(pub, function(text) {
+function scrape(doc, url) {
+	var host = url.match(/^(.+)\/mathscinet/)
+	var pub = host[0] + "/search/publications.html?fmt=bibtex";
+	var MR = ZU.xpathText(doc, '//div[@id="content"]/div[@class="doc"]/div[@class="headline"]/strong[1]');
+	pub += "&pg1=MR&s1="+MR.replace(/^MR0*/, "");
+
+	ZU.doGet(pub, function(text) {
 		var preRE = /<pre>\s*([\s\S]*?)\s*<\/pre>/g;
 		var bibTeXString = "";
 		
@@ -99,19 +98,9 @@ function scrape(pub, docLinks, doc) {
 			
 			if(mrnumber) {
 				url = 'http://www.ams.org/mathscinet-getitem?mr=' + mrnumber;
-				docLinks.shift();
-			} else {
-				url = docLinks.shift();
 			}
-			
+			item.attachments.push({title: "MathSciNet Snapshot", document: doc});
 			item.url = url;
-			
-			if(doc) {
-				item.attachments.push({title: "MathSciNet Snapshot", document: doc});
-			} else {
-				item.attachments.push({title: "MathSciNet Snapshot", url: url, mimeType: "text/html"});
-			}
-			
 			item.complete();
 		});
 		translator.translate();
@@ -177,7 +166,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ams.org/mathscinet-getitem?mr=2767535",
+		"url": "http://www.ams.org.libezproxy2.syr.edu/mathscinet-getitem?mr=2767535",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -201,7 +190,7 @@ var testCases = [
 				],
 				"date": "2011",
 				"bookTitle": "Advances in directional and linear statistics",
-				"extra": "MR: 2767535",
+				"extra": "MR: 2767535\nDOI: 10.1007/978-3-7908-2628-9_7",
 				"itemID": "MR2767535",
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "97–111",
@@ -220,7 +209,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ams.org/mathscinet-getitem?mr=2663710",
+		"url": "http://www.ams.org.libezproxy2.syr.edu/mathscinet-getitem?mr=2663710",
 		"items": [
 			{
 				"itemType": "book",
@@ -239,7 +228,7 @@ var testCases = [
 				],
 				"date": "2011",
 				"ISBN": "9783790826272",
-				"extra": "A Festschrift for Sreenivasa Rao Jammalamadaka\nMR: 2663710",
+				"extra": "MR: 2663710\nDOI: 10.1007/978-3-7908-2628-9",
 				"itemID": "MR2663710",
 				"libraryCatalog": "AMS MathSciNet",
 				"numPages": "xiv+321",
@@ -251,7 +240,11 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p>A Festschrift for Sreenivasa Rao Jammalamadaka</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
