@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-22 13:49:53"
+	"lastUpdated": "2017-04-28 19:23:09"
 }
 
 /*
@@ -100,12 +100,12 @@ function scrape(doc, url) {
 
 	//get author
 	var authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
-	for (var i in authors){
+	for (var i = 0; i<authors.length; i++){
 		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 	}
 
 	var publishers = ZU.xpath(doc, '//article/header//div[@itemprop="publisher"]//p');
-	for (var i in publishers ){
+	for (var i = 0; i<publishers.length; i++){
 		newItem.creators.push( {
 		"lastName" : publishers[i].innerText,
 		"creatorType" : "contributor",
@@ -121,16 +121,32 @@ function scrape(doc, url) {
 	newItem.tags = xpathtags.split(";").filter(function(tag) {return tag.length != 0});
 
 	var related_links = ZU.xpathText(doc, '//article//li/p/a/@href');
+	var note=""
 	if(related_links)
-		newItem.notes = related_links.split(",").filter(function(tag) {return tag.length != 0});
+		note = addNote(note, related_links.split(",").filter(function(tag) {return tag.length != 0}))
+	if (note.length != 0) {
+		newItem.notes.push( {note: note} );
+	}
 
 	newItem.attachments = ({
-		url: url,
+		document: doc,
 		title: "The Globe and Mail Snapshot",
 		mimeType: "text/html"
 	});
 	newItem.complete();
-}/** BEGIN TEST CASES **/
+}
+
+function addNote(originalNote, newNote) {
+	if (originalNote.length == 0) {
+		originalNote = "Related URL: " + newNote;
+	}
+	else
+	{
+		originalNote += newNote;
+	}
+	return originalNote;
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -158,7 +174,23 @@ var testCases = [
 				"section": "news",
 				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 				"attachments": {
-					"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+					"document": {
+						"Globe and Mail columnist Gary Mason.": {},
+						"</caption><cutline_leadin>iStockphoto": {},
+						"Specialists on the floor of the New York Stock Exchange watch Gary Cohn, director of the White House National Economic Council, Wednesday, April 26.": {},
+						"location": {
+							"href": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+							"origin": "http://www.theglobeandmail.com",
+							"protocol": "http:",
+							"host": "www.theglobeandmail.com",
+							"hostname": "www.theglobeandmail.com",
+							"port": "",
+							"pathname": "/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
+							"search": "",
+							"hash": ""
+						},
+						"_html5shiv": 1
+					},
 					"title": "The Globe and Mail Snapshot",
 					"mimeType": "text/html"
 				},
@@ -172,9 +204,9 @@ var testCases = [
 					"leadership"
 				],
 				"notes": [
-					"http://www.theglobeandmail.com/news/toronto/doug-ford-says-ontario-pc-leadership-bid-is-on-the-table/article21358827/",
-					" http://www.theglobeandmail.com/news/toronto/uniting-a-divided-toronto-will-be-a-key-task-for-torys-transition-team/article21359883/",
-					" http://www.theglobeandmail.com/news/toronto/a-chuckling-ford-on-his-mayoralty-it-will-definitely-be-remembered/article21414526/"
+					{
+						"note": "Related URL: http://www.theglobeandmail.com/news/toronto/doug-ford-says-ontario-pc-leadership-bid-is-on-the-table/article21358827/, http://www.theglobeandmail.com/news/toronto/uniting-a-divided-toronto-will-be-a-key-task-for-torys-transition-team/article21359883/, http://www.theglobeandmail.com/news/toronto/a-chuckling-ford-on-his-mayoralty-it-will-definitely-be-remembered/article21414526/"
+					}
 				],
 				"seeAlso": []
 			}
