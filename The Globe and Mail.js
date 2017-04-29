@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-28 19:23:09"
+	"lastUpdated": "2017-04-29 17:01:57"
 }
 
 /*
@@ -128,10 +128,9 @@ function scrape(doc, url) {
 		newItem.notes.push( {note: note} );
 	}
 
-	newItem.attachments = ({
+	newItem.attachments.push({
 		document: doc,
 		title: "The Globe and Mail Snapshot",
-		mimeType: "text/html"
 	});
 	newItem.complete();
 }
@@ -173,27 +172,11 @@ var testCases = [
 				"libraryCatalog": "The Globe and Mail",
 				"section": "news",
 				"url": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
-				"attachments": {
-					"document": {
-						"Globe and Mail columnist Gary Mason.": {},
-						"</caption><cutline_leadin>iStockphoto": {},
-						"Specialists on the floor of the New York Stock Exchange watch Gary Cohn, director of the White House National Economic Council, Wednesday, April 26.": {},
-						"location": {
-							"href": "http://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
-							"origin": "http://www.theglobeandmail.com",
-							"protocol": "http:",
-							"host": "www.theglobeandmail.com",
-							"hostname": "www.theglobeandmail.com",
-							"port": "",
-							"pathname": "/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
-							"search": "",
-							"hash": ""
-						},
-						"_html5shiv": 1
-					},
-					"title": "The Globe and Mail Snapshot",
-					"mimeType": "text/html"
-				},
+				"attachments": [
+					{
+						"title": "The Globe and Mail Snapshot"
+					}
+				],
 				"tags": [
 					"Christine Elliott",
 					"Doug Ford",
