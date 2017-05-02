@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-29 20:52:49"
+	"lastUpdated": "2017-05-02 20:55:39"
 }
 
 /*
@@ -33,10 +33,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-/*
-Known issues:
-- Turkish char problem: using ZU.capitalizeTitle with publisher names with "I" returns "i" instead of "ı".
-*/
 
 function detectWeb(doc, url) {
 	if (url.indexOf('/kitap/')>-1||url.indexOf('product_id')>-1) {
@@ -91,14 +87,23 @@ function cleanCreatorTitles(str){
 function scrape(doc, url) {
 	var item = new Zotero.Item("book");
 	
-	item.title = ZU.trimInternal(doc.querySelector('[class=product-heading]').textContent);
-
-	var authors = ZU.trimInternal(doc.querySelector('[class=manufacturers]').textContent);
-	authors = authors.split(',');
-	for (var i=0; i<authors.length; i++) {
-		var creator = cleanCreatorTitles(authors[i]);
-		item.creators.push(ZU.cleanAuthor(creator, "author"));
+	var title = doc.querySelector('[class=product-heading]');
+	if (title) {
+		item.title = ZU.trimInternal(title.textContent);
 	}
+	
+	var authors = doc.querySelector('[class=manufacturers]');
+	if (authors) {
+		authors = ZU.trimInternal(authors.textContent);
+		authors = authors.split(',');
+		
+			for (var i=0; i<authors.length; i++) {
+				var creator = cleanCreatorTitles(authors[i]);
+				item.creators.push(ZU.cleanAuthor(creator, "author"));
+			}
+			
+	}
+
 	
 	var translators = ZU.xpath(doc, '//tr[contains(., "Çevirmen")]');
 	for (var i=0; i<translators.length; i++) {
@@ -112,16 +117,37 @@ function scrape(doc, url) {
 		item.creators.push(ZU.cleanAuthor(creator, "editor"));
 	}
 	
-	var edition = ZU.trimInternal(doc.querySelector('[itemprop=bookEdition]').textContent);
-	item.edition = edition.split('.')[0];
+	var edition = doc.querySelector('[itemprop=bookEdition]');
+	if (edition){
+		edition = ZU.trimInternal(edition.textContent);
+		item.edition = edition.split('.')[0];
+	}
 	
-	var publisher = ZU.trimInternal(doc.querySelector('[itemprop=publisher]').textContent);
-	item.publisher = ZU.capitalizeTitle(publisher,true);
+	var publisher = doc.querySelector('[itemprop=publisher]');
+	if (publisher){
+		publisher = ZU.trimInternal(publisher.textContent);
+		item.publisher = ZU.capitalizeTitle(publisher,true);
+	}
 	
-	item.date = ZU.trimInternal(doc.querySelector('[itemprop=datePublished]').textContent);
-	item.ISBN = ZU.trimInternal(doc.querySelector('[itemprop=isbn]').textContent);
-	item.numPages = ZU.trimInternal(doc.querySelector('[itemprop=numberOfPages]').textContent);
-	item.abstractNote = ZU.trimInternal(doc.querySelector('[id=description_text]').textContent);
+	var date = doc.querySelector('[itemprop=datePublished]');
+	if (date){
+		item.date = ZU.trimInternal(date.textContent);
+	}
+	
+	var isbn = doc.querySelector('[itemprop=isbn]');
+	if (isbn){
+		item.ISBN = ZU.trimInternal(isbn.textContent);
+	}
+	
+	var numPages = doc.querySelector('[itemprop=numberOfPages]');
+	if (numPages){
+		item.numPages = ZU.trimInternal(numPages.textContent);
+	}
+	
+	var abstractNote = doc.querySelector('[id=description_text]');
+	if (abstractNote){
+		item.abstractNote = ZU.trimInternal(abstractNote.textContent);
+	}
 	
 	item.attachments.push({
 		title: "Snapshot",
