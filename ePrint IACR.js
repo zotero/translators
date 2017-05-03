@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-01-04 13:32:05"
+	"lastUpdated": "2016-05-19 17:50:43"
 }
 
 function detectWeb(doc, url) {
@@ -36,15 +36,21 @@ function scrape(doc, url) {
 		var no   = reportNo[2];
 	}
 	var title = doc.evaluate(titleXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	title = ZU.trimInternal(title);
 
 	var authors = doc.evaluate(authorsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
+	authors = ZU.trimInternal(authors);
 	authors = authors.split(" and ");
 	
 	var abstr = "";
 	var abstractLines = doc.evaluate(abstractXPath, doc, null, XPathResult.ANY_TYPE, null);
 	var nextLine;
 	while(nextLine = abstractLines.iterateNext()) {
-		abstr += nextLine.textContent;
+		// An inner line starting with \n starts a new paragraph in the abstract.
+		if (nextLine.textContent[0] == "\n") {
+			abstr += "\n\n";
+		}
+		abstr +=  ZU.trimInternal(nextLine.textContent);
 	}
 	
 	var keywords = doc.evaluate(keywordsXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
@@ -126,7 +132,7 @@ var testCases = [
 					}
 				],
 				"date": "2005",
-				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP.  In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial \nsetup work and $2^{15}$ oracle queries for each block.  Standard CFB mode encryption does not appear to be affected by this attack.  It applies to a particular variation of CFB used by OpenPGP.  In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
+				"abstractNote": "This paper describes an adaptive-chosen-ciphertext attack on the Cipher Feedback (CFB) mode of encryption as used in OpenPGP. In most circumstances it will allow an attacker to determine 16 bits of any block of plaintext with about $2^{15}$ oracle queries for the initial setup work and $2^{15}$ oracle queries for each block. Standard CFB mode encryption does not appear to be affected by this attack. It applies to a particular variation of CFB used by OpenPGP. In particular it exploits an ad-hoc integrity check feature in OpenPGP which was meant as a \"quick check\" to determine the correctness of the decrypting symmetric key.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "ePrint IACR",
 				"reportNumber": "033",

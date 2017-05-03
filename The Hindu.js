@@ -2,14 +2,14 @@
     "translatorID": "06142d59-fa9c-48c3-982b-6e7c67d3d6b8",
     "label": "The Hindu",
     "creator": "Piyush Srivastava",
-    "target": "https?://www\\.thehindu\\.com/.*ece",
+    "target": "^https?://www\\.thehindu\\.com/.*ece",
     "minVersion": "1.0",
     "maxVersion": "",
     "priority": 100,
     "inRepository": true,
     "translatorType": 4,
     "browserSupport": "gcv",
-    "lastUpdated": "2013-11-19 08:23:18"
+    "lastUpdated": "2016-03-22 15:08:45"
 }
 
 /*****
@@ -94,7 +94,7 @@ function scrape(doc, url){
     
     
     //Get author(s) of the article
-    var authorXPath = '//span[@class="author"]';
+    var authorXPath = '//span[@class="artauthor"]//li';
     var authorListObject = doc.evaluate(authorXPath, doc, null, 
 					XPathResult.ANY_TYPE, null);
     var authorObject = authorListObject.iterateNext();

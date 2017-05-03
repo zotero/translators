@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-11-08 21:46:36"
+	"lastUpdated": "2016-11-02 21:46:36"
 }
 
 /*
@@ -98,7 +98,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var bibtexUrl = url.replace(/#.+|\/$/, "") + "/bibtex";
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract-content"]');
-	var pdfUrl = url.replace(/#.+|\/$/, "") + "/document";
+	var pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content'); 
 	//Z.debug(pdfUrl)
 	ZU.doGet(bibtexUrl, function (bibtex) {
 		//Z.debug(bibtex)
@@ -109,7 +109,7 @@ function scrape(doc, url) {
 			if (abstract){
 				item.abstractNote=abstract.replace(/(Abstract|Résumé)\s*:/, "");
 			}
-			if (ZU.xpathText(doc, '//div/a[contains(@data-original-title, ".pdf")]')){	
+			if (pdfUrl){	
 				item.attachments = [{
 					url: pdfUrl,
 					title: "HAL PDF Full Text",
@@ -147,7 +147,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "J.-P.",
+						"firstName": "Jean-Pierre",
 						"lastName": "Cammas",
 						"creatorType": "author"
 					},
@@ -273,9 +273,8 @@ var testCases = [
 					}
 				],
 				"tags": [
-					" ICT appropriation",
 					"Bibliothèque universitaire",
-					"Innovation",
+					"ICT appropriation",
 					"Learning Centre",
 					"Pedagogy",
 					"University Library",
@@ -303,7 +302,7 @@ var testCases = [
 					}
 				],
 				"date": "March 2012",
-				"abstractNote": "Children performing for a crowd of passersby in a park in Kunming. (Enfants jouant dans un parc à Kunming Photo d'enfants jouant dans un parc à Kunming",
+				"abstractNote": "Description : Children performing for a crowd of passersby in a park in Kunming. (Enfants jouant dans un parc à Kunming Photo d'enfants jouant dans un parc à Kunming",
 				"itemID": "gipouloux:medihal-00772952",
 				"libraryCatalog": "HAL Archives Ouvertes",
 				"url": "https://medihal.archives-ouvertes.fr/medihal-00772952",

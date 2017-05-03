@@ -1,198 +1,216 @@
 {
 	"translatorID": "c3edb423-f267-47a1-a8c2-158c247f87c2",
 	"label": "Common-Place",
-	"creator": "Frederick Gibbs",
-	"target": "^https?://(www\\.)?(common-place\\.org/vol-.*/no-.*/.|historycooperative\\.org/journals/cp)",
-	"minVersion": "1.0.0b4.r5",
+	"creator": "Frederick Gibbs, Philipp Zumstein",
+	"target": "^https?://(www\\.)?(common-place\\.org/|common-place-archives\\.org/)",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:51:17"
+	"lastUpdated": "2016-09-10 09:34:34"
 }
 
 function detectWeb(doc, url) {
-	if(doc.title.indexOf("Previous Issues") != -1 || doc.title.indexOf("Search Site") != -1 ) {
+	if (getSearchResults(doc, true)) {//multiples works only on search pages
 		return "multiple";
-	} else {
+	} else if (doc.body.className.indexOf("single-article")>-1 || url.indexOf("common-place-archives.org")>-1) {
 		return "journalArticle";
 	}
 }
 
-function scrape(doc) {
-	
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//h3[contains(@class, "article-title")]/a|//h2/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	var newItem = new Zotero.Item("journalArticle");
 	newItem.publicationTitle = "Common-Place";
-	newItem.url = doc.location.href;
-
-
-	//get issue year and month
-	//these will determine what xpaths we use for title and author
-	var pubDate;
-	var dateRe = /<a href="\/vol-[0-9]{2}\/no-[0-9]{2}\/">(.*)<\/a><\/b>/;
-	var m = dateRe.exec(Zotero.Utilities.trimInternal(doc.getElementsByTagName("body")[0].innerHTML));
-
-	if(m) {
-		//newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.unescapeHTML(m[1]));
-		pubDate = m[1];
+	newItem.url = url;
+	
+	if (doc.body.className.indexOf("single-article")>-1) {
+		newItem.title = ZU.xpathText(doc, '//article/h1');
+		var author = ZU.xpathText(doc, '//article/h1/following-sibling::p');
+		if (author) {
+			newItem.creators.push(ZU.cleanAuthor(author, "author"));
+		}
+		newItem.abstractNote = ZU.xpathText(doc, '//article/div[contains(@class, "entry-excerpt")]');
+		newItem.date = ZU.strToISO(ZU.trimInternal(ZU.xpathText(doc, '//article/ol[contains(@class, "breadcrumb")]/li/text()')));
+		var volno = ZU.xpathText(doc, '//article/ol[contains(@class, "breadcrumb")]/li[1]/a');
+		var m = volno.match(/Vol\. (\d+) No\. (\d+)/);
+		if (m) {
+			newItem.volume = m[1];
+			newItem.issue = m[2];
+		}
+	
 	} else {
-	pubDate = doc.evaluate('//div[@id="container"]/div[@id="top"]/p/b/a[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	}
-	var d;
-	//Zotero.debug(pubDate);
-	pubDateVolRE = /vol. (.*) · no. /;
-	d = pubDateVolRE.exec(pubDate);
-	newItem.volume = d[1];
-
-	pubDateVolRE = /no. (.*) ·/;
-	d = pubDateVolRE.exec(pubDate);
-	newItem.issue = d[1];
-
-	pubDateVolRE = /no. [0-9] · (.*)/;
-	d = pubDateVolRE.exec(pubDate);
-	newItem.date = d[1];
-
-	//usually the page begins with the article title or book title (of reviewed book)
-	//some pages have an image just before them, so we need to skip it if it's there.
-	var pLevel;
-	var m=doc.evaluate('//div[@id="content"]/p[1]/img', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	
-	//if there is an image here, offset the xpath
-	if (m == null) {
-		pLevel = '//div[@id="content"]/p[1]';
-	} else { 
-		pLevel = '//div[@id="content"]/p[2]';
-	}
-	
-	//issues before 2004 have a table based layout, so a totally different xpath.
-	//check to see if we have anything, then try again if we don't.
-	var author;
-	var title;
-		
-	author = doc.evaluate(pLevel+'/span[1]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	author = author.iterateNext();
-
-	if (author != null) {
-		//Zotero.debug("au"+author+"au");
-		var title = doc.evaluate(pLevel+'/span[2]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		//Zotero.debug("ti"+title+"ti");
-		title = title.iterateNext().textContent;		
-
-		//determine if we have a book review
-		// if so, get the publication information
-		if (author.textContent.indexOf("Review by") != -1 ) {
-			newItem.title = String.concat("Review of ", title);
-			newItem.author = author.textContent.substring(10);
-		} else {
-			newItem.author = author.textContent;
-			newItem.title = title;
+		//get issue year and month
+		//these will determine what xpaths we use for title and author
+		//e.g. <a href="/vol-12/no-01/">vol. 12 · no. 1 · October 2011</a>
+		var dateRe = /<a href="\/vol-(\d+)\/no-(\d+)\/">([^<]*)<\/a>/;
+		var m = dateRe.exec(ZU.trimInternal(doc.getElementsByTagName("body")[0].innerHTML));
+		if(m) {
+			newItem.volume = m[1];
+			newItem.issue = m[2];
+			var n = m[3].match(/· ([\w\s]+)$/);
+			if (n) {
+				newItem.date = ZU.strToISO(n[1]);
+			}
 		}
-
-	}	
-	else { //we have older issue
 		
-		//check if we are on a review
-		var review = doc.evaluate('/html/body/table/tbody/tr/td[2]/p[2]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-		var temp = review.textContent;
-		if (temp.indexOf("Review") != -1) {
-			title = doc.evaluate('/html/body/table/tbody/tr/td[2]/p/i', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			title = "Review of " + title; 
-			author = review.textContent.substring(10);
-		} else { //for articles
-			title = doc.evaluate('/html/body/table/tbody/tr/td[2]/p/b', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			author = doc.evaluate('/html/body/table/tbody/tr/td[2]/p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.split(/\n/)[1];
-			//Zotero.debug(author);	
+		var author = ZU.xpathText(doc, '//div[@id="content"]/p/span[1]');
+		var title = ZU.xpathText(doc, '//div[@id="content"]/p/span[2]');
+		if (author) {
+			//determine if we have a book review
+			// if so, get the publication information
+			if (author.indexOf("Review by") != -1 ) {
+				title = String.concat("Review of ", title);
+				author = author.substring(10);
+			} 
+			newItem.creators.push(ZU.cleanAuthor(author, "author"));
+		} else { //we have older issue
+			//check if we are on a review
+			var review = ZU.xpathText(doc, '/html/body/table/tbody/tr/td[2]/p[2]');
+			if (review.indexOf("Review") != -1) {
+				title = ZU.xpathText(doc, '/html/body/table/tbody/tr/td[2]/p/i');
+				title = "Review of " + title; 
+				author = review.substring(10);
+			} else { //for articles
+				title = ZU.xpathText(doc, '/html/body/table/tbody/tr/td[2]/p/b');
+				author = ZU.xpathText(doc, '/html/body/table/tbody/tr/td[2]/p[1]').split(/\n/)[1];;	
+			}
+			newItem.creators.push(ZU.cleanAuthor(author, "author"));
 		}
-		newItem.author = author;
 		newItem.title = title;
 	}
 	
 	newItem.attachments.push({document:doc, title:doc.title});
-	
 	newItem.complete();
 }
-
-function doWeb(doc, url) {
-var type = detectWeb(doc, url);
-if (type == "multiple") {
-		
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-		//create list of items
-		//what about home page (current issue table of contents?)
-		//for search result links: /html/body/table[2]/tbody/tr/td[2]/li[3]/a
-		//for previous issues: //tr/td/p/a/b (but we need to strip out volume links (starts with 'Volume')
-		
-	var link;
-	var title;
-	var items = new Object();
-	var searchLinks = doc.evaluate('/html/body/table[2]/tbody/tr/td[2]/li/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-
-		while (elmt = searchLinks.iterateNext()) {
-			Zotero.debug(elmt.textContent);
-			title = elmt.textContent;
-			link = elmt.href;
-			if (title && link){
-				items[link] = title;
-			}
-		}
-		
-		items = Zotero.selectItems(items);
-		
-		if(!items) {
-			return true;
-		}
-		
-		var uris = new Array();
-		for(var i in items) {
-			uris.push(i);
-		}
-		
-		Zotero.Utilities.processDocuments(uris, function(doc) { scrape(doc) },
-			function() { Zotero.done(); }, null);
-		
-		Zotero.wait();
-	} else {
-		scrape(doc);
-	}
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.common-place.org/vol-12/no-01/tales/",
+		"url": "http://www.common-place-archives.org/vol-12/no-01/tales/",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"title": "Looking for Limbs in all the Right Places",
+				"creators": [
+					{
+						"firstName": "Megan Kate",
+						"lastName": "Nelson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-10",
+				"issue": "01",
+				"libraryCatalog": "Common-Place",
+				"publicationTitle": "Common-Place",
+				"url": "http://www.common-place-archives.org/vol-12/no-01/tales/",
+				"volume": "12",
 				"attachments": [
 					{
-						"document": {
-							"location": {}
-						},
 						"title": "Common-place: Tales from the Vault"
 					}
 				],
-				"publicationTitle": "Common-Place",
-				"url": "http://www.common-place.org/vol-12/no-01/tales/",
-				"volume": "12",
-				"issue": "1",
-				"date": "October 2011",
-				"author": "Megan Kate Nelson",
-				"title": "Looking for Limbs in all the Right Places",
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.common-place-archives.org/vol-03/no-03/mccaffrey/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "American Originals",
+				"creators": [
+					{
+						"firstName": "Katherine Stebbins",
+						"lastName": "McCaffrey",
+						"creatorType": "author"
+					}
+				],
+				"date": "2003-04",
+				"issue": "03",
 				"libraryCatalog": "Common-Place",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"publicationTitle": "Common-Place",
+				"url": "http://www.common-place-archives.org/vol-03/no-03/mccaffrey/",
+				"volume": "03",
+				"attachments": [
+					{
+						"title": "Common-place: American Originals"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://common-place.org/book/alive-with-the-sound-of-music/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Alive with the Sound of Music",
+				"creators": [
+					{
+						"firstName": "Douglas",
+						"lastName": "Shadle",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008-04",
+				"abstractNote": "Next to Stephen Foster, William Henry Fry was arguably the most important American composer working before the Civil War.",
+				"issue": "3",
+				"libraryCatalog": "Common-Place",
+				"publicationTitle": "Common-Place",
+				"url": "http://common-place.org/book/alive-with-the-sound-of-music/",
+				"volume": "8",
+				"attachments": [
+					{
+						"title": "Alive with the Sound of Music › Common-placeCommon-place: The Journal of early American Life"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

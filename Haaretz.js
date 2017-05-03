@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-17 22:01:10"
+	"lastUpdated": "2016-10-31 17:33:48"
 }
 
 /**
@@ -57,18 +57,19 @@ function doWeb(doc, url) {
 		item.creators.push(ZU.cleanAuthor(authors[i].textContent, 'author'));
 	}
 
-	item.date = ZU.xpathText(doc, '//time[@itemprop="datePublished"]/@datetime').split('T')[0];
-	var keywords = ZU.xpathText(doc, '//head/meta[@name="news_keywords"]/@content').split(',');
+	item.date = ZU.strToISO(ZU.xpathText(doc, '//time[@itemprop="datePublished"]/@datetime'));
+	var keywords = ZU.xpathText(doc, '//meta[@name="news_keywords"]/@content').split(',');
 	for(var i=0; i<keywords.length; i++) {
 		if(keywords[i].length>0) item.tags.push(keywords[i].trim());
 	}
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.haaretz.com/news/diplomacy-defense/1.671202",
+		"url": "http://www.haaretz.com/israel-news/1.671202",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -96,7 +97,7 @@ var testCases = [
 				"libraryCatalog": "Haaretz",
 				"publicationTitle": "Haaretz",
 				"shortTitle": "Islamic Jihad",
-				"url": "http://www.haaretz.com/news/diplomacy-defense/1.671202",
+				"url": "http://www.haaretz.com/israel-news/1.671202",
 				"attachments": [],
 				"tags": [
 					"Palestinian hunger strike"

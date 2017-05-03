@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-24 21:47:37"
+	"lastUpdated": "2016-08-12 13:07:14"
 }
 
 function detectWeb(doc, url) {
@@ -182,6 +182,8 @@ function getIds(doc, url) {
 //retrieve RIS data
 //retry n times
 function fetchRIS(url, post, itemType, doc, retry) {
+	//language only available on the page;
+	var language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
 	ZU.doPost(url, post, function(text) {
 		//There's some cookie/session magic going on
 		//our first request for RIS might not succeed
@@ -199,7 +201,7 @@ function fetchRIS(url, post, itemType, doc, retry) {
 		
 		//clean up (double) spacing in RIS
 		text = text.replace(/  +/g, ' ');
-		
+		//Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 
@@ -232,6 +234,15 @@ function fetchRIS(url, post, itemType, doc, retry) {
 			//item.url = newurl;
 			
 			item.title = item.title.replace(/\.$/,'');
+			if (item.ISSN) {
+				var ISSN = item.ISSN.split(/\s*;\s*/);
+				var ISSNArray = [];
+				for (var i=0; i<ISSN.length; i++) {
+					ISSNArray.push(ZU.cleanISSN(ISSN[i]));
+				}
+				item.ISSN = ISSNArray.join(" ");
+				item.language = language;
+			}
 			finalizeItem(item, doc);		
 		});
 		translator.translate();
@@ -382,13 +393,14 @@ var testCases = [
 				],
 				"date": "2004",
 				"DOI": "10.1037/0894-4105.18.3.485",
-				"ISSN": "1931-1559(Electronic);0894-4105(Print)",
+				"ISSN": "1931-1559 0894-4105",
 				"abstractNote": "A comprehensive, empirically based review of the published studies addressing neuropsychological performance in adults diagnosed with attention-deficit/hyperactivity disorder (ADHD) was conducted to identify patterns of performance deficits. Findings from 33 published studies were submitted to a meta-analytic procedure producing sample-size-weighted mean effect sizes across test measures. Results suggest that neuropsychological deficits are expressed in adults with ADHD across multiple domains of functioning, with notable impairments in attention, behavioral inhibition, and memory, whereas normal performance is noted in simple reaction time. Theoretical and developmental considerations are discussed, including the role of behavioral inhibition and working memory impairment. Future directions for research based on these findings are highlighted, including further exploration of specific impairments and an emphasis on particular tests and testing conditions.",
 				"issue": "3",
+				"language": "English",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "485-503",
 				"publicationTitle": "Neuropsychology",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"shortTitle": "Neuropsychology of Adults With Attention-Deficit/Hyperactivity Disorder",
 				"volume": "18",
 				"attachments": [
@@ -402,6 +414,7 @@ var testCases = [
 					"*Experimentation",
 					"*Neuropsychological Assessment",
 					"*Neuropsychology",
+					"Behavioral Inhibition",
 					"Empirical Methods",
 					"Hyperkinesis",
 					"Inhibition (Personality)",
@@ -433,13 +446,14 @@ var testCases = [
 				],
 				"date": "1955",
 				"DOI": "10.1037/h0043965",
-				"ISSN": "0022-1015(Print)",
+				"ISSN": "0022-1015",
 				"abstractNote": "Two factor analytic studies of meaningful judgments based upon the same sample of 50 bipolar descriptive scales are reported. Both analyses reveal three major connotative factors: evaluation, potency, and activity. These factors appear to be independent dimensions of the semantic space within which the meanings of concepts may be specified.",
 				"issue": "5",
+				"language": "English",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "325-338",
 				"publicationTitle": "Journal of Experimental Psychology",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"volume": "50",
 				"attachments": [
 					{
@@ -496,7 +510,7 @@ var testCases = [
 				"pages": "334-357",
 				"place": "New York, NY, US",
 				"publisher": "W H Freeman/Times Books/ Henry Holt & Co",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"series": "A series of books in psychology.",
 				"shortTitle": "Catatonia",
 				"attachments": [
@@ -539,7 +553,7 @@ var testCases = [
 				"numPages": "617",
 				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"shortTitle": "The abnormal personality",
 				"volume": "x",
 				"attachments": [
@@ -576,7 +590,7 @@ var testCases = [
 				"numPages": "617",
 				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"shortTitle": "The abnormal personality",
 				"volume": "x",
 				"attachments": [
@@ -613,7 +627,7 @@ var testCases = [
 				"pages": "54-101",
 				"place": "New York, NY, US",
 				"publisher": "Ronald Press Company",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"shortTitle": "Clinical introduction",
 				"attachments": [
 					{
@@ -665,13 +679,13 @@ var testCases = [
 				],
 				"date": "2010",
 				"DOI": "10.1037/a0020280",
-				"ISSN": "1939-2222(Electronic);0096-3445(Print)",
+				"ISSN": "1939-2222 0096-3445",
 				"abstractNote": "Social scientists often rely on economic experiments such as ultimatum and dictator games to understand human cooperation. Systematic deviations from economic predictions have inspired broader conceptions of self-interest that incorporate concerns for fairness. Yet no framework can describe all of the major results. We take a different approach by asking players directly about their self-interest—defined as what they want to do (pleasure-maximizing options). We also ask players directly about their sense of fairness—defined as what they think they ought to do (fairness-maximizing options). Player-defined measures of self-interest and fairness predict (a) the majority of ultimatum-game and dictator-game offers, (b) ultimatum-game rejections, (c) exiting behavior (i.e., escaping social expectations to cooperate) in the dictator game, and (d) who cooperates more after a positive mood induction. Adopting the players' perspectives of self-interest and fairness permits better predictions about who cooperates, why they cooperate, and when they punish noncooperators.",
 				"issue": "4",
 				"libraryCatalog": "APA PsycNET",
 				"pages": "743-755",
 				"publicationTitle": "Journal of Experimental Psychology: General",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"volume": "139",
 				"attachments": [
 					{
@@ -723,7 +737,7 @@ var testCases = [
 				"pages": "17-33",
 				"place": "Washington, DC, US",
 				"publisher": "American Psychological Association",
-				"rights": "(c) 2012 APA, all rights reserved",
+				"rights": "(c) 2016 APA, all rights reserved",
 				"shortTitle": "The self in vocational psychology",
 				"attachments": [
 					{
@@ -734,7 +748,7 @@ var testCases = [
 				"tags": [
 					"*Occupational Guidance",
 					"*Personality",
-					"Self Concept"
+					"Self-Concept"
 				],
 				"notes": [],
 				"seeAlso": []

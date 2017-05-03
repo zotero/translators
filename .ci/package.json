@@ -1,0 +1,19 @@
+{
+  "name": "translators-check",
+  "version": "1.0.0",
+  "description": "Continuous integration of Zotero translators",
+  "main": "index.js",
+  "scripts": {
+    "test": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P8 ./checkTranslator.sh --skip-warn",
+    "start": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P1 ./checkTranslator.sh"
+  },
+  "author": "kba+pz",
+  "license": "CC0-1.0",
+  "repository": {
+    "url": "https://github.com/zotero/translators/blob/master/.ci/"
+  },
+  "dependencies": {
+    "jshint": "^2.9.4",
+    "jsonlint": "^1.6.2"
+  }
+}

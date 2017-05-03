@@ -339,6 +339,7 @@ function scrape(doc, url) {
 			case 'year':
 			case 'jahr':
 			case 'jaar':
+			case 'date':
 				newItem.date = value; //we clean this up below
 				break;
 
@@ -354,6 +355,7 @@ function scrape(doc, url) {
 			case 'publisher':
 			case 'ort/jahr':
 			case 'uitgever':
+			case 'publication':
 				//ignore publisher for thesis, so that it does not overwrite university
 				if (newItem.itemType == 'thesis' && newItem.university) break;
 

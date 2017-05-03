@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 320,
+	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-01-18 22:06:26"
+	"lastUpdated": "2016-11-05 10:57:01"
 }
 
 // The variables items and selectArray will be filled during the first
@@ -47,6 +47,9 @@ function getDOIs(doc) {
 		while(m = DOIre.exec(node.nodeValue)) {
 			DOI = m[0];
 			if(DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
+				DOI = DOI.substr(0, DOI.length-1);
+			}
+			if(DOI.substr(-1) == "}" && DOI.indexOf("{") == -1) {
 				DOI = DOI.substr(0, DOI.length-1);
 			}
 			// only add new DOIs
@@ -177,6 +180,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.egms.de/static/de/journals/mbi/2015-15/mbi000336.shtml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.roboticsproceedings.org/rss09/p23.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://en.wikipedia.org/wiki/Template_talk:Doi",
 		"items": "multiple"
 	}
 ]

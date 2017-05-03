@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "3.0.4",
 	"maxVersion": "",
-	"priority": 400,
+	"priority": 320,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-01-17 17:54:53"
+	"lastUpdated": "2017-04-04 04:24:04"
 }
 
 /*
@@ -40,9 +40,11 @@
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
 	"citation_publication_date":"date",	//perhaps this is still used in some old implementations
+	"citation_cover_date": "date", //used e.g. by Springer http://link.springer.com/article/10.1023/A:1021669308832
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
+	"citation_inbook_title": "bookTitle", //used on RSC, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
@@ -479,15 +481,15 @@ function addHighwireMetadata(doc, newItem) {
 		pdfURL = pdfURL[0].textContent;
 		//delete any pdf attachments if present
 		//would it be ok to just delete all attachments??
-		for(var i=0, n=newItem.attachments.length; i<n; i++) {
+		for(var i=newItem.attachments.length-1; i>=0; i--) {
 			if(newItem.attachments[i].mimeType == 'application/pdf') {
-				delete newItem.attachments[i];
+				newItem.attachments.splice(i, 1);
 			}
 		}
 
 		newItem.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
 	}
-	
+
 	//add snapshot
 	newItem.attachments.push({document:doc, title:"Snapshot"});
 	
@@ -575,9 +577,11 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(!newItem.creators.length) {
 		//the authors in the standard W3 author tag are safer than byline guessing
-		var w3authors = ZU.xpath(doc, '//meta[@name="author"]');
+		var w3authors = ZU.xpath(doc, '//meta[@name="author" or @property="author"]' );
 		if (w3authors.length>0){
 			for (var i = 0; i<w3authors.length; i++){
+				//skip empty authors. Try to match something other than punctuation
+				if(!w3authors[i].content || !w3authors[i].content.match(/[^\s,-.;]/)) continue;
 				newItem.creators.push(ZU.cleanAuthor(w3authors[i].content, "author"));
 			}
 		}
@@ -601,8 +605,12 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	
 	if(!newItem.url) {
+		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href');
+	}
+	if(!newItem.url) {
 		newItem.url = doc.location.href;
 	}
+
 	
 	newItem.libraryCatalog = doc.location.host;
 	
@@ -807,51 +815,6 @@ var exports = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "\"La Huelga de los Conventillos\", Buenos Aires, Nueva Pompeya, 1936. Un aporte a los estudios sobre género y clase",
-				"creators": [
-					{
-						"firstName": "Verónica",
-						"lastName": "Norando",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ludmila",
-						"lastName": "Scheinkman",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011/10/10",
-				"ISSN": "1548-7083",
-				"abstractNote": "Este trabajo se propone realizar un análisis de las   relaciones de género y clase a través de un estudio de caso: la “Huelga de   los Conventillos” de la fábrica textil Gratry en 1936, que se extendió por   más de tres meses, pasando casi inadvertida, sin embargo, para la   investigación histórica. Siendo la textil una rama de industria con una   mayoría de mano de obra femenina, el caso de la casa Gratry, donde el 60% de   los 800 obreros eran mujeres, aparece como ejemplar para la observación de la   actividad de las mujeres en conflicto.   En el trabajo se analiza el rol de las trabajadoras en   la huelga, su participación política, sus formas de organización y   resistencia, haciendo eje en las determinaciones de género y de clase que son   abordadas de manera complementaria e interrelacionada, así como el complejo   entramado de tensiones y solidaridades que éstas generan. De éste modo, se   pretende ahondar en la compleja conformación de una identidad obrera   femenina, a la vez que se discute con aquella mirada historiográfica tradicional   que ha restado importancia a la participación de la mujer en el conflicto   social. Esto se realizará a través de la exploración de una serie de   variables: las relaciones inter-género e inter-clase (fundamentalmente el   vínculo entre las trabajadoras y la patronal masculina), inter-género e   intra-clase (la relación entre trabajadoras y trabajadores), intra-género e   inter-clase (los lazos entre las trabajadoras y las vecinas comerciantes del   barrio), intra-género e intra-clase (relaciones de solidaridad entre   trabajadoras en huelga, y de antagonismo entre huelguistas y “carneras”).   Para ello se trabajó un corpus documental que incluye   información de tipo cuantitativa (las estadísticas del Boletín Informativo   del Departamento Nacional del Trabajo), y cualitativa: periódicos obreros   –fundamentalmente  El Obrero Textil , órgano gremial de la Unión   Obrera Textil,  Semanario de la CGT-Independencia  (órgano de   la Confederación General del Trabajo (CGT)-Independencia) y  La   Vanguardia  (periódico del Partido Socialista), entre otros, y   entrevistas orales a vecinas de Nueva Pompeya y familiares de trabajadoras de   la fábrica Gratry. Se desarrollará una metodología cuali-cuantitativa para el   cruce de estas fuentes.",
-				"issue": "1",
-				"language": "en",
-				"libraryCatalog": "acontracorriente.chass.ncsu.edu",
-				"pages": "1-37",
-				"publicationTitle": "A Contracorriente",
-				"rights": "Copyright (c)",
-				"url": "http://acontracorriente.chass.ncsu.edu/index.php/acontracorriente/article/view/174",
-				"volume": "9",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
 		"items": [
 			{
@@ -894,7 +857,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "2011-01-01",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
@@ -1070,6 +1033,10 @@ var testCases = [
 				"volume": "41",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1223,38 +1190,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://books.upress.virginia.edu/title/4539",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "The Papers of George Washington : 1 August–21 October 1779",
-				"creators": [
-					{
-						"firstName": "George",
-						"lastName": "Washington",
-						"creatorType": "author"
-					}
-				],
-				"date": "2013",
-				"ISBN": "9780813933665",
-				"language": "eng",
-				"libraryCatalog": "books.upress.virginia.edu",
-				"publisher": "University of Virginia Press",
-				"shortTitle": "The Papers of George Washington",
-				"url": "http://books.upress.virginia.edu/title/4539",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://hbr.org/2015/08/how-to-do-walking-meetings-right",
 		"items": [
 			{
@@ -1267,7 +1202,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Chris",
+						"firstName": "Christopher",
 						"lastName": "Thomas",
 						"creatorType": "author"
 					},
@@ -1351,11 +1286,143 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-01-09T21:20:00Z",
+				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
 				"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=2797",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Mobility modeling for transport efficiency : Analysis of travel characteristics based on mobile phone data",
+				"creators": [
+					{
+						"firstName": "Vangelis",
+						"lastName": "Angelakis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Gundlegård",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Clas",
+						"lastName": "Rydergren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Botond",
+						"lastName": "Rajna",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katerina",
+						"lastName": "Vrotsou",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Carlsson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julien",
+						"lastName": "Forgeat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tracy H.",
+						"lastName": "Hu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Evan L.",
+						"lastName": "Liu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simon",
+						"lastName": "Moritz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sky",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yaotian",
+						"lastName": "Zheng",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"abstractNote": "Signaling data from the cellular networks can provide a means of analyzing the efficiency of a deployed transportation system and assisting in the formulation of transport models to predict its fut ...",
+				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
+				"language": "eng",
+				"libraryCatalog": "www.diva-portal.org",
+				"shortTitle": "Mobility modeling for transport efficiency",
+				"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2:766397",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Why Bohm's Quantum Theory?",
+				"creators": [
+					{
+						"firstName": "H. D.",
+						"lastName": "Zeh",
+						"creatorType": "author"
+					}
+				],
+				"date": "1999/04/01",
+				"DOI": "10.1023/A:1021669308832",
+				"ISSN": "0894-9875, 1572-9524",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (",
+				"issue": "2",
+				"journalAbbreviation": "Found Phys Lett",
+				"language": "en",
+				"libraryCatalog": "link.springer.com",
+				"pages": "197-200",
+				"publicationTitle": "Foundations of Physics Letters",
+				"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}

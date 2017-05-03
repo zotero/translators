@@ -2,7 +2,7 @@
 	"translatorID": "2abe2519-2f0a-48c0-ad3a-b87b9c059459",
 	"label": "ebrary",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://site\\.ebrary\\.com/.+(?:docDetail|search|detail)\\.action\\?",
+	"target": "^https?://site\\.ebrary\\.com/.+(docDetail|search|detail)\\.action\\?",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -96,39 +96,38 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Routledge Studies in Science, Technology and Society : Biology and Political Science (1)",
 				"creators": [
 					{
 						"lastName": "Blank",
-						"firstName": "Robert H.",
+						"firstName": "Robert",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Hines",
+						"lastName": "Hines Jnr.",
 						"firstName": "Samuel M.",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2002",
+				"ISBN": "9780203201329",
+				"libraryCatalog": "ebrary",
+				"place": "Abingdon, Oxon, US",
+				"publisher": "Routledge",
+				"shortTitle": "Routledge Studies in Science, Technology and Society",
+				"url": "http://site.ebrary.com/lib/alltitles/docDetail.action?docID=10071244",
+				"attachments": [
+					{
+						"title": "ebrary Snapshot"
+					}
+				],
 				"tags": [
 					"Biopolitics.",
 					"Political science.",
 					"Sociobiology."
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "ebrary Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Biology and Political Science",
-				"place": "London, GBR",
-				"publisher": "Routledge",
-				"ISBN": "9780203201329",
-				"url": "http://site.ebrary.com/lib/alltitles/docDetail.action?docID=10071244",
-				"date": "2001",
-				"libraryCatalog": "ebrary",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

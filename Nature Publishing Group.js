@@ -2,14 +2,14 @@
 	"translatorID": "6614a99-479a-4524-8e30-686e4d66663e",
 	"label": "Nature Publishing Group",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(?:[^/]+\\.)?(?:nature\\.com|palgrave-journals\\.com)(?::[\\d]+)?(?=/)[^?]*(?:/(?:journal|archive|research|topten|search|full|abs)/|/current_issue\\.htm|/most\\.htm)",
+	"target": "^https?://([^/]+\\.)?nature\\.com(:[\\d]+)?(?=/)[^?]*(/(journal|archive|research|topten|search|full|abs)/|/current_issue\\.htm|/most\\.htm|/articles/ncomms)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-18 22:31:12"
+	"lastUpdated": "2017-03-11 22:33:14"
 }
 
 /**
@@ -444,7 +444,7 @@ function isNature(url) {
 }
 
 function detectWeb(doc, url) {
-	if (url.search(/\/(full|abs)\/[^\/]+($|\?|#)|\/fp\/.+?[?&]lang=ja(?:&|$)/) != -1) {
+	if (url.search(/\/(full|abs)\/[^\/]+($|\?|#)|\/fp\/.+?[?&]lang=ja(?:&|$)|\/articles\/ncomms/) != -1) {
 
 		return 'journalArticle';
 
@@ -1729,7 +1729,7 @@ var testCases = [
 				"date": "February 2008",
 				"DOI": "10.1038/nsmb.1371",
 				"ISSN": "1545-9993",
-				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5' untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
+				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"issue": "2",
 				"journalAbbreviation": "Nat Struct Mol Biol",
 				"language": "en",
@@ -2262,58 +2262,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.palgrave-journals.com/cpcs/journal/v12/n3/abs/cpcs20104a.html",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Direct elections and the local governance of crime in the United Kingdom: A view from the ground",
-				"creators": [
-					{
-						"firstName": "Mark",
-						"lastName": "Button",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Barry",
-						"lastName": "Loveday",
-						"creatorType": "author"
-					}
-				],
-				"date": "July 2010",
-				"DOI": "10.1057/cpcs.2010.4",
-				"ISSN": "1460-3780",
-				"abstractNote": "In the latter half of 2008, proposals emerged from the Home Office for the creation of a completely new elected office in England and Wales, the Crime and Policing Representative. These were to be directly elected and would chair Crime and Disorder Reduction Partnerships (CDRPs) in England and Community Safety Partnerships (CSPs) in Wales, as well as automatically become members of the police authority. However, before the proposals were even debated in parliament they were dropped because of concerns extremist parties may win them. This article presents findings from interviews with a range of councillors, police officers and other officials working with or for CDRPs/CSPs in a representative mix of authorities. It shows that although extremist parties winning were a concern there were many more compelling reasons to reject this policy. The article ends with a brief discussion of alternative proposals that could be considered.",
-				"issue": "3",
-				"journalAbbreviation": "Crime Prev Community Saf",
-				"language": "en",
-				"libraryCatalog": "www.palgrave-journals.com",
-				"pages": "156-175",
-				"publicationTitle": "Crime Prevention & Community Safety",
-				"shortTitle": "Direct elections and the local governance of crime in the United Kingdom",
-				"url": "http://www.palgrave-journals.com/cpcs/journal/v12/n3/abs/cpcs20104a.html",
-				"volume": "12",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					"CDRP",
-					"CSP",
-					"crime",
-					"direct elections"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www.nature.com/nprot/journal/v1/n1/full/nprot.2006.52.html",
 		"items": [
 			{
@@ -2365,7 +2313,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/ncomms/2015/150203/ncomms7186/full/ncomms7186.html",
+		"url": "http://www.nature.com/articles/ncomms7186",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -2422,31 +2370,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "February 3, 2015",
+				"date": "2015-02-03",
 				"DOI": "10.1038/ncomms7186",
-				"abstractNote": "Chromatin interactions connect distal regulatory elements to target gene promoters guiding stimulus- and lineage-specific transcription. Few factors securing chromatin interactions have so far been identified. Here, by integrating chromatin interaction maps with the large collection of transcription factor-binding profiles provided by the ENCODE project, we demonstrate that the zinc-finger protein ​ZNF143 preferentially occupies anchors of chromatin interactions connecting promoters with distal regulatory elements. It binds directly to promoters and associates with lineage-specific chromatin interactions and gene expression. Silencing ​ZNF143 or modulating its DNA-binding affinity using single-nucleotide polymorphisms (SNPs) as a surrogate of site-directed mutagenesis reveals the sequence dependency of chromatin interactions at gene promoters. We also find that chromatin interactions alone do not regulate gene expression. Together, our results identify ​ZNF143 as a novel chromatin-looping factor that contributes to the architectural foundation of the genome by providing sequence specificity at promoters connected with distal regulatory elements.",
-				"journalAbbreviation": "Nat Commun",
+				"ISSN": "2041-1723",
+				"abstractNote": "Chromatin interactions can connect distal regulatory elements to promoters via protein factors, but few such factors have been identified. Here, the authors show that zinc-finger protein ZNF143 is a sequence-specific chromatin-looping factor that connects promoters with distal regulatory elements.",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "6186",
 				"publicationTitle": "Nature Communications",
-				"rights": "© 2015 Nature Publishing Group, a division of Macmillan Publishers Limited. All Rights Reserved.",
+				"rights": "© 2017 Macmillan Publishers Limited, part of Springer Nature. All rights reserved.",
 				"url": "http://www.nature.com/ncomms/2015/150203/ncomms7186/full/ncomms7186.html",
 				"volume": "2",
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					"Biological sciences",
-					"Genetics",
-					"Molecular biology"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

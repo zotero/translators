@@ -2,7 +2,7 @@
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
 	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
-	"target": "^https?://([^/]+\\.)?youtube\\.com\\/",
+	"target": "^https?://([^/]+\\.)?youtube\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

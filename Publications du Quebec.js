@@ -2,7 +2,7 @@
 	"translatorID": "22d0bede-8db5-4656-9b9a-7d682ec1335d",
 	"label": "Publications du Québec",
 	"creator": "Marc Lajoie",
-	"target": "^https?://(?:www2\\.)?publicationsduquebec\\.gouv\\.qc\\.ca\\/",
+	"target": "^https?://(www2\\.)?publicationsduquebec\\.gouv\\.qc\\.ca/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

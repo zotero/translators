@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2016-01-21 21:22:38"
+	"lastUpdated": "2017-01-26 07:54:49"
 }
 
 /*
@@ -66,7 +66,7 @@ function getSearchResults(doc, url) {
 					title = ZU.xpath(results[i], './h2[contains(@class,"itemTitle")]/a')[0];
 			}
 		} else {//view issue
-			title = ZU.xpath(results[i],'./h3/a')[0];
+			title = ZU.xpath(results[i],'.//h3/a')[0];
 		}
 
 		if(!title || !title.href) continue;
@@ -98,7 +98,7 @@ function scrapeRIS(doc, url) {
 	var abstract = doc.getElementById('overviewContent') || 
 					ZU.xpath(doc,'//div[@class="articleBody_abstract"]/p')[0] || 
 					ZU.xpath(doc,'//div[@class="articleBody_transAbstract"]/p')[0];
-	var pdfUrl = ZU.xpathText(doc,'//div[@class="fullContentLink"]/a[@class="pdf-link"]/@href');
+	var pdfUrl = ZU.xpathText(doc,'//div[contains(@class, "fullContentLink")]/a[@class="pdf-link"]/@href');
 
 	var biblRemark = doc.getElementById('biblRemark');
 
