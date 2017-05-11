@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-10-07 14:06:56"
+	"lastUpdated": "2016-09-19 22:12:20"
 }
 
 /*
@@ -93,7 +93,7 @@ function scrape(doc, url) {
 				}
 		}
 	}
-	var abstract = '//table[@class="product_info_text"]/tbody/tr/td/div[@class="description"]';
+	var abstract = '//div[@itemprop="description"]';
 	var abstractObject = doc.evaluate(abstract, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (abstractObject){
 		abstractObject = abstractObject.textContent;
@@ -121,7 +121,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = new Object();
 		
-		var titles = '//div[@style="padding-bottom:1em;"]/a';
+		var titles = '//td[contains(@class, "productSearch-data")]//a[contains(@class, "fn")]';
 		var titleObject = doc.evaluate(titles, doc, null, XPathResult.ANY_TYPE, null);
 		var next_title; 
 		while ( next_title = titleObject.iterateNext()) {

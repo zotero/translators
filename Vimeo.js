@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-07-25 23:57:48"
+	"lastUpdated": "2016-09-23 14:16:08"
 }
 
 /*
@@ -37,50 +37,80 @@ function detectWeb(doc, url) {
 		return "videoRecording";
 	}
 
-	if (url.match(/vimeo\.com\/search\?q=/)) {
+	if (url.indexOf('vimeo.com/search?q=')>-1 && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
 }
 
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "iris_p_infinite__item")]//a[h5 and contains(@href, "//vimeo.com/")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.xpathText(rows[i], './/h5');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		var results = ZU.xpath(doc, "//li[contains(@id, 'clip_')]/a");
-
-		for (var i in results) {
-			hits[results[i].href] = results[i].title;
-		}
-		Z.selectItems(hits, function (items) {
-			if (items == null) return true;
-			for (var j in items) {
-				urls.push(j);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
 			}
-			ZU.processDocuments(urls, doWeb);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		// We call the Embedded Metadata translator to do the actual work
-		var creator = ZU.xpathText(doc, '//div[@class="byline"]/a[1]');
-		var date = ZU.xpathText(doc, '//meta[@itemprop="dateCreated"]/@content');
-		var duration = ZU.xpathText(doc, '//meta[@itemprop="duration"]/@content');
-		var translator = Zotero.loadTranslator("web");
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.itemType= "videoRecording";
-			item.title = item.title.replace(/\s*on Vimeo$/, "");
-			item.creators = ZU.cleanAuthor(creator, "author");
-			if (date) item.date = date.replace(/T.+/, "");
-			if (duration) item.runningTime = duration;
-			item.extra = '';
-			item.complete();
-		});
-		translator.translate();
+		scrape(doc, url);
 	}
 }
-/** BEGIN TEST CASES **/
+
+
+function scrape(doc, url) {
+	var json = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
+	var objects = JSON.parse(json);
+	var videoObject;
+	for (var i=0; i<objects.length; i++) {
+		if (objects[i]["@type"] == "VideoObject") {
+			videoObject = objects[i];
+		}
+	}
+	var item = new Zotero.Item("videoRecording");
+	item.title = videoObject.name;
+	item.url = videoObject.url;
+	item.abstractNote = videoObject.description;
+	item.runningTime = videoObject.duration;
+	item.date = videoObject.uploadDate;
+	var author = videoObject.author;
+	if (author) {
+		item.creators.push(ZU.cleanAuthor(author.name, "author"));
+	}
+	var keywords = videoObject.keywords;
+	if (keywords) {
+		var tags = keywords.replace('[', '').replace(']', '').split(',');
+		for (var j=0; j<tags.length; j++) {
+			item.tags.push(tags[j]);
+		}
+	}
+	item.attachments.push({
+		title:"Snapshot",
+		document:doc
+	});
+	
+	item.complete();
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -89,32 +119,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://vimeo.com/31179423",
+		"url": "https://vimeo.com/31179423",
 		"items": [
 			{
 				"itemType": "videoRecording",
-				"creators": {
-					"firstName": "Alexander",
-					"lastName": "Chen",
-					"creatorType": "author"
-				},
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
+				"creators": [
+					{
+						"firstName": "Alexander",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-10-26T22:29:03-04:00",
+				"abstractNote": "Strings (2011) by Alexander Chen visualizes the first Prelude from Bach&#039;s Cello Suites. Using the math behind string length and pitch, it came from a simple&hellip;",
+				"libraryCatalog": "Vimeo",
+				"runningTime": "PT00H02M57S",
+				"shortTitle": "Strings",
+				"url": "https://vimeo.com/31179423",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"title": "Strings: J.S. Bach - Cello Suite No. 1 - Prelude",
-				"url": "http://vimeo.com/31179423",
-				"abstractNote": "Strings (2011) by Alexander Chen visualizes the first Prelude from Bach's Cello Suites. Using the math behind string length and pitch, it came from a simple idea:…",
-				"libraryCatalog": "vimeo.com",
-				"date": "2011-10-26",
-				"runningTime": "PT00H02M57S",
-				"shortTitle": "Strings"
+				"tags": [
+					"art",
+					"audio",
+					"classical",
+					"experimental",
+					"html5",
+					"interactive",
+					"music",
+					"sound",
+					"visualization"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://vimeo.com/search?q=zotero",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

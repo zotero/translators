@@ -3,13 +3,13 @@
 	"label": "Handelszeitung",
 	"creator": "ibex",
 	"target": "^https?://((www\\.)?(handelszeitung|bilanz|stocks)\\.ch/.)",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-06-01 19:22:55"
+	"lastUpdated": "2016-10-31 18:41:26"
 }
 
 /*
@@ -31,61 +31,70 @@
 	along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-/*
-Reference URLs:
-  Article: http://www.handelszeitung.ch/unternehmen/google-kauft-daily-deal
-  Search: http://www.handelszeitung.ch/search/apachesolr_search/Google
-
-  Article: http://www.bilanz.ch/unternehmen/google-kauft-daily-deal
-  Search: http://www.bilanz.ch/search/apachesolr_search/Google
-
-*/
 
 /* Zotero API */
 function detectWeb(doc, url) {
 	//Z.debug("ibex detectWeb URL = " + url);
-	if (doc.location.href.match(/\/search\//) && (ZU.xpath(doc, '//dl[contains(@class, "search-results")]').length > 0)) {
-		return "multiple";
-	} else if (doc.location.href.match(/./) && (ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']').length > 0)) {
+	var classes = doc.body.className;
+	if (classes.indexOf("page-type-article")>-1) {
 		return "newspaperArticle";
+	}
+	if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
 }
 
-/* Zotero API */
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//dl[contains(@class, "search-results")]/dt/a|//div[@id="main-content"]//div[contains(@class, "views-row")]//h2/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		//distinguish article urls from dossiers urls
+		//by looking at the slashes in the url
+		//e.g. dossier: http://www.handelszeitung.ch/die-enthuellungen-der-panama-papers
+		//e.g. article: http://www.handelszeitung.ch/unternehmen/technologie/google-drive-startschuss-fuer-den-online-speicher
+		var slash = href.indexOf("/", 10);
+		var slash2 = href.indexOf("/", slash+1);
+		if (slash2 == -1) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
-	//Z.debug("ibex doWeb URL = " + url);
-	var urls = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = ZU.getItemArray(doc, doc.getElementsByClassName('title'), 'http://.+/.+');
-		if (!items || countObjectProperties(items) == 0) {
-			return true;
-		}
-		// Bildergalerien are not supported - don't show them in the results
-		for (var i in items) {
- 			if (i.match(/\/bildergalerie\//)) {
- 				delete items[i];
- 			}
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
-				urls.push(i);
+				// Bildergalerien are not supported - don't show them in the results
+				if (i.search(/\/bildergalerie\//) != -1) {
+					continue;
+				}
+				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape);	
-		});	
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
-	 scrape(doc, url);
+		scrape(doc, url);
 	}
 }
 
+
 /* Zotero API */
-function scrape(doc) {
+function scrape(doc, url) {
 	//Z.debug("ibex scrape URL = " + doc.location.href);
 
 	var newItem = new Z.Item('newspaperArticle');
-	newItem.url = doc.location.href;
+	newItem.url = url;
 	var title = ZU.xpathText(doc, '//div[contains(@class, "field field-title")]/h1');
 	if (title) {
 		newItem.title = ZU.trimInternal(title);
@@ -99,21 +108,21 @@ function scrape(doc) {
 
 	var date = ZU.xpathText(doc, '//div[contains(@class, "region-middle")]/div[contains(@class, "field-publish-date") or contains(@class, "field-update-info")]|//span[@class="date-display-single"]');
 	if (date) {
-		newItem.date = ZU.trimInternal(date.replace(/\|.*$/, ''));
+		newItem.date = ZU.strToISO(date.replace(/\|.*$/, ''));
 	}
 
-	if (doc.location.href.match('handelszeitung.ch')) {
+	if (url.indexOf('handelszeitung.ch') != -1) {
 		newItem.publicationTitle = 'Handelszeitung';
 		newItem.ISSN = "1422-8971";
-	} else if (doc.location.href.match('bilanz.ch')) {
+	} else if (url.indexOf('bilanz.ch') != -1) {
 		newItem.publicationTitle = 'Bilanz';
 		newItem.ISSN = "1022-3487";
-	} else if (doc.location.href.match('stocks.ch')) {
+	} else if (url.indexOf('stocks.ch') != -1) {
 		newItem.publicationTitle = 'Stocks';
 		newItem.ISSN = "1424-7739";
 	}
 
-	newItem.language = "de";
+	newItem.language = "de-CH";
 
 	var section = ZU.xpath(doc, '//div[' + containingClass('node-type-article') + ']//div[' + containingClass('channel') + ']');
 	if (section.length > 0) {
@@ -128,19 +137,6 @@ function scrape(doc) {
 	newItem.complete();
 }
 
-/*
- * There is no built-in function to count object properties which often are used as associative arrays.
- *
- * @param {Object} obj Associative array
- * @return {int} Number of object properties = ength of associative array
- */
-function countObjectProperties(obj) {
-	var size = 0;
-	for (var key in obj) {
-		if (obj.hasOwnProperty(key)) size++;
-	}
-	return size;
-}
 
 /**
  * Generates a partial xpath expression that matches an element whose 'class' attribute
@@ -183,24 +179,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Google kauft Daily Deal",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-09-19",
+				"ISSN": "1022-3487",
+				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
+				"language": "de-CH",
+				"libraryCatalog": "Handelszeitung",
+				"publicationTitle": "Bilanz",
+				"section": "Unternehmen",
+				"url": "http://www.bilanz.ch/unternehmen/google-kauft-daily-deal",
 				"attachments": [
 					{
 						"title": "Bilanz Article Snapshot"
 					}
 				],
-				"url": "http://www.bilanz.ch/unternehmen/google-kauft-daily-deal",
-				"title": "Google kauft Daily Deal",
-				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"date": "19.09.2011",
-				"publicationTitle": "Bilanz",
-				"ISSN": "1022-3487",
-				"language": "de",
-				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -210,51 +206,51 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Google kauft Daily Deal",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-09-19",
+				"ISSN": "1422-8971",
+				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
+				"language": "de-CH",
+				"libraryCatalog": "Handelszeitung",
+				"publicationTitle": "Handelszeitung",
+				"section": "Unternehmen",
+				"url": "http://www.handelszeitung.ch/unternehmen/google-kauft-daily-deal",
 				"attachments": [
 					{
 						"title": "Handelszeitung Article Snapshot"
 					}
 				],
-				"url": "http://www.handelszeitung.ch/unternehmen/google-kauft-daily-deal",
-				"title": "Google kauft Daily Deal",
-				"abstractNote": "Gutscheine für Google: Der Online-Riese hat das Portal Daily Deal übernommen. Das Unternehmen verkauft in der Schweiz, in Deutschland und in Österreich Rabattgutscheine im Internet.",
-				"date": "19.09.2011",
-				"publicationTitle": "Handelszeitung",
-				"ISSN": "1422-8971",
-				"language": "de",
-				"section": "Unternehmen",
-				"libraryCatalog": "Handelszeitung",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.bilanz.ch/news/google-eroeffnet-online-speicher-google-drive",
+		"url": "http://www.handelszeitung.ch/unternehmen/technologie/google-drive-startschuss-fuer-den-online-speicher",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Google Drive: Startschuss für den Online-Speicher",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-04-24",
+				"ISSN": "1422-8971",
+				"abstractNote": "Lange erwartet, jetzt da: Google hat sein virtuelles Laufwerk vorgestellt. Drive tritt in Konkurrenz mit Systemen wie Dropbox, iCloud und SkyDrive, kommt jedoch reichlich spät.",
+				"language": "de-CH",
+				"libraryCatalog": "Handelszeitung",
+				"publicationTitle": "Handelszeitung",
+				"section": "Unternehmen",
+				"url": "http://www.handelszeitung.ch/unternehmen/technologie/google-drive-startschuss-fuer-den-online-speicher",
 				"attachments": [
 					{
-						"title": "Bilanz Article Snapshot"
+						"title": "Handelszeitung Article Snapshot"
 					}
 				],
-				"url": "http://www.bilanz.ch/news/google-eroeffnet-online-speicher-google-drive",
-				"title": "Google eröffnet Online-Speicher Google Drive",
-				"date": "24.04.2012",
-				"publicationTitle": "Bilanz",
-				"ISSN": "1022-3487",
-				"language": "de",
-				"libraryCatalog": "Handelszeitung",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -266,6 +262,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.handelszeitung.ch/search/site/argentinien",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.handelszeitung.ch/die-enthuellungen-der-panama-papers",
 		"items": "multiple"
 	}
 ]

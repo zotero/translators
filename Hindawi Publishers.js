@@ -2,14 +2,14 @@
 	"translatorID": "186efdd2-3621-4703-aac6-3b5e286bdd86",
 	"label": "Hindawi Publishers",
 	"creator": "Sebastian Karcher",
-	"target": "http://www.hindawi.com/(journals|search)/",
+	"target": "^https?://www\\.hindawi\\.com/(journals|search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-05-01 00:37:52"
+	"lastUpdated": "2016-01-06 05:33:07"
 }
 
 /*
@@ -29,9 +29,9 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 
 function detectWeb(doc,url) {
-	var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 	var xpath='//x:meta[@name="citation_journal_title"]';
 
 	if (ZU.xpath(doc, xpath, namespace).length > 0) {
@@ -50,10 +50,10 @@ function detectWeb(doc,url) {
 }
 
 
+
 function doWeb(doc,url)
 {
 	if (detectWeb(doc, url) == "multiple") {
-		var namespace = {"x"  : "http://www.w3.org/1999/xhtml"}
 		var hits = {};
 		var urls = [];
 		resultxpath = '//x:div[@class="middle_content"]/x:ul/x:li/x:a[contains(@href, "/journals/")]|\
@@ -80,7 +80,29 @@ function doWeb(doc,url)
 				// use article ID as a page (seems to be the last part of URL/DOI)
 				item.pages = 'e' + item.DOI.substr(item.DOI.lastIndexOf('/') + 1);
 			}
-			item.extra = "";
+			//remove duplicate metadata			
+			for (var i in item){
+				if (typeof item[i] == "string" && item[i].match(/^.+,/)){
+					//Z.debug(item[i])
+					  item[i] = item[i].replace(/^(PMID: )?(.+), \2$/, "$1$2");
+				}
+			}
+			//remove duplicate authors
+			if (item.creators.length && item.creators.length % 2 == 0) {
+  				var duplicate = true;
+  				for (var i = 0, j = item.creators.length / 2; duplicate && j < item.creators.length; i++, j++) {
+					var a1 = item.creators[i], a2 = item.creators[j];
+					duplicate = a1.firstName == a2.firstName && a1.lastName == a2.lastName;
+  				}
+
+				if (duplicate) {
+					item.creators = item.creators.slice(0, item.creators.length / 2);
+  				}
+			}
+			//convert html entities in abstract
+			if (item.abstractNote){
+				item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+			}
 			item.complete();
 		});
 		translator.translate();
@@ -95,50 +117,54 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.hindawi.com/journals/scientifica/2012/942507/",
+		"url": "http://www.hindawi.com/search/all/data/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.hindawi.com/journals/ije/2015/210527/",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Validity of 12-Month Falls Recall in Community-Dwelling Older Women Participating in a Clinical Trial",
 				"creators": [
 					{
-						"firstName": "C. Francisco",
-						"lastName": "Espinel",
+						"firstName": "Kerrie M.",
+						"lastName": "Sanders",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Shaughn",
-						"lastName": "Keating",
+						"firstName": "Amanda L.",
+						"lastName": "Stuart",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Hanina",
-						"lastName": "Hibshoosh",
+						"firstName": "David",
+						"lastName": "Scott",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Bret",
-						"lastName": "Taback",
+						"firstName": "Mark A.",
+						"lastName": "Kotowicz",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kathie-Ann",
-						"lastName": "Joseph",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Mahmoud",
-						"lastName": "El-Tamer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sheldon",
-						"lastName": "Feldman",
+						"firstName": "Geoff C.",
+						"lastName": "Nicholson",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2015/07/27",
+				"DOI": "10.1155/2015/210527",
+				"ISSN": "1687-8337",
+				"abstractNote": "Objectives. To compare 12-month falls recall with falls reported prospectively on daily falls calendars in a clinical trial of women aged ≥70 years. Methods. 2,096 community-dwelling women at high risk of falls and/or fracture completed a daily falls calendar and standardised interviews when falls were recorded, for 12 months. Data were compared to a 12-month falls recall question that categorised falls status as “no falls,” “a few times,” “several,” and “regular” falls. Results. 898 (43%) participants reported a fall on daily falls calendars of whom 692 (77%) recalled fall(s) at 12 months. Participants who did not recall a fall were older (median 79.3 years versus 77.8 years, ). Smaller proportions of fallers who sustained an injury or accessed health care failed to recall a fall (all ). Among participants who recalled “no fall,” 85% reported zero falls on daily calendars. Few women selected falls categories of “several times” or “regular” (4.1% and 0.4%, resp.) and the sensitivity of these categories was low (30% to 33%). Simply categorising participants into fallers or nonfallers had 77% sensitivity and 94% specificity. Conclusion. For studies where intensive ascertainment of falls is not feasible, 12-month falls recall questions with fewer responses may be an acceptable alternative.",
+				"extra": "PMID: 26273292",
+				"language": "en",
+				"libraryCatalog": "www.hindawi.com",
+				"pages": "e210527",
+				"publicationTitle": "International Journal of Endocrinology",
+				"url": "http://www.hindawi.com/journals/ije/2015/210527/abs/",
+				"volume": "2015",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -146,26 +172,18 @@ var testCases = [
 					},
 					{
 						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
-				"language": "en",
-				"abstractNote": "Background. The MammaPrint (MP) diagnostic assay stratifies breast cancer patients into high- and low-risk groups using mRNA analysis of a 70-gene profile. The assay is validated for assessment of patients with estrogen receptor positive or negative tumors less than 5 cm with 3 or fewer malignant lymph nodes. TargetPrint (TP) is an assay for assessing estrogen, progesterone, and HER2-neu receptor status based on mRNA expression. A potential limitation of these assays is that they require an evaluation of fresh tissue samples. There is limited published experience describing MP or TP implementation. Methods. Over 10 months, 4 breast surgeons obtained samples from 54 patients for MP/TP analysis. The samples were analyzed by Agendia Labs. The tumors were independently evaluated for receptor status using immunohistochemistry (IHC). Retrospectively, we identified patients who were assessed by MP/TP during this period. Patients who underwent OncotypeDx evaluation were also identified. Results. Of the 54 patients receiving MP, 4 were found ineligible for MP risk assessment because &#x3e;3 lymph nodes were found to be malignant. Out of all eligible patients, 14/50 (28&#x25;) had samples whose quantity of tumor was not sufficient for analysis (QNS). Out of eligible patients with tumors &#x3c;1&#x2009;cm, 7/8 (88&#x25;) had QNS samples. 7/42 with tumors &#x2265;1&#x2009;cm (17&#x25;) had QNS samples. Nine patients had discordant receptor results when evaluated by IHC versus. TP. Of patients who also underwent OncotypeDx testing, 6/14 (43&#x25;) had discordant results with MP. Conclusions. This study indicates that using MP/TP assay is feasible in a tertiary care center but there may be utility in limiting MP testing to patients with tumors between 1 and 5&#x2009;cm due to high likelihood of uninformative results in subcentimeter tumors. Further study is needed to explore the discordance between oncotype and MP results.",
-				"DOI": "10.6064/2012/942507",
-				"url": "http://www.hindawi.com/journals/scientifica/2012/942507/abs/",
-				"libraryCatalog": "www.hindawi.com",
-				"shortTitle": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center",
-				"title": "MammaPrint Feasibility in a Large Tertiary Urban Medical Center: An Initial Experience",
-				"publicationTitle": "Scientifica",
-				"volume": "2012",
-				"date": "2012/12/31",
-				"pages": "e942507"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.hindawi.com/search/all/data/",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

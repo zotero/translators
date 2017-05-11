@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-09-24 13:06:01"
+	"lastUpdated": "2015-09-25 00:35:34"
 }
 
 /*
@@ -35,9 +35,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/s|pub\//)) return "multiple";
-	if (url.match(/\/browse\//) && ZU.xpathText(doc, '//ol[@class="entryList"]/li/@id')!= null) return "multiple";
-	if (url.match(/\/rec\//)) return "journalArticle";
+	if (url.search(/\/s|pub\//)!=-1) return "multiple";
+	if (url.indexOf("/browse/")!=-1 && ZU.xpathText(doc, '//ol[@class="entryList"]/li/@id')!= null) return "multiple";
+	if (url.indexOf("/rec/")!=-1) return "journalArticle";
 }
 	
 
@@ -46,7 +46,7 @@ function doWeb(doc, url){
 	var ids = new Array();
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = ZU.xpath(doc, '//li/span[@class="citation"]//span[@class="articleTitle"]');
+		var titles = ZU.xpath(doc, '//li/span[@class="citation"]//span[contains (@class, "articleTitle")]');
 		var identifiers = ZU.xpath(doc, '//ol[@class="entryList"]/li/@id');
 		for (var i in titles) {
 			items[identifiers[i].textContent] = titles[i].textContent;
@@ -58,7 +58,7 @@ function doWeb(doc, url){
 			for (var i in items) {
 				ids.push(i.replace(/^e/, ""));
 			}
-			scrape(ids, function () {});
+			scrape(ids);
 		});
 	} else {
 		var identifier = url.match(/(\/rec\/)([A-Z-\d]+)/)[2]
@@ -69,24 +69,24 @@ function doWeb(doc, url){
 
 function scrape(identifier){
 	Z.debug(identifier)
-	for (var i in identifier){
-	var bibtexurl= "http://philpapers.org/export.html?__format=bib&eId="+identifier[i]+"&formatName=BibTeX";
-	//Z.debug(bibtexurl);
-	Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
-	//Z.debug(text);
-	//remove line breaks, then match match the bibtex.
-	bibtex = text.replace(/\n/g, "").match(/<pre class='export'>.+<\/pre>/)[0];
-	//Zotero.debug(bibtex)
- 	var url = "http://philpapers.org/rec/" + identifier[i];
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(bibtex);
-		translator.setHandler("itemDone", function(obj, item) {
-			item.attachments = [{url:url, title: "PhilPapers - Snapshot", mimeType: "text/html"}];
-			item.complete();
-			});	
-		translator.translate();
-		});
+	for (var i =0; i<identifier.length; i++){
+		var bibtexurl= "http://philpapers.org/export.html?__format=bib&eId="+identifier[i]+"&formatName=BibTeX";
+		//Z.debug(bibtexurl);
+		Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
+		//Z.debug(text);
+		//remove line breaks, then match match the bibtex.
+		bibtex = text.replace(/\n/g, "").match(/<pre class='export'>.+<\/pre>/)[0];
+		//Zotero.debug(bibtex)
+	 	var url = "http://philpapers.org/rec/" + identifier[i];
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+			translator.setString(bibtex);
+			translator.setHandler("itemDone", function(obj, item) {
+				item.attachments = [{url:url, title: "PhilPapers - Snapshot", mimeType: "text/html"}];
+				item.complete();
+				});	
+			translator.translate();
+			});
 	}	
 }/** BEGIN TEST CASES **/
 var testCases = [

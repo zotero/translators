@@ -9,26 +9,32 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-02-12 08:57:37"
+	"lastUpdated": "2016-09-21 18:53:33"
 }
 
 /*
-   Google Play Translator
-   Copyright (C) 2014 Avram Lyon, ajlyon@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Google Play Translator
+	Copyright © 2014 Avram Lyon, ajlyon@gmail.com
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 	var bodyContent = doc.getElementById('body-content');
@@ -75,7 +81,7 @@ function cardList(doc) {
 }
 
 function cardListFindCards(doc) {
-	return ZU.xpath(doc, '//div[contains(@class,"card-list")]/div[contains(@class, "card")]//h2/a[contains(@class, "title")]');
+	return ZU.xpath(doc, '//div[contains(@class,"card-list")]//div[contains(@class, "card-content")]//a[@class="title"]');
 }
 
 function findProperty(doc, propertyKey) {
@@ -83,22 +89,24 @@ function findProperty(doc, propertyKey) {
 }
 
 function saveIndividual(doc, url) {
-	var title = findProperty(doc, "name");
-	var author = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
-
-	var date = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//div[contains(@class, "document-subtitle")]');
-	date = date.replace(/\s*-\s*/, '');
-
-	var description = findProperty(doc, "description");
-
-	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
-
 	var item = new Zotero.Item("computerProgram");
-	item.title = title;
-	item.url = url;
-	item.date = date;
-	item.abstractNote = description;
+	
+	item.title = ZU.xpathText(doc, '//h1[contains(@class, "document-title")]');
+	
+	var author = ZU.xpathText(doc, '//div[contains(@itemprop, "author")]//span[contains(@itemprop, "name")]');
+	if (author) {
+		item.creators.push(ZU.cleanAuthor(author, "author"));
+	}
 
+	item.url = url;
+	
+	var date = ZU.xpathText(doc, '//div[contains(@itemprop, "datePublished")]');
+	if (date) {
+		item.date = date.replace(/\s*-\s*/, '');
+	}
+	item.abstractNote = findProperty(doc, "description");
+	
+	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
 	for (var index = 0; index < screenshots.length; index++) {
 		item.attachments.push({
 			url: screenshots[index].src,
@@ -116,10 +124,11 @@ function saveIndividual(doc, url) {
 		item.version = version;
 	}
 	
-	item.company = author;
+	item.company = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
 	
 	item.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [

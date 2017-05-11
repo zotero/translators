@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-14 21:10:24"
+	"lastUpdated": "2015-06-02 19:17:47"
 }
 
 function detectWeb(doc, url) {
@@ -91,8 +91,8 @@ function scrape(doc, url){
 		item.journalAbbreviation = journals[jour][1];
 		item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//p[@class="abstract_block"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);
 		var authors = Zotero.Utilities.trimInternal(doc.evaluate('//div[@class="bb"]/h3', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent).split(/,\s+/);
-		for each (var aut in authors) {
-			aut = aut.replace(/[^\w^\s^\.]/g, "").replace(/\d/g, "");
+		for (var i=0; i<authors.length; i++) {
+			var aut = authors[i].replace(/[^A-Z\s.]+/gi, '');
 			item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 		}
 		item.date = doc.evaluate('//div[@class="abs-footer"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/date:\s+(.*)/)[1];

@@ -1,14 +1,15 @@
 {
-	"translatorID":"6f5f1b24-7519-4314-880f-d7004fbcfe7e",
-	"translatorType":4,
-	"label":"ReliefWeb",
-	"creator":"Michael Berkowitz",
-	"target":"http://(www.)?reliefweb.int/",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "6f5f1b24-7519-4314-880f-d7004fbcfe7e",
+	"label": "ReliefWeb",
+	"creator": "Michael Berkowitz",
+	"target": "^https?://(www\\.)?reliefweb\\.int/",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 21:13:59"
 }
 
 function detectWeb(doc, url) {
@@ -45,8 +46,8 @@ function doWeb(doc, url) {
 			var auts = doc.evaluate('//div[@id="docBody"]/p/i', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="docBody"]/p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(auts, ""));
 			auts = auts.replace('By ', "").split(/\//);
-			for each (var aut in auts) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+			for (var i=0; i<auts.length; i++) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(auts[i], "author"));
 			}
 		} else {
 			item.abstractNote = Zotero.Utilities.trimInternal(doc.evaluate('//div[@id="docBody"]/p[1]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent);

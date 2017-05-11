@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-08-26 03:36:05"
+	"lastUpdated": "2015-06-04 03:25:27"
 }
 
 var RECOGNIZABLE_FORMATS = ["rdf_zotero", "rdf_bibliontology", "mods", "marc", "unimarc", "ris",
@@ -312,8 +312,6 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var ids = getUnAPIIDs(doc);
 	
-	Zotero.wait();
-	
 	getAllItems(ids, function(items) {
 		// get the domain we're scraping, so we can use it for libraryCatalog
 		domain = doc.location.href.match(/https?:\/\/([^/]+)/);
@@ -330,18 +328,16 @@ function doWeb(doc, url) {
 			}
 			
 			// Show item selection dialog
-			var chosenItems = Zotero.selectItems(itemTitles);
-			if(!chosenItems) Zotero.done(true);
-			
-			// Complete items
-			for(var i in chosenItems) {
-				items[i].libraryCatalog = domain[1];
-				items[i].complete();
-			}
+			Zotero.selectItems(itemTitles, function(chosenItems) {
+				if(!chosenItems) return true
+				
+				// Complete items
+				for(var i in chosenItems) {
+					items[i].libraryCatalog = domain[1];
+					items[i].complete();
+				}
+			});
 		}
-		
-		Zotero.done();
-		return;
 	});
 }
 

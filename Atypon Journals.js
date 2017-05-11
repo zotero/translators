@@ -2,32 +2,38 @@
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^?#]+(?:/doi/(?:abs|abstract|full|figure|ref|citedby|book)/10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
+	"target": "^https?://[^?#]+(/doi/((abs|abstract|full|figure|ref|citedby|book)/)?10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-10-04 22:19:55"
+	"lastUpdated": "2016-09-04 09:34:44"
 }
 
 /*
-Atypon Journals Translator
-Copyright (C) 2011-2014 Sebastian Karcher
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Atypon Journals Translator
+	Copyright © 2011-2014 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -36,13 +42,16 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	if (url.indexOf('/doi/book/') != -1) {
-		return 'book';
+	var citLinks = ZU.xpath(doc, '//a[contains(@href, "/action/showCitFormats")]');
+	if (citLinks.length > 0) {
+		if (url.indexOf('/doi/book/') != -1) {
+			return 'book';
+		}
+		else if (url.search(/\.ch\d+$/)!=-1){
+			return 'bookSection';
+		}
+		return "journalArticle";
 	}
-	else if (url.search(/\.ch\d+$/)!=-1){
-		return 'bookSection';
-	}
-	return "journalArticle";
 }
 
 function getSearchResults(doc, checkOnly, extras) {
@@ -111,7 +120,7 @@ function getSearchResults(doc, checkOnly, extras) {
 }
 
 // Keep this in line with target regexp
-var replURLRegExp = /\/doi\/(?:abs|abstract|full|figure|ref|citedby|book)\//;
+var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
@@ -185,8 +194,8 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = ZU.xpathText(doc, '//div[@class="abstractSection"]')
-	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keywordsfield") or contains(@href, "Keyword=")]');
+	var abstract = doc.getElementsByClassName('abstractSection')[0];
+	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
 		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
@@ -211,11 +220,23 @@ function scrape(doc, url, extras) {
 				}
 				
 				item.url = url;
+				//for Emerald, get rid of the "null" that they add at the end of every title:
+				if (url.indexOf("www.emeraldinsight.com")!=-1){
+					item.title = item.title.replace(/null$/, "")
+				}
 				item.notes = [];
 				for (var i in tags){
 					item.tags.push(tags[i].textContent)
 				}
-				item.abstractNote = abstract;
+				
+				if (abstract) {
+					// Drop "Abstract" prefix
+					// This is not excellent, since some abstracts could
+					// conceivably begin with the word "abstract"
+					item.abstractNote = abstract.textContent
+						.replace(/^[^\w\d]*abstract\s*/i, '');
+				}
+				
 				item.attachments = [];
 				if (extras.pdf) {
 					item.attachments.push({
@@ -241,84 +262,6 @@ function scrape(doc, url, extras) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Assimilation of multiple data sets with the ensemble Kalman filter to improve forecasts of forest carbon dynamics",
-				"creators": [
-					{
-						"lastName": "Gao",
-						"firstName": "Chao",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Wang",
-						"firstName": "Han",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Weng",
-						"firstName": "Ensheng",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Lakshmivarahan",
-						"firstName": "S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zhang",
-						"firstName": "Yanfen",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Luo",
-						"firstName": "Yiqi",
-						"creatorType": "author"
-					}
-				],
-				"date": "February 22, 2011",
-				"DOI": "10.1890/09-1234.1",
-				"ISSN": "1051-0761",
-				"abstractNote": "The ensemble Kalman filter (EnKF) has been used in weather forecasting to assimilate observations into weather models. In this study, we examine how effectively forecasts of a forest carbon cycle can be improved by assimilating observations with the EnKF. We used the EnKF to assimilate into the terrestrial ecosystem (TECO) model eight data sets collected at the Duke Forest between 1996 and 2004 (foliage biomass, fine root biomass, woody biomass, litterfall, microbial biomass, forest floor carbon, soil carbon, and soil respiration). We then used the trained model to forecast changes in carbon pools from 2004 to 2012. Our daily analysis of parameters indicated that all the exit rates were well constrained by the EnKF, with the exception of the exit rates controlling the loss of metabolic litter and passive soil organic matter. The poor constraint of these two parameters resulted from the low sensitivity of TECO predictions to their values and the poor correlation between these parameters and the observed variables. Using the estimated parameters, the model predictions and observations were in agreement. Model forecasts indicate 15 380–15 660 g C/m2 stored in Duke Forest by 2012 (a 27% increase since 2004). Parameter uncertainties decreased as data were sequentially assimilated into the model using the EnKF. Uncertainties in forecast carbon sinks increased over time for the long-term carbon pools (woody biomass, structure litter, slow and passive SOM) but remained constant over time for the short-term carbon pools (foliage, fine root, metabolic litter, and microbial carbon). Overall, EnKF can effectively assimilate multiple data sets into an ecosystem model to constrain parameters, forecast dynamics of state variables, and evaluate uncertainty.",
-				"issue": "5",
-				"journalAbbreviation": "Ecological Applications",
-				"libraryCatalog": "esajournals.org (Atypon)",
-				"pages": "1461-1473",
-				"publicationTitle": "Ecological Applications",
-				"url": "http://www.esajournals.org/doi/abs/10.1890/09-1234.1",
-				"volume": "21",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					"carbon cycle",
-					"data assimilation",
-					"ecological forecast",
-					"ensemble Kalman filter (EnKF)",
-					"parameter estimation",
-					"uncertainty analysis"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.esajournals.org/toc/ecap/21/5",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://pubs.rsna.org/toc/radiographics/toc/33/7",
@@ -421,7 +364,7 @@ var testCases = [
 					}
 				],
 				"date": "January 1, 2001",
-				"ISBN": "978-0-89871-478-4",
+				"ISBN": "9780898714784",
 				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
 				"libraryCatalog": "epubs.siam.org (Atypon)",
 				"numPages": "172",
@@ -453,7 +396,7 @@ var testCases = [
 				"title": "6. Extensions and Generalizations",
 				"creators": [],
 				"date": "January 1, 2001",
-				"ISBN": "978-0-89871-478-4",
+				"ISBN": "9780898714784",
 				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
 				"bookTitle": "Combinatorial Data Analysis",
 				"libraryCatalog": "epubs.siam.org (Atypon)",
@@ -582,7 +525,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "BLOCK COPOLYMER THIN FILMS: Physics and Applications1",
+				"title": "Block Copolymer Thin Films: Physics and Applications",
 				"creators": [
 					{
 						"lastName": "Fasolka",
@@ -598,13 +541,13 @@ var testCases = [
 				"date": "August 1, 2001",
 				"DOI": "10.1146/annurev.matsci.31.1.323",
 				"ISSN": "1531-7331",
-				"abstractNote": "▪ Abstract  A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
+				"abstractNote": "A two-part review of research concerning block copolymer thin films is presented. The first section summarizes experimental and theoretical studies of the fundamental physics of these systems, concentrating upon the forces that govern film morphology. The role of film thickness and surface energetics on the morphology of compositionally symmetric, amorphous diblock copolymer films is emphasized, including considerations of boundary condition symmetry, so-called hybrid structures, and surface chemical expression. Discussions of compositionally asymmetric systems and emerging research areas, e.g., liquid-crystalline and A-B-C triblock systems, are also included. In the second section, technological applications of block copolymer films, e.g., as lithographic masks and photonic materials, are considered. Particular attention is paid to means by which microphase domain order and orientation can be controlled, including exploitation of thickness and surface effects, the application of external fields, and the use of patterned substrates.",
 				"issue": "1",
 				"journalAbbreviation": "Annu. Rev. Mater. Res.",
 				"libraryCatalog": "annualreviews.org (Atypon)",
 				"pages": "323-355",
 				"publicationTitle": "Annual Review of Materials Research",
-				"shortTitle": "BLOCK COPOLYMER THIN FILMS",
+				"shortTitle": "Block Copolymer Thin Films",
 				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 				"volume": "31",
 				"attachments": [
@@ -637,9 +580,9 @@ var testCases = [
 				"title": "Irish coffee? Well, something better …",
 				"creators": [
 					{
-						"lastName": "Rao",
-						"firstName": "Pramila",
-						"creatorType": "author"
+						"lastName": "Pramila Rao",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "August 16, 2013",
@@ -653,6 +596,142 @@ var testCases = [
 				"shortTitle": "Irish coffee?",
 				"url": "http://www.emeraldinsight.com/doi/full/10.1108/SAJGBR-10-2012-0120",
 				"volume": "2",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Observations of Ice Microphysics through the Melting Layer",
+				"creators": [
+					{
+						"lastName": "Heymsfield",
+						"firstName": "Andrew J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bansemer",
+						"firstName": "Aaron",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Poellot",
+						"firstName": "Michael R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wood",
+						"firstName": "Norm",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 30, 2015",
+				"DOI": "10.1175/JAS-D-14-0363.1",
+				"ISSN": "0022-4928",
+				"abstractNote": "The detailed microphysical processes and properties within the melting layer (ML)—the continued growth of the aggregates by the collection of the small particles, the breakup of these aggregates, the effects of relative humidity on particle melting—are largely unresolved. This study focuses on addressing these questions for in-cloud heights from just above to just below the ML. Observations from four field programs employing in situ measurements from above to below the ML are used to characterize the microphysics through this region. With increasing temperatures from about −4° to +1°C, and for saturated conditions, slope and intercept parameters of exponential fits to the particle size distributions (PSD) fitted to the data continue to decrease downward, the maximum particle size (largest particle sampled for each 5-s PSD) increases, and melting proceeds from the smallest to the largest particles. With increasing temperature from about −4° to +2°C for highly subsaturated conditions, the PSD slope and intercept continue to decrease downward, the maximum particle size increases, and there is relatively little melting, but all particles experience sublimation.",
+				"issue": "8",
+				"journalAbbreviation": "J. Atmos. Sci.",
+				"libraryCatalog": "journals.ametsoc.org (Atypon)",
+				"pages": "2902-2928",
+				"publicationTitle": "Journal of the Atmospheric Sciences",
+				"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
+				"volume": "72",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Development of the Worldwide Harmonized Test Procedure for Light-Duty Vehicles",
+				"creators": [
+					{
+						"lastName": "Ciuffo",
+						"firstName": "Biagio",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Marotta",
+						"firstName": "Alessandro",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tutuianu",
+						"firstName": "Monica",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Anagnostopoulos",
+						"firstName": "Konstantinos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fontaras",
+						"firstName": "Georgios",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pavlovic",
+						"firstName": "Jelica",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Serra",
+						"firstName": "Simone",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tsiakmakis",
+						"firstName": "Stefanos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zacharof",
+						"firstName": "Nikiforos",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 1, 2015",
+				"DOI": "10.3141/2503-12",
+				"ISSN": "0361-1981",
+				"abstractNote": "To assess vehicle performance on criteria compounds, carbon dioxide emissions, and fuel energy consumption, laboratory tests are generally carried out. During these tests, a vehicle is driven on a chassis dynamometer (which simulates the resistances the vehicle encounters during its motion) to follow a predefined test cycle. In addition, all conditions for running a test must strictly adhere to a predefined test procedure. The procedure is necessary to ensure that all tests are carried out in a comparable way, following the requirements set by the relevant legislation. Test results are used to assess vehicle compliance with emissions limits or to evaluate the fuel consumption that will be communicated to customers. Every region in the world follows its own approach in carrying out these types of tests. The variations in approaches have resulted in a series of drawbacks for vehicle manufacturers and regulating authorities, leading to a plethora of different conditions and results. As a step toward the harmonization of the test procedures, the United Nations Economic Commission for Europe launched a project in 2009 for the development of a worldwide harmonized light-duty test procedure (WLTP), including a new test cycle. The objective of the study reported here was to provide a brief description of WLTP and outline the plausible pathway for its introduction in European legislation.",
+				"journalAbbreviation": "Transportation Research Record: Journal of the Transportation Research Board",
+				"libraryCatalog": "trrjournalonline.trb.org (Atypon)",
+				"pages": "110-118",
+				"publicationTitle": "Transportation Research Record: Journal of the Transportation Research Board",
+				"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
+				"volume": "2503",
 				"attachments": [
 					{
 						"title": "Full Text PDF",

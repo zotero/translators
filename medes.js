@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-14 16:21:49"
+	"lastUpdated": "2016-12-27 13:01:58"
 }
 
 /*
@@ -46,11 +46,11 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//table[contains(@class, "resultsTable")]//tr');
+	var rows = ZU.xpath(doc, '//li[contains(@class, "resultados")]/div[contains(@class, "row")]');
 	for (var i=0; i<rows.length; i++) {
-		var id = ZU.xpathText(rows[i], './td[@class="firstCell"]/input[@id="PublicationHidden"]/@value');
+		var id = ZU.xpathText(rows[i], './/input[@id="PublicationHidden"]/@value');
 		var href = "/Public/ResumePublication.aspx?idmedes=" + id;
-		var title = ZU.xpathText(rows[i], './td/p[@class="larger"]');
+		var title = ZU.xpathText(rows[i], '.');
 		title = ZU.trimInternal(title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -254,10 +254,21 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"Anemia perniciosa",
 					"Diabetes mellitus",
+					"Diabetes mellitus insulino-dependiente",
 					"Endocrinología",
+					"Enfermedad celíaca",
+					"Enfermedad de Addison",
+					"Enfermedades autoinmunes",
+					"Estudios descriptivos",
+					"Estudios observacionales",
+					"Estudios retrospectivos",
+					"Estudios transversales",
 					"Medes",
-					"Medicina en español"
+					"Medicina en español",
+					"Tiroiditis autoinmune",
+					"Vitíligo"
 				],
 				"notes": [],
 				"seeAlso": []

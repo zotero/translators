@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-10 09:55:17"
+	"lastUpdated": "2016-09-19 21:07:47"
 }
 
 /*
@@ -36,42 +36,52 @@
 function detectWeb(doc, url) {
 
 	//Zotero.debug("ibex detectWeb URL= "+ url);
-	if (doc.title == "Suche und Suchergebnisse - FAZ" && doc.evaluate('//div[@class = "SuchergebnisListe"]', doc, null, XPathResult.ANY_TYPE, null)) {
+	if (doc.title == "Suche und Suchergebnisse - FAZ" && getSearchResults(doc, true)) {
 		return "multiple";
 	} else if (ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]')) {
 		return "newspaperArticle";
 	}
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	//make sure we don't get media objects
+	var rows = ZU.xpath(doc, '//div[not(descendant::span[@class="icon-play30"])]/a[@class="TeaserHeadLink"]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 
 function doWeb(doc, url) {
-	var arts = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object;
-		//make sure we don't get media objects
-		var titles = doc.evaluate('//div[not(div[contains(@class, "MediaLink")])]/a[@class="TeaserHeadLink"]', doc, null, XPathResult.ANY_TYPE, null);
-		var title;
-		while (title = titles.iterateNext()) {
-			items[title.href] = title.textContent.trim();
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
-			for (var itemurl in items) {
-				arts.push(itemurl);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
 			}
-			ZU.processDocuments(arts, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
-function scrape(doc) {
+
+function scrape(doc, url) {
 	var newArticle = new Zotero.Item('newspaperArticle');
-	newArticle.url = doc.location.href;
-	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h2')).replace(/^,/, "");
+	newArticle.url = url;
+	newArticle.title = ZU.trimInternal(ZU.xpathText(doc, '//div[@class = "FAZArtikelEinleitung"]/h2').trim().replace(/\n/g,":")).replace(/^,/, "");
 	var date = ZU.xpathText(doc, '(//span[@class="Datum"])[1]/@content');
 	if (date) newArticle.date = ZU.trimInternal(date.replace(/T.+$/, ""));
 	var teaser = ZU.xpathText(doc, '//div[@class="FAZArtikelEinleitung"]/p[@class = "Copy"]');
@@ -105,7 +115,8 @@ function scrape(doc) {
 	//language
 	var language = ZU.xpathText(doc, '//meta[@name="language"]/@content');
 	if (language != null) newArticle.language = language;
-
+	else newArticle.language = "de-DE";
+	
 	newArticle.ISSN = "0174-4909";
 	newArticle.attachments.push({
 		title: "FAZ.NET Article Snapshot",
@@ -130,10 +141,11 @@ function countObjectProperties(obj) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
+		"url": "http://www.faz.net/sonntagszeitung/wissenschaft/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Wissenschaftsphilosophie: Krumme Wege der Vernunft",
 				"creators": [
 					{
 						"firstName": "Fynn Ole",
@@ -146,9 +158,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-06-13",
+				"ISSN": "0174-4909",
+				"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
+				"language": "de-DE",
+				"libraryCatalog": "FAZ.NET",
+				"publicationTitle": "Frankfurter Allgemeine Zeitung",
+				"shortTitle": "Wissenschaftsphilosophie",
+				"url": "http://www.faz.net/sonntagszeitung/wissenschaft/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
 				"attachments": [
 					{
 						"title": "FAZ.NET Article Snapshot",
@@ -156,16 +173,9 @@ var testCases = [
 						"snapshot": true
 					}
 				],
-				"url": "http://www.faz.net/aktuell/wissen/mensch-gene/wissenschaftsphilosophie-krumme-wege-der-vernunft-1654864.html",
-				"title": "Wissenschaftsphilosophie Krumme Wege der Vernunft",
-				"date": "2011-06-13",
-				"abstractNote": "Wissenschaft hat eine Geschichte, wie kann sie dann aber rational sein? Im Briefwechsel zwischen Ludwik Fleck und Moritz Schlick deuteten sich bereits Antworten an.",
-				"publicationTitle": "Frankfurter Allgemeine Zeitung",
-				"section": "Wissen",
-				"language": "Deutsch",
-				"ISSN": "0174-4909",
-				"libraryCatalog": "FAZ.NET",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

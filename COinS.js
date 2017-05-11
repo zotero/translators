@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-31 18:33:30"
+	"lastUpdated": "2015-06-04 03:25:10"
 }
 
 function detectWeb(doc, url) {
@@ -118,6 +118,7 @@ function completeCOinS(newItems, couldUseFullItems, doc) {
 		}
 		
 		Zotero.selectItems(selectArray, function (selectArray) {
+			if (!selectArray) return true;
 			var useIndices = new Array();
 			for(var i in selectArray) {
 				useIndices.push(i);

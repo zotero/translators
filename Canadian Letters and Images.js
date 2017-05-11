@@ -1,158 +1,146 @@
 {
 	"translatorID": "a7c8b759-6f8a-4875-9d6e-cc0a99fe8f43",
 	"label": "Canadian Letters and Images",
-	"creator": "Adam Crymble",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://(www\\.)?canadianletters\\.ca/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-01-30 22:52:00"
+	"lastUpdated": "2016-09-09 19:45:42"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2016 Philipp Zumstein
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 
 function detectWeb(doc, url) {
-	if (doc.location.href.match("results")) {
+	if (url.indexOf("/content/document")>-1) {
+		var type = ZU.xpathText(doc, '//span[contains(@class, "lineage-item")]');
+		switch(type) {
+			case "Letter":
+			case "Postcard":
+				return "letter";
+			case "Photo":
+			case "Personal Item":
+				return "artwork";
+		}
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (doc.location.href.match("letters.php")) {
-		return "letter";
-	} else if (doc.location.href.match("template")) {
-		return "artwork";
 	}
-	
 }
 
-//Translator for Canadian Letters and Images. Code by Adam Crymble
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//h3[contains(@class, "title")]//a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
 
 
 function scrape(doc, url) {
-
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;	
-	
-	var dataTags = new Object();
-	
-	var mediaType = (detectWeb(doc, url));
-	if (mediaType == "letter") {
-		var newItem = new Zotero.Item("letter");
-		var title2;
-		
-		//title
-		if (doc.evaluate('//h3', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			newItem.title = doc.evaluate('//h3', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		} else {
-			newItem.title = doc.title;
-		}
-	
-		//letter, diary, memoir, personal item
-		if (doc.evaluate('//div[@id="collectionCategory_letters"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-		
-			var xPathType = doc.evaluate('//div[@id="collectionCategory_letters"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-			newItem.type = xPathType;
-		}
-		
-		//gets date, to and from
-		if (doc.evaluate('//div[@class="letterInfo_label"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var xPathHeaders = doc.evaluate('//div[@class="letterInfo_label"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var xPathContent = doc.evaluate('//div[@class="letterInfo_title"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			var xPathCount = doc.evaluate('count (//div[@class="letterInfo_label"])', doc, nsResolver, XPathResult.ANY_TYPE, null);
-			
-			for (i=0; i<xPathCount.numberValue; i++) {	
-				fieldTitle=xPathHeaders.iterateNext().textContent.replace(/\s+/g, '');
-				dataTags[fieldTitle] = xPathContent.iterateNext().textContent.replace(/^\s*|\s*$/g, '');
-				
-				if (fieldTitle == "To:") {
-					
-					newItem.abstractNote = ("To: " + dataTags[fieldTitle]);
-					
-				} else if (fieldTitle == "From:") {
-				
-					newItem.creators.push(Zotero.Utilities.cleanAuthor(dataTags[fieldTitle], "author"));
-					
-				} else if (fieldTitle == "Date:") {
-					
-					newItem.date = dataTags[fieldTitle];
-				}	
-			}		
-		}
-	} else if (mediaType == "artwork") {
-		
-		newItem = new Zotero.Item("artwork");
-		
-		if (doc.evaluate('//div[@class="pictureDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
-			newItem.title = doc.evaluate('//div[@class="pictureDisplay"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-		} else {
-			newItem.title = doc.title;
-		}		
+	var newItem = new Zotero.Item(detectWeb(doc, url));
+	newItem.title = ZU.xpathText(doc, '//div[contains(@class, "breadcrumbs")]//h1');
+	newItem.type = ZU.xpathText(doc, '//span[contains(@class, "lineage-item")]');
+	var date = ZU.xpathText(doc, '//div[span[contains(@class, "field-label") and contains(text(), "Date")]]/text()');
+	if (date) {
+		newItem.date = ZU.strToISO(date);
 	}
-	
-	
-		
-	newItem.url = doc.location.href;
-
+	var author = ZU.xpathText(doc, '//div[div[contains(@class, "field-label") and contains(text(), "From")]]/div[contains(@class, "field-items")]');
+	if (author) {
+		newItem.creators.push(ZU.cleanAuthor(author, "author"));
+	}
+	var recipient = ZU.xpathText(doc, '//div[div[contains(@class, "field-label") and contains(text(), "To")]]/div[contains(@class, "field-items")]');
+	if (recipient) {
+		newItem.creators.push(ZU.cleanAuthor(recipient, "recipient"));
+	}
+	newItem.url = url;
 	newItem.complete();
 }
-
-function doWeb(doc, url) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-		if (prefix == 'x') return namespace; else return null;
-	} : null;
-	
-	var articles = new Array();
-	
-	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		
-		var titles = doc.evaluate('//div[@class="searchResultsDisplay"]/div/a', doc, nsResolver, XPathResult.ANY_TYPE, null);
-		
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			items[next_title.href] = next_title.textContent;
-		}
-		items = Zotero.selectItems(items);
-		for (var i in items) {
-			articles.push(i);
-		}
-	} else {
-		articles = [url];
-	}
-	Zotero.Utilities.processDocuments(articles, scrape, function() {Zotero.done();});
-	Zotero.wait();
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://canadianletters.ca/results.php?searchFor=Germany&x=0&y=0",
+		"url": "http://canadianletters.ca/search/site/Germany",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://canadianletters.ca/letters.php?letterid=10944&warid=3&docid=1&collectionid=421",
+		"url": "http://canadianletters.ca/content/document-11014?position=47",
 		"items": [
 			{
 				"itemType": "letter",
+				"title": "Davey, John (Jack) Letter: 1915 December 12th",
 				"creators": [
 					{
 						"firstName": "",
 						"lastName": "Jack",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Kate",
+						"creatorType": "recipient"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Davey, John (Jack)",
-				"type": "Letter",
-				"date": "December 12, 1915",
-				"abstractNote": "To: Kate",
-				"url": "http://canadianletters.ca/letters.php?letterid=10944&warid=3&docid=1&collectionid=421",
+				"date": "1915-12-12",
+				"letterType": "Letter",
 				"libraryCatalog": "Canadian Letters and Images",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"shortTitle": "Davey, John (Jack) Letter",
+				"url": "http://canadianletters.ca/content/document-11014?position=47",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

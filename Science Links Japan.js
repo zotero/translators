@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2012-09-24 16:11:51"
+	"lastUpdated": "2015-06-02 21:28:10"
 }
 
 function scrape(doc) {
@@ -21,8 +21,8 @@ function scrape(doc) {
 		if (m = datum.match(/^Title;(.*)$/)) {
 			item.title = ZU.capitalizeTitle(m[1]);
 		} else if (datum.indexOf('Author;') == 0 && (m = datum.match(/\b[A-Z'\-]+\s+[A-Z'\-]+/g))) {
-			for each (var aut in m) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(aut, true), "author"));
+			for (var j=0; j<m.length; j++) {
+				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.capitalizeTitle(m[j], true), "author"));
 			}
 		} else if (m = datum.match(/^Journal Title;(.*)$/)) {
 			item.publicationTitle = m[1];

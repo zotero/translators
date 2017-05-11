@@ -2,14 +2,14 @@
 	"translatorID": "180a62bf-efdd-4d38-8d85-8971af04dd85",
 	"label": "TV by the Numbers",
 	"creator": "odie5533",
-	"target": "^https?://tvbythenumbers\\.com",
+	"target": "^https?://tvbythenumbers\\.com/",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2014-04-04 10:18:02"
+	"lastUpdated": "2015-06-10 10:48:25"
 }
 
 /*
@@ -104,10 +104,12 @@ function scrape(doc, url) {
 			else
 				authors.push(author_text);
 		}
-		for each(var a in authors)
-			if (a != 'null')
+		for (var i=0; i<authors.length; i++) {
+			if (authors[i] != 'null') {
 				newItem.creators.push(
-					Zotero.Utilities.cleanAuthor(a, "author"));
+					Zotero.Utilities.cleanAuthor(authors[i], "author"));
+			}
+		}
 
 		// attach html
 		if (url == newItem.url)
@@ -123,15 +125,18 @@ function scrape(doc, url) {
 	   the items which were selected */
 	if (post_count > 1) {
 		var sel_items = new Object();
-		for each(var i in items)
-			sel_items[i.url] = i.title;
+		for (var i=0; i<items.length; i++) {
+			var item = items[i];
+			sel_items[item.url] = item.title;
+		}
 		sel_items = Zotero.selectItems(sel_items);
 		
 		for (var i in sel_items)
 			items[i].complete();
 	} else if (post_count == 1)
-		for each(var i in items)
-			i.complete();
+		for (var i=0; i<items.length; i++) {
+			items[i].complete();
+		}
 }
 
 function doWeb(doc, url) {

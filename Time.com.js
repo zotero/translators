@@ -2,14 +2,14 @@
 	"translatorID": "d9be934c-edb9-490c-a88d-34e2ee106cd7",
 	"label": "Time.com",
 	"creator": "Michael Berkowitz",
-	"target": "^https?://([^/]*\\.)?time.com/",
+	"target": "^https?://([^/]*\\.)?time\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-10-25 07:16:36"
+	"lastUpdated": "2016-06-14 03:54:31"
 }
 
 function detectWeb(doc, url) {
@@ -63,7 +63,7 @@ function scrape(doc, url) {
 		item.title = ZU.trimInternal(article.getElementsByClassName('article-title')[0].textContent);
 		item.publicationTitle = "Time";
 		item.url = url;
-		item.ISSN = "0040-718X";
+		item.ISSN = "0040-781X";
 		
 		var authors = article.getElementsByClassName('byline');
 		if (authors.length) {
@@ -89,7 +89,7 @@ function scrape(doc, url) {
 			item.itemType = "magazineArticle";
 			item.publicationTitle = "Time";
 			item.url = url;
-			item.ISSN = "0040-718X";
+			item.ISSN = "0040-781X";
 			
 			var authors = ZU.xpathText(doc, '//meta[@name="byline"]/@content')
 				|| ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ')
@@ -156,7 +156,7 @@ var testCases = [
 					}
 				],
 				"date": "2014-10-23 05:58:37",
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "It’s really difficult to fire a bad teacher. A group of Silicon Valley investors wants to change that",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "time.com",
@@ -195,7 +195,7 @@ var testCases = [
 					}
 				],
 				"date": "2014-10-16 06:26:47",
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "New U.S. cases have health experts rethinking the response and turning to doctors and hospitals that were truly prepared",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "time.com",
@@ -231,7 +231,7 @@ var testCases = [
 					}
 				],
 				"date": "Thursday, Nov. 17, 2011",
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "Battling debilitating congressional mandates and competition online, the USPS is closing thousands of post offices and struggling to find a place in the modern world. But there are people behind the scenes trying to save this American institution",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "content.time.com",
@@ -268,7 +268,7 @@ var testCases = [
 					}
 				],
 				"date": "Sunday, Mar. 04, 2012",
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "The month of March isn't really the heart of the tornado season but they have come fast and with awesome destruction.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "content.time.com",
@@ -308,7 +308,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "swampland.time.com",
@@ -350,7 +350,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"ISSN": "0040-718X",
+				"ISSN": "0040-781X",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
 				"accessDate": "CURRENT_TIMESTAMP",
 				"libraryCatalog": "business.time.com",

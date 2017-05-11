@@ -3,16 +3,14 @@
 	"label": "CSL JSON",
 	"creator": "Simon Kornblith",
 	"target": "json",
-	"minVersion": "3.0b3",
+	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-10-24 05:03:52"
+	"lastUpdated": "2016-07-31 15:24:21"
 }
-
-var parsedData;
 
 function parseInput() {
 	var str, json = "";
@@ -23,7 +21,7 @@ function parseInput() {
 	while((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
-		parsedData = JSON.parse(json);	
+		return JSON.parse(json);
 	} catch(e) {
 		Zotero.debug(e);
 	}
@@ -40,7 +38,7 @@ function detectImport() {
 		"post":true, "post-weblog":true, "report":true, "review":true, "review-book":true,
 		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
 		
-	parseInput();
+	var parsedData = parseInput();
 	if(!parsedData) return false;
 	
 	if(typeof parsedData !== "object") return false;
@@ -56,8 +54,9 @@ function detectImport() {
 }
 
 function doImport() {
-	if(!parsedData) parseInput();
+	var parsedData = parseInput();
 	if(!parsedData) return;
+	if(!Array.isArray(parsedData)) parsedData = [parsedData];
 	
 	for(var i=0; i<parsedData.length; i++) {
 		var item = new Z.Item();

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-02-28 15:02:29"
+	"lastUpdated": "2015-06-10 11:33:38"
 }
 
 function detectWeb(doc, url) {
@@ -63,7 +63,8 @@ function doWeb(doc, url) {
 		author = data['Autores'];
 		if (author) {
 			var authors = author.match(/\b.*,\s+\w+[^([]/g);
-			for each (aut in authors) {
+			for (var i=0; i<authors.length; i++) {
+				var aut = Zotero.Utilities.trimInternal(authors[i]);
 				item.creators.push(Zotero.Utilities.cleanAuthor(Zotero.Utilities.trimInternal(aut), "author", true));
 			}
 		}

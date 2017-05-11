@@ -2,7 +2,7 @@
 	"translatorID": "f520b141-9ce8-42f4-93ec-a39e375a9516",
 	"label": "Pubget",
 	"creator": "Sebastian Karcher",
-	"target": "https?://pubget\\.com/(search|journals|paper|mesh_browser)",
+	"target": "^https?://pubget\\.com/(search|journals|paper|mesh_browser)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

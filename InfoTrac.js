@@ -5,11 +5,11 @@
 	"target": "^https?://[^/]+/itw/infomark/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-06-06 00:19:59"
+	"lastUpdated": "2015-06-10 10:51:29"
 }
 
 function detectWeb(doc, url) {
@@ -151,7 +151,8 @@ function extractCitation(url, elmts, title, doc) {
 			
 			// ensure author is not already there
 			var add = true;
-			for each(var existingAuthor in newItem.creators) {
+			for (var i=0; i<newItem.creators.length; i++) {
+				var existingAuthor = newItem.creators[i];
 				if(existingAuthor.firstName == author.firstName && existingAuthor.lastName == author.lastName) {
 					add = false;
 					break;

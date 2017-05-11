@@ -251,6 +251,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Elektrischer Verbinder mit Abschirmung",
 				"creators": [
 					{
 						"firstName": "Jacques",
@@ -263,9 +264,15 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1998-11-26",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"applicationNumber": "4446098",
+				"assignee": "Philips Patentverwaltung GmbH; Siemens AG",
+				"extra": "IPC: H01R 23/68; H01R 4/24; H01R 13/648; H01R 13/652",
+				"filingDate": "1994-12-22",
+				"libraryCatalog": "DEPATISnet",
+				"patentNumber": "DE4446098C2",
+				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=DE000004446098C2",
 				"attachments": [
 					{
 						"title": "DEPATISnet patent record"
@@ -275,16 +282,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Elektrischer Verbinder mit Abschirmung",
-				"assignee": "Philips Patentverwaltung GmbH; Siemens AG",
-				"filingDate": "1994-12-22",
-				"applicationNumber": "4446098",
-				"date": "1998-11-26",
-				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=DE000004446098C2",
-				"patentNumber": "DE4446098C2",
-				"extra": "IPC: H01R 23/68; H01R 4/24; H01R 13/648; H01R 13/652",
-				"libraryCatalog": "DEPATISnet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -294,6 +294,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Elektrischer Verbinder Mit Abschirmung",
 				"creators": [
 					{
 						"firstName": "Jacques",
@@ -306,9 +307,15 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1998-10-21",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"applicationNumber": "95942705",
+				"assignee": "Koninkl Philips Electronics Nv; Philips Patentverwaltung; Siemens Ag",
+				"extra": "IPC: H01R 12/16",
+				"filingDate": "1995-12-20",
+				"libraryCatalog": "DEPATISnet",
+				"patentNumber": "EP871998A1",
+				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=EP000000871998A1",
 				"attachments": [
 					{
 						"title": "DEPATISnet patent record"
@@ -318,16 +325,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Elektrischer Verbinder Mit Abschirmung",
-				"assignee": "Koninkl Philips Electronics Nv; Philips Patentverwaltung; Siemens Ag",
-				"filingDate": "1995-12-20",
-				"applicationNumber": "95942705",
-				"date": "1998-10-21",
-				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=EP000000871998A1",
-				"patentNumber": "EP871998A1",
-				"extra": "IPC: H01R 12/16",
-				"libraryCatalog": "DEPATISnet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -337,26 +337,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "Sistema De Inyeccion De Odorizante En El Gas Natural",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"issueDate": "2006-02-22",
+				"abstractNote": "[XX] Un sistema de inyeccion de odorizante en el gas natural, para inyectar odorizante en un conducto de gas natural, que incluye un conducto de derivacion, un tanque de odorizante, un medidor de caudal, una válvula de control y un controlador acoplado para comunicarse con el medidor de caudal y con la válvula de control. El conducto de derivacion incluye una entrada que está en comunicacion fluida con una seccion corriente abajo del conducto de gas, y una salida que está en comunicacion fluida con una seccion corriente abajo del conducto de gas. El tanque de odorizante, la válvula de control y el medidor de caudal están dispuestos en el conducto de derivacion. El medidor de caudal detecta una característica de una corriente de fluido que lo atraviesa y genera una senal de flujo de fluido correspondiente. El controlador está programado para operar la válvula de control en base a la senal de flujo de fluido recibida del medidor de caudal.",
+				"applicationNumber": "P 050100188",
+				"assignee": "Fisher Controls Int",
+				"extra": "IPC: F17D 5/02; F17D 1/04; F17D 3/12; G01M 3/28; F17D 5/00",
+				"filingDate": "2005-01-19",
+				"patentNumber": "AR47789A1",
+				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=AR000000047789A1",
 				"attachments": [
 					{
 						"title": "DEPATISnet patent record"
 					}
 				],
-				"title": "Sistema De Inyeccion De Odorizante En El Gas Natural",
-				"assignee": "Fisher Controls Int",
-				"filingDate": "2005-01-19",
-				"applicationNumber": "P 050100188",
-				"date": "2006-02-22",
-				"abstractNote": "[ES] Un sistema de inyeccion de odorizante en el gas natural, para inyectar odorizante en un conducto de gas natural, que incluye un conducto de derivacion, un tanque de odorizante, un medidor de caudal, una válvula de control y un controlador acoplado para comunicarse con el medidor de caudal y con la válvula de control. El conducto de derivacion incluye una entrada que está en comunicacion fluida con una seccion corriente abajo del conducto de gas, y una salida que está en comunicacion fluida con una seccion corriente abajo del conducto de gas. El tanque de odorizante, la válvula de control y el medidor de caudal están dispuestos en el conducto de derivacion. El medidor de caudal detecta una característica de una corriente de fluido que lo atraviesa y genera una senal de flujo de fluido correspondiente. El controlador está programado para operar la válvula de control en base a la senal de flujo de fluido recibida del medidor de caudal.",
-				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=AR000000047789A1",
-				"patentNumber": "AR47789A1",
-				"extra": "IPC: F17D 5/02; F17D 3/12; F17D 1/04; F17D 5/00; G01M 3/28",
-				"libraryCatalog": "DEPATISnet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -366,24 +364,24 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
+				"title": "JP2007522283A",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2007-08-09",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"applicationNumber": "2006551227",
+				"extra": "IPC: C10L 3/10",
+				"filingDate": "2005-01-18",
+				"libraryCatalog": "DEPATISnet",
+				"patentNumber": "JP2007522283A",
+				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=JP002007522283A",
 				"attachments": [
 					{
 						"title": "DEPATISnet patent record"
 					}
 				],
-				"title": "JP2007522283A",
-				"filingDate": "2005-01-18",
-				"applicationNumber": "2006551227",
-				"date": "2007-08-09",
-				"url": "http://depatisnet.dpma.de/DepatisNet/depatisnet?action=bibdat&docid=JP002007522283A",
-				"patentNumber": "JP2007522283A",
-				"extra": "IPC: C10L 3/10",
-				"libraryCatalog": "DEPATISnet",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

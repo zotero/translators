@@ -2,14 +2,14 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Simon Kornblith",
-	"target": "^https?://(?:query\\.nytimes\\.com/(?:search|gst)/(?:alternate/)?|(?:select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
+	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/(alternate/)?|(select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-06-11 21:54:15"
+	"lastUpdated": "2015-06-02 20:52:10"
 }
 
 function detectWeb(doc, url) {
@@ -142,11 +142,12 @@ function scrape(doc, url) {
 		}
 
 		var authors = author.split(" and ");
-		for each(var author in authors) {
+		for (var i=0; i<authors.length; i++) {
+			var author = authors[i];
 			// fix capitalization
 			var words = author.split(" ");
-			for (var i in words) {
-				words[i] = words[i][0].toUpperCase() + words[i].substr(1).toLowerCase();
+			for (var j=0; j<words.length; j++) {
+				words[j] = words[j][0].toUpperCase() + words[j].substr(1).toLowerCase();
 			}
 			author = words.join(" ");
 
@@ -224,10 +225,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://query.nytimes.com/gst/abstract.html?res=F30D15FD3F5813738DDDAC0894DB405B828DF1D3",
+		"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF&legacy=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
 				"creators": [
 					{
 						"firstName": "Special To The New York",
@@ -235,9 +237,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1912-03-05",
+				"ISSN": "0362-4331",
+				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF&legacy=true",
 				"attachments": [
 					{
 						"title": "New York Times Snapshot"
@@ -247,13 +252,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"publicationTitle": "The New York Times",
-				"ISSN": "0362-4331",
-				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF",
-				"date": "1912-03-05",
-				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
-				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
-				"libraryCatalog": "NYTimes.com"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -263,6 +264,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
 				"creators": [
 					{
 						"firstName": "Nicholas",
@@ -270,37 +272,33 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Science and Technology",
-					"Research",
-					"Ethics",
-					"Hauser, Marc D",
-					"Harvard University"
-				],
-				"seeAlso": [],
+				"date": "2010-08-20",
+				"ISSN": "0362-4331",
+				"abstractNote": "The university has found Marc Hauser “solely responsible” for eight instances of scientific misconduct.",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html",
 				"attachments": [
 					{
 						"title": "New York Times Snapshot"
 					}
 				],
-				"publicationTitle": "The New York Times",
-				"ISSN": "0362-4331",
-				"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html",
-				"date": "2010-08-20",
-				"title": "Harvard Finds Marc Hauser Guilty of Scientific Misconduct",
-				"abstractNote": "The university has found Marc Hauser “solely responsible” for eight instances of scientific misconduct.",
-				"section": "Education",
-				"accessionNumber": "1248068890906",
-				"libraryCatalog": "NYTimes.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Ethics",
+					"Harvard University",
+					"Hauser, Marc D",
+					"Research",
+					"Science and Technology"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://query.nytimes.com/search/sitesearch/#/marc+hauser",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -309,6 +307,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Our Broken Social Contract",
 				"creators": [
 					{
 						"firstName": "Thomas B.",
@@ -316,25 +315,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Economic Conditions and Trends",
-					"Income Inequality",
-					"Social Conditions and Trends",
-					"United States",
-					"United States Economy"
-				],
-				"seeAlso": [],
+				"date": "2013-06-19",
+				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
+				"blogTitle": "The New York Times",
+				"url": "http://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
 				"attachments": [
 					{
 						"title": "New York Times Snapshot"
 					}
 				],
-				"url": "http://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
-				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
-				"title": "Our Broken Social Contract",
-				"blogTitle": "The New York Times",
-				"date": "2013-06-19"
+				"tags": [
+					"Economic Conditions and Trends",
+					"Income Inequality",
+					"Social Conditions and Trends",
+					"Thomas B. Edsall",
+					"United States",
+					"United States Economy"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

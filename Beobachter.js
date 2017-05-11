@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 16:37:44"
+	"lastUpdated": "2016-09-07 21:24:35"
 }
 
 /*
@@ -97,7 +97,7 @@ function scrape(doc) {
 
 	newItem.ISSN = "1661-7444";
 
-	var authorline = ZU.xpath(doc, '//div[' + containingClass('mediaarticleSingleView') + ']//dl/dt[. = "Text:"]');
+	var authorline = ZU.xpath(doc, '//div[' + containingClass('mediaarticleSingleView') + ']//dl/dt[. = "Autor:"]');
 	if (authorline.length > 0) {
 		authorline = ZU.trimInternal(authorline[0].nextSibling.textContent);
 		// Assumption of authorline: "name1[, name2] [und Name3]"
@@ -163,7 +163,7 @@ function fetchMeta(doc) {
  */
 function associateMeta(newItem, metaTags, name, zoteroField) {
   if (metaTags[name]) {
-	newItem[zoteroField] = ZU.trimInternal(metaTags[name]);
+	newItem[zoteroField] = ZU.trimInternal(ZU.unescapeHTML(metaTags[name]));
   }
 }
 

@@ -2,32 +2,38 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(?:[^/]+\\.)?cnki.net",
+	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-08-25 04:10:34"
+	"lastUpdated": "2017-01-01 16:51:46"
 }
 
 /*
-   CNKI(China National Knowledge Infrastructure) Translator
-   Copyright (C) 2013 Aurimas Vinckevicius
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	CNKI(China National Knowledge Infrastructure) Translator
+	Copyright © 2013 Aurimas Vinckevicius
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 // fetches Refworks record for provided IDs and calls next with resulting text

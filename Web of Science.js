@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-04-17 21:20:22"
+	"lastUpdated": "2015-06-04 04:20:22"
 }
 
 /*
@@ -82,6 +82,14 @@ function doWeb(doc, url) {
 			for(var i in items) {
 				ids.push(i);
 			}
+			
+			// Due to a long-standing bug in connectors, when no items are selected,
+			// an empty object is returned instead of false, so we actually do get to
+			// this point. Furthermore, WoS appears to export all results if no IDs
+			// are supplied. So this is a hack to avoid this very special case.
+			// See https://github.com/zotero/zotero-connectors/pull/36
+			if (!ids.length) return true;
+			
 			fetchIds(ids, doc);
 		});
 	} else {

@@ -2,14 +2,14 @@
 	"translatorID": "5eacdb93-20b9-4c46-a89b-523f62935ae4",
 	"label": "HighWire",
 	"creator": "Simon Kornblith",
-	"target": "^https?://[^/]+/(?:cgi/searchresults|cgi/search|cgi/content/(?:abstract|full|short|summary)|current.dtl$|content/vol[0-9]+/issue[0-9]+/(?:index.dtl)?$)",
+	"target": "^https?://[^/]+/(cgi/searchresults|cgi/search|cgi/content/(abstract|full|short|summary)|current\\.dtl$|content/vol[0-9]+/issue[0-9]+/(index\\.dtl)?$)",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-04-03 17:39:30"
+	"lastUpdated": "2015-06-02 17:33:54"
 }
 
 function detectWeb(doc, url) {
@@ -169,7 +169,8 @@ function doWeb(doc, url) {
 				var baseURL = 'http://' + doc.location.host + '/cgi/citmgr?type=refman';
 				
 				var thisRequest = null;
-				for each(var request in requests) {
+				for (var i=0; i<requests.length; i++) {
+					var request = requests[i];
 					if(request.baseURL == baseURL) {
 						thisRequest = request;
 						break;

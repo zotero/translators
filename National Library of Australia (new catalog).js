@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 19:42:02"
+	"lastUpdated": "2016-12-28 12:19:19"
 }
 
 function detectWeb(doc, url) {
@@ -60,23 +60,6 @@ function computeFormat(format){
 
 }
 
-// TODO: Remove this when we drop support for Fx3
-if (!JSON) {
-	var JSON = new function() {
-		this.parse = function (arg) {
-			var j;
-			if (/^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]*$/.test(arg.
-					replace(/\\./g, '@').
-					replace(/"[^"\\\n\r]*"/g, ''))) {
-				// Friendly AMO reviewer: This is the official json.org library and is safe.
-				j = eval('(' + arg + ')');
-				return j;
-			}
-			throw new SyntaxError('parseJSON');
-		}
-	}
-}
-
 function load_item(responseText, url, format) {
 	var metadata = JSON.parse(Zotero.Utilities.trimInternal(responseText));
 	var bibid = url.match("^.*\/Record/([0-9]+)")[1];
@@ -104,7 +87,7 @@ function load_item(responseText, url, format) {
 
 	/* and everything else */
 	for (var attr in metadata) {
-		if (!newItem[attr]) {
+		if (!newItem[attr] && attr!="authors") {
 			newItem[attr] = metadata[attr];
 		}
 	}
@@ -154,6 +137,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
 				"creators": [
 					{
 						"firstName": "Richard Allen",
@@ -161,23 +145,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Working class",
-					"United States.",
-					"Labor unions"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Labor : readings on major issues / [edited by] Richard A. Lester",
-				"publisher": "Random House",
-				"callNumber": "331.082 L642",
-				"place": "New York",
 				"date": "New York : Random House, [1967]",
-				"authors": "Lester, Richard Allen, 1908-",
+				"callNumber": "331.082 L642",
 				"extra": "Bibliographical footnotes.",
 				"libraryCatalog": "National Library of Australia",
-				"shortTitle": "Labor"
+				"place": "New York",
+				"publisher": "Random House",
+				"shortTitle": "Labor",
+				"attachments": [],
+				"tags": [
+					"Labor unions -- United States.",
+					"Working class -- United States."
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

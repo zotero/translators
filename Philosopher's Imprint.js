@@ -2,14 +2,14 @@
 	"translatorID": "b0abb562-218c-4bf6-af66-c320fdb8ddd3",
 	"label": "Philosopher's Imprint",
 	"creator": "Michael Berkowitz",
-	"target": "http://quod.lib.umich.edu/p/phimp",
+	"target": "^https?://quod\\.lib\\.umich\\.edu/p/phimp",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-05 23:35:13"
+	"lastUpdated": "2015-06-02 21:09:41"
 }
 
 function detectWeb(doc, url) {
@@ -54,13 +54,15 @@ function doWeb(doc, url) {
 			item.creators.push(Zotero.Utilities.cleanAuthor(data['Author'], "author"));
 		} else if (data['Authors']) {
 			var authors = data['Authors'].split(",");
-			for each (var a in authors) {
+			for (var i=0; i<authors.length; i++) {
+				var a = authors[i];
 				item.creators.push(Zotero.Utilities.cleanAuthor(a, "author"));
 			}
 		}
 		if (data['Keywords']) {
 			var kws = data['Keywords'].split(/\n/);
-			for each (var kw in kws) {
+			for (var i=0; i<kws.length; i++) {
+				var kw = kws[i];
 				if (kw != "") item.tags.push(kw);
 			}
 		}

@@ -10,7 +10,7 @@
 	"displayOptions":{"exportCharset":"UTF-8"},
 	"browserSupport":"gcs",
 	"inRepository":true,
-	"lastUpdated":"2015-02-21 07:16:26"
+	"lastUpdated":"2017-03-13 11:45:52"
 }
 
 var fieldMap = {
@@ -64,7 +64,8 @@ var typeMap = {
 
 function formatAuthors(authors, useTypes) {
 	var text = "";
-	for each(var author in authors) {
+	for (var i=0; i<authors.length; i++) {
+		var author = authors[i];
 		text += ", "+author.firstName;
 		if(author.firstName && author.lastName) text += " ";
 		text += author.lastName;
@@ -366,11 +367,15 @@ function doExport() {
 					}
 				}
 			} else {
-				Zotero.write("| "+key+" = "+properties[key]);
+				Zotero.write("| "+key+" = "+ escapeWiki(properties[key]));
 			}
 		}
 		Zotero.write("}}");
 		
 		first = false;
 	}
+}
+
+function escapeWiki(markup) {
+    return markup.replace('|', '{{!}}');
 }
