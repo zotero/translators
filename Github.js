@@ -1,15 +1,15 @@
 {
-	"translatorID": "5e385e77-2f51-41b4-a29b-908e23d5d3e8",
-	"label": "Github",
-	"creator": "Martin Fenner",
+	"translatorID": "a7747ba7-42c6-4a22-9415-1dafae6262a9",
+	"label": "GitHub",
+	"creator": "Martin Fenner, Philipp Zumstein",
 	"target": "^https?://(www\\.)?github\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2015-04-28 17:02:52"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-05-11 18:12:25"
 }
 
 /**
@@ -30,112 +30,331 @@
 	<http://www.gnu.org/licenses/>.
 */
 
+
 function detectWeb(doc, url) {
-	if(url.indexOf("/search?") != -1 && getResults(doc).length) {
-		return "multiple";
-	} else if(getResult(doc)) {
-		return "journalArticle";
+	if (url.indexOf("/search?") != -1) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+	} else if (ZU.xpathText(doc, '/html/head/meta[@property="og:type" and @content="object"]/@content')) {
+		return "computerProgram";
 	}
 }
 
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//*[contains(@class, "repo-list-item")]//h3/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		getSelectedItems(doc);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}
 }
 
-function getSearchResults(doc) {
-	var results = doc.getElementsByClassName('repo-list-item');
-	var items = {};
-	for (var i = 0; i < results.length; i++) {
-		var title = results[i].getElementsByTagName("a")[2];
-		if (title) { 
-			items[title.href] = ZU.trimInternal(title.textContent);
-		}
-	}
-	return items;
-}
-
-function getSelectedItems(doc) {
-	var items = getSearchResults(doc);
-
-	Z.selectItems(items, function(selectedItems) {
-		if(!selectedItems) return true;
-		
-		var urls = [];
-		for(var i in selectedItems) {
-			urls.push(i);
-		}
-		ZU.processDocuments(urls, scrape);
-	});
-}
 
 function scrape(doc, url) {	
-	var item = new Z.Item("journalArticle");
+	var item = new Z.Item("computerProgram");
+	
+	//basic metadata from the meta tags in the head
 	item.url = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
-	item.title = ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
+	item.title = ZU.xpathText(doc, '/html/head/meta[@property="og:title"]/@content');
+	item.abstractNote = ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
+	item.libraryCatalog = "GitHub";
+	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
 	
-	// use archive and archive location
-	item.archive = "Github";
-	item.archiveLocation = item.url;
-	
-	var username = ZU.xpathText(doc, '/html/head/meta[@name="octolytics-dimension-user_login"]/@content');
-	item.creators.push(getAuthor(username));
-	
-	// indicate that this is in fact a software repository
-	item.extra = "{:itemType: computer_program}";
-	
-	item.language = "en-US";
-	item.attachments.push({
-		mimeType: "text/plain",
-		document: doc,
-		snapshot: false
+	//api calls to /repos and /repos/../../stats/contribuors
+	var apiUrl = "https://api.github.com/repos/"+item.title;
+	ZU.doGet(apiUrl, function(result) {
+		var json = JSON.parse(result);
+		//Z.debug(json);
+		item.programmingLanguage = json.language;
+		
+		item.extra = "original-date: " + json.created_at;
+		item.date = json.updated_at;
+		ZU.doGet(apiUrl+"/stats/contributors", function(contributors) {
+			var jsonContributors = JSON.parse(contributors);
+			//it seems that the contributors with most contributions are
+			//at the end of this list --> loop trough in inverse direction
+			for (var i=jsonContributors.length-1; i>-1; i--) {
+				var contributor = jsonContributors[i].author;
+				item.creators.push({ "lastName": contributor.login, creatorType : 'contributor', fieldMode : 1 });
+				//getAuthor(contributor.login);
+			}
+			item.attachments.push({
+				title: "Snapshot",
+				document: doc
+			});
+			
+			item.complete();
+		});
+
 	});
 	
-	item.complete();
-	return item;
+
 }
 
-function getResult(doc) {
-	return ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
-}
-
-function getResults(doc) {
-	return doc.getElementsByClassName('repo-list-item');
-}
 
 // get the full name from the author profile page
 function getAuthor(username) {
-    var url = "https://github.com/" + encodeURIComponent(username);	
+	var url = "https://github.com/" + encodeURIComponent(username);	
 	ZU.processDocuments(url, function(text) {
-		var author = ZU.xpathText(text, '//span[@class="vcard-fullname"]');
-		if (!author) { author = ZU.xpathText(text, '//span[@class="vcard-username"]'); }
-	    if (!author) { author = ZU.xpathText(text, '/html/head/meta[@property="profile:username"]/@content'); }
-	    author = ZU.cleanAuthor(author, "author");
+		var author = ZU.xpathText(text, '//span[contains(@class, "vcard-fullname")]');
+		if (!author) { author = ZU.xpathText(text, '//span[contains(@class, "vcard-username")]'); }
+		if (!author) { author = ZU.xpathText(text, '/html/head/meta[@property="profile:username"]/@content'); }
+		Z.debug(author);
+		author = ZU.cleanAuthor(author, "author");
 	});
 	// temporary, until we get the author string out of the closure
 	return ZU.cleanAuthor(username, "author");
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://github.com/najoshi/sickle",
+		"url": "https://github.com/zotero/zotero/",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "sickle - Windowed Adaptive Trimming for fastq files using quality",
+				"itemType": "computerProgram",
+				"title": "zotero/zotero",
 				"creators": [
-					undefined
+					{
+						"lastName": "dstillman",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "simonster",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "aurimasv",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "avram",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "davidnortonjr",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "mcburton",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "adomasven",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "fbennett",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "erazlogo",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "bdarcus",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "gracile-fr",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "stakats",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "rmzelle",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "adam3smith",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "mmoole",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "pmhm",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "f-mb",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "fredgibbs",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "zuphilip",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "tnajdek",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "mikowitz",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "petzi53",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "mronkko",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "LinuxMercedes",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "wragge",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "jgrigera",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "rsnape",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "jlegewie",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "retorquere",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "lennart0901",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Ashley-Wright",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Emxiam",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "asakusuma",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "glandais",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Lemonlee8",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "mtd91429",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "COV-Steve",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "egh",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "adunning",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "simpzan",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
 				],
-				"archive": "Github",
-				"archiveLocation": "https://github.com/najoshi/sickle",
-				"extra": "{:itemType: computer_program}",
-				"language": "en-US",
-				"libraryCatalog": "Github",
-				"url": "https://github.com/najoshi/sickle",
-				"attachments": [],
+				"date": "2017-05-10T16:27:29Z",
+				"abstractNote": "zotero - Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
+				"extra": "original-date: 2011-10-27T07:46:48Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"rights": "AGPL-3.0",
+				"url": "https://github.com/zotero/zotero",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -144,8 +363,59 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://github.com/search?utf8=%E2%9C%93&q=zotero",
+		"url": "https://github.com/search?utf8=%E2%9C%93&q=topic%3Ahocr&type=",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/datacite/schema",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "datacite/schema",
+				"creators": [
+					{
+						"lastName": "mfenner",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "koelnconcert",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "kjgarza",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "nichtich",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "lnielsen",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2016-10-27T14:19:05Z",
+				"abstractNote": "schema - DataCite Metadata Schema Repository",
+				"extra": "original-date: 2011-04-13T07:08:41Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Ruby",
+				"url": "https://github.com/datacite/schema",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
