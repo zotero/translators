@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-12 05:29:46"
+	"lastUpdated": "2017-05-12 20:27:47"
 }
 
 /**
@@ -85,8 +85,12 @@ function scrape(doc, url) {
 	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
 	item.title = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	item.title = item.title.replace(' - ', ': ').replace(/\.$/, '');
-	//item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	item.libraryCatalog = "GitHub";
+	var topics = ZU.xpath(doc, '//div[@id="topics-list-container"]//a');
+	for (var i=0; i<topics.length; i++) {
+		item.tags.push(topics[i].textContent.trim());
+	}
+
 	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
 	
 	//api calls to /repos and /repos/../../stats/contribuors
@@ -105,7 +109,7 @@ function scrape(doc, url) {
 			var jsonUser = JSON.parse(user);
 			var ownerName = jsonUser.name || jsonUser.login;
 			if (jsonUser.type == "User") {
-				item.creators.push(ZU.cleanAuthor(ownerName, "author"))
+				item.creators.push(ZU.cleanAuthor(ownerName, "author"));
 			} else {
 				item.company = ownerName;
 			}
@@ -147,7 +151,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero: Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources",
 				"creators": [],
-				"date": "2017-05-10T16:27:29Z",
+				"date": "2017-05-12T10:27:25Z",
 				"company": "zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
