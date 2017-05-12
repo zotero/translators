@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-11 18:12:25"
+	"lastUpdated": "2017-05-12 05:29:46"
 }
 
 /**
-	Copyright (c) 2015 Martin Fenner
+	Copyright (c) 2017 Martin Fenner, Philipp Zumstein
 
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -79,30 +79,35 @@ function doWeb(doc, url) {
 function scrape(doc, url) {	
 	var item = new Z.Item("computerProgram");
 	
+	var repo = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	
 	//basic metadata from the meta tags in the head
-	item.url = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
-	item.title = ZU.xpathText(doc, '/html/head/meta[@property="og:title"]/@content');
-	item.abstractNote = ZU.xpathText(doc, '/html/head/meta[@property="og:description"]/@content');
+	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
+	item.title = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	item.title = item.title.replace(' - ', ': ').replace(/\.$/, '');
+	//item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	item.libraryCatalog = "GitHub";
 	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
 	
 	//api calls to /repos and /repos/../../stats/contribuors
-	var apiUrl = "https://api.github.com/repos/"+item.title;
-	ZU.doGet(apiUrl, function(result) {
+	var apiUrl = "https://api.github.com/";
+	ZU.doGet(apiUrl+"repos/"+repo, function(result) {
 		var json = JSON.parse(result);
 		//Z.debug(json);
-		item.programmingLanguage = json.language;
+		var name = json.name;
+		var owner = json.owner.login;
 		
+		item.programmingLanguage = json.language;
 		item.extra = "original-date: " + json.created_at;
 		item.date = json.updated_at;
-		ZU.doGet(apiUrl+"/stats/contributors", function(contributors) {
-			var jsonContributors = JSON.parse(contributors);
-			//it seems that the contributors with most contributions are
-			//at the end of this list --> loop trough in inverse direction
-			for (var i=jsonContributors.length-1; i>-1; i--) {
-				var contributor = jsonContributors[i].author;
-				item.creators.push({ "lastName": contributor.login, creatorType : 'contributor', fieldMode : 1 });
-				//getAuthor(contributor.login);
+		
+		ZU.doGet(apiUrl+"users/"+owner, function(user) {
+			var jsonUser = JSON.parse(user);
+			var ownerName = jsonUser.name || jsonUser.login;
+			if (jsonUser.type == "User") {
+				item.creators.push(ZU.cleanAuthor(ownerName, "author"))
+			} else {
+				item.company = ownerName;
 			}
 			item.attachments.push({
 				title: "Snapshot",
@@ -140,215 +145,15 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "zotero/zotero",
-				"creators": [
-					{
-						"lastName": "dstillman",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "simonster",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "aurimasv",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "avram",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "davidnortonjr",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "mcburton",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "adomasven",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "fbennett",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "erazlogo",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "bdarcus",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "gracile-fr",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "stakats",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "rmzelle",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "adam3smith",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "mmoole",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "pmhm",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "f-mb",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "fredgibbs",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "zuphilip",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "tnajdek",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "mikowitz",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "petzi53",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "mronkko",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "LinuxMercedes",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "wragge",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "jgrigera",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "rsnape",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "jlegewie",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "retorquere",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "lennart0901",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Ashley-Wright",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Emxiam",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "asakusuma",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "glandais",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Lemonlee8",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "mtd91429",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "COV-Steve",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "egh",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "adunning",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "simpzan",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					}
-				],
+				"title": "zotero: Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources",
+				"creators": [],
 				"date": "2017-05-10T16:27:29Z",
-				"abstractNote": "zotero - Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
+				"company": "zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
 				"rights": "AGPL-3.0",
+				"shortTitle": "zotero",
 				"url": "https://github.com/zotero/zotero",
 				"attachments": [
 					{
@@ -372,40 +177,78 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "datacite/schema",
-				"creators": [
-					{
-						"lastName": "mfenner",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "koelnconcert",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "kjgarza",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "nichtich",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "lnielsen",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					}
-				],
+				"title": "schema: DataCite Metadata Schema Repository",
+				"creators": [],
 				"date": "2016-10-27T14:19:05Z",
-				"abstractNote": "schema - DataCite Metadata Schema Repository",
+				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Ruby",
+				"shortTitle": "schema",
 				"url": "https://github.com/datacite/schema",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/mittagessen/kraken",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "kraken: Ocropus fork with sane defaults",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "mittagessen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-05-10T17:16:42Z",
+				"extra": "original-date: 2015-05-19T09:24:38Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "Apache-2.0",
+				"shortTitle": "kraken",
+				"url": "https://github.com/mittagessen/kraken",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/aurimasv/z2csl",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "z2csl: Zotero extension for creating Zotero to CSL item type and field mappings",
+				"creators": [
+					{
+						"firstName": "Aurimas",
+						"lastName": "Vinckevicius",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-03-24T09:05:01Z",
+				"extra": "original-date: 2012-05-20T07:53:58Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"shortTitle": "z2csl",
+				"url": "https://github.com/aurimasv/z2csl",
 				"attachments": [
 					{
 						"title": "Snapshot"
