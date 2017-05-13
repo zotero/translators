@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-13 09:34:28"
+	"lastUpdated": "2017-05-13 13:11:51"
 }
 
 /*
@@ -84,6 +84,11 @@ function scrape(doc, url) {
 
 	//info from h1 and following line
 	item.title = ZU.xpathText(doc, '//h1[not(@id="logoheader")]');
+	var found = item.title.match(/\sv?([\d.]+)$/);
+	if (found) {
+		item.title = item.title.slice(0,found.index);
+		item.version = found[1];
+	}
 	var subtitle = ZU.xpathText(doc, '//h1[not(@id="logoheader")]/following::p[1]');
 	if (subtitle) {
 		item.title += ": " + subtitle;
@@ -144,7 +149,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "simplejson 3.10.0: Simple, fast, extensible JSON encoder/decoder for Python",
+				"title": "simplejson: Simple, fast, extensible JSON encoder/decoder for Python",
 				"creators": [
 					{
 						"firstName": "Bob",
@@ -155,9 +160,10 @@ var testCases = [
 				"libraryCatalog": "PyPI",
 				"programmingLanguage": "Python",
 				"rights": "MIT License",
-				"shortTitle": "simplejson 3.10.0",
+				"shortTitle": "simplejson",
 				"system": "any",
 				"url": "http://github.com/simplejson/simplejson",
+				"version": "3.10.0",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -182,7 +188,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "lxml 3.7.3: Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.",
+				"title": "lxml: Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.",
 				"creators": [
 					{
 						"firstName": "lxml dev",
@@ -193,9 +199,10 @@ var testCases = [
 				"libraryCatalog": "PyPI",
 				"programmingLanguage": "C, Cython, Python",
 				"rights": "BSD License",
-				"shortTitle": "lxml 3.7.3",
+				"shortTitle": "lxml",
 				"system": "OS Independent",
 				"url": "http://lxml.de/",
+				"version": "3.7.3",
 				"attachments": [
 					{
 						"title": "Snapshot"
