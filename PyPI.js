@@ -2,7 +2,7 @@
 	"translatorID": "94a8328a-ec87-4ba0-82b6-cf3000ea1dee",
 	"label": "PyPI",
 	"creator": "Philipp Zumstein",
-	"target": "https://pypi.python.org/pypi",
+	"target": "^https?://pypi\\.python\\.org/pypi",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -129,14 +129,15 @@ function scrape(doc, url) {
 		item.system = os.split(" :: ")[1];
 	}
 
-	
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
 	
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
