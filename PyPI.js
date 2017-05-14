@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//head/link[@rel="meta" and @title="DOAP"]/@href')) {
 		return "computerProgram";
-	} else if ((url.indexOf('action=search')>-1 || url.indexOf('action=browse')) && getSearchResults(doc, true)) {
+	} else if ((url.indexOf('action=search')>-1 || url.indexOf('action=browse')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
