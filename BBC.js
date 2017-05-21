@@ -3,13 +3,13 @@
 	"label": "BBC",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
-	"minVersion": "2.1",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-20 19:58:56"
+	"lastUpdated": "2017-05-20 06:30:47"
 }
 
 /*
@@ -46,6 +46,9 @@ function detectWeb(doc, url) {
 		}
 		return "newspaperArticle";
 	}
+	if(url.indexOf("/newsbeat/article") != -1){
+		return "blogPost";
+	}
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -55,7 +58,11 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
-	for (var i=0; i<rows.length; i++) {
+	//for NewsBeat
+	if(!rows.length) {
+		var rows = ZU.xpath(doc, '//article/div/h1[@itemprop="headline"]/a');
+	}
+	for (var i = 0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -65,7 +72,6 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
-
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -112,6 +118,12 @@ function scrape(doc, url) {
 				item.date = date.toISOString();
 			} else {
 				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
+				if(!item.date) {
+					item.date = ZU.xpathText(doc, '//p[@class="timestamp"]');
+					if (item.date) {
+						item.date = ZU.strToISO(item.date);
+					}
+				}
 			}
 		}
 		
@@ -133,7 +145,23 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
 		}
+		else
+		{
+			var authorString = ZU.xpathText(doc, '//p[@class="byline"]');
+			var title = ZU.xpathText(doc, '//em[@class="title"]');
+			if (authorString) {
+				authorString = authorString.replace(title, '').replace('By', '');
+				var authors = authorString.split('&');
+				for (var i=0; i<authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+				}
+			}	
+		}
 		
+		if (url.indexOf("/newsbeat/article") != -1) {
+  			item.blogTitle = "BBC Newsbeat";
+		}
+
 		item.language = "en-GB";
 		
 		item.complete();
@@ -142,8 +170,7 @@ function scrape(doc, url) {
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = itemType;
 		trans.doWeb(doc, url);
-	});
-
+});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -167,57 +194,6 @@ var testCases = [
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
 				"url": "http://www.bbc.com/news/magazine-15335899",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bbc.com/news/world-africa-37066738",
-		"items": [
-			{
-				"itemType": "videoRecording",
-				"title": "Drone photography captures South Africa inequality",
-				"creators": [],
-				"date": "2016-08-12T23:57:42.000Z",
-				"abstractNote": "Photographer Johnny Miller has been documenting the disparity between South Africa's rich and poor using a drone.",
-				"language": "en-GB",
-				"libraryCatalog": "www.bbc.com",
-				"url": "http://www.bbc.com/news/world-africa-37066738",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bbc.com/sport/olympics/37068610",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Rio Olympics 2016: Joseph Schooling beats Michael Phelps in 100m butterfly",
-				"creators": [],
-				"date": "2016/08/13 1:43:21",
-				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
-				"language": "en-GB",
-				"libraryCatalog": "www.bbc.com",
-				"publicationTitle": "BBC Sport",
-				"section": "Olympics",
-				"shortTitle": "Rio Olympics 2016",
-				"url": "http://www.bbc.com/sport/olympics/37068610",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -286,6 +262,68 @@ var testCases = [
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
 				"url": "http://www.bbc.com/news/magazine-36287752",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/search?q=harry+potter",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Will new music streaming service Tidal make the waves artists want?",
+				"creators": [
+					{
+						"firstName": "Chi Chi",
+						"lastName": "Izundu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03-31",
+				"abstractNote": "Big names in the world of music made it known that they wanted a change when they all stood on stage on Monday and announced the relaunch of streaming service Tidal.",
+				"blogTitle": "BBC Newsbeat",
+				"language": "en-GB",
+				"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/sport/olympics/37068610",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rio Olympics 2016: Joseph Schooling beats Michael Phelps in 100m butterfly",
+				"creators": [],
+				"date": "2016/08/13 1:43:21",
+				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC Sport",
+				"section": "Olympics",
+				"shortTitle": "Rio Olympics 2016",
+				"url": "http://www.bbc.com/sport/olympics/37068610",
 				"attachments": [
 					{
 						"title": "Snapshot"
