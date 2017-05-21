@@ -236,7 +236,7 @@ function processCrossRef(xmlOutput) {
 	else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:database', ns)).length) {
 		item = new Zotero.Item("report"); //should be dataset
 		refXML = ZU.xpath(itemXML, 'c:dataset', ns);
-		item.extra = "itemType: dataset";
+		item.extra = "type: dataset";
 		metadataXML = ZU.xpath(itemXML, 'c:database_metadata', ns);
 		if (!ZU.xpathText(refXML, 'c:contributors', ns)) {
 			parseCreators(metadataXML, item);
