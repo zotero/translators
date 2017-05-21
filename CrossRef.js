@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-25 10:05:00"
+	"lastUpdated": "2017-05-18 10:05:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -236,7 +236,14 @@ function processCrossRef(xmlOutput) {
 	else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:database', ns)).length) {
 		item = new Zotero.Item("report"); //should be dataset
 		refXML = ZU.xpath(itemXML, 'c:dataset', ns);
+		item.extra = "itemType: dataset";
 		metadataXML = ZU.xpath(itemXML, 'c:database_metadata', ns);
+		if (!ZU.xpathText(refXML, 'c:contributors', ns)) {
+			parseCreators(metadataXML, item);
+		}
+		if (!ZU.xpathText(metadataXML, 'c:publisher', ns)) {
+			item.institution = ZU.xpathText(metadataXML, 'c:institution/c:institution_name', ns);
+		}
 	}
 
 
@@ -245,6 +252,7 @@ function processCrossRef(xmlOutput) {
 	item.ISBN = ZU.xpathText(metadataXML, 'c:isbn', ns);
 	item.ISSN = ZU.xpathText(metadataXML, 'c:issn', ns);
 	item.publisher = ZU.xpathText(metadataXML, 'c:publisher/c:publisher_name', ns);
+
 	item.edition = ZU.xpathText(metadataXML, 'c:edition_number', ns);
 	if(!item.volume) item.volume = ZU.xpathText(metadataXML, 'c:volume', ns);
 
@@ -302,6 +310,9 @@ function processCrossRef(xmlOutput) {
 	}
 	item.url = ZU.xpathText(refXML, 'c:doi_data/c:resource', ns);
 	var title = ZU.xpath(refXML, 'c:titles[1]/c:title[1]', ns)[0];
+	if (!title) {
+		title = ZU.xpath(metadataXML, 'c:titles[1]/c:title[1]', ns)[0];
+	}
 	if(title) {
 		item.title = ZU.trimInternal(
 			removeUnsupportedMarkup(innerXML(title))
