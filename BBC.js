@@ -55,28 +55,16 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var namespace = doc.documentElement.namespaceURI;
-	var nsResolver = namespace ? function(prefix) {
-	if (prefix == 'x') return namespace; else return null;
-	} : null;
-
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
 	//for NewsBeat
-	if(!rows.length)
-	{
-		var rows = ZU.xpath(doc, '//article/div[h1[@itemprop="headline"]]');
-		var hrefs =  doc.evaluate('//article/div/h1/a/@href', doc, nsResolver, XPathResult.ANY_TYPE, null);
+	if(!rows.length) {
+		var rows = ZU.xpath(doc, '//article/div/h1[@itemprop="headline"]/a');
 	}
 	for (var i = 0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
-		//for NewsBeat
-		if(href == null)
-		{
-			var href = hrefs.iterateNext().value
-		}
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
