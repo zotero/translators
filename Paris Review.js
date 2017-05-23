@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:50:53"
+	"lastUpdated": "2017-05-23 21:29:39"
 }
 
 /*
@@ -93,7 +93,8 @@ function magazineArticle(doc,url) {
 		item.issue = doc.evaluate('//div[@class="moreonissue-right"]/h3/text()[2]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.match(/[0-9]+/)[0];
 		item.publicationTitle = "Paris Review";
 		item.url = url;
-		item.ISSN="0031-2037";
+		item.ISSN = "0031-2037";
+		item.language = "en-US";
 		item.attachments.push({url:url})
 		item.complete();
 }
