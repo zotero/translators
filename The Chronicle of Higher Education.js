@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-04-09 14:53:05"
+	"lastUpdated": "2017-05-23 21:34:32"
 }
 
 /*
@@ -86,6 +86,7 @@ function scrape (doc, url){
 		item.publicationTitle = "The Chronicle of Higher Education";
 		// Does the ISSN apply to online-only blog posts?
 		item.ISSN = "0009-5982";
+		item.language = "en-US";
 		
 		var byline = doc.evaluate('//header/div/span[@class="content-item__byline"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 		if (!byline) byline = doc.evaluate('//div[@class="blog__author"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
@@ -159,7 +160,7 @@ function parseAuthors(author) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
+		"url": "http://www.chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -172,11 +173,9 @@ var testCases = [
 					}
 				],
 				"date": "March 26, 2010",
-				"ISSN": "0009-5982",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "The Chronicle of Higher Education",
-				"publicationTitle": "The Chronicle of Higher Education Blogs: ProfHacker",
-				"url": "http://chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
+				"blogTitle": "The Chronicle of Higher Education Blogs: ProfHacker",
+				"language": "en-US",
+				"url": "http://www.chronicle.com/blogs/profhacker/the-second-day-of-thatcamp/23068",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
@@ -191,7 +190,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
+		"url": "http://www.chronicle.com/article/A-Little-Advice-From-32000/46210/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -210,11 +209,10 @@ var testCases = [
 				],
 				"date": "January 14, 2002",
 				"ISSN": "0009-5982",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"language": "en-US",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"publicationTitle": "The Chronicle of Higher Education",
-				"section": "Advice",
-				"url": "http://chronicle.com/article/A-Little-Advice-From-32000/46210/",
+				"url": "http://www.chronicle.com/article/A-Little-Advice-From-32000/46210/",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
@@ -229,7 +227,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
+		"url": "http://www.chronicle.com/article/Grinnells-Green-Secrets/2653/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -243,9 +241,10 @@ var testCases = [
 				],
 				"date": "June 16, 2006",
 				"ISSN": "0009-5982",
+				"language": "en-US",
 				"libraryCatalog": "The Chronicle of Higher Education",
 				"publicationTitle": "The Chronicle of Higher Education",
-				"url": "http://chronicle.com/article/Grinnells-Green-Secrets/2653/",
+				"url": "http://www.chronicle.com/article/Grinnells-Green-Secrets/2653/",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
@@ -260,7 +259,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
+		"url": "http://www.chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -274,8 +273,9 @@ var testCases = [
 				],
 				"date": "July 17, 2008",
 				"blogTitle": "The Chronicle of Higher Education Blogs: Brainstorm",
+				"language": "en-US",
 				"shortTitle": "Humanities Cyberinfrastructure",
-				"url": "http://chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
+				"url": "http://www.chronicle.com/blogs/brainstorm/humanities-cyberinfrastructure-project-bamboo/6138",
 				"attachments": [
 					{
 						"title": "Chronicle of Higher Education Snapshot",
