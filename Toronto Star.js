@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-04 10:01:02"
+	"lastUpdated": "2017-05-23 21:39:10"
 }
 
 function detectWeb(doc, url) {
@@ -57,6 +57,7 @@ function scrape(doc, url) {
 
 	newItem.publicationTitle = "The Toronto Star";
 	newItem.ISSN = "0319-0781";
+	newItem.language = "en-CA";
 	
 	}
 	else{

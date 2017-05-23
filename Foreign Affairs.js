@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-20 08:59:00"
+	"lastUpdated": "2017-05-23 21:21:00"
 }
 
 /*
@@ -78,27 +78,28 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-    var translator = Zotero.loadTranslator('web');
-    // Embedded Metadata
-    translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
-    translator.setHandler('itemDone', function (obj, item) {
-	var creators = ZU.xpath(doc, '//div[@class="article-header__byline-container"]/span/a');
-	for (var i=0; i<creators.length; i++) {
-		item.creators.push(ZU.cleanAuthor(creators[i].textContent, "author"));
-	}
-	var issue = ZU.xpathText(doc, '//span[@class="article-header__metadata-date"]/a');
-	if (!item.issue && issue) {
-		item.issue = issue.replace('Issue', '');
-	}
-	item.ISSN = "0015-7120";
-        item.complete();
-    });
+	translator.setHandler('itemDone', function (obj, item) {
+		var creators = ZU.xpath(doc, '//div[@class="article-header__byline-container"]/span/a');
+		for (var i=0; i<creators.length; i++) {
+			item.creators.push(ZU.cleanAuthor(creators[i].textContent, "author"));
+		}
+		var issue = ZU.xpathText(doc, '//span[@class="article-header__metadata-date"]/a');
+		if (!item.issue && issue) {
+			item.issue = issue.replace('Issue', '');
+		}
+		item.ISSN = "0015-7120";
+		item.language = "en-US";
+		item.complete();
+	});
 
-    translator.getTranslatorObject(function(trans) {
-        trans.itemType = "magazineArticle";
-        trans.doWeb(doc, url);
-    });
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = "magazineArticle";
+		trans.doWeb(doc, url);
+	});
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -125,6 +126,7 @@ var testCases = [
 				"ISSN": "0015-7120",
 				"abstractNote": "A fascinating and well-translated account of Argentina's misadventures over the last century by one of that country's brightest historians. Absorbing vast amounts of British capital and tens of thousands of European immigrants, Argentina began the century with great promise. In 1914, with half of its population still foreign, a dynamic society had emerged that was both open and mobile.",
 				"issue": "May/June 2003",
+				"language": "en-US",
 				"libraryCatalog": "www.foreignaffairs.com",
 				"publicationTitle": "Foreign Affairs",
 				"url": "https://www.foreignaffairs.com/reviews/capsule-review/2003-05-01/history-argentina-twentieth-century",
