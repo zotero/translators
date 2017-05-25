@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-25 08:36:20"
+	"lastUpdated": "2017-05-25 11:36:28"
 }
 
 /*
@@ -67,6 +67,16 @@ function scrape(doc, url) {
 		} else {
 			item.publicationTitle = "The New York Times";
 			item.ISSN = "0362-4331";
+		}
+		//Multiple authors are just put into the same Metadata field
+		//we have to split this here
+		var authors = ZU.xpathText(doc, '//meta[@name="author"]/@content');
+		if (authors) {
+			item.creators = [];
+			var authorsList = authors.split(/,|\band\b/);
+			for (var i=0; i<authorsList.length; i++) {
+				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
+			}
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href');
@@ -275,6 +285,61 @@ var testCases = [
 					"Labor and Jobs",
 					"New York City",
 					"Wages and Salaries"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2017/05/24/us/politics/russia-trump-manafort-flynn.html?hp&action=click&pgtype=Homepage&clickSource=story-heading&module=span-ab-top-region&region=top-news&WT.nav=top-news&_r=0",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Top Russian Officials Discussed How to Influence Trump Aides Last Summer",
+				"creators": [
+					{
+						"firstName": "Matthew",
+						"lastName": "Rosenberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adam",
+						"lastName": "Goldman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matt",
+						"lastName": "Apuzzo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-05-24",
+				"ISSN": "0362-4331",
+				"abstractNote": "American spies collected intelligence last summer revealing that Russians were debating how to work with Trump advisers, current and former officials say.",
+				"archiveLocation": "100000005126615",
+				"language": "en-US",
+				"libraryCatalog": "www.nytimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "Politics",
+				"url": "https://www.nytimes.com/2017/05/24/us/politics/russia-trump-manafort-flynn.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Cyberwarfare and Defense",
+					"Donald J",
+					"Flynn",
+					"Manafort",
+					"Michael T",
+					"Paul J",
+					"Presidential Election of 2016",
+					"Russia",
+					"Trump",
+					"United States Politics and Government"
 				],
 				"notes": [],
 				"seeAlso": []
