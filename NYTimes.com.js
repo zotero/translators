@@ -83,7 +83,7 @@ function scrape(doc, url) {
 		if (pdfurl) {
 			item.attachments.push({
 				url: pdfurl,
-				title: "NY Times Archive PDF"
+				title: "NYTimes Archive PDF"
 			})
 		}
 		item.complete();
@@ -157,7 +157,7 @@ var testCases = [
 						"title": "Snapshot"
 					},
 					{
-						"title": "NY Times Archive PDF"
+						"title": "NYTimes Archive PDF"
 					}
 				],
 				"tags": [],
