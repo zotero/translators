@@ -3,12 +3,12 @@
 	"label": "The Telegraph",
 	"creator": "Reino Ruusu",
 	"target": "^https?://[^/]*telegraph\\.co\\.uk/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2013-12-12 13:59:44"
 }
 
