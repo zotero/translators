@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-26 15:38:35"
+	"lastUpdated": "2017-05-26 15:41:56"
 }
 
 /*
@@ -131,79 +131,38 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://pypi.python.org/pypi?%3Aaction=search&term=zotero&submit=search",
+		"url": "https://www.openconf.com/demo/openconf6/modules/request.php?module=oc_program&action=program.php",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://pypi.python.org/pypi/simplejson/3.10.0",
+		"url": "https://www.openconf.com/demo/openconf6/modules/request.php?module=oc_program&action=summary.php&id=27",
 		"items": [
 			{
-				"itemType": "computerProgram",
-				"title": "simplejson: Simple, fast, extensible JSON encoder/decoder for Python",
+				"itemType": "presentation",
+				"title": "The Infinite Monkey Protocol Suite (IMPS)",
 				"creators": [
 					{
-						"firstName": "Bob",
-						"lastName": "Ippolito",
+						"firstName": "S.",
+						"lastName": "Christey",
 						"creatorType": "author"
 					}
 				],
-				"libraryCatalog": "PyPI",
-				"programmingLanguage": "Python",
-				"rights": "MIT License",
-				"shortTitle": "simplejson",
-				"system": "any",
-				"url": "http://github.com/simplejson/simplejson",
-				"version": "3.10.0",
+				"date": "2015-12-01 to 2015-12-02",
+				"abstractNote": "This memo describes a protocol suite which supports an infinite number of monkeys that sit at an infinite number of typewriters in order to determine when they have either produced the entire works of William Shakespeare or a good television show.  The suite includes communications and control protocols for monkeys and the organizations that interact with them.",
+				"meetingName": "OpenConf Conference 2020",
 				"attachments": [
+					{
+						"title": "OpenConf Presentation"
+					},
+					{
+						"title": "OpenConf Presentation"
+					},
 					{
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Software Development - Libraries - Python Modules"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://pypi.python.org/pypi?:action=browse&show=all&c=385&c=393",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://pypi.python.org/pypi/lxml/3.7.3",
-		"items": [
-			{
-				"itemType": "computerProgram",
-				"title": "lxml: Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API.",
-				"creators": [
-					{
-						"firstName": "lxml dev",
-						"lastName": "team",
-						"creatorType": "author"
-					}
-				],
-				"libraryCatalog": "PyPI",
-				"programmingLanguage": "C, Cython, Python",
-				"rights": "BSD License",
-				"shortTitle": "lxml",
-				"system": "OS Independent",
-				"url": "http://lxml.de/",
-				"version": "3.7.3",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Software Development - Libraries - Python Modules",
-					"Text Processing - Markup - HTML",
-					"Text Processing - Markup - XML"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
