@@ -106,7 +106,7 @@ function scrape(doc, url) {
 		if (creators && creators[0].match(/;/)) {
 			creators = creators[0].split(/\s*;\s*/);
 		}
-		for (var i in creators) {
+		for (var i = 0; i<creators.length; i++) {
 			//authors are lastname, firstname, additional info - only use the first two.
 			var author = creators[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
 			if (author.indexOf(',')>-1) {
@@ -116,7 +116,7 @@ function scrape(doc, url) {
 			}
 		}
 		var contributors = obj.contributor;
-		for (i in contributors) {
+		for (var i = 0; i<contributors.length; i++) {
 			//authors are lastname, firstname, additional info - only use the first two.
 			var contributor = contributors[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
 			if (contributor.indexOf(',')>-1) {
@@ -126,7 +126,7 @@ function scrape(doc, url) {
 			}
 		}
 
-		for (i in newItem.creators) {
+		for (var i = 0; i<newItem.creators.length; i++) {
 			if (!newItem.creators[i].firstName) {
 				newItem.creators[i].fieldMode = 1;
 			}
@@ -138,7 +138,7 @@ function scrape(doc, url) {
 		
 		var tags = test(obj.subject);
 		if (tags) tags = tags.split(/\s*;\s*/);
-		for (i in tags) {
+		for (var i =0; i<tags.length; i++) {
 			newItem.tags.push(tags[i]);
 		}
 		
