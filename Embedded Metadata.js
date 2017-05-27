@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-04 04:24:04"
+	"lastUpdated": "2017-05-27 10:46:41"
 }
 
 /*
@@ -246,6 +246,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		if (!tags) tags = metaTag.getAttribute("property");
 		var value = metaTag.getAttribute("content");
 		if(!tags || !value) continue;
+		//Z.debug(tags + " -> " + value);
 
 		tags = tags.split(/\s+/);
 		for(var j=0, m=tags.length; j<m; j++) {
@@ -594,8 +595,7 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	//fall back to "keywords"
 	if(!newItem.tags.length) {
-		 newItem.tags = ZU.xpath(doc, '//x:meta[@name="keywords"]/@content', namespaces)
-		 	.map(function(t) { return t.textContent; });
+		 newItem.tags = ZU.xpathText(doc, '//x:meta[@name="keywords"]/@content', namespaces);
 	}
 	
 	//We can try getting abstract from 'description'
@@ -766,25 +766,27 @@ function getAuthorFromByline(doc, newItem) {
 
 function finalDataCleanup(doc, newItem) {
 	/**If we already have tags - run through them one by one,
-	 * split where ncessary and concat them.
-	 * This  will deal with multiple tags, some of them comma delimited,
+	 * split where necessary and concat them.
+	 * This will deal with multiple tags, some of them comma delimited,
 	 * some semicolon, some individual
 	 */
-	if (newItem.tags.length && Zotero.parentTranslator) {
-		var tags = [];
-		for (var i in newItem.tags) {
-			newItem.tags[i] = newItem.tags[i].trim();
-			if (newItem.tags[i].indexOf(';') == -1) {
-				//split by comma, since there are no semicolons
-				tags = tags.concat( newItem.tags[i].split(/\s*,\s*/) );
-			} else {
-				tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
+	if (newItem.tags && newItem.tags.length && Zotero.parentTranslator) {
+		if (exports.splitTags) {
+			var tags = [];
+			for (var i in newItem.tags) {
+				newItem.tags[i] = newItem.tags[i].trim();
+				if (newItem.tags[i].indexOf(';') == -1) {
+					//split by comma, since there are no semicolons
+					tags = tags.concat( newItem.tags[i].split(/\s*,\s*/) );
+				} else {
+					tags = tags.concat( newItem.tags[i].split(/\s*;\s*/) );
+				}
 			}
+			for (var i=0; i<tags.length; i++) {
+				if (tags[i] === "") tags.splice(i, 1);
+			}
+			newItem.tags = tags;
 		}
-		for (var i=0; i<tags.length; i++) {
-			if (tags[i] === "") tags.splice(i, 1);
-		}
-		newItem.tags = tags;
 	} else {
 		// Unless called from another translator, don't include automatic tags,
 		// because most of the time they are not right
@@ -808,6 +810,8 @@ var exports = {
 	"detectWeb": detectWeb,
 	"addCustomFields": addCustomFields,
 	"itemType": false,
+	//activate/deactivate splitting tags in final data cleanup when they contain commas or semicolons
+	"splitTags": true,
 	"fixSchemaURI": setPrefixRemap
 }
 
@@ -815,7 +819,7 @@ var exports = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+		"url": "https://www.ajol.info/index.php/thrb/article/view/63347",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -866,7 +870,7 @@ var testCases = [
 				"libraryCatalog": "www.ajol.info",
 				"publicationTitle": "Tanzania Journal of Health Research",
 				"rights": "Copyright for articles published in this journal is retained by the journal.",
-				"url": "http://www.ajol.info/index.php/thrb/article/view/63347",
+				"url": "https://www.ajol.info/index.php/thrb/article/view/63347",
 				"volume": "13",
 				"attachments": [
 					{
@@ -899,7 +903,6 @@ var testCases = [
 				],
 				"date": "2011",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F",
@@ -977,7 +980,7 @@ var testCases = [
 				"date": "2012",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
 				"libraryCatalog": "scholarworks.umass.edu",
-				"university": "University of Massachusetts - Amherst",
+				"university": "University of Massachusetts Amherst",
 				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
 				"attachments": [
 					{
@@ -1048,7 +1051,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+		"url": "https://www.hindawi.com/journals/mpe/2013/868174/abs/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1077,7 +1080,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.hindawi.com",
 				"publicationTitle": "Mathematical Problems in Engineering",
-				"url": "http://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"url": "https://www.hindawi.com/journals/mpe/2013/868174/abs/",
 				"volume": "2013",
 				"attachments": [
 					{
@@ -1274,7 +1277,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
+		"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 		"items": [
 			{
 				"itemType": "webpage",
@@ -1288,7 +1291,7 @@ var testCases = [
 				],
 				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
-				"url": "http://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
+				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
 					{
@@ -1394,7 +1397,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+		"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1416,7 +1419,7 @@ var testCases = [
 				"libraryCatalog": "link.springer.com",
 				"pages": "197-200",
 				"publicationTitle": "Foundations of Physics Letters",
-				"url": "http://link.springer.com/article/10.1023/A:1021669308832",
+				"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 				"volume": "12",
 				"attachments": [
 					{

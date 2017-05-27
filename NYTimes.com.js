@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-25 11:36:28"
+	"lastUpdated": "2017-05-27 10:52:46"
 }
 
 /*
@@ -84,16 +84,16 @@ function scrape(doc, url) {
 			item.attachments.push({
 				url: pdfurl,
 				title: "NYTimes Archive PDF"
-			})
+			});
 		}
 		item.complete();
 	});
 	
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = type;
+		trans.splitTags = false;
 		trans.addCustomFields({
 			'dat': 'date',
-			'articleid': 'archiveLocation'
 		});
 		trans.doWeb(doc, url);
 	});
@@ -147,7 +147,6 @@ var testCases = [
 				"date": "1912-03-05",
 				"ISSN": "0362-4331",
 				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
-				"archiveLocation": "100523320",
 				"language": "en-US",
 				"libraryCatalog": "query.nytimes.com",
 				"publicationTitle": "The New York Times",
@@ -183,7 +182,6 @@ var testCases = [
 				"date": "2010-08-20",
 				"ISSN": "0362-4331",
 				"abstractNote": "The university has found Marc Hauser “solely responsible” for eight instances of scientific misconduct.",
-				"archiveLocation": "1248068890906",
 				"language": "en-US",
 				"libraryCatalog": "www.nytimes.com",
 				"publicationTitle": "The New York Times",
@@ -197,8 +195,7 @@ var testCases = [
 				"tags": [
 					"Ethics",
 					"Harvard University",
-					"Hauser",
-					"Marc D",
+					"Hauser, Marc D",
 					"Research",
 					"Science and Technology"
 				],
@@ -267,7 +264,6 @@ var testCases = [
 				"date": "2015-05-07",
 				"ISSN": "0362-4331",
 				"abstractNote": "뉴욕타임스는 취재 중 많은 네일숍 직원들이 부당한 대우와 인종차별 및 학대에 흔하게 시달리며 정부 노동자법률기구의 보호도 제대로 받지 못한다는 사실을 발견했다.",
-				"archiveLocation": "100000003670004",
 				"language": "ko-KR",
 				"libraryCatalog": "www.nytimes.com",
 				"publicationTitle": "The New York Times",
@@ -318,7 +314,6 @@ var testCases = [
 				"date": "2017-05-24",
 				"ISSN": "0362-4331",
 				"abstractNote": "American spies collected intelligence last summer revealing that Russians were debating how to work with Trump advisers, current and former officials say.",
-				"archiveLocation": "100000005126615",
 				"language": "en-US",
 				"libraryCatalog": "www.nytimes.com",
 				"publicationTitle": "The New York Times",
@@ -331,14 +326,12 @@ var testCases = [
 				],
 				"tags": [
 					"Cyberwarfare and Defense",
-					"Donald J",
-					"Flynn",
-					"Manafort",
-					"Michael T",
-					"Paul J",
+					"Espionage and Intelligence Services",
+					"Flynn, Michael T",
+					"Manafort, Paul J",
 					"Presidential Election of 2016",
 					"Russia",
-					"Trump",
+					"Trump, Donald J",
 					"United States Politics and Government"
 				],
 				"notes": [],
