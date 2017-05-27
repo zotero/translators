@@ -127,10 +127,12 @@ function doExport() {
 			}
 		}
 		
-		item.language = item.language.toLowerCase();
-		if (item.language && languageMapping[item.language]) {
-			Zotero.write('LAST	P407	' + languageMapping[item.language] + '\n');
-			Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
+		if (item.language) {
+			item.language = item.language.toLowerCase();
+			if (languageMapping[item.language]) {
+				Zotero.write('LAST	P407	' + languageMapping[item.language] + '\n');
+				Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
+			}
 		}
 		
 		if (item.extra) {
