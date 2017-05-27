@@ -44,7 +44,6 @@ var typeMapping = {
 
 //simple properties with string values can be simply mapped here
 var propertyMapping = {
-	"P1476" : "title",
 	"P356" : "doi",
 	"P854" : "url",
 	"P478" : "volume",
@@ -79,6 +78,7 @@ function doExport() {
 			Zotero.write('LAST	P31	' + typeMapping[item.itemType] + '\n');
 		}
 		Zotero.write('LAST	Len	"' + item.title + '"\n');
+		
 		for (var pnumber in propertyMapping) {
 			var zfield = propertyMapping[pnumber];
 			if (item[zfield]) {
@@ -127,8 +127,10 @@ function doExport() {
 			}
 		}
 		
+		item.language = item.language.toLowerCase();
 		if (item.language && languageMapping[item.language]) {
 			Zotero.write('LAST	P407	' + languageMapping[item.language] + '\n');
+			Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
 		}
 		
 		if (item.extra) {
