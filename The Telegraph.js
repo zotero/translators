@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-26 11:54:14"
+	"lastUpdated": "2017-05-27 08:35:39"
 }
 
 /*
@@ -68,23 +68,26 @@ function scrape(doc, url) {
 			item.tags = keywords.split(/,\s*/);
 		}
 		
-		
+		//the author extraction from EM contains also additional info/clutter about persons
+		//e.g. "Chief Political Correspondent"
+		//thus, we do here a different scraping method
 		item.creators = [];
-		//authors
 		var authors = ZU.xpathText(doc, '//meta[@name="GSAAuthor"]/@content') ||
 					ZU.xpathText(doc, '//meta[@name="DCSext.author"]/@content');
 		if (authors) {
-			//clean authors string
-			//e.g. "By Alex Spillius in Washington"
-			authors = authors.replace(/^By /, '').replace(/ in .*/, '');
-			item.creators.push(ZU.cleanAuthor(authors, 'author'));
+			authorsList = authors.split(';');
+			for (var i=0; i<authorsList.length; i++) {
+				//clean authors string
+				//e.g. "By Alex Spillius in Washington"
+				authorsList[i] = authorsList[i].replace(/^By /, '').replace(/ in .*/, '');
+				item.creators.push(ZU.cleanAuthor(authorsList[i], 'author'));
+			}
 		}
 		
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		}
 		
-		item.archiveLocation = ZU.xpathText(doc, '//meta[@name="article-id"]/@content');
 		item.language = "en-GB";
 
 		item.complete();
@@ -123,7 +126,6 @@ var testCases = [
 				],
 				"date": "2011-11-14",
 				"abstractNote": "Vast, unidentified, structures have been spotted by satellites in the barren Gobi desert, raising questions about what China might be building in a region it uses for its military, space and nuclear programmes.",
-				"archiveLocation": "8888909",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
 				"section": "World",
@@ -251,7 +253,6 @@ var testCases = [
 				],
 				"date": "2009-10-05",
 				"abstractNote": "President Barack Obama has refused to meet the Dalai Lama in Washington this week in a move to curry favour with the Chinese.",
-				"archiveLocation": "6262938",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
 				"section": "World",
@@ -265,6 +266,63 @@ var testCases = [
 					"Barack Obama",
 					"News",
 					"World News"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.telegraph.co.uk/news/0/who-will-win-general-election-2017-latest-polls-odds-tracker/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "General election 2017: Latest polls and odds tracker",
+				"creators": [
+					{
+						"firstName": "Ashley",
+						"lastName": "Kirk",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Patrick",
+						"lastName": "Scott",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-05-11",
+				"abstractNote": "Labour continue to narrow the gap on the Conservatives with one YouGov poll putting them within five points of Theresa May's party.",
+				"language": "en-GB",
+				"libraryCatalog": "www.telegraph.co.uk",
+				"publicationTitle": "The Telegraph",
+				"shortTitle": "General election 2017",
+				"url": "http://www.telegraph.co.uk/news/0/who-will-win-general-election-2017-latest-polls-odds-tracker/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Brexit",
+					"Conservative Party",
+					"Data story",
+					"Data top stories",
+					"David Cameron",
+					"EU Referendum",
+					"General Election 2017",
+					"Green Party",
+					"House of Commons",
+					"Jeremy Corbyn",
+					"Labour Party",
+					"Liberal Democrats",
+					"News",
+					"Politics",
+					"Standard",
+					"Theresa May",
+					"Tim Farron",
+					"UK Independence Party (UKIP)",
+					"UK News"
 				],
 				"notes": [],
 				"seeAlso": []
