@@ -50,6 +50,11 @@ function getSearchResults(doc, checkOnly) {
 	var rows = ZU.xpath(doc, '//li[@class="title"]/a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
+		if (href.indexOf("javascript")>-1) {
+			var tnameAndKey = href.match(/detailView\(\'([\S]+)\'\,\'([\S]+)\'/);
+			var journalhref = "../journal/thesis_name.asp?tname=" + tnameAndKey[1] + "&key=" + tnameAndKey[2];
+			href = journalhref;
+		}
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
