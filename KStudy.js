@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	KISS (Koreanstudies Information Service System) Translator
-	Copyright © 2017 Yunwoo Song
+	Copyright © 2017 Yunwoo Song and Philipp Zumstein
 
 	This file is part of Zotero.
 
