@@ -1,7 +1,7 @@
 {
 	"translatorID": "b298ca93-0010-48f5-97fb-e9923519a380",
 	"label": "KStudy",
-	"creator": "Yunwoo Song",
+	"creator": "Yunwoo Song","Philipp Zumstein"
 	"target": "^https?://[^/]+\\.kstudy\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
