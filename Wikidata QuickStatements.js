@@ -45,7 +45,7 @@ var typeMapping = {
 //simple properties with string values can be simply mapped here
 var propertyMapping = {
 	"P356" : "doi",
-	"P854" : "url",
+	"P953" : "url",
 	"P478" : "volume",
 	"P433" : "issue",
 	"P304" : "pages"
