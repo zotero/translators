@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-05-19 17:50:43"
+	"lastUpdated": "2017-05-18 02:42:48"
 }
 
 function detectWeb(doc, url) {
@@ -28,7 +28,6 @@ function scrape(doc, url) {
 	var authorsXPath  = "(//p/i)[1]";
 	var abstractXPath = "//p[starts-with(b/text(),\"Abstract\")]/text() | //p[not(*)]";
 	var keywordsXPath = "//p[starts-with(b/text(),\"Category\")]";
-
 	var reportNo = doc.evaluate(reportNoXPath, doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
 	reportNo = reportNo.match(/(\d{4})\/(\d{3,4})$/);
 	if (reportNo){
@@ -108,7 +107,13 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc, url)
+		if (url.search(/\.pdf$/)!= -1) {
+			//go to the landing page to scrape
+			//we use http to prevent (somewhat mysterious) same-origin violations leading to permission denied errors
+			url = url.replace(/\.pdf$/, "").replace(/^https/, "http")
+			ZU.processDocuments([url], scrape)
+		}
+		else scrape(doc, url)
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -163,6 +168,71 @@ var testCases = [
 		"type": "web",
 		"url": "https://eprint.iacr.org/eprint-bin/search.pl?last=31&title=1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://eprint.iacr.org/2016/1013.pdf",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "A Formal Security Analysis of the Signal Messaging Protocol",
+				"creators": [
+					{
+						"firstName": "Katriel",
+						"lastName": "Cohn-Gordon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cas",
+						"lastName": "Cremers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benjamin",
+						"lastName": "Dowling",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luke",
+						"lastName": "Garratt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Douglas",
+						"lastName": "Stebila",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"abstractNote": "Signal is a new security protocol and accompanying app that provides end-to-end encryption for instant messaging. The core protocol has recently been adopted by WhatsApp, Facebook Messenger, and Google Allo among many others; the first two of these have at least 1 billion active users. Signal includes several uncommon security properties (such as \"future secrecy\" or \"post-compromise security\"), enabled by a novel technique called *ratcheting* in which session keys are updated with every message sent. Despite its importance and novelty, there has been little to no academic analysis of the Signal protocol.\n\nWe conduct the first security analysis of Signal's Key Agreement and Double Ratchet as a multi-stage key exchange protocol. We extract from the implementation a formal description of the abstract protocol, and define a security model which can capture the \"ratcheting\" key update structure. We then prove the security of Signal's core in our model, demonstrating several standard security properties. We have found no major flaws in the design, and hope that our presentation and results can serve as a starting point for other analyses of this widely adopted protocol.",
+				"libraryCatalog": "ePrint IACR",
+				"reportNumber": "1013",
+				"url": "http://eprint.iacr.org/2016/1013",
+				"attachments": [
+					{
+						"title": "ePrint IACR Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "ePrint IACR Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Signal",
+					"authenticated key exchange",
+					"cryptographic protocols",
+					"future secrecy",
+					"messaging",
+					"multi-stage key exchange",
+					"post-compromise security",
+					"protocols",
+					"provable security"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

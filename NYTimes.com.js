@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-06-02 20:52:10"
+	"lastUpdated": "2017-05-23 21:27:51"
 }
 
 function detectWeb(doc, url) {
@@ -49,6 +49,7 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.publicationTitle = "The New York Times";
 	newItem.ISSN = "0362-4331";
+	newItem.language = "en-US";
 	var metaTags = new Object();
 	var metaTagsProperty = new Object();
 	if (url != undefined) {
@@ -240,6 +241,7 @@ var testCases = [
 				"date": "1912-03-05",
 				"ISSN": "0362-4331",
 				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
+				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF&legacy=true",
@@ -275,6 +277,7 @@ var testCases = [
 				"date": "2010-08-20",
 				"ISSN": "0362-4331",
 				"abstractNote": "The university has found Marc Hauser “solely responsible” for eight instances of scientific misconduct.",
+				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html",
@@ -303,7 +306,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
+		"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -318,7 +321,8 @@ var testCases = [
 				"date": "2013-06-19",
 				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
 				"blogTitle": "The New York Times",
-				"url": "http://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
+				"language": "en-US",
+				"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
 				"attachments": [
 					{
 						"title": "New York Times Snapshot"

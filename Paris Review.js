@@ -107,7 +107,7 @@ function scrape(doc, url) {
 			}
 			item.ISSN="0031-2037";
 		}
-		
+
 		item.complete();
 	});
 	

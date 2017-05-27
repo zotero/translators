@@ -2,36 +2,36 @@
 	"translatorID": "c4008cc5-9243-4d13-8b35-562cdd184558",
 	"label": "Delpher",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^/]+\\.delpher\\.nl",
+	"target": "^https?://[^\\/]+\\.delpher\\.nl",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-12 19:12:39"
+	"lastUpdated": "2017-05-21 03:21:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2016 Philipp Zumstein
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -58,7 +58,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//main[contains(@class, "searchresults")]/article//a[p[contains(@class, "title")] and starts-with(@href, "/")]');
+	var rows = ZU.xpath(doc, '//main[contains(@class, "searchresults")]/article//a[h2[contains(@class, "title")] and starts-with(@href, "/")]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -90,105 +90,50 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item(detectWeb(doc, url));
-	var details = ZU.xpath(doc, '//div[contains(@class, "bkt-mvc-detailsAction")]/dt');
-	for (var i=0; i<details.length; i++) {
-		
-		if (!details[i].textContent) continue;
-		var value = ZU.xpathText(details[i], './following-sibling::dd[1]/ul/li', null, '; ');
-		if (!value) continue;
-		//Z.debug(details[i].textContent + " : " + value.trim());
-		
-		switch (details[i].textContent) {
-			case "Titel":
-			case "Kop":
-				item.title = value;
-				break;
-			case "Auteur":
-				item = addCreators(value, "author", item);
-				break;
-			case "Datum":
-			case "Publicatiedatum":
-				var m = value.match(/(\d{1,2})-(\d{1,2})-(\d{4})/);
-				if (m) {
-					item.date = m[3] + "-" + m[2] + "-" + m[1];
-				} else {
-					item.date = value;
-				}
-				break;
-			case "Jaar van uitgave":
-				//only if the date is not already set
-				if (!item.date) {
-					item.date = value;
-				}
-				break;
-			case "Titel tijdschrift":
-			case "Krantentitel":
-				item.publicationTitle = value;
-				break
-			case "Jaargang":
-				item.volume = value;
-				break;
-			case "Nummer":
-			case "Aflevering":
-				item.issue = value;
-				break;
-			case "Drukker/Uitgever":
-			case "Uitgever":
-				item.publisher = ZU.trimInternal(value);
-				break;
-			case "Plaats van uitgave":
-				item.place = value;
-				break;
-			case "Taal":
-				item.language = ZU.trimInternal(value);
-				break;
-			case "Editie":
-				item.edition = value;
-				break;
-			case "Onderwerp":
-				var tags = value.split(";");
-				for (var j=0; j<tags.length; j++) {
-					item.tags.push(tags[j].trim());
-				}
-				break
-			case "Coauteur":
-				item = addCreators(value, "contributor", item);
-				break;
-			case "Aantal pagina's":
-			case "Omvang":
-				item.numPages = value;
-				break;
-			case "Berichtnummer":
-				item.reportNumber = value;
-				break;
-			case "Herkomst":
-				item.libraryCatalog = value;
-				break;
-			case "Signatuur":
-				item.callNumber = value;
-				break;
-			case "Bron metadata":
-				break;
-		}
+	var details = ZU.xpath(doc, '//div[contains(@class, "bkt-mvc-detailsAction") and contains(@class, "side-bar-block")]');
+
+	item.title = ZU.xpathText(details, './/dd[@data-testing-id="search-result__title"]');
+	item.numPages = ZU.xpathText(details, './/dd[@data-testing-id="search-result__extent"]');
+
+	var date = ZU.xpathText(details, './/dd[@data-testing-id="search-result__date"]');
+
+	if (date && date.length > 4) {
+		item.date = date.replace(/(\d{2})\-(\d{2})-(\d{4})/, "$3-$2-$1");
 	}
-	
+	else item.date = date;
+
+
+	item.publicationTitle = 	item.issue = ZU.xpathText(details, './/dd[@data-testing-id="search-result__papertitle"]');
+	item.libraryCatalog = ZU.xpathText(details, './/dd[@data-testing-id="search-result__source"]');
+	if (!item.libraryCatalog) item.libraryCatalog = "Delpher";
+	item.publisher = ZU.xpathText(details, './/dd[@data-testing-id="search-result__publisher"]/a');
+	item.callNumber = ZU.xpathText(details, './/dd[@data-testing-id="search-result__signature"]');
+	var language = ZU.xpathText(details, './/dd[@data-testing-id="search-result__language"]');
+	if (language) item.language = ZU.trimInternal(language);
+	item.volume = ZU.xpathText(details, './/dd[@data-testing-id="search-result__volume"]');
+	item.issue = ZU.xpathText(details, './/dd[@data-testing-id="search-result__issuenumber"]');
+	item.edition = ZU.xpathText(details, './/dd[@data-testing-id="search-result__edition"]');
+	item.place = ZU.xpathText(details, './/dd[@data-testing-id="search-result__spatialCreation"]');
+
+
+	var tags = ZU.xpath(details, './/dd[@data-testing-id="search-result__subject"]/a');
+
+	for (var i = 0; i<tags.length; i++) {
+		item.tags.push(tags[i].textContent);
+	}
+
+	var authors = ZU.xpath(details, './/dd[@data-testing-id="search-result__creator"]/a');
+	for (var i = 0; i<authors.length; i++) {
+		item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author", true));
+	}
+
 	item.url = ZU.xpathText(doc, '(//input[contains(@class, "persistent-id")])[1]/@value');
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
-	
+
 	item.complete();
-}
-
-
-function addCreators(value, type, item) {
-	var creators = value.split(';');
-	for (var j=0; j<creators.length; j++) {
-		var usecomma = (creators[j].indexOf(",")>-1);
-		item.creators.push(ZU.cleanAuthor(creators[j], type, usecomma));
-	}
-	return item;
 }
 
 /** BEGIN TEST CASES **/
@@ -214,15 +159,15 @@ var testCases = [
 					{
 						"firstName": "N. C. (wed C. van Streek)",
 						"lastName": "Brinkman",
-						"creatorType": "contributor"
+						"creatorType": "author"
 					}
 				],
 				"date": "1796",
 				"callNumber": "1089 C 52:1",
-				"language": "Nederlands ; Vlaams ; néerlandais",
+				"language": "Nederlands , Vlaams , néerlandais",
 				"libraryCatalog": "Leiden, Universiteitsbibliotheek",
 				"numPages": "72",
-				"publisher": "Helders, Jan Amsterdam, 1779-1798 ; Mars, Abraham Amsterdam, 1783-1802",
+				"publisher": "Helders, Jan Amsterdam, 1779-1798, Mars, Abraham Amsterdam, 1783-1802",
 				"url": "http://resolver.kb.nl/resolve?urn=dpo:2390:mpeg21",
 				"attachments": [
 					{
@@ -310,11 +255,9 @@ var testCases = [
 				"title": "Nieuwsblad voor den boekhandel jrg 91, 1924, no 35, 02-05-1924",
 				"creators": [],
 				"date": "1924-05-02",
-				"callNumber": "Koninklijke Bibliotheek: LHO AW.A 06b NIE",
 				"issue": "35",
 				"language": "Nederlands",
-				"libraryCatalog": "Delpher",
-				"publicationTitle": "Nieuwsblad voor den boekhandel",
+				"libraryCatalog": "Koninklijke Bibliotheek: LHO AW.A 06b NIE",
 				"url": "http://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21",
 				"attachments": [
 					{
@@ -343,12 +286,12 @@ var testCases = [
 					{
 						"firstName": "W. K. de",
 						"lastName": "Bruin",
-						"creatorType": "contributor"
+						"creatorType": "author"
 					}
 				],
 				"date": "[192-?]",
 				"callNumber": "BJ 50012 [1]",
-				"language": "Nederlands ; Vlaams ; néerlandais",
+				"language": "Nederlands",
 				"libraryCatalog": "Koninklijke Bibliotheek",
 				"numPages": "95 p., [6] bl. pl",
 				"publisher": "Alkmaar : Gebr. Kluitman",
@@ -359,8 +302,10 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"1505",
 					"1505 bed",
 					"Achttiende eeuw",
+					"Digitale versies",
 					"Historische verhalen",
 					"Napoleontische oorlogen",
 					"Negentiende eeuw",

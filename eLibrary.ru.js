@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-09-13 22:35:27"
+	"lastUpdated": "2017-05-19 04:15:03"
 }
 
 /*
@@ -45,7 +45,7 @@ function detectWeb(doc, url){
 }
 
 function doWeb(doc, url){
-	var articles = new Array();
+	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var results = doc.evaluate('//table[@id="restab"]//tr[@bgcolor = "#f5f5f5"]/td[2]', doc, null,XPathResult.ANY_TYPE, null);
 		var items = {};
@@ -53,14 +53,14 @@ function doWeb(doc, url){
 		while(result = results.iterateNext()) {
 			var link = doc.evaluate('./a', result, null,XPathResult.ANY_TYPE, null).iterateNext();
 			var title = link.textContent;
-			var url = link.href;
-			items[url] = title;
+			var uri = link.href;
+			items[uri] = title;
 		}
 		Zotero.selectItems(items, function (items) {
 				if (!items) {
 					return true;
 				}
-				for (i in items) {
+				for (var i in items) {
 					articles.push(i);
 				}
 				Zotero.Utilities.processDocuments(articles, scrape);
@@ -70,9 +70,15 @@ function doWeb(doc, url){
 		}
 }
 
+function fixCasing (string) {
+	if (string && string == string.toUpperCase()) {
+		return ZU.capitalizeTitle(string, true);
+	}
+	else return string;
+}
+
 function scrape (doc) {
 		var datablock = ZU.xpath(doc, '//td[@align="left" and @valign="top"]//tr[2]/td[@align="left" and @valign="top"]');
-		
 		var item = new Zotero.Item();
 		/*var pdf = false;
 		// Now see if we have a free PDF to download
@@ -98,27 +104,18 @@ function scrape (doc) {
 		} else {
 			item.title = doc.title;
 		}
-		
+		item.title = fixCasing(item.title);
 		var title = ZU.xpathText(datablock, "./table[1]");
-		var authorBlock = ZU.xpath(datablock, "./table[2]");
-		
-		if (authorBlock) {
-			
-		// Sometimes we don't have links, just bold text
-		var authorNode = doc.evaluate('.//td[2]/span//b', authorBlock[0], null,XPathResult.ANY_TYPE, null);
-		while ((author = authorNode.iterateNext()) !== null) {
-			// Remove organizations; by URL or by node name
-			if ((author.href && !author.href.match(/org_about\.asp/)
-							 && !author.href.match(/org_items\.asp/))
-					|| author.nodeName == "B") { 
-				author = author.textContent;
-				var authors = author.split(",");
-				for (var i = 0; i < authors.length; i++) {
+		var authors =   ZU.xpath(datablock, './div[1]/table[1]//span/a[contains(@href, "authorid")]');
+		if (!authors.length) {
+			authors = ZU.xpath(datablock, './div[1]/table[1]//b');
+		}
+		for  (var i = 0; i<authors.length; i++) {
 					/**Some names listed as last first_initials (no comma), so we need
 					 * to fix this by placing a comma in-between.
 					 * Also note that the space between last and first is nbsp
 					 */
-					 var cleaned = authors[i];
+					 var cleaned = authors[i].textContent;
 					 var useComma = false;
 					 if(cleaned.match(/[\s\u00A0]([A-Z\u0400-\u042f]\.?[\s\u00A0]*)+$/)) {
 						cleaned = cleaned.replace(/[\u00A0\s]/,', ');
@@ -127,23 +124,21 @@ function scrape (doc) {
 
 					cleaned = ZU.cleanAuthor(cleaned, "author", useComma);
 					// If we have only one name, set the author to one-name mode
-					if (cleaned.firstName == "") {
+					if (cleaned.firstName === "") {
 						cleaned["fieldMode"] = true;
 					} else {
 						// We can check for all lower-case and capitalize if necessary
 						// All-uppercase is handled by cleanAuthor
-						cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ?
+						cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase() || cleaned.firstName == cleaned.firstName.toUpperCase() ) ?
 							Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
-						cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase()) ?
+						cleaned.lastName = (cleaned.lastName == cleaned.lastName.toLowerCase() || cleaned.lastName == cleaned.lastName.toUpperCase()) ?
 							Zotero.Utilities.capitalizeTitle(cleaned.lastName, true) : cleaned.lastName;
 					}
 					// Skip entries with an @ sign-- email addresses slip in otherwise
 					if (cleaned.lastName.indexOf("@") === -1) item.creators.push(cleaned);
 				}
-			} else { Zotero.debug("Skipping presumed affiliation: " + author.textContent) ; } 
-		}
-		}
-		
+
+
 		var mapping = {
 			"Журнал" : "publicationTitle",
 			"Издательство" : "publisher",
@@ -163,24 +158,24 @@ function scrape (doc) {
 				item[mapping[key]] = t;
 			}
 		}
-		
+
 		if (item.extra) item.extra = "Цитируемость в РИНЦ: " + item.extra;
-		
-		var journalBlock = ZU.xpath(datablock, "./table[4]");
-		item.publicationTitle = ZU.xpathText(journalBlock, ".//a[1]");
-		item.ISSN = ZU.xpathText(journalBlock, ".//tr[2]//font[last()]");
-	
-		var keywordBlock = ZU.xpath(datablock, "./table[5]")[0];
-		if (keywordBlock) {
-			var tag, tagNode = doc.evaluate('.//td[2]/a', keywordBlock, null,XPathResult.ANY_TYPE, null);
-			while ((tag = tagNode.iterateNext()) !== null)
-					item.tags.push(tag.textContent);
+
+		var journalBlock = ZU.xpath(datablock, './div/table[tbody/tr/td/font[contains(text(), "ЖУРНАЛ")]]');
+		if (!item.publicationTitle) item.publicationTitle = ZU.xpathText(journalBlock, ".//a[1]");
+		item.publicationTitle = fixCasing(item.publicationTitle);
+
+		if (!item.ISSN) item.ISSN = ZU.xpathText(journalBlock, ".//tr[2]//font[last()]");
+
+		var tags = ZU.xpath(datablock, './div/table[tbody/tr/td/font[contains(text(), "КЛЮЧЕВЫЕ СЛОВА")]]//tr[2]/td/a');
+		for (var i = 0; i<tags.length; i++) {
+			item.tags.push(fixCasing(tags[i].textContent));
 		}
-	
+
 		var abstractBlock = ZU.xpath(datablock, "./table[6]")[0];
 		if (abstractBlock)
 			item.abstractNote = ZU.xpathText(abstractBlock, './tbody/tr[2]/td[2]/p');
-		
+
 		// Set type
 		switch (item.itemType) {
 			case "обзорная статья": // Would be "review article"
@@ -200,7 +195,7 @@ function scrape (doc) {
 				item.itemType = "journalArticle";
 				break;
 		}
-		
+
 		/*if (referenceBlock) {
 			var note = Zotero.Utilities.trimInternal(
 							doc.evaluate('./tbody/tr/td[2]/table', referenceBlock, null,XPathResult.ANY_TYPE, null)
@@ -208,7 +203,7 @@ function scrape (doc) {
 			Zotero.debug(note);
 			item.notes.push(note);
 		}*/
-/*		
+/*
 		if (codeBlock) {
 			item.extra += ' '+ doc.evaluate('.//td[2]', codeBlock, null,XPathResult.ANY_TYPE, null).iterateNext().textContent;
  			var doi = item.extra.match(/DOI: (10\.[^\s]+)/);
@@ -217,16 +212,12 @@ function scrape (doc) {
 	 			item.extra = item.extra.replace(/DOI: 10\.[^\s]+/,"");
 	 		}
  		}
-		
-		
+
+
 */
-		if (item.title.toUpperCase() == item.title) {
-			Zotero.debug("Trying to fix all-uppers");
-			item.title = item.title.substr(0,1) + item.title.toLowerCase().substr(1);
-		}
 
 		//if(pdf) item.attachments.push(pdf);
-		
+
 		item.complete();
 }
 /** BEGIN TEST CASES **/
