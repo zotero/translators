@@ -82,7 +82,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	//Somehow it is important to switch here also to English in the
 	//parameter, because otherwise it will not work when the original
-	//website is looked in French.
+	//website is viewed in French.
 	var urlRDF = url.split(';')[0] + ";dc?sf_culture=en&sf_format=xml";
 	
 	ZU.doGet(urlRDF, function(text) {
