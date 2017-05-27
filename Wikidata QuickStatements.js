@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-05-26 06:30:00"
+	"lastUpdated": "2017-05-27 18:00:00"
 }
 
 
@@ -114,7 +114,7 @@ function doExport() {
 				default:
 					formatedDate = formatedDate + "/11";
 			}
-			Zotero.write('LAST	P577	"+' + formatedDate + '"\n');
+			Zotero.write('LAST	P577	+' + formatedDate + '\n');
 		}
 		
 		if (item.ISBN) {
