@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-05-27 18:00:00"
+	"lastUpdated": "2017-05-27 23:30:00"
 }
 
 
@@ -182,10 +182,15 @@ function doExport() {
 		
 		if (item.language) {
 			item.language = item.language.toLowerCase();
-			if (languageMapping[item.language]) {
-				Zotero.write('LAST	P407	' + languageMapping[item.language] + '\n');
-				Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
+			Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
+			for (var lang in languageMapping) {
+				if (item.language.startsWith(lang)) {
+					Zotero.write('LAST	P407	' + languageMapping[lang] + '\n');
+				}
 			}
+		} else {
+			//otherwise use "und" for undetermined language
+			Zotero.write('LAST	P1476	und:"' + item.title + '"\n');
 		}
 		
 		if (item.extra) {
