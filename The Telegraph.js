@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-27 08:35:39"
+	"lastUpdated": "2017-05-28 21:24:22"
 }
 
 /*
@@ -88,6 +88,10 @@ function scrape(doc, url) {
 			item.date = ZU.strToISO(item.date);
 		}
 		
+		if (item.itemType=="newspaperArticle") {
+			item.ISSN = "0307-1235";
+		}
+		
 		item.language = "en-GB";
 
 		item.complete();
@@ -125,6 +129,7 @@ var testCases = [
 					}
 				],
 				"date": "2011-11-14",
+				"ISSN": "0307-1235",
 				"abstractNote": "Vast, unidentified, structures have been spotted by satellites in the barren Gobi desert, raising questions about what China might be building in a region it uses for its military, space and nuclear programmes.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
@@ -162,6 +167,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-05-26",
+				"ISSN": "0307-1235",
 				"abstractNote": "Donald Tusk has told Britain to pay its Brexit divorce bill for the sake of &ldquo;future relations&rdquo; with the EU as he rubbished suggestions that Brussels might end up owing money to the UK.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
@@ -213,6 +219,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-03-26",
+				"ISSN": "0307-1235",
 				"abstractNote": "A committee will decide Hong Kong&rsquo;s new leader on Sunday in the first chief executive election since mass protests brought the city to a standstill in 2014.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
@@ -252,6 +259,7 @@ var testCases = [
 					}
 				],
 				"date": "2009-10-05",
+				"ISSN": "0307-1235",
 				"abstractNote": "President Barack Obama has refused to meet the Dalai Lama in Washington this week in a move to curry favour with the Chinese.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
@@ -274,11 +282,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.telegraph.co.uk/news/0/who-will-win-general-election-2017-latest-polls-odds-tracker/",
+		"url": "http://www.telegraph.co.uk/news/0/general-election-2017-polls-latest-odds-tracker/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "General election 2017: Latest polls and odds tracker",
+				"title": "General election 2017: Polls and latest odds tracker",
 				"creators": [
 					{
 						"firstName": "Ashley",
@@ -291,13 +299,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-05-11",
+				"date": "2017-05-28",
+				"ISSN": "0307-1235",
 				"abstractNote": "Labour continue to narrow the gap on the Conservatives with one YouGov poll putting them within five points of Theresa May's party.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
 				"publicationTitle": "The Telegraph",
 				"shortTitle": "General election 2017",
-				"url": "http://www.telegraph.co.uk/news/0/who-will-win-general-election-2017-latest-polls-odds-tracker/",
+				"url": "http://www.telegraph.co.uk/news/0/general-election-2017-polls-latest-odds-tracker/",
 				"attachments": [
 					{
 						"title": "Snapshot"
