@@ -1,7 +1,7 @@
 {
 	"translatorID": "b298ca93-0010-48f5-97fb-e9923519a380",
 	"label": "KStudy",
-	"creator": "Yunwoo Song, Philipp Zumstein",
+	"creator": "Yunwoo Song, Frank Bennett, Philipp Zumstein",
 	"target": "^https?://[^/]+\\.kstudy\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	KISS (Koreanstudies Information Service System) Translator
-	Copyright © 2017 Yunwoo Song and Philipp Zumstein
+	Copyright © 2017 Yunwoo Song, Frank Bennett, and Philipp Zumstein
 
 	This file is part of Zotero.
 
@@ -119,6 +119,16 @@ function scrape(doc, url) {
 	if (item.abstractNote) {
 		item.abstractNote = ZU.trimInternal(item.abstractNote);
 	}
+
+	var pdfJSurl = ZU.xpathText(doc, '//div[@class="search_box"]/div[@class="choice"]/span[1]/a/@href');
+  	var pdfurlKeys = pdfJSurl.match(/Select1\(\'(\S+)\'\,\s?\'(\S+)\'\,\s?(\S+)\,\s?(\S+)\,\s?(\S+)\)\;/);
+  	var pdfUrl = pdfurlKeys[1].replace(/^(.*\/).*/, "$1") + "viewer.asp?code_num=" + pdfurlKeys[2];
+
+	item.attachments.push({
+		url : pdfUrl,
+		title : "KISS PDF",
+		mimeType : "application/pdf",
+	});	
 	
 	item.complete();
 
