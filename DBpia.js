@@ -73,32 +73,28 @@ function doWeb(doc, url) {
 			}
 			for (var i=0; i<num.length; i++) {
 				var n = num[i];
-				scrapeMulti(doc, url, n);
+				var link = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a/@href')
+				if (link.indexOf('book')==-1) {
+					ZU.processDocuments(link, scrape);
+				} else {
+					var item = new Zotero.Item("book");
+					var title = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a');
+					item.title = title;
+					var creators = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[1]');
+					if (creators) {
+						var creatorsList = creators.split(',');
+						for (var i=0; i<creatorsList.length; i++) {
+							item.creators.push(ZU.cleanAuthor(creatorsList[i], "author", true));
+						}
+					}
+					item.publisher = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[2]/a');
+					item.date = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[3]');
+					item.complete();
+				}
 			}
 		});
 	} else {
 		scrape(doc, url);
-	}
-}
-
-function scrapeMulti(doc, url, n) {
-	var link = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a/@href')
-	if (link.indexOf('book')==-1) {
-		ZU.processDocuments(link, scrape);
-	} else {
-		var item = new Zotero.Item("book");
-		var title = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a');
-		item.title = title;
-		var creators = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[1]');
-		if (creators) {
-			var creatorsList = creators.split(',');
-			for (var i=0; i<creatorsList.length; i++) {
-				item.creators.push(ZU.cleanAuthor(creatorsList[i], "author", true));
-			}
-		}
-		item.publisher = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[2]/a');
-		item.date = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dd[3]');
-		item.complete();
 	}
 }
 
@@ -119,9 +115,9 @@ function scrape(doc, url) {
 	item.publicationTitle = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
 
 	var pagerange = ZU.xpathText(doc, '//div[@class="book_info"]/dl/dt[1]').match(/\s([\d+-\d+])\s/);
-		if (pagerange) {
-			item.pages = pagerange[1];
-		}
+	if (pagerange) {
+		item.pages = pagerange[1];
+	}
 		
 	item.volume = ZU.xpathText(doc, '//meta[@name="citation_volume"]/@content');
 	item.issue = ZU.xpathText(doc, '//meta[@name="citation_issue"]/@content');
