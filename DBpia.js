@@ -99,42 +99,22 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var item = new Zotero.Item("journalArticle");
-	var title = ZU.xpathText(doc, '//meta[@name="citation_title"]/@content');
-	item.title = title;
-	
-	var creators = ZU.xpathText(doc, '//meta[@name="citation_author"]/@content');
-	if (creators) {
-		var creatorsList = creators.split(',');
-		for (var i=0; i<creatorsList.length; i++) {
-			item.creators.push(ZU.cleanAuthor(creatorsList[i], "author", true));
-		}
-	}
-	
-	item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
-	item.publicationTitle = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
-
-	var pagerange = ZU.xpathText(doc, '//div[@class="book_info"]/dl/dt[1]').match(/\s([\d+-\d+])\s/);
-	if (pagerange) {
-		item.pages = pagerange[1];
-	}
-		
-	item.volume = ZU.xpathText(doc, '//meta[@name="citation_volume"]/@content');
-	item.issue = ZU.xpathText(doc, '//meta[@name="citation_issue"]/@content');
-	item.ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
-	
-	item.abstractNote = ZU.xpathText(doc, '//div[@class="con_txt"]');
-	if (item.abstractNote) {
-		item.abstractNote = ZU.trimInternal(item.abstractNote);
-	}
-	
-	var pdfurl = ZU.xpathText(doc, '//div[@class="btn_box"]/a[@title="PDF Download"]/@href');
-	item.attachments.push({
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setHandler('itemDone', function (obj, item) {
+		var pdfurl = ZU.xpathText(doc, '//div[@class="btn_box"]/a[@title="PDF Download"]/@href');
+		item.attachments.push({
 			url : pdfurl,
-			snapshot : true
+			snapshot : true,
 		})
-	
-	item.complete();
+
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = "journalArticle";
+		trans.doWeb(doc, url);
+	});
 
 }/** BEGIN TEST CASES **/
 var testCases = [
