@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var pmid = ZU.xpathText(doc, '//p[contains(@class, "citation")]/a[contains(@href, "http://www.ncbi.nlm.nih.gov/pubmed/")]');
+	var pmid = ZU.xpathText(doc, '//p[contains(@class, "citation")]/a[contains(@href, "ncbi.nlm.nih.gov/pubmed/")]');
 	if (pmid && pmid.search(/\d+/)!=-1){
 		//the best data is from Pubmed
 		
