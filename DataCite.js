@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-05-29 07:46:16"
+	"lastUpdated": "2017-06-03 11:41:00"
 }
 
 function detectSearch(items) {
