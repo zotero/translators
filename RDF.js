@@ -11,8 +11,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2016-06-22 21:09:00"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-03 11:32:59"
 }
 
 /*
@@ -1217,3 +1217,42 @@ var exports = {
 	"defaultUnknownType":false,
 	"itemType": false
 };
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n         xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n         xmlns:bibo=\"http://purl.org/ontology/bibo/\"\n         xmlns:dc=\"http://purl.org/dc/terms/\"\n         xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n         xmlns:dc11=\"http://purl.org/dc/elements/1.1/\"\n         xmlns:ns0=\"http://rdaregistry.info/Elements/u/\"\n         xmlns:ns1=\"http://iflastandards.info/ns/isbd/elements/\"\n         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n\n  <bibo:Book rdf:about=\"http://d-nb.info/1054873992\">\n    <dc:medium rdf:resource=\"http://rdaregistry.info/termList/RDACarrierType/1044\"/>\n    <owl:sameAs rdf:resource=\"http://hub.culturegraph.org/resource/DNB-1054873992\"/>\n    <dc11:identifier>(DE-101)1054873992</dc11:identifier>\n    <dc11:identifier>(OCoLC)888461076</dc11:identifier>\n    <bibo:isbn13>9783658060268</bibo:isbn13>\n    <ns0:P60521>kart. : ca. EUR 39.99 (DE), ca. EUR 41.11 (AT), ca. sfr 50.00 (freier Pr.)</ns0:P60521>\n    <bibo:isbn10>3658060263</bibo:isbn10>\n    <bibo:gtin14>9783658060268</bibo:gtin14>\n    <dc:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-2/ger\"/>\n    <dc11:title>Das Adam-Smith-Projekt</dc11:title>\n    <dc:creator rdf:resource=\"http://d-nb.info/gnd/136486045\"/>\n    <dc11:publisher>Springer VS</dc11:publisher>\n    <ns0:P60163>Wiesbaden</ns0:P60163>\n    <ns0:P60333>Wiesbaden : Springer VS</ns0:P60333>\n    <ns1:P1053>447 S.</ns1:P1053>\n    <dc:isPartOf>Edition Theorie und Kritik</dc:isPartOf>\n    <ns0:P60489>Zugl. leicht überarb. Fassung von: Berlin, Freie Univ., Diss., 2012</ns0:P60489>\n    <dc:relation rdf:resource=\"http://d-nb.info/1064805604\"/>\n    <dc:subject>Smith, Adam</dc:subject>\n    <dc:subject>Liberalismus</dc:subject>\n    <dc:subject>Rechtsordnung</dc:subject>\n    <dc:subject>Foucault, Michel</dc:subject>\n    <dc:subject>Macht</dc:subject>\n    <dc:subject>Politische Philosophie</dc:subject>\n    <dc:subject rdf:resource=\"http://dewey.info/class/320.512092/e22/\"/>\n    <dc:tableOfContents rdf:resource=\"http://d-nb.info/1054873992/04\"/>\n    <dc:issued>2015</dc:issued>\n    <ns0:P60493>zur Genealogie der liberalen Gouvernementalität</ns0:P60493>\n  </bibo:Book>\n  \n  <foaf:Person rdf:about=\"http://d-nb.info/gnd/136486045\">\n    <foaf:familyName>Ronge</foaf:familyName>\n    <foaf:givenName>Bastian</foaf:givenName>\n  </foaf:Person>\n  \n\n</rdf:RDF>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Das Adam-Smith-Projekt",
+				"creators": [
+					{
+						"lastName": "Ronge",
+						"firstName": "Bastian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"ISBN": "9783658060268",
+				"itemID": "http://d-nb.info/1054873992",
+				"language": "http://id.loc.gov/vocabulary/iso639-2/ger",
+				"publisher": "Springer VS",
+				"attachments": [],
+				"tags": [
+					"Foucault, Michel",
+					"Liberalismus",
+					"Macht",
+					"Politische Philosophie",
+					"Rechtsordnung",
+					"Smith, Adam"
+				],
+				"notes": [],
+				"seeAlso": [
+					"http://d-nb.info/1064805604"
+				]
+			}
+		]
+	}
+]
+/** END TEST CASES **/

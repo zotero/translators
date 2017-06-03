@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcs",
-	"lastUpdated": "2016-07-31 15:24:21"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-03 11:41:00"
 }
 
 function parseInput() {
@@ -70,3 +70,37 @@ function doExport() {
 	while(item = Z.nextItem()) data.push(ZU.itemToCSLJSON(item));
 	Z.write(JSON.stringify(data, null, "\t"));
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "[\n\t{\n\t\t\"id\": \"http://zotero.org/users/96641/items/BDQRTS3T\",\n\t\t\"type\": \"book\",\n\t\t\"title\": \"Stochastic biomathematical models: With applications to neuronal modeling\",\n\t\t\"collection-title\": \"Lecture notes in mathematics\",\n\t\t\"publisher\": \"Springer\",\n\t\t\"publisher-place\": \"Heidelberg\",\n\t\t\"volume\": \"2058\",\n\t\t\"number-of-pages\": \"206\",\n\t\t\"event-place\": \"Heidelberg\",\n\t\t\"ISBN\": \"978-3-642-32156-6\",\n\t\t\"language\": \"en\",\n\t\t\"author\": [\n\t\t\t{\n\t\t\t\t\"family\": \"Bachar\",\n\t\t\t\t\"given\": \"Mostafa\"\n\t\t\t}\n\t\t],\n\t\t\"issued\": {\n\t\t\t\"date-parts\": [\n\t\t\t\t[\n\t\t\t\t\t\"2013\",\n\t\t\t\t\t1,\n\t\t\t\t\t1\n\t\t\t\t]\n\t\t\t]\n\t\t}\n\t}\n]",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Stochastic biomathematical models: With applications to neuronal modeling",
+				"creators": [
+					{
+						"lastName": "Bachar",
+						"firstName": "Mostafa",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 1, 2013",
+				"ISBN": "978-3-642-32156-6",
+				"itemID": "http://zotero.org/users/96641/items/BDQRTS3T",
+				"language": "en",
+				"numPages": "206",
+				"place": "Heidelberg",
+				"publisher": "Springer",
+				"series": "Lecture notes in mathematics",
+				"volume": "2058",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
