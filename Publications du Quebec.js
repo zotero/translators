@@ -90,7 +90,7 @@ function scrape(doc, url) {
 	titleloi = ZU.trimInternal(titleloi);
 	
 	var codeloi = ZU.xpathText(doc, '//div[contains(@class, "Identification-Id")]');
-	codeloi = ZU.trimInternal(codeloi);
+	if (codeloi) codeloi = ZU.trimInternal(codeloi);
 
 	newItem.title = titleloi;
 
