@@ -78,6 +78,12 @@ function processDOIs(dois) {
 		var trans = Zotero.loadTranslator('import');
 		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 		trans.setString(text);
+		trans.setHandler("itemDone", function(obj, item) {
+			if (!item.DOI) {
+				item.extra = "DOI: " + doi;
+			}
+			item.complete();
+		});
 		trans.translate();
 	}, function() {
 		if(dois.length) processDOIs(dois, queryTracker);
@@ -110,7 +116,8 @@ var testCases = [
 				"abstractNote": "[object Object],[object Object],[object Object]",
 				"language": "fre",
 				"institution": "de l'imprimerie de Claude Simon (A Paris)",
-				"libraryCatalog": "DataCite"
+				"libraryCatalog": "DataCite",
+				"extra": "DOI: 10.12763/ONA1045"
 			}
 		]
 	}
