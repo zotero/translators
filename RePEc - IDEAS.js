@@ -37,25 +37,31 @@
 
 
 function detectWeb(doc, url) {
-	Z.debug("DETECTWEB on: " + url);
+	if (typeByUrl(url))  {
+		return typeByURL(url)
+	}
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+}
+
+function typeByUrl (url) {
 	if (url.indexOf('/p/')>-1) {
 		return "report";
 	}
-	if (url.indexOf('/a/')>-1) {
+	else if (url.indexOf('/a/')>-1) {
 		return "journalArticle";
 	}
-	if (url.indexOf('/c/')>-1) {
+	else if (url.indexOf('/c/')>-1) {
 		return "computerProgram";
 	}
-	if (url.indexOf('/b/')>-1) {
+	else if (url.indexOf('/b/')>-1) {
 		return "book";
 	}
-	if (url.indexOf('/h/')>-1) {
+	else if (url.indexOf('/h/')>-1) {
 		return "bookSection";
 	}
-	if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
+	else return false;
 }
 
 
@@ -94,11 +100,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	//On multiples each item should call independently detectWeb, however
-	//it seems that all items have the same type as the first one; and
-	//the function detectWeb is only called once. Why? E.g.
-	//https://ideas.repec.org/cgi-bin/htsearch?ul=&q=arbitrage&cmd=Search%21&wf=4BFF&s=R&dt=range&db=&de=&m=all&fmt=long&sy=1&ps=10
-	var type = detectWeb(doc, url);
+	var type = typeByUrl(url);
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
