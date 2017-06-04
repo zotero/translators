@@ -73,9 +73,10 @@ function doWeb(doc, url) {
 			}
 			for (var i=0; i<num.length; i++) {
 				var n = num[i];
+				var journals = [];
 				var link = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a/@href')
 				if (link.indexOf('book')==-1) {
-					ZU.processDocuments(link, scrape);
+					journals.push(link);
 				} else {
 					var item = new Zotero.Item("book");
 					var title = ZU.xpathText(doc, '//div[@class="subSearchResultList"]/div[' + n + ']/ul[1]/li[4]/dl/dt/div/a');
@@ -92,6 +93,9 @@ function doWeb(doc, url) {
 					item.complete();
 				}
 			}
+			if (journals.length>0) {
+				ZU.processDocuments(journals, scrape);
+			}	
 		});
 	} else {
 		scrape(doc, url);
@@ -105,6 +109,8 @@ function scrape(doc, url) {
 		var pdfurl = ZU.xpathText(doc, '//div[@class="btn_box"]/a[@title="PDF Download"]/@href');
 		item.attachments.push({
 			url : pdfurl,
+			title : "DBpia Full Text PDF",
+			mimeType : "application/pdf",
 			snapshot : true,
 		})
 
