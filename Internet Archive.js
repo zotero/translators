@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-26 20:31:03"
+	"lastUpdated": "2017-06-04 10:03:10"
 }
 
 function detectWeb(doc, url) {
@@ -102,27 +102,31 @@ function scrape(doc, url) {
 		
 		newItem.title = obj.title[0];
 		var creators = obj.creator;
-		//sometimes authors are in one field delimiter by ;
-		if (creators && creators[0].match(/;/)) {
-			creators = creators[0].split(/\s*;\s*/);
-		}
-		for (var i = 0; i<creators.length; i++) {
-			//authors are lastname, firstname, additional info - only use the first two.
-			var author = creators[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
-			if (author.indexOf(',')>-1) {
-				newItem.creators.push(ZU.cleanAuthor(author, "author", true));
-			} else {
-				newItem.creators.push({"lastName": author, "creatorType": "author", "fieldMode": 1});
+		if (creators) {
+			//sometimes authors are in one field delimiter by ;
+			if (creators && creators[0].match(/;/)) {
+				creators = creators[0].split(/\s*;\s*/);
+			}
+			for (var i = 0; i<creators.length; i++) {
+				//authors are lastname, firstname, additional info - only use the first two.
+				var author = creators[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
+				if (author.indexOf(',')>-1) {
+					newItem.creators.push(ZU.cleanAuthor(author, "author", true));
+				} else {
+					newItem.creators.push({"lastName": author, "creatorType": "author", "fieldMode": 1});
+				}
 			}
 		}
 		var contributors = obj.contributor;
-		for (var i = 0; i<contributors.length; i++) {
-			//authors are lastname, firstname, additional info - only use the first two.
-			var contributor = contributors[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
-			if (contributor.indexOf(',')>-1) {
-				newItem.creators.push(ZU.cleanAuthor(contributor, "contributor", true));
-			} else {
-				newItem.creators.push({"lastName": contributor, "creatorType": "contributor", "fieldMode": 1});
+		if (contributors) {
+			for (var i = 0; i<contributors.length; i++) {
+				//authors are lastname, firstname, additional info - only use the first two.
+				var contributor = contributors[i].replace(/(\,[^\,]+)(\,.+)/, "$1");
+				if (contributor.indexOf(',')>-1) {
+					newItem.creators.push(ZU.cleanAuthor(contributor, "contributor", true));
+				} else {
+					newItem.creators.push({"lastName": contributor, "creatorType": "contributor", "fieldMode": 1});
+				}
 			}
 		}
 
@@ -137,9 +141,11 @@ function scrape(doc, url) {
 		var date = obj.date || obj.year;
 		
 		var tags = test(obj.subject);
-		if (tags) tags = tags.split(/\s*;\s*/);
-		for (var i =0; i<tags.length; i++) {
-			newItem.tags.push(tags[i]);
+		if (tags) {
+			tags = tags.split(/\s*;\s*/);
+			for (var i =0; i<tags.length; i++) {
+				newItem.tags.push(tags[i]);
+			}
 		}
 		
 		//download PDFs; We're being conservative here, only downloading if we understand the filesize
