@@ -85,7 +85,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("journalArticle");
 	item.title = ZU.xpathText(doc, '//div[@class="agency_box"]/div[1]/span');
-	item.language = "kr";
+	item.language = "ko-KR";
 	
 	var creators = ZU.xpathText(doc, '//div[@class="agency_detail"]/ul/li[1]');
 	if (creators) {
@@ -126,7 +126,7 @@ function scrape(doc, url) {
 
 	item.attachments.push({
 		url : pdfUrl,
-		title : "KISS PDF",
+		title : "KStudy Full Text PDF",
 		mimeType : "application/pdf",
 	});	
 	
