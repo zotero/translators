@@ -163,6 +163,54 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.dbpia.co.kr/Journal/ArticleDetail/NODE06648914?TotalCount=17797&Seq=13&q=%5B%EC%B2%AD%EC%86%8C%EB%85%84%C2%A7coldb%C2%A72%C2%A751%C2%A73%5D&searchWord=%EC%A0%84%EC%B2%B4%3D%5E%24%EC%B2%AD%EC%86%8C%EB%85%84%5E*&Multimedia=0&isIdentifyAuthor=0&Collection=0&SearchAll=%EC%B2%AD%EC%86%8C%EB%85%84&isFullText=0&specificParam=0&SearchMethod=0&Sort=1&SortType=desc&Page=1&PageSize=20",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "다문화가족 청소년의 가족유형에 따른 일탈행위의 차이 분석",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "김현식",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016/2",
+				"ISSN": "1225-0120",
+				"abstractNote": "이 논문의 목적은 일탈행위의 사회학에 기초하여 한국 청소년의 일탈행위가 다문화가족 유형에 따라 다른지에 관한 이론적 가설을 도출하고, 이를 경험적으로 검증하는 것이다. 분석 자료로 2011년부터 2014년까지 수집된 청소년건강행태온라인조사를 활용하였다. 이 논문에서는 가족유형을 양 부모 한국출생, 어머니만 외국출생, 아버지만 외국출생, 양 부모 외국출생으로 분류하였고, 흡연, 음주, 인터넷 중독, 성관계 경험, 약물남용으로 일탈행위를 측정하였다. 각 일탈행위에 있어서의 차이에 더해 항목응답이론(item response theory)에 근거한 일탈행위성향을 측정한 후 집단별 일탈행위성향의 차이를 분석하였다. 분석결과, 어머니만 외국출생인 청소년은 양 부모가 한국출생인 청소년에 비해 인터넷 중독 위험이 높았으나 다른 일탈행위에 있어서는 다르지 않았고, 음주경험에서는 오히려 낮았다. 아버지만 외국출생인 청소년은 양 부모가 한국출생인 청소년에 비해 성관계 경험이나 약물남용 위험이 높았으나 다른 일탈행위에서는 차이를 보이지 않았다. 양 부모가 외국출생인 청소년은 양 부모가 한국출생인 청소년에 비해 음주를 제외한 모든 일탈행위에서 커다란 위험에 놓여 있었다. 이러한 분석결과는 다문화가족 청소년들이 처한 가족 및 사회적 환경이 하위 유형에 따라 다르기 때문에 각 집단에 알맞은 사회 통합 정책이 고안되어야함을 시사한다.",
+				"issue": "1",
+				"libraryCatalog": "www.dbpia.co.kr",
+				"pages": "41-74",
+				"publicationTitle": "한국사회학",
+				"url": "http://www.dbpia.co.kr",
+				"volume": "50",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "DBpia Full Text PDF",
+						"mimeType": "application/pdf",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					"Adolescents of multi-cultural families",
+					"juvenile delinquency",
+					"sociological theories of delinquency",
+					"다문화가족 청소년",
+					"사회학적 일탈론",
+					"일탈",
+					"일탈행위성향"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
+]
 ]
 /** END TEST CASES **/
