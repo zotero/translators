@@ -113,7 +113,7 @@ var testCases = [
 				"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses.",
 				"date": "1734",
 				"itemID": "https://doi.org/10.12763/ona1045",
-				"abstractNote": "[object Object],[object Object],[object Object]",
+				"abstractNote": "Le code est accompagné de commentaires de F. A. Vogel, qui signe l'épitre dédicatoire",
 				"language": "fre",
 				"institution": "de l'imprimerie de Claude Simon (A Paris)",
 				"libraryCatalog": "DataCite",
