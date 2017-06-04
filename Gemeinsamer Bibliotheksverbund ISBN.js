@@ -142,7 +142,8 @@ var testCases = [
 				"date": "2014",
 				"numPages": "219",
 				"language": "ger",
-				"shortTitle": "Evaluation in Deutschland und Österreich"
+				"shortTitle": "Evaluation in Deutschland und Österreich",
+				"extra": "OCLC: 885612607"
 			}
 		]
 	},
@@ -166,14 +167,13 @@ var testCases = [
 						"note": "Literaturverz. S. [373] - 387 Die CD-ROM enth. einen Anh. mit Dokumenten zur Sprachproduktion und Sprachbewertung"
 					},
 					{
-						"note": "Univ., FB SLM, Diss. u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit--Hamburg, 2011"
+						"note": "Teilw. zugl.: Hamburg, Univ., FB SLM, Diss., 2011 u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit"
 					}
 				],
 				"tags": [
 					"CD-ROM",
 					"Deutsch",
 					"Deutsch",
-					"Hochschulschrift",
 					"Russisch",
 					"Russisch",
 					"Wortschatz",
@@ -198,7 +198,8 @@ var testCases = [
 				"shortTitle": "Bilinguale Lexik",
 				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
 				"publisher": "Sagner",
-				"date": "2012"
+				"date": "2012",
+				"extra": "OCLC: 795769702"
 			}
 		]
 	},
@@ -253,7 +254,8 @@ var testCases = [
 				"seriesNumber": "1930",
 				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
 				"publisher": "Archaeopress" ,
-				"date": "2009" 
+				"date": "2009",
+				"extra": "OCLC: 320755805"
 			}
 		]
 	}
