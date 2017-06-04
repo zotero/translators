@@ -107,13 +107,14 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		var pdfurl = ZU.xpathText(doc, '//div[@class="btn_box"]/a[@title="PDF Download"]/@href');
-		item.attachments.push({
-			url : pdfurl,
-			title : "DBpia Full Text PDF",
-			mimeType : "application/pdf",
-			snapshot : true,
-		})
-
+		if (pdfurl) {
+			item.attachments.push({
+				url : pdfurl,
+				title : "DBpia Full Text PDF",
+				mimeType : "application/pdf",
+				snapshot : true,
+			})
+		}
 		item.complete();
 	});
 
