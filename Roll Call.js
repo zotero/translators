@@ -1,26 +1,22 @@
 {
 	"translatorID": "d522149f-b776-413f-8aa4-ced13f59c759",
 	"label": "Roll Call",
-	"creator": "Sebastian Karcher",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://(www\\.|blogs\\.)?rollcall\\.com",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-19 00:17:52"
+	"lastUpdated": "2017-06-04 17:53:19"
 }
 
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Roll Call Translator
-	(Created as part of the 2012 Zotero Trainer Workshop at Boston College
-	and with contributions from participants.)
-	Copyright © 2012 Sebastian Karcher
-
+	Copyright © 2017 Philipp Zumstein
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -40,50 +36,74 @@
 */
 
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
-
-/** Articles */
-FW.Scraper({
-itemType : 'newspaperArticle',
-detect : FW.Xpath('//div[@id="tab-story-content"]/h1'),
-title : FW.Xpath('//div[@id="tab-story-content"]/h1').text().trim(),
-attachments : {
-  url : FW.Url(),
-  title : "Roll Call snapshot",
-  type : "text/html"
-},
-creators : FW.Xpath('//ul[contains(@class, "byline")]/li/a').text().cleanAuthor("author"),
-abstractNote : FW.Xpath('//meta[@name="description"]/@content').text(),
-date : FW.Xpath('//ul[contains(@class, "byline")]/li[3]').text(),
-publicationTitle : "Roll Call"
-});
-
-/**Blogpost */
-FW.Scraper({
-itemType : 'blogPost',
-detect : FW.Xpath('//body[contains(@class, "single")]//div[contains(@class, "post")]/h1'),
-title : FW.Xpath('//div[contains(@class, "post")]/h1').text().trim(),
-attachments : {
-  url : FW.Url(),
-  title : "Roll Call snapshot",
-  type : "text/html"
-},
-creators : FW.Xpath('//span[@class="author"]/a').text().cleanAuthor("author"),
-abstractNote : FW.Xpath('//meta[@name="description"]/@content').text(),
-date : FW.Xpath('//p[@class="by-line"]/span[@class="date"]').text().remove(/.+\son\s/),
-publicationTitle :  FW.Xpath('//img[@class="header-logo"]/@alt').text().prepend("Roll Call Blog: ")
-});
-
-/** Search results */
-FW.MultiScraper({
-itemType : "multiple",
-detect : FW.Url().match(/\/search\/index\.html/),
-choices : {
-  titles : FW.Xpath('//div[@class="item"]/h3/a').text(),
-  urls : FW.Xpath('//div[@class="item"]/h3/a').key('href').text()
+function detectWeb(doc, url) {
+	var urlparts = url.split('/');
+	//e.g. urlparts = [ "0": "http:", "1": "", "2": "www.rollcall.com", "3": "news", "4": "john_boehner_reiterates_that_ball_is_in_barack_obamas_court_on_fiscal_cliff-218917-1.html" ]
+	if (urlparts[3]=="news") {
+		return "newspaperArticle";
+	} else if (urlparts[3].indexOf('blog')>-1) {
+		return "blogPost";
+	} else if (url.indexOf('/search')>-1 && getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
-});/** BEGIN TEST CASES **/
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "search-result-item")]//a[contains(@class, "story-title")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
+	var type = detectWeb(doc, url);
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	//translator.setDocument(doc);
+	translator.setHandler('itemDone', function (obj, item) {
+		if (item.creators.length==0) {
+			var authors = ZU.xpath(doc, '//div[@itemprop="author"]');
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+			}
+		}
+		item.complete();
+	});
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = type;
+		trans.doWeb(doc, url);
+	});
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -91,6 +111,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "John Boehner Reiterates That Ball Is in Barack Obama’s Court on ‘Fiscal Cliff’",
 				"creators": [
 					{
 						"firstName": "Daniel",
@@ -98,36 +119,34 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012-11-09T11:08:02Z",
+				"abstractNote": "Speaker John Boehner today again called on President Barack Obama to lead the discussion about the “fiscal cliff,” saying that this is his time to work on a deal that can pass both chambers of Congress.",
+				"libraryCatalog": "www.rollcall.com",
+				"publicationTitle": "Roll Call",
+				"url": "http://www.rollcall.com/news/john_boehner_reiterates_that_ball_is_in_barack_obamas_court_on_fiscal_cliff-218917-1.html",
 				"attachments": [
 					{
-						"title": "Roll Call snapshot",
-						"type": "text/html"
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://www.rollcall.com/news/john_boehner_reiterates_that_ball_is_in_barack_obamas_court_on_fiscal_cliff-218917-1.html",
-				"abstractNote": "Speaker John Boehner today again called on President Barack Obama to lead the discussion about the fiscal cliff, saying that this is his time to work on a deal that can pass both chambers of Congress.",
-				"date": "Nov. 9, 2012, 12:08 p.m.",
-				"publicationTitle": "Roll Call",
-				"title": "John Boehner Reiterates That Ball Is in Barack Obama’s Court on ‘Fiscal Cliff’",
-				"libraryCatalog": "Roll Call",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.rollcall.com/search/index.html?zkDo=search&query=obama&x=0&y=0",
+		"url": "http://www.rollcall.com/page/search?keyword=obama&advanced=false&sort=relevance",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://blogs.rollcall.com/rothenblog/obama-administration-heading-for-a-tough-few-weeks/",
+		"url": "http://www.rollcall.com/rothenblog/obama-administration-heading-for-a-tough-few-weeks/",
 		"items": [
 			{
 				"itemType": "blogPost",
+				"title": "Obama Administration Heading for a Tough Few Weeks",
 				"creators": [
 					{
 						"firstName": "Stuart",
@@ -135,20 +154,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013-05-12T02:49:35Z",
+				"abstractNote": "Maybe it’s because two-term presidents suffer from hubris, or merely that after an administration has been in office for years, it inevitably makes mistakes (and too often tries to cover them up). But recent news reports ought to make Democrats at least a little nervous about the next few months and even 2014.First, the administration started digging a hole for itself on Benghazi, with a high-level Foreign Service officer raising questions about the Obama administration’s handling of the September incident and subsequent behavior.",
+				"blogTitle": "Roll Call",
+				"url": "http://www.rollcall.com/news/rothenblog/obama-administration-heading-for-a-tough-few-weeks",
 				"attachments": [
 					{
-						"title": "Roll Call snapshot",
-						"type": "text/html"
+						"title": "Snapshot"
 					}
 				],
-				"url": "http://blogs.rollcall.com/rothenblog/obama-administration-heading-for-a-tough-few-weeks/",
-				"abstractNote": "Maybe it’s because two-term presidents suffer from hubris, or merely that after an administration has been in office for years, it inevitably makes mistake",
-				"date": "May 11, 2013",
-				"title": "Obama Administration Heading for a Tough Few Weeks",
-				"blogTitle": "Roll Call Blog: Rothenblog"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
