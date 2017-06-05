@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-04 14:15:24"
+	"lastUpdated": "2017-06-05 07:38:26"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	if (typeByUrl(url))  {
-		return typeByURL(url)
+		return typeByUrl(url)
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
