@@ -1,4 +1,4 @@
-50  # Increment number when modifying file
+51  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -93,3 +93,5 @@ ac721d14-f081-4613-91e8-255c22ad05eb # IASSIST Quarterly
 fcfcfe9c-f6dd-48c6-aef9-61adbba31a4e # National Library of Australia - Australian Newspapers covered by Trove now
 a77690cf-c5d1-8fc4-110f-d1fc765dcf88 # ProQuest Legacy.js, see issue #660
 291934d5-36ec-4b81-ac9c-c5ad5313dba4 # Pion publisher acquired by Sage
+cd77f1e5-507f-4c41-a6d2-bda5fa6f8694 # Readability was shut down on September 30, 2016
+6f5f1b24-7519-4314-880f-d7004fbcfe7e # ReliefWeb is now covered by Embedded Metadata translator
