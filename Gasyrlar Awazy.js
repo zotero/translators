@@ -55,6 +55,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Рассекречивание архивных материалов – актуальное направление деятельности КГБ РТ",
 				"creators": [
 					{
 						"firstName": "Сирена",
@@ -67,24 +68,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/1998_3_4/09/09_6/",
-						"title": "Echo of the Ages Snapshot",
-						"type": "text/html"
-					}
-				],
-				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/1998_3_4/09/09_6/",
 				"date": "1998",
 				"issue": "3/4",
+				"libraryCatalog": "Gasyrlar Awazy",
 				"publicationTitle": "Гасырлар авазы / Эхо веков",
-				"section": "Информация. Хроника",
-				"title": "Рассекречивание архивных материалов – актуальное направление деятельности КГБ РТ",
-				"libraryCatalog": "Гасырлар авазы / Эхо веков",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/1998_3_4/09/09_6/",
+				"attachments": [
+					{
+						"title": "Echo of the Ages Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -94,6 +91,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Ансамбли времен Великой Отечественной войны",
 				"creators": [
 					{
 						"firstName": "Евгений",
@@ -101,24 +99,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2002_3_4/05/05_2/",
-						"title": "Echo of the Ages Snapshot",
-						"type": "text/html"
-					}
-				],
-				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2002_3_4/05/05_2/",
 				"date": "2002",
 				"issue": "3/4",
+				"libraryCatalog": "Gasyrlar Awazy",
 				"publicationTitle": "Гасырлар авазы / Эхо веков",
-				"section": "Свидетельства. Мемуары.",
-				"title": "Ансамбли времен Великой Отечественной войны",
-				"libraryCatalog": "Гасырлар авазы / Эхо веков",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2002_3_4/05/05_2/",
+				"attachments": [
+					{
+						"title": "Echo of the Ages Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -128,6 +122,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Приказ НКВД № 00447. Массовые репрессии в г. Краснокамске в 1937-1938 гг.",
 				"creators": [
 					{
 						"firstName": "Андрей",
@@ -140,24 +135,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2011_3_4/04/07/",
-						"title": "Echo of the Ages Snapshot",
-						"type": "text/html"
-					}
-				],
-				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2011_3_4/04/07/",
 				"date": "2011",
 				"issue": "3/4",
+				"libraryCatalog": "Gasyrlar Awazy",
 				"publicationTitle": "Гасырлар авазы / Эхо веков",
-				"section": "XX век: страницы истории",
-				"title": "Приказ НКВД № 00447. Массовые репрессии в г. Краснокамске в 1937-1938 гг.",
-				"libraryCatalog": "Гасырлар авазы / Эхо веков",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"url": "http://www.archive.gov.tatarstan.ru/magazine/go/anonymous/main/?path=mg:/numbers/2011_3_4/04/07/",
+				"attachments": [
+					{
+						"title": "Echo of the Ages Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
