@@ -145,7 +145,7 @@ function fixCitation(item, citation) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://biotechnologyforbiofuels.biomedcentral.com/articles/10.1186/s13068-015-0395-8",
+		"url": "https://biotechnologyforbiofuels.biomedcentral.com/articles/10.1186/s13068-015-0395-8",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -206,7 +206,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Pages 1-16 in PDF"
+						"note": "Pages 212 in PDF"
 					}
 				],
 				"seeAlso": []
@@ -215,7 +215,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://parasitesandvectors.biomedcentral.com/articles/10.1186/1756-3305-2-S1-S1",
+		"url": "https://parasitesandvectors.biomedcentral.com/articles/10.1186/1756-3305-2-S1-S1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -234,7 +234,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "Parasites & Vectors",
 				"libraryCatalog": "BioMed Central",
-				"pages": "1-8",
+				"pages": "S1",
 				"publicationTitle": "Parasites & Vectors",
 				"url": "http://dx.doi.org/10.1186/1756-3305-2-S1-S1",
 				"volume": "2",
@@ -255,12 +255,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.biomedcentral.com/search?query=zelle&searchType=publisherSearch",
+		"url": "https://www.biomedcentral.com/search?query=zelle&searchType=publisherSearch",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://bmcevolbiol.biomedcentral.com/articles/",
+		"url": "https://bmcevolbiol.biomedcentral.com/articles/",
 		"items": "multiple"
 	}
 ]
