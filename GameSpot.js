@@ -66,7 +66,7 @@ choices          : {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.gamespot.com/reviews/red-dead-redemption-undead-nightmare-pack-review/1900-6283137/",
+		"url": "https://www.gamespot.com/reviews/red-dead-redemption-undead-nightmare-pack-review/1900-6283137/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -83,7 +83,7 @@ var testCases = [
 				"blogTitle": "GameSpot",
 				"language": "en-US",
 				"shortTitle": "Red Dead Redemption",
-				"url": "http://www.gamespot.com/reviews/red-dead-redemption-undead-nightmare-pack-review/1900-6283137/",
+				"url": "https://www.gamespot.com/reviews/red-dead-redemption-undead-nightmare-pack-review/1900-6283137/",
 				"attachments": [
 					{
 						"title": "GameSpot snapshot",
@@ -98,7 +98,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.gamespot.com/articles/more-of-the-most-american-games-of-all-time/1100-6420916/",
+		"url": "https://www.gamespot.com/articles/more-of-the-most-american-games-of-all-time/1100-6420916/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -114,7 +114,7 @@ var testCases = [
 				"abstractNote": "From obscure gems on the original Xbox to mainstream classics on PC, GameSpot celebrates the Fourth of July with even more of the most American games of all time.",
 				"blogTitle": "GameSpot",
 				"language": "en-US",
-				"url": "http://www.gamespot.com/articles/more-of-the-most-american-games-of-all-time/1100-6420916/",
+				"url": "https://www.gamespot.com/articles/more-of-the-most-american-games-of-all-time/1100-6420916/",
 				"attachments": [
 					{
 						"title": "GameSpot snapshot",
@@ -129,7 +129,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.gamespot.com/reviews/the-legend-of-zelda-breath-of-the-wild-review/1900-6416626/",
+		"url": "https://www.gamespot.com/reviews/the-legend-of-zelda-breath-of-the-wild-review/1900-6416626/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -146,7 +146,7 @@ var testCases = [
 				"blogTitle": "GameSpot",
 				"language": "en-US",
 				"shortTitle": "The Legend Of Zelda",
-				"url": "http://www.gamespot.com/reviews/the-legend-of-zelda-breath-of-the-wild-review/1900-6416626/",
+				"url": "https://www.gamespot.com/reviews/the-legend-of-zelda-breath-of-the-wild-review/1900-6416626/",
 				"attachments": [
 					{
 						"title": "GameSpot snapshot",
@@ -161,7 +161,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.gamespot.com/articles/sonic-mania-gameplay-trailer-reveals-the-new-green/1100-6448624/",
+		"url": "https://www.gamespot.com/articles/sonic-mania-gameplay-trailer-reveals-the-new-green/1100-6448624/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -173,11 +173,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-03-10 14:41",
+				"date": "2017-03-11 05:19",
 				"abstractNote": "Watch the newest footage from this year's 2D revival for PS4, Xbox One, Switch, and PC.",
 				"blogTitle": "GameSpot",
 				"language": "en-US",
-				"url": "http://www.gamespot.com/articles/sonic-mania-gameplay-trailer-reveals-the-new-green/1100-6448624/",
+				"url": "https://www.gamespot.com/articles/sonic-mania-gameplay-trailer-reveals-the-new-green/1100-6448624/",
 				"attachments": [
 					{
 						"title": "GameSpot snapshot",
@@ -192,7 +192,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.gamespot.com/the-legend-of-zelda-breath-of-the-wild/news/",
+		"url": "https://www.gamespot.com/the-legend-of-zelda-breath-of-the-wild/news/",
 		"items": "multiple"
 	}
 ]
