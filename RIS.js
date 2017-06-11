@@ -17,7 +17,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-01-25 14:10:26"
+	"lastUpdated": "2017-06-11 22:32:23"
 }
 
 function detectImport() {
@@ -1454,9 +1454,12 @@ function applyValue(item, zField, value, rawLine) {
 		break;
 		case 'DOI':
 			value = ZU.cleanDOI(value);
+			//add DOI to extra field, 
 			if (!ZU.fieldIsValidForType("DOI", item.itemType) && value) {
 				if(item.extra) {
-					item.extra += '\nDOI: ' + value;
+					if (item.extra.search(/^DOI:/) == -1) {
+						item.extra += '\nDOI: ' + value;
+					}
 				} else {
 					item.extra = 'DOI: ' + value;
 				}
