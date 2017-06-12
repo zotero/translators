@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-12 06:07:10"
+	"lastUpdated": "2017-06-12 16:13:55"
 }
 
 /*
@@ -106,6 +106,7 @@ var mapping = {
 	'wdt:P2047': 'runningTime'
 };
 
+//creators with no special role here are treated as contributor
 var creatorMapping = {
 	'wdt:P50': 'author',
 	'wdt:P2093': 'author',
@@ -114,7 +115,6 @@ var creatorMapping = {
 	'wdt:P110': 'illustrator',
 	'wdt:P57': 'director',
 	'wdt:P58': 'scriptwriter',
-	'wdt:P161': 'contributor',
 	'wdt:P162': 'producer'
 }
 
@@ -202,10 +202,8 @@ function scrape(doc, url) {
 								//Z.debug(value);
 							}
 							if (zprop=="creator") {
-								var func = creatorMapping[tagname];
-								if (func) {
-									item.creators.push(ZU.cleanAuthor(value, func));
-								}
+								var func = creatorMapping[tagname] || 'contributor';
+								item.creators.push(ZU.cleanAuthor(value, func));
 							} else if (item[zprop]) {
 								item[zprop] += ', ' + value;
 							} else {
