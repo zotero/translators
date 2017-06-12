@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-03-01 20:19:14"
+	"lastUpdated": "2017-06-11 18:58:14"
 }
 
 function detectWeb(doc, url) {
@@ -208,7 +208,7 @@ function scrape(doc, url) {
 			trans.doWeb(doc, doc.location.href);
 		});
 	} else {
-		var risURL = url.replace(/springer\.com/, "springer.com/export-citation/").replace(
+		var risURL = url.replace(/springer\.com/, "springer.com/export-citation").replace(
 				/[#?].*/, "") + ".ris";
 			//Z.debug(risURL)
 		var DOI = url.match(/\/(10\.[^#?]+)/)[1];
