@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-11 19:46:12"
+	"lastUpdated": "2017-06-12 06:07:10"
 }
 
 /*
@@ -74,21 +74,50 @@ var typeMapping = {
 	"Q36774" : "webpage"
 };
 
+//see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
 var mapping = {
 	'wdt:P1476': 'title',
+	'wdt:P1680': 'subtitle',
+	'wdt:P123': 'publisher',
 	'wdt:P577': 'date',
 	'wdt:P356': 'DOI',
 	'wdt:P407': 'language',
 	'wdt:P1433': 'publicationTitle',
-	'wdt:P50': 'creatorString',
-	'wdt:P2093': 'creatorString',
+	'wdt:P921': 'tagString', 
+	'wdt:P50': 'creator',
+	'wdt:P2093': 'creator',
+	'wdt:P98': 'creator',
+	'wdt:P655': 'creator',
+	'wdt:P110': 'creator',
+	'wdt:P57': 'creator',
+	'wdt:P58': 'creator',
+	'wdt:P161': 'creator',
+	'wdt:P162': 'creator',
 	'wdt:P953': 'url',
 	'wdt:P478': 'volume',
 	'wdt:P433': 'issue',
 	'wdt:P304': 'pages',
+	'wdt:P179': 'series',
 	'wdt:P212':	'ISBN',
-	'wdt:P957': 'ISBN'	
+	'wdt:P957': 'ISBN',
+	'wdt:P236': 'ISSN',
+	'wdt:P136': 'genre',
+	'wdt:P275': 'rights',
+	'wdt:P2047': 'runningTime'
 };
+
+var creatorMapping = {
+	'wdt:P50': 'author',
+	'wdt:P2093': 'author',
+	'wdt:P98': 'editor',
+	'wdt:P655': 'translator',
+	'wdt:P110': 'illustrator',
+	'wdt:P57': 'director',
+	'wdt:P58': 'scriptwriter',
+	'wdt:P161': 'contributor',
+	'wdt:P162': 'producer'
+}
+
 
 var namespaces = {
 	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
@@ -117,7 +146,10 @@ var namespaces = {
 	"schema": "http://schema.org/",
 	"cc": "http://creativecommons.org/ns#",
 	"geo": "http://www.opengis.net/ont/geosparql#",
-	"prov": "http://www.w3.org/ns/prov#"
+	"prov": "http://www.w3.org/ns/prov#",
+	//usually the defintion of the xml namespace is not needed, but
+	//here we have to explicitely define it before using ZU.xpath
+	"xml": "http://www.w3.org/XML/1998/namespace"
 };
 
 
@@ -143,7 +175,7 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	url = url.replace(/#.*/, '');
 	var qposition = url.indexOf('Q');
-	var qnumber = url.substr(qposition);Z.debug(qnumber);
+	var qnumber = url.substr(qposition);
 	var xmlUrl = ZU.xpathText(doc, '//link[@rel="alternate" and @type="application/rdf+xml"]/@href');
 	ZU.doGet(xmlUrl, function(data) {
 		var parser = new DOMParser();
@@ -164,10 +196,17 @@ function scrape(doc, url) {
 							var value = propstatement.textContent;
 							var resource = propstatement.getAttribute("rdf:resource");
 							if (!value && resource) {
-								Z.debug("Internal look up resource: " + resource);
-								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[1]', namespaces);
+								//Z.debug("Internal look up resource: " + resource);
+								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
+									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[1]', namespaces);
+								//Z.debug(value);
 							}
-							if (item[zprop]) {
+							if (zprop=="creator") {
+								var func = creatorMapping[tagname];
+								if (func) {
+									item.creators.push(ZU.cleanAuthor(value, func));
+								}
+							} else if (item[zprop]) {
 								item[zprop] += ', ' + value;
 							} else {
 								item[zprop] = value;
@@ -177,11 +216,17 @@ function scrape(doc, url) {
 				}
 			}
 		}
-		var creators = item.creatorString.split(', ');
-		for (var j=0; j<creators.length; j++) {
-			item.creators.push(ZU.cleanAuthor(creators[j], "author"));
+		if (item.title && item.subtitle) {
+			item.title += ': ' + item.subtitle;
+			delete item.subtitle;
 		}
-		delete item.creatorString;
+		if (item.tagString) {
+			var tags = item.tagString.split(', ');
+			for (var j=0; j<tags.length; j++) {
+				item.tags.push(tags[j]);
+			}
+			delete item.tagString;
+		}
 
 		item.complete();
 	});
@@ -229,7 +274,9 @@ var testCases = [
 				"libraryCatalog": "Wikidata",
 				"publicationTitle": "Molecular Endocrinology",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					"transcription"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -298,7 +345,215 @@ var testCases = [
 				"shortTitle": "FindZebra",
 				"volume": "82",
 				"attachments": [],
+				"tags": [
+					"rare disease",
+					"search engine"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q470573",
+		"items": [
+			{
+				"itemType": "film",
+				"title": "Les Charlots en folie: À nous quatre Cardinal !",
+				"creators": [
+					{
+						"firstName": "André",
+						"lastName": "Hunebelle",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "Jean",
+						"lastName": "Halain",
+						"creatorType": "scriptwriter"
+					},
+					{
+						"firstName": "Gérard",
+						"lastName": "Rinaldi",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jean-Guy",
+						"lastName": "Fechner",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jean",
+						"lastName": "Sarrus",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Gérard",
+						"lastName": "Filippelli",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "André",
+						"lastName": "Badin",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "André",
+						"lastName": "Dumas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Bernard",
+						"lastName": "Haller",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Bernard",
+						"lastName": "Lajarrige",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Bernard",
+						"lastName": "Menez",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Catherine",
+						"lastName": "Jourdan",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Daniel",
+						"lastName": "Ceccaldi",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Dominique",
+						"lastName": "Zardi",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Gib",
+						"lastName": "Grossac",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Henri",
+						"lastName": "Attal",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Igor De",
+						"lastName": "Savitch",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jacques",
+						"lastName": "Dynam",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jacques",
+						"lastName": "Legras",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jacques",
+						"lastName": "Seiler",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jean",
+						"lastName": "Valmont",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jean-Marie",
+						"lastName": "Proslier",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Josephine",
+						"lastName": "Chaplin",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Karin",
+						"lastName": "Petersen",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Max",
+						"lastName": "Montavon",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Mercey",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Préboist",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Yvan",
+						"lastName": "Chiffre",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Yvan",
+						"lastName": "Tanguy",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Georges",
+						"lastName": "Mansart",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Favart",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1974-08-30T00:00:00Z",
+				"genre": "comedy film, parody film, swashbuckler film, film adaptation",
+				"libraryCatalog": "Wikidata",
+				"runningTime": "+75",
+				"shortTitle": "Les Charlots en folie",
+				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q480743",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Eichmann in Jerusalem: A Report on the Banality of Evil",
+				"creators": [
+					{
+						"firstName": "Hannah",
+						"lastName": "Arendt",
+						"creatorType": "author"
+					}
+				],
+				"date": "1963-01-01T00:00:00Z",
+				"libraryCatalog": "Wikidata",
+				"publisher": "Viking Press",
+				"shortTitle": "Eichmann in Jerusalem",
+				"attachments": [],
+				"tags": [
+					"Adolf Eichmann",
+					"the Holocaust",
+					"war crimes trial"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
