@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-12 16:13:55"
+	"lastUpdated": "2017-06-14 05:35:24"
 }
 
 /*
@@ -103,7 +103,8 @@ var mapping = {
 	'wdt:P236': 'ISSN',
 	'wdt:P136': 'genre',
 	'wdt:P275': 'rights',
-	'wdt:P2047': 'runningTime'
+	'wdt:P2047': 'runningTime',
+	'wdt:P750': 'distributor'
 };
 
 //creators with no special role here are treated as contributor
