@@ -2,7 +2,7 @@
 	"translatorID": "62415874-b53c-4afd-86e8-814e18a986f6",
 	"label": "Oxford Reference",
 	"creator": "Sonali Gupta",
-	"target": "http://www.oxfordreference.com/",
+	"target": "^https?://www\\.oxfordreference\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
