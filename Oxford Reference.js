@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-08 18:09:33"
+	"lastUpdated": "2017-06-15 08:51:48"
 }
 
 /*
@@ -39,7 +39,14 @@ function detectWeb(doc, url) {
 	if (url.indexOf("/search") != -1)
 		return "multiple";
 	else
-		return "book";
+	{
+		var body = doc.getElementsByTagName("body")[0];
+		if ((body.className).indexOf('dctype-oxencycl-entry') != -1) {
+   			return "bookSection";
+		}
+		else
+   			return "book";
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -77,7 +84,11 @@ function doWeb(doc, url) {
 
 function scrape(doc, url)
 {
-	var item = new Zotero.Item("book");
+	if (detectWeb(doc, url) == "book")
+		var item = new Zotero.Item("book");
+	else
+		var item = new Zotero.Item("bookSection");
+
 	var edition = ZU.xpathText(doc, '//meta[@property="http://schema.org/bookEdition"]/@content');
 	if(edition)
 		item.edition = edition;
@@ -142,6 +153,36 @@ function scrape(doc, url)
 var testCases = [
 	{
 		"type": "web",
+		"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199546572.001.0001/acref-9780199546572-e-0009",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Accutane - Oxford Reference",
+				"creators": [
+					{
+						"firstName": "Andrew",
+						"lastName": "Hodges",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"ISBN": "9780199546572",
+				"abstractNote": "Isotretinoin. The synthetic retinoid derivative 13-cis-retinoic acid (Accutane) used for severe Acne vulgaris. The dose is 1",
+				"libraryCatalog": "Oxford Reference",
+				"publisher": "Oxford University Press",
+				"attachments": {
+					"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199546572.001.0001/acref-9780199546572-e-0009",
+					"title": "Oxford Reference Snapshot",
+					"mimeType": "text/html"
+				},
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199608218.001.0001/acref-9780199608218",
 		"items": [
 			{
@@ -167,36 +208,6 @@ var testCases = [
 				"publisher": "Oxford University Press",
 				"attachments": {
 					"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199608218.001.0001/acref-9780199608218",
-					"title": "Oxford Reference Snapshot",
-					"mimeType": "text/html"
-				},
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199546572.001.0001/acref-9780199546572-e-0009",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Accutane - Oxford Reference",
-				"creators": [
-					{
-						"firstName": "Andrew",
-						"lastName": "Hodges",
-						"creatorType": "author"
-					}
-				],
-				"date": "2008",
-				"ISBN": "9780199546572",
-				"abstractNote": "Isotretinoin. The synthetic retinoid derivative 13-cis-retinoic acid (Accutane) used for severe Acne vulgaris. The dose is 1",
-				"libraryCatalog": "Oxford Reference",
-				"publisher": "Oxford University Press",
-				"attachments": {
-					"url": "http://www.oxfordreference.com/view/10.1093/acref/9780199546572.001.0001/acref-9780199546572-e-0009",
 					"title": "Oxford Reference Snapshot",
 					"mimeType": "text/html"
 				},
