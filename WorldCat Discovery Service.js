@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-06-27 03:23:48"
+	"lastUpdated": "2017-06-17 16:37:52"
 }
 
 /*
@@ -99,7 +99,7 @@ function getTitleNode(searchResult) {
 }
 
 function getFirstContextObj(doc) {
-	return ZU.xpathText(doc, '//span[@class="Z3988"][1]/@title');
+	return ZU.xpathText(doc, '//span[contains(@class, "Z3988")][1]/@title');
 }
 
 
@@ -298,7 +298,7 @@ var testCases = [
 					}
 				],
 				"date": "2010",
-				"ISBN": "9781598565836\n1598565834",
+				"ISBN": "9781598565836",
 				"language": "English",
 				"libraryCatalog": "WorldCat Discovery Service",
 				"numPages": "xx, 404",
@@ -306,6 +306,7 @@ var testCases = [
 				"publisher": "Hendrickson Publishers Marketing",
 				"series": "Lexham Bible reference series; Lexham Bible reference series.",
 				"shortTitle": "Discourse grammar of the Greek New Testament",
+				"url": "Table of contents http://bvbr.bib-bvb.de:8991/F?func=service&doc_library=BVB01&local_base=BVB01&doc_number=024386228&line_number=0001&func_code=DB_RECORDS&service_type=MEDIA",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
