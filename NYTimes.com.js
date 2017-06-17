@@ -3,13 +3,13 @@
 	"label": "NYTimes.com",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/(alternate/)?|(select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
-	"minVersion": "3.0",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-27 10:52:46"
+	"lastUpdated": "2017-06-17 18:44:24"
 }
 
 /*
@@ -37,8 +37,18 @@
 
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc, true)) {
-		return "multiple";
+	//we use another function name to avoid confusions with the
+	//same function from the called EM translator (sigh)
+	return detectWebHere(doc, url);
+}
+
+
+function detectWebHere(doc, url) {
+	if (doc.getElementById("searchResults")) {
+		Z.monitorDOMChanges(doc.getElementById("searchResults"), {childList: true});
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
 	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type" and @content="article"]/@content')) {
 		if (url.indexOf('blog')>-1) {
@@ -51,13 +61,14 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var type = detectWeb(doc, url);
+	var type = detectWebHere(doc, url);
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	//translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
+		item.itemType = type;
 		item.language = ZU.xpathText(doc, '//meta[@itemprop="inLanguage"]/@content') || "en-US";
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
@@ -90,7 +101,6 @@ function scrape(doc, url) {
 	});
 	
 	translator.getTranslatorObject(function(trans) {
-		trans.itemType = type;
 		trans.splitTags = false;
 		trans.addCustomFields({
 			'dat': 'date',
@@ -106,7 +116,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc, '(//div[@id="search_results"]|//div[@id="searchResults"]|//div[@id="srchContent"])//li');
 	for (var i=0; i<rows.length; i++) {
-		var href = ZU.xpathText(rows[i], './/a/@href');
+		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
