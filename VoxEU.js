@@ -83,7 +83,7 @@ var testCases = [
 				"title": "Green growth? Evidence from energy taxes in Europe",
 				"creators": [
 					{
-						"firstName": "Richard S. J.",
+						"firstName": "Richard",
 						"lastName": "Tol",
 						"creatorType": "author"
 					},
