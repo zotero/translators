@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-06-13 10:18:29"
+	"lastUpdated": "2017-06-19 03:23:09"
 }
 
 /*
@@ -37,41 +37,43 @@
 
 function detectWeb(doc, url) {
 	if (url.indexOf('/record/')>-1) {
-		var collections = ZU.xpath(doc, '//div[contains(@class, "metadata")]//a[@class="navtrail"]');
+		var collections = ZU.xpath(doc, '//div[@itemscope]//span[@class="pull-right"]/span[contains(@class, "label-default")]');;
 		for (var i=0; i<collections.length; i++) {
-			//Z.debug(collections[i].textContent);
-			switch (collections[i].textContent) {
-				case "Software":
+			var type = collections[i].textContent.toLowerCase();
+			//Z.debug(type)
+			switch (type) {
+				case "software":
 					return "computerProgram";
-				case "Videos/Audio":
+				case "video/audio":
 					return "videoRecording";//or audioRecording?
-				case "Images":
+				case "figure":
+				case "drawing":
+				case "photo":
+				case "diagram":
+				case "plot":
 					return "artwork";
-				case "Presentations":
-				case "Posters":
+				case "presentation":
+				case "conference paper":
+				case "poster":
+				case "lesson":
 					return "presentation";
-				case "Lessons":
-				case "Books":
+				case "book":
 					return "book";
-				case "book-section":
-					return "chapter";
-				case "conference-papers":
-					return "conferencePaper"
-				case "patents":
+				case "book section":
+					return "bookSection";
+				case "patent":
 					return "patent";
-				case "reports":
-				case "working-papers":
-				case "technical-notes":
-				case "project-deliverables":
-				case "project-milestones":
-				case "proposals":
+				case "report":
+				case "working paper":
+				case "project deliverables":
+				case "preprint":
 					return "report";
-				case "Theses":
+				case "thesis":
 					return "thesis";
-				case "Datasets":
+				case "dataset":
 					//change when dataset as itemtype is available
-				case "journal-articles":
-				case "preprints":
+					return "document";
+				case "journal article":
 					return "journalArticle";
 			}
 		}
@@ -84,7 +86,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "row")]//h4/a');
+	var rows = ZU.xpath(doc, '//invenio-search-results//h4/a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -114,38 +116,79 @@ function doWeb(doc, url) {
 	}
 }
 
+var zoteroType = {
+	"figure": "artwork",
+	 "article": "report"
+}
 
 function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	var type = detectWeb(doc, url);
-	var schemaType = ZU.xpathText(doc, '//div[@id="wrap"]//div[@itemscope]/@itemtype');
+	var abstract = ZU.xpathText(doc, '//meta[@name="description"]/@content');
+	var doi = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
+	var schemaType = ZU.xpathText(doc, '//div[contains(@class, "record-detail")]//div[@itemscope]/@itemtype');
+	var pdfURL = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+	var tags = ZU.xpath(doc, '//meta[@name="citation_keywords"]')
+	var cslURL = url.replace(/#.+/, "").replace(/\?.+/, "").replace(/\/export\/.+/, "") + "/export/csl"
+	//Z.debug(cslURL)
+	//	Z.debug(schemaType)
 	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setDocument(doc);
-
-	translator.setHandler('itemDone', function (obj, item) {
-		// sometimes DOIs have to been cleaned up
-		// e.g. https://zenodo.org/record/54747
-		var dois = item.DOI.split(", ");
-		var cleaned = [];
-		for (var i=0; i<dois.length; i++) {
-			if (dois[i].substr(0,3) == "10.") {
-				cleaned.push(dois[i]);
+	// use CSL JSON translator
+	ZU.processDocuments(cslURL, function(newDoc){
+		var text = ZU.xpathText(newDoc, '//div[@itemscope]//h3/following-sibling::pre');
+		//Z.debug(text)
+		var type = text.match(/"type": "(.+?)"/)[1]
+		text = text.replace(/publisher_place/, "publisher-place");
+		text = text.replace(/container_title/, "container-title");
+	
+		var trans = Zotero.loadTranslator('import');
+		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+		trans.setString(text);
+		trans.setHandler("itemDone", function(obj, item) {
+			if (!item.DOI) {
+				if (item.extra) {
+					item.extra += "\nDOI: " + doi;
+				}
+				else {
+					item.extra = "DOI: " + doi;
+				}
 			}
-		}
-		item.DOI = cleaned.join();
-		if (type != "journalArticle" && type != "conferencePaper") {
-			item.extra = "DOI: " + item.DOI;
-		}
-		if (schemaType == "http://schema.org/Dataset") {
-			item.extra = "itemType: dataset\n" + "DOI: " + item.DOI;
-		}
-		item.complete();
-	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = type;
-		trans.doWeb(doc, url);
+			//workaround while we don't have proper item type for data
+			if (schemaType.indexOf("Dataset") != -1) {
+				if (item.extra) {
+					item.extra += "\ntype: dataset";
+				}
+				else {
+					item.extra = "type: dataset";
+				}
+			}
+			
+			//get PDF attachment, otherwise just snapshot.
+			if (pdfURL) {
+				item.attachments.push({url:pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf"})
+			}
+			else {
+				item.attachments.push({url:url, title: "Zenodo Snapshot", mimeType: "text/html"})
+			}
+			for (var i = 0; i<tags.length; i++) {
+				item.tags.push(tags[i].content);
+			}
+			
+			//something is odd with zenodo's author parsing; fix it
+			for (var i = 0; i< item.creators.length; i++) {
+				if (!item.creators[i].firstName && item.creators[i].lastName.indexOf(",")!=-1) {
+					item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
+					item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+				}
+			}
+			
+			item.url = url;
+			if (abstract) item.abstractNote = abstract;
+			if (item.itemType == "document" && zoteroType[type]) {
+				item.itemType = zoteroType[type];
+			}
+			item.itemID = "";
+			item.complete();
+		});
+		trans.translate();
 	});
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -158,23 +201,21 @@ var testCases = [
 				"title": "Measurement and Analysis of Strains Developed on Tie-rods of a Steering System",
 				"creators": [
 					{
-						"firstName": "Stefan",
 						"lastName": "Asenov",
+						"firstName": "Stefan",
 						"creatorType": "author"
 					}
 				],
-				"date": "2016/06/03",
-				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped\nwith steering assist to help drivers undertake manoeuvres. However the lack of\nresearch for a situation where one tie-rod experiences different strains than the\nopposite one leads to failure in the tie-rod assembly and misalignment in the wheels&nbsp;over time. The performance of the steering system would be improved if this&nbsp;information existed. This bachelor&rsquo;s dissertation looks into this specific situation and&nbsp;conducts an examination on the tie-rods.\nA simple kinematic model is used to determine how the steering system moves\nwhen there is a steering input. An investigation has been conducted to determine how&nbsp;the system&rsquo;s geometry affects the strains.\nThe experiment vehicle is a Formula Student car which is designed by the\nstudents of Coventry University. The tests performed show the difference in situations&nbsp;where the two front tyres are on a single surface, two different surfaces &ndash; one with high&nbsp;friction, the other with low friction and a situation where there&rsquo;s an obstacle in the way&nbsp;of one of the tyres.\nThe experiment results show a major difference in strain in the front tie-rods in\nthe different situations. Interesting conclusions can be made due to the results for the&nbsp;different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference.\nThis results given in the report can be a starting ground and help with the\nimprovement in steering systems if more research is conducted.",
+				"date": "June 3, 2016",
+				"abstractNote": "Modern day manufacturers research and develop vehicles that are equipped with steering assist to help drivers undertake manoeuvres. However the lack of research for a situation where one tie-rod experiences different strains than the opposite one leads to failure in the tie-rod assembly and misalignment in the wheels over time. The performance of the steering system would be improved if this information existed. This bachelor’s dissertation looks into this specific situation and conducts an examination on the tie-rods. A simple kinematic model is used to determine how the steering system moves when there is a steering input. An investigation has been conducted to determine how the system’s geometry affects the strains. The experiment vehicle is a Formula Student car which is designed by the students of Coventry University. The tests performed show the difference in situations where the two front tyres are on a single surface, two different surfaces – one with high friction, the other with low friction and a situation where there’s an obstacle in the way of one of the tyres. The experiment results show a major difference in strain in the front tie-rods in the different situations. Interesting conclusions can be made due to the results for the different surface situation where one of the tyres receives similar results in bothcompression and tension, but the other one receives results with great difference. This results given in the report can be a starting ground and help with the improvement in steering systems if more research is conducted.",
 				"extra": "DOI: 10.5281/zenodo.54766",
-				"libraryCatalog": "zenodo.org",
-				"url": "http://zenodo.org/record/54766",
+				"libraryCatalog": "Zenodo",
+				"university": "Zenodo",
+				"url": "https://zenodo.org/record/54766?ln=en",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Zenodo Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -194,18 +235,19 @@ var testCases = [
 				"title": "An introduction to data visualizations for open access advocacy",
 				"creators": [
 					{
-						"firstName": "Marieke",
 						"lastName": "Guy",
-						"creatorType": "author"
+						"firstName": "Marieke",
+						"creatorType": "presenter"
 					}
 				],
-				"date": "2015/09/17",
+				"date": "September 17, 2015",
 				"abstractNote": "Guides you through important steps in developing relevant visualizations by showcasing the work of PASTEUR4OA to develop visualizations from ROARMAP.",
 				"extra": "DOI: 10.5281/zenodo.54747",
-				"url": "http://zenodo.org/record/54747",
+				"url": "https://zenodo.org/record/54747",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Zenodo Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -229,25 +271,26 @@ var testCases = [
 				"title": "Figures 8-11 in A new Savignia from Cretan caves (Araneae: Linyphiidae)",
 				"creators": [
 					{
-						"firstName": "Jan",
 						"lastName": "Bosselaers",
+						"firstName": "Jan",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Hans",
 						"lastName": "Henderickx",
+						"firstName": "Hans",
 						"creatorType": "author"
 					}
 				],
-				"date": "2002/11/26",
+				"date": "November 26, 2002",
 				"abstractNote": "FIGURES 8-11. Savignia naniplopi sp. nov., female paratype. 8, epigyne, ventral view; 9, epigyne, posterior view; 10, epigyne, lateral view; 11, cleared vulva, ventral view. Scale bar: 8-10, 0.30 mm; 11, 0.13 mm.",
-				"extra": "DOI: 10.5281/zenodo.14837",
-				"libraryCatalog": "zenodo.org",
+				"extra": "Figure uploaded by Plazi\nDOI: 10.5281/zenodo.14837",
+				"libraryCatalog": "Zenodo",
 				"shortTitle": "Figures 8-11 in A new Savignia from Cretan caves (Araneae",
-				"url": "http://zenodo.org/record/14837",
+				"url": "https://zenodo.org/record/14837?ln=en",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Zenodo Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -268,11 +311,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/search?ln=en&p=zotero&action_search=",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://zenodo.org/record/11879?ln=en",
 		"items": [
 			{
@@ -280,35 +318,23 @@ var testCases = [
 				"title": "Sequence Comparison in Historical Linguistics",
 				"creators": [
 					{
-						"firstName": "Johann-Mattis",
 						"lastName": "List",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hans",
-						"lastName": "Geisler",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Wiebke",
-						"lastName": "Petersen",
+						"firstName": "Johann-Mattis",
 						"creatorType": "author"
 					}
 				],
-				"date": "2014",
+				"date": "September 4, 2014",
 				"ISBN": "9783943460728",
 				"abstractNote": "The comparison of sound sequences (words, morphemes) constitutes the core of many techniques and methods in historical linguistics. With the help of these techniques, corresponding sounds can be determined, historically related words can be identified, and the history of languages can be uncovered. So far, the application of traditional techniques for sequence comparison is very tedious and time-consuming, since scholars have to apply them manually, without computational support. In this study, algorithms from bioinformatics are used to develop computational methods for sequence comparison in historical linguistics. The new methods automatize several steps of the traditional comparative method and can thus help to ease the painstaking work of language comparison.",
 				"extra": "DOI: 10.5281/zenodo.11879",
-				"libraryCatalog": "zenodo.org",
+				"libraryCatalog": "Zenodo",
+				"place": "Düsseldorf",
 				"publisher": "Düsseldorf University Press",
-				"url": "http://zenodo.org/record/11879",
+				"url": "https://zenodo.org/record/11879?ln=en",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Zenodo Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -327,50 +353,50 @@ var testCases = [
 		"url": "https://zenodo.org/record/45756?ln=en#.VsoJtEKVuYU",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "X-ray diffraction images for DPF3 tandem PHD fingers co-crystallized with an acetylated histone-derived peptide",
+				"itemType": "document",
+				"title": "X-ray diffraction images for  DPF3 tandem PHD fingers co-crystallized with an acetylated histone-derived peptide",
 				"creators": [
 					{
-						"firstName": "Wolfram",
 						"lastName": "Tempel",
+						"firstName": "Wolfram",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Yanli",
 						"lastName": "Liu",
+						"firstName": "Yanli",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jinrong",
-						"lastName": "Min",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Peter",
-						"lastName": "Loppnau",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anthony",
-						"lastName": "Zhao",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Su",
 						"lastName": "Qin",
+						"firstName": "Su",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhao",
+						"firstName": "Anthony",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Loppnau",
+						"firstName": "Peter",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Min",
+						"firstName": "Jinrong",
 						"creatorType": "author"
 					}
 				],
-				"date": "2016/02/10",
-				"DOI": "10.5281/zenodo.45756",
-				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images.\n\nPlease find below the content of an input file XDS.INP for the program&nbsp;XDS&nbsp;(Kabsch, 2010), which&nbsp;may be used for data reduction. The &quot;NAME_TEMPLATE_OF_DATA_FRAMES=&quot; item inside&nbsp;XDS.INP may need to be edited to point to the location of the downloaded and untarred images.\n\n!!! Paste lines below in to a file named XDS.INP\n\nDETECTOR=ADSC &nbsp;MINIMUM_VALID_PIXEL_VALUE=1 &nbsp;OVERLOAD= 65000\nDIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0\nDIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0\nTRUSTED_REGION=0.0 1.05\nMAXIMUM_NUMBER_OF_JOBS=10\nORGX= &nbsp; 1582.82 &nbsp;ORGY= &nbsp; 1485.54\nDETECTOR_DISTANCE= 150\nROTATION_AXIS= -1.0 0.0 0.0\nOSCILLATION_RANGE=1\nX-RAY_WAVELENGTH= 1.2821511\nINCIDENT_BEAM_DIRECTION=0.0 0.0 1.0\nFRACTION_OF_POLARIZATION=0.90\nPOLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0\nSPACE_GROUP_NUMBER=20\nUNIT_CELL_CONSTANTS= 100.030 &nbsp; 121.697 &nbsp; &nbsp;56.554 &nbsp; &nbsp;90.000 &nbsp; &nbsp;90.000 &nbsp; &nbsp;90.000\nDATA_RANGE=1 &nbsp;180\nBACKGROUND_RANGE=1 6\nSPOT_RANGE=1 3\nSPOT_RANGE=31 33\nMAX_CELL_AXIS_ERROR=0.03\nMAX_CELL_ANGLE_ERROR=2.0\nTEST_RESOLUTION_RANGE=8.0 3.8\nMIN_RFL_Rmeas= 50\nMAX_FAC_Rmeas=2.0\nVALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000\nINCLUDE_RESOLUTION_RANGE=50.0 1.7\nFRIEDEL&#39;S_LAW= FALSE\nSTARTING_ANGLE= -100 &nbsp; &nbsp; &nbsp;STARTING_FRAME=1\nNAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img\n\n!!! End of XDS.INP\n\n&nbsp;\n\n&nbsp;",
-				"extra": "itemType: dataset\nDOI: 10.5281/zenodo.45756",
-				"libraryCatalog": "zenodo.org",
-				"publicationTitle": "Zenodo",
-				"url": "http://zenodo.org/record/45756",
+				"date": "February 10, 2016",
+				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images. Please find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images. !!! Paste lines below in to a file named XDS.INP DETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000 DIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0 DIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0 TRUSTED_REGION=0.0 1.05 MAXIMUM_NUMBER_OF_JOBS=10 ORGX=   1582.82  ORGY=   1485.54 DETECTOR_DISTANCE= 150 ROTATION_AXIS= -1.0 0.0 0.0 OSCILLATION_RANGE=1 X-RAY_WAVELENGTH= 1.2821511 INCIDENT_BEAM_DIRECTION=0.0 0.0 1.0 FRACTION_OF_POLARIZATION=0.90 POLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0 SPACE_GROUP_NUMBER=20 UNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000 DATA_RANGE=1  180 BACKGROUND_RANGE=1 6 SPOT_RANGE=1 3 SPOT_RANGE=31 33 MAX_CELL_AXIS_ERROR=0.03 MAX_CELL_ANGLE_ERROR=2.0 TEST_RESOLUTION_RANGE=8.0 3.8 MIN_RFL_Rmeas= 50 MAX_FAC_Rmeas=2.0 VALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000 INCLUDE_RESOLUTION_RANGE=50.0 1.7 FRIEDEL'S_LAW= FALSE STARTING_ANGLE= -100      STARTING_FRAME=1 NAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img !!! End of XDS.INP",
+				"extra": "Argonne is operated by UChicago Argonne, LLC, for the U.S. Department of Energy, Office of Biological and Environmental Research under contract DE-AC02-06CH11357. The SGC is a registered charity (number 1097737) that receives funds from AbbVie, Bayer Pharma AG, Boehringer Ingelheim, Canada Foundation for Innovation, Eshelman Institute for Innovation, Genome Canada through Ontario Genomics Institute, Innovative Medicines Initiative (EU/EFPIA) [ULTRA-DD grant no. 115766], Janssen, Merck & Co., Novartis Pharma AG, Ontario Ministry of Economic Development and Innovation, Pfizer, São Paulo Research Foundation-FAPESP, Takeda, and the Wellcome Trust.\nDOI: 10.5281/zenodo.45756\ntype: dataset",
+				"libraryCatalog": "Zenodo",
+				"publisher": "Zenodo",
+				"url": "https://zenodo.org/record/45756?ln=en#.VsoJtEKVuYU",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Zenodo Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -383,6 +409,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/search?page=1&size=20&q=&type=video",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

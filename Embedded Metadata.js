@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-06 18:09:35"
+	"lastUpdated": "2017-06-16 18:52:30"
 }
 
 /*
@@ -144,7 +144,7 @@ function getPrefixes(doc) {
 			}
 		}
 	}
-	
+
 	//also look in html and head elements
 	var prefixes = (doc.documentElement.getAttribute('prefix') || '')
 		+ (doc.head.getAttribute('prefix') || '');
@@ -196,7 +196,7 @@ function processFields(doc, item, fieldMap, strict) {
 function completeItem(doc, newItem) {
 	// Strip off potential junk from RDF
 	newItem.seeAlso = [];
-	
+
 	addHighwireMetadata(doc, newItem);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
@@ -205,7 +205,7 @@ function completeItem(doc, newItem) {
 	if(CUSTOM_FIELD_MAPPINGS) {
 		processFields(doc, newItem, CUSTOM_FIELD_MAPPINGS, true);
 	}
-	
+
 	newItem.complete();
 }
 
@@ -259,14 +259,13 @@ function init(doc, url, callback, forceLoadRDF) {
 
 			if(_prefixes[prefix]) {
 				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
-
 				//bib and bibo types are special, they use rdf:type to define type
 				var specialNS = [_prefixes['bib'], _prefixes['bibo']];
 				if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
 					value = _prefixes[prefix] + value;
 					prefix = 'rdf';
 				}
-				
+
 				// This debug is for seeing what is being sent to RDF
 				//Zotero.debug(_prefixes[prefix]+prop +"=>"+value);
 				statements.push([url, _prefixes[prefix]+prop, value]);
@@ -275,7 +274,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				if(lcValue.indexOf('blogger') != -1
 					|| lcValue.indexOf('wordpress') != -1
 					|| lcValue.indexOf('wooframework') != -1
-				) {	
+				) {
 					generatorType = 'blogPost';
 				}
 			} else {
@@ -308,7 +307,7 @@ function init(doc, url, callback, forceLoadRDF) {
 			}
 		}
 	}
-	
+
 	if(statements.length || forceLoadRDF) {
 		// load RDF translator, so that we don't need to replicate import code
 		var translator = Zotero.loadTranslator("import");
@@ -317,13 +316,12 @@ function init(doc, url, callback, forceLoadRDF) {
 			_haveItem = true;
 			completeItem(doc, newItem);
 		});
-		
+
 		translator.getTranslatorObject(function(rdf) {
 			for(var i=0; i<statements.length; i++) {
-				var statement = statements[i];			
+				var statement = statements[i];
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
-
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
@@ -462,13 +460,13 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
 	}
-	
+
 	//fall back to some other date options
 	if(!newItem.date) {
 		newItem.date = getContentText(doc, 'citation_online_date')
 			|| getContentText(doc, 'citation_year');
 	}
-	
+
 	//prefer ISSN over eISSN
 	var issn = getContentText(doc, 'citation_issn') ||
 			getContentText(doc, 'citation_eIssn');
@@ -493,16 +491,16 @@ function addHighwireMetadata(doc, newItem) {
 
 	//add snapshot
 	newItem.attachments.push({document:doc, title:"Snapshot"});
-	
+
 	//store PMID in Extra and as a link attachment
 	//e.g. http://www.sciencemag.org/content/332/6032/977.full
 	var PMID = getContentText(doc, 'citation_pmid');
 	if(PMID) {
 		if(newItem.extra) newItem.extra += '\n';
 		else newItem.extra = '';
-		
+
 		newItem.extra += 'PMID: ' + PMID;
-		
+
 		newItem.attachments.push({
 			title: "PubMed entry",
 			url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
@@ -525,16 +523,16 @@ function addOtherMetadata(doc, newItem) {
 		try {
 			var parsely = JSON.parse(parselyJSON);
 		} catch(e) {}
-		
+
 		if(parsely) {
 			if(!newItem.title && parsely.title) {
 				newItem.title = parsely.title;
 			}
-			
+
 			if(!newItem.url && parsely.url) {
 				newItem.url = parsely.url;
 			}
-			
+
 			if(!newItem.date && parsely.pub_date) {
 				var date = new Date(parsely.pub_date);
 				if(!isNaN(date.getUTCFullYear())) {
@@ -545,11 +543,11 @@ function addOtherMetadata(doc, newItem) {
 					}, true);
 				}
 			}
-			
+
 			if(!newItem.creators.length && parsely.author) {
 				newItem.creators.push(ZU.cleanAuthor(''+parsely.author, 'author'));
 			}
-			
+
 			if(!newItem.tags.length && parsely.tags && parsely.tags.length) {
 				newItem.tags = parsely.tags;
 			}
@@ -564,7 +562,7 @@ function addLowQualityMetadata(doc, newItem) {
 		Z.debug("Title was not found in meta tags. Using document title as title");
 		newItem.title = doc.title;
 	}
-	
+
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
 		if(newItem.publicationTitle) {
@@ -597,13 +595,13 @@ function addLowQualityMetadata(doc, newItem) {
 	if(!newItem.tags.length) {
 		 newItem.tags = ZU.xpathText(doc, '//x:meta[@name="keywords"]/@content', namespaces);
 	}
-	
+
 	//We can try getting abstract from 'description'
 	if(!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
 			ZU.xpathText(doc, '//x:meta[@name="description"]/@content', namespaces) || '');
 	}
-	
+
 	if(!newItem.url) {
 		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href');
 	}
@@ -611,9 +609,9 @@ function addLowQualityMetadata(doc, newItem) {
 		newItem.url = doc.location.href;
 	}
 
-	
+
 	newItem.libraryCatalog = doc.location.host;
-	
+
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 }
@@ -641,11 +639,11 @@ function getAuthorFromByline(doc, newItem) {
 		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
 		for(var j=0; j<byline.length; j++) {
 			if (!byline[j].textContent.trim()) continue;
-			
+
 			bylines.push(byline[j]);
 		}
 	}
-	
+
 	var actualByline;
 	if(!bylines.length) {
 		Z.debug("No byline found.");
@@ -656,12 +654,12 @@ function getAuthorFromByline(doc, newItem) {
 		Z.debug(bylines.length + " bylines found:");
 		Z.debug(bylines.map(function(n) { return ZU.trimInternal(n.textContent)}).join('\n'));
 		Z.debug("Locating the one closest to title.");
-		
+
 		//find the closest one to the title (in DOM)
 		actualByline = false;
 		var parentLevel = 1;
 		var skipList = [];
-		
+
 		// Wrap title in quotes so we can use it in the xpath
 		var xpathTitle = newItem.title.toLowerCase();
 		if(xpathTitle.indexOf('"') != -1) {
@@ -676,7 +674,7 @@ function getAuthorFromByline(doc, newItem) {
 		} else {
 			xpathTitle = '"' + xpathTitle + '"';
 		}
-		
+
 		var titleXPath = './/*[normalize-space(translate(text(),"ABCDEFGHJIKLMNOPQRSTUVWXYZ\u00a0","abcdefghjiklmnopqrstuvwxyz "))='
 			+ xpathTitle + ']';
 		Z.debug("Looking for title using: " + titleXPath);
@@ -684,7 +682,7 @@ function getAuthorFromByline(doc, newItem) {
 			Z.debug("Parent level " + parentLevel);
 			for(var i=0; i<bylines.length; i++) {
 				if(skipList.indexOf(i) !== -1) continue;
-				
+
 				if(parentLevel == 1) {
 					//skip bylines that contain bylines
 					var containsBylines = false;
@@ -697,7 +695,7 @@ function getAuthorFromByline(doc, newItem) {
 						continue;
 					}
 				}
-				
+
 				var bylineParent = bylines[i];
 				for(var j=0; j<parentLevel; j++) {
 					bylineParent = bylineParent.parentElement;
@@ -707,7 +705,7 @@ function getAuthorFromByline(doc, newItem) {
 					skipList.push(i);
 					continue;
 				}
-				
+
 				if(ZU.xpath(bylineParent, titleXPath).length) {
 					if(actualByline) {
 						//found more than one, bail
@@ -717,11 +715,11 @@ function getAuthorFromByline(doc, newItem) {
 					actualByline = bylines[i];
 				}
 			}
-			
+
 			parentLevel++;
 		}
 	}
-	
+
 	if(actualByline) {
 		var byline = ZU.trimInternal(actualByline.textContent);
 		Z.debug("Extracting author(s) from byline: " + byline);
@@ -744,7 +742,7 @@ function getAuthorFromByline(doc, newItem) {
 						//skip some odd splits and twitter handles
 						continue;
 					}
-					
+
 					if(authors[i].split(/\s/).length == 1) {
 						//probably corporate author
 						newItem.creators.push({
@@ -795,15 +793,28 @@ function finalDataCleanup(doc, newItem) {
 		// because most of the time they are not right
 		newItem.tags = [];
 	}
-	
+
 	//Cleanup DOI
 	if (newItem.DOI){
 		newItem.DOI =newItem.DOI.replace(/^doi:\s*/, "");
 	}
-	
+
+	// Add DOI to non-supported item types
+	if (newItem.DOI && !ZU.fieldIsValidForType("DOI", newItem.itemType)) {
+		if (newItem.extra){
+			newItem.extra += "\nDOI: " + newItem.DOI;
+		}
+		else {
+			newItem.extra = "DOI: " + newItem.DOI;
+		}
+	}
+
+
+
+
 	//remove itemID - comes from RDF translator, doesn't make any sense for online data
 	newItem.itemID = "";
-	
+
 	//worst case, if this is not called from another translator, use URL for title
 	if(!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
 }

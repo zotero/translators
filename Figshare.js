@@ -9,28 +9,28 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-09-19 21:47:31"
+	"lastUpdated": "2017-06-16 19:31:52"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Figshare translator Copyright © 2013-2016 Sebastian Karcher
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -109,14 +109,19 @@ function scrape(doc, url) {
 			//place DOI in DOI field for journal articles, into Extra otherwise
 			if (DOI) {
 				DOI = DOI.replace(/^doi:?\s*/i, "")
-				if (item.itemType == "journalArticle") {
+				if (ZU.fieldIsValidForType("DOI", item.itemType)) {
 					item.DOI = DOI;
 				}
-				else if (DOI) {
-					item.extra = "DOI:" + DOI;
+				else {
+					if (item.extra) {
+						if (item.extra.search(/^DOI:/) == -1) {
+							item.extra += "\nDOI: " + DOI;
+						}
+					} else {
+						item.extra = "DOI: " + DOI;
+					}
 				}
 			}
-
 			item.complete();
 		});
 		translator.translate();
@@ -167,7 +172,7 @@ var testCases = [
 				],
 				"date": "October 4, 2013",
 				"abstractNote": "Pertussis cases are shown by the black line, with each value representing a week of the year. The percentage of adolescent and adult cases (≥15 years old) per year is shown in red circles. The data were obtained from the Ministry of Health, Labor and Welfare of Japan Infectious Disease Surveillance data. Data regarding the number of adolescent and adult cases in 2012 were not available.",
-				"extra": "DOI:10.1371/journal.pone.0077165.g001",
+				"extra": "DOI: 10.1371/journal.pone.0077165.g001",
 				"libraryCatalog": "Figshare",
 				"url": "https://figshare.com/articles/_Number_of_reported_pertussis_cases_per_week_in_Japan_from_2002_to_2012_/815480",
 				"attachments": [
@@ -189,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://figshare.com/articles/search?q=labor&quick=1&x=0&y=0",
+		"url": "https://figshare.com/search?q=labor&quick=1&x=0&y=0",
 		"defer": true,
 		"items": "multiple"
 	},

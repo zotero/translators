@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-06-04 17:59:52"
+	"lastUpdated": "2017-06-16 19:28:35"
 }
 
 /*
@@ -73,18 +73,21 @@ function scrape(doc, type) {
 		if(item.tags.length == 1 && !item.tags[0]) {
 			item.tags = [];
 		}
-		
+
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		}
 
-		if (item.itemType == "bookSection") {
-			if (item.DOI){
-				if (item.extra) item.extra += "\nDOI: " + item.DOI;
-				else item.extra = "DOI: " + item.DOI;
+		if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)){
+			if (item.extra) {
+				if (item.extra.search(/^DOI:/) == -1) {
+					item.extra += "\nDOI: " + DOI;
+				}
+			} else {
+				item.extra = "DOI: " + DOI;
 			}
 		}
-
+		
 		item.complete();
 	});
 	translator.translate();
