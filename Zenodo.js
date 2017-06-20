@@ -14,24 +14,24 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2016, 2017 Philipp Zumstein & Sebastian Karcher
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -133,7 +133,7 @@ function scrape(doc, url) {
 		var type = text.match(/"type": "(.+?)"/)[1]
 		text = text.replace(/publisher_place/, "publisher-place");
 		text = text.replace(/container_title/, "container-title");
-	
+
 		var trans = Zotero.loadTranslator('import');
 		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 		trans.setString(text);
@@ -143,8 +143,8 @@ function scrape(doc, url) {
 				item.notes.push({"note": item.extra});
 				item.extra = "";
 			}
-			
-			if (!item.DOI) {
+
+			if (!item.DOI && doi) {
 				item.extra = "DOI: " + doi;
 			}
 			//workaround while we don't have proper item type for data
@@ -156,7 +156,7 @@ function scrape(doc, url) {
 					item.extra = "type: dataset";
 				}
 			}
-			
+
 			//get PDF attachment, otherwise just snapshot.
 			if (pdfURL) {
 				item.attachments.push({url:pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf"})
@@ -167,16 +167,16 @@ function scrape(doc, url) {
 			for (var i = 0; i<tags.length; i++) {
 				item.tags.push(tags[i].content);
 			}
-			
+
 			//something is odd with zenodo's author parsing to CSL on some pages; fix it
-			//e.g. https://zenodo.org/record/569323 
+			//e.g. https://zenodo.org/record/569323
 			for (var i = 0; i< item.creators.length; i++) {
 				if (!item.creators[i].firstName && item.creators[i].lastName.indexOf(",")!=-1) {
 					item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
 					item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
 				}
 			}
-			
+
 			//Don't use Zenodo as university for theses
 			if (item.itemType == "thesis" && item.publisher == "Zenodo") {
 				item.publisher = "";
@@ -184,13 +184,13 @@ function scrape(doc, url) {
 			if (item.date) item.date = ZU.strToISO(item.date);
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
-			
+
 			//Zenodo uses some non-existent CSL types we're fixing.
 			var zoteroType = {
 				"figure": "artwork",
 	 			"article": "report"
 			}
-		
+
 			if (item.itemType == "document" && zoteroType[type]) {
 				item.itemType = zoteroType[type];
 			}
