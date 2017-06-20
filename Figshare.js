@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-06-16 19:31:52"
+	"lastUpdated": "2017-06-20 03:57:47"
 }
 
 /*
@@ -81,8 +81,6 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var risURL = ZU.xpathText(doc, '//div[@class="exports-wrap section"]/div/a[contains(text(), "Ref. manager")]/@href');
-	var DOI = ZU.xpathText(doc, '//meta[@name="DC.identifier"]/@content');
-	//Z.debug(DOI)
 	//Z.debug(risURL)
 	ZU.HTTP.doGet(risURL, function (text) {
 		//Z.debug(text)
@@ -93,7 +91,7 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			//Authors are firstName LastName - fix
-			for (i in item.creators) {
+			for (i = 0; i<item.creators.length; i++) {
 				//sometimes there _is_ a comma delimiter
 				if (!item.creators[i].firstName) {
 					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, "author");
@@ -106,22 +104,7 @@ function scrape(doc, url) {
 				title: "Figshare Snapshot",
 				mimeType: "text/html"
 			});
-			//place DOI in DOI field for journal articles, into Extra otherwise
-			if (DOI) {
-				DOI = DOI.replace(/^doi:?\s*/i, "")
-				if (ZU.fieldIsValidForType("DOI", item.itemType)) {
-					item.DOI = DOI;
-				}
-				else {
-					if (item.extra) {
-						if (item.extra.search(/^DOI:/) == -1) {
-							item.extra += "\nDOI: " + DOI;
-						}
-					} else {
-						item.extra = "DOI: " + DOI;
-					}
-				}
-			}
+			
 			item.complete();
 		});
 		translator.translate();
