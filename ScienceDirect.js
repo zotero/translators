@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-21 15:06:42"
+	"lastUpdated": "2017-06-22 12:34:14"
 }
 
 function detectWeb(doc, url) {
@@ -56,7 +56,7 @@ function getPDFLink(doc) {
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data');
 	}
-	if (!pdfLink) {
+/*	if (!pdfLink) {
 		var mainPdf = ZU.xpath(doc, '//a[contains(@href, "main.pdf")]');
 		//we only look at the first match
 		if (mainPdf.length>0) {
@@ -66,7 +66,7 @@ function getPDFLink(doc) {
 				pdfLink = mainPdf[0].href;
 			}
 		}
-	}
+	} */
 	return pdfLink;
 }
 
