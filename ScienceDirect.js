@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-10 05:15:05"
+	"lastUpdated": "2017-06-21 15:06:42"
 }
 
 function detectWeb(doc, url) {
@@ -49,13 +49,23 @@ function detectWeb(doc, url) {
 }
 
 function getPDFLink(doc) {
-	Z.debug(ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data'));
 	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	}
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data');
+	}
+	if (!pdfLink) {
+		var mainPdf = ZU.xpath(doc, '//a[contains(@href, "main.pdf")]');
+		//we only look at the first match
+		if (mainPdf.length>0) {
+			var classes = mainPdf[0].class || '';
+			//Z.debug(classes);
+			if (mainPdf[0].title!="Purchase PDF" && classes.indexOf('excerptLink')==-1 && classes.indexOf('purchaseSprite')==-1 ) {
+				pdfLink = mainPdf[0].href;
+			}
+		}
 	}
 	return pdfLink;
 }
@@ -462,7 +472,6 @@ var testCases = [
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"ISSN": "0896-6273",
 				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "5",
 				"journalAbbreviation": "Neuron",
 				"libraryCatalog": "ScienceDirect",
@@ -569,43 +578,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"title": "8 - Introduction to Discrete Dislocation Statics and Dynamics",
 				"creators": [
 					{
-						"lastName": "Raabe",
-						"firstName": "Dierk",
+						"lastName": "Dierk",
+						"firstName": "Raabe",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "Janssens",
-						"firstName": "Koenraad G. F.",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Raabe",
-						"firstName": "Dierk",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Kozeschnik",
-						"firstName": "Ernst",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Miodownik",
-						"firstName": "Mark A.",
-						"creatorType": "editor"
-					},
-					{
-						"lastName": "Nestler",
-						"firstName": "Britta",
-						"creatorType": "editor"
 					}
 				],
 				"date": "2007",
 				"ISBN": "9780123694683",
-				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
 				"bookTitle": "Computational Materials Engineering",
+				"extra": "DOI: 10.1016/B978-012369468-3/50008-3",
 				"libraryCatalog": "ScienceDirect",
 				"pages": "267-316",
 				"place": "Burlington",
@@ -710,7 +694,6 @@ var testCases = [
 				"DOI": "10.1016/j.bpj.2011.11.4028",
 				"ISSN": "0006-3495",
 				"abstractNote": "To permit access to DNA-binding proteins involved in the control and expression of the genome, the nucleosome undergoes structural remodeling including unwrapping of nucleosomal DNA segments from the nucleosome core. Here we examine the mechanism of DNA dissociation from the nucleosome using microsecond timescale coarse-grained molecular dynamics simulations. The simulations exhibit short-lived, reversible DNA detachments from the nucleosome and long-lived DNA detachments not reversible on the timescale of the simulation. During the short-lived DNA detachments, 9 bp dissociate at one extremity of the nucleosome core and the H3 tail occupies the space freed by the detached DNA. The long-lived DNA detachments are characterized by structural rearrangements of the H3 tail including the formation of a turn-like structure at the base of the tail that sterically impedes the rewrapping of DNA on the nucleosome surface. Removal of the H3 tails causes the long-lived detachments to disappear. The physical consistency of the CG long-lived open state was verified by mapping a CG structure representative of this state back to atomic resolution and performing molecular dynamics as well as by comparing conformation-dependent free energies. Our results suggest that the H3 tail may stabilize the nucleosome in the open state during the initial stages of the nucleosome remodeling process.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "4",
 				"journalAbbreviation": "Biophysical Journal",
 				"libraryCatalog": "ScienceDirect",
@@ -880,6 +863,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -890,7 +877,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com.libezproxy2.syr.edu/science/article/pii/0022460X72904348",
+		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
 		"items": [
 			{
 				"itemType": "journalArticle",
