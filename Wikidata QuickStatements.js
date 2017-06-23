@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-05-27 23:30:00"
+	"lastUpdated": "2017-06-22 07:00:00"
 }
 
 
@@ -88,7 +88,7 @@ var typeMapping = {
 
 //simple properties with string values can be simply mapped here
 var propertyMapping = {
-	"P356" : "doi",
+	"P356" : "DOI",
 	"P953" : "url",
 	"P478" : "volume",
 	"P433" : "issue",
