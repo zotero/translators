@@ -125,11 +125,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.zotero.org/groups/all_things_zotero/items/itemKey/HXTTNJGD",
+		"url": "https://www.zotero.org/groups/729/all_things_zotero/items/itemKey/HXTTNJGD",
 		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Expert Searching, Zotero: A New Breed of Search Tool",
 				"creators": [
 					{
 						"creatorType": "author",
@@ -137,80 +138,33 @@ var testCases = [
 						"lastName": "Desirto"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Expert Searching, Zotero: A New Bread of Search Tool",
-				"publicationTitle": "Medical Library Association Newsletter",
 				"date": "April 2007",
-				"callNumber": "0000",
-				"extra": "Cited by 0000"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.zotero.org/marksample/items/collectionKey/5RN69IBP/itemKey/58VT7DAA",
-		"defer": true,
-		"items": [
-			{
-				"itemType": "book",
-				"creators": [
-					{
-						"creatorType": "author",
-						"firstName": "Mark",
-						"lastName": "Osteen"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"extra": "00000 \nCited by 0000",
+				"publicationTitle": "Medical Library Association Newsletter",
 				"attachments": [],
-				"title": "American Magic and Dread: Don DeLillo’s Dialogue with Culture",
-				"place": "Philadelphia",
-				"publisher": "University of Pennsylvania Press",
-				"date": "2000",
-				"ISBN": "0812235517",
-				"shortTitle": "American Magic"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
 		"url": "https://www.zotero.org/groups/all_things_zotero/items",
-		"items": "multiple",
-		"defer": true
+		"defer": true,
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.zotero.org/groups/all_things_zotero/items/collectionKey/XX99JMW8",
-		"items": "multiple",
-		"defer": true
-	},
-	{
-		"type": "web",
-		"url": "https://www.zotero.org/marksample/items",
-		"items": "multiple",
-		"defer": true
-	},
-	{
-		"type": "web",
-		"url": "https://www.zotero.org/marksample/items/collectionKey/5RN69IBP",
-		"items": "multiple",
-		"defer": true
-	},
-	{
-		"type": "web",
-		"url": "https://www.zotero.org/marksample/items/collection/5RN69IBP",
-		"items": "multiple",
-		"defer": true
+		"defer": true,
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.zotero.org/groups/devtesting/items/tag/tag2",
-		"items": "multiple",
-		"defer": true
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
