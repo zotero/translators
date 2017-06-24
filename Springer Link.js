@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-11 18:58:14"
+	"lastUpdated": "2017-06-24 17:34:19"
 }
 
 function detectWeb(doc, url) {
@@ -134,19 +134,16 @@ function complementItem(doc, item) {
 			}
 		}
 		if(!item.ISBN) {
-			item.ISBN = ZU.xpathText(doc,
-				'//dd[@id="abstract-about-book-print-isbn" or\
-						@id="abstract-about-book-online-isbn"]'
-			);
+			item.ISBN = ZU.xpathText(doc, '//dd[@id="abstract-about-book-print-isbn" or @id="abstract-about-book-online-isbn"]')
+				|| ZU.xpathText(doc, '//span[@id="print-isbn" or @id="electronic-isbn"]');
 		}
 		//series/seriesNumber
 		if(!item.series) {
-			item.series = ZU.xpathText(doc,
-				'//dd[@id="abstract-about-book-series-title"]');
+			item.series = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-title"]')
+				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]');;
 		}
 		if(!item.seriesNumber) {
-			item.seriesNumber = ZU.xpathText(doc,
-				'//dd[@id="abstract-about-book-series-volume"]');
+			item.seriesNumber = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-volume"]');
 		}
 	}
 	//add the DOI to extra for non journal articles
@@ -234,7 +231,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
+		"url": "https://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -244,21 +241,6 @@ var testCases = [
 						"firstName": "Jan J.",
 						"lastName": "Koenderink",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Forsyth",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Philip",
-						"lastName": "Torr",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Andrew",
-						"lastName": "Zisserman",
-						"creatorType": "editor"
 					}
 				],
 				"date": "2008/10/12",
@@ -270,10 +252,9 @@ var testCases = [
 				"libraryCatalog": "link.springer.com",
 				"pages": "1-1",
 				"proceedingsTitle": "Computer Vision – ECCV 2008",
-				"publisher": "Springer Berlin Heidelberg",
-				"rights": "©2008 Springer-Verlag Berlin Heidelberg",
+				"publisher": "Springer, Berlin, Heidelberg",
 				"series": "Lecture Notes in Computer Science",
-				"url": "http://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
+				"url": "https://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -283,14 +264,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Computer Appl. in Arts and Humanities",
-					"Computer Graphics",
-					"Computer Imaging, Vision, Pattern Recognition and Graphics",
-					"Data Mining and Knowledge Discovery",
-					"Image Processing and Computer Vision",
-					"Pattern Recognition"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
