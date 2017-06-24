@@ -2,14 +2,14 @@
 	"translatorID": "f8b5501a-1acc-4ffa-a0a5-594add5e6bd3",
 	"label": "US National Archives Research Catalog",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://arcweb\\.archives\\.gov",
+	"target": "^https?://catalog\\.archives\\.gov",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-17 10:28:58"
+	"lastUpdated": "2017-06-24 07:29:33"
 }
 
 /*
@@ -67,7 +67,11 @@ function doWeb(doc, url) {
 				if (creators[i].indexOf(", ")>-1) {
 					item.creators.push(ZU.cleanAuthor(creators[i], "author"));	
 				} else {
-					item.creators.push({'lastName': creators[i], 'creatorType': 'author'});
+					creators[i] = creators[i].replace(/\.? ?\d\d?\/\d\d?\/\d\d\d\d-\d\d?\/\d\d?\/\d\d\d\d/, '');
+					if (creators[i].length>255) {
+						creators[i] = creators[i].substr(0,252) + '...';
+					}
+					item.creators.push({'lastName': creators[i].trim(), 'creatorType': 'author', 'fieldMode': true});
 				}
 			}
 			if (json[0].productionDates) {
@@ -105,8 +109,9 @@ var testCases = [
 				"title": "The Struggle for Trade Union Democracy, December 1947",
 				"creators": [
 					{
-						"lastName": "Supreme Commander for the Allied Powers. Economic and Scientific Section. Director for Labor. Labor Division. 8/22/1949-4/28/1952 ",
-						"creatorType": "author"
+						"lastName": "Supreme Commander for the Allied Powers. Economic and Scientific Section. Director for Labor. Labor Division",
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
 				"date": "1945 - 1952",
@@ -134,8 +139,9 @@ var testCases = [
 				"title": "Alien Case File for Francisca Torre Vda De Garcia",
 				"creators": [
 					{
-						"lastName": "Department of Justice. Immigration and Naturalization Service. 6/14/1940-3/1/2003 ",
-						"creatorType": "author"
+						"lastName": "Department of Justice. Immigration and Naturalization Service",
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
 				"date": "1944 - 2003",
