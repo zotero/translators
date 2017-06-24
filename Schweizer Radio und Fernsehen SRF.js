@@ -2,14 +2,14 @@
 	"translatorID": "a8e51f4e-0372-42ad-81a8-bc3dcea6dc03",
 	"label": "Schweizer Radio und Fernsehen SRF",
 	"creator": "ibex, Sebastian Karcher",
-	"target": "^https?://(www\\.)?srf\\.ch/.",
+	"target": "^https?://(www\\.)?srf\\.ch/sendungen/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-25 21:02:50"
+	"lastUpdated": "2017-06-24 22:06:07"
 }
 
 /*
@@ -37,10 +37,10 @@ Barebones re-write. This will work for radio shows, but nothing else & no search
 
 /* Zotero API */
 function detectWeb(doc, url) {
-	if (doc.location.href.match(/.*\/sendungen\/.*/i) && (ZU.xpath(doc, '//h1[@class="article-heading"]').length > 0)) {
+	if (ZU.xpathText(doc, '//h1[@class="article-heading"]')) {
 		return "radioBroadcast";
 	// Archive pages
-	} else if (doc.location.href.match(/.*\/sendungen\/.*/i) && ZU.xpath(doc, '//div[contains(@class, "container_episodes")]').length > 0) {
+	} else if (ZU.xpathText(doc, '//div[contains(@class, "container_episodes")]')) {
 		return "multiple";
 	}
 }
@@ -79,8 +79,15 @@ function scrape(doc) {
 
 	newItem.title = ZU.xpathText(doc, '//h1[@class="article-heading"]');
 	
-	var date = ZU.xpathText(doc, '//li[@class="publication"]');
-	if (date) newItem.date = date.match(/^[^,]+,([^,]+),.+/)[1]
+	var date = ZU.xpathText(doc, '//li[@class="publication"]');Z.debug(date);
+	if (date) {
+		var match = date.match(/^[^,]+,([^,]+),.+/);
+		if (match) {
+			newItem.date = match[1];
+		} else {
+			newItem.date = date;
+		}
+	}
 
 
 	newItem.language = 'de-CH';
