@@ -111,6 +111,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "radioBroadcast",
+				"title": "Micheline Calmy-Rey zu ihrem Rücktritt",
 				"creators": [
 					{
 						"firstName": "Ursula",
@@ -123,18 +124,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://www.srf.ch/sendungen/echo-der-zeit/micheline-calmy-rey-zu-ihrem-ruecktritt",
-				"title": "Micheline Calmy-Rey zu ihrem Rücktritt",
 				"date": "7. September 2011",
 				"language": "de-CH",
-				"programTitle": "Echo der Zeit",
-				"network": "Schweizer Radio und Fernsehen SRF",
 				"libraryCatalog": "Schweizer Radio und Fernsehen SRF",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"network": "Schweizer Radio und Fernsehen SRF",
+				"url": "http://www.srf.ch/sendungen/echo-der-zeit/micheline-calmy-rey-zu-ihrem-ruecktritt",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
