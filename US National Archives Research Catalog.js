@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 				} else {
 					creators[i] = creators[i].replace(/\.? ?\d\d?\/\d\d?\/\d\d\d\d-\d\d?\/\d\d?\/\d\d\d\d/, '');
 					if (creators[i].length>255) {
-						creators[i] = creators[i].substr(0,252) + '...';
+						creators[i] = creators[i].substr(0,251) + '...';
 					}
 					item.creators.push({'lastName': creators[i].trim(), 'creatorType': 'author', 'fieldMode': true});
 				}
