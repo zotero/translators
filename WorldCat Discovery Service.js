@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-17 16:37:52"
+	"lastUpdated": "2017-06-25 19:26:46"
 }
 
 /*
@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 	//single result
 	// generate item and return type
 	var co = getFirstContextObj(doc);
-	if (!co | url.indexOf("?databaseList") == -1) return false;
+	if (!co || url.indexOf("?databaseList") == -1) return false;
 
 	return generateItem(doc, co).itemType;
 }
@@ -193,6 +193,20 @@ function scrape(risURL) {
 				var numPages = item.section.match(/(([lxiv]+,\s*)?\d+)\s*p/);
 				if (numPages) item.numPages = numPages[1];
 			}
+			
+			//the url field sometimes contains an additional label, e.g. for TOC
+			//"url": "Table of contents http://bvbr.bib-bvb.de:8991/...
+			if (item.url) {
+				var posUrl = item.url.indexOf('http');
+				if (posUrl>0) {
+					item.attachments.push({
+						url: item.url.substr(posUrl),
+						title: item.url.substr(0, posUrl),
+						snapshot: false
+					});
+					delete item.url;
+				}
+			}
 
 			item.complete();
 		});
@@ -306,8 +320,12 @@ var testCases = [
 				"publisher": "Hendrickson Publishers Marketing",
 				"series": "Lexham Bible reference series; Lexham Bible reference series.",
 				"shortTitle": "Discourse grammar of the Greek New Testament",
-				"url": "Table of contents http://bvbr.bib-bvb.de:8991/F?func=service&doc_library=BVB01&local_base=BVB01&doc_number=024386228&line_number=0001&func_code=DB_RECORDS&service_type=MEDIA",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Table of contents ",
+						"snapshot": false
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []

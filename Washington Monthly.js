@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-18 16:28:53"
+	"lastUpdated": "2017-06-25 18:58:09"
 }
 
 /*
@@ -108,6 +108,9 @@ function scrape(doc, url) {
 			delete item.publicationTitle;
 			item.blogTitle = "Washington Monthly - " + category.trim();
 		}
+		if (type=="magazineArticle") {
+			item.ISSN = "0043-0633";
+		}
 		item.complete();
 	});
 	translator.translate();
@@ -130,6 +133,7 @@ var testCases = [
 					}
 				],
 				"date": "2011-04-26T16:49:38+00:00",
+				"ISSN": "0043-0633",
 				"abstractNote": "Meet Edward Tufte, the graphics guru to the power elite who is revolutionizing how we see data.",
 				"libraryCatalog": "washingtonmonthly.com",
 				"publicationTitle": "Washington Monthly",
