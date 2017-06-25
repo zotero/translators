@@ -1,7 +1,7 @@
 {
 	"translatorID": "d21dcd90-c997-4e14-8fe0-353b8e19a47a",
 	"label": "SAGE Knowledge",
-	"creator": "ProQuest",
+	"creator": "ProQuest, Philipp Zumstein",
 	"target": "^https?://sk\\.sagepub\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-25 09:54:16"
+	"lastUpdated": "2017-06-25 19:38:38"
 }
 
 /*
    SAGE Knowledge Translator
-   Copyright (C) 2014 ProQuest LLC
+   Copyright (C) 2014 ProQuest LLC, Philipp Zumstein
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -62,8 +62,7 @@ function getItem(doc, url) {
 	//Z.debug(citeLink)
 
 	ZU.doGet(citeLink, function(text) {
-		var re = /<textarea name="records".*?>([\s\S]*?)<\/textarea>/;
-		var match = text//re.exec(text)[1]
+		var match = text
 			.replace(/NV\s+-\s+1\n/, "")
 			.replace(/^AU\s+-\s+,\s+$/m, '')
 			.replace(/^(AU\s+-\s+.+?),? Ph\.? ?D\.?\b/mg, '$1')
