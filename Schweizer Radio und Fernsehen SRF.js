@@ -52,7 +52,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {}
 	var titles = ZU.xpath(doc, '//div[@class="module-content"]/h3/a');
-	for (var i in titles){
+	for (var i = 0; i<titles.length; i++){
 		items[titles[i].href] = titles[i].textContent.trim();	
 	}
 	Zotero.selectItems(items, function (items) {
@@ -79,7 +79,8 @@ function scrape(doc) {
 
 	newItem.title = ZU.xpathText(doc, '//h1[@class="article-heading"]');
 	
-	var date = ZU.xpathText(doc, '//li[@class="publication"]');Z.debug(date);
+	var date = ZU.xpathText(doc, '//li[@class="publication"]');
+	//Z.debug(date);
 	if (date) {
 		var match = date.match(/^[^,]+,([^,]+),.+/);
 		if (match) {
@@ -95,7 +96,6 @@ function scrape(doc) {
 	newItem.network = "Schweizer Radio und Fernsehen SRF";
 	newItem.abstractNote = ZU.xpathText(doc, '//p[contains(@class, "lead-text")]');
 	
-
 	var runningTime = ZU.xpath(doc, '//div[@id = "article"]//a[@class = "beitrag_hoeren"]');
 	if (runningTime.length > 0) {
 		newItem.runningTime = ZU.trimInternal(runningTime[0].textContent.match(/(\d|:)+/)[0]);
