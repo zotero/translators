@@ -1,4 +1,4 @@
-52  # Increment number when modifying file
+53  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -96,3 +96,5 @@ a77690cf-c5d1-8fc4-110f-d1fc765dcf88 # ProQuest Legacy.js, see issue #660
 cd77f1e5-507f-4c41-a6d2-bda5fa6f8694 # Readability was shut down on September 30, 2016
 6f5f1b24-7519-4314-880f-d7004fbcfe7e # ReliefWeb is now covered by Embedded Metadata translator
 882f70a8-b8ad-403e-bd76-cb160224999d # Vanderbilt eJournals is now coverd by OJS translator
+c0d7d260-d795-4782-9446-f6c403a7922c # ScienceLink Japan closed on 2014-03-31
+dfec8317-9b59-4cc5-8771-cdcef719d171 # Springer Science is now covered by BioMedCentral translator
