@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-22 12:34:14"
+	"lastUpdated": "2017-06-22 16:54:54"
 }
 
 function detectWeb(doc, url) {
@@ -49,24 +49,24 @@ function detectWeb(doc, url) {
 }
 
 function getPDFLink(doc) {
-	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+	var pdfLink = ZU.xpathText(doc, '//div[@id="articleToolbar"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
 	}
 	if (!pdfLink) {
 		pdfLink = ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data');
 	}
-/*	if (!pdfLink) {
-		var mainPdf = ZU.xpath(doc, '//a[contains(@href, "main.pdf")]');
+	if (!pdfLink) {
+		var mainPdf = ZU.xpath(doc, '//div[@id="articleToolbar" or @class="Toolbar"]//a[contains(@href, "main.pdf")]');
 		//we only look at the first match
 		if (mainPdf.length>0) {
 			var classes = mainPdf[0].class || '';
 			//Z.debug(classes);
-			if (mainPdf[0].title!="Purchase PDF" && classes.indexOf('excerptLink')==-1 && classes.indexOf('purchaseSprite')==-1 ) {
+			if (mainPdf[0].title!="Purchase PDF" && classes.indexOf('excerptLink')==-1 && classes.indexOf('purchaseSprite')==-1 && classes.indexOf('ref-article-pdf')==-1 && classes.indexOf('cLink')==-1) {
 				pdfLink = mainPdf[0].href;
 			}
 		}
-	} */
+	}
 	return pdfLink;
 }
 
@@ -705,10 +705,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
