@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-24 20:43:43"
+	"lastUpdated": "2017-06-26 04:35:21"
 }
 
 /*
@@ -83,6 +83,14 @@ function scrape(doc, url) {
 		if(number) item.reportNumber= "ID " + number[1];
 		item.place = "Rochester, NY";
 		if (abstract) item.abstractNote = abstract.trim(); 
+		//The pdfurl in the meta tag 'citation_pdf_url' is just pointing
+		//to the entry itself and there seems to be no stable, reliable
+		//one-click pdfurl anyhow. --> Delete this non-working attachment.
+		for (var i=0; i<item.attachments.length; i++) {
+			if (item.attachments[i].title=="Full Text PDF") {
+				item.attachments.splice(i, 1);
+			}
+		}
 
 		item.complete();
 	});
@@ -92,17 +100,17 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://papers.ssrn.com/sol3/results.cfm?txtKey_Words=europe",
+		"url": "https://papers.ssrn.com/sol3/results.cfm?txtKey_Words=europe",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://papers.ssrn.com/sol3/JELJOUR_Results.cfm?form_name=journalBrowse&journal_id=1747960",
+		"url": "https://papers.ssrn.com/sol3/JELJOUR_Results.cfm?form_name=journalBrowse&journal_id=1747960",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=16042",
+		"url": "https://papers.ssrn.com/sol3/cf_dev/AbsByAuth.cfm?per_id=16042",
 		"items": "multiple"
 	},
 	{
@@ -134,10 +142,6 @@ var testCases = [
 				"shortTitle": "Who Doesn't Support the Genocide Convention?",
 				"url": "https://papers.ssrn.com/abstract=1450387",
 				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot"
 					}
