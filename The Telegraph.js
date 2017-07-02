@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-05-28 21:24:22"
+	"lastUpdated": "2017-07-02 15:26:57"
 }
 
 /*
@@ -282,55 +282,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.telegraph.co.uk/news/0/general-election-2017-polls-latest-odds-tracker/",
+		"url": "http://www.telegraph.co.uk/news/2017/06/09/election-results-2017-theresa-may-clings-power-needs-support/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "General election 2017: Polls and latest odds tracker",
+				"title": "Election results 2017: Theresa May says sorry to defeated Tory candidates as she eyes deal with DUP",
 				"creators": [
 					{
-						"firstName": "Ashley",
-						"lastName": "Kirk",
+						"firstName": "Laura",
+						"lastName": "Hughes",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Patrick",
-						"lastName": "Scott",
+						"firstName": "Jack",
+						"lastName": "Maidment",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Barney",
+						"lastName": "Henderson",
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-05-28",
+				"date": "2017-06-09",
 				"ISSN": "0307-1235",
-				"abstractNote": "Labour continue to narrow the gap on the Conservatives with one YouGov poll putting them within five points of Theresa May's party.",
+				"abstractNote": "Theresa May has said sorry to the Tory MPs and ministers who lost their seats as a result of her decision to call a snap general election which cost the Conservatives their majority.",
 				"language": "en-GB",
 				"libraryCatalog": "www.telegraph.co.uk",
 				"publicationTitle": "The Telegraph",
-				"shortTitle": "General election 2017",
-				"url": "http://www.telegraph.co.uk/news/0/general-election-2017-polls-latest-odds-tracker/",
+				"shortTitle": "Election results 2017",
+				"url": "http://www.telegraph.co.uk/news/2017/06/09/election-results-2017-theresa-may-clings-power-needs-support/",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
 				"tags": [
-					"Brexit",
 					"Conservative Party",
-					"Data story",
-					"Data top stories",
-					"David Cameron",
-					"EU Referendum",
 					"General Election 2017",
-					"Green Party",
-					"House of Commons",
 					"Jeremy Corbyn",
 					"Labour Party",
-					"Liberal Democrats",
 					"News",
 					"Politics",
-					"Standard",
 					"Theresa May",
-					"Tim Farron",
-					"UK Independence Party (UKIP)",
 					"UK News"
 				],
 				"notes": [],
