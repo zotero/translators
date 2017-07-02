@@ -244,7 +244,7 @@ function generateItem(item, zoteroType, resource) {
 		// set series type
 		Zotero.RDF.addStatement(series, rdf+"type", n.bib+"Series", false);
 		// add relationship to resource
-		Zotero.RDF.addStatement((containerElement ? containerElement : resource), n.dcterms+"isPartOf", series, false);
+		Zotero.RDF.addStatement(resource, n.dcterms+"isPartOf", series, false);
 	}
 	
 	// generate publisher
