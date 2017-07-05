@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-01 10:25:25"
+	"lastUpdated": "2017-07-05 10:59:44"
 }
 
 /*
@@ -95,6 +95,9 @@ function scrape(doc, url) {
 			for (var i=0; i<authors.length; i++) {
 				insertCreator(authors[i].textContent, item);
 			}
+		}
+		if (!item.date) {
+			item.date = ZU.xpathText(doc, '//meta[@name="publish-date"]/@content');
 		}
 		var utcontainer = ZU.xpathText(doc, '(//div[contains(@class, "ut-container")]/span)[1]');
 		//test that we are not already in the date node (name of places should not contain any number)
