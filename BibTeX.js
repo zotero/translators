@@ -7,6 +7,7 @@
 	"maxVersion": "",
 	"priority": 200,
 	"configOptions": {
+		"async": true,
 		"getCollections": true
 	},
 	"displayOptions": {
@@ -18,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-03-11 13:39:28"
+	"lastUpdated": "2017-07-05 19:32:38"
 }
 
 function detectImport() {
@@ -879,7 +880,7 @@ function beginRecord(type, closeChar) {
 					item.publisher=item.backupPublisher;
 					delete item.backupPublisher;
 				}
-				item.complete();
+				return item.complete();
 			}
 			return;
 		} else if(" \n\r\t".indexOf(read) == -1) {		// skip whitespace
@@ -889,30 +890,67 @@ function beginRecord(type, closeChar) {
 }
 
 function doImport() {
-	var read = "", text = "", recordCloseElement = false;
+	if (typeof Promise == 'undefined') {
+		readString(
+			function () {},
+			function (e) {
+				throw e;
+			}
+		);
+	}
+	else {
+		return new Promise(function (resolve, reject) {
+			readString(resolve, reject);
+		});
+	}
+}
+
+function readString(resolve, reject) {
+	var read = "";
 	var type = false;
 	
-	while(read = Zotero.read(1)) {
-		if(read == "@") {
-			type = "";
-		} else if(type !== false) {
-			if(type == "comment") {
-				processComment();
-				type = false;
-			} else if(read == "{") {		// possible open character
-				beginRecord(type, "}");
-				type = false;
-			} else if(read == "(") {		// possible open character
-				beginRecord(type, ")");
-				type = false;
-			} else if(/[a-zA-Z0-9-_]/.test(read)) {
-				type += read;
+	var next = function () {
+		readString(resolve, reject);
+	};
+	
+	try {
+		while (read = Zotero.read(1)) {
+			if(read == "@") {
+				type = "";
+			} else if(type !== false) {
+				if(type == "comment") {
+					processComment();
+					type = false;
+				} else if(read == "{") {		// possible open character
+					// This might return a promise if an item was saved
+					// TODO: When 5.0-only, make sure this always returns a promise
+					var maybePromise = beginRecord(type, "}");
+					if (maybePromise) {
+						maybePromise.then(next);
+						return;
+					}
+				} else if(read == "(") {		// possible open character
+					var maybePromise = beginRecord(type, ")");
+					if (maybePromise) {
+						maybePromise.then(next);
+						return;
+					}
+				} else if(/[a-zA-Z0-9-_]/.test(read)) {
+					type += read;
+				}
 			}
 		}
+		for (var key in jabref.root) {
+			// TODO: Handle promise?
+			if (jabref.root.hasOwnProperty(key)) { jabref.root[key].complete(); }
+		}
 	}
-	for (var key in jabref.root) {
-		if (jabref.root.hasOwnProperty(key)) { jabref.root[key].complete(); }
+	catch (e) {
+		reject(e);
+		return;
 	}
+	
+	resolve();
 }
 
 // some fields are, in fact, macros.  If that is the case then we should not put the
