@@ -86,11 +86,11 @@ function startImport(resolve, reject) {
 
 function importNext(data, resolve, reject) {
 	try {
-		let d;
+		var d;
 		while (d = data.shift()) {
 			var item = new Z.Item();
 			ZU.itemFromCSLJSON(item, d);
-			let maybePromise = item.complete();
+			var maybePromise = item.complete();
 			if (maybePromise) {
 				maybePromise.then(function () {
 					importNext(data, resolve, reject);
