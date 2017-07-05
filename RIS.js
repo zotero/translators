@@ -1793,7 +1793,7 @@ function importNext(resolve, reject) {
 				}
 			}
 			
-			let maybePromise = completeItem(item);
+			var maybePromise = completeItem(item);
 			if (maybePromise) {
 				maybePromise.then(function () {
 					importNext(resolve, reject);
