@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-14 05:35:24"
+	"lastUpdated": "2017-07-05 20:54:39"
 }
 
 /*
@@ -219,6 +219,12 @@ function scrape(doc, url) {
 			item.title += ': ' + item.subtitle;
 			delete item.subtitle;
 		}
+		//in Zotero we cannot allow multiple DOIs
+		if (item.DOI && item.DOI.indexOf(', ')>-1) {
+			item.DOI = ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#PreferredRank")]]/ps:P356)[1]', namespaces)
+				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#NormalRank")]]/ps:P356)[1]', namespaces)
+				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#DeprecatedRank")]]/ps:P356)[1]', namespaces);
+		}
 		if (item.tagString) {
 			var tags = item.tagString.split(', ');
 			for (var j=0; j<tags.length; j++) {
@@ -268,7 +274,7 @@ var testCases = [
 					}
 				],
 				"date": "2002-04-01T00:00:00Z",
-				"DOI": "10.1210/MEND.16.4.0808, 10.1210/ME.16.4.837",
+				"DOI": "10.1210/MEND.16.4.0808",
 				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"publicationTitle": "Molecular Endocrinology",
@@ -553,6 +559,64 @@ var testCases = [
 					"the Holocaust",
 					"war crimes trial"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q30051491",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Characterization of Agouti-Related Protein Binding to Melanocortin Receptors",
+				"creators": [
+					{
+						"firstName": "Ying-kui",
+						"lastName": "Yang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Darren A.",
+						"lastName": "Thompson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chris J.",
+						"lastName": "Dickinson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jill",
+						"lastName": "Wilken",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Greg S.",
+						"lastName": "Barsh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen B. H.",
+						"lastName": "Kent",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ira",
+						"lastName": "Gantz",
+						"creatorType": "author"
+					}
+				],
+				"date": "1999-01-01T00:00:00Z",
+				"DOI": "10.1210/MEND.13.1.0223",
+				"issue": "1",
+				"libraryCatalog": "Wikidata",
+				"pages": "148-155",
+				"publicationTitle": "Molecular Endocrinology",
+				"volume": "13",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
