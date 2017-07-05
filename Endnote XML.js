@@ -682,7 +682,7 @@ function importNext(records, index, resolve, reject) {
 			if (notecache.length > 0){ 
 				newItem.notes.push({note: "The following values have no corresponding Zotero field:<br/>" + notecache.join("<br/>"), tags: ['_EndnoteXML import']})
 			}
-			let maybePromise = newItem.complete();
+			var maybePromise = newItem.complete();
 			if (maybePromise) {
 				maybePromise.then(function () {
 					importNext(records, i + 1, resolve, reject);
