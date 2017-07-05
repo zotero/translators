@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-02 16:12:28"
+	"lastUpdated": "2017-07-05 06:39:28"
 }
 
 /*
@@ -127,6 +127,38 @@ var testCases = [
 				"publicationTitle": "The Sunday Times",
 				"section": "Money",
 				"url": "https://www.thetimes.co.uk/article/weve-come-a-long-way-since-1967-reg-2l5j3gsph",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.thetimes.co.uk/edition/news/british-museum-looks-to-the-future-with-digital-developments-to-control-crowds-3dfczszdz",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "British Museum looks to the future with digital developments to control crowds",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Sanderson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-07-05",
+				"ISSN": "0140-0460",
+				"abstractNote": "The British Museum launched its vision for the future yesterday and indicated that its digital developments will be used to control the enormous crowds that flock to its artefacts. The museum’s...",
+				"libraryCatalog": "www.thetimes.co.uk",
+				"publicationTitle": "The Times",
+				"section": "News",
+				"url": "https://www.thetimes.co.uk/article/british-museum-looks-to-the-future-with-digital-developments-to-control-crowds-3dfczszdz",
 				"attachments": [
 					{
 						"title": "Snapshot"
