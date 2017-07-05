@@ -924,13 +924,13 @@ function readString(resolve, reject) {
 				} else if(read == "{") {		// possible open character
 					// This might return a promise if an item was saved
 					// TODO: When 5.0-only, make sure this always returns a promise
-					let maybePromise = beginRecord(type, "}");
+					var maybePromise = beginRecord(type, "}");
 					if (maybePromise) {
 						maybePromise.then(next);
 						return;
 					}
 				} else if(read == "(") {		// possible open character
-					let maybePromise = beginRecord(type, ")");
+					var maybePromise = beginRecord(type, ")");
 					if (maybePromise) {
 						maybePromise.then(next);
 						return;
