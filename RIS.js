@@ -7,6 +7,7 @@
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
+		"async": true,
 		"getCollections": "true"
 	},
 	"displayOptions": {
@@ -17,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-06-11 22:32:23"
+	"lastUpdated": "2017-07-05 19:32:38"
 }
 
 function detectImport() {
@@ -1701,7 +1702,7 @@ function completeItem(item) {
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
 
-	item.complete();
+	return item.complete();
 }
 
 //creates a new item of specified type
@@ -1713,62 +1714,99 @@ function getNewItem(type) {
 }
 
 function doImport() {
-	//set up import field mapper
-	var maps = [fieldMap, degenerateImportFieldMap];
-	if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
-	importFields = new TagMapper(maps);
-	
-	//prepare some configurable options
-	if(Zotero.getHiddenPref) {
-		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
-			ignoreUnknown = true;
-		}
-		if(Zotero.getHiddenPref("RIS.import.keepID")) {
-			degenerateImportFieldMap.ID = undefined;
-		}
-	}
-	
-	var entry;
-	while(entry = RISReader.nextEntry()) {
-		//determine item type
-		var itemType = exportedOptions.itemType;
-		if(!itemType && entry.tags.TY) {
-			var risType = entry.tags.TY[0].value.trim().toUpperCase();
-			if(exportedOptions.typeMap) {
-				itemType = exportedOptions.typeMap[risType];
+	if (typeof Promise == 'undefined') {
+		startImport(
+			function () {},
+			function (e) {
+				throw e;
 			}
-			if(!itemType) {
-				itemType = importTypeMap[risType];
+		);
+	}
+	else {
+		return new Promise(function (resolve, reject) {
+			startImport(resolve, reject);
+		});
+	}
+}
+
+function startImport(resolve, reject) {
+	try {
+		//set up import field mapper
+		var maps = [fieldMap, degenerateImportFieldMap];
+		if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
+		importFields = new TagMapper(maps);
+		
+		//prepare some configurable options
+		if(Zotero.getHiddenPref) {
+			if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
+				ignoreUnknown = true;
+			}
+			if(Zotero.getHiddenPref("RIS.import.keepID")) {
+				degenerateImportFieldMap.ID = undefined;
 			}
 		}
 		
-		//we allow entries without TY and just use default type
-		if(!itemType) {
-			var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
-			if(entry.tags.TY) {
-				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-					+ ". Defaulting to " + defaultType);
-			} else {
-				Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+		importNext(resolve, reject);
+	}
+	catch (e) {
+		reject(e);
+	}
+}
+
+function importNext(resolve, reject) {
+	try {
+		var entry;
+		while(entry = RISReader.nextEntry()) {
+			//determine item type
+			var itemType = exportedOptions.itemType;
+			if(!itemType && entry.tags.TY) {
+				var risType = entry.tags.TY[0].value.trim().toUpperCase();
+				if(exportedOptions.typeMap) {
+					itemType = exportedOptions.typeMap[risType];
+				}
+				if(!itemType) {
+					itemType = importTypeMap[risType];
+				}
 			}
 			
-			itemType = defaultType;
-		}
-		
-		var item = getNewItem(itemType);
-		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
-		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
-		CitaviCleaner.cleanTags(entry, item);
-		
-		for(var i=0, n=entry.length; i<n; i++) {
-			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
-				processTag(item, entry[i], entry);
+			//we allow entries without TY and just use default type
+			if(!itemType) {
+				var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
+				if(entry.tags.TY) {
+					Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
+						+ ". Defaulting to " + defaultType);
+				} else {
+					Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+				}
+				
+				itemType = defaultType;
+			}
+			
+			var item = getNewItem(itemType);
+			ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
+			EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
+			CitaviCleaner.cleanTags(entry, item);
+			
+			for(var i=0, n=entry.length; i<n; i++) {
+				if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
+					processTag(item, entry[i], entry);
+				}
+			}
+			
+			var maybePromise = completeItem(item);
+			if (maybePromise) {
+				maybePromise.then(function () {
+					importNext(resolve, reject);
+				});
+				return;
 			}
 		}
-		
-		completeItem(item);
+	}
+	catch (e) {
+		reject(e);
 	}
 	
+	resolve();
 }
 
 /********************
