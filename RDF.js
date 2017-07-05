@@ -1206,8 +1206,8 @@ function startImport(resolve, reject) {
 
 function importNext(nodes, index, collections, resolve, reject) {
 	try {
-		for (let i = index; i < nodes.length; i++) {
-			let node = nodes[i];
+		for (var i = index; i < nodes.length; i++) {
+			var node = nodes[i];
 			
 			// type
 			var type = Zotero.RDF.getTargets(node, rdf+"type");
@@ -1230,7 +1230,7 @@ function importNext(nodes, index, collections, resolve, reject) {
 			newItem.itemID = Zotero.RDF.getResourceURI(node);
 			
 			if (importItem(newItem, node)) {
-				let maybePromise = newItem.complete();
+				var maybePromise = newItem.complete();
 				if (maybePromise) {
 					maybePromise.then(function () {
 						importNext(nodes, i + 1, collections, resolve, reject);
