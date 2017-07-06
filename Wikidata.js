@@ -43,6 +43,7 @@ var typeMapping = {
 	"Q686822" : "bill",
 	"Q17928402" : "blogPost",
 	"Q571" : "book",
+	"Q3331189" : "book", // Edition
 	"Q1980247" : "bookSection",
 	"Q2334719" : "case",
 	"Q40056" : "computerProgram",
