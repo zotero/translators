@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 20:54:39"
+	"lastUpdated": "2017-07-06 12:03:00"
 }
 
 /*
@@ -43,6 +43,7 @@ var typeMapping = {
 	"Q686822" : "bill",
 	"Q17928402" : "blogPost",
 	"Q571" : "book",
+	"Q3331189" : "book", // Edition
 	"Q1980247" : "bookSection",
 	"Q2334719" : "case",
 	"Q40056" : "computerProgram",
