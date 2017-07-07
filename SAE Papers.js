@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-24 09:09:38"
+	"lastUpdated": "2017-07-07 05:40:25"
 }
 
 /*
@@ -79,14 +79,6 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function scrape(doc, url) {
-	//the highwire meta tags are now part of the body and not head
-	//which we have to correct here before calling EM translator
-	var head = doc.getElementsByTagName('head');
-	var metasInBody = ZU.xpath(doc, '//body/meta');
-	for (var i=0; i<metasInBody.length; i++) {
-		head[0].append(metasInBody[i]);
-	}
-	
 	var abstract = ZU.xpathText(doc, '//div[@class="dt-scope" and div/div[contains(text(), "Abstract")]]//div[@class="dt-scope-c-content"]');
 	var translator = Zotero.loadTranslator('web');
 	// use the Embedded Metadata translator
