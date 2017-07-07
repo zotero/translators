@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2017-07-06 22:13:01"
+	"lastUpdated": "2017-07-07 11:47:44"
 }
 
 /*
@@ -595,7 +595,7 @@ var BnfClass = function() {
 			//by the users, which is achieved by opening the url with
 			//public ending again.
 			if (url.indexOf('.public')==-1) {
-				url = url + '.public';
+				url = url.replace('.unimarc', '') + '.public';
 			}
 			ZU.doGet(url, function(text) {;
 				newItem.complete();
@@ -652,7 +652,7 @@ function doWeb(doc, url) {
 				if (urls.length > 0) {
 					//Z.debug(urls)
 					Zotero.Utilities.processDocuments(urls, function(doc) {
-						Bnf.processMarcUrl.call(Bnf, doc, url);
+						Bnf.processMarcUrl.call(Bnf, doc, urls[0]);
 					});
 				}
 			});
