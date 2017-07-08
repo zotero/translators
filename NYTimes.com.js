@@ -91,6 +91,20 @@ function scrape(doc, url) {
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 		item.libraryCatalog = "NYTimes.com";
+		// Convert title/tags of NYT archives when in all caps: 
+		if (item.title == item.title.toUpperCase())
+				item.title = ZU.capitalizeTitle(item.title, true);
+		var allcaps = false;
+		for (i=0; i < item.tags.length; i++) {
+			if (item.tags[i] == item.tags[i].toUpperCase())
+				allcaps = true;
+		}
+		if (allcaps) {
+			for (i=0; i < item.tags.length; i++) {
+				item.tags[i] = ZU.capitalizeTitle(item.tags[i], true);
+			}
+		}
+		// PDF attachments are in subURL with key & signature
 		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href | //a[@class="button download-pdf-button"]/@href');
 		if (pdfurl) {
 			ZU.processDocuments(pdfurl, 
@@ -365,6 +379,87 @@ var testCases = [
 					"Russia",
 					"Trump, Donald J",
 					"United States Politics and Government"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://query.nytimes.com/gst/abstract.html?res=9406EFDF153DE532A25751C1A96F9C946791D6CF&login=email&auth=login-email&legacy=true",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Draft Deferment Scored at Rutgers",
+				"creators": [],
+				"date": "1966-09-12",
+				"ISSN": "0362-4331",
+				"abstractNote": "NEW BRUNSWICK, Sept. 11 (AP)--About 1,000 Rutgers University freshmen were urged today by Paul Goodman, author, to go out and campaign for the abolition of the student draft deferment.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"url": "http://query.nytimes.com/gst/abstract.html?res=9406EFDF153DE532A25751C1A96F9C946791D6CF",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "NYTimes Archive PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					""
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.nytimes.com/1970/11/12/archives/ideological-labels-changing-along-with-the-labelmakers-ideological.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Ideological Labels Changing Along With the Label–Makers",
+				"creators": [
+					{
+						"firstName": "Israel",
+						"lastName": "Shenker",
+						"creatorType": "author"
+					}
+				],
+				"date": "1970-11-12",
+				"ISSN": "0362-4331",
+				"abstractNote": "Comment on labeling pol ideology of intellectuals, apropos of Prof N Glazer coming pub of book of essays on subject; Glazer classification of P Goodman, D Macdonald, M Harrington, I Howe and late C W Mills noted; Goodman, Macdonald, Howe, Harrington, Prof Trilling, I Kristol, N Podhoretz, D Bell, B Rustin, Prof H Rosenberg comment; some pors",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "Archives",
+				"url": "https://www.nytimes.com/1970/11/12/archives/ideological-labels-changing-along-with-the-labelmakers-ideological.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "NYTimes Archive PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Bell, Daniel",
+					"Glazer, Nathan",
+					"Goodman, Paul",
+					"Howe, Irving",
+					"Intellectuals",
+					"Kristol, Irving",
+					"Macdonald, Dwight",
+					"Podhoretz, Norman",
+					"Politics and Government",
+					"Trilling, Lionel",
+					"United States"
 				],
 				"notes": [],
 				"seeAlso": []
