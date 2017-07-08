@@ -6,10 +6,13 @@
 	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 100,
+	"configOptions": {
+		"async": true
+	},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 11:41:00"
+	"lastUpdated": "2017-07-05 19:32:38"
 }
 
 function parseInput() {
@@ -54,15 +57,53 @@ function detectImport() {
 }
 
 function doImport() {
-	var parsedData = parseInput();
-	if(!parsedData) return;
-	if(!Array.isArray(parsedData)) parsedData = [parsedData];
-	
-	for(var i=0; i<parsedData.length; i++) {
-		var item = new Z.Item();
-		ZU.itemFromCSLJSON(item, parsedData[i]);
-		item.complete();
+	if (typeof Promise == 'undefined') {
+		startImport(
+			function () {},
+			function (e) {
+				throw e;
+			}
+		);
 	}
+	else {
+		return new Promise(function (resolve, reject) {
+			startImport(resolve, reject);
+		});
+	}
+}
+
+function startImport(resolve, reject) {
+	try {
+		var parsedData = parseInput();
+		if (!parsedData) resolve();
+		if (!Array.isArray(parsedData)) parsedData = [parsedData];
+		importNext(parsedData, resolve, reject);
+	}
+	catch (e) {
+		reject (e);
+	}
+}
+
+function importNext(data, resolve, reject) {
+	try {
+		var d;
+		while (d = data.shift()) {
+			var item = new Z.Item();
+			ZU.itemFromCSLJSON(item, d);
+			var maybePromise = item.complete();
+			if (maybePromise) {
+				maybePromise.then(function () {
+					importNext(data, resolve, reject);
+				});
+				return;
+			}
+		}
+	}
+	catch (e) {
+		reject(e);
+	}
+	
+	resolve();
 }
 
 function doExport() {
