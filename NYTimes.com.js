@@ -90,14 +90,32 @@ function scrape(doc, url) {
 			}
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
-		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href');
+		item.libraryCatalog = "NYTimes.com";
+		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href | //a[@class="button download-pdf-button"]/@href');
 		if (pdfurl) {
-			item.attachments.push({
-				url: pdfurl,
-				title: "NYTimes Archive PDF"
-			});
+			ZU.processDocuments(pdfurl, 
+				function(pdfDoc) {
+					authenticatedPDFURL = pdfDoc.getElementById('archivePDF').src;
+					if (authenticatedPDFURL) {
+						item.attachments.push({
+							title: "NYTimes Archive PDF",
+							mimeType: 'application/pdf',
+							url: authenticatedPDFURL
+						});
+					} else {
+						Z.debug("Could not find authenticated PDF URL");
+						item.complete();
+					}
+				},
+				function() {
+					Z.debug("PDF retrieved: "+authenticatedPDFURL);
+					item.complete();
+				}
+			);
+		} else {
+			Z.debug("Not attempting PDF retrieval");
+			item.complete();
 		}
-		item.complete();
 	});
 	
 	translator.getTranslatorObject(function(trans) {
@@ -158,7 +176,7 @@ var testCases = [
 				"ISSN": "0362-4331",
 				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
 				"language": "en-US",
-				"libraryCatalog": "query.nytimes.com",
+				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF",
 				"attachments": [
@@ -166,10 +184,13 @@ var testCases = [
 						"title": "Snapshot"
 					},
 					{
-						"title": "NYTimes Archive PDF"
+						"title": "NYTimes Archive PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					""
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -193,7 +214,7 @@ var testCases = [
 				"ISSN": "0362-4331",
 				"abstractNote": "The university has found Marc Hauser “solely responsible” for eight instances of scientific misconduct.",
 				"language": "en-US",
-				"libraryCatalog": "www.nytimes.com",
+				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"section": "Education",
 				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html",
@@ -236,6 +257,7 @@ var testCases = [
 				],
 				"date": "2013-06-19",
 				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
+				"libraryCatalog": "NYTimes.com",
 				"blogTitle": "Opinionator",
 				"language": "en-US",
 				"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
@@ -275,7 +297,7 @@ var testCases = [
 				"ISSN": "0362-4331",
 				"abstractNote": "뉴욕타임스는 취재 중 많은 네일숍 직원들이 부당한 대우와 인종차별 및 학대에 흔하게 시달리며 정부 노동자법률기구의 보호도 제대로 받지 못한다는 사실을 발견했다.",
 				"language": "ko-KR",
-				"libraryCatalog": "www.nytimes.com",
+				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"section": "N.Y. / Region",
 				"url": "https://www.nytimes.com/2015/05/10/nyregion/manicurists-in-new-york-area-are-underpaid-and-unprotected.html",
@@ -325,7 +347,7 @@ var testCases = [
 				"ISSN": "0362-4331",
 				"abstractNote": "American spies collected intelligence last summer revealing that Russians were debating how to work with Trump advisers, current and former officials say.",
 				"language": "en-US",
-				"libraryCatalog": "www.nytimes.com",
+				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"section": "Politics",
 				"url": "https://www.nytimes.com/2017/05/24/us/politics/russia-trump-manafort-flynn.html",
