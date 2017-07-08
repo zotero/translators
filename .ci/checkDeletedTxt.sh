@@ -22,7 +22,7 @@ main() {
     declare -a deletions=()
     local failed=0
     # Find all deleted js files
-    deletions+=($(git diff-index --diff-filter=D --name-only $MASTER|grep -v '\.ci'|grep 'js$'))
+    deletions+=($(git diff-index --diff-filter=D --name-only --find-renames $MASTER|grep -v '\.ci'|grep 'js$'))
     if (( ${#deletions[@]} > 0 ));then
         for f in "${deletions[@]}";do
             local id=$(git show $MASTER:"$f"|grepTranslatorId)
