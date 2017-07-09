@@ -35,6 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
+// attr()/text()
+function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.getAttribute(attr):null}var elem=doc.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(doc,selector,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.textContent:null}var elem=doc.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
 	//we use another function name to avoid confusions with the
@@ -82,11 +84,10 @@ function scrape(doc, url) {
 			item.ISSN = "0362-4331";
 		}
 		//Multiple authors are just put into the same Metadata field
-		//we have to split this here
-		var authors = doc.querySelector('meta[name="author"], span[class^="Byline-bylineAuthor--"]').textContent;
-		if (authors == authors.toUpperCase()) // convert to title case if all caps
-			authors = ZU.capitalizeTitle(authors, true);
+		var authors = attr(doc,'meta[name="author"]','content') || text(doc, 'span[class^="Byline-bylineAuthor--"]');
 		if (authors) {
+			if (authors == authors.toUpperCase()) // convert to title case if all caps
+				authors = ZU.capitalizeTitle(authors, true);
 			item.creators = [];
 			var authorsList = authors.split(/,|\band\b/);
 			for (var i=0; i<authorsList.length; i++) {
@@ -95,13 +96,14 @@ function scrape(doc, url) {
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 		item.libraryCatalog = "NYTimes.com";
-		// Convert title/tags of NYT archives when in all caps: 
+		// Convert all caps title of NYT archive pages to title case
 		if (item.title == item.title.toUpperCase())
 				item.title = ZU.capitalizeTitle(item.title, true);
-		var allcaps = false;
+		// Only force all caps to title case when all tags are all caps
+		var allcaps = true;
 		for (i=0; i < item.tags.length; i++) {
-			if (item.tags[i] == item.tags[i].toUpperCase())
-				allcaps = true;
+			if (item.tags[i] != item.tags[i].toUpperCase())
+				allcaps = false;
 		}
 		if (allcaps) {
 			for (i=0; i < item.tags.length; i++) {
