@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-08 22:56:15"
+	"lastUpdated": "2017-07-09 02:19:40"
 }
 
 /*
@@ -58,7 +58,10 @@ function scrape(doc, url) {
 	item.title = attr(doc,'[property="og:title"]','content');
 	item.date = text(doc,'.published-date');
 	item.abstractNote = text(doc,'#content-body- p');
-	item.tags = attr(doc,'meta[name="keywords"]','content').split(", ");
+	var keywords = attr(doc,'meta[name="keywords"]','content');
+	if (keywords) { // so as not to perform a split when keyword string is null
+		item.tags = keywords.split(", ");
+	}
 	item.attachments.push({
 		title: "The Sacramento Bee snapshot",
 		mimeType: "text/html",
@@ -67,7 +70,7 @@ function scrape(doc, url) {
 
 	// Authors
 	var authorMetadata = doc.querySelectorAll('.ng_byline_name');
-	if (authorMetadata) {
+	if (authorMetadata.length) { // querySelectorAll always retuns a NodeList, so test against length instead
 		// when authors are split between multiple selectors, combine them
 		var authorString = '';
 		for (i=0; i < authorMetadata.length; i++) {
@@ -88,7 +91,7 @@ function doWeb(doc, url) { // news & search pages supported, Feature support to 
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
 		articles = [];
-		var titles = doc.querySelectorAll('h2.title a');
+		var titles = doc.querySelectorAll('#site-search-results .title a, .media-body .title a, #story-list .title a, .col-sm-7 .title a');
 		for (var i = 0; i < titles.length; i++) {
 			items[titles[i].href] = titles[i].textContent;
 		}
@@ -241,6 +244,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sacbee.com/search/?q=mcdavid",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sacbee.com/sports/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.sacbee.com/sports/nfl/san-francisco-49ers/",
 		"items": "multiple"
 	}
 ]
