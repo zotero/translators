@@ -40,9 +40,9 @@
 function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.getAttribute(attr):null}var elem=doc.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(doc,selector,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.textContent:null}var elem=doc.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
-	if (/article\d+/.test(url) != false) {
+	if (/article\d+/.test(url)) {
 		return "newspaperArticle";
-	} else if (/(\/((news|sports|entertainment)\/)|(search\/\?q=))|sacbee\.com\/?$/.test(url) != false && getSearchResults(doc, true) ) {
+	} else if (/(\/((news|sports|entertainment)\/)|(search\/\?q=))|sacbee\.com\/?$/.test(url) && getSearchResults(doc, true) ) {
 		return "multiple";
 	}
 }
