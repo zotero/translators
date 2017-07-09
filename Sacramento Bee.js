@@ -42,7 +42,7 @@ function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll
 function detectWeb(doc, url) {
 	if (url.search(/article\d+/) != -1) {
 		return "newspaperArticle";
-	} else if (url.search(/(\/((news|sports|entertainment)\/)|(search\/\?q=))|sacbee\.com\/?$/) != -1) {
+	} else if (url.search(/(\/((news|sports|entertainment)\/)|(search\/\?q=))|sacbee\.com\/?$/) != -1  && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
