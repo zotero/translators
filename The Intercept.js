@@ -40,11 +40,11 @@
 function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.getAttribute(attr):null}var elem=doc.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(doc,selector,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.textContent:null}var elem=doc.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
-	if (url.search(/theintercept.com\/\d{4}\/\d{2}\/\d{2}\//) != -1) {
+	if (/theintercept.com\/\d{4}\/\d{2}\/\d{2}\//.test(url) != false) {
 		return "blogPost";
 	} else if (url.indexOf("/document/") != -1) {
 		return "document";
-	} else if (url.search(/(theintercept.com\/search\/\?s=)|(theintercept.com\/?$)/) != -1) {
+	} else if (/(theintercept.com\/search\/\?s=)|(theintercept.com\/?$)/.test(url) != false && getSearchResults(doc, true) ) {
 		return "multiple";
 	}
 }
