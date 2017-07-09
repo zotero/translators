@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-09 06:33:49"
+	"lastUpdated": "2017-07-09 06:55:10"
 }
 
 /*
@@ -44,15 +44,12 @@ function detectWeb(doc, url) {
 		return "blogPost";
 	} else if (url.indexOf("/document/") != -1) {
 		return "document";
-	} else if (url.indexOf("theintercept.com/search/?s=") != -1) {
+	} else if (url.search(/(theintercept.com\/search\/\?s=)|(theintercept.com\/?$)/) != -1) {
 		return "multiple";
 	}
 }
 
 function scrape(doc, url) {
-	if (url.indexOf("theintercept.com/search/?s=") != -1) {
-		return;
-	}
 	var item = new Zotero.Item("blogPost");
 	item.blogTitle = "The Intercept";
 	item.language = "en-US";
@@ -103,8 +100,8 @@ function scrapeDocument(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.Promo-title');
-	var links = doc.querySelectorAll('.Promo-link');
+	var rows = doc.querySelectorAll('.Promo-title, h1.HomeFeature-title');
+	var links = doc.querySelectorAll('.Promo-link, a.HomeFeature-link');
 	for (var i=0; i<rows.length; i++) {
 		var href = links[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -130,7 +127,10 @@ function doWeb(doc, url) {
 		});
 	} if (detectWeb(doc, url) == "document") {
 		scrapeDocument(doc, url);
-	} else scrape(doc, url);
+	} if (detectWeb(doc, url) == "blogPost") {
+		// if this if statement is removed, the multi page attempts to feed itself into the scrape function
+		scrape(doc, url);
+	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -233,6 +233,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://theintercept.com/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
