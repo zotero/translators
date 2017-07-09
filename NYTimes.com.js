@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-17 18:44:24"
+	"lastUpdated": "2017-07-09 03:45:18"
 }
 
 /*
@@ -72,6 +72,8 @@ function scrape(doc, url) {
 		item.language = ZU.xpathText(doc, '//meta[@itemprop="inLanguage"]/@content') || "en-US";
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
+		} else {
+			item.date = doc.querySelector('time').getAttribute('datetime');
 		}
 		if (item.itemType == "blogPost") {
 			item.blogTitle = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content');
@@ -81,7 +83,9 @@ function scrape(doc, url) {
 		}
 		//Multiple authors are just put into the same Metadata field
 		//we have to split this here
-		var authors = ZU.xpathText(doc, '//meta[@name="author"]/@content');
+		var authors = doc.querySelector('meta[name="author"], span[class^="Byline-bylineAuthor--"]').textContent;
+		if (authors == authors.toUpperCase()) // convert to title case if all caps
+			authors = ZU.capitalizeTitle(authors, true);
 		if (authors) {
 			item.creators = [];
 			var authorsList = authors.split(/,|\band\b/);
@@ -141,7 +145,6 @@ function scrape(doc, url) {
 	});
 	
 }
-
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
@@ -271,7 +274,6 @@ var testCases = [
 				],
 				"date": "2013-06-19",
 				"abstractNote": "At their core, are America’s problems primarily economic or moral?",
-				"libraryCatalog": "NYTimes.com",
 				"blogTitle": "Opinionator",
 				"language": "en-US",
 				"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
@@ -460,6 +462,45 @@ var testCases = [
 					"Politics and Government",
 					"Trilling, Lionel",
 					"United States"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2017/07/03/business/oreo-new-flavors.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "When Just Vanilla Won’t Do, How About a Blueberry Pie Oreo?",
+				"creators": [
+					{
+						"firstName": "Maya",
+						"lastName": "Salam",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-07-03",
+				"ISSN": "0362-4331",
+				"abstractNote": "The company has increasingly been experimenting with limited-edition flavors that seemed designed as much for an Instagram feed as they are to be eaten.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "Business Day",
+				"url": "https://www.nytimes.com/2017/07/03/business/oreo-new-flavors.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Contests and Prizes",
+					"Cookies",
+					"Mondelez International Inc",
+					"Oreo",
+					"Social Media"
 				],
 				"notes": [],
 				"seeAlso": []
