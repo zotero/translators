@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-09 06:55:10"
+	"lastUpdated": "2017-07-10 20:57:50"
 }
 
 /*
@@ -53,7 +53,7 @@ function scrape(doc, url) {
 	var item = new Zotero.Item("blogPost");
 	item.blogTitle = "The Intercept";
 	item.language = "en-US";
-	var ldjson = JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
+	var ldjson = JSON.parse(text(doc,'script[type="application/ld+json"]'));
 	item.url = ldjson.url;
 	item.title = ldjson.headline;
 	item.date = ldjson.dateCreated;
@@ -125,9 +125,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} if (detectWeb(doc, url) == "document") {
+	} else if (detectWeb(doc, url) == "document") {
 		scrapeDocument(doc, url);
-	} if (detectWeb(doc, url) == "blogPost") {
+	} else if (detectWeb(doc, url) == "blogPost") {
 		// if this if statement is removed, the multi page attempts to feed itself into the scrape function
 		scrape(doc, url);
 	}
