@@ -102,8 +102,10 @@ function scrape(doc, url) {
 		// Only force all caps to title case when all tags are all caps
 		var allcaps = true;
 		for (i=0; i < item.tags.length; i++) {
-			if (item.tags[i] != item.tags[i].toUpperCase())
+			if (item.tags[i] != item.tags[i].toUpperCase()) {
 				allcaps = false;
+				break;
+			}
 		}
 		if (allcaps) {
 			for (i=0; i < item.tags.length; i++) {
