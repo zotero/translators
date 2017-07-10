@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-01 10:32:43"
+	"lastUpdated": "2017-07-10 15:25:23"
 }
 
 function detectWeb(doc, url) {
@@ -61,7 +61,6 @@ function doWeb(doc, url) {
 		Zotero.debug(art);
 		Zotero.Utilities.HTTP.doGet(art, function(text) {
 			var newItem = new Zotero.Item("newspaperArticle");
-			newItem.publicationTitle = "The Hindu";
 			newItem.url = art;
 			//title
 			var t = /\<TITLE\>[\w\W]*\:([\w\W]*?)<\/TITLE/;
@@ -76,6 +75,7 @@ function doWeb(doc, url) {
 			}
 	
 			newItem.publicationTitle="The Hindu";
+			newItem.ISSN = "0971-751X";
 			
 			newItem.attachments = [{"title":"The Hindu Snapshot", mimeType:"text/html", url:art}];
 	
@@ -86,9 +86,7 @@ function doWeb(doc, url) {
 				regexMeta(metaTags[j], newItem);
 			}
 			newItem.complete();
-			Zotero.done();
 		});
-		Zotero.wait();
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -107,6 +105,7 @@ var testCases = [
 					}
 				],
 				"date": "01-01-2004",
+				"ISSN": "0971-751X",
 				"libraryCatalog": "The Hindu (old)",
 				"pages": "01",
 				"place": "CHEN",

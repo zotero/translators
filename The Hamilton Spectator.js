@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-30 20:43:20"
+	"lastUpdated": "2017-07-10 15:23:44"
 }
 
 /*
@@ -87,6 +87,7 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		item.publicationTitle = "The Hamilton Spectator";
+		item.ISSN = "1189-9417";
 		item.complete();
 	});
 
@@ -107,6 +108,7 @@ var testCases = [
 				"title": "Expert calls Occupy demos most important in generations",
 				"creators": [],
 				"date": "2011-11-16T21:54:00Z",
+				"ISSN": "1189-9417",
 				"abstractNote": "The Occupy protest is the most important democratic social movement of the last two generations and demonstrators who have taken over parks and other public spaces should be left alone, says an expert...",
 				"libraryCatalog": "www.thespec.com",
 				"publicationTitle": "The Hamilton Spectator",

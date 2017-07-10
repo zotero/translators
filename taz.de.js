@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-28 07:08:03"
+	"lastUpdated": "2017-07-10 15:42:25"
 }
 
 /*
@@ -87,7 +87,8 @@ function scrape(doc, url) {
 	//translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.publicationTitle = "taz. die tageszeitung";
+		item.publicationTitle = "Die Tageszeitung : taz";
+		item.ISSN = "0931-9085";
 		item.section = ZU.xpathText(doc, '//ul[contains(@class, "navbar")]/li[contains(@class, "selected")]');
 		//sometimes taz puts itself as author
 		for (var i=0; i<item.creators.length; i++) {
@@ -126,9 +127,10 @@ var testCases = [
 					}
 				],
 				"date": "2011-03-23T18:22:00+02:00",
+				"ISSN": "0931-9085",
 				"abstractNote": "Der deutsche Wald als Leistungsträger. Oder: zynisch Kranke auf freiem Fuß! Was ist mit der öffentlichen Sicherheit?",
 				"libraryCatalog": "www.taz.de",
-				"publicationTitle": "taz. die tageszeitung",
+				"publicationTitle": "Die Tageszeitung : taz",
 				"section": "Gesellschaft",
 				"shortTitle": "Kolumne Wortklauberei",
 				"url": "http://www.taz.de/!5124174/",
@@ -169,10 +171,11 @@ var testCases = [
 				"title": "Briten machen dicht:Hering muss gesamteuropäisch bleiben",
 				"creators": [],
 				"date": "2017-06-28T00:00:00+01:00",
+				"ISSN": "0931-9085",
 				"abstractNote": "Das große linke Nachrichten-Portal der \"tageszeitung\" aus Berlin: Unabhängig dank mehr als 14.000 GenossInnen.",
 				"libraryCatalog": "www.taz.de",
 				"pages": "20",
-				"publicationTitle": "taz. die tageszeitung",
+				"publicationTitle": "Die Tageszeitung : taz",
 				"section": "Archiv",
 				"shortTitle": "Briten machen dicht",
 				"url": "http://www.taz.de/!5421550/",

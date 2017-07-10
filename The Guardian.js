@@ -97,7 +97,6 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
 		}
-		//FW.Xpath('//p[@class="byline"]').text().remove(/\s(in|for)\s.+/).split(/\s+and\s+|\s*,\s*/).cleanAuthor("author")
 		item.language = "en-GB";
 		var serie = ZU.xpathText(doc, '(//a[contains(@class, "content__series-label__link")])[1]');
 		if (serie=="The Observer") {

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 06:39:28"
+	"lastUpdated": "2017-07-10 15:33:23"
 }
 
 /*
@@ -59,8 +59,12 @@ function scrape(doc, url) {
 		if (date) {
 			item.date = ZU.strToISO(date);
 		}
-		item.ISSN = "0140-0460";
 		item.publicationTitle = ZU.xpathText(doc, '//p[contains(@class, "Meta-content")]/span[contains(@class, "Publication")]');
+		if (item.publicationTitle == "The Sunday Times") {
+			item.ISSN = "0956-1382";
+		} else {
+			item.ISSN = "0140-0460";
+		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 		item.section = ZU.xpathText(doc, '//article[@id="article-main"]/@data-article-sectionname');
 		item.complete();
@@ -89,7 +93,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-07-02",
-				"ISSN": "0140-0460",
+				"ISSN": "0956-1382",
 				"abstractNote": "More than 900 creatures in the care of the Royal Zoological Society of Scotland (RZSS) died in captivity last year, including several hundred rare snails bred for conservation. Figures released by...",
 				"libraryCatalog": "www.thetimes.co.uk",
 				"publicationTitle": "The Sunday Times",
@@ -121,7 +125,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-07-02",
-				"ISSN": "0140-0460",
+				"ISSN": "0956-1382",
 				"abstractNote": "Last week was the 50th anniversary of a landmark in the history of money: on June 27, 1967, the world’s first cash machine was unveiled in the unlikely setting of a Barclays branch in Enfield...",
 				"libraryCatalog": "www.thetimes.co.uk",
 				"publicationTitle": "The Sunday Times",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-01 19:09:10"
+	"lastUpdated": "2017-07-10 15:27:10"
 }
 
 /*
@@ -88,7 +88,7 @@ function scrape(doc, url) {
 	if (authorString) {
 		var authors = authorString.split(/\.,|&/);
 		for (var i=0; i<authors.length; i++) {
-			item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+			item.creators.push(ZU.cleanAuthor(authors[i], "author", true));
 		}
 	}
 	
@@ -126,18 +126,18 @@ var testCases = [
 				"title": "Reaching the Hard to Reach: Literature Review",
 				"creators": [
 					{
-						"firstName": "Hirschland",
-						"lastName": "M",
+						"firstName": "M.",
+						"lastName": "Hirschland",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jazayeri",
-						"lastName": "A",
+						"firstName": "A.",
+						"lastName": "Jazayeri",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Lee",
-						"lastName": "N",
+						"firstName": "N.",
+						"lastName": "Lee",
 						"creatorType": "author"
 					}
 				],

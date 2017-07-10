@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 10:52:23"
+	"lastUpdated": "2017-07-10 15:35:58"
 }
 
 /*
@@ -95,7 +95,7 @@ function scrape(doc, url) {
 	}
 	var urlParts = url.split('/');
 	item.blogTitle = '@' + urlParts[3];
-	item.websiteType = "microblog";
+	item.websiteType = "Tweet";
 	item.attachments.push({
 		document: doc,
 		title: "Snapshot"
@@ -130,7 +130,7 @@ var testCases = [
 				"date": "2011-08-22T04:52",
 				"blogTitle": "@zotero",
 				"shortTitle": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http",
-				"websiteType": "microblog",
+				"websiteType": "Tweet",
 				"attachments": [
 					{
 						"title": "Snapshot"
