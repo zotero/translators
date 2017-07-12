@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-11 22:28:49"
+	"lastUpdated": "2017-07-12 10:51:59"
 }
 
 /*
@@ -83,8 +83,12 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
+	//each magazinArticle covers one radio or tv show
 	var item = new Zotero.Item("magazineArticle");
 	item.title = text(doc, 'h1');
+	if (item.title == item.title.toUpperCase()) {
+		item.title = ZU.capitalizeTitle(item.title, true);
+	}
 	
 	var aside = text(doc, 'aside.issue p');
 	//e.g.    Issue 2384\n   7 July 1969\n   Page 16
@@ -93,17 +97,48 @@ function scrape(doc, url) {
 	item.date = ZU.strToISO(parts[1]);
 	item.pages = parts[2].replace('Page', '').trim();
 	
-	item.abstractNote = text(doc, '.primary-content a');
+	var aired = text(doc, '.primary-content a');
+	var urlprogram = attr(doc, '.primary-content a', 'href');
+	var synopsis = text(doc, '.synopsis');
+	item.notes.push({note: aired});
+	if (synopsis) {
+		item.notes.push({note: synopsis.trim()});
+	}
 	
 	item.publicationTitle = 'The Radio Times';
 	item.ISSN = '0033-8060';
 	item.language = 'en-GB';
 	item.url = url;
+	item.itemID = url + '#magazinArticle';
 	item.attachments.push({
 		document: doc,
 		title: "Snapshot"
 	});
+	
 	item.complete();
+	
+	//we also save a seperate item for the radio/tv show and connect these two
+	//by a seeAlso link
+	var tv = ["bbcone", "bbctwo", "bbcthree", "bbcfour", "cbbc", "cbeebies", 
+		"bbcnews", "bbcparliament", "bbchd", "bbctv", "bbcchoice", "bbcknowledge"];
+	var program = urlprogram.split('/')[2];
+	var type = "radioBroadcast";
+	if (tv.indexOf(program)>-1) {
+		type = "tvBroadcast";
+	}
+	var additionalItem = new Zotero.Item(type);
+	additionalItem.title = item.title;
+	var pieces = aired.split(',');
+	//e.g ["BBC Radio 4 FM" , "30 September 1967 6.35"]
+	additionalItem.programTitle = pieces[0];
+	var time = text(doc, '.primary-content a span.time');
+	var date = ZU.strToISO(pieces[1].replace(time, ''))
+	if (time.indexOf('.') == 1) {
+		time = '0'+time;
+	}
+	additionalItem.date = date +'T'+time.replace('.', ':');
+	additionalItem.seeAlso.push(item.itemID);
+	additionalItem.complete();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -113,12 +148,12 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "ST. HILDA'S BAND",
+				"title": "St. Hilda's Band",
 				"creators": [],
 				"date": "1933-10-20",
 				"ISSN": "0033-8060",
-				"abstractNote": "Regional Programme Midland, 28 October 1933 20.00",
 				"issue": "525",
+				"itemID": "http://genome.ch.bbc.co.uk/09d732e273ae49e490d35ff1b69bf5f9#magazinArticle",
 				"language": "en-GB",
 				"libraryCatalog": "BBC Genome",
 				"pages": "68",
@@ -130,8 +165,29 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Regional Programme Midland, 28 October 1933 20.00"
+					},
+					{
+						"note": "Conducted by JAMES OLIVER \nRelayed from The Town Hall, Walsall"
+					}
+				],
 				"seeAlso": []
+			},
+			{
+				"itemType": "radioBroadcast",
+				"title": "St. Hilda's Band",
+				"creators": [],
+				"date": "1933-10-28T20:00",
+				"libraryCatalog": "BBC Genome",
+				"programTitle": "Regional Programme Midland",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [
+					"http://genome.ch.bbc.co.uk/09d732e273ae49e490d35ff1b69bf5f9#magazinArticle"
+				]
 			}
 		]
 	},
@@ -145,8 +201,8 @@ var testCases = [
 				"creators": [],
 				"date": "1969-07-17",
 				"ISSN": "0033-8060",
-				"abstractNote": "BBC One London, 21 July 1969 6.00",
 				"issue": "2384",
+				"itemID": "http://genome.ch.bbc.co.uk/4bad6bdda36645d7be09f44bf51eff18#magazinArticle",
 				"language": "en-GB",
 				"libraryCatalog": "BBC Genome",
 				"pages": "16",
@@ -158,8 +214,29 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"note": "BBC One London, 21 July 1969 6.00"
+					},
+					{
+						"note": "The First Man on the Moon\n\nShortly after 7.0 this morning astronaut Neil Armstrong should set foot on the moon. As he goes down the steps Armstrong will switch on the black and white television camera to beam live pictures back to earth. That transmission should also cover the moment when Edwin Aldrin joins Armstrong on the surface and continue throughout the two hours and forty mins. of the Moon Walk.\n\nBefore that more live pictures are expected from the Command Module as Michael Collins looks towards the moon and the landing ground from sixty miles up.\nA report by James Burke with Patrick Moore from the Apollo Space Studio and Michael Charlton at Houston Mission Control"
+					}
+				],
 				"seeAlso": []
+			},
+			{
+				"itemType": "tvBroadcast",
+				"title": "Apollo 11",
+				"creators": [],
+				"date": "1969-07-21T06:00",
+				"libraryCatalog": "BBC Genome",
+				"programTitle": "BBC One London",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [
+					"http://genome.ch.bbc.co.uk/4bad6bdda36645d7be09f44bf51eff18#magazinArticle"
+				]
 			}
 		]
 	},
