@@ -139,6 +139,7 @@ function doExport() {
 			}
 		}
 		
+		var index = 1;
 		for (var i=0; i<item.creators.length; i++) {
 			var creatorValue = item.creators[i].lastName;
 			var creatorType = item.creators[i].creatorType;
@@ -146,7 +147,8 @@ function doExport() {
 				creatorValue = item.creators[i].firstName + ' ' + creatorValue;
 			}
 			if (creatorType=="author") {
-				Zotero.write('LAST	P2093	"' + creatorValue + '"\n');
+				Zotero.write('LAST	P2093	"' + creatorValue + '"	P1545	"' + index+ '"\n');
+				index++;
 			}
 			//other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
 		}
