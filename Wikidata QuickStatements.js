@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-06-22 07:00:00"
+	"lastUpdated": "2017-07-15 20:00:00"
 }
 
 
@@ -131,6 +131,20 @@ function doExport() {
 			Zotero.write('LAST	P31	' + typeMapping[itemType] + '\n');
 		}
 		Zotero.write('LAST	Len	"' + item.title + '"\n');
+		
+		var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
+			return ' ' + firstLetter.toLowerCase();
+		});
+		if (item.publicationTitle) {
+			description = description + ' from \'' + item.publicationTitle + '\'';
+		}
+		if (item.date) {
+			var year = ZU.strToDate(item.date).year;
+			if (year) {
+				description = description + ' published in ' + year;
+			}
+		}
+		Zotero.write('LAST	Den	"' + description + '"\n');
 		
 		for (var pnumber in propertyMapping) {
 			var zfield = propertyMapping[pnumber];
