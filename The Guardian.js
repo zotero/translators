@@ -1,67 +1,120 @@
 {
 	"translatorID": "8e11559d-60f0-4a7f-bb91-99ac0c5a2d63",
 	"label": "The Guardian",
-	"creator": "Sebastian Karcher",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://(www\\.)?(guardian\\.co\\.uk|theguardian\\.com)",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-27 20:35:11"
+	"lastUpdated": "2017-06-30 19:04:30"
 }
 
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
+/*
+	***** BEGIN LICENSE BLOCK *****
 
+	Copyright © 2017 Philipp Zumstein
+	
+	This file is part of Zotero.
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
- /* The Guardian Translator
-   Copyright (C) 2013 Sebastian Karcher
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
-
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	***** END LICENSE BLOCK *****
 */
 
 
-/** Articles */
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Xpath('//div[contains(@class, "content__main-column")]/h1'),
-title            : FW.Xpath('//div[contains(@class, "content__main-column")]/h1').text().trim(),
-attachments      : [{ url: FW.Url(),
-  title:  "Guardian Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//p[@class="byline"]').text().remove(/\s(in|for)\s.+/).split(/\s+and\s+|\s*,\s*/).cleanAuthor("author"),
-date             : FW.Xpath('//time[@itemprop="datePublished"]/@datetime').text().remove(/T.+/),
-abstractNote	 : FW.Xpath('//meta[@itemprop="description"]/@content').text().trim(),
-tags			 : FW.Xpath('//meta[@property="article:tag"]/@content').text().split(","),
-section			 : FW.Xpath('//meta[@property="article:section"]/@content').text(),
-language		 : "en-GB",
-ISSN			 : "0261-3077",
-publicationTitle : "The Guardian"
-});
- 
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Xpath('//div[@class="gsc-webResult gsc-result"]'),
-choices          : {
-  titles  :  FW.Xpath('//td/div[contains(@class, "gs-title")]/a[@class="gs-title" and contains(@href, "20")]').text().trim(),
-  urls    :  FW.Xpath('//td/div[contains(@class, "gs-title")]/a[@class="gs-title" and contains(@href, "20")]').key("href")
+function detectWeb(doc, url) {
+	if (ZU.xpathText(doc, '//div[contains(@class, "content__main-column")]/h1')) {
+		return "newspaperArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
-});
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	//TODO test this path
+	var rows = ZU.xpath(doc, '//td/div[contains(@class, "gs-title")]/a[@class="gs-title" and contains(@href, "20")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	//translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) {
+		//The authors in the metadata are incomplete and are not cleaned,
+		//but contain unneccessary data about location etc.
+		//Thus we try to take them directly from the byline.
+		var byline = ZU.xpathText(doc, '//p[contains(@class, "byline")]');
+		if (byline) {
+			item.creators = [];
+			var authors = byline.replace(/\s(in|for)\s.+/, '').split(/\s+and\s+|\s*,\s*/);
+			for (var i=0; i<authors.length; i++) {
+				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+			}
+		}
+		item.language = "en-GB";
+		var serie = ZU.xpathText(doc, '(//a[contains(@class, "content__series-label__link")])[1]');
+		if (serie=="The Observer") {
+			item.publicationTitle = "The Observer";
+			item.ISSN = "0029-7712";
+		} else {
+			item.publicationTitle = "The Guardian";
+			item.ISSN = "0261-3077";
+		}
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = "newspaperArticle";
+		trans.doWeb(doc, url);
+	});
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -70,7 +123,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Venezuela begins seven days of mourning after death of Hugo Chávez",
+				"title": "Venezuela begins seven days of mourning following death of Hugo Chávez",
 				"creators": [
 					{
 						"firstName": "Jonathan",
@@ -83,18 +136,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-03-06",
+				"date": "2013-03-06T15:38:00.000Z",
 				"ISSN": "0261-3077",
 				"abstractNote": "Death comes 21 months after it was revealed he had a tumour, and he will be given a state funeral in the capital",
 				"language": "en-GB",
-				"libraryCatalog": "The Guardian",
+				"libraryCatalog": "www.theguardian.com",
 				"publicationTitle": "The Guardian",
 				"section": "World news",
-				"url": "https://www.theguardian.com/world/2013/mar/05/hugo-chavez-dies-cuba",
+				"url": "http://www.theguardian.com/world/2013/mar/05/hugo-chavez-dies-cuba",
 				"attachments": [
 					{
-						"title": "Guardian Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -137,19 +189,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-03-06",
+				"date": "2013-03-06T20:04:00.000Z",
 				"ISSN": "0261-3077",
 				"abstractNote": "Exclusive: General David Petraeus and 'dirty wars' veteran behind commando units implicated in detainee abuse See the full-length documentary film of the 15-month investigation",
 				"language": "en-GB",
-				"libraryCatalog": "The Guardian",
+				"libraryCatalog": "www.theguardian.com",
 				"publicationTitle": "The Guardian",
 				"section": "World news",
 				"shortTitle": "Revealed",
-				"url": "https://www.theguardian.com/world/2013/mar/06/pentagon-iraqi-torture-centres-link",
+				"url": "http://www.theguardian.com/world/2013/mar/06/pentagon-iraqi-torture-centres-link",
 				"attachments": [
 					{
-						"title": "Guardian Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -184,18 +235,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-02-26",
+				"date": "2013-02-26T17:18:55.000Z",
 				"ISSN": "0261-3077",
 				"abstractNote": "If there is, does God himself play? And if he does, what position, asks Percy Zvomuya?",
 				"language": "en-GB",
-				"libraryCatalog": "The Guardian",
+				"libraryCatalog": "www.theguardian.com",
 				"publicationTitle": "The Guardian",
 				"section": "World news",
-				"url": "https://www.theguardian.com/world/2013/feb/26/football-heaven-god-play?INTCMP=SRCH",
+				"url": "http://www.theguardian.com/world/2013/feb/26/football-heaven-god-play",
 				"attachments": [
 					{
-						"title": "Guardian Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -226,19 +276,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-02-18",
+				"date": "2015-02-18T20:22:30.000Z",
 				"ISSN": "0261-3077",
 				"abstractNote": "The political commentator talks about the response to his attack on the Daily Telegraph, his hopes for the future of the paper – and why the distinction between deer hunting and deer stalking matters",
 				"language": "en-GB",
-				"libraryCatalog": "The Guardian",
+				"libraryCatalog": "www.theguardian.com",
 				"publicationTitle": "The Guardian",
 				"section": "Media",
 				"shortTitle": "Peter Oborne",
-				"url": "https://www.theguardian.com/media/2015/feb/18/peter-oborne-daily-telegraph-newspaper-unprecedented",
+				"url": "http://www.theguardian.com/media/2015/feb/18/peter-oborne-daily-telegraph-newspaper-unprecedented",
 				"attachments": [
 					{
-						"title": "Guardian Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -249,6 +298,60 @@ var testCases = [
 					"National newspapers",
 					"Newspapers",
 					"Newspapers & magazines"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theguardian.com/books/2011/nov/27/christmas-gifts-2011-books-tree",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Christmas gifts 2011: which books will be under your tree?",
+				"creators": [],
+				"date": "2011-11-27T00:05:08.000Z",
+				"ISSN": "0029-7712",
+				"abstractNote": "Our critics choose the books they intend to give this Christmas, and the ones they hope to receive",
+				"language": "en-GB",
+				"libraryCatalog": "www.theguardian.com",
+				"publicationTitle": "The Observer",
+				"section": "Books",
+				"shortTitle": "Christmas gifts 2011",
+				"url": "http://www.theguardian.com/books/2011/nov/27/christmas-gifts-2011-books-tree",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"Alan Hollinghurst",
+					"Art and design",
+					"Best books of the year",
+					"Biography",
+					"Books",
+					"Business and finance",
+					"Caitlin Moran",
+					"Charles Dickens",
+					"Christopher Hitchens",
+					"Comics and graphic novels",
+					"Culture",
+					"Fiction",
+					"Food and drink",
+					"Health",
+					"History",
+					"Julian Barnes",
+					"Magazines",
+					"Magnum",
+					"Poetry",
+					"Private Eye",
+					"Robert Harris",
+					"Science and nature",
+					"Thrillers",
+					"Tina Fey",
+					"mind and body"
 				],
 				"notes": [],
 				"seeAlso": []
