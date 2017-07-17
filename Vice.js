@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-10 08:03:12"
+	"lastUpdated": "2017-07-17 05:38:35"
 }
 
 /*
@@ -71,13 +71,7 @@ function scrape(doc, url) {
 			item.tags.push(keywords_i_D[i].getAttribute('content'))
 		}		
 	}
-	
-	// archives appear to 404 on load?
-	item.attachments.push({
-		title: (attr(doc,'meta[property="og:site_name"]','content') || "Vice")+ " Snapshot",
-		mimeType: "text/html",
-		document: doc
-	});
+	// see PR#1366: dynamic pages don't archive well, so skipping
 
 	// Authors – I haven't found an article with more than one author, but share if you do
 	var authors = attr(doc,'.contributor__name .contributor__link','title') || attr(doc,'meta[property="og:article:author"]','content')/* i-D */ || text(doc,'.post__speaker a')/* Vice News? */ || text(doc,'.header-info-module__info span')/* Amuse i-D */;
@@ -140,12 +134,6 @@ var testCases = [
 				"blogTitle": "Vice",
 				"language": "en",
 				"url": "https://www.vice.com/en_us/article/padaqv/anti-g20-activists-told-us-what-they-brought-to-the-protest-in-hamburg",
-				"attachments": [
-					{
-						"title": "Vice Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [
 					"G20",
 					"Hamburg",
@@ -179,12 +167,6 @@ var testCases = [
 				"blogTitle": "Waypoint",
 				"language": "en",
 				"url": "https://waypoint.vice.com/en_us/article/bjxjbw/nina-freemans-games-really-get-millennial-romance",
-				"attachments": [
-					{
-						"title": "Waypoint Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [
 					"Awkward Teenage Rituals",
 					"How Do You Do It",
@@ -218,12 +200,6 @@ var testCases = [
 				"blogTitle": "Vice",
 				"language": "de",
 				"url": "https://www.vice.com/de/article/59pdy5/wie-kaputte-handys-und-profite-die-g20-gegner-antreiben",
-				"attachments": [
-					{
-						"title": "Vice Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [
 					"G20",
 					"Hamburg",
@@ -266,12 +242,6 @@ var testCases = [
 				"blogTitle": "i-D",
 				"language": "en",
 				"url": "http://i-d.vice.com/en_us/article/anish-kapoor-has-been-banned-from-using-yet-another-rare-paint",
-				"attachments": [
-					{
-						"title": "i-D Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [
 					"Anish Kapoor",
 					"Art",
@@ -307,12 +277,6 @@ var testCases = [
 				"blogTitle": "Vice",
 				"language": "en-US",
 				"url": "https://news.vice.com/story/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
-				"attachments": [
-					{
-						"title": "Vice Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -339,12 +303,6 @@ var testCases = [
 				"language": "en-US",
 				"shortTitle": "Exclusive",
 				"url": "https://amuse-i-d.vice.com/exclusive-around-the-world-with-goshas-favourite-artist/",
-				"attachments": [
-					{
-						"title": "Amuse Snapshot",
-						"mimeType": "text/html"
-					}
-				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
