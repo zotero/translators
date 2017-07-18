@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-16 12:37:59"
+	"lastUpdated": "2017-07-18 11:06:53"
 }
 
 /*
@@ -36,6 +36,7 @@
 */
 
 function detectWeb(doc, url) {
+	url = url.replace(/[\?#].+/, "");
 	if (/\d{8}$/.test(url)||/\d{7}\.(stm)$/.test(url)) {
 		var pageNode = doc.getElementById("page");
 		if (pageNode) {
@@ -91,7 +92,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	
+	url = url.replace(/[\?#].+/, "");
 	var itemType = detectWeb(doc, url);
 	
 	var translator = Zotero.loadTranslator('web');
@@ -173,9 +174,11 @@ function scrape(doc, url) {
 		for (var i in item.tags)
 			item.tags[i] = item.tags[i].charAt(0).toUpperCase()+item.tags[i].substring(1);
 
-		//item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
-		
 		item.language = "en-GB";
+
+		if (url.substr(-4)==".stm") {
+			item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
+		}
 
 		item.complete();
 	});
@@ -354,7 +357,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "BBC NEWS | UK | UK Politics | EU must expand, Straw warns",
+				"title": "EU must expand, Straw warns",
 				"creators": [],
 				"date": "2002-07-08",
 				"abstractNote": "Debate on reform of the Common Agricultural Policy must not dilute support for EU enlargement, Foreign Secretary Jack Straw will warn.",
