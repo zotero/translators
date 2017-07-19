@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-07-05 19:32:38"
+	"lastUpdated": "2017-07-27 09:11:30"
 }
 
 function detectImport() {
@@ -591,7 +591,7 @@ var importFields;
 
 //do not store unknwon fields in notes
 //configurable via RIS.import.ignoreUnknown hidden preference
-var ignoreUnknown = false;
+var ignoreUnknown = true;
 
 /**
  * @singleton Provides facilities to read one RIS entry at a time
@@ -1738,11 +1738,13 @@ function startImport(resolve, reject) {
 		
 		//prepare some configurable options
 		if(Zotero.getHiddenPref) {
-			if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
-				ignoreUnknown = true;
+			var pref = Zotero.getHiddenPref("RIS.import.ignoreUnknown");
+			if(pref != undefined) {
+				ignoreUnknown = pref;
 			}
-			if(Zotero.getHiddenPref("RIS.import.keepID")) {
-				degenerateImportFieldMap.ID = undefined;
+			var pref = Zotero.getHiddenPref("RIS.import.keepID");
+			if(pref === true) {
+				degenerateImportFieldMap.ID = pref;
 			}
 		}
 		
