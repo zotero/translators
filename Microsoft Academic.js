@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 12:59:33"
+	"lastUpdated": "2017-07-18 05:59:40"
 }
 
 /*
@@ -37,15 +37,17 @@
 
 
 function detectWeb(doc, url) {
-	//The page can change from a search page to a single item page
+	//i) The page can change from a search page to a single item page
 	//without loading the whole content as a new website and therfore
 	//we need to monitor these DOM changes all the time.
-	Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "entity-detail")]')[0], {childList: true});
-	//When we are on a single page and search for something, then
+	//ii) When we are on a single page and search for something, then
 	//the content will not vanish, but just set to invisible by
 	//the style element of a parent node. Thus, we need to monitor
 	//for that as well.
-	Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {attributes: true, attributeFilter: ['style']});
+	Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {childList: true, subtree: true, attributes: true, attributeFilter: ['style']});
+	//Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "author-page")]')[0], {attributes: true, attributeFilter: ['style']});
+	//Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "search-page")]')[0]);
+	Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "search-page")]')[0], {childList: true, subtree: true, attributes: true, attributeFilter: ['style']});
 	
 	var visibility = ZU.xpathText(doc, '//article[contains(@class, "author-page")]/@style');
 	if (visibility && visibility.indexOf("none")>-1) {
@@ -55,23 +57,24 @@ function detectWeb(doc, url) {
 			//It is possible that the content of the single page is already
 			//set to invisible, but the search results have not yet been
 			//loaded. Therefore we have to monitor that.
-			Z.monitorDOMChanges(ZU.xpath(doc, '//div[contains(@class, "search-page")]/div[contains(@class, "search-results")]')[0], {childList: true});
+//			Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "search-page")]/div[contains(@class, "search-results")]')[0]);
+//			Z.monitorDOMChanges(ZU.xpath(doc, '//article[contains(@class, "search-page")]//paper-tile')[0]);
 		}
 	} else {
 		//The entity-detail DIV has all template code as SCRIPT childrens with some @id
 		//and one other (active) child, which will determine the websiteType,
-		//i.e. PAPER-DETAIL-ENTITY,  JOURNAL-DETAIL-ENTITY, AUTHOR-DETAIL-ENTITY,
-		//AFFILIATION-DETAIL-ENTITY, or, FOS-DETAIL-ENTITY
+		//i.e. MA-PAPER-DETAIL,  MA-JOURNAL-DETAIL, MA-AUTHOR-DETAIL,
+		//MA-AFFILIATION-DETAIL, or, MA-FOS-DETAIL
 		var child = ZU.xpath(doc, '//div[contains(@class, "entity-detail")]/*[not(@id)]');
 		if (child && child.length>0) {
 			var websiteType = child[0].tagName;
 			Z.debug(websiteType);
-			if (websiteType == 'PAPER-DETAIL-ENTITY') {
-				var conf = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Conference")]');
+			if (websiteType == 'MA-PAPER-DETAIL') {
+				var conf = ZU.xpathText(doc, '//article[contains(@class, "detail")]//section[contains(@class, "paper-venue")]//a[contains(@data-bind, "entityTypes.conference")]');
 				if (conf) {
 					return 'conferencePaper';
 				}
-				var jour = ZU.xpathText(doc, '//div[contains(@class, "entity-section")]//span[contains(@class, "semibold") and contains(., "Journal")]');
+				var jour = ZU.xpathText(doc, '//article[contains(@class, "detail")]//section[contains(@class, "paper-venue")]//a[contains(@data-bind, "entityTypes.journal")]');
 				if (!jour) {
 					return 'book';
 				}
@@ -83,7 +86,7 @@ function detectWeb(doc, url) {
 
 	}
 
-	//The automatic testing doe not work because of the monitoring.
+	//The automatic testing does not work because of the monitoring.
 	//Setting the correct type therefore here manually for three test cases:
 	if (url == "https://academic.microsoft.com/#/detail/2084324324") {
 		return 'journalArticle';
@@ -98,7 +101,7 @@ function detectWeb(doc, url) {
 	//  https://academic.microsoft.com/#/search?iq=%2540zotero%2540&q=zotero&filters=&from=0&sort=0
 	//  https://academic.microsoft.com/#/detail/975761300
 	//  https://academic.microsoft.com/#/detail/1337865506
-	//But test also to navigate in the website by clickin on the links to
+	//But test also to navigate in the website by clicking on the links to
 	//journal, author, affilation, subjects, or search something.
 }
 
@@ -110,9 +113,9 @@ function getSearchResults(doc, url, checkOnly) {
 	//The search results will sometimes stay invisible when switched to another
 	//page, and therefore we have to differentiate the xpath accordingly.
 	if (url.indexOf("#/search")>-1) {
-		rows = ZU.xpath(doc, '//div[contains(@class, "search-page")]//paper-tile/article//div[contains(@class, "title-bar")]//a');
+		rows = ZU.xpath(doc, '//article[contains(@class, "search-page")]//paper-tile/article//section[contains(@class, "paper-title")]//a');
 	} else {
-		rows = ZU.xpath(doc, '//article[contains(@class, "author-page")]//paper-tile/article//div[contains(@class, "title-bar")]//a');
+		rows = ZU.xpath(doc, '//article[contains(@class, "author-page")]//paper-tile/article//section[contains(@class, "paper-title")]//a');
 	}
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
@@ -166,9 +169,12 @@ function scrape(urlList) {
 			}
 			var item = new Zotero.Item(type);
 			item.itemID = pubID;
-			item.title = data.entityTitle;
+			item.title = data.entityTitle.replace(/\.$/, '');
 			item.date = data.entity.d;//alternatively ZU.strToISO(data.date);
-			item.abstractNote = data.abstract;
+			if (data.abstract && data.abstract.replace(/\W/g, '').length>0) {
+				//we don't want an abstract which contains only non-word characters
+				item.abstractNote = data.abstract;
+			}
 			
 			if (data.authors) {
 				for (var i=0; i<data.authors.length; i++) {
@@ -251,15 +257,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"daylight saving time",
-					"multimedia",
-					"qualitative comparative analysis",
-					"social science",
-					"sociology"
+					"Daylight saving time",
+					"Multimedia",
+					"Qualitative comparative analysis",
+					"Social science",
+					"Sociology"
 				],
 				"notes": [
 					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://www.jstor.org/stable/20452393\">http://www.jstor.org/stable/20452393</a><br/><a href=\"http://www.journals.cambridge.org/abstract_S1049096509090337\">http://www.journals.cambridge.org/abstract_S1049096509090337</a><br/><a href=\"http://eric.ed.gov/?id=EJ867276\">http://eric.ed.gov/?id=EJ867276</a><br/><a href=\"http://www.editlib.org/p/70972/share/\">http://www.editlib.org/p/70972/share/</a><br/><a href=\"http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true\">http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true</a><br/><a href=\"https://www.learntechlib.org/p/70972\">https://www.learntechlib.org/p/70972</a><br/>"
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"https://eric.ed.gov/?id=EJ867276\">https://eric.ed.gov/?id=EJ867276</a><br/><a href=\"http://journals.cambridge.org/abstract_S1049096509090337\">http://journals.cambridge.org/abstract_S1049096509090337</a><br/><a href=\"https://www.learntechlib.org/p/70972/\">https://www.learntechlib.org/p/70972/</a><br/><a href=\"http://www.editlib.org/p/70972/\">http://www.editlib.org/p/70972/</a><br/><a href=\"http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true\">http://www.researchgate.net/profile/Stephen_Yoder/publication/231965398_Out_of_Cite%21_How_Reference_Managers_Are_Taking_Research_to_the_Next_Level/links/0c96052958659e8f2a000000.pdf?disableCoverPage=true</a><br/><a href=\"http://eric.ed.gov/?id=EJ867276\">http://eric.ed.gov/?id=EJ867276</a><br/>"
 					}
 				],
 				"seeAlso": []
@@ -275,12 +281,13 @@ var testCases = [
 				"title": "Introduction to graph theory",
 				"creators": [
 					{
-						"firstName": "Douglas B.",
+						"firstName": "Douglas Brent",
 						"lastName": "West",
 						"creatorType": "author"
 					}
 				],
-				"date": "2001-01-01",
+				"date": "1996-01-01",
+				"abstractNote": "1. Fundamental Concepts. What Is a Graph? Paths, Cycles, and Trails. Vertex Degrees and Counting. Directed Graphs. 2. Trees and Distance. Basic Properties. Spanning Trees and Enumeration. Optimization and Trees. 3. Matchings and Factors. Matchings and Covers. Algorithms and Applications. Matchings in General Graphs. 4. Connectivity and Paths. Cuts and Connectivity. k-connected Graphs. Network Flow Problems. 5. Coloring of Graphs. Vertex Colorings and Upper Bounds. Structure of k-chromatic Graphs. Enumerative Aspects. 6. Planar Graphs. Embeddings and Euler's Formula. Characterization of Planar Graphs. Parameters of Planarity. 7. Edges and Cycles. Line Graphs and Edge-Coloring. Hamiltonian Cycles. Planarity, Coloring, and Cycles. 8. Additional Topics (Optional). Perfect Graphs. Matroids. Ramsey Theory. More Extremal Problems. Random Graphs. Eigenvalues of Graphs. Appendix A: Mathematical Background. Appendix B: Optimization and Complexity. Appendix C: Hints for Selected Exercises. Appendix D: Glossary of Terms. Appendix E: Supplemental Reading. Appendix F: References. Indices.",
 				"itemID": "1479863711",
 				"libraryCatalog": "Microsoft Academic",
 				"attachments": [
@@ -289,30 +296,34 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"butterfly graph",
-					"clique width",
-					"complement graph",
-					"coxeter graph",
-					"crossing number",
-					"cubic graph",
-					"edge transitive graph",
-					"factor critical graph",
-					"friendship graph",
-					"graph labeling",
-					"graph property",
-					"line graph",
-					"null graph",
-					"quartic graph",
-					"simplex graph",
-					"strength of a graph",
-					"string graph",
-					"vertex transitive graph",
-					"voltage graph",
-					"windmill graph"
+					"1-planar graph",
+					"Book embedding",
+					"Chordal graph",
+					"Clique-sum",
+					"Cograph",
+					"Combinatorics",
+					"Dense graph",
+					"Discrete mathematics",
+					"Graph coloring",
+					"Indifference graph",
+					"Interval graph",
+					"Mathematics",
+					"Maximal independent set",
+					"Modular decomposition",
+					"Nowhere-zero flow",
+					"Odd graph",
+					"Pancyclic graph",
+					"Partial k-tree",
+					"Pathwidth",
+					"Split graph",
+					"Strong perfect graph theorem",
+					"Topological graph theory",
+					"Topology",
+					"Treewidth"
 				],
 				"notes": [
 					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://home.ku.edu.tr/mudogan/public_html/Introduction%20to%20Graph%20Theory%202E%20-%20West.pdf\">http://home.ku.edu.tr/mudogan/public_html/Introduction%20to%20Graph%20Theory%202E%20-%20West.pdf</a><br/><a href=\"http://people.math.gatech.edu/~tetali/MATH4022/intro.pdf\">http://people.math.gatech.edu/~tetali/MATH4022/intro.pdf</a><br/><a href=\"http://pdfdirff.com/download/introduction-to-graph-theory.pdf\">http://pdfdirff.com/download/introduction-to-graph-theory.pdf</a><br/><a href=\"http://www.math.uri.edu/~adamgilbert/Documents/MathRigor/GamesOnGraphs.pdf\">http://www.math.uri.edu/~adamgilbert/Documents/MathRigor/GamesOnGraphs.pdf</a><br/><a href=\"http://bayanbox.ir/view/2051120523710881534/Introduction-to-graph-theory-solution-manual.pdf\">http://bayanbox.ir/view/2051120523710881534/Introduction-to-graph-theory-solution-manual.pdf</a><br/><a href=\"http://dehdarpour1.persiangig.com/document/pdf/Introduction%20to%20Graph%20Theory%202E%20-%20WestSolution%20Manual.pdf\">http://dehdarpour1.persiangig.com/document/pdf/Introduction%20to%20Graph%20Theory%202E%20-%20WestSolution%20Manual.pdf</a><br/><a href=\"http://www.math.uiuc.edu/~kostochk/math412/412F15.pdf\">http://www.math.uiuc.edu/~kostochk/math412/412F15.pdf</a><br/><a href=\"http://ehsanmoradi.ir/upload/m/moradiehsan/file/west_solution.pdf\">http://ehsanmoradi.ir/upload/m/moradiehsan/file/west_solution.pdf</a><br/><a href=\"https://math.la.asu.edu/~andrzej/teach/mat416/syllabus.pdf\">https://math.la.asu.edu/~andrzej/teach/mat416/syllabus.pdf</a><br/><a href=\"http://ci.nii.ac.jp/ncid/BA27008641\">http://ci.nii.ac.jp/ncid/BA27008641</a><br/>"
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://ci.nii.ac.jp/ncid/BA27008641\">http://ci.nii.ac.jp/ncid/BA27008641</a><br/>"
 					}
 				],
 				"seeAlso": []
@@ -350,26 +361,26 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"combinatorics",
-					"constant mean curvature surface",
-					"constrained delaunay triangulation",
-					"curvature",
-					"delaunay triangulation",
-					"geometric measure theory",
-					"geometry",
-					"mathematics",
-					"mean curvature",
-					"mean curvature flow",
-					"principal curvature",
-					"radius of curvature",
-					"riemann curvature tensor",
-					"scalar curvature",
-					"sectional curvature",
-					"topology"
+					"Combinatorics",
+					"Constant-mean-curvature surface",
+					"Constrained Delaunay triangulation",
+					"Curvature",
+					"Delaunay triangulation",
+					"Geometric measure theory",
+					"Geometry",
+					"Mathematics",
+					"Mean curvature",
+					"Mean curvature flow",
+					"Principal curvature",
+					"Radius of curvature",
+					"Riemann curvature tensor",
+					"Scalar curvature",
+					"Sectional curvature",
+					"Topology"
 				],
 				"notes": [
 					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"https://formaurbis.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">https://formaurbis.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf\">http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf</a><br/><a href=\"http://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">http://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf\">http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf</a><br/><a href=\"http://www.ann.jussieu.fr/~frey/papers/meshing/Cohen-Steiner%20D.,%20Restricted%20Delaunay%20triangulations%20and%20normal%20cycles.pdf\">http://www.ann.jussieu.fr/~frey/papers/meshing/Cohen-Steiner%20D.,%20Restricted%20Delaunay%20triangulations%20and%20normal%20cycles.pdf</a><br/><a href=\"https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf\">https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf</a><br/><a href=\"http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf&coll=portal&dl=ACM\">http://dl.acm.org/ft_gateway.cfm?id=777839&type=pdf&coll=portal&dl=ACM</a><br/><a href=\"http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#HASH#Cohen-SteinerM03\">http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#HASH#Cohen-SteinerM03</a><br/><a href=\"http://dl.acm.org/citation.cfm?id=777839&dl=ACM&coll=DL\">http://dl.acm.org/citation.cfm?id=777839&dl=ACM&coll=DL</a><br/><a href=\"http://portal.acm.org/citation.cfm?doid=777792.777839\">http://portal.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"http://doi.acm.org/10.1145/777792.777839\">http://doi.acm.org/10.1145/777792.777839</a><br/>"
+						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"https://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">https://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf\">https://dpt-info.u-strasbg.fr/~sauvage/Recherche/GT_geom_diff/CM03.pdf</a><br/><a href=\"http://dl.acm.org/citation.cfm?doid=777792.777839\">http://dl.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#Cohen-SteinerM03\">http://dblp.uni-trier.de/db/conf/compgeom/compgeom2003.html#Cohen-SteinerM03</a><br/><a href=\"http://portal.acm.org/citation.cfm?doid=777792.777839\">http://portal.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"http://doi.acm.org/10.1145/777792.777839\">http://doi.acm.org/10.1145/777792.777839</a><br/>"
 					}
 				],
 				"seeAlso": []
