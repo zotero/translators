@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-10 15:35:58"
+	"lastUpdated": "2017-07-22 12:54:26"
 }
 
 /*
@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = ZU.xpath(doc, '//div[contains(@class, "content")]');
 	for (var i=0; i<rows.length; i++) {
 		var href = ZU.xpathText(rows[i], './/a[contains(@class, "js-permalink") and contains(@href, "/status/")]/@href');
-		var title = ZU.xpathText(rows[i], './/div[contains(@class, "js-tweet-text-container")]');
+		var title = ZU.xpathText(rows[i], './div[contains(@class, "js-tweet-text-container")]');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -80,6 +80,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("blogPost");
 	item.title = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]');
+	item.language = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]/@lang');
 	var author = ZU.xpathText(doc, '//div[contains(@class,"permalink-header")]//strong[contains(@class,"fullname")]');
 	if (author) {
 		item.creators.push(ZU.cleanAuthor(author, "author"));
@@ -96,11 +97,12 @@ function scrape(doc, url) {
 	var urlParts = url.split('/');
 	item.blogTitle = '@' + urlParts[3];
 	item.websiteType = "Tweet";
+	item.url = url;
 	item.attachments.push({
 		document: doc,
 		title: "Snapshot"
 	});
-	var urls = ZU.xpath(doc, '//a[contains(@class, "twitter-timeline-link")]/@title');
+	var urls = ZU.xpath(doc, '//div[contains(@class,"permalink-tweet-container")]//a[contains(@class, "twitter-timeline-link")]/@title');
 	for (var i=0; i<urls.length; i++) {
 		item.attachments.push({
 			url: urls[i].textContent,
@@ -129,7 +131,9 @@ var testCases = [
 				],
 				"date": "2011-08-22T04:52",
 				"blogTitle": "@zotero",
+				"language": "en",
 				"shortTitle": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http",
+				"url": "https://twitter.com/zotero/status/105608278976905216",
 				"websiteType": "Tweet",
 				"attachments": [
 					{
