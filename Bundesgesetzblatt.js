@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-15 10:24:06"
+	"lastUpdated": "2017-07-22 20:35:31"
 }
 
 /*
@@ -149,7 +149,7 @@ function scrape(doc, url) {
 		//e.g. media.xav/bgbl117s2262_75530.pdf?SID=&name=A730335D9081EC7D0035E5213AFA9AF8%2Fbgbl117s2262_75530.pdf&iid=75530
 		var m = embeddedPdf.match(/&name=([^&]+)/);
 		if (m) {
-			var pdfLink = '/xaver/bgbl/media/' + m[1].replace('%2F', '/');
+			var pdfLink = '/xaver/bgbl/media/' + decodeURIComponent(m[1]);
 			//Z.debug(pdfLink);
 			item.attachments.push({
 				title: 'Full Text PDF',
