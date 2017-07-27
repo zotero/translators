@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"lastUpdated": "2017-07-27 10:44:58"
 }
 
 /*
@@ -77,7 +77,7 @@ function doWeb(doc,url)
 		var assignee = ZU.xpathText(doc, '//meta[@scheme="assignee"]/@content');
 		var abstract = ZU.xpathText(doc, '//tr/td[b[contains(text(), "Abstract:")]]/following-sibling::td/div/span');
 		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator("web");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function(obj, item) {
 			item.itemType = "patent";
