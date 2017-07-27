@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-22 17:09:55"
+	"lastUpdated": "2017-07-27 10:44:28"
 }
 
 /*
@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	// We call the Embedded Metadata translator to do the actual work
-	var translator = Zotero.loadTranslator("import");
+	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setHandler("itemDone", function(obj, item) {
 		var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
