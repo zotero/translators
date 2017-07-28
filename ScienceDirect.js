@@ -66,6 +66,14 @@ function getPDFLink(doc, onDone) {
 		return;
 	}
 	
+	// If intermediate page URL is available, use that directly
+	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
+	if (intermediateURL) {
+		//Zotero.debug("Embedded intermediate URL: " + intermediateURL);
+		parseIntermediatePDFPage(intermediateURL, onDone);
+		return;
+	}
+	
 	// For pages that use the new JS drop-down, the DOM doesn't seem to have the intermediate page URL
 	// after the page load, but it's in the initial HTML, so fetch the page again. This is awful, and
 	// we should try to find a better way of getting the URL (which is obviously available to JS in
@@ -79,24 +87,30 @@ function getPDFLink(doc, onDone) {
 		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
 		//Zotero.debug("Intermediate URL: " + intermediateURL);
 		if (intermediateURL) {
-			// Get the PDF URL from the meta refresh on the intermediate page
-			ZU.doGet(intermediateURL, function (html) {
-				doc = dp.parseFromString(html, 'text/html');
-				var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
-				//Zotero.debug("Meta refresh URL: " + pdfURL);
-				if (pdfURL) {
-					// Strip '0;URL='
-					var matches = pdfURL.match(/\d+;URL=(.+)/);
-					pdfURL = matches ? matches[1] : null;
-				}
-				onDone(pdfURL);
-				return;
-			});
+			parseIntermediatePDFPage(intermediateURL, onDone);
 			return;
 		}
 		onDone();
 	});
 }
+
+
+function parseIntermediatePDFPage(url, onDone) {
+	// Get the PDF URL from the meta refresh on the intermediate page
+	ZU.doGet(url, function (html) {
+		var dp = new DOMParser();
+		var doc = dp.parseFromString(html, 'text/html');
+		var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
+		//Zotero.debug("Meta refresh URL: " + pdfURL);
+		if (pdfURL) {
+			// Strip '0;URL='
+			var matches = pdfURL.match(/\d+;URL=(.+)/);
+			pdfURL = matches ? matches[1] : null;
+		}
+		onDone(pdfURL);
+	});
+}
+
 
 function getISBN(doc) {
 	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
