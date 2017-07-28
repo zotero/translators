@@ -84,9 +84,9 @@ function getPDFLink(doc, onDone) {
 		try {
 			pdfLink.click();
 			intermediateURL = attr(doc, '.PdfDropDownMenu li a', 'href');
-			var clickEvent = document.createEvent('MouseEvents');
+			var clickEvent = doc.createEvent('MouseEvents');
 			clickEvent.initEvent('mousedown', true, true);
-			document.dispatchEvent(clickEvent);
+			doc.dispatchEvent(clickEvent);
 		}
 		catch (e) {
 			Zotero.debug(e, 2);
