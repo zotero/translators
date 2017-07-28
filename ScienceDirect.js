@@ -69,23 +69,45 @@ function getPDFLink(doc, onDone) {
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
-		//Zotero.debug("Embedded intermediate URL: " + intermediateURL);
+		//Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
 		parseIntermediatePDFPage(intermediateURL, onDone);
 		return;
 	}
 	
-	// For pages that use the new JS drop-down, the DOM doesn't seem to have the intermediate page URL
-	// after the page load, but it's in the initial HTML, so fetch the page again. This is awful, and
-	// we should try to find a better way of getting the URL (which is obviously available to JS in
-	// the page).
+	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
+	// for the intermediate page, which doesn't seem to be available in the DOM after the page load.
+	// This is an awful hack, and we should look out for a better way to get the URL, but it beats
+	// refetching the original source as we do below.
+	var pdfLink = doc.querySelector('#pdfLink');
+	if (pdfLink) {
+		// Just in case
+		try {
+			pdfLink.click();
+			intermediateURL = attr(doc, '.PdfDropDownMenu li a', 'href');
+			var clickEvent = document.createEvent('MouseEvents');
+			clickEvent.initEvent('mousedown', true, true);
+			document.dispatchEvent(clickEvent);
+		}
+		catch (e) {
+			Zotero.debug(e, 2);
+		}
+		if (intermediateURL) {
+			//Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
+			parseIntermediatePDFPage(intermediateURL, onDone);
+			return;
+		}
+	}
+	
+	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
+	// by fetching the page source again. Hopefully this is never actually used.
 	var url = doc.location.href;
-	//Zotero.debug("Getting HTML from " + url + " for PDF link");
+	Zotero.debug("Refetching HTML for PDF link");
 	ZU.doGet(url, function (html) {
 		// TODO: Switch to HTTP.request() and get a Document from the XHR
 		var dp = new DOMParser();
 		var doc = dp.parseFromString(html, 'text/html');
 		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
-		//Zotero.debug("Intermediate URL: " + intermediateURL);
+		//Zotero.debug("Intermediate PDF URL: " + intermediateURL);
 		if (intermediateURL) {
 			parseIntermediatePDFPage(intermediateURL, onDone);
 			return;
