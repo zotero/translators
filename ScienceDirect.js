@@ -61,7 +61,7 @@ function getPDFLink(doc, onDone) {
 	
 	// Some pages still have the PDF link available
 	var pdfURL = attr(doc, '#pdfLink', 'href');
-	if (pdfURL) {
+	if (pdfURL && pdfURL != '#') {
 		onDone(pdfURL);
 		return;
 	}
