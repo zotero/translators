@@ -9,8 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-22 16:54:54"
+	"lastUpdated": "2017-07-28 00:42:47"
 }
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
@@ -48,27 +51,88 @@ function detectWeb(doc, url) {
 	}
 }
 
-function getPDFLink(doc) {
-	var pdfLink = ZU.xpathText(doc, '//div[@id="articleToolbar"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
-	if (!pdfLink) {
-		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+function getPDFLink(doc, onDone) {
+	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
+	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text')) {
+		Zotero.debug("PDF is not available");
+		onDone();
+		return;
 	}
-	if (!pdfLink) {
-		pdfLink = ZU.xpathText(doc, '//div[@class="PdfEmbed"]/object/@data');
+	
+	// Some pages still have the PDF link available
+	var pdfURL = attr(doc, '#pdfLink', 'href');
+	if (pdfURL && pdfURL != '#') {
+		onDone(pdfURL);
+		return;
 	}
-	if (!pdfLink) {
-		var mainPdf = ZU.xpath(doc, '//div[@id="articleToolbar" or @class="Toolbar"]//a[contains(@href, "main.pdf")]');
-		//we only look at the first match
-		if (mainPdf.length>0) {
-			var classes = mainPdf[0].class || '';
-			//Z.debug(classes);
-			if (mainPdf[0].title!="Purchase PDF" && classes.indexOf('excerptLink')==-1 && classes.indexOf('purchaseSprite')==-1 && classes.indexOf('ref-article-pdf')==-1 && classes.indexOf('cLink')==-1) {
-				pdfLink = mainPdf[0].href;
-			}
+	
+	// If intermediate page URL is available, use that directly
+	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
+	if (intermediateURL) {
+		//Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
+		parseIntermediatePDFPage(intermediateURL, onDone);
+		return;
+	}
+	
+	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
+	// for the intermediate page, which doesn't seem to be available in the DOM after the page load.
+	// This is an awful hack, and we should look out for a better way to get the URL, but it beats
+	// refetching the original source as we do below.
+	var pdfLink = doc.querySelector('#pdfLink');
+	if (pdfLink) {
+		// Just in case
+		try {
+			pdfLink.click();
+			intermediateURL = attr(doc, '.PdfDropDownMenu li a', 'href');
+			var clickEvent = doc.createEvent('MouseEvents');
+			clickEvent.initEvent('mousedown', true, true);
+			doc.dispatchEvent(clickEvent);
+		}
+		catch (e) {
+			Zotero.debug(e, 2);
+		}
+		if (intermediateURL) {
+			//Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
+			parseIntermediatePDFPage(intermediateURL, onDone);
+			return;
 		}
 	}
-	return pdfLink;
+	
+	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
+	// by fetching the page source again. Hopefully this is never actually used.
+	var url = doc.location.href;
+	Zotero.debug("Refetching HTML for PDF link");
+	ZU.doGet(url, function (html) {
+		// TODO: Switch to HTTP.request() and get a Document from the XHR
+		var dp = new DOMParser();
+		var doc = dp.parseFromString(html, 'text/html');
+		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
+		//Zotero.debug("Intermediate PDF URL: " + intermediateURL);
+		if (intermediateURL) {
+			parseIntermediatePDFPage(intermediateURL, onDone);
+			return;
+		}
+		onDone();
+	});
 }
+
+
+function parseIntermediatePDFPage(url, onDone) {
+	// Get the PDF URL from the meta refresh on the intermediate page
+	ZU.doGet(url, function (html) {
+		var dp = new DOMParser();
+		var doc = dp.parseFromString(html, 'text/html');
+		var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
+		//Zotero.debug("Meta refresh URL: " + pdfURL);
+		if (pdfURL) {
+			// Strip '0;URL='
+			var matches = pdfURL.match(/\d+;URL=(.+)/);
+			pdfURL = matches ? matches[1] : null;
+		}
+		onDone(pdfURL);
+	});
+}
+
 
 function getISBN(doc) {
 	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
@@ -262,13 +326,6 @@ function processRIS(doc, text) {
 			document: doc
 		});
 
-		var pdfLink = getPDFLink(doc);
-		if (pdfLink) item.attachments.push({
-			title: 'ScienceDirect Full Text PDF',
-			url: pdfLink,
-			mimeType: 'application/pdf'
-		});
-
 		//attach supplementary data
 		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
 			try { //don't fail if we can't attach supplementary data
@@ -297,7 +354,16 @@ function processRIS(doc, text) {
 			item.url = "https:" + item.url;
 		}
 
-		item.complete();
+		getPDFLink(doc, function (pdfURL) {
+			if (pdfURL) {
+				item.attachments.push({
+					title: 'ScienceDirect Full Text PDF',
+					url: pdfURL,
+					mimeType: 'application/pdf'
+				});
+			}
+			item.complete();
+		});
 	});
 	translator.translate();
 }
