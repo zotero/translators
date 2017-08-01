@@ -135,7 +135,7 @@ function doExport() {
 		var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
 			return ' ' + firstLetter.toLowerCase();
 		});
-		if (item.publicationTitle) {
+		if (item.publicationTitle && (itemType=="journalArticle" || itemType=="magazineArticle" || itemType=="newspaperArticle")) {
 			description = description + ' from \'' + item.publicationTitle + '\'';
 		}
 		if (item.date) {
