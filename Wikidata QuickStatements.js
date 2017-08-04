@@ -113,114 +113,119 @@ var identifierMapping = {
 };
 
 
+function zoteroItemToQuickStatements(item) {
+	var statements = ['CREATE'];
+
+	var itemType = item.itemType;
+	//check whether a special itemType is defined in the extra fields
+	if (item.extra) {
+		var matchItemType = item.extra.match(/itemType: ([\w\-]+)($|\n)/);
+		if (matchItemType) {
+			itemType = matchItemType[1];
+		}
+	}
+	if (typeMapping[itemType]) {
+		statements.push('LAST	P31	' + typeMapping[itemType]);
+	}
+	statements.push('LAST	Len	"' + item.title + '"');
+
+	var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
+		return ' ' + firstLetter.toLowerCase();
+	});
+	if (item.publicationTitle && (itemType=="journalArticle" || itemType=="magazineArticle" || itemType=="newspaperArticle")) {
+		description = description + ' from \'' + item.publicationTitle + '\'';
+	}
+	if (item.date) {
+		var year = ZU.strToDate(item.date).year;
+		if (year) {
+			description = description + ' published in ' + year;
+		}
+	}
+	statements.push('LAST	Den	"' + description + '"');
+
+	for (var pnumber in propertyMapping) {
+		var zfield = propertyMapping[pnumber];
+		if (item[zfield]) {
+			statements.push('LAST	' + pnumber + '	"' + item[zfield] + '"');
+		}
+	}
+
+	var index = 1;
+	for (var i=0; i<item.creators.length; i++) {
+		var creatorValue = item.creators[i].lastName;
+		var creatorType = item.creators[i].creatorType;
+		if (item.creators[i].firstName) {
+			creatorValue = item.creators[i].firstName + ' ' + creatorValue;
+		}
+		if (creatorType=="author") {
+			statements.push('LAST	P2093	"' + creatorValue + '"	P1545	"' + index+ '"');
+			index++;
+		}
+		//other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
+	}
+
+	if (item.date) {
+		//e.g. +1967-01-17T00:00:00Z/11
+		var formatedDate = ZU.strToISO(item.date);
+		switch(formatedDate.length) {
+			case 4:
+				formatedDate = formatedDate + "-00-00T00:00:00Z/9";
+				break;
+			case 7:
+				formatedDate = formatedDate + "-00T00:00:00Z/10";
+				break;
+			case 10:
+				formatedDate = formatedDate + "T00:00:00Z/11";
+				break;
+			default:
+				formatedDate = formatedDate + "/11";
+		}
+		statements.push('LAST	P577	+' + formatedDate);
+	}
+
+	if (item.ISBN) {
+		var isbnDigits = item.ISBN.replace(/\-/g, '');
+		if (isbnDigits.length==13) {
+			statements.push('LAST	P212	"' + item.ISBN + '"');
+		}
+		if (isbnDigits.length==10) {
+			statements.push('LAST	P957	"' + item.ISBN + '"');
+		}
+	}
+
+	if (item.language) {
+		item.language = item.language.toLowerCase();
+		statements.push('LAST	P1476	' + item.language + ':"' + item.title + '"');
+		for (var lang in languageMapping) {
+			if (item.language.startsWith(lang)) {
+				statements.push('LAST	P407	' + languageMapping[lang]);
+			}
+		}
+	} else {
+		//otherwise use "und" for undetermined language
+		statements.push('LAST	P1476	und:"' + item.title + '"');
+	}
+
+	if (item.extra) {
+		var extraLines = item.extra.split('\n');
+		for (var i=0; i<extraLines.length; i++) {
+			var colon = extraLines[i].indexOf(':');
+			if (colon>-1) {
+				var label = extraLines[i].substr(0,colon);
+				var value = extraLines[i].substr(colon+1);
+				if (identifierMapping[label]) {
+					statements.push('LAST	' + identifierMapping[label] + '	"' + value.trim() + '"');
+				}
+			}
+		}
+	}
+
+	return statements.join('\n') + '\n';
+}
+
 function doExport() {
 	var item;
 	while ((item = Zotero.nextItem())) {
-		
-		Zotero.write('CREATE\n');
-		
-		var itemType = item.itemType;
-		//check whether a special itemType is defined in the extra fields
-		if (item.extra) {
-			var matchItemType = item.extra.match(/itemType: ([\w\-]+)($|\n)/);
-			if (matchItemType) {
-				itemType = matchItemType[1];
-			}
-		}
-		if (typeMapping[itemType]) {
-			Zotero.write('LAST	P31	' + typeMapping[itemType] + '\n');
-		}
-		Zotero.write('LAST	Len	"' + item.title + '"\n');
-		
-		var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
-			return ' ' + firstLetter.toLowerCase();
-		});
-		if (item.publicationTitle && (itemType=="journalArticle" || itemType=="magazineArticle" || itemType=="newspaperArticle")) {
-			description = description + ' from \'' + item.publicationTitle + '\'';
-		}
-		if (item.date) {
-			var year = ZU.strToDate(item.date).year;
-			if (year) {
-				description = description + ' published in ' + year;
-			}
-		}
-		Zotero.write('LAST	Den	"' + description + '"\n');
-		
-		for (var pnumber in propertyMapping) {
-			var zfield = propertyMapping[pnumber];
-			if (item[zfield]) {
-				Zotero.write('LAST	' + pnumber + '	"' + item[zfield] + '"\n');
-			}
-		}
-		
-		var index = 1;
-		for (var i=0; i<item.creators.length; i++) {
-			var creatorValue = item.creators[i].lastName;
-			var creatorType = item.creators[i].creatorType;
-			if (item.creators[i].firstName) {
-				creatorValue = item.creators[i].firstName + ' ' + creatorValue;
-			}
-			if (creatorType=="author") {
-				Zotero.write('LAST	P2093	"' + creatorValue + '"	P1545	"' + index+ '"\n');
-				index++;
-			}
-			//other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
-		}
-		
-		if (item.date) {
-			//e.g. +1967-01-17T00:00:00Z/11
-			var formatedDate = ZU.strToISO(item.date);
-			switch(formatedDate.length) {
-				case 4:
-					formatedDate = formatedDate + "-00-00T00:00:00Z/9";
-					break;
-				case 7:
-					formatedDate = formatedDate + "-00T00:00:00Z/10";
-					break;
-				case 10:
-					formatedDate = formatedDate + "T00:00:00Z/11";
-					break;
-				default:
-					formatedDate = formatedDate + "/11";
-			}
-			Zotero.write('LAST	P577	+' + formatedDate + '\n');
-		}
-		
-		if (item.ISBN) {
-			var isbnDigits = item.ISBN.replace(/\-/g, '');
-			if (isbnDigits.length==13) {
-				Zotero.write('LAST	P212	"' + item.ISBN + '"\n');
-			}
-			if (isbnDigits.length==10) {
-				Zotero.write('LAST	P957	"' + item.ISBN + '"\n');
-			}
-		}
-		
-		if (item.language) {
-			item.language = item.language.toLowerCase();
-			Zotero.write('LAST	P1476	' + item.language + ':"' + item.title + '"\n');
-			for (var lang in languageMapping) {
-				if (item.language.startsWith(lang)) {
-					Zotero.write('LAST	P407	' + languageMapping[lang] + '\n');
-				}
-			}
-		} else {
-			//otherwise use "und" for undetermined language
-			Zotero.write('LAST	P1476	und:"' + item.title + '"\n');
-		}
-		
-		if (item.extra) {
-			var extraLines = item.extra.split('\n');
-			for (var i=0; i<extraLines.length; i++) {
-				var colon = extraLines[i].indexOf(':');
-				if (colon>-1) {
-					var label = extraLines[i].substr(0,colon);
-					var value = extraLines[i].substr(colon+1);
-					if (identifierMapping[label]) {
-						Zotero.write('LAST	' + identifierMapping[label] + '	"' + value.trim() + '"\n');
-					}
-				}
-			}
-		}
+		Zotero.write(zoteroItemToQuickStatements(item));
 	}
 }
