@@ -115,6 +115,10 @@ var identifierMapping = {
 
 function zoteroItemToQuickStatements(item) {
 	var statements = ['CREATE'];
+	var addStatement = function() {
+		var args = Array.prototype.slice.call(arguments);
+		statements.push('LAST\t' + args.join('\t'))
+	};
 
 	var itemType = item.itemType;
 	//check whether a special itemType is defined in the extra fields
@@ -125,9 +129,9 @@ function zoteroItemToQuickStatements(item) {
 		}
 	}
 	if (typeMapping[itemType]) {
-		statements.push('LAST	P31	' + typeMapping[itemType]);
+		addStatement('P31', typeMapping[itemType]);
 	}
-	statements.push('LAST	Len	"' + item.title + '"');
+	addStatement('Len', '"' + item.title + '"');
 
 	var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
 		return ' ' + firstLetter.toLowerCase();
@@ -141,12 +145,12 @@ function zoteroItemToQuickStatements(item) {
 			description = description + ' published in ' + year;
 		}
 	}
-	statements.push('LAST	Den	"' + description + '"');
+	addStatement('Den', '"' + description + '"');
 
 	for (var pnumber in propertyMapping) {
 		var zfield = propertyMapping[pnumber];
 		if (item[zfield]) {
-			statements.push('LAST	' + pnumber + '	"' + item[zfield] + '"');
+			addStatement('LAST', pnumber, '"' + item[zfield] + '"');
 		}
 	}
 
@@ -158,7 +162,7 @@ function zoteroItemToQuickStatements(item) {
 			creatorValue = item.creators[i].firstName + ' ' + creatorValue;
 		}
 		if (creatorType=="author") {
-			statements.push('LAST	P2093	"' + creatorValue + '"	P1545	"' + index+ '"');
+			addStatement('P2093', '"' + creatorValue + '"', 'P1545', '"' + index+ '"');
 			index++;
 		}
 		//other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
@@ -180,30 +184,30 @@ function zoteroItemToQuickStatements(item) {
 			default:
 				formatedDate = formatedDate + "/11";
 		}
-		statements.push('LAST	P577	+' + formatedDate);
+		addStatement('P577', '+'+formatedDate);
 	}
 
 	if (item.ISBN) {
 		var isbnDigits = item.ISBN.replace(/\-/g, '');
 		if (isbnDigits.length==13) {
-			statements.push('LAST	P212	"' + item.ISBN + '"');
+			addStatement('P212', '"' + item.ISBN + '"');
 		}
 		if (isbnDigits.length==10) {
-			statements.push('LAST	P957	"' + item.ISBN + '"');
+			addStatement('P957', '"' + item.ISBN + '"');
 		}
 	}
 
 	if (item.language) {
 		item.language = item.language.toLowerCase();
-		statements.push('LAST	P1476	' + item.language + ':"' + item.title + '"');
+		addStatement('P1476', item.language + ':"' + item.title + '"');
 		for (var lang in languageMapping) {
 			if (item.language.startsWith(lang)) {
-				statements.push('LAST	P407	' + languageMapping[lang]);
+				addStatement('P407', languageMapping[lang]);
 			}
 		}
 	} else {
 		//otherwise use "und" for undetermined language
-		statements.push('LAST	P1476	und:"' + item.title + '"');
+		addStatement('P1476', 'und:"' + item.title + '"');
 	}
 
 	if (item.extra) {
@@ -214,7 +218,7 @@ function zoteroItemToQuickStatements(item) {
 				var label = extraLines[i].substr(0,colon);
 				var value = extraLines[i].substr(colon+1);
 				if (identifierMapping[label]) {
-					statements.push('LAST	' + identifierMapping[label] + '	"' + value.trim() + '"');
+					addStatements(identifierMapping[label], '"' + value.trim() + '"');
 				}
 			}
 		}
