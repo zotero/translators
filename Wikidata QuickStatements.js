@@ -212,11 +212,11 @@ function zoteroItemToQuickStatements(item) {
 
 	if (item.extra) {
 		var extraLines = item.extra.split('\n');
-		for (var i=0; i<extraLines.length; i++) {
-			var colon = extraLines[i].indexOf(':');
+		for (var j=0; j<extraLines.length; j++) {
+			var colon = extraLines[j].indexOf(':');
 			if (colon>-1) {
-				var label = extraLines[i].substr(0,colon);
-				var value = extraLines[i].substr(colon+1);
+				var label = extraLines[j].substr(0,colon);
+				var value = extraLines[j].substr(colon+1);
 				if (identifierMapping[label]) {
 					addStatements(identifierMapping[label], '"' + value.trim() + '"');
 				}
