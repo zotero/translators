@@ -117,7 +117,7 @@ function zoteroItemToQuickStatements(item) {
 	var statements = ['CREATE'];
 	var addStatement = function() {
 		var args = Array.prototype.slice.call(arguments);
-		statements.push('LAST\t' + args.join('\t'))
+		statements.push('LAST\t' + args.join('\t'));
 	};
 
 	var itemType = item.itemType;
@@ -150,7 +150,7 @@ function zoteroItemToQuickStatements(item) {
 	for (var pnumber in propertyMapping) {
 		var zfield = propertyMapping[pnumber];
 		if (item[zfield]) {
-			addStatement('LAST', pnumber, '"' + item[zfield] + '"');
+			addStatement(pnumber, '"' + item[zfield] + '"');
 		}
 	}
 
