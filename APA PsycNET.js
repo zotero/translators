@@ -1,7 +1,7 @@
 {
 	"translatorID": "1e1e35be-6264-45a0-ad2e-7212040eb984",
 	"label": "APA PsycNET",
-	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://psycnet\\.apa\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,154 +9,191 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-12 13:07:14"
+	"lastUpdated": "2017-08-13 20:01:09"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017 Philipp Zumstein
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+
 
 function detectWeb(doc, url) {
-	var type;
-	url = url.toLowerCase();
-	if (url.indexOf('search.searchresults') != -1) {
-	//permission error (still relevant?)
-	//return false;
+	return "journalArticle";
+	if (url.indexOf('/PsycBOOKS/')>-1) {
+		return "book";
+	} else if (url.indexOf('/search/display?')>-1 || url.indexOf('/record/')>-1) {
+		if (doc.getElementById('bookchapterstoc')) {
+			return "bookSection";
+		} else {
+			return "journalArticle";
+		}
+	} else if (url.indexOf('/search/results?')>-1 && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-
-	if(url.indexOf('search.displayrecord') != -1) {
-		type = doc.getElementById('rdcPubType');
-		if(!type) return false;
-		type = type.textContent.replace(/[\s\[\]]/g,'').split(';');
-		switch(type[0].toLowerCase()) {
-			case 'book':
-				return 'book';
-			case 'chapter':
-				return 'bookSection';
-			case 'journalarticle':
-			case 'editorial':
-				return 'journalArticle';
-			default:
-				return false;
-		}
-	}
-
-	if(url.search(/journals\/\S+\/\d+\/\d+\/\d+\//) != -1) {
-		return "journalArticle";
-	}
-
-	if(url.search(/\/books\/\d+/) != -1) {
-		var pubType = doc.getElementById('rdcPubType');
-		if (pubType && pubType.textContent.indexOf('Chapter') != -1) {
-			return "bookSection";
-		}
-		
-		fields.title = '(//h3[@id="bwcBookTitle"])[1]';
-		fields.authors = '(//div[@id="bwcBookAuthors"])[1]';
-		fields.voliss = '(//div[@id="bwcBookSource"])[1]';
-		fields.abstract = '(//div[@id="bwcAbstract"])[1]';
-
-		return "book";
-	}
-
-	if(url.indexOf('buy.optiontobuy') != -1
-		&& url.indexOf('id=') != -1
-		&& (type = doc.getElementById('obArticleHeaderText')) ) {
-		fields.title = '(//div[@id="obArticleTitleHighlighted"])[1]';
-		fields.authors = '(//div[@id="obAuthor"])[1]';
-		fields.voliss = '(//div[@id="obSource"])[1]';
-		fields.abstract = '(//div[@id="obAbstract"])[1]';
-
-		if(type.textContent.toLowerCase().indexOf('article') != -1) {
-			return 'journalArticle';
-		}
-
-		if(type.textContent.toLowerCase().indexOf('chapter') != -1) {
-			return 'bookSection';
-		}
-	}
-
-	/**for the book database - item IDs ending in 000 are books
-	 * everything else chapters
-	 */
-	if (url.search(/psycinfo\/[0-9]{4}-[0-9]+-000/) != -1){
-		return "book";
-	}
-
-	if (url.search(/psycinfo\/[0-9]{4}-[0-9]+-[0-9]{3}/) != -1){
-		return "bookSection";
-	}
 }
 
-//default field xpath
-var fields = {
-	title: '(//div[@id="rdcTitle"])[1]',
-	authors: '(//div[@id="rdcAuthors"])[1]',
-	voliss: '(//div[@id="rdcSource"])[1]',
-	abstract: '//div[@id="rdRecord"]/div[@class="rdRecordSection"][2]'
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('a.article-title');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);Z.debug(title);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
-function getField(field, doc) {
-	var val = ZU.xpathText(doc, field);
-	if(val) val = ZU.trimInternal(val);
-	return val;
-}
-
-//for scraping publication information directly from pages
-var volissRe = {
-	journalArticle: 
-		/^(.+?)(?:,\sVol\s(\d+)\((\d+)\))?,\s(\w+\s(?:\d+\s*,\s)?\d{4}),\s(?:(\d+-\d+)|No Pagination Specified).(?:\sdoi:\s(.+))?$/i,
-	bookSection:
-		/^(.+?),\s\((\d{4})\)\.\s(.+?),\s\(pp\.\s(\d+-\d+)\)\.\s(.+?):\s(.+?),\s(?:(\w+))?,\s(\d+)\spp\.(?:\sdoi:\s(.+))?/i,
-	book:
-		/^(.+?):\s(.+?)(?:\.\s\((\d{4})\)\.\s(\w+)\s(\d+)\spp\.\sdoi:\s(.+))?$/i
-};
-
-var creatorMap = {
-	Ed: 'editor'
-};
 
 function doWeb(doc, url) {
-	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		var items = new Object();
-		var titles = ZU.xpath(doc, '//div[@class="srhcTitle"]/a');
-		for(var i=0, n=titles.length; i<n; i++) {
-			items[titles[i].href] = titles[i].textContent;
-		}
-		Zotero.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
-	
-			var arts = new Array();
-			for(var i in selectedItems) {
-				arts.push(i);
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
 			}
-			ZU.processDocuments(arts, scrape);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		scrape(doc, url, type);
+		scrape(doc, url);
 	}
 }
+
+
+function scrape(doc, url) {
+	var uid = getIds(doc,url);
+	
+	var productCode;
+	var db = doc.getElementById('database');
+	if (db) {
+		var db = db.parentNode.textContent;
+		if (db.indexOf('PsycARTICLES')>-1) {
+			productCode = 'PA';
+		} else if (db.indexOf('PsycBOOKS')>-1) {
+			productCode = 'PB';
+		} else if (db.indexOf('PsycINFO')>-1) {
+			productCode = 'PI';
+		}
+	}
+	Z.debug(productCode);
+	
+	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"'+uid+'","ProductCode":"'+productCode+'"}],"exportType":"zotero"}}';
+	var headers = {
+		'Content-Type': 'application/json',
+		'Referer': url
+	};
+	Z.debug(postData);
+
+
+	ZU.doPost('/api/request/record.exportRISFile', postData, function(text) {
+		try {
+			var data = JSON.parse(text);
+		} catch(e) {
+			Z.debug('POST request did not result in valid JSON');
+			Z.debug(text);
+		};
+Z.debug(text)
+		if (data && data.isRisExportCreated) {
+			Z.debug(data);
+			ZU.doGet('/ris/download', function(text2) {
+				Z.debug("TEXT 2: "+text2);
+				var redirect = text2.match(/<meta http-equiv="refresh" content="10; url=([^"]*)"/)
+				Z.debug("REDIRECT: "+redirect);
+				if (redirect) {
+					ZU.doGet(redirect, function(text3) {
+						Z.debug("TEXT 3: "+text3);
+						processRIS(text3, doc);
+					}, null, null, headers);
+				} else {
+					processRIS(text2, doc);
+				}
+				
+				
+			});
+		}
+	}, headers);
+}
+
+
+function processRIS(text, doc) {
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function(obj, item) {
+		for (var i=0; i<item.tags.length; i++) {
+			item.tags[i] = item.tags[i].replace(/^\*/, '');
+		}
+		var pdfURL = attr(doc, 'a[href*="/fulltext"]');
+		if (pdfURL) {
+			item.attachments.push({
+				url: pdfURL.href,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
+			});
+		}
+		item.attachments.push({
+			title: "Snapshot",
+			document: doc
+		});
+		item.complete();
+	})
+	translator.translate();
+}
+
 
 //try to figure out ids that we can use for fetching RIS
 function getIds(doc, url) {
-	var ret = {}
-	ret.id = ZU.xpathText(doc, '(//input[@name="id"])[1]/@value') || '';
-	ret.lstUID = ZU.xpathText(doc,
-			'(//input[@name="lstUIDs"][@id="srhLstUIDs"])[1]/@value');
-	if(ret.id || ret.lstUID) return ret;
+	//try to extract uid from the table
+	var uid = doc.getElementById('uid');
+	if (uid) {
+		return text(doc, '#uid + dd');
+	}
 
-	url = url.toLowerCase();
-	/**on the /book/\d+ pages, we can find the UID in
+	//try to extract uid from the url
+	if (url.indexOf('/record/')>-1) {
+		var m = url.match(/\/record\/([\d\-]*)/);
+		if (m && m[1]) {
+			return m[1];
+		}
+	}
+	
+	/**on the book pages, we can find the UID in
 	 * the Front matter and Back matter links
 	 */
-	if(url.search(/\/books\/\d+/) != -1) {
-		var links = ZU.xpath(doc,
-			'//a[@target="_blank" and contains(@href,"&id=")]');
-		var m;
-		for(var i=0, n=links.length; i<n; i++) {
-			m = links[i].href.match(/\bid=([^&]+?)-(?:FRM|BKM)/i);
-			if(m && m[1]) {
-				ret.lstUID = m[1];
-				return ret;
-			}
+	if (url.indexOf('/PsycBOOKS/')>-1) {
+		var link = attr(doc, '.bookMatterLinks a', 'href');
+		var m = link.match(/\/fulltext\/([^&]+?)-(?:FRM|BKM)/i);
+		if (m && m[1]) {
+			return m[1];
 		}
 	}
 
@@ -179,193 +216,7 @@ function getIds(doc, url) {
 	}
 }
 
-//retrieve RIS data
-//retry n times
-function fetchRIS(url, post, itemType, doc, retry) {
-	//language only available on the page;
-	var language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
-	ZU.doPost(url, post, function(text) {
-		//There's some cookie/session magic going on
-		//our first request for RIS might not succeed
-		var foundRIS = (text.indexOf('TY  - ') != -1);
-		if(!foundRIS && retry) {
-			//retry
-			Z.debug('No RIS data. Retrying (' + retry + ').');
-			fetchRIS(url, post, itemType, doc, --retry);
-			return;
-		} else if(!foundRIS) {
-			Z.debug('No RIS data. Falling back to scraping the page directly.');
-			scrapePage(doc, itemType);
-			return;
-		}
-		
-		//clean up (double) spacing in RIS
-		text = text.replace(/  +/g, ' ');
-		//Z.debug(text)
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-
-		//Some authors are not entered according to spec
-		//We try to fix places where multiple authors are entered in one entry
-		text = text.replace(/^((?:A[U123]|ED) - )(.+?)$/mg,
-			function(match, tag, authors) {
-				var authorRE = /((?:[A-Z](?:\.?\s|\.))+)([-A-Za-z]+)/g;
-				var author, newStr='';
-				while(author = authorRE.exec(authors)) {
-					if(newStr) {	//not the first author
-						newStr += '\r\n';
-					}
-
-					newStr += tag + author[2] + ', ' + author[1].trim();
-				}
-
-				if(newStr) {
-					return newStr;
-				} else {	//we didn't find any authors
-					return match;
-				}
-			}
-		);
-			
-		text = text.replace(/^DESCRIPTORS -.+/gm, "");
-		
-		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-			//item.url = newurl;
-			
-			item.title = item.title.replace(/\.$/,'');
-			if (item.ISSN) {
-				var ISSN = item.ISSN.split(/\s*;\s*/);
-				var ISSNArray = [];
-				for (var i=0; i<ISSN.length; i++) {
-					ISSNArray.push(ZU.cleanISSN(ISSN[i]));
-				}
-				item.ISSN = ISSNArray.join(" ");
-				item.language = language;
-			}
-			finalizeItem(item, doc);		
-		});
-		translator.translate();
-	});
-}
-
-//scrape directly from page
-function scrapePage(doc, type) {
-	Z.debug('Attempting to scrape directly from page');
-	var item = new Zotero.Item(type);
-	item.title = getField(fields.title, doc);
-	if(!item.title) item.title = getField('obArticleTitleHighlighted', doc);
-	if(!item.title) item.title = getField('bwcBookTitle', doc);
-
-	var authors = getField(fields.authors, doc);
-	if(authors) {
-		authors = authors.replace(/^by\s+/i, '').split(/\s*;\s+/);
-		var m, creatorType, name;
-		for(var i=0, n=authors.length; i<n; i++) {
-			m = authors[i].match(/^(.+?)\s?\((\w+)\)$/);
-			if(m) {
-				creatorType = creatorMap[m[2]];
-				name = m[1];
-			} else {
-				creatorType = 'author';
-				name = authors[i];
-			}
-			item.creators.push(ZU.cleanAuthor(name, creatorType, true));
-		}
-	}
-
-	var voliss = getField(fields.voliss, doc);
-	if(voliss
-		&& (voliss = voliss.match(volissRe[type]))) {
-		switch(type) {
-			case 'journalArticle':
-				item.publicationTitle = voliss[1];
-				item.volume = voliss[2];
-				item.issue = voliss[3];
-				item.date = voliss[4];
-				item.pages = voliss[5];
-				item.DOI = voliss[6];
-			break;
-			case 'bookSection':
-				var eds = voliss[1].split(/\s*;\s*/);
-				var m, name, creatorType;
-				for(var i=0, n=eds.length; i<n; i++) {
-					m = eds[i].match(/^(.+?)(?:\s\((\w+)\))?$/);
-					if(m) {
-						creatorType = creatorMap[m[2]] || 'editor';
-						item.creators.push(
-							ZU.cleanAuthor(m[1], creatorType, true)
-						);
-					}
-				}
-				item.date = voliss[2];
-				item.bookTitle = voliss[3];
-				item.pages = voliss[4];
-				item.place = voliss[5];
-				item.publisher = voliss[6];
-				item.volume = voliss[7];
-				item.numPages = voliss[8];
-				item.DOI = voliss[9];
-			break;
-			case 'book':
-				item.place = voliss[1];
-				item.publisher = voliss[2];
-				item.date = voliss[3];
-				item.volume = voliss[4];
-				item.numPages = voliss[5];
-				item.DOI = voliss[6];
-			break;
-		}
-	}
-
-	item.abstractNote = getField(fields.abstract, doc);
-
-	finalizeItem(item, doc);
-}
-
-function finalizeItem(item, doc) {
-
-	var pdfurl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-	if (!pdfurl) pdfurl = ZU.xpathText(doc, '//li[contains(@class, "PDF") and contains(@href, ".pdf")]/@href');
-	//clean up abstract and get copyright info
-	if(item.abstractNote) {
-		var m = item.abstractNote.match(/^(.+)\([^)]+(\(c\)[^)]+)\)$/i);
-		if(m) {
-			item.abstractNote = m[1];
-			item.rights = m[2];
-		}
-	}
-
-	//for books, volume is in the same field as numPages
-	if(item.itemType == 'book' && item.numPages) {
-		var m = item.numPages.match(/^(\w+)\s*,\s*(\d+)$/);
-		if(m) {
-			item.volume = m[1];
-			item.numPages = m[2];
-		}
-	}
-	if (pdfurl) item.attachments =[{url: pdfurl, title: "APA Psycnet Fulltext PDF", mimeType: "application/pdf"}]
-	else item.attachments = [{title:"APA PsycNET Snapshot",	document:doc}] 
-	
-	item.complete();
-}
-
-function scrape (doc, newurl, type) {
-	if(!type) type = detectWeb(doc, newurl);
-	var ids = getIds(doc, newurl);
-	var id = ids.id;
-	var lstUID = ids.lstUID;
-	if (id || lstUID) {
-		var url = '/index.cfm?fa=search.export'
-		var post = 'id=' + id + '&lstUIDs=' + lstUID
-			+ '&records=records&exportFormat=referenceSoftware';
-		Zotero.debug("Url: " + url);
-		Zotero.debug("Post: " + post);
-		fetchRIS(url, post, type, doc, 1);
-	} else {
-		scrapePage(doc, type);
-	}
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
