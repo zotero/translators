@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2017-01-26 07:54:49"
+	"lastUpdated": "2017-08-26 11:30:28"
 }
 
 /*
@@ -191,11 +191,23 @@ function scrapeRIS(doc, url) {
 
 
 function scrapeMetadata(doc, url) {
+	//the highwire meta tags are now part of the body and not head
+	//which we have to correct here before calling EM translator
+	var head = doc.getElementsByTagName('head');
+	var metasInBody = ZU.xpath(doc, '//body/div/meta');
+	for (var i=0; i<metasInBody.length; i++) {
+		head[0].append(metasInBody[i]);
+	}
 	// We call the Embedded Metadata translator
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setHandler("itemDone", function(obj, item) {
 		item.abstractNote = ZU.xpathText(doc, '//div[@class="articleBody_abstract"]');
+		var doi = ZU.xpathText(doc, '(//a[@itemprop="citation_doi"])[1]/@href');
+		if (doi) {
+			var start = doi.indexOf('10.');
+			item.DOI = doi.substr(start);
+		}
 		item.complete();
 	});
 	translator.setDocument(doc);
@@ -209,35 +221,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
+		"url": "https://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "The Midterm Landslide of 2010: A Triple Wave Election",
 				"creators": [
 					{
+						"firstName": "James E.",
 						"lastName": "Campbell",
-						"creatorType": "author",
-						"firstName": "James E."
+						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "2011-01-10",
 				"DOI": "10.2202/1540-8884.1405",
 				"ISSN": "1540-8884",
-				"abstractNote": "Democrats were trounced in the 2010 midterm elections. They lost six seats in the U.S. Senate, six governorships, and about 700 seats in state legislatures. Compared to 2008, Democrats lost 64 seats in the House and Republicans regained their House majority. The Republican majority elected in 2010 was the largest number of Republicans elected since 1946. The analysis finds that Republican seat gains resulted from the receding of the pro-Democratic waves of 2006 and 2008 as well as the incoming pro-Republican wave of 2010. Voters rejected Democrats in 2010 for their failure to revive the economy, but also for their advancement of the national healthcare reform and other liberal policies. The analysis speculates that Democrats are likely to gain House seats and lose Senate seats in 2012. Finally, President Obama’s prospects of re-election have probably been improved because of the Republican gains in the 2010 midterm.",
+				"abstractNote": "Democrats were trounced in the 2010 midterm elections. They lost six seats in the U.S. Senate, six governorships, and about 700 seats in state legislatures. Compared to 2008, Democrats lost 64 seats in the House and Republicans regained their House majority. The Republican majority elected in 2010 was the largest number of Republicans elected since 1946. The analysis finds that Republican seat gains resulted from the receding of the pro-Democratic waves of 2006 and 2008 as well as the incoming  pro-Republican wave of 2010. Voters rejected Democrats in 2010 for their failure to revive the economy, but also for their advancement of the national healthcare reform and other liberal policies. The analysis speculates that Democrats are likely to gain House seats and lose Senate seats in 2012. Finally, President Obamas prospects of re-election have probably been improved because of the Republican gains in the 2010 midterm.",
 				"issue": "4",
-				"libraryCatalog": "DeGruyter",
+				"libraryCatalog": "www.degruyter.com",
 				"publicationTitle": "The Forum",
 				"shortTitle": "The Midterm Landslide of 2010",
-				"url": "http://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml?format=INT",
+				"url": "https://www.degruyter.com/view/j/for.2011.8.4_20120105083457/for.2011.8.4/for.2011.8.4.1405/for.2011.8.4.1405.xml",
 				"volume": "8",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"congress",
+					"economy",
+					"elections",
+					"midterm elections",
+					"polarization",
+					"political parties",
+					"presidency",
+					"presidential approval",
+					"retrospective voting",
+					"voting"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -245,32 +271,35 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
+		"url": "https://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Comment on Nordhaus: Carbon Tax Calculations",
 				"creators": [
 					{
+						"firstName": "Yoram",
 						"lastName": "Bauman",
-						"creatorType": "author",
-						"firstName": "Yoram"
+						"creatorType": "author"
 					}
 				],
-				"date": "2010",
+				"date": "2010-10-08",
 				"DOI": "10.2202/1553-3832.1796",
 				"ISSN": "1553-3832",
 				"abstractNote": "William Nordhaus confuses the impact of a tax on carbon and a tax on carbon dioxide, according to Yoram Bauman.",
 				"issue": "4",
-				"libraryCatalog": "DeGruyter",
+				"libraryCatalog": "www.degruyter.com",
 				"publicationTitle": "The Economists' Voice",
 				"shortTitle": "Comment on Nordhaus",
-				"url": "http://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml?format=INT",
+				"url": "https://www.degruyter.com/view/j/ev.2010.7.4/ev.2010.7.4.1796/ev.2010.7.4.1796.xml",
 				"volume": "7",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -325,36 +354,45 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
+		"url": "https://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Did Magic Matter? The Saliency of Magic in the Early Roman Empire",
 				"creators": [
 					{
+						"firstName": "Justin J.",
 						"lastName": "Meggitt",
-						"creatorType": "author",
-						"firstName": "Justin J."
+						"creatorType": "author"
 					}
 				],
-				"date": "2013",
+				"date": "2013/11/01",
 				"DOI": "10.1515/jah-2013-0010",
 				"ISSN": "2324-8114",
-				"abstractNote": "Magic is usually assumed to have been ubiquitous and culturally significant in the early Roman Empire, something exemplified by Pliny the Elder’s claim that “there is no one who does not fear to be spell-bound by curse tablets”.1 A variety of written and material evidence is commonly taken to be indicative of both the regular use of magic and widespread anxiety about its deployment. However, this paper argues that if we attempt, having determined a contextually appropriate definition of magic, to gauge the prevalence and significance of magic in this period, it can be seen to have had little cultural salience. Not only is evidence for its presence more equivocal than usually presumed, but magic is found to be strikingly absent from major popular cultural sources that shed light on the presuppositions and preoccupations of most of the empire’s inhabitants, and to have had little explanatory or symbolic utility. The paper then proceeds to suggest possible reasons for magic’s lack of salience in the early Empire, including the role of various sceptical discourses concerned with the supernatural in general and magic in particular, and the consequence of the largely agonistic context of its use on the limited occasions that it was employed.",
+				"abstractNote": "AbstractMagic is usually assumed to have been ubiquitous and culturally significant in the early Roman Empire, something exemplified by Pliny the Elder’s claim that “there is no one who does not fear to be spell-bound by curse tablets”.1 A variety of written and material evidence is commonly taken to be indicative of both the regular use of magic and widespread anxiety about its deployment. However, this paper argues that if we attempt, having determined a contextually appropriate definition of magic, to gauge the prevalence and significance of magic in this period, it can be seen to have had little cultural salience. Not only is evidence for its presence more equivocal than usually presumed, but magic is found to be strikingly absent from major popular cultural sources that shed light on the presuppositions and preoccupations of most of the empire’s inhabitants, and to have had little explanatory or symbolic utility. The paper then proceeds to suggest possible reasons for magic’s lack of salience in the early Empire, including the role of various sceptical discourses concerned with the supernatural in general and magic in particular, and the consequence of the largely agonistic context of its use on the limited occasions that it was employed.",
 				"issue": "2",
-				"libraryCatalog": "DeGruyter",
-				"pages": "170–229",
+				"libraryCatalog": "www.degruyter.com",
+				"pages": "170-229",
 				"publicationTitle": "Journal of Ancient History",
 				"shortTitle": "Did Magic Matter?",
-				"url": "http://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
+				"url": "https://www.degruyter.com/view/j/jah-2013-1-issue-2/jah-2013-0010/jah-2013-0010.xml",
 				"volume": "1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Belief",
+					"Early Roman Empire.",
+					"Magic",
+					"Popular Culture",
+					"Scepticism"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
