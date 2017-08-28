@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-12 10:51:59"
+	"lastUpdated": "2017-08-28 16:06:49"
 }
 
 /*
@@ -102,7 +102,7 @@ function scrape(doc, url) {
 	var synopsis = text(doc, '.synopsis');
 	item.notes.push({note: aired});
 	if (synopsis) {
-		item.notes.push({note: synopsis.trim()});
+		item.abstractNote = synopsis.trim();
 	}
 	
 	item.publicationTitle = 'The Radio Times';
@@ -126,6 +126,7 @@ function scrape(doc, url) {
 	if (tv.indexOf(program)>-1) {
 		type = "tvBroadcast";
 	}
+	
 	var additionalItem = new Zotero.Item(type);
 	additionalItem.title = item.title;
 	var pieces = aired.split(',');
@@ -140,6 +141,12 @@ function scrape(doc, url) {
 	additionalItem.seeAlso.push(item.itemID);
 	additionalItem.complete();
 }
+
+
+//Update or test the test cases does not work because of the saving of
+//two items at each time. But one can create new tests from the urls
+//and then delete the old tests for updating.
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -152,6 +159,7 @@ var testCases = [
 				"creators": [],
 				"date": "1933-10-20",
 				"ISSN": "0033-8060",
+				"abstractNote": "Conducted by JAMES OLIVER \nRelayed from The Town Hall, Walsall",
 				"issue": "525",
 				"itemID": "http://genome.ch.bbc.co.uk/09d732e273ae49e490d35ff1b69bf5f9#magazinArticle",
 				"language": "en-GB",
@@ -168,9 +176,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Regional Programme Midland, 28 October 1933 20.00"
-					},
-					{
-						"note": "Conducted by JAMES OLIVER \nRelayed from The Town Hall, Walsall"
 					}
 				],
 				"seeAlso": []
@@ -201,6 +206,7 @@ var testCases = [
 				"creators": [],
 				"date": "1969-07-17",
 				"ISSN": "0033-8060",
+				"abstractNote": "The First Man on the Moon\n\nShortly after 7.0 this morning astronaut Neil Armstrong should set foot on the moon. As he goes down the steps Armstrong will switch on the black and white television camera to beam live pictures back to earth. That transmission should also cover the moment when Edwin Aldrin joins Armstrong on the surface and continue throughout the two hours and forty mins. of the Moon Walk.\n\nBefore that more live pictures are expected from the Command Module as Michael Collins looks towards the moon and the landing ground from sixty miles up.\nA report by James Burke with Patrick Moore from the Apollo Space Studio and Michael Charlton at Houston Mission Control",
 				"issue": "2384",
 				"itemID": "http://genome.ch.bbc.co.uk/4bad6bdda36645d7be09f44bf51eff18#magazinArticle",
 				"language": "en-GB",
@@ -217,9 +223,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "BBC One London, 21 July 1969 6.00"
-					},
-					{
-						"note": "The First Man on the Moon\n\nShortly after 7.0 this morning astronaut Neil Armstrong should set foot on the moon. As he goes down the steps Armstrong will switch on the black and white television camera to beam live pictures back to earth. That transmission should also cover the moment when Edwin Aldrin joins Armstrong on the surface and continue throughout the two hours and forty mins. of the Moon Walk.\n\nBefore that more live pictures are expected from the Command Module as Michael Collins looks towards the moon and the landing ground from sixty miles up.\nA report by James Burke with Patrick Moore from the Apollo Space Studio and Michael Charlton at Houston Mission Control"
 					}
 				],
 				"seeAlso": []
