@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-16 18:52:30"
+	"lastUpdated": "2017-08-26 11:30:00"
 }
 
 /*
@@ -469,6 +469,7 @@ function addHighwireMetadata(doc, newItem) {
 
 	//prefer ISSN over eISSN
 	var issn = getContentText(doc, 'citation_issn') ||
+			getContentText(doc, 'citation_ISSN') ||
 			getContentText(doc, 'citation_eIssn');
 
 	if(issn) newItem.ISSN = issn;
