@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:53:43"
+	"lastUpdated": "2017-08-31 10:27:59"
 }
 
 function detectWeb(doc, url) {
@@ -98,7 +98,7 @@ function doWeb(doc, url) {
 
 function scrape (doc, url) {
 	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)\//))[1];
-	var pdf = ZU.xpathText(doc, '//a[i[contains(@class, "doc-act-icon-pdf")]]/@href');
+	var pdf = ZU.xpathText(doc, '//a[contains(@class, "stats-document-lh-action-downloadPdf_2")]/@href');
 	//Z.debug(pdf);
 	//Z.debug("arNumber = " + arnumber);
 	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
@@ -141,7 +141,7 @@ function scrape (doc, url) {
 				ZU.doGet(pdf, function (src) {
 					// Either the PDF is embedded in the page, or (e.g. for iOS)
 					// the page has a redirect to the full-page PDF
-					var m = /<frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+					var m = /<i?frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
 					var pdfUrl = m && (m[1] || m[2]);
 					if (pdfUrl) {
 						item.attachments.unshift({
