@@ -57,7 +57,7 @@ function doWeb(doc, url) {
 		var modifiedData = JSON.parse(modifiedMatch[1]);
 		item.creators.push(ZU.cleanAuthor(modifiedData[0], "author"));
 		var date = new Date(modifiedData[1]);
-    	item.date = date.toISOString();
+    		item.date = date.toISOString();
 	}
 	
 	var urlparts = url.split('/');
