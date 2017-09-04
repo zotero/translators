@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-28 16:06:49"
+	"lastUpdated": "2017-09-04 22:38:30"
 }
 
 /*
@@ -94,8 +94,8 @@ function scrape(doc, url) {
 	//e.g.    Issue 2384\n   7 July 1969\n   Page 16
 	var parts = aside.trim().split('\n');
 	item.issue = parts[0].replace('Issue', '').trim();
-	item.date = ZU.strToISO(parts[1]);
-	item.pages = parts[2].replace('Page', '').trim();
+	if (parts.length>1) item.date = ZU.strToISO(parts[1]);
+	if (parts.length>2) item.pages = parts[2].replace('Page', '').trim();
 	
 	var aired = text(doc, '.primary-content a');
 	var urlprogram = attr(doc, '.primary-content a', 'href');
@@ -132,12 +132,14 @@ function scrape(doc, url) {
 	var pieces = aired.split(',');
 	//e.g ["BBC Radio 4 FM" , "30 September 1967 6.35"]
 	additionalItem.programTitle = pieces[0];
-	var time = text(doc, '.primary-content a span.time');
-	var date = ZU.strToISO(pieces[1].replace(time, ''))
-	if (time.indexOf('.') == 1) {
-		time = '0'+time;
+	if (pieces.length>1) {
+		var date = ZU.strToISO(pieces[1].replace(time, ''));
+		var time = text(doc, '.primary-content a span.time');
+		if (time.indexOf('.') == 1) {
+			time = '0'+time;
+		}
+		additionalItem.date = date +'T'+time.replace('.', ':');
 	}
-	additionalItem.date = date +'T'+time.replace('.', ':');
 	additionalItem.seeAlso.push(item.itemID);
 	additionalItem.complete();
 }
