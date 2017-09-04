@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-01 10:17:32"
+	"lastUpdated": "2017-09-04 21:31:05"
 }
 
 // attr()/text() v2
@@ -131,7 +131,9 @@ function parseIntermediatePDFPage(url, onDone) {
 		} else {
 			//Sometimes we are already on the PDF page here and therefore
 			//can simply use the original url as pdfURL.
-			pdfURL = url;
+			if (url.indexOf('.pdf') > -1) {
+				pdfURL = url;
+			}
 		}
 		onDone(pdfURL);
 	});
@@ -311,10 +313,14 @@ function processRIS(doc, text) {
 
 		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
 
-		//add spaces after initials
 		for (var i = 0, n = item.creators.length; i < n; i++) {
+			//add spaces after initials
 			if (item.creators[i].firstName) {
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
+			}
+			//fix all uppercase lastnames
+			if (item.creators && item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
+				item.creators[i].lastName = item.creators[i].lastName.charAt(0) + item.creators[i].lastName.slice(1).toLowerCase();
 			}
 		}
 
@@ -994,12 +1000,12 @@ var testCases = [
 				"title": "Increased sink capacity enhances C and N assimilation under drought and elevated CO2 conditions in maize",
 				"creators": [
 					{
-						"lastName": "ZONG",
+						"lastName": "Zong",
 						"firstName": "Yu-zheng",
 						"creatorType": "author"
 					},
 					{
-						"lastName": "SHANGGUAN",
+						"lastName": "Shangguan",
 						"firstName": "Zhou-ping",
 						"creatorType": "author"
 					}
