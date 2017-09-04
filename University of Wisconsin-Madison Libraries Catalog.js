@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-28 19:21:51"
+	"lastUpdated": "2017-09-04 22:23:21"
 }
 
 /*
@@ -49,7 +49,6 @@ function detectWeb(doc, url) {
 		var format = ZU.xpathText(doc, '//span[@class="pub_title" and contains(., "Format")]/following-sibling::span[@class="pub_desc"]');
 		//Z.debug(format);
 		switch(format) {
-			case "Music Scores":
 			case "Sound Recordings":
 				return "audioRecording";
 			case "Videos, Slides, Films":
@@ -62,6 +61,7 @@ function detectWeb(doc, url) {
 				return "artwork";
 			//case "Journals, Magazines, Newspapers":
 			//there is no such itemType yet
+			case "Music Scores":
 			default:
 				return "book";
 		}
@@ -103,17 +103,31 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	 
 	var risURL = url.replace(/[#?].*$/, '') + '.ris';
 	//there is also a link tag for RIS but the href is currently missing
 
 	ZU.doGet(risURL, function(text) {
 		//delete birth/death year from author name
 		text = text.replace(/^(AU\s+-.*), \d\d\d\d-(\d\d\d\d)?$/m, "$1");
+		//music scores should be treated as book
+		text = text.replace('TY  - MUSIC', 'TY  - BOOK');
+		//Z.debug(text);
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if (item.abstractNote) {
+				//sometimes the physical description is saved in the abstract
+				//e.g. 38 pages ; 24 cm
+				var m = item.abstractNote.match(/(\d+)\spages\b/);
+				if (m) {
+					item.numPages = m[1];
+					delete item.abstractNote;
+				}
+			}
+			item.complete();
+		});
 		translator.translate();
 	})
 }
@@ -135,9 +149,9 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "xi, 159 pages : illustrations ; 23 cm",
 				"callNumber": "PN171.F56 P83 2011",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
+				"numPages": "159",
 				"publisher": "Chicago : Association of College and Research Libraries, 2011.",
 				"shortTitle": "Zotero",
 				"url": "https://search.library.wisc.edu/catalog/9910104568102121",
@@ -167,9 +181,9 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"abstractNote": "38 pages ; 24 cm",
 				"callNumber": "Y 1.1/7: 114-178",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
+				"numPages": "38",
 				"publisher": "Washington : U.S. Government Publishing Office, 2016.",
 				"shortTitle": "Fiscal year 2017 budget amendments",
 				"url": "https://search.library.wisc.edu/catalog/9912334246702121",
@@ -220,20 +234,20 @@ var testCases = [
 		"url": "https://search.library.wisc.edu/catalog/9910065379202121",
 		"items": [
 			{
-				"itemType": "audioRecording",
+				"itemType": "book",
 				"title": "Oktett für vier Violinen, zwei Violen und zwei Violoncelli, op. 20 : Arrangement für Klavier zu vier Händen",
 				"creators": [
 					{
 						"lastName": "Mendelssohn-Bartholdy",
 						"firstName": "Felix",
-						"creatorType": "composer"
+						"creatorType": "author"
 					}
 				],
 				"date": "2004",
-				"abstractNote": "1 score (xvii, 101 pages) : facsimiles ; 31 cm",
 				"callNumber": "M3 M236 1997 Ser.3 v.5a",
-				"label": "Wiesbaden : Breitkopf & Härtel, 2004.",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
+				"numPages": "101",
+				"publisher": "Wiesbaden : Breitkopf & Härtel, 2004.",
 				"shortTitle": "Oktett für vier Violinen, zwei Violen und zwei Violoncelli, op. 20",
 				"url": "https://search.library.wisc.edu/catalog/9910065379202121",
 				"attachments": [],
