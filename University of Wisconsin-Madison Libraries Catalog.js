@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-04 22:23:21"
+	"lastUpdated": "2017-09-05 20:27:48"
 }
 
 /*
@@ -126,6 +126,16 @@ function scrape(doc, url) {
 					delete item.abstractNote;
 				}
 			}
+			//clean-up the information for publisher
+			//e.g. Chicago : Association of College and Research Libraries, 2011.
+			if (item.publisher) {
+				item.publisher = item.publisher.replace(/,\s\d\d\d\d\.?$/, '');
+				var parts = item.publisher.split(' : ');
+				if (parts.length == 2) {
+					item.place = parts[0];
+					item.publisher = parts[1];
+				}
+			}
 			item.complete();
 		});
 		translator.translate();
@@ -152,7 +162,8 @@ var testCases = [
 				"callNumber": "PN171.F56 P83 2011",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "159",
-				"publisher": "Chicago : Association of College and Research Libraries, 2011.",
+				"place": "Chicago",
+				"publisher": "Association of College and Research Libraries",
 				"shortTitle": "Zotero",
 				"url": "https://search.library.wisc.edu/catalog/9910104568102121",
 				"attachments": [],
@@ -184,7 +195,8 @@ var testCases = [
 				"callNumber": "Y 1.1/7: 114-178",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "38",
-				"publisher": "Washington : U.S. Government Publishing Office, 2016.",
+				"place": "Washington",
+				"publisher": "U.S. Government Publishing Office",
 				"shortTitle": "Fiscal year 2017 budget amendments",
 				"url": "https://search.library.wisc.edu/catalog/9912334246702121",
 				"attachments": [],
@@ -247,7 +259,8 @@ var testCases = [
 				"callNumber": "M3 M236 1997 Ser.3 v.5a",
 				"libraryCatalog": "University of Wisconsin-Madison Libraries Catalog",
 				"numPages": "101",
-				"publisher": "Wiesbaden : Breitkopf & Härtel, 2004.",
+				"place": "Wiesbaden",
+				"publisher": "Breitkopf & Härtel",
 				"shortTitle": "Oktett für vier Violinen, zwei Violen und zwei Violoncelli, op. 20",
 				"url": "https://search.library.wisc.edu/catalog/9910065379202121",
 				"attachments": [],
