@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:17:52"
+	"lastUpdated": "2017-09-06 17:35:09"
 }
 
 function detectWeb(doc, url) {
@@ -193,10 +193,6 @@ function doWeb(doc, url) {
 			
 			var tableRows = doc.evaluate('//table//tr[@class="browseEntry" or @class="briefCitRow" or td/input[@type="checkbox"] or td[contains(@class,"briefCitRow") or contains(@class,"briefcitCell") or contains(@class,"briefcitDetail")]]',
 										 doc, null, XPathResult.ANY_TYPE, null);
-			if (!tableRows.iterateNext()){
-				//http://lib.ntu.edu.tw/en
-				tableRows = doc.evaluate('//table[@class="briefCitRow"]', doc, null, XPathResult.ANY_TYPE, null);
-			}
 			// Go through table rows
 			var i = 0;
 			while(tableRow = tableRows.iterateNext()) {
