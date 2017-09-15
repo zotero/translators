@@ -120,7 +120,10 @@ function scrape(doc, url) {
 	var edition = doc.querySelector('[itemprop=bookEdition]');
 	if (edition){
 		edition = ZU.trimInternal(edition.textContent);
-		item.edition = edition.split('.')[0];
+		//don't add first edition:
+		if (edition.split('.')[0] != "1") {				
+			item.edition = edition.split('.')[0];
+		}
 	}
 	
 	var language = ZU.xpathText(doc, '//tr/td[contains(., "Dil")]//following-sibling::td');
@@ -199,7 +202,6 @@ var testCases = [
 				"date": "2009-10-30",
 				"ISBN": "9786054160389",
 				"abstractNote": "Gregory Mankiw’in Makroekonomi kitabı tüm dünya da ders kitabı olarak geniş kabul görmüştür. Kitap bugüne kadar altı baskı yaparken, başta Almanca, Fransızca, İtalyanca, İspanyolca, Çince, Rusça, Japonca ve Portekizce olmak üzere 16 dile çevrilmiştir. Elinizde tuttuğunuz Türkçe çeviride altıncı baskıdan yapılmıştır. Mankiw’in makroekonomi kitabını bu kadar önemli kılan nokta kitabın öğrenci ve öğretici dostu olmasıdır. Kitap makroekonomideki son gelişmeleri teorik olarak anlatırken ekonomideki gerçekleşmelere ilişkin verdiği örneklerle de teorik bilginin ayakları üzerine basmasını sağlamaktadır.Kitapta konular anlatıldıktan sonra her bölümün sonuna özet, anahtar kelimeler ile problemler ve uygulama soruları koyulmuştur. Kitaba sahip olan öğrenciler Eflatun Yayınevi’nin web sayfasına kayıt olup kitaptaki kodu girdiklerinde süresiz olarak kitaptaki sorular için istedikleri yardımı mail yoluyla alabileceklerdir. Böylece öğrenci, çalıştığı konular üzerinde kendisini interaktif hale getirmiş olacaktır.",
-				"edition": "1",
 				"language": "tr",
 				"libraryCatalog": "KitapYurdu.com",
 				"numPages": "688",
