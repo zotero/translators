@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-13 06:16:23"
+	"lastUpdated": "2017-09-16 08:49:18"
 }
 
 /*
@@ -142,7 +142,7 @@ function scrape(doc, url) {
 		if (item.language == "tr") {
 			var words = publisher.split(' ');
 			for (var i=0; i<words.length; i++) {
-				words[i] = words[i][0] + words[i].substr(1).replace(/I/g, 'ı').toLowerCase();
+				words[i] = words[i][0] + words[i].substr(1).replace(/I/g, 'ı').replace(/İ/g, 'i').toLowerCase();
 			}
 			item.publisher = words.join(' ');
 		} else {
