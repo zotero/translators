@@ -2,14 +2,14 @@
 	"translatorID": "4883f662-29df-44ad-959e-27c9d036d165",
 	"label": "FAO Publications",
 	"creator": "Bin Liu <lieubean@gmail.com>",
-	"target": "^https?://www\\.fao\\.org/documents|publications/*",
+	"target": "^https?://www\\.fao\\.org/documents|publications/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 12,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2017-09-12 09:00:08"
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-09-16 21:24:44"
 }
 
 /*
@@ -33,7 +33,7 @@ function detectWeb(doc, url) {
 	//Just differentiate single and multiple. Correct itemType (either book or conferencePaper) will be determined in scrape().
 	if (url.indexOf('card') !== -1) {
 		return 'book';
-	} else {
+	} else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 }
@@ -81,7 +81,7 @@ function scrape(doc, url) {
 		newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
 		//language: according to the last letter of PDF file name
 		var lang = pdfUrl.charAt(pdfUrl.indexOf('pdf')-2);
-		if (lang === 'a'){
+		if (lang === 'a') {
 			newItem.language = 'Arabic';
 		} else if (lang === 'c') {
 			newItem.language = 'Chinese';
@@ -104,7 +104,7 @@ function scrape(doc, url) {
 
 		//Variables that appear neither in all document pages nor at same positions in the pages.
 		var metaText = ZU.xpath(doc, '//*[@id="mainN1"]')[0].innerText.split('\n'); //scrape text of meta area and split into an array based on line breaks.
-		//get what variables are listed in the page, save to object existingTextVariable
+		//get what variables are listed in the page, save to object existingMeta
 		var textVariable = { //declarations for metadata names as appeared in document pages in different languages
 				date: ['سنة النشر', '出版年代', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
 				publisher: ['Publisher', 'Издательство'],
@@ -130,8 +130,7 @@ function scrape(doc, url) {
 				}
 			}
 		}
-		Z.debug(existingMeta);
-		
+
 		for (var key in existingMeta) {
 			var metaResult = cleanMeta(existingMeta[key]);
 			
@@ -205,7 +204,7 @@ function scrape(doc, url) {
 				newItem.creators.push({lastName: corpAuthorWeb});
 			} else if (!corpAuthorWeb && officeWeb) {
 				newItem.creators.push({lastName: officeWeb});
-			} else if (!corpAuthorWeb && !officeWeb) {
+			} else {
 				newItem.creators.push({lastName: 'FAO'});
 			}
 		}
@@ -256,8 +255,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			Z.debug(items);
+		Z.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -270,220 +268,211 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-}
-
-
-//********** BEGIN TEST CASES **********
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"type": "book",
+		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/204a6894-b554-472e-9a9b-d84404dfcb9e/",
 		"items": [
 			{
-			 "itemType": "book",
-			 "creators": [
-			{
-				 "creatorType": "author"
-			   },
-			   {
-				 "lastName": "Fisheries and Aquaculture Economics and Policy Division, Fisheries and Aquaculture Department"
-			   }
-			 ],
-			 "notes": [],
-			 "tags": [
-			   " aquaculture statistics",
-			   " fishery resources",
-			   " information dissemination",
-			   " marine fisheries",
-			   " markets",
-			   " prices",
-			   " salmon",
-			   " seafoods",
-			   " statistics",
-			   " tuna",
-			   "fisheries"
-			 ],
-			 "seeAlso": [],
-			 "attachments": [
-			   {
-				 "title": "FAO Document Record Snapshot",
-				 "mimeType": "text/html",
-				 "snapshot": true
-			   },
-			   {
-				 "title": "Full Text PDF",
-				 "mimeType": "application/pdf"
-			   }
-			 ],
-			 "title": "GLOBEFISH Highlights - Issue 2/2017",
-			 "abstractNote": "The publication contains a detailed quarterly update on market trends for a variety of major commodities. Combining the price information collected for the European Price Report with other market survey data collected by FAO GLOBEFISH, the report provides a detailed update on market trends for a variety of major commodities. Key market data is presented in a time series tabular or graphical form with written analysis of trends and key events and news affecting commodities such as tuna, groundfish, small pelagics, shrimp, salmon, fishmeal and fish oil, cephalopods, bivalves and crustacea.",
-			 "url": "www.fao.org/3/a-i7332e.pdf",
-			 "language": "English",
-			 "date": "2017",
-			 "publisher": "FAO",
-			 "numPages": "80",
-			 "ISBN": "9789251097786",
-			 "series": "GLOBEFISH Highlights",
-			 "seriesNumber": "2/2017",
-			 "place": "Rome",
-			 "libraryCatalog": "FAO Publications",
-		     "accessDate": "CURRENT_TIMESTAMP"
-		   }
-		   ]
-	},	
+				"itemType": "book",
+				"title": "GLOBEFISH Highlights - Issue 2/2017",
+				"creators": [
+					{
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Fisheries and Aquaculture Economics and Policy Division, Fisheries and Aquaculture Department"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9789251097786",
+				"abstractNote": "The publication contains a detailed quarterly update on market trends for a variety of major commodities. Combining the price information collected for the European Price Report with other market survey data collected by FAO GLOBEFISH, the report provides a detailed update on market trends for a variety of major commodities. Key market data is presented in a time series tabular or graphical form with written analysis of trends and key events and news affecting commodities such as tuna, groundfish, small pelagics, shrimp, salmon, fishmeal and fish oil, cephalopods, bivalves and crustacea.",
+				"language": "English",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "80",
+				"place": "Rome",
+				"publisher": "FAO",
+				"series": "GLOBEFISH Highlights",
+				"seriesNumber": "2/2017",
+				"url": "www.fao.org/3/a-i7332e.pdf",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					" aquaculture statistics",
+					" fishery resources",
+					" information dissemination",
+					" marine fisheries",
+					" markets",
+					" prices",
+					" salmon",
+					" seafoods",
+					" statistics",
+					" tuna",
+					"fisheries"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
-		"type": "conferencePaper",
+		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/02682a52-0227-485b-8d2b-863e5b282e2d/",
 		"items": [
 			{
-			 "itemType": "conferencePaper",
-			 "creators": [
-			   {
-				 "creatorType": "author"
-			   },
-			   {
-				 "lastName": "FAO"
-			   }
-			 ],
-			 "notes": [],
-			 "tags": [
-			   "forest management"
-			 ],
-			 "seeAlso": [],
-			 "attachments": [
-			   {
-				 "title": "FAO Document Record Snapshot",
-				 "mimeType": "text/html",
-				 "snapshot": true
-			   },
-			   {
-				 "title": "Full Text PDF",
-				 "mimeType": "application/pdf"
-			   }
-			 ],
-			 "title": "Rapport Intérimaire sur la Mise En Oeuvre Des Recommandations Formulées lors des Sessions Antérieures du Comité et du Programme de Travail Pluriannuel",
-			 "url": "www.fao.org/3/a-mk192f.pdf",
-			 "language": "French",
-			 "date": "2014",
-		     "numPages": "4",
-		     "publicationTitle": "COFO/2014/6.1",
-			 "publisher": "FAO",
-			 "conferenceName": "Committee on Forestry",
-			 "place": "Rome",
-			 "libraryCatalog": "FAO Publications",
-		     "accessDate": "CURRENT_TIMESTAMP",
-		     "proceedingsTitle": "COFO/2014/6.1"
-		   }
+				"itemType": "conferencePaper",
+				"title": "Rapport Intérimaire sur la Mise En Oeuvre Des Recommandations Formulées lors des Sessions Antérieures du Comité et du Programme de Travail Pluriannuel",
+				"creators": [
+					{
+						"creatorType": "author"
+					},
+					{
+						"lastName": "FAO"
+					}
+				],
+				"date": "2014",
+				"conferenceName": "Committee on Forestry",
+				"language": "French",
+				"libraryCatalog": "FAO Publications",
+				"place": "Rome",
+				"proceedingsTitle": "COFO/2014/6.1",
+				"publisher": "FAO",
+				"url": "www.fao.org/3/a-mk192f.pdf",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"forest management"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
 		]
 	},
 	{
-		"type": "book",
+		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/78c1b49f-b5c2-43b5-abdf-e63bb6955f4f/",
 		"items": [
 			{
-			 "itemType": "book",
-			 "creators": [
-			   {
-				 "firstName": "R. S.",
-				 "lastName": "Rolle",
-				 "creatorType": "author"
-			   },
-			   {
-				 "firstName": "G.",
-				 "lastName": "Mrema",
-				 "creatorType": "author"
-			   },
-			   {
-				 "firstName": "P.",
-				 "lastName": "Soni",
-				 "creatorType": "author"
-			   },
-			 ],
-			 "notes": [],
-			 "tags": [
-			   " agricultural development",
-			   " agricultural statistics",
-			   " appropriate technology",
-			   " mechanization",
-			   " sustainable agriculture",
-			   " tractors",
-			   " working animals",
-			   "draught animals"
-			 ],
-			 "seeAlso": [],
-			 "attachments": [
-			   {
-				 "title": "FAO Document Record Snapshot",
-				 "mimeType": "text/html",
-				 "snapshot": true
-			   },
-			   {
-				 "title": "Full Text PDF",
-				 "mimeType": "application/pdf"
-			   }
-			 ],
-			 "title": "A Regional Strategy for Sustainable Agricultural Mechanization. Sustainable Mechanization across Agri-Food Chains in Asia and the Pacific region",
-			 "abstractNote": "Draught animals have played a key role over many centuries in providing farm power for agricultural operations. Since the 1990s, the use of draught animals has declined appreciably in Asia and the Pacific region. In India, the number of draught animals in use is projected to decline from over 85 million in 1975 to 18 million by 2030. Similarly, it is projected that in China draught animals will be completely replaced by a combination of 2-wheel and 4-wheel tractors by 2025. This is indeed a great achievement. However, beginning in the late 1990s, the environmental impact of mechanization – especially that of tillage implements and practices – has become an issue of major concern.  This book outlines an agricultural mechanization strategy that contributes to agricultural sustainability and is environmentally sound, while generating economic development and inclusive growth.",
-			 "url": "www.fao.org/3/a-i4270e.pdf",
-			 "language": "English",
-			 "date": "2015",
-			 "numPages": "92",
-			 "ISBN": "9789251086766",
-			 "series": "RAP Publication",
-			 "seriesNumber": "No. 2014/24",
-			 "publisher": "FAO",
-			 "place": "Rome",
-			 "libraryCatalog": "FAO Publications",
-		     "accessDate": "CURRENT_TIMESTAMP"
-		   }
+				"itemType": "book",
+				"title": "A Regional Strategy for Sustainable Agricultural Mechanization. Sustainable Mechanization across Agri-Food Chains in Asia and the Pacific region",
+				"creators": [
+					{
+						"firstName": "R. S.",
+						"lastName": "Rolle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "G.",
+						"lastName": "Mrema",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P.",
+						"lastName": "Soni",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"ISBN": "9789251086766",
+				"abstractNote": "Draught animals have played a key role over many centuries in providing farm power for agricultural operations. Since the 1990s, the use of draught animals has declined appreciably in Asia and the Pacific region. In India, the number of draught animals in use is projected to decline from over 85 million in 1975 to 18 million by 2030. Similarly, it is projected that in China draught animals will be completely replaced by a combination of 2-wheel and 4-wheel tractors by 2025. This is indeed a great achievement. However, beginning in the late 1990s, the environmental impact of mechanization – especially that of tillage implements and practices – has become an issue of major concern.  This book outlines an agricultural mechanization strategy that contributes to agricultural sustainability and is environmentally sound, while generating economic development and inclusive growth.",
+				"language": "English",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "92",
+				"place": "Rome",
+				"publisher": "FAO",
+				"series": "RAP Publication",
+				"seriesNumber": "No. 2014/24",
+				"url": "www.fao.org/3/a-i4270e.pdf",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					" agricultural development",
+					" agricultural statistics",
+					" appropriate technology",
+					" mechanization",
+					" sustainable agriculture",
+					" tractors",
+					" working animals",
+					"draught animals"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
 		]
 	},
 	{
-		"type": "book",
+		"type": "web",
 		"url": "http://www.fao.org/documents/card/zh/c/5317526a-77f2-4e9d-901a-20967f5b2753/",
 		"items": [
 			{
-			 "itemType": "book",
-			 "creators": [
-			   {
-				 "creatorType": "author"
-			   },
-			   {
-				 "lastName": "FAO"
-			   }
-			 ],
-			 "notes": [],
-			 "tags": [
-			   " energy demand",
-			   " 木材能量",
-			   " 能源管理",
-			   " 薪炭材",
-			   "可持续发展"
-			 ],
-			 "seeAlso": [],
-			 "attachments": [
-			   {
-				 "title": "FAO Document Record Snapshot",
-				 "mimeType": "text/html",
-				 "snapshot": true
-			   },
-			   {
-				 "title": "Full Text PDF",
-				 "mimeType": "application/pdf"
-			   }
-			 ],
-			 "title": "森林和能源",
-			 "abstractNote": "森林是自然的动力源泉，是用于满足全球可再生能源需求的关键能源。",
-			 "url": "www.fao.org/3/a-i6928c.pdf",
-			 "language": "Chinese",
-			 "date": "2017",
-			 "publisher": "粮农组织",
-			 "numPages": "1",
-			 "place": "Rome",
-			 "libraryCatalog": "FAO Publications",
-		     "accessDate": "CURRENT_TIMESTAMP"
-		   }
+				"itemType": "book",
+				"title": "森林和能源",
+				"creators": [
+					{
+						"creatorType": "author"
+					},
+					{
+						"lastName": "FAO"
+					}
+				],
+				"date": "2017",
+				"abstractNote": "森林是自然的动力源泉，是用于满足全球可再生能源需求的关键能源。",
+				"language": "Chinese",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "1",
+				"place": "Rome",
+				"publisher": "粮农组织",
+				"url": "www.fao.org/3/a-i6928c.pdf",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					" energy demand",
+					" 木材能量",
+					" 能源管理",
+					" 薪炭材",
+					"可持续发展"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
 		]
 	}
 ]
-//********** END TEST CASES **********
+/** END TEST CASES **/
