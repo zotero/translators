@@ -9,7 +9,7 @@
 	"priority": 200,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-14 00:00:00"
+	"lastUpdated": "2017-09-15 00:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -26,7 +26,7 @@ function doWeb(doc, url) {
 	newItem.title = document.querySelector('[itemprop=name]').innerText;
 
 	var subtitle = document.querySelector('[itemprop=alternateName]') ? document.querySelector('[itemprop=alternateName]').innerText : null;
-	if(subtitle) {
+	if (subtitle) {
 		newItem.title = newItem.title + ': ' + capitalizeHungarianTitle(subtitle, true);
 	}
 
@@ -40,7 +40,7 @@ function doWeb(doc, url) {
 
 	var seriesElement = document.getElementById('konyvAdatlapSorozatLink');
 	if (seriesElement) {
-		newItem.series = seriesElement.innerText;	
+		newItem.series = seriesElement.innerText;
 		newItem.seriesNumber = getElementByInnerText('th', 'Kötetszám:').parentElement.children[1].innerText;
 		newItem.volume = newItem.seriesNumber;
 	}
@@ -49,7 +49,11 @@ function doWeb(doc, url) {
 	if (publisherElement) {
 		newItem.publisher = publisherElement.querySelector('[itemprop=name]').innerText;
 		newItem.place = publisherElement.querySelector('[itemprop=address]').innerText.replace('(', '').replace(')', '');
-		newItem.date = document.querySelector('[itemprop=datePublished]').innerText;
+	}
+
+	var dateElement = document.querySelector('[itemprop=datePublished]');
+	if (dateElement) {
+		newItem.date = dateElement.innerText;
 	}
 
 	var numPagesElement = document.querySelector('[itemprop=numberOfPages]');
@@ -72,21 +76,21 @@ function doWeb(doc, url) {
 		newItem.extra = contentsElement.innerText;
 	}
 
-	newItem.attachments.push({document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html"});	
+	newItem.attachments.push({ document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
 
 	newItem.complete();
 }
 
 function getElementByInnerText(elementType, innerText) {
 	var tags = document.getElementsByTagName(elementType);
-	
+
 	for (var i = 0; i < tags.length; i++) {
-	  if (tags[i].textContent == innerText) {
-		return tags[i];
-	  }
+		if (tags[i].textContent == innerText) {
+			return tags[i];
+		}
 	}
 
-	return null;	
+	return null;
 }
 
 function cleanHungarianAuthor(authorName) {
@@ -104,7 +108,7 @@ function cleanHungarianAuthor(authorName) {
 
 function capitalizeHungarianTitle(title) {
 	title = title[0].toUpperCase() + title.substring(1).toLowerCase();
-	var words = title.split(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/);
+	var words = title.split(/[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/);
 	words.forEach(w => {
 		if (isRomanNumeral(w)) {
 			title = title.replace(w, w.toUpperCase());
@@ -115,5 +119,5 @@ function capitalizeHungarianTitle(title) {
 
 function isRomanNumeral(word) {
 	var romanRegex = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
-	return word.toUpperCase().match(romanRegex) ? true : false;	
+	return word.toUpperCase().match(romanRegex) ? true : false;
 }
