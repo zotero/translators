@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-04 21:31:05"
+	"lastUpdated": "2017-09-16 17:22:53"
 }
 
 // attr()/text() v2
@@ -62,7 +62,7 @@ function getPDFLink(doc, onDone) {
 	// Some pages still have the PDF link available
 	var pdfURL = attr(doc, '#pdfLink', 'href');
 	if (pdfURL && pdfURL != '#') {
-		onDone(pdfURL);
+		parseIntermediatePDFPage(pdfURL, onDone);
 		return;
 	}
 	
