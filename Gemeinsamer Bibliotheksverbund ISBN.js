@@ -82,6 +82,8 @@ function doSearch(item) {
 			item.callNumber = "";
 			//place the queried ISBN as the first ISBN in the list (dublicates will be removed later)
 			item.ISBN = queryISBN + " " + item.ISBN;
+			//delete German tags
+			item.tags = [];
 			item.complete();
 		});
 		translator.translate();
@@ -119,14 +121,7 @@ var testCases = [
 						"note": "Literaturangaben" 
 					}
 				],
-				"tags": [
-					"Aufsatzsammlung",
-					"Deutschland",
-					"Evaluation",
-					"Professionalisierung",
-					"Qualität",
-					"Österreich"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -170,17 +165,7 @@ var testCases = [
 						"note": "Teilw. zugl.: Hamburg, Univ., FB SLM, Diss., 2011 u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit"
 					}
 				],
-				"tags": [
-					"CD-ROM",
-					"Deutsch",
-					"Deutsch",
-					"Russisch",
-					"Russisch",
-					"Wortschatz",
-					"Wortschatz",
-					"Zweisprachigkeit",
-					"Zweisprachigkeit"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -225,20 +210,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"tags": [
-					"Ausgrabung",
-					"Caesarea (Israel) Antiquities",
-					"Caesarea Maritima",
-					"Excavations (Archaeology)",
-					"Excavations (Archaeology) Israel Caesarea",
-					"Funde",
-					"Hafen",
-					"Harbors",
-					"Harbors Israel Caesarea",
-					"Israel Caesarea",
-					"Underwater archaeology",
-					"Underwater archaeology Israel Caesarea"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
