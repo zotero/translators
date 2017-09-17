@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-28 03:56:11"
+	"lastUpdated": "2017-09-17 23:54:00"
 }
 
 /*
@@ -228,6 +228,42 @@ var testCases = [
 				"publisher": "Archaeopress" ,
 				"date": "2009",
 				"extra": "OCLC: 320755805"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "978-1-4912-5316-8"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Classroom activities for the busy teacher: EV3: A 10 week plan for teaching robotics using the LEGO Education EV3 Core Set (45544)",
+				"creators": [
+					{
+						"firstName": "Damien",
+						"lastName": "Kee",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "Place of publication information from back of book. Publisher information provided by Amazon"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "978-1-4912-5316-8",
+				"language": "eng",
+				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
+				"place": "Lexington, KY",
+				"numPages": "93",
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"publisher": "CreateSpace" ,
+				"date": "2013",
+				"extra": "OCLC: 860902984"
 			}
 		]
 	}

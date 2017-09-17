@@ -410,7 +410,7 @@ record.prototype.translate = function(item) {
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
 		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
-		item.title = clean(item.title);
+		item.title = item.title;
 
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
@@ -578,7 +578,7 @@ record.prototype.translate = function(item) {
 			glueTogether(clean(titlesubfields["n"]), clean(titlesubfields["p"]), ": "),
 			". "
 		);
-		item.title = clean(item.title);
+		item.title = item.title;
 		
 		// Extract edition
 		this._associateDBField(item, "250", "a", "edition");
