@@ -43,6 +43,10 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (url.indexOf('/publication/')>-1) {
 		var type = text(doc, 'strong.publication-meta-type');
+		if (!type) {
+			//for logged in users (yes, really...)
+			type = text(doc, 'b[data-reactid]');
+		}
 		switch(type) {
 			case "Data"://until we have a data itemType
 			case "Article":
@@ -70,7 +74,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.publication-title, a.js-publication-title-link');
+	var rows = doc.querySelectorAll('a.publication-title, a.js-publication-title-link, a[itemprop="mainEntityOfPage"]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -106,6 +110,11 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 
 	var uid = attr(doc, 'meta[property="rg:id"]', 'content');
+	if (!uid) {
+		//trying to get the uid from URL; for logged in users
+		var uidURL = url.match(/publication\/(\d+)_/);
+		if (uidURL) uid = uidURL[1];
+	}
 	uid = uid.replace('PB:', '');
 	var risURL = "https://www.researchgate.net/publicliterature.PublicationHeaderDownloadCitation.downloadCitation.html?publicationUid=" + uid + "&fileType=RIS&citationAndAbstract=true";
 	var pdfURL = attr(doc, 'meta[property="citation_pdf_url"]', 'content');
