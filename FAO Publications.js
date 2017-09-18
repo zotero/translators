@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-16 21:24:44"
+	"lastUpdated": "2017-09-18 19:48:10"
 }
 
 /*
@@ -81,20 +81,27 @@ function scrape(doc, url) {
 		newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
 		//language: according to the last letter of PDF file name
 		var lang = pdfUrl.charAt(pdfUrl.indexOf('pdf')-2);
-		if (lang === 'a') {
-			newItem.language = 'Arabic';
-		} else if (lang === 'c') {
-			newItem.language = 'Chinese';
-		} else if (lang === 'e') {
-			newItem.language = 'English';
-		} else if (lang === 'f') {
-			newItem.language = 'French';
-		} else if (lang === 'r') {
-			newItem.language = 'Russian';
-		} else if (lang === 's') {
-			newItem.language = 'Spanish';
-		} else {
-			newItem.language = 'Other';
+		switch(lang) {
+			case 'a': 
+				newItem.language = 'ar';
+				break;
+			case 'c':
+				newItem.language = 'zh';
+				break;
+			case 'e':
+				newItem.language = 'en';
+				break;
+			case 'f': 
+				newItem.language = 'fr';
+				break;
+			case 'r': 
+				newItem.language = 'ru';
+				break;
+			case 's': 
+				newItem.language = 'es';
+				break;
+			default: 
+				newItem.language = 'other';
 		}
 
 		//********** End fixed-location variables **********
@@ -106,25 +113,25 @@ function scrape(doc, url) {
 		var metaText = ZU.xpath(doc, '//*[@id="mainN1"]')[0].innerText.split('\n'); //scrape text of meta area and split into an array based on line breaks.
 		//get what variables are listed in the page, save to object existingMeta
 		var textVariable = { //declarations for metadata names as appeared in document pages in different languages
-				date: ['سنة النشر', '出版年代', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
-				publisher: ['Publisher', 'Издательство'],
-				pages: ['الصفحات', '页次', 'Pages', 'Страницы', 'Páginas'],
-				ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
-				author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
-				corpAuthor: ['الشعبة', '司', 'Corporate author', 'Division', 'Отдел', 'División'],
-				office: ['مكتب', '办公室', 'Office', 'Bureau', 'Oфис', 'Oficina'],
-				seriesTitle: ['Serial Title'],
-				seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
-				conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'],
-				confCode: ['رمز/شفرة الاجتماع', '会议代码', 'Meeting symbol/code', 'Symbole/code de la réunion', 'Cимвол/код мероприятия', 'Código/Símbolo de la reunión'],
-				session: ['Session', 'undefined', 'session'], //web page bug: in Russian page, session name is 'undefined'
-				tags: ['المعجم الكلمات الموضوع', 'AGROVOC', 'Agrovoc', 'АГРОВОК']
-			}
+			date: ['سنة النشر', '出版年代', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
+			publisher: ['Publisher', 'Издательство'],
+			pages: ['الصفحات', '页次', 'Pages', 'Страницы', 'Páginas'],
+			ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
+			author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
+			corpAuthor: ['الشعبة', '司', 'Corporate author', 'Division', 'Отдел', 'División'],
+			office: ['مكتب', '办公室', 'Office', 'Bureau', 'Oфис', 'Oficina'],
+			seriesTitle: ['Serial Title'],
+			seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
+			conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'],
+			confCode: ['رمز/شفرة الاجتماع', '会议代码', 'Meeting symbol/code', 'Symbole/code de la réunion', 'Cимвол/код мероприятия', 'Código/Símbolo de la reunión'],
+			session: ['Session', 'undefined', 'session'], //web page bug: in Russian page, session name is 'undefined'
+			tags: ['المعجم الكلمات الموضوع', 'AGROVOC', 'Agrovoc', 'АГРОВОК']
+		}
 		var existingMeta = {};
 		for (var i = 0; i < metaText.length; i++) {
 			for (var key in textVariable) {
 				for (var j = 0; j < textVariable[key].length; j++) {
-					if (metaText[i].includes(textVariable[key][j]) === true) {
+					if (metaText[i].includes(textVariable[key][j])) {
 						existingMeta[key] = metaText[i];
 					}
 				}
@@ -135,58 +142,58 @@ function scrape(doc, url) {
 			var metaResult = cleanMeta(existingMeta[key]);
 			
 			//date
-			if (key.includes('date') === true) {
+			if (key.includes('date')) {
 				newItem.date = metaResult;
 			}
 			//publisher
-			if (key.includes('publisher') === true) {
+			if (key.includes('publisher')) {
 				newItem.publisher = metaResult;
 			}
 			//number of pages
-			if (key.includes('pages') === true) {
+			if (key.includes('pages')) {
 				newItem.numPages = metaResult.match(/\d+/)[0];
 			}
 			//ISBN
-			if (key.includes('ISBN') === true) {
+			if (key.includes('ISBN')) {
 				newItem.ISBN = ZU.cleanISBN(metaResult, false); 
 			}
 			//individual author(s)
-			if (key.includes('author') === true) {
+			if (key.includes('author')) {
 				for (var i = 0; i < metaResult.length; i++) {
 					var author = metaResult[i];
 					newItem.creators.push(ZU.cleanAuthor(author, 'author', true));
 				}
 			}
 			//corporate author: save for later conditions
-			if (key.includes('corpAuthor') === true) {
+			if (key.includes('corpAuthor')) {
 				var corpAuthorWeb = metaResult;
 			}
-			if (key.includes('office') === true) {
+			if (key.includes('office')) {
 				var officeWeb = metaResult;
 			}
 			//tag (Agrovoc)
-			if (key.includes('tags') === true) {
+			if (key.includes('tags')) {
 				for (var i = 0; i < metaResult.length; i++) {
-					newItem.tags[i] = metaResult[i];
+					newItem.tags[i] = metaResult[i].trim();
 				}
 			}	
 			//seriesTitle
-			if (key.includes('seriesTitle') === true) {
+			if (key.includes('seriesTitle')) {
 				newItem.series = metaResult[0];
 			}
 			//seriesNumber: convert first letter to upper case
-			if (key.includes('seriesNumber') === true) {
+			if (key.includes('seriesNumber')) {
 				newItem.seriesNumber = metaResult[0].toUpperCase() + metaResult.slice(1);
 			}
 			//use confCode as 'Proceedings Title' in Zotero.
-			if (key.includes('confCode') === true) {
+			if (key.includes('confCode')) {
 				newItem.publicationTitle = metaResult;
 			}
 			//conferenceName: save for later conditions.
-			if (key.includes('conference') === true) {
+			if (key.includes('conference')) {
 				var conferenceWeb = metaResult[0];
 			}
-			if (key.includes('session') === true) {
+			if (key.includes('session')) {
 				var sessionWeb = metaResult;
 			}
 		}
@@ -197,15 +204,14 @@ function scrape(doc, url) {
 		}
 		//Write corporate author; if no individual or corporate author, use 'FAO' as author.
 		if (newItem.creators.length == 0) {
-			newItem.creators.push({creatorType: 'author'});
 			if (corpAuthorWeb && officeWeb) {
-				newItem.creators.push({lastName: corpAuthorWeb + ', ' + officeWeb,});
+				newItem.creators.push({lastName: corpAuthorWeb + ', ' + officeWeb, creatorType: author, fieldMode: true});
 			} else if (corpAuthorWeb && !officeWeb) {
-				newItem.creators.push({lastName: corpAuthorWeb});
+				newItem.creators.push({lastName: corpAuthorWeb, creatorType: author, fieldMode: true});
 			} else if (!corpAuthorWeb && officeWeb) {
-				newItem.creators.push({lastName: officeWeb});
+				newItem.creators.push({lastName: officeWeb, creatorType: author, fieldMode: true});
 			} else {
-				newItem.creators.push({lastName: 'FAO'});
+				newItem.creators.push({lastName: 'FAO', creatorType: author, fieldMode: true});
 			}
 		}
 		//Write conferenceName
@@ -227,7 +233,7 @@ function scrape(doc, url) {
 
 		//********** Others **********
 		//Place: not shown in page. Just differentiate Bangkok / Rome.
-		if (newItem.publisher.includes('Regional Office for Asia and the Pacific') === true) {
+		if (newItem.publisher.includes('Regional Office for Asia and the Pacific')) {
 			newItem.place = 'Bangkok';
 		} else {
 			newItem.place = 'Rome';
@@ -279,16 +285,14 @@ var testCases = [
 				"title": "GLOBEFISH Highlights - Issue 2/2017",
 				"creators": [
 					{
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Fisheries and Aquaculture Economics and Policy Division, Fisheries and Aquaculture Department"
+						"lastName": "Fisheries and Aquaculture Economics and Policy Division, Fisheries and Aquaculture Department",
+						"fieldMode": true
 					}
 				],
 				"date": "2017",
 				"ISBN": "9789251097786",
 				"abstractNote": "The publication contains a detailed quarterly update on market trends for a variety of major commodities. Combining the price information collected for the European Price Report with other market survey data collected by FAO GLOBEFISH, the report provides a detailed update on market trends for a variety of major commodities. Key market data is presented in a time series tabular or graphical form with written analysis of trends and key events and news affecting commodities such as tuna, groundfish, small pelagics, shrimp, salmon, fishmeal and fish oil, cephalopods, bivalves and crustacea.",
-				"language": "English",
+				"language": "en",
 				"libraryCatalog": "FAO Publications",
 				"numPages": "80",
 				"place": "Rome",
@@ -308,17 +312,17 @@ var testCases = [
 					}
 				],
 				"tags": [
-					" aquaculture statistics",
-					" fishery resources",
-					" information dissemination",
-					" marine fisheries",
-					" markets",
-					" prices",
-					" salmon",
-					" seafoods",
-					" statistics",
-					" tuna",
-					"fisheries"
+					"aquaculture statistics",
+					"fisheries",
+					"fishery resources",
+					"information dissemination",
+					"marine fisheries",
+					"markets",
+					"prices",
+					"salmon",
+					"seafoods",
+					"statistics",
+					"tuna"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -334,15 +338,13 @@ var testCases = [
 				"title": "Rapport Intérimaire sur la Mise En Oeuvre Des Recommandations Formulées lors des Sessions Antérieures du Comité et du Programme de Travail Pluriannuel",
 				"creators": [
 					{
-						"creatorType": "author"
-					},
-					{
-						"lastName": "FAO"
+						"lastName": "FAO",
+						"fieldMode": true
 					}
 				],
 				"date": "2014",
 				"conferenceName": "Committee on Forestry",
-				"language": "French",
+				"language": "fr",
 				"libraryCatalog": "FAO Publications",
 				"place": "Rome",
 				"proceedingsTitle": "COFO/2014/6.1",
@@ -394,7 +396,7 @@ var testCases = [
 				"date": "2015",
 				"ISBN": "9789251086766",
 				"abstractNote": "Draught animals have played a key role over many centuries in providing farm power for agricultural operations. Since the 1990s, the use of draught animals has declined appreciably in Asia and the Pacific region. In India, the number of draught animals in use is projected to decline from over 85 million in 1975 to 18 million by 2030. Similarly, it is projected that in China draught animals will be completely replaced by a combination of 2-wheel and 4-wheel tractors by 2025. This is indeed a great achievement. However, beginning in the late 1990s, the environmental impact of mechanization – especially that of tillage implements and practices – has become an issue of major concern.  This book outlines an agricultural mechanization strategy that contributes to agricultural sustainability and is environmentally sound, while generating economic development and inclusive growth.",
-				"language": "English",
+				"language": "en",
 				"libraryCatalog": "FAO Publications",
 				"numPages": "92",
 				"place": "Rome",
@@ -414,14 +416,14 @@ var testCases = [
 					}
 				],
 				"tags": [
-					" agricultural development",
-					" agricultural statistics",
-					" appropriate technology",
-					" mechanization",
-					" sustainable agriculture",
-					" tractors",
-					" working animals",
-					"draught animals"
+					"agricultural development",
+					"agricultural statistics",
+					"appropriate technology",
+					"draught animals",
+					"mechanization",
+					"sustainable agriculture",
+					"tractors",
+					"working animals"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -437,15 +439,13 @@ var testCases = [
 				"title": "森林和能源",
 				"creators": [
 					{
-						"creatorType": "author"
-					},
-					{
-						"lastName": "FAO"
+						"lastName": "FAO",
+						"fieldMode": true
 					}
 				],
 				"date": "2017",
 				"abstractNote": "森林是自然的动力源泉，是用于满足全球可再生能源需求的关键能源。",
-				"language": "Chinese",
+				"language": "zh",
 				"libraryCatalog": "FAO Publications",
 				"numPages": "1",
 				"place": "Rome",
@@ -463,11 +463,11 @@ var testCases = [
 					}
 				],
 				"tags": [
-					" energy demand",
-					" 木材能量",
-					" 能源管理",
-					" 薪炭材",
-					"可持续发展"
+					"energy demand",
+					"可持续发展",
+					"木材能量",
+					"能源管理",
+					"薪炭材"
 				],
 				"notes": [],
 				"seeAlso": []
