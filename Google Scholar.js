@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-22 07:17:20"
+	"lastUpdated": "2017-09-24 01:38:44"
 }
 
 /*
@@ -143,8 +143,9 @@ function getHTMLTitle(text) {
  *********************/
 
 function getViableResults(doc) {
-	 return ZU.xpath(doc, '//div[@class="gs_r"]\
-		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit" and contains(@onclick, "gs_ocit(")] \
+	 return ZU.xpath(doc, '//div[contains(@class, "gs_r")]\
+		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"] \
+			and .//a[contains(@href, "scholar?q=related")] \
 			and .//h3[@class="gs_rt"]]');
 }
 
@@ -364,33 +365,19 @@ function unescapeJSString(str) {
 
 // Builds Cite URL from the link "onclick" attribute
 var gs_ocit_url; // Fetch directly from page. Seems like this may vary
-function makeCiteUrl(onclick, doc) {
-	var m = onclick.match(/\bgs_ocit\(event,\s*'([^']+)'\s*,\s*'(\d+)'\s*\)/);
-	if (!m) return;
-	
-	if (!gs_ocit_url) {
-		var root = doc.getElementById('gs_cit');
-		if (!root) {
-			Zotero.debug('Could not find gs_cit div');
-			root = doc.body;
-		}
-		
-		var script = ZU.xpathText(root, './/script[starts-with(text(),"function gs_ocit(")][1]');
-		if (!script) throw new Error('Could not locate gs_ocit script');
-		
-		gs_ocit_url = script.match(/\bgs_ajax\('([^']+)/);
-		if (!gs_ocit_url) {
-			Zotero.debug(script);
-			throw new Error('Could not extract gs_ocit_url from gs_ocit script');
-		}
-		
-		gs_ocit_url = unescapeJSString(gs_ocit_url[1]);
-		Zotero.debug('Using ' + gs_ocit_url + ' as gs_ocit_url');
+function makeCiteUrl(related, doc) {
+	var m = related.match(/=related:([^:]+):/);
+	if (m) {
+		var itemID = m[1];
+		var citeURL = "https://" + doc.location.host + "/scholar?q=info:" + itemID + ":scholar.google.com/&output=cite&scirp=1";
+		return citeURL
 	}
-	
-	return gs_ocit_url
-		.replace('{id}', m[1])
-		.replace('{p}', m[2]);
+	else {
+		Z.debug("Can't find itemID. related URL is " + related);
+		throw new Error("Cannot extract itemID from related link")
+	}
+
+
 }
 
 function doWeb(doc, url) {
@@ -429,17 +416,17 @@ function doWeb(doc, url) {
 		var resultDivs = new Object();
 		var citeUrl;
 		for(var i=0, n=results.length; i<n; i++) {
-			var onclick = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"]/@onclick');
-			if (!onclick) {
+			var related = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[contains(@href, "scholar?q=related")]/@href');
+			if (!related) {
 				// Should never hit this, since we check it in getViableResults
 				Zotero.debug(results[i].innerHTML);
-				throw new Error("Could not locate Cite onclick attribute");
+				throw new Error("Could not locate related URL");
 			}
 			
-			citeUrl = makeCiteUrl(onclick, doc);
+			citeUrl = makeCiteUrl(related, doc);
 			if (!citeUrl) {
 				// This could happen if GS changes their code around
-				Zotero.debug(onclick);
+				Zotero.debug(related);
 				throw new Error("Could not determine Cite link parameters");
 			}
 			
