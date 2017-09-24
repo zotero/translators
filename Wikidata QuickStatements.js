@@ -218,7 +218,7 @@ function zoteroItemToQuickStatements(item) {
 				var label = extraLines[j].substr(0,colon);
 				var value = extraLines[j].substr(colon+1);
 				if (identifierMapping[label]) {
-					addStatements(identifierMapping[label], '"' + value.trim() + '"');
+					addStatement(identifierMapping[label], '"' + value.trim() + '"');
 				}
 			}
 		}
