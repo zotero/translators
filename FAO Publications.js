@@ -33,9 +33,12 @@ function detectWeb(doc, url) {
 	//Just differentiate single and multiple. Correct itemType (either book or conferencePaper) will be determined in scrape().
 	if (url.indexOf('card') !== -1) {
 		return 'book';
-	} else if (getSearchResults(doc, true)) {
+	} 
+	/* Multiples currently don't load properly
+	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	*/
 }
 
 function cleanMeta(str) {
