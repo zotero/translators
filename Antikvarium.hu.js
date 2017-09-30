@@ -1,7 +1,20 @@
+{
+	"translatorID": "68a54283-67e0-4e1c-ad3d-5b699868b194",
+	"translatorType": 4,
+	"label": "Antikvarium.hu",
+	"creator": "Velősy Péter Kristóf",
+	"target": "^https?://(www\\.)?antikvarium\\.hu/",
+	"minVersion": "3.0",
+	"maxVersion": null,
+	"priority": 200,
+	"inRepository": true,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-09-30 00:00:00"
+}
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 YourName
+	Copyright © 2017 Velősy Péter Kristóf
 	
 	This file is part of Zotero.
 
@@ -21,19 +34,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-{
-	"translatorID": "68a54283-67e0-4e1c-ad3d-5b699868b194",
-	"translatorType": 4,
-	"label": "Antikvarium.hu",
-	"creator": "Velősy Péter Kristóf",
-	"target": "^https?://(www\\.)?antikvarium\\.hu/",
-	"minVersion": "3.0",
-	"maxVersion": null,
-	"priority": 200,
-	"inRepository": true,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-30 00:00:00"
-}
 
 //Zotero attr() and text() functions:
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
