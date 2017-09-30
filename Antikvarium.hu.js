@@ -9,7 +9,7 @@
 	"priority": 200,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-15 00:00:00"
+	"lastUpdated": "2017-09-30 00:00:00"
 }
 
 function detectWeb(doc, url) {
@@ -47,8 +47,16 @@ function doWeb(doc, url) {
 
 	var publisherElement = document.querySelector('[itemprop=publisher]');
 	if (publisherElement) {
-		newItem.publisher = publisherElement.querySelector('[itemprop=name]').innerText;
-		newItem.place = publisherElement.querySelector('[itemprop=address]').innerText.replace('(', '').replace(')', '');
+
+		var publisherNameElement = publisherElement.querySelector('[itemprop=name]');
+		if (publisherNameElement) {
+			newItem.publisher = publisherNameElement.innerText;
+		}
+
+		var publisherPlaceElement = publisherElement.querySelector('[itemprop=address]');
+		if (publisherPlaceElement) {
+			newItem.place = publisherPlaceElement.innerText.replace('(', '').replace(')', '');
+		}
 	}
 
 	var dateElement = document.querySelector('[itemprop=datePublished]');
