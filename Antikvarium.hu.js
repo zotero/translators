@@ -1,3 +1,26 @@
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017 YourName
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 {
 	"translatorID": "68a54283-67e0-4e1c-ad3d-5b699868b194",
 	"translatorType": 4,
@@ -12,6 +35,9 @@
 	"lastUpdated": "2017-09-30 00:00:00"
 }
 
+//Zotero attr() and text() functions:
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+
 function detectWeb(doc, url) {
 	if (url.includes('konyv')) {
 		return "book";
@@ -23,9 +49,9 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var newItem = new Zotero.Item('book');
 
-	newItem.title = document.querySelector('[itemprop=name]').innerText;
+	newItem.title = text(document, '[itemprop=name]', 0).trim();
 
-	var subtitle = document.querySelector('[itemprop=alternateName]') ? document.querySelector('[itemprop=alternateName]').innerText : null;
+	var subtitle = text(document, '[itemprop=alternateName]', 0) ? text(document, '[itemprop=alternateName]', 0).trim() : null;
 	if (subtitle) {
 		newItem.title = newItem.title + ': ' + capitalizeHungarianTitle(subtitle, true);
 	}
@@ -33,9 +59,9 @@ function doWeb(doc, url) {
 	var authors = Array.from(document.querySelectorAll('[itemprop=author]')).map(x => cleanHungarianAuthor(x.innerText));
 	authors.forEach(x => newItem.creators.push(x));
 
-	var abstractElement = document.getElementById('fulszovegFull') || document.getElementById('eloszoFull');
-	if (abstractElement) {
-		newItem.abstractNote = abstractElement.innerText.replace(' Vissza', '').trim();
+	var abstract = text(document, 'fulszovegFull', 0) || text(document, 'eloszoFull', 0);
+	if (abstract) {
+		newItem.abstractNote = abstract.replace(' Vissza', '').trim();
 	}
 
 	var seriesElement = document.getElementById('konyvAdatlapSorozatLink');
@@ -48,30 +74,30 @@ function doWeb(doc, url) {
 	var publisherElement = document.querySelector('[itemprop=publisher]');
 	if (publisherElement) {
 
-		var publisherNameElement = publisherElement.querySelector('[itemprop=name]');
-		if (publisherNameElement) {
-			newItem.publisher = publisherNameElement.innerText;
+		var publisherName = text(publisherElement, '[itemprop=name]', 0);
+		if (publisherName) {
+			newItem.publisher = publisherName;
 		}
 
-		var publisherPlaceElement = publisherElement.querySelector('[itemprop=address]');
-		if (publisherPlaceElement) {
-			newItem.place = publisherPlaceElement.innerText.replace('(', '').replace(')', '');
+		var publisherPlace = text(publisherElement, '[itemprop=address]', 0);
+		if (publisherPlace) {
+			newItem.place = publisherPlace.replace('(', '').replace(')', '');
 		}
 	}
 
-	var dateElement = document.querySelector('[itemprop=datePublished]');
-	if (dateElement) {
-		newItem.date = dateElement.innerText;
+	var date = text('[itemprop=datePublished]');
+	if (date) {
+		newItem.date = date;
 	}
 
-	var numPagesElement = document.querySelector('[itemprop=numberOfPages]');
-	if (numPagesElement) {
-		newItem.numPages = numPagesElement.innerText;
+	var numPages = text(document, '[itemprop=numberOfPages]', 0);
+	if (numPages) {
+		newItem.numPages = numPages;
 	}
 
-	var lngElement = document.querySelector('[itemprop=inLanguage]');
-	if (lngElement) {
-		newItem.language = lngElement.innerText;
+	var lng = text(document, '[itemprop=inLanguage]', 0);
+	if (lng) {
+		newItem.language = lng;
 	}
 
 	var isbnElement = getElementByInnerText('th', 'ISBN:');
@@ -79,6 +105,7 @@ function doWeb(doc, url) {
 		newItem.isbn = isbnElement.parentElement.children[1].innerText;
 	}
 
+	//TODO cannot refactor this by using text() because text() cuts newline characters
 	var contentsElement = document.getElementById('tartalomFull');
 	if (contentsElement) {
 		newItem.extra = contentsElement.innerText;
