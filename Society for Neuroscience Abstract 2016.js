@@ -2,14 +2,14 @@
 	"translatorID": "1ed36c21-de68-4ba4-a27f-d724ce258db4",
 	"label": "Society for Neuroscience Abstract 2016",
 	"creator": "Kouchi C. Nakamura, PhD; kouichi.c.nakamura@gmail.com",
-	"target": "^https?://www\\.abstractsonline\\.com/pp8/#!/(4036|4376)/presentation/",
+	"target": "^https?://www\\.abstractsonline\\.com/pp8/#!/\\d+/presentation/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-28 06:13:46"
+	"lastUpdated": "2017-09-30 20:41:00"
 }
 
 /*
@@ -37,10 +37,10 @@
 
 
 /*
-This Zotero translator works with Soceity for Neuroscience Abstract from 2016 onwards
+This Zotero translator works with Socieity for Neuroscience Abstract from 2016 onwards
 
 **Caveats**
-Does not support "mulitple" yet
+Does not support "mulitiple" yet
 Does not support taking a snapshot for "attachments"
 The dynamically generated HTML of abstractsonline.com does not allow above operations
 
@@ -59,7 +59,7 @@ kouichi.c.nakamura@gmail.com
 
 function detectWeb(doc, url) {
 
-	if (url.search(/\/presentation\/\d+/) != -1) {
+	if (url.indexOf('/presentation/') > -1) {
 		return 'conferencePaper';
 	} //else if (url.search(/(presentations|session|participant)\/[^\\]+\/\d+/) != -1) {
 	//	return 'multiple'; // does not work
@@ -69,183 +69,116 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 
 	if (detectWeb(doc,url) == 'conferencePaper') {
-		var id = [];
-		id[0] = url.match(/\d+$/)[0];
-		var baseurl = url.replace(/\d+$/,"");
 
-		scrape(id,baseurl);
-
-	} else if (detectWeb(doc,url) == 'multiple') {
-		//TODO does not work properly becuase the page HTML is dynamically generated and
-		// ZU.processDocuments() cannot obtain the actual page content from URL.
-
-		var items = {};
-
-		var bodyTitle = ZU.xpath(doc,'//h4[@class="name"]//span[@class="bodyTitle"]');
-
-		for (var i = 0; i < bodyTitle.length; i++) {
-			var item = new Zotero.Item("conferencePaper");
-			item.title = bodyTitle[i].innerText.replace(/^\d+\.\d+\.\s/,"");
-
-			item.id = ZU.xpath(doc,'//h4[@class="name"]/@data-id')[i].value;
-
-			items[item.id] = item.title;
-		}
-		//Zotero.debug(items);
-
-		Zotero.selectItems(items, function(selectedItems){
-
-		if(!selectedItems) return true;
-
-			var abstractIDs = [];
-			for (var i in selectedItems) {
-				abstractIDs.push(i);
-				//ZU.processDocuments(i, scrape);
-			}
-
-			var baseurl = url.replace(/presentations.+$|sessions.+$|participants.+$/,"presntation/");
-			Zotero.debug(baseurl);
-			scrape(abstractIDs,baseurl);
-		});
+		scrape(doc,url);
 
 	}
+	//TODO does not work properly becuase the page HTML is dynamically generated and
+	// ZU.processDocuments() cannot obtain the actual page content from URL.
 }
 
 
 
 
-function scrape(ids,baseurl){
+function scrape(doc,url){
 
-Zotero.debug(ids);
+	// NOTE doGet() html does not contain the actual contents,
+	// object is HTTPreqest object, use processDocuments
+	//
+	// Zotero.debug(doc); //object HTMLDocument
+	// Zotero.debug(doc.URL);
 
-for (k = 0; k < ids.length; k++) {
+	var item = new Zotero.Item("conferencePaper");
 
-	var newurl = baseurl + ids[k];
-	Zotero.debug(newurl);
+	// pages, title
+	var h1color_primary = ZU.xpath(doc,'//h1[@class="color-primary"]');
 
-	ZU.processDocuments(newurl, function (doc) {
-		// NOTE doGet()  html does not contain the actual contents,
-		// object is HTTPreqest object, use processDocuments
-		//
-		// Zotero.debug(doc); //object HTMLDocument
-		// Zotero.debug(doc.URL);
+	//TODO when multiple doc does not contain the contents
 
-		var item = new Zotero.Item("conferencePaper");
+	// Zotero.debug(h1color_primary);
+	//TODO does not work for mulitiple
 
-		// pages, title
-		var color_primary = ZU.xpath(doc,'//h1[@class="color-primary"]');
-
-		//TODO when multiple doc does not contain the contents
-
-		// Zotero.debug(color_primary);
-		//TODO does not work for mulitiple
-
-		// var m1 = color_primary[0].innerHTML.match(/^\s*(\d+\.\d+)\n\s*\/\s(\w+\d+)\n\s*\-\s/);
-
-		// 282.18/B8, 1, 3.02
-		var m1 = color_primary[0].innerHTML.match(
-			/^\s*\n\s*(\d+)(\.(\d+))?\n(\s*\/\s([\w\/\d]+)\n)?\s*-\s/);
-
-		//Zotero.debug(m1);
-
-		var title;
-		if (m1 != null ) {
-			if (m1[3] != undefined) {
-				if (m1[5] != undefined) {
-					item.pages = m1[1] + "." + m1[3] + "/" + m1[5];
-				} else {
-					item.pages = m1[1] + "." + m1[3];
-				}
-			} else {
-				item.pages = m1[1];
-			}
-
-			title = color_primary[0].innerHTML.replace(
-				/^\s*\n\s*\d+(\.\d+)?\n(\s*\/\s[\w\/\d]+\n)?\s*-\s/,"");
-		} else {
-			// SPC01, SOC01, SAT02, PDW01
-
-			var m2 = color_primary[0].innerHTML.match(/^[\s\n]*([\w\d]+)\n.+\s*-\s/);
-			//Zotero.debug(m2);
-
-			item.pages = m2[1];
-
-			var m3 = color_primary[0].innerHTML.match(/\n\s+-\s(.+)\t+<br>\t/);
-			if (m3 != null) {
-				title = m3[1];
-			} else {
-				title = "";
-			}
-			//Zotero.debug(m3[1]); // null
-
-		}
-		if (title == title.toUpperCase()) {
-			title = ZU.capitalizeTitle(title,true);
-		};
-
-		item.title = title;
-
-		//Zotero.debug(item.pages);
-		//Zotero.debug(item.title);
-
-
-		// extra
-		var well =ZU.xpath(doc,'//div[@class="well well-small"]');
-		//Zotero.debug(well[0].innerHTML);
-
-		var mst = well[0].innerHTML.match(/<dt>Session Type<\/dt>[.\n\s]*<dd>(.+)<\/dd>/);
-
-		if (mst == null) {
-			mst = "";
-		}
-
-		//Zotero.debug(mst);
-		var session = ZU.xpath(doc,'//h2[@class="session"]/a');
-
-		item.extra = "Session: " + session[0].innerText
-			+ "; " + "Session Type: " + mst[1];
-
-
-		//attachments
-		//TODO does not work
-		// item.attachments = [{
-		//	url: doc.URL,
-		//	title: "Print page",
-		//	mimeType: "text/html",
-		//	snapshot: true
-		//}];
-
-
-		// creators
-
-		var disclosure = ZU.xpath(doc,'//div[@class="span7"]/dl/dd[2]'); // Use Disclosure data
-
-		var m = disclosure[0].innerHTML.match(/<b>[^<]+:<\/b>/g);
-		var names = [];
-		for (i = 0; i < m.length; i++) {
-			item.creators.push(ZU.cleanAuthor(m[i].match(/<b>([^<]+):<\/b>/)[1],"author"));
-		}
-		//Zotero.debug(item.creators);
-
-
-		// date
-		var spandate = ZU.xpath(doc,'//span[@class="session-date"]');
-
-		item.date = spandate[0].innerHTML.match(/\w+\s\d+,\s\d+/)[0];
-
-		if (ZU.xpath(doc,'//div[@class="span7"]/dl/dd[3]').length != 0) {
-			item.abstractNote = ZU.xpath(doc,'//div[@class="span7"]/dl/dd[3]')[0].innerHTML;
-		}
-
-		item.publicationTitle = "Society for Neuroscience Abstract";
-		item.url = doc.URL;
-		item.conferenceName = "Society for Neuroscience";
-		item.language = 'eng';
-
-		item.complete();
-
-		});
+	var m1 = h1color_primary[0].innerHTML.match(/^[.\n\s\d\w\/\-]+(?=\s-\s)/);
+	if (m1) {
+		item.pages = m1[0].replace(/\s|\n/g,"");
 	}
+
+	//Zotero.debug(item.pages);
+
+	var ogtitle = ZU.xpath(doc,'//meta[@property="og:title"]');
+	item.title = ZU.xpath(ogtitle,'@content')[0].value;
+
+	//Zotero.debug(item.pages);
+	//Zotero.debug(item.title);
+
+
+	// extra
+	var well =ZU.xpath(doc,'//div[@class="well well-small"]');
+	//Zotero.debug(well[0].innerHTML);
+
+	var mst = well[0].innerHTML.match(/<dt>Session Type<\/dt>[.\n\s]*<dd>(.+)<\/dd>/);
+
+	if (mst == null) {
+		mst = "";
+	}
+
+	//Zotero.debug(mst);
+	var session = ZU.xpath(doc,'//h2[@class="session"]/a');
+
+	item.extra = "Session: " + session[0].innerText
+		+ "; " + "Session Type: " + mst[1];
+
+
+	//attachments
+	//TODO does not work
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
+
+
+	// creators
+
+	// var disclosure = ZU.xpath(doc,'//div[@class="span7"]/dl/dd[2]'); // Use Disclosure data
+
+	// var m = disclosure[0].innerHTML.match(/<b>[^<]+:<\/b>/g);
+	// var names = [];
+	// for (i = 0; i < m.length; i++) {
+	// 	item.creators.push(ZU.cleanAuthor(m[i].match(/<b>([^<]+):<\/b>/)[1],"author"));
+	// }
+
+	var disclosures = ZU.xpath(doc, '//dl/dt[contains(., "Disclosures")]/following-sibling::dd');
+	var authorsList = ZU.xpath(doc, '//dl/dt[contains(., "Authors")]/following-sibling::dd');
+	if (disclosures) {
+		var authors = ZU.xpath(disclosures[0], './b');
+	} else if (authorsList) {
+		var authors = authorsList.split(',');
+	}
+	if (authors) {
+		for (var i=0; i<authors.length; i++) {
+			item.creators.push(ZU.cleanAuthor((authors[i].textContent), "author"));
+		}
+	}
+
+	Zotero.debug(item.creators);
+
+
+	// date
+	var spandate = ZU.xpath(doc,'//span[@class="session-date"]');
+
+	item.date = spandate[0].innerHTML.match(/\w+\s\d+,\s\d+/)[0];
+
+	if (ZU.xpath(doc,'//div[@class="span7"]/dl/dd[3]').length != 0) {
+		item.abstractNote = ZU.xpath(doc,'//div[@class="span7"]/dl/dd[3]')[0].innerHTML;
+	}
+
+	item.publicationTitle = "Society for Neuroscience Abstract";
+	item.url = doc.URL;
+	item.conferenceName = "Society for Neuroscience";
+	item.language = 'eng';
+
+	item.complete();
+
 }
 
 // All the tests will fail because page contents cannot be loaded. They will issue "TypeError: m2 is n ull"
@@ -436,6 +369,98 @@ var testCases = [
 				"shortTitle": "Sensory adaptation",
 				"url": "http://www.abstractsonline.com/pp8/#!/4376/presentation/32999",
 				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.abstractsonline.com/pp8/index.html#!/3658/presentation/37598",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Ablation vs. Amiodarone for Treatment of Persistent Atrial Fibrillation in Patients With Congestive Heart Failure and an Implanted device: Results from the AATAC Multicenter Randomized Trial",
+				"creators": [],
+				"date": "March 16, 2015",
+				"conferenceName": "Society for Neuroscience",
+				"extra": "Session: Session 408 - Joint Session of the American College of Cardiology/New England Journal of Medicine Late-Breaking Clinical Trials; Session Type: undefined",
+				"language": "eng",
+				"libraryCatalog": "Society for Neuroscience Abstract 2016",
+				"pages": "408-08",
+				"proceedingsTitle": "Society for Neuroscience Abstract",
+				"shortTitle": "Ablation vs. Amiodarone for Treatment of Persistent Atrial Fibrillation in Patients With Congestive Heart Failure and an Implanted device",
+				"url": "http://www.abstractsonline.com/pp8/index.html#!/3658/presentation/37598",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.abstractsonline.com/pp8/#!/4292/presentation/6761",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "RNA fusion detection in thyroid nodules with a targeted RNA sequencing panel",
+				"creators": [
+					{
+						"firstName": "S.",
+						"lastName": "Tian",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Baird",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Reinecke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Deng",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M. Nezami",
+						"lastName": "Ranjbar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Samara",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "E.",
+						"lastName": "Lader",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 5, 2017",
+				"abstractNote": "Thyroid nodules are quite common and detected in as high as 67% of the population. Only a small portion of thyroid nodules are malignant thyroid cancers. Advances in understanding the molecular pathology of thyroid cancer are leading to the development of better biomarkers and novel targeted therapies. The tumorigenic role of RNA fusions has been reported in many forms of cancer. Fusions can result from structural rearrangements like translocations and deletions, transcription read-through of neighboring genes, or the trans- and cis-splicing of pre-mRNAs. Many fusions act as key drivers for cancer development. Detection of fusion RNA is a challenge with traditional technologies like FISH and qPCR, as they are laborious, low throughput, and do not provide detailed information about the fusion. Here we explored the possible use of a tumor fusion-targeted RNA-based panel (QIAseq targeted RNAscan panel, which is targeting 223 fusion gene pairs, 576 unique fusions) as a tool to study fusions in thyroid nodules. The presence of these fusions were surveyed in RNA samples from 10 thyroid cancer (PTC and FVPTC) samples and 19 non-cancer control samples (NH and FA) using this oncology targeted panel and sequenced on the Illumina NextSeq. PAX8-PPARG, a fusion gene with a well-established link to thyroid cancer, was found in the cancer group. In addition, we observed a universal expression of a recurrent read-through transcript, HALC1-COQL, in all thyroid nodules. Our results suggest that a targeted RNA-based panel provided a useful tool for fusion gene study in thyroid cancer. The role of the expected rearrangement and the unexpected read-through fusion in thyroid nodules needs to be further evaluated, as it could provide useful information for thyroid nodule differentiation.",
+				"conferenceName": "Society for Neuroscience",
+				"extra": "Session: Session PO.MCB09.08 - Genomic Analyses of Circulating Tumor Material and RNA; Session Type: undefined",
+				"language": "eng",
+				"libraryCatalog": "Society for Neuroscience Abstract 2016",
+				"pages": "5408/19",
+				"proceedingsTitle": "Society for Neuroscience Abstract",
+				"url": "http://www.abstractsonline.com/pp8/#!/4292/presentation/6761",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
