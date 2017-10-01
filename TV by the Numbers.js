@@ -81,23 +81,17 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function(obj, item) {
-		if(item.date)
-			item.date = ZU.strToISO(item.date);
+		if(item.date) item.date = ZU.strToISO(item.date);
 		var authors = ZU.xpath(doc, '//a[@rel="author"]');
-		for (var i in authors) {
-			if (authors[i].textContent == 'TV By The Numbers')
-				item.creators.push({
-					lastName: authors[i].textContent,
-					creatorType: "author",
-					fieldMode: 1
-				});
-			else
+		for (var i = 0; i<authors.length; i++ ) {
+			if (authors[i].textContent != 'TV By The Numbers') {
 				item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+			}
 		}
 		item.publicationTitle = "TV By The Numbers";
 		var tags = ZU.xpath(doc, '//a[@rel="tag"]');
 		item.tags = [];
-		for (var i in tags) {
+		for (var i = 0; i<tags.length; i++) {
 			item.tags.push(tags[i].textContent);
 		}
 		item.complete();
@@ -165,13 +159,7 @@ var testCases = [
 			{
 				"itemType": "blogPost",
 				"title": "TV Ratings Friday: ‘Grimm’ & ‘Constantine’ Fall, ‘Shark Tank’, ‘The Amazing Race’ & ‘Last Man Standing’ Up, ‘Cristela’ & ‘Hawaii FIve-0’ Steady",
-				"creators": [
-					{
-						"lastName": "TV By The Numbers",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2014-11-01",
 				"abstractNote": "ABC was number one in adults 18-49 while CBS won with total viewers.",
 				"blogTitle": "TV By The Numbers",
