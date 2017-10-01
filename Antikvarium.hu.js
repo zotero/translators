@@ -51,12 +51,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// Adjust the CSS Selectors 
 	var rows = doc.querySelectorAll('.src-result-book');
 	for (var i=0; i<rows.length; i++) {
-	    // Adjust if required, use Zotero.debug(rows) to check
 		var href = attr(rows[i], '#searchResultKonyv-csempes', 'href')
-		// Adjust if required, use Zotero.debug(rows) to check
 		var title = ZU.trimInternal(text(rows[i], '.book-title-src'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -152,7 +149,6 @@ function getElementByInnerText(doc, elementType, innerText) {
 			return tags[i];
 		}
 	}
-
 	return null;
 }
 
