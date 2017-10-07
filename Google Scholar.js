@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-07 14:33:56"
+	"lastUpdated": "2017-10-07 14:43:16"
 }
 
 /*
@@ -1193,6 +1193,16 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/scholar?hl=en&as_sdt=0%2C24&q=Korean+Wave%3A+Discourse+Analysis+on+K-pop+in+US+and+UK+Digital+Newspapers&btnG=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.be/scholar?hl=en&scisbd=1&as_sdt=1%2C5&as_vis=1&q=testing&btnG=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
