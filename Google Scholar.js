@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-24 01:38:44"
+	"lastUpdated": "2017-10-07 14:33:56"
 }
 
 /*
@@ -143,12 +143,10 @@ function getHTMLTitle(text) {
  *********************/
 
 function getViableResults(doc) {
-	 return ZU.xpath(doc, '//div[contains(@class, "gs_r")]\
-		[.//div[contains(@class, "gs_fl")]/a[@aria-controls="gs_cit"] \
-			and .//a[contains(@href, "scholar?q=related")] \
+	 return ZU.xpath(doc, '//div[contains(@class, "gs_r") and @data-cid]\
+		[.//div[contains(@class, "gs_fl")] \
 			and .//h3[@class="gs_rt"]]');
 }
-
 // Imports BibTeX for journalArticle and book
 function importArticleResult(doc, article, bibtex) {
 	var translator = Zotero.loadTranslator('import');
@@ -192,7 +190,6 @@ function importArticleResult(doc, article, bibtex) {
 		
 		var linkTitle = ZU.xpathText(article,
 			'(.//h3[@class="gs_rt"]|.//a[@class="gsc_title_link"])[1]');
-
 		var attachment;
 		if(linkTitle && snapshotUrl) {
 			//try to get an attachment
@@ -226,7 +223,6 @@ function importArticleResult(doc, article, bibtex) {
 				title = title.parentNode;
 			}
 			var attach = getAttachment(pdf[i].href, title.textContent);
-			
 			if(!attach) continue;
 
 			//drop attachment linked by the main link
@@ -365,19 +361,9 @@ function unescapeJSString(str) {
 
 // Builds Cite URL from the link "onclick" attribute
 var gs_ocit_url; // Fetch directly from page. Seems like this may vary
-function makeCiteUrl(related, doc) {
-	var m = related.match(/=related:([^:]+):/);
-	if (m) {
-		var itemID = m[1];
-		var citeURL = "https://" + doc.location.host + "/scholar?q=info:" + itemID + ":scholar.google.com/&output=cite&scirp=1";
+function makeCiteUrl(dataCid, doc) {
+		var citeURL = "https://" + doc.location.host + "/scholar?q=info:" + dataCid + ":scholar.google.com/&output=cite&scirp=1";
 		return citeURL
-	}
-	else {
-		Z.debug("Can't find itemID. related URL is " + related);
-		throw new Error("Cannot extract itemID from related link")
-	}
-
-
 }
 
 function doWeb(doc, url) {
@@ -416,18 +402,12 @@ function doWeb(doc, url) {
 		var resultDivs = new Object();
 		var citeUrl;
 		for(var i=0, n=results.length; i<n; i++) {
-			var related = ZU.xpathText(results[i], './/div[contains(@class, "gs_fl")]/a[contains(@href, "scholar?q=related")]/@href');
-			if (!related) {
-				// Should never hit this, since we check it in getViableResults
-				Zotero.debug(results[i].innerHTML);
-				throw new Error("Could not locate related URL");
+			var dataCid = ZU.xpathText(results[i], './@data-cid');
+			if (dataCid) {
+				citeUrl = makeCiteUrl(dataCid, doc);
 			}
-			
-			citeUrl = makeCiteUrl(related, doc);
-			if (!citeUrl) {
-				// This could happen if GS changes their code around
-				Zotero.debug(related);
-				throw new Error("Could not determine Cite link parameters");
+			else {
+				throw new Error("Could not find data-cid");
 			}
 			
 			var title = ZU.xpathText(results[i], './/h3[@class="gs_rt"]');
