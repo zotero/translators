@@ -9,10 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-07 15:13:24"
+	"lastUpdated": "2017-10-07 19:10:23"
 }
-
-
 
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
@@ -108,7 +106,7 @@ function doWeb(doc, url) {
 				for (var i in items) {
 					articles.push(i);
 				}
-				//here we need open these pages for continue
+				//here we need open these pages before calling scrape
 				ZU.processDocuments(articles, scrape);
 			});
 		}
@@ -156,7 +154,6 @@ function scrapeIds(doc, ids) {
 				//Saved lists and possibly other places have different formats for BibTeX URLs
 				//Trying to catch them here (can't add test bc lists are tied to google accounts)
 				m = citePage.match(/href="(.+?)">BibTeX<\/a>/);
-				//TODO saved list do not yet work...
 			}
 			if (!m) {
 				var msg = "Could not find BibTeX URL"
@@ -167,11 +164,28 @@ function scrapeIds(doc, ids) {
 				throw new Error(msg);
 			}
 			var bibUrl = ZU.unescapeHTML(m[1]);
-			ZU.doGet(bibUrl, function(bibtex){
+			ZU.doGet(bibUrl, function(bibtex) {
+				
 				var translator = Zotero.loadTranslator("import");
 				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 				translator.setString(bibtex);
 				translator.setHandler("itemDone", function(obj, item) {
+					let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
+					if (!context && ids.length==1) context = doc;
+					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
+					var secondLine = text(context, '.gs_a');
+					//case are not recognized and can be characterized by the
+					//titleLink, or that the second line starts with a number
+					//e.g. 1 Cr. 137 - Supreme Court, 1803
+					if ((titleLink && titleLink.indexOf('/scholar_case?')>-1) || 
+						secondLine && ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'].indexOf(secondLine[0])>-1) {
+						item.itemType = "case";
+						item.caseName = item.title;
+						item.reporter = item.publicationTitle;
+						item.reporterVolume = item.volume;
+						item.dateDecided = item.date;
+						item.court = item.publisher;
+					}
 					//delete "others" as author
 					if (item.creators.length) {
 						var lastCreatorIndex = item.creators.length-1,
@@ -192,22 +206,20 @@ function scrapeIds(doc, ids) {
 							true);
 					}
 					
-					let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
-					if (!context && ids.length==1) context = doc;
+					
 					//attach linked page as snapshot if available
 					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
-					//attach linked document as attachment if available
-					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
-					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
 					if (titleLink) {
 						item.attachments.push({
 							url: titleLink,
 							title: "Snapshot"
 						});
 					}
+					//attach linked document as attachment if available
+					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
+					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
 					if (documentLinkTarget) {
-						Z.debug(documentLinkTarget);
-						//TODO it seems to work in Scaffold but not for real?
+						//Z.debug(documentLinkTarget);
 						attachment = {
 							title: "Fulltext",
 							url: documentLinkTarget
