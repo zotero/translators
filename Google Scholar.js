@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-08 15:41:14"
+	"lastUpdated": "2017-10-08 18:19:43"
 }
 
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
-var detectWeb = function (doc, url) {
+function detectWeb(doc, url) {
 	/* Detection for law cases, but not "How cited" pages,
 	 * e.g. url of "how cited" page:
 	 *   http://scholar.google.co.jp/scholar_case?about=1101424605047973909&q=kelo&hl=en&as_sdt=2002
@@ -129,7 +129,7 @@ function scrape(doc, idsOrUrl, type) {
 				scrapeIds(doc, [itemID[1]]);
 			} else {
 				Z.debug("Can't find itemID. related URL is " + related);
-				throw new Error("Cannot extract itemID from related link")
+				throw new Error("Cannot extract itemID from related link");
 			}
 		}
 	}
@@ -151,7 +151,7 @@ function scrapeIds(doc, ids) {
 				m = citePage.match(/href="(.+?)">BibTeX<\/a>/);
 			}
 			if (!m) {
-				var msg = "Could not find BibTeX URL"
+				var msg = "Could not find BibTeX URL";
 				var title = citePage.match(/<title>(.*?)<\/title>/i);
 				if (title) {
 					if (title) msg += ' Got page with title "' + title[1] +'"';
@@ -165,7 +165,7 @@ function scrapeIds(doc, ids) {
 				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 				translator.setString(bibtex);
 				translator.setHandler("itemDone", function(obj, item) {
-					//
+					//these two variables are extracted from the context
 					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
 					var secondLine = text(context, '.gs_a') || '';
 					//case are not recognized and can be characterized by the
@@ -207,7 +207,6 @@ function scrapeIds(doc, ids) {
 					if (item.creators.length) {
 						var lastCreatorIndex = item.creators.length-1,
 							lastCreator = item.creators[lastCreatorIndex];
-						Z.debug(lastCreator);
 						if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 ||lastCreator.firstName === "")) {
 							item.creators.splice(lastCreatorIndex, 1);
 						}
@@ -225,7 +224,6 @@ function scrapeIds(doc, ids) {
 					}
 					
 					//attach linked page as snapshot if available
-					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
 					if (titleLink) {
 						item.attachments.push({
 							url: titleLink,
@@ -264,13 +262,14 @@ function scrapeIds(doc, ids) {
 }
 
 
-var bogusItemID = 1;
-
 /*
  * #########################
  * ### Scraper Functions ###
  * #########################
  */
+ 
+var bogusItemID = 1;
+
 var scrapeCase = function (doc, url) {
 	// Citelet is identified by
 	// id="gsl_reference"
