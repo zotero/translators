@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-10-08 12:22:52"
+	"lastUpdated": "2017-10-08 12:37:29"
 }
 
 function detectWeb(doc, url) {
@@ -86,3 +86,82 @@ function scrape(doc, url) {
 	});
 	translator.translate();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.springer.com/gb/book/9780387952697",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Handbook of Physics",
+				"creators": [
+					{
+						"firstName": "Walter",
+						"lastName": "Benenson",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "John W.",
+						"lastName": "Harris",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Horst",
+						"lastName": "Stöcker",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Holger",
+						"lastName": "Lutz",
+						"creatorType": "editor"
+					}
+				],
+				"ISBN": "9780387952697",
+				"abstractNote": "The Handbook of Physics is a complete desktop reference for scientists, engineers, and students. A veritable toolbox for everyday use in problem solving, homework, examinations, and practical applications of physics, it provides quick and easy access to a wealth of information including not only the fundamental formulas of physics but also a wide variety of experimental methods used in practice. Compiled by professional scientists, engineers, and lecturers who are experts in the day-to-day use of physics, the Handbook covers topics from classical mechanics to elementary particles, electric circuits to error analysis. The previous editions in German are renowned for their clarity and completeness.",
+				"libraryCatalog": "www.springer.com",
+				"publisher": "Springer-Verlag New York",
+				"url": "http://www.springer.com/gb/book/9780387952697",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.springer.com/gb/book/9783540212904",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Complex Geometry - An Introduction",
+				"creators": [
+					{
+						"firstName": "Daniel",
+						"lastName": "Huybrechts",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9783540212904",
+				"abstractNote": "Complex geometry studies (compact) complex manifolds. It discusses algebraic as well as metric aspects. The subject is on the crossroad of algebraic and differential geometry. Recent developments in string theory have made it an highly attractive area, both for mathematicians and theoretical physicists. The author’s goal is to provide an easily accessible introduction to the subject. The book contains detailed accounts of the basic concepts and the many exercises illustrate the theory. Appendices to various chapters allow an outlook to recent research directions. Daniel Huybrechts is currently Professor of Mathematics at the University Denis Diderot in Paris.",
+				"libraryCatalog": "www.springer.com",
+				"publisher": "Springer-Verlag Berlin Heidelberg",
+				"url": "http://www.springer.com/gb/book/9783540212904",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
