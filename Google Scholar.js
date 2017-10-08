@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-07 19:10:23"
+	"lastUpdated": "2017-10-08 15:41:14"
 }
 
 // attr()/text() v2
@@ -33,11 +33,7 @@ var detectWeb = function (doc, url) {
 		//individual saved citation
 		var link = ZU.xpathText(doc, '//a[@class="gsc_vcd_title_link"]/@href');
 		if(!link) return;
-		
-		
-		if (link.indexOf('/patents?') != -1) {
-			return 'patent';// TODO no example found
-		} else if (link.indexOf('/scholar_case?') != -1) {
+		if (link.indexOf('/scholar_case?') != -1) {
 			return 'case';
 		} else {
 			//Can't distinguish book from journalArticle
@@ -123,8 +119,6 @@ function scrape(doc, idsOrUrl, type) {
 	} else {
 		if (type && type=="case") {
 			scrapeCase(doc, idsOrUrl);
-		} else if (type && type=="patent") {
-			//TODO
 		} else {
 			var related = ZU.xpathText(doc, '//a[contains(@href, "q=related:")]/@href');
 			if (!related) {
@@ -146,7 +140,8 @@ function scrape(doc, idsOrUrl, type) {
 function scrapeIds(doc, ids) {
 	for (let i=0; i<ids.length; i++) {
 		// We need here 'let' to access ids[i] later in the nested functions
-		
+		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
+		if (!context && ids.length==1) context = doc;
 		var citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
 		ZU.doGet(citeUrl, function(citePage) {
 			var m = citePage.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
@@ -170,10 +165,9 @@ function scrapeIds(doc, ids) {
 				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 				translator.setString(bibtex);
 				translator.setHandler("itemDone", function(obj, item) {
-					let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
-					if (!context && ids.length==1) context = doc;
+					//
 					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
-					var secondLine = text(context, '.gs_a');
+					var secondLine = text(context, '.gs_a') || '';
 					//case are not recognized and can be characterized by the
 					//titleLink, or that the second line starts with a number
 					//e.g. 1 Cr. 137 - Supreme Court, 1803
@@ -186,11 +180,35 @@ function scrapeIds(doc, ids) {
 						item.dateDecided = item.date;
 						item.court = item.publisher;
 					}
+					//patents are not recognized but are easily detected
+					//by the titleLink or second line
+					if ((titleLink && titleLink.indexOf('google.com/patents/')>-1) || secondLine.indexOf('Google Patents')>-1) {
+						item.itemType = "patent";
+						//authors are inventors
+						for(var i=0, n=item.creators.length; i<n; i++) {
+							item.creators[i].creatorType = 'inventor';
+						}
+						//country and patent number
+						if (titleLink) {
+							let m = titleLink.match(/\/patents\/([A-Za-z]+)(.*)$/);
+							if (m) {
+								item.country = m[1];
+								item.patentNumber = m[2];
+							}
+						}
+					}
+					
+					//fix titles in all upper case, e.g. some patents in search results
+					if(item.title.toUpperCase() == item.title) {
+						item.title = ZU.capitalizeTitle(item.title);
+					}
+					
 					//delete "others" as author
 					if (item.creators.length) {
 						var lastCreatorIndex = item.creators.length-1,
 							lastCreator = item.creators[lastCreatorIndex];
-						if (lastCreator.lastName === "others" && lastCreator.firstName === "") {
+						Z.debug(lastCreator);
+						if (lastCreator.lastName === "others" && (lastCreator.fieldMode === 1 ||lastCreator.firstName === "")) {
 							item.creators.splice(lastCreatorIndex, 1);
 						}
 					}
@@ -205,7 +223,6 @@ function scrapeIds(doc, ids) {
 							item.creators[j].creatorType,
 							true);
 					}
-					
 					
 					//attach linked page as snapshot if available
 					var titleLink = attr(context, 'h3 a, #gsc_vcd_title a', 'href');
@@ -247,193 +264,7 @@ function scrapeIds(doc, ids) {
 }
 
 
-
-
-
-
-
 var bogusItemID = 1;
-
-/*****************************
- * Accessory functions *
- *****************************/
-
-//determine item type from a result node
-function determineType(result) {
-	var titleHref =  ZU.xpathText(result, './/h3[@class="gs_rt"]/a[1]/@href');
-
-	if(titleHref) {
-		if(titleHref.indexOf('/scholar_case?') != -1) {
-			return 'case';
-		} else if(titleHref.indexOf('/patents?') != -1) {
-			return 'patent';
-		} else if(titleHref.indexOf('/books?') != -1) {
-			return 'book';
-		} else if(titleHref.indexOf('/citations?') == -1){
-			//not a saved citation
-			return 'journalArticle';
-		}
-	}
-
-	/**if there is no link (i.e. [CITATION]), or we're looking at saved citations
-	 * we can determine this by the second line.
-	 * Patents have the word Patent here
-	 * Cases seem to always start with a number
-	 * Books just have year after last dash
-	 * Articles are assumed to be everything else
-	 * 
-	 * This is probably not going to work with google scholar in other languages
-	 */
-	var subTitle = ZU.xpathText(result, './/div[@class="gs_a"]');
-	if(!subTitle) return 'journalArticle';
-	
-	subTitle = subTitle.trim();
-
-	if(subTitle.search(/\bpatent\s+\d/i) != -1) {
-		return 'patent';
-	}
-
-	if(subTitle.search(/^\d/) != -1) {
-		return 'case';
-	}
-	
-	if(subTitle.search(/-\s*\d+$/) != -1) {
-		return 'book';
-	}
-
-	return 'journalArticle';
-}
-
-
-
-// Imports BibTeX for cases
-function importCaseResult(doc, result, bibtex, factory, callback) {
-	//check if the BibTeX file has title
-	if(!text.match(/title={{}}/i)) {
-		var translator = Zotero.loadTranslator("import");
-		//BibTeX
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(text);
-
-		translator.setHandler("itemDone", function(obj, item) {
-			item.attachments = factory.getAttachments("Page");
-			item.complete();
-		});
-
-		translator.translate();
-		
-		callback();
-		return;
-	}
-	
-	// If BibTeX is empty, this is some kind of case, if anything.
-	// Metadata from the citelet, supplemented by the target
-	// document for the docket number, if possible.
-	if (!factory.hasReporter() && factory.attachmentLinks[0]) {
-		//fetch docket from the case page
-		ZU.processDocuments(factory.attachmentLinks[0], 
-			function(doc) {
-				factory.getDocketNumber(doc);
-			},
-			function(doc) {
-				factory.saveItem();
-				callback();
-			}
-		);
-	} else {
-		factory.saveItem();
-		callback();
-	}
-}
-
-// Imports BibTeX for patents
-function importPatentResult(doc, patent, bibtex) {
-	var translator = Zotero.loadTranslator("import");
-	//BibTeX
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(bibtex);
-
-	translator.setHandler("itemDone", function(obj, item) {
-		item.itemType = 'patent';
-
-		//fix case for patent titles in all upper case
-		if(item.title.toUpperCase() == item.title) {
-			item.title = ZU.capitalizeTitle(item.title);
-		}
-
-		//authors are inventors
-		for(var i=0, n=item.creators.length; i<n; i++) {
-			item.creators[i].creatorType = 'inventor';
-		}
-
-		//country and patent number end up in extras
-		if(item.extra) {
-			var m = item.extra.split(/\s*Patent\s*/i);
-			if(m.length == 2) {
-				item.country = m[0];
-				item.patentNumber = m[1];
-				delete item.extra;
-			}
-		}
-
-		//attach google patents page
-		var attachmentDone = false;
-		if(item.patentNumber && item.country) {
-			attachmentDone = true;
-			item.attachments.push({
-				title: 'Google Patents PDF',
-				url: 'http://patentimages.storage.googleapis.com/pdfs/'
-					+ item.country.toUpperCase()
-					+ item.patentNumber.replace(/\D+/g, '')
-					+ '.pdf',
-				mimeType: 'application/pdf'
-			});
-		}
-		
-		var patentUrl;
-		if(!attachmentDone && patent) {
-			patentUrl = ZU.xpathText(patent,
-				'(.//h3[@class="gs_rt"]/a[1]|//a[@class="gsc_title_link"])[1]/@href');
-		}
-		
-		if(patentUrl) {
-			item.attachments.push({
-				title: 'Google Patents page',
-				url: patentUrl,
-				mimeType: 'text/html'
-			});
-		}
-
-		item.complete();
-	});
-
-	translator.translate();
-}
-
-function unescapeJSString(str) {
-	return str.replace(/\\x([\da-f]{2})/gi, function(m, hex) {
-		return String.fromCharCode(parseInt(hex, 16));
-	});
-}
-
-// Builds Cite URL from the link "onclick" attribute
-var gs_ocit_url; // Fetch directly from page. Seems like this may vary
-function makeCiteUrl(related, doc) {
-	var m = related.match(/=related:([^:]+):/);
-	if (m) {
-		var itemID = m[1];
-		var citeURL = "https://" + doc.location.host + "/scholar?q=info:" + itemID + ":scholar.google.com/&output=cite&scirp=1";
-		return citeURL
-	}
-	else {
-		Z.debug("Can't find itemID. related URL is " + related);
-		throw new Error("Cannot extract itemID from related link")
-	}
-
-
-}
-
-
 
 /*
  * #########################
@@ -1118,6 +949,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://scholar.google.de/citations?user=INQwsQkAAAAJ&hl=de&oi=sra",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.be/scholar?hl=en&as_sdt=1,5&as_vis=1&q=%22transformative+works+and+cultures%22&scisbd=1",
 		"items": "multiple"
 	}
 ]
