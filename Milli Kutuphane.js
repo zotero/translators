@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-16 11:06:31"
+	"lastUpdated": "2017-10-01 17:23:23"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -129,6 +128,11 @@ function scrape(doc, url) {
 		
 		record.translate(newItem);
 		
+		//don't save value "no publisher" = "yayl.y."
+		if (newItem.publisher == 'yayl.y.') {
+			delete newItem.publisher;
+		}
+		
 		newItem.complete();
 	});
 }
@@ -168,6 +172,38 @@ var testCases = [
 						"note": "Dizin vardır"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kasif.mkutup.gov.tr/SonucDetay.aspx?MakId=423635",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Peygamberlik makamı ve sevgili peygamberimiz",
+				"creators": [
+					{
+						"firstName": "Nihat (F)",
+						"lastName": "Dalgın",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Yunus (F)",
+						"lastName": "Macit",
+						"creatorType": "editor"
+					}
+				],
+				"date": "1992",
+				"callNumber": "1993 AD 4043",
+				"language": "TUR",
+				"libraryCatalog": "Milli Kütüphane",
+				"numPages": "126",
+				"place": "Samsun",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
