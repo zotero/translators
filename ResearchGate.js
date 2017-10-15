@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-29 19:41:50"
+	"lastUpdated": "2017-10-15 14:15:09"
 }
 
 /*
@@ -141,8 +141,9 @@ function scrape(doc, url) {
 				});
 			}
 			item.attachments.push({
-				title: "Snapshot",
-				document: doc
+				title: "ResearchGate Link",
+				url: url,
+				snapshot: false
 			});
 			item.complete();
 		});
@@ -158,7 +159,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Academic social networking sites: comparative analysis of ResearchGate, Academia.edu, Mendeley and Zotero",
+				"title": "Academic social networking sites: Comparative analysis of ResearchGate, Academia.edu, Mendeley and Zotero",
 				"creators": [
 					{
 						"lastName": "Bhardwaj",
@@ -176,7 +177,8 @@ var testCases = [
 				"volume": "118",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -210,7 +212,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -239,7 +242,8 @@ var testCases = [
 				"shortTitle": "Understanding Meaningful Learning in a Technology Training Program",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -271,7 +275,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -313,7 +318,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
@@ -345,7 +351,8 @@ var testCases = [
 				"shortTitle": "Reference Management Tools",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "ResearchGate Link",
+						"snapshot": false
 					}
 				],
 				"tags": [],
