@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-15 16:03:55"
+	"lastUpdated": "2017-10-15 19:28:43"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (url.includes('action/doSearch') || url.includes('toc/')) {
 		return "multiple";
-	} else if (url.includes('doi/abs/')) {
+	} else if (url.includes('doi/abs/') || url.includes('doi/full/')) {
 		return "journalArticle";
 	}
 }
@@ -133,6 +133,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Removable Hair Caps of Karamoja (Uganda)",
 				"creators": [
 					{
 						"lastName": "Verswijver",
@@ -140,32 +141,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "November 8, 2010",
+				"DOI": "10.1162/afar.2010.43.4.60",
+				"ISSN": "0001-9933",
+				"issue": "4",
+				"journalAbbreviation": "African Arts",
+				"libraryCatalog": "MIT Press Journals",
+				"pages": "60-71",
+				"publicationTitle": "African Arts",
+				"url": "https://doi.org/10.1162/afar.2010.43.4.60",
+				"volume": "43",
 				"attachments": [
 					{
-						"title": "African Arts Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"title": "African Arts Full Text PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Removable Hair Caps of Karamoja (Uganda)",
-				"date": "November 8, 2010",
-				"DOI": "10.1162/afar.2010.43.4.60",
-				"publicationTitle": "African Arts",
-				"journalAbbreviation": "African Arts",
-				"pages": "60-71",
-				"volume": "43",
-				"issue": "4",
-				"publisher": "MIT Press",
-				"ISSN": "0001-9933",
-				"url": "http://dx.doi.org/10.1162/afar.2010.43.4.60",
-				"accessDate": "September 4, 2012",
-				"libraryCatalog": "MIT Press Journals"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
