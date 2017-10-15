@@ -88,13 +88,10 @@ function doWeb(doc, url) {
 }
 
 
-
-
-
 function scrape(doc, url){
 	var abs = text(doc, '.abstractSection');
 	var doi = getDOI(doc.location.href);
-	var risurl = 'http://www.mitpressjournals.org/action/downloadCitation?doi=' + doi + '&include=cit&format=refman&direct=on&submit=Download+article+metadata';		
+	var risurl = 'http://www.mitpressjournals.org/action/downloadCitation?doi=' + doi + '&include=cit&format=refman&direct=on&submit=Download+article+metadata';
 	var pdfurl = doc.location.href.replace("/doi/abs/", "/doi/pdf/");
 	Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 		var translator = Zotero.loadTranslator("import");
@@ -106,17 +103,17 @@ function scrape(doc, url){
 			item.attachments= [];
 			item.notes=[];
 			item.attachments.push({
-				url:doc.location.href,
-				title:item.publicationTitle + " Snapshot",
-				mimeType:"text/html"
+				url: doc.location.href,
+				title: "Snapshot",
+				mimeType: "text/html"
 			});
 			item.attachments.push({
-				url:pdfurl,
-				title:item.publicationTitle + " Full Text PDF",
-				mimeType:"application/pdf"
+				url: pdfurl,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
 			});
 			if (abs) item.abstractNote = abs;
-			item.complete();	
+			item.complete();
 		});
 		translator.translate();
 	});
