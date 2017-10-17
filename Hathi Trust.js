@@ -106,7 +106,7 @@ function scrape(ids){
 			if (item.place)	item.place = item.place.replace(/[\[\]]/g, "");
 			if (item.tags.length) item.tags = item.tags.join("/").split("/");
 			if (item.url.substr(0,2)=="//") {
-				item.url = "https" + item.url;
+				item.url = "https:" + item.url;
 			};
 			item.attachments = [{url:item.url, title: "Hathi Trust Record", mimeType: "text/html"}];
 			item.complete();
@@ -142,7 +142,7 @@ var testCases = [
 				"numPages": "3 p.l., 192 p.",
 				"place": "Oxford",
 				"publisher": "The Clarendon press",
-				"url": "https//catalog.hathitrust.org/Record/001050654",
+				"url": "https://catalog.hathitrust.org/Record/001050654",
 				"attachments": [
 					{
 						"title": "Hathi Trust Record",
