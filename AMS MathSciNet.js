@@ -97,7 +97,7 @@ function scrape(doc, url) {
 			}
 			
 			if(mrnumber) {
-				url = 'http://mathscinet.ams.org/mathscinet-getitem?mr=' + mrnumber;
+				url = 'https://mathscinet.ams.org/mathscinet-getitem?mr=' + mrnumber;
 			}
 			item.attachments.push({title: "MathSciNet Snapshot", document: doc});
 			item.url = url;
@@ -110,12 +110,12 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://mathscinet.ams.org/mathscinet/search/publications.html?pg4=AUCN&s4=Karcher&co4=AND&pg5=TI&s5=&co5=AND&pg6=PC&s6=&co6=AND&pg7=ALLF&s7=&co7=AND&Submit=Search&dr=all&yrop=eq&arg3=&yearRangeFirst=&yearRangeSecond=&pg8=ET&s8=All&review_format=html",
+		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg4=AUCN&s4=Karcher&co4=AND&pg5=TI&s5=&co5=AND&pg6=PC&s6=&co6=AND&pg7=ALLF&s7=&co7=AND&Submit=Search&dr=all&yrop=eq&arg3=&yearRangeFirst=&yearRangeSecond=&pg8=ET&s8=All&review_format=html",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
+		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -146,7 +146,7 @@ var testCases = [
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "516–536",
 				"publicationTitle": "Journal of Multivariate Analysis",
-				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
+				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=3004573",
 				"volume": "115",
 				"attachments": [
 					{
@@ -161,97 +161,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
+		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://mathscinet.ams.org.libezproxy2.syr.edu/mathscinet-getitem?mr=2767535",
-		"items": [
-			{
-				"itemType": "bookSection",
-				"title": "On implementation of the Markov chain Monte Carlo stochastic approximation algorithm",
-				"creators": [
-					{
-						"firstName": "Yihua",
-						"lastName": "Jiang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Peter",
-						"lastName": "Karcher",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yuedong",
-						"lastName": "Wang",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011",
-				"bookTitle": "Advances in directional and linear statistics",
-				"extra": "MR: 2767535\nDOI: 10.1007/978-3-7908-2628-9_7",
-				"itemID": "MR2767535",
-				"libraryCatalog": "AMS MathSciNet",
-				"pages": "97–111",
-				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2767535",
-				"attachments": [
-					{
-						"title": "MathSciNet Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://mathscinet.ams.org.libezproxy2.syr.edu/mathscinet-getitem?mr=2663710",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Advances in directional and linear statistics",
-				"creators": [
-					{
-						"firstName": "Martin T.",
-						"lastName": "Wells",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Ashis",
-						"lastName": "SenGupta",
-						"creatorType": "editor"
-					}
-				],
-				"date": "2011",
-				"ISBN": "9783790826272",
-				"extra": "MR: 2663710\nDOI: 10.1007/978-3-7908-2628-9",
-				"itemID": "MR2663710",
-				"libraryCatalog": "AMS MathSciNet",
-				"numPages": "xiv+321",
-				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
-				"attachments": [
-					{
-						"title": "MathSciNet Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "<p>A Festschrift for Sreenivasa Rao Jammalamadaka</p>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
+		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -272,7 +187,7 @@ var testCases = [
 				"libraryCatalog": "AMS MathSciNet",
 				"pages": "163–222",
 				"publicationTitle": "Expositiones Mathematicae. International Journal",
-				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
+				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=1346201",
 				"volume": "13",
 				"attachments": [
 					{
