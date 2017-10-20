@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 19:32:38"
+	"lastUpdated": "2017-10-20 21:15:21"
 }
 
 /*
@@ -1056,7 +1056,7 @@ function importItem(newItem, node) {
 		var type = Zotero.RDF.getTargets(referentNode, rdf+"type");
 		if(type && Zotero.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
 			// if this is a memo
-			var note = new Array();
+			var note = {};
 			note.note = getFirstResults(referentNode, [rdf+"value", n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
 			if(note.note != undefined) {
 				// handle see also
