@@ -161,6 +161,48 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Advances in directional and linear statistics",
+				"creators": [
+					{
+						"firstName": "Martin T.",
+						"lastName": "Wells",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Ashis",
+						"lastName": "SenGupta",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2011",
+				"ISBN": "9783790826272",
+				"extra": "MR: 2663710\nDOI: 10.1007/978-3-7908-2628-9",
+				"itemID": "MR2663710",
+				"libraryCatalog": "AMS MathSciNet",
+				"numPages": "xiv+321",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
+				"attachments": [
+					{
+						"title": "MathSciNet Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>A Festschrift for Sreenivasa Rao Jammalamadaka</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
 		"items": "multiple"
 	},
