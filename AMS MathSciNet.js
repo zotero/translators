@@ -161,7 +161,55 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
+		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2767535",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "On implementation of the Markov chain Monte Carlo stochastic approximation algorithm",
+				"creators": [
+					{
+						"firstName": "Yihua",
+						"lastName": "Jiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Karcher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuedong",
+						"lastName": "Wang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"bookTitle": "Advances in directional and linear statistics",
+				"extra": "MR: 2767535\nDOI: 10.1007/978-3-7908-2628-9_7",
+				"itemID": "MR2767535",
+				"libraryCatalog": "AMS MathSciNet",
+				"pages": "97–111",
+				"publisher": "Physica-Verlag/Springer, Heidelberg",
+				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2767535",
+				"attachments": [
+					{
+						"title": "MathSciNet Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},	
+	{
+		"type": "web",
+		"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
 		"items": [
 			{
 				"itemType": "book",
@@ -185,7 +233,7 @@ var testCases = [
 				"libraryCatalog": "AMS MathSciNet",
 				"numPages": "xiv+321",
 				"publisher": "Physica-Verlag/Springer, Heidelberg",
-				"url": "http://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
+				"url": "https://mathscinet.ams.org/mathscinet-getitem?mr=2663710",
 				"attachments": [
 					{
 						"title": "MathSciNet Snapshot"
@@ -200,11 +248,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://mathscinet.ams.org/mathscinet/search/publications.html?pg1=ISSI&s1=308850",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
