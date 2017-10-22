@@ -2,14 +2,14 @@
 	"translatorID": "b38a44f4-b8af-4553-9edf-fba4d2598d6a",
 	"label": "Springer Books",
 	"creator": "Jonathan Schulz",
-	"target": "^https?://www\\.springer\\.com/\\w\\w/(book)/",
+	"target": "^https?://www\\.springer\\.com/\\w\\w/(book|search)\\W",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-10-08 12:37:29"
+	"lastUpdated": "2017-10-22 19:04:17"
 }
 
 function detectWeb(doc, url) {
@@ -19,15 +19,61 @@ function detectWeb(doc, url) {
 		case "book":
 			// test if any relevant <meta> information is available
 			if(ZU.xpathText(doc, '//meta[@property="og:title"]/@content')) return "book";
-//	add other types in the future
+			//test for relevant search entries
+		case "search": return getSearchResults(doc, true) ? "multiple" : false;
 	}
 }
 
 function doWeb(doc, url) {
-	scrape(doc, url);
+	var detection_type = detectWeb(doc, url);
+	switch (detection_type) {
+		case "book": scrapeBook(doc, url);
+		case "multiple": {
+			if (!getSearchResults(doc, true)) return;
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) return true;
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrapeBook);
+			});
+		}
+	}
+	
 }
 
-function scrape(doc, url) {
+//returns true if origStr is a shorter version of newStr
+function shortenedStringTest(origStr, newStr) {
+	if (origStr.length > newStr.length) return false;
+	if (origStr.length < 10)
+		return (origStr == newStr.substring(0, origStr.length));
+	else
+		return (origStr.substring(0,9) == newStr.substring(0,9));
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var search_entries = ZU.xpath(doc, '//div[@id="result-list"]/div');
+	for (var i=0; i<search_entries.length; i++) {
+		var item_type = search_entries[i].getAttribute("class");
+		//test if we actually have a usable result
+		if (!item_type || item_type.search(/result-item result-item-\d+ result-type-book.*/) == -1) continue;
+		var title_link = ZU.xpath(search_entries[i], "h4/a");
+		if (title_link.length == 0) continue;
+		//extract book title and URL
+		var title = title_link[0].textContent;
+		var href = title_link[0].getAttribute("href");
+		if (!title || !href) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function scrapeBook(doc, url) {
 	//Call the embedded metadata translator
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -35,7 +81,7 @@ function scrape(doc, url) {
 	translator.setHandler("itemDone", function(obj, item) {
 		//extract information from the title field:
 		//item.title = <book title> | <first creator> | Springer
-		title_entries = item.title.split(/\s\|\s/);
+		var title_entries = item.title.split(/\s\|\s/);
 		item.title = title_entries[0];
 		//forward compatibility: check if the embedded metadata translator
 		//has found a creator (i.e. relevant metadata)
@@ -43,6 +89,21 @@ function scrape(doc, url) {
 			item.complete; return;
 		}
 		Z.debug("no creators found by Embedded Metadata translator");
+		//Split title into title and (presumably) subtitle, verify the subtitle from
+		//a different field and complete the subtitle if neccessary;
+		if (item.title.indexOf(" - ") != -1) {
+			//match to the first " - "
+			titleParts = item.title.match(/^(.*?)(?:\s-\s)(.*)/);
+			//verify that the second entry is a subtitle via the bibliography part
+			var subtitleXpath = ZU.xpath(doc, '//div[@class="product-bibliographic"]/dl/dd/div/div/dl/dd');
+			for (var i=0; i<subtitleXpath.length; i++) {
+				if (shortenedStringTest(titleParts[2], subtitleXpath[i].textContent)) {
+					item.shortTitle = titleParts[1];
+					item.title = titleParts[1] + " - " + subtitleXpath[i].textContent;
+					break;
+				}
+			}
+		}
 		//try to extract data from the bibliography fields
 		editors = ZU.xpathText(doc, '//li[@itemprop="editor"]/span');
 		authors = ZU.xpathText(doc, '//li[@itemprop="author"]/span');
@@ -60,28 +121,37 @@ function scrape(doc, url) {
 		}
 		//Try to find additional information
 		if (!item.publisher) {
-			publisher = ZU.xpathText(doc, '//dd[@itemprop="publisher"]/span');
+			var publisher = ZU.xpathText(doc, '//dd[@itemprop="publisher"]/span');
 			item.publisher = publisher;
 		}
+		//see if we can seperate "Springer-Verlag <place>" into publisher and place
+		if (item.publisher && item.publisher.search(/^Springer-Verlag\s.+/)!=-1) {
+			var publisherInfo = item.publisher.match(/^(Springer-Verlag)\s(.+)/);
+			item.publisher = publisherInfo[1];
+			item.place = publisherInfo[2];
+		}
 		if (!item.ISBN) {
-			isbn = ZU.xpathText(doc, '//dd[@itemprop="isbn"]');
+			var isbn = ZU.xpathText(doc, '//dd[@itemprop="isbn"]');
+			if (isbn && isbn.search(/\d+-\d+-\d+-\d+-\d+/)!=-1)
 			item.ISBN = isbn;
+		}
+		if (!item.year) {
+			var yearField = ZU.xpathText(doc, '//div[@class="copyright"]');
+			if (yearField && yearField.search(/^©\s\d+/) != -1) {
+				item.date = yearField.match(/^©\s(\d+)/)[1];
+			}
 		}
 		//The abstract note is shortened in the <meta> field; try to load
 		//the full abstract note
-		long_abstractNote = ZU.xpath(doc, '//div[@class="product-about"]//div[@class="springer-html"]');
-		long_abstractNote = long_abstractNote[0].textContent.trim();
-		long_abstractNote = long_abstractNote.replace(/(?:\r\n|\r|\n)/g, ' ');
-		//Check for consistency with existing shortened abstractNote
-		if (item.abstractNote && item.abstractNote.length>10) {
-			if (item.abstractNote.substring(0,9) == long_abstractNote.substring(0,9))
+		var long_abstractNote = ZU.xpath(doc, '//div[@class="product-about"]//div[@class="springer-html"]');
+		if (long_abstractNote.length > 0) {
+			long_abstractNote = long_abstractNote[0].textContent.trim();
+			long_abstractNote = long_abstractNote.replace(/(?:\r\n|\r|\n)/g, '');
+			//Check for consistency with existing shortened abstractNote
+			if (shortenedStringTest(item.abstractNote, long_abstractNote))
 				item.abstractNote = long_abstractNote;
-			else
-				Z.debug("Error in the detection of the long abstract note.");
-		} else {
-			item.abstractNote = long_abstractNote;
 		}
-		
+
 		item.complete();
 	});
 	translator.translate();
@@ -90,38 +160,25 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.springer.com/gb/book/9780387952697",
+		"url": "http://www.springer.com/us/book/9783319633237",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Handbook of Physics",
+				"title": "Theoretical Physics 7 - Quantum Mechanics - Methods and Applications",
 				"creators": [
 					{
-						"firstName": "Walter",
-						"lastName": "Benenson",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "John W.",
-						"lastName": "Harris",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Horst",
-						"lastName": "Stöcker",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Holger",
-						"lastName": "Lutz",
-						"creatorType": "editor"
+						"firstName": "Wolfgang",
+						"lastName": "Nolting",
+						"creatorType": "author"
 					}
 				],
-				"ISBN": "9780387952697",
-				"abstractNote": "The Handbook of Physics is a complete desktop reference for scientists, engineers, and students. A veritable toolbox for everyday use in problem solving, homework, examinations, and practical applications of physics, it provides quick and easy access to a wealth of information including not only the fundamental formulas of physics but also a wide variety of experimental methods used in practice. Compiled by professional scientists, engineers, and lecturers who are experts in the day-to-day use of physics, the Handbook covers topics from classical mechanics to elementary particles, electric circuits to error analysis. The previous editions in German are renowned for their clarity and completeness.",
+				"date": "2017",
+				"ISBN": "9783319633237",
+				"abstractNote": "This textbook offers a clear and comprehensive introduction to methods and applications in quantum mechanics, one of the core components of undergraduate physics courses.  It follows on naturally from the previous volumes in this series, thus developing the understanding of quantized states further on. The first part of the book introduces the quantum theory of angular momentum and approximation methods. More complex themes are covered in the second part of the book, which describes multiple particle systems and scattering theory.  Ideally suited to undergraduate students with some grounding in the basics of quantum mechanics, the book is enhanced throughout with learning features such as boxed inserts and chapter summaries, with key mathematical derivations highlighted to aid understanding.  The text is supported by numerous worked examples and end of chapter problem sets. About the Theoretical Physics series Translated from the renowned and highly successful German editions, the eight volumes of this series cover the complete core curriculum of theoretical physics at undergraduate level. Each volume is self-contained and provides all the material necessary for the individual course topic. Numerous problems with detailed solutions support a deeper understanding.  Wolfgang Nolting is famous for his refined didactical style and has been referred to as the \"German Feynman\" in reviews.",
 				"libraryCatalog": "www.springer.com",
-				"publisher": "Springer-Verlag New York",
-				"url": "http://www.springer.com/gb/book/9780387952697",
+				"publisher": "Springer International Publishing",
+				"shortTitle": "Theoretical Physics 7",
+				"url": "//www.springer.com/us/book/9783319633237",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -135,7 +192,39 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.springer.com/gb/book/9783540212904",
+		"url": "http://www.springer.com/us/book/9789462094826",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Testing Times - A History of Vocational, Civil Service and Secondary Examinations in England since 1850",
+				"creators": [
+					{
+						"firstName": "Willis",
+						"lastName": "Richard",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"ISBN": "9789462094826",
+				"abstractNote": "This book focuses on the delivery of public examinations offered by the main examining boards in England since Victorian England. The investigation reveals that the provision of examinations was as controversial in the nineteenth century as it is today, particularly since the government is now determined to bring in reform. The issues of grade inflation, the place of coursework in marking, and the introduction of technological change all feature in this book. Educational policy is primarily examined as well as some reference to the global scene. The study analyses archival material from a wide range of sources, including those records stored at the National Archives and the London Metropolitan Archives. An emphasis is placed upon the various institutions that contributed to the process, including the Royal Society of Arts, the London Chamber of Commerce, the City of Guilds of London Institute and the University of London. Attention is given to the findings of the Taunton Commission and the Bryce Commission and shorter reports such as the Northcote-Trevelyn Report which served to radicalise entry and recruitment to the Civil Service. The modern GCSE and the plans for I-levels are considered and key observations are made about the efficacy of those examinations offered by Oxford and Cambridge universities and O-levels, A-levels and NVQs, The reader is given every opportunity to benefit enthusiastically in this account of examinations, and those engaged in education, whether teachers, examiners, students or administrators, will be able to gain useful insights into the workings of the examination system.",
+				"libraryCatalog": "www.springer.com",
+				"publisher": "Sense Publishers",
+				"shortTitle": "Testing Times",
+				"url": "//www.springer.com/us/book/9789462094826",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.springer.com/de/book/9783540212904",
 		"items": [
 			{
 				"itemType": "book",
@@ -147,11 +236,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2005",
 				"ISBN": "9783540212904",
-				"abstractNote": "Complex geometry studies (compact) complex manifolds. It discusses algebraic as well as metric aspects. The subject is on the crossroad of algebraic and differential geometry. Recent developments in string theory have made it an highly attractive area, both for mathematicians and theoretical physicists. The author’s goal is to provide an easily accessible introduction to the subject. The book contains detailed accounts of the basic concepts and the many exercises illustrate the theory. Appendices to various chapters allow an outlook to recent research directions. Daniel Huybrechts is currently Professor of Mathematics at the University Denis Diderot in Paris.",
+				"abstractNote": "Complex geometry studies (compact) complex manifolds. It discusses algebraic as well as metric aspects. The subject is on the crossroad of algebraic and differential geometry. Recent developments in string theory have made it an highly attractive area, both for mathematicians and theoretical physicists.The author’s goal is to provide an easily accessible introduction to the subject. The book contains detailed accounts of the basic concepts and the many exercises illustrate the theory. Appendices to various chapters allow an outlook to recent research directions.Daniel Huybrechts is currently Professor of Mathematics at the University Denis Diderot in Paris.",
 				"libraryCatalog": "www.springer.com",
-				"publisher": "Springer-Verlag Berlin Heidelberg",
-				"url": "http://www.springer.com/gb/book/9783540212904",
+				"place": "Berlin Heidelberg",
+				"publisher": "Springer-Verlag",
+				"shortTitle": "Complex Geometry",
+				"url": "//www.springer.com/de/book/9783540212904",
 				"attachments": [
 					{
 						"title": "Snapshot"
