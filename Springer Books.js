@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-10-22 19:04:17"
+	"lastUpdated": "2017-10-23 17:56:11"
 }
 
 function detectWeb(doc, url) {
@@ -89,18 +89,29 @@ function scrapeBook(doc, url) {
 			item.complete; return;
 		}
 		Z.debug("no creators found by Embedded Metadata translator");
-		//Split title into title and (presumably) subtitle, verify the subtitle from
+		//Split title into title and subtitle, verify both from
 		//a different field and complete the subtitle if neccessary;
 		if (item.title.indexOf(" - ") != -1) {
-			//match to the first " - "
-			titleParts = item.title.match(/^(.*?)(?:\s-\s)(.*)/);
-			//verify that the second entry is a subtitle via the bibliography part
-			var subtitleXpath = ZU.xpath(doc, '//div[@class="product-bibliographic"]/dl/dd/div/div/dl/dd');
-			for (var i=0; i<subtitleXpath.length; i++) {
-				if (shortenedStringTest(titleParts[2], subtitleXpath[i].textContent)) {
-					item.shortTitle = titleParts[1];
-					item.title = titleParts[1] + " - " + subtitleXpath[i].textContent;
+			//Step 1: decompose item.title into the "title" field from the bibliography
+			//and the (potentially abbreviated) subtitle
+			var titlesXpath = ZU.xpath(doc, '//div[@class="product-bibliographic"]/dl/dd/div/div/dl/dd');
+			var titleCand = null;
+			var subtitleCand = null;
+			for (var i=0; i<titlesXpath.length; i++) {
+				titleCand = titlesXpath[i].textContent;
+				if (titleCand == item.title.substring(0, titleCand.length)) {
+					subtitleCand = item.title.substring(titleCand.length).match(/^\s-\s(.+)$/);
 					break;
+				}
+			}
+			//Step 2: find the non-abbreviated subtitle from the "subtitle" field
+			if (subtitleCand) {
+				for (var i=0; i<titlesXpath.length; i++) {
+					if (shortenedStringTest(subtitleCand[1], titlesXpath[i].textContent)) {
+						item.shortTitle = titleCand;
+						item.title = titleCand + " - " + titlesXpath[i].textContent;
+						break;
+					}
 				}
 			}
 		}
