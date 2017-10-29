@@ -1217,7 +1217,6 @@ function importNext(nodes, index, collections, resolve, reject) {
 	try {
 		for (var i = index; i < nodes.length; i++) {
 			var node = nodes[i];
-			//Z.debug(t.zotero)
 			// type
 			var type = Zotero.RDF.getTargets(node, rdf+"type");
 			if (type) {
