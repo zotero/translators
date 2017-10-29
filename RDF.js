@@ -5,7 +5,7 @@
 	"creator": "Simon Kornblith",
 	"target": "rdf",
 	"minVersion": "2.1.9",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
@@ -13,7 +13,7 @@
 		"async": true,
 		"dataMode": "rdf/xml"
 	},
-	"lastUpdated": "2017-10-20 21:45:00"
+	"lastUpdated": "2017-10-27 21:45:00"
 }
 
 /*
