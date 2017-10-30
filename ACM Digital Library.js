@@ -43,7 +43,7 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-
+			
 			var urls = [];
 			for (var i in items) {
 				urls.push(i);
@@ -63,16 +63,16 @@ function getSearchResults(doc, checkOnly) {
 		var url = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
 		if (!title || !url) continue;
-
+		
 		if (checkOnly) return true;
 		found = true;
-
+		
 		url = url.replace(/#.*/, '')
 			.replace(/([?&])preflayout=[^&]*/, '$1')
 			+ '&preflayout=flat';
 		items[url] = title;
 	}
-
+	
 	return found ? items : false;
 }
 
@@ -97,10 +97,8 @@ function scrape(doc) {
 	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
 		.replace(/citation\.cfm/, 'downformats.cfm')
 		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
-
-
 	Zotero.debug('bibtex URL: ' + bibtexURL);
-
+	
 	ZU.doGet(bibtexURL, function (text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -117,21 +115,21 @@ function scrape(doc) {
 					mimeType: "application/pdf"
 				}];
 			}
-
+			
 			//fix DOIs if they're in URL form
 			if (item.DOI) item.DOI = item.DOI.replace(/^.*\/(10\.\d+\/)/, '$1');
-
+			
 			//The Abstract from above - may or may not work
 			if (abs) item.abstractNote = abs.textContent;
-
+			
 			//Conference Locations shouldn't go int Loc in Archive (nor should anything else)
 			delete item.archiveLocation;
-
+			
 			// some bibtext contains odd </kwd> tags - remove them
 			for(var i=0; i<item.tags.length; i++) {
 				item.tags[i] = item.tags[i].replace("</kwd>", "");
 			}
-
+			
 			//full issues of journals/magazines don't have a title
 			if (!item.title && text.indexOf("issue_date")>-1) {
 				var m = text.match(/issue_date\s*=\s*{(.*)},?/);
@@ -141,7 +139,7 @@ function scrape(doc) {
 					item.title = item.title + ", " + m[1];
 				}
 			}
-
+			
 			item.complete();
 		});
 		translator.translate();
@@ -158,10 +156,10 @@ function scrape(doc) {
 function getArticleType(doc) {
 	var conference = ZU.xpathText(doc, '//meta[@name="citation_conference"][1]/@content');
 	if (conference && conference.trim()) return "conferencePaper";
-
+	
 	var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"][1]/@content');
 	if (journal && journal.trim()) return "journalArticle";
-
+	
 	return "book";
 }/** BEGIN TEST CASES **/
 var testCases = [
