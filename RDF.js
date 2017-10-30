@@ -252,7 +252,7 @@ function isPart(node) {
 		var arc = arcs[i];
 		arc = Zotero.RDF.getResourceURI(arc);
 		if(arc != n.dc+"relation" && arc != n.dc1_0+"relation"
-			&& arc != n.dcterms+"relation" && arc != n.dcterms+"hasPart") {
+			&& arc != n.dcterms+"relation" && arc != n.dcterms+"hasPart") {	
 			// related to another item by some arc besides see also
 			skip = true;
 		}
@@ -715,13 +715,13 @@ function detectType(newItem, node, ret) {
 			break;
 		}
 	}
-
+	
 	ret.container = container;
 	ret.isPartOf = isPartOf;
 
 	return 	itemType;
 }
-
+	
 function importItem(newItem, node) {
 	var ret = new Object();
 	var itemType = detectType(newItem, node, ret);
@@ -956,6 +956,7 @@ function importItem(newItem, node) {
 	// DOI from PRISM
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
 
+	
 	if(!newItem.url) {
 		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url", n.bibo+"uri"]);
 		if(url) {
@@ -963,9 +964,11 @@ function importItem(newItem, node) {
 		}
 	}
 
+	
 	// archiveLocation
 	newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage", n.dc1_0+"coverage", n.dcterms+"coverage"], true);
 
+	
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.prism2_1+"teaser", n.og+"description",
 		n.bibo+"abstract", n.dcterms+"abstract", n.dc+"description.abstract", n.dcterms+"description.abstract", n.dc1_0+"description"], true);
@@ -975,9 +978,11 @@ function importItem(newItem, node) {
 		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
 	}
 
+	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dc1_0+"type", n.dcterms+"type"], true);
 
+	
 	/**CUSTOM ITEM TYPE  -- Currently only Dataset **/
 	if (type && type.toLowerCase() == "dataset") {
 		if (newItem.extra) {
@@ -1034,31 +1039,31 @@ function importItem(newItem, node) {
 	if(adr) {
 		newItem.address = getFirstResults(adr[0], [n.vcard2+"label"], true);
 	}
-
+	
 	// telephone
 	newItem.telephone = getFirstResults(node, [n.vcard2+"tel"], true);
-
+	
 	// email
 	newItem.email = getFirstResults(node, [n.vcard2+"email"], true);
-
+	
 	// accepted
 	newItem.accepted = getFirstResults(node, [n.dcterms+"dateAccepted"], true);
 
 	// language
 	newItem.language = getFirstResults(node, [n.dc+"language", n.dc1_0+"language", n.dcterms+"language"], true);
-
+	
 	// see also
 	processSeeAlso(node, newItem);
-
+	
 	// description/attachment note
 	if(newItem.itemType == "attachment") {
 		newItem.note = getFirstResults(node, [n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
 	} else if (!newItem.abstractNote && !isZoteroRDF) {
 		newItem.abstractNote = getFirstResults(node, [n.dc+"description", n.dcterms+"description"], true);
 	}
-
+	
 	/** NOTES **/
-
+	
 	var referencedBy = Zotero.RDF.getTargets(node, n.dcterms+"isReferencedBy");
 	for (var i=0; i<referencedBy.length; i++) {
 		var referentNode = referencedBy[i];
