@@ -955,7 +955,6 @@ function importItem(newItem, node) {
 	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true) || newItem.ISBN;
 	// DOI from PRISM
 	newItem.DOI = getFirstResults(node, [n.prism2_0+"doi", n.prism2_1+"doi", n.bibo+"doi"], true) || newItem.DOI;
-
 	
 	if(!newItem.url) {
 		var url = getFirstResults(node, [n.eprints+"official_url", n.vcard2+"url", n.og+"url", n.prism2_0+"url", n.prism2_1+"url", n.bibo+"uri"]);
@@ -963,11 +962,9 @@ function importItem(newItem, node) {
 			newItem.url = Zotero.RDF.getResourceURI(url[0]);
 		}
 	}
-
 	
 	// archiveLocation
 	newItem.archiveLocation = getFirstResults(node, [n.dc+"coverage", n.dc1_0+"coverage", n.dcterms+"coverage"], true);
-
 	
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.prism2_1+"teaser", n.og+"description",
@@ -981,7 +978,6 @@ function importItem(newItem, node) {
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dc1_0+"type", n.dcterms+"type"], true);
-
 	
 	/**CUSTOM ITEM TYPE  -- Currently only Dataset **/
 	if (type && type.toLowerCase() == "dataset") {
