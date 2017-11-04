@@ -8,7 +8,6 @@
 	"maxVersion":"",
 	"priority":100,
 	"displayOptions":{"exportCharset":"UTF-8"},
-	"browserSupport":"gcs",
 	"inRepository":true,
 	"lastUpdated":"2017-03-13 11:45:52"
 }
