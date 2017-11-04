@@ -3,7 +3,7 @@
 	"translatorType": 4,
 	"label": "Bibliotheque et Archives Nationale du Quebec (Pistard)",
 	"creator": "Adam Crymble",
-	"target": "http://pistard.banq.qc.ca",
+	"target": "^https?://pistard\\.banq\\.qc\\.ca",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
