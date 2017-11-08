@@ -12,14 +12,14 @@
 	},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
-		"exportNotes": true,
+		"exportNotes": false,
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-07-05 19:32:38"
+	"lastUpdated": "2017-11-08 20:02:00"
 }
 
 function detectImport() {
@@ -272,6 +272,8 @@ function processField(item, field, value, rawValue) {
 		}
 	} else if(inputFieldMap[field]) {
 		item[inputFieldMap[field]] = value;
+    } else if(field == "location") {
+        item.place = value;
 	} else if(field == "subtitle") {
 		if (!item.title) item.title = '';
 		item.title = item.title.trim();
@@ -287,6 +289,12 @@ function processField(item, field, value, rawValue) {
 		
 		item.title += value;
 	} else if(field == "journal") {
+		if(item.publicationTitle) {
+			item.journalAbbreviation = value;
+		} else {
+			item.publicationTitle = value;
+		}
+	} else if(field == "journaltitle") {
 		if(item.publicationTitle) {
 			item.journalAbbreviation = value;
 		} else {
