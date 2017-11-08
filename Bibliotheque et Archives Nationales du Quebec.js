@@ -1,15 +1,15 @@
 {
-	"translatorID":"59cce211-9d77-4cdd-876d-6229ea20367f",
-	"translatorType":4,
-	"label":"Bibliothèque et Archives Nationales du Québec",
-	"creator":"Adam Crymble",
-	"target":"^https?://catalogue\\.banq\\.qc\\.ca/",
-	"minVersion":"3.0",
-	"maxVersion":"",
-	"priority":100,
+	"translatorID": "59cce211-9d77-4cdd-876d-6229ea20367f",
+	"translatorType": 4,
+	"label": "Bibliothèque et Archives Nationales du Québec",
+	"creator": "Adam Crymble",
+	"target": "^https?://catalogue\\.banq\\.qc\\.ca/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
 	"browserSupport": "gcsibv",
-	"inRepository":true,
-	"lastUpdated":"2015-06-29 17:02:02"
+	"inRepository": true,
+	"lastUpdated": "2015-06-29 17:02:02"
 }
 
 function detectWeb(doc, url) {

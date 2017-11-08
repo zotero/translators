@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-26 12:12:58"
+	"lastUpdated": "2017-10-29 04:47:45"
 }
 
 /*
@@ -94,7 +94,8 @@ function scrape(doc) {
 
 	//compose bibtex URL
 	var bibtexstring = 'id=' + itemID + '&parent_id=' + parentID + '&expformat=bibtex';
-	var bibtexURL = url.replace(/citation\.cfm/, 'downformats.cfm')
+	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
+		.replace(/citation\.cfm/, 'downformats.cfm')
 		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
 	Zotero.debug('bibtex URL: ' + bibtexURL);
 	
@@ -106,8 +107,10 @@ function scrape(doc) {
 			//get the URL for the pdf fulltext from the metadata
 			var pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content')[0];
 			if (pdfURL) {
+				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); //deproxify URL
+				Z.debug("pdfURL: " + pdfURL);
 				item.attachments = [{
-					url: pdfURL.textContent,
+					url: pdfURL,
 					title: "ACM Full Text PDF",
 					mimeType: "application/pdf"
 				}];
