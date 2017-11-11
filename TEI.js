@@ -164,7 +164,8 @@ function generateItem(item, teiDoc) {
 		"bookSection": true,
 		"magazineArticle": true,
 		"newspaperArticle": true,
-		"conferencePaper": true
+		"conferencePaper": true,
+		"encyclopediaArticle": true
 	};
 
 	var isAnalytic = analyticItemTypes[item.itemType] ? true : false;
@@ -215,30 +216,16 @@ function generateItem(item, teiDoc) {
 			analytic.appendChild(idno);
 		}
 
-		// book title
-		if (item.bookTitle) {
-			var bookTitle = teiDoc.createElementNS(ns.tei, "title");
-			bookTitle.setAttribute("level", "m");
-			bookTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.bookTitle)));
-			monogr.appendChild(bookTitle);
-		}
-		// proceedings title
-		else if (item.proceedingsTitle) {
-			var proTitle = teiDoc.createElementNS(ns.tei, "title");
-			proTitle.setAttribute("level", "m");
-			proTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.proceedingsTitle)));
-			monogr.appendChild(proTitle);
-		}
-
-		// other publication title
-		else if (item.publicationTitle) {
+		// publication title
+		var publicationTitle = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.publicationTitle;
+		if (publicationTitle) {
 			var pubTitle = teiDoc.createElementNS(ns.tei, "title");
 			if (item.itemType == "journalArticle") {
 				pubTitle.setAttribute("level", "j");
 			} else {
 				pubTitle.setAttribute("level", "m");
 			}
-			pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(item.publicationTitle)));
+			pubTitle.appendChild(teiDoc.createTextNode(replaceFormatting(publicationTitle)));
 			monogr.appendChild(pubTitle);
 		}
 
