@@ -5,11 +5,11 @@
 	"target": "^https?://(www\\.)?antikvarium\\.hu/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 200,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-01 15:04:38"
+	"lastUpdated": "2017-11-11 15:26:37"
 }
 
 /*
@@ -37,7 +37,8 @@
 
 
 //Zotero attr() and text() functions:
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 function detectWeb(doc, url) {
 	if (url.includes('konyv')) {
@@ -53,7 +54,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.src-result-book');
 	for (var i=0; i<rows.length; i++) {
-		var href = attr(rows[i], '#searchResultKonyv-csempes', 'href')
+		var href = attr(rows[i], '#searchResultKonyv-csempes', 'href');
 		var title = ZU.trimInternal(text(rows[i], '.book-title-src'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -83,7 +84,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-		var newItem = new Zotero.Item('book');
+	var newItem = new Zotero.Item('book');
 
 	newItem.title = text(doc, '[itemprop=name]', 0).trim();
 
@@ -101,7 +102,7 @@ function scrape(doc, url) {
 	}
 
 	var seriesElement = doc.getElementById('konyvAdatlapSorozatLink');
-	if (seriesElement.length) {
+	if (seriesElement && seriesElement.length) {
 		newItem.series = seriesElement.innerText;
 		newItem.seriesNumber = getElementByInnerText('th', 'Kötetszám:').parentElement.children[1].innerText;
 		newItem.volume = newItem.seriesNumber;
@@ -133,7 +134,7 @@ function scrape(doc, url) {
 
 	var contentsElement = doc.getElementById('tartalomFull');
 	if (contentsElement) {
-		newItem.notes.push({note: contentsElement.innerText})
+		newItem.notes.push({note: contentsElement.innerText});
 	}
 
 	newItem.attachments.push({document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
