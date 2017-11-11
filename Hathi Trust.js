@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-31 19:10:24"
+	"lastUpdated": "2017-11-11 20:05:29"
 }
 
 /*
@@ -79,7 +79,7 @@ function doWeb(doc, url){
 			if (!items) {
 				return true;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i.replace(/^\d+-/,''));
 			}
@@ -107,7 +107,7 @@ function scrape(ids){
 			if (item.tags.length) item.tags = item.tags.join("/").split("/");
 			if (item.url.substr(0,2)=="//") {
 				item.url = "https:" + item.url;
-			};
+			}
 			item.attachments = [{url:item.url, title: "Hathi Trust Record", mimeType: "text/html"}];
 			item.complete();
 		});	
