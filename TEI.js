@@ -165,7 +165,8 @@ function generateItem(item, teiDoc) {
 		"magazineArticle": true,
 		"newspaperArticle": true,
 		"conferencePaper": true,
-		"encyclopediaArticle": true
+		"encyclopediaArticle": true,
+		"dictionaryEntry": true
 	};
 
 	var isAnalytic = analyticItemTypes[item.itemType] ? true : false;
@@ -217,7 +218,7 @@ function generateItem(item, teiDoc) {
 		}
 
 		// publication title
-		var publicationTitle = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.publicationTitle;
+		var publicationTitle = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle;
 		if (publicationTitle) {
 			var pubTitle = teiDoc.createElementNS(ns.tei, "title");
 			if (item.itemType == "journalArticle") {
