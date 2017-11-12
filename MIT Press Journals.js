@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-15 19:28:43"
+	"lastUpdated": "2017-11-12 11:41:41"
 }
 
 /*
@@ -90,9 +90,9 @@ function doWeb(doc, url) {
 
 function scrape(doc, url){
 	var abs = text(doc, '.abstractSection');
-	var doi = getDOI(doc.location.href);
+	var doi = getDOI(url);
 	var risurl = 'http://www.mitpressjournals.org/action/downloadCitation?doi=' + doi + '&include=cit&format=refman&direct=on&submit=Download+article+metadata';
-	var pdfurl = doc.location.href.replace("/doi/abs/", "/doi/pdf/");
+	var pdfurl = url.replace("/doi/abs/", "/doi/pdf/");
 	Zotero.Utilities.HTTP.doGet(risurl, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -103,7 +103,7 @@ function scrape(doc, url){
 			item.attachments= [];
 			item.notes=[];
 			item.attachments.push({
-				url: doc.location.href,
+				url: url,
 				title: "Snapshot",
 				mimeType: "text/html"
 			});
