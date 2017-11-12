@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-05 21:09:41"
+	"lastUpdated": "2017-11-12 22:00:35"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	var bodyClass = ZU.xpathText(doc, '//body/@class');
-	if (bodyClass.indexOf('article')>-1) {
+	if (bodyClass && bodyClass.indexOf('article')>-1) {
 		return "magazineArticle";
 	} else if (url.indexOf('/search/')>-1 && getSearchResults(doc, true)) {
 		return "multiple";
@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//section[contains(@class, "pageContent")]//h4/a');
+	var rows = ZU.xpath(doc, '//li//a[h4]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -90,7 +90,6 @@ function scrape(doc, url) {
 	//translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		//var author = ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader__metaInfo")]//a[@rel="author"]');
 		if (item.creators.length==0 && json.author) {
 			//json.author can either be an array, or a object containing an array
 			if (Array.isArray(json.author)) {
