@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-11 12:36:27"
+	"lastUpdated": "2017-11-13 19:29:53"
 }
 
 /*
@@ -43,7 +43,7 @@ function detectWeb(doc,url) {
 		if (typeDocument == "Revues") {
 			return "journalArticle";
 		} else if (typeDocument == "Ouvrages") {
-			return "book";
+			return "bookSection";
 		}
 	}
 
@@ -77,17 +77,26 @@ function doWeb(doc,url) {
 			ZU.processDocuments(urls, scrape);
 		});
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc) {
+function scrape(doc, url) {
+	var type = detectWeb(doc, url);
 	// We call the Embedded Metadata translator to do the actual work
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
+		
+		item.itemType = type;
+		
+		if (type == "bookSection" && item.publicationTitle == "Cairn.info") {
+			delete item.publicationTitle;
+			// otherwise the bookTitle will be overwritten with that
+		}
+		
 		// Cairn.info uses non-standard keywords:
 		// we import them here, as the Embedded Metadata translator
 		// cannot catch them.
@@ -296,6 +305,41 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.cairn.info/jeu-d-echecs-comme-representation--9782728835904-page-111.htm",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Des figurines de chair et de sang (sur l'échiquier de la passion), d'après une mise en scène de Daniel Mesguich : La Seconde Surprise de l'amour de Marivaux",
+				"creators": [
+					{
+						"firstName": "Sébastien",
+						"lastName": "Lenglet",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014-07-02",
+				"ISBN": "9782728835904",
+				"abstractNote": "Dans La Seconde Surprise de l’amour, Marivaux a choisi de représenter une marquise, récemment séparée de son mari (la mort de celui-ci précédant le début de la pièce), qui a décidé de rompre avec tous les hommes. « Eh ! Que m’importe qu’il reste des hommes », dit-elle en s’adressant à sa suivante, Lisette. Pour remédier à son désespoir, la Marquise a engagé un bibliothécaire, Hortensius, une figure...",
+				"bookTitle": "Le jeu d'échecs comme représentation",
+				"language": "fr",
+				"libraryCatalog": "Cairn.info",
+				"pages": "111-119",
+				"publisher": "Éditions Rue d'Ulm",
+				"shortTitle": "Des figurines de chair et de sang (sur l'échiquier de la passion), d'après une mise en scène de Daniel Mesguich",
+				"url": "https://www.cairn.info/jeu-d-echecs-comme-representation--9782728835904-page-111.htm",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
