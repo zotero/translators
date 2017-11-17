@@ -403,7 +403,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://link.springer.com/book/10.1007/978-3-540-88682-2/page/1",
+		"url": "http://link.springer.com/book/10.1007/978-3-540-88682-2",
 		"items": "multiple"
 	},
 	{
