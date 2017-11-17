@@ -50,6 +50,10 @@ function getResultList(doc) {
 	}
 	if(!results.length) {
 		results = ZU.xpath(doc,
+			'//div[@class="book-toc-container"]/ol//div[contains(@class,"content-type-list__meta")]/div/a');
+	}
+	if(!results.length) {
+		results = ZU.xpath(doc,
 			'//div[@class="toc"]/ol\
 			//li[contains(@class,"toc-item")]/p[@class="title"]/a'
 		);
