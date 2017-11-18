@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-24 17:34:19"
+	"lastUpdated": "2017-11-18 14:34:19"
 }
 
 function detectWeb(doc, url) {
@@ -47,6 +47,10 @@ function getResultList(doc) {
 	if(!results.length) {
 		results = ZU.xpath(doc,
 			'//div[@class="toc"]/ol//div[contains(@class,"toc-item")]/h3/a');
+	}
+	if(!results.length) {
+		results = ZU.xpath(doc,
+			'//div[@class="book-toc-container"]/ol//div[contains(@class,"content-type-list__meta")]/div/a');
 	}
 	if(!results.length) {
 		results = ZU.xpath(doc,
@@ -399,7 +403,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://link.springer.com/book/10.1007/978-3-540-88682-2/page/1",
+		"url": "http://link.springer.com/book/10.1007/978-3-540-88682-2",
 		"items": "multiple"
 	},
 	{
