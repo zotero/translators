@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2017-01-22 20:45:00"
+	"lastUpdated": "2017-11-18 10:45:00"
 }
 
 // ********************************************************************
