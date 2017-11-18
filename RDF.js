@@ -969,12 +969,6 @@ function importItem(newItem, node) {
 	// abstract
 	newItem.abstractNote = getFirstResults(node, [n.eprints+"abstract", n.prism+"teaser", n.prism2_0+"teaser", n.prism2_1+"teaser", n.og+"description",
 		n.bibo+"abstract", n.dcterms+"abstract", n.dc+"description.abstract", n.dcterms+"description.abstract", n.dc1_0+"description"], true);
-
-	//extra for Zotero RDF
-	if (isZoteroRDF) {
-		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
-	}
-
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dc1_0+"type", n.dcterms+"type"], true);
@@ -1054,7 +1048,12 @@ function importItem(newItem, node) {
 	// description/attachment note
 	if(newItem.itemType == "attachment") {
 		newItem.note = getFirstResults(node, [n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
-	} else if (!newItem.abstractNote && !isZoteroRDF) {
+	}
+	// extra for Zotero RDF
+	else if (isZoteroRDF) {
+		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
+	}
+	else if (!newItem.abstractNote) {
 		newItem.abstractNote = getFirstResults(node, [n.dc+"description", n.dcterms+"description"], true);
 	}
 	
