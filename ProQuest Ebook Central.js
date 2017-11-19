@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-18 20:15:01"
+	"lastUpdated": "2017-11-19 21:23:37"
 }
 
 /*
@@ -53,7 +53,6 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the xpath
 	var rows = doc.querySelectorAll('.pub-list-item-description>a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
@@ -88,7 +87,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var risURL = url.replace(/(detail|reader)\.action\?/, "biblioExport.action?").replace(/&.+./, "");
 	var abstract =  text(doc, '#desc-container');
-	Z.debug(risURL)
+	//Z.debug(risURL)
 	ZU.doGet(risURL, function(text) {
 		//Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
@@ -103,9 +102,9 @@ function scrape(doc, url) {
 			item.title = item.title.replace(/\s+:/, ":");
 			item.abstractNote = abstract; 
 			item.complete();
-		})
+		});
 		translator.translate();
-	})
+	});
 }
 /** BEGIN TEST CASES **/
 var testCases = [
