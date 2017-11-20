@@ -56,7 +56,7 @@ function getSearchResults(doc, checkOnly) {
 		var href = attr(rows[i], 'a:first-of-type', 'data-ctorig') || attr(rows[i], 'a:first-of-type', 'href');
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
-		if (!href.match(/abstracts\/[a-z]+\/[v0-9]+\/[p\-0-9]+\//)) continue;
+		if (href.search(/abstracts\/[a-z]+\/[v0-9]+\/[p\-0-9]+\//) == -1) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
