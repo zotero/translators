@@ -36,13 +36,13 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/search") != -1 && getSearchResults(doc, true))
+	if (url.includes("/search")  && getSearchResults(doc, true))
 		return "multiple";
 	else {
 		var body = doc.getElementsByTagName("body")[0];
-		if ((body.className).indexOf('dctype-oxencycl-entry') > -1) {
+		if ((body.className).includes('dctype-oxencycl-entry')) {
 			return "bookSection";
-		} else if ((body.className).indexOf('dctype-book') > -1) {
+		} else if ((body.className).includes('dctype-book')) {
 			return "book";
 		}
 	}
@@ -127,9 +127,9 @@ function scrape(doc, url) {
 	translator.getTranslatorObject(function(trans) {
 		// Writing this again because calling trans.detectWeb is not serving the purpose
 		var body = doc.getElementsByTagName("body")[0];
-		if ((body.className).indexOf('dctype-oxencycl-entry') > -1) {
+		if ((body.className).includes('dctype-oxencycl-entry')) {
 			trans.itemType = "bookSection";
-		} else if ((body.className).indexOf('dctype-book') > -1) {
+		} else if ((body.className).includes('dctype-book')) {
 			trans.itemType = "book";
 		}
 
