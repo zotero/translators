@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-11-19 20:03:16"
+	"lastUpdated": "2017-11-24 18:05:50"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017 Sebastian Karcher
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,6 +37,7 @@
 
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 function detectWeb(doc, url) {
 	if (url.includes("encore/record")) {
@@ -71,10 +72,10 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			scrape(articles)
+			scrape(articles);
 		});
 	} else {
-		var marcURL = createMarcURL(url)
+		var marcURL = createMarcURL(url);
 		scrape([marcURL]);
 	}
 }
@@ -95,21 +96,15 @@ function scrape(marcURL) {
 			translator.getTranslatorObject(function(marc) {
 				var record = new marc.record();
 				var newItem = new Zotero.Item();
+				text = text.replace(/^\n/mg, '').replace(/\s?\n\s+/gm, ' ');
+				//Z.debug(text);
+				var line = text.split("\n");
+				for (var i = 0; i < line.length; i++) {
 
-				var linee = text.split("\n");
-				for (var i = 0; i < linee.length; i++) {
-					if (!linee[i]) {
-						continue;
-					}
+					line[i] = line[i].replace(/[\xA0_\t]/g, " ");
+					var value = line[i].substr(7);
 
-					linee[i] = linee[i].replace(/[\xA0_\t]/g, " ");
-					var value = linee[i].substr(7);
-
-					if (linee[i].substr(0, 6) == "      ") {
-						// add this onto previous value
-						tagValue += value;
-					} else {
-						if (linee[i].substr(0, 6) == "LEADER") {
+						if (line[i].substr(0, 6) == "LEADER") {
 							// trap leader
 							record.leader = value;
 						} else {
@@ -123,11 +118,11 @@ function scrape(marcURL) {
 								record.addField(tag, ind, tagValue);
 							}
 
-							var tag = linee[i].substr(0, 3);
-							var ind = linee[i].substr(4, 2);
+							var tag = line[i].substr(0, 3);
+							var ind = line[i].substr(4, 2);
 							var tagValue = value;
 						}
-					}
+					
 				}
 				if (tagValue) {
 					tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter + "$1");
@@ -138,9 +133,7 @@ function scrape(marcURL) {
 					// add previous tag
 					record.addField(tag, ind, tagValue);
 				}
-
 				record.translate(newItem);
-
 				newItem.repository = domain[1].replace(/encore\./, "");
 				// there is too much stuff in the note field - or file this as an abstract?
 				newItem.notes = [];
@@ -148,70 +141,85 @@ function scrape(marcURL) {
 			});
 		});
 	}
-}
-
-/** BEGIN TEST CASES **/
-var testCases = [{
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
 		"type": "web",
-		"url": "http://sallypro.sandiego.edu/iii/encore/search/C__Rb3558162__Stesting__Orightresult__U__X6?lang=eng&suite=cobalt#resultRecord-b3558162",
-		"items": "multiple"
+		"url": "http://sallypro.sandiego.edu/iii/encore/record/C__Rb4044553__Stesting__P0%2C6__Orightresult__U__X6?lang=eng&suite=cobalt",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Evaluation and testing in nursing education",
+				"creators": [
+					{
+						"firstName": "Marilyn H.",
+						"lastName": "Oermann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kathleen B.",
+						"lastName": "Gaberson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9780826194886",
+				"abstractNote": "Considered the \"gold standard' for evaluation and testing in nursing education, this classic text helps educators to assess the level of learning achieved in the classroom, clinical settings, and online. The fifth edition helps teachers to keep pace with new learning dynamics through expanded coverage of essential concepts in assessment, evaluation, and testing in a wider variety of learning environments. It presents new content on evaluation in online programs and testing, and features a new chapter on using simulation for assessment and high stakes evaluations. Also included is updated information on clinical evaluation and program evaluation along with current research featuring new examples and tools. The fifth edition expands content on standardized tests, including how to write test items for licensure and certification exam prep, and provides new information on developing rubrics for assessing written assignments. -- Provided by publisher",
+				"callNumber": "RT73.7 .O47 2017",
+				"edition": "Fifth edition",
+				"extra": "OCLC: 957077777",
+				"libraryCatalog": "sallypro.sandiego.edu",
+				"numPages": "403",
+				"place": "New York, NY",
+				"publisher": "Springer Publishing Company, LLC",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Ability testing"
+					},
+					{
+						"tag": "Ability testing"
+					},
+					{
+						"tag": "Examinations"
+					},
+					{
+						"tag": "Examinations"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Nursing"
+					},
+					{
+						"tag": "Study and teaching Evaluation"
+					},
+					{
+						"tag": "Study and teaching Evaluation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
-		"url": "http://sallypro.sandiego.edu/iii/encore/record/C__Rb1516899__Stesting__P0%2C2__Orightresult__U__X6?lang=eng&suite=cobalt",
-		"items": [{
-			"itemType": "thesis",
-			"title": "Testing a theoretical model of critical thinking and cognitive development",
-			"creators": [{
-					"firstName": "Jane",
-					"lastName": "Rapps",
-					"creatorType": "author"
-				},
-				{
-					"lastName": "University of San Diego",
-					"creatorType": "contributor",
-					"fieldMode": true
-				}
-			],
-			"date": "1998",
-			"callNumber": "BF441 .R3 1998",
-			"libraryCatalog": "sallypro.sandiego.edu Library Catalog",
-			"numPages": "199",
-			"attachments": [],
-			"tags": [{
-					"tag": "Constructivism (Education)"
-				},
-				{
-					"tag": "Critical thinking"
-				},
-				{
-					"tag": "Decision making"
-				},
-				{
-					"tag": "Dissertations"
-				},
-				{
-					"tag": "Education"
-				},
-				{
-					"tag": "Nursing"
-				},
-				{
-					"tag": "Nursing"
-				},
-				{
-					"tag": "Nursing"
-				},
-				{
-					"tag": "Nursing"
-				},
-				{
-					"tag": "Philosophy"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"url": "http://sallypro.sandiego.edu/iii/encore/search/C__Rb3558162__Stesting__Orightresult__U__X6?lang=eng&suite=cobalt#resultRecord-b3558162",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
