@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-26 11:30:00"
+	"lastUpdated": "2017-11-25 17:49:05"
 }
 
 /*
@@ -463,8 +463,20 @@ function addHighwireMetadata(doc, newItem) {
 
 	//fall back to some other date options
 	if(!newItem.date) {
-		newItem.date = getContentText(doc, 'citation_online_date')
-			|| getContentText(doc, 'citation_year');
+		var onlineDate = getContentText(doc, 'citation_online_date');
+		var citationYear = getContentText(doc, 'citation_year');
+		
+		if (onlineDate && citationYear) {
+			onlineDate = ZU.strToISO(onlineDate);
+			if (citationYear < onlineDate.substr(0,4)) {
+				// online date can be years after the citation year
+				newItem.date = citationYear;
+			} else {
+				newItem.date = onlineDate;
+			}
+		} else {
+			newItem.date = onlineDate || citationYear;
+		}
 	}
 
 	//prefer ISSN over eISSN
@@ -624,7 +636,8 @@ function tryOgAuthors(doc) {
 	var authors = [];
 	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
 	for (var i = 0; i<ogAuthors.length; i++) {
-		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0) {
+		
+		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0 && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"))
 		}
 	}
@@ -1014,7 +1027,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+		"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1041,13 +1054,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/2007",
+				"date": "2007-12",
 				"DOI": "10.1590/S0034-89102007000900015",
-				"ISSN": "0034-8910",
-				"libraryCatalog": "www.scielosp.org",
+				"ISSN": "0034-8910, 0034-8910, 1518-8787",
+				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
+				"journalAbbreviation": "Rev. Saúde Pública, Rev. saúde pública",
+				"language": "pt",
+				"libraryCatalog": "scielosp.org",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
-				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
 				"volume": "41",
 				"attachments": [
 					{
@@ -1114,21 +1130,16 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+		"url": "https://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
 		"items": [
 			{
 				"itemType": "webpage",
 				"title": "Junot Díaz: My stories come from trauma",
-				"creators": [
-					{
-						"firstName": "Gregg",
-						"lastName": "Barrios",
-						"creatorType": "author"
-					}
-				],
+				"creators": [],
+				"date": "2012-10-10 15:36:00",
 				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
 				"shortTitle": "Junot Díaz",
-				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
+				"url": "https://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
 				"websiteTitle": "Salon",
 				"attachments": [
 					{
@@ -1436,6 +1447,45 @@ var testCases = [
 				"publicationTitle": "Foundations of Physics Letters",
 				"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/article/234097",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Serfs on the Move: Peasant Seasonal Migration in Pre-Reform Russia, 1800–61",
+				"creators": [
+					{
+						"firstName": "Boris B.",
+						"lastName": "Gorshkov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2000",
+				"DOI": "10.1353/kri.2008.0061",
+				"ISSN": "1538-5000",
+				"issue": "4",
+				"libraryCatalog": "muse.jhu.edu",
+				"pages": "627-656",
+				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
+				"shortTitle": "Serfs on the Move",
+				"url": "https://muse.jhu.edu/article/234097",
+				"volume": "1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
