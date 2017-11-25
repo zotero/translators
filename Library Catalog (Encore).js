@@ -3,13 +3,13 @@
 	"label": "Library Catalog (Encore)",
 	"creator": "Sebastian Karcher",
 	"target": "/iii/encore/(record|search)",
-	"minVersion": "1.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 270,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2017-11-24 18:05:50"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-11-25 15:51:49"
 }
 
 /*
@@ -88,7 +88,7 @@ function createMarcURL(url) {
 function scrape(marcURL) {
 	for (let i = 0; i < marcURL.length; i++) {
 		//Z.debug(marcURL[i])
-		//the library catalogue name isn't perfect, but should be unambiguous. 
+		// the library catalogue name isn't perfect, but should be unambiguous. 
 		var domain = marcURL[i].match(/https?:\/\/([^/]+)/);
 		ZU.doGet(marcURL[i], function(text) {
 			var translator = Zotero.loadTranslator("import");
@@ -96,43 +96,29 @@ function scrape(marcURL) {
 			translator.getTranslatorObject(function(marc) {
 				var record = new marc.record();
 				var newItem = new Zotero.Item();
-				text = text.replace(/^\n/mg, '').replace(/\s?\n\s+/gm, ' ');
+				text = text.replace(/^\n/mg, '') // skip empty lines
+						.replace(/\s?\n\s+/gm, ' '); // delete line breaks when only needed for displaying long lines
 				//Z.debug(text);
 				var line = text.split("\n");
-				for (var i = 0; i < line.length; i++) {
-
-					line[i] = line[i].replace(/[\xA0_\t]/g, " ");
-					var value = line[i].substr(7);
-
-						if (line[i].substr(0, 6) == "LEADER") {
-							// trap leader
-							record.leader = value;
-						} else {
-							if (tagValue) { // finish last tag
-								tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter + "$1");
-								if (tagValue[0] != marc.subfieldDelimiter) {
-									tagValue = marc.subfieldDelimiter + "a" + tagValue;
-								}
-
-								// add previous tag
-								record.addField(tag, ind, tagValue);
+				for (var j = 0; j < line.length; j++) {
+					line[j] = line[j].replace(/[\xA0_\t]/g, " ");
+					var value = line[j].substr(7);
+					if (line[j].substr(0, 6) == "LEADER") {
+						// trap leader
+						record.leader = value;
+					} else {
+						var tag = line[j].substr(0, 3);
+						var ind = line[j].substr(4, 2);
+						if (value) {
+							value = value.replace(/\|(.)/g, marc.subfieldDelimiter + "$1");
+							if (value[0] != marc.subfieldDelimiter) {
+								value = marc.subfieldDelimiter + "a" + value;
 							}
-
-							var tag = line[i].substr(0, 3);
-							var ind = line[i].substr(4, 2);
-							var tagValue = value;
+							record.addField(tag, ind, value);
 						}
-					
-				}
-				if (tagValue) {
-					tagValue = tagValue.replace(/\|(.)/g, marc.subfieldDelimiter + "$1");
-					if (tagValue[0] != marc.subfieldDelimiter) {
-						tagValue = marc.subfieldDelimiter + "a" + tagValue;
 					}
-
-					// add previous tag
-					record.addField(tag, ind, tagValue);
 				}
+
 				record.translate(newItem);
 				newItem.repository = domain[1].replace(/encore\./, "");
 				// there is too much stuff in the note field - or file this as an abstract?
