@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-16 21:55:19"
+	"lastUpdated": "2017-11-28 13:38:42"
 }
 
 function detectWeb(doc, url) {
-	var m = url.match(/economist\.com\/[^\/]*\/[^\/]*\/\d+/);
+	var m = url.match(/^https?:\/\/[^\/]+\/[^\/]*\/[^\/]*\/\d+/);
 	//Z.debug(m)
 	if (url.includes('/node/') || m) {
 		return "magazineArticle";
