@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-26 11:30:00"
+	"lastUpdated": "2017-10-03 01:32:00"
 }
 
 /*
@@ -360,7 +360,7 @@ function doWeb(doc, url) {
 function importRDF(doc, url) {
 	RDF.doImport();
 	if(!_haveItem) {
-		completeItem(doc, new Zotero.Item(_itemType));
+		completeItem(doc, new Zotero.Item(_itemType || 'webpage'));
 	}
 }
 
@@ -611,7 +611,9 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 
 
-	newItem.libraryCatalog = doc.location.host;
+	if (Zotero.parentTranslator) {
+		newItem.libraryCatalog = doc.location.host;
+	}
 
 	// add access date
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
