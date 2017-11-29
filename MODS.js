@@ -1013,9 +1013,6 @@ function doImport() {
 				}
 			}
 			
-			// creators (might be editors)
-			processCreators(host, newItem, "editor");
-			
 			// identifiers
 			processIdentifiers(host, newItem);
 			
