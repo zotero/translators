@@ -628,6 +628,11 @@ function processTitleInfo(titleInfo) {
 	if(subtitle) title = title.replace(/:$/,'') + ": "+ subtitle.trim();
 	var nonSort = ZU.xpathText(titleInfo, "m:nonSort[1]", xns);
 	if(nonSort) title = nonSort.trim() + " " + title;
+	var partNumber = ZU.xpathText(titleInfo, "m:partNumber[1]", xns);
+	var partName = ZU.xpathText(titleInfo, "m:partName[1]", xns);
+	if(partNumber && partName) title = title.replace(/\.$/,'') + ". "+ partNumber.trim() + ": " + partName.trim()
+	else if(partNumber) title = title.replace(/\.$/,'') + ". " + partNumber.trim()
+	else if(partName) title = title.replace(/\.$/,'') + ". " + partName.trim();
 	return title;
 }
 
@@ -1905,6 +1910,47 @@ var testCases = [
 					},
 					{
 						"note": "Forms part of: Miscellaneous Manuscripts collection."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mods version=\"3.6\" xmlns=\"http://www.loc.gov/mods/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-6.xsd\">\n   <titleInfo>\n      <title>Ludvig Holbergs udvalgte Skrifter</title>\n      <partNumber>D. 1-6 B. 4</partNumber>\n      <partName>Holbergs Comedier</partName>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Den honette Ambition</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Den Stundesløse</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>De Usynlige</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Pernilles korte Frøkenstand</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Erasmus Montanus</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Det lykkelige Skibbrud</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Den pantsatte Bondedreng</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Comedier</title>\n   </titleInfo>\n   <titleInfo type=\"alternative\">\n      <title>Udvalgte Skrifter</title>\n   </titleInfo>\n   <name type=\"personal\" usage=\"primary\">\n      <namePart>Holberg, Ludvig</namePart>\n      <namePart type=\"date\">1684-1754</namePart>\n      <nameIdentifier>bibsys.no:authority:90073658</nameIdentifier>\n   </name>\n   <name type=\"personal\">\n      <namePart>Rahbek, K.L.</namePart>\n      <nameIdentifier>bibsys.no:authority:90253663</nameIdentifier>\n   </name>\n   <typeOfResource>text</typeOfResource>\n   <genre type=\"literaryform\">fiction</genre>\n   <genre authority=\"marcgt\">fiction</genre>\n   <originInfo>\n      <place>\n         <placeTerm authority=\"marccountry\" type=\"code\">dk</placeTerm>\n      </place>\n      <place>\n         <placeTerm authority=\"iso3166\" type=\"code\">dk</placeTerm>\n      </place>\n      <place>\n         <placeTerm type=\"text\">Kjøbenhavn</placeTerm>\n      </place>\n      <publisher>Schultz</publisher>\n      <dateIssued>1805</dateIssued>\n      <issuance>monographic</issuance>\n   </originInfo>\n   <language>\n      <languageTerm authority=\"iso639-2b\" type=\"code\">dan</languageTerm>\n   </language>\n   <physicalDescription>\n      <form authority=\"marcform\">print</form>\n      <form authority=\"marccategory\">electronic resource</form>\n      <form authority=\"marcsmd\">remote</form>\n      <form authority=\"marccategory\">text</form>\n      <form authority=\"marcsmd\">regular print</form>\n      <extent>XII, 532 s.</extent>\n   </physicalDescription>\n   <accessCondition type=\"restriction on access\"/>\n   <note type=\"reproduction\">Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2014-02-07</note>\n   <subject>\n      <name type=\"personal\">\n         <namePart>Holberg, Ludvig</namePart>\n         <namePart type=\"date\">1684-1754</namePart>\n      </name>\n   </subject>\n   <location>\n      <url displayLabel=\"Fulltekst NB digitalisert\" note=\"Elektronisk reproduksjon. Gratis\" usage=\"primary display\">http://urn.nb.no/URN:NBN:no-nb_digibok_2012051624006</url>\n   </location>\n   <location>\n      <url displayLabel=\"Fulltekst NB digitalisert\" note=\"Elektronisk reproduksjon. Gratis\">http://urn.nb.no/URN:NBN:no-nb_digibok_2014012024006</url>\n   </location>\n   <location>\n      <url displayLabel=\"electronic resource\" note=\"Elektronisk reproduksjon. Gratis\" usage=\"primary display\">http://urn.nb.no/URN:NBN:no-nb_digibok_2012051624006</url>\n   </location>\n   <identifier type=\"urn\">URN:NBN:no-nb_digibok_2012051624006</identifier>\n   <location>\n      <url displayLabel=\"electronic resource\" note=\"Elektronisk reproduksjon. Gratis\">http://urn.nb.no/URN:NBN:no-nb_digibok_2014012024006</url>\n   </location>\n   <identifier type=\"urn\">URN:NBN:no-nb_digibok_2014012024006</identifier>\n   <location>\n      <physicalLocation authority=\"isil\">NO-0183300</physicalLocation>\n      <holdingSimple>\n         <copyInformation>\n            <subLocation>0183300</subLocation>\n         </copyInformation>\n      </holdingSimple>\n   </location>\n   <location>\n      <physicalLocation authority=\"isil\">NO-0030100</physicalLocation>\n      <holdingSimple>\n         <copyInformation>\n            <subLocation>0030100</subLocation>\n            <note>(ib.) (Proveniens Johan Schweigaard) (Til bruk på NB Oslos lesesal)</note>\n         </copyInformation>\n      </holdingSimple>\n   </location>\n   <location>\n      <physicalLocation authority=\"isil\">NO-0030100</physicalLocation>\n      <holdingSimple>\n         <copyInformation>\n            <subLocation>0030100</subLocation>\n            <note>(ib.) (Til bruk på Spesiallesesalen)</note>\n         </copyInformation>\n      </holdingSimple>\n   </location>\n   <location>\n      <physicalLocation authority=\"isil\">NO-0030100</physicalLocation>\n      <holdingSimple>\n         <copyInformation>\n            <subLocation>0030100</subLocation>\n            <note>(ib.) (Til bruk på Spesiallesesalen)</note>\n         </copyInformation>\n      </holdingSimple>\n   </location>\n   <relatedItem displayLabel=\"Inkludert i\" type=\"host\">\n      <titleInfo>\n         <title>Ludvig Holbergs udvalgte Skrifter. D. 1-6, Holbergs Comedier</title>\n      </titleInfo>\n      <name>\n         <namePart>Holberg, Ludvig, 1684-1754</namePart>\n      </name>\n      <originInfo>\n         <publisher>Kjøbenhavn : Schultz, 1804-1806</publisher>\n      </originInfo>\n      <identifier type=\"local\">999417135394702201</identifier>\n      <part>\n         <text>B. 4</text>\n      </part>\n   </relatedItem>\n   <identifier type=\"oldoaiid\">oai:bibsys.no:biblio:941621081</identifier>\n   <identifier type=\"oldoaiid\">oai:bibsys.no:biblio:121586413</identifier>\n   <identifier type=\"uri\">http://urn.nb.no/URN:NBN:no-nb_digibok_2012051624006</identifier>\n   <identifier type=\"uri\">http://urn.nb.no/URN:NBN:no-nb_digibok_2014012024006</identifier>\n   <recordInfo>\n      <descriptionStandard>katreg</descriptionStandard>\n      <recordContentSource authority=\"marcorg\">NO-TrBIB</recordContentSource>\n      <recordCreationDate encoding=\"marc\">120621</recordCreationDate>\n      <recordChangeDate encoding=\"iso8601\">20170126171829.0</recordChangeDate>\n      <recordIdentifier source=\"nb.bibsys.no\">999416210814702202</recordIdentifier>\n      <recordOrigin>Converted from MARCXML to MODS version 3.6 using a customized MARC21slim2MODS3-5.xsl\n                (based on 3.5 Revision 1.106 2014/12/19)</recordOrigin>\n      <languageOfCataloging>\n         <languageTerm authority=\"iso639-2b\" type=\"code\">nob</languageTerm>\n      </languageOfCataloging>\n   </recordInfo>\n   <relatedItem displayLabel=\"Del av Bibliografien\" type=\"host\">\n      <titleInfo>\n         <title>Schweigaardsamlingen</title>\n      </titleInfo>\n      <genre authority=\"marcgt\">bibliography</genre>\n   </relatedItem>\n   <identifier type=\"sesamid\">4c8b333d27a2eb37c35f99ce42a679bf</identifier>\n   <identifier type=\"oaiid\">oai:nb.bibsys.no:999416210814702202</identifier>\n</mods>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Ludvig Holbergs udvalgte Skrifter. D. 1-6 B. 4: Holbergs Comedier",
+				"creators": [
+					{
+						"firstName": "Ludvig",
+						"lastName": "Holberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. L.",
+						"lastName": "Rahbek",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Holberg, Ludvig, 1684-1754",
+						"fieldMode": 1,
+						"creatorType": "editor"
+					}
+				],
+				"date": "1805",
+				"archiveLocation": "NO-0183300; NO-0030100; NO-0030100; NO-0030100",
+				"language": "dan",
+				"place": "Kjøbenhavn",
+				"publisher": "Kjøbenhavn : Schultz, 1804-1806",
+				"url": "http://urn.nb.no/URN:NBN:no-nb_digibok_2012051624006",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "reproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2014-02-07"
 					}
 				],
 				"seeAlso": []
