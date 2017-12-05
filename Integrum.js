@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 }
 
 function scrapeMultiples(article) {
-	//Z.debug(articles)
+	// Z.debug(articles)
 	var item = new Z.Item('magazineArticle');
 	var title = article.match(/Title: (.+?),\n/)[1];
 	//	Z.debug(title)
