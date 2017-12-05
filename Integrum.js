@@ -61,26 +61,26 @@ function doWeb(doc, url) {
 
 			var title = ZU.xpathText(rows[i], './dt/a[@class="aftitle"]');
 			infoArray.push("Title: " + title);
-			//	Z.debug(title);
+			// Z.debug(title);
 			var info = ZU.xpathText(rows[i], './dd/div[@class="docs"]/text()');
 			infoArray.push("\nInfo: " + ZU.trimInternal(info));
-			//	Z.debug(info);
+			// Z.debug(info);
 			var link = ZU.xpathText(rows[i], './dt/a[@class="aftitle"]/@href');
-			//	Z.debug(link)
+			// Z.debug(link)
 			infoArray.push("\nLink: " + link);
-			//	Z.debug(infoArray);
+			// Z.debug(infoArray);
 			items[infoArray] = title;
 
 		}
 
 		Zotero.selectItems(items, function(items) {
-			//	Z.debug(items)
+			// Z.debug(items)
 			if (!items) {
 				return true;
 			}
 			var articles = [];
 			for (var i in items) {
-				//	Z.debug(i)
+				// Z.debug(i)
 				articles.push(i);
 			}
 			for (let i = 0; i < articles.length; i++) {
@@ -96,19 +96,19 @@ function scrapeMultiples(article) {
 	// Z.debug(articles)
 	var item = new Z.Item('magazineArticle');
 	var title = article.match(/Title: (.+?),\n/)[1];
-	//	Z.debug(title)
+	// Z.debug(title)
 	item.title = fixCasing(title);
 	var info = article.match(/Info: (.+?),\n/)[1];
-	//	Z.debug(info);
+	// Z.debug(info);
 	item.publicationTitle = info.match(/^(.+?);/)[1].trim();
 	var date = info.match(/;(.+);/)[1];
 	item.date = ISOdate(date);
 	item.issue = info.match(/;.+?;(.+)$/)[1];
 	var link = article.match(/Link: (.+)/)[1];
-	//	Z.debug(link);
+	// Z.debug(link);
 	ZU.processDocuments(link, function(doc) {
 		var frameurl = ZU.xpathText(doc, '//frame[@name="fb"]/@src');
-		//Z.debug(frameurl)
+		// Z.debug(frameurl)
 		item.attachments.push({
 			url: frameurl,
 			title: "Integrum Snapshot",
