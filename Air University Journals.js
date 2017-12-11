@@ -3,17 +3,44 @@
 	"label": "Air University Journals",
 	"creator": "Sebastian Karcher",
 	"target": "https?://www\\.airuniversity\\.af\\.mil/(ASPJ|SSQ)",
-	"minVersion": "3",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-09 03:07:33"
+	"lastUpdated": "2017-12-11 22:06:13"
 }
 
-function detectWeb(doc, url) {
+/*
+	***** BEGIN LICENSE BLOCK *****
 
+	Copyright © 2017 Sebastian Karcher
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
+function detectWeb(doc, url) {
 	if (text(doc, 'a[title="View Article"]', 1)) {
 		return "multiple";
 	}
@@ -39,18 +66,18 @@ function doWeb(doc, url) {
 			var ISSN = "1936-1815";
 		}
 		var voliss = text(doc, 'h1.title');
-		var date = text(doc, 'p.da_story_info')
+		var date = text(doc, 'p.da_story_info');
 		for (let i = 0; i < rows.length; i++) {
 			var infoArray = [];
 
 			var title = text(rows[i], 'span > a[title="View Article"]');
-			var id = attr(rows[i], 'span > a[title="View Article"]', "id")
+			var id = attr(rows[i], 'span > a[title="View Article"]', "id");
 			if (!title) {
 				title = text(rows[i], 'strong > a[title="View Article"]');
 				id = attr(rows[i], 'strong > a[title="View Article"]', "id");
 			}
 
-			if (title != null) {
+			if (title !== null) {
 				items[id] = title;
 			}
 		}
@@ -60,13 +87,8 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			var articles = [];
-			for (var i in items) {
-				//	Z.debug(i);
-				articles.push(i);
-			}
-			for (let i = 0; i < articles.length; i++) {
-				scrapeMultiples(doc, articles[i], date, voliss, journal, abbr, ISSN);
+			for (let id in items) {
+				scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN);
 			}
 		});
 	}
@@ -92,11 +114,14 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 		if (!authors) authors = text(section[0], 'p>strong>span');
 		if (authors) {
 			authors = ZU.trimInternal(authors.trim());
-			authors = authors.split(/\/|\sand\s/);
-			var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|Brig Gen|Gen|Maj Gen|Maj|Capt|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/
-			for (i = 0; i < authors.length; i++) {
-				// Z.debug(authors[i]);
-				var author = authors[i].trim().replace(rank, "").replace(/,.+/, "");
+			// delete name suffixes
+			authors = authors.replace(/, (USAF|USN|Retired|PE|LMFT)\b/g, "");
+			authorsList = authors.split(/\/|,?\sand\s|,\s/);
+			var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
+			
+			for (i = 0; i < authorsList.length; i++) {
+				// Z.debug(authorsList[i]);
+				var author = authorsList[i].trim().replace(rank, "");
 				item.creators.push(ZU.cleanAuthor(author, "author"));
 			}
 		}
@@ -127,9 +152,11 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 		url: link,
 		title: "Full Text PDF",
 		mimeType: "application/pdf"
-	})
-	item.complete()
-}/** BEGIN TEST CASES **/
+	});
+	item.complete();
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
