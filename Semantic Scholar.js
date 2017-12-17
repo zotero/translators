@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-17 02:18:25"
+	"lastUpdated": "2017-12-17 02:34:49"
 }
 
 /*
@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 function createUmlautReplacement(char) {
 	// There's this issue where e,i,o,u characters with umlauts have unbalanced
 	// braces in the Semantic Scholar BibTeX, which kills the Zotero translator.
-	return [new RegExp('{\\\\"{' + char + '}[^}]'), '{\\"' + char + '}'];
+	return [new RegExp('{\\\\"{' + char + '}[^}]', 'g'), '{\\"' + char + '}'];
 }
 
 var umlautReplacements = ['e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'].map(createUmlautReplacement);
@@ -94,7 +94,7 @@ function doWeb(doc, url) {
 		// Add the abstract
 		var abstractSection = ZU.xpath(doc, '//section[@class="page-section paper-detail paper-abstract"]/p')[0];
 		if (abstractSection) {
-			item.abstractNote = abstractSection.textContent;
+			item.abstractNote = ZU.unescapeHTML(abstractSection.textContent);
 		}
 
 		// Add DOI
@@ -350,6 +350,139 @@ var testCases = [
 						"title": "Semantic Scholar Link",
 						"mimeType": "text/html",
 						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/paper/The-German-hospital-malnutrition-study-Pirlich-Schuetz/b59a79b2194f5f6d82b06593c23f25f67fbef512",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The German hospital malnutrition study.",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Pirlich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tatjana",
+						"lastName": "Schuetz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristina",
+						"lastName": "Norman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sylvia",
+						"lastName": "Gastell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heinrich Josef",
+						"lastName": "Lüke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephan",
+						"lastName": "Bischoff",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulrich",
+						"lastName": "Bolder",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "T. M.",
+						"lastName": "Frieling",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Helge",
+						"lastName": "Güdenzoph",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristian",
+						"lastName": "Hahn",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. W.",
+						"lastName": "Jauch",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Karin",
+						"lastName": "Schindler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jügen",
+						"lastName": "Stein",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dorothee",
+						"lastName": "Volkert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arved",
+						"lastName": "Weimann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hansjög",
+						"lastName": "Werner",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christiane",
+						"lastName": "Wolf",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gudrun",
+						"lastName": "Zücher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Bauer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Herbert",
+						"lastName": "Lochs",
+						"creatorType": "author"
+					}
+				],
+				"date": "2006",
+				"abstractNote": "BACKGROUND & AIMS\nMalnutrition is frequently observed in chronic and severe diseases and associated with impaired outcome. In Germany general data on prevalence and impact of hospital malnutrition are missing.\n\n\nMETHODS\nNutritional state was assessed by subjective global assessment (SGA) and by anthropometric measurements in 1,886 consecutively admitted patients in 13 hospitals (n=1,073, university hospitals; n=813, community or teaching hospitals). Risk factors for malnutrition and the impact of nutritional status on length of hospital stay were analyzed.\n\n\nRESULTS\nMalnutrition was diagnosed in 27.4% of patients according to SGA. A low arm muscle area and arm fat area were observed in 11.3% and 17.1%, respectively. Forty-three % of patients 70 years old were malnourished compared to only 7.8% of patients &lt;30 years. The highest prevalence of malnutrition was observed in geriatric (56.2%), oncology (37.6%), and gastroenterology (32.6%) departments. Multivariate analysis revealed three independent risk factors: higher age, polypharmacy, and malignant disease (all P&lt;0.01). Malnutrition was associated with an 43% increase of hospital stay (P&lt;0.001).\n\n\nCONCLUSIONS\nIn German hospitals every fourth patient is malnourished. Malnutrition is associated with increased length of hospital stay. Higher age, malignant disease and major comorbidity were found to be the main contributors to malnutrition. Adequate nutritional support should be initiated in order to optimize the clinical outcome of these patients.",
+				"itemID": "Pirlich2006TheGH",
+				"libraryCatalog": "Semantic Scholar",
+				"pages": "563-72",
+				"publicationTitle": "Clinical nutrition",
+				"volume": "25 4",
+				"attachments": [
+					{
+						"title": "Semantic Scholar Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "The German hospital malnutrition study.",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
