@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-15 02:17:44"
+	"lastUpdated": "2017-12-17 02:18:25"
 }
 
 /*
@@ -43,15 +43,29 @@ function detectWeb(doc, url) {
 	return bibtex2zoteroTypeMap[type];
 }
 
+function createUmlautReplacement(char) {
+	// There's this issue where e,i,o,u characters with umlauts have unbalanced
+	// braces in the Semantic Scholar BibTeX, which kills the Zotero translator.
+	return [new RegExp('{\\\\"{' + char + '}[^}]'), '{\\"' + char + '}'];
+}
+
+var umlautReplacements = ['e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'].map(createUmlautReplacement);
+
+function fixBibtex(bibtex) {
+	umlautReplacements.forEach(function(replacement) {
+		bibtex = bibtex.replace(replacement[0], replacement[1]);
+	});
+	return bibtex;
+}
+
 function doWeb(doc, url) {
-	var citationElement = ZU.xpath(doc, '//cite[@class="formatted-citation formatted-citation--style-bibtex"]')[0];
-	var citation = citationElement.textContent;
+	var citation = ZU.xpath(doc, '//cite[@class="formatted-citation formatted-citation--style-bibtex"]')[0].textContent;
+	citation = fixBibtex(citation);
 
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(citation);
 	translator.setHandler("itemDone", function (obj, item) {
-
 		// Add the link to Semantic Scholar
 		item.attachments.push({
 			url: url,
