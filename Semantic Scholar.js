@@ -14,7 +14,7 @@
 
 /*
 	Semantic Scholar Translator
-	Copyright (C) 2011 Guy Aglionby
+	Copyright (C) 2017 Guy Aglionby
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
