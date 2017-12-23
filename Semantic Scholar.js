@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www[.])?semanticscholar\\.org/paper/[^#]+",
+	"target": "^https?://(www[.])?semanticscholar\\.org/(search|paper|author)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-17 02:34:49"
+	"lastUpdated": "2017-12-23 23:19:11"
 }
 
 /*
@@ -38,27 +38,37 @@ var bibtex2zoteroTypeMap = {
 };
 
 function detectWeb(doc, url) {
-	var citationElement = ZU.xpath(doc, '//cite[@class="formatted-citation formatted-citation--style-bibtex"]')[0];
-	var type = citationElement.textContent.split("{")[0].replace("@", "");
-	return bibtex2zoteroTypeMap[type];
-}
-
-function createUmlautReplacement(char) {
-	// There's this issue where e,i,o,u characters with umlauts have unbalanced
-	// braces in the Semantic Scholar BibTeX, which kills the Zotero translator.
-	return [new RegExp('{\\\\"{' + char + '}[^}]', 'g'), '{\\"' + char + '}'];
-}
-
-var umlautReplacements = ['e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'].map(createUmlautReplacement);
-
-function fixBibtex(bibtex) {
-	umlautReplacements.forEach(function(replacement) {
-		bibtex = bibtex.replace(replacement[0], replacement[1]);
-	});
-	return bibtex;
+	if (url.includes('/search') || url.includes('/author/')) {
+		return 'multiple';
+	} else {
+		var citationElement = ZU.xpath(doc, '//cite[@class="formatted-citation formatted-citation--style-bibtex"]')[0];
+		var type = citationElement.textContent.split("{")[0].replace("@", "");
+		return bibtex2zoteroTypeMap[type];
+	}
 }
 
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) === 'multiple') {
+		Zotero.selectItems(getSearchResults(doc), function (selected) {
+			if (selected) {
+				ZU.processDocuments(Object.keys(selected), parseDocument);
+			}
+		});
+	} else {
+		parseDocument(doc, url);
+	}
+}
+
+function getSearchResults(doc) {
+	var titles = ZU.xpath(doc, '//a[@data-selenium-selector="title-link"]');
+	var results = {};
+	titles.forEach(function(linkElement) {
+		results[linkElement.href] = linkElement.textContent;
+	});
+	return results;
+}
+
+function parseDocument(doc, url) {
 	var citation = ZU.xpath(doc, '//cite[@class="formatted-citation formatted-citation--style-bibtex"]')[0].textContent;
 	citation = fixBibtex(citation);
 
@@ -78,11 +88,11 @@ function doWeb(doc, url) {
 		var scripts = ZU.xpath(doc, '//script');
 		const DATA_INDICATOR = 'var DATA ='
 		var dataText = scripts.map(function(element) { return element.innerHTML; } )
-						      .filter(function(script) { return script.startsWith(DATA_INDICATOR); })[0]
-						      .replace(DATA_INDICATOR, '')
-						      .slice(0, -1);
+							  .filter(function(script) { return script.startsWith(DATA_INDICATOR); })[0]
+							  .replace(DATA_INDICATOR, '')
+							  .slice(0, -1);
 		var rawData = JSON.parse(dataText)[0].resultData.paper;
-		if(rawData.hasPdf) {
+		if (rawData.hasPdf) {
 			var paperLink = rawData.links.filter(function(link) { return link.linkType === 's2'; })[0].url;
 			item.attachments.push({
 				url: paperLink,
@@ -106,6 +116,21 @@ function doWeb(doc, url) {
 		item.complete();
 	});
 	translator.translate();
+}
+
+function createUmlautReplacement(char) {
+	// There's this issue where e,i,o,u characters with umlauts have unbalanced
+	// braces in the Semantic Scholar BibTeX, which kills the Zotero translator.
+	return [new RegExp('{\\\\"{' + char + '}[^}]', 'g'), '{\\"' + char + '}'];
+}
+
+var umlautReplacements = ['e', 'E', 'i', 'I', 'o', 'O', 'u', 'U'].map(createUmlautReplacement);
+
+function fixBibtex(bibtex) {
+	umlautReplacements.forEach(function(replacement) {
+		bibtex = bibtex.replace(replacement[0], replacement[1]);
+	});
+	return bibtex;
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -468,7 +493,7 @@ var testCases = [
 					}
 				],
 				"date": "2006",
-				"abstractNote": "BACKGROUND & AIMS\nMalnutrition is frequently observed in chronic and severe diseases and associated with impaired outcome. In Germany general data on prevalence and impact of hospital malnutrition are missing.\n\n\nMETHODS\nNutritional state was assessed by subjective global assessment (SGA) and by anthropometric measurements in 1,886 consecutively admitted patients in 13 hospitals (n=1,073, university hospitals; n=813, community or teaching hospitals). Risk factors for malnutrition and the impact of nutritional status on length of hospital stay were analyzed.\n\n\nRESULTS\nMalnutrition was diagnosed in 27.4% of patients according to SGA. A low arm muscle area and arm fat area were observed in 11.3% and 17.1%, respectively. Forty-three % of patients 70 years old were malnourished compared to only 7.8% of patients &lt;30 years. The highest prevalence of malnutrition was observed in geriatric (56.2%), oncology (37.6%), and gastroenterology (32.6%) departments. Multivariate analysis revealed three independent risk factors: higher age, polypharmacy, and malignant disease (all P&lt;0.01). Malnutrition was associated with an 43% increase of hospital stay (P&lt;0.001).\n\n\nCONCLUSIONS\nIn German hospitals every fourth patient is malnourished. Malnutrition is associated with increased length of hospital stay. Higher age, malignant disease and major comorbidity were found to be the main contributors to malnutrition. Adequate nutritional support should be initiated in order to optimize the clinical outcome of these patients.",
+				"abstractNote": "BACKGROUND & AIMS\nMalnutrition is frequently observed in chronic and severe diseases and associated with impaired outcome. In Germany general data on prevalence and impact of hospital malnutrition are missing.\n\n\nMETHODS\nNutritional state was assessed by subjective global assessment (SGA) and by anthropometric measurements in 1,886 consecutively admitted patients in 13 hospitals (n=1,073, university hospitals; n=813, community or teaching hospitals). Risk factors for malnutrition and the impact of nutritional status on length of hospital stay were analyzed.\n\n\nRESULTS\nMalnutrition was diagnosed in 27.4% of patients according to SGA. A low arm muscle area and arm fat area were observed in 11.3% and 17.1%, respectively. Forty-three % of patients 70 years old were malnourished compared to only 7.8% of patients <30 years. The highest prevalence of malnutrition was observed in geriatric (56.2%), oncology (37.6%), and gastroenterology (32.6%) departments. Multivariate analysis revealed three independent risk factors: higher age, polypharmacy, and malignant disease (all P<0.01). Malnutrition was associated with an 43% increase of hospital stay (P<0.001).\n\n\nCONCLUSIONS\nIn German hospitals every fourth patient is malnourished. Malnutrition is associated with increased length of hospital stay. Higher age, malignant disease and major comorbidity were found to be the main contributors to malnutrition. Adequate nutritional support should be initiated in order to optimize the clinical outcome of these patients.",
 				"itemID": "Pirlich2006TheGH",
 				"libraryCatalog": "Semantic Scholar",
 				"pages": "563-72",
@@ -490,6 +515,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/author/Josie-Holmes/27569076",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
