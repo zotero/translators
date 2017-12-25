@@ -14,8 +14,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2017-11-29 22:59:00"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-12-25 13:29:42"
 }
 
 var fromMarcGenre = {
@@ -1013,6 +1013,11 @@ function doImport() {
 				}
 			}
 			
+			// creators of host item will be evaluated by their role info
+			// and only if this is missing then they are connected by a generic
+			// contributor role
+			processCreators(host, newItem, "contributor");
+			
 			// identifiers
 			processIdentifiers(host, newItem);
 			
@@ -1374,11 +1379,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"numPages": "322",
 				"date": "1999",
 				"ISBN": "0801486394",
 				"callNumber": "PN4888.P6 A48 1999, 071/.3",
 				"language": "eng",
+				"numPages": "322",
 				"place": "Ithaca, N.Y",
 				"publisher": "Cornell University Press",
 				"attachments": [],
@@ -1934,7 +1939,7 @@ var testCases = [
 					{
 						"lastName": "Holberg, Ludvig, 1684-1754",
 						"fieldMode": 1,
-						"creatorType": "editor"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "1805",
