@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-07-05 19:32:38"
+	"lastUpdated": "2017-12-25 12:10:47"
 }
 
 function detectImport() {
@@ -170,7 +170,13 @@ var inputFieldMap = {
 	institution:"publisher",
 	publisher:"publisher",
 	issue:"issue",
-	location:"place"
+	location:"place",
+	// import also BibLaTeX fields:
+	journaltitle:"publicationTitle",
+	shortjournal:"journalAbbreviation",
+	eventtitle:"conferenceName",
+	pagetotal:"numPages",
+	version:"version"
 };
 
 var zotero2bibtexTypeMap = {
@@ -207,7 +213,21 @@ var bibtex2zoteroTypeMap = {
 	"mastersthesis":"thesis",
 	"misc":"book",
 	"proceedings":"book",
-	"online":"webpage"
+	"online":"webpage",
+	// from BibLaTeX translator:
+	"thesis":"thesis",
+	"letter":"letter",
+	"movie":"film",
+	"artwork":"artwork",
+	"report":"report",
+	"legislation":"bill",
+	"jurisdiction":"case",
+	"audio":"audioRecording",
+	"video":"videoRecording",
+	"software":"computerProgram",
+	"inreference":"encyclopediaArticle",
+	"collection":"book",
+	"mvbook":"book"
 };
 
 /*
