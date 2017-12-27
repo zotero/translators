@@ -3,13 +3,13 @@
 	"label": "Biblio.com",
 	"creator": "Adam Crymble, Michael Berkowitz, and Sebastian Karcher",
 	"target": "^https?://www\\.biblio\\.com/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 08:32:10"
+	"lastUpdated": "2016-09-08 06:09:28"
 }
 
 function detectWeb(doc, url) {
@@ -45,9 +45,10 @@ function scrape(doc, url) {
 	
 	for (var i=0; i<xPathCount.numberValue; i++) {	 	
 	 		contents = content.iterateNext().textContent.split(": ");
-	 		if (contents.length>1){
-	 		fieldTitle = contents[0].replace(/\s*/g, '');
-	 		dataTags[fieldTitle] = contents[1].replace(/^\s*|\s*$/g, '');}
+	 		if (contents.length>1) {
+		 		fieldTitle = contents[0].replace(/\s*/g, '');
+		 		dataTags[fieldTitle] = contents[1].replace(/^\s*|\s*$/g, '');
+	 		}
 	 	}
 
 	//Authors
@@ -76,30 +77,39 @@ function scrape(doc, url) {
 	associateData (newItem, dataTags, "Pages", "pages");
 	associateData (newItem, dataTags, "Edition", "edition");
 
-	newItem.title = doc.evaluate('//h1', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent.replace(/^\s*|\s&+/g, '');
+	newItem.title = ZU.xpathText(doc, '//h1').replace(/^\s*|\.\s*$/g, '');
 	newItem.url = doc.location.href;
 	newItem.complete();
 }
 
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[@class="row"]//a[@class="sr-title-text"]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var articles = new Array();
-		var titles = doc.evaluate('//div[@class="search-result"]//a[@class="sr-title-text"]', doc, null, XPathResult.ANY_TYPE, null);
-		var next_title;
-		while (next_title = titles.iterateNext()) {
-			if (next_title.textContent.match(/\w/)) {
-				items[next_title.href] = next_title.textContent;
-			}
-		}
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape);	
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);

@@ -103,19 +103,19 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Brugada Syndrome: Practice Essentials, Background, Pathophysiology",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					" Brugada Syndrome articles",
-					"Brugada Syndrome information"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Brugada Syndrome",
-				"date": "2014-03-28-04:00",
-				"abstractNote": "Brugada Syndrome. Brugada syndrome is a disorder characterized by sudden death associated with one of several ECG patterns characterized by incomplete right bundle-branch block and ST-segment elevations in the anterior precordial leads.",
+				"date": "2017-03-02-12:28",
+				"abstractNote": "Brugada syndrome is a disorder characterized by sudden death associated with one of several ECG patterns characterized by incomplete right bundle-branch block and ST-segment elevations in the anterior precordial leads. See the image below.",
+				"libraryCatalog": "eMedicine",
+				"shortTitle": "Brugada Syndrome",
 				"url": "http://emedicine.medscape.com/article/163751-overview",
-				"libraryCatalog": "eMedicine"
+				"attachments": [],
+				"tags": [
+					"Brugada Syndrome Overview"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

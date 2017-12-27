@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-25 06:51:40"
+	"lastUpdated": "2017-01-29 10:18:58"
 }
 
 /*
@@ -101,7 +101,7 @@ function getSearchResults(doc, url, checkOnly) {
 }
 
 function getHost(url) {
-	return url.match(/^http:\/\/[^\/]+/)[0];
+	return url.match(/^https?:\/\/[^\/]+/)[0];
 }
 
 function scrape(doc, url) {
@@ -156,6 +156,12 @@ function parseItemTable(table) {
 			} else {
 				data = ZU.trimInternal(td[1].textContent);
 			}
+		} else if (label == 'related searches') {
+			var childrens = td[1].getElementsByTagName('a');
+			data = [];
+			for (var j=0; j<childrens.length; j++) {
+				data.push(childrens[j].textContent.trim());
+			}
 		} else {
 			data = ZU.trimInternal(td[1].textContent);
 		}
@@ -207,14 +213,10 @@ function scrapeSeries(doc, url) {
 	item.date = meta['contents dates'];
 	item.medium = meta['predominant physical format'];
 	item.abstractNote = meta['series note'];
+	item.archiveLocation = meta['series number'];
 	
 	var seriesNumber = encodeURIComponent(meta['series number']);
-	item.attachments.push({
-		title: "National Archives of Australia Record",
-		url: 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber,
-		mimeType: 'text/html',
-		snapshot: false
-	})
+	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber;
 	
 	// Agencies recording into this series
 	var agencies = ZU.xpath(doc, '//div[@id="provenanceRecording"]//div[@class="linkagesInfo"]');
@@ -331,10 +333,10 @@ function parsePhotoTitle(title) {
 }
 
 function scrapePhoto(doc, url) {
-	table = ZU.xpath(doc, '(//table[@id="PhotoDetailTable"]//tr)[1]/td[last()]')[0];
+	table = ZU.xpath(doc, '//table[@id="PhotoDetailTable"]//table[@id="Table1"]/tbody')[0];
 	if (!table) return;
 	
-	var meta = parseMeta(table);
+	var meta = parseItemTable(table);
 	
 	var item = new Zotero.Item('manuscript'); // Transition to artwork or similar when fields become available
 	
@@ -352,28 +354,24 @@ function scrapePhoto(doc, url) {
 		item.type = 'photograph'
 	}
 	
-	item.date = meta.date;
-	item.place = meta.location;
+	item.date = meta.date || meta['date range'];
+	item.place = meta.location || meta['item location'];
 	
 	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
 		+ encodeURIComponent(meta.barcode);
 	
 	item.archiveLocation = meta['image no.'];
 	
-	// Save subjects as tags
-	if (meta['primary subject']) {
-		item.tags.push(meta['primary subject']);
-	}
-	if (meta['secondary subject']) {
-		item.tags.push(meta['secondary subject']);
+	if (meta['related searches']) {
+		item.tags = meta['related searches'];
 	}
 	
-	var image = table.parentElement.getElementsByTagName('img')[0];
-	if (image) {
-		var url = image.src.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
+	var imageurl = ZU.xpathText(doc, '//table[@id="PhotoDetailTable"]//img/@src');
+	if (imageurl) {
+		imageurl = imageurl.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
 		item.attachments.push({
 			title: 'Digital image of NAA: ' + item.archiveLocation,
-			url: url,
+			url: imageurl,
 			mimeType: 'image/jpeg' // Seems like that is generally the case
 		});
 	}
@@ -384,13 +382,13 @@ function scrapePhoto(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=1646857",
+		"url": "http://recordsearch.naa.gov.au/scripts/PhotoSearchItemDetail.asp?M=0&B=1646857&SE=1",
 		"items": [
 			{
 				"itemType": "manuscript",
 				"title": "Ford V8 three ton lorry loaded with mail [rear view]",
 				"creators": [],
-				"date": "1937",
+				"date": "1937 - 1937",
 				"archive": "National Archives of Australia",
 				"archiveLocation": "C4078, N1005B",
 				"libraryCatalog": "National Archives of Australia",
@@ -405,6 +403,7 @@ var testCases = [
 				],
 				"tags": [
 					"Communications",
+					"Photographs in series C4078",
 					"Postal"
 				],
 				"notes": [],
@@ -506,6 +505,7 @@ var testCases = [
 				"date": "14 Aug 1944 - 31 Oct 1944",
 				"abstractNote": "This series consists of one volume bound in black with the title 'A report on war crimes by individual members of the armed forces of the enemy against Australians by Sir William Webb Kt' embossed on the front cover in gold.\n\nBackground\n\nThe United Nations War Crimes Commission had two stated objectives (1) to hear evidence of war crimes brought to it by member governments and to list the perpetrator for arrest and (2) to make recommendations to member governments on how war criminals could be brought to trial. It held its first meeting on 20 October 1943 and in reporting to Dr Evatt the Secretary of the Department of External Affairs recommended that a Commission be given to Sir William Webb to investigate war crimes against Australians and to bring to the government such cases as could be forwarded to the UNWCC. \n\nOn 9 February Dr Evatt approached Sir William with an invitation and this was accepted on 24 February. The new commission was issued on 8 June 1944 with prime responsibility for administrative matters held by the Department of External Affairs though the report was to be submitted also to the Attorney Generals Department.\n\nThe hearings commenced on 14 August and concluded on 20 October 1944. The report was tendered to the Minister on 31 October 1944.",
 				"archive": "National Archives of Australia",
+				"archiveLocation": "A10950",
 				"libraryCatalog": "National Archives of Australia",
 				"attachments": [
 					{

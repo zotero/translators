@@ -2,14 +2,14 @@
 	"translatorID": "e5e34825-1314-43bd-a9fe-f38f6ab48403",
 	"label": "Jahrbuch",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://jfm.sub.uni-goettingen.de/",
+	"target": "^https?://www\\.emis\\.de/cgi-bin/jfmen/MATH/JFM/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gv",
-	"lastUpdated": "2013-04-15 18:04:37"
+	"browserSupport": "gcsv",
+	"lastUpdated": "2017-11-04 10:50:28"
 }
 
 function detectWeb(doc, url) {
@@ -106,7 +106,7 @@ function scrape(ids) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://jfm.sub.uni-goettingen.de/cgi-bin/jfmen/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0003.01&format=complete",
+		"url": "http://www.emis.de/cgi-bin/jfmen/MATH/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0003.01&format=complete",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -144,7 +144,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://jfm.sub.uni-goettingen.de/cgi-bin/jfmen/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0052.03&format=complete",
+		"url": "http://www.emis.de/cgi-bin/jfmen/MATH/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0052.03&format=complete",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -177,7 +177,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://jfm.sub.uni-goettingen.de/cgi-bin/jfmen/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0078.01&format=complete",
+		"url": "http://www.emis.de/cgi-bin/jfmen/MATH/JFM/en/quick.html?first=1&maxdocs=20&type=html&an=JFM%2068.0078.01&format=complete",
 		"items": [
 			{
 				"itemType": "journalArticle",

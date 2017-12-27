@@ -2,14 +2,14 @@
 	"translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
 	"label": "ACM Digital Library",
 	"creator": "Simon Kornblith, Michael Berkowitz, John McCaffery, and Sebastian Karcher",
-	"target": "^https?://([^/]+\\.)?dl\\.acm\\.org/(results|citation)\\.cfm",
+	"target": "^https?://([^/]+\\.)?dl\\.acm\\.org/(results|citation|author_page)\\.cfm",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-05-21 02:23:33"
+	"lastUpdated": "2017-10-29 04:47:45"
 }
 
 /*
@@ -30,7 +30,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 function detectWeb(doc, url) {
-	if (url.indexOf("/results.cfm") != -1) {
+	if (url.indexOf("/results.cfm") != -1 || url.indexOf("/author_page.cfm") != -1) {
 		return getSearchResults(doc, true) ? 'multiple' : false;
 	} else if (url.indexOf("/citation.cfm") != -1) {
 		return getArticleType(doc);
@@ -56,7 +56,7 @@ function doWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var results = ZU.xpath(doc, '//tr/td/a[@target="_self"]'),
+	var results = ZU.xpath(doc, '//div[@id="results"]//div[@class="title"]/a[@target="_self"]'),
 		items = {},
 		found = false;
 	for (var i=0; i<results.length; i++) {
@@ -94,7 +94,8 @@ function scrape(doc) {
 
 	//compose bibtex URL
 	var bibtexstring = 'id=' + itemID + '&parent_id=' + parentID + '&expformat=bibtex';
-	var bibtexURL = url.replace(/citation\.cfm/, 'downformats.cfm')
+	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
+		.replace(/citation\.cfm/, 'downformats.cfm')
 		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
 	Zotero.debug('bibtex URL: ' + bibtexURL);
 	
@@ -106,8 +107,10 @@ function scrape(doc) {
 			//get the URL for the pdf fulltext from the metadata
 			var pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content')[0];
 			if (pdfURL) {
+				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); //deproxify URL
+				Z.debug("pdfURL: " + pdfURL);
 				item.attachments = [{
-					url: pdfURL.textContent,
+					url: pdfURL,
 					title: "ACM Full Text PDF",
 					mimeType: "application/pdf"
 				}];
@@ -125,6 +128,16 @@ function scrape(doc) {
 			// some bibtext contains odd </kwd> tags - remove them
 			for(var i=0; i<item.tags.length; i++) {
 				item.tags[i] = item.tags[i].replace("</kwd>", "");
+			}
+			
+			//full issues of journals/magazines don't have a title
+			if (!item.title && text.indexOf("issue_date")>-1) {
+				var m = text.match(/issue_date\s*=\s*{(.*)},?/);
+				item.itemType = "book";
+				item.title = item.publicationTitle;
+				if (m) {
+					item.title = item.title + ", " + m[1];
+				}
 			}
 			
 			item.complete();
@@ -368,6 +381,43 @@ var testCases = [
 					"latent social space",
 					"urban analytics"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org/author_page.cfm?id=81100246710",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://dl.acm.org/citation.cfm?id=3029062",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "interactions, January - February 2017",
+				"creators": [
+					{
+						"firstName": "Ron",
+						"lastName": "Wakkary",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Erik",
+						"lastName": "Stolterman",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"itemID": "Wakkary:2016:3029062",
+				"libraryCatalog": "ACM Digital Library",
+				"place": "New York, NY, USA",
+				"publisher": "ACM",
+				"volume": "24",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

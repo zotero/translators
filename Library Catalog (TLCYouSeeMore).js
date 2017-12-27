@@ -2,7 +2,7 @@
 	"translatorID": "0f9fc2fc-306e-5204-1117-25bca009dffc",
 	"label": "Library Catalog (TLC/YouSeeMore)",
 	"creator": "Simon Kornblith",
-	"target": "TLCScripts/interpac\\.dll\\?(?:.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
+	"target": "TLCScripts/interpac\\.dll\\?(.*LabelDisplay.*RecordNumber=[0-9]|Search|ItemTitles)",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 260,

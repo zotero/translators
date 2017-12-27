@@ -7,6 +7,7 @@
 	"maxVersion": "",
 	"priority": 200,
 	"configOptions": {
+		"async": true,
 		"getCollections": true
 	},
 	"displayOptions": {
@@ -169,7 +170,13 @@ var inputFieldMap = {
 	institution:"publisher",
 	publisher:"publisher",
 	issue:"issue",
-	location:"place"
+	location:"place",
+	// import also BibLaTeX fields:
+	journaltitle:"publicationTitle",
+	shortjournal:"journalAbbreviation",
+	eventtitle:"conferenceName",
+	pagetotal:"numPages",
+	version:"version"
 };
 
 var zotero2bibtexTypeMap = {
@@ -206,7 +213,21 @@ var bibtex2zoteroTypeMap = {
 	"mastersthesis":"thesis",
 	"misc":"book",
 	"proceedings":"book",
-	"online":"webpage"
+	"online":"webpage",
+	// from BibLaTeX translator:
+	"thesis":"thesis",
+	"letter":"letter",
+	"movie":"film",
+	"artwork":"artwork",
+	"report":"report",
+	"legislation":"bill",
+	"jurisdiction":"case",
+	"audio":"audioRecording",
+	"video":"videoRecording",
+	"software":"computerProgram",
+	"inreference":"encyclopediaArticle",
+	"collection":"book",
+	"mvbook":"book"
 };
 
 /*
@@ -262,7 +283,13 @@ function setKeywordDelimRe( val, flags ) {
 function processField(item, field, value, rawValue) {
 	if(Zotero.Utilities.trim(value) == '') return null;
 	if(fieldMap[field]) {
-		item[fieldMap[field]] = value;
+		//map DOIs + Label to Extra for unsupported item types
+		if (field == "doi" &&!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
+			item._extraFields.push({field: "DOI", value: ZU.cleanDOI(value)});
+		}
+		else {
+			item[fieldMap[field]] = value;
+		}
 	} else if(inputFieldMap[field]) {
 		item[inputFieldMap[field]] = value;
 	} else if(field == "subtitle") {
@@ -293,7 +320,7 @@ function processField(item, field, value, rawValue) {
 		item.publicationTitle = value;
 	} else if(field == "author" || field == "editor" || field == "translator") {
 		// parse authors/editors/translators
-		var names = splitUnprotected(rawValue.trim(), /\sand\s/gi);
+		var names = splitUnprotected(rawValue.trim(), /\s+and\s+/gi);
 		for(var i in names) {
 			var name = names[i];
 			// skip empty names
@@ -372,7 +399,17 @@ function processField(item, field, value, rawValue) {
 			item.pages = value.replace(/--/g, "-");
 		}
 	} else if(field == "note") {
-		item._extraFields.push({raw: value.trim()});
+		var isExtraId = false;
+		for (var element in extraIdentifiers) {
+			if (value.trim().startsWith(extraIdentifiers[element])) {
+				isExtraId = true;
+			}
+		}
+		if (isExtraId) {
+			item._extraFields.push({raw: value.trim()});
+		} else {
+			item.notes.push({note:Zotero.Utilities.text2html(value)});
+		}
 	} else if(field == "howpublished") {
 		if(value.length >= 7) {
 			var str = value.substr(0, 7);
@@ -867,7 +904,7 @@ function beginRecord(type, closeChar) {
 					item.publisher=item.backupPublisher;
 					delete item.backupPublisher;
 				}
-				item.complete();
+				return item.complete();
 			}
 			return;
 		} else if(" \n\r\t".indexOf(read) == -1) {		// skip whitespace
@@ -877,30 +914,67 @@ function beginRecord(type, closeChar) {
 }
 
 function doImport() {
-	var read = "", text = "", recordCloseElement = false;
+	if (typeof Promise == 'undefined') {
+		readString(
+			function () {},
+			function (e) {
+				throw e;
+			}
+		);
+	}
+	else {
+		return new Promise(function (resolve, reject) {
+			readString(resolve, reject);
+		});
+	}
+}
+
+function readString(resolve, reject) {
+	var read = "";
 	var type = false;
 	
-	while(read = Zotero.read(1)) {
-		if(read == "@") {
-			type = "";
-		} else if(type !== false) {
-			if(type == "comment") {
-				processComment();
-				type = false;
-			} else if(read == "{") {		// possible open character
-				beginRecord(type, "}");
-				type = false;
-			} else if(read == "(") {		// possible open character
-				beginRecord(type, ")");
-				type = false;
-			} else if(/[a-zA-Z0-9-_]/.test(read)) {
-				type += read;
+	var next = function () {
+		readString(resolve, reject);
+	};
+	
+	try {
+		while (read = Zotero.read(1)) {
+			if(read == "@") {
+				type = "";
+			} else if(type !== false) {
+				if(type == "comment") {
+					processComment();
+					type = false;
+				} else if(read == "{") {		// possible open character
+					// This might return a promise if an item was saved
+					// TODO: When 5.0-only, make sure this always returns a promise
+					var maybePromise = beginRecord(type, "}");
+					if (maybePromise) {
+						maybePromise.then(next);
+						return;
+					}
+				} else if(read == "(") {		// possible open character
+					var maybePromise = beginRecord(type, ")");
+					if (maybePromise) {
+						maybePromise.then(next);
+						return;
+					}
+				} else if(/[a-zA-Z0-9-_]/.test(read)) {
+					type += read;
+				}
 			}
 		}
+		for (var key in jabref.root) {
+			// TODO: Handle promise?
+			if (jabref.root.hasOwnProperty(key)) { jabref.root[key].complete(); }
+		}
 	}
-	for (var key in jabref.root) {
-		if (jabref.root.hasOwnProperty(key)) { jabref.root[key].complete(); }
+	catch (e) {
+		reject(e);
+		return;
 	}
+	
+	resolve();
 }
 
 // some fields are, in fact, macros.  If that is the case then we should not put the
@@ -1077,13 +1151,13 @@ var citeKeyConversions = {
 		if(item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g,"_").replace(/,/g,"");
 		}
-		return "";
+		return "noauthor";
 	},
 	"t":function (flags, item) {
 		if (item["title"]) {
 			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
-		return "";
+		return "notitle";
 	},
 	"y":function (flags, item) {
 		if(item.date) {
@@ -1092,7 +1166,7 @@ var citeKeyConversions = {
 				return date.year;
 			}
 		}
-		return "????";
+		return "nodate";
 	}
 }
 
@@ -2217,6 +2291,8 @@ var mappingTable = {
 	"\u016B":"{\\=u}", // LATIN SMALL LETTER U WITH MACRON
 	"\u016C":"{\\u U}", // LATIN CAPITAL LETTER U WITH BREVE
 	"\u016D":"{\\u u}", // LATIN SMALL LETTER U WITH BREVE
+	"\u016E":"{\\r U}", // LATIN CAPITAL U WITH A RING ABOVE
+	"\u016F":"{\\r u}", // LATIN SMALL U WITH A RING ABOVE
 	"\u0170":"{\\H U}", // LATIN CAPITAL LETTER U WITH DOUBLE ACUTE
 	"\u0171":"{\\H u}", // LATIN SMALL LETTER U WITH DOUBLE ACUTE
 	"\u0172":"{\\k U}", // LATIN CAPITAL LETTER U WITH OGONEK
@@ -2345,6 +2421,8 @@ var mappingTable = {
 	"\u1E95":"{\\b z}", // LATIN SMALL LETTER Z WITH LINE BELOW
 	"\u1E96":"{\\b h}", // LATIN SMALL LETTER H WITH LINE BELOW
 	"\u1E97":"{\\\"t}", // LATIN SMALL LETTER T WITH DIAERESIS
+	"\u1E98":"{\\r w}", // LATIN SMALL W WITH A RING ABOVE
+	"\u1E99":"{\\r y}", // LATIN SMALL Y WITH A RING ABOVE
 	"\u1EA0":"{\\d A}", // LATIN CAPITAL LETTER A WITH DOT BELOW
 	"\u1EA1":"{\\d a}", // LATIN SMALL LETTER A WITH DOT BELOW
 	"\u1EB8":"{\\d E}", // LATIN CAPITAL LETTER E WITH DOT BELOW
@@ -2736,6 +2814,8 @@ var reversemappingTable = {
 	"{\\=u}"                          : "\u016B", // LATIN SMALL LETTER U WITH MACRON
 	"{\\u U}"                          : "\u016C", // LATIN CAPITAL LETTER U WITH BREVE
 	"{\\u u}"                          : "\u016D", // LATIN SMALL LETTER U WITH BREVE
+	"{\\r U}"                          : "\u016E", // LATIN CAPITAL LETTER U WITH RING ABOVE
+	"{\\r u}"                          : "\u016F", // LATIN SMALL LETTER U WITH RING ABOVE
 	"{\\H U}"                          : "\u0170", // LATIN CAPITAL LETTER U WITH DOUBLE ACUTE
 	"{\\H u}"                          : "\u0171", // LATIN SMALL LETTER U WITH DOUBLE ACUTE
 	"{\\k U}"                          : "\u0172", // LATIN CAPITAL LETTER U WITH OGONEK
@@ -2864,6 +2944,8 @@ var reversemappingTable = {
 	"{\\b z}"                          : "\u1E95", // LATIN SMALL LETTER Z WITH LINE BELOW
 	"{\\b h}"                          : "\u1E96", // LATIN SMALL LETTER H WITH LINE BELOW
 	"{\\\"t}"                         : "\u1E97", // LATIN SMALL LETTER T WITH DIAERESIS
+	"{\\r w}"                          : "\u1E98", // LATIN SMALL LETTER W WITH RING ABOVE
+	"{\\r y}"                          : "\u1e99", // LATIN SMALL LETTER Y WITH RING ABOVE
 	"{\\d A}"                          : "\u1EA0", // LATIN CAPITAL LETTER A WITH DOT BELOW
 	"{\\d a}"                          : "\u1EA1", // LATIN SMALL LETTER A WITH DOT BELOW
 	"{\\d E}"                          : "\u1EB8", // LATIN CAPITAL LETTER E WITH DOT BELOW
@@ -2892,6 +2974,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The physical volcanology of the 1600 eruption of Huaynaputina, southern Peru",
 				"creators": [
 					{
 						"firstName": "Nancy K",
@@ -2929,13 +3012,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Vulcanian eruptions",
-					"breadcrust",
-					"plinian"
-				],
-				"seeAlso": [],
+				"date": "2001",
+				"itemID": "Adams2001",
+				"pages": "493–518",
+				"publicationTitle": "Bulletin of Volcanology",
+				"volume": "62",
 				"attachments": [
 					{
 						"path": "Users/heatherwright/Documents/Scientific Papers/Adams_Huaynaputina.pdf",
@@ -2943,12 +3024,13 @@ var testCases = [
 						"title": "Attachment"
 					}
 				],
-				"itemID": "Adams2001",
-				"publicationTitle": "Bulletin of Volcanology",
-				"pages": "493–518",
-				"title": "The physical volcanology of the 1600 eruption of Huaynaputina, southern Peru",
-				"volume": "62",
-				"date": "2001"
+				"tags": [
+					"Vulcanian eruptions",
+					"breadcrust",
+					"plinian"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -2958,6 +3040,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables",
 				"creators": [
 					{
 						"firstName": "Milton",
@@ -2970,19 +3053,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "1964",
+				"edition": "ninth Dover printing, tenth GPO printing",
 				"itemID": "abramowitz+stegun",
 				"place": "New York",
-				"edition": "ninth Dover printing, tenth GPO printing",
-				"title": "Handbook of Mathematical Functions with Formulas, Graphs, and Mathematical Tables",
 				"publisher": "Dover",
-				"date": "1964"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "The Yankee Years",
 				"creators": [
 					{
 						"firstName": "Joe",
@@ -2995,15 +3078,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "Torre2008",
+				"date": "2008",
 				"ISBN": "0385527403",
+				"itemID": "Torre2008",
 				"publisher": "Doubleday",
-				"title": "The Yankee Years",
-				"date": "2008"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3013,6 +3095,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "conferencePaper",
+				"title": "Some publication title",
 				"creators": [
 					{
 						"firstName": "First",
@@ -3025,16 +3108,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"itemID": "author:06",
-				"title": "Some publication title",
-				"pages": "330—331"
+				"pages": "330—331",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "book",
+				"title": "Proceedings of the Xth Conference on XYZ",
 				"creators": [
 					{
 						"firstName": "First",
@@ -3047,13 +3130,12 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "October 2006",
 				"itemID": "conference:06",
-				"title": "Proceedings of the Xth Conference on XYZ",
-				"date": "October 2006"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3063,6 +3145,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Design of a Carbon Fiber Composite Grid Structure for the GLAST Spacecraft Using a Novel Manufacturing Technique",
 				"creators": [
 					{
 						"firstName": "Michael, III",
@@ -3070,17 +3153,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2001",
+				"ISBN": "0-69-697269-4",
+				"edition": "1st,",
 				"itemID": "hicks2001",
 				"place": "Palo Alto",
-				"edition": "1st,",
-				"ISBN": "0-69-697269-4",
-				"title": "Design of a Carbon Fiber Composite Grid Structure for the GLAST Spacecraft Using a Novel Manufacturing Technique",
 				"publisher": "Stanford Press",
-				"date": "2001"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3090,6 +3172,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "USGS monitoring ecological impacts",
 				"creators": [
 					{
 						"firstName": "A",
@@ -3097,17 +3180,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "Oliveira_2009",
-				"issue": "29",
-				"title": "USGS monitoring ecological impacts",
-				"volume": "107",
-				"publicationTitle": "Oil & Gas Journal",
 				"date": "2009",
-				"pages": "29"
+				"issue": "29",
+				"itemID": "Oliveira_2009",
+				"pages": "29",
+				"publicationTitle": "Oil & Gas Journal",
+				"volume": "107",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3117,13 +3199,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "non-braking space: ; accented characters: ñ and ñ; tilde operator: ∼",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"itemID": "test-ticket1661",
-				"title": "non-braking space: ; accented characters: ñ and ñ; tilde operator: ∼"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3133,6 +3215,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
 				"creators": [
 					{
 						"firstName": "U.",
@@ -3150,17 +3233,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "Frit2",
-				"DOI": "10.1007/s13127-011-0069-8",
-				"title": "Test of markupconversion: Italics, bold, superscript, subscript, and small caps: Mitochondrial DNA<sub>2</sub>$ sequences suggest unexpected phylogenetic position of Corso-Sardinian grass snakes (<i>Natrix cetti</i>) and <b>do not</b> support their <span style=\"small-caps\">species status</span>, with notes on phylogeography and subspecies delineation of grass snakes.",
-				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
 				"date": "2012",
+				"DOI": "10.1007/s13127-011-0069-8",
+				"itemID": "Frit2",
+				"pages": "71-80",
+				"publicationTitle": "Actes du <sup>ème</sup>$ Congrès Français d'Acoustique",
 				"volume": "12",
-				"pages": "71-80"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3170,6 +3252,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Public Service Research Foundation",
 				"creators": [
 					{
 						"firstName": "American Rights at",
@@ -3177,14 +3260,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2012",
 				"itemID": "american_rights_at_work_public_2012",
 				"url": "http://www.americanrightsatwork.org/blogcategory-275/",
-				"title": "Public Service Research Foundation",
-				"date": "2012"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3194,10 +3276,9 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Zotero: single attachment",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "zoteroFilePath1",
 				"attachments": [
 					{
 						"title": "Test",
@@ -3205,15 +3286,15 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "zoteroFilePath1",
-				"title": "Zotero: single attachment"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Zotero: multiple attachments",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "zoteroFilePaths2",
 				"attachments": [
 					{
 						"title": "Test1",
@@ -3226,25 +3307,25 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "zoteroFilePaths2",
-				"title": "Zotero: multiple attachments"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Zotero: linked attachments (old)",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"itemID": "zoteroFilePaths3",
-				"title": "Zotero: linked attachments (old)"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Zotero: linked attachments",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "zoteroFilePaths4",
 				"attachments": [
 					{
 						"title": "Test",
@@ -3252,15 +3333,16 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "zoteroFilePaths4",
-				"title": "Zotero: linked attachments"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Mendeley: single attachment",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "mendeleyFilePaths1",
+				"url": "https://forums.zotero.org/discussion/28347/unable-to-get-pdfs-stored-on-computer-into-zotero-standalone/",
 				"attachments": [
 					{
 						"title": "Attachment",
@@ -3268,16 +3350,15 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "mendeleyFilePaths1",
-				"url": "https://forums.zotero.org/discussion/28347/unable-to-get-pdfs-stored-on-computer-into-zotero-standalone/",
-				"title": "Mendeley: single attachment"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Mendeley: escaped characters",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "mendeleyFilePaths2",
 				"attachments": [
 					{
 						"title": "Attachment",
@@ -3285,15 +3366,16 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "mendeleyFilePaths2",
-				"title": "Mendeley: escaped characters"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			},
 			{
 				"itemType": "journalArticle",
+				"title": "Citavi: single attachment",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"itemID": "citaviFilePaths1",
+				"url": "https://forums.zotero.org/discussion/35909/bibtex-import-from-citavi-including-pdf-attachments/",
 				"attachments": [
 					{
 						"title": "Test",
@@ -3301,9 +3383,9 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "citaviFilePaths1",
-				"url": "https://forums.zotero.org/discussion/35909/bibtex-import-from-citavi-including-pdf-attachments/",
-				"title": "Citavi: single attachment"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3313,13 +3395,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "extbackslash extbackslash{}: {",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"itemID": "BibTeXEscapeTest1",
-				"title": "extbackslash extbackslash{}: {"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -3329,6 +3411,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates: a science advisory from the American Heart Association for healthcare providers, policymakers, public health departments, and community leaders",
 				"creators": [
 					{
 						"firstName": "Comilla",
@@ -3431,7 +3514,18 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [],
+				"date": "March 2013",
+				"DOI": "10.1161/CIR.0b013e318288b4dd",
+				"ISSN": "1524-4539",
+				"extra": "PMID: 23439512",
+				"issue": "12",
+				"itemID": "sasson_increasing_2013",
+				"language": "eng",
+				"pages": "1342–1350",
+				"publicationTitle": "Circulation",
+				"shortTitle": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates",
+				"volume": "127",
+				"attachments": [],
 				"tags": [
 					"Administrative Personnel",
 					"American Heart Association",
@@ -3444,29 +3538,18 @@ var testCases = [
 					"Public Health",
 					"United States"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "sasson_increasing_2013",
-				"ISSN": "1524-4539",
-				"shortTitle": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates",
-				"DOI": "10.1161/CIR.0b013e318288b4dd",
-				"language": "eng",
-				"issue": "12",
-				"extra": "PMID: 23439512",
-				"title": "Increasing cardiopulmonary resuscitation provision in communities with low bystander cardiopulmonary resuscitation rates: a science advisory from the American Heart Association for healthcare providers, policymakers, public health departments, and community leaders",
-				"volume": "127",
-				"publicationTitle": "Circulation",
-				"date": "March 2013",
-				"pages": "1342–1350"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "import",
-		"input": "@article{smith_testing_????,\n    title = {Testing identifier import},\n\tauthor = {Smith, John},\n\tlccn = {L123456},\n\tmrnumber = {MR123456},\n\tzmnumber = {ZM123456},\n\tpmid = {P123456},\n\tpmcid = {PMC123456},\n\teprinttype = {arxiv},\n\teprint = {AX123456}\n}",
+		"input": "@article{smith_testing_????,\n    title = {Testing identifier import},\n\tauthor = {Smith, John},\n\tdoi = {10.12345/123456},\n\tlccn = {L123456},\n\tmrnumber = {MR123456},\n\tzmnumber = {ZM123456},\n\tpmid = {P123456},\n\tpmcid = {PMC123456},\n\teprinttype = {arxiv},\n\teprint = {AX123456}\n}",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Testing identifier import",
 				"creators": [
 					{
 						"firstName": "John",
@@ -3474,13 +3557,36 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"itemID": "smith_testing_????",
+				"DOI": "10.12345/123456",
 				"extra": "LCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
-				"title": "Testing identifier import"
+				"itemID": "smith_testing_????",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@inbook{smith_testing_????,\n    title = {Testing identifier import chapter},\n\tauthor = {Smith, John},\n\tdoi = {10.12345/123456},\n\tlccn = {L123456},\n\tmrnumber = {MR123456},\n\tzmnumber = {ZM123456},\n\tpmid = {P123456},\n\tpmcid = {PMC123456},\n\teprinttype = {arxiv},\n\teprint = {AX123456}\n}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Testing identifier import chapter",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Smith",
+						"creatorType": "author"
+					}
+				],
+				"extra": "DOI: 10.12345/123456\nLCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
+				"itemID": "smith_testing_????",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

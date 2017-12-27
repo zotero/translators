@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2015-08-07 17:04:56"
+	"browserSupport": "gcsbv",
+	"lastUpdated": "2016-08-28 15:36:29"
 }
 
 /*
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
 			}
 			fetchPNX(urls);
-		})
+		});
 	} else {
 		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
 	}
@@ -178,7 +178,7 @@ function fetchPNX(itemData) {
 				PNXUrlGenerator.confirmed = true;
 			}
 			
-			importPNX(text);
+			importPNX(text, url);
 		},
 		function() {
 			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
@@ -193,8 +193,9 @@ function fetchPNX(itemData) {
 }
 
 //import PNX record
-function importPNX(text) {
+function importPNX(text, url) {
 	//Note that if the session times out, PNX record will just contain a "null" entry
+	//Z.debug(url)
 	Z.debug(text);
 	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
 	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
@@ -210,7 +211,7 @@ function importPNX(text) {
 	
 	var item = new Zotero.Item();
 	
-	var itemType = ZU.xpathText(doc, '//display/type');
+	var itemType = ZU.xpathText(doc, '//display/type')  || ZU.xpathText(doc, '//facets/rsrctype') || ZU.xpathText(doc, '//search/rsrctype');
 	if(!itemType) {
 		throw new Error('Could not locate item type');
 	}
@@ -220,40 +221,71 @@ function importPNX(text) {
 		case 'ebook':
 		case 'pbook' :
 		case 'books':
+		case 'score':
 		case 'journal':		//as long as we don't have a periodical item type;
  			item.itemType = "book";
-		break;
+			break;
 		case 'audio':
+		case 'sound_recording':
 			item.itemType = "audioRecording";
-		break;
+			break;
 		case 'video':
+		case 'dvd':
 			item.itemType = "videoRecording";
-		break;
+			break;
+		case 'computer_file':
+			item.itemType = "computerProgram";
+			break;
 		case 'report':
 			item.itemType = "report";
-		break;
+			break;
 		case 'webpage':
 			item.itemType = "webpage";
-		break;
+			break;
 		case 'article':
+		case 'review':
 			item.itemType = "journalArticle";
-		break;
+			break;
 		case 'thesis':
+		case 'dissertation':
 			item.itemType = "thesis";
-		break;
+			break;
+		case 'archive_manuscript':
+		case 'object':
+			item.itemType = "manuscript";
+			break;
 		case 'map':
 			item.itemType = "map";
-		break;
+			break;
+		case 'reference_entry':
+			item.itemType = "encyclopediaArticle";
+			break;
+		case 'image':
+			item.itemType = "artwork";
+			break;
 		case 'newspaper_article':
-			item.itemType="newspaperArticle";
-		break;
+			item.itemType = "newspaperArticle";
+			break;
+		case 'conference_proceeding':
+			item.itemType = "conferencePaper";
+			break;
 		default:
 			item.itemType = "document";
+			var risType = ZU.xpathText(doc, '//addata/ristype');
+			if (risType) {
+				switch(risType.toUpperCase()) {
+					case 'THES':
+						item.itemType = "thesis";
+						break;
+				}
+			}
 	}
 	
 	item.title = ZU.xpathText(doc, '//display/title');
-	if(item.title) item.title = ZU.unescapeHTML(item.title);
-	
+	if(item.title) {
+		item.title = ZU.unescapeHTML(item.title);
+		item.title = item.title.replace(/\s*:/, ":");
+	}
 	var creators = ZU.xpath(doc, '//display/creator');
 	var contributors = ZU.xpath(doc, '//display/contributor');
 	if(!creators.length && contributors.length) {
@@ -272,7 +304,7 @@ function importPNX(text) {
 			var splitAu = author.split(',');
 			if (splitAu.length > 2) continue;
 			var name = splitAu[1].trim().toLowerCase() + ' '
-				+ splitAu[0].trim().toLowerCase()
+				+ splitAu[0].trim().toLowerCase();
 			splitGuidance[name] = author;
 		}
 	}
@@ -280,15 +312,24 @@ function importPNX(text) {
 	fetchCreators(item, creators, 'author', splitGuidance);
 	fetchCreators(item, contributors, 'contributor', splitGuidance);
 	
-	var publisher = ZU.xpathText(doc, '//display/publisher');
-	if(publisher) var pubplace = ZU.unescapeHTML(publisher).split(" : ");
-	if(pubplace && pubplace[1]) {
-		item.place = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
-		item.publisher = pubplace[1].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
-	} else if(pubplace) {
-		item.publisher = pubplace[0].replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "")
-			.replace(/^\s*"|,?"\s*$/g, '');
+	item.place = ZU.xpathText(doc, '//addata/cop');
+	var publisher = ZU.xpathText(doc, '//addata/pub');
+	if(!publisher) publisher = ZU.xpathText(doc, '//display/publisher');
+	if(publisher) {
+		publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
+		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
+		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
+
+		if(pubplace && pubplace[1]) {
+			var possibleplace = pubplace[0];
+			if(!item.place ) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+				item.place = possibleplace;
+			}
+			if(item.place && item.place == possibleplace) {
+				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
+			}
+		}
 	}
 	
 	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
@@ -330,6 +371,10 @@ function importPNX(text) {
 	item.edition = ZU.xpathText(doc, '//display/edition');
 	
 	var subjects = ZU.xpath(doc, '//search/subject');
+	if(!subjects.length) {
+		subjects = ZU.xpath(doc, '//display/subject');
+	}
+
 	for(var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
@@ -356,9 +401,66 @@ function importPNX(text) {
 		item.pages = endPage;
 	}
 	
-	// does callNumber get stored anywhere else in the xml?
-	item.callNumber = ZU.xpathText(doc, '//enrichment/classificationlcc');
-	
+	//these are actual local full text links (e.g. to google-scanned books)
+	//e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
+	var URL = ZU.xpathText(doc, '//links/linktorsrc');
+	if (URL && URL.search(/\$\$U.+\$\$/) != -1) {
+		item.url = URL.match(/\$\$U(.+?)\$\$/)[1];
+	}
+
+	//add finding aids as links
+	var findingAid = ZU.xpathText(doc, '//links/linktofa');
+	if (findingAid && findingAid.search(/\$\$U.+\$\$/) != -1) {
+		item.attachments.push({url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false});
+	}
+	// get the best call Number; sequence recommended by Harvard University Library
+	var callNumber = ZU.xpath(doc, '//browse/callnumber');
+	var callArray = [];
+	for (var i = 0; i<callNumber.length; i++) {
+		if (callNumber[i].textContent.search(/\$\$D.+\$/) != -1) {
+			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
+		}
+	}
+	if (!callArray.length) {
+		callNumber = ZU.xpath(doc, '//display/availlibrary');
+		for (var i = 0; i<callNumber.length; i++) {
+			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
+				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
+			}
+		}
+	}
+	if (callArray.length) {
+		//remove duplicate call numbers
+		callArray = dedupeArray(callArray);
+		item.callNumber = callArray.join(", ");
+	}
+	else {
+		ZU.xpathText(doc, '//enrichment/classificationlcc');
+	}
+
+	if (url) {
+		item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
+	}
+
+	//Harvard specific code, requested by Harvard Library:
+	//Getting the library abbreviation properly,
+	//so it's easy to implement custom code for other libraries, either locally or globally should we want to.
+	var library;
+	var source = ZU.xpathText(doc, '//control/sourceid');
+	if (source) {
+		library = source.match(/^(.+?)_/);
+		if (library) library = library[1];
+	}
+	//Z.debug(library)
+	if (library && library == "HVD") {
+		if (ZU.xpathText(doc, '//display/lds01')) {
+			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
+		}
+		if (ZU.xpathText(doc, '//display/lds03')) {
+			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
+		}
+	}
+	//End Harvard-specific code
 	item.complete();
 }
 
@@ -367,7 +469,10 @@ function stripAuthor(str) {
 		// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
 		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*\([^()]*\)$/, '');
+		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '')
+		// The full "continuous" name uses no separators, which need be removed
+		// cf. "Luc, Jean André : de (1727-1817)"
+		.replace(/\s*:\s+/, " ");
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -406,11 +511,21 @@ function extractNumPages(str) {
 		);
 	}
 	return numPages.join('; ');
+}
+
+function dedupeArray(names) {
+	//via http://stackoverflow.com/a/15868720/1483360
+	return names.reduce(function(a,b){
+		if(a.indexOf(b)<0) {
+			a.push(b);
+		}
+		return a;
+	},[]);
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN&showPNX=true",
+		"url": "http://princeton-primo.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PRINCETON&search_scope=All%20Princeton%20Libraries&docId=PRN_VOYAGER2778598&fn=permalink",
 		"items": [
 			{
 				"itemType": "book",
@@ -423,9 +538,11 @@ var testCases = [
 					}
 				],
 				"date": "1860",
+				"callNumber": "5552.406",
 				"language": "eng",
-				"libraryCatalog": "Primo",
-				"publisher": "London",
+				"libraryCatalog": "princeton-primo.com",
+				"place": "London",
+				"publisher": "London 1860-1912",
 				"attachments": [],
 				"tags": [
 					"China Foreign relations Great Britain.",
@@ -440,7 +557,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=PURDUE&docId=PURDUE_ALMA21505315560001081&fn=permalink",
+		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/default:default_scope:PURDUE_ALMA21505315560001081",
 		"items": [
 			{
 				"itemType": "book",
@@ -453,9 +570,9 @@ var testCases = [
 					}
 				],
 				"date": "1994",
-				"ISBN": "0192892541",
+				"ISBN": "9780192892546",
 				"abstractNote": "Experience of war -- Causes of war -- War and the military establishment -- Ethics of war -- Strategy -- Total war and the great powers -- Limited war and developing countries., \"War makes headlines and history books. It has shaped the international system, prompted social change, and inspired literature, art, and music. It engenders some of the most intense as well as the most brutal human experiences, and it raises fundamental questions of human ethics.\" \"The ubiquitous, contradictory, and many-sided character of war is fully reflected in this reader. It addresses a wide range of questions: What are the causes of war? Which strategic as well as moral principles guide its conduct, and how have these changed? Has total war become unthinkable? What is the nature of contemporary conflict? How is war experienced by those on the front line?\" \"These and other key issues are examined through a variety of writings. Drawing on sources from numerous countries and disciplines, this reader includes accounts by generals, soldiers, historians, strategists, and poets, who consider conflicts from the Napoleonic Wars to Vietnam and Bosnia. The writing not only of great strategic thinkers but also of ordinary soldiers illustrates both the theory and the experience of war in its many guises.\"--BOOK JACKET.",
-				"callNumber": "U21.2",
+				"callNumber": "355.02 W1945 1994",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"numPages": "xi+385",
@@ -473,7 +590,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://limo.libis.be/primo_library/libweb/action/dlDisplay.do?vid=LIBISnet&docId=32LIBIS_ALMA_DS71166851730001471&fn=permalink",
+		"url": "http://limo.libis.be/LIBISnet:default_scope:32LIBIS_ALMA_DS71166851730001471",
 		"items": [
 			{
 				"itemType": "book",
@@ -491,7 +608,8 @@ var testCases = [
 					}
 				],
 				"date": "1973",
-				"ISBN": "0600393046",
+				"ISBN": "9780600393047",
+				"callNumber": "9B6655",
 				"language": "eng",
 				"libraryCatalog": "Primo",
 				"numPages": "252",
@@ -528,15 +646,160 @@ var testCases = [
 					}
 				],
 				"date": "1970",
+				"callNumber": "NX650G8B38",
 				"language": "eng",
-				"libraryCatalog": "Primo",
-				"publisher": "Boston Boston Book and Art Chop",
+				"libraryCatalog": "virtuose.uqam.ca",
+				"place": "Boston",
+				"publisher": "Boston Book and Art Chop",
 				"series": "Art and society 1",
 				"attachments": [],
 				"tags": [
 					"ART",
 					"GUERRE",
 					"WAR"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://primo-prod.u-paris10.fr/primo_library/libweb/action/dlDisplay.do?vid=UPON&search_scope=default_scope&docId=SCD_ALEPH000546633&fn=permalink",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud) : quand la ville fait œuvre d'art et l'art œuvre de ville",
+				"creators": [
+					{
+						"firstName": "Pauline",
+						"lastName": "Guinard",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philippe )",
+						"lastName": "Gervais-Lambony",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "Université Paris Ouest Nanterre La Défense",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "cultures et sociétés du passé et du présent Nanterre",
+						"lastName": "Ecole doctorale Milieux",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2012",
+				"abstractNote": "Thèse de doctorat, Cette thèse porte sur les espaces publics à Johannesburg, capitale économique de l’Afrique du Sud. Dans le contexte contemporain, l’utilisation de la notion occidentale d’espaces publics pose problème : d’une part, du fait des ségrégations passées qui ont eu tendance à faire de ces espaces des lieux de séparation et de mise à distance des différents publics ; et d’autre part, du fait des forts taux de violence et du fort sentiment d’insécurité, qui tendent à encourager la sécurisation et la privatisation de ces mêmes espaces. L’enjeu est alors de comprendre les éventuels processus de construction de la publicité (au sens de caractère public) de ces espaces, à la fois sur le plan juridique, social et politique. Pour ce faire, l’art qui se déploie dans les espaces juridiquement publics de la métropole depuis la fin de l’apartheid, est utilisé comme une clef de lecture privilégiée de ces phénomènes, en tant qu’il permettrait, ainsi que nous entendons le montrer, de créer des espaces de rencontre et de débats ou, à l’inverse, de mieux réguler et contrôler ces espaces. Selon une approche qualitative, notre étude se base à la fois sur des observations de terrain et sur des entretiens conduits auprès des producteurs mais aussi des récepteurs de cet art qui a lieu dans les espaces publics. A la croisée de la géographie urbaine et de la géographie culturelle, nous envisageons donc de réexaminer la notion d’espaces publics au prisme de l’art à Johannesburg en vue de saisir – entre tentative de normalisation et résistance à cette normalisation – quelle ville est aujourd’hui à l’œuvre non seulement à Johannesburg, mais aussi, à travers elle, dans d’autres villes du monde., This Ph.D. thesis deals with public spaces in Johannesburg, the economic capital of South Africa. In the current context, the issues raised by the use of the western notion of public spaces are explored. On one hand, the previous segregations tended to mark off spaces into different publics completely separated from each other. On the other hand, the high rates of violence and sense of insecurity enhance securitization and privatization of these same spaces. What is at stake is to understand how the publicness of these spaces can be legally, socially, and politically built. In that framework, art spread in legally public spaces of Johannesburg since the end of apartheid is used as a tool to understand and reveal these phenomena since it is presented, as we aim at demonstrating, as a mean to create spaces of encounter and debate or, conversely, to regulate and control better these spaces. In a qualitative approach, our study is based on field observations and interviews with both producers and receivers of this art which takes place in public spaces. At the crossroads of urban geography and cultural geography, we are therefore re-examining the concept of public spaces through the prism of art in Johannesburg to figure out – between normalization and resistance to this normalization – which city is today at work not only in Johannesburg, but also, through her, in other cities of the world.",
+				"language": "fre",
+				"libraryCatalog": "Primo",
+				"place": "Sl",
+				"shortTitle": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud)",
+				"university": "sn",
+				"attachments": [],
+				"tags": [
+					"Art",
+					"Art urbain -- Thèses et écrits académiques -- Afrique du Sud -- Johannesburg (Afrique du Sud)",
+					"Espaces publics -- Normalisation -- Thèses et écrits académiques",
+					"Espaces publics -- Thèses et écrits académiques -- Afrique du Sud -- Johannesburg (Afrique du Sud)",
+					"Géographie culturelle -- Thèses et écrits académiques",
+					"Géographie urbaine -- Thèses et écrits académiques",
+					"Johannesburg",
+					"Johannesburg (Afrique du Sud) -- Thèses et écrits académiques -- Afrique du Sud",
+					"Normalisation",
+					"Prisme",
+					"Publicisation"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://hollis.harvard.edu/primo_library/libweb/action/dlDisplay.do?vid=HVD&search_scope=default_scope&docId=HVD_ALEPH002208563&fn=permalink",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Mastering the art of French cooking",
+				"creators": [
+					{
+						"firstName": "Simone",
+						"lastName": "Beck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Louisette",
+						"lastName": "Bertholle",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Julia",
+						"lastName": "Child",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Barbara Ketcham",
+						"lastName": "Wheaton",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Avis",
+						"lastName": "DeVoto",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1961",
+				"abstractNote": "Illustrates the ways in which classic French dishes may be created with American foodstuffs and appliances.",
+				"callNumber": "641.64 C53m, c.1, 641.64 C53m, c. 3, 641.64 C53m, c.4, 641.64 C53m, c.5, 641.64 C53m, c.6, 641.64 C53m, c. 7, 641.64 C53m, c. 8, 641.64 C53m, c.2",
+				"edition": "[1st ed.]",
+				"extra": "HOLLIS number: 002208563",
+				"language": "eng",
+				"libraryCatalog": "hollis.harvard.edu",
+				"place": "New York",
+				"publisher": "Knopf",
+				"attachments": [
+					{
+						"title": "HOLLIS Permalink",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Authors' inscriptions (Provenance)",
+					"Cookery, French",
+					"Cooking, French.",
+					"French cooking"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Grida per i Milanesi che avevano seguito Ludovico il Moro",
+				"creators": [
+					{
+						"lastName": "Milano",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "1500",
+				"language": "ita",
+				"libraryCatalog": "digitale.beic.it",
+				"place": "Milano",
+				"publisher": "Ambrogio : da Caponago",
+				"attachments": [],
+				"tags": [
+					"LEGGI;ITALIA - STORIA MEDIOEVALE"
 				],
 				"notes": [],
 				"seeAlso": []

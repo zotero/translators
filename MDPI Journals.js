@@ -9,76 +9,83 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-11-19 17:39:27"
+	"lastUpdated": "2016-12-27 12:49:31"
 }
+
 
 /*
-   MDPI Translator
-   Copyright (C) 2013 Sebastian Karcher
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
-
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	MDPI Translator
+	Copyright (C) 2013 Sebastian Karcher
+	
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc,url) {
 
+function detectWeb(doc, url) {
 	var xpath='//meta[@name="citation_journal_title"]';
-
 	if (ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
-			
-	if (url.indexOf("/search?")!=-1 || url.search(/\d{4}-\d{3}.\/\d+/)!=-1) {
-		multxpath = '//table[@id="articles"]//div[@class="title"]/a'
-	
-	if (ZU.xpath(doc, multxpath).length>0){
-			return "multiple";
-		}
-	}
-	return false;
 }
 
 
-function doWeb(doc,url)
-{
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "article-content")]/a[contains(@class, "title-link")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		resultxpath = '//table[@id="articles"]//div[@class="title"]/a'
-		var results = ZU.xpath(doc, resultxpath);
-	
-		for (var i in results) {
-			hits[results[i].href] = results[i].textContent;
-		}
-		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
-			for (var j in items) {
-				urls.push(j);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
 			}
-			ZU.processDocuments(urls, doWeb);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
-		var translator = Zotero.loadTranslator('web');
-		//use Embedded Metadata
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler('itemDone', function(obj, item) {
-			if (!item.abstractNote) item.abstractNote = item.extra;
-			delete item.extra;
-			item.complete();
-		});
-		translator.translate();
+		scrape(doc, url);
 	}
+}
+
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	//use Embedded Metadata
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function(obj, item) {
+		if (!item.abstractNote) item.abstractNote = item.extra;
+		delete item.extra;
+		item.complete();
+	});
+	translator.translate();
 }
 /** BEGIN TEST CASES **/
 var testCases = [

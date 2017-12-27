@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-04-10 10:10:29"
+	"lastUpdated": "2016-03-14 15:46:49"
 }
 
 /*
@@ -360,7 +360,7 @@ function process(accNo, pubLaw, type, typeText)
 										var i;
 										var obj;
 										
-										var objarr = eval('(' + text + ')');                                        
+										var objarr = JSON.parse(text);
 										
 										for (i=0; i < objarr.length; i++)
 										{

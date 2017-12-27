@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com/(.*/)?(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch\\/(figtables|documents))",
+	"target": "^https?://search\\.proquest\\.com/(.*/)?(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch/(figtables|documents))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-08-29 22:16:34"
+	"lastUpdated": "2017-08-13 08:57:34"
 }
 
 /*
@@ -32,6 +32,7 @@
 
 var language="English";
 var L={};
+var isEbrary = false;
 
 //returns an array of values for a given field or array of fields
 //the values are in the same order as the field names
@@ -87,19 +88,12 @@ function initLang(doc, url) {
 	L = {};
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults(doc, checkOnly, extras) {
 	var root;
-	
 	var elements = doc.getElementsByClassName('resultListContainer');
+	
 	for (var i=0; i<elements.length; i++) {
 		if (elements[i] && elements[i].offsetHeight>0) {
-			// Bookmarklet cannot handle ebrary results, because they are cross-origin
-			if (Zotero.isBookmarklet
-				&& ZU.xpath(elements[i], './/ancestor::div[@id="allResults-content"]').length
-			) {
-				return false;
-			}
-			
 			root = elements[i];
 			break;
 		}
@@ -113,6 +107,9 @@ function getSearchResults(doc, checkOnly) {
 	var results = root.getElementsByClassName('resultItem');
 	//root.querySelectorAll('.resultTitle, .previewTitle');
 	var items = {}, found = false;
+	isEbrary = (results && results[0] && results[0].getElementsByClassName('ebraryitem').length > 0);
+	// if the first result is Ebrary, they all are - we're looking at the Ebrary results tab
+	
 	for(var i=0, n=results.length; i<n; i++) {
 		var title = results[i].querySelectorAll('.resultTitle, .previewTitle')[0];
 		if (!title || title.nodeName != 'A') continue;
@@ -130,23 +127,17 @@ function getSearchResults(doc, checkOnly) {
 		}
 		
 		items[title.href] = item;
-	}
 		
-	return found ? items : false;
-}
+		if (isEbrary && Zotero.isBookmarklet) {
+			extras[title.href] = {
+				html: results[i],
+				title: item,
+				url: title.href
+			};
+		}
+	}
 
-var map = {
-	"newspaperArticle" : "newspaperArticle",
-	"jnlArticle" : "journalArticle", //also magazineArticles
-	"dissertationPublished" : "thesis",
-	"reportSerial" : "report",
-	"workingPaper" : "report",
-	"book" : "book",
-	"webPage" : "webpage",
-	"blog" : "blogPost",
-	"report" : "report",
-	"audioVideo" : "videoRecording",
-	"default" : "conferencePaper" //also default = manuscript?, referenceWork, encyclopedia
+	return found ? items : false;
 }
 
 function detectWeb(doc, url) {
@@ -162,14 +153,6 @@ function detectWeb(doc, url) {
 	var types = getTextValue(doc, ["Source type", "Document type", "Record type"]);
 	var zoteroType = getItemType(types);
 	if (zoteroType) return zoteroType;
-
-	//search for comments like
-	//<!-- Open:block:newspaperArticle -->
-	//these are also present on the pdf sites
-	var type = doc.getElementById('mainContentLeft');
-	type = type && type.innerHTML.match(/\bopen:block:\S+/i);
-	type = type && map[type[0].substring(11)];
-	if (type) return type;
 	
 	//hack for NYTs, which misses crucial data.
 	var db = getTextValue(doc, "Database")[0];
@@ -177,16 +160,24 @@ function detectWeb(doc, url) {
 		return "newspaperArticle";
 	}
 
-	// Fall back on journalArticle-- even if we couldn't guess the type
-	if(types.length) return "journalArticle";
-	
+	//there is not much information about the item type in the pdf/fulltext page
+	var citationTextWrapper = ZU.xpathText(doc, '//div[@class="citationTextWrapper"]');
+	if (citationTextWrapper) {
+		if (citationTextWrapper.indexOf('ProQuest Dissertations Publishing')>-1) {
+			return "thesis";
+		}
+		// Fall back on journalArticle - even if we couldn't guess the type
+		return "journalArticle";
+	}
 }
 
 function doWeb(doc, url, noFollow) {
 	var type = detectWeb(doc, url);
 	if (type == "multiple") {
 		// detect web returned multiple
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+		var resultData = {};
+		
+		Zotero.selectItems(getSearchResults(doc, false, resultData), function (items) {
 			if (!items) return true;
 			
 			var articles = new Array();
@@ -194,22 +185,34 @@ function doWeb(doc, url, noFollow) {
 				articles.push(item);
 			}
 			
-			if (articles[0].indexOf("ebraryresults") > -1) {
-				// if the first result is for ebrary, the rest are also ebrary
-				ZU.processDocuments(articles, function(doc) {
-					var translator = Zotero.loadTranslator("web");
-					translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
-					translator.setDocument(doc);
-					translator.translate();
-				});
+			if (isEbrary) {
+				if(Zotero.isBookmarklet) {
+					// The bookmarklet can't use the ebrary translator
+					
+					var refs = [];
+					
+					for(var i in items) {
+						refs.push(resultData[i]);
+					}
+					
+					scrapeEbraryResults(refs);
+				} else {
+					ZU.processDocuments(articles, function(doc) {
+						var translator = Zotero.loadTranslator("web");
+						translator.setTranslator("2abe2519-2f0a-48c0-ad3a-b87b9c059459");
+						translator.setDocument(doc);
+						translator.translate();
+					});
+				}
 			} else {
 				ZU.processDocuments(articles, doWeb);
 			}
 		});
 	} else {
-		var abstractTab = doc.getElementById('tab-AbstractRecord-null'); // Seems like that null is a bug and it might change at some point
-		var followLink = abstractTab && !abstractTab.classList.contains('active');
-		if (!followLink) {//i.e. we are on an abstract/metadata page
+		var abstractTab = doc.getElementById('tab-AbstractRecord-null') // Seems like that null is a bug and it might change at some point
+			|| doc.getElementById('tab-Record-null'); // Shown as Details
+		if (!(abstractTab && !abstractTab.classList.contains('active'))) {
+			Zotero.debug("On Abstract page, scraping")
 			scrape(doc, url, type);
 		} else if (noFollow) {
 			Z.debug('Not following link again. Attempting to scrape');
@@ -219,6 +222,7 @@ function doWeb(doc, url, noFollow) {
 			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
+			Zotero.debug("Going to the Abstract tab");
 			ZU.processDocuments(link.href, function(doc, url) { doWeb(doc, url, true) });
 		}
 	}
@@ -302,6 +306,9 @@ function scrape(doc, url, type) {
 			case 'Pages':
 				item.pages = value;
 			break;
+			case 'First page':
+				item.firstPage = value;
+			break;
 			case 'University/institution':
 			case 'School':
 				item.university = value;
@@ -356,11 +363,11 @@ function scrape(doc, url, type) {
 			break;
 
 			default:
-				Z.debug('Unhandled field: "' + label + '"');
+				Z.debug('Unhandled field: "' + label + '": ' +  value);
 		}
 	}
 
-	item.url = url.replace(/\baccountid=[^&#]+&?/, '');
+	item.url = url.replace(/\baccountid=[^&#]*&?/, '').replace(/\?(?:#|$)/, '');
 	if (item.itemType=="thesis" && place.schoolLocation) {
 		item.place = place.schoolLocation;
 	}
@@ -373,6 +380,17 @@ function scrape(doc, url, type) {
 	} 
 
 	item.date = dates.pop();
+
+	// Sometimes we can get first page and num pages for a journal article
+	if (item.firstPage && !item.pages) {
+		var firstPage = parseInt(item.firstPage);
+		var numPages = parseInt(item.numPages);
+		if (!numPages || numPages < 2) {
+			item.pages = item.firstPage;
+		} else {
+			item.pages = firstPage + '–' + (firstPage + numPages - 1);
+		}
+	}
 
 	//sometimes number of pages ends up in pages
 	if(!item.numPages) item.numPages = item.pages;
@@ -483,6 +501,63 @@ function getItemType(types) {
 	return guessType;
 }
 
+function scrapeEbraryResults(refs) {
+	// Since we can't chase URLs, let's get what we can from the page
+	
+	for(var i = 0; i < refs.length; i++) {
+		var ref = refs[i];
+		var hiddenData = ZU.xpathText(ref.html, './span');
+		var visibleData = Array.prototype.map.call(ref.html.getElementsByClassName('results_list_copy'), function(node) {
+			// The text returned by textContent is of the following format:
+			// book title \n author, first; [author, second; ...;] publisher name; publisher location (date) \n
+			return /\n(.*)\n?/.exec(node.textContent)[1].split(';').reverse();
+		})[0];
+		var item = new Zotero.Item("book");
+		var date = /\(([\w\s]+)\)/.exec(visibleData[0]);
+		var place = /([\w,\s]+)\(/.exec(visibleData[0]);
+		var isbn = /isbn,\svalue\s=\s\'([\dX]+)\'/i.exec(hiddenData);
+		var language = /language_code,\svalue\s=\s\'([A-Za-z]+)\'\n/i.exec(hiddenData);
+		var numPages = /page_count,\svalue\s=\s\'(\d+)\'\n/i.exec(hiddenData);
+		var locNum = /lccn,\svalue\s=\s\'([-.\s\w]+)\'\n/i.exec(hiddenData);
+
+		item.title = ref.title;
+		item.url = ref.url;
+		
+		if(date) {
+			item.date = date[1];
+		}
+		
+		if(place) {
+			item.place = place[1].trim();
+		}
+		
+		item.publisher = visibleData[1].trim();
+		
+		// Push the authors in reverse to restore the original order
+		for(var j = visibleData.length - 1; j >= 2; j--) {
+			item.creators.push(ZU.cleanAuthor(visibleData[j], "author", true));
+		}
+		
+		if(isbn) {
+			item.ISBN = isbn[1];
+		}
+		
+		if(language) {
+			item.language = language[1];
+		}
+		
+		if(numPages) {
+			item.numPages = numPages[1];
+		}
+		
+		if(locNum) {
+			item.callNumber = locNum[1];
+		}
+		
+		item.complete();
+	}
+}
+
 //localized field names
 var fieldNames = {
 	'العربية': {
@@ -550,6 +625,39 @@ var fieldNames = {
 		"Identifier / keyword":'Pengidentifikasi/kata kunci',
 		"Subject":'Subjek',
 		"Journal subject":'Subjek jurnal'
+	},
+	'Čeština': {
+		"Source type":'Typ zdroje',
+		"Document type":'Typ dokumentu',
+		//"Record type"
+		"Database":'Databáze',
+		"Title":'Název',
+		"Author":'Autor',
+		//"Editor":
+		"Publication title":'Název publikace',
+		"Volume":'Svazek',
+		"Issue":'Číslo',
+		"Number of pages":'Počet stránek',
+		"ISSN":'ISSN',
+		"ISBN":'ISBN',
+		//"DOI":
+		"Copyright":'Copyright',
+		"Language":'Jazyk',
+		"Language of publication":'Jazyk publikace',
+		"Section":'Sekce',
+		"Publication date":'Datum vydání',
+		"Publication year":'Rok vydání',
+		"Year":'Rok',
+		"Pages":'Strany',
+		"School":'Instituce',
+		"Degree":'Stupeň',
+		"Publisher":'Vydavatel',
+		"Place of publication":'Místo vydání',
+		"School location":'Místo instituce',
+		"Country of publication":'Země vydání',
+		"Identifier / keyword":'Identifikátor/klíčové slovo',
+		"Subject":'Předmět',
+		"Journal subject":'Předmět časopisu'
 	},
 	'Deutsch': {
 		"Source type":'Quellentyp',
@@ -1437,6 +1545,50 @@ var testCases = [
 					"Growth Regulators",
 					"Mammalian Genetics",
 					"PLANT SCIENCE"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://search.proquest.com/docview/1297954386/citation?accountid=12861",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Women's Rights as Human Rights: Toward a Re-Vision of Human Rights",
+				"creators": [
+					{
+						"firstName": "Charlotte",
+						"lastName": "Bunch",
+						"creatorType": "author"
+					}
+				],
+				"date": "Nov 1, 1990",
+				"ISSN": "0275-0392",
+				"issue": "4",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"pages": "486–498",
+				"publicationTitle": "Human Rights Quarterly",
+				"shortTitle": "Women's Rights as Human Rights",
+				"url": "http://search.proquest.com/docview/1297954386/citation",
+				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"Law",
+					"Law--Civil Law",
+					"Political Science",
+					"Political Science--Civil Rights",
+					"Social Sciences (General)",
+					"Social Sciences: Comprehensive Works",
+					"Sociology"
 				],
 				"notes": [],
 				"seeAlso": []

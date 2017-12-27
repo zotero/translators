@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-07-03 01:15:45"
+	"lastUpdated": "2016-11-04 21:18:44"
 }
 
 function getSearchResults(doc) {
@@ -87,7 +87,7 @@ function makeItem(doc, url) {
 	item.publisher = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="publisher"]') || '');
 	item.rights = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="copyright-info"]') || '');	
 	item.language = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="language"]') || '');
-	item.date = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="publication-date"]') || '');
+	item.date = ZU.strToISO(ZU.xpathText(productDetails, './dd[@class="publication-date"]') || '');
 	item.numPages = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="pages"]') || '');
 	
 	item.attachments.push({
@@ -170,7 +170,7 @@ var testCases = [
 				"publisher": "Dr.SELVAKUMAR RAJAN",
 				"rights": "selvakumar (Standard Copyright License)",
 				"language": "English",
-				"date": "September 29, 2011",
+				"date": "2011-09-30",
 				"numPages": "15",
 				"libraryCatalog": "Lulu"
 			}
@@ -178,7 +178,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lulu.com/shop/search.ep?keyWords=zotero&categoryId=107110&sorter=relevance-desc",
+		"url": "http://www.lulu.com/shop/search.ep?keyWords=zotero",
 		"items": "multiple"
 	},
 	{
@@ -214,7 +214,7 @@ var testCases = [
 				"publisher": "Fitness Blender",
 				"rights": "Standard Copyright License",
 				"language": "English",
-				"date": "August 20, 2013",
+				"date": "2013-08-21",
 				"numPages": "63",
 				"libraryCatalog": "Lulu"
 			}
@@ -240,9 +240,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-					"title": "Lulu Link",
-					"mimeType": "text/html",
-					"snapshot": false
+						"title": "Lulu Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
 				"abstractNote": "ALL YOU NEED TO KNOW ABOUT GROWING VINES IN 123 PAGES. \n\nThis book is a basic introduction to growing grapes and aimed at the serious student in the wine trade, WSET Diploma student or Master of Wine candidate. It is also very useful for those thinking of setting up vineyards as it answers a lot of the basic questions. \n\nHas sold over 3,500 copies now and received LOTS of emails saying how helpful it has been. \n\n\"Couldn't have become an MW without your book\" was the latest endorsement!",
@@ -253,7 +253,7 @@ var testCases = [
 				"libraryCatalog": "Lulu",
 				"title": "Viticulture - An Introduction to Commercial Grape Growing for Wine Production",
 				"publisher": "Stephen Skelton",
-				"date": "May 24, 2014"
+				"date": "2017-03-06"
 			}
 		]
 	}

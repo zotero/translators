@@ -1,16 +1,17 @@
 {
-	"translatorID":"3f50aaac-7acc-4350-acd0-59cb77faf620",
-	"translatorType":2,
-	"label":"Wikipedia Citation Templates",
-	"creator":"Simon Kornblith",
-	"target":"txt",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"displayOptions":{"exportCharset":"UTF-8"},
-	"browserSupport":"gcs",
-	"inRepository":true,
-	"lastUpdated":"2015-02-21 07:16:26"
+	"translatorID": "3f50aaac-7acc-4350-acd0-59cb77faf620",
+	"translatorType": 2,
+	"label": "Wikipedia Citation Templates",
+	"creator": "Simon Kornblith",
+	"target": "txt",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"displayOptions": {
+		"exportCharset": "UTF-8"
+	},
+	"inRepository": true,
+	"lastUpdated": "2017-03-13 11:45:52"
 }
 
 var fieldMap = {
@@ -367,11 +368,15 @@ function doExport() {
 					}
 				}
 			} else {
-				Zotero.write("| "+key+" = "+properties[key]);
+				Zotero.write("| "+key+" = "+ escapeWiki(properties[key]));
 			}
 		}
 		Zotero.write("}}");
 		
 		first = false;
 	}
+}
+
+function escapeWiki(markup) {
+    return markup.replace('|', '{{!}}');
 }

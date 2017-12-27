@@ -7,12 +7,13 @@
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
+		"async": true,
 		"dataMode": "rdf/xml"
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-07 21:09:00"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-10-28 21:15:21"
 }
 
 /*
@@ -394,7 +395,7 @@ function detectType(newItem, node, ret) {
 			t.dc = type;
 		} else {
 			//on eprints the type fields are often in the form "Journal Article", "Conference Item" etc.
-			type = type.toLowerCase().replace(/\s/g, "")
+			type = type.toLowerCase().replace(/\s/g, "");
 			switch (type) {
 				//eprints
 				//from http://www.ukoln.ac.uk/repositories/digirep/index/Eprints_Type_Vocabulary_Encoding_Scheme
@@ -413,6 +414,8 @@ function detectType(newItem, node, ret) {
 				case 'conferenceposter':
 					t.dc = 'conferencePaper';
 					break;
+				case 'article':  //from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
+				case 'dataset':  //until dataset gets implemented
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
@@ -444,9 +447,6 @@ function detectType(newItem, node, ret) {
 
 				//from http://www.idealliance.org/specifications/prism/specifications/prism-controlled-vocabularies/prism-12-controlled-vocabularies
 				//some are the same as eprints and are handled above
-				case 'article':
-					t.dcGuess = 'journalArticle';
-					break;
 				case 'electronicbook':
 					t.dc = 'book';
 					break;
@@ -521,6 +521,8 @@ function detectType(newItem, node, ret) {
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
+				case 'dataset':
+				//map to dataset once we have it as item type
 				case 'article':
 					t.eprints = 'journalArticle';
 					break;
@@ -535,8 +537,6 @@ function detectType(newItem, node, ret) {
 					break;
 				//from  samples at http://oro.open.ac.uk, http://eprints.soton.ac.uk/, http://eprints.biblio.unitn.it
 				case 'techreport':
-				case 'dataset':  
-				//map to dataset once we have it as item type
 					t.eprints = 'report';
 					break;
 				case 'bookedit':
@@ -683,7 +683,7 @@ function detectType(newItem, node, ret) {
 
 	var itemType = t.zotero || t.bib || t.prism ||t.eprints|| t.og || t.dc || 
 		exports.defaultUnknownType || t.zoteroGuess || t.bibGuess || 
-		t.prismGuess || t.ogGuess || t.dcGuess 
+		t.prismGuess || t.ogGuess || t.dcGuess ;
 
 	//in case we still don't have a container, double-check
 	//some are copied from above
@@ -725,6 +725,10 @@ function detectType(newItem, node, ret) {
 function importItem(newItem, node) {
 	var ret = new Object();
 	var itemType = detectType(newItem, node, ret);
+	var isZoteroRDF = false;
+	if (getFirstResults(node, [n.z+"itemType", n.z+"type"], true)) {
+		isZoteroRDF = true;
+	}
 	newItem.itemType = exports.itemType || itemType;
 	var container = ret.container;
 	var isPartOf = ret.isPartOf;
@@ -754,8 +758,14 @@ function importItem(newItem, node) {
 		} else if(creatorType == "editor" || creatorType == "contributor") {
 			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name"]);
 		//get presenters in unpublished conference papers on eprints
-		}else if(creatorType == "presenter") {
+		} else if(creatorType == "presenter") {
 			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
+
+		} else if(creatorType == "castMember") {
+			creators = getFirstResults(node, [n.video+"actor"]);
+
+		} else if(creatorType == "scriptwriter") {
+			creators = getFirstResults(node, [n.video+"writer"]);
 
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
@@ -766,7 +776,8 @@ function importItem(newItem, node) {
 	
 	
 	// publicationTitle -- first try PRISM, then DC
-	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",	n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
+	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",
+		n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
 	
 
 	// rights
@@ -880,7 +891,8 @@ function importItem(newItem, node) {
 	newItem.distributor = newItem.label = newItem.company = newItem.institution = newItem.publisher;
 	
 	// date
-	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate", n.og+"published_time",
+	newItem.date = getFirstResults(node, [n.eprints+"date", n.prism+"publicationDate", n.prism2_0+"publicationDate", n.prism2_1+"publicationDate",
+		n.og+"published_time", n.article+"published_time", n.book+"release_date", n.music+"release_date", n.video+"release_date",
 		n.dc+"date.issued", n.dcterms+"date.issued", n.dcterms+"issued", n.dc+"date", n.dc1_0+"date", n.dcterms+"date",
 		n.dcterms+"dateSubmitted", n.eprints+"datestamp"], true);
 	// accessDate
@@ -937,8 +949,8 @@ function importItem(newItem, node) {
 	// ISSN, if encoded per PRISM (DC uses "identifier")
 	newItem.ISSN = getFirstResults((container ? container : node), [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
 		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn"], true) || newItem.ISSN;
-	// ISBN from PRISM
-	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10"], true) || newItem.ISBN;
+	// ISBN from PRISM or OG
+	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10", n.book+"isbn"], true) || newItem.ISBN;
 	// ISBN from eprints
 	newItem.ISBN = getFirstResults(node, [n.eprints+"isbn"], true) || newItem.ISBN;
 	// DOI from PRISM
@@ -960,6 +972,16 @@ function importItem(newItem, node) {
 	
 	// type
 	var type = getFirstResults(node, [n.dc+"type", n.dc1_0+"type", n.dcterms+"type"], true);
+	
+	/**CUSTOM ITEM TYPE  -- Currently only Dataset **/
+	if (type && type.toLowerCase() == "dataset") {
+		if (newItem.extra) {
+			newItem.extra += "\ntype: dataset";
+		}
+		else newItem.extra = "type: dataset";
+	}
+
+
 	// these all mean the same thing
 	var typeProperties = ["reportType", "letterType", "manuscriptType",
 				"mapType", "thesisType", "websiteType",
@@ -968,6 +990,8 @@ function importItem(newItem, node) {
 		newItem[ typeProperties[i] ] = type;
 	}
 	
+	
+
 	//thesis type from eprints
 	if (newItem.itemType == "thesis"){
 		newItem.thesisType = getFirstResults(node, [n.eprints+"thesis_type"], true) || newItem.thesisType;
@@ -996,7 +1020,10 @@ function importItem(newItem, node) {
 
 	// journalAbbreviation
 	newItem.journalAbbreviation = getFirstResults((container ? container : node), [n.dcterms+"alternative"], true);
-	
+
+	//running Time
+	newItem.runningTime == getFirstResults(node, [n.video+"duration", n.song+"duration"], true);
+
 	// address
 	var adr = getFirstResults(node, [n.vcard2+"adr"]);
 	if(adr) {
@@ -1021,7 +1048,12 @@ function importItem(newItem, node) {
 	// description/attachment note
 	if(newItem.itemType == "attachment") {
 		newItem.note = getFirstResults(node, [n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
-	} else if (!newItem.abstractNote) {
+	}
+	// extra for Zotero RDF
+	else if (isZoteroRDF) {
+		newItem.extra = getFirstResults(node, [n.dc+"description"], true);
+	}
+	else if (!newItem.abstractNote) {
 		newItem.abstractNote = getFirstResults(node, [n.dc+"description", n.dcterms+"description"], true);
 	}
 	
@@ -1033,7 +1065,7 @@ function importItem(newItem, node) {
 		var type = Zotero.RDF.getTargets(referentNode, rdf+"type");
 		if(type && Zotero.RDF.getResourceURI(type[0]) == n.bib+"Memo") {
 			// if this is a memo
-			var note = new Array();
+			var note = {};
 			note.note = getFirstResults(referentNode, [rdf+"value", n.dc+"description", n.dc1_0+"description", n.dcterms+"description"], true);
 			if(note.note != undefined) {
 				// handle see also
@@ -1045,6 +1077,7 @@ function importItem(newItem, node) {
 			}
 		}
 	}
+
 	
 	if(newItem.itemType == "note") {
 		// add note for standalone
@@ -1147,54 +1180,92 @@ function getNodes(skipCollections) {
 }
 
 function doImport() {
-	Zotero.setProgress(null);
-	var nodes = getNodes();
-	if(!nodes.length) {
-		return false;
-	}
-	
-	// keep track of collections while we're looping through
-	var collections = new Array();
-	
-	for (var i=0; i<nodes.length; i++) {
-		var node = nodes[i];
-		// type
-		var type = Zotero.RDF.getTargets(node, rdf+"type");
-		if(type) {
-			type = Zotero.RDF.getResourceURI(type[0]);
-
-			// skip if this is not an independent attachment,
-			if((type == n.z+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
-				continue;
+	if (typeof Promise == 'undefined') {
+		startImport(
+			function () {},
+			function (e) {
+				throw e;
 			}
+		);
+	}
+	else {
+		return new Promise(function (resolve, reject) {
+			startImport(resolve, reject);
+		});
+	}
+}
 
-			// skip collections until all the items are done
-			if(type == n.bib+"Collection" || type == n.z+"Collection") {
-				collections.push(node);
-				continue;
+function startImport(resolve, reject) {
+	try {
+		Zotero.setProgress(null);
+		var nodes = getNodes();
+		if (!nodes.length) {
+			resolve();
+			return;
+		}
+		
+		// keep track of collections while we're looping through
+		var collections = [];
+		importNext(nodes, 0, collections, resolve, reject);
+	}
+	catch (e) {
+		reject(e);
+	}
+}
+
+function importNext(nodes, index, collections, resolve, reject) {
+	try {
+		for (var i = index; i < nodes.length; i++) {
+			var node = nodes[i];
+			
+			// type
+			var type = Zotero.RDF.getTargets(node, rdf+"type");
+			if (type) {
+				type = Zotero.RDF.getResourceURI(type[0]);
+				
+				// skip if this is not an independent attachment,
+				if((type == n.z+"Attachment" || type == n.bib+"Memo") && isPart(node)) {
+					continue;
+				}
+				
+				// skip collections until all the items are done
+				if(type == n.bib+"Collection" || type == n.z+"Collection") {
+					collections.push(node);
+					continue;
+				}
+			}
+			
+			var newItem = new Zotero.Item();
+			newItem.itemID = Zotero.RDF.getResourceURI(node);
+			
+			if (importItem(newItem, node)) {
+				var maybePromise = newItem.complete();
+				if (maybePromise) {
+					maybePromise.then(function () {
+						importNext(nodes, i + 1, collections, resolve, reject);
+					});
+					return;
+				}
+			}
+			
+			Zotero.setProgress((i + 1) / nodes.length * 100);
+		}
+		
+		// Collections
+		for (var i=0; i<collections.length; i++) {
+			var collection = collections[i];
+			if(!Zotero.RDF.getArcsIn(collection)) {
+				var newCollection = new Zotero.Collection();
+				processCollection(collection, newCollection);
+				newCollection.complete();
 			}
 		}
-
-		var newItem = new Zotero.Item();
-		newItem.itemID = Zotero.RDF.getResourceURI(node);
-
-		if(importItem(newItem, node)) {
-			newItem.complete();
-		}
-
-		Zotero.setProgress((i+1)/nodes.length*100);
+	}
+	catch (e) {
+		reject(e);
 	}
 	
-	/* COLLECTIONS */
-	
-	for (var i=0; i<collections.length; i++) {
-		var collection = collections[i];
-		if(!Zotero.RDF.getArcsIn(collection)) {
-			var newCollection = new Zotero.Collection();
-			processCollection(collection, newCollection);
-			newCollection.complete();
-		}
-	}
+	resolve();
 }
 
 /**
@@ -1207,3 +1278,42 @@ var exports = {
 	"defaultUnknownType":false,
 	"itemType": false
 };
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n         xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n         xmlns:bibo=\"http://purl.org/ontology/bibo/\"\n         xmlns:dc=\"http://purl.org/dc/terms/\"\n         xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n         xmlns:dc11=\"http://purl.org/dc/elements/1.1/\"\n         xmlns:ns0=\"http://rdaregistry.info/Elements/u/\"\n         xmlns:ns1=\"http://iflastandards.info/ns/isbd/elements/\"\n         xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n\n  <bibo:Book rdf:about=\"http://d-nb.info/1054873992\">\n    <dc:medium rdf:resource=\"http://rdaregistry.info/termList/RDACarrierType/1044\"/>\n    <owl:sameAs rdf:resource=\"http://hub.culturegraph.org/resource/DNB-1054873992\"/>\n    <dc11:identifier>(DE-101)1054873992</dc11:identifier>\n    <dc11:identifier>(OCoLC)888461076</dc11:identifier>\n    <bibo:isbn13>9783658060268</bibo:isbn13>\n    <ns0:P60521>kart. : ca. EUR 39.99 (DE), ca. EUR 41.11 (AT), ca. sfr 50.00 (freier Pr.)</ns0:P60521>\n    <bibo:isbn10>3658060263</bibo:isbn10>\n    <bibo:gtin14>9783658060268</bibo:gtin14>\n    <dc:language rdf:resource=\"http://id.loc.gov/vocabulary/iso639-2/ger\"/>\n    <dc11:title>Das Adam-Smith-Projekt</dc11:title>\n    <dc:creator rdf:resource=\"http://d-nb.info/gnd/136486045\"/>\n    <dc11:publisher>Springer VS</dc11:publisher>\n    <ns0:P60163>Wiesbaden</ns0:P60163>\n    <ns0:P60333>Wiesbaden : Springer VS</ns0:P60333>\n    <ns1:P1053>447 S.</ns1:P1053>\n    <dc:isPartOf>Edition Theorie und Kritik</dc:isPartOf>\n    <ns0:P60489>Zugl. leicht überarb. Fassung von: Berlin, Freie Univ., Diss., 2012</ns0:P60489>\n    <dc:relation rdf:resource=\"http://d-nb.info/1064805604\"/>\n    <dc:subject>Smith, Adam</dc:subject>\n    <dc:subject>Liberalismus</dc:subject>\n    <dc:subject>Rechtsordnung</dc:subject>\n    <dc:subject>Foucault, Michel</dc:subject>\n    <dc:subject>Macht</dc:subject>\n    <dc:subject>Politische Philosophie</dc:subject>\n    <dc:subject rdf:resource=\"http://dewey.info/class/320.512092/e22/\"/>\n    <dc:tableOfContents rdf:resource=\"http://d-nb.info/1054873992/04\"/>\n    <dc:issued>2015</dc:issued>\n    <ns0:P60493>zur Genealogie der liberalen Gouvernementalität</ns0:P60493>\n  </bibo:Book>\n  \n  <foaf:Person rdf:about=\"http://d-nb.info/gnd/136486045\">\n    <foaf:familyName>Ronge</foaf:familyName>\n    <foaf:givenName>Bastian</foaf:givenName>\n  </foaf:Person>\n  \n\n</rdf:RDF>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Das Adam-Smith-Projekt",
+				"creators": [
+					{
+						"lastName": "Ronge",
+						"firstName": "Bastian",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"ISBN": "9783658060268",
+				"itemID": "http://d-nb.info/1054873992",
+				"language": "http://id.loc.gov/vocabulary/iso639-2/ger",
+				"publisher": "Springer VS",
+				"attachments": [],
+				"tags": [
+					"Foucault, Michel",
+					"Liberalismus",
+					"Macht",
+					"Politische Philosophie",
+					"Rechtsordnung",
+					"Smith, Adam"
+				],
+				"notes": [],
+				"seeAlso": [
+					"http://d-nb.info/1064805604"
+				]
+			}
+		]
+	}
+]
+/** END TEST CASES **/
