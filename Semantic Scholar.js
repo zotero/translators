@@ -123,7 +123,7 @@ function parseDocument(doc, url) {
 			let paperLink = rawData.links.filter(function(link) { return link.linkType === 's2'; })[0].url;
 			item.attachments.push({
 				url: paperLink,
-				title: item.title,
+				title: "Full Text PDF",
 				mimeType: 'application/pdf'
 			});
 		}
