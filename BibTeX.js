@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-12-27 21:53:46"
+	"lastUpdated": "2017-12-27 22:23:20"
 }
 
 function detectImport() {
@@ -3583,6 +3583,52 @@ var testCases = [
 				],
 				"extra": "DOI: 10.12345/123456\nLCCN: L123456\nMR: MR123456\nZbl: ZM123456\nPMID: P123456\nPMCID: PMC123456\narXiv: AX123456",
 				"itemID": "smith_testing_????",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@mastersthesis{DBLP:ms/Hoffmann2008,\n  author    = {Oliver Hoffmann},\n  title     = {Regelbasierte Extraktion und asymmetrische Fusion bibliographischer\n               Informationen},\n  school    = {Diplomarbeit, Universit{\\\"{a}}t Trier, {FB} IV, {DBIS/DBLP}},\n  year      = {2009},\n  url       = {http://dblp.uni-trier.de/papers/DiplomarbeitOliverHoffmann.pdf},\n  timestamp = {Wed, 03 Aug 2011 15:40:21 +0200},\n  biburl    = {http://dblp.org/rec/bib/ms/Hoffmann2008},\n  bibsource = {dblp computer science bibliography, http://dblp.org}\n}\n\n@phdthesis{DBLP:phd/Ackermann2009,\n  author    = {Marcel R. Ackermann},\n  title     = {Algorithms for the Bregman k-Median problem},\n  school    = {University of Paderborn},\n  year      = {2009},\n  url       = {http://digital.ub.uni-paderborn.de/hs/content/titleinfo/1561},\n  urn       = {urn:nbn:de:hbz:466-20100407029},\n  timestamp = {Thu, 01 Dec 2016 16:33:49 +0100},\n  biburl    = {http://dblp.org/rec/bib/phd/Ackermann2009},\n  bibsource = {dblp computer science bibliography, http://dblp.org}\n}",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Regelbasierte Extraktion und asymmetrische Fusion bibliographischer Informationen",
+				"creators": [
+					{
+						"firstName": "Oliver",
+						"lastName": "Hoffmann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"itemID": "DBLP:ms/Hoffmann2008",
+				"thesisType": "Master's Thesis",
+				"university": "Diplomarbeit, Universität Trier, FB IV, DBIS/DBLP",
+				"url": "http://dblp.uni-trier.de/papers/DiplomarbeitOliverHoffmann.pdf",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "thesis",
+				"title": "Algorithms for the Bregman k-Median problem",
+				"creators": [
+					{
+						"firstName": "Marcel R.",
+						"lastName": "Ackermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2009",
+				"itemID": "DBLP:phd/Ackermann2009",
+				"thesisType": "PhD Thesis",
+				"university": "University of Paderborn",
+				"url": "http://digital.ub.uni-paderborn.de/hs/content/titleinfo/1561",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
