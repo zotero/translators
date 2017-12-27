@@ -18,7 +18,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-07-02 02:03:17"
+	"lastUpdated": "2017-12-27 21:53:46"
 }
 
 function detectImport() {
@@ -804,6 +804,10 @@ function beginRecord(type, closeChar) {
 		item._extraFields = [];
 	}
 	
+	// For theses write the thesisType determined by the BibTeX type.
+	if (type == "mastersthesis" && item) item.type = "Master's Thesis";
+	if (type == "phdthesis" && item) item.type = "PhD Thesis";
+
 	var field = "";
 	
 	// by setting dontRead to true, we can skip a read on the next iteration
@@ -1174,14 +1178,16 @@ function doExport() {
 		var type = zotero2bibtexTypeMap[item.itemType];
 		if (typeof(type) == "function") { type = type(item); }
 
-		// The thesis Zotero type doesn't nicely map onto a BibTeX type,
-		// as BibTeX uses both @mastersthesis and @phdthesis. We thus have
-		// to tell them apart by the "Type" field as well as by the item type.
+		// For theses BibTeX distinguish between @mastersthesis and @phdthesis
+		// and the default mapping will map all Zotero thesis items to a
+		// BibTeX phdthesis item. Here we try to fix this by examining the
+		// Zotero thesisType field.
 		if (type == "phdthesis") {
 			// In practice, we just want to separate out masters theses,
 			// and will assume everything else maps to @phdthesis. Better to
 			// err on the side of caution.
-			if (item["type"] && item["type"].toLowerCase() == "masters") {
+			var thesisType = item.type && item.type.toLowerCase().replace(/[\s.]+|thesis|unpublished/g, '');
+			if (thesisType &&  (thesisType == 'master' || thesisType == 'masters'  || thesisType == "master's" || thesisType == 'ms' || thesisType == 'msc' || thesisType == 'ma')) {
 				type = "mastersthesis";
 				item["type"] = "";
 			}
