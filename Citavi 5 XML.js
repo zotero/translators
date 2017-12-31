@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2017-12-09 12:00:14"
+	"lastUpdated": "2017-12-31 16:11:41"
 }
 
 /*
@@ -247,10 +247,19 @@ function doImport() {
 				} else if (addressType == "PubMedId" && item.extra.indexOf("PMID") == -1) {
 					addExtraLine(item, "PMID", address);
 				} else {
-					item.attachments.push({
-						url: address,
-						title:"Location"
-					});
+					// distinguish between local paths and internet addresses
+					// (maybe also encoded in AddressInfo subfield?)
+					if (address.indexOf('http://')==0 || address.indexOf('https://')==0) {
+						item.attachments.push({
+							url: address,
+							title:"Location"
+						});
+					} else {
+						item.attachments.push({
+							path: address,
+							title: address
+						});
+					}
 				}
 			}
 			var callNumber = ZU.xpathText(locations[j], 'CallNumber');
