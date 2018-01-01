@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	if (url.indexOf('/thesis/thesis-view.asp')>-1) {
 		return "journalArticle";
-	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/result_kiss.asp')>-1) && getSearchResults(doc, true)) {
+	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/sch-search.asp')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
