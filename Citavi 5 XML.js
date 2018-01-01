@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2017-12-31 16:11:41"
+	"lastUpdated": "2018-01-01 10:43:28"
 }
 
 /*
@@ -252,12 +252,12 @@ function doImport() {
 					if (address.indexOf('http://')==0 || address.indexOf('https://')==0) {
 						item.attachments.push({
 							url: address,
-							title:"Location"
+							title: "Online"
 						});
 					} else {
 						item.attachments.push({
 							path: address,
-							title: address
+							title: "Full Text"
 						});
 					}
 				}
