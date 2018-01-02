@@ -133,9 +133,7 @@ function scrape(doc, url) {
 		var containerParts = containerValue.match(/(.*)\s+(\d+)\D\s*(\d+)/);
 		if (containerParts) {
 			item.publicationTitle = containerParts[1];
-			if (/\d{4}/.test(containerParts[2])) {
-				containerParts[2] = null;
-			} else {
+			if (containerParts[2].length<4) { //This is to avoid cases like Vol. 2017
 				item.volume = containerParts[2];
 			}
 			item.issue = containerParts[3] !== '0' ? containerParts[3] : null;
