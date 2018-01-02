@@ -2,14 +2,14 @@
 	"translatorID": "d71e9b6d-2baa-44ed-acb4-13fe2fe592c0",
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon",
-	"target": "^https?://(www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)",
+	"target": "^https?://(www\\.)?google\\.[^/]+/(patents|[^/]*[&?#]tbm=pts)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-15 02:22:24"
+	"lastUpdated": "2016-09-21 18:59:28"
 }
 
 function detectWeb(doc, url) {
@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
-	return ZU.xpath(doc, '//div[@id="ires"]//li[@class="g"]//h3/a');
+	return ZU.xpath(doc, '//div[@id="ires"]//div[@class="g"]//h3/a');
 }
 
 function fixAuthorCase(name) {
@@ -528,8 +528,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "http://www.google.fr/#q=ordinateur&hl=fr&prmd=imvns&source=lnms&tbm=pts&sa=X&ei=oJJfUJKgBOiU2gWqwIHYCg&ved=0CBIQ_AUoBQ&tbo=1&prmdo=1&bav=on.2,or.r_gc.r_pw.r_qf.&fp=ec5bd0c9391b4cc0&biw=1024&bih=589",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -596,7 +596,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "patent",
-				"title": "For christmas",
+				"title": "Artificial tree",
 				"creators": [
 					{
 						"firstName": "Chester L. Craig",

@@ -2,7 +2,7 @@
 	"translatorID": "c816f8ad-4c73-4f6d-914e-a6e7212746cf",
 	"label": "Neural Information Processing Systems",
 	"creator": "Fei Qi, Sebastian Karcher",
-	"target": "^https?://(?:books|papers)\\.nips\\.cc/",
+	"target": "^https?://(books|papers)\\.nips\\.cc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

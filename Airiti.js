@@ -2,7 +2,7 @@
 	"translatorID": "5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801",
 	"label": "Airiti",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(?:[^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
+	"target": "^https?://([^/]+\\.)?airitilibrary\\.com/Publication/alDetailedMesh",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 110,
@@ -465,7 +465,8 @@ var testCases = [
 				"publicationTitle": "品質學報",
 				"volume": "19",
 				"date": "February 2012",
-				"pages": "1-20"
+				"pages": "1-20",
+				"ISSN": "1022-0690"
 			}
 		]
 	}

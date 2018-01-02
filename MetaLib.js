@@ -2,14 +2,14 @@
 	"translatorID": "b06d2609-ebca-4125-ac67-6d7a0dba274e",
 	"label": "MetaLib",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*/V/",
+	"target": "^https?://[^/]*/V/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2012-04-11 05:03:56"
+	"lastUpdated": "2017-01-01 15:26:24"
 }
 
 /**

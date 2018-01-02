@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-07-21 00:46:10"
+	"lastUpdated": "2017-03-19 23:26:57"
 }
 
 /**
@@ -90,6 +90,11 @@ function extractOCLCID(url) {
 	return id[1];
 }
 
+function cleanBrackets(field) {
+	if (!field) return null;
+	field = field.replace(/^\[|\]\.?$/g, "");
+	return field;
+}
 /**
  * RIS Scraper Function
  *
@@ -158,10 +163,16 @@ function scrape(ids, data) {
 					item.creators[i].fieldMode=1;
 				}
 			}
-			
+
+			item.title = cleanBrackets(item.title);
+			item.place = cleanBrackets(item.place);
+			item.publisher = cleanBrackets(item.publisher);
 			//attach notes
 			if(itemData && itemData.notes) {
 				item.notes.push({note: itemData.notes});
+			}
+			if (oclcID) {
+				item.extra = "OCLC: " + oclcID;
 			}
 			
 			item.complete();
@@ -235,7 +246,6 @@ function doWeb(doc, url) {
 				oclcID = extractOCLCID(canonicalURL.href);
 			}
 		}
-		
 		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		scrape([oclcID]);
 	}
@@ -316,11 +326,11 @@ function fetchIDs(isbns, ids, callback) {
 	}
 	
 	var isbn = isbns.shift();
-	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+	var url = "http://www.worldcat.org/search?qt=results_page&q=isbn%3A"
 		+ encodeURIComponent(isbn);
 	ZU.processDocuments(url,
 		function (doc) {
-			//we take the first search result
+			//mostly these are search results; for those, we take the first search result
 			var results = getSearchResults(doc);
 			if (results.length) {
 				var title = getTitleNode(results[0]);
@@ -330,8 +340,17 @@ function fetchIDs(isbns, ids, callback) {
 				} else {
 					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
 				}
-			} else {
-				Z.debug("No search results found for ISBN " + isbn);
+			}
+			//but sometimes we have single items
+			else  {
+				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
+   				if (canonicalURL) {
+      					oclcID = extractOCLCID(canonicalURL);
+      					if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+         				scrape([oclcID]);
+   				} else {
+     					 Z.debug("No search results found for ISBN " + isbn);
+   				}
 			}
 		},
 		function() {
@@ -339,6 +358,7 @@ function fetchIDs(isbns, ids, callback) {
 		}
 	);
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -363,6 +383,7 @@ var testCases = [
 					}
 				],
 				"date": "1964",
+				"extra": "OCLC: 489605",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Englewood Cliffs, N.J.",
@@ -395,6 +416,7 @@ var testCases = [
 				],
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"extra": "OCLC: 42854423",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Cambridge, Mass.",
@@ -424,6 +446,7 @@ var testCases = [
 				"date": "2006",
 				"ISBN": "9780521770590 9780521779241",
 				"abstractNote": "\"Adam Smith is best known as the founder of scientific economics and as an early proponent of the modern market economy. Political economy, however, was only one part of Smith's comprehensive intellectual system. Consisting of a theory of mind and its functions in language, arts, science, and social intercourse, Smith's system was a towering contribution to the Scottish Enlightenment. His ideas on social intercourse, in fact, also served as the basis for a moral theory that provided both historical and theoretical accounts of law, politics, and economics. This companion volume provides an up-to-date examination of all aspects of Smith's thought. Collectively, the essays take into account Smith's multiple contexts - Scottish, British, European, Atlantic, biographical, institutional, political, philosophical - and they draw on all his works, including student notes from his lectures. Pluralistic in approach, the volume provides a contextualist history of Smith, as well as direct philosophical engagement with his ideas.\"--Jacket.",
+				"extra": "OCLC: 60321422",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Cambridge; New York",
@@ -461,6 +484,7 @@ var testCases = [
 				],
 				"date": "2011",
 				"ISBN": "9789067183840",
+				"extra": "OCLC: 765821302",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Leiden",
@@ -479,7 +503,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Newman's relation to modernism",
+				"title": "Newman's relation to modernism.",
 				"creators": [
 					{
 						"lastName": "Smith",
@@ -488,10 +512,12 @@ var testCases = [
 					}
 				],
 				"date": "1912",
+				"extra": "OCLC: 676747555",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "London",
-				"publisher": "s.n.",
+				"publisher": "publisher not identified",
+				"url": "https://archive.org/details/a626827800smituoft/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -505,7 +531,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "[Cahokia Mounds replicas]",
+				"title": "Cahokia Mounds replicas",
 				"creators": [
 					{
 						"lastName": "Grimont",
@@ -525,10 +551,11 @@ var testCases = [
 				],
 				"date": "2000",
 				"ISBN": "9781881563020",
+				"extra": "OCLC: 48394842",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
 				"place": "Collinsville, Ill.",
-				"publisher": "Cahokia Mounds Museum Society]",
+				"publisher": "Cahokia Mounds Museum Society",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -568,6 +595,7 @@ var testCases = [
 				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"extra": "OCLC: 793205903",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -606,6 +634,7 @@ var testCases = [
 				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"extra": "OCLC: 42854423",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -631,7 +660,8 @@ var testCases = [
 				],
 				"date": "2009",
 				"ISSN": "1049-0078",
-				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"abstractNote": "In recent years China has faced an increasing trilemma—how to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"extra": "OCLC: 4933578953",
 				"issue": "3",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
@@ -665,8 +695,9 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2004",
+				"date": "2005",
 				"ISBN": "9787112062317",
+				"extra": "OCLC: 77641948",
 				"language": "Chinese",
 				"libraryCatalog": "Open WorldCat",
 				"place": "北京",

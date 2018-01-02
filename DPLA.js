@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2013-10-24 09:48:34"
+	"lastUpdated": "2016-09-12 06:17:30"
 }
 
 /**
@@ -34,7 +34,7 @@ function detectWeb(doc, url) {
 	if (url.indexOf("/search?") != -1) return "multiple";
 
 	else if (url.indexOf("/item/") != -1) {
-		var type = ZU.xpathText(doc, '//article[@id="content"]/div[@class="table"]/ul/li[h6[contains(text(), "Type")]]/following-sibling::li')
+		var type = ZU.xpathText(doc, '//article[@id="content"]//div[@class="table"]/ul/li[h6[contains(text(), "Type")]]/following-sibling::li')
 		//Z.debug(type)
 		//we can't use the typemap below, as the types get merged together when scraping them
 		if (type){
@@ -211,17 +211,18 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dp.la/item/100b1a8594ff7d162e13ff9dfca27c3d",
+		"url": "https://dp.la/item/100b1a8594ff7d162e13ff9dfca27c3d",
 		"items": [
 			{
 				"itemType": "artwork",
+				"title": "O. W. Croxall",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Palmer, William R., 1877-1960",
-					"Portraits"
-				],
-				"seeAlso": [],
+				"date": "1899-08",
+				"abstractNote": "O. W. Croxall; Photographs",
+				"archive": "Southern Utah University - Sherratt Library",
+				"libraryCatalog": "DPLA",
+				"rights": "Digital image c1999 Sherratt Library, Southern Utah University. All rights reserved.",
+				"url": "http://utah-primoprod.hosted.exlibrisgroup.com/primo_library/libweb/action/dlDisplay.do?vid=MWDL&afterPDS=true&docId=digcoll_suu_13palmer/918",
 				"attachments": [
 					{
 						"title": "DPLA Link",
@@ -229,14 +230,12 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "O. W. Croxall",
-				"date": "1899-08",
-				"rights": "Digital image c1999 Sherratt Library, Southern Utah University. All rights reserved.",
-				"abstractNote": "O. W. Croxall; Photographs",
-				"url": "http://thoth.library.utah.edu:1701/primo_library/libweb/action/dlDisplay.do?vid=MWDL&afterPDS=true&docId=digcoll_suu_13palmer/918",
-				"archive": "Southern Utah University - Sherratt Library",
-				"libraryCatalog": "DPLA",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Palmer, William R., 1877-1960",
+					"Portraits"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -246,6 +245,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "audioRecording",
+				"title": "Oral History Interview with Mary Moultrie",
 				"creators": [
 					{
 						"firstName": "Mary",
@@ -260,7 +260,21 @@ var testCases = [
 						"fieldMode": 0
 					}
 				],
-				"notes": [],
+				"date": "1982-07-28",
+				"abstractNote": "In this interview, Mary Moultrie (born 1943) talks about her involvement in the 113-day Charleston Hospital Strike at the Medical University of South Carolina (MUSC) in March 1969. After graduating from Burke High School in 1960, Moultrie went to Goldwater Memorial Hospital, New York to become a Licensed Practical Nurse (LPN). In 1967, she returned to Charleston and was hired at MUSC only as a nurses assistant since her LPN was not accepted. She speaks in detail about the working conditions and employee relationships at MUSC prior to and after the strike. Ms. Moultrie explains the various types of nursing titles and the unequal pay between black and white nurses. She retells in detail how the racial tensions that led up to the strike at MUSC increased due to the harassing treatment toward black nurses. In the interview, Moultrie details the first informal meetings and get-togethers that were held, until the black nurses joined forces with the 1199 union and Bill Saunders. Moultrie elaborates, in particular, on the lack of support from the white community under the Gaillard administration, as well as the hesitation of the black community to join them in their efforts for equal pay and treatment. She then refers to support from the Southern Christian Leadership Conference (SCLC), Septima Poinsette Clark, and various leaders such as Andrew Young and Ralph Abernathy. Moultrie mentions the difficult and hostile negotiation process with MUSCs president Dr. William McCord and the memorandum of agreement that was ultimately reached. The interview closes by the interviewer inquiring about the current work force diversity at MUSC and Moultries feelings regarding the strikes accomplishments.",
+				"archive": "Avery Research Center at the College of Charleston",
+				"audioRecordingFormat": "Audio",
+				"libraryCatalog": "DPLA",
+				"place": "Charleston",
+				"rights": "Digital resource copyright 2010, Avery Research Center at the College of Charleston Libraries. All rights reserved. For more information contact the Avery Research Center, College of Charleston, Charleston, SC 29424.",
+				"url": "http://lowcountrydigital.library.cofc.edu/u?/AOH,203",
+				"attachments": [
+					{
+						"title": "DPLA Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
 				"tags": [
 					"African American nurses--South Carolina Charleston",
 					"African Americans--Civil rights--South Carolina--Charleston",
@@ -282,23 +296,8 @@ var testCases = [
 					"Strikes and lockouts--Hospitals--South Carolina",
 					"Women--Employment--South Carolina--Charleston"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "DPLA Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"title": "Oral History Interview with Mary Moultrie",
-				"date": "1982-07-28",
-				"abstractNote": "In this interview, Mary Moultrie (born 1943) talks about her involvement in the 113-day Charleston Hospital Strike at the Medical University of South Carolina (MUSC) in March 1969. After graduating from Burke High School in 1960, Moultrie went to Goldwater Memorial Hospital, New York to become a Licensed Practical Nurse (LPN). In 1967, she returned to Charleston and was hired at MUSC only as a nurses assistant since her LPN was not accepted. She speaks in detail about the working conditions and employee relationships at MUSC prior to and after the strike. Ms. Moultrie explains the various types of nursing titles and the unequal pay between black and white nurses. She retells in detail how the racial tensions that led up to the strike at MUSC increased due to the harassing treatment toward black nurses. In the interview, Moultrie details the first informal meetings and get-togethers that were held, until the black nurses joined forces with the 1199 union and Bill Saunders. Moultrie elaborates, in particular, on the lack of support from the white community under the Gaillard administration, as well as the hesitation of the black community to join them in their efforts for equal pay and treatment. She then refers to support from the Southern Christian Leadership Conference (SCLC), Septima Poinsette Clark, and various leaders such as Andrew Young and Ralph Abernathy. Moultrie mentions the difficult and hostile negotiation process with MUSCs president Dr. William McCord and the memorandum of agreement that was ultimately reached. The interview closes by the interviewer inquiring about the current work force diversity at MUSC and Moultries feelings regarding the strikes accomplishments.",
-				"place": "Charleston",
-				"rights": "Digital resource copyright 2010, Avery Research Center at the College of Charleston Libraries. All rights reserved. For more information contact the Avery Research Center, College of Charleston, Charleston, SC 29424.",
-				"url": "http://lowcountrydigital.library.cofc.edu/u?/AOH,203",
-				"archive": "Avery Research Center at the College of Charleston",
-				"libraryCatalog": "DPLA",
-				"audioRecordingFormat": "Audio"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -308,6 +307,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Historia de la Iglesia en México, v. 2",
 				"creators": [
 					{
 						"firstName": "Mariano",
@@ -316,13 +316,14 @@ var testCases = [
 						"fieldMode": 0
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Catholic Church",
-					"Catholic Church",
-					"Missions"
-				],
-				"seeAlso": [],
+				"date": "1921",
+				"abstractNote": "Added t.p; Bibliografia de la historia de la Iglesia en México\" : v. 1, p. [13]-27, and at head of chapters; Includes indexes; Appendices; STH LIBRARY HAS: vols. 1-3 ; later edition (1928) has vols. 4-5. See Theo Research BX1428.C8 1928; V. 1. Estado del país de Anahuac antes de su evangelización. Orígenes de la Iglesia en Nueva España, 1511-1548.--v. 2. Consolidación y actividades de las instituciones fundadoras, 1548-1572. Los elementos regeneradores, 1572-1600. Frutos especiales de la Iglesia en el Siglo XVI.--v. 3. Instituciones y labor de la Iglesia organizada. Las Misiones. Frutos de la Iglesia en el Siglo XVII",
+				"archive": "School of Theology, Boston University",
+				"libraryCatalog": "DPLA",
+				"place": "Tlalpam [D.F.] (México)",
+				"publisher": "Impr. del asilo \"Patricio Sanz",
+				"rights": "Access to the Internet Archive's Collections is granted for scholarship and research purposes only. Some of the content available through the Archive may be governed by local, national, and/or international laws and regulations, and your use of such content is solely at your own risk.",
+				"url": "http://www.archive.org/details/historiadelaigle02cuev",
 				"attachments": [
 					{
 						"title": "DPLA Link",
@@ -330,15 +331,93 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Historia de la Iglesia en México, v. 2",
+				"tags": [
+					"Catholic Church",
+					"Catholic Church",
+					"Missions"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dp.la/item/74b6748286e211f2fd337eecef6fc1e9?back_uri=https%3A%2F%2Fdp.la%2Fsearch%3Futf8%3D%25E2%259C%2593%26q%3DOral%2BHistory%2BInterview%2Bwith%2BMary%2BMoultrie&next=1",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Oral History Interview with Mary Moultrie",
+				"creators": [],
+				"abstractNote": "Interview with Mary Moultrie by Jean-Claude Bouffard, July 28, 1982, AMN 500.009.005, in the Jean-Claude Bouffard Civil Rights Interviews, of the Avery Research Center at the College of Charleston",
+				"archive": "Avery Research Center at the College of Charleston",
+				"audioRecordingFormat": "Oral Histories",
+				"libraryCatalog": "DPLA",
+				"place": "Charleston (S.C)",
+				"rights": "Digital resource copyright 2010, Avery Research Center at the College of Charleston Libraries. All rights reserved. For more information contact the Avery Research Center, College of Charleston, Charleston, SC 29424.",
+				"url": "http://lcdl.library.cofc.edu/lcdl/catalog/lcdl:23397",
+				"attachments": [
+					{
+						"title": "DPLA Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"African American nurses--South Carolina Charleston",
+					"African Americans--Civil rights--South Carolina--Charleston",
+					"African Americans--South Carolina--Charleston--History--20th century",
+					"African Americans--South Carolina--Charleston--Social conditions",
+					"Hospital Workers' Strike, Charleston, S.C., 1969",
+					"Hospitals--Employees--Labor unions--South Carolina Charleston",
+					"Hospitals--Employees--Salaries, etc",
+					"Hospitals--South Carolina--Charleston--History--20th century",
+					"Labor unions--South Carolina--Charleston",
+					"Race discrimination--South Carolina--History",
+					"Strikes and lockouts--Hospitals--South Carolina",
+					"Women--Employment--South Carolina--Charleston"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dp.la/item/da939253474d2be9751c95d3a531eaf5?back_uri=https%3A%2F%2Fdp.la%2Fsearch%3Futf8%3D%25E2%259C%2593%26q%3DHistoria%2Bde%2Bla%2BIglesia%2Ben%2BM%25C3%25A9xico&next=1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Historia de la Iglesia en México, v. 3",
+				"creators": [
+					{
+						"firstName": "Mariano",
+						"lastName": "Cuevas",
+						"creatorType": "author",
+						"fieldMode": 0
+					}
+				],
 				"date": "1921",
+				"abstractNote": "Added t.p; Bibliografia de la historia de la Iglesia en México\" : v. 1, p. [13]-27, and at head of chapters; Includes indexes; Appendices; STH LIBRARY HAS: vols. 1-3 ; later edition (1928) has vols. 4-5. See Theo Research BX1428.C8 1928; V. 1. Estado del país de Anahuac antes de su evangelización. Orígenes de la Iglesia en Nueva España, 1511-1548.--v. 2. Consolidación y actividades de las instituciones fundadoras, 1548-1572. Los elementos regeneradores, 1572-1600. Frutos especiales de la Iglesia en el Siglo XVI.--v. 3. Instituciones y labor de la Iglesia organizada. Las Misiones. Frutos de la Iglesia en el Siglo XVII",
+				"archive": "School of Theology, Boston University",
+				"libraryCatalog": "DPLA",
 				"place": "Tlalpam [D.F.] (México)",
 				"publisher": "Impr. del asilo \"Patricio Sanz",
-				"abstractNote": "Added t.p; Bibliografia de la historia de la Iglesia en México\" : v. 1, p. [13]-27, and at head of chapters; Includes indexes; Appendices; STH LIBRARY HAS: vols. 1-3 ; later edition (1928) has vols. 4-5. See Theo Research BX1428.C8 1928; V. 1. Estado del país de Anahuac antes de su evangelización. Orígenes de la Iglesia en Nueva España, 1511-1548.--v. 2. Consolidación y actividades de las instituciones fundadoras, 1548-1572. Los elementos regeneradores, 1572-1600. Frutos especiales de la Iglesia en el Siglo XVI.--v. 3. Instituciones y labor de la Iglesia organizada. Las Misiones. Frutos de la Iglesia en el Siglo XVII",
 				"rights": "Access to the Internet Archive's Collections is granted for scholarship and research purposes only. Some of the content available through the Archive may be governed by local, national, and/or international laws and regulations, and your use of such content is solely at your own risk.",
-				"url": "http://www.archive.org/details/historiadelaigle02cuev",
-				"archive": "School of Theology, Boston University",
-				"libraryCatalog": "DPLA"
+				"url": "http://www.archive.org/details/historiadelaigle03cuev",
+				"attachments": [
+					{
+						"title": "DPLA Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Catholic Church",
+					"Missions"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

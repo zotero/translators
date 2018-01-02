@@ -2,14 +2,14 @@
 	"translatorID": "27ee5b2c-2a5a-4afc-a0aa-d386642d4eed",
 	"label": "PubMed Central",
 	"creator": "Michael Berkowitz and Rintze Zelle",
-	"target": "^https?://(www\\.)?ncbi\\.nlm\\.nih\\.gov/pmc",
+	"target": "^https://(www\\.)?ncbi\\.nlm\\.nih\\.gov/pmc",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-01-16 05:50:52"
+	"lastUpdated": "2017-09-29 03:13:21"
 }
 
 function detectWeb(doc, url) {
@@ -29,7 +29,7 @@ function doWeb(doc, url) {
 			if (!ids) {
 				return true;
 			}
-			var pmcids = new Array();
+			var pmcids = [];
 			for (var i in ids) {
 				pmcids.push(i);
 			}
@@ -40,6 +40,10 @@ function doWeb(doc, url) {
 		var pdf = getPDF(doc,'//td[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//div[@class="format-menu"]//a[contains(@href,".pdf")]'
 				+ '|//aside[@id="jr-alt-p"]/div/a[contains(@href,".pdf")]');
+		//if we're looking at a pdf, just use the current url
+		if (!pdf && url.search(/\/pdf\/.+.pdf/)!=-1) {
+			pdf = url;
+		}
 		var pdfCollection = {};
 				
 		if(pdf) pdfCollection[pmcid] = pdf;
@@ -85,7 +89,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function lookupPMCIDs(ids, doc, pdfLink) {
-	var newUri = "//eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&retmode=xml&id="
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&retmode=xml&id="
 		+ encodeURIComponent(ids.join(","));
 	Zotero.debug(newUri);
 	ZU.doGet(newUri, function (text) {
@@ -95,7 +99,6 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 		
 		text = text.replace(/<xref[^<\/]*<\/xref>/g, ""); //Strip xref cross reference from e.g. title
 		//Z.debug(text)
-		
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "text/xml");
 
@@ -129,7 +132,7 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 				newItem.abstractNote = abstract;
 			} else {
 				var abstractSections = ZU.xpath(article, 'abstract/sec');
-				var abstract = [];
+				abstract = [];
 				for (var j in abstractSections) {
 					abstract.push(ZU.xpathText(abstractSections[j], 'title') + "\n" + ZU.xpathText(abstractSections[j], 'p'));
 				}
@@ -177,13 +180,14 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 					if (firstName || lastName) {
 						newItem.creators.push({
 							lastName: lastName,
-							firstName: firstName
+							firstName: firstName,
+							creatorType: "author"
 						});
 					}
 				}
 			}
 
-			var linkurl = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/";
+			var linkurl = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + ids[i] + "/";
 			newItem.url = linkurl;
 			newItem.attachments = [{
 				url: linkurl,
@@ -195,11 +199,11 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 			if (pdfLink) {
 				var pdfFileName = pdfLink[ids[i]];
 			} else if (ZU.xpathText(article, 'selfuri/@xlinktitle') == "pdf") {
-				var pdfFileName = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + 
+				var pdfFileName = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC" +
 				ids[i] + "/pdf/" + ZU.xpathText(article, 'selfuri/@xlinkhref');
 			} else if (ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]')){
 				//this should work on most multiples
-				var pdfFileName = "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC" + 
+				var pdfFileName = "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC" +
 				ids[i] + "/pdf/" + ZU.xpathText(article, 'articleid[@pubidtype="publisherid"]') + ".pdf";
 			}
 			
@@ -219,7 +223,7 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/?tool=pmcentrez",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/?tool=pmcentrez",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -227,31 +231,38 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Aoki",
-						"firstName": "Takuya"
+						"firstName": "Takuya",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Yamasawa",
-						"firstName": "Fumihiro"
+						"firstName": "Fumihiro",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Kawashiro",
-						"firstName": "Takeo"
+						"firstName": "Takeo",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Shibata",
-						"firstName": "Tetsuichi"
+						"firstName": "Tetsuichi",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Ishizaka",
-						"firstName": "Akitoshi"
+						"firstName": "Akitoshi",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Urano",
-						"firstName": "Tetsuya"
+						"firstName": "Tetsuya",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Okada",
-						"firstName": "Yasumasa"
+						"firstName": "Yasumasa",
+						"creatorType": "author"
 					}
 				],
 				"date": "2008",
@@ -264,7 +275,7 @@ var testCases = [
 				"libraryCatalog": "PubMed Central",
 				"pages": "37",
 				"publicationTitle": "Respiratory Research",
-				"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/",
+				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2377243/",
 				"volume": "9",
 				"attachments": [
 					{
@@ -285,17 +296,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/?term=anger",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/?term=anger",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/issues/184700/",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/issues/184700/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/?report=classic",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/?report=classic",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -303,39 +314,48 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Rubio",
-						"firstName": "Doris McGartland"
+						"firstName": "Doris McGartland",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "del Junco",
-						"firstName": "Deborah J."
+						"firstName": "Deborah J.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Bhore",
-						"firstName": "Rafia"
+						"firstName": "Rafia",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Lindsell",
-						"firstName": "Christopher J."
+						"firstName": "Christopher J.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Oster",
-						"firstName": "Robert A."
+						"firstName": "Robert A.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Wittkowski",
-						"firstName": "Knut M."
+						"firstName": "Knut M.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Welty",
-						"firstName": "Leah J."
+						"firstName": "Leah J.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Li",
-						"firstName": "Yi-Ju"
+						"firstName": "Yi-Ju",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "DeMets",
-						"firstName": "Dave"
+						"firstName": "Dave",
+						"creatorType": "author"
 					}
 				],
 				"date": "2011-10-15",
@@ -348,7 +368,7 @@ var testCases = [
 				"libraryCatalog": "PubMed Central",
 				"pages": "2767-2777",
 				"publicationTitle": "Statistics in medicine",
-				"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
+				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3139813/",
 				"volume": "30",
 				"attachments": [
 					{
@@ -369,36 +389,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/?term=test",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/?term=test",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/?report=reader",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/?report=reader",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Cdk4 Regulates Recruitment of Quiescent ?-Cells and Ductal Epithelial Progenitors to Reconstitute ?-Cell Mass",
+				"title": "Cdk4 Regulates Recruitment of Quiescent β-Cells and Ductal Epithelial Progenitors to Reconstitute β-Cell Mass",
 				"creators": [
 					{
 						"lastName": "Lee",
-						"firstName": "Ji-Hyeon"
+						"firstName": "Ji-Hyeon",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Jo",
-						"firstName": "Junghyo"
+						"firstName": "Junghyo",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Hardikar",
-						"firstName": "Anandwardhan A."
+						"firstName": "Anandwardhan A.",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Periwal",
-						"firstName": "Vipul"
+						"firstName": "Vipul",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Rane",
-						"firstName": "Sushil G."
+						"firstName": "Sushil G.",
+						"creatorType": "author"
 					}
 				],
 				"date": "2010-1-13",
@@ -410,9 +435,72 @@ var testCases = [
 				"journalAbbreviation": "PLoS One",
 				"libraryCatalog": "PubMed Central",
 				"publicationTitle": "PLoS ONE",
-				"shortTitle": "Cdk4 Regulates Recruitment of Quiescent ?",
-				"url": "http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
+				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
 				"volume": "5",
+				"attachments": [
+					{
+						"title": "PubMed Central Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "PubMed Central Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4368415/pdf/imr0264-0088.pdf",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The human immune response to tuberculosis and its treatment: a view from the blood",
+				"creators": [
+					{
+						"lastName": "Cliff",
+						"firstName": "Jacqueline M",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kaufmann",
+						"firstName": "Stefan H E",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McShane",
+						"firstName": "Helen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "van Helden",
+						"firstName": "Paul",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "O'Garra",
+						"firstName": "Anne",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-3",
+				"DOI": "10.1111/imr.12269",
+				"ISSN": "0105-2896",
+				"abstractNote": "The immune response upon infection with the pathogen Mycobacterium tuberculosis is poorly understood, hampering the discovery of new treatments and the improvements in diagnosis. In the last years, a blood transcriptional signature in tuberculosis has provided knowledge on the immune response occurring during active tuberculosis disease. This signature was absent in the majority of asymptomatic individuals who are latently infected with M. tuberculosis (referred to as latent). Using modular and pathway analyses of the complex data has shown, now in multiple studies, that the signature of active tuberculosis is dominated by overexpression of interferon-inducible genes (consisting of both type I and type II interferon signaling), myeloid genes, and inflammatory genes. There is also downregulation of genes encoding B and T-cell function. The blood signature of tuberculosis correlates with the extent of radiographic disease and is diminished upon effective treatment suggesting the possibility of new improved strategies to support diagnostic assays and methods for drug treatment monitoring. The signature suggested a previously under-appreciated role for type I interferons in development of active tuberculosis disease, and numerous mechanisms have now been uncovered to explain how type I interferon impedes the protective response to M. tuberculosis infection.",
+				"extra": "PMID: 25703554\nPMCID: PMC4368415",
+				"issue": "1",
+				"journalAbbreviation": "Immunol Rev",
+				"libraryCatalog": "PubMed Central",
+				"pages": "88-102",
+				"publicationTitle": "Immunological Reviews",
+				"shortTitle": "The human immune response to tuberculosis and its treatment",
+				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4368415/",
+				"volume": "264",
 				"attachments": [
 					{
 						"title": "PubMed Central Link",

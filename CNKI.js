@@ -2,14 +2,14 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(?:[^/]+\\.)?cnki.net",
+	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2013-08-25 04:10:34"
+	"lastUpdated": "2017-09-02 11:17:43"
 }
 
 /*
@@ -103,6 +103,14 @@ function getTypeFromDBName(dbname) {
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
+	var iframe = doc.getElementById('iframeResult');
+	if (iframe) {
+		var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+		if (innerDoc) {
+			doc = innerDoc;
+		}
+	}
+	
 	var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
 	var aXpath = './/a[@class="fz14"]';
 	if(!links.length) {

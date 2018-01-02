@@ -2,25 +2,27 @@
 	"translatorID": "43a53465-0354-42fd-aba9-dc1af8be7061",
 	"label": "Isidore",
 	"creator": "Guillaume Adreani and Aurimas Vinckevicius",
-	"target": "https?://(www\\.)?rechercheisidore\\.fr/search/(resource/)?\\?",
+	"target": "^https?://(www\\.)?rechercheisidore\\.fr/search(/resource/|\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-28 21:06:26"
+	"lastUpdated": "2017-01-01 15:22:12"
 }
 
 var typeMap = {
 	'Articles': 'journalArticle',
-	'Ouvrages': 'book',
 	'Actualités': 'newspaperArticle',
+	'Billets de blog' : 'blogPost',
 	'Colloques et conférences': 'conferencePaper',
+	"Livres et chapitres d'ouvrages" : 'book',
+	'Manuscrits': 'manuscript',
 	'Mémoires, Thèses et HDR': 'thesis',
+	'Ouvrages': 'book',
 	'Page Web': 'webpage',
-	'Photos et images': 'artwork',
-	'Manuscrits': 'manuscript'
+	'Photos et images': 'artwork'
 };
 
 function getSearchResults(doc) {
@@ -33,6 +35,7 @@ function detectWeb(doc, url) {
 	if(getSearchResults(doc).length) return "multiple";
 
 	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
+	//Z.debug(type);
 	if(type) return typeMap[type] || 'journalArticle';	//default to journalArticle if we can't recognize it
 }
 
@@ -96,10 +99,11 @@ function scrape(doc, url, type) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.v5517l",
+		"url": "https://rechercheisidore.fr/search/resource/?uri=10670/1.v00h5m",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Sur la géométrie anallagmatique (addition à l'article précédent)",
 				"creators": [
 					{
 						"firstName": "J.",
@@ -107,13 +111,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Géométrie",
-					"géométrie",
-					"Addition"
-				],
-				"seeAlso": [],
+				"date": "1927",
+				"archiveLocation": "XVIIe siècle",
+				"language": "Français",
+				"libraryCatalog": "rechercheisidore.fr",
+				"url": "http://www.numdam.org/item?id=NAM_1927_6_2__314_0",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -123,35 +125,36 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Sur la géométrie anallagmatique (addition à l'article précédent)",
-				"publisher": "Cellule Mathdoc",
-				"institution": "Cellule Mathdoc",
-				"company": "Cellule Mathdoc",
-				"label": "Cellule Mathdoc",
-				"distributor": "Cellule Mathdoc",
-				"date": "1927",
-				"reportType": "Articles",
-				"letterType": "Articles",
-				"manuscriptType": "Articles",
-				"mapType": "Articles",
-				"thesisType": "Articles",
-				"websiteType": "Articles",
-				"presentationType": "Articles",
-				"postType": "Articles",
-				"audioFileType": "Articles",
-				"url": "http://www.numdam.org/item?id=NAM_1927_6_2__314_0",
-				"libraryCatalog": "rechercheisidore.fr",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"language": "Français"
+				"tags": [
+					"Addition",
+					"Anthropologie religieuse",
+					"Architecture",
+					"Economies et finances",
+					"Espace",
+					"Géométrie",
+					"Histoire",
+					"Pensée",
+					"Philosophie et Sociologie des sciences",
+					"Représentations",
+					"aménagement de l'espace",
+					"géométrie",
+					"société et territoire",
+					"Économie",
+					"Épistémologie",
+					"Études des sciences"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.ny16mx",
+		"url": "https://rechercheisidore.fr/search/resource/?uri=10670/1.ny16mx",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Introduction",
 				"creators": [
 					{
 						"firstName": "Florence",
@@ -159,25 +162,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Sociologie",
-					"Anthropologie sociale et ethnologie",
-					"Géographie",
-					"Economies et finances",
-					"Géographie",
-					"Ethnologie",
-					"anthropologie",
-					"Études urbaines",
-					"Économie",
-					"Migrations",
-					"immigrations",
-					"minorités",
-					"Études du politique",
-					"Sociologie",
-					"tisserand"
-				],
-				"seeAlso": [],
+				"date": "2000",
+				"abstractNote": "Weber Florence. Introduction. In: Genèses, 41, 2000. Comment décrire les transactions, sous la direction de Susanna Magri. pp. 2-4.",
+				"archiveLocation": "Florence",
+				"language": "Français",
+				"libraryCatalog": "rechercheisidore.fr",
+				"publisher": "MESR",
+				"url": "http://www.persee.fr/doc/genes_1155-3219_2000_num_41_1_1644",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -187,69 +178,41 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Introduction",
-				"publisher": "MESR",
-				"institution": "MESR",
-				"company": "MESR",
-				"label": "MESR",
-				"distributor": "MESR",
-				"date": "2000",
-				"abstractNote": "Weber Florence, . Introduction. In: Genèses, 41, 2000. Comment décrire les transactions. pp. 2-4.",
-				"reportType": "Ouvrages",
-				"letterType": "Ouvrages",
-				"manuscriptType": "Ouvrages",
-				"mapType": "Ouvrages",
-				"thesisType": "Ouvrages",
-				"websiteType": "Ouvrages",
-				"presentationType": "Ouvrages",
-				"postType": "Ouvrages",
-				"audioFileType": "Ouvrages",
-				"url": "http://www.persee.fr/web/revues/home/prescript/article/genes_1155-3219_2000_num_41_1_1644",
-				"libraryCatalog": "rechercheisidore.fr",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"language": "Français"
+				"tags": [
+					"Gestion",
+					"Géographie urbaine",
+					"Histoire",
+					"Histoire urbaine",
+					"Sociologie",
+					"Sociologie de la culture",
+					"Sociologie économique",
+					"Études du politique",
+					"Études urbaines"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.c2463y",
+		"url": "https://www.rechercheisidore.fr/search/resource/?uri=10670/1.ys05aw",
 		"items": [
 			{
-				"itemType": "conferencePaper",
+				"itemType": "blogPost",
+				"title": "Séminaire - Quand la santé questionne le couple. Correspondances Sud et Nord",
 				"creators": [
 					{
-						"firstName": "Liens",
-						"lastName": "socio",
+						"firstName": "",
+						"lastName": "corpsetmedecine",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Education",
-					"Mars",
-					"Pensée",
-					"Philosophie",
-					"Philosophie",
-					"Philosophie",
-					"Psychisme",
-					"Psychologie",
-					"Psychologie",
-					"Psychologie",
-					"Psychologie de l'éducation",
-					"Sciences de l'éducation",
-					"Sciences et civilisation",
-					"philosophie",
-					"psychologie",
-					"Éducation",
-					"Éducation",
-					"Épistémologie",
-					"Épistémologie et méthodes",
-					"Étudiants",
-					"éducation",
-					"épistémologie"
-				],
-				"seeAlso": [],
+				"date": "2010-07-06",
+				"abstractNote": "L'équipe \"Genre et santé\" du CEPED organise un séminaire le jeudi 21 octobre 2010, à l'Université Paris Descartes : \"Quand la santé questionne le couple. Correspondances Sud et Nord\" Voir la présentation et le bulletin d'inscription en pièces jointes (pdf).",
+				"language": "Français",
+				"url": "http://corpsetmedecine.hypotheses.org/995",
+				"websiteType": "Billets de blog",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -259,193 +222,52 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"archiveLocation": "Époque contemporaine",
-				"abstractNote": "L'objectif de ce colloque est de réunir les étudiants, doctorants, et professionnels en psychologie, sociologies, philosophie, épistémologie, histoire et sciences de l'éducation autour d'Alfred Binet. Colloque international, Lyon, 9-10 mars 2007",
-				"language": "Français",
-				"url": "http://calenda.revues.org/nouvelle13432.html",
-				"libraryCatalog": "rechercheisidore.fr",
-				"title": "De la psychopédagogie aux sciences de l'éducation",
-				"publisher": "OpenEdition",
-				"date": "2007-03-10"
+				"tags": [
+					"Couple",
+					"Nord (point cardinal)",
+					"Pièces",
+					"Santé",
+					"Sociologie de la santé",
+					"Sud (point cardinal)",
+					"santé"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.a0o7by",
+		"url": "https://www.rechercheisidore.fr/search/resource/?uri=10670/1.5tkdos",
 		"items": [
 			{
-				"itemType": "thesis",
+				"itemType": "conferencePaper",
+				"title": "LES CHERCHEURS ALGERIENS ET LA PUBLICATION ELECTRONIQUE DANS LES ARCHIVES OUVERTES : CAS D'ARCHIVALG",
 				"creators": [
 					{
 						"firstName": "Karima",
 						"lastName": "Ben Allal",
 						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"Algériennes",
-					"Archives",
-					"Cas",
-					"Communautés",
-					"Création",
-					"Documentation technique",
-					"Information scientifique",
-					"Information technique",
-					"Marche",
-					"Modes",
-					"Mouvement",
-					"Organisation",
-					"Origines",
-					"Paysage",
-					"Production",
-					"Recherche",
-					"Sciences -- Documentation",
-					"Sciences -- Vulgarisation",
-					"Sciences de l'information",
-					"Sciences de l'information et de la             communication",
-					"Scientifiques",
-					"Vers",
-					"archives",
-					"dépôt",
-					"exploitation",
-					"lieu",
-					"mouvement/immobilité",
-					"place",
-					"production",
-					"recherche",
-					"représentation de paysage",
-					"Édition scientifique",
-					"Électronique"
-				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Snapshot"
 					},
 					{
-						"title": "Isidore Record",
-						"snapshot": false
-					}
-				],
-				"archiveLocation": "Époque contemporaine",
-				"abstractNote": "L'exploitation rationnelle des résultats de la recherche scientifique dépend en premier lieu de l'accès à ces résultats. C'est de ce principe qu'a émergé le mouvement des archives ouvertes dans les milieux de la recherche afin de prôner un accès libre et gratuit à la littérature scientifique mondiale. La maîtrise de ce mouvement quand à ses principes, ses techniques....justifie cette étude qui se propose de définir un prototype d'archive ouverte institutionnelle (CERIST d'Alger) et multidisciplinaire pour les communautés scientifiques algériennes. Pour atteindre cet objectif, nous avons, dans un premier lieu, fait un rappel sur les origines et les évolutions du mouvement des archives ouvertes (Open Archive) dans le paysage de la communication scientifique. Puis, nous avons étudié quelques dépôts d'archives afin de nous inspirer de leur modes d'organisation et de fonctionnement dans la réalisation de notre prototype d'archive ouverte que nous avons nommé ArchivAlg. La suite de cette recherche expose dans une démarche constructive les étapes de création et de mise en oeuvre de notre prototype et propose vers la fin quelques perspectives de promotion de l'archivage libre en Algérie.",
-				"thesisType": "Mémoires, Thèses et HDR",
-				"language": "Arabe",
-				"url": "http://tel.archives-ouvertes.fr/tel-00167331",
-				"libraryCatalog": "rechercheisidore.fr",
-				"shortTitle": "Mise en place d'un prototype d'archive ouverte institutionnelle ARCHIVALG",
-				"title": "Mise en place d'un prototype d'archive ouverte institutionnelle ARCHIVALG : cas de la production scientifique du CERIST d'ALGER",
-				"university": "Centre pour la communication scientifique directe",
-				"date": "2007-05-30"
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://rechercheisidore.fr/search/resource/?uri=10670/1.mucjwn",
-		"items": [
-			{
-				"itemType": "webpage",
-				"creators": [
+						"firstName": "Madjid",
+						"lastName": "Dahmane",
+						"creatorType": "author"
+					},
 					{
-						"firstName": "Institut de recherche sur le",
-						"lastName": "développement",
+						"firstName": "Rahima",
+						"lastName": "Slimani",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Sociologie",
-					"Sociologie",
-					"Sociologie de la santé",
-					"Santé",
-					"santé",
-					"Couple",
-					"Enfants",
-					"enfant",
-					"Sud (point cardinal)",
-					"Nord (point cardinal)",
-					"Hommes",
-					"Sein",
-					"mère",
-					"bien",
-					"Cas",
-					"Sphère",
-					"sphère",
-					"mariage",
-					"Mariage",
-					"Prévention",
-					"Information scientifique",
-					"Sciences -- Documentation",
-					"Sciences -- Vulgarisation",
-					"Information technique",
-					"Documentation technique",
-					"rapports sociaux",
-					"Relations humaines",
-					"Développement",
-					"Concept",
-					"Reproduction",
-					"restitution",
-					"Et les femmes",
-					"Nouvelle",
-					"nouvelle",
-					"sexualité",
-					"Sexualité",
-					"Risque",
-					"Vie",
-					"vie",
-					"Membres",
-					"Soins",
-					"père",
-					"lieu",
-					"place",
-					"Matière",
-					"matière",
-					"source",
-					"Monde",
-					"cosmos",
-					"Évolution",
-					"Âge",
-					"entrée",
-					"Concorde",
-					"union",
-					"Femmes",
-					"Arrestine 4",
-					"Nouvelles",
-					"concubinage",
-					"polygamie",
-					"Polygamie",
-					"Africains",
-					"Africains",
-					"Pacte civil de solidarité",
-					"Contexte",
-					"Couples homosexuels",
-					"droit",
-					"Droit",
-					"coudée",
-					"Enquêtes",
-					"Sida",
-					"Vie sexuelle -- Enquêtes",
-					"Expériences",
-					"recherche",
-					"Recherche",
-					"réflexion",
-					"Sciences sociales",
-					"Propriété foncière",
-					"Domaine public",
-					"Virus de l'immunodéficience humaine",
-					"Planification",
-					"Reproduction humaine",
-					"espace",
-					"Espace",
-					"rue",
-					"Autobus",
-					"Télécopie",
-					"Cédéroms"
-				],
-				"seeAlso": [],
+				"date": "2008-05-29",
+				"abstractNote": "Au cours de la dernière décennie, le monde de la communication scientifique a subi des mutations majeures engendrées principalement par la généralisation de l'utilisation des Technologies de l'Information et de la Communication. Ces mutations se distinguent par le développement de nouvelles tendances dont le mouvement des Archives ouvertes. En effet, l'initiative en faveur des archives ouvertes a émergé dans les milieux de la recherche dans le but de prôner un Accès Libre et gratuit à la littérature scientifique mondiale. Afin d'accompagner ce mouvement et de maîtriser ses principes et ses techniques, un prototype d'archive ouverte institutionnelle (CERIST d'Alger) et multidisciplinaire a été mis en place pour les communautés scientifiques algériennes. Ce prototype d'archive nommé ‘ArchivAlg' permet aux chercheurs de diffuser librement sur Internet leurs travaux de recherche. L'expérimentation de ce dispositif a montré que les chercheurs algériens sont peu familiarisés au dépôt dans les bases d'archives. Aujourd'hui, la question des archives ouvertes est stratégique pour le contexte algérien, elle est même indispensable pour valoriser et offrir une meilleure visibilité aux publications scientifiques et enrichir le patrimoine scientifique national d'où la nécessité de sensibiliser les chercheurs algériens et leurs institutions aux intérêts et retombées positifs de l'adoption de ces systèmes ouverts d'accès à l'Information Scientifique et Technique.",
+				"archiveLocation": "Époque contemporaine",
+				"language": "Français",
+				"libraryCatalog": "www.rechercheisidore.fr",
+				"publisher": "Centre pour la communication scientifique directe",
+				"shortTitle": "LES CHERCHEURS ALGERIENS ET LA PUBLICATION ELECTRONIQUE DANS LES ARCHIVES OUVERTES",
+				"url": "https://archivesic.ccsd.cnrs.fr/sic_00284311",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -455,34 +277,133 @@ var testCases = [
 						"snapshot": false
 					}
 				],
-				"title": "Séminaire \"Quand la santé questionne le couple - Correspondances Sud et Nord\"",
-				"publisher": "Institut de recherche sur le développement",
-				"institution": "Institut de recherche sur le développement",
-				"company": "Institut de recherche sur le développement",
-				"label": "Institut de recherche sur le développement",
-				"distributor": "Institut de recherche sur le développement",
-				"date": "2010-10-21",
-				"archiveLocation": "Époque contemporaine",
-				"abstractNote": "Séminaire organisé par Annabel DESGREES du LOU, Agnès GUILLAUME et Dolorès POURETTE Équipe &quot;Genre et Santé&quot; du Ceped \n\n\n\nLes dernières décennies ont été marquées par la prise en compte croissante des rapports sociaux entre les sexes, dans le champ de la santé comme dans les autres champs du développement. À partir de 1994, le concept de santé de la reproduction tel que défini lors de la conférence du Caire conduit à prendre en compte les hommes et les femmes et implique donc une nouvelle façon d’aborder les questions de santé au sein des couples : avoir une sexualité sans risque et avoir des enfants sans mettre en danger ni la vie de la mère ni celle de l’enfant concerne bien les deux membres d’un couple. Plus tard, les soins à porter à l’enfant impliqueront aussi, dans la majorité des cas, son père (biologique ou social) et sa mère. La sphère conjugale est donc le lieu où prennent place les décisions et les pratiques en matière de santé sexuelle et reproductive et de santé de l’enfant.\n\n\nMais à quelle entité correspond cette sphère conjugale selon les contextes sociaux ?\n\n\n\nD’une part, on observe, dans le monde entier, une profonde évolution des structures familiales. Celle-ci s’est accompagnée d’un bouleversement des situations conjugales : dans de nombreux pays, l’âge « d’entrée en union » a reculé tant pour les femmes que pour les hommes, les unions durent moins longtemps car on se sépare plus vite et plus facilement.\n\n\nD’autre part, de nouvelles formes de mise en couple existent, en dehors du mariage : unions libres avec ou sans cohabitation, système de polygamie officieuse dans les pays africains où celle-ci est devenue légalement interdite, PACS dans le cas de la France. Dans ce contexte, émerge aussi une revendication à la reconnaissance des couples homosexuels (droit au mariage, à avoir des enfants).\n\n\nDans cette multiplicité des formes conjugales actuelles, la notion même de couple reste peu questionnée. \nElle est même bien souvent évitée. Dans de nombreuses enquêtes ce sont les catégories matrimoniales classiques qui restent utilisées, et qui ne prennent pas en compte les formes conjugales non formalisées, ou non cohabitantes. Dans le champ de la prévention des IST et du Sida ou dans les enquêtes sur la sexualité, on parle de partenariat (sous entendu sexuel) occasionnel ou régulier, notion sensiblement différente de celle de relation conjugale.\n\n\nÀ partir d’expériences croisées de recherche au Sud et au Nord, ce séminaire interrogera cette notion de couple et de conjugalité. \nLa matinée sera consacrée à une réflexion sur la pluralité des situations qu’elle recouvre et conduira à analyser la façon dont les différentes sciences sociales appréhendent la relation conjugale.\n\n\nL’après-midi, nous examinerons, à travers différentes recherches, comment se structurent les choix et décisions de santé au sein de ces &quot;couples&quot; dans quatre domaines de la santé reproductive : la prévention des IST et du VIH, la planification des grossesses et des naissances, l’assistante médicale à la procréation, les soins de santé des petits enfants.\n\n\n\nCe séminaire se tiendra à l’Espace MONCASSIN, 164 rue de Javel, 75015 ParisMétro Félix Faure, Bus 70-88-62\n\n\n\nContact : \nYvonne LAFITTE : \n\n\n\n\n\t\n\t\t\tyvonne.lafitte@ceped.org \n\n\t\n\n\n\n\nTél. : 01 78 94 98 72 − Fax : 01 78 94 98 79\n\n\nSéminaire  &quot;Quand la santé questionne le couple&quot; - Bulletin d'inscription\n\n\nTélécharger le document (DOC, 113 Ko)Séminaire  &quot;Quand la santé questionne le couple&quot; - Bulletin d'inscription\t\t\n\t\t\nSéminaire &quot;Quand la santé questionne le couple&quot; - Description\n\n\nTélécharger le document (PDF, 115 Ko)Séminaire &quot;Quand la santé questionne le couple&quot; - Description\t\t\n\t\t\nSéminaire &quot;Quand la santé questionne le couple&quot; - Programme provisoire\n\n\nTélécharger le document (PDF, 112 Ko)Séminaire &quot;Quand la santé questionne le couple&quot; - Programme provisoire",
-				"reportType": "Page Web",
-				"letterType": "Page Web",
-				"manuscriptType": "Page Web",
-				"mapType": "Page Web",
-				"thesisType": "Page Web",
-				"websiteType": "Page Web",
-				"presentationType": "Page Web",
-				"postType": "Page Web",
-				"audioFileType": "Page Web",
-				"url": "http://www.ird.fr/index.php/toute-l-actualite/evenements-et-manifestations/colloques/seminaire-quand-la-sante-questionne-le-couple-correspondances-sud-et-nord",
-				"libraryCatalog": "rechercheisidore.fr",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"language": "Français"
+				"tags": [
+					"Adoption",
+					"Algériennes",
+					"Algériens",
+					"Archives",
+					"Bénédiction et malédiction",
+					"Chercheurs",
+					"Communautés",
+					"Communication",
+					"Digital humanities",
+					"Documentation technique",
+					"Développement",
+					"Expériences",
+					"Information",
+					"Information scientifique",
+					"Information technique",
+					"Internet",
+					"Littérature",
+					"Monde",
+					"Mouvement",
+					"Mutations",
+					"Nouvelles",
+					"Nécessité",
+					"Patrimoine",
+					"Rapports techniques",
+					"Recherche",
+					"Sciences de l'information",
+					"Sciences de l'information et de la communication",
+					"Scientifiques",
+					"Technique",
+					"Thèses et écrits académiques",
+					"Utilisation",
+					"Visibilité",
+					"administrations",
+					"adoption",
+					"archives",
+					"cosmos",
+					"dépôt",
+					"expérimentation",
+					"littérature",
+					"mouvement/immobilité",
+					"nécessité",
+					"patrimoine",
+					"place",
+					"publication",
+					"recherche",
+					"technologie",
+					"Édition",
+					"Édition scientifique",
+					"Édition électronique",
+					"Électronique"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://rechercheisidore.fr/search/?type=http://www.rechercheisidore.fr/ontology/art",
+		"url": "https://www.rechercheisidore.fr/search/resource/?uri=10670/1.gmcezm",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Théories pré-keynésiennes de l’instabilité financière : Marx, Veblen, Hawtrey",
+				"creators": [
+					{
+						"firstName": "Julien",
+						"lastName": "Mendez",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-05-02",
+				"abstractNote": "Cette thèse montre que l’on peut trouver chez Marx, Veblen et Hawtrey trois théories pré-keynésiennes de l’instabilité financière. Elle dégage, pour chacun d’eux, le cadre théorique qu’il met en place et qui lui permet de poser la question du rôle de la finance dans la dynamique économique. Elle analyse ensuite leurs écrits pour montrer que l’on peut en déduire des théories (incomplètes) de l’instabilité financière, c’est-à-dire que les perturbations économiques sont dues à la manière dont les entreprises se financent. Le chapitre I reconstruit la théorie marxienne des marchés financiers, ce qui permet, dans le chapitre II, de montrer le rôle central joué par la finance dans l’explication du cycle économique chez Marx. Le chapitre III dégage les éléments qui font de la théorie de Veblen une théorie du capitalisme financier, puis, dans le chapitre IV, discute cette dernière pour montrer qu’il s’agit d’une théorie de l’instabilité financière. Le chapitre V propose une représentation du modèle macroéconomique de Hawtrey, à partir de laquelle le chapitre VI dégage les conditions dans lesquelles le crédit est instable dans sa théorie. Le chapitre VII fait le lien entre les théories de ces auteurs et les faits économiques dont la connaissance a nourri leur réflexion : les théories de l’instabilité financière sont à la fois une explication, une représentation et un projet de régulation du capitalisme financier",
+				"language": "Français",
+				"libraryCatalog": "www.rechercheisidore.fr",
+				"shortTitle": "Théories pré-keynésiennes de l’instabilité financière",
+				"thesisType": "Mémoires, Thèses et HDR",
+				"university": "ABES",
+				"url": "http://www.theses.fr/2012PA100060/document",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Isidore Record",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Analyse",
+					"Capitalisme",
+					"Cognition",
+					"Commande",
+					"Crédit",
+					"Cycles",
+					"Discussion",
+					"Dynamique",
+					"Economies et finances",
+					"Entreprises",
+					"Explication",
+					"Finances",
+					"Histoire économique",
+					"Main",
+					"Marché financier",
+					"Places financières",
+					"Projet",
+					"Stabilité",
+					"Terrains de golf",
+					"Théorie de la",
+					"capitalisme",
+					"crédit",
+					"main",
+					"modèle",
+					"place",
+					"réflexion",
+					"Économie",
+					"Économie politique",
+					"Écrivains"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.rechercheisidore.fr/search?q=libert%C3%A9",
 		"items": "multiple"
 	}
 ]

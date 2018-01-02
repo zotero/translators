@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-10-11 17:07:44"
+	"lastUpdated": "2016-12-19 05:02:00"
 }
 
 /*
@@ -355,7 +355,7 @@ function addEmbMeta(doc, url) {
 	});
 
 	translator.getTranslatorObject(function(trans) {
-        trans.doWeb(doc, url);
+		trans.doWeb(doc, url);
    	});
 }
 
@@ -412,92 +412,6 @@ function doWeb(doc, url) {
 }
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://rer.sagepub.com/content/52/2/201.abstract",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "The Role of the Laboratory in Science Teaching: Neglected Aspects of Research",
-				"creators": [
-					{
-						"firstName": "Avi",
-						"lastName": "Hofstein",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Vincent N.",
-						"lastName": "Lunetta",
-						"creatorType": "author"
-					}
-				],
-				"date": "06/01/1982",
-				"DOI": "10.3102/00346543052002201",
-				"ISSN": "0034-6543, 1935-1046",
-				"abstractNote": "The laboratory has been given a central and distinctive role in science education, and science educators have suggested that there are rich benefits in learning from using laboratory activities. At this time, however, some educators have begun to question seriously the effectiveness and the role of laboratory work, and the case for laboratory teaching is not as self-evident as it once seemed. This paper provides perspectives on these issues through a review of the history, goals, and research findings regarding the laboratory as a medium of instruction in introductory science teaching. The analysis of research culminates with suggestions for researchers who are working to clarify the role of the laboratory in science education.",
-				"issue": "2",
-				"journalAbbreviation": "REVIEW OF EDUCATIONAL RESEARCH",
-				"language": "en",
-				"libraryCatalog": "rer.sagepub.com",
-				"pages": "201-217",
-				"publicationTitle": "Review of Educational Research",
-				"shortTitle": "The Role of the Laboratory in Science Teaching",
-				"url": "http://rer.sagepub.com/content/52/2/201",
-				"volume": "52",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277.abstract",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Modding the History of Science: Values at Play in Modder Discussions of Sid Meier’s CIVILIZATION",
-				"creators": [
-					{
-						"firstName": "Trevor",
-						"lastName": "Owens",
-						"creatorType": "author"
-					}
-				],
-				"date": "2010-05-27",
-				"DOI": "10.1177/1046878110366277",
-				"ISSN": "1046-8781, 1552-826X",
-				"abstractNote": "Sid Meier’s CIVILIZATION has been promoted as an educational tool, used as a platform for building educational simulations, and maligned as promoting Eurocentrism, bioimperialism, and racial superiority. This article explores the complex issues involved in interpreting a game through analysis of the ways modders (gamers who modify the game) have approached the history of science, technology, and knowledge embodied in the game. Through text analysis of modder discussion, this article explores the assumed values and tone of the community’s discourse. The study offers initial findings that CIVILIZATION modders value a variety of positive discursive practices for developing historical models. Community members value a form of historical authenticity, they prize subtlety and nuance in models for science in the game, and they communicate through civil consensus building. Game theorists, players, and scholars, as well as those interested in modeling the history, sociology, and philosophy of science, will be interested to see the ways in which CIVILIZATION III cultivates an audience of modders who spend their time reimagining how science and technology could work in the game.",
-				"journalAbbreviation": "Simulation Gaming",
-				"language": "en",
-				"libraryCatalog": "sag.sagepub.com",
-				"publicationTitle": "Simulation & Gaming",
-				"shortTitle": "Modding the History of Science",
-				"url": "http://sag.sagepub.com/content/early/2010/04/23/1046878110366277",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "http://bjaesthetics.oxfordjournals.org/search?fulltext=art&submit=yes&x=0&y=0",
@@ -876,7 +790,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10.abstract",
+		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -903,17 +817,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "01/01/2012",
+				"date": "2012/01/01",
 				"DOI": "10.1302/0301-620X.94B1.28047",
-				"ISSN": "2049-4394, 2049-4408",
-				"abstractNote": "The most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
+				"ISSN": "0301-620X, 2044-5377",
+				"abstractNote": "Skip to Next Section\nThe most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
 				"extra": "PMID: 22219240",
 				"issue": "1",
 				"journalAbbreviation": "J Bone Joint Surg Br",
 				"language": "en",
 				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
 				"pages": "10-15",
-				"publicationTitle": "Journal of Bone & Joint Surgery, British Volume",
+				"publicationTitle": "J Bone Joint Surg Br",
+				"rights": "©2012 British Editorial Society of\nBone and Joint Surgery",
 				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
 				"volume": "94-B",
 				"attachments": [
@@ -1013,7 +928,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencemag.org/content/340/6131/483",
+		"url": "http://science.sciencemag.org/content/340/6131/483",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1035,18 +950,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "04/26/2013",
+				"date": "2013/04/26",
 				"DOI": "10.1126/science.1232769",
 				"ISSN": "0036-8075, 1095-9203",
-				"abstractNote": "Conformity to local behavioral norms reflects the pervading role of culture in human life. Laboratory experiments have begun to suggest a role for conformity in animal social learning, but evidence from the wild remains circumstantial. Here, we show experimentally that wild vervet monkeys will abandon personal foraging preferences in favor of group norms new to them. Groups first learned to avoid the bitter-tasting alternative of two foods. Presentations of these options untreated months later revealed that all new infants naïve to the foods adopted maternal preferences. Males who migrated between groups where the alternative food was eaten switched to the new local norm. Such powerful effects of social learning represent a more potent force than hitherto recognized in shaping group differences among wild animals.\nAnimal Culture\nCultural transmission of information occurs when individuals learn from others with more experience or when individuals come to accept particular modes of behavior as the local norm. Such information transfer can be expected in highly social or long-lived species where contact and time for learning are maximized and are seen in humans (see the Perspective by de Waal). Using a network-based diffusion analysis on a long-term data set that includes tens of thousands of observations of individual humpback whales, Allen et al. (p. 485) show that an innovative feeding behavior has spread through social transmission since it first emerged in a single individual in 1980. The “lobtail” feeding has passed among associating individuals for more than three decades. Van de Waal et al. (p. 483), on the other hand, used a controlled experimental approach in vervet monkeys to show that individuals learn what to eat from more experienced individuals within their social group. Not only did young animals learn from observing older animals, but immigrating males switched their food preference to that of their new group.",
+				"abstractNote": "Animal Culture\nCultural transmission of information occurs when individuals learn from others with more experience or when individuals come to accept particular modes of behavior as the local norm. Such information transfer can be expected in highly social or long-lived species where contact and time for learning are maximized and are seen in humans (see the Perspective by de Waal). Using a network-based diffusion analysis on a long-term data set that includes tens of thousands of observations of individual humpback whales, Allen et al. (p. 485) show that an innovative feeding behavior has spread through social transmission since it first emerged in a single individual in 1980. The “lobtail” feeding has passed among associating individuals for more than three decades. Van de Waal et al. (p. 483), on the other hand, used a controlled experimental approach in vervet monkeys to show that individuals learn what to eat from more experienced individuals within their social group. Not only did young animals learn from observing older animals, but immigrating males switched their food preference to that of their new group.\nConformity to local behavioral norms reflects the pervading role of culture in human life. Laboratory experiments have begun to suggest a role for conformity in animal social learning, but evidence from the wild remains circumstantial. Here, we show experimentally that wild vervet monkeys will abandon personal foraging preferences in favor of group norms new to them. Groups first learned to avoid the bitter-tasting alternative of two foods. Presentations of these options untreated months later revealed that all new infants naïve to the foods adopted maternal preferences. Males who migrated between groups where the alternative food was eaten switched to the new local norm. Such powerful effects of social learning represent a more potent force than hitherto recognized in shaping group differences among wild animals.\nA natural experiment reveals that wild vervet migrants adopt local norms when it comes to choosing foods. [Also see Perspective by de Waal]\nA natural experiment reveals that wild vervet migrants adopt local norms when it comes to choosing foods. [Also see Perspective by de Waal]",
 				"extra": "PMID: 23620053",
 				"issue": "6131",
-				"journalAbbreviation": "Science",
 				"language": "en",
-				"libraryCatalog": "www.sciencemag.org",
+				"libraryCatalog": "science.sciencemag.org",
 				"pages": "483-485",
 				"publicationTitle": "Science",
-				"url": "http://www.sciencemag.org/content/340/6131/483",
+				"rights": "Copyright © 2013, American Association for the Advancement of Science",
+				"url": "http://science.sciencemag.org/content/340/6131/483",
 				"volume": "340",
 				"attachments": [
 					{
@@ -1067,11 +982,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://oss.sagepub.com/search/results?fulltext=labor&x=0&y=0&submit=yes&journal_set=sposs&src=selected&andorexactfulltext=and",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -1284,6 +1194,7 @@ var testCases = [
 				"date": "2001/01/06",
 				"DOI": "10.1136/bmj.322.7277.29",
 				"ISSN": "0959-8138, 1468-5833",
+				"abstractNote": "By 2010 the number of people with diabetes is expected to exceed 350 million. Late diabetic complications will cause considerable morbidity in 5-10% of these patients and place an enormous burden on society. Transplantation of insulin producing islet cells isolated in vitro from a donor pancreas could be a cure for type 1 and some cases of type 2 diabetes. Currently, however, lack of sufficient donor organs and the side effects of immunosuppressive therapy limit its potential. Ways to overcome these problems include deriving islet cells from other sources such as pigs, human pancreatic duct cells, fetal pancreatic stem cells, embryonic stem cells, and by therapeutic cloning. This article outlines these developments and discusses how islet cell transplantation is likely to become the treatment of choice for most insulin dependent diabetics within the next five to 10 years.\n\nOur article is based on information from the following core references: the international islet transplant registry; recently published articles describing improvements in islet cell transplantation, reporting treatment of diabetes in animal models with islet cells grown in vitro, and describing novel molecular mechanisms in pancreatic endocrine development (including our own recent work); papers in embryonic and adult stem cell research that have had a major influence on our thinking; and the seminal work from the Roslin Institute and other groups on nuclear transfer.\n\nIn many cases current diabetes drug therapies do not provide sufficiently tight control of blood glucose to avoid diabetic late complications. 1 2 Transplantation of whole donor pancreas is an effective form of treatment but is of limited application since it entails major surgery and long term immunosuppression. This failure to prevent the morbidity associated with diabetes places an enormous burden not only on patients and their relatives but also on society. The costs of treating late diabetic complications …",
 				"extra": "PMID: 11141151",
 				"issue": "7277",
 				"journalAbbreviation": "BMJ",
@@ -1353,10 +1264,11 @@ var testCases = [
 				"ISSN": "1756-1833",
 				"abstractNote": "Objective To investigate relation between inpatient length of stay after hip fracture and risk of death after hospital discharge.\nSetting Population ≥50 years old living in Sweden as of 31 December 2005 with a first hip fracture the years 2006-12.\nParticipants 116 111 patients with an incident hip fracture from a closed nationwide cohort.\nMain outcome measure Death within 30 days of hospital discharge in relation to hospital length of stay after adjustment for multiple covariates.\nResults Mean inpatient length of stay after a hip fracture decreased from 14.2 days in 2006 to 11.6 days in 2012 (P<0.001). The association between length of stay and risk of death after discharge was non-linear (P<0.001), with a threshold for this non-linear effect of about 10 days. Thus, for patients with length of stay of ≤10 days (n=59 154), each 1-day reduction in length of stay increased the odds of death within 30 days of discharge by 8% in 2006 (odds ratio 1.08 (95% confidence interval 1.04 to 1.12)), which increased to16% in 2012 (odds ratio 1.16 (1.12 to 1.20)). In contrast, for patients with a length of stay of ≥11 days (n=56 957), a 1-day reduction in length of stay was not associated with an increased risk of death after discharge during any of the years of follow up.\nLimitations No accurate evaluation of the underlying cause of death could be performed.\nConclusion Shorter length of stay in hospital after hip fracture is associated with increased risk of death after hospital discharge, but only among patients with length of stay of 10 days or less. This association remained robust over consecutive years.",
 				"extra": "PMID: 25700551",
+				"journalAbbreviation": "BMJ",
 				"language": "en",
 				"libraryCatalog": "www.bmj.com",
 				"pages": "h696",
-				"publicationTitle": "The BMJ",
+				"publicationTitle": "BMJ",
 				"rights": "© Nordström et al 2015. This is an Open Access article distributed in accordance with the Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited and the use is non-commercial. See:  http://creativecommons.org/licenses/by-nc/4.0/.",
 				"shortTitle": "Length of hospital stay after hip fracture and short term risk of death after discharge",
 				"url": "http://www.bmj.com/content/350/bmj.h696",

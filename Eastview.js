@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-01 13:01:04"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-12-01 06:32:25"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-	if (url.search("/search/simple/articles?") != -1 || url.indexOf("/search/advanced/articles") != -1 || url.search(/browse\/(favorites|issue)/) != -1) {
+	if (url.includes("/search/simple/articles?") || url.includes("/search/advanced/articles") || url.search(/browse\/(favorites|issue)/) != -1) {
 		if (ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a').length) return "multiple";
 	} else {
 		return "newspaperArticle"
@@ -87,7 +87,7 @@ function scrape(doc, url) {
 	Z.debug(url)
 	var item = new Zotero.Item("newspaperArticle");
 	var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
-	item.publication = publication;
+	item.publicationTitle = publication;
 	var voliss = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/issue/")]');
 	if (voliss) {
 		var issue = voliss.match(/No\. (\d+)/);
@@ -116,7 +116,8 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"))
 			}
 		}
-		item.place = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Place of Publication")]/following-sibling::td');
+		var place = ZU.xpathText(doc, '//table[@id="metatable"]//td[@class="hdr" and contains(text(), "Place of Publication")]/following-sibling::td');
+		if (place) item.place = ZU.trimInternal(place);
 	} else {
 		var title = ZU.xpathText(doc, '//div[@class="change_font"]');
 		//the "old" page format. We have very little structure here, doing the best we can.	
@@ -127,10 +128,10 @@ function scrape(doc, url) {
 	}
 
 	//see if we have a match for item type; default to newspaper otherwise.
-	var itemType = typeMap[item.publication];
+	var itemType = typeMap[item.publicationTitle];
 	if (itemType) item.itemType = itemType;
 	item.attachments.push({
-		document: doc,
+		url: url,
 		title: "Eastview Fulltext Snapshot",
 		mimeType: "text/html"
 	});
@@ -139,7 +140,7 @@ function scrape(doc, url) {
 	}
 	item.title = title;
 	//sometimes items actually don't have a title: use the publication title instead.
-	if (!item.title) item.title = item.publication;
+	if (!item.title) item.title = item.publicationTitle;
 	item.complete();
 
 }
@@ -217,38 +218,38 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dlib.eastview.com/browse/doc/2945904",
+		"url": "https://dlib.eastview.com/browse/doc/2945904",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Moscow",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "02-11-98",
+				"libraryCatalog": "Russian Central Newspapers (Eastview)",
+				"publicationTitle": "ITAR-TASS  Daily",
 				"attachments": [
 					{
 						"title": "Eastview Fulltext Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"publication": "ITAR-TASS  Daily",
-				"issue": "9",
-				"libraryCatalog": "Russian Central Newspapers (Eastview)",
-				"date": "02-11-98",
-				"title": "Moscow"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://dlib.eastview.com/browse/doc/39272962",
+		"url": "https://dlib.eastview.com/browse/doc/39272962",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Zanitnyi raketnyi kompleks S-300F \"Fort\"",
 				"creators": [
 					{
 						"firstName": "Rostislav",
-						"lastName": "Angel'skii'",
+						"lastName": "Angel'skii",
 						"creatorType": "author"
 					},
 					{
@@ -257,22 +258,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "March 2014",
+				"libraryCatalog": "Russian Military & Security Periodicals (Eastview)",
+				"place": "Moscow, Russian Federation",
+				"publicationTitle": "Tekhnika i vooruzhenie",
 				"attachments": [
 					{
 						"title": "Eastview Fulltext Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"publication": "Tekhnika i vooruzhenie",
-				"issue": "3",
-				"libraryCatalog": "Military & Security Periodicals (Eastview)",
-				"date": "March 2014",
-				"page": "20-24",
-				"place": "Moscow, Russian Federation",
-				"title": "Zanitnyi' raketnyi' kompleks S-300F \"Fort\""
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -282,21 +280,21 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Narodnaia gazeta",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "March 20, 2014",
+				"libraryCatalog": "Baltics, Belarus, Moldova, Ukraine (Eastview)",
+				"place": "Minsk, Belarus",
+				"publication": "Narodnaia gazeta",
 				"attachments": [
 					{
 						"title": "Eastview Fulltext Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"publication": "Narodnaia gazeta",
-				"libraryCatalog": "Baltics, Belarus, Moldova, Ukraine (Eastview)",
-				"date": "March 20, 2014",
-				"place": "Minsk, Belarus",
-				"title": "Narodnaia gazeta"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

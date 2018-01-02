@@ -2,14 +2,14 @@
 	"translatorID": "838d8849-4ffb-9f44-3d0d-aa8a0a079afe",
 	"label": "OCLC WorldCat FirstSearch",
 	"creator": "Simon Kornblith",
-	"target": "https?://[^/]*firstsearch\\.oclc\\.org[^/]*/WebZ/",
+	"target": "^https?://[^/]*firstsearch\\.oclc\\.org[^/]*/WebZ/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2013-02-25 18:54:22"
+	"lastUpdated": "2017-01-01 15:28:35"
 }
 
 function detectWeb(doc, url) {
@@ -31,10 +31,6 @@ function processURLs(urls, url) {
 	}
 	var newUrl = urls.shift();
 
-	//if non-roman characters are shown, shift the charset to utf-8,
-	//else move it to iso8859 so that accented roman letters work
-	if (url.match(/dfltcharset\=UTF\-8/)) var charset="utf-8";
-	else var charset="iso-8859-1"
 	Zotero.Utilities.HTTP.doPost(newUrl,
 	'exportselect=record&exporttype=wc-endnote', function(text) {
 		Z.debug(text)
@@ -127,8 +123,8 @@ function processURLs(urls, url) {
 				}
 				else if(match[1] == "Abstract") {
 					newItem.abstractNote = match[2];
-				} else if(match[1] == "Accession No") {
-					newItem.accessionNumber = ZU.trimInternal(match[2]);
+				} else if(match[1] == "Accession No" && match[2].indexOf("OCLC") != -1) {
+					newItem.extra = ZU.trimInternal(match[2]);
 				} else if(match[1] == "Degree") {
 					newItem.itemType = "thesis";
 					newItem.thesisType = match[2];
@@ -156,7 +152,7 @@ function processURLs(urls, url) {
 
 		newItem.complete();
 		processURLs(urls, url);
-	}, false, charset);
+	});
 }
 
 function doWeb(doc, url) {

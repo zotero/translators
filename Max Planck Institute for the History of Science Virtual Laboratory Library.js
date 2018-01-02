@@ -86,6 +86,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "A descriptive list of anthropometric apparatus, consisting of instruments for measuring and testing the chief physical characteristics of the human body. Designed under the direction of Mr. Francis Galton",
 				"creators": [
 					{
 						"firstName": "The Cambridge Scientific Instrument",
@@ -93,16 +94,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"date": "1887",
-				"title": "A descriptive list of anthropometric apparatus, consisting of instruments for measuring and testing the chief physical characteristics of the human body. Designed under the direction of Mr. Francis Galton",
+				"language": "English",
+				"libraryCatalog": "Max Planck Institute for the History of Science: Virtual Laboratory Library",
 				"place": "Cambridge",
 				"url": "http://vlp.mpiwg-berlin.mpg.de/references?id=lit38593",
-				"libraryCatalog": "Max Planck Institute for the History of Science: Virtual Laboratory Library",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

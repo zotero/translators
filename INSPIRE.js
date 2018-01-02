@@ -113,6 +113,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Electromagnetic Radiation in Hot QCD Matter: Rates, Electric Conductivity, Flavor Susceptibility and Diffusion",
 				"creators": [
 					{
 						"firstName": "Chang-Hwan",
@@ -125,17 +126,31 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					"27 pages, 11 figures "
+				"date": "2014-08-12",
+				"DOI": "10.1103/PhysRevC.90.025204",
+				"abstractNote": "We discuss the general features of the electromagnetic radiation from a thermal hadronic gas as constrained by chiral symmetry. The medium effects on the electromagnetic spectral functions and the partial restoration of chiral symmetry are quantified in terms of the pion densities. The results are compared with the electromagnetic radiation from a strongly interacting quark-gluon plasma in terms of the leading gluon condensate operators. We use the spectral functions as constrained by the emission rates to estimate the electric conductivity, the light flavor susceptibility and diffusion constant across the transition from the correlated hadronic gas to a strongly interacting quark-gluon plasma.",
+				"libraryCatalog": "INSPIRE",
+				"pages": "025204",
+				"publicationTitle": "Phys.Rev.",
+				"shortTitle": "Electromagnetic Radiation in Hot QCD Matter",
+				"volume": "C90",
+				"attachments": [
+					{
+						"title": "INSPIRE Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "INSPIRE PDF Full Text",
+						"mimeType": "application/pdf`"
+					}
 				],
 				"tags": [
-					"* Automatic Keywords *",
 					"conductivity: electric",
 					"diffusion",
 					"flavor",
 					"flux",
-					"gas",
 					"gluon: condensation",
+					"hadron: gas",
 					"matter: effect",
 					"pi: density",
 					"quantum chromodynamics: matter",
@@ -147,22 +162,10 @@ var testCases = [
 					"symmetry: chiral",
 					"thermal"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "INSPIRE Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "INSPIRE PDF Full Text",
-						"mimeType": "application/pdf`"
-					}
+				"notes": [
+					"27 pages, 11 figures "
 				],
-				"title": "Electromagnetic Radiation in Hot QCD Matter: Rates, Electric Conductivity, Flavor Susceptibility and Diffusion",
-				"date": "2014",
-				"abstractNote": "We discuss the general features of the electromagnetic radiation from a thermal hadronic gas as constrained by chiral symmetry. The medium effects on the electromagnetic spectral functions and the partial restoration of chiral symmetry are quantified in terms of the pion densities. The results are compared with the electromagnetic radiation from a strongly interacting quark-gluon plasma in terms of the leading gluon condensate operators. We use the spectral functions as constrained by the emission rates to estimate the electric conductivity, the light flavor susceptibility and diffusion constant across the transition from the correlated hadronic gas to a strongly interacting quark-gluon plasma.",
-				"libraryCatalog": "INSPIRE",
-				"shortTitle": "Electromagnetic Radiation in Hot QCD Matter"
+				"seeAlso": []
 			}
 		]
 	},
@@ -172,6 +175,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Relativistically induced transparency acceleration of light ions by an ultrashort laser pulse interacting with a heavy-ion-plasma density gradient",
 				"creators": [
 					{
 						"firstName": "Aakash A.",
@@ -199,9 +203,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013-10-28",
+				"DOI": "10.1103/PhysRevE.88.043105",
+				"abstractNote": "The relativistically induced transparency acceleration (RITA) scheme of proton and ion acceleration using laser-plasma interactions is introduced, modeled, and compared to the existing schemes. Protons are accelerated with femtosecond relativistic pulses to produce quasimonoenergetic bunches with controllable peak energy. The RITA scheme works by a relativistic laser inducing transparency to densities higher than the cold-electron critical density, while the background heavy ions are stationary. The rising laser pulse creates a traveling acceleration structure at the relativistic critical density by ponderomotively driving a local electron density inflation, creating an electron snowplow and a co-propagating electrostatic potential. The snowplow advances with a velocity determined by the rate of the rise of the laser's intensity envelope and the heavy-ion-plasma density gradient scale length. The rising laser is incrementally rendered transparent to higher densities such that the relativistic-electron plasma frequency is resonant with the laser frequency. In the snowplow frame, trace density protons reflect off the electrostatic potential and get snowplowed, while the heavier background ions are relatively unperturbed. Quasimonoenergetic bunches of velocity equal to twice the snowplow velocity can be obtained and tuned by controlling the snowplow velocity using laser-plasma parameters. An analytical model for the proton energy as a function of laser intensity, rise time, and plasma density gradient is developed and compared to 1D and 2D PIC OSIRIS simulations. We model the acceleration of protons to GeV energies with tens-of-femtoseconds laser pulses of a few petawatts. The scaling of proton energy with laser power compares favorably to other mechanisms for ultrashort pulses.",
+				"libraryCatalog": "INSPIRE",
+				"pages": "043105",
+				"publicationTitle": "Phys.Rev.",
+				"volume": "E88",
 				"attachments": [
 					{
 						"title": "INSPIRE Snapshot",
@@ -212,14 +220,9 @@ var testCases = [
 						"mimeType": "application/pdf`"
 					}
 				],
-				"title": "Relativistically induced transparency acceleration of light ions by an ultrashort laser pulse interacting with a heavy-ion-plasma density gradient",
-				"publicationTitle": "Phys.Rev.",
-				"DOI": "10.1103/PhysRevE.88.043105",
-				"pages": "043105",
-				"volume": "E88",
-				"date": "2013-10-28",
-				"abstractNote": "The relativistically induced transparency acceleration (RITA) scheme of proton and ion acceleration using laser-plasma interactions is introduced, modeled, and compared to the existing schemes. Protons are accelerated with femtosecond relativistic pulses to produce quasimonoenergetic bunches with controllable peak energy. The RITA scheme works by a relativistic laser inducing transparency to densities higher than the cold-electron critical density, while the background heavy ions are stationary. The rising laser pulse creates a traveling acceleration structure at the relativistic critical density by ponderomotively driving a local electron density inflation, creating an electron snowplow and a co-propagating electrostatic potential. The snowplow advances with a velocity determined by the rate of the rise of the laser's intensity envelope and the heavy-ion-plasma density gradient scale length. The rising laser is incrementally rendered transparent to higher densities such that the relativistic-electron plasma frequency is resonant with the laser frequency. In the snowplow frame, trace density protons reflect off the electrostatic potential and get snowplowed, while the heavier background ions are relatively unperturbed. Quasimonoenergetic bunches of velocity equal to twice the snowplow velocity can be obtained and tuned by controlling the snowplow velocity using laser-plasma parameters. An analytical model for the proton energy as a function of laser intensity, rise time, and plasma density gradient is developed and compared to 1D and 2D PIC OSIRIS simulations. We model the acceleration of protons to GeV energies with tens-of-femtoseconds laser pulses of a few petawatts. The scaling of proton energy with laser power compares favorably to other mechanisms for ultrashort pulses.",
-				"libraryCatalog": "INSPIRE"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
