@@ -75,7 +75,7 @@ function getSearchResults(doc) {
                 author = tds[1].innerHTML,
                 title = tds[2].innerHTML.replace(/<br>/g, '. ');
 
-            if (!author == '') {
+            if (author) {
                 var item = author.replace(/; <br>.*/, ' et al.') + ": " + title;
             } else {
                 var item = title;
