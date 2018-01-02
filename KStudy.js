@@ -39,10 +39,12 @@
 function detectWeb(doc, url) {
 	if (url.indexOf('/thesis/thesis-view.asp')>-1) {
 		return "journalArticle";
-	} else if (url.search(/\/public\/public\d-article\.asp/)>-1) {
+	} else if (url.indeoxOf('/public2-article.asp')>-1) {
 		// these are reports and working paper series but with publicaton name,
 		// volume, issue numbers; thus handled as journal articles as well
 		return "journalArticle";
+	} else if (url.indexOf('/public3-article.asp')>-1) {
+		return "report";
 	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/sch-search.asp')>-1 || url.indexOf('/search/result_kiss.asp')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -131,11 +133,23 @@ function scrape(doc, url) {
 		var containerParts = containerValue.match(/(.*)\s+(\d+)\D\s*(\d+)/);
 		if (containerParts) {
 			item.publicationTitle = containerParts[1];
-			item.volume = containerParts[2];
+			if (/\d{4}/.test(containerParts[2])) {
+				containerParts[2] = null;
+			} else {
+				item.volume = containerParts[2];
+			}
 			item.issue = containerParts[3] !== '0' ? containerParts[3] : null;
 		}
 	}
-	
+
+	var department = ZU.xpathText(doc, '//li[label[text()="발행기관"]]');
+	if (department && department.includes(':')) {
+		var departmentValue = department.split(':')[1];
+		if (type == "report" && departmentValue) {
+			item.institution = departmentValue;
+		}
+	}
+
 	var date = ZU.xpathText(doc, '//li[label[text()="발행년월" or text()="발행 연도"]]');
 	// e.g. date = 발행년월 : 2012년 04월
 	if (date && date.includes(':')) {
@@ -145,9 +159,12 @@ function scrape(doc, url) {
 	
 	var pages = ZU.xpathText(doc, '//li[label[text()="페이지"]]');
 	// e.g. pages = 페이지 : 43-93(51pages)
-	if (pages && pages.includes(':')) {
-		var pagesValue = pages.split(':')[1];
-		item.pages = pagesValue.split('(')[0].replace('-', '–').replace('pp.', '');
+	if (pages.search('-')>-1) {
+		//This is to avoid importing the total number of pages as the pages value.
+		if (pages && pages.includes(':')) {
+			var pagesValue = pages.split(':')[1];
+			item.pages = pagesValue.split('(')[0].replace('-', '–').replace('pp.', '');
+		}
 	}
 	
 	var abstract = ZU.xpathText(doc, '//comment()[contains(., "초록 보기")]/following-sibling::section[1]');
@@ -319,6 +336,53 @@ var testCases = [
 				"pages": "1–10",
 				"publicationTitle": "Korean Journal of mathematics (강원경기수학회)",
 				"volume": "23",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+	{
+		"type": "web",
+		"url": "http://kiss.kstudy.com/public/public3-article.asp?key=60023584",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "온라인 수업 활성화를 위한 제도 분석",
+				"creators": [
+					{
+						"lastName": "정영식",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "박종필",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "정순원",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "김유리",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "송교준",
+						"fieldMode": true,
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"abstractNote": "초록 보기",
+				"institution": "교육부",
+				"language": "ko-KR",
+				"libraryCatalog": "KStudy",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
