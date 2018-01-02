@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-01 22:27:16"
+	"lastUpdated": "2018-01-02 15:40:30"
 }
 
 /*
@@ -39,7 +39,11 @@
 function detectWeb(doc, url) {
 	if (url.indexOf('/thesis/thesis-view.asp')>-1) {
 		return "journalArticle";
-	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/sch-search.asp')>-1) && getSearchResults(doc, true)) {
+	} else if (url.search(/\/public\/public\d-article\.asp/)>-1) {
+		// these are reports and working paper series but with publicaton name,
+		// volume, issue numbers; thus handled as journal articles as well
+		return "journalArticle";
+	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/sch-search.asp')>-1 || url.indexOf('/search/result_kiss.asp')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -78,8 +82,9 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var item = new Zotero.Item("journalArticle");
-	item.title = ZU.xpathText(doc, '//section[@class="pub-info"]/h3');
+	var type = detectWeb(doc, url);
+	var item = new Zotero.Item(type);
+	item.title = ZU.xpathText(doc, '//section[contains(@class, "pub-info")]//h3');
 	item.language = "ko-KR";
 	
 	var creators = ZU.xpathText(doc, '//div[@class="writers"]');
@@ -92,13 +97,38 @@ function scrape(doc, url) {
 				creatorType: "author"
 			});
 		}
+	} else {
+		var authors = ZU.xpathText(doc, '//li[label[text()="저자"]]');
+		// e.g. authors = 저자 : Kim, Yoon Tae,  Park, Hyun Suk
+		// e.g. authors = 저자 : 이동호,  이재서,  윤숙자,  강병철
+		if (authors && authors.includes(':')) {
+			var authorsValue = authors.split(':')[1];
+			if (authorsValue.includes(',  ')) {
+				// two spaces after comma are important here
+				var authorsList = authorsValue.split(',  ');
+			} else {
+				var authorsList = authorsValue.split(',');
+			}
+			for (let i=0; i<authorsList.length; i++)  {
+				let author = authorsList[i].trim();
+				if (author.includes(',')) {
+					item.creators.push(ZU.cleanAuthor(author, "author", true));
+				} else {
+					item.creators.push({
+						lastName: author,
+						fieldMode: true,
+						creatorType: "author"
+					});
+				}
+			}
+		}
 	}
 
 	var container = ZU.xpathText(doc, '//li[label[text()="간행물"]]');
 	// e.g. container = 간행물 : 국제어문 54권0호
 	if (container && container.includes(':')) {
 		var containerValue = container.split(':')[1];
-		var containerParts = containerValue.match(/(.*)\s+(\d+)\D(\d+)/);
+		var containerParts = containerValue.match(/(.*)\s+(\d+)\D\s*(\d+)/);
 		if (containerParts) {
 			item.publicationTitle = containerParts[1];
 			item.volume = containerParts[2];
@@ -106,7 +136,7 @@ function scrape(doc, url) {
 		}
 	}
 	
-	var date = ZU.xpathText(doc, '//li[label[text()="발행년월"]]');
+	var date = ZU.xpathText(doc, '//li[label[text()="발행년월" or text()="발행 연도"]]');
 	// e.g. date = 발행년월 : 2012년 04월
 	if (date && date.includes(':')) {
 		var dateValue = date.split(':')[1];
@@ -117,7 +147,7 @@ function scrape(doc, url) {
 	// e.g. pages = 페이지 : 43-93(51pages)
 	if (pages && pages.includes(':')) {
 		var pagesValue = pages.split(':')[1];
-		item.pages = pagesValue.split('(')[0].replace('-', '–');
+		item.pages = pagesValue.split('(')[0].replace('-', '–').replace('pp.', '');
 	}
 	
 	var abstract = ZU.xpathText(doc, '//comment()[contains(., "초록 보기")]/following-sibling::section[1]');
@@ -125,16 +155,6 @@ function scrape(doc, url) {
 		item.abstractNote = ZU.trimInternal(abstract);
 	}
 
-	//var pdfJSurl = ZU.xpathText(doc, '//div[@class="search_box"]/div[@class="choice"]/span[1]/a/@href');
-  	//var pdfurlKeys = pdfJSurl.match(/Select1\(\'(\S+)\'\,\s?\'(\S+)\'\,\s?(\S+)\,\s?(\S+)\,\s?(\S+)\)\;/);
-  	//var pdfUrl = pdfurlKeys[1].replace(/^(.*\/).*/, "$1") + "viewer.asp?code_num=" + pdfurlKeys[2];
-/*
-	item.attachments.push({
-		url : pdfUrl,
-		title : "KStudy Full Text PDF",
-		mimeType : "application/pdf",
-	});	
-*/
 	item.complete();
 
 }
@@ -227,6 +247,84 @@ var testCases = [
 		"type": "web",
 		"url": "http://kiss.kstudy.com/journal/journal-view.asp?key1=25169&key2=2201",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50064290",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "치과용 콘빔 CT를 이용한 상악 정중과잉치의 3차원 분석",
+				"creators": [
+					{
+						"lastName": "이동호",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "이재서",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "윤숙자",
+						"fieldMode": true,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "강병철",
+						"fieldMode": true,
+						"creatorType": "author"
+					}
+				],
+				"date": "2010",
+				"abstractNote": "초록 보기",
+				"issue": "3",
+				"language": "ko-KR",
+				"libraryCatalog": "KStudy",
+				"pages": "109–114",
+				"publicationTitle": "대한구강악안면방사선학회지 (대한구강악안면방사선학회)",
+				"volume": "40",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50789039",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "KOLMOGOROV DISTANCE FOR MULTIVARIATE NORMAL APPROXIMATION",
+				"creators": [
+					{
+						"firstName": "Yoon Tae",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hyun Suk",
+						"lastName": "Park",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"abstractNote": "초록 보기",
+				"issue": "1",
+				"language": "ko-KR",
+				"libraryCatalog": "KStudy",
+				"pages": "1–10",
+				"publicationTitle": "Korean Journal of mathematics (강원경기수학회)",
+				"volume": "23",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
