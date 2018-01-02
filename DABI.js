@@ -48,7 +48,6 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
     var ids = [];
 
-    //If Statement checks if page is a Search Result, then saves requested Items
     if (detectWeb(doc, url) == "multiple") {
         Z.selectItems(getSearchResults(doc), function(items) {
             if (!items) return true;
