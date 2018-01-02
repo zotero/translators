@@ -91,34 +91,29 @@ function getSearchResults(doc) {
 function scrape(doc, url) {
     var newItem = new Zotero.Item('journalArticle');
     var trs = doc.getElementsByTagName("tr"),
-        headers,
-        contents,
         items = {};
 
-    //For Loop to populate "items" Object and save tags to an Array.
     for (var i = 0; i < trs.length; i++) {
-        headers = trs[i].getElementsByTagName("th")[0].textContent;
-        contents = trs[i].getElementsByTagName("td")[0].innerHTML;
+        var headers = trs[i].getElementsByTagName("th")[0].textContent;
+        var contents = trs[i].getElementsByTagName("td")[0].innerHTML;
 
         items[headers.replace(/\s+/g, '')] = contents.trim();
     }
 
     //set url to fulltext resource, if present; else to database item
     if (items["URL"] == '') {
-        newItem.url = url;
-    } else {
-        var link = doc.createElement('a');
-        link.innerHTML = items["URL"];
-        newItem.url = link.firstChild.getAttribute("href");
+		newItem.url = url;
+	} else {
+		newItem.url = items["URL"].replace(/<a.*?href=\"(.*?)\".*/,"$1");
 
-        if (/\.pdf(#.*)?$/.test(newItem.url)) {
-            newItem.attachments = [{
-                url: newItem.url,
-                title: "DABI Full Text PDF",
-                mimeType: "application/pdf"
-            }];
-        }
-    }
+		if (/\.pdf(#.*)?$/.test(newItem.url)) {
+			newItem.attachments = [{
+				url: newItem.url,
+				title: "DABI Full Text PDF",
+				mimeType: "application/pdf"
+			}];
+		}
+	}
 
 
     //Formatting and saving "title" fields
