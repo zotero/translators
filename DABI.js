@@ -76,7 +76,7 @@ function getSearchResults(doc) {
                 title = tds[2].innerHTML.replace(/<br>/g, '. ');
 
             if (author) {
-                var item = author.replace(/; <br>.*/, ' et al.') + ": " + title;
+                var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
             } else {
                 var item = title;
             }
@@ -120,7 +120,7 @@ function scrape(doc, url) {
     if (items["Titel"]) {
         newItem.title = items["Titel"].replace(/\*/g, '');
         var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)?/, '');
-        short = short.replace(/\W?(,|:|\?|!|\.|\"|\')/, '').split(' ').slice(0, 6).join(' ');
+        short = short.replace(/\W?[,:?!."']/, '').split(' ').slice(0, 6).join(' ');
         newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
         if (items["Untertitel"]) {
             if (/(\?|!|\.)\W?$/.test(newItem.title)) {
