@@ -72,8 +72,8 @@ function getSearchResults(doc) {
         tds = trs[i].getElementsByTagName("td");
         for (var n = 0; n < tds.length; n++) {
             var url = doc.location.origin + "/cgi-bin/dabi/" + tds[0].firstChild.getAttribute("href"),
-                author = tds[1].innerHTML,
-                title = tds[2].innerHTML.replace(/<br>/g, '. ');
+                author = tds[1].textContent,
+                title = tds[2].textContent.replace(/<br>/g, '. ');
 
             if (author) {
                 var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
@@ -95,7 +95,7 @@ function scrape(doc, url) {
 
     for (var i = 0; i < trs.length; i++) {
         var headers = trs[i].getElementsByTagName("th")[0].textContent;
-        var contents = trs[i].getElementsByTagName("td")[0].innerHTML;
+        var contents = trs[i].getElementsByTagName("td")[0].textContent;
 
         items[headers.replace(/\s+/g, '')] = contents.trim();
     }
