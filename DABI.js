@@ -15,7 +15,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Jens Mittelbach
-    Contact: mail@jensmittelbach.de
+	Contact: mail@jensmittelbach.de
     
 	This file is part of Zotero.
 
