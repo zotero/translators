@@ -95,15 +95,13 @@ function scrape(doc, url) {
 
     for (var i = 0; i < trs.length; i++) {
         var headers = trs[i].getElementsByTagName("th")[0].textContent;
-        var contents = trs[i].getElementsByTagName("td")[0].textContent;
+        var contents = trs[i].getElementsByTagName("td")[0].innerHTML;
 
         items[headers.replace(/\s+/g, '')] = contents.trim();
     }
 
-    //set url to fulltext resource, if present; else to database item
-    if (items["URL"] == '') {
-		newItem.url = url;
-	} else {
+    //set url to fulltext resource, if present
+	if (items["URL"]) {
 		newItem.url = items["URL"].replace(/<a.*?href=\"(.*?)\".*/,"$1");
 
 		if (/\.pdf(#.*)?$/.test(newItem.url)) {
@@ -160,20 +158,12 @@ function scrape(doc, url) {
         newItem.publicationTitle = items["Zeitschrift"].replace(/ : /g, ": ");
     }
 
-    //Associating and saving the well formatted data to Zotero
-    var fieldMap = {
-        "date": items["Jahr"],
-        "issue": items["Heft"],
-        "volume": items["Band"],
-        "abstractNote": items["Abstract"]
-    };
-
-    for (var key in fieldMap) {
-        if (fieldMap.hasOwnProperty(key)) {
-            newItem[key] = fieldMap[key];
-        }
-    };
-
+	//Associating and saving the well formatted data to Zotero
+	newItem["date"] = items["Jahr"];
+	newItem["issue"] = items["Heft"];
+	newItem["volume"] = items["Band"];
+	newItem["abstractNote"] = items["Abstract"];
+	
     //Scrape is COMPLETE!
     newItem.complete();
 } /** BEGIN TEST CASES **/
@@ -198,7 +188,7 @@ var testCases = [
 				"libraryCatalog": "DABI",
 				"publicationTitle": "GMS Medizin, Bibliothek, Information",
 				"shortTitle": "Mich interessierten kostengünstige Alternativen zu Citavi",
-				"url": "Volltext",
+				"url": "http://www.egms.de/static/de/journals/mbi/2012-12/mbi000261.shtml",
 				"volume": "12",
 				"attachments": [],
 				"tags": [
@@ -272,7 +262,7 @@ var testCases = [
 				"libraryCatalog": "DABI",
 				"publicationTitle": "GMS Medizin, Bibliothek, Information",
 				"shortTitle": "Frage stellen Antwort bekommen, weiterarbeiten!\" -",
-				"url": "Volltext",
+				"url": "http://www.egms.de/static/de/journals/mbi/2013-13/mbi000290.shtml",
 				"volume": "13",
 				"attachments": [],
 				"tags": [
@@ -341,9 +331,14 @@ var testCases = [
 				"pages": "79-81",
 				"publicationTitle": "Bibliotheks-Magazin",
 				"shortTitle": "Was ihr wollt",
-				"url": "Volltext",
+				"url": "http://staatsbibliothek-berlin.de/fileadmin/user_upload/zentrale_Seiten/ueber_uns/pdf/Bibliotheksmagazin/Bibliotheksmagazin_3-2014.pdf",
 				"volume": "9",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "DABI Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Benutzerorientierter Bestandsaufbau"
@@ -404,7 +399,6 @@ var testCases = [
 				"pages": "364-372",
 				"publicationTitle": "Mitteilungsblatt des Verbandes der Bibliotheken des Landes Nordrhein-Westfalen",
 				"shortTitle": "Anpassung der Personalstruktur der Fachhochschulbibliotheken in",
-				"url": "http://dabi.ib.hu-berlin.de/cgi-bin/dabi/vollanzeige.pl?artikel_id=5676&modus=html",
 				"volume": "4",
 				"attachments": [],
 				"tags": [
@@ -437,9 +431,14 @@ var testCases = [
 				"pages": "46",
 				"publicationTitle": "Bibliotheksforum Bayern",
 				"shortTitle": "Bibliophile Flaggschiff Bayerns",
-				"url": "Volltext",
+				"url": "http://www.bsb-muenchen.de/fileadmin/imageswww/pdf-dateien/bibliotheksforum/2009-1/BFB_0109_13%20Beckstein%20V06.pdf",
 				"volume": "3",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "DABI Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Altes Buch"
