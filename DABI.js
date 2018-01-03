@@ -35,46 +35,44 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-    if (doc.title.trim().indexOf("DABI. Datensatz Vollanzeige") == 0) {
-        return "journalArticle";
-    } else if (doc.title.trim().indexOf("DABI: Rechercheergebnis") == 0) {
-        var keinTreffer = doc.getElementsByTagName("br")[7].nextSibling.data.indexOf("Keine Treffer für die Suche nach:")
-        if (keinTreffer == -1) {
-            return "multiple";
-        }
-    }
+	if (doc.title.trim().indexOf("DABI. Datensatz Vollanzeige") == 0) {
+		return "journalArticle";
+	} else if (doc.title.trim().indexOf("DABI: Rechercheergebnis") == 0) {
+		return getSearchResults(doc, true) ? 'multiple' : false;
+	}
 }
 
 function doWeb(doc, url) {
-    var ids = [];
+	var ids = [];
 
-    if (detectWeb(doc, url) == "multiple") {
-        Z.selectItems(getSearchResults(doc), function(data) {
-            if (!data) return true;
-            for (var i in data) {
-                ids.push(i);
-                ZU.processDocuments(ids, scrape);
-            }
-        });
-    } else if (detectWeb(doc, url) == "journalArticle") {
-        //saves single page data
-        ids = [url];
-        scrape(doc, ids);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Z.selectItems(getSearchResults(doc), function(data) {
+			if (!data) return true;
+			for (var i in data) {
+				ids.push(i);
+				ZU.processDocuments(ids, scrape);
+			}
+		});
+	} else if (detectWeb(doc, url) == "journalArticle") {
+		//saves single page data
+		ids = [url];
+		scrape(doc, ids);
+	}
    
 }
 
 
-function getSearchResults(doc) {
+function getSearchResults(doc, checkOnly) {
 	var trs = doc.getElementsByTagName("tr"),
 		tds = null,
 		data = {};
+		found = false;
 
 	for (var i = 1; i < trs.length; i++) {
 		tds = trs[i].getElementsByTagName("td");
 		for (var n = 0; n < tds.length; n++) {
-		    var url = ZU.xpathText(doc, '//html/body/table/tbody/tr['+i+']/td[1]/a/@href'),
-			    author = tds[1].textContent,
+			var url = ZU.xpathText(doc, '//html/body/table/tbody/tr['+i+']/td[1]/a/@href'),
+				author = tds[1].textContent,
 				title = tds[2].textContent.replace(/<br>/g, '. ');
 			if (author) {
 				var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
@@ -82,11 +80,14 @@ function getSearchResults(doc) {
 				var item = title;
 			}
 			if (!item || !url) continue;
+			
+			if (checkOnly) return true;
+			found = true;
 
 			data[url] = item;
 		}
 	}
-	return data;
+	return found ? data : false;
 }
 
 function scrape(doc, url) {
