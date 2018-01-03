@@ -41,7 +41,6 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	var type = attr(doc, 'meta[property="og:type"]', 'content');
 	if ((url.includes('/revues/') || url.includes('/journals/')) && type == "article") {
 		return "journalArticle";
@@ -54,12 +53,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the xpath
 	var rows = doc.querySelectorAll('.result h3 a, .article-item h6 a');
 	for (let i=0; i<rows.length; i++) {
-		// TODO: check and maybe adjust
 		let href = rows[i].href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -89,7 +85,6 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
 	var abstractFR = text(doc, '#resume-fr>p');
 	var abstractEN = text(doc, '#resume-en>p');
 	var abstract;
@@ -98,6 +93,7 @@ function scrape(doc, url) {
 	} else {
 		abstract = abstractFR || abstractEN;
 	}
+	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
