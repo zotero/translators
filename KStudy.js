@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-03 00:14:29"
+	"lastUpdated": "2018-01-03 13:10:00"
 }
 
 /*
@@ -38,15 +38,18 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/thesis/thesis-view.asp')) {
-		return "journalArticle";
-	} else if (url.includes('/public2-article.asp')) {
-		// these are reports and working paper series but with publicaton name,
-		// volume, issue numbers; thus handled as journal articles as well
-		return "journalArticle";
-	} else if (url.includes('/public3-article.asp')) {
-		return "report";
-	} else if (getSearchResults(doc, true)) {
+	if (/\bkey=(\d+)\b/.test(url)) {
+		if (url.includes('/thesis/thesis-view.asp')) {
+			return "journalArticle";
+		} else if (url.includes('/public2-article.asp')) {
+			// these are reports and working paper series but with publicaton name,
+			// volume, issue numbers; thus handled as journal articles as well
+			return "journalArticle";
+		} else if (url.includes('/public3-article.asp')) {
+			return "report";
+		}
+	}
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -63,6 +66,8 @@ function getSearchResults(doc, checkOnly) {
 		if (href=="#") continue;
 		// exclude links to overview of journal
 		if (href.includes("/journal/journal-view")) continue;
+		// make sure we have a key to make the risURL
+		if (!(/\bkey=(\d+)\b/.test(href))) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -91,9 +96,10 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var key = url.match(/\bkey=(\d+)\b/)[1];
-	var risURL = "http://kiss.kstudy.com/p-common/export_endnote.asp";
+	var risURL = "/p-common/export_endnote.asp";
 	var postData = "atcl_data=" + key + "&export_gubun=EndNote";
 	ZU.doPost(risURL, postData, function(text) {
+		// Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -101,17 +107,79 @@ function scrape(doc, url) {
 			if (url.includes('/public/public3-article')) {
 				item.itemType = "report";
 			}
+			var latin = item.title.match(/[\u{0000}-\u{00FF}]/ug);
+			if (latin.length > item.title.length/2 && item.title.toUpperCase() == item.title) {
+				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			// sometimes the author tags in RIS are empty and therefore we
+			// try to scrape author names also directly
+			if (item.creators.length == 0) {
+				item.creators = scrapeAuthorsDirectly(doc, url);
+			} else {
+				// romanized Korean names with first and last name are splitted
+				// wrongly into two AU tags in RIS and therefore we scrape
+				// author names directly here
+				let firstName = item.creators[0].lastName;
+				let latinCharacters = firstName.match(/[\u{0000}-\u{00FF}]/ug);
+				if (!item.creators[0].firstName && latinCharacters && latinCharacters.length == firstName.length) {
+					item.creators = scrapeAuthorsDirectly(doc, url);
+				}
+			}
 			if (item.issue && item.issue == "0") {
 				delete item.issue;
 			}
 			item.language = "ko-KR";
-			if (item.pages) {
-				item.pages = item.pages.replace('-', '–');
-			}
 			item.complete();
 		});
 		translator.translate();
 	});
+}
+
+
+function scrapeAuthorsDirectly(doc, url) {
+	var creators = [];
+	var writers = ZU.xpathText(doc, '//div[@class="writers"]');
+	if (writers) {
+		var creatorsList = writers.split(',');
+		for (var i=0; i<creatorsList.length; i++) {
+			let author = creatorsList[i].replace(/^\s*\(\s*/, '').replace(/\s*\)\s*$/, '');
+			if (author.includes(' ')) {
+				creators.push(ZU.cleanAuthor(author, "author"));
+			} else {
+				creators.push({
+					lastName: author,
+					fieldMode: true,
+					creatorType: "author"
+				});
+			}
+		}
+	} else {
+		var authors = ZU.xpathText(doc, '//li[label[text()="저자"]]');
+		// e.g. authors = 저자 : Kim, Yoon Tae,  Park, Hyun Suk
+		// e.g. authors = 저자 : 이동호,  이재서,  윤숙자,  강병철
+		if (authors && authors.includes(':')) {
+			var authorsValue = authors.split(':')[1];
+			if (authorsValue.includes(',  ')) {
+				// two spaces after comma are important here
+				var authorsList = authorsValue.split(',  ');
+			} else {
+				var authorsList = authorsValue.split(',');
+ 			}
+			for (let i=0; i<authorsList.length; i++)  {
+				let author = authorsList[i].trim();
+				if (author.includes(',')) {
+					creators.push(ZU.cleanAuthor(author, "author", true));
+				} else {
+					creators.push({
+						lastName: author,
+						fieldMode: true,
+						creatorType: "author"
+					});
+				}
+ 			}
+		}
+	}
+	return creators;
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -135,7 +203,7 @@ var testCases = [
 				"journalAbbreviation": "공자학",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
-				"pages": "179–210",
+				"pages": "179-210",
 				"publicationTitle": "공자학",
 				"shortTitle": "투고논문",
 				"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3297333",
@@ -256,7 +324,7 @@ var testCases = [
 				"journalAbbreviation": "국제어문",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
-				"pages": "43–93",
+				"pages": "43-93",
 				"publicationTitle": "국제어문",
 				"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3500796",
 				"volume": "54",
@@ -369,7 +437,7 @@ var testCases = [
 				"journalAbbreviation": "대한구강악안면방사선학회지 (대한구강악안면방사선학회)",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
-				"pages": "109–114",
+				"pages": "109-114",
 				"publicationTitle": "대한구강악안면방사선학회지 (대한구강악안면방사선학회)",
 				"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50064290",
 				"volume": "40",
@@ -399,27 +467,17 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "KOLMOGOROV DISTANCE FOR MULTIVARIATE NORMAL APPROXIMATION",
+				"title": "Kolmogorov Distance for Multivariate Normal Approximation",
 				"creators": [
 					{
+						"firstName": "Yoon Tae",
 						"lastName": "Kim",
-						"creatorType": "author",
-						"fieldMode": 1
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Yoon Tae",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
+						"firstName": "Hyun Suk",
 						"lastName": "Park",
-						"creatorType": "author",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "Hyun Suk",
-						"creatorType": "author",
-						"fieldMode": 1
+						"creatorType": "author"
 					}
 				],
 				"date": "2015",
@@ -429,7 +487,7 @@ var testCases = [
 				"journalAbbreviation": "Korean Journal of mathematics (강원경기수학회)",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
-				"pages": "1–10",
+				"pages": "1-10",
 				"publicationTitle": "Korean Journal of mathematics (강원경기수학회)",
 				"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50789039",
 				"volume": "23",
@@ -500,6 +558,69 @@ var testCases = [
 				"url": "http://kiss.kstudy.com/public/public3-article.asp?key=60023584",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3480580",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Analysis of Enzymes related to Lignin Modification of Phanerochaete chrysosporium ATCC20696 through the Transcriptomic and Proteomic Approaches",
+				"creators": [
+					{
+						"firstName": "Chang-young",
+						"lastName": "Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Su-yeon",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Myungkil",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "In-gyu",
+						"lastName": "Choi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016",
+				"ISSN": "2288-257x",
+				"abstractNote": "Phanerochaete chrysosporium (ATCC20696) is one of the most intensively studied basidiomycetes, and is well-known to degrade lignin with ligninolytic enzymes system. In general, ligninolytic enzymes catalyze lignin by oxidation in multi-step electron transfers with other accessory enzymes. Our previous work indicated that P. chrysosporium (ATCC20696) degraded lignin polymer and produced lignin derived-acid compound under the addition of reducing agents. Accordingly, in this study, we investigated various enzymes related to lignin modification by transcriptomic and proteomic analysis. In transcriptomic analysis, lignin peroxidase, copper radical oxidase and multicopper oxidase as extracellular enzymes were highly expressed that exposed to synthetic lignin with reducing agents. In addition, cytochrome P450 monooxygenase, 1,4-benzoquinone reductase and aryl alcohol dehydrogenase as intracellular enzymes were also over-expressed. In the proteomic analysis, it was confirmed to identify these enzymes highly secreted from P. chrysospo-rium (ATCC20696) and obtained the protein sequences by liquid chromatography mass spectroscopy. These results supported that both extracellular enzymes and intracellular enzymes were involved in lignin degradation and production of lignin derived compounds.",
+				"issue": "2",
+				"journalAbbreviation": "균학회소식",
+				"language": "ko-KR",
+				"libraryCatalog": "KStudy",
+				"pages": "84-84",
+				"publicationTitle": "균학회소식",
+				"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3480580",
+				"volume": "28",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Enzyme system"
+					},
+					{
+						"tag": "Phanerochaete chrysosporium"
+					},
+					{
+						"tag": "lignin degradation"
+					},
+					{
+						"tag": "proteomic analysis"
+					},
+					{
+						"tag": "transcriptomic analysis"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
