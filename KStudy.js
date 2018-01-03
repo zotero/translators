@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 15:40:30"
+	"lastUpdated": "2018-01-03 00:14:29"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	KISS (Koreanstudies Information Service System) Translator
+	KISS (Korean Studies Information Service System) Translator
 	Copyright © 2017 Yunwoo Song, Frank Bennett, and Philipp Zumstein
 
 	This file is part of Zotero.
@@ -36,16 +36,17 @@
 	***** END LICENSE BLOCK *****
 */
 
+
 function detectWeb(doc, url) {
 	if (url.indexOf('/thesis/thesis-view.asp')>-1) {
 		return "journalArticle";
-	} else if (url.indeoxOf('/public2-article.asp')>-1) {
+	} else if (url.indexOf('/public2-article.asp')>-1) {
 		// these are reports and working paper series but with publicaton name,
 		// volume, issue numbers; thus handled as journal articles as well
 		return "journalArticle";
 	} else if (url.indexOf('/public3-article.asp')>-1) {
 		return "report";
-	} else if ((url.indexOf('/journal/journal-view.asp')>-1 || url.indexOf('/search/sch-search.asp')>-1 || url.indexOf('/search/result_kiss.asp')>-1) && getSearchResults(doc, true)) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -53,11 +54,15 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "thesis-info")]/h5/a[contains(@href, "/thesis")]');
+	var rows = ZU.xpath(doc, '//div[contains(@class, "thesis-info")]/h5/a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
+		// exclude no real links
+		if (href=="#") continue;
+		// exclude links to overview of journal
+		if (href.includes("/journal/journal-view")) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -83,97 +88,31 @@ function doWeb(doc, url) {
 	}
 }
 
+
 function scrape(doc, url) {
-	var type = detectWeb(doc, url);
-	var item = new Zotero.Item(type);
-	item.title = ZU.xpathText(doc, '//section[contains(@class, "pub-info")]//h3');
-	item.language = "ko-KR";
-	
-	var creators = ZU.xpathText(doc, '//div[@class="writers"]');
-	if (creators) {
-		var creatorsList = creators.split(',');
-		for (var i=0; i<creatorsList.length; i++) {
-			item.creators.push({
-				lastName: creatorsList[i],
-				fieldMode: true,
-				creatorType: "author"
-			});
-		}
-	} else {
-		var authors = ZU.xpathText(doc, '//li[label[text()="저자"]]');
-		// e.g. authors = 저자 : Kim, Yoon Tae,  Park, Hyun Suk
-		// e.g. authors = 저자 : 이동호,  이재서,  윤숙자,  강병철
-		if (authors && authors.includes(':')) {
-			var authorsValue = authors.split(':')[1];
-			if (authorsValue.includes(',  ')) {
-				// two spaces after comma are important here
-				var authorsList = authorsValue.split(',  ');
-			} else {
-				var authorsList = authorsValue.split(',');
+	var key = url.match(/\bkey=(\d+)\b/)[1];
+	var risURL = "http://kiss.kstudy.com/p-common/export_endnote.asp";
+	var postData = "atcl_data=" + key + "&export_gubun=EndNote";
+	ZU.doPost(risURL, postData, function(text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function(obj, item) {
+			if (url.includes('/public/public3-article')) {
+				item.itemType = "report";
 			}
-			for (let i=0; i<authorsList.length; i++)  {
-				let author = authorsList[i].trim();
-				if (author.includes(',')) {
-					item.creators.push(ZU.cleanAuthor(author, "author", true));
-				} else {
-					item.creators.push({
-						lastName: author,
-						fieldMode: true,
-						creatorType: "author"
-					});
-				}
+			if (item.issue && item.issue == "0") {
+				delete item.issue;
 			}
-		}
-	}
-
-	var container = ZU.xpathText(doc, '//li[label[text()="간행물"]]');
-	// e.g. container = 간행물 : 국제어문 54권0호
-	if (container && container.includes(':')) {
-		var containerValue = container.split(':')[1];
-		var containerParts = containerValue.match(/(.*)\s+(\d+)\D\s*(\d+)/);
-		if (containerParts) {
-			item.publicationTitle = containerParts[1];
-			if (containerParts[2].length<4) { //This is to avoid cases like Vol. 2017
-				item.volume = containerParts[2];
+			item.language = "ko-KR";
+			if (item.pages) {
+				item.pages = item.pages.replace('-', '–');
 			}
-			item.issue = containerParts[3] !== '0' ? containerParts[3] : null;
-		}
-	}
-
-	var department = ZU.xpathText(doc, '//li[label[text()="발행기관"]]');
-	if (department && department.includes(':')) {
-		var departmentValue = department.split(':')[1];
-		if (type == "report" && departmentValue) {
-			item.institution = departmentValue;
-		}
-	}
-
-	var date = ZU.xpathText(doc, '//li[label[text()="발행년월" or text()="발행 연도"]]');
-	// e.g. date = 발행년월 : 2012년 04월
-	if (date && date.includes(':')) {
-		var dateValue = date.split(':')[1];
-		item.date = dateValue.trim().replace(/\D+/g, '-').replace(/-$/, '');
-	}
-	
-	var pages = ZU.xpathText(doc, '//li[label[text()="페이지"]]');
-	// e.g. pages = 페이지 : 43-93(51pages)
-	if (pages.search('-')>-1) {
-		//This is to avoid importing the total number of pages as the pages value.
-		if (pages && pages.includes(':')) {
-			var pagesValue = pages.split(':')[1];
-			item.pages = pagesValue.split('(')[0].replace('-', '–').replace('pp.', '');
-		}
-	}
-	
-	var abstract = ZU.xpathText(doc, '//comment()[contains(., "초록 보기")]/following-sibling::section[1]');
-	if (abstract) {
-		item.abstractNote = ZU.trimInternal(abstract);
-	}
-
-	item.complete();
-
+			item.complete();
+		});
+		translator.translate();
+	});
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -185,21 +124,88 @@ var testCases = [
 				"title": "투고논문 : 소옹(邵雍)의 선천역학(先天易學)에 대한 王夫之의 비판",
 				"creators": [
 					{
-						"lastName": "조우진 ( Woo Jin Cho )",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "조우진",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
-				"date": "2014-11",
-				"abstractNote": "초록 보기 본 논문의 목적은 소옹의 선천역학(先天易學)을 바탕으로 한 송대(宋代) 상수역(象數易)의 흐름을 살펴보고 왕부지의 비판적 입장을 고찰하는데 있다. 필자는 이러한 과정에서 상수역의 본래 모습을 확인하고자 한다. 왕부지는 자신의 역학체계를 바탕으로 선천과 후천의 개념, 선천의 전수과정, 선천도(先天圖)의 체계, 선천역학의 원리, 괘(卦)의 형성의 과정 등을 신랄하게 비판하였다. 그의 비판 논리는 경전의 내용을 바탕으로 하는 실증주의적 사고방식에 근거하고 있다. 왕부지의 입장에서 보자면 소옹의 선천역학과 관련된 이론이나 내용은 경전에 전혀 찾아볼 수 없는 것이며, 도가(道家)의 술수가들에 의해 전수된 것에 불과할 따름이다. 왕부지는 소옹의 선천역학을 비판하는 근거를 여러 가지로 제시하는데, 가장 결정적인 것은 점(占)과 관련된다. 선천역학의 핵심원리인 가일배법(加一倍法)은 아래로부터 위로 쌓아서 괘(卦)를 만들어가는 과정으로 점치는 것과 같은 것이다. 그래서 왕부지는 소옹의 선천역학을 술수학일 뿐만 아니라 점역(占易)에 치우친 것이라고 비판하면서 ‘점학일리(占學一理)’를 주장한다. The object of this paper is to examine the current of Xiangshuyi(象數易) in Song dynasty(宋代) based on Shao-Yong(邵雍)’s Sunchenyeokhak(先天易學) and consider Wang-Fuzhi(王夫之)’s critical position. By this critical examination, we can ascertain the true features of Xiangshuyi. Wang-Fuzhi severely criticised the concept of Sunchen(先天) and Huchen(後天), the transmission process of Sunchen, the system of Sunchentu(先天圖), and the principle of Sunchenyeokhak, and the formation process of Gua(卦) through his Yeokhak(易學) system. His criticism is especially based on positivistic thinking on the contents of Jingzhuan(經傳). For Wang-Fuzhii, the content and theory concerning Shao-Yong’s Sunchenyeokhak aren’t found in Jingzhuan(經傳) and are nothing but brought by Zhushujia(術數家) in Daojia(道家). Wang-Fuzhi presents the several evidences of criticising Shao-Yong’s Xiangshuyi. Among them, the most decisive evidence is related to Zhan(占). Jiayibeifa(加一倍法) as the key principle of Sunchenyeokhak is a process of making Gua by stacking one on top of another and this process is the same as that of Zhan. In conclusion, Wang-Fuzhi maintains Zhanxueyili(占學一理) criticizing that Shao-Yong’s Sunchenyeokhak is only Zhushuxue and is biased toward Zhanyi.",
+				"date": "2014",
+				"ISSN": "1738-2629",
+				"abstractNote": "본 논문의 목적은 소옹의 선천역학(先天易學)을 바탕으로 한 송대(宋代) 상수역(象數易)의 흐름을 살펴보고 왕부지의 비판적 입장을 고찰하는데 있다. 필자는 이러한 과정에서 상수역의 본래 모습을 확인하고자 한다. 왕부지는 자신의 역학체계를 바탕으로 선천과 후천의 개념, 선천의 전수과정, 선천도(先天圖)의 체계, 선천역학의 원리, 괘(卦)의 형성의 과정 등을 신랄하게 비판하였다. 그의 비판 논리는 경전의 내용을 바탕으로 하는 실증주의적 사고방식에 근거하고 있다. 왕부지의 입장에서 보자면 소옹의 선천역학과 관련된 이론이나 내용은 경전에 전혀 찾아볼 수 없는 것이며, 도가(道家)의 술수가들에 의해 전수된 것에 불과할 따름이다. 왕부지는 소옹의 선천역학을 비판하는 근거를 여러 가지로 제시하는데, 가장 결정적인 것은 점(占)과 관련된다. 선천역학의 핵심원리인 가일배법(加一倍法)은 아래로부터 위로 쌓아서 괘(卦)를 만들어가는 과정으로 점치는 것과 같은 것이다. 그래서 왕부지는 소옹의 선천역학을 술수학일 뿐만 아니라 점역(占易)에 치우친 것이라고 비판하면서 ‘점학일리(占學一理)’를 주장한다.",
+				"journalAbbreviation": "공자학",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
 				"pages": "179–210",
 				"publicationTitle": "공자학",
 				"shortTitle": "투고논문",
+				"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3297333",
 				"volume": "27",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Gua"
+					},
+					{
+						"tag": "Jiayibeifa"
+					},
+					{
+						"tag": "Sunchentu"
+					},
+					{
+						"tag": "Sunchenyeokhak"
+					},
+					{
+						"tag": "Xiangshuyi"
+					},
+					{
+						"tag": "Zhan"
+					},
+					{
+						"tag": "Zhanxueyili"
+					},
+					{
+						"tag": "先天圖"
+					},
+					{
+						"tag": "先天易學"
+					},
+					{
+						"tag": "加一倍法"
+					},
+					{
+						"tag": "占"
+					},
+					{
+						"tag": "占學一理"
+					},
+					{
+						"tag": "卦"
+					},
+					{
+						"tag": "常數易"
+					},
+					{
+						"tag": "가일배법"
+					},
+					{
+						"tag": "괘"
+					},
+					{
+						"tag": "상수역"
+					},
+					{
+						"tag": "선천도"
+					},
+					{
+						"tag": "선천역학"
+					},
+					{
+						"tag": "점"
+					},
+					{
+						"tag": "점학일리"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -214,45 +220,109 @@ var testCases = [
 				"title": "청소년의 비속어 · 욕설 · 은어 · 유행어 사용 실태와 언어 의식 연구",
 				"creators": [
 					{
-						"lastName": "김태경 ( Kim Tae-kyung ) ",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "김태경",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": " 장경희 ( Chang Kyung-hee ) ",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "장경희",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": " 김정선 ( Kim Jeong-seon ) ",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "김정선",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": " 이삼형 ( Lee Sam-hyung ) ",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "이삼형",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": " 이필영 ( Lee Phil-young ) ",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "이필영",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": " 전은진 ( Jeon Eun-jin )",
-						"fieldMode": true,
-						"creatorType": "author"
+						"lastName": "전은진",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
-				"date": "2012-04",
-				"abstractNote": "초록 보기 본 연구는 전국 청소년의 언어 실태와 언어 의식을 조사하고 이에 영향을 미치는 환경요인을 분석해 내는 데 목적이 있다. 본 연구의 조사 대상이 되는 언어 실태는 욕설 등 공격적 언어 표현, 비속어, 은어, 유행어 사용에 관한 것이다. 이를 위하여 본 연구에서는 전국 6개 권역(경인, 강원, 충청, 전라, 경상, 제주)의 초 · 중 · 고등학교 학생 6,053명을 대상으로 설문 조사를 수행하고, 비속어 등의 사용빈도와 거친 강도, 언어 규범 파괴 정도, 관련 환경 요인 등을 분석하였다. 그 결과, 응답자의 학교 급이 올라갈수록 사용하는 비속어나 은어·유행어의 거친 강도나 언어 규범 파괴 정도가 점점 심해지는 것으로 나타났다. 청소년의 이러한 언어실태는 부정적 언어 사용에 관한 용인 태도와 밀접한 관련을 지니고 있었다. 또한, 거주지의 도시화 층, 가정 경제 수준, 학업 성적, 자기통제력, 공감능력 등도 청소년의 공격적 언어 표현 사용에 직간접적으로 영향을 미치는 것으로 조사되었다. 가정 · 학교 · 사회 환경 요인별로는 `또래 간 비공식적 통제`가 청소년 언어에 가장 긍정적인 요소로 작용하며 `부모의 언어폭력으로 인한 스트레스`가 가장 부정적인 요소로 작용하는 것으로 나타났다. The purpose of this study is to investigate the current state of Korean teenager`s language use and attitude regarding expletives, aggressive language expression such as curses, teenage slangs and to examine the relevant environmental factors. We performed a questionnaire survey targeting 6,053 students of elementary, middle, high schools in 6 regions(Gyeongi, Gangwon, Chungcheong, Jeolla, Gyeongsang, Jeju). Our result indicate that the rough intensity of expletive and the language destruction level deepens with age, and adolescents` actual language use is closely related with the language attitude. The urbanization layer of dwelling place, home financial level, schoolwork grade, self-control, and empathy were also indicated to have direct and indirect influence upon adolescents` use of aggressive language expression. As a result of analyzing the relevant environmental factors, teenagers` language use is greatly influenced by their peers` informal control. And the stress caused by parents` verbal abuse would have an adverse effects upon teenager`s language use.",
+				"date": "2012",
+				"ISSN": "1225-1216",
+				"abstractNote": "본 연구는 전국 청소년의 언어 실태와 언어 의식을 조사하고 이에 영향을 미치는 환경요인을 분석해 내는 데 목적이 있다. 본 연구의 조사 대상이 되는 언어 실태는 욕설 등 공격적 언어 표현, 비속어, 은어, 유행어 사용에 관한 것이다. 이를 위하여 본 연구에서는 전국 6개 권역(경인, 강원, 충청, 전라, 경상, 제주)의 초 · 중 · 고등학교 학생 6,053명을 대상으로 설문 조사를 수행하고, 비속어 등의 사용빈도와 거친 강도, 언어 규범 파괴 정도, 관련 환경 요인 등을 분석하였다. 그 결과, 응답자의 학교 급이 올라갈수록 사용하는 비속어나 은어·유행어의 거친 강도나 언어 규범 파괴 정도가 점점 심해지는 것으로 나타났다. 청소년의 이러한 언어실태는 부정적 언어 사용에 관한 용인 태도와 밀접한 관련을 지니고 있었다. 또한, 거주지의 도시화 층, 가정 경제 수준, 학업 성적, 자기통제력, 공감능력 등도 청소년의 공격적 언어 표현 사용에 직간접적으로 영향을 미치는 것으로 조사되었다. 가정 · 학교 · 사회 환경 요인별로는 `또래 간 비공식적 통제`가 청소년 언어에 가장 긍정적인 요소로 작용하며 `부모의 언어폭력으로 인한 스트레스`가 가장 부정적인 요소로 작용하는 것으로 나타났다.",
+				"journalAbbreviation": "국제어문",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
 				"pages": "43–93",
 				"publicationTitle": "국제어문",
+				"url": "http://kiss.kstudy.com/thesis/thesis-view.asp?key=3500796",
 				"volume": "54",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "aggressive language expression"
+					},
+					{
+						"tag": "buzz-word"
+					},
+					{
+						"tag": "curse"
+					},
+					{
+						"tag": "expletive"
+					},
+					{
+						"tag": "language attitude"
+					},
+					{
+						"tag": "language destruction"
+					},
+					{
+						"tag": "language use"
+					},
+					{
+						"tag": "questionnaire survey"
+					},
+					{
+						"tag": "teenage slang"
+					},
+					{
+						"tag": "teenager`s language"
+					},
+					{
+						"tag": "공격적 언어 표현"
+					},
+					{
+						"tag": "비속어"
+					},
+					{
+						"tag": "설문 조사"
+					},
+					{
+						"tag": "언어 실태"
+					},
+					{
+						"tag": "언어 의식"
+					},
+					{
+						"tag": "언어 파괴"
+					},
+					{
+						"tag": "욕설"
+					},
+					{
+						"tag": "유행어"
+					},
+					{
+						"tag": "은어"
+					},
+					{
+						"tag": "청소년 언어"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -273,35 +343,51 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "이동호",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "이재서",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "윤숙자",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "강병철",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2010",
-				"abstractNote": "초록 보기",
+				"ISSN": "1229-8212",
+				"abstractNote": "Purpose : This study was performed to analyze the position, pattern of impacted mesiodens, and their relationship to the adjacent teeth using Dental cone-beam CT. Materials and Methods : Sixty-two dental cone-beam CT images with 81 impacted mesiodenses were selected from about 2,298 cone-beam CT images at Chonnam National University Dental Hospital from June 2006 to March 2009. The position, pattern, shape of impacted mesiodenses and their complications were analyzed in cone-beam CT including 3D images. Results : The sex ratio (M : F) was 2.9 : 1. Most of the mesiodenses (87.7%) were located at palatal side to the incisors. 79% of the mesiodenses were conical in shape. 60.5% of the mesiodenses were inverted, 21% normal erupting direction, and 18.5% transverse direction. The complications due to the presence of mesiodenses were none in 43.5%, diastema in 19.4%, tooth displacement in 17.7%, delayed eruption or impaction in 12.9%, tooth rotation in 4.8%, and dentigerous cyst in 1.7%. Conclusions : Dental cone-beam CT images with 3D provided 3-dimensional perception of mesiodens to the neighboring teeth. This results would be helpful for management of the impacted mesiodens.",
 				"issue": "3",
+				"journalAbbreviation": "대한구강악안면방사선학회지 (대한구강악안면방사선학회)",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
 				"pages": "109–114",
 				"publicationTitle": "대한구강악안면방사선학회지 (대한구강악안면방사선학회)",
+				"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50064290",
 				"volume": "40",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Cone-Beam Computed Tomograpahy"
+					},
+					{
+						"tag": "Incisor"
+					},
+					{
+						"tag": "Supernumerary"
+					},
+					{
+						"tag": "Tooth"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -316,32 +402,63 @@ var testCases = [
 				"title": "KOLMOGOROV DISTANCE FOR MULTIVARIATE NORMAL APPROXIMATION",
 				"creators": [
 					{
-						"firstName": "Yoon Tae",
 						"lastName": "Kim",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"firstName": "Hyun Suk",
+						"lastName": "Yoon Tae",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
 						"lastName": "Park",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Hyun Suk",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2015",
-				"abstractNote": "초록 보기",
+				"ISSN": "1976-8605",
+				"abstractNote": "This paper concerns the rate of convergence in the multidimensional normal approximation of functional of Gaussian fields. The aim of the present work is to derive explicit upper bounds of the Kolmogorov distance for the rate of convergence instead of Wasserstein distance studied by Nourdin et al. [Ann. Inst. H. Poincar$\\acute{e}$(B) Probab.Statist. 46(1) (2010) 45-98].",
 				"issue": "1",
+				"journalAbbreviation": "Korean Journal of mathematics (강원경기수학회)",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
 				"pages": "1–10",
 				"publicationTitle": "Korean Journal of mathematics (강원경기수학회)",
+				"url": "http://kiss.kstudy.com/public/public2-article.asp?key=50789039",
 				"volume": "23",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Kolmogorov distance"
+					},
+					{
+						"tag": "Malliavin calculus"
+					},
+					{
+						"tag": "Stein`s method"
+					},
+					{
+						"tag": "Wasserstein distance"
+					},
+					{
+						"tag": "fractional Brownian motion"
+					},
+					{
+						"tag": "multidimensional normal approximation"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
-	}
-]
+	},
 	{
 		"type": "web",
 		"url": "http://kiss.kstudy.com/public/public3-article.asp?key=60023584",
@@ -352,35 +469,35 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "정영식",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "박종필",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "정순원",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "김유리",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
 						"lastName": "송교준",
-						"fieldMode": true,
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2013",
-				"abstractNote": "초록 보기",
 				"institution": "교육부",
 				"language": "ko-KR",
 				"libraryCatalog": "KStudy",
+				"url": "http://kiss.kstudy.com/public/public3-article.asp?key=60023584",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
