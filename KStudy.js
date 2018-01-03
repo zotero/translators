@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	KISS (Korean Studies Information Service System) Translator
-	Copyright © 2017 Yunwoo Song, Frank Bennett, and Philipp Zumstein
+	Copyright © 2017-2018 Yunwoo Song, Frank Bennett, and Philipp Zumstein
 
 	This file is part of Zotero.
 
@@ -38,13 +38,13 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/thesis/thesis-view.asp')>-1) {
+	if (url.includes('/thesis/thesis-view.asp')) {
 		return "journalArticle";
-	} else if (url.indexOf('/public2-article.asp')>-1) {
+	} else if (url.includes('/public2-article.asp')) {
 		// these are reports and working paper series but with publicaton name,
 		// volume, issue numbers; thus handled as journal articles as well
 		return "journalArticle";
-	} else if (url.indexOf('/public3-article.asp')>-1) {
+	} else if (url.includes('/public3-article.asp')) {
 		return "report";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
