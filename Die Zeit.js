@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-06 21:11:25"
+	"lastUpdated": "2017-05-23 21:14:22"
 }
 
 /*
@@ -61,7 +61,7 @@ function getSearchResults(doc, checkOnly) {
 		rows = doc.getElementsByClassName('teaser-small__container');
 	}
 	for (var i=0; i<rows.length; i++) {
-		var href = ZU.xpathText(rows[i], './/a/@href');
+		var href = ZU.xpathText(rows[i], '(.//a/@href)[1]');
 		var title = ZU.trimInternal( ZU.xpathText(rows[i], './/a/h4|.//a[span]') );
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -95,11 +95,16 @@ function scrape(doc, url){
 	newItem.url = url;
 	newItem.title = ZU.xpathText(doc, './/title').replace(/\s\|\sZEIT\sONLINE$/, '');
 	newItem.abstractNote = ZU.xpathText(articleNode, './/*[@itemprop="description"]');
-	newItem.date = ZU.xpathText(articleNode, './/*[@itemprop="datePublished"]/@content');
-
+	var date = ZU.xpathText(doc, '//meta[@name="date"]/@content');
+	if (date) {
+		newItem.date = date.replace(/T.+/, "");
+	}
 	var authorNode = ZU.xpath(articleNode, './/*[@itemprop="author"]//*[@itemprop="name"]');
 	if (authorNode.length == 0) {
 		authorNode = ZU.xpath(articleNode, './/*[@itemprop="author"]');
+	}
+	if (authorNode.length == 0) {
+		authorNode = ZU.xpath(articleNode, './/div[@class="byline"]');
 	}
 	for (var i=0; i<authorNode.length; i++) {
 		var authorName = authorNode[i].textContent;
@@ -114,13 +119,14 @@ function scrape(doc, url){
 		}
 	}
 	
-	var section = doc.getElementsByClassName("primary-nav__link--current");
+	var section = doc.getElementsByClassName("nav__ressorts-link--current");
 	if (section.length > 0) {
 		newItem.section = section[0].textContent;
 	}
 	
 	newItem.publicationTitle = "Die Zeit";
 	newItem.ISSN = "0044-2070";
+	newItem.language = "de-DE";
 	newItem.place = "Hamburg";
 	
 	var keywordsString = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
@@ -130,9 +136,12 @@ function scrape(doc, url){
 			keywords[i].trim()
 		)
 	}
-	
+
+	// if present, use the link to show the whole content on a single page
+	var snapshotNode = ZU.xpath(doc, '//li[@class="article-pager__all"]/a');
+	var snapshotUrl = (snapshotNode.length > 0) ? snapshotNode[0].href : url;
 	newItem.attachments.push({
-		url : url+"?page=all&print=true",
+		url : snapshotUrl,
 		title : "Snapshot", 
 		mimeType : "text/html"
 	}); 
@@ -159,9 +168,10 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2011-09-04T14:55:40+02:00",
+				"date": "2011-09-04",
 				"ISSN": "0044-2070",
 				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
+				"language": "de-DE",
 				"libraryCatalog": "Die Zeit",
 				"place": "Hamburg",
 				"publicationTitle": "Die Zeit",
@@ -176,6 +186,7 @@ var testCases = [
 				],
 				"tags": [
 					"Ausland",
+					"Libyen",
 					"Politik"
 				],
 				"notes": [],
@@ -197,9 +208,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-09-01T08:00:00+02:00",
+				"date": "2011-09-01",
 				"ISSN": "0044-2070",
 				"abstractNote": "Tschechow und Robben, Drama im Flutlicht und Wahrhaftigkeit bei der Arbeit. Der Fußballprofi und Autor Philipp Lahm im Gespräch mit dem Schriftsteller und Fußballer Moritz Rinke",
+				"language": "de-DE",
 				"libraryCatalog": "Die Zeit",
 				"place": "Hamburg",
 				"publicationTitle": "Die Zeit",
@@ -234,6 +246,7 @@ var testCases = [
 					"Robert Enke",
 					"SV Werder Bremen",
 					"Schriftsteller",
+					"Sport",
 					"Stadion",
 					"Trainer",
 					"Türkei"
@@ -262,9 +275,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2009-03-05T07:00:00+01:00",
+				"date": "2009-03-05",
 				"ISSN": "0044-2070",
 				"abstractNote": "Ein Iraner in Wien. Der Fotograf  Daniel Shaked, 31, gibt Österreichs einziges Hip-Hop-Magazin heraus",
+				"language": "de-DE",
 				"libraryCatalog": "Die Zeit",
 				"place": "Hamburg",
 				"publicationTitle": "Die Zeit",
@@ -279,6 +293,7 @@ var testCases = [
 				],
 				"tags": [
 					"Band",
+					"DRINNEN",
 					"Eltern",
 					"Familie",
 					"Geschwister",
@@ -288,6 +303,7 @@ var testCases = [
 					"Israel",
 					"Musik",
 					"Offenheit",
+					"Politik",
 					"Reise",
 					"Revolution",
 					"Salzburg",

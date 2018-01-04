@@ -321,6 +321,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Level of competencies of family physicians from patients’ viewpoint in post-war Kosovo",
 				"creators": [
 					{
 						"firstName": "Gazmend",
@@ -338,16 +339,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2014-02-09",
 				"DOI": "10.12908/SEEJPH-2014-05",
-				"url": "http://www.seejph.com/wp-content/uploads/2014/02/2014-02-Gazmend-Bojaj-et-al.-SEEJPH.pdf",
 				"language": "ger",
 				"libraryCatalog": "mEDRA",
-				"title": "Level of competencies of family physicians from patients’ viewpoint in post-war Kosovo",
-				"date": "2014-02-09"
+				"url": "http://www.seejph.com/index.php/seejph/article/view/25",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -357,6 +357,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Mostar story. Results and challenges of post-war recovery",
 				"creators": [
 					{
 						"firstName": "Medina",
@@ -364,21 +365,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2012",
 				"DOI": "10.1446/38900",
-				"url": "http://www.mulino.it/rivisteweb/scheda_articolo.php?id_articolo=38900",
 				"ISSN": "1122-7885",
 				"issue": "3",
 				"language": "ita",
-				"rights": "©2012 Societ� Editrice Il Mulino S.p.A.",
 				"libraryCatalog": "mEDRA",
+				"pages": "305–314",
 				"publicationTitle": "Economia della Cultura",
-				"date": "2012",
-				"title": "Mostar story. Results and challenges of post-war recovery",
-				"pages": "305–314"
+				"rights": "©2012 Societ� Editrice Il Mulino S.p.A.",
+				"url": "http://www.mulino.it/rivisteweb/scheda_articolo.php?id_articolo=38900",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -388,6 +388,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Sir John Moore Speaks Spanish: His Views on Spanish People and on Patriot Spain in the Peninsular War",
 				"creators": [
 					{
 						"firstName": "Tamara",
@@ -395,19 +396,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://digital.casalini.it/10.1400/221264",
 				"ISBN": "9788490120989",
-				"place": "Spain",
+				"bookTitle": "Current trends in Anglophone studies: cultural, linguistic and literary research / eds., Javier Ruano García ... [et al.]",
 				"language": "eng",
 				"libraryCatalog": "mEDRA",
-				"shortTitle": "Sir John Moore Speaks Spanish",
-				"bookTitle": "Current trends in Anglophone studies: cultural, linguistic and literary research / eds., Javier Ruano García ... [et al.]",
+				"place": "Spain",
 				"publisher": "Ediciones Universidad de Salamanca",
-				"title": "Sir John Moore Speaks Spanish: His Views on Spanish People and on Patriot Spain in the Peninsular War"
+				"shortTitle": "Sir John Moore Speaks Spanish",
+				"url": "http://digital.casalini.it/inc/DOInotfound.asp?DOI=10.1400/221264",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -417,6 +417,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Triple Control System During the Civil War in Soviet Russia",
 				"creators": [
 					{
 						"firstName": "Alexander L.",
@@ -429,18 +430,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2014-04",
 				"DOI": "10.12851/EESJ201404ART32",
-				"url": "http://auris-verlag.de/journale.html",
 				"issue": "2/2014",
 				"language": "rus",
 				"libraryCatalog": "mEDRA",
 				"publicationTitle": "Eastern European Scientific Journal",
-				"date": "2014-04",
-				"title": "The Triple Control System During the Civil War in Soviet Russia"
+				"url": "http://auris-verlag.de/journale.html",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -450,6 +450,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bookSection",
+				"title": "Attrition war e patronato: ufficiali spagnoli ed élite lombarde nella seconda fase delle Guerre d'Italia",
 				"creators": [
 					{
 						"firstName": "Michele Maria",
@@ -457,19 +458,18 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://digital.casalini.it/10.7410/1100",
 				"ISBN": "9788897317135",
-				"place": "Italy",
+				"bookTitle": "El que del amistad mostró el camino: omaggio a Giuseppe Bellini / a cura di Patrizia Spinato Bruschi, coordinamento di Emilia del Giudice e Michele Maria Rabà",
 				"language": "ita",
 				"libraryCatalog": "mEDRA",
-				"shortTitle": "Attrition war e patronato",
-				"bookTitle": "El que del amistad mostró el camino: omaggio a Giuseppe Bellini / a cura di Patrizia Spinato Bruschi, coordinamento di Emilia del Giudice e Michele Maria Rabà",
+				"place": "Italy",
 				"publisher": "ISEM - Istituto di Storia dell'Europa Mediterranea",
-				"title": "Attrition war e patronato: ufficiali spagnoli ed élite lombarde nella seconda fase delle Guerre d'Italia"
+				"shortTitle": "Attrition war e patronato",
+				"url": "http://digital.casalini.it/10.7410/1100",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -479,6 +479,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Treatment of the Chronic War Tibial Osteomyelitis, Gustilo Type Iiib and Cierny-Mader Iiib, Using Various Methods. a Retrospective Study.",
 				"creators": [
 					{
 						"firstName": "Predrag",
@@ -486,20 +487,19 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
+				"date": "2014",
 				"DOI": "10.3269/1970-5492.2014.9.2",
-				"url": "http://www.embj.org/images/ISSUE_2014/grubor_2.pdf",
 				"ISSN": "2279-7165",
 				"issue": "9",
 				"language": "eng",
 				"libraryCatalog": "mEDRA",
+				"pages": "7–18",
 				"publicationTitle": "Euromediterranean Biomedical Journal",
-				"date": "2014",
-				"title": "Treatment of the Chronic War Tibial Osteomyelitis, Gustilo Type Iiib and Cierny-Mader Iiib, Using Various Methods. a Retrospective Study.",
-				"pages": "7–18"
+				"url": "http://www.embj.org/images/ISSUE_2014/grubor_2.pdf",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -509,6 +509,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Iraq War 2003 - A Just or Unjust War?",
 				"creators": [
 					{
 						"firstName": "Dennis",
@@ -516,14 +517,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
 				"DOI": "10.3239/9783656578857",
-				"url": "http://www.grin.com/en/e-book/267324/the-iraq-war-2003-a-just-or-unjust-war",
 				"libraryCatalog": "mEDRA",
-				"title": "The Iraq War 2003 - A Just or Unjust War?"
+				"url": "http://www.grin.com/en/e-book/267324/the-iraq-war-2003-a-just-or-unjust-war",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -533,6 +533,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Second world war, communism and post-communism in Albania, an equilateral triangle of a tragic trans-Adriatic story. The Eftimiadi’s Saga",
 				"creators": [
 					{
 						"firstName": "Muner",
@@ -540,59 +541,46 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"DOI": "10.7336/academicus.2014.09.05",
-				"url": "http://academicus.edu.al/?subpage=volumes&nr=9",
-				"ISSN": "20793715",
-				"language": "eng",
-				"abstractNote": "The complicated, troubled and tragic events of a wealthy family from Vlorë, Albania, which a century ago expanded its business to Italy, in Brindisi and Trieste, and whose grand land tenures and financial properties in Albania were nationalized by Communism after the Second World War. Hence the life-long solitary and hopeless fight of the last heir of the family to reconquer his patrimony that had been nationalized by Communism. Such properties would have been endowed to a planned foundation, which aims at perpetuating the memory of his brother, who was active in the resistance movement during the war and therefore hung by the Germans. His main institutional purpose is to help students from the Vlorë area to attend the University of Trieste. The paper is a travel in time through history, sociology and the consolidation of a state’s fundamentals, by trying to read the past aiming to understand the presence and save the future. The paper highlights the need to consider past models of social solidarity meanwhile renewing the actual one. This as a re-establishment of rule and understanding, a strategy to cope with pressures to renegotiate the social contract, as a universal need, by considering the past’s experiences as a firm base for successful social interaction. All this, inside a story which in the first look seems to be too personal and narrow, meanwhile it highlights the present and the past in a natural organic connection, dedicated to a nation in continuous struggle for its social reconstruction.",
-				"rights": "©2014 Academicus",
-				"libraryCatalog": "mEDRA",
-				"publicationTitle": "Academicus International Scientific Journal",
 				"date": "2014-01",
-				"title": "Second world war, communism and post-communism in Albania, an equilateral triangle of a tragic trans-Adriatic story. The Eftimiadi’s Saga",
-				"pages": "69–78"
+				"DOI": "10.7336/academicus.2014.09.05",
+				"ISSN": "20793715",
+				"abstractNote": "The complicated, troubled and tragic events of a wealthy family from Vlorë, Albania, which a century ago expanded its business to Italy, in Brindisi and Trieste, and whose grand land tenures and financial properties in Albania were nationalized by Communism after the Second World War. Hence the life-long solitary and hopeless fight of the last heir of the family to reconquer his patrimony that had been nationalized by Communism. Such properties would have been endowed to a planned foundation, which aims at perpetuating the memory of his brother, who was active in the resistance movement during the war and therefore hung by the Germans. His main institutional purpose is to help students from the Vlorë area to attend the University of Trieste. The paper is a travel in time through history, sociology and the consolidation of a state’s fundamentals, by trying to read the past aiming to understand the presence and save the future. The paper highlights the need to consider past models of social solidarity meanwhile renewing the actual one. This as a re-establishment of rule and understanding, a strategy to cope with pressures to renegotiate the social contract, as a universal need, by considering the past’s experiences as a firm base for successful social interaction. All this, inside a story which in the first look seems to be too personal and narrow, meanwhile it highlights the present and the past in a natural organic connection, dedicated to a nation in continuous struggle for its social reconstruction.",
+				"language": "eng",
+				"libraryCatalog": "mEDRA",
+				"pages": "69–78",
+				"publicationTitle": "Academicus International Scientific Journal",
+				"rights": "©2014 Academicus",
+				"url": "http://academicus.edu.al/?subpage=volumes&nr=9",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "search",
 		"input": {
-			"DOI": "10.12908/SEEJPH-2014-05"
+			"DOI": "10.3239/9783656578857"
 		},
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Iraq War 2003 - A Just or Unjust War?",
 				"creators": [
 					{
-						"firstName": "Gazmend",
-						"lastName": "Bojaj",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Katarzyna",
-						"lastName": "Czabanowska",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Fitim",
-						"lastName": "Skeraj",
+						"firstName": "Dennis",
+						"lastName": "Trom",
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"DOI": "10.12908/SEEJPH-2014-05",
-				"url": "http://www.seejph.com/wp-content/uploads/2014/02/2014-02-Gazmend-Bojaj-et-al.-SEEJPH.pdf",
-				"language": "ger",
+				"DOI": "10.3239/9783656578857",
 				"libraryCatalog": "mEDRA",
-				"title": "Level of competencies of family physicians from patients’ viewpoint in post-war Kosovo",
-				"date": "2014-02-09"
+				"url": "http://www.grin.com/en/e-book/267324/the-iraq-war-2003-a-just-or-unjust-war",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

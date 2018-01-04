@@ -2,7 +2,7 @@
 	"translatorID": "48d3b115-7e09-4134-ad5d-0beda6296761",
 	"label": "AIP",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://scitation\\.aip\\.org/(?:search\\?|content/)",
+	"target": "^https?://scitation\\.aip\\.org/(search\\?|content/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

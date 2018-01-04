@@ -2,17 +2,18 @@
 	"translatorID": "1f40baef-eece-43e4-a1cc-27d20c0ce086",
 	"label": "Engineering Village",
 	"creator": "Ben Parr, Sebastian Karcher",
-	"target": "^https?://(?:www\\.)?engineeringvillage(2)?\\.(?:com|org)",
+	"target": "^https?://(www\\.)?engineeringvillage(2)?\\.(com|org)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2015-09-10 22:42:33"
+	"lastUpdated": "2017-02-12 17:40:59"
 }
 
 function detectWeb(doc, url) {
+	Z.monitorDOMChanges(doc.getElementById("resultsarea"), {childList: true});
 	var downloadLink = doc.getElementById('oneclickDL');
 	if(downloadLink && getDocIDs(downloadLink.href)) {
 		return "journalArticle";

@@ -2,7 +2,7 @@
 	"translatorID": "23ba3be6-412d-4dde-9cc1-c4df0cc09378",
 	"label": "Library Catalog (SIRSI eLibrary)",
 	"creator": "Mang Sun",
-	"target": "/uhtbin/(?:cgisirsi|quick_keyword)",
+	"target": "/uhtbin/(cgisirsi|quick_keyword)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,

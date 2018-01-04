@@ -2,14 +2,14 @@
 	"translatorID": "cde4428-5434-437f-9cd9-2281d14dbf9",
 	"label": "Ovid",
 	"creator": "Simon Kornblith, Michael Berkowitz, and Ovid Technologies",
-	"target": "(gw2|asinghal|sp)[^\\/]+/ovidweb\\.cgi",
+	"target": "(gw2|asinghal|sp)[^/]+/ovidweb\\.cgi",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-10-20 05:37:26"
+	"lastUpdated": "2017-01-01 16:18:44"
 }
 
 /*

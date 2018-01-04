@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 17:51:06"
+	"lastUpdated": "2017-01-08 16:37:54"
 }
 
 function detectWeb(doc, url) {
@@ -21,70 +21,38 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {	
-	
-	var tagsContent = new Array();
-	var fieldTitle;
-	
 	var newItem = new Zotero.Item("case");
-
-	var headers = doc.evaluate('//div[@class="apparatus"]/b', doc, null, XPathResult.ANY_TYPE, null);
-	var contents = doc.evaluate('//div[@class="apparatus"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;
-	var xPathCount = doc.evaluate('count (//div[@class="apparatus"]/b)', doc, null, XPathResult.ANY_TYPE, null);
-	
-	var headersArray = new Array();
-	var oneHeader = '';
-
-	if (xPathCount.numberValue > 1) {
-		for (var i = 0; i < xPathCount.numberValue; i++) {
-			fieldTitle = headers.iterateNext().textContent;
-			headersArray.push(fieldTitle);
-		}
-	} else {
-		oneHeader = (headers.iterateNext().textContent);
-	}
-	
-	var contentsArray = new Array();
-	var j = 0;
-	
-	if (oneHeader.length<1) {
-	
-		for (var i = headersArray.length-1; i> -1; i--) {	 	
-		
-			var fieldIndex = contents.indexOf(headersArray[i]);
-			
-			contentsArray.push(contents.substr(fieldIndex));
-			contents = contents.substr(0, fieldIndex);
-			fieldTitle = headersArray[i].replace(/\s+/g, '');
-			
-			if (fieldTitle != "ReferenceNumber:") {
-				tagsContent.push(contentsArray[j]);
-			} else {
-				refNum = contentsArray[j];
-				newItem.extra = refNum;
-			}
-			j++;
-		}
-	} else {
-
-		if (oneHeader.match("Reference")) {
-			newItem.extra = contents;
-		} else {
-			newItem.tags = contents;
-			var noMoreTags = 1;
-		}
-	}
-		
-	if (noMoreTags != 1) {
-		for (var i = 0; i < tagsContent.length; i++) {
-		 		newItem.tags[i] = tagsContent[i];
-	 		}
-	}
-	
 	newItem.title = doc.evaluate('//div[@class="sessionsPaperTitle"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().textContent;	
 	newItem.url = doc.location.href;
 
+	//More information is saved in the childrens of the "apparatus" node
+	//where the label is always bold (b-node) and we will use them to separate
+	//the the text content into different fields.
+	var headers = ZU.xpath(doc, '//div[@class="apparatus"]/b');
+	var contents = ZU.xpathText(doc, '//div[@class="apparatus"]');
+	
+	var j = 0;
+	
+	for (var i=headers.length-1; i>-1; i--) {
+		var label = headers[i].textContent;
+		var fieldIndex = contents.indexOf(label);
+		var text = contents.substr(fieldIndex);
+		
+		label = label.replace(/\s+/g, '');
+		if (label == "ReferenceNumber:") {
+			var startValue = text.indexOf(":")+2;
+			newItem.docketNumber = text.substr(startValue);
+		} else if (label != "Navigation:") {
+			newItem.tags.push(text);
+		}
+		
+		contents = contents.substr(0, fieldIndex);
+		j++;
+	}
+
 	newItem.complete();
 }
+
 
 function doWeb(doc, url) {
 
@@ -176,23 +144,21 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
 		"items": [
 			{
 				"itemType": "case",
+				"caseName": "Theft > animal theft, 28th August 1678.",
 				"creators": [],
-				"notes": [],
-				"tags": [
-					"Verdict: Guilty",
-					"Offence: Theft > animal theft"
-				],
-				"seeAlso": [],
+				"docketNumber": "t16780828-12",
+				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
 				"attachments": [],
-				"extra": "Reference Number: t16780828-12",
-				"title": "Theft > animal theft, 28th August 1678.",
-				"url": "http://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
-				"libraryCatalog": "Old Bailey Online",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"Offence: Theft > animal theft",
+					"Verdict: Guilty"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

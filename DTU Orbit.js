@@ -96,6 +96,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Nonlinear wave equation in frequency domain: accurate modeling of ultrafast interaction in anisotropic nonlinear media",
 				"creators": [
 					{
 						"lastName": "Guo",
@@ -116,50 +117,32 @@ var testCases = [
 						"lastName": "Bache",
 						"firstName": "Morten",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "Guo",
-						"firstName": "Hairun",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zeng",
-						"firstName": "Xianglong",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zhou",
-						"firstName": "Binbin",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Bache",
-						"firstName": "Morten",
-						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "March 1, 2013",
+				"DOI": "10.1364/JOSAB.30.000494",
+				"ISSN": "0740-3224",
+				"abstractNote": "We interpret the purely spectral forward Maxwell equation with up to third-order induced polarizations for pulse propagation and interactions in quadratic nonlinear crystals. The interpreted equation, also named the nonlinear wave equation in the frequency domain, includes quadratic and cubic nonlinearities, delayed Raman effects, and anisotropic nonlinearities. The full potential of this wave equation is demonstrated by investigating simulations of solitons generated in the process of ultrafast cascaded second-harmonic generation. We show that a balance in the soliton delay can be achieved due to competition between self-steepening, Raman effects, and self-steepening-like effects from cascading originating in the group-velocity mismatch between the pump and the second harmonic. We analyze the first-order contributions, and show that this balance can be broken to create fast or slow pulses. Through further simulations we demonstrate few-cycle compressed solitons in extremely short crystals, where spectral phenomena, such as blue/red shifting, nonstationary radiation in accordance with the nonlocal phase-matching condition, and dispersive-wave generation are observed and marked, which helps improve the experimental knowledge of cascading nonlinear soliton pulse compression.",
+				"issue": "3",
+				"journalAbbreviation": "Optical Society of America. Journal B: Optical Physics",
+				"libraryCatalog": "DTU Orbit",
+				"pages": "494-504",
+				"publicationTitle": "Optical Society of America. Journal B: Optical Physics",
+				"shortTitle": "Nonlinear wave equation in frequency domain",
+				"volume": "30",
 				"attachments": [
 					{
 						"title": "DTU Orbit - Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "Nonlinear wave equation in frequency domain: accurate modeling of ultrafast interaction in anisotropic nonlinear media",
-				"publisher": "Optical Society of America",
-				"date": "March 1, 2013",
-				"abstractNote": "We interpret the purely spectral forward Maxwell equation with up to third-order induced polarizations for pulse propagation and interactions in quadratic nonlinear crystals. The interpreted equation, also named the nonlinear wave equation in the frequency domain, includes quadratic and cubic nonlinearities, delayed Raman effects, and anisotropic nonlinearities. The full potential of this wave equation is demonstrated by investigating simulations of solitons generated in the process of ultrafast cascaded second-harmonic generation. We show that a balance in the soliton delay can be achieved due to competition between self-steepening, Raman effects, and self-steepening-like effects from cascading originating in the group-velocity mismatch between the pump and the second harmonic. We analyze the first-order contributions, and show that this balance can be broken to create fast or slow pulses. Through further simulations we demonstrate few-cycle compressed solitons in extremely short crystals, where spectral phenomena, such as blue/red shifting, nonstationary radiation in accordance with the nonlocal phase-matching condition, and dispersive-wave generation are observed and marked, which helps improve the experimental knowledge of cascading nonlinear soliton pulse compression.",
-				"DOI": "10.1364/JOSAB.30.000494",
-				"journalAbbreviation": "Optical Society of America. Journal B: Optical Physics",
-				"publicationTitle": "Optical Society of America. Journal B: Optical Physics",
-				"ISSN": "0740-3224",
-				"issue": "3",
-				"volume": "30",
-				"pages": "494-504",
-				"libraryCatalog": "DTU Orbit",
-				"shortTitle": "Nonlinear wave equation in frequency domain"
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>This paper was published in JOSA B and is made available as an electronic reprint with the permission of OSA. The paper can be found at the following URL on the OSA website: http://www.opticsinfobase.org/josab/abstract.cfm?URI=josab-30-3-494. Systematic or multiple reproduction or distribution to multiple locations via electronic or other means is prohibited and is subject to penalties under law.</p>"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},

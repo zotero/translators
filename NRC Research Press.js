@@ -9,10 +9,10 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2014-06-01 23:00:28"
+	"lastUpdated": "2016-05-24 13:18:11"
 }
 
-/*
+ /*
 	***** BEGIN LICENSE BLOCK *****
 
 	NRC Research Press
@@ -37,7 +37,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) return "journalArticle";
 	else if (url.match(/\/action\/doSearch|\/toc\//) && getSearchResults(doc).length) return "multiple";
@@ -45,7 +44,7 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc) {
 	return ZU.xpath(doc,
-		'//div[@class="item-details clearfix" and div[p[a[contains(@href, "/doi/abs/")]]]]|\
+		'//div[@class="item-details clearfix"]//a[contains(@href, "/doi/abs/")]|\
 		//div[@class="art_title"]/a[contains(@href, "/doi/abs/")][1]');
 }
 
@@ -55,8 +54,8 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var rows = getSearchResults(doc);
 		for (var i=0, n=rows.length; i<n; i++) {
-			//Z.debug(ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href'))
-			items[ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href')] = ZU.xpathText(rows[i], './h3');
+			//Z.debug(rows[i].href)
+			items[rows[i].href] = rows[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -92,6 +91,11 @@ function scrape(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
 			if (item.title === item.title.toUpperCase()){
 				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+			}
+			for (var i = 0; i<item.creators.length; i++) {
+				if (item.creators[i].lastName === item.creators[i].lastName.toUpperCase()){
+					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
+				}
 			}
 			item.attachments = [{
 				document: doc,
