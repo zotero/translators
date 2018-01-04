@@ -111,6 +111,8 @@ function scrape(doc, url) {
 			if (latin.length > item.title.length/2 && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
+			//remove space before colon in title
+			item.title = item.title.replace(/\s+:/, ":");
 			// sometimes the author tags in RIS are empty and therefore we
 			// try to scrape author names also directly
 			if (item.creators.length == 0) {
@@ -189,7 +191,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "투고논문 : 소옹(邵雍)의 선천역학(先天易學)에 대한 王夫之의 비판",
+				"title": "투고논문: 소옹(邵雍)의 선천역학(先天易學)에 대한 王夫之의 비판",
 				"creators": [
 					{
 						"lastName": "조우진",
