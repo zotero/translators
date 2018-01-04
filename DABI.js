@@ -1,22 +1,23 @@
 {
-    "translatorID": "5cf8bb21-e350-444f-b9b4-f46d9fab7827",
-    "label": "DABI",
-    "creator": "Jens Mittelbach",
-    "target": "^https?://dabi\\.ib\\.hu-berlin\\.de/",
-    "minVersion": "1.0",
-    "maxVersion": "",
-    "priority": 100,
-    "inRepository": true,
-    "translatorType": 4,
-    "browserSupport": "gcsibv",
-    "lastUpdated": "2016-01-08 11:43:21"
+	"translatorID": "5cf8bb21-e350-444f-b9b4-f46d9fab7827",
+	"label": "DABI",
+	"creator": "Jens Mittelbach",
+	"target": "^https?://dabi\\.ib\\.hu-berlin\\.de/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-01-03 19:28:23"
 }
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Jens Mittelbach
 	Contact: mail@jensmittelbach.de
-    
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -34,19 +35,22 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+
 function detectWeb(doc, url) {
-	if (doc.title.trim().indexOf("DABI. Datensatz Vollanzeige") == 0) {
+	if (url.includes("/vollanzeige.pl?")) {
 		return "journalArticle";
-	} else if (doc.title.trim().indexOf("DABI: Rechercheergebnis") == 0) {
-		return getSearchResults(doc, true) ? 'multiple' : false;
+	} else if (url.includes("/suche.pl?") && getSearchResults(doc, true)) {
+		return 'multiple';
 	}
 }
+
 
 function doWeb(doc, url) {
 	var ids = [];
 
 	if (detectWeb(doc, url) == "multiple") {
-		Z.selectItems(getSearchResults(doc), function(data) {
+		Z.selectItems(getSearchResults(doc, false), function(data) {
 			if (!data) return true;
 			for (var i in data) {
 				ids.push(i);
@@ -54,55 +58,50 @@ function doWeb(doc, url) {
 			}
 		});
 	} else if (detectWeb(doc, url) == "journalArticle") {
-		//saves single page data
-		ids = [url];
-		scrape(doc, ids);
+		scrape(doc, url);
 	}
-   
+
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var trs = doc.getElementsByTagName("tr"),
-		tds = null,
-		data = {};
+		data = {},
 		found = false;
 
 	for (var i = 1; i < trs.length; i++) {
-		tds = trs[i].getElementsByTagName("td");
-		for (var n = 0; n < tds.length; n++) {
-			var url = ZU.xpathText(doc, '//html/body/table/tbody/tr['+i+']/td[1]/a/@href'),
-				author = tds[1].textContent,
-				title = tds[2].textContent.replace(/<br>/g, '. ');
-			if (author) {
-				var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
-			} else {
-				var item = title;
-			}
-			if (!item || !url) continue;
-			
-			if (checkOnly) return true;
-			found = true;
-
-			data[url] = item;
+		var tds = trs[i].getElementsByTagName("td");
+		var url = ZU.xpathText(tds, './a/@href'),
+			author = tds[1].textContent,
+			title = tds[2].textContent.replace(/<br>/g, '. ');
+		if (author) {
+			var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
+		} else {
+			var item = title;
 		}
+		if (!item || !url) continue;
+		
+		if (checkOnly) return true;
+		found = true;
+
+		data[url] = item;
 	}
 	return found ? data : false;
 }
 
 function scrape(doc, url) {
-    var newItem = new Zotero.Item('journalArticle');
-    var trs = doc.getElementsByTagName("tr"),
-        data = {};
+	var newItem = new Zotero.Item('journalArticle');
+	var trs = doc.getElementsByTagName("tr"),
+		data = {};
 
-    for (var i = 0; i < trs.length; i++) {
-        var headers = trs[i].getElementsByTagName("th")[0].textContent;
-        var contents = trs[i].getElementsByTagName("td")[0].innerHTML;
+	for (var i = 0; i < trs.length; i++) {
+		var headers = trs[i].getElementsByTagName("th")[0].textContent;
+		var contents = trs[i].getElementsByTagName("td")[0].innerHTML;
 
-        data[headers.replace(/\s+/g, '')] = contents.trim();
-    }
+		data[headers.replace(/\s+/g, '')] = contents.trim();
+	}
 
-    //set url to fulltext resource, if present
+	//set url to fulltext resource, if present
 	if (data["URL"]) {
 		newItem.url = data["URL"].replace(/<a.*?href=\"(.*?)\".*/,"$1");
 
@@ -112,53 +111,53 @@ function scrape(doc, url) {
 				title: "DABI Full Text PDF",
 				mimeType: "application/pdf"
 			}];
+			delete newItem.url;
 		}
 	}
 
+	//Formatting and saving "title" fields
+	//Sometimes titles are missing
+	if (!data["Titel"]) {
+		data["Titel"] = data["Untertitel"];
+		delete data["Untertitel"];
+	}
+	
+	if (data["Titel"]) {
+		newItem.title = data["Titel"].replace(/\*/g, '');
+		var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)?/, '');
+		short = short.replace(/\W?[,:?!."']/, '').split(' ').slice(0, 6).join(' ');
+		newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
+		if (data["Untertitel"]) {
+			if (/(\?|!|\.)\W?$/.test(newItem.title)) {
+				newItem.title += " " + data["Untertitel"];
+			} else {
+				newItem.title += ": " + data["Untertitel"];
+			}
+		}
+	}
 
-    //Formatting and saving "title" fields
-    //Sometimes titles are missing
-    if (!data["Titel"]) {
-        data["Titel"] = data["Untertitel"];
-        delete data["Untertitel"];
-    }
-    
-    if (data["Titel"]) {
-        newItem.title = data["Titel"].replace(/\*/g, '');
-        var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)?/, '');
-        short = short.replace(/\W?[,:?!."']/, '').split(' ').slice(0, 6).join(' ');
-        newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
-        if (data["Untertitel"]) {
-            if (/(\?|!|\.)\W?$/.test(newItem.title)) {
-                newItem.title += " " + data["Untertitel"];
-            } else {
-                newItem.title += ": " + data["Untertitel"];
-            }
-        }
-    }
-
-    //Formatting and saving "Author" field
-    if (data["Autoren"]) {
-        var authors = data["Autoren"].split("; ");
-        for (var i = 0; i < authors.length; i++) {
-            newItem.creators.push(ZU.cleanAuthor(authors[i], "author", true));
-        }
-    }
+	//Formatting and saving "Author" field
+	if (data["Autoren"]) {
+		var authors = data["Autoren"].split("; ");
+		for (var i = 0; i < authors.length; i++) {
+			newItem.creators.push(ZU.cleanAuthor(authors[i], "author", true));
+		}
+	}
 
 	//Formatting and saving "pages" field
 	 if (data["Anfangsseite"] > 0) {
 		newItem.pages = data["Anfangsseite"] + (data["Endseite"] > data["Anfangsseite"] ? "-" + data["Endseite"] : "");
 	}
 
-    //Saving the tags to Zotero
-    if (data["Schlagwörter"]) {
-        newItem.tags = data["Schlagwörter"].split("; ");
-    }
+	//Saving the tags to Zotero
+	if (data["Schlagwörter"]) {
+		newItem.tags = data["Schlagwörter"].split("; ");
+	}
 
-    //Making the publication title orthographic
-    if (data["Zeitschrift"]) {
-        newItem.publicationTitle = data["Zeitschrift"].replace(/ : /g, ": ");
-    }
+	//Making the publication title orthographic
+	if (data["Zeitschrift"]) {
+		newItem.publicationTitle = data["Zeitschrift"].replace(/ : /g, ": ");
+	}
 
 	//Associating and saving the well formatted data to Zotero
 	newItem["date"] = data["Jahr"];
@@ -166,9 +165,11 @@ function scrape(doc, url) {
 	newItem["volume"] = data["Band"];
 	newItem["abstractNote"] = data["Abstract"];
 	
-    //Scrape is COMPLETE!
-    newItem.complete();
-} /** BEGIN TEST CASES **/
+	//Scrape is COMPLETE!
+	newItem.complete();
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -333,7 +334,6 @@ var testCases = [
 				"pages": "79-81",
 				"publicationTitle": "Bibliotheks-Magazin",
 				"shortTitle": "Was ihr wollt",
-				"url": "http://staatsbibliothek-berlin.de/fileadmin/user_upload/zentrale_Seiten/ueber_uns/pdf/Bibliotheksmagazin/Bibliotheksmagazin_3-2014.pdf",
 				"volume": "9",
 				"attachments": [
 					{
@@ -433,7 +433,6 @@ var testCases = [
 				"pages": "46",
 				"publicationTitle": "Bibliotheksforum Bayern",
 				"shortTitle": "Bibliophile Flaggschiff Bayerns",
-				"url": "http://www.bsb-muenchen.de/fileadmin/imageswww/pdf-dateien/bibliotheksforum/2009-1/BFB_0109_13%20Beckstein%20V06.pdf",
 				"volume": "3",
 				"attachments": [
 					{
