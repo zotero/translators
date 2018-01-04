@@ -124,9 +124,7 @@ function scrape(doc, url) {
 	
 	if (data["Titel"]) {
 		newItem.title = data["Titel"].replace(/\*/g, '');
-		var short = newItem.title.replace(/^\W?(?:Die |Der |Das |\.{3}\s?)?/, '');
-		short = short.replace(/\W?[,:?!."']/, '').split(' ').slice(0, 6).join(' ');
-		newItem.shortTitle = short.substring(0, 1).toUpperCase() + short.slice(1);
+		
 		if (data["Untertitel"]) {
 			if (/(\?|!|\.)\W?$/.test(newItem.title)) {
 				newItem.title += " " + data["Untertitel"];
@@ -190,7 +188,7 @@ var testCases = [
 				"issue": "3",
 				"libraryCatalog": "DABI",
 				"publicationTitle": "GMS Medizin, Bibliothek, Information",
-				"shortTitle": "Mich interessierten kostengünstige Alternativen zu Citavi",
+				"shortTitle": "\"Mich interessierten kostengünstige Alternativen zu Citavi\"",
 				"url": "http://www.egms.de/static/de/journals/mbi/2012-12/mbi000261.shtml",
 				"volume": "12",
 				"attachments": [],
@@ -264,7 +262,6 @@ var testCases = [
 				"issue": "3",
 				"libraryCatalog": "DABI",
 				"publicationTitle": "GMS Medizin, Bibliothek, Information",
-				"shortTitle": "Frage stellen Antwort bekommen, weiterarbeiten!\" -",
 				"url": "http://www.egms.de/static/de/journals/mbi/2013-13/mbi000290.shtml",
 				"volume": "13",
 				"attachments": [],
@@ -333,7 +330,6 @@ var testCases = [
 				"libraryCatalog": "DABI",
 				"pages": "79-81",
 				"publicationTitle": "Bibliotheks-Magazin",
-				"shortTitle": "Was ihr wollt",
 				"volume": "9",
 				"attachments": [
 					{
@@ -400,7 +396,6 @@ var testCases = [
 				"libraryCatalog": "DABI",
 				"pages": "364-372",
 				"publicationTitle": "Mitteilungsblatt des Verbandes der Bibliotheken des Landes Nordrhein-Westfalen",
-				"shortTitle": "Anpassung der Personalstruktur der Fachhochschulbibliotheken in",
 				"volume": "4",
 				"attachments": [],
 				"tags": [
@@ -432,7 +427,7 @@ var testCases = [
 				"libraryCatalog": "DABI",
 				"pages": "46",
 				"publicationTitle": "Bibliotheksforum Bayern",
-				"shortTitle": "Bibliophile Flaggschiff Bayerns",
+				"shortTitle": "\"Das bibliophile Flaggschiff Bayerns\"",
 				"volume": "3",
 				"attachments": [
 					{
