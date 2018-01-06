@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|\\?.*\\b_ob=ArticleListURL|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|\\?.*\\b_ob=ArticleListURL|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-21 08:47:21"
+	"lastUpdated": "2018-01-06 17:28:45"
 }
 
 // attr()/text() v2
@@ -25,23 +25,24 @@ function detectWeb(doc, url) {
 		return false;
 	}
 
-	if ((url.indexOf("pdf") !== -1 &&
-			url.indexOf("_ob=ArticleURL") === -1 &&
-			url.indexOf("/article/") === -1) ||
+	if ((url.includes("pdf") &&
+			!url.includes("_ob=ArticleURL") &&
+			!url.includes("/article/")) ||
 		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 ||
-		url.indexOf("_ob=ArticleListURL") !== -1) {
+		url.includes("_ob=ArticleListURL")) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
 			return false;
 		}
 	}
+
 	if (url.includes('/search?') && getArticleList(doc).length > 0) {
 		return "multiple";
 	}
-	if (url.indexOf("pdf") === -1) {
+	if (!url.includes("pdf")) {
 		// Book sections have the ISBN in the URL
-		if (url.indexOf("/B978") !== -1) {
+		if (url.includes("/B978")) {
 			return "bookSection";
 		} else if (getISBN(doc)) {
 			if (getArticleList(doc).length) {
@@ -399,6 +400,7 @@ function getArticleList(doc) {
 			|//td[@class="nonSerialResultsList"]/h3/a\
 			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
 			|//h2/a[contains(@class, "result-list-title-link")]\
+			|//ol[@class="article-list"]//a[contains(@class, "article-content-title")]\
 		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
@@ -880,12 +882,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/journal/22126716",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
 		"defer": true,
 		"items": "multiple"
@@ -1050,6 +1046,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/search?qs=zotero&show=25&sortBy=relevance",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/journal/le-pharmacien-hospitalier-et-clinicien/vol/52/issue/4",
 		"items": "multiple"
 	}
 ]
