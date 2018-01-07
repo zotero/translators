@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-05 22:14:32"
+	"lastUpdated": "2018-01-07 07:56:46"
 }
 
 /*
@@ -39,6 +39,8 @@
 // Some test cases are only working in the browser with some AJAX loading:
 // 1) http://psycnet.apa.org/PsycBOOKS/toc/10023
 // 2) follow a link in a search
+// 3) search page
+// 4) journal page
 //
 // Moreover, after three test cases you have to load an psycnet url in the browser
 // to avoid some automatic download detection.
@@ -49,23 +51,26 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	// the dection will only work if the page is not loade completely,
-	// thus we hardcoded some test cases
+	// the dection will only work if the page is load completely,
+	// thus we have to hardcode some test cases
 	if (url.includes('://psycnet.apa.org/record/1992-98221-010')) return "bookSection";
 	if (url.includes('://psycnet.apa.org/record/2004-16329-000')) return "book";
 	if (url.includes('://psycnet.apa.org/buy/2004-16329-002')) return "bookSection";
 	if (url.includes('://psycnet.apa.org/buy/2010-19350-001')) return "journalArticle";
 	if (url.includes('://psycnet.apa.org/record/2010-09295-002')) return "bookSection";
 	// normal cases
-	if (url.indexOf('/PsycBOOKS/')>-1) {
+	//Z.monitorDOMChanges(doc.getElementsByTagName("main")[0], {childList: true});
+	if (url.includes('/PsycBOOKS/')) {
 		return "book";
-	} else if (url.indexOf('/search/display?')>-1 || url.indexOf('/record/')>-1) {
+	}
+	if (url.includes('/search/display?') || url.includes('/record/')) {
 		if (doc.getElementById('bookchapterstoc')) {
 			return "bookSection";
 		} else {
 			return "journalArticle";
 		}
-	} else if (url.indexOf('/search/results?')>-1 && getSearchResults(doc, true)) {
+	}
+	if (url.includes('/search/results?') || url.includes('/journal/')) {// && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -75,8 +80,9 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('a.article-title');
 	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);Z.debug(title);
+		var href = attr(rows[i].parentNode, '#buy, a.fullTextHTMLLink, a.fullTextLink', 'href') ;
+		Z.debug(href);
+		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -111,49 +117,65 @@ function scrape(doc, url) {
 	var db = doc.getElementById('database');
 	if (db) {
 		var db = db.parentNode.textContent;
-		if (db.indexOf('PsycARTICLES')>-1) {
+		if (db.includes('PsycARTICLES')) {
 			productCode = 'PA';
-		} else if (db.indexOf('PsycBOOKS')>-1) {
+		} else if (db.includes('PsycBOOKS')) {
 			productCode = 'PB';
-		} else if (db.indexOf('PsycINFO')>-1) {
+		} else if (db.includes('PsycINFO')) {
 			productCode = 'PI';
+		} else if (db.includes('PsycEXTRA')) {
+			productCode = 'PE';
 		}
+	} else {
+		// default, e.g. if page is not completely loaded
+		productCode = 'PI';
 	}
 	// Z.debug(productCode);
 	
+	var postData = {
+		"api": "record.exportRISFile",
+		"params": {
+			"UIDList":[
+				{
+					"UID": uid,
+					"ProductCode": productCode
+					
+				}
+			],
+			"exportType": "zotero"
+		}
+	};
+	Z.debug("POSTDATA:");
+	Z.debug(JSON.stringify(postData));
 	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"'+uid+'","ProductCode":"'+productCode+'"}],"exportType":"zotero"}}';
 	var headers = {
 		'Content-Type': 'application/json',
 		'Referer': url
 	};
-	// Z.debug(postData);
+	// Z.debug("POSTDATA: " + JSON.stringify(postData));
 
-
-	ZU.doPost('/api/request/record.exportRISFile', postData, function(text) {
-		// Z.debug(text)
+	// 1. We have to set the uid, product code and format with a post request
+	ZU.doPost('/api/request/record.exportRISFile', postData, function(apiReturnMessage) {
 		try {
-			var data = JSON.parse(text);
+			var apiReturnData = JSON.parse(apiReturnMessage);
 		} catch(e) {
 			Z.debug('POST request did not result in valid JSON');
-			Z.debug(text);
+			Z.debug(apiReturnMessage);
 		};
 		
-		if (data && data.isRisExportCreated) {
-			// Z.debug(data);
-			ZU.doGet('/ris/download', function(text2) {
-				// Z.debug("TEXT 2: "+text2);
-				var redirect = text2.match(/<meta http-equiv="refresh" content="10; url=([^"]*)"/)
-				// Z.debug("REDIRECT: "+redirect);
-				if (redirect) {
-					ZU.doGet(redirect, function(text3) {
-						// Z.debug("TEXT 3: "+text3);
-						processRIS(text3, doc);
-					}, null, null, headers);
+		if (apiReturnData && apiReturnData.isRisExportCreated) {
+			// 2. Download the requested data (after step 1)
+			ZU.doGet('/ris/download', function(data) {
+				if (data.includes('Content: application/x-research-info-systems')) {
+					processRIS(data, doc);
 				} else {
-					processRIS(text2, doc);
+					// sometimes (e.g. during testing) the data is not loaded
+					// but a meta redirect to a captcha page mentioning
+					Z.debug("The APA anomaly detection think we are doing " +
+						"something unusual (sigh). Please reload any APA page e.g. " +
+						"http://psycnet.apa.org/ in your browser and try again.");
+					Z.debug(data);
 				}
-				
-				
 			});
 		}
 	}, headers);
@@ -200,7 +222,7 @@ function getIds(doc, url) {
 	}
 
 	//try to extract uid from the url
-	if (url.indexOf('/record/')>-1) {
+	if (url.includes('/record/')) {
 		var m = url.match(/\/record\/([\d\-]*)/);
 		if (m && m[1]) {
 			return m[1];
@@ -210,7 +232,7 @@ function getIds(doc, url) {
 	/**on the book pages, we can find the UID in
 	 * the Front matter and Back matter links
 	 */
-	if (url.indexOf('/PsycBOOKS/')>-1) {
+	if (url.includes('/PsycBOOKS/')) {
 		var link = attr(doc, '.bookMatterLinks a', 'href');
 		if (link) {
 			var m = link.match(/\/fulltext\/([^&]+?)-(?:FRM|BKM)/i);
@@ -224,14 +246,14 @@ function getIds(doc, url) {
 	 * we can fetch the id from the url
 	 * alternatively, the id is in a javascript section (this is messy)
 	 */
-	if(url.indexOf('/buy/') != -1) {
+	if(url.includes('/buy/')) {
 		var m = url.match(/\/buy\/([\d\-]*)/);
-		if(m) {
+		if (m) {
 			return m[1];
 		}
 
 		m = doc.documentElement.textContent.match(/\bitemUID\s*=\s*(['"])(.*?)\1/);
-		if(m && m[2]) {
+		if (m && m[2]) {
 			return m[2];
 		}
 	}
@@ -240,7 +262,7 @@ function getIds(doc, url) {
 	 */
 	var purchaseLink = attr(doc, 'a.purchase[href*="/buy/"]', 'href');
 	if (purchaseLink) {
-		var m = url.match(/\/buy\/([\d\-]*)/);
+		var m = purchaseLink.match(/\/buy\/([\d\-]*)/);
 		return m[1];
 	}
 
