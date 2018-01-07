@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 03:45:49"
+	"lastUpdated": "2018-01-07 15:18:43"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (url.search(/\d+_\d+\.html/) !== -1) {
 		return "newspaperArticle";
-	} else if ((url.includes("/buscador")||url.includes("/tag/")) && getSearchResults(doc, true)) {
+	} else if ((url.includes("/buscador") || url.includes("/tag/")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -96,14 +96,14 @@ function scrape(doc, url) {
 		//Z.debug(authors)
 		for (let author of authors) {
 			if (author !== "Agencias") {
-				item.creators.push(ZU.cleanAuthor(author, "author"))
+				item.creators.push(ZU.cleanAuthor(author, "author"));
 			}
 		}
 		item.publicationTitle = "El País";
-		item.ISSN = "0213-4608";
+		item.ISSN = "1134-6582";
 		item.place = "Madrid";
 		if (item.section) {
-			item.section = ZU.capitalizeTitle(item.section, true);
+			item.section = ZU.capitalizeTitle(item.section.replace(/_/, " "), true);
 		}
 		item.complete();
 	});
@@ -116,10 +116,6 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-
-
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -148,7 +144,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-01-05",
-				"ISSN": "0213-4608",
+				"ISSN": "1134-6582",
 				"abstractNote": "El rey emérito acudirá este sábado con Felipe VI a la conmemoración de la Pascua militar en el Palacio Real",
 				"libraryCatalog": "politica.elpais.com",
 				"place": "Madrid",
@@ -206,12 +202,12 @@ var testCases = [
 				"title": "Hallada vacía la botella de vodka valorada en 1,1 millones de euros robada en Copenhague",
 				"creators": [],
 				"date": "2018-01-06",
-				"ISSN": "0213-4608",
+				"ISSN": "1134-6582",
 				"abstractNote": "Un obrero encontró el recipiente, hecho de oro y plata, y está aparentemente intacto y en poder de la policía",
 				"libraryCatalog": "elpais.com",
 				"place": "Madrid",
 				"publicationTitle": "El País",
-				"section": "Mundo_global",
+				"section": "Mundo Global",
 				"url": "https://elpais.com/internacional/2018/01/06/mundo_global/1515256305_575545.html",
 				"attachments": [
 					{
@@ -254,6 +250,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://elpais.com/buscador/?qt=carlos",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
