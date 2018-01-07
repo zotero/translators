@@ -2,7 +2,7 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|\\?.*\\b_ob=ArticleListURL|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -18,18 +18,17 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
 
-	if ((url.indexOf("_ob=DownloadURL") !== -1) ||
+	if ((url.includes("_ob=DownloadURL")) ||
 		doc.title == "ScienceDirect Login" ||
 		doc.title == "ScienceDirect - Dummy" ||
-		(url.indexOf("/science/advertisement/") !== -1)) {
+		(url.includes("/science/advertisement/"))) {
 		return false;
 	}
 
 	if ((url.includes("pdf") &&
 			!url.includes("_ob=ArticleURL") &&
 			!url.includes("/article/")) ||
-		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 ||
-		url.includes("_ob=ArticleListURL")) {
+		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
@@ -136,7 +135,7 @@ function parseIntermediatePDFPage(url, onDone) {
 		} else {
 			//Sometimes we are already on the PDF page here and therefore
 			//can simply use the original url as pdfURL.
-			if (url.indexOf('.pdf') > -1) {
+			if (url.includes('.pdf')) {
 				pdfURL = url;
 			}
 		}
@@ -297,7 +296,7 @@ function processRIS(doc, text) {
 	// e.g. http://www.sciencedirect.com/science/article/pii/S0065260108602506
 	text = text.replace(/^((?:A[U\d]|ED)\s+-\s+)(?:Editor-in-Chief:\s+)?(.+)/mg,
 		function(m, pre, name) {
-			if (name.indexOf(',') == -1) {
+			if (!name.includes(',')) {
 				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
 			}
 
