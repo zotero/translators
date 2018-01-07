@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 12:20:19"
+	"lastUpdated": "2018-01-07 09:27:42"
 }
 
 /*
@@ -93,7 +93,6 @@ function scrape(doc, url) {
 	// translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.language = "cs";
 		if (authorsMeta) {
 			// multiple authors are not handled correctly by EM and
 			// we want to exclude generic names like "Redakce"
