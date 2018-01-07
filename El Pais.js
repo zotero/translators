@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 15:18:43"
+	"lastUpdated": "2018-01-07 16:59:34"
 }
 
 /*
@@ -146,6 +146,7 @@ var testCases = [
 				"date": "2018-01-05",
 				"ISSN": "1134-6582",
 				"abstractNote": "El rey emérito acudirá este sábado con Felipe VI a la conmemoración de la Pascua militar en el Palacio Real",
+				"language": "es",
 				"libraryCatalog": "politica.elpais.com",
 				"place": "Madrid",
 				"publicationTitle": "El País",
@@ -204,6 +205,7 @@ var testCases = [
 				"date": "2018-01-06",
 				"ISSN": "1134-6582",
 				"abstractNote": "Un obrero encontró el recipiente, hecho de oro y plata, y está aparentemente intacto y en poder de la policía",
+				"language": "es",
 				"libraryCatalog": "elpais.com",
 				"place": "Madrid",
 				"publicationTitle": "El País",
