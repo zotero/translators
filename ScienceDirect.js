@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-06 17:28:45"
+	"lastUpdated": "2018-01-07 22:17:42"
 }
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
@@ -28,7 +28,7 @@ function detectWeb(doc, url) {
 	if ((url.includes("pdf") &&
 			!url.includes("_ob=ArticleURL") &&
 			!url.includes("/article/")) ||
-		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 {
+		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
