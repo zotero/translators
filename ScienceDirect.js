@@ -2,46 +2,46 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|\\?.*\\b_ob=ArticleListURL|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-21 08:47:21"
+	"lastUpdated": "2018-01-07 22:17:42"
 }
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
 
-	if ((url.indexOf("_ob=DownloadURL") !== -1) ||
+	if ((url.includes("_ob=DownloadURL")) ||
 		doc.title == "ScienceDirect Login" ||
 		doc.title == "ScienceDirect - Dummy" ||
-		(url.indexOf("/science/advertisement/") !== -1)) {
+		(url.includes("/science/advertisement/"))) {
 		return false;
 	}
 
-	if ((url.indexOf("pdf") !== -1 &&
-			url.indexOf("_ob=ArticleURL") === -1 &&
-			url.indexOf("/article/") === -1) ||
-		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1 ||
-		url.indexOf("_ob=ArticleListURL") !== -1) {
+	if ((url.includes("pdf") &&
+			!url.includes("_ob=ArticleURL") &&
+			!url.includes("/article/")) ||
+		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
 			return false;
 		}
 	}
+
 	if (url.includes('/search?') && getArticleList(doc).length > 0) {
 		return "multiple";
 	}
-	if (url.indexOf("pdf") === -1) {
+	if (!url.includes("pdf")) {
 		// Book sections have the ISBN in the URL
-		if (url.indexOf("/B978") !== -1) {
+		if (url.includes("/B978")) {
 			return "bookSection";
 		} else if (getISBN(doc)) {
 			if (getArticleList(doc).length) {
@@ -135,7 +135,7 @@ function parseIntermediatePDFPage(url, onDone) {
 		} else {
 			//Sometimes we are already on the PDF page here and therefore
 			//can simply use the original url as pdfURL.
-			if (url.indexOf('.pdf') > -1) {
+			if (url.includes('.pdf')) {
 				pdfURL = url;
 			}
 		}
@@ -296,7 +296,7 @@ function processRIS(doc, text) {
 	// e.g. http://www.sciencedirect.com/science/article/pii/S0065260108602506
 	text = text.replace(/^((?:A[U\d]|ED)\s+-\s+)(?:Editor-in-Chief:\s+)?(.+)/mg,
 		function(m, pre, name) {
-			if (name.indexOf(',') == -1) {
+			if (!name.includes(',')) {
 				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
 			}
 
@@ -399,6 +399,7 @@ function getArticleList(doc) {
 			|//td[@class="nonSerialResultsList"]/h3/a\
 			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
 			|//h2/a[contains(@class, "result-list-title-link")]\
+			|//ol[@class="article-list"]//a[contains(@class, "article-content-title")]\
 		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
@@ -880,12 +881,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/journal/22126716",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
 		"defer": true,
 		"items": "multiple"
@@ -1050,6 +1045,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/search?qs=zotero&show=25&sortBy=relevance",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/journal/le-pharmacien-hospitalier-et-clinicien/vol/52/issue/4",
 		"items": "multiple"
 	}
 ]
