@@ -65,7 +65,7 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		Z.debug(item);
-		//item.complete();
+		item.complete();
 	});
 	
 	translator.getTranslatorObject(function(trans) {
