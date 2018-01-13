@@ -2,14 +2,14 @@
 	"translatorID": "271ee1a5-da86-465b-b3a5-eafe7bd3c156",
 	"label": "Idref",
 	"creator": "Sylvain Machefert",
-	"target": "^https?://www\\.idref\\.fr/",
+	"target": "^https?://www\\.idref\\.fr/.*",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2018-01-12 10:00:51"
+	"lastUpdated": "2018-01-13 21:39:39"
 }
 
 function detectWeb(doc, url) { 
@@ -22,24 +22,24 @@ function detectWeb(doc, url) {
 function doWeb(doc, url)
 {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		var title;
-		var link;
 		var resultsTitle = ZU.xpath(doc, '//div[@id="perenne-references-docs"]/span[contains(@class, "detail_value")]');
 		var resultsHref = ZU.xpath(doc, '//div[@id="perenne-references-docs"]/span[contains(@class, "detail_label")]/a/@href');
 		
-		itemsList = [];
+		items = {};
 		for (var i in resultsTitle) {
-			itemsList[resultsHref[i].textContent] = resultsTitle[i].textContent;
+			href = resultsHref[i].textContent;
+			// We need to replace the http://www.sudoc.fr/XXXXXX links are they are redirects and aren't handled correctly from subtranslator
+			href = href.replace(/http:\/\/www\.sudoc\.fr\/(.*)$/, "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=$1");
+			items[href] = resultsTitle[i].textContent;
+			
 		}
 		
-		Zotero.selectItems(itemsList, function (items) {
-			if (!items) {
+		Zotero.selectItems(items, function (selectedItems) {
+			if (!selectedItems) {
 				return true;
 			}
 			var articles = [];
-			for (var i in items) {
+			for (var i in selectedItems) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
@@ -56,15 +56,15 @@ function scrape(doc, url) {
 		// HAL Archives ouvertes
 		Z.debug("HAL");
 		translator.setTranslator('58ab2618-4a25-4b9b-83a7-80cd0259f896');
-	} else if (url.indexOf("sudoc.fr") != -1) {
+	} else if (url.indexOf("sudoc.abes.fr") != -1) {
 		Z.debug("Sudoc");
 		translator.setTranslator('1b9ed730-69c7-40b0-8a06-517a89a3a278');
 	} else {
 		Z.debug("Undefined website");
+		return false;
 	}
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
-		Z.debug(item);
 		item.complete();
 	});
 	
