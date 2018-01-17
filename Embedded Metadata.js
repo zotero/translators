@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-25 17:49:05"
+	"lastUpdated": "2018-01-07 09:42:13"
 }
 
 /*
@@ -616,10 +616,15 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 
 	if(!newItem.url) {
-		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href');
+		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
 	}
-	if(!newItem.url) {
-		newItem.url = doc.location.href;
+	
+	if (!newItem.language) {
+		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//html/@lang') || 
+			doc.documentElement.getAttribute('xml:lang');
 	}
 
 
@@ -932,6 +937,7 @@ var testCases = [
 				"date": "2011",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F",
 				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
@@ -970,6 +976,7 @@ var testCases = [
 				"ISSN": "1947-508X",
 				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
 				"issue": "1",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"pages": "2",
 				"publicationTitle": "Landscapes of Violence",
@@ -1007,6 +1014,7 @@ var testCases = [
 				],
 				"date": "2012",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
 				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
@@ -1135,9 +1143,16 @@ var testCases = [
 			{
 				"itemType": "webpage",
 				"title": "Junot Díaz: My stories come from trauma",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Gregg",
+						"lastName": "Barrios",
+						"creatorType": "author"
+					}
+				],
 				"date": "2012-10-10 15:36:00",
 				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
+				"language": "en",
 				"shortTitle": "Junot Díaz",
 				"url": "https://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
 				"websiteTitle": "Salon",
@@ -1169,6 +1184,7 @@ var testCases = [
 				"date": "2013-12-22T11:58:34+00:00",
 				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
 				"blogTitle": "The Volokh Conspiracy",
+				"language": "en-US",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
 					{
@@ -1480,6 +1496,7 @@ var testCases = [
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
 				"issue": "4",
+				"language": "en",
 				"libraryCatalog": "muse.jhu.edu",
 				"pages": "627-656",
 				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
