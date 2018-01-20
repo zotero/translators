@@ -2,7 +2,7 @@
 	"translatorID": "cd669d1f-96b8-4040-aa36-48f843248399",
 	"label": "Primo 2018",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^.]*.hosted.exlibrisgroup.com/primo-explore/",
+	"target": "/primo-explore/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
