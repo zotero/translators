@@ -9,17 +9,24 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-20 05:35:28"
+	"lastUpdated": "2018-01-20 09:28:07"
 }
 
 function detectWeb(doc, url) {
-	var austliiRegexp = /\/cases\/.+\d\.html/
-	if(austliiRegexp.test(url)) {
+	var caseRegexp = /\/cases\/.+\d\.html/;
+	var legisSectionRegexp = /\/legis\/.+\.html/;
+	var legisRegexp = /\/legis\/.+/;
+	
+	if(caseRegexp.test(url)) {
 		return "case";
+	} else if(legisRegexp.test(url)) {
+		return "statute";
+	} else if(legisSectionRegexp.test(url)) {
+		return "statute";
 	} else {
 		var aTags = doc.getElementsByTagName("a");
 		for(var i=0; i<aTags.length; i++) {
-			if(austliiRegexp.test(aTags[i].href)) {
+			if(caseRegexp.test(aTags[i].href)) {
 				return "multiple";
 			}
 		}
@@ -27,27 +34,59 @@ function detectWeb(doc, url) {
 }
 
 
-function scrape(doc) {
+function caseScrape(doc) {
 	var newItem = new Zotero.Item("case");
 	var voliss = ZU.xpathText(doc, '//head/title');
 	var title = voliss.match(/.+?\[/)[0].replace(/ \[/, "");
 
 	newItem.title = newItem.caseName = title;
 	newItem.url = doc.location.href;
-	var court = ZU.trim(voliss.match(/\].+?[\(\[]/)[0].replace(/[\]\(\[]/g, ""))
-	newItem.court = court.match(/[^0-9]+/)[0]
-	newItem.docketNumber=court.match(/\d+/)[0]
+	var court = ZU.trim(voliss.match(/\].+?[\(\[]/)[0].replace(/[\]\(\[]/g, ""));
+	newItem.court = court.match(/[^0-9]+/)[0];
+	newItem.docketNumber = court.match(/\d+/)[0];
 	newItem.dateDecided = voliss.match(/\(\d[^\)]+\d{4}\)/)[0].replace(/[\(\)]/g, "");
 	newItem.attachments = [{ document:doc, title:"AustLII/NZLII snapshot", mimeType:"text/html"}];
 	newItem.complete();
 }
 
+function legisScrape(doc) {
+	var newItem = new Zotero.Item("statute");
+	
+	var ribbon = ZU.xpath(doc, "//nav[@id='ribbon']");
+	var jurisdiction = ZU.xpathText(ribbon, "//li[@class='ribbon-jurisdiction']/a/span");
+	var legiscode = ZU.xpathText(ribbon, "//li[@class='ribbon-database']/a/span");
+	var act = ZU.xpathText(ribbon, "//li[@class='ribbon-citation']/a/span");
+	var section = ZU.xpathText(ribbon, "//li[@class='ribbon-subject']/a/span");
+
+	var title = ZU.trim(act);
+	if (section != null) {
+		section = ZU.trim(section.match(/SECT\s+.+/)[0].replace(/SECT/g, ""));
+		
+		title += " " + section;
+		newItem.section = section;
+	}
+	newItem.title = title;
+	newItem.nameOfAct = act;
+	newItem.url = doc.location.href;
+	newItem.code = jurisdiction;
+	newItem.attachments = [{ document:doc, title:"AustLII/NZLII snapshot", mimeType:"text/html"}];
+	newItem.complete();
+}
+
 function doWeb(doc, url) {
-	var austliiRegexp = /\/cases\/.+\d\.html/;
-	if(austliiRegexp.test(url)) {
-		scrape(doc);
+	var caseRegexp = /\/cases\/.+\d\.html/;
+	var legisSectionRegexp = /\/legis\/.+\.html/;
+	var legisRegexp = /\/legis\/.+/;
+	
+	if(caseRegexp.test(url)) {
+		caseScrape(doc);
+	} else if(legisRegexp.test(url)) {
+		legisScrape(doc);
+	} else if(legisSectionRegexp.test(url)) {
+		legisScrape(doc);
 	} else {
-		var items = Zotero.Utilities.getItemArray(doc, doc, austliiRegexp);
+		// Detect multi-case page
+		var items = Zotero.Utilities.getItemArray(doc, doc, caseRegexp);
 		var urls = new Array();
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -56,7 +95,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				urls.push(i);
 			}
-			Zotero.Utilities.processDocuments(urls, scrape, function () {
+			Zotero.Utilities.processDocuments(urls, caseScrape, function () {
 				Zotero.done();
 			});
 			Zotero.wait();
@@ -139,30 +178,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nzlii.org/nz/cases/NZSC/2008/1.html",
-		"items": [
-			{
-				"itemType": "case",
-				"caseName": "Bronwyn Estate Ltd and ors v Gareth Hoole and others",
-				"creators": [],
-				"dateDecided": "8 February 2008",
-				"court": "NZSC",
-				"docketNumber": "1",
-				"url": "http://www.nzlii.org/nz/cases/NZSC/2008/1.html",
-				"attachments": [
-					{
-						"title": "AustLII/NZLII snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://www8.austlii.edu.au/cgi-bin/viewtoc/au/cases/act/ACTSC/2010/",
 		"items": "multiple"
 	},
@@ -178,6 +193,51 @@ var testCases = [
 				"court": "AICmr",
 				"docketNumber": "134",
 				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/cases/cth/AICmr/2017/134.html",
+				"attachments": [
+					{
+						"title": "AustLII/NZLII snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Freedom of Information Act 1982",
+				"creators": [],
+				"code": "Commonwealth",
+				"section": "24AB",
+				"url": "http://www8.austlii.edu.au/cgi-bin/viewdoc/au/legis/cth/consol_act/foia1982222/s24ab.html",
+				"attachments": [
+					{
+						"title": "AustLII/NZLII snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Freedom of Information Act 1982",
+				"creators": [],
+				"code": "CTH",
+				"url": "http://www8.austlii.edu.au/cgi-bin/viewdb/au/legis/cth/consol_act/foia1982222/",
 				"attachments": [
 					{
 						"title": "AustLII/NZLII snapshot",
