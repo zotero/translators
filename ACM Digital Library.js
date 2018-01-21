@@ -187,7 +187,7 @@ function getArticleType(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=1596682&preflayout=tabs",
+		"url": "https://dl.acm.org/citation.cfm?id=1596682&preflayout=tabs",
 		"defer": true,
 		"items": [
 			{
@@ -209,6 +209,7 @@ var testCases = [
 				"DOI": "10.1145/1596655.1596682",
 				"ISBN": "9781605585987",
 				"abstractNote": "Repository-based revision control systems such as CVS, RCS, Subversion, and GIT, are extremely useful tools that enable software developers to concurrently modify source code, manage conflicting changes, and commit updates as new revisions. Such systems facilitate collaboration with and concurrent contribution to shared source code by large developer bases. In this work, we investigate a framework for \"performance-aware\" repository and revision control for Java programs. Our system automatically tracks behavioral differences across revisions to provide developers with feedback as to how their change impacts performance of the application. It does so as part of the repository commit process by profiling the performance of the program or component, and performing automatic analyses that identify differences in the dynamic behavior or performance between two code revisions. In this paper, we present our system that is based upon and extends prior work on calling context tree (CCT) profiling and performance differencing. Our framework couples the use of precise CCT information annotated with performance metrics and call-site information, with a simple tree comparison technique and novel heuristics that together target the cause of performance differences between code revisions without knowledge of program semantics. We evaluate the efficacy of the framework using a number of open source Java applications and present a case study in which we use the framework to distinguish two revisions of the popular FindBugs application.",
+				"extra": "event-place: Calgary, Alberta, Canada",
 				"itemID": "Mostafa:2009:TPA:1596655.1596682",
 				"libraryCatalog": "ACM Digital Library",
 				"pages": "162–171",
@@ -224,9 +225,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"calling context tree",
-					"performance-aware revision control",
-					"profiling"
+					{
+						"tag": "calling context tree"
+					},
+					{
+						"tag": "performance-aware revision control"
+					},
+					{
+						"tag": "profiling"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -328,7 +335,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
+		"url": "https://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
 		"defer": true,
 		"items": [
 			{
@@ -350,6 +357,7 @@ var testCases = [
 				"DOI": "10.1145/258948.258973",
 				"ISBN": "9780897919180",
 				"abstractNote": "Fran (Functional Reactive Animation) is a collection of data types and functions for composing richly interactive, multimedia animations. The key ideas in Fran are its notions of behaviors and events. Behaviors are time-varying, reactive values, while events are sets of arbitrarily complex conditions, carrying possibly rich information. Most traditional values can be treated as behaviors, and when images are thus treated, they become animations. Although these notions are captured as data types rather than a programming language, we provide them with a denotational semantics, including a proper treatment of real time, to guide reasoning and implementation. A method to effectively and efficiently perform event detection using interval analysis is also described, which relies on the partial information structure on the domain of event times. Fran has been implemented in Hugs, yielding surprisingly good performance for an interpreter-based system. Several examples are given, including the ability to describe physical phenomena involving gravity, springs, velocity, acceleration, etc. using ordinary differential equations.",
+				"extra": "event-place: Amsterdam, The Netherlands",
 				"itemID": "Elliott:1997:FRA:258948.258973",
 				"libraryCatalog": "ACM Digital Library",
 				"pages": "263–273",
