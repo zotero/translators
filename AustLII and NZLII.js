@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-20 21:59:00"
+	"lastUpdated": "2018-01-21 10:31:23"
 }
 
 /*
@@ -108,7 +108,7 @@ function scrape(doc, url) {
 	var citation = text(doc, 'li.ribbon-citation>a>span');
 	
 	
-	if (url.includes('austlii.edu.au/')) {
+	if (text(doc, '#ribbon')) {
 		if (type == "case") {
 			var voliss = text(doc, 'head>title');
 			// e.g. C & M [2006] FamCA 212 (20 January 2006)
