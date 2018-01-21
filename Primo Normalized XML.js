@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-21 17:56:27"
+	"lastUpdated": "2018-01-21 18:14:00"
 }
 
 /*
@@ -173,11 +173,16 @@ function doImport() {
 			}
 		}
 	}
-	
-	var date = ZU.xpathText(doc, '//p:display/p:creationdate|//p:search/p:creationdate', ns);
-	var m;
-	if(date && (m = date.match(/\d+/))) {
-		item.date = m[0];
+	var date = ZU.xpathText(doc, '//p:addata/p:date', ns) ||
+		ZU.xpathText(doc, '//p:addata/p:risdate', ns);
+	if (date && /\d\d\d\d\d\d\d\d/.test(date)) {
+		item.date = date.substring(0,4)+'-'+date.substring(4,6)+'-'+date.substring(6,8);
+	} else {
+		date = ZU.xpathText(doc, '//p:display/p:creationdate|//p:search/p:creationdate', ns);
+		var m;
+		if(date && (m = date.match(/\d+/))) {
+			item.date = m[0];
+		}
 	}
 	
 	// the three letter ISO codes that should be in the language field work well:
@@ -391,7 +396,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012",
+				"date": "2012-01-17",
 				"DOI": "10.1021/ar2003286",
 				"ISSN": "1520-4898",
 				"issue": "1",
