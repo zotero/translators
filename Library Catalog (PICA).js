@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2018-01-26 07:05:08"
+	"lastUpdated": "2018-01-26 09:57:02"
 }
 
 function getSearchResults(doc) {
@@ -584,7 +584,7 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var newUrl = doc.evaluate('//base/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 		// fix for sudoc, see #1529
-		newUrl.replace(/sudoc\.abes\.fr\/\/?DB=/, 'sudoc.abes.fr/xslt/DB=');
+		newUrl = newUrl.replace(/sudoc\.abes\.fr\/\/?DB=/, 'sudoc.abes.fr/xslt/DB=');
 		var elmts = getSearchResults(doc);
 		var elmt = elmts.iterateNext();
 		var links = [];
