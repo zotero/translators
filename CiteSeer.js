@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-28 02:10:41"
+	"lastUpdated": "2018-01-28 14:23:28"
 }
 
 /*
@@ -37,11 +37,11 @@
 function detectWeb(doc, url) {
 	//for running the tests with book examples:
 	//return "book";
-	if ((url.indexOf('/search') != -1 || url.indexOf('/showciting') != -1) && getSearchResults(doc).length) {
+	if ((url.includes('/search') || url.includes('/showciting')) && getSearchResults(doc).length) {
 		return "multiple";
 	}
-	if ((url.indexOf('/viewdoc/') != -1 && doc.getElementById('bibtex'))
-		|| url.indexOf('/download?doi=') != -1) {
+	if ((url.includes('/viewdoc/') && doc.getElementById('bibtex'))
+		|| url.includes('/download?doi=')) {
 		return "journalArticle";
 	}
 }
@@ -67,10 +67,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else if (url.indexOf('/download?doi=') !== -1) {
-		let doi = url.replace('http://citeseerx.ist.psu.edu/viewdoc/download?doi=', '');
-		doi = doi.replace('&rep=rep1', '').replace('&type=pdf', '');
-		let paperUrl = 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=' + doi;
+	} else if (url.includes('/download?doi=')) {
+		let doi = url.match(/\/download\?doi=([^&]*)/);
+		let paperUrl = 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=' + doi[1];
 		ZU.processDocuments(paperUrl, scrape);
 	} else {
 		scrape(doc, url);
