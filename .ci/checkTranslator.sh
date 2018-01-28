@@ -23,6 +23,7 @@ declare -a ERROR_CHECKS=(
 declare -a WARN_CHECKS=(
     "badLicense"
     "problematicJS"
+    "unnecessaryIndexOf"
 )
 
 #-----------------------------------------------------------------------
@@ -89,6 +90,14 @@ deprecatedForEach () {
     fi
 }
 
+unnecessaryIndexOf () {
+    if grep -qE '\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)' "$TRANSLATOR";then
+        warn "Unnecessary '.indexOf()', use '.includes()' instead:"
+        grep -nE '\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)' "$TRANSLATOR"
+        return 1
+    fi
+}
+
 badLicense () {
     if ! grep -q "GNU Affero General Public License" "$TRANSLATOR";then
         warn "Must be AGPL licensed"
@@ -112,7 +121,7 @@ problematicJS () {
         | sed '/BEGIN TEST/,$ d' \
         | jshint --config="$SCRIPT_DIR"/jshintrc --reporter=unix -)
     if (( $? > 0 ));then
-        warn "JSHint shows issues with this code"
+        warn "JSHint shows issues with this code:"
         warn "$jshint_error"
         return 1
     fi
