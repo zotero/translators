@@ -1,7 +1,7 @@
 {
 	"translatorID": "fa396dd4-7d04-4f99-95e1-93d6f355441d",
 	"label": "CiteSeer",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Guy Aglionby",
 	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-13 06:39:17"
+	"lastUpdated": "2018-01-28 02:10:41"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2012 Sebastian Karcher
+	Copyright © 2018 Sebastian Karcher, Guy Aglionby
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -40,7 +40,8 @@ function detectWeb(doc, url) {
 	if ((url.indexOf('/search') != -1 || url.indexOf('/showciting') != -1) && getSearchResults(doc).length) {
 		return "multiple";
 	}
-	if (url.indexOf('/viewdoc/') != -1 && doc.getElementById('bibtex')) {
+	if ((url.indexOf('/viewdoc/') != -1 && doc.getElementById('bibtex'))
+		|| url.indexOf('/download?doi=') != -1) {
 		return "journalArticle";
 	}
 }
@@ -66,6 +67,11 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
+	} else if (url.indexOf('/download?doi=') !== -1) {
+		let doi = url.replace('http://citeseerx.ist.psu.edu/viewdoc/download?doi=', '');
+		doi = doi.replace('&rep=rep1', '').replace('&type=pdf', '');
+		let paperUrl = 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=' + doi;
+		ZU.processDocuments(paperUrl, scrape);
 	} else {
 		scrape(doc, url);
 	}
