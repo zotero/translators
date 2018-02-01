@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-01 19:04:24"
+	"lastUpdated": "2018-02-01 19:37:14"
 }
 
 /*
@@ -95,8 +95,9 @@ function scrape(doc, url) {
 			if (m[0].includes("PM")) {
 				m[0] = m[0].replace("PM", "").replace(/\d+:/, function(matched) {
 					return (parseInt(matched)+12) + ":";
-				});
+				}).trim();
 			}
+			m[0].replace("24:", "00");
 			item.date = ZU.strToISO(m[1]) + "T" + m[0];
 		} else {
 			item.date = date;
