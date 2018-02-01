@@ -101,8 +101,8 @@ function scrape(doc, url) {
 				m[0] = m[0].replace("PM", "").replace(/\d+:/, function(matched) {
 					return (parseInt(matched)+12) + ":";
 				}).trim();
+				m[0] = m[0].replace("24:", "12:");
 			}
-			m[0] = m[0].replace("24:", "12:");
 			item.date = ZU.strToISO(m[1]) + "T" + m[0];
 		} else {
 			item.date = date;
