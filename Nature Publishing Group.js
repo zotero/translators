@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-27 11:23:52"
+	"lastUpdated": "2018-02-01 07:12:46"
 }
 
 /**
@@ -198,7 +198,7 @@ function attachSupplementary(doc, item, next) {
 
 //unescape Highwire's special html characters
 function unescape(str) {
-	if(!str || str.indexOf('[') == -1) return str;
+	if(!str || !str.includes('[')) return str;
 
 	return str.replace(/\|?\[([^\]]+)\]\|?/g, function(s, p1) {
 		if(ISO8879CharMap[p1] !== undefined) {
@@ -285,7 +285,7 @@ function scrapeEM(doc, url, next) {
 	translator.setHandler("itemDone", function (obj, item) {
 		//Replace HTML special characters with proper characters
 		//also remove all caps in Names and Titles
-		for (let i in item.creators) {
+		for (let i=0; i<item.creators.length; i++) {
 			item.creators[i].lastName = unescape(item.creators[i].lastName);
 			item.creators[i].firstName = unescape(item.creators[i].firstName);
 
@@ -294,7 +294,7 @@ function scrapeEM(doc, url, next) {
 		}
 
 		item.title = fixCaps(unescape(item.title));
-		item.abstractNote = unescape(item.abstractNote);
+		item.abstractNote = ZU.cleanTags(item.abstractNote);
 
 		//the date in EM is usually online publication date
 		//If we can find a publication year, that's better
@@ -385,7 +385,7 @@ function getMultipleNodes(doc, url) {
 	var nodex, titlex, linkx;
 	var nodes = [];
 
-	if (url.indexOf('/search/') != -1 || url.indexOf('/most.htm') != -1) {
+	if (url.includes('/search/') || url.includes('/most.htm')) {
 		//search, "top" lists
 		nodex = '//ol[@class="results-list" or @id="content-list"]/li';
 		titlex = './' + allHNodes + '/node()[not(self::span)]';
@@ -468,21 +468,21 @@ function detectWeb(doc, url) {
 	if (url.search(/\/(full|abs)\/[^\/]+($|\?|#)|\/fp\/.+?[?&]lang=ja(?:&|$)|\/articles\//) != -1) {
 		return 'journalArticle';
 
-	} else if (doc.title.toLowerCase().indexOf('table of contents') != -1 //single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
-		|| doc.title.toLowerCase().indexOf('current issue') != -1
-		|| url.indexOf('/research/') != -1 || url.indexOf('/topten/') != -1
-		|| url.indexOf('/most.htm') != -1
-		|| (url.indexOf('/vaop/') != -1 && url.indexOf('index.html') != -1) //advanced online publication
-		|| url.indexOf('sp-q=') != -1 //search query
+	} else if (doc.title.toLowerCase().includes('table of contents') //single issue ToC. e.g. http://www.nature.com/emboj/journal/v30/n1/index.html or http://www.nature.com/nature/journal/v481/n7381/index.html
+		|| doc.title.toLowerCase().includes('current issue')
+		|| url.includes('/research/') || url.includes('/topten/')
+		|| url.includes('/most.htm')
+		|| (url.includes('/vaop/') && url.includes('index.html')) //advanced online publication
+		|| url.includes('sp-q=') //search query
 		|| url.search(/journal\/v\d+\/n\d+\/index\.html/i) != -1 //more ToC
 		|| url.search(/volumes\/\d+\/issues\/\d+/i) != -1
 		|| url.includes('/search?')) { //new more ToC
 		return getMultipleNodes(doc, url)[0].length ? 'multiple' : null;
 
-	} else if (url.indexOf('/archive/') != -1) {
-		if (url.indexOf('index.htm') != -1) return false; //list of issues
-		if (url.indexOf('subject.htm') != -1) return false; //list of subjects
-		if (url.indexOf('category.htm') != -1 && url.indexOf('code=') == -1) return false; //list of categories
+	} else if (url.includes('/archive/')) {
+		if (url.includes('index.htm')) return false; //list of issues
+		if (url.includes('subject.htm')) return false; //list of subjects
+		if (url.includes('category.htm') && !url.includes('code=')) return false; //list of categories
 		return getMultipleNodes(doc, url)[0].length ? 'multiple' : null; //all else should be ok
 	}
 }
@@ -490,7 +490,7 @@ function detectWeb(doc, url) {
 function supplementItem(item, supp, prefer) {
 	for(var i in supp) {
 		if(!supp.hasOwnProperty(i)
-			|| (item.hasOwnProperty(i) && prefer.indexOf(i) == -1)) {
+			|| (item.hasOwnProperty(i) && !prefer.includes(i))) {
 			continue;	//this also skips creators, tags, notes, and related
 		}
 
@@ -533,7 +533,7 @@ function scrape(doc, url) {
 			//palgrave-macmillan journals
 			if(!isNature(url)) {
 				preferredRisFields.push('publisher'); //all others are going to be dropped since we only handle journalArticle
-				if(item.rights.indexOf('Nature Publishing Group') != -1) {
+				if(item.rights.includes('Nature Publishing Group')) {
 					delete item.rights;
 				}
 			}
@@ -644,9 +644,11 @@ function scrape(doc, url) {
 		// write 'en' instead of 'En'
 		if (item.language && item.language == 'En') item.language = 'en';
 
-		if(item.journalAbbreviation == 'Nature') {
-			item.publicationTitle = 'Nature';	//old articles mess this up
+		// journal abbreviations are now all wrong, i.e. the full title of the journal
+		if (item.journalAbbreviation && !item.publicationTitle) {
+			item.publicationTitle = 'Nature';// old articles mess this up
 		}
+		delete item.journalAbbreviation;
 
 		item.attachments = [{
 			document: doc,
@@ -1154,7 +1156,6 @@ var testCases = [
 				"ISSN": "1476-5594",
 				"abstractNote": "Identification and characterization of cancer stem cells (CSCs) in gastric cancer are difficult owing to the lack of specific markers and consensus methods. In this study, we show that cells with the CD90 surface marker in gastric tumors could be enriched under non-adherent, serum-free and sphere-forming conditions. These CD90+ cells possess a higher ability to initiate tumor in vivo and could re-establish the cellular hierarchy of tumors from single-cell implantation, demonstrating their self-renewal properties. Interestingly, higher proportion of CD90+ cells correlates with higher in vivo tumorigenicity of gastric primary tumor models. In addition, it was found that ERBB2 was overexpressed in about 25% of the gastric primary tumor models, which correlates with the higher level of CD90 expression in these tumors. Trastuzumab (humanized anti-ERBB2 antibody) treatment of high-tumorigenic gastric primary tumor models could reduce the CD90+ population in tumor mass and suppress tumor growth when combined with traditional chemotherapy. Moreover, tumorigenicity of tumor cells could also be suppressed when trastuzumab treatment starts at the same time as cell implantation. Therefore, we have identified a CSC population in gastric primary tumors characterized by their CD90 phenotype. The finding that trastuzumab targets the CSC population in gastric tumors suggests that ERBB2 signaling has a role in maintaining CSC populations, thus contributing to carcinogenesis and tumor invasion. In conclusion, the results from this study provide new insights into the gastric tumorigenic process and offer potential implications for the development of anticancer drugs as well as therapeutic treatment of gastric cancers.",
 				"issue": "6",
-				"journalAbbreviation": "Oncogene",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "671-682",
@@ -1212,12 +1213,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-18",
+				"date": "2012-01",
 				"DOI": "10.1038/nature10669",
 				"ISSN": "1476-4687",
 				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1,2,3,4,5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6,7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9,10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be , with an average mass fraction of per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13,14,15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"issue": "7381",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "341-343",
@@ -1244,10 +1244,10 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Antarctic Treaty is cold comfort",
 				"creators": [],
-				"date": "2012-01-18",
+				"date": "2012-01",
 				"DOI": "10.1038/481237a",
 				"ISSN": "1476-4687",
-				"abstractNote": "<p>Researchers need to cement the bond between science and the South Pole if the region is to remain one of peace and collaboration.</p>",
+				"abstractNote": "Researchers need to cement the bond between science and the South Pole if the region is to remain one of peace and collaboration.",
 				"issue": "7381",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
@@ -1296,12 +1296,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-09",
+				"date": "2012-01",
 				"DOI": "10.1038/nature10728",
 				"ISSN": "1476-4687",
 				"abstractNote": "Histone deacetylase enzymes (HDACs) are emerging cancer drug targets. They regulate gene expression by removing acetyl groups from lysine residues in histone tails, resulting in chromatin condensation. The enzymatic activity of most class I HDACs requires recruitment into multi-subunit co-repressor complexes, which are in turn recruited to chromatin by repressive transcription factors. Here we report the structure of a complex between an HDAC and a co-repressor, namely, human HDAC3 with the deacetylase activation domain (DAD) from the human SMRT co-repressor (also known as NCOR2). The structure reveals two remarkable features. First, the SMRT-DAD undergoes a large structural rearrangement on forming the complex. Second, there is an essential inositol tetraphosphate molecule—d-myo-inositol-(1,4,5,6)-tetrakisphosphate (Ins(1,4,5,6)P4)—acting as an ‘intermolecular glue’ between the two proteins. Assembly of the complex is clearly dependent on the Ins(1,4,5,6)P4, which may act as a regulator—potentially explaining why inositol phosphates and their kinases have been found to act as transcriptional regulators. This mechanism for the activation of HDAC3 appears to be conserved in class I HDACs from yeast to humans, and opens the way to novel therapeutic opportunities.",
 				"issue": "7381",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "335-340",
@@ -1424,7 +1423,6 @@ var testCases = [
 				"ISSN": "1546-1718",
 				"abstractNote": "The estrogen receptor is the master transcriptional regulator of breast cancer phenotype and the archetype of a molecular therapeutic target. We mapped all estrogen receptor and RNA polymerase II binding sites on a genome-wide scale, identifying the authentic cis binding sites and target genes, in breast cancer cells. Combining this unique resource with gene expression data demonstrates distinct temporal mechanisms of estrogen-mediated gene regulation, particularly in the case of estrogen-suppressed genes. Furthermore, this resource has allowed the identification of cis-regulatory sites in previously unexplored regions of the genome and the cooperating transcription factors underlying estrogen signaling in breast cancer.",
 				"issue": "11",
-				"journalAbbreviation": "Nature Genetics",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "1289-1297",
@@ -1662,7 +1660,6 @@ var testCases = [
 				"ISSN": "1476-4687",
 				"abstractNote": "Genomes are organized into high-level three-dimensional structures, and DNA elements separated by long genomic distances can in principle interact functionally. Many transcription factors bind to regulatory DNA elements distant from gene promoters. Although distal binding sites have been shown to regulate transcription by long-range chromatin interactions at a few loci, chromatin interactions and their impact on transcription regulation have not been investigated in a genome-wide manner. Here we describe the development of a new strategy, chromatin interaction analysis by paired-end tag sequencing (ChIA-PET) for the de novo detection of global chromatin interactions, with which we have comprehensively mapped the chromatin interaction network bound by oestrogen receptor α (ER-α) in the human genome. We found that most high-confidence remote ER-α-binding sites are anchored at gene promoters through long-range chromatin interactions, suggesting that ER-α functions by extensive chromatin looping to bring genes together for coordinated transcriptional regulation. We propose that chromatin interactions constitute a primary mechanism for regulating transcription in mammalian genomes.",
 				"issue": "7269",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "58-64",
@@ -1715,7 +1712,6 @@ var testCases = [
 				"ISSN": "1545-9985",
 				"abstractNote": "In bacteria, numerous genes harbor regulatory elements in the 5′ untranslated regions of their mRNA, termed riboswitches, which control gene expression by binding small-molecule metabolites. These sequences influence the secondary and tertiary structure of the RNA in a ligand-dependent manner, thereby directing its transcription or translation. The crystal structure of an S-adenosylmethionine–responsive riboswitch found predominantly in proteobacteria, SAM-II, has been solved to reveal a second means by which RNA interacts with this important cellular metabolite. Notably, this is the first structure of a complete riboswitch containing all sequences associated with both the ligand binding aptamer domain and the regulatory expression platform. Chemical probing of this RNA in the absence and presence of ligand shows how the structure changes in response to S-adenosylmethionine to sequester the ribosomal binding site and affect translational gene regulation.",
 				"issue": "2",
-				"journalAbbreviation": "Nature Structural &Amp; Molecular Biology",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "177-182",
@@ -1783,12 +1779,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-18",
+				"date": "2012-01",
 				"DOI": "10.1038/nature10669",
 				"ISSN": "1476-4687",
 				"abstractNote": "The mass function of dwarf satellite galaxies that are observed around Local Group galaxies differs substantially from simulations1,2,3,4,5 based on cold dark matter: the simulations predict many more dwarf galaxies than are seen. The Local Group, however, may be anomalous in this regard6,7. A massive dark satellite in an early-type lens galaxy at a redshift of 0.222 was recently found8 using a method based on gravitational lensing9,10, suggesting that the mass fraction contained in substructure could be higher than is predicted from simulations. The lack of very low-mass detections, however, prohibited any constraint on their mass function. Here we report the presence of a (1.9 ± 0.1) × 108 dark satellite galaxy in the Einstein ring system JVAS B1938+666 (ref. 11) at a redshift of 0.881, where denotes the solar mass. This satellite galaxy has a mass similar to that of the Sagittarius12 galaxy, which is a satellite of the Milky Way. We determine the logarithmic slope of the mass function for substructure beyond the local Universe to be , with an average mass fraction of per cent, by combining data on both of these recently discovered galaxies. Our results are consistent with the predictions from cold dark matter simulations13,14,15 at the 95 per cent confidence level, and therefore agree with the view that galaxies formed hierarchically in a Universe composed of cold dark matter.",
 				"issue": "7381",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "341-343",
@@ -1871,12 +1866,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-03-06",
+				"date": "2013-03",
 				"DOI": "10.1038/nature11968",
 				"ISSN": "1476-4687",
 				"abstractNote": "Natural epigenetic variation provides a source for the generation of phenotypic diversity, but to understand its contribution to such diversity, its interaction with genetic variation requires further investigation. Here we report population-wide DNA sequencing of genomes, transcriptomes and methylomes of wild Arabidopsis thaliana accessions. Single cytosine methylation polymorphisms are not linked to genotype. However, the rate of linkage disequilibrium decay amongst differentially methylated regions targeted by RNA-directed DNA methylation is similar to the rate for single nucleotide polymorphisms. Association analyses of these RNA-directed DNA methylation regions with genetic variants identified thousands of methylation quantitative trait loci, which revealed the population estimate of genetically dependent methylation variation. Analysis of invariably methylated transposons and genes across this population indicates that loci targeted by RNA-directed DNA methylation are epigenetically activated in pollen and seeds, which facilitates proper development of these structures.",
 				"issue": "7440",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "193-198",
@@ -1934,12 +1928,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-03-03",
+				"date": "2013-03",
 				"DOI": "10.1038/nature11899",
 				"ISSN": "1476-4687",
 				"abstractNote": "P-type ATPases are ATP-powered ion pumps that establish ion concentration gradients across biological membranes, and are distinct from other ATPases in that the reaction cycle includes an autophosphorylation step. The best studied is Ca2+-ATPase from muscle sarcoplasmic reticulum (SERCA1a), a Ca2+ pump that relaxes muscle cells after contraction, and crystal structures have been determined for most of the reaction intermediates1,2. An important outstanding structure is that of the E1 intermediate, which has empty high-affinity Ca2+-binding sites ready to accept new cytosolic Ca2+. In the absence of Ca2+ and at pH 7 or higher, the ATPase is predominantly in E1, not in E2 (low affinity for Ca2+)3, and if millimolar Mg2+ is present, one Mg2+ is expected to occupy one of the Ca2+-binding sites with a millimolar dissociation constant4,5. This Mg2+ accelerates the reaction cycle4, not permitting phosphorylation without Ca2+ binding. Here we describe the crystal structure of native SERCA1a (from rabbit) in this E1·Mg2+ state at 3.0 Å resolution in addition to crystal structures of SERCA1a in E2 free from exogenous inhibitors, and address the structural basis of the activation signal for phosphoryl transfer. Unexpectedly, sarcolipin6, a small regulatory membrane protein of Ca2+-ATPase7, is bound, stabilizing the E1·Mg2+ state. Sarcolipin is a close homologue of phospholamban, which is a critical mediator of β-adrenergic signal in Ca2+ regulation in heart (for reviews, see, for example, refs 8–10), and seems to play an important role in muscle-based thermogenesis11. We also determined the crystal structure of recombinant SERCA1a devoid of sarcolipin, and describe the structural basis of inhibition by sarcolipin/phospholamban. Thus, the crystal structures reported here fill a gap in the structural elucidation of the reaction cycle and provide a solid basis for understanding the physiological regulation of the calcium pump.",
 				"issue": "7440",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "260-264",
@@ -2398,12 +2391,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-04-20",
+				"date": "2011-05",
 				"DOI": "10.1038/nature09944",
 				"ISSN": "1476-4687",
 				"abstractNote": "Our knowledge of species and functional composition of the human gut microbiome is rapidly increasing, but it is still based on very few cohorts and little is known about variation across the world. By combining 22 newly sequenced faecal metagenomes of individuals from four countries with previously published data sets, here we identify three robust clusters (referred to as enterotypes hereafter) that are not nation or continent specific. We also confirmed the enterotypes in two published, larger cohorts, indicating that intestinal microbiota variation is generally stratified, not continuous. This indicates further the existence of a limited number of well-balanced host–microbial symbiotic states that might respond differently to diet and drug intake. The enterotypes are mostly driven by species composition, but abundant molecular functions are not necessarily provided by abundant species, highlighting the importance of a functional analysis to understand microbial communities. Although individual host properties such as body mass index, age, or gender cannot explain the observed enterotypes, data-driven marker genes or functional modules can be identified for each of these host properties. For example, twelve genes significantly correlate with age and three functional modules with the body mass index, hinting at a diagnostic potential of microbial markers.",
 				"issue": "7346",
-				"journalAbbreviation": "Nature",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "174-180",
@@ -2451,7 +2443,6 @@ var testCases = [
 				"ISSN": "1750-2799",
 				"abstractNote": "A substantial range of protein-protein interactions can be readily monitored in real time using bioluminescence resonance energy transfer (BRET). The procedure involves heterologous coexpression of fusion proteins, which link proteins of interest to a bioluminescent donor enzyme or acceptor fluorophore. Energy transfer between these proteins is then detected. This protocol encompasses BRET1, BRET2 and the recently described eBRET, including selection of the donor, acceptor and substrate combination, fusion construct generation and validation, cell culture, fluorescence and luminescence detection, BRET detection and data analysis. The protocol is particularly suited to studying protein-protein interactions in live cells (adherent or in suspension), but cell extracts and purified proteins can also be used. Furthermore, although the procedure is illustrated with references to mammalian cell culture conditions, this protocol can be readily used for bacterial or plant studies. Once fusion proteins are generated and validated, the procedure typically takes 48–72 h depending on cell culture requirements.",
 				"issue": "1",
-				"journalAbbreviation": "Nature Protocols",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "337-345",
@@ -2533,7 +2524,6 @@ var testCases = [
 				"DOI": "10.1038/ncomms7186",
 				"ISSN": "2041-1723",
 				"abstractNote": "Chromatin interactions connect distal regulatory elements to target gene promoters guiding stimulus- and lineage-specific transcription. Few factors securing chromatin interactions have so far been identified. Here, by integrating chromatin interaction maps with the large collection of transcription factor-binding profiles provided by the ENCODE project, we demonstrate that the zinc-finger protein ZNF143 preferentially occupies anchors of chromatin interactions connecting promoters with distal regulatory elements. It binds directly to promoters and associates with lineage-specific chromatin interactions and gene expression. Silencing ZNF143 or modulating its DNA-binding affinity using single-nucleotide polymorphisms (SNPs) as a surrogate of site-directed mutagenesis reveals the sequence dependency of chromatin interactions at gene promoters. We also find that chromatin interactions alone do not regulate gene expression. Together, our results identify ZNF143 as a novel chromatin-looping factor that contributes to the architectural foundation of the genome by providing sequence specificity at promoters connected with distal regulatory elements.",
-				"journalAbbreviation": "Nature Communications",
 				"language": "en",
 				"libraryCatalog": "www.nature.com",
 				"pages": "6186",
