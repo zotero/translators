@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-27 23:57:56"
+	"lastUpdated": "2018-02-01 11:52:27"
 }
 
 /*
@@ -60,6 +60,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (isSearchPage(url)) {
+		// e.g. https://research.google.com/search.html?q=algorithm
 		let results = scrapeSearchPage(doc);
 		
 		if (Object.keys(results).length) {
@@ -88,6 +89,7 @@ function doWeb(doc, url) {
 			});
 		}
 	} else if (isPaperPdf(url)) {
+		// e.g. https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36296.pdf
 		let paperId = url.replace('https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/', '');
 		paperId = paperId.replace('.pdf', '');
 		let publicationPage = 'https://research.google.com/pubs/pub' + paperId + '.html';
@@ -192,6 +194,8 @@ function scrape(doc, url) {
  			mimeType: "text/html",
  			snapshot: false
  		});
+ 		
+ 		delete item.itemID;
 		
 		item.complete();
 	});
@@ -211,7 +215,7 @@ function isSearchPage(url) {
 }
 
 function isAuthorPage(url) {
-	return url.includes('/pubs/') && !url.includes('/pubs/pub');
+	return url.includes('/pubs/') && !url.includes('/pubs/pub') && !url.includes('/pubs/archive');
 }
 
 function isPaperPdf(url) {
@@ -264,7 +268,6 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"itemID": "45619",
 				"libraryCatalog": "Google Research",
 				"proceedingsTitle": "arXiv:1609.08675",
 				"shortTitle": "YouTube-8M",
@@ -321,7 +324,6 @@ var testCases = [
 					}
 				],
 				"date": "2016",
-				"itemID": "45742",
 				"libraryCatalog": "Google Research",
 				"shortTitle": "What’s your ML test score?",
 				"attachments": [
