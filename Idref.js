@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2018-01-13 21:39:39"
+	"lastUpdated": "2018-02-03 09:39:41"
 }
 
 function detectWeb(doc, url) { 
@@ -72,3 +72,12 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.idref.fr/199676100",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
