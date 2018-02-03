@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-01 07:12:46"
+	"lastUpdated": "2018-02-03 18:26:58"
 }
 
 /**
@@ -294,7 +294,7 @@ function scrapeEM(doc, url, next) {
 		}
 
 		item.title = fixCaps(unescape(item.title));
-		item.abstractNote = ZU.cleanTags(item.abstractNote);
+		if (item.abstractNote) item.abstractNote = ZU.cleanTags(item.abstractNote);
 
 		//the date in EM is usually online publication date
 		//If we can find a publication year, that's better
@@ -601,6 +601,7 @@ function scrape(doc, url) {
 					if(items[1].creators[j].fieldMode !== 1) {
 						item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
 					} else {
+						delete item.creators[i].firstName;
 						item.creators[i].fieldMode = 1;
 					}
 					item.creators[i].lastName = emLName;
@@ -649,19 +650,21 @@ function scrape(doc, url) {
 			item.publicationTitle = 'Nature';// old articles mess this up
 		}
 		delete item.journalAbbreviation;
-
-		item.attachments = [{
-			document: doc,
-			title: 'Snapshot'
-		}];
-
-		var pdf = getPdfUrl(url);
-		if (pdf) {
-			item.attachments.push({
-				url: pdf,
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			});
+		
+		if (!item.attachments) {
+			item.attachments = [{
+				document: doc,
+				title: 'Snapshot'
+			}];
+	
+			var pdf = getPdfUrl(url);
+			if (pdf) {
+				item.attachments.push({
+					url: pdf,
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf'
+				});
+			}
 		}
 		
 		//attach some useful links, like...
@@ -1165,6 +1168,10 @@ var testCases = [
 				"volume": "31",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1227,6 +1234,10 @@ var testCases = [
 				"volume": "481",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1257,6 +1268,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/481237a",
 				"volume": "481",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -1309,6 +1324,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/nature10728",
 				"volume": "481",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -1431,6 +1450,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/ng1901",
 				"volume": "38",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -1669,6 +1692,10 @@ var testCases = [
 				"volume": "462",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1721,6 +1748,10 @@ var testCases = [
 				"volume": "15",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1732,7 +1763,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nature.com/ng/journal/v38/n11/index.html",
+		"url": "https://www.nature.com/ng/volumes/38/issues/11",
 		"items": "multiple"
 	},
 	{
@@ -1792,6 +1823,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/nature10669",
 				"volume": "481",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -1880,6 +1915,10 @@ var testCases = [
 				"volume": "495",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -1941,6 +1980,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/nature11899",
 				"volume": "495",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -2155,7 +2198,6 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "MetaHIT Consortium (additional",
 						"lastName": "MetaHIT Consortium (additional Members)",
 						"creatorType": "author",
 						"fieldMode": 1
@@ -2405,6 +2447,10 @@ var testCases = [
 				"volume": "473",
 				"attachments": [
 					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
 						"title": "Snapshot"
 					}
 				],
@@ -2451,6 +2497,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/nprot.2006.52",
 				"volume": "1",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
@@ -2532,6 +2582,10 @@ var testCases = [
 				"url": "https://www.nature.com/articles/ncomms7186",
 				"volume": "2",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
