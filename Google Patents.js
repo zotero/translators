@@ -9,8 +9,16 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-03 22:55:00"
+	"lastUpdated": "2018-02-03 22:51:13"
 }
+
+/* Test cases for new interface does not work within Scaffold
+   Thus, one has to test them individually:
+   https://patents.google.com/patent/US20090197681A1/en?q=networks&q=G06Q30%2f02
+   https://patents.google.com/patent/US4390992A/en
+   https://patents.google.com/patent/EP1808414A1/en
+*/
+
 
 function detectWeb(doc, url) {
 	if (!doc.getElementsByTagName("body")[0].hasChildNodes()) return;
@@ -179,14 +187,10 @@ var scrapers = [
 			if (fields.title.toUpperCase() == fields.title) {
 				fields.title = ZU.capitalizeTitle(fields.title, true);
 			}
-			if (fields.extra && fields.extra.indexOf('U.S. Classification') != -1) {
+			if (fields.extra && fields.extra.includes('U.S. Classification')) {
 				fields.country = "United States";
 			}
-			var url = doc.location.href;
-			fields.url = 'http://' + doc.location.host + doc.location.pathname;
-			var m;
-			if (m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
-			Z.debug(fields.url)
+			fields.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
 			fields.attachments = [{
 				url: ZU.xpathText(doc, '//a[@id="appbar-download-pdf-link"]/@href'),
 				title: "Google Patents PDF",
@@ -257,16 +261,12 @@ var scrapers = [
 				fields.abstractNote += ZU.trimInternal(abs[i].textContent) + '\n';
 			}
 			fields.abstractNote = fields.abstractNote.trim();
-			fields.url = 'http://' + doc.location.host + doc.location.pathname;
-			// Below seems to no longer be necessry. There used to be /about?id=XXXX
-			// pages that now simply redirect to the /XXXX URL, but we'll leave it for now
-			var m, url = doc.location.href;
-			if (m = url.match(/[?&](id=[^&]+)/)) fields.url += '?' + m[1];
+			fields.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
 			if (fields.patentNumber) {
 				fields.country = getPatentOffice(fields.patentNumber);
 			} //the api works for all versions of the page
-			var pdfurl = doc.location.href.replace(/[\?#].+/, "").replace(/.+\//, "http://patentimages.storage.googleapis.com/pdfs/") + ".pdf"
-				//var pdfurl = "http://patentimages.storage.googleapis.com/pdfs/" + fields.patentNumber + ".pdf"
+			var pdfurl = doc.location.href.replace(/[\?#].+/, "").replace(/.+\//, "http://patentimages.storage.googleapis.com/pdfs/") + ".pdf";
+				//var pdfurl = "http://patentimages.storage.googleapis.com/pdfs/" + fields.patentNumber + ".pdf";
 			fields.attachments = [{
 				url: pdfurl,
 				title: "Google Patents PDF",
@@ -274,12 +274,12 @@ var scrapers = [
 			}];
 			if (!fields.extra) {
 				//classifications are at the bottom of the page in modern outline.
-				var classification = ZU.xpath(doc, '//div[a[@id="classifications"]]//tbody/tr[td[contains(@class, "patent-data-table")]]')
+				var classification = ZU.xpath(doc, '//div[a[@id="classifications"]]//tbody/tr[td[contains(@class, "patent-data-table")]]');
 				var classificationArray = [];
 				for (i in classification) {
 					classificationArray.push(ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][1]') + " " + ZU.xpathText(classification[i], './td[contains(@class, "patent-data-table")][2]'));
 				}
-				if (classificationArray) fields.extra = classificationArray.join("; ")
+				if (classificationArray) fields.extra = classificationArray.join("; ");
 			}
 			return fields;
 		}
@@ -291,8 +291,8 @@ var scrapers = [
 				// Wait for page to load (loads in stages, so we'll need to check this several times)
 				var monitorNode = ZU.xpath(doc, '//search-app/search-result/search-ui//paper-header-panel[@id="mainCoreHeaderPanel"]//div[contains(@class,"flex-2")]')[0] || ZU.xpath(doc, '//search-app/search-result/search-ui//div[@id="content"]/paper-header-panel[@id="mainCoreHeaderPanel"]')[0] || ZU.xpath(doc, '//search-app/search-result/search-ui//div[@id="content"]')[0] || ZU.xpath(doc, '//search-app')[0];
 				if (monitorNode) {
-					Z.debug("individual detect")
-					Z.debug("Monitoring node: " + monitorNode.outerHTML.replace(monitorNode.innerHTML, ''))
+					Z.debug("individual detect");
+					Z.debug("Monitoring node: " + monitorNode.outerHTML.replace(monitorNode.innerHTML, ''));
 					Z.monitorDOMChanges(monitorNode, {
 						childList: true
 					});
@@ -350,9 +350,9 @@ var scrapers = [
 			fields.patentNumber = ZU.xpathText(doc, '//section[contains(@class, "knowledge-card")]//h2');
 			var abs = ZU.xpathText(doc, '//abstract/div');
 			fields.abstractNote = abs.trim();
-			fields.url = 'http://' + doc.location.host + doc.location.pathname;
+			fields.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
 			if (fields.patentNumber) {
-				fields.country = getPatentOffice(fields.patentNumber)
+				fields.country = getPatentOffice(fields.patentNumber);
 			}
 			//patent number/URL and what's used in the API can vary; grap PDF URL from the page.
 			var pdfurl = ZU.xpathText(doc, '//div[contains(@class, "knowledge-card")]/a[contains(@href, "https://patentimages.storage.googleapis.com/pdfs/")]/@href');
@@ -364,7 +364,7 @@ var scrapers = [
 			}];
 			if (!fields.extra) {
 				//classifications are in a box half-way down
-				var classification = ZU.xpath(doc, '//div[contains(@class, "classification-tree") and not( @hidden="")]/a')
+				var classification = ZU.xpath(doc, '//div[contains(@class, "classification-tree") and not( @hidden="")]/a');
 				var classificationArray = [];
 				for (var i = 0; i < classification.length; i++) {
 					classificationArray.push(classification[i].textContent.trim());
@@ -391,8 +391,7 @@ function scrape(doc) {
 	//go through all the fields and add them to an item
 	var item = new Zotero.Item("patent");
 	var fields = scraper.getMetadata(doc);
-	var f;
-	for (f in fields) {
+	for (let f in fields) {
 		item[f] = fields[f];
 	}
 	item.complete();
@@ -423,11 +422,11 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function(items) {
 			if (!items) return true;
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
-			Z.debug(articles)
+			//Z.debug(articles);
 			ZU.processDocuments(articles, scrape);
 		});
 	} else {
@@ -606,7 +605,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.google.fr/#q=ordinateur&hl=fr&prmd=imvns&source=lnms&tbm=pts&sa=X&ei=oJJfUJKgBOiU2gWqwIHYCg&ved=0CBIQ_AUoBQ&tbo=1&prmdo=1&bav=on.2,or.r_gc.r_pw.r_qf.&fp=ec5bd0c9391b4cc0&biw=1024&bih=589",
+		"url": "https://www.google.fr/search?q=ordinateur&hl=fr&prmd=imvns&source=lnms&tbm=pts&sa=X&ei=oJJfUJKgBOiU2gWqwIHYCg&ved=0CBIQ_AUoBQ&tbo=1&prmdo=1&bav=on.2,or.r_gc.r_pw.r_qf.&biw=1024&bih=589&cad=h",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -628,10 +627,10 @@ var testCases = [
 				"abstractNote": "The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl. The installation for recycling used water originating from sanitary equipment and re-use of water for rinsing a water closet bowl, comprises a control system having an electronic terminal with a micro controller, and an additional drain to pour an overflow of a tank directly in an evacuation pipe of the water closet bowl. The water closet bowl is equipped with a flush water saver system, which surmounts the bowl. The saver system comprises tank (3) with a water reserve, and a water-flushing device placed in the tank to supply the flush water to the water closet bowl, water supply pipes, a filter and a raising pump are arranged in one of the pipes, a water level detector to control the water reserve level contained in the tank, and a flapper valve to control the arrival of running water. The flapper valve is normally closed and temporarily opened when quantity of water contained in the tank is lower than a predetermined quantity detected by the detector. The water-flushing device comprises a drain valve (25A) with a vertical actuation inside a flow regulation tube, which extends on all the height of the tank and communicates with the rest of the tank by openings in lateral surface of the tube. The drain valve is operated automatically by a motor reducer, which is connected to the valve by a rod and a chain. The drain valve is equipped with a cam and limit switch. The level detector comprises a probe connected to the flapper valve. One of the water supply pipes comprises a flow regulator in which the pipe is bent so as to present an outlet opening in the bottom of the tank. The sanitary equipment generates used water comprises bathtub, shower and/or washbasin. The capacity of the tank is higher than 150 liters. The used water path is traversed between the sanitary equipment and the tank. The filter is placed in an upstream of the pump. The filter comprises a basket filter for a coarse filtration, a float sensor and reed contact, and an outlet towards the overflow discharge. The basket filter contains a solid preference product for the used water treatment, which dissolves gradually during draining by sanitary equipment. The raising pump is equipped with a plunger of automatic startup when water is reached a predetermined level, a non-return valve, and a venting device. The control system comprises a device to regulate/modify the volume of water supplied by the actuation of the flushing water, and a device to- control the flow of the water in the tank, and check and display the electronic installation, the pump and the filter. The terminal comprises display board e.g. liquid crystals, which allows message display. The control system is programmed to operate the actuator periodically in the drain valve. Another water supply pipe in the tank is connected by an upstream of the flapper valve with a rainwater collection device. The water closet bowl is connected to a forced ventilation device.",
 				"assignee": "Michel Billon",
 				"country": "European Union",
-				"extra": "International Classification C02F1/00; Cooperative Classification E03D5/006, C02F2209/42, E03B2001/045, C02F2103/002, C02F2209/005, E03B2001/047, E03B1/042, E03B1/04, E03D5/003; European Classification E03B1/04B2, E03D5/00B1, E03B1/04, E03D5/00B",
+				"extra": "International Classification C02F1/00; Cooperative Classification Y02A20/148, Y02A20/304, Y02A20/108, E03D5/006, C02F2209/42, E03B2001/045, C02F2103/002, C02F2209/005, E03B2001/047, E03B1/042, E03B1/04, E03D5/003; European Classification E03B1/04B2, E03D5/00B1, E03B1/04, E03D5/00B",
 				"filingDate": "Jan 16, 2006",
 				"patentNumber": "EP1808414 A1",
-				"url": "http://www.google.com/patents/EP1808414A1",
+				"url": "http://www.google.com/patents/EP1808414A1?cl=en",
 				"attachments": [
 					{
 						"title": "Google Patents PDF",
@@ -665,7 +664,7 @@ var testCases = [
 				"extra": "International Classification D06M15/01, C08L5/00, C08B37/00; Cooperative Classification C08B37/0087, D06M15/01; European Classification D06M15/01, C08B37/00P6",
 				"filingDate": "Nov 6, 1979",
 				"patentNumber": "EP0011951 A1",
-				"url": "http://www.google.com/patents/EP0011951A1",
+				"url": "http://www.google.com/patents/EP0011951A1?cl=en",
 				"attachments": [
 					{
 						"title": "Google Patents PDF",
@@ -852,58 +851,9 @@ var testCases = [
 				"assignee": "Rhodia Operations",
 				"country": "United States",
 				"extra": "U.S. Classification 510/299; International Classification C11D3/60; Cooperative Classification C11D1/345, C11D3/361, C11D3/3784, C11D11/0017, C11D3/362, C11D3/0036, C11D1/342; European Classification C11D3/36B, C11D11/00B2A, C11D3/37C10, C11D3/00B7, C11D1/34C, C11D3/36C, C11D1/34B",
+				"filingDate": "Mar 24, 2011",
 				"patentNumber": "US20110172136 A1",
 				"url": "http://www.google.com/patents/US20110172136",
-				"attachments": [
-					{
-						"title": "Google Patents PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"defer": true,
-		"url": "https://patents.google.com/patent/US20090197681A1/en?q=networks&cpc=G06Q30%2f02",
-		"items": [
-			{
-				"itemType": "patent",
-				"title": "System and method for targeted recommendations using social gaming networks",
-				"creators": [
-					{
-						"firstName": "Shyam",
-						"lastName": "Krishnamoorthy",
-						"creatorType": "inventor"
-					},
-					{
-						"firstName": "Pooja",
-						"lastName": "Mathur",
-						"creatorType": "inventor"
-					},
-					{
-						"firstName": "Shaykat",
-						"lastName": "Chaudhuri",
-						"creatorType": "inventor"
-					},
-					{
-						"firstName": "Theodore Ludovicus",
-						"lastName": "Michel",
-						"creatorType": "inventor"
-					}
-				],
-				"issueDate": "2009-08-06",
-				"abstractNote": "Systems, methods and computer readable media are disclosed for targeting a recommendation to a first user of an online multi-player gaming environment based on tracked data of a second user with which the first user has a relationship on the online multi-player gaming environment. In addition to the general system, methods and computer readable medium for such recommendations, the recommendations can be further refined by incorporating information about the first user, including how the user accesses the online multi-player gaming environment.",
-				"assignee": "Microsoft Corporation",
-				"country": "United States",
-				"extra": "Cooperative Classifications: A63F13/12, G06Q30/02, G07F17/32, G07F17/3223, G07F17/3272, A63F2300/5506, A63F2300/552, A63F2300/5533, A63F2300/556, A63F2300/5566, A63F2300/572",
-				"filingDate": "2008-01-31",
-				"patentNumber": "US20090197681A1",
-				"url": "http://patents.google.com/patent/US20090197681A1/en",
 				"attachments": [
 					{
 						"title": "Google Patents PDF",
