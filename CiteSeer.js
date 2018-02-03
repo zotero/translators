@@ -1,7 +1,7 @@
 {
 	"translatorID": "fa396dd4-7d04-4f99-95e1-93d6f355441d",
 	"label": "CiteSeer",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Guy Aglionby",
 	"target": "^https?://citeseerx?\\.ist\\.psu\\.edu",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-24 02:37:16"
+	"lastUpdated": "2018-01-28 16:31:16"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2012 Sebastian Karcher
+	Copyright © 2018 Sebastian Karcher, Guy Aglionby
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,10 +35,13 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/search?q') != -1 && getSearchResults(doc).length) {
+	if ((url.includes('/search') || url.includes('/showciting')) && getSearchResults(doc).length) {
 		return "multiple";
 	}
-	if (url.indexOf('/viewdoc/') != -1 && doc.getElementById('bibtex')) {
+	//for running the tests with book example
+	if (url == "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.332.356&rank=1") return "book";
+	if ((url.includes('/viewdoc/') && doc.getElementById('bibtex'))
+		|| url.includes('/download?doi=')) {
 		return "journalArticle";
 	}
 }
@@ -48,12 +51,12 @@ function getSearchResults(doc) {
 }
 
 function doWeb(doc, url) {
-	var articles = new Array();
+	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
 		var titles = getSearchResults(doc);
 		for (var i=0; i<titles.length; i++) {
-			items[titles[i].href] = titles[i].textContent;
+			items[titles[i].href] = titles[i].textContent.trim();
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -64,6 +67,12 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
+	} else if (url.includes('/download?doi=')) {
+		// PDF paper view
+		// e.g. http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.415.9750&rep=rep1&type=pdf
+		let doi = url.match(/\/download\?doi=([^&]*)/);
+		let paperUrl = 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=' + doi[1];
+		ZU.processDocuments(paperUrl, scrape);
 	} else {
 		scrape(doc, url);
 	}
@@ -82,6 +91,9 @@ function scrape(doc, url) {
 		if (abs) item.abstractNote = abs.replace(/.+?:/, "");
 		if (item.title == item.title.toUpperCase()) {
 			item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+		}
+		if (item.publicationTitle && (item.publicationTitle == item.publicationTitle.toUpperCase())) {
+			item.publicationTitle = ZU.capitalizeTitle(item.publicationTitle.toLowerCase(), true);
 		}
 		item.attachments = [{
 			document: doc,
@@ -110,15 +122,11 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Computing Discrete Minimal Surfaces and Their Conjugates",
 				"creators": [
 					{
 						"firstName": "Ulrich",
 						"lastName": "Pinkall",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Strasse Des",
-						"lastName": "Juni",
 						"creatorType": "author"
 					},
 					{
@@ -127,9 +135,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1993",
+				"abstractNote": "We present a new algorithm to compute stable discrete minimal surfaces bounded by a number of fixed or free boundary curves in R³, S³ and H³. The algorithm makes no restriction on the genus and can handle singular triangulations. For a discrete harmonic map a conjugation process is presented leading in case of minimal surfaces additionally to instable solutions of the free boundary value problem for minimal surfaces. Symmetry properties of boundary curves are respected during conjugation.",
+				"itemID": "Pinkall93",
+				"libraryCatalog": "CiteSeer",
+				"pages": "15–36",
+				"publicationTitle": "Experimental Mathematics",
+				"volume": "2",
 				"attachments": [
 					{
 						"title": "Citeseer - Snapshot",
@@ -140,14 +152,43 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"itemID": "Pinkall93",
-				"title": "Computing Discrete Minimal Surfaces and Their Conjugates",
-				"publicationTitle": "Experimental Mathematics",
-				"date": "1993",
-				"volume": "2",
-				"pages": "15–36",
-				"abstractNote": "We present a new algorithm to compute stable discrete  minimal surfaces bounded by a number of fixed or free boundary curves in R 3,  S 3 and H 3. The algorithm makes no restriction on the genus and can handle  singular triangulations. For a discrete harmonic map a conjugation process is  presented leading in case of minimal surfaces additionally to instable solutions  of the free boundary value problem for minimal surfaces. Symmetry properties  of boundary curves are respected during conjugation.",
-				"libraryCatalog": "CiteSeer"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.332.356&rank=1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Nature of Statistical Learning Theory",
+				"creators": [
+					{
+						"firstName": "Vladimir N.",
+						"lastName": "Vapnik",
+						"creatorType": "author"
+					}
+				],
+				"date": "1999",
+				"abstractNote": "Statistical learning theory was introduced in the late 1960’s. Until the 1990’s it was a purely theoretical analysis of the problem of function estimation from a given collection of data. In the middle of the 1990’s new types of learning algorithms (called support vector machines) based on the developed theory were proposed. This made statistical learning theory not only a tool for the theoretical analysis but also a tool for creating practical algorithms for estimating multidimensional functions. This article presents a very general overview of statistical learning theory including both theoretical and algorithmic aspects of the theory. The goal of this overview is to demonstrate how the abstract learning theory established conditions for generalization which are more general than those discussed in classical statistical paradigms and how the understanding of these conditions inspired new algorithmic approaches to function estimation problems. A more",
+				"itemID": "Vapnik99thenature",
+				"libraryCatalog": "CiteSeer",
+				"attachments": [
+					{
+						"title": "Citeseer - Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Citeseer - Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

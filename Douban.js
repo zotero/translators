@@ -2,14 +2,14 @@
 	"translatorID": "fc353b26-8911-4c34-9196-f6f567c93901",
 	"label": "Douban",
 	"creator": "Ace Strong<acestrong@gmail.com>",
-	"target": "^https?://(?:www|book).douban.com/(?:subject|doulist|people/[a-zA-Z._]*/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group/[0-9]*?/collection|tag)",
+	"target": "^https?://(www|book)\\.douban\\.com/(subject|doulist|people/[a-zA-Z._]*/(do|wish|collect)|.*?status=(do|wish|collect)|group/[0-9]*?/collection|tag)",
 	"minVersion": "2.0rc1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-12 18:08:35"
+	"lastUpdated": "2017-01-01 16:52:39"
 }
 
 /*
@@ -235,10 +235,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://book.douban.com/subject/1355643/",
+		"url": "https://book.douban.com/subject/1355643/",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Norwegian Wood",
 				"creators": [
 					{
 						"firstName": "Haruki",
@@ -251,7 +252,14 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"notes": [],
+				"date": "2003-06-30",
+				"ISBN": "9780099448822",
+				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
+				"libraryCatalog": "Douban",
+				"numPages": "400",
+				"publisher": "Vintage",
+				"url": "https://book.douban.com/subject/1355643/",
+				"attachments": [],
 				"tags": [
 					"HarukiMurakami",
 					"小说",
@@ -262,16 +270,8 @@ var testCases = [
 					"英文原版",
 					"英文版"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://book.douban.com/subject/1355643/",
-				"title": "Norwegian Wood",
-				"ISBN": "9780099448822",
-				"numPages": "400",
-				"publisher": "Vintage",
-				"date": "2003-06-30",
-				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
-				"libraryCatalog": "Douban"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

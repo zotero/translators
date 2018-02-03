@@ -2,14 +2,14 @@
 	"translatorID": "cde4428-5434-437f-9cd9-2281d14dbf9",
 	"label": "Ovid",
 	"creator": "Simon Kornblith, Michael Berkowitz, and Ovid Technologies",
-	"target": "(gw2|asinghal|sp)[^\\/]+/ovidweb\\.cgi",
+	"target": "(gw2|asinghal|sp)[^/]+/ovidweb\\.cgi",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-19 19:29:45"
+	"lastUpdated": "2017-01-01 16:18:44"
 }
 
 /*
@@ -164,6 +164,14 @@ function getSearchResults(doc, checkOnly, extras) {
 		found = true;
 		items[id] = title;
 		
+		var checkbox = row.querySelectorAll('input.bibrecord-checkbox')[0];
+		if (checkbox) {
+			items[id] = {
+				title: title,
+				checked: checkbox.checked
+			};
+		}
+		
 		if (extras) {
 			// Look for PDF link
 			var pdfLink = ZU.xpath(row, './/a[starts-with(@name, "PDF")]')[0];
@@ -245,14 +253,6 @@ function fetchMetadata(doc, url, ids, extras) {
 		trans.setTranslator('59e7e93e-4ef0-4777-8388-d6eddb3261bf');
 		trans.setString(text);
 		trans.setHandler('itemDone', function(obj, item) {
-			if (item.callNumber) {
-				item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
-			}
-			
-			if (item.DOI) {
-				item.DOI = ZU.cleanDOI(item.DOI);
-			}
-			
 			if (item.itemID && extras[item.itemID]) {
 				retrievePdfUrl(item, extras[item.itemID]);
 			} else {

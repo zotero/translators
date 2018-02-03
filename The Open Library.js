@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-08-02 18:53:58"
+	"lastUpdated": "2017-05-25 13:52:51"
 }
 
 /*
@@ -61,19 +61,19 @@ function getEdition(doc, url){
 }
 
 function scrape(doc, url) {
-	var dcUrl = url.replace(/(OL[A-Z0-9]+)\/.+/, "$1.rdf");
+	var regex = /(OL[A-Z0-9]+)\/.+/;
+	var dcUrl = url.replace(regex, "$1.rdf");
+	var olid = url.match(regex);
+	
 	//no ISBN in the RDF data; scraping that from the page; sigh.
 	var isbnscrape;
 	if (ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 13")]]') ){
 		isbnscrape = ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 13")]]/following-sibling::td');
-	}
-	else{
+	} else {
 		isbnscrape = ZU.xpathText(doc, '//td[@class="title" and span[contains(text(), "ISBN 10")]]/following-sibling::td');
 	}
 	Zotero.Utilities.doGet(dcUrl, function (text) {
-		//fix broken RDF; Reported the error to OL on 08/01/2015
-		text = text.replace(/<rdf:RDF/, "<rdf:RDF\nxmlns:ov='http://open.vocab.org/terms.ttl'");
-		Z.debug(text)
+		//Z.debug(text)
 		var docxml = (new DOMParser()).parseFromString(text, "text/xml");
   	 	ns = {	"rdf" : "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
 				"rdfs" : "http://www.w3.org/2000/01/rdf-schema#",
@@ -96,10 +96,11 @@ function scrape(doc, url) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.itemType= "book";
+			item.itemType = "book";
 			//the DC doesn't distinguish between personal and institutional authors - get them from the page and parse
 			//var authors = ZU.xpath(doc, '//div[@id="archivalDescriptionArea"]//div[@class="field"]/h3[contains(text(), "Name of creator")]/following-sibling::div/a');
-			for (var i in authors) {
+			item.creators = [];
+			for (i = 0; i<authors.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 				//if (!item.creators[i].firstName) item.creators[i].fieldMode = 1;
 			}
@@ -107,6 +108,9 @@ function scrape(doc, url) {
 			if (numPages) item.numPages = numPages.replace(/p\..*/, "");
 			if (note) item.notes.push(note);
 			if (item.extra) item.abstractNote=item.extra; item.extra="";
+			if (olid) {
+				item.extra = "Open Library ID: " + olid[1];
+			}
 			item.place = place;
 			if (isbn) item.ISBN= isbn;
 			else item.ISBN = isbnscrape;
@@ -174,6 +178,7 @@ var testCases = [
 				],
 				"date": "April 3, 1985",
 				"ISBN": "9782213014012",
+				"extra": "Open Library ID: OL12455445M",
 				"libraryCatalog": "The Open Library",
 				"numPages": "486",
 				"publisher": "Fayard",
@@ -200,6 +205,7 @@ var testCases = [
 				],
 				"date": "1985",
 				"ISBN": "9788402103222",
+				"extra": "Open Library ID: OL13188011M",
 				"libraryCatalog": "The Open Library",
 				"publisher": "Bruguera",
 				"shortTitle": "Borges",

@@ -14,7 +14,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-03-24 02:55:12"
+	"lastUpdated": "2016-06-21 08:45:20"
 }
 
 /*This Translator mirrors closely Aurimas Vinckevicius' RIS translator

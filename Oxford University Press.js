@@ -2,106 +2,148 @@
 	"translatorID": "e9989043-fcdf-4f33-93b6-0381828aeb41",
 	"label": "Oxford University Press",
 	"creator": "Jingjing Yin and Qiang Fang",
-	"target": "^https?://ukcatalogue\\.oup\\.com/product/\\d+\\.do",
+	"target": "^https?://global\\.oup\\.com/academic/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2014-07-26 02:11:51"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-01-08 15:58:04"
 }
 
 /*
-Oxford University Press Translator
-Copyright (C) 2014 Jingjing Yin and Qiang Fang
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Copyright © 2017 Philipp Zumstein
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
+
+
 function detectWeb(doc, url) {
-	return 'book';
+	//The url of books contains the ISBN (i.e. 9 digits) where the 
+	//url of journals contains the ISSN (i.e. 4 digits).
+	if (url.indexOf('/product/')>-1 && url.search(/\d{9}/)>-1) {
+		return 'book';
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
 
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//td[contains(@class, "result_biblio")]//a[contains(@href, "/academic/product/")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+
+function scrape(doc, url) {
 	var item = new Zotero.Item("book");
 
-	var subTitle = doc.getElementsByClassName('prodShortDesc')[0];
-	item.title = ZU.trimInternal(doc.getElementsByClassName('prodName')[0].textContent);
+	var subTitle = doc.getElementsByClassName('product_biblio_strapline')[0];
+	item.title = ZU.trimInternal(doc.getElementsByClassName('product_biblio_title')[0].textContent);
 	if(subTitle) {
 		item.title += ': ' + ZU.trimInternal(subTitle.textContent);
 	}
-
-	var edition = doc.getElementsByClassName("volumeEdition")[0];
-	if(edition) {
-		item.edition = ZU.trimInternal(edition.textContent);
+	
+	var edition = ZU.xpathText(doc, '//div[@id="overview_tab"]/div[@id="content"]/p[contains(., "Edition")]');
+	if (edition) {
+		item.edition = edition;
 	}
 
-	var aut1 = doc.getElementsByClassName('composedBy')[0];
-	var aut2 = doc.getElementsByClassName('authors')[0];
-	if(aut1) {
-		var auts = aut1;
-	} else {
-		var auts = aut2;
+	var creators = ZU.xpath(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]/b');
+	var role = "author";//default
+	if (ZU.xpathText(doc, '//div[@id="content"]/h3[contains(@class, "product_biblio_author")]').indexOf("Edited by")>-1) {
+		role = "editor";
 	}
-	var role = 'author';
-	if(auts.textContent.trim()
-		.indexOf('Edited ') == 0) {
-		role = 'editor';
+	for (var i=0; i<creators.length; i++) {
+		var creator = creators[i].textContent;
+		creator = creator.replace(/^(Prof|Dr)/, '');
+		item.creators.push(ZU.cleanAuthor(creator, role));
 	}
-	auts = auts.getElementsByTagName('b');
-	for(var i = 0; i < auts.length; i++) {
-		var name = ZU.trimInternal(auts[i].textContent);
-		item.creators.push(ZU.cleanAuthor(name, role, false));
+	
+	var date = ZU.xpathText(doc, '//div[contains(@class, "product_sidebar")]/p[starts-with(., "Published:")]');
+	if (date) {
+		item.date = ZU.strToISO(date);
 	}
+	
+	item.ISBN = ZU.xpathText(doc, '//div[contains(@class, "product_sidebar")]/p[starts-with(., "ISBN:")]');
+	
+	var pages = ZU.xpathText(doc, '//div[contains(@class, "product_sidebar")]/p[contains(., "Pages")]');
+	if (pages) {
+		var m = pages.match(/(\d+) Pages/);
+		if (m) {
+			item.numPages = m[1];
+		}
+	}
+	
+	item.series = ZU.xpathText(doc, '(//h3[contains(@class, "product_biblio_series_heading")])[1]');
 
-	var date_isbn, pages;
-	if(!ZU.xpathText(doc, '//div[@class="alsoAvailable"]')) {
-		date_isbn = ZU.xpathText(doc, '//td[@class="bibliographicalInfo"]/div[last()-1]');
-		pages = ZU.xpathText(doc, '//td[@class="bibliographicalInfo"]/div[last()-2]');
-		item.numPages = ZU.trimInternal(pages.split(' ')[0]);
-		item.date = ZU.trimInternal(date_isbn.split('|').pop());
-		item.ISBN = ZU.trimInternal(date_isbn.split('|')[0]);
-	} else {
-		date_isbn = ZU.xpathText(doc, '//td[@class="bibliographicalInfo"]/div[last()-2]');
-		pages = ZU.xpathText(doc, '//td[@class="bibliographicalInfo"]/div[last()-3]');
-		item.numPages = ZU.trimInternal(pages.split(' ')[0]);
-		item.date = ZU.trimInternal(date_isbn.split('|').pop());
-		item.ISBN = ZU.trimInternal(date_isbn.split('|')[0]);
-	}
+	item.publisher = "Oxford University Press";
+	item.place = "Oxford, New York";
 
-	var publisher = ZU.xpathText(doc, '//td[@class="bibliographicalInfo"]/div[a]');
-	if(publisher) {
-		item.publisher = ZU.trimInternal(publisher.split(',')[0]);
-	} else {
-		item.publisher = "Oxford University Press";
+	var abs = ZU.xpathText(doc, '//div[@id="description_tab"]//div[contains(@class, "expanding_content_container_inner_narrow")]');
+	if (abs) {
+		item.abstractNote = abs;
 	}
-	var abs = ZU.xpathText(doc, '//div[@id="tab_01_content"]/table/tbody/tr/td/table/tbody/tr/td/text()', null, ' ')
-		+ ZU.xpathText(doc, '//div[@id="tab_01_content"]/table/tbody/tr/td/table/tbody/tr/td/p[1]', null, ' ');
-	item.abstractNote = ZU.trimInternal(abs);
-
-	item.tags = ZU.xpath(doc, '//div[@class="breadcrumb"]/a[position()>1]')
-		.map(function(v) {
-			return v.textContent;
-		});
+	
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
 		
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ukcatalogue.oup.com/product/9780193221031.do",
+		"url": "https://global.oup.com/academic/product/flute-time-1-piano-accompaniment-book-9780193221031?cc=de&lang=en&",
 		"items": [
 			{
 				"itemType": "book",
@@ -113,18 +155,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "24 July 2003",
-				"ISBN": "978-0-19-322103-1",
-				"abstractNote": "Tutor Easy Piano accompaniments to selected pieces in Flute Time 1",
+				"date": "2003-07-24",
+				"ISBN": "9780193221031",
+				"abstractNote": "Piano accompaniments to selected pieces in Flute Time 1",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "32",
-				"publisher": "Flute Time",
-				"attachments": [],
-				"tags": [
-					"Flute",
-					"Music",
-					"Woodwind & Brass"
+				"place": "Oxford, New York",
+				"publisher": "Oxford University Press",
+				"series": "Flute Time",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
 				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -132,7 +176,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ukcatalogue.oup.com/product/9780194422505.do",
+		"url": "https://global.oup.com/academic/product/form-focused-instruction-and-teacher-education-9780194422505?cc=de&lang=en&",
 		"items": [
 			{
 				"itemType": "book",
@@ -149,22 +193,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "24 May 2007",
-				"ISBN": "978-0-19-442250-5",
+				"date": "2007-05-24",
+				"ISBN": "9780194422505",
 				"abstractNote": "An overview of form-focused instruction as an option for second language grammar teaching. It combines theoretical concerns, classroom practices, and teacher education.",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "296",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
+				"series": "Oxford Applied Linguistics",
 				"shortTitle": "Form-focused Instruction and Teacher Education",
-				"attachments": [],
-				"tags": [
-					"Academic, Professional, & General",
-					"Background & Reference Material",
-					"Language & Linguistics",
-					"Language Teaching & Learning",
-					"Teaching & Learning English as a Foreign or Second Language",
-					"Teaching Theory & Methods"
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
 				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -172,7 +215,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ukcatalogue.oup.com/product/9780198781875.do",
+		"url": "https://global.oup.com/academic/product/education-9780198781875?cc=de&lang=en&",
 		"items": [
 			{
 				"itemType": "book",
@@ -199,19 +242,53 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "17 April 1997",
-				"ISBN": "978-0-19-878187-5",
-				"abstractNote": "is a book for everyone concerned with the social study of education: students studying the sociology of education, foundations of education, educational policy, and other related courses. It aims to establish the social study of education at the centre stage of political and sociological debate about post-industrial societies. In examining major changes which have taken place in the late twentieth century, it gives students a comprehensive introduction to both the nature of these changes and to their interpretation in relation to long-standing debates within education, sociology, and cultural studies. The extensive editorial introduction outlines the major theoretical approaches within the sociology of education, assesses their contribution to an adequate understanding of the changing educational context, and sets out the key issues and areas for future research. The 52 papers in this wide-ranging thematic reader bring together the most powerful work in education into an international dialogue which is sure to become a classic text.",
+				"date": "1997-04-17",
+				"ISBN": "9780198781875",
+				"abstractNote": "Education: Culture, Economy, and Society is a book for everyone concerned with the social study of education: students studying the sociology of education, foundations of education, educational policy, and other related courses. It aims to establish the social study of education at the centre stage of political and sociological debate about post-industrial societies. In examining major changes which have taken place in the late twentieth century, it gives students a comprehensive introduction to both the nature of these changes and to their interpretation in relation to long-standing debates within education, sociology, and cultural studies.   The extensive editorial introduction outlines the major theoretical approaches within the sociology of education, assesses their contribution to an adequate understanding of the changing educational context, and sets out the key issues and areas for future research. The 52 papers in this wide-ranging thematic reader bring together the most powerful work in education into an international dialogue which is sure to become a classic text.",
 				"libraryCatalog": "Oxford University Press",
 				"numPages": "848",
+				"place": "Oxford, New York",
 				"publisher": "Oxford University Press",
 				"shortTitle": "Education",
-				"attachments": [],
-				"tags": [
-					"Academic, Professional, & General",
-					"Education",
-					"Society, Culture, & Environment"
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
 				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://global.oup.com/academic/product/computer-law-9780199696468?lang=en&cc=de#",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Computer Law",
+				"creators": [
+					{
+						"firstName": "Chris",
+						"lastName": "Reed",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-12-01",
+				"ISBN": "9780199696468",
+				"abstractNote": "This edition is fully updated to reflect the Digital Economy Act 2010 and changes to consumer protection law at EU level including the Unfair Commercial Practices Directive. Analysis of recent case law is also incorporated including, amongst others, the series of trade mark actions against eBay and copyrights suits against Google as well as the implications for IT contracts of BSkyB Ltd v HP Enterprise Services UK Ltd. All chapters have been revised to take into account the rapid evolution of the ways in which we consume, generate, store and exchange information, such as cloud computing, off-shoring and Web 2.0.Now established as a standard text on computer and information technology law, this book analyses the unique legal problems which arise from computing technology and transactions carried out through the exchange of digital information rather than human interaction. Topics covered range from contractual matters and intellectual property protection to electronic commerce, data protection and liability of internet service providers. Competition law issues are integrated into the various commercial sections as they arise to indicate their interaction with information technology law.",
+				"edition": "Seventh Edition",
+				"libraryCatalog": "Oxford University Press",
+				"numPages": "800",
+				"place": "Oxford, New York",
+				"publisher": "Oxford University Press",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

@@ -13,22 +13,28 @@
 }
 
 /*
-AIAA Translator 
-Copyright (C) 2013 Sebastian Karcher
-Based on ASCE
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	AIAA Translator
+	(Based on ASCE)
+	Copyright © 2013 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
@@ -143,15 +149,16 @@ function scrape(doc, url, dois) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://arc.aiaa.org/action/doSearch?searchText=titanium",
+		"url": "https://arc.aiaa.org/action/doSearch?AllField=titanium",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744?prevSearch=&searchHistoryKey=",
+		"url": "https://arc.aiaa.org/doi/abs/10.2514/1.T3744?prevSearch=&searchHistoryKey=",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Solidification Characteristics of Titania Nanofluids",
 				"creators": [
 					{
 						"firstName": "Songping",
@@ -174,9 +181,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"DOI": "10.2514/1.T3744",
+				"ISSN": "0887-8722",
+				"issue": "1",
+				"itemID": "doi:10.2514/1.T3744",
+				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
+				"pages": "192-196",
+				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
+				"url": "https://doi.org/10.2514/1.T3744",
+				"volume": "26",
 				"attachments": [
 					{
 						"title": "AIAA Full Text PDF",
@@ -186,20 +200,9 @@ var testCases = [
 						"title": "AIAA Snapshot"
 					}
 				],
-				"itemID": "doi:10.2514/1.T3744",
-				"title": "Solidification Characteristics of Titania Nanofluids",
-				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
-				"volume": "26",
-				"issue": "1",
-				"pages": "192-196",
-				"date": "2012",
-				"DOI": "10.2514/1.T3744",
-				"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744",
-				"bookTitle": "Journal of Thermophysics and Heat Transfer",
-				"publisher": "American Institute of Aeronautics and Astronautics",
-				"ISSN": "0887-8722",
-				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

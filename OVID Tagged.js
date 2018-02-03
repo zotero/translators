@@ -8,28 +8,35 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2015-08-19 19:29:09"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-03 11:41:00"
 }
 
 /*
-OVID Tagged import translator
-Based on hhttp://ospguides.ovid.com/OSPguides/medline.htm#PT and lots of testing
-Created as part of the 2014 Zotero Trainer Workshop in Syracus and with contributions from participants.
-Copyright (C) 2014 Sebastian Karcher 
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	OVID Tagged import translator
+	(Based on hhttp://ospguides.ovid.com/OSPguides/medline.htm#PT and lots of testing
+	Created as part of the 2014 Zotero Trainer Workshop in Syracus 
+	and with contributions from participants.)
+	Copyright © 2014 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectImport() {
@@ -78,6 +85,9 @@ var inputTypeMap = {
 	"Book": "book",
 	"Book Chapter": "bookSection",
 	"Book chapter": "bookSection",
+	"Chapter": "bookSection",
+	"Dissertation": "thesis",
+	"Dissertation Abstract": "thesis",
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
@@ -93,7 +103,7 @@ function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
-	} else if (tag == "PT") {
+	} else if (tag == "PT" || tag == "DT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
 			item.itemType = inputTypeMap[value]
 		}
@@ -121,9 +131,13 @@ function processTag(item, tag, value) {
 		if (value.indexOf("10.") != -1) item.DOI = value
 	} else if (tag == "YR") {
 		item.date = value;
-	} else if (tag == "SO") {
+	} else if (tag == "IN") {
+		item.institution = value;
+	}  else if (tag == "SO") {
 		item.citation = value;
-	} else if (tag == "KW") {
+	}  else if (tag == "PU") {
+		item.publishing = value;
+	}  else if (tag == "KW") {
 		tags = value.split(/;\s*/);
 		for (var i in tags) {
 			item.tags.push(tags[i]);
@@ -198,7 +212,7 @@ function finalizeItem(item) {
 	}
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
-	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous)\])?$/, "")
+	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "");
 	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+/;
 	var value = item.citation
 	if (!value && item.itemType == "bookSection") value = item.bookTitle
@@ -231,18 +245,20 @@ function finalizeItem(item) {
 		item.publicationTitle = item.publicationTitle.split(monthRegex)[0];
 	}
 	if (item.itemType == "bookSection" && value) {
-		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
-		if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
+		if (!item.pages){
+			if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
+			if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
+		}
 		//editors are only listed as part of the citation...
-		if (value.match(/(.+?)\[Ed(itor|\.)/)) {
-			var editors = value.match(/.+?\[Ed(itor|\.)/g);
+		if (value.match(/(.+?)\[Ed(itor|\.|\])/)) {
+			var editors = value.match(/.+?\[Ed(itor|\.|\])/g);
 			for (var i in editors) {
-				editor = editors[i].replace(/\[Ed(itor|\.).*$/, "").replace(/.*?\][,\s]*/, "");
+				editor = editors[i].replace(/\[Ed(itor|\.|\]).*$/, "").replace(/.*?\][,\s]*/, "");
 				item.creators.push(ZU.cleanAuthor(editor, "editor", true))
 			}
 		}
-		if (value.match(/.+\[Ed(?:\.|itor)\][\.\s]*([^\.]+)/)) {
-			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)\][\.\s]*([^\.]+)/)[1]
+		if (value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*([^\.]+)/)) {
+			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*(?:\(\d{4}\)\.)?([^\.]+)/)[1]
 		};
 	}
 	//fix all caps authors
@@ -274,19 +290,35 @@ function finalizeItem(item) {
 			}
 		}
 	}
+	if((item.itemType == "book" ||item.itemType == "bookSection")&& !item.publisher){
+		item.publisher = item.publishing;
+	}
+	
 	if (item.publisher && !item.pace) {
 		if (item.publisher.search(/,./) != -1) {
 			item.place = item.publisher.match(/,(.+?)$/)[1];
 			item.publisher = item.publisher.replace(/,.+?$/, "")
 		}
 	}
+	if (item.itemType == "thesis" && item.institution){
+		item.publisher = item.institution.replace(/^.+:\s*/, "");
+		delete item.institution;
+	}
 	if (item.ISBN) item.ISBN = ZU.cleanISBN(item.ISBN);
 	if (item.ISSN) item.ISSN = ZU.cleanISSN(item.ISSN);
+	if (item.DOI) item.DOI = ZU.cleanDOI(item.DOI);
+	if (item.callNumber) {
+		item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
+	}
+	//strip extraneous label at the end of title (reported for Psycinfo)
 	if (item.libraryCatalog && item.libraryCatalog.indexOf("MEDLINE") != -1 && item.PMID) {
 		item.extra = item.PMID;
 		delete item.PMID;
 	}
+
+	delete item.publishing
 	delete item.citation;
+	delete item.itemID;
 	item.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -543,7 +575,7 @@ var testCases = [
 				"date": "2010 January/February",
 				"DOI": "10.1249/FIT.0b013e3181c6723d",
 				"ISSN": "1091-5397",
-				"callNumber": "00135124-201001000-00018.",
+				"callNumber": "00135124-201001000-00018",
 				"issue": "1",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
@@ -598,7 +630,7 @@ var testCases = [
 				"DOI": "10.1093/abbs/gmr050",
 				"ISSN": "1672-9145",
 				"abstractNote": "Human epidermal growth factor receptor 2 (HER2/neu, also known as ErbB2) overexpression is correlated with the poor prognosis and chemoresistance in cancer. Breast cancer resistance protein (BCRP and ABCG2) is a drug efflux pump responsible for multidrug resistance (MDR) in a variety of cancer cells. HER2 and BCRP are associated with poor treatment response in breast cancer patients, although the relationship between HER2 and BCRP expression is not clear. Here, we showed that transfection of HER2 into MCF7 breast cancer cells (MCF7/HER2) resulted in an up-regulation of BCRP via the phosphatidylinositol 3-kinase (PI3K)/Akt and nuclear factor-kappa B (NF-[kappa]B) signaling. Treatment of MCF/HER2 cells with the PI3K inhibitor LY294002, the I[kappa]B phosphorylation inhibitor Bay11-7082, and the dominant negative mutant of I[kappa]B[alpha] inhibited HER2-induced BCRP promoter activity. Furthermore, we found that HER2 overexpression led to an increased resistance of MCF7 cells to multiple antitumor drugs such as paclitaxel (Taxol), cisplatin (DDP), etoposide (VP-16), adriamycin (ADM), mitoxantrone (MX), and 5-fluorouracil (5-FU). Moreover, silencing the expression of BCRP or selectively inhibiting the activity of Akt or NF-[kappa]B sensitized the MCF7/HER2 cells to these chemotherapy agents at least in part. Taken together, up-regulation of BCRP through PI3K/AKT/NF-[kappa]B signaling pathway played an important role in HER2-mediated chemoresistance of MCF7 cells, and AKT, NF-[kappa]B, and BCRP pathways might serve as potential targets for therapeutic intervention., Copyright (C) 2011 Blackwell Publishing Ltd.",
-				"callNumber": "01189059-201108000-00009.",
+				"callNumber": "01189059-201108000-00009",
 				"issue": "8",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
@@ -641,7 +673,7 @@ var testCases = [
 				],
 				"date": "2010 November/December",
 				"ISSN": "0001-5458",
-				"callNumber": "00000042-201011000-00010.",
+				"callNumber": "00000042-201011000-00010",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
 				"pages": "611-613",
@@ -671,7 +703,7 @@ var testCases = [
 				"DOI": "10.1097/DAD.0b013e31820d9c0e",
 				"ISSN": "0193-1091",
 				"abstractNote": "Tumor to tumor metastasis is a rare phenomenon, in which one, benign or malignant, tumor is involved by metastatic deposits from another. Most documented tumor to tumor metastases have been located intracranially, in which, in the majority of cases, either a breast or a lung carcinoma metastasized to a meningioma. Only 7 cases of metastases to schwannoma have so far been reported in the English literature, in 6 cases to an intracranial acoustic schwannoma and in a single case to a subcutaneous schwannoma. We present a case of dermal/subcutaneous plexiform schwannoma containing metastatic deposits of an occult lobular breast carcinoma, creating a unique schwannoma with epithelioid cells. Differential diagnosis of schwannoma with epithelioid cells includes malignant transformation of schwannoma and metastasis of a carcinoma or melanoma to schwannoma, epithelioid schwannoma, and schwannoma with glandular or pseudo glandular elements., (C) 2011 Lippincott Williams & Wilkins, Inc.",
-				"callNumber": "00000372-201112000-00014.",
+				"callNumber": "00000372-201112000-00014",
 				"issue": "8",
 				"language": "English.",
 				"libraryCatalog": "Your Journals@Ovid",
@@ -868,7 +900,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression. [References]",
+				"title": "A comparison of manifestations and impact of reassurance seeking among Japanese individuals with OCD and depression",
 				"creators": [
 					{
 						"firstName": "Osamu",
@@ -892,12 +924,11 @@ var testCases = [
 					}
 				],
 				"date": "2015 Sep",
-				"DOI": "http://dx.doi.org/10.1017/S1352465814000277",
+				"DOI": "10.1017/S1352465814000277",
 				"ISSN": "1352-4658",
 				"abstractNote": "Background: One of the most common interpersonal reactions to threat and anxiety is to seek reassurance from a trusted person. The Reassurance Seeking Questionnaire (ReSQ) measures several key aspects of reassurance seeking behaviour, including frequency, trust of sources, intensity, carefulness, and the emotional consequences of reassurance seeking. Aims: The current study compares patterns and consequences of reassurance seeking in obsessive-compulsive disorder (OCD) and depression. Method: ReSQ scores were compared for three groups: 32 individuals with OCD, 17 individuals with depression, and 24 healthy comparison participants. Results: We found that individuals with OCD tended to seek reassurance more intensely and employ self-reassurance more frequently than individuals with depression or healthy participants, and that if reassurance was not provided, they tended to feel a greater urge to seek additional reassurance. Conclusions: This study is the first to quantitatively elucidate differences in reassurance seeking between OCD and depression. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
-				"callNumber": "Peer Reviewed Journal: 2015-33942-012.",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-012",
 				"issue": "5",
-				"itemID": "7",
 				"language": "English",
 				"libraryCatalog": "PsycINFO",
 				"pages": "623-634",
@@ -910,7 +941,7 @@ var testCases = [
 			},
 			{
 				"itemType": "journalArticle",
-				"title": "A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders. [References]",
+				"title": "A meta-analysis of transdiagnostic cognitive behavioural therapy in the treatment of child and young person anxiety disorders",
 				"creators": [
 					{
 						"firstName": "Donna L.",
@@ -939,17 +970,77 @@ var testCases = [
 					}
 				],
 				"date": "2015 Sep",
-				"DOI": "http://dx.doi.org/10.1017/S1352465813001094",
+				"DOI": "10.1017/S1352465813001094",
 				"ISSN": "1352-4658",
 				"abstractNote": "Background: Previous meta-analyses of cognitive-behavioural therapy (CBT) for children and young people with anxiety disorders have not considered the efficacy of transdiagnostic CBT for the remission of childhood anxiety. Aim: To provide a meta-analysis on the efficacy of transdiagnostic CBT for children and young people with anxiety disorders. Methods: The analysis included randomized controlled trials using transdiagnostic CBT for children and young people formally diagnosed with an anxiety disorder. An electronic search was conducted using the following databases: ASSIA, Cochrane Controlled Trials Register, Current Controlled Trials, Medline, PsycArticles, PsychInfo, and Web of Knowledge. The search terms included \"anxiety disorder(s)\", \"anxi*\", \"cognitive behavio*, \"CBT\", \"child*\", \"children\", \"paediatric\", \"adolescent(s)\", \"adolescence\", \"youth\" and \"young pe*\". The studies identified from this search were screened against the inclusion and exclusion criteria, and 20 studies were identified as appropriate for inclusion in the current meta-analysis. Pre- and posttreatment (or control period) data were used for analysis. Results: Findings indicated significantly greater odds of anxiety remission from pre- to posttreatment for those engaged in the transdiagnostic CBT intervention compared with those in the control group, with children in the treatment condition 9.15 times more likely to recover from their anxiety diagnosis than children in the control group. Risk of bias was not correlated with study effect sizes. Conclusions: Transdiagnostic CBT seems effective in reducing symptoms of anxiety in children and young people. Further research is required to investigate the efficacy of CBT for children under the age of 6. (PsycINFO Database Record (c) 2015 APA, all rights reserved) (journal abstract).",
-				"callNumber": "Peer Reviewed Journal: 2015-33942-007.",
+				"callNumber": "Peer Reviewed Journal: 2015-33942-007",
 				"issue": "5",
-				"itemID": "8",
 				"language": "English",
 				"libraryCatalog": "PsycINFO",
 				"pages": "562-577",
 				"publicationTitle": "Behavioural and Cognitive Psychotherapy",
 				"volume": "43",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<53. >\nVN - Ovid Technologies\nDB - PsycINFO\nAN - Dissertation Abstract: 2014-99150-257.\nTI - Academic procrastination as mediated by executive functioning, perfectionism, and frustration intolerance in college students.\nDP - 2014\nYR - 2014\nLG - English\nAU - Sudler, Eric L\nIN - Sudler, Eric L.: St. John's U. (New York), US\nSO - Dissertation Abstracts International Section A: Humanities and Social Sciences. Vol.75(2-A(E)),2014, pp. No Pagination Specified.\nIS - 0419-4209\nIB - 978-1-303-52924-5\nOL - Dissertation Abstracts International\nPU - ProQuest Information & Learning; US\nON - AAI3575249\nOU - http://gateway.proquest.com/openurl?url_ver=Z39.88-2004&rft_val_fmt=info:ofi/fmt:kev:mtx:dissertation&res_dat=xri:pqm&rft_dat=xri:pqdiss:3575249\nFO - Electronic\nPT - Dissertation Abstract\nDT - Dissertation\nAB - With academic procrastination prevalent at every level of education (O'Brien, 2002; Onwuegbuzie, 2008), school psychologists and other educators would benefit from a more detailed look at procrastination and what factors and characteristics mediate it. This exploratory study investigated the relative contributions of Executive Functioning, Perfectionism, and Frustration Intolerance to Academic Procrastination and investigated whether academic procrastinators can be classified into specific clusters. To achieve this, 150 undergraduate and graduate students completed an online survey assessing Executive Functioning, Perfectionism, and Frustration Intolerance. Although no distinct clusters of procrastinators formed, results indicated that Perfectionism and irrational beliefs associated with frustration intolerance were the strongest mediators for academic procrastination. These results could aid mental health professionals, therapists, and school psychologists in recognizing these traits and patterns early to develop more specific treatments, interventions, and possible prevention of academic procrastination. Keywords: academic procrastination, irrational beliefs, executive functioning, perfectionism. (PsycINFO Database Record (c) 2014 APA, all rights reserved).\nID - academic procrastination, frustration intolerance, irrational beliefs, executive functioning, school psychologists, college students, detailed look, mental health professionals, academic procrastinators, relative contributions, possible prevention, graduate students, distinct clusters, exploratory study, online survey\nMH - *Cognitive Ability\nMH - *College Students\nMH - *School Based Intervention\nMH - Frustration\nMH - Perfectionism\nMH - Procrastination\nCC - Health Psychology & Medicine [3360].\nPO - Human. Adulthood (18 yrs & older)\nMD - Empirical Study; Quantitative Study\nUP - 20140901 (PsycINFO)\nJN - Dissertation Abstracts International Section A: Humanities and Social Sciences\nVO - 75\nIP - 2-A(E)\nPG - No Pagination Specified\nXL - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=psyc11&AN=2014-99150-257\nXL - http://sfx.scholarsportal.info/ottawa?sid=OVID:psycdb&id=pmid:&id=doi:&issn=0419-4209&isbn=9781303529245&volume=75&issue=2-A%28E%29&spage=No&pages=No+Pagination+Specified&date=2014&title=Dissertation+Abstracts+International+Section+A%3A+Humanities+and+Social+Sciences&atitle=Academic+procrastination+as+mediated+by+executive+functioning%2C+perfectionism%2C+and+frustration+intolerance+in+college+students.&aulast=Sudler&pid=%3Cauthor%3ESudler%2C+Eric+L%3C%2Fauthor%3E%3CAN%3E2014-99150-257%3C%2FAN%3E%3CDT%3EDissertation%3C%2FDT%3E\n\n\n<1. >\nVN - Ovid Technologies\nDB - PsycINFO\nAN - Book: 2011-27892-001.\nTI - Understanding and tackling procrastination. [References].\n\nDP - 2012\nYR - 2012\nLG - English\nAU - Neenan, Michael\nIN - Neenan, Michael: Centre for Coaching, Blackheath, London, England\nSO - Neenan, Michael [Ed]; Palmer, Stephen [Ed]. (2012). Cognitive behavioural coaching in practice: An evidence based approach. (pp. 11-31). xvii, 254 pp. New York, NY, US: Routledge/Taylor & Francis Group; US.\nIB - 978-0-415-47263-0 (Paperback), 978-0-415-47262-3 (Hardcover), 978-0-203-14440-4 (PDF)\nPU - Routledge/Taylor & Francis Group; US\nFO - Print\nPT - Book\nPT - Edited Book\nDT - Chapter\nAB - (from the chapter) Coaching aims to bring out the best in people in order to help them achieve their desired goals. When the rational emotive behavior therapy (REBT) approach is used outside of a therapy context it is more advantageous to call it rational emotive behavioural coaching (REBC), although some practitioners prefer to use the shorter name of rational coaching. Rational emotive behavior therapy terms such as 'irrational' and 'disturbance' can be reframed as performance-interfering thoughts and/or self-limiting beliefs or any permutation on problematic thinking that coachees are willing to endorse. A theoretical model for understanding and tackling psychological blocks in general and procrastination in particular is rational emotive behavioural therapy, founded in 1955 by the late Albert Ellis, an American clinical psychologist. (REBT is one of the approaches within the field of CBT.) A capsule account of the REBT approach follows. The approach proposes that rigid and extreme thinking (irrational beliefs) lies at the core of psychological disturbance. For example, faced with a coachee who is skeptical about the value of coaching, the coach makes himself very anxious and over-prepares for each session by insisting: 'I must impress her with my skills [rigid belief-why can't he let the coachee make up her own mind?], because if I don't this will prove I'm an incompetent coach' (an extreme view of his role to adopt if the coachee is unimpressed). Rigid thinking takes the form, for example, of must, should, have to and got to. Derived from these rigid beliefs are three major and extreme conclusions: awfulising (nothing could be worse and nothing good can come from negative events), low frustration tolerance (frustration and discomfort are too hard to bear) and depreciation of self and/or others (a person can be given a single global rating [e.g. useless] that defines their essence or worth). (PsycINFO Database Record (c) 2012 APA, all rights reserved).\nID - rational emotive behavioural coaching, procrastination, irrational beliefs, rigid thinking\nMH - *Procrastination\nMH - *Rational Emotive Behavior Therapy\nMH - *Coaching\nMH - Irrational Beliefs\nMH - Rigidity (Personality)\nMH - Thinking\nCC - Personality Traits & Processes [3120]; Cognitive Therapy [3311].\nPO - Human\nIA - Psychology: Professional & Research.\nUP - 20120430 (PsycINFO)\nPG - 11-31\nXL - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=psyc9&AN=2011-27892-001\nXL - http://sfx.scholarsportal.info/ottawa?sid=OVID:psycdb&id=pmid:&id=doi:&issn=&isbn=9780415472630&volume=&issue=&spage=11&pages=11-31&date=2012&title=Cognitive+behavioural+coaching+in+practice%3A+An+evidence+based+approach.&atitle=Understanding+and+tackling+procrastination.&aulast=Neenan&pid=%3Cauthor%3ENeenan%2C+Michael%3C%2Fauthor%3E%3CAN%3E2011-27892-001%3C%2FAN%3E%3CDT%3EChapter%3C%2FDT%3E",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Academic procrastination as mediated by executive functioning, perfectionism, and frustration intolerance in college students",
+				"creators": [
+					{
+						"firstName": "Eric L.",
+						"lastName": "Sudler",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"abstractNote": "With academic procrastination prevalent at every level of education (O'Brien, 2002; Onwuegbuzie, 2008), school psychologists and other educators would benefit from a more detailed look at procrastination and what factors and characteristics mediate it. This exploratory study investigated the relative contributions of Executive Functioning, Perfectionism, and Frustration Intolerance to Academic Procrastination and investigated whether academic procrastinators can be classified into specific clusters. To achieve this, 150 undergraduate and graduate students completed an online survey assessing Executive Functioning, Perfectionism, and Frustration Intolerance. Although no distinct clusters of procrastinators formed, results indicated that Perfectionism and irrational beliefs associated with frustration intolerance were the strongest mediators for academic procrastination. These results could aid mental health professionals, therapists, and school psychologists in recognizing these traits and patterns early to develop more specific treatments, interventions, and possible prevention of academic procrastination. Keywords: academic procrastination, irrational beliefs, executive functioning, perfectionism. (PsycINFO Database Record (c) 2014 APA, all rights reserved).",
+				"callNumber": "Dissertation Abstract: 2014-99150-257",
+				"language": "English",
+				"libraryCatalog": "PsycINFO",
+				"university": "St. John's U. (New York), US",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "bookSection",
+				"title": "Understanding and tackling procrastination",
+				"creators": [
+					{
+						"firstName": "Michael",
+						"lastName": "Neenan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Neenan",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Stephen",
+						"lastName": "; Palmer",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2012",
+				"ISBN": "9780415472630",
+				"abstractNote": "(from the chapter) Coaching aims to bring out the best in people in order to help them achieve their desired goals. When the rational emotive behavior therapy (REBT) approach is used outside of a therapy context it is more advantageous to call it rational emotive behavioural coaching (REBC), although some practitioners prefer to use the shorter name of rational coaching. Rational emotive behavior therapy terms such as 'irrational' and 'disturbance' can be reframed as performance-interfering thoughts and/or self-limiting beliefs or any permutation on problematic thinking that coachees are willing to endorse. A theoretical model for understanding and tackling psychological blocks in general and procrastination in particular is rational emotive behavioural therapy, founded in 1955 by the late Albert Ellis, an American clinical psychologist. (REBT is one of the approaches within the field of CBT.) A capsule account of the REBT approach follows. The approach proposes that rigid and extreme thinking (irrational beliefs) lies at the core of psychological disturbance. For example, faced with a coachee who is skeptical about the value of coaching, the coach makes himself very anxious and over-prepares for each session by insisting: 'I must impress her with my skills [rigid belief-why can't he let the coachee make up her own mind?], because if I don't this will prove I'm an incompetent coach' (an extreme view of his role to adopt if the coachee is unimpressed). Rigid thinking takes the form, for example, of must, should, have to and got to. Derived from these rigid beliefs are three major and extreme conclusions: awfulising (nothing could be worse and nothing good can come from negative events), low frustration tolerance (frustration and discomfort are too hard to bear) and depreciation of self and/or others (a person can be given a single global rating [e.g. useless] that defines their essence or worth). (PsycINFO Database Record (c) 2012 APA, all rights reserved).",
+				"bookTitle": "Cognitive behavioural coaching in practice: An evidence based approach",
+				"callNumber": "Book: 2011-27892-001",
+				"language": "English",
+				"libraryCatalog": "PsycINFO",
+				"pages": "11-31",
+				"publisher": "Routledge/Taylor & Francis Group; US",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
