@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-04 16:05:29"
+	"lastUpdated": "2018-02-04 17:10:25"
 }
 
 /*
@@ -178,7 +178,8 @@ var testCases = [
 				],
 				"date": "2017",
 				"ISBN": "9783319633237",
-				"abstractNote": "This textbook offers a clear and comprehensive introduction to methods and applications in quantum mechanics, one of the core components of undergraduate physics courses.  It follows on naturally from the previous volumes in this series, thus developing the understanding of quantized states further on. The first part of the book introduces the quantum theory of angular momentum and approximation methods. More complex themes are covered in the second part of the book, which describes multiple particle systems and scattering theory.  Ideally suited to undergraduate students with some grounding in the basics of quantum mechanics, the book is enhanced throughout with learning features such as boxed inserts and chapter summaries, with key mathematical derivations highlighted to aid understanding.  The text is supported by numerous worked examples and end of chapter problem sets. About the Theoretical Physics series Translated from the renowned and highly successful German editions, the eight volumes of this series cover the complete core curriculum of theoretical physics at undergraduate level. Each volume is self-contained and provides all the material necessary for the individual course topic. Numerous problems with detailed solutions support a deeper understanding.  Wolfgang Nolting is famous for his refined didactical style and has been referred to as the \"German Feynman\" in reviews.",
+				"abstractNote": "This textbook offers a clear and comprehensive introduction to methods and applications in quantum mechanics, one of the core components of undergraduate physics courses. It follows on naturally from the previous volumes in this series, thus developing the understanding of quantized states further on. The first part of the book introduces the quantum theory of angular momentum and approximation methods. More complex themes are covered in the second part of the book, which describes multiple particle systems and scattering theory. Ideally suited to undergraduate students with some grounding in the basics of quantum mechanics, the book is enhanced throughout with learning features such as boxed inserts and chapter summaries, with key mathematical derivations highlighted to aid understanding. The text is supported by numerous worked examples and end of chapter problem sets. About the Theoretical Physics series Translated from the renowned and highly successful German editions, the eight volumes of this series cover the complete core curriculum of theoretical physics at undergraduate level. Each volume is self-contained and provides all the material necessary for the individual course topic. Numerous problems with detailed solutions support a deeper understanding. Wolfgang Nolting is famous for his refined didactical style and has been referred to as the \"German Feynman\" in reviews.",
+				"language": "en",
 				"libraryCatalog": "www.springer.com",
 				"publisher": "Springer International Publishing",
 				"shortTitle": "Theoretical Physics 7",
@@ -211,6 +212,7 @@ var testCases = [
 				"date": "2013",
 				"ISBN": "9789462094826",
 				"abstractNote": "This book focuses on the delivery of public examinations offered by the main examining boards in England since Victorian England. The investigation reveals that the provision of examinations was as controversial in the nineteenth century as it is today, particularly since the government is now determined to bring in reform. The issues of grade inflation, the place of coursework in marking, and the introduction of technological change all feature in this book. Educational policy is primarily examined as well as some reference to the global scene. The study analyses archival material from a wide range of sources, including those records stored at the National Archives and the London Metropolitan Archives. An emphasis is placed upon the various institutions that contributed to the process, including the Royal Society of Arts, the London Chamber of Commerce, the City of Guilds of London Institute and the University of London. Attention is given to the findings of the Taunton Commission and the Bryce Commission and shorter reports such as the Northcote-Trevelyn Report which served to radicalise entry and recruitment to the Civil Service. The modern GCSE and the plans for I-levels are considered and key observations are made about the efficacy of those examinations offered by Oxford and Cambridge universities and O-levels, A-levels and NVQs, The reader is given every opportunity to benefit enthusiastically in this account of examinations, and those engaged in education, whether teachers, examiners, students or administrators, will be able to gain useful insights into the workings of the examination system.",
+				"language": "en",
 				"libraryCatalog": "www.springer.com",
 				"publisher": "Sense Publishers",
 				"shortTitle": "Testing Times",
@@ -243,6 +245,7 @@ var testCases = [
 				"date": "2005",
 				"ISBN": "9783540212904",
 				"abstractNote": "Complex geometry studies (compact) complex manifolds. It discusses algebraic as well as metric aspects. The subject is on the crossroad of algebraic and differential geometry. Recent developments in string theory have made it an highly attractive area, both for mathematicians and theoretical physicists. The author’s goal is to provide an easily accessible introduction to the subject. The book contains detailed accounts of the basic concepts and the many exercises illustrate the theory. Appendices to various chapters allow an outlook to recent research directions. Daniel Huybrechts is currently Professor of Mathematics at the University Denis Diderot in Paris.",
+				"language": "en",
 				"libraryCatalog": "www.springer.com",
 				"place": "Berlin Heidelberg",
 				"publisher": "Springer-Verlag",
@@ -278,6 +281,7 @@ var testCases = [
 				"ISBN": "9783658115449",
 				"abstractNote": "Dieses seit vier Jahrzehnten bewährte Standardwerk ist gedacht als Begleittext zur Analysis-Vorlesung des ersten Semesters für Mathematiker, Physiker und Informatiker. Bei der Darstellung wurde besonderer Wert darauf gelegt, in systematischer Weise, aber ohne zu große Abstraktionen zu den wesentlichen Inhalten vorzudringen und sie mit vielen konkreten Beispielen zu illustrieren. An verschiedenen Stellen wurden Bezüge zur Informatik hergestellt. Einige numerische Beispiele wurden durch Programm-Codes ergänzt, so dass die Rechnungen direkt am Computer nachvollzogen werden können. Die vorliegende 12. Auflage wurde in mehreren Details verbessert und enthält einige zusätzliche Aufgaben und Beispiele.",
 				"edition": "12",
+				"language": "en",
 				"libraryCatalog": "www.springer.com",
 				"publisher": "Springer Spektrum",
 				"series": "Grundkurs Mathematik",
@@ -366,6 +370,7 @@ var testCases = [
 				"date": "2012",
 				"ISBN": "9783642331909",
 				"abstractNote": "The two volume set LNCS 7431 and 7432 constitutes the refereed proceedings of the 8th International Symposium on Visual Computing, ISVC 2012, held in Rethymnon, Crete, Greece, in July 2012. The 68 revised full papers and 35 poster papers presented together with 45 special track papers were carefully reviewed and selected from more than 200 submissions. The papers are organized in topical sections: Part I (LNCS 7431) comprises computational bioimaging; computer graphics; calibration and 3D vision; object recognition; illumination, modeling, and segmentation; visualization; 3D mapping, modeling and surface reconstruction; motion and tracking; optimization for vision, graphics, and medical imaging, HCI and recognition. Part II (LNCS 7432) comprises topics such as unconstrained biometrics: advances and trends; intelligent environments: algorithms and applications; applications; virtual reality; face processing and recognition.",
+				"language": "en",
 				"libraryCatalog": "www.springer.com",
 				"place": "Berlin Heidelberg",
 				"publisher": "Springer-Verlag",
