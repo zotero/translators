@@ -3,20 +3,26 @@
 	"label": "Google Patents",
 	"creator": "Adam Crymble, Avram Lyon, Sebastian Karcher",
 	"target": "^https?://((www\\.)?google\\.[^/]+/(?:patents|[^/]*[&?#]tbm=pts)|patents\\.google\\.[^/]+/(\\?q=|patent/))",
-	"minVersion": "3.0",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-03 22:51:13"
+	"lastUpdated": "2018-02-04 13:12:12"
 }
 
-/* Test cases for new interface does not work within Scaffold
+/* 
+   Test cases for new interface does not work within Scaffold
    Thus, one has to test them individually:
    https://patents.google.com/patent/US20090197681A1/en?q=networks&q=G06Q30%2f02
    https://patents.google.com/patent/US4390992A/en
    https://patents.google.com/patent/EP1808414A1/en
+   
+   Multiples does not work and also individual entries received from a search
+   might not triger the detectWeb again corretly. In the latter case a reload
+   of the website can help.
+   e.g. https://patents.google.com/?q=user&q=interactor&q=social&q=content&q=network&before=priority:20060703&scholar
 */
 
 
@@ -31,7 +37,9 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc) {
 	return ZU.xpath(doc, '//div[@id="ires"]//div[@class="g"]//h3/a');
-	//new format should be '//search-result-item/article/a' but isn't working yet
+	// new format should be '//search-result-item/article//a[@id="link"]' resp.
+	// '//search-result-item/article/state-modifier' with .dataset.result,
+	// but isn't working
 }
 
 function fixAuthorCase(name) {
@@ -60,6 +68,8 @@ function getPatentOffice(number) {
 	}
 	return country;
 }
+
+
 var scrapers = [
 	//U.S. (?) patent page. E.g. http://www.google.com/patents/US20090289560
 	{
@@ -231,8 +241,8 @@ var scrapers = [
 						if (!zField) zField = 'assignee';
 						fields[zField] = values[0].textContent.trim();
 						break;
-						//case 'PRIORITY DATE':
-						//case 'ALSO PUBLISHED AS':
+					//case 'PRIORITY DATE':
+					//case 'ALSO PUBLISHED AS':
 					case 'INVENTORS':
 						fields.creators = [];
 						for (var j = 0, m = values.length; j < m; j++) {
@@ -308,11 +318,19 @@ var scrapers = [
 		},
 		getMetadata: function(doc) {
 			var rows = this.getBox(doc);
-			var label, values, zField;
+			var label, nextValue, values, zField;
 			var fields = {};
-			for (var i = 0, n = rows.length; i < n; i++) {
-				label = rows[i].textContent.trim();
+			for (let i= 0, n=rows.length; i<n; i++) {
+				label = rows[i].textContent.trim().split('\n')[0];
+				// We have to take the first non-empty text line, because
+				// there are also the text lines for the tooltips, which we
+				// don't want to take into the label.
+				nextValue = ZU.xpathText(rows[i], '(./following-sibling::dd)[1]');
 				values = ZU.xpath(rows[i], './following-sibling::dd');
+				// These are all values following this label and therefore
+				// we prefer to use only the nextValue or have to restrict
+				// which values to take further.
+				
 				/*Z.debug(label)
 				for (var j = 0; j < values.length; j++) {
 					Z.debug(values[j].textContent)
@@ -323,20 +341,21 @@ var scrapers = [
 						if (!zField) zField = 'date';
 					case 'FILING DATE':
 						if (!zField) zField = 'filingDate';
+					//case 'PRIORITY DATE':
+						// See http://www.bios.net/daisy/patentlens/2343.html
+					//case 'ALSO PUBLISHED AS':
 					case 'APPLICANT':
 					case 'ASSIGNEE':
 					case 'ORIGINAL ASSIGNEE':
 						if (!zField) zField = 'assignee';
-						fields[zField] = values[0].textContent.trim();
+						fields[zField] = nextValue.trim();
 						break;
-						//case 'PRIORITY DATE':
-						//case 'ALSO PUBLISHED AS':
 					case 'INVENTOR':
 						fields.creators = [];
-						var inventor;
-						for (var j = 0, m = values.length; j < m; j++) {
+						for (let j=0, m=values.length; j<m; j++) {
 							//this captures both assignees and inventors -- make sure we get only inventors here;
-							if (inventor = ZU.xpathText(values[j], './a[@add-inventor]')) {
+							let inventor = ZU.xpathText(values[j], './/a[contains(@href, "/?inventor=")]');
+							if (inventor) {
 								fields.creators.push(ZU.cleanAuthor(inventor.trim(), 'inventor'));
 							}
 						}
@@ -347,9 +366,13 @@ var scrapers = [
 			}
 			//add other data
 			fields.title = ZU.xpathText(doc, '//h1[@id="title"]');
+			var date = ZU.xpathText(doc, '//meta[@name="DC.date" and @scheme="dateSubmitted"]/@content');
+			if (date) fields.filingDate = date;
+			var date = ZU.xpathText(doc, '//meta[@name="DC.date" and not(@scheme="dateSubmitted")]/@content');
+			if (date) fields.issueDate = date;
 			fields.patentNumber = ZU.xpathText(doc, '//section[contains(@class, "knowledge-card")]//h2');
 			var abs = ZU.xpathText(doc, '//abstract/div');
-			fields.abstractNote = abs.trim();
+			if (abs) fields.abstractNote = abs.trim();
 			fields.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
 			if (fields.patentNumber) {
 				fields.country = getPatentOffice(fields.patentNumber);
@@ -364,14 +387,10 @@ var scrapers = [
 			}];
 			if (!fields.extra) {
 				//classifications are in a box half-way down
-				var classification = ZU.xpath(doc, '//div[contains(@class, "classification-tree") and not( @hidden="")]/a');
-				var classificationArray = [];
-				for (var i = 0; i < classification.length; i++) {
-					classificationArray.push(classification[i].textContent.trim());
-				}
+				var classification = ZU.xpathText(doc, '//div[contains(@class, "classification-tree") and not(@hidden)]/state-modifier/a');
 				//the layout only provides the cooperative classifications
-				if (classificationArray) {
-					fields.extra = "Cooperative Classifications: " + classificationArray.join(", ");
+				if (classification) {
+					fields.extra = "Cooperative Classifications: " + classification;
 				}
 			}
 			return fields;
@@ -417,13 +436,13 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var res = getSearchResults(doc);
 		var items = {};
-		for (var i = 0, n = res.length; i < n; i++) {
+		for (let i=0, n=res.length; i<n; i++) {
 			items[fixUrl(res[i].href)] = res[i].textContent.trim();
 		}
 		Zotero.selectItems(items, function(items) {
 			if (!items) return true;
 			var articles = [];
-			for (var i in items) {
+			for (let i in items) {
 				articles.push(i);
 			}
 			//Z.debug(articles);
