@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-21 18:14:00"
+	"lastUpdated": "2018-02-05 07:13:43"
 }
 
 /*
@@ -350,8 +350,7 @@ function extractNumPages(str) {
 	//   x-109 p., 510 p. and X, 106 S.; 123 S.
 	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig;
 	var numPages = [];
-	var m = numPagesRE.exec(str);
-	while(m) {
+	if ((m = numPagesRE.exec(str))) {
 		numPages.push(m[1].trim()
 			.replace(/[ ,\-]+/g,'+')
 			.toLowerCase() // for Roman numerals
