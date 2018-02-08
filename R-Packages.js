@@ -145,6 +145,69 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://cran.rstudio.com/web/packages/effects/",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "effects: Effect Displays for Linear, Generalized Linear, and Other Models",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Fox",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sanford",
+						"lastName": "Weisberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Friendly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jangman",
+						"lastName": "Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Andersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Firth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Steve",
+						"lastName": "Taylor",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-10-05",
+				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for \n  various statistical models with linear predictors.",
+				"libraryCatalog": "R-Packages",
+				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
+				"shortTitle": "effects",
+				"url": "http://cran.us.r-project.org/web/packages/effects/index.html",
+				"version": "3.1-2",
+				"attachments": [
+					{
+						"title": "R Package Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
