@@ -2,7 +2,7 @@
 	"translatorID": "24a10ebf-ada1-4b8d-8f76-5a29e24d3e78",
 	"label": "R-Packages",
 	"creator": "Sebastian Karcher",
-	"target": "(cran\\..+|cloud\\.r-project.org|/CRAN)?/web/packages/",
+	"target": "(cran\\..+|cloud\\.r-project.org|/CRAN)/web/packages/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
