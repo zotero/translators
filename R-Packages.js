@@ -2,7 +2,7 @@
 	"translatorID": "24a10ebf-ada1-4b8d-8f76-5a29e24d3e78",
 	"label": "R-Packages",
 	"creator": "Sebastian Karcher",
-	"target": "r-project\\.org/web/packages/(.+/index\\.html|available_packages_by_(name|date)\\.html)",
+	"target": "(r-project\\.org|rstudio\\.com)/web/packages/(.+(/index\\.html)?|available_packages_by_(name|date)\\.html)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
