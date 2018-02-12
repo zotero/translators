@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-08 18:19:43"
+	"lastUpdated": "2018-01-27 15:12:16"
 }
 
 // attr()/text() v2
@@ -143,6 +143,12 @@ function scrapeIds(doc, ids) {
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
 		if (!context && ids.length==1) context = doc;
 		var citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
+		// For 'My Library' we check the search field at the top
+		// and then in these cases change the citeUrl accordingly.
+		var scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value')
+		if (scilib && scilib==1) {
+			var citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
+		}
 		ZU.doGet(citeUrl, function(citePage) {
 			var m = citePage.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
