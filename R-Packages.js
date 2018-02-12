@@ -5,7 +5,7 @@
 	"target": "(cran\\..+|cloud\\.r-project.org|/CRAN)/web/packages/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
@@ -40,6 +40,10 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 	***** END LICENSE BLOCK *****
 */
 
+/*Some other sample sites:
+https://stat.ethz.ch/CRAN/web/packages/MCMCpack/
+https://cloud.r-project.org/web/packages/asciiruler/index.html
+*/
 
 /**Packages*/
 FW.Scraper({
