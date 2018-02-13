@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 09:42:13"
+	"lastUpdated": "2018-02-13 19:20:46"
 }
 
 /*
@@ -44,7 +44,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
-	"citation_inbook_title": "bookTitle", //used on RSC, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
+	"citation_inbook_title": "publicationTitle", //used as bookTitle or proceedingTitle, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
@@ -922,7 +922,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
+		"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -940,7 +940,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
+				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -954,7 +954,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
+		"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -981,7 +981,7 @@ var testCases = [
 				"pages": "2",
 				"publicationTitle": "Landscapes of Violence",
 				"shortTitle": "Wabanaki Resistance and Healing",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
+				"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2",
 				"volume": "2",
 				"attachments": [
 					{
@@ -1000,7 +1000,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
+		"url": "https://scholarworks.umass.edu/open_access_dissertations/508/",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1017,7 +1017,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
+				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1454,7 +1454,7 @@ var testCases = [
 				"date": "1999/04/01",
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "0894-9875, 1572-9524",
-				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today.It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's...",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
