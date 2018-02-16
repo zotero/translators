@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-02-15 19:29:55"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-02-16 06:39:03"
 }
 
 /*
@@ -43,8 +43,7 @@ function detectWeb(doc,url) {
 }
 
 
-function doWeb(doc,url)
-{
+function doWeb(doc,url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var hits = {};
 		var urls = [];
@@ -65,7 +64,7 @@ function doWeb(doc,url)
 			ZU.processDocuments(urls, scrape);
 		});
 	} else {
-		scrape(doc, url)
+		scrape(doc, url);
 	}
 }
 
@@ -93,10 +92,11 @@ function scrape(doc, url) {
 		//Extract the correct PDF URL from the download button
 		var download_xpath = ZU.xpath(doc, '//a[@id="downloadPdf"]');
 		if (download_xpath.length > 0) {
-			item.attachments.push(
-				{title: "Full Text PDF",
-				url: download_xpath[i].href,
-				mimeType: "application/pdf"});
+			item.attachments.push({
+				title: "Full Text PDF",
+				url: download_xpath[0].href,
+				mimeType: "application/pdf"
+			});
 		}
 
 		item.complete();
