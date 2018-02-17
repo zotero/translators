@@ -9,16 +9,18 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-02-07 23:22:18"
+	"lastUpdated": "2017-09-08 06:15:38"
 }
 
-function detectWeb(doc, url) {
-	var singXpath = '//input[@name="bibcode"][@type="hidden"]';
-	var multXpath = '//input[@name="bibcode"][@type="checkbox"]';
 
-	if (doc.evaluate(multXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+
+
+function detectWeb(doc, url) {
+	if (attr(doc, 'input[name="bibcode"][type="checkbox"]', 'value')) {
 		return "multiple";
-	} else if (doc.evaluate(singXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
+	} else if (attr(doc, 'input[name="bibcode"][type="hidden"]', 'value')){
 		return "journalArticle";
 	}
 }
@@ -28,9 +30,9 @@ function parseRIS(bibcodes, hostname){
 		+ bibcodes + "data_type=REFMAN&nocookieset=1";
 	var pdfURL = "http://" + hostname + "/cgi-bin/nph-data_query?"
 		+ bibcodes + "link_type=ARTICLE";
-		//Z.debug(getURL)
-		//Z.debug(pdfURL)
-		Zotero.Utilities.HTTP.doGet(getURL, function(text){	
+	//Z.debug(getURL)
+	//Z.debug(pdfURL)
+	Zotero.Utilities.HTTP.doGet(getURL, function(text){	
 		// load translator for RIS
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -43,7 +45,7 @@ function parseRIS(bibcodes, hostname){
 	}, function() {});
 }
 
-function doWeb(doc, url) {
+function doWeb2(doc, url) {
 
 	var singXpath = '//input[@name="bibcode"][@type="hidden"]';
 	var multXpath = '//input[@name="bibcode"][@type="checkbox"]';
@@ -63,22 +65,61 @@ function doWeb(doc, url) {
 			items[bibElmt.value] = Zotero.Utilities.trimInternal(titleElmt.textContent);
 		} while((bibElmt = bibElmts.iterateNext()) && (titleElmt = titleElmts.iterateNext()));
 	
-	Zotero.selectItems(items, function (items) {
-		if (!items) {
-			return true;
-		}	
-		var bibcodes="";
-		for(var bibcode in items) {
-			bibcodes = bibcodes + "bibcode="+encodeURIComponent(bibcode) + "&";
-		}
-		parseRIS(bibcodes, hostname);		
-	});			
+		Zotero.selectItems(items, function (items) {
+			if (!items) {
+				return true;
+			}	
+			var bibcodes="";
+			for(var bibcode in items) {
+				bibcodes = bibcodes + "bibcode="+encodeURIComponent(bibcode) + "&";
+			}
+			parseRIS(bibcodes, hostname);		
+		});			
 	} else if (bibElmt = doc.evaluate(singXpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()){
 		var bibcode = bibElmt.value;
 		var bibcodes = "bibcode="+encodeURIComponent(bibcode) + "&";
 		parseRIS(bibcodes, hostname);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	//TODO: adjust the xpath
+	var rows = doc.querySelectorAll('h2>a.title[href*="/article/"]');
+	for (var i=0; i<rows.length; i++) {
+		//TODO: check and maybe adjust
+		var href = rows[i].href;
+		//TODO: check and maybe adjust
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				//articles.push(i);
+				parseRIS(i, items[i]);
+			}
+			//ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		parseRIS(doc, url);
+	}
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
