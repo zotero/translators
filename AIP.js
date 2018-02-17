@@ -3,7 +3,7 @@
 	"label": "AIP",
 	"creator": "Aurimas Vinckevicius",
 	"target": "^https?://scitation\\.aip\\.org/(search\\?|content/)",
-	"minVersion": "3.0",
+	"minVersion": "3.0"
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
