@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-21 10:31:23"
+	"lastUpdated": "2018-02-18 10:21:48"
 }
 
 /*
@@ -116,7 +116,7 @@ function scrape(doc, url) {
 			var lastParenthesis = voliss.match(/\(([^\)]*)\)$/);
 			if (lastParenthesis) {
 				newItem.dateDecided = ZU.strToISO(lastParenthesis[1]);
-			} else if (year) {
+			} else {
 				newItem.dateDecided = text(doc, 'li.ribbon-year>a>span');
 			}
 			newItem.court = text(doc, 'li.ribbon-database>a>span');
