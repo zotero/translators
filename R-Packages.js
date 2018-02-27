@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-18 16:30:37"
+	"lastUpdated": "2018-02-27 07:48:03"
 }
 
 /*
@@ -97,7 +97,15 @@ function scrape(doc, url) {
 	if (authorString) {
 		var creators = authorString.replace(/\[.+?\]/g, '').split(/\s*,\s*/);
 		for (let i=0; i<creators.length; i++) {
-			item.creators.push(ZU.cleanAuthor(creators[i], 'author'));
+			if (creators[i].trim()=="R Core Team") {
+				item.creators.push({
+					lastName: creators[i].trim(),
+					fieldMode: true,
+					creatorType: "author"
+				});
+			} else {
+				item.creators.push(ZU.cleanAuthor(creators[i], 'author'));
+			}
 		}
 		
 	}
@@ -172,8 +180,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "R. Core",
-						"lastName": "Team",
+						"lastName": "R Core Team",
+						"fieldMode": true,
 						"creatorType": "author"
 					}
 				],
@@ -245,8 +253,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "R. Core",
-						"lastName": "Team",
+						"lastName": "R Core Team",
+						"fieldMode": true,
 						"creatorType": "author"
 					}
 				],
@@ -318,8 +326,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "R. Core",
-						"lastName": "Team",
+						"lastName": "R Core Team",
+						"fieldMode": true,
 						"creatorType": "author"
 					}
 				],
@@ -391,8 +399,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "R. Core",
-						"lastName": "Team",
+						"lastName": "R Core Team",
+						"fieldMode": true,
 						"creatorType": "author"
 					}
 				],
