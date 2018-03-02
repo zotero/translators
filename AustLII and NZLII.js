@@ -123,6 +123,8 @@ function scrape(doc, url) {
 			var voliss = text(doc, 'head>title');
 			// e.g. C & M [2006] FamCA 212 (20 January 2006)
 			newItem.caseName = voliss.replace(/\s?\[.*$/, '');
+			newItem.title = newItem.caseName
+			
 			var lastParenthesis = voliss.match(/\(([^\)]*)\)$/);
 			if (lastParenthesis) {
 				newItem.dateDecided = ZU.strToISO(lastParenthesis[1]);
