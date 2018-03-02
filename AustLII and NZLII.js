@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-18 10:21:48"
+	"lastUpdated": "2018-03-02 09:46:09"
 }
 
 /*
@@ -37,8 +37,15 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+function attr(docOrElem,selector,attr,index) { 
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.getAttribute(attr) : null;
+}
 
+function text(docOrElem,selector,index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
 
 function detectWeb(doc, url) {
 	var classes = attr(doc, 'body', 'class');
@@ -54,6 +61,9 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	if (url.includes('nzlii.org/nz/cases/') && url.includes('.html')) {
+		return "case";
+	}
+	if (url.includes('austlii.edu.au/cgi-bin/sinodisp/au/cases/') && url.includes('.html')) {
 		return "case";
 	}
 	if (getSearchResults(doc, true)) {
@@ -365,6 +375,30 @@ var testCases = [
 		"type": "web",
 		"url": "http://www7.austlii.edu.au/cgi-bin/sinosrch.cgi?mask_path=;method=auto;query=adam%20smith;view=relevance&mask_path=au/cases/act/ACTCA",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www8.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Cash World Gold Buyers Pty Ltd and Australian Taxation Office (Freedom of information)",
+				"creators": [],
+				"dateDecided": "2017-03-10",
+				"court": "AICmr",
+				"docketNumber": "20",
+				"url": "http://www8.austlii.edu.au/cgi-bin/sinodisp/au/cases/cth/AICmr/2017/20.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
