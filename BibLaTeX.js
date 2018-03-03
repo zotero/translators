@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2017-08-28 10:55:00"
+	"lastUpdated": "2018-03-03 14:00:00"
 }
 
 
@@ -57,7 +57,8 @@ var revExtraIds = {
 	MR: 'mrnumber',
 	Zbl: 'zmnumber',
 	PMCID: 'pmcid',
-	PMID: 'pmid'
+	PMID: 'pmid',
+	DOI: 'doi'
 };
 
 // Imported by BibTeX. Exported by BibLaTeX only
