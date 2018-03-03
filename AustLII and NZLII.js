@@ -37,15 +37,8 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index) { 
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-function text(docOrElem,selector,index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
 
 function detectWeb(doc, url) {
 	var classes = attr(doc, 'body', 'class');
@@ -123,7 +116,7 @@ function scrape(doc, url) {
 			var voliss = text(doc, 'head>title');
 			// e.g. C & M [2006] FamCA 212 (20 January 2006)
 			newItem.caseName = voliss.replace(/\s?\[.*$/, '');
-			newItem.title = newItem.caseName
+			newItem.title = newItem.caseName;
 			
 			var lastParenthesis = voliss.match(/\(([^\)]*)\)$/);
 			if (lastParenthesis) {
