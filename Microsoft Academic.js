@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-18 00:35:26"
+	"lastUpdated": "2018-03-04 19:36:45"
 }
 
 /*
@@ -155,6 +155,7 @@ function scrape(urlList) {
 			pubID + "&correlationId=undefined";
 		
 		ZU.doGet(apiUrl, function(text) {
+			//Z.debug(text)
 			var data = JSON.parse(text);
 			var type;
 			if (data.entity.c) {
@@ -213,6 +214,16 @@ function scrape(urlList) {
 				snapshot: false
 			});
 			
+			//add DOIs for books, but make this robust to addition of other item types
+			if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
+				if(item.extra) {
+					if (item.extra.search(/^DOI:/) == -1) {
+						item.extra += '\nDOI: ' + item.DOI;
+					}
+				} else {
+					item.extra = 'DOI: ' + item.DOI;
+				}
+			}
 			/*
 			delete data.references;
 			delete data.sources;
