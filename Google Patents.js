@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-25 21:09:39"
+	"lastUpdated": "2018-03-03 21:09:39"
 }
 
 /*
@@ -227,9 +227,16 @@ function scrapeJson(json, url, doc) {
 	}
 	
 	item.url = url;
-	if (json.pdfLink || json.pdf) {
+	let pdfurl = json.pdfLink || json.pdf;
+	if (pdfurl) {
+		//Relative links don't resolve correctly in all cases. Let's make sure we're getting this all from 
+		//the right place on the google API
+		if (!pdfurl.includes("https://")) {
+			pdfurl = "https://patentimages.storage.googleapis.com" + pdfurl;
+		}
+		//Z.debug(pdfurl);
 		item.attachments.push({
-			url: json.pdfLink || json.pdf,
+			url: pdfurl,
 			title: "Fulltext PDF",
 			mimeType: "application/pdf"
 		});
