@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-11 13:13:58"
+	"lastUpdated": "2018-03-05 07:35:01"
 }
 
 /*
@@ -89,6 +89,7 @@ function scrape(doc, url) {
 	var box = doc.querySelector('.box-cartel ul');
 	var artist = text(box, 'li p', 0);
 	if (artist) {
+		artist = artist.replace(/\(.*\)/, '');
 		item.creators.push({
 			lastName: ZU.trimInternal(artist),
 			creatorType: "artist"
@@ -167,7 +168,7 @@ var testCases = [
 				"title": "Mona Lisa – Portrait of Lisa Gherardini, wife of Francesco del Giocondo",
 				"creators": [
 					{
-						"lastName": "Leonardo di ser Piero da Vinci, known as LEONARDO DA VINCI (Vinci, 1452 - Amboise, 1519)",
+						"lastName": "Leonardo di ser Piero da Vinci, known as LEONARDO DA VINCI",
 						"creatorType": "artist"
 					}
 				],

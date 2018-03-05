@@ -2,14 +2,14 @@
 	"translatorID": "83979786-44af-494a-9ddb-46654e0486ef",
 	"label": "Reuters",
 	"creator": "Avram Lyon, Michael Berkowitz, Sebastian Karcher",
-	"target": "^https?://(www|blogs)?\\.reuters\\.com/",
-	"minVersion": "2.1.9",
+	"target": "^https?://\\w+\\.reuters\\.com/",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-28 20:10:54"
+	"lastUpdated": "2018-03-05 19:27:07"
 }
 
 /*
@@ -42,9 +42,9 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (url.match(/^https?:\/\/(www\.)?reuters\.com\/article/)) {
+	if (url.includes("/article/")) {
 		return "newspaperArticle";
-	} else if (url.match(/^https?:\/\/blogs\.reuters\.com/)) {
+	} else if (url.includes("blogs.reuters.com")) {
 	  return "blogPost";
 	} else if (url.includes('/search/') && getSearchResults(doc, true)) {
 	  return "multiple";
@@ -101,15 +101,11 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		if (detectWeb(doc, url) == "newspaperArticle") {
-			Z.debug(item.date);
-			item.date = doc.evaluate('//meta[@name="REVISION_DATE"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content;
-			Z.debug(item.date);
+			item.date = attr(doc, 'meta[name="REVISION_DATE"]', 'content');
+			var authors = doc.querySelectorAll('[class*="BylineBar_byline_"] a');
 			var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
-			if (byline) {
-				var authors = byline.substr(3).split(/and |,/);
-				for (var i=0; i<authors.length; i++) {
-					item.creators.push(authorFix(authors[i]));
-				}
+			for (let i=0; i<authors.length; i++) {
+				item.creators.push(authorFix(authors[i].textContent));
 			}
 			item.publicationTitle = "Reuters";
 		}
@@ -118,7 +114,7 @@ function scrape(doc, url) {
 			var byline = text(doc, 'div.author');
 			if (byline) {
 				var authors = byline.split(/and |,/);
-				for (var i=0; i<authors.length; i++) {
+				for (let i=0; i<authors.length; i++) {
 					item.creators.push(authorFix(authors[i]));
 				}
 			}
@@ -167,7 +163,7 @@ function authorFix(author) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
+		"url": "https://www.reuters.com/article/us-eurozone/europe-could-be-in-worst-hour-since-ww2-merkel-idUSTRE7AC15K20111114",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -184,52 +180,157 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Mon Nov 14 21:16:28 UTC 2011",
-				"abstractNote": "ROME (Reuters) - Prime Minister-designate Mario Monti meets the leaders of Italy's biggest two parties on Tuesday to discuss the many sacrifices needed to reverse a collapse in market confidence that is",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Reuters",
-				"place": "Rome",
+				"date": "2011-11-14",
+				"abstractNote": "Prime Minister-designate Mario Monti meets the leaders of Italy's biggest two parties on Tuesday to discuss the \"many sacrifices\" needed to reverse a collapse in market confidence that is driving an ever deepening euro zone debt crisis.",
+				"language": "en",
+				"libraryCatalog": "www.reuters.com",
 				"publicationTitle": "Reuters",
 				"shortTitle": "Europe could be in worst hour since WW2",
-				"url": "http://www.reuters.com/article/2011/11/14/us-eurozone-idUSTRE7AC15K20111114",
+				"url": "https://www.reuters.com/article/us-eurozone/new-italian-greek-governments-race-to-limit-damage-idUSTRE7AC15K20111114",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
 				"tags": [
-					"Angela Merkel",
-					"Angela Merkel",
-					"Angela Merkel",
-					"Antonis Samaras",
-					"Antonis Samaras",
-					"George Papandreou",
-					"George Papandreou",
-					"Germany",
-					"Germany",
-					"Germany",
-					"Giorgio Napolitano",
-					"Greece",
-					"Greece",
-					"Harry Papachristou",
-					"Harry Papachristou",
-					"Italy",
-					"Italy",
-					"Jack Ablin",
-					"Jens Weidmann",
-					"Jens Weidmann",
-					"Kai Pfaffenbach",
-					"Kai Pfaffenbach",
-					"Lucas Papademos",
-					"Lucas Papademos",
-					"Mario Monti",
-					"Mario Monti",
-					"Olli Rehn",
-					"Olli Rehn",
-					"Philip Pullella",
-					"Philip Pullella",
-					"Silvio Berlusconi",
-					"Silvio Berlusconi"
+					{
+						"tag": "Angela Merkel"
+					},
+					{
+						"tag": "Angela Merkel"
+					},
+					{
+						"tag": "Angela Merkel"
+					},
+					{
+						"tag": "Antonis Samaras"
+					},
+					{
+						"tag": "Antonis Samaras"
+					},
+					{
+						"tag": "Debt / Fixed Income Markets"
+					},
+					{
+						"tag": "Diplomacy / Foreign Policy"
+					},
+					{
+						"tag": "EUROZONE"
+					},
+					{
+						"tag": "Economic Events"
+					},
+					{
+						"tag": "Euro Zone as a Whole"
+					},
+					{
+						"tag": "Europe"
+					},
+					{
+						"tag": "European Union"
+					},
+					{
+						"tag": "George Papandreou"
+					},
+					{
+						"tag": "George Papandreou"
+					},
+					{
+						"tag": "Germany"
+					},
+					{
+						"tag": "Germany"
+					},
+					{
+						"tag": "Germany"
+					},
+					{
+						"tag": "Giorgio Napolitano"
+					},
+					{
+						"tag": "Government / Politics"
+					},
+					{
+						"tag": "Government Finances"
+					},
+					{
+						"tag": "Greece"
+					},
+					{
+						"tag": "Greece"
+					},
+					{
+						"tag": "Greece"
+					},
+					{
+						"tag": "Harry Papachristou"
+					},
+					{
+						"tag": "Harry Papachristou"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "Jack Ablin"
+					},
+					{
+						"tag": "Jens Weidmann"
+					},
+					{
+						"tag": "Jens Weidmann"
+					},
+					{
+						"tag": "Kai Pfaffenbach"
+					},
+					{
+						"tag": "Kai Pfaffenbach"
+					},
+					{
+						"tag": "Lucas Papademos"
+					},
+					{
+						"tag": "Lucas Papademos"
+					},
+					{
+						"tag": "Mario Monti"
+					},
+					{
+						"tag": "Mario Monti"
+					},
+					{
+						"tag": "National Government Debt"
+					},
+					{
+						"tag": "Olli Rehn"
+					},
+					{
+						"tag": "Olli Rehn"
+					},
+					{
+						"tag": "Philip Pullella"
+					},
+					{
+						"tag": "Philip Pullella"
+					},
+					{
+						"tag": "Silvio Berlusconi"
+					},
+					{
+						"tag": "Silvio Berlusconi"
+					},
+					{
+						"tag": "US"
+					},
+					{
+						"tag": "Western Europe"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -250,23 +351,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012-03-26",
 				"abstractNote": "After years when the risks to the consensus modest-growth forecast were to the downside, they are now very much two-sided.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "Reuters",
-				"publicationTitle": "Reuters Blogs - Lawrence Summers",
+				"blogTitle": "Reuters Blogs",
 				"url": "http://blogs.reuters.com/lawrencesummers/2012/03/26/its-too-soon-to-return-to-normal-policies/",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"deficit",
-					"fiscal policy",
-					"housing",
-					"recovery",
-					"unemployment"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -274,13 +368,88 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.reuters.com/search?blob=europe",
+		"url": "https://www.reuters.com/search/news?blob=europe",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.reuters.com/search/news?blob=europe",
-		"items": "multiple"
+		"url": "https://de.reuters.com/article/deutschland-koalition-csu-idDEKBN1GH2GW",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "CSU besetzt Ministerien nur mit Männern",
+				"creators": [],
+				"date": "2018-03-05",
+				"abstractNote": "Die CSU schickt anders als ihre Koalitionspartner CDU und SPD ausschließlich Männer an die Spitze der ihr zustehenden Bundesministerien.",
+				"language": "de",
+				"libraryCatalog": "de.reuters.com",
+				"publicationTitle": "Reuters",
+				"url": "https://de.reuters.com/article/deutschland-koalition-csu-idDEKBN1GH2GW",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Africa"
+					},
+					{
+						"tag": "Auto and Truck Manufacturers (TRBC)"
+					},
+					{
+						"tag": "CSU"
+					},
+					{
+						"tag": "Conflicts / War / Peace"
+					},
+					{
+						"tag": "DEUTSCHLAND"
+					},
+					{
+						"tag": "Elections / Voting"
+					},
+					{
+						"tag": "Euro Zone"
+					},
+					{
+						"tag": "Europe"
+					},
+					{
+						"tag": "General"
+					},
+					{
+						"tag": "German Language"
+					},
+					{
+						"tag": "Germany"
+					},
+					{
+						"tag": "Government / Politics"
+					},
+					{
+						"tag": "International / National Security"
+					},
+					{
+						"tag": "Internet / World Wide Web"
+					},
+					{
+						"tag": "KOALITION"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Technology / Media / Telecoms"
+					},
+					{
+						"tag": "Western Europe"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-01 13:41:02"
+	"lastUpdated": "2018-03-05 18:54:31"
 }
 
 /*
@@ -52,13 +52,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
-	// //table[@class="listing_table"]/tbody/tr/td[3]/a
 	var rows = doc.querySelectorAll('table.listing_table>tbody>tr>td>a');
 	for (let i=0; i<rows.length; i++) {
-		// TODO: check and maybe adjust
 		let href = rows[i].href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -107,10 +103,11 @@ function scrape(doc, url) {
 				newItem.applicationNumber = value;
 				break;
 			case "publication date":
-				newItem.issueDate = ZU.strToISO(value);
+				//e.g. 07/18/2006
+				newItem.issueDate = parseDate(value);
 				break;
 			case "filing date":
-				newItem.filingDate = ZU.strToISO(value);
+				newItem.filingDate = parseDate(value);
 				break;
 			case "assignee":
 				newItem.assignee = ZU.trimInternal(value);
@@ -157,7 +154,7 @@ function scrape(doc, url) {
 	
 	
 	newItem.attachments.push({
-		doc: doc,
+		document: doc,
 		title: "Snaptshot"
 	});
 	
@@ -170,6 +167,17 @@ function scrape(doc, url) {
 	}
 
 	newItem.complete();
+}
+
+
+function parseDate(value) {
+	//e.g. 07/18/2006
+	let dateParts = value.split('/');
+	if (dateParts.length==3) {
+		return dateParts[2] + '-' + dateParts[0] + '-' + dateParts[1]
+	} else {
+		return ZU.strToISO(value);
+	}
 }
 
 /** BEGIN TEST CASES **/

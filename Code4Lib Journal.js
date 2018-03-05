@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-31 07:40:11"
+	"lastUpdated": "2018-03-05 07:15:21"
 }
 
 // attr()/text() v2
@@ -80,9 +80,9 @@ function scrape(doc, url){
 	}
 	
 	newItem.attachments.push({
-		url:doc.location.href,
-		title:"Code4Lib Journal Snapshot",
-		mimeType:"text/html"
+		document: doc,
+		title: "Code4Lib Journal Snapshot",
+		mimeType: "text/html"
 	});
 	newItem.complete();
 }
