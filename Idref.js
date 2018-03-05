@@ -36,17 +36,15 @@
 */
 
 function detectWeb(doc, url) { 
-	if (ZU.xpathText(doc, '//div[@class="detail_bloc_biblio"]')) {
-		if (Object.keys(getSearchResults(doc)).length) {
-			return "multiple";	
-		}
+	if (ZU.xpathText(doc, '//div[@class="detail_bloc_biblio"]') && getSearchResults(doc, true)) {
+		return "multiple";	
 	}
 }
 
-function getSearchResults(doc) {
+function getSearchResults(doc, checkOnly) {
 	var resultsTitle = ZU.xpath(doc, '//div[@id="perenne-references-docs"]/span[contains(@class, "detail_value")]');
 	var resultsHref = ZU.xpath(doc, '//div[@id="perenne-references-docs"]/span[contains(@class, "detail_label")]/a/@href');
-	
+	var found = false;
 	items = {};
 	for (let i=0; i<resultsTitle.length; i++) {
 		href = resultsHref[i].textContent;
@@ -54,19 +52,17 @@ function getSearchResults(doc) {
 		href = href.replace(/http:\/\/www\.sudoc\.fr\/(.*)$/, "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=$1");
 
 		if ( (href.includes("www.sudoc.abes.fr")) || (href.includes("archives-ouvertes")) ) {
+			if (checkOnly) return true;
+			found = true;
 			items[href] = resultsTitle[i].textContent;
 		}
 	}
-	return items;
+	return found ? items : false;
 }
 
 function doWeb(doc, url)
 {
-	if (detectWeb(doc, url) == "multiple") {
-		items = getSearchResults(doc);
-	}
-		
-	Zotero.selectItems(items, function (selectedItems) {
+	Zotero.selectItems(getSearchResults(doc, false), function (selectedItems) {
 		if (!selectedItems) {
 			return true;
 		}
