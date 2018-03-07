@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-07 15:20:56"
+	"lastUpdated": "2018-03-07 15:46:59"
 }
 
 /*
@@ -175,6 +175,7 @@ function scrape(doc, url) {
 				if (!item.creators[i].firstName && item.creators[i].lastName.indexOf(",")!=-1) {
 					item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
 					item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+					item.creators[i].fieldMode = true;
 				}
 				delete item.creators[i].creatorTypeID;
 			}
