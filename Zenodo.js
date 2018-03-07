@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-22 21:59:40"
+	"lastUpdated": "2018-03-07 14:55:24"
 }
 
 /*
@@ -195,6 +195,11 @@ function scrape(doc, url) {
 
 			if (item.itemType == "document" && zoteroType[type]) {
 				item.itemType = zoteroType[type];
+				
+				//undo the fix for non-existent CSL types, if Zotero supports the original itemType
+				if (detectWeb(doc, url) == "computerProgram") {
+					item.itemType = "computerProgram"
+				}
 			}
 			item.itemID = "";
 			item.complete();
@@ -468,6 +473,61 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/record/1048320",
+		"items": [
+			 {
+             "itemType": "computerProgram"
+             "creators": [
+               {
+                 "lastName": "Carl Boettiger"
+                 "firstName": ""
+                 "creatorType": "author"
+               }
+               {
+                 "lastName": "Maëlle Salmon"
+                 "firstName": ""
+                 "creatorType": "author"
+               }
+               {
+                 "lastName": "Noam Ross"
+                 "firstName": ""
+                 "creatorType": "author"
+               }
+               {
+                 "lastName": "Arfon Smith"
+                 "firstName": ""
+                 "creatorType": "author"
+               }
+               {
+                 "lastName": "Anna Krystalli"
+                 "firstName": ""
+                 "creatorType": "author"
+               }
+             ]
+             "notes": []
+             "tags": []
+             "seeAlso": []
+             "attachments": [
+               {
+                 "title": "Zenodo Snapshot"
+                 "mimeType": "text/html"
+               }
+             ]
+             "title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages"
+         -   "publisher": "Zenodo"
+             "abstractNote": "an R package for generating and working with codemeta"
+             "date": "2017-11-13"
+             "extra": "DOI: 10.5281/zenodo.1048320"
+             "url": "https://zenodo.org/record/1048320"
+             "libraryCatalog": "Zenodo"
+         -   "accessDate": "2018-03-07T13:45:35Z"
+             "shortTitle": "ropensci/codemetar"
+         +   "company": "Zenodo"
+           }
 		]
 	}
 ]
