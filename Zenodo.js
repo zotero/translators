@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-07 14:55:24"
+	"lastUpdated": "2018-03-07 15:20:56"
 }
 
 /*
@@ -187,20 +187,7 @@ function scrape(doc, url) {
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
 
-			//Zenodo uses some non-existent CSL types we're fixing.
-			var zoteroType = {
-				"figure": "artwork",
-	 			"article": "report"
-			};
-
-			if (item.itemType == "document" && zoteroType[type]) {
-				item.itemType = zoteroType[type];
-				
-				//undo the fix for non-existent CSL types, if Zotero supports the original itemType
-				if (detectWeb(doc, url) == "computerProgram") {
-					item.itemType = "computerProgram"
-				}
-			}
+			item.itemType = detectWeb(doc, url)
 			item.itemID = "";
 			item.complete();
 		});
