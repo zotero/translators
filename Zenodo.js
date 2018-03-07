@@ -518,15 +518,15 @@ var testCases = [
                }
              ]
              "title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages"
-         -   "publisher": "Zenodo"
+             "publisher": "Zenodo"
              "abstractNote": "an R package for generating and working with codemeta"
              "date": "2017-11-13"
              "extra": "DOI: 10.5281/zenodo.1048320"
              "url": "https://zenodo.org/record/1048320"
              "libraryCatalog": "Zenodo"
-         -   "accessDate": "2018-03-07T13:45:35Z"
+             "accessDate": "2018-03-07T13:45:35Z"
              "shortTitle": "ropensci/codemetar"
-         +   "company": "Zenodo"
+             "company": "Zenodo"
            }
 		]
 	}
