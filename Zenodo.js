@@ -470,52 +470,57 @@ var testCases = [
 		"url": "https://zenodo.org/record/1048320",
 		"items": [
 			{
-				"itemType": "computerProgram"
+				"itemType": "computerProgram",
 				"creators": [
 					{
-						"lastName": "Carl Boettiger"
-						"firstName": ""
-						"creatorType": "author"
-					}
+						"lastName": "Carl Boettiger",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
 					{
-						"lastName": "Maëlle Salmon"
-						"firstName": ""
-						"creatorType": "author"
-					}
+						"lastName": "Maëlle Salmon",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
 					{
-						"lastName": "Noam Ross"
-						"firstName": ""
-						"creatorType": "author"
-					}
+						"lastName": "Noam Ross",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
 					{
-						"lastName": "Arfon Smith"
-						"firstName": ""
-						"creatorType": "author"
-					}
+						"lastName": "Arfon Smith",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
 					{
-						"lastName": "Anna Krystalli"
-						"firstName": ""
-						"creatorType": "author"
+						"lastName": "Anna Krystalli",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
 					}
-				]
-				"notes": []
-				"tags": []
-				"seeAlso": []
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
 				"attachments": [
 					{
-						"title": "Zenodo Snapshot"
+						"title": "Zenodo Snapshot",
 						"mimeType": "text/html"
 					}
-				]
-				"title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages"
-				"publisher": "Zenodo"
-				"abstractNote": "an R package for generating and working with codemeta"
-				"date": "2017-11-13"
-				"extra": "DOI: 10.5281/zenodo.1048320"
-				"url": "https://zenodo.org/record/1048320"
-				"libraryCatalog": "Zenodo"
-				"accessDate": "2018-03-07T13:45:35Z"
-				"shortTitle": "ropensci/codemetar"
+				],
+				"title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages",
+				"publisher": "Zenodo",
+				"abstractNote": "an R package for generating and working with codemeta",
+				"date": "2017-11-13",
+				"extra": "DOI: 10.5281/zenodo.1048320",
+				"url": "https://zenodo.org/record/1048320",
+				"libraryCatalog": "Zenodo",
+				"accessDate": "2018-03-07T13:45:35Z",
+				"shortTitle": "ropensci/codemetar",
 				"company": "Zenodo"
 			}
 		]
