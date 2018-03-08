@@ -171,10 +171,13 @@ function scrape(doc, url) {
 			//something is odd with zenodo's author parsing to CSL on some pages; fix it
 			//e.g. https://zenodo.org/record/569323
 			for (var i = 0; i< item.creators.length; i++) {
-				if (!item.creators[i].firstName && item.creators[i].lastName.indexOf(",")!=-1) {
-					item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
-					item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
-					item.creators[i].fieldMode = true;
+				if (!item.creators[i].firstName) {
+					if (item.creators[i].lastName.indexOf(",")!=-1) {
+						item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
+						item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+					} else {
+						item.creators[i].fieldMode = true;
+					}
 				}
 				delete item.creators[i].creatorTypeID;
 			}
