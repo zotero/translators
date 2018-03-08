@@ -190,7 +190,7 @@ function scrape(doc, url) {
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
 
-			item.itemType = detectWeb(doc, url)
+			item.itemType = detectWeb(doc, url);
 			item.itemID = "";
 			item.complete();
 		});
