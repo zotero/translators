@@ -130,7 +130,6 @@ function scrape(doc, url) {
 	ZU.processDocuments(cslURL, function(newDoc){
 		var text = ZU.xpathText(newDoc, '//h3/following-sibling::pre');
 		//Z.debug(text)
-		var type = text.match(/"type": "(.+?)"/)[1];
 		text = text.replace(/publisher_place/, "publisher-place");
 		text = text.replace(/container_title/, "container-title");
 
