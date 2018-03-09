@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-03 21:09:39"
+	"lastUpdated": "2018-03-09 07:50:46"
 }
 
 /*
@@ -209,7 +209,9 @@ function scrapeJson(json, url, doc) {
 	}
 	
 	// Abstract
-	if (doc) {
+	if (json.abstract) {
+		item.abstractNote = json.abstract.content;
+	} else if (doc) {
 		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
 	}
 	
@@ -457,6 +459,7 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nG11C11/16: Digital stores characterised by the use of particular electric or magnetic storage elements; Storage elements therefor using magnetic elements using elements in which the storage effect is based on magnetic spin effect"
 					}
 				],
+				"abstractNote": "MRAM has read word lines WLR and write word line WLW extending in the y direction, write/read bit line BLW/R and write bit line BLW extending in the x direction, and the memory cells MC disposed at the points of the intersection of these lines. The memory MC includes sub-cells SC1 and SC2. The sub-cell SC1 includes magneto resistive elements MTJ1 and MTJ2 and a selection transistor Tr1, and the sub-cell SC2 includes magneto resistive elements MTJ3 and MTJ4 and a selection transistor Tr2. The magneto resistive elements MTJ1 and MTJ2 are connected in parallel, and the magneto resistive elements MTJ3 and MTJ4 are also connected in parallel. Further, the sub-cells SC1 and SC2 are connected in series between the write/read bit line BLW/R and the ground.",
 				"seeAlso": []
 			}
 		]
@@ -512,6 +515,7 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nH01S3/091: Processes or apparatus for excitation, e.g. pumping using optical pumping"
 					}
 				],
+				"abstractNote": "A device and method for optically pumping a gaseous laser using blackbody radiation produced by a plasma channel which is formed from an electrical discharge between two electrodes spaced at opposite longitudinal ends of the laser. A preionization device which can comprise a laser or electron beam accelerator produces a preionization beam which is sufficient to cause an electrical discharge between the electrodes to initiate the plasma channel along the preionization path. The optical pumping energy is supplied by a high voltage power supply rather than by the preionization beam. High output optical intensities are produced by the laser due to the high temperature blackbody radiation produced by the plasma channel, in the same manner as an exploding wire type laser. However, unlike the exploding wire type laser, the disclosed invention can be operated in a repetitive manner by utilizing a repetitive pulsed preionization device.",
 				"seeAlso": []
 			}
 		]
@@ -684,6 +688,7 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nA47G33/06: Artificial Christmas trees"
 					}
 				],
+				"abstractNote": "An artificial tree assembly, and a tree constructed therefrom, are provided. The assembly comprises a collapsible three-piece pole; a base member formed by the bottom of a box for storing the tree assembly and including a pole support member secured thereto for supporting the pole; and a plurality of limb sections and interconnecting garlands. The limb-sections each comprise a central ring portion and a plurality of limb members extending radially outwardly from the central ring portions. The ring portions of the limb sections are stacked, when not in use, on the pole support member and are disposed, in use, along the length of pole in spaced relationship therealong. The garlands interconnect the limb portions so that as the ring portions are lifted, from the top, from the stacked positions thereof on the pole support member and slid along the pole, the garlands between adjacent limb section are tensioned, in turn, and thus serve to lift the next adjacent limb section until the tree is fully erected.",
 				"seeAlso": []
 			}
 		]
@@ -859,6 +864,7 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nC11D3/3796: Amphoteric polymers; Zwitterionic polymers<br/>\nC11D3/0073: Anticorrosion compositions<br/>\nC11D3/3719: Polyamides; Polyimides<br/>\nC11D3/3723: Polyamines, polyalkyleneimines<br/>\nC11D3/3769: (Co)polymerised monomers containing nitrogen, e.g. carbonamides, nitriles, amines<br/>\nC11D3/3776: Heterocyclic compounds, e.g. lactam<br/>\nC23F11/173: Macromolecular compounds"
 					}
 				],
+				"abstractNote": "A detergent or rinse aid composition which reduces spotting and filming on glassware cleaned in an automatic dishwashing machine is described. The composition contains an effective amount of a water soluble cationic or amphoteric polymer having at least one monomer unit having a cationic charge over a portion of the pH range of about 2 to about 11 in the wash or rinse cycle.",
 				"seeAlso": []
 			}
 		]
@@ -925,6 +931,7 @@ var testCases = [
 						"note": "<h2>Classifications</h2>\nC11D3/0036: Soil deposition preventing compositions; Antiredeposition agents<br/>\nC11D1/342: Phosphonates; Phosphinates; Phosphonites<br/>\nC11D1/345: Phosphates; Phosphites<br/>\nC11D11/0017: \"Soft\" surfaces, e.g. textiles<br/>\nC11D3/361: Phosphonates, phosphinates, phosphonites<br/>\nC11D3/362: Phosphates, phosphites<br/>\nC11D3/3784: (Co)polymerised monomers containing phosphorus"
 					}
 				],
+				"abstractNote": "Laundry detergent compositions that provide soil release benefits to all fabric comprising an organophosphorus soil release agents and optional non-cotton secondary soil release agents. The present invention further relates to a method for providing soil release benefits to cotton fabric by contacting cotton articles with a water soluble and/or dispersible organophosphorus material. The contacting can be during washing or by pretreating by applying the composition directly to stains or by presoaking the clothing in the composition prior to washing. The present invention further relates to providing soil release benefits to all fabric in the laundry wash load in the presence of a bleaching agent.",
 				"seeAlso": []
 			}
 		]
