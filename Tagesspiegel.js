@@ -108,9 +108,8 @@ function scrape(doc, url) {
 	// Tags
 	var tags = ZU.xpathText(doc, "//meta[@name='news_keywords']/@content");
 	if (tags) var tags= tags.split(","); // this seems to work even if there's no |
-	for (var i in tags) {
-		tags[i] = tags[i].replace(/^\s*|\s*$/g, ''); // remove whitespace around the tags
-		newItem.tags.push(tags[i]);
+	for (let tag of tags) {
+		newItem.tags.push(tag.trim());
 	}
 	newItem.publicationTitle = "Der Tagesspiegel Online";
 	newItem.language = "de-DE";
