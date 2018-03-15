@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-29 18:16:26"
+	"lastUpdated": "2018-03-15 10:24:57"
 }
 
 /*
@@ -87,6 +87,10 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		item.url = url;
+		// Delete generic abstract as "Información del artículo <title>"
+		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
+			delete item.abstractNote;
+		}
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
@@ -111,7 +115,6 @@ var testCases = [
 				],
 				"date": "2007",
 				"ISBN": "9788430945450",
-				"abstractNote": "Información del libro Libres, buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural",
 				"language": "spa",
 				"libraryCatalog": "dialnet.unirioja.es",
 				"publisher": "Tecnos",
@@ -123,9 +126,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Libres",
-					"Libro",
-					"buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
+					{
+						"tag": "Libres"
+					},
+					{
+						"tag": "Libro"
+					},
+					{
+						"tag": "buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
