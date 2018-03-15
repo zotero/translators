@@ -17,7 +17,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (text(doc, 'h2[class="articletitle"]>a')) {
+	if (getSearchResults(doc, true) {
 		return "multiple";
 	} else if (text(doc, 'h1[class="articletitle"]')) {
 		return "journalArticle";
