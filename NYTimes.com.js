@@ -2,14 +2,14 @@
 	"translatorID": "ce7a3727-d184-407f-ac12-52837f3361ff",
 	"label": "NYTimes.com",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/(alternate/)?|(select\\.|www\\.|\\.blogs\\.)?nytimes\\.com/)",
+	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/|(select\\.|www\\.|mobile\\.|[^\\/.]*\\.blogs\\.)?nytimes\\.com/)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-09 03:45:18"
+	"lastUpdated": "2018-03-11 13:49:31"
 }
 
 /*
@@ -35,8 +35,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text()
-function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.getAttribute(attr):null}var elem=doc.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(doc,selector,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.textContent:null}var elem=doc.querySelector(selector);return elem?elem.textContent:null}
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 function detectWeb(doc, url) {
 	//we use another function name to avoid confusions with the
@@ -84,31 +85,34 @@ function scrape(doc, url) {
 			item.ISSN = "0362-4331";
 		}
 		//Multiple authors are just put into the same Metadata field
-		var authors = attr(doc,'meta[name="author"]','content') || text(doc, 'span[class^="Byline-bylineAuthor--"]');
+		var authors = attr(doc,'meta[name="author"]','content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
 		if (authors) {
 			if (authors == authors.toUpperCase()) // convert to title case if all caps
 				authors = ZU.capitalizeTitle(authors, true);
 			item.creators = [];
 			var authorsList = authors.split(/,|\band\b/);
-			for (var i=0; i<authorsList.length; i++) {
+			for (let i=0; i<authorsList.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 			}
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
+		if (item.url && item.url.substr(0,2)=="//") {
+			item.url = "https:" + item.url;
+		}
 		item.libraryCatalog = "NYTimes.com";
 		// Convert all caps title of NYT archive pages to title case
 		if (item.title == item.title.toUpperCase())
 				item.title = ZU.capitalizeTitle(item.title, true);
 		// Only force all caps to title case when all tags are all caps
 		var allcaps = true;
-		for (i=0; i < item.tags.length; i++) {
+		for (let i=0; i < item.tags.length; i++) {
 			if (item.tags[i] != item.tags[i].toUpperCase()) {
 				allcaps = false;
 				break;
 			}
 		}
 		if (allcaps) {
-			for (i=0; i < item.tags.length; i++) {
+			for (let i=0; i < item.tags.length; i++) {
 				item.tags[i] = ZU.capitalizeTitle(item.tags[i], true);
 			}
 		}
@@ -153,7 +157,7 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '(//div[@id="search_results"]|//div[@id="searchResults"]|//div[@id="srchContent"])//li');
+	var rows = ZU.xpath(doc, '(//div[@id="^"]|//div[@id="searchResults"]|//div[@id="srchContent"])//li');
 	for (var i=0; i<rows.length; i++) {
 		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -505,6 +509,61 @@ var testCases = [
 					"Mondelez International Inc",
 					"Oreo",
 					"Social Media"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mobile.nytimes.com/2018/01/11/opinion/social-media-dumber-steven-pinker.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Opinion | Social Media Is Making Us Dumber. Here’s Exhibit A.",
+				"creators": [
+					{
+						"firstName": "Jesse",
+						"lastName": "Singal",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-01-11",
+				"ISSN": "0362-4331",
+				"abstractNote": "Steven Pinker is a liberal, Jewish professor. But social media convinced people that he’s a darling of the alt-right.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "Opinion",
+				"url": "https://www.nytimes.com/2018/01/11/opinion/social-media-dumber-steven-pinker.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Anti-Semitism"
+					},
+					{
+						"tag": "Fringe Groups and Movements"
+					},
+					{
+						"tag": "Harvard University"
+					},
+					{
+						"tag": "Jews and Judaism"
+					},
+					{
+						"tag": "Pinker, Steven"
+					},
+					{
+						"tag": "Social Media"
+					},
+					{
+						"tag": "Twitter"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

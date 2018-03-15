@@ -106,7 +106,7 @@ badLicense () {
 }
 
 invalidJSON () {
-    jsonerror=$(sed -ne  '1,/^}/p' "$TRANSLATOR" | jsonlint 2>&1)
+    jsonerror=$(sed -ne  '1,/^}/p' "$TRANSLATOR" | jshint --config="$SCRIPT_DIR"/jsonhintrc --reporter=unix -)
     if (( $? > 0 ));then
       err "Parse error in JSON metadata part"
       err "$jsonerror"
@@ -137,7 +137,7 @@ usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 [--skip-warn] <translator.js
 
 main() {
 
-    # Add './node_modules/.bin to PATH for jsonlint
+    # Add './node_modules/.bin to PATH for jshint
     PATH=$SCRIPT_DIR/node_modules/.bin:"$PATH"
 
     if [[ "$1" = "--skip-warn" ]];then
