@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-16 11:46:37"
+	"lastUpdated": "2018-03-16 12:14:19"
 }
 
 /*
@@ -126,6 +126,9 @@ function scrape(doc, url) {
 					);
 				}
 				break;
+			case 'Publisher:':
+				item.publisher = value;
+				break;
 			case 'URI:':
 				item.url = value;
 				break;
@@ -171,6 +174,7 @@ var testCases = [
 				],
 				"language": "English",
 				"libraryCatalog": "WHO",
+				"publisher": "Geneva : World Health Organization",
 				"url": "http://www.who.int/iris/handle/10665/70863",
 				"attachments": [],
 				"tags": [],
