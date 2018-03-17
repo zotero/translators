@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-22 15:27:05"
+	"lastUpdated": "2018-10-07 18:00:00"
 }
 
 /*
@@ -36,6 +36,11 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
@@ -157,12 +162,18 @@ function getPrefixes(doc) {
 	}
 }
 
-function getContentText(doc, name, strict) {
-	var xpath = '/x:html/x:head/x:meta[' +
-		(strict?'@name':
-			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
-		'="'+ name +'"]/';
-	return ZU.xpathText(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
+// Boolean Parameters (default values false)
+//   * strict = false: compare only ending substring, e.g. bepress
+//   * strict = true: compare exactly
+//   * all = false: return only first match
+//   * all = true: concatenate all values
+function getContentText(doc, name, strict, all) {
+	let csspath = 'html>head>meta[name' + (strict ? '="' : '$="') + name + '"]';
+	if (all) {
+		return Array.from(doc.querySelectorAll(csspath)).map(obj => obj.content || obj.contents).join(', ');
+	} else {
+		return attr(doc, csspath, 'content') || attr(doc, csspath, 'contents');
+	}
 }
 
 function getContent(doc, name, strict) {
@@ -186,7 +197,8 @@ function fixCase(authorName) {
 function processFields(doc, item, fieldMap, strict) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		var value = getContentText(doc, metaName, strict);
+		var allValues = (zoteroName == "ISSN" || zoteroName == "ISBN");
+		var value = getContentText(doc, metaName, strict, allValues);
 		if(value && value.trim()) {
 			item[zoteroName] = ZU.trimInternal(value);
 		}
@@ -481,9 +493,9 @@ function addHighwireMetadata(doc, newItem) {
 	}
 
 	//prefer ISSN over eISSN
-	var issn = getContentText(doc, 'citation_issn') ||
-			getContentText(doc, 'citation_ISSN') ||
-			getContentText(doc, 'citation_eIssn');
+	var issn = getContentText(doc, 'citation_issn', null, true) ||
+			getContentText(doc, 'citation_ISSN', null, true) ||
+			getContentText(doc, 'citation_eIssn', null, true);
 
 	if(issn) newItem.ISSN = issn;
 
@@ -1069,7 +1081,7 @@ var testCases = [
 				"DOI": "10.1590/S0034-89102007000900015",
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
-				"journalAbbreviation": "Rev. Saúde Pública, Rev. saúde pública",
+				"journalAbbreviation": "Rev. Saúde Pública",
 				"language": "pt",
 				"libraryCatalog": "scielosp.org",
 				"pages": "94-100",
@@ -1383,12 +1395,13 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "Signaling data from the cellular networks can provide a means of analyzing the efficiency of a deployed transportation system and assisting in the formulation of transport models to predict its fut ...",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 47 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
+				"proceedingsTitle": "DIVA",
 				"shortTitle": "Mobility modeling for transport efficiency",
-				"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2:766397",
+				"url": "http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
