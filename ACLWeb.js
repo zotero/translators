@@ -3,19 +3,19 @@
 	"label": "ACL",
 	"creator": "Nathan Schneider, Guy Aglionby",
 	"target": "^https?://(www\\.)?aclweb\\.org/anthology/[^#]+",
-	"minVersion": "3",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-06 13:32:50"
+	"lastUpdated": "2018-03-18 22:57:26"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Nathan Schneider, Guy Aglionby
+	Copyright © 2018 Guy Aglionby
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -36,7 +36,8 @@
 
 function detectWeb(doc, url) {
 	if (doc.contentType === 'application/pdf' || url.endsWith('.bib')) {
-		return 'conferencePaper';
+		let id = url.split('/').pop();
+		return id[0] == 'J' || id[0] == 'Q' ? 'journalArticle' : 'conferencePaper';
 	} else {
 		return 'multiple';
 	}
@@ -94,7 +95,7 @@ function extractFullProceedings(doc) {
 		return 'not(contains(., "' + title + '"))';
 	}).join(' and ');
 	
-	let baseXpath = '//div[@id="content"]/p[i[' + unwantedTitles + ']]/'
+	let baseXpath = '//div[@id="content"]/p[i[' + unwantedTitles + ']]/';
 	
 	let ids = ZU.xpath(doc, baseXpath + 'a[@href = concat(text(), ".pdf")]');
 	ids = ids.map(function(id) { return id.textContent });
@@ -110,10 +111,7 @@ function extractFullProceedings(doc) {
 	for (let i = 0; i < ids.length; i++) {
 		let articleAuthors = authors[i].split('; ');
 		let authorSurname = articleAuthors[0].split(' ').pop();
-		let etAl = '';
-		if (articleAuthors.length > 1) {
-			etAl = ' et al.';
-		}
+		let etAl = articleAuthors.length > 1 ? ' et al.' : '';
 		let author = authorSurname + etAl;
 		items[ids[i]] = ids[i] + ' (' + author + '): ' + titles[i];
 	}
@@ -140,11 +138,12 @@ function scrapeBibtex(responseString, bibtexURL) {
 }
 
 function scrapeProceedings(doc, id) {
-	let newItem = new Zotero.Item("conferencePaper");
+	let itemType = id[0] == 'J' || id[0] == 'Q' ? 'journalArticle' : 'conferencePaper';
+	let newItem = new Zotero.Item(itemType);
 	
 	let paragraphXpath = '//p[a[text()="' + id + '"]]/';
 	
-	let pdfURL = ZU.xpath(doc, paragraphXpath + 'a')[0].href;
+	let pdfURL = ZU.xpathText(doc, paragraphXpath + 'a[contains(@href, "pdf")]/@href');
 	newItem.attachments.push({
 		title: "Full Text PDF",
 		mimeType: "application/pdf",
@@ -155,9 +154,20 @@ function scrapeProceedings(doc, id) {
 	// one relevant to this paper ID.
 	// e.g. http://www.aclweb.org/anthology/Y/Y16/
 	let titles = ZU.xpath(doc, paragraphXpath + 'preceding-sibling::h1');
-	newItem.proceedingsTitle = titles[titles.length - 1].textContent;
 	
-	newItem.publisher = "Association for Computational Linguistics";
+	if (itemType == 'conferencePaper') {
+		newItem.proceedingsTitle = titles[titles.length - 1].textContent;
+		newItem.publisher = 'Association for Computational Linguistics';
+	} else {
+		let publicationName = id[0] == 'J' 
+			? 'Computational Linguistics'
+			: 'Transactions of the Association of Computational Linguistics';
+		newItem.publicationTitle = publicationName;
+		let journalInfo = titles[titles.length - 1].textContent;
+		newItem.volume = journalInfo.match(/Volume (\d)/)[1];
+		newItem.issue = journalInfo.match(/(Issue|Number) (\d)/)[2];
+	}
+	
 	newItem.url = constructProceedingsURL(id) + '/' + id;
 	
 	let titleElement = ZU.xpath(doc, paragraphXpath + 'i')[0];
