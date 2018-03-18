@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-11 10:44:00"
+	"lastUpdated": "2018-03-18 18:59:11"
 }
 
 /*
@@ -48,7 +48,7 @@ function doWeb(doc, url) {
 			metaArr[metaTags[i].getAttribute("property")] = metaTags[i].getAttribute("content");
 		}
 	}
-	newItem.title = ZU.xpathText(doc, "//h1[1]");
+	newItem.title = doc.getElementById("spotTitle").innerHTML;
 	newItem.url = metaArr["og:url"];
 	
 	/*
@@ -61,7 +61,7 @@ function doWeb(doc, url) {
 		newItem.title = tokens[0].trim();
 		// multiple authors are separated with semicolons
 		var authors = author.split("; ");
-		for (var i=0; i<authors.length; i++) {
+		for (i=0; i<authors.length; i++) {
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
 		}
 	}
@@ -89,30 +89,23 @@ function doWeb(doc, url) {
 		4. Page e.g. "Page 13"
 	*/
 	
-	var citation = doc.getElementById("printlocation").getElementsByTagName("a");
-	var publication = citation[0].innerHTML;
-	var start = publication.indexOf("(");
-	if (start>-1) {
-		newItem.publicationTitle = publication.substr(0, start-1);
-		newItem.place = publication.substr(start+1,publication.length-start-2);
-	}
-	else { // no location given
-		newItem.publicationTitle = publication;
-	}
-	
+	var citation = ZU.xpath(doc, "//h3[@class='source-info']//a");
+	newItem.publication = citation[0].innerText;
+	newItem.place = ZU.xpath(doc, "//span[@itemprop='location']")[0].innerText;
+
 	var date = citation[1].innerHTML;
 	newItem.date = ZU.strToISO(date);
-	//newItem.date = date.replace(/(.*)\,.*/, "$1"); // remove weekday from end of date
 
-	var p = citation[citation.length-1].innerHTML;
+	var p = citation[citation.length-1].innerText;
 	newItem.pages = p.substring(p.indexOf(" "));
 
 	if (citation.length > 3) {
-		newItem.edition = citation[2].innerHTML;
+		newItem.edition = citation[2].innerText;
 	}
 	
 	newItem.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -120,36 +113,32 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.newspapers.com/clip/7960447/my_day_eleanor_roosevelt/",
 		"items": [
-		   {
-			 "itemType": "newspaperArticle",
-			 "creators": [
-			   {
-				 "firstName": "Eleanor",
-				 "lastName": "Roosevelt",
-				 "creatorType": "author"
-			   }
-			 ],
-			 "notes": [],
-			 "tags": [],
-			 "seeAlso": [],
-			 "attachments": [
-			   {
-				 "title": "Image",
-				 "mimeType": "image/jpeg"
-			   }
-			 ],
-			 "title": "My Day",
-			 "url": "https://www.newspapers.com/clip/7960447/my_day_eleanor_roosevelt/",
-			 "publicationTitle": "The Akron Beacon Journal",
-                         "place": "Akron, Ohio",
-			 "date": "1939-10-30",
-			 "pages": "15",
-			 "edition": "Main Edition",
-			 "libraryCatalog": "newspapers.com",
-			 "accessDate": "CURRENT_TIMESTAMP"
-		   }
+			{
+				"itemType": "newspaperArticle",
+				"title": "My Day",
+				"creators": [
+					{
+						"firstName": "Eleanor",
+						"lastName": "Roosevelt",
+						"creatorType": "author"
+					}
+				],
+				"date": "1939-10-30",
+				"libraryCatalog": "newspapers.com",
+				"pages": "15",
+				"place": "Akron, Ohio",
+				"url": "https://www.newspapers.com/clip/7960447/my_day_eleanor_roosevelt/",
+				"attachments": [
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
 		]
 	}
 ]
 /** END TEST CASES **/
-
