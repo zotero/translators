@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-18 18:59:11"
+	"lastUpdated": "2018-03-18 22:31:58"
 }
 
 /*
@@ -90,7 +90,7 @@ function doWeb(doc, url) {
 	*/
 	
 	var citation = ZU.xpath(doc, "//h3[@class='source-info']//a");
-	newItem.publication = citation[0].innerText;
+	newItem.publicationTitle = citation[0].innerText;
 	newItem.place = ZU.xpath(doc, "//span[@itemprop='location']")[0].innerText;
 
 	var date = citation[1].innerHTML;
@@ -127,6 +127,7 @@ var testCases = [
 				"libraryCatalog": "newspapers.com",
 				"pages": "15",
 				"place": "Akron, Ohio",
+				"publicationTitle": "The Akron Beacon Journal",
 				"url": "https://www.newspapers.com/clip/7960447/my_day_eleanor_roosevelt/",
 				"attachments": [
 					{
