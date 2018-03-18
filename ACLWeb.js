@@ -1,15 +1,15 @@
 {
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
 	"label": "ACL",
-	"creator": "Nathan Schneider",
+	"creator": "Nathan Schneider, Yoav Goldberg",
 	"target": "^https?://(www[.])?aclweb\\.org/anthology/[^#]+",
-	"minVersion": "1.0.7",
+	"minVersion": "1.0.8",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2013-09-16 00:20:13"
+	"lastUpdated": "2015-09-09 09:12:23"
 }
 
 // based on ACM translator
@@ -23,11 +23,16 @@ function detectWeb(doc, url) {
 	if(doc.evaluate(bibXpath, doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext()) {
 	  return "multiple"
 	}
+	
   //commenting out single stuff
-  // if (url.indexOf("/anthology-new/J/")>-1)
-  //  return "journalArticle";
-  // else
-  //  return "conferencePaper";
+  if (url.indexOf("aclweb.org/anthology")>-1) {
+   if (url.indexOf("/anthology/J/")>-1)
+    return "journalArticle";
+   else if (url.indexOf("/anthology/Q/")>-1)
+    return "journalArticle";
+   else
+    return "conferencePaper";
+  }
 }
 
 
@@ -52,6 +57,10 @@ function scrapeIndex(doc, items) {
 			var bibFile = bibFileName.substring(0, bibFileName.length-4);
 
 			var bNodes = doc.evaluate('//a[@href="' + bibFileName + '"]/following-sibling::b[position()=1]', doc, null, XPathResult.ANY_TYPE, null);	// These nodes contain author information
+			var bTitles = doc.evaluate('//a[@href="' + bibFileName + '"]/following-sibling::i[position()=1]', doc, null, XPathResult.ANY_TYPE, null);	// These nodes contain title information
+			var title = bTitles.iterateNext();
+			if (title!=null)
+				title = title.innerHTML;
 
 			// Extract authors' last names
 			var authorLasts = new Array();
@@ -95,6 +104,7 @@ function scrapeIndex(doc, items) {
 			else
 				result += authorLasts[0] + "+";
 
+			if (title!=null) result = result + " :: " + title;
 			results.push(result);
 			bibFileNode = bibFileNodes.iterateNext();
 		}
@@ -129,7 +139,7 @@ function scrapeIndex(doc, items) {
 		attachments.push({title:authorsShort + " " + year + ".pdf", mimeType:"application/pdf", url:pdf});
 
 		var type = "";
-		if (pageurl.indexOf("/anthology-new/J/")>-1)
+		if (pageurl.indexOf("/anthology-new/J/")>-1 || pageurl.indexOf("/anthology/J/")>-1)
 			type = "journalArticle";
 		else
 			type = "conferencePaper";
@@ -138,6 +148,45 @@ function scrapeIndex(doc, items) {
 			callTranslator(bib, type, attachments);
 
 	}
+}
+
+function scrape(doc) {
+		var pageurl = doc.location.href;
+		if ((pageurl.lastIndexOf(".bib", pageurl.length - 4) === pageurl.length - 4) ||
+		    (pageurl.lastIndexOf(".pdf", pageurl.length - 4) === pageurl.length - 4) ||
+		    (pageurl.lastIndexOf(".") == -1)) // if it is a paper or a bib, just grab it.
+        {
+			var lastDot = pageurl.lastIndexOf(".");
+			var woExtension = pageurl.substring(0, lastDot);
+            if (lastDot == -1) { woExtension = pageurl; } // if doesn't end with either .bib or .pdf, try adding them.
+			var lastSlash = pageurl.lastIndexOf("/");
+			var dirInUrl = pageurl.substring(0, lastSlash+1);
+			var fileInUrl = pageurl.substring(lastSlash+1, pageurl.indexOf("#", lastSlash));
+			var bib = woExtension + ".bib";
+			var pdf = woExtension + ".pdf";
+			var j = woExtension.lastIndexOf("-");
+			var yearShort = woExtension.substring(j-2, j);
+			var year = "";
+			if (new Number(yearShort) < 50)
+				year = "20" + yearShort;
+			else
+				year = "19" + yearShort;
+	
+			var attachments = new Array();
+			attachments.push({title:pdf.substring(lastSlash+1, lastDot) + ".pdf", mimeType:"application/pdf", url:pdf});
+	
+			var type = "";
+			if (pageurl.indexOf("/anthology-new/J/")>-1 || pageurl.indexOf("/anthology/J/")>-1)
+				type = "journalArticle";
+            else if (pageurl.indexOf("/anthology-new/Q/")>-1 || pageurl.indexOf("/anthology/Q/")>-1)
+				type = "journalArticle";
+			else
+				type = "conferencePaper";
+			
+			//Zotero.debug(bib);
+			//Zotero.debug(pdf);
+			callTranslator(bib, type, attachments);
+	    }
 }
 
 function callTranslator(bibFileURL, type, attachments) {
@@ -153,13 +202,19 @@ function callTranslator(bibFileURL, type, attachments) {
 			item.repository = "Association for Computational Linguistics"
 			item.complete();
 		});
+		Zotero.debug("translating");
 		translator.translate();
 
 	});
 }
 
 function doWeb(doc, url) {
+
 	var searchResult = true;
+	if (url.lastIndexOf(".bib")>-1 || url.lastIndexOf(".pdf") > -1 || url.lastIndexOf(".") == -1) {
+		searchResult = false;
+			Zotero.debug(url);
+	}
 	if(searchResult) {
 		var possibleItems = scrapeIndex(doc, null);	// items to present to user
 		Zotero.selectItems(possibleItems, function (items) {
@@ -170,6 +225,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 	  //not implemented yet
+	  	Zotero.debug("scrape");
 		scrape(doc);
 	}
 }
