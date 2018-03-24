@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< Updated upstream
 	"lastUpdated": "2016-08-29 18:16:26"
+=======
+	"lastUpdated": "2018-03-24 00:07:52"
+>>>>>>> Stashed changes
 }
 
 /*
@@ -87,6 +91,33 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		item.url = url;
+<<<<<<< Updated upstream
+=======
+		// Delete generic abstract as "Información del artículo <title>"
+		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
+			delete item.abstractNote;
+		}
+		// in the case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3" 
+		var issue = ZU.xpathText(doc, '//*[@id="informacion"]/li[2]/span/a[2]');//.replace(/^Vol.\s\d*,\sNº.\s/, '').replace(/^Vol.\s/, '').replace(/^Nº.\s/, '');
+		if (issue) {
+			if (issue.match(/^Vol.\s\d*,\sNº.\s/)) {
+				issue = issue.replace(/^Vol.\s\d*,\sNº.\s/, '');
+				}
+			else if (issue.match(/^Vol.\s/)) {
+				issue = issue.replace(/^Vol.\s/, '');
+				}
+			else if (issue.match(/^Nº.\s/)) { 
+				issue = issue.replace(/^Nº.\s/, '');
+				}
+			else if (issue.match(/^Año\s\d*,\sNº.\s/)) { 
+				issue = issue.replace(/^Año\s\d*,\sNº.\s/, '');
+				}
+			}
+ 		item.issue = issue.replace(/,\s\d*/, '');
+ 		
+ 		if (item.tags);
+ 			delete item.tags;
+>>>>>>> Stashed changes
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
@@ -111,7 +142,10 @@ var testCases = [
 				],
 				"date": "2007",
 				"ISBN": "9788430945450",
+<<<<<<< Updated upstream
 				"abstractNote": "Información del libro Libres, buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural",
+=======
+>>>>>>> Stashed changes
 				"language": "spa",
 				"libraryCatalog": "dialnet.unirioja.es",
 				"publisher": "Tecnos",
@@ -123,9 +157,21 @@ var testCases = [
 					}
 				],
 				"tags": [
+<<<<<<< Updated upstream
 					"Libres",
 					"Libro",
 					"buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
+=======
+					{
+						"tag": "Libres"
+					},
+					{
+						"tag": "Libro"
+					},
+					{
+						"tag": "buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
+					}
+>>>>>>> Stashed changes
 				],
 				"notes": [],
 				"seeAlso": []
