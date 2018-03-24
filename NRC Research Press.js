@@ -9,28 +9,33 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcbv",
-	"lastUpdated": "2014-06-01 23:00:28"
+	"lastUpdated": "2016-05-24 13:18:11"
 }
 
-/*
-NRC Research Press
-Closely based on the ESA journals translator
-Copyright (C) 2013 Sebastian Karcher
+ /*
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	NRC Research Press
+	(Closely based on the ESA journals translator)
+	Copyright © 2013 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
-
 
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) return "journalArticle";
@@ -39,7 +44,7 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc) {
 	return ZU.xpath(doc,
-		'//div[@class="item-details clearfix" and div[p[a[contains(@href, "/doi/abs/")]]]]|\
+		'//div[@class="item-details clearfix"]//a[contains(@href, "/doi/abs/")]|\
 		//div[@class="art_title"]/a[contains(@href, "/doi/abs/")][1]');
 }
 
@@ -49,8 +54,8 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var rows = getSearchResults(doc);
 		for (var i=0, n=rows.length; i<n; i++) {
-			//Z.debug(ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href'))
-			items[ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/")][1]/@href')] = ZU.xpathText(rows[i], './h3');
+			//Z.debug(rows[i].href)
+			items[rows[i].href] = rows[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -86,6 +91,11 @@ function scrape(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
 			if (item.title === item.title.toUpperCase()){
 				item.title = ZU.capitalizeTitle(item.title.toLowerCase(), true);
+			}
+			for (var i = 0; i<item.creators.length; i++) {
+				if (item.creators[i].lastName === item.creators[i].lastName.toUpperCase()){
+					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
+				}
 			}
 			item.attachments = [{
 				document: doc,

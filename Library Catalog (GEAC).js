@@ -2,7 +2,7 @@
 	"translatorID": "c0e6fda6-0ecd-e4f4-39ca-37a4de436e15",
 	"label": "Library Catalog (GEAC)",
 	"creator": "Simon Kornblith",
-	"target": "/(?:GeacQUERY|GeacFETCH[\\:\\?].*[&:]next=html/(?:record\\.html|geacnffull\\.html))",
+	"target": "/(GeacQUERY|GeacFETCH[\\:\\?].*[&:]next=html/(record\\.html|geacnffull\\.html))",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 260,

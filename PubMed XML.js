@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-21 14:39:07"
+	"lastUpdated": "2015-10-17 05:38:38"
 }
 
 /*******************************
@@ -176,7 +176,11 @@ function doImport() {
 		for(var j=0, m=keywords.length; j<m; j++) {
 			newItem.tags.push(ZU.xpathText(keywords[j], 'DescriptorName'));
 		}
-		
+		//OT Terms
+		var otherKeywords = ZU.xpath(citation, 'KeywordList/Keyword');
+		for(var j=0, m=otherKeywords.length; j<m; j++) {
+			newItem.tags.push(otherKeywords[j].textContent);
+		}
 		var abstractSections = ZU.xpath(article, 'Abstract/AbstractText');
 		var abstractNote = [];
 		for(var j=0, m=abstractSections.length; j<m; j++) {
@@ -539,6 +543,134 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\"?>\n<!DOCTYPE PubmedArticleSet PUBLIC \"-//NLM//DTD PubMedArticle, 1st January 2015//EN\" \"http://www.ncbi.nlm.nih.gov/corehtml/query/DTD/pubmed_150101.dtd\">\n<PubmedArticleSet>\n\n<PubmedArticle>\n    <MedlineCitation Owner=\"NLM\" Status=\"In-Process\">\n        <PMID Version=\"1\">26074225</PMID>\n        <DateCreated>\n            <Year>2015</Year>\n            <Month>07</Month>\n            <Day>20</Day>\n        </DateCreated>\n        <Article PubModel=\"Print-Electronic\">\n            <Journal>\n                <ISSN IssnType=\"Electronic\">1525-3198</ISSN>\n                <JournalIssue CitedMedium=\"Internet\">\n                    <Volume>98</Volume>\n                    <Issue>8</Issue>\n                    <PubDate>\n                        <Year>2015</Year>\n                        <Month>Aug</Month>\n                    </PubDate>\n                </JournalIssue>\n                <Title>Journal of dairy science</Title>\n                <ISOAbbreviation>J. Dairy Sci.</ISOAbbreviation>\n            </Journal>\n            <ArticleTitle>Evaluation of testing strategies to identify infected animals at a single round of testing within dairy herds known to be infected with Mycobacterium avium ssp. paratuberculosis.</ArticleTitle>\n            <Pagination>\n                <MedlinePgn>5194-210</MedlinePgn>\n            </Pagination>\n            <ELocationID EIdType=\"doi\" ValidYN=\"Y\">10.3168/jds.2014-8211</ELocationID>\n            <ELocationID EIdType=\"pii\" ValidYN=\"Y\">S0022-0302(15)00395-1</ELocationID>\n            <Abstract>\n                <AbstractText>As part of a broader control strategy within herds known to be infected with Mycobacterium avium ssp. paratuberculosis (MAP), individual animal testing is generally conducted to identify infected animals for action, usually culling. Opportunities are now available to quantitatively compare different testing strategies (combinations of tests) in known infected herds. This study evaluates the effectiveness, cost, and cost-effectiveness of different testing strategies to identify infected animals at a single round of testing within dairy herds known to be MAP infected. A model was developed, taking account of both within-herd infection dynamics and test performance, to simulate the use of different tests at a single round of testing in a known infected herd. Model inputs included the number of animals at different stages of infection, the sensitivity and specificity of each test, and the costs of testing and culling. Testing strategies included either milk or serum ELISA alone or with fecal culture in series. Model outputs included effectiveness (detection fraction, the proportion of truly infected animals in the herd that are successfully detected by the testing strategy), cost, and cost-effectiveness (testing cost per true positive detected, total cost per true positive detected). Several assumptions were made: MAP was introduced with a single animal and no management interventions were implemented to limit within-herd transmission of MAP before this test. In medium herds, between 7 and 26% of infected animals are detected at a single round of testing, the former using the milk ELISA and fecal culture in series 5 yr after MAP introduction and the latter using fecal culture alone 15 yr after MAP introduction. The combined costs of testing and culling at a single round of testing increases with time since introduction of MAP infection, with culling costs being much greater than testing costs. The cost-effectiveness of testing varied by testing strategy. It was also greater at 5 yr, compared with 10 or 15 yr, since MAP introduction, highlighting the importance of early detection. Future work is needed to evaluate these testing strategies in subsequent rounds of testing as well as accounting for different herd dynamics and different levels of herd biocontainment.</AbstractText>\n                <CopyrightInformation>Copyright © 2015 American Dairy Science Association. Published by Elsevier Inc. All rights reserved.</CopyrightInformation>\n            </Abstract>\n            <AuthorList CompleteYN=\"Y\">\n                <Author ValidYN=\"Y\">\n                    <LastName>More</LastName>\n                    <ForeName>S J</ForeName>\n                    <Initials>SJ</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Centre for Veterinary Epidemiology and Risk Analysis, UCD School of Veterinary Medicine, University College Dublin, Belfield, Dublin 4, Ireland. Electronic address: simon.more@ucd.ie.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Cameron</LastName>\n                    <ForeName>A R</ForeName>\n                    <Initials>AR</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>AusVet Animal Health Services Pty Ltd., 69001 Lyon, France.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Strain</LastName>\n                    <ForeName>S</ForeName>\n                    <Initials>S</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Animal Health &amp; Welfare Northern Ireland, Dungannon BT71 7DX, Northern Ireland.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Cashman</LastName>\n                    <ForeName>W</ForeName>\n                    <Initials>W</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Riverstown Cross, Glanmire, Co. Cork, Ireland.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Ezanno</LastName>\n                    <ForeName>P</ForeName>\n                    <Initials>P</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>INRA, Oniris, LUNAM Université, UMR1300 Biologie, Epidémiologie et Analyse de Risque en Santé Animale, CS 40706, F-44307 Nantes, France.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Kenny</LastName>\n                    <ForeName>K</ForeName>\n                    <Initials>K</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Central Veterinary Research Laboratory, Department of Agriculture, Food and the Marine, Backweston, Cellbridge, Co. Kildare, Ireland.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Fourichon</LastName>\n                    <ForeName>C</ForeName>\n                    <Initials>C</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>INRA, Oniris, LUNAM Université, UMR1300 Biologie, Epidémiologie et Analyse de Risque en Santé Animale, CS 40706, F-44307 Nantes, France.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Graham</LastName>\n                    <ForeName>D</ForeName>\n                    <Initials>D</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Animal Health Ireland, Main Street, Carrick-on-Shannon, Co. Leitrim, Ireland.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n            </AuthorList>\n            <Language>eng</Language>\n            <PublicationTypeList>\n                <PublicationType UI=\"D016428\">Journal Article</PublicationType>\n                <PublicationType UI=\"D013485\">Research Support, Non-U.S. Gov't</PublicationType>\n            </PublicationTypeList>\n            <ArticleDate DateType=\"Electronic\">\n                <Year>2015</Year>\n                <Month>07</Month>\n                <Day>07</Day>\n            </ArticleDate>\n        </Article>\n        <MedlineJournalInfo>\n            <Country>United States</Country>\n            <MedlineTA>J Dairy Sci</MedlineTA>\n            <NlmUniqueID>2985126R</NlmUniqueID>\n            <ISSNLinking>0022-0302</ISSNLinking>\n        </MedlineJournalInfo>\n        <CitationSubset>IM</CitationSubset>\n        <KeywordList Owner=\"NOTNLM\">\n            <Keyword MajorTopicYN=\"N\">Johne’s disease</Keyword>\n            <Keyword MajorTopicYN=\"N\">control</Keyword>\n            <Keyword MajorTopicYN=\"N\">evaluation</Keyword>\n            <Keyword MajorTopicYN=\"N\">infected herd</Keyword>\n            <Keyword MajorTopicYN=\"N\">testing strategies</Keyword>\n        </KeywordList>\n    </MedlineCitation>\n    <PubmedData>\n        <History>\n            <PubMedPubDate PubStatus=\"received\">\n                <Year>2014</Year>\n                <Month>4</Month>\n                <Day>7</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"accepted\">\n                <Year>2015</Year>\n                <Month>4</Month>\n                <Day>24</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"aheadofprint\">\n                <Year>2015</Year>\n                <Month>7</Month>\n                <Day>7</Day>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"entrez\">\n                <Year>2015</Year>\n                <Month>6</Month>\n                <Day>16</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"pubmed\">\n                <Year>2015</Year>\n                <Month>6</Month>\n                <Day>16</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"medline\">\n                <Year>2015</Year>\n                <Month>6</Month>\n                <Day>16</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n        </History>\n        <PublicationStatus>ppublish</PublicationStatus>\n        <ArticleIdList>\n            <ArticleId IdType=\"pubmed\">26074225</ArticleId>\n            <ArticleId IdType=\"pii\">S0022-0302(15)00395-1</ArticleId>\n            <ArticleId IdType=\"doi\">10.3168/jds.2014-8211</ArticleId>\n        </ArticleIdList>\n    </PubmedData>\n</PubmedArticle>\n\n\n<PubmedArticle>\n    <MedlineCitation Status=\"Publisher\" Owner=\"NLM\">\n        <PMID Version=\"1\">26166904</PMID>\n        <DateCreated>\n            <Year>2015</Year>\n            <Month>7</Month>\n            <Day>13</Day>\n        </DateCreated>\n        <DateRevised>\n            <Year>2015</Year>\n            <Month>7</Month>\n            <Day>19</Day>\n        </DateRevised>\n        <Article PubModel=\"Print\">\n            <Journal>\n                <ISSN IssnType=\"Print\">0035-9254</ISSN>\n                <JournalIssue CitedMedium=\"Print\">\n                    <Volume>64</Volume>\n                    <Issue>4</Issue>\n                    <PubDate>\n                        <Year>2015</Year>\n                        <Month>Aug</Month>\n                        <Day>1</Day>\n                    </PubDate>\n                </JournalIssue>\n                <Title>Journal of the Royal Statistical Society. Series C, Applied statistics</Title>\n                <ISOAbbreviation>J R Stat Soc Ser C Appl Stat</ISOAbbreviation>\n            </Journal>\n            <ArticleTitle>Optimal retesting configurations for hierarchical group testing.</ArticleTitle>\n            <Pagination>\n                <MedlinePgn>693-710</MedlinePgn>\n            </Pagination>\n            <Abstract>\n                <AbstractText NlmCategory=\"UNASSIGNED\">Hierarchical group testing is widely used to test individuals for diseases. This testing procedure works by first amalgamating individual specimens into groups for testing. Groups testing negatively have their members declared negative. Groups testing positively are subsequently divided into smaller subgroups and are then retested to search for positive individuals. In our paper, we propose a new class of informative retesting procedures for hierarchical group testing that acknowledges heterogeneity among individuals. These procedures identify the optimal number of groups and their sizes at each testing stage in order to minimize the expected number of tests. We apply our proposals in two settings: 1) HIV testing programs that currently use three-stage hierarchical testing and 2) chlamydia and gonorrhea screening practices that currently use individual testing. For both applications, we show that substantial savings can be realized by our new procedures.</AbstractText>\n            </Abstract>\n            <AuthorList>\n                <Author>\n                    <LastName>Black</LastName>\n                    <ForeName>Michael S</ForeName>\n                    <Initials>MS</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Department of Mathematics, University of Wisconsin-Platteville, Platteville, WI 53818, USA, blackmi@uwplatt.edu.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author>\n                    <LastName>Bilder</LastName>\n                    <ForeName>Christopher R</ForeName>\n                    <Initials>CR</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Department of Statistics, University of Nebraska-Lincoln, Lincoln, NE 68583, USA.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author>\n                    <LastName>Tebbs</LastName>\n                    <ForeName>Joshua M</ForeName>\n                    <Initials>JM</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Department of Statistics, University of South Carolina, Columbia, SC 29208, USA, tebbs@stat.sc.edu.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n            </AuthorList>\n            <Language>ENG</Language>\n            <GrantList>\n                <Grant>\n                    <GrantID>R01 AI067373</GrantID>\n                    <Acronym>AI</Acronym>\n                    <Agency>NIAID NIH HHS</Agency>\n                    <Country>United States</Country>\n                </Grant>\n            </GrantList>\n            <PublicationTypeList>\n                <PublicationType UI=\"\">JOURNAL ARTICLE</PublicationType>\n            </PublicationTypeList>\n        </Article>\n        <MedlineJournalInfo>\n            <MedlineTA>J R Stat Soc Ser C Appl Stat</MedlineTA>\n            <NlmUniqueID>101086541</NlmUniqueID>\n            <ISSNLinking>0035-9254</ISSNLinking>\n        </MedlineJournalInfo>\n        <KeywordList Owner=\"NOTNLM\">\n            <Keyword MajorTopicYN=\"N\">Classification</Keyword>\n            <Keyword MajorTopicYN=\"N\">HIV</Keyword>\n            <Keyword MajorTopicYN=\"N\">Infertility Prevention Project</Keyword>\n            <Keyword MajorTopicYN=\"N\">Informative retesting</Keyword>\n            <Keyword MajorTopicYN=\"N\">Pooled testing</Keyword>\n            <Keyword MajorTopicYN=\"N\">Retesting</Keyword>\n        </KeywordList>\n    </MedlineCitation>\n    <PubmedData>\n        <History>\n            <PubMedPubDate PubStatus=\"entrez\">\n                <Year>2015</Year>\n                <Month>7</Month>\n                <Day>14</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"pubmed\">\n                <Year>2015</Year>\n                <Month>7</Month>\n                <Day>15</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"medline\">\n                <Year>2015</Year>\n                <Month>7</Month>\n                <Day>15</Day>\n                <Hour>6</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n            <PubMedPubDate PubStatus=\"pmc-release\">\n                <Year>2016</Year>\n                <Month>8</Month>\n                <Day>1</Day>\n                <Hour>0</Hour>\n                <Minute>0</Minute>\n            </PubMedPubDate>\n        </History>\n        <PublicationStatus>ppublish</PublicationStatus>\n        <ArticleIdList>\n            <ArticleId IdType=\"doi\">10.1111/rssc.12097</ArticleId>\n            <ArticleId IdType=\"pubmed\">26166904</ArticleId>\n            <ArticleId IdType=\"pmc\">PMC4495770</ArticleId>\n            <ArticleId IdType=\"mid\">NIHMS641826</ArticleId>\n        </ArticleIdList>\n        <?nihms?>\n    </PubmedData>\n</PubmedArticle>\n\n</PubmedArticleSet>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Evaluation of testing strategies to identify infected animals at a single round of testing within dairy herds known to be infected with Mycobacterium avium ssp. paratuberculosis",
+				"creators": [
+					{
+						"firstName": "S. J.",
+						"lastName": "More",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A. R.",
+						"lastName": "Cameron",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Strain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "W.",
+						"lastName": "Cashman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "P.",
+						"lastName": "Ezanno",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K.",
+						"lastName": "Kenny",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Fourichon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Graham",
+						"creatorType": "author"
+					}
+				],
+				"date": "Aug 2015",
+				"DOI": "10.3168/jds.2014-8211",
+				"ISSN": "1525-3198",
+				"abstractNote": "As part of a broader control strategy within herds known to be infected with Mycobacterium avium ssp. paratuberculosis (MAP), individual animal testing is generally conducted to identify infected animals for action, usually culling. Opportunities are now available to quantitatively compare different testing strategies (combinations of tests) in known infected herds. This study evaluates the effectiveness, cost, and cost-effectiveness of different testing strategies to identify infected animals at a single round of testing within dairy herds known to be MAP infected. A model was developed, taking account of both within-herd infection dynamics and test performance, to simulate the use of different tests at a single round of testing in a known infected herd. Model inputs included the number of animals at different stages of infection, the sensitivity and specificity of each test, and the costs of testing and culling. Testing strategies included either milk or serum ELISA alone or with fecal culture in series. Model outputs included effectiveness (detection fraction, the proportion of truly infected animals in the herd that are successfully detected by the testing strategy), cost, and cost-effectiveness (testing cost per true positive detected, total cost per true positive detected). Several assumptions were made: MAP was introduced with a single animal and no management interventions were implemented to limit within-herd transmission of MAP before this test. In medium herds, between 7 and 26% of infected animals are detected at a single round of testing, the former using the milk ELISA and fecal culture in series 5 yr after MAP introduction and the latter using fecal culture alone 15 yr after MAP introduction. The combined costs of testing and culling at a single round of testing increases with time since introduction of MAP infection, with culling costs being much greater than testing costs. The cost-effectiveness of testing varied by testing strategy. It was also greater at 5 yr, compared with 10 or 15 yr, since MAP introduction, highlighting the importance of early detection. Future work is needed to evaluate these testing strategies in subsequent rounds of testing as well as accounting for different herd dynamics and different levels of herd biocontainment.",
+				"extra": "PMID: 26074225",
+				"issue": "8",
+				"journalAbbreviation": "J. Dairy Sci.",
+				"language": "eng",
+				"pages": "5194-5210",
+				"publicationTitle": "Journal of Dairy Science",
+				"volume": "98",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Johne’s disease",
+					"control",
+					"evaluation",
+					"infected herd",
+					"testing strategies"
+				],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Optimal retesting configurations for hierarchical group testing",
+				"creators": [
+					{
+						"firstName": "Michael S.",
+						"lastName": "Black",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher R.",
+						"lastName": "Bilder",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joshua M.",
+						"lastName": "Tebbs",
+						"creatorType": "author"
+					}
+				],
+				"date": "Aug 1, 2015",
+				"DOI": "10.1111/rssc.12097",
+				"ISSN": "0035-9254",
+				"abstractNote": "Hierarchical group testing is widely used to test individuals for diseases. This testing procedure works by first amalgamating individual specimens into groups for testing. Groups testing negatively have their members declared negative. Groups testing positively are subsequently divided into smaller subgroups and are then retested to search for positive individuals. In our paper, we propose a new class of informative retesting procedures for hierarchical group testing that acknowledges heterogeneity among individuals. These procedures identify the optimal number of groups and their sizes at each testing stage in order to minimize the expected number of tests. We apply our proposals in two settings: 1) HIV testing programs that currently use three-stage hierarchical testing and 2) chlamydia and gonorrhea screening practices that currently use individual testing. For both applications, we show that substantial savings can be realized by our new procedures.",
+				"extra": "PMID: 26166904\nPMCID: PMC4495770",
+				"issue": "4",
+				"journalAbbreviation": "J R Stat Soc Ser C Appl Stat",
+				"language": "ENG",
+				"pages": "693-710",
+				"publicationTitle": "Journal of the Royal Statistical Society. Series C, Applied Statistics",
+				"volume": "64",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Classification",
+					"HIV",
+					"Infertility Prevention Project",
+					"Informative retesting",
+					"Pooled testing",
+					"Retesting"
+				],
 				"notes": [],
 				"seeAlso": []
 			}

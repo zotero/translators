@@ -117,7 +117,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Elo",
-						"firstName": "Irma",
+						"firstName": "Irma T.",
 						"creatorType": "author"
 					},
 					{

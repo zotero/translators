@@ -2,14 +2,14 @@
 	"translatorID": "d93c14fb-d327-4540-b60a-327309ea512b",
 	"label": "Journal of Electronic Publishing",
 	"creator": "Sebastian Karcher",
-	"target": "http://quod.lib.umich.edu/.*c=jep",
+	"target": "^https?://quod\\.lib\\.umich\\.edu/.*c=jep",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-05-08 23:17:32"
+	"lastUpdated": "2017-07-27 10:42:26"
 }
 
 /*
@@ -71,7 +71,7 @@ function doWeb(doc,url)
 		var issue = ZU.xpathText(doc, '//meta[@name="DC.citation.issue"]/@content')
 		var volume = ZU.xpathText(doc, '//meta[@name="DC.citation.volume"]/@content')
 		
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator("web");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function(obj, item) {
 				item.itemType = "journalArticle";
@@ -105,6 +105,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "The Upright Script: Words in Space and on the Page",
 				"creators": [
 					{
 						"firstName": "Amaranth",
@@ -112,24 +113,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011-10-03",
+				"DOI": "10.3998/3336451.0014.212",
+				"ISSN": "1080-2711",
+				"abstractNote": "This essay provides a critical analysis of the way pervasive data culture impacts the form of poetry and conceptions of authorship for those print and digital poets who let it enter their work. As depicted in popular media, the data cloud is a confusing and disordered space in which we lose all sense of privacy. However, a number of contemporary poets seek to get lost in this ether, reveling in the network of language that surrounds us. They do so in part because the very technologies that make such data visible in turn make the writer invisible, an authorial position more comfortable for poets of the networked age. Examined alongside the recent surge in interest in infosthetics, conceptual and digital poetry can be seen as embracing a “data poetics” attuned to the materiality of language.",
+				"issue": "2",
+				"libraryCatalog": "quod.lib.umich.edu",
+				"publicationTitle": "The Journal of Electronic Publishing",
+				"shortTitle": "The Upright Script",
+				"url": "http://dx.doi.org/10.3998/3336451.0014.212",
+				"volume": "14",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"ISSN": "1080-2711",
-				"url": "http://quod.lib.umich.edu/j/jep/3336451.0014.212?rgn=main;view=fulltext;q1=zotero",
-				"libraryCatalog": "quod.lib.umich.edu",
-				"issue": "2",
-				"abstractNote": "This essay provides a critical analysis of the way pervasive data culture impacts the form of poetry and conceptions of authorship for those print and digital poets who let it enter their work. As depicted in popular media, the data cloud is a confusing and disordered space in which we lose all sense of privacy. However, a number of contemporary poets seek to get lost in this ether, reveling in the network of language that surrounds us. They do so in part because the very technologies that make such data visible in turn make the writer invisible, an authorial position more comfortable for poets of the networked age. Examined alongside the recent surge in interest in infosthetics, conceptual and digital poetry can be seen as embracing a “data poetics” attuned to the materiality of language.",
-				"shortTitle": "The Upright Script",
-				"title": "The Upright Script: Words in Space and on the Page",
-				"date": "Fall 2011",
-				"volume": "14",
-				"publicationTitle": "The Journal of Electronic Publishing"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

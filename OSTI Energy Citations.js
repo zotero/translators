@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-31 22:43:59"
+	"lastUpdated": "2017-07-27 10:41:29"
 }
 
 /*
@@ -77,7 +77,7 @@ function doWeb(doc,url)
 		if (type && type.indexOf("Thesis")!=-1) itemtype = "thesis";
 		
 		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator("import");
+		var translator = Zotero.loadTranslator("web");
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setHandler("itemDone", function(obj, item) {
 				if (item.institution){
@@ -101,6 +101,7 @@ function doWeb(doc,url)
 				});
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -109,6 +110,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Phase Transition from Hadronic Matter to Quark Matter",
 				"creators": [
 					{
 						"firstName": "P.",
@@ -126,15 +128,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"physics of elementary particles and fields",
-					"nuclear matter",
-					"quark matter",
-					"quarks",
-					"superconductivity"
-				],
-				"seeAlso": [],
+				"date": "2007/04/01",
+				"DOI": "10.1103/PhysRevC.75.045202",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"institution": "Thomas Jefferson National Accelerator Facility, Newport",
+				"language": "English",
+				"libraryCatalog": "www.osti.gov",
+				"number": "JLAB-THY-06-545; DOE/ER/40150-4072",
+				"place": "News, VA",
+				"publicationTitle": "Phys.Rev.C",
+				"url": "http://www.osti.gov/scitech/biblio/893699",
+				"volume": "75",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -144,27 +148,25 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Phase Transition from Hadronic Matter to Quark Matter",
-				"date": "2007/04/01",
-				"publicationTitle": "Phys.Rev.C",
-				"volume": "75",
-				"institution": "Thomas Jefferson National Accelerator Facility, Newport",
-				"number": "JLAB-THY-06-545; DOE/ER/40150-4072",
-				"DOI": "10.1103/PhysRevC.75.045202",
-				"language": "English",
-				"url": "http://www.osti.gov/scitech/biblio/893699",
-				"libraryCatalog": "www.osti.gov",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"place": "News, VA"
+				"tags": [
+					"nuclear matter",
+					"physics of elementary particles and fields",
+					"quark matter",
+					"quarks",
+					"superconductivity"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://www.osti.gov/scitech/biblio/1084504",
+		"url": "https://www.osti.gov/scitech/biblio/1084504",
 		"items": [
 			{
 				"itemType": "report",
+				"title": "Superconductivity",
 				"creators": [
 					{
 						"firstName": "Boris A.",
@@ -172,12 +174,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"condensed matter physics",
-					"superconductivity & superfluidity(75)"
-				],
-				"seeAlso": [],
+				"date": "2013/06/19",
+				"institution": "Los Alamos National Laboratory (LANL)",
+				"language": "English",
+				"libraryCatalog": "www.osti.gov",
+				"reportNumber": "LA-UR-13-24526",
+				"url": "https://www.osti.gov/scitech/biblio/1084504",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -187,15 +189,12 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"title": "Superconductivity",
-				"date": "2013/06/19",
-				"institution": "Los Alamos National Laboratory (LANL)",
-				"number": "LA-UR-13-24526",
-				"DOI": "10.2172/1084504",
-				"language": "English",
-				"url": "http://www.osti.gov/scitech/biblio/1084504",
-				"libraryCatalog": "www.osti.gov",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [
+					"condensed matter physics",
+					"superconductivity & superfluidity(75)"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

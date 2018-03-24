@@ -13,21 +13,27 @@
 }
 
 /*
-Amicus Library Translator
-Copyright (C) 2011 Sebastian Karcher and CHNM
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Amicus Library Translator
+	Copyright ? 2011 Sebastian Karcher and CHNM
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -215,10 +221,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://collectionscanada.gc.ca/ourl/res.php?url_ver=Z39.88-2004&url_tim=2012-09-28T06%3A28%3A22Z&url_ctx_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Actx&rft_dat=10442013&rfr_id=info%3Asid%2Fcollectionscanada.gc.ca%3Aamicus&lang=eng",
+		"url": "http://amicus.collectionscanada.ca/aaweb-bin/aamain/itemdisp?sessionKey=999999999_142&l=0&d=2&v=0&lvl=1&itm=10442013",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Adam Smith (1723-1790): ein Werk und seine Wirkungsgeschichte",
 				"creators": [
 					{
 						"firstName": "Heinz-Dieter",
@@ -226,21 +233,20 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
+				"date": "1990",
+				"ISBN": "9783926570260",
+				"callNumber": "HB103.S6 A6223 1990",
+				"libraryCatalog": "Library Catalog (Amicus)",
+				"numPages": "297",
+				"place": "Marburg",
+				"publisher": "Metropolis",
+				"shortTitle": "Adam Smith (1723-1790)",
+				"attachments": [],
 				"tags": [
 					"Smith, Adam"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "3926570261",
-				"title": "Adam Smith (1723-1790): ein Werk und seine Wirkungsgeschichte",
-				"place": "Marburg",
-				"publisher": "Metropolis",
-				"date": "1990",
-				"numPages": "297",
-				"callNumber": "HB103.S6 A6223 1990",
-				"libraryCatalog": "Library Catalog (Amicus)",
-				"shortTitle": "Adam Smith (1723-1790)"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

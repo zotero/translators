@@ -2,7 +2,7 @@
 	"translatorID": "2dc0b23d-64d8-4933-b629-5c003451ccf7",
 	"label": "Légifrance",
 	"creator": "Guillaume Adreani",
-	"target": "^https?:\\/\\/(www.)?legifrance\\.gouv\\.fr/",
+	"target": "^https?://(www.)?legifrance\\.gouv\\.fr/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,

@@ -2,14 +2,14 @@
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"label": "Library Catalog (PICA)",
 	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
-	"target": "^https?://[^/]+(?:/[^/]+)?//?DB=\\d",
+	"target": "^https?://[^/]+(/[^/]+)?//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 248,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2014-09-25 15:49:46"
+	"lastUpdated": "2017-05-03 09:47:57"
 }
 
 function getSearchResults(doc) {
@@ -339,6 +339,7 @@ function scrape(doc, url) {
 			case 'year':
 			case 'jahr':
 			case 'jaar':
+			case 'date':
 				newItem.date = value; //we clean this up below
 				break;
 
@@ -354,6 +355,7 @@ function scrape(doc, url) {
 			case 'publisher':
 			case 'ort/jahr':
 			case 'uitgever':
+			case 'publication':
 				//ignore publisher for thesis, so that it does not overwrite university
 				if (newItem.itemType == 'thesis' && newItem.university) break;
 
@@ -1957,6 +1959,59 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<div><span>1, Notions générales et législation comparée, histoire, organisation compétence de la juridiction administrative. 2, Compétence (suite), marchés et autres contrats, dommages, responsabilité de l'état, traitements et pensions, contributions directes, élections, recours pour excés de pouvoir, interprétation, contraventions de grandes voirie</span></div>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=200278649",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Il brutto all'opera: l'emancipazione del negativo nel teatro di Giuseppe Verdi",
+				"creators": [
+					{
+						"firstName": "Gabriele",
+						"lastName": "Scaramuzza",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9788857515953",
+				"language": "italien",
+				"libraryCatalog": "Library Catalog - www.sudoc.abes.fr",
+				"numPages": "232",
+				"place": "Italie",
+				"shortTitle": "Il brutto all'opera",
+				"attachments": [
+					{
+						"title": "Worldcat Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Link to Library Catalog Entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Library Catalog Entry Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					"Laideur -- Dans l'opéra",
+					"ML410.V4. S36 2013",
+					"Opera -- 19th century",
+					"Ugliness in opera",
+					"Verdi, Giuseppe (1813-1901) -- Thèmes, motifs"
+				],
+				"notes": [
+					{
+						"note": "<div><span>Table des matières disponible en ligne (</span><span><a class=\"\n\t\t\tlink_gen\n\t\t    \" target=\"\" href=\"http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf\">http://catdir.loc.gov/catdir/toc/casalini11/13192019.pdf</a></span><span>)</span></div>"
 					}
 				],
 				"seeAlso": []

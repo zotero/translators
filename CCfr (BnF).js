@@ -2,7 +2,7 @@
 	"translatorID": "899d10f5-3f35-40e6-8dfb-f8ee2dfb1849",
 	"label": "CCfr (BnF)",
 	"creator": "Sylvain Machefert, Aurimas Vinckevicius",
-	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(?:action=search|menu=menu_view_grappage|search\\.jsp)\\b",
+	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(action=search|menu=menu_view_grappage|search\\.jsp)\\b",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,

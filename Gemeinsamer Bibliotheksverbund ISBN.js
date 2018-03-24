@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-04-16 18:45:00"
+	"lastUpdated": "2017-09-17 23:54:00"
 }
 
 /*
@@ -44,24 +44,36 @@ function doSearch(item) {
 	//search the ISBN over the SRU of the GBV, and take the result it as MARCXML
 	//documentation: https://www.gbv.de/wikis/cls/SRU
 	var url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
+	//Z.debug(url);
 	ZU.doGet(url, function (text) {
-		Z.debug(text);
+		//Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(text);
-		
 		translator.setHandler("itemDone", function (obj, item) {
-			// The url to the table of contents (scanned through DNB)
-			// can be contained in field 856 $3 and the url schema is unique:
-			// prefix (http://d-nb.info/) + id + suffix for toc (/04) 
-			var tocURL = text.match(/http:\/\/d-nb\.info\/.*\/04/);
-			if (tocURL) {
+			// Table of Contents = Inhaltsverzeichnis
+			/* e.g.
+			<datafield tag="856" ind1="4" ind2="2">
+			  <subfield code="u">http://d-nb.info/1054452857/04</subfield>
+			  <subfield code="m">DE-101</subfield>
+			  <subfield code="3">Inhaltsverzeichnis</subfield>
+			</datafield>
+			*/
+			var parser = new DOMParser();
+			var xml = parser.parseFromString(text, "application/xml");
+			var ns = {
+				"marc": "http://www.loc.gov/MARC21/slim"
+			};
+			var tocURL = ZU.xpath(xml, '//marc:datafield[@tag="856"][ marc:subfield[text()="Inhaltsverzeichnis"] ]/marc:subfield[@code="u"]', ns);
+			if (tocURL.length) {
+				//Z.debug(tocURL[0].textContent);
 				item.attachments = [{
-					url: tocURL[0],
+					url: tocURL[0].textContent,
 					title: "Table of Contents PDF",
 					mimeType: "application/pdf"
 				}];
 			}
+			
 			//delete [u.a.] from place
 			if (item.place) {
 				item.place = item.place.replace(/\[?u\.[\s\u00A0]?a\.\]?\s*$/, '');
@@ -70,6 +82,8 @@ function doSearch(item) {
 			item.callNumber = "";
 			//place the queried ISBN as the first ISBN in the list (dublicates will be removed later)
 			item.ISBN = queryISBN + " " + item.ISBN;
+			//delete German tags
+			item.tags = [];
 			item.complete();
 		});
 		translator.translate();
@@ -107,14 +121,7 @@ var testCases = [
 						"note": "Literaturangaben" 
 					}
 				],
-				"tags": [
-					"Aufsatzsammlung",
-					"Deutschland",
-					"Evaluation",
-					"Professionalisierung",
-					"Qualität",
-					"Österreich"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -124,13 +131,14 @@ var testCases = [
 				],
 				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
 				"place": "Münster",
-				"ISBN": "9783830931492 3830931492 9783830931492",
+				"ISBN": "9783830931492",
 				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
 				"publisher": "Waxmann",
 				"date": "2014",
 				"numPages": "219",
 				"language": "ger",
-				"shortTitle": "Evaluation in Deutschland und Österreich"
+				"shortTitle": "Evaluation in Deutschland und Österreich",
+				"extra": "OCLC: 885612607"
 			}
 		]
 	},
@@ -154,21 +162,10 @@ var testCases = [
 						"note": "Literaturverz. S. [373] - 387 Die CD-ROM enth. einen Anh. mit Dokumenten zur Sprachproduktion und Sprachbewertung"
 					},
 					{
-						"note": "Univ., FB SLM, Diss. u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit--Hamburg, 2011"
+						"note": "Teilw. zugl.: Hamburg, Univ., FB SLM, Diss., 2011 u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit"
 					}
 				],
-				"tags": [
-					"CD-ROM",
-					"Deutsch",
-					"Deutsch",
-					"Hochschulschrift",
-					"Russisch",
-					"Russisch",
-					"Wortschatz",
-					"Wortschatz",
-					"Zweisprachigkeit",
-					"Zweisprachigkeit"
-				],
+				"tags": [],
 				"seeAlso": [],
 				"attachments": [
 					{
@@ -176,7 +173,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"ISBN": "3866882408 9783866882409 9783866882416",
+				"ISBN": "9783866882409 9783866882416",
 				"language": "ger",
 				"place": "München",
 				"numPages": "387",
@@ -186,7 +183,87 @@ var testCases = [
 				"shortTitle": "Bilinguale Lexik",
 				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
 				"publisher": "Sagner",
-				"date": "2012"
+				"date": "2012",
+				"extra": "OCLC: 795769702"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "978-1-4073-0412-0"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The harbour of Sebastos (Caesarea Maritima) in its Roman Mediterranean context",
+				"creators": [
+					 {
+						"firstName": "Avnēr",
+						"lastName": "Rabbān",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michal",
+						"lastName": "Artzy",
+						"creatorType": "author" 
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+					} 
+				],
+				"ISBN": "9781407304120",
+				"language": "eng",
+				"place": "Oxford",
+				"numPages": "222",
+				"series": "BAR International series",
+				"seriesNumber": "1930",
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"publisher": "Archaeopress" ,
+				"date": "2009",
+				"extra": "OCLC: 320755805"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "978-1-4912-5316-8"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Classroom activities for the busy teacher: EV3: A 10 week plan for teaching robotics using the LEGO Education EV3 Core Set (45544)",
+				"creators": [
+					{
+						"firstName": "Damien",
+						"lastName": "Kee",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [
+					{
+						"note": "Place of publication information from back of book. Publisher information provided by Amazon"
+					}
+				],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"ISBN": "978-1-4912-5316-8",
+				"language": "eng",
+				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
+				"place": "Lexington, KY",
+				"numPages": "93",
+				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"publisher": "CreateSpace" ,
+				"date": "2013",
+				"extra": "OCLC: 860902984"
 			}
 		]
 	}

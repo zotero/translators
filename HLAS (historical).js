@@ -90,6 +90,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Peronism and the three Perons: a checklist of material on peronism and on Juan Domingo, Eva, and Isabel Peron, and their writings, in the Hoover Institution library and archives and in the Stanford University Libraries",
 				"creators": [
 					{
 						"firstName": "Laszlo",
@@ -98,44 +99,44 @@ var testCases = [
 					},
 					{
 						"lastName": "Hoover Institution on War, Revolution, and Peace",
+						"creatorType": "contributor",
 						"fieldMode": true
 					},
 					{
 						"lastName": "Stanford University",
+						"creatorType": "contributor",
 						"fieldMode": true
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Perón, Juan Domingo",
-					"Bibliography Catalogs",
-					"Perón, Eva",
-					"Bibliography Catalogs",
-					"Perón, Isabel",
-					"Bibliography Catalogs",
-					"Peronism",
-					"Bibliography Catalogs",
-					"Peronism",
-					"Manuscripts Catalogs",
-					"Peronism",
-					"Sources Bibliography Catalogs",
-					"Argentina",
-					"History Bibliography Catalogs",
-					"1943-"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "0817927123",
-				"title": "Peronism and the three Perons: a checklist of material on peronism and on Juan Domingo, Eva, and Isabel Peron, and their writings, in the Hoover Institution library and archives and in the Stanford University Libraries",
-				"place": "Stanford, CA",
-				"publisher": "Hoover Institution, Stanford University",
 				"date": "1988",
-				"numPages": "170",
-				"series": "Hoover Press bibliography",
-				"seriesNumber": "71",
+				"ISBN": "9780817927127",
 				"callNumber": "Z1630.3 F2849 .H67 1988",
 				"libraryCatalog": "HLAS (historical)",
-				"shortTitle": "Peronism and the three Perons"
+				"numPages": "170",
+				"place": "Stanford, CA",
+				"publisher": "Hoover Institution, Stanford University",
+				"series": "Hoover Press bibliography",
+				"seriesNumber": "71",
+				"shortTitle": "Peronism and the three Perons",
+				"attachments": [],
+				"tags": [
+					"1943-",
+					"Argentina",
+					"Bibliography Catalogs",
+					"Catalogs",
+					"History Bibliography Catalogs",
+					"Hoover Institution on War, Revolution, and Peace",
+					"Libraries",
+					"Manuscripts Catalogs",
+					"Peronism",
+					"Perón, Eva",
+					"Perón, Isabel",
+					"Perón, Juan Domingo",
+					"Sources Bibliography Catalogs",
+					"Stanford University"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

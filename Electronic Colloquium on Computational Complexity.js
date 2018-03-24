@@ -2,19 +2,19 @@
 	"translatorID": "09a9599e-c20e-a405-d10d-35ad4130a426",
 	"label": "Electronic Colloquium on Computational Complexity",
 	"creator": "Jonas Schrieb",
-	"target": "^https?://(www\\.)?eccc\\.(uni-trier|hpi-web)\\.de/",
+	"target": "^https?://eccc\\.weizmann\\.ac\\.il/",
 	"minVersion": "1.0.0b3.r1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-03 17:35:30"
+	"lastUpdated": "2017-01-05 17:11:41"
 }
 
 function detectWeb(doc, url) {
-	var singleRe   = /^https?:\/\/(www\.)?eccc\.(uni-trier|hpi-web)\.de\/report\/\d{4}\/\d{3}/;
-	var multipleRe = /^https?:\/\/(www\.)?eccc\.(uni-trier|hpi-web)\.de\/(title|year|keyword)\//;
+	var singleRe   = /^https?:\/\/eccc\.weizmann\.ac\.il\/report\/\d{4}\/\d{3}/;
+	var multipleRe = /^https?:\/\/eccc\.weizmann\.ac\.il\/(title|year|keyword)\//;
 	if(singleRe.test(url)) {
 		return "report";
 	} else if(multipleRe.test(url)) {
@@ -107,7 +107,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://eccc.hpi-web.de/report/2006/067/",
+		"url": "https://eccc.weizmann.ac.il/report/2006/067/",
 		"items": [
 			{
 				"itemType": "report",
@@ -138,19 +138,19 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-						"url": "http://eccc.hpi-web.de/report/2006/067/",
+						"url": "https://eccc.weizmann.ac.il/report/2006/067/",
 						"title": "ECCC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://eccc.hpi-web.de/report/2006/067/download",
+						"url": "https://eccc.weizmann.ac.il/report/2006/067/download",
 						"title": "ECCC Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
 				"date": "2006",
 				"reportNumber": "067",
-				"url": "http://eccc.hpi-web.de/report/2006/067/",
+				"url": "https://eccc.weizmann.ac.il/report/2006/067/",
 				"title": "On the Impact of Combinatorial Structure on Congestion Games",
 				"abstractNote": "",
 				"libraryCatalog": "Electronic Colloquium on Computational Complexity",
@@ -160,7 +160,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://eccc.hpi-web.de/keyword/13486/",
+		"url": "https://eccc.weizmann.ac.il/keyword/13486/",
 		"items": "multiple"
 	}
 ]

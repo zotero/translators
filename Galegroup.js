@@ -2,14 +2,14 @@
 	"translatorID": "4ea89035-3dc4-4ae3-b22d-726bc0d83a64",
 	"label": "Galegroup",
 	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
-	"target": "https?://(find|go)\\.galegroup\\.com",
+	"target": "^https?://(find|go)\\.galegroup\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-09-26 22:55:11"
+	"lastUpdated": "2017-01-01 15:20:39"
 }
 
 /*

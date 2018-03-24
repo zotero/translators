@@ -2,14 +2,14 @@
 	"translatorID": "5e684d82-73a3-9a34-095f-19b112d77bbe",
 	"label": "Digital Medievalist",
 	"creator": "Fred Gibbs, Sebastian Karcher",
-	"target": "^https?://digitalmedievalist\\.org/(index\\.html)?($|journal/?$|(journal/[3-9]))",
+	"target": "^https?://(www\\.)?digitalmedievalist\\.org/(index\\.html)?($|journal/?$|(journal/\\d+))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-12 00:24:31"
+	"lastUpdated": "2016-12-17 02:55:59"
 }
 
 function detectWeb(doc, url) {
