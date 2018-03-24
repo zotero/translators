@@ -1,6 +1,6 @@
 {
 	"translatorID": "f4a5876a-3e53-40e2-9032-d99a30d7a6fc",
-	"label": "ACL",
+	"label": "ACLWeb",
 	"creator": "Nathan Schneider, Guy Aglionby",
 	"target": "^https?://(www\\.)?aclweb\\.org/anthology/[^#]+",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-18 22:57:26"
+	"lastUpdated": "2018-03-24 09:47:15"
 }
 
 /*
@@ -98,13 +98,13 @@ function extractFullProceedings(doc) {
 	let baseXpath = '//div[@id="content"]/p[i[' + unwantedTitles + ']]/';
 	
 	let ids = ZU.xpath(doc, baseXpath + 'a[@href = concat(text(), ".pdf")]');
-	ids = ids.map(function(id) { return id.textContent });
+	ids = ids.map(function(id) { return id.textContent; });
 	
 	let authors = ZU.xpath(doc, baseXpath + 'b');
-	authors = authors.map(function(author) { return author.textContent });
+	authors = authors.map(function(author) { return author.textContent; });
 	
 	let titles = ZU.xpath(doc, baseXpath + 'i');
-	titles = titles.map(function(title) { return title.textContent });
+	titles = titles.map(function(title) { return title.textContent; });
 	
 	let items = {};
 
@@ -164,8 +164,10 @@ function scrapeProceedings(doc, id) {
 			: 'Transactions of the Association of Computational Linguistics';
 		newItem.publicationTitle = publicationName;
 		let journalInfo = titles[titles.length - 1].textContent;
-		newItem.volume = journalInfo.match(/Volume (\d)/)[1];
-		newItem.issue = journalInfo.match(/(Issue|Number) (\d)/)[2];
+		let matchVolume = journalInfo.match(/Volume (\d)/);
+		if (matchVolume) newItem.volume = matchVolume[1];
+		let matchIssue = journalInfo.match(/(Issue|Number) (\d)/);
+		if (matchIssue) newItem.issue = matchIssue[2];
 	}
 	
 	newItem.url = constructProceedingsURL(id) + '/' + id;
