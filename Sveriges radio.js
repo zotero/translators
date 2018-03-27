@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-28 13:17:24"
+	"lastUpdated": "2018-03-27 08:08:42"
 }
 
 /*
@@ -41,9 +41,9 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/sida/artikel')) {
+	if (url.indexOf('/sida/artikel') >= 0) {
 		return "newspaperArticle";
-	} else if (url.includes('/sida/sok') && getSearchResults(doc, true)) {
+	} else if (url.indexOf('/sida/sok') >= 0 && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -349,7 +349,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-02-26",
-				"abstractNote": "A Siberian cold front has brought Sweden unusually cold temperatures for late February. It was -42 degrees C when Kristina Lindqvist left home for her ...",
+				"abstractNote": "A Siberian cold front has brought Sweden unusually cold temperatures for late February. It was -42C when Kristina Lindqvist left home for her job at the ...",
 				"language": "en",
 				"libraryCatalog": "sverigesradio.se",
 				"publicationTitle": "Sveriges Radio",
