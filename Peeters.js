@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-27 10:22:34"
+	"lastUpdated": "2018-03-27 13:51:30"
 }
 
 /*
@@ -95,7 +95,7 @@ function getValue(nodes) {
 			value += part.textContent.trim();
 		}
 	}
-	return value;
+	return value.replace(/\<i\>/g, '').replace(/\<\/i\>/g, '');
 }
 
 
@@ -134,7 +134,7 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
-	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
+	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()|//b[contains(text(), "Abstract :")]/following::i', '', '');
 	
 	item.attachments.push({
 		url: url,
@@ -574,6 +574,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://poj.peeters-leuven.be/content.php?url=issue&journal_code=BYZ&issue=0&vol=87",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
