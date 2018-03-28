@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-24 00:33:54"
+	"lastUpdated": "2018-03-28 21:36:40"
 }
 
 /*
@@ -93,22 +93,12 @@ function scrape(doc, url) {
 		}
 		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3" 
 		// clean issue number in case of multiple download
-		var issue = ZU.xpathText(doc, '//*[@id="informacion"]/li[2]/span/a[2]');//.replace(/^Vol.\s\d*,\sNº.\s/, '').replace(/^Vol.\s/, '').replace(/^Nº.\s/, '');
+		var issue = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(text(), "Nº.")]');
 		if (issue) {
-			if (issue.match(/^Vol.\s\d*,\sNº.\s/)) {
-				issue = issue.replace(/^Vol.\s\d*,\sNº.\s/, '');
-				}
-			else if (issue.match(/^Vol.\s/)) {
-				issue = issue.replace(/^Vol.\s/, '');
-				}
-			else if (issue.match(/^Nº.\s/)) { 
-				issue = issue.replace(/^Nº.\s/, '');
-				}
-			else if (issue.match(/^Año\s\d*,\sNº.\s/)) { 
-				issue = issue.replace(/^Año\s\d*,\sNº.\s/, '');
-				}
-			}
- 		item.issue = issue.replace(/,\s\d*/, '');
+			// e.g. Vol. 89, Nº. 3-4, 2012
+			item.issue = issue.split('Nº.')[1].split(',')[0];
+		}
+ 		
  		// Delete generic keywords
  		if (item.tags);
  			delete item.tags;
@@ -144,17 +134,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Libres"
-					},
-					{
-						"tag": "Libro"
-					},
-					{
-						"tag": "buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
 					}
 				],
 				"notes": [],
@@ -200,11 +179,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Ciencias sociales",
-					"Grupo D",
-					"Sociología. Población. Trabajo social"
-				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -219,6 +193,39 @@ var testCases = [
 		"type": "web",
 		"url": "https://dialnet.unirioja.es/ejemplar/381860",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dialnet.unirioja.es/servlet/articulo?codigo=4251373",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Secularisation as a challenge for a contemporary order theology International Theological Symposium as part of the research project \"Transmission of Faith in social and Religious Transformation Processes\".",
+				"creators": [
+					{
+						"firstName": "Ulrich",
+						"lastName": "Engel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISSN": "1123-5772",
+				"issue": "3-4",
+				"language": "mul",
+				"libraryCatalog": "dialnet.unirioja.es",
+				"pages": "659-666",
+				"publicationTitle": "Angelicum",
+				"url": "https://dialnet.unirioja.es/servlet/articulo?codigo=4251373",
+				"volume": "89",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
