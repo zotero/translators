@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-27 13:51:30"
+	"lastUpdated": "2018-03-28 20:52:23"
 }
 
 /*
@@ -89,13 +89,13 @@ function getValue(nodes) {
 	for (let part of nodes) {
 		if (part.tagName=="BR" || part.tagName=="B") break;
 		value += ' ';
-		if (part.tagName) {
+		if (part.tagName=="I") {
 			value += part.outerHTML;
 		} else {
 			value += part.textContent.trim();
 		}
 	}
-	return value.replace(/\<i\>/g, '').replace(/\<\/i\>/g, '');
+	return value.trim();
 }
 
 
@@ -310,7 +310,7 @@ var testCases = [
 				],
 				"date": "March 1994",
 				"DOI": "10.2143/EP.1.1.630100",
-				"abstractNote": "Today, applied ethics confronts many problems: technological and biomedical innovations, crisis of the welfare state, rising unemployment, migration and xenophobia. These and the changes accompanying them are, in themselves, important objects of study.",
+				"abstractNote": "Today, applied ethics confronts many problems: technological and biomedical innovations, crisis of the welfare state, rising unemployment, migration and xenophobia. These and the changes accompanying them are, in themselves, important objects of study. \n\nAn investigation on the level of the differentiated disciplines of practical ethics is insufficient. In as far as practical ethics also serves to disclose reality, it shows that modern problems can only be understood in the light of the general cultural crisis of which they are, at the very least, symptoms. In the first part of this article, we will try to clarify this byanalyzing the crisis in the ethos of modern secularized society. The second part will try to show that Christian ethics can offer a meaningful answer to this cultural crisis, and how it can do so.",
 				"issue": "1",
 				"libraryCatalog": "Peeters",
 				"pages": "3-12",
@@ -524,6 +524,7 @@ var testCases = [
 				],
 				"date": "July 1996",
 				"DOI": "10.2143/EP.3.2.563038",
+				"abstractNote": "Umuntu ngumuntu ngabantu is the Zulu version of a traditional African aphorism. Although with considerable loss of culture-specific meaning, it can be translated as: 'A human being is a human being through (the otherness of) other human beings.' Still, its meaning can be interpreted in various ways of which I would like to highlight only two, in accordance with the grammar of the central concept 'Ubuntu' which denotes both a state of being and one of becoming.",
 				"issue": "2",
 				"libraryCatalog": "Peeters",
 				"pages": "76-90",
@@ -557,7 +558,7 @@ var testCases = [
 				],
 				"date": "2017",
 				"DOI": "10.2143/BYZ.87.0.3256900",
-				"abstractNote": "The paper presents the first ever edition of the first half (chapters 1-28) of the long",
+				"abstractNote": "The paper presents the first ever edition of the first half (chapters 1-28) of the long Life of St John Chrysostom by Nicetas David the Paphlagonian, composed in all probability in the second quarter of the tenth century. This is an important text for a number of reasons, as explained in detail in my introduction to the Life published in Byz, 86 (2016), pp. 1-51. The critical edition is preceded by a study of the unique manuscript and an exposition of the peculiarities of the author’s language as well as of the editorial principles.",
 				"libraryCatalog": "Peeters",
 				"pages": "1-67",
 				"publicationTitle": "Byzantion",
