@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-15 10:24:57"
+	"lastUpdated": "2018-03-24 00:33:54"
 }
 
 /*
@@ -91,6 +91,27 @@ function scrape(doc, url) {
 		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
 			delete item.abstractNote;
 		}
+		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3" 
+		// clean issue number in case of multiple download
+		var issue = ZU.xpathText(doc, '//*[@id="informacion"]/li[2]/span/a[2]');//.replace(/^Vol.\s\d*,\sNº.\s/, '').replace(/^Vol.\s/, '').replace(/^Nº.\s/, '');
+		if (issue) {
+			if (issue.match(/^Vol.\s\d*,\sNº.\s/)) {
+				issue = issue.replace(/^Vol.\s\d*,\sNº.\s/, '');
+				}
+			else if (issue.match(/^Vol.\s/)) {
+				issue = issue.replace(/^Vol.\s/, '');
+				}
+			else if (issue.match(/^Nº.\s/)) { 
+				issue = issue.replace(/^Nº.\s/, '');
+				}
+			else if (issue.match(/^Año\s\d*,\sNº.\s/)) { 
+				issue = issue.replace(/^Año\s\d*,\sNº.\s/, '');
+				}
+			}
+ 		item.issue = issue.replace(/,\s\d*/, '');
+ 		// Delete generic keywords
+ 		if (item.tags);
+ 			delete item.tags;
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
