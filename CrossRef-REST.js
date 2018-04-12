@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-09-01 20:00:01"
+	"lastUpdated": "2018-04-11 10:00:01"
 }
 
 // Based on CrossRef.js (by Simon Kornblith), which uses OpenURL API
@@ -199,7 +199,9 @@ function processCrossRef(json) {
 					item.title += ': ' + result.subtitle[0];
 				}
 			}
-			item.title = item.title;
+			item.title = item.title.replace(/<!\[CDATA\[/g, '');
+			item.title = item.title.replace(/\]\]>/g, '');
+			item.title = item.title.replace(/<[a-zA-Z\/].*?>/g, '');
 		}
 		
 		//check if there are potential issues with character encoding and try to fix it
