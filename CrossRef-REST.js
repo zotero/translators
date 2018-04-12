@@ -222,18 +222,16 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	let query = null;
-	if (item.DOI) {
-		query = '?filter=doi:' + ZU.cleanDOI(item.DOI.toString());
-	}
-	else if (item.title) {
-		query = '?query.title=' + encodeURIComponent(item.title);
-		if (item.author) {
-			query += '&query.author=' + encodeURIComponent(item.author);
-		}
+	// if (item.DOI) {
+	// 	query = '?filter=doi:' + ZU.cleanDOI(item.DOI.toString());
+	// }
+	// else
+	if (item.query) {
+		query = '?query.bibliographic=' + encodeURIComponent(item.query);
 	}
 	else return;
 	
-	query += '&rows=5';
+	query += '&rows=50';
 	
 	ZU.doGet('http://api.crossref.org/works/' + query, function (responseText) {
 		processCrossRef(responseText);
