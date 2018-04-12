@@ -219,7 +219,7 @@ function processCrossRef(json) {
 }
 
 function detectSearch(item) {
-	return (item.DOI || item.title);
+	return false;
 }
 
 function doSearch(item) {
