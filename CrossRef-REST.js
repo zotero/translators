@@ -179,10 +179,10 @@ function processCrossRef(json) {
 			// add DOI to extra for unsupprted items
 			else {
 				if (item.extra) {
-					item.extra += '\nDOI: ' + item.DOI;
+					item.extra += '\nDOI: ' + result.DOI;
 				}
 				else {
-					item.extra = 'DOI: ' + item.DOI;
+					item.extra = 'DOI: ' + result.DOI;
 				}
 			}
 		}
