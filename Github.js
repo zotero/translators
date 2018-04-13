@@ -93,7 +93,7 @@ function scrape(doc, url) {
 
 	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
 	
-	//api calls to /repos and /repos/../../stats/contribuors
+	//api calls to /repos and /repos/../../contribuors
 	var apiUrl = "https://api.github.com/";
 	ZU.doGet(apiUrl+"repos/"+repo, function(result) {
 		var json = JSON.parse(result);
