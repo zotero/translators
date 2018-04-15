@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:58:26"
+	"lastUpdated": "2018-04-14 15:11:17"
 }
 
 /*
@@ -211,7 +211,7 @@ function scrapeEM(doc, url, pdfUrl) {
 	});
 }
 
-function scrapeBibTeX(doc, url, pdfUrl) {
+function scrapeBibTeX(doc, url, pdfUrl) {Z.debug(url);
 	var doi = ZU.xpathText(doc, '(//meta[@name="citation_doi"])[1]/@content')
 		|| ZU.xpathText(doc, '(//input[@name="publicationDoi"])[1]/@value');
 	if(!doi) {
@@ -224,12 +224,22 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		return;
 	}
 	
-	var postUrl = '/documentcitationdownloadformsubmit';
-	var body = 'doi=' + encodeURIComponent(doi) + 
-				'&fileFormat=REFERENCE_MANAGER' +
-				'&hasAbstract=CITATION_AND_ABSTRACT';
+	var postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';//'/documentcitationdownloadformsubmit';
+	//var body = 'doi=' + encodeURIComponent(doi) + 
+	//			'&fileFormat=REFERENCE_MANAGER' +
+	//			'&hasAbstract=CITATION_AND_ABSTRACT';
+	var body = 'direct=direct' +
+				'&doi=' + encodeURIComponent(doi) + 
+				'&downloadFileName=pericles_14619563AxA' +
+				'&format=ris' +
+				'&include=abs' +
+				'&submit=Download';
+	
 	ZU.doPost(postUrl, body, function(text) {
-		//Z.debug(text)
+		Z.debug(text)
+		if (!text.includes("TY  - ") && text.includes("T3  - Wiley Online Books")) {
+			text = "TY  - CHAPT\n" + text;
+		}
 		var translator = Zotero.loadTranslator('import');
 		//use RIS
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -484,9 +494,9 @@ function doWeb(doc, url) {
 		) {
 			//redirect to abstract or summary so we can scrape that
 			if(type == 'bookSection') {
-				url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/summary');
+				//url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/summary');
 			} else {
-				url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/abstract');
+				//url = url.replace(/\/[^?#\/]+(?:[?#].*)?$/, '/abstract');
 			}
 			ZU.processDocuments(url, scrape);
 		} else {
