@@ -2,14 +2,14 @@
 	"translatorID": "86c35e86-3f97-4e80-9356-8209c97737c2",
 	"label": "MIDAS Journals",
 	"creator": "Rupert Brooks",
-	"target": "(insight-journal|midasjournal|vtkjournal)\\.org/browse/publication",
+	"target": "^https?://(www\\.)?(insight-journal|midasjournal|vtkjournal)\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2018-04-10 13:40:05"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-04-15 19:18:02"
 }
 
 /*
@@ -30,99 +30,120 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 function detectWeb(doc, url) {
-	if (url.match("browse/publication")) return "journalArticle";
-}
-
-function scrape(doc, url) {
-   var namespace = doc.documentElement.namespaceURI; 
-   var nsResolver = namespace ? function(prefix) {
-	  if (prefix == 'x') return namespace; else return null; 
-	   } : null; 
-   var titleXPath = doc.evaluate('//*[@id="publication"]/div[@class="title"]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var authorXPath = doc.evaluate('//*[@id="publication"]/div[@class="authors"]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var urlXPath = doc.evaluate('//*[@id="publication"]/table/tbody/tr/td/a', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var journalXPath = doc.evaluate('//*[@id="publication"]/div[@class="journal"]/a[1]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var issueXPath = doc.evaluate('//*[@id="publication"]/div[@class="journal"]/a[2]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var submittedXPath = doc.evaluate('//*[@id="publication"]/div[@class="submittedby"]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var abstractXPath = doc.evaluate('//*[@id="publication"]/div[@class="abstract"]', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var downloadAllXPath = doc.evaluate('//a[contains(text(),"Download All")]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-   var pdfXPath1 = doc.evaluate('//a[contains(text(),"Download Paper")]/@href', doc, nsResolver, XPathResult.ANY_TYPE, null); 
-
-  
-   var authors=authorXPath.iterateNext().textContent.split(/, */);
-   var newItem = new Zotero.Item("journalArticle");
-   newItem.title = titleXPath.iterateNext().textContent;
-   newItem.url = urlXPath.iterateNext().textContent; 
-   newItem.publicationTitle = journalXPath.iterateNext().textContent;
-   newItem.seriesTitle = issueXPath.iterateNext().textContent;
-   newItem.abstractNote = abstractXPath.iterateNext().textContent;
-
-   var datematch=new RegExp("on +([0-9]+)\\-([0-9]+)\\-([0-9]+)");
-   var submittedString=submittedXPath.iterateNext().textContent;
-   var dateparse=datematch.exec(submittedString);
-   newItem.date = dateparse[3]+"-"+dateparse[1]+"-"+ dateparse[2];
-
-   var splitDownloadPath = downloadAllXPath.iterateNext().value.split('/');
-   var version=splitDownloadPath[splitDownloadPath.length-1];
-   newItem.extra="Revision: " + version;
-   newItem.issue=splitDownloadPath[splitDownloadPath.length-2]
-
-   // This method of scraping the authors is imperfect, we end up with just
-   // first initials.
-   // The XML export has better information, but we would need to perform a 
-   // http post to get it.
-   //
-   // e.g. wget http://www.insight-journal.org/browse/publication/645 --post-data='data[Export][select]=xml&data[Export][submit]=Export'
-
-   var a=0;
-   while (a<authors.length) {
-   	   splitname=authors[a].split(' ');
-   	   a=a+1;
-   	   //Zotero.debug("splitname");
-   	   //Zotero.debug(splitname);
-   	   var z=1;
-   	   var name="";
-   	   while (z<splitname.length) {
-   	   	  name=name+splitname[z]+" ";
-   	   	  z=z+1;
-   	   }
-   	   name=name+splitname[0];
-   	   newItem.creators.push(Zotero.Utilities.cleanAuthor(name,"author"));
-   }
-   //author
-   //date
-   //pdf	
-   var pdfhref=pdfXPath1.iterateNext();
-   if(pdfhref) {
-	    var tmp=pdfhref.baseURI.split('/');
-        pdflink=tmp[0]+'//' +tmp[2]+pdfhref.value;
-   		newItem.attachments.push({
-		   title: newItem.publicationTitle+" "+newItem.issue + " v" + version + " PDF",
-		   url: pdflink,
-		   mimeType: "application/pdf"
-		});
-   }
-	newItem.attachments.push({
-		title: newItem.publicationTitle+" "+newItem.issue + " v" + version +" Snapshot",
-		url: url,
-		mimeType:"text/html"
-	});
-
-   newItem.complete();
-}
-
-//function parseXML(text) {
-//	Z.debug("in parseXML");
-//	Z.debug(text)
-//	text;
-//}
-
-function doWeb(doc, url) {
-	if(detectWeb(doc,url)=="journalArticle") {
-		scrape(doc,url);
+	if (url.includes("browse/publication")) return "journalArticle";
+	if (url.includes("search/?search=") || url.includes("/?journal=") || url.includes("/browse/journal/")) {
+		if (getSearchResults(doc, true)) return "multiple";
 	}
 }
+function scrape(doc, url) {
+	var bibUrl = url;
+	
+}
+
+
+function scrape(doc, url) {
+	var newItem = new Zotero.Item("journalArticle");
+	newItem.title = text(doc, '#publication>div.title');
+	newItem.url = text(doc, '#publication>table>tbody>tr>td>a');
+	newItem.publicationTitle = text(doc, '#publication>div.journal>a', 0);
+	newItem.seriesTitle = text(doc, '#publication>div.journal>a', 1);
+	newItem.abstractNote = text(doc, '#publication>div.abstract');
+	if (newItem.abstractNote) newItem.abstractNote = ZU.trimInternal(newItem.abstractNote);
+	
+	var submittedString = text(doc, '#publication>div.submittedby');
+	//e.g. Submitted by Karthik Krishnan on 06-26-2013.
+	var datematch = new RegExp("on +([0-9]+)\\-([0-9]+)\\-([0-9]+)");
+	var dateparse = datematch.exec(submittedString);
+	newItem.date = dateparse[3]+"-"+dateparse[1]+"-"+ dateparse[2];
+	
+	var splitDownloadPath = ZU.xpathText(doc, '//a[contains(text(),"Download All")]/@href').split('/');
+	var version = splitDownloadPath[splitDownloadPath.length-1];
+	newItem.extra="Revision: " + version;
+	newItem.issue = splitDownloadPath[splitDownloadPath.length-2];
+	
+	var pdfhref = ZU.xpathText(doc, '//a[contains(text(),"Download Paper")]/@href');
+	if (pdfhref) {
+		var tmp = url.split('/');
+		pdflink = tmp[0]+'//' + tmp[2] + pdfhref;
+			newItem.attachments.push({
+			title: "Fulltext",
+			url: pdflink,
+			mimeType: "application/pdf"
+		});
+	}
+	newItem.attachments.push({
+		title: "Snapshot",
+		document: doc,
+		mimeType:"text/html"
+	});
+	
+	var postData = "data[Export][select]=xml&data[Export][submit]=Export";
+	ZU.doPost(url, postData, function(text) {
+		//Z.debug(text);
+		parser = new DOMParser();
+		xml = parser.parseFromString(text, "application/xml");
+		
+		var authors = ZU.xpath(xml, '//Author');
+		for (let author of authors) {
+			let lastName = ZU.xpathText(author, './LastName');
+			let firstName = ZU.xpathText(author, './FirstName');
+			newItem.creators.push({
+				lastName: lastName,
+				firstName: firstName,
+				creatorType: "author"
+			});
+		}
+		
+		var tags = ZU.xpath(xml, '//Keyword');
+		for (let tag of tags) {
+			newItem.tags.push(tag.textContent);
+		}
+		
+		newItem.complete();
+	});
+
+}
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.publication_title>a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -134,23 +155,23 @@ var testCases = [
 				"title": "Computing Bone Morphometric Feature Maps from 3-Dimensional Images",
 				"creators": [
 					{
-						"firstName": "J.",
 						"lastName": "Vimort",
+						"firstName": "Jean-Baptiste",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "M.",
 						"lastName": "McCormick",
+						"firstName": "Matthew",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "B.",
 						"lastName": "Paniagua",
+						"firstName": "Beatriz",
 						"creatorType": "author"
 					}
 				],
 				"date": "2017-11-02",
-				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the  input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
+				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 1",
 				"issue": "988",
 				"libraryCatalog": "MIDAS Journals",
@@ -159,15 +180,25 @@ var testCases = [
 				"url": "http://hdl.handle.net/10380/3588",
 				"attachments": [
 					{
-						"title": "The Insight Journal 988 v1 PDF",
+						"title": "Fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "The Insight Journal 988 v1 Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Bone Morphometry"
+					},
+					{
+						"tag": "Image feature"
+					},
+					{
+						"tag": "remote module"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -182,28 +213,28 @@ var testCases = [
 				"title": "Rotational Registration of Spherical Surfaces Represented as QuadEdge Meshes",
 				"creators": [
 					{
-						"firstName": "L.",
 						"lastName": "Ibanez",
+						"firstName": "Luis",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "M.",
 						"lastName": "Audette",
+						"firstName": "Michel",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "B. T.",
 						"lastName": "Yeo",
+						"firstName": "B.T. Thomas",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "P.",
 						"lastName": "Golland",
+						"firstName": "Polina",
 						"creatorType": "author"
 					}
 				],
 				"date": "2009-06-04",
-				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes.\nThis paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
+				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes. This paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 3",
 				"issue": "645",
 				"libraryCatalog": "MIDAS Journals",
@@ -212,19 +243,85 @@ var testCases = [
 				"url": "http://hdl.handle.net/10380/3063",
 				"attachments": [
 					{
-						"title": "The Insight Journal 645 v3 PDF",
+						"title": "Fulltext",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "The Insight Journal 645 v3 Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Mesh"
+					},
+					{
+						"tag": "Mesh Registration"
+					},
+					{
+						"tag": "QuadEdgeMesh"
+					},
+					{
+						"tag": "Registration"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.insight-journal.org/browse/publication/983",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Automatic Conductance Estimation Methods for Anisotropic Diffusion ITK Filters",
+				"creators": [
+					{
+						"lastName": "Senra Filho",
+						"firstName": "Antonio Carlos",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-05-03",
+				"abstractNote": "The anisotropic diffusion algorithm has been intensively studied in the past decades, which could be considered as a very efficient image denoising procedure in many biomedical applications. Several authors contributed many clever solutions for diffusion parameters fitting in specific imaging modalities. Furthermore, besides improvements regarding the image denoising quality, one important variable that must be carefully set is the conductance, which regulates the structural edges preservation among the objects presented in the image. The conductance value is strongly dependent on image noise level and an appropriate parameter setting is, usually, difficult to find for different images databases and modalities. Fortunately, thanks to many efforts from the scientific community, a few automatic methods have been proposed in order to set the conductance value automatically. Here, it is presented an ITK class which offers a simple collection of the most common automatic conductance setting approaches in order to assist researchers in image denoising procedures using anisotropic-based filtering methods (such as well described in the AnisotropicDiffusionFunction class).",
+				"extra": "Revision: 1",
+				"issue": "983",
+				"libraryCatalog": "MIDAS Journals",
+				"publicationTitle": "The Insight Journal",
+				"seriesTitle": "2017 January-December",
+				"url": "http://hdl.handle.net/10380/3572",
+				"attachments": [
+					{
+						"title": "Fulltext",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Anisotropic Diffusion"
+					},
+					{
+						"tag": "Conductance"
+					},
+					{
+						"tag": "Image Filtering"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.midasjournal.org/?journal=40",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
