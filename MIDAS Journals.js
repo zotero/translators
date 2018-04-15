@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-15 18:36:24"
+	"lastUpdated": "2018-04-15 19:18:02"
 }
 
 /*
@@ -37,9 +37,13 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	if (url.includes("browse/publication")) return "journalArticle";
-	if (url.includes("search/?search=") || url.includes("/?journal=") || url.includes("/browse/journal/")) {Z.debug("hu")
+	if (url.includes("search/?search=") || url.includes("/?journal=") || url.includes("/browse/journal/")) {
 		if (getSearchResults(doc, true)) return "multiple";
 	}
+}
+function scrape(doc, url) {
+	var bibUrl = url;
+	
 }
 
 
@@ -50,6 +54,7 @@ function scrape(doc, url) {
 	newItem.publicationTitle = text(doc, '#publication>div.journal>a', 0);
 	newItem.seriesTitle = text(doc, '#publication>div.journal>a', 1);
 	newItem.abstractNote = text(doc, '#publication>div.abstract');
+	if (newItem.abstractNote) newItem.abstractNote = ZU.trimInternal(newItem.abstractNote);
 	
 	var submittedString = text(doc, '#publication>div.submittedby');
 	//e.g. Submitted by Karthik Krishnan on 06-26-2013.
@@ -60,36 +65,8 @@ function scrape(doc, url) {
 	var splitDownloadPath = ZU.xpathText(doc, '//a[contains(text(),"Download All")]/@href').split('/');
 	var version = splitDownloadPath[splitDownloadPath.length-1];
 	newItem.extra="Revision: " + version;
-	newItem.issue = splitDownloadPath[splitDownloadPath.length-2]
+	newItem.issue = splitDownloadPath[splitDownloadPath.length-2];
 	
-	// This method of scraping the authors is imperfect, we end up with just
-	// first initials.
-	// The XML export has better information, but we would need to perform a 
-	// http post to get it.
-	//
-	// e.g. wget http://www.insight-journal.org/browse/publication/645 --post-data='data[Export][select]=xml&data[Export][submit]=Export'
-	
-
-	var authors = text(doc, '#publication>div.authors').split(',');
-	for (let author of authors) {
-		let parts = author.trim().split(' ');
-		if (parts.length>1) {
-			let lastName = parts.slice(0, -1).join(' ');
-			let firstName = parts[parts.length-1];
-			newItem.creators.push({
-				lastName: lastName,
-				firstName: firstName,
-				creatorType: "author"
-			});
-		} else {
-			newItem.creators.push({
-				lastName: author,
-				fieldMode: 1,
-				creatorType: "author"
-			});
-		}
-	}
-
 	var pdfhref = ZU.xpathText(doc, '//a[contains(text(),"Download Paper")]/@href');
 	if (pdfhref) {
 		var tmp = url.split('/');
@@ -106,14 +83,32 @@ function scrape(doc, url) {
 		mimeType:"text/html"
 	});
 	
-	newItem.complete();
-}
+	var postData = "data[Export][select]=xml&data[Export][submit]=Export";
+	ZU.doPost(url, postData, function(text) {
+		//Z.debug(text);
+		parser = new DOMParser();
+		xml = parser.parseFromString(text, "application/xml");
+		
+		var authors = ZU.xpath(xml, '//Author');
+		for (let author of authors) {
+			let lastName = ZU.xpathText(author, './LastName');
+			let firstName = ZU.xpathText(author, './FirstName');
+			newItem.creators.push({
+				lastName: lastName,
+				firstName: firstName,
+				creatorType: "author"
+			});
+		}
+		
+		var tags = ZU.xpath(xml, '//Keyword');
+		for (let tag of tags) {
+			newItem.tags.push(tag.textContent);
+		}
+		
+		newItem.complete();
+	});
 
-//function parseXML(text) {
-//	Z.debug("in parseXML");
-//	Z.debug(text)
-//	text;
-//}
+}
 
 
 function getSearchResults(doc, checkOnly) {
@@ -161,22 +156,22 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Vimort",
-						"firstName": "J.",
+						"firstName": "Jean-Baptiste",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "McCormick",
-						"firstName": "M.",
+						"firstName": "Matthew",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Paniagua",
-						"firstName": "B.",
+						"firstName": "Beatriz",
 						"creatorType": "author"
 					}
 				],
 				"date": "2017-11-02",
-				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the  input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
+				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 1",
 				"issue": "988",
 				"libraryCatalog": "MIDAS Journals",
@@ -193,7 +188,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Bone Morphometry"
+					},
+					{
+						"tag": "Image feature"
+					},
+					{
+						"tag": "remote module"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -209,27 +214,27 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Ibanez",
-						"firstName": "L.",
+						"firstName": "Luis",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Audette",
-						"firstName": "M.",
+						"firstName": "Michel",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Yeo",
-						"firstName": "B.T.",
+						"firstName": "B.T. Thomas",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Golland",
-						"firstName": "P.",
+						"firstName": "Polina",
 						"creatorType": "author"
 					}
 				],
 				"date": "2009-06-04",
-				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes.\nThis paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
+				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes. This paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 3",
 				"issue": "645",
 				"libraryCatalog": "MIDAS Journals",
@@ -246,7 +251,20 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Mesh"
+					},
+					{
+						"tag": "Mesh Registration"
+					},
+					{
+						"tag": "QuadEdgeMesh"
+					},
+					{
+						"tag": "Registration"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -262,7 +280,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Senra Filho",
-						"firstName": "A.C.",
+						"firstName": "Antonio Carlos",
 						"creatorType": "author"
 					}
 				],
@@ -284,7 +302,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Anisotropic Diffusion"
+					},
+					{
+						"tag": "Conductance"
+					},
+					{
+						"tag": "Image Filtering"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
