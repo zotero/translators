@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-16 04:54:51"
+	"lastUpdated": "2018-04-16 11:27:22"
 }
 
 /*
@@ -51,7 +51,14 @@ function scrape(doc, url) {
 	newItem.seriesTitle = text(doc, '#publication>div.journal>a', 1);
 	newItem.abstractNote = text(doc, '#publication>div.abstract');
 	if (newItem.abstractNote) newItem.abstractNote = ZU.trimInternal(newItem.abstractNote);
-	
+	var issnString = ZU.xpathText(doc, '//div[contains(@class,"issn")]');
+	var issnMatch = new RegExp('ISSN\\s+(\\w+-\\w+)');
+	var issnParse = issnMatch.exec(issnString);
+	// The midas journal has no ISSN tag, for some reason
+	if (issnParse)
+	{
+		newItem.ISSN = issnParse[1];
+	}
 	var submittedString = text(doc, '#publication>div.submittedby');
 	//e.g. Submitted by Karthik Krishnan on 06-26-2013.
 	var datematch = new RegExp("on +([0-9]+)\\-([0-9]+)\\-([0-9]+)");
@@ -172,6 +179,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-11-02",
+				"ISSN": "2327-770X",
 				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 1",
 				"libraryCatalog": "MIDAS Journals",
@@ -235,6 +243,7 @@ var testCases = [
 					}
 				],
 				"date": "2009-06-04",
+				"ISSN": "2327-770X",
 				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes. This paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 3",
 				"libraryCatalog": "MIDAS Journals",
@@ -286,6 +295,7 @@ var testCases = [
 					}
 				],
 				"date": "2017-05-03",
+				"ISSN": "2327-770X",
 				"abstractNote": "The anisotropic diffusion algorithm has been intensively studied in the past decades, which could be considered as a very efficient image denoising procedure in many biomedical applications. Several authors contributed many clever solutions for diffusion parameters fitting in specific imaging modalities. Furthermore, besides improvements regarding the image denoising quality, one important variable that must be carefully set is the conductance, which regulates the structural edges preservation among the objects presented in the image. The conductance value is strongly dependent on image noise level and an appropriate parameter setting is, usually, difficult to find for different images databases and modalities. Fortunately, thanks to many efforts from the scientific community, a few automatic methods have been proposed in order to set the conductance value automatically. Here, it is presented an ITK class which offers a simple collection of the most common automatic conductance setting approaches in order to assist researchers in image denoising procedures using anisotropic-based filtering methods (such as well described in the AnisotropicDiffusionFunction class).",
 				"extra": "Revision: 1",
 				"libraryCatalog": "MIDAS Journals",
