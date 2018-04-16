@@ -9,25 +9,25 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-15 19:18:02"
+	"lastUpdated": "2018-04-16 04:54:51"
 }
 
 /*
-   Midas Journal Translator
-   (Includes ITKJournal,InsightJournal,VTKJournal)
-   Copyright (C) 2016-18 Rupert Brooks
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
-
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Midas Journal Translator
+	(Includes ITKJournal,InsightJournal,VTKJournal)
+	Copyright (C) 2016-18 Rupert Brooks
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -40,10 +40,6 @@ function detectWeb(doc, url) {
 	if (url.includes("search/?search=") || url.includes("/?journal=") || url.includes("/browse/journal/")) {
 		if (getSearchResults(doc, true)) return "multiple";
 	}
-}
-function scrape(doc, url) {
-	var bibUrl = url;
-	
 }
 
 
@@ -65,7 +61,8 @@ function scrape(doc, url) {
 	var splitDownloadPath = ZU.xpathText(doc, '//a[contains(text(),"Download All")]/@href').split('/');
 	var version = splitDownloadPath[splitDownloadPath.length-1];
 	newItem.extra="Revision: " + version;
-	newItem.issue = splitDownloadPath[splitDownloadPath.length-2];
+	// Article ID
+	newItem.pages = splitDownloadPath[splitDownloadPath.length-2];
 	
 	var pdfhref = ZU.xpathText(doc, '//a[contains(text(),"Download Paper")]/@href');
 	if (pdfhref) {
@@ -83,6 +80,7 @@ function scrape(doc, url) {
 		mimeType:"text/html"
 	});
 	
+	// Only in XML there are also the first name of the authors.
 	var postData = "data[Export][select]=xml&data[Export][submit]=Export";
 	ZU.doPost(url, postData, function(text) {
 		//Z.debug(text);
@@ -105,6 +103,8 @@ function scrape(doc, url) {
 			newItem.tags.push(tag.textContent);
 		}
 		
+		newItem.language = ZU.xpathText(xml, '//Language');
+		
 		newItem.complete();
 	});
 
@@ -114,9 +114,10 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.publication_title>a');
+	var rows = doc.querySelectorAll('.publication_title>a, td>a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
+		if (!href.includes('/browse/publication/')) continue;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -173,8 +174,8 @@ var testCases = [
 				"date": "2017-11-02",
 				"abstractNote": "This document describes a new remote module implemented for the Insight Toolkit (ITK), itkBoneMorphometry. This module contains bone analysis filters that compute features from N-dimensional images that represent the internal architecture of bone. The computation of the bone morphometry features in this module is based on well known methods. The two filters contained in this module are itkBoneMorphometryFeaturesFilter. which computes a set of features that describe the whole input image in the form of a feature vector, and itkBoneMorphometryFeaturesImageFilter, which computes an N-D feature map that locally describes the input image (i.e. for every voxel). itkBoneMorphometryFeaturesImageFilter can be configured based in the locality of the desired morphometry features by specifying the neighborhood size. This paper is accompanied by the source code, the input data, the choice of parameters and the output data that we have used for validating the algorithms described. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 1",
-				"issue": "988",
 				"libraryCatalog": "MIDAS Journals",
+				"pages": "988",
 				"publicationTitle": "The Insight Journal",
 				"seriesTitle": "2017 January-December",
 				"url": "http://hdl.handle.net/10380/3588",
@@ -236,8 +237,8 @@ var testCases = [
 				"date": "2009-06-04",
 				"abstractNote": "This document describes a contribution to the Insight Toolkit intended to support the process of registering two Meshes. The methods included here are restricted to Meshes with a Spherical geometry and topology, and with scalar values associated to their nodes. This paper is accompanied with the source code, input data, parameters and output data that we used for validating the algorithm described in this paper. This adheres to the fundamental principle that scientific publications must facilitate reproducibility of the reported results.",
 				"extra": "Revision: 3",
-				"issue": "645",
 				"libraryCatalog": "MIDAS Journals",
+				"pages": "645",
 				"publicationTitle": "The Insight Journal",
 				"seriesTitle": "2009 January - June",
 				"url": "http://hdl.handle.net/10380/3063",
@@ -287,8 +288,8 @@ var testCases = [
 				"date": "2017-05-03",
 				"abstractNote": "The anisotropic diffusion algorithm has been intensively studied in the past decades, which could be considered as a very efficient image denoising procedure in many biomedical applications. Several authors contributed many clever solutions for diffusion parameters fitting in specific imaging modalities. Furthermore, besides improvements regarding the image denoising quality, one important variable that must be carefully set is the conductance, which regulates the structural edges preservation among the objects presented in the image. The conductance value is strongly dependent on image noise level and an appropriate parameter setting is, usually, difficult to find for different images databases and modalities. Fortunately, thanks to many efforts from the scientific community, a few automatic methods have been proposed in order to set the conductance value automatically. Here, it is presented an ITK class which offers a simple collection of the most common automatic conductance setting approaches in order to assist researchers in image denoising procedures using anisotropic-based filtering methods (such as well described in the AnisotropicDiffusionFunction class).",
 				"extra": "Revision: 1",
-				"issue": "983",
 				"libraryCatalog": "MIDAS Journals",
+				"pages": "983",
 				"publicationTitle": "The Insight Journal",
 				"seriesTitle": "2017 January-December",
 				"url": "http://hdl.handle.net/10380/3572",
@@ -321,6 +322,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.midasjournal.org/?journal=40",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.vtkjournal.org/browse/journal/53",
 		"items": "multiple"
 	}
 ]
