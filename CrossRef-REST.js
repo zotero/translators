@@ -21,6 +21,33 @@
 // some fields are undocumented.
 // All CrossRef item types can be retrieved at http://api.crossref.org/types
 
+function removeUnsupportedMarkup(text) {
+	let markupRE = /<(\/?)(\w+)[^<>]*>/gi;
+	let supportedMarkup = ['i', 'b', 'sub', 'sup', 'sc'];
+	let transformMarkup = {
+		'scp': {
+			open: '<span style="font-variant:small-caps;">',
+			close: '</span>'
+		}
+	};
+	
+	return text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') // Remove CDATA markup
+		.replace(markupRE, function (m, close, name) {
+			name = name.toLowerCase();
+			
+			if (supportedMarkup.includes(name)) {
+				return (close ? '</' : '<') + name + '>';
+			}
+			
+			let newMarkup = transformMarkup[name.toLowerCase()];
+			if (newMarkup) {
+				return close ? newMarkup.close : newMarkup.open;
+			}
+			
+			return '';
+		});
+}
+
 function fixAuthorCapitalization(string) {
 	if (typeof string === "string" && string.toUpperCase() === string) {
 		string = string.toLowerCase().replace(/\b[a-z]/g, function (m) {
@@ -199,9 +226,7 @@ function processCrossRef(json) {
 					item.title += ': ' + result.subtitle[0];
 				}
 			}
-			item.title = item.title.replace(/<!\[CDATA\[/g, '');
-			item.title = item.title.replace(/\]\]>/g, '');
-			item.title = item.title.replace(/<[a-zA-Z\/].*?>/g, '');
+			item.title = removeUnsupportedMarkup(item.title);
 		}
 		
 		//check if there are potential issues with character encoding and try to fix it
