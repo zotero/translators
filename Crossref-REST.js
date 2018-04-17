@@ -1,25 +1,48 @@
 {
 	"translatorID": "0a61e167-de9a-4f93-a68a-628b48855909",
 	"translatorType": 8,
-	"label": "CrossRef REST",
+	"label": "Crossref REST",
 	"creator": "Martynas Bagdonas",
 	"target": "",
 	"minVersion": "5.0.0",
 	"maxVersion": null,
 	"priority": 90,
 	"inRepository": true,
-	"browserSupport": "gcsv",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2018-04-11 10:00:01"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2018
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 // Based on CrossRef.js (by Simon Kornblith), which uses OpenURL API
 
 // This translator uses the newer REST API
-// https://github.com/CrossRef/rest-api-doc
-// https://github.com/CrossRef/rest-api-doc/blob/master/api_format.md
-// REST API documentation not always reflect the actual API i.e. and
-// some fields are undocumented.
-// All CrossRef item types can be retrieved at http://api.crossref.org/types
+// https://github.com/Crossref/rest-api-doc
+// https://github.com/Crossref/rest-api-doc/blob/master/api_format.md
+// REST API documentation not always reflect the actual API
+// and some fields are undocumented.
+// All Crossref item types can be retrieved at http://api.crossref.org/types
 
 function removeUnsupportedMarkup(text) {
 	let markupRE = /<(\/?)(\w+)[^<>]*>/gi;
@@ -51,7 +74,7 @@ function removeUnsupportedMarkup(text) {
 function fixAuthorCapitalization(string) {
 	if (typeof string === "string" && string.toUpperCase() === string) {
 		string = string.toLowerCase().replace(/\b[a-z]/g, function (m) {
-			return m[0].toUpperCase()
+			return m[0].toUpperCase();
 		});
 	}
 	return string;
@@ -99,7 +122,7 @@ function parseCreators(result, item, typeOverrideMap) {
 	}
 }
 
-function processCrossRef(json) {
+function processCrossref(json) {
 	json = JSON.parse(json);
 	
 	for (let i = 0; i < json.message.items.length; i++) {
@@ -165,7 +188,7 @@ function processCrossRef(json) {
 			return;
 		}
 		
-		// edited-book, standard-series - ignore, because CrossRef has zero results for this type
+		// edited-book, standard-series - ignore, because Crossref has zero results for this type
 		// component, journal, journal-issue, journal-volume, other, proceedings - ignore,
 		// because Zotero doesn't have equivalent item types.
 		
@@ -229,11 +252,11 @@ function processCrossRef(json) {
 			item.title = removeUnsupportedMarkup(item.title);
 		}
 		
-		//check if there are potential issues with character encoding and try to fix it
-		//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
+		// Check if there are potential issues with character encoding and try to fix it
+		// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
 		for (let field in item) {
 			if (typeof item[field] != 'string') continue;
-			//check for control characters that should never be in strings from CrossRef
+			// Check for control characters that should never be in strings from Crossref
 			if (/[\u007F-\u009F]/.test(item[field])) {
 				item[field] = decodeURIComponent(escape(item[field]));
 			}
@@ -254,14 +277,16 @@ function doSearch(item) {
 	// }
 	// else
 	if (item.query) {
-		query = '?query.bibliographic=' + encodeURIComponent(item.query);
+		query = '?query.bibliographic=' + encodeURIComponent(item.query) + '&rows=50';
 	}
 	else return;
 	
-	query += '&rows=50';
+	if(Z.getHiddenPref('CrossrefREST.email')) {
+		query += '&mailto=' + Z.getHiddenPref('CrossrefREST.email');
+	}
 	
 	ZU.doGet('http://api.crossref.org/works/' + query, function (responseText) {
-		processCrossRef(responseText);
+		processCrossref(responseText);
 	});
 }
 
