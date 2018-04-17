@@ -7,7 +7,7 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 8,
+	"translatorType": 12,
 	"browserSupport": "gcsv",
 	"lastUpdated": "2018-04-17 20:00:00"
 }
@@ -17,7 +17,7 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	var url = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
+	var url = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
 	ZU.doGet(url, parseXML);
 }
