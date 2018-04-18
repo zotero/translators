@@ -255,7 +255,7 @@ function processCrossref(json) {
 		// Check if there are potential issues with character encoding and try to fix it
 		// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
 		for (let field in item) {
-			if (typeof item[field] != 'string') continue;
+			if (typeof item[field] !== 'string') continue;
 			// Check for control characters that should never be in strings from Crossref
 			if (/[\u007F-\u009F]/.test(item[field])) {
 				item[field] = decodeURIComponent(escape(item[field]));
@@ -277,7 +277,7 @@ function doSearch(item) {
 	// }
 	// else
 	if (item.query) {
-		query = '?query.bibliographic=' + encodeURIComponent(item.query) + '&rows=50';
+		query = '?query.bibliographic=' + encodeURIComponent(item.query);
 	}
 	else return;
 	
@@ -285,7 +285,7 @@ function doSearch(item) {
 		query += '&mailto=' + Z.getHiddenPref('CrossrefREST.email');
 	}
 	
-	ZU.doGet('http://api.crossref.org/works/' + query, function (responseText) {
+	ZU.doGet('https://api.crossref.org/works/' + query, function (responseText) {
 		processCrossref(responseText);
 	});
 }
