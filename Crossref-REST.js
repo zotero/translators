@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-11 10:00:01"
+	"lastUpdated": "2018-04-19 07:00:19"
 }
 
 /*
@@ -262,6 +262,7 @@ function processCrossref(json) {
 			}
 			item[field] = ZU.unescapeHTML(item[field]);
 		}
+		item.libraryCatalog = 'Crossref';
 		item.complete();
 	}
 }
