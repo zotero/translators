@@ -98,6 +98,7 @@ function scrape (doc, url) {
 	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
 	ZU.doPost('/xpl/downloadCitations', post, function(text) {
 		text = ZU.unescapeHTML(text.replace(/(&[^\s;]+) and/g, '$1;'));
+		text = text.replace(' #x2019;', "’");// e.g. title in  https://ieeexplore.ieee.org/document/7926395/
 		//remove empty tag - we can take this out once empty tags are ignored
 		text = text.replace(/(keywords=\{.+);\}/, "$1}");
 		var earlyaccess = false;
