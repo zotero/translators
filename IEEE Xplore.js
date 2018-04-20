@@ -2,14 +2,14 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/((abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-20 20:44:37"
+	"lastUpdated": "2018-04-20 06:43:19"
 }
 
 function detectWeb(doc, url) {
