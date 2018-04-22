@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-15 21:29:08"
+	"lastUpdated": "2018-04-22 06:48:50"
 }
 
 /*
@@ -115,6 +115,8 @@ function scrape(doc, url) {
 				item.tags[i] = ZU.capitalizeTitle(item.tags[i], true);
 			}
 		}
+		/* TODO: Fix saving the PDF attachment which is currently broken
+		
 		// PDF attachments are in subURL with key & signature
 		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href | //a[@class="button download-pdf-button"]/@href');
 		if (pdfurl) {
@@ -138,9 +140,10 @@ function scrape(doc, url) {
 				}
 			);
 		} else {
+		*/
 			Z.debug("Not attempting PDF retrieval");
 			item.complete();
-		}
+		//}
 	});
 	
 	translator.getTranslatorObject(function(trans) {
@@ -160,7 +163,7 @@ function getSearchResults(doc, checkOnly) {
 	for (var i=0; i<rows.length; i++) {
 		if (!rows[i].className.includes('SearchResults-item')) continue;
 		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
-		var title = ZU.trimInternal(rows[i].textContent);
+		var title = ZU.xpathText(rows[i], './/h4');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
