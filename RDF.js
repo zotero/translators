@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-23 16:25:49"
+	"lastUpdated": "2018-04-23 19:48:28"
 }
 
 /*
@@ -412,7 +412,8 @@ function detectType(newItem, node, ret) {
 			case 'movie':
 				t.so = 'film'; break;
 			case 'musicrecording':
-			case "audiobook":
+			case 'musicalbum':
+			case 'audiobook':
 			case 'audioobject':
 				t.so = 'audioRecording'; break;
 			case 'softwareapplication':
@@ -906,7 +907,7 @@ function importItem(newItem, node) {
 		newItem.section = getFirstResults(section, [n.dc+"title", n.dc1_0+"title", n.dcterms+"title"], true);
 	}
 	if (!section) {
-		newItem.section = getFirstResults(node, [n.article+"section"], true);
+		newItem.section = getFirstResults(node, [n.article+"section", n.so+"genre"], true);
 	}
 	
 	// series
