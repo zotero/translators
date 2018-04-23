@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-23 13:17:38"
+	"lastUpdated": "2018-04-23 16:25:49"
 }
 
 /*
@@ -72,7 +72,8 @@ var n = {
 	og:"http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article:"http://ogp.me/ns/article#",
 	book:"http://ogp.me/ns/book#",
-	so:"http://schema.org/"
+	so:"http://schema.org/",
+	codemeta:"https://codemeta.github.io/terms/"
 };
 
 var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
@@ -868,16 +869,14 @@ function importItem(newItem, node) {
 		//get presenters in unpublished conference papers on eprints
 		} else if(creatorType == "presenter") {
 			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
-
 		} else if(creatorType == "castMember") {
 			creators = getFirstResults(node, [n.video+"actor"]);
-
 		} else if(creatorType == "scriptwriter") {
 			creators = getFirstResults(node, [n.video+"writer"]);
-
 		} else if(creatorType == "producer") {
 			creators = getFirstResults(node, [n.so+"producer"]);
-
+		} else if(creatorType == "programmer") {
+			creators = getFirstResults(node, [n.so+"author", n.codemeta+"maintainer"]);
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}
@@ -935,7 +934,7 @@ function importItem(newItem, node) {
 	// edition
 	newItem.edition = getFirstResults(node, [n.prism+"edition", n.prism2_0+"edition", n.prism2_1+"edition", n.bibo+"edition", n.so+"bookEdition", n.so+"version"], true);
 	// these fields mean the same thing
-	newItem.version = newItem.edition;
+	newItem.versionNumber = newItem.edition;
 	
 	// pages
 	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange", n.bibo+"pages", n.so+"pagination"], true);
@@ -959,6 +958,12 @@ function importItem(newItem, node) {
 	
 	// mediums
 	newItem.artworkMedium = newItem.interviewMedium = getFirstResults(node, [n.dcterms+"medium"], true);
+	
+	// programmingLanguage
+	newItem.programmingLanguage = getFirstResults(node, [n.so+"programmingLanguage"], true);
+	
+	// system
+	newItem.system = getFirstResults(node, [n.so+"operatingSystem"], true);
 	
 	// publisher
 	var publisher = getFirstResults([node, containerPeriodical, containerPublicationVolume], [ n.dc+"publisher", n.dc1_0+"publisher",
@@ -1470,6 +1475,124 @@ var testCases = [
 					},
 					{
 						"tag": "Works"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<rdf:RDF\n  xmlns:codemeta=\"https://codemeta.github.io/terms/\"\n  xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n  xmlns:schema=\"http://schema.org/\"\n>\n  <schema:SoftwareSourceCode rdf:nodeID=\"N7272101842f544e2a9a7508327eb329b\">\n    <schema:name>CodeMeta: Minimal metadata schemas for science software and code, in JSON-LD</schema:name>\n    <schema:description>CodeMeta is a concept vocabulary that can be used to standardize the exchange of software metadata across repositories and organizations.</schema:description>\n    <schema:dateCreated rdf:datatype=\"http://schema.org/Date\">2017-06-05</schema:dateCreated>\n    <schema:datePublished rdf:datatype=\"http://schema.org/Date\">2017-06-05</schema:datePublished>\n    <schema:version>2.0</schema:version>\n    <schema:softwareVersion>2.0</schema:softwareVersion>\n    <schema:programmingLanguage>JSON-LD</schema:programmingLanguage>\n    <schema:license rdf:resource=\"https://spdx.org/licenses/Apache-2.0\"/>\n    <codemeta:developmentStatus rdf:resource=\"file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/active\"/>\n    <codemeta:funding>National Science Foundation Award #1549758; Codemeta: A Rosetta Stone for Metadata in Scientific Software</codemeta:funding>\n    <schema:codeRepository rdf:resource=\"https://github.com/codemeta/codemeta\"/>\n    <schema:downloadUrl rdf:resource=\"https://github.com/codemeta/codemeta/archive/2.0.zip\"/>\n    <codemeta:contIntegration rdf:resource=\"https://travis-ci.org/codemeta/codemeta\"/>\n    <schema:identifier rdf:resource=\"file:///base/data/home/apps/s%7Erdf-translator/2.408516547054015808/CodeMeta\"/>\n    <codemeta:issueTracker rdf:resource=\"https://github.com/codemeta/codemeta/issues\"/>\n    <schema:keywords>software</schema:keywords>\n    <schema:keywords>metadata</schema:keywords>\n    <codemeta:maintainer rdf:resource=\"http://orcid.org/0000-0002-1642-628X\"/>\n    <schema:author rdf:resource=\"http://orcid.org/0000-0002-1642-628X\"/>\n    <schema:author rdf:resource=\"http://orcid.org/0000-0003-0077-4738\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-4925-7248\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0001-5636-0433\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0002-9300-5278\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-1419-2405\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0002-8876-7606\"/>\n    <schema:contributor rdf:resource=\"N99ac8e31c13d4ae5994cbc8669e01866\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0001-8465-8341\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-4741-0309\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-2720-0339\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0002-1642-628X\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-1219-2137\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0002-3957-2474\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-3477-2845\"/>\n    <schema:contributor rdf:resource=\"Nefd7fe71736c433db9ada28e54018b34\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-1304-1939\"/>\n    <schema:contributor rdf:resource=\"Nc65fe076896346a9a8859f25f5e3bca9\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0003-4425-7097\"/>\n    <schema:contributor rdf:resource=\"http://orcid.org/0000-0002-2192-403X\"/>\n  </schema:SoftwareSourceCode>\n  \n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-4925-7248\">\n    <schema:familyName>Druskat</schema:familyName>\n    <schema:email>mail@sdruskat.net</schema:email>\n    <schema:givenName>Stephan</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0001-5636-0433\">\n    <schema:givenName>Ashley</schema:givenName>\n    <schema:familyName>Sands</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0002-9300-5278\">\n    <schema:givenName>Patricia</schema:givenName>\n    <schema:familyName>Cruse</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-1419-2405\">\n    <schema:givenName>Martin</schema:givenName>\n    <schema:familyName>Fenner</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0002-8876-7606\">\n    <schema:givenName>Neil</schema:givenName>\n    <schema:familyName>Chue Hong</schema:familyName>\n    <schema:email>n.chuehong@epcc.ed.ac.uk</schema:email>\n  </schema:Person>\n  <schema:Person rdf:nodeID=\"N99ac8e31c13d4ae5994cbc8669e01866\">\n    <schema:familyName>Nowak</schema:familyName>\n    <schema:givenName>Krzysztof</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0001-8465-8341\">\n    <schema:familyName>Gil</schema:familyName>\n    <schema:email>GIL@ISI.EDU</schema:email>\n    <schema:givenName>Yolanda</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-4741-0309\">\n    <schema:familyName>Hahnel</schema:familyName>\n    <schema:givenName>Mark</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-2720-0339\">\n    <schema:email>dskatz@illinois.edu</schema:email>\n    <schema:givenName>Dan</schema:givenName>\n    <schema:familyName>Katz</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0002-1642-628X\">\n    <schema:givenName>Carl</schema:givenName>\n    <schema:familyName>Boettiger</schema:familyName>\n    <schema:email>cboettig@gmail.com</schema:email>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-1219-2137\">\n    <schema:email>carole.goble@manchester.ac.uk</schema:email>\n    <schema:familyName>Goble</schema:familyName>\n    <schema:givenName>Carole</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0002-3957-2474\">\n    <schema:familyName>Smith</schema:familyName>\n    <schema:givenName>Arfon</schema:givenName>\n    <schema:email>arfon.smith@gmail.com</schema:email>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-3477-2845\">\n    <schema:givenName>Alice</schema:givenName>\n    <schema:email>aallen@ascl.net</schema:email>\n    <schema:familyName>Allen</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:nodeID=\"Nefd7fe71736c433db9ada28e54018b34\">\n    <schema:email>abbycabs@gmail.com</schema:email>\n    <schema:givenName>Abby Cabunoc</schema:givenName>\n    <schema:familyName>Mayes</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-1304-1939\">\n    <schema:givenName>Mercè</schema:givenName>\n    <schema:familyName>Crosas</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"Nc65fe076896346a9a8859f25f5e3bca9\">\n    <schema:email>luke.coy@rit.edu</schema:email>\n    <schema:familyName>Coy</schema:familyName>\n    <schema:givenName>Luke</schema:givenName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-4425-7097\">\n    <schema:givenName>Kyle</schema:givenName>\n    <schema:email>Kyle.Niemeyer@oregonstate.edu</schema:email>\n    <schema:familyName>Niemeyer</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0002-2192-403X\">\n    <schema:givenName>Peter</schema:givenName>\n    <schema:email>slaughter@nceas.ucsb.edu</schema:email>\n    <schema:familyName>Slaughter</schema:familyName>\n  </schema:Person>\n  <schema:Person rdf:about=\"http://orcid.org/0000-0003-0077-4738\">\n    <schema:givenName>Matthew B.</schema:givenName>\n    <schema:familyName>Jones</schema:familyName>\n    <schema:email>jones@nceas.ucsb.edu</schema:email>\n  </schema:Person>\n</rdf:RDF>",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "CodeMeta: Minimal metadata schemas for science software and code, in JSON-LD",
+				"creators": [
+					{
+						"creatorType": "programmer",
+						"lastName": "Boettiger",
+						"firstName": "Carl"
+					},
+					{
+						"creatorType": "programmer",
+						"lastName": "Jones",
+						"firstName": "Matthew B."
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Druskat",
+						"firstName": "Stephan"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Sands",
+						"firstName": "Ashley"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Cruse",
+						"firstName": "Patricia"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Fenner",
+						"firstName": "Martin"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Chue Hong",
+						"firstName": "Neil"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Gil",
+						"firstName": "Yolanda"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Hahnel",
+						"firstName": "Mark"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Katz",
+						"firstName": "Dan"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Boettiger",
+						"firstName": "Carl"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Goble",
+						"firstName": "Carole"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Smith",
+						"firstName": "Arfon"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Allen",
+						"firstName": "Alice"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Crosas",
+						"firstName": "Mercè"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Coy",
+						"firstName": "Luke"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Niemeyer",
+						"firstName": "Kyle"
+					},
+					{
+						"creatorType": "contributor",
+						"lastName": "Slaughter",
+						"firstName": "Peter"
+					}
+				],
+				"date": "2017-06-05",
+				"abstractNote": "CodeMeta is a concept vocabulary that can be used to standardize the exchange of software metadata across repositories and organizations.",
+				"programmingLanguage": "JSON-LD",
+				"rights": "https://spdx.org/licenses/Apache-2.0",
+				"versionNumber": "2.0",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "metadata"
+					},
+					{
+						"tag": "software"
 					}
 				],
 				"notes": [],
