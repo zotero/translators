@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-13 13:41:00"
+	"lastUpdated": "2018-04-24 13:41:00"
 }
 
 /*
@@ -49,7 +49,7 @@ function doSearch(item) {
 		url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
 	}
 	else if (item.query) {
-		url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
+		url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=100";
 	}
 	
 	//Z.debug(url);

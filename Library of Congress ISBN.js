@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-13 13:41:00"
+	"lastUpdated": "2018-04-24 13:41:00"
 }
 
 
@@ -31,7 +31,7 @@ function doSearch(item) {
 		url = "http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=bath.ISBN=^" + ZU.cleanISBN(item.ISBN) + "&maximumRecords=1";
 	}
 	else if (item.query) {
-		url = "http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
+		url = "http://lx2.loc.gov:210/LCDB?operation=searchRetrieve&version=1.1&query=" + encodeURIComponent(item.query) + "&maximumRecords=100";
 	}
 	
 	ZU.doGet(url, function (text) {
