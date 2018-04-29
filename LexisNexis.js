@@ -3,13 +3,14 @@
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://[^/]*lexis-?nexis\\.com",
+	"targetAll": "^https?://[^/]*lexis-?nexis\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-20 20:48:18"
+	"lastUpdated": "2018-04-29 12:06:56"
 }
 
 /*
@@ -91,7 +92,7 @@ function scrape(doc, url) {
 	var poststring="";
 	for (var i=0; i<hiddenInputs.length; i++) {
 		poststring = poststring+"&"+encodeURIComponent(hiddenInputs[i].name)+"="+encodeURIComponent(hiddenInputs[i].value);
-	};
+	}
 	
 	poststring += "&focusTerms=&nextSteps=0";
 	
@@ -200,8 +201,8 @@ function cleanAuthorFields(m, authorStr) {//see e.g. Test Cases 2,3
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		
-		var items = new Object();
-		var articles = new Array();
+		var items = {};
+		var articles = [];
 		
 		//if the detectWeb is not clear on the iframe, we might need
 		//tempDoc instead of doc:
