@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-18 06:55:25"
+	"lastUpdated": "2018-04-29 11:03:04"
 }
 
 /*
@@ -95,7 +95,9 @@ function scrape(doc, url) {
 		if (!authors || authors.length===0) authors = ZU.xpath(doc, '(//section[contains(@class, "article-info")])[1]//a[contains(@class, "article-author")]');
 		if (authors) {
 			for (let i=0; i<authors.length; i++) {
-				item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+				// Delete "Par" = From in authors name
+				let author = authors[i].textContent.replace(/^Par /, '');
+				item.creators.push(ZU.cleanAuthor(author, "author"));
 			}
 		}
 		
@@ -410,6 +412,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2018-04-18",
 				"ISSN": "1010-2248",
 				"abstractNote": "Dans 64 jours, le pape François sera en visite à Genève. Discrètement, sa garde rapprochée a repéré les lieux cette semaine.",
 				"language": "fr",
@@ -465,6 +468,38 @@ var testCases = [
 						"tag": "Impôts"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tdg.ch/editorial/surveillance-assures-reveil-tardif/story/27369648",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Surveillance des assurés: un réveil tardif",
+				"creators": [
+					{
+						"firstName": "Sophie",
+						"lastName": "Simon",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-27",
+				"ISSN": "1010-2248",
+				"language": "fr",
+				"libraryCatalog": "www.tdg.ch",
+				"publicationTitle": "TDG",
+				"shortTitle": "Surveillance des assurés",
+				"url": "https://www.tdg.ch/editorial/surveillance-assures-reveil-tardif/story/27369648",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
