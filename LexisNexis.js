@@ -3,14 +3,14 @@
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://[^/]*lexis-?nexis\\.com",
-	"targetAll": "^https?://[^/]*lexis-?nexis\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
+	"targetAll": "^https?://[^/]*lexis-?nexis\\.com",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-04-29 12:06:56"
+	"lastUpdated": "2018-05-02 08:49:49"
 }
 
 /*
@@ -50,6 +50,9 @@ function detectWeb(doc, url) {
 	if (url.indexOf("parent=docview") != -1 && url.indexOf("target=results_listview_resultsNav") != -1 ) {
 		return "newspaperArticle";
 	}
+	if (url.includes("/results/enhdocview.do") || url.includes("/docview/")) {
+		return "newspaperArticle";
+	}
 	
 	if ((url.indexOf("contentRenderer.do?") != -1 || url.indexOf("target=results_ResultsList") != -1) && ZU.xpath(doc, '//tr[./td/input[@name="frm_tagged_documents"]]/td/a').length > 0) {
 		return "multiple";
@@ -78,13 +81,11 @@ function scrape(doc, url) {
 	
 	var risb = ZU.xpathText(doc,'//input[@name="risb"]/@value');
 	
-	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value');
-	if (!cisb) {
-		cisb = "";
-	}
-
+	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value') || "";
+	
+	// OLD interface
 	var urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
-
+Z.debug(urlIntermediateSite)
 	var hiddenInputs = ZU.xpath(doc, '//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]');
 	//if (hiddenInputs.length==0) {
 	//	hiddenInputs = ZU.xpath(doc, '//input[@type="hidden" and not(@name="tagData")]');
@@ -96,14 +97,22 @@ function scrape(doc, url) {
 	
 	poststring += "&focusTerms=&nextSteps=0";
 	
+	// NEW interface
+	
+	urlIntermediateSite = "https://www.nexis.com/results/enhDelPrep.do?";
+	var erskey = ZU.xpathText(doc, '//input[@id="ersKey"]/@value');
+	poststring = "mode=delivery_refworks&formatStr=GNBFULL&tagData=null&fromEnhListView=true&ersKey=" + erskey + "&random=" + Math.random() + "&offset=1";
+Z.debug(poststring);
 	ZU.doPost(urlIntermediateSite, poststring, function(text) {
-		
+		Z.debug(text);
 		var urlRis = base+"delivery/rwBibiographicDelegate.do";
+		Z.debug(urlRis)
 		var disb = /<input type="hidden" name="disb" value="([^"]+)">/.exec(text);
 		var initializationPage = /<input type="hidden" name="initializationPage" value="([^"]+)">/.exec(text);
 		
-		var poststring2 = "screenReaderSupported=false&delRange=cur&selDocs=&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1]);
-		//Z.debug(poststring2);
+		var poststring2 = "screenReaderSupported=false&delRange=cur&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1])+"delRange=all"//+"&selDocs=";
+		poststring2 = "screenReaderSupported=false&delRange=all&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1])
+		Z.debug(poststring2);//&delRange=sel&selDocs=2
 
 		ZU.doPost(urlRis, poststring2, function(text) {
 			var risData = text;
