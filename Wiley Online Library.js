@@ -2,14 +2,14 @@
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://onlinelibrary\\.wiley\\.com[^/]*/(book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
+	"target": "^https?://(besjournals\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
 	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-18 20:55:57"
+	"lastUpdated": "2018-05-03 12:16:33"
 }
 
 /*
@@ -242,11 +242,21 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function(obj, item) {
+			// BibTeX throws the last names and first names together
+			// Therefore, we prefer creators names from EM (if available)
+			var authors = doc.querySelectorAll('meta[name="citation_author"]');
+			if (authors && authors.length>0) {
+				item.creators = [];
+				for (let i=0; i<authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
+				}
+			}
 			//fix author case
 			for(var i=0, n=item.creators.length; i<n; i++) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
 				item.creators[i].lastName = fixCase(item.creators[i].lastName);
 			}
+			
 			//delete nonsense author Null, Null
 			if (item.creators.length && item.creators[item.creators.length-1].lastName == "Null"
 				&& item.creators[item.creators.length-1].firstName == "Null") {
