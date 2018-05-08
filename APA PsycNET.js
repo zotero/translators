@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-25 09:27:37"
+	"lastUpdated": "2018-05-08 19:12:21"
 }
 
 /*
@@ -143,7 +143,7 @@ function scrape(doc, url) {
 
 	// 1. We have to set the uid, product code and format with a post request
 	ZU.doPost('/api/request/record.exportRISFile', postData, function(apiReturnMessage) {
-		var apiReturnData
+		var apiReturnData;
 		try {
 			apiReturnData = JSON.parse(apiReturnMessage);
 		} catch(e) {
@@ -183,10 +183,10 @@ function processRIS(text, doc) {
 		for (var i=0; i<item.tags.length; i++) {
 			item.tags[i] = item.tags[i].replace(/^\*/, '');
 		}
-		var pdfURL = attr(doc, 'a[href*="/fulltext"]');
+		var pdfURL = attr(doc, 'a[href*="/fulltext"]', 'href');
 		if (pdfURL) {
 			item.attachments.push({
-				url: pdfURL.href,
+				url: pdfURL,
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
