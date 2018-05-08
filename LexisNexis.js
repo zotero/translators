@@ -2,15 +2,15 @@
 	"translatorID": "b047a13c-fe5c-6604-c997-bef15e502b09",
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^/]*lexis-?nexis\\.com",
+	"target": "^https?://[^/]*(lexis)?-?nexis\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"targetAll": "^https?://[^/]*lexis-?nexis\\.com",
+	"targetAll": "^https?://[^/]*lexis-?nexis\\.com/lnacui2api/frame.do\?",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-05-07 16:11:05"
+	"lastUpdated": "2018-05-08 13:49:17"
 }
 
 /*
@@ -42,7 +42,13 @@
 
 // Test Cases Examples:
 // 1. https://www.nexis.com/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=280434&oc=00240&perma=true
-// 
+// 2. https://www.nexis.com/docview/getDocForCuiReq?lni=5BRW-BGR1-JD34-V3FB&csi=280434&oc=00240&perma=true
+// 3. https://www.nexis.com/docview/getDocForCuiReq?lni=5BS7-5CJ1-DYR7-33T8&csi=280434&oc=00240&perma=true
+// 4. https://www.nexis.com/docview/getDocForCuiReq?lni=4WMW-WG80-TXFX-11XY&csi=6443&oc=00240&perma=true
+// 5. https://www.nexis.com/docview/getDocForCuiReq?lni=59H1-X9C0-00CV-70R0&csi=7416&oc=00240&perma=true
+// 6. https://www.nexis.com/docview/getDocForCuiReq?lni=5BPR-K321-JDMN-J0G3&csi=339134&oc=00240&perma=true
+
+// http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?oc=00240&hnsd=f&hgn=t&lni=5BY7-7RC1-JC0G-402V&hns=t&perma=true&hv=t&hl=t&csi=270944%2C270077%2C11059%2C8411&secondRedirectIndicator=true
 
 function detectWeb(doc, url) {
 	//besides deciding whether it is a single item or multiple items
@@ -79,15 +85,15 @@ function scrape(doc, url) {
 	//e.g. http://www.lexisnexis.com/uk/nexis/
 	//or   http://www.lexisnexis.com/us/lnacademic/
 	//or   http://www.lexisnexis.com/lnacui2api/
+	//or   https://www.nexis.com/
 	var urlParts = url.split('/');
-	var base = urlParts.slice(0,Math.min(5, urlParts.length-1)).join('/') + '/';
-
-	var permaLink = ZU.xpathText(doc,'//input[@name="bookmarkUrl"]/@value');Z.debug(permaLink);
+	var minimum = (url.includes("www.nexis.com")) ? 3 : 5;
+	var base = urlParts.slice(0,Math.min(minimum, urlParts.length-1)).join('/') + '/';
 	
 	var risb = ZU.xpathText(doc,'//input[@name="risb"]/@value');
-	
 	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value') || "";
 	
+	var urlIntermediateSite;
 	var poststring="";
 	
 	// OLD interface
@@ -95,58 +101,60 @@ function scrape(doc, url) {
 	//if (hiddenInputs.length==0) hiddenInputs = ZU.xpath(doc, '//input[@type="hidden" and not(@name="tagData")]');
 	if (hiddenInputs.length>0) {
 		Z.debug("Old Interface");
-		Z.debug(hiddenInputs);
-		var urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
-		Z.debug(urlIntermediateSite);
-		
+		urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
 		for (var i=0; i<hiddenInputs.length; i++) {
 			poststring = poststring+"&"+encodeURIComponent(hiddenInputs[i].name)+"="+encodeURIComponent(hiddenInputs[i].value);
 		}
-		//poststring += "&focusTerms=&nextSteps=0";
 	} else {
 		// NEW interface
 		Z.debug("New interface");
-		urlIntermediateSite = "https://www.nexis.com/results/enhDelPrep.do?";
+		urlIntermediateSite = base + "results/enhDelPrep.do?";
 		var erskey = ZU.xpathText(doc, '//input[@id="ersKey"]/@value');
 		poststring = "mode=delivery_refworks&formatStr=GNBFULL&tagData=null&fromEnhListView=true&ersKey=" + erskey + "&random=" + Math.random() + "&offset=1";
-		//Z.debug(poststring);
 	}
+	//Z.debug(urlIntermediateSite);
+	//Z.debug(poststring);
 
 	ZU.doPost(urlIntermediateSite, poststring, function(text) {
-		// TODO possibly follow redirect from meta
-		//Z.debug(text);
+		// Follow redirect if there is a meta tag with http-equiv="refresh"
 		var m = text.match(/<meta[^>]*http-equiv="refresh"[^>]*content="\d+;url="([^>]*)"/);
-		//attr(doc, 'meta[http-equiv="refresh"]', 'content');
 		if (m) {
 			Z.debug("Redirected to " + m[1]);
 			var redirect = m[1];
 			ZU.doPost(redirect, poststring, function(redirectedText) {
-				scrapeRis(redirectedText, url);
+				scrapeRis(redirectedText, url, base, doc);
 			});
 		} else {
-			scrapeRis(text, url);
+			scrapeRis(text, url, base, doc);
 		}
 	});
 }
 		
 		
-function scrapeRis(text, url) {
+function scrapeRis(text, url, base, doc) {
+	var permaLink = ZU.xpathText(doc,'//input[@name="bookmarkUrl"]/@value');
+	var docNo = ZU.xpathText(doc,'//input[@name="docNo"]/@value') || "";
 	//Z.debug(text);
-	var urlRis = "https://www.nexis.com/delivery/rwBibiographicDelegate.do";
-	Z.debug(urlRis)
+	var urlRis = base + "delivery/rwBibiographicDelegate.do";
+	//Z.debug(urlRis);
 	var disb = /<input type="hidden" name="disb" value="([^"]+)">/.exec(text);
 	var initializationPage = /<input type="hidden" name="initializationPage" value="([^"]+)">/.exec(text);
+	if (!disb) Z.debug(/<title>([^<>]*)<\/title>/.exec(text)[1]);
 	
-	var poststring2 = "screenReaderSupported=false&delRange=cur&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1])+"delRange=all"//+"&selDocs=";
-	poststring2 = "screenReaderSupported=false&delRange=all&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1])
-	Z.debug(poststring2);//&delRange=sel&selDocs=2
+	var poststring = "screenReaderSupported=false&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1]);
+	if (docNo) {
+		poststring += "&delRange=sel&selDocs="+docNo;
+	} else {
+		poststring += "&delRange=all";
+	}
+	//Z.debug(poststring);
 
-	ZU.doPost(urlRis, poststring2, function(text) {
+	ZU.doPost(urlRis, poststring, function(text) {
 		var risData = text;
 		//type is GEN, but better NEWS (or CASE, JOUR)
 		text = text.replace(/^TY\s+-\s+GEN\s*$/mg, 'TY  - NEWS');
 		//the title information is sometimes somewhere else
-		if ( text.search(/^TI\s+-/m) == -1) {
+		if ( text.search(/^TI\s+-/m) == -1 && text.search(/^T1\s+-/m) == -1 ) {
 			if ( text.search(/^N2\s+-/m) != -1 ) {//see e.g. Test Case 5
 				text = text.replace(/^N2\s+-/m,"TI  -");
 				text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - JOUR');
@@ -180,7 +188,7 @@ function scrapeRis(text, url) {
 
 		trans.setHandler('itemDone', function (obj, item) {
 			
-			//item.url = permaLink;
+			if (permaLink) item.url = permaLink;
 			
 			//for debugging TODO: delete later
 			item.notes.push({note:risData});
