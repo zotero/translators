@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-23 19:48:28"
+	"lastUpdated": "2018-05-08 19:39:38"
 }
 
 /*
@@ -82,8 +82,7 @@ var callNumberTypes = [n.dcterms+"LCC", n.dcterms+"DDC", n.dcterms+"UDC"];
 // ontologies
 function getFirstResults(nodes, properties, onlyOneString) {
 	if (!nodes.length) nodes = [nodes];
-	for (let j=0; j<nodes.length; j++) {
-		let node = nodes[j];
+	for (let node of nodes) {
 		for(var i=0; i<properties.length; i++) {
 			var result = Zotero.RDF.getTargets(node, properties[i]);
 			if(result) {
@@ -133,13 +132,13 @@ function handleCreators(newItem, creators, creatorType) {
 		} else {
 			let c = { creatorType: creatorType };
 			c.lastName = getFirstResults(obj,
-										 [ n.foaf+"familyName", n.foaf+"lastName",
-										   n.foaf+"surname", n.foaf+"family_name",
-										   n.so+"familyName" ], true);
+				[ n.foaf+"familyName", n.foaf+"lastName",
+				  n.foaf+"surname", n.foaf+"family_name",
+				  n.so+"familyName" ], true);
 			c.firstName = getFirstResults(obj,
-										  [ n.foaf+"givenName", n.foaf+"firstName",
-											n.foaf+"givenname",
-											n.so+"givenName" ], true);
+				[ n.foaf+"givenName", n.foaf+"firstName",
+				  n.foaf+"givenname",
+				  n.so+"givenName" ], true);
 			if (!c.firstName) c.fieldMode = 1;
 			if (c.firstName || c.lastName) return c;
 
@@ -427,8 +426,9 @@ function detectType(newItem, node, ret) {
 			case 'visualartwork':
 			case 'sculpture':
 				t.so = 'artwork'; break;
-			//case 'datacatalog':
-			//case 'dataset':
+			case 'datacatalog':
+			case 'dataset':
+				t.so = 'journalArticle'; break;  //until dataset gets implemented
 			
 			// specials cases
 			case "article":
@@ -860,10 +860,10 @@ function importItem(newItem, node) {
 	for (var i=0; i<possibleCreatorTypes.length; i++) {
 		var creatorType = possibleCreatorTypes[i];
 		if(creatorType == "author") {
-			creators = getFirstResults(node, [n.bib+"authors", n.dc+"creator", n.dc1_0+"creator",
+			creators = getFirstResults(node, [n.bib+"authors", n.so+"author",
+				n.so+"creator", n.dc+"creator", n.dc1_0+"creator",
 				n.dcterms+"creator", n.eprints+"creators_name",
-				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor",
-				n.so+"author", n.so+"creator"]);
+				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor"]);
 		} else if(creatorType == "editor" || creatorType == "contributor") {
 			creators = getFirstResults(node, [n.bib+creatorType+"s", n.eprints+creatorType+"s_name",
 				n.so+creatorType]);
@@ -1094,7 +1094,7 @@ function importItem(newItem, node) {
 	var type = getFirstResults(node, [n.dc+"type", n.dc1_0+"type", n.dcterms+"type"], true);
 	
 	/**CUSTOM ITEM TYPE  -- Currently only Dataset **/
-	if (type && type.toLowerCase() == "dataset") {
+	if (type && (type.toLowerCase() == "dataset" || type.toLowerCase() == "datacatalog")) {
 		if (newItem.extra) {
 			newItem.extra += "\ntype: dataset";
 		}
@@ -1357,10 +1357,9 @@ function importNext(nodes, index, collections, resolve, reject) {
 			}
 			
 			var newItem = new Zotero.Item();
-			//newItem.itemID = Zotero.RDF.getResourceURI(node);
+			newItem.itemID = Zotero.RDF.getResourceURI(node);
 			
 			if (importItem(newItem, node)) {
-				delete newItem.itemID;
 				var maybePromise = newItem.complete();
 				if (maybePromise) {
 					maybePromise.then(function () {
@@ -1418,6 +1417,7 @@ var testCases = [
 				],
 				"date": "2015",
 				"ISBN": "9783658060268",
+				"itemID": "http://d-nb.info/1054873992",
 				"language": "http://id.loc.gov/vocabulary/iso639-2/ger",
 				"publisher": "Springer VS",
 				"attachments": [],
@@ -1465,6 +1465,7 @@ var testCases = [
 				"ISSN": "1544-4554",
 				"abstractNote": "The library catalog as a catalog of works was an infectious idea, which together with research led to reconceptualization in the form of the FRBR conceptual model. Two categories of lacunae emerge--the expression entity, and gaps in the model such as aggregates and dynamic documents. Evidence needed to extend the FRBR model is available in contemporary research on instantiation. The challenge for the bibliographic community is to begin to think of FRBR as a form of knowledge organization system, adding a final dimension to classification. The articles in the present special issue offer a compendium of the promise of the FRBR model.",
 				"issue": "5",
+				"itemID": "_:n82",
 				"pages": "360-368",
 				"publicationTitle": "Cataloging & Classification Quarterly",
 				"url": "http://dx.doi.org/10.1080/01639374.2012.682254",
@@ -1584,6 +1585,7 @@ var testCases = [
 				],
 				"date": "2017-06-05",
 				"abstractNote": "CodeMeta is a concept vocabulary that can be used to standardize the exchange of software metadata across repositories and organizations.",
+				"itemID": "_:n79",
 				"programmingLanguage": "JSON-LD",
 				"rights": "https://spdx.org/licenses/Apache-2.0",
 				"versionNumber": "2.0",
