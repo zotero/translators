@@ -2,14 +2,14 @@
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://(besjournals\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
+	"target": "^https?://(besjournals\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|toc|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
 	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-03 12:16:33"
+	"lastUpdated": "2018-05-10 18:59:07"
 }
 
 /*
@@ -348,24 +348,26 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				)
 			) {
 				ZU.doGet(pdfUrl, function(text) {
-					var m = text.match(
-						/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-					if(m) {
-						m[1] = ZU.unescapeHTML(m[1]);
-						Z.debug('PDF url: ' + m[1]);
-						pdfUrl = m[1];
-					} else {
-						Z.debug('Could not determine PDF URL.');
-						m = text.match(/<iframe[^>]*>/i);
+					if (text) {
+						var m = text.match(
+							/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
 						if(m) {
-							Z.debug(m[0]);
-							pdfUrl = null; // Clearly not the PDF
+							m[1] = ZU.unescapeHTML(m[1]);
+							Z.debug('PDF url: ' + m[1]);
+							pdfUrl = m[1];
 						} else {
-							Z.debug('No iframe found. This may be the PDF');
-							// It seems that on Mac, Wiley serves the PDF
-							// directly, not in an iframe, so try using this URL.
-							// TODO: detect whether this is a case before trying
-							// to fetch the PDF page above. See https://github.com/zotero/translators/pull/442
+							Z.debug('Could not determine PDF URL.');
+							m = text.match(/<iframe[^>]*>/i);
+							if(m) {
+								Z.debug(m[0]);
+								pdfUrl = null; // Clearly not the PDF
+							} else {
+								Z.debug('No iframe found. This may be the PDF');
+								// It seems that on Mac, Wiley serves the PDF
+								// directly, not in an iframe, so try using this URL.
+								// TODO: detect whether this is a case before trying
+								// to fetch the PDF page above. See https://github.com/zotero/translators/pull/442
+							}
 						}
 					}
 					
