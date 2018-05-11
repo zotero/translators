@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-20 03:52:15"
+	"lastUpdated": "2018-03-08 08:11:55"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 function detectWeb(doc, url) {
 	if (url.indexOf('/record/')>-1) {
-		var collections = ZU.xpath(doc, '//div[@itemscope]//span[@class="pull-right"]/span[contains(@class, "label-default")]');
+		var collections = ZU.xpath(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default")]');
 		for (var i=0; i<collections.length; i++) {
 			var type = collections[i].textContent.toLowerCase();
 			//Z.debug(type)
@@ -105,7 +105,7 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
@@ -128,9 +128,8 @@ function scrape(doc, url) {
 	//Z.debug(schemaType)
 	// use CSL JSON translator
 	ZU.processDocuments(cslURL, function(newDoc){
-		var text = ZU.xpathText(newDoc, '//div[@itemscope]//h3/following-sibling::pre');
+		var text = ZU.xpathText(newDoc, '//h3/following-sibling::pre');
 		//Z.debug(text)
-		var type = text.match(/"type": "(.+?)"/)[1]
 		text = text.replace(/publisher_place/, "publisher-place");
 		text = text.replace(/container_title/, "container-title");
 
@@ -148,7 +147,8 @@ function scrape(doc, url) {
 				item.extra = "DOI: " + doi;
 			}
 			//workaround while we don't have proper item type for data
-			if (schemaType.indexOf("Dataset") != -1) {
+			//if (schemaType && schemaType.includes("Dataset")) {
+			if (ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 				if (item.extra) {
 					item.extra += "\ntype: dataset";
 				}
@@ -159,10 +159,10 @@ function scrape(doc, url) {
 
 			//get PDF attachment, otherwise just snapshot.
 			if (pdfURL) {
-				item.attachments.push({url:pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf"})
+				item.attachments.push({url:pdfURL, title: "Zenodo Full Text PDF", mimeType: "application/pdf"});
 			}
 			else {
-				item.attachments.push({url:url, title: "Zenodo Snapshot", mimeType: "text/html"})
+				item.attachments.push({url:url, title: "Zenodo Snapshot", mimeType: "text/html"});
 			}
 			for (var i = 0; i<tags.length; i++) {
 				item.tags.push(tags[i].content);
@@ -171,10 +171,15 @@ function scrape(doc, url) {
 			//something is odd with zenodo's author parsing to CSL on some pages; fix it
 			//e.g. https://zenodo.org/record/569323
 			for (var i = 0; i< item.creators.length; i++) {
-				if (!item.creators[i].firstName && item.creators[i].lastName.indexOf(",")!=-1) {
-					item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
-					item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+				if (!item.creators[i].firstName) {
+					if (item.creators[i].lastName.indexOf(",")!=-1) {
+						item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
+						item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+					} else {
+						item.creators[i].fieldMode = true;
+					}
 				}
+				delete item.creators[i].creatorTypeID;
 			}
 
 			//Don't use Zenodo as university for theses
@@ -185,21 +190,14 @@ function scrape(doc, url) {
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
 
-			//Zenodo uses some non-existent CSL types we're fixing.
-			var zoteroType = {
-				"figure": "artwork",
-	 			"article": "report"
-			}
-
-			if (item.itemType == "document" && zoteroType[type]) {
-				item.itemType = zoteroType[type];
-			}
+			item.itemType = detectWeb(doc, url);
 			item.itemID = "";
 			item.complete();
 		});
 		trans.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -465,6 +463,66 @@ var testCases = [
 				],
 				"notes": [],
 				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://zenodo.org/record/1048320",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"creators": [
+					{
+						"lastName": "Carl Boettiger",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Maëlle Salmon",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Noam Ross",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Arfon Smith",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "Anna Krystalli",
+						"firstName": "",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [
+					{
+						"title": "Zenodo Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages",
+				"publisher": "Zenodo",
+				"abstractNote": "an R package for generating and working with codemeta",
+				"date": "2017-11-13",
+				"extra": "DOI: 10.5281/zenodo.1048320",
+				"url": "https://zenodo.org/record/1048320",
+				"libraryCatalog": "Zenodo",
+				"accessDate": "2018-03-07T13:45:35Z",
+				"shortTitle": "ropensci/codemetar",
+				"company": "Zenodo"
 			}
 		]
 	}

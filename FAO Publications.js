@@ -248,8 +248,6 @@ function scrape(doc, url) {
 			newItem.itemType = 'book';
 		}
 		//********** End dynamic-location variables **********
-
-
 	}
 	newItem.complete();
 }

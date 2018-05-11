@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-05-26 11:34:16"
+	"lastUpdated": "2018-01-30 09:40:41"
 }
 
 function detectImport() {
@@ -409,8 +409,8 @@ record.prototype.translate = function(item) {
 						.replace(	//chop off any translations, since they may have repeated $e fields
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
-		item.title = glueTogether(title.a, title.e, ': ');
-		item.title = clean(item.title);
+		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
+		item.title = item.title;
 
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
@@ -521,29 +521,29 @@ record.prototype.translate = function(item) {
 		
 		// Extract tags
 		// personal
-		this._associateTags(item, "600", "aqtxyz");
+		this._associateTags(item, "600", "aqtxyzv");
 		// corporate
-		this._associateTags(item, "610", "abxyz");
+		this._associateTags(item, "610", "abxyzv");
 		// meeting
-		this._associateTags(item, "611", "abtxyz");
+		this._associateTags(item, "611", "abtxyzv");
 		// uniform title
-		this._associateTags(item, "630", "acetxyz");
+		this._associateTags(item, "630", "acetxyzv");
 		// chronological
-		this._associateTags(item, "648", "atxyz");
+		this._associateTags(item, "648", "atxyzv");
 		// topical
-		this._associateTags(item, "650", "axyz");
+		this._associateTags(item, "650", "axyzv");
 		// geographic
-		this._associateTags(item, "651", "abcxyz");
+		this._associateTags(item, "651", "abcxyzv");
 		// uncontrolled
-		this._associateTags(item, "653", "axyz");
+		this._associateTags(item, "653", "axyzv");
 		// faceted topical term (whatever that means)
-		this._associateTags(item, "654", "abcyz");
+		this._associateTags(item, "654", "abcyzv");
 		// genre/form
-		this._associateTags(item, "655", "abcxyz");
+		this._associateTags(item, "655", "abcxyzv");
 		// occupation
-		this._associateTags(item, "656", "axyz");
+		this._associateTags(item, "656", "axyzv");
 		// function
-		this._associateTags(item, "657", "axyz");
+		this._associateTags(item, "657", "axyzv");
 		// curriculum objective
 		this._associateTags(item, "658", "ab");
 		// hierarchical geographic place name
@@ -574,11 +574,11 @@ record.prototype.translate = function(item) {
 		//  p = Name of part/section of a work
 		var titlesubfields = this.getFieldSubfields("245")[0];
 		item.title = glueTogether(
-			glueTogether(titlesubfields["a"], titlesubfields["b"], ": "),
-			glueTogether(titlesubfields["n"], titlesubfields["p"], ": "),
+			glueTogether(clean(titlesubfields["a"]), clean(titlesubfields["b"]), ": "),
+			glueTogether(clean(titlesubfields["n"]), clean(titlesubfields["p"]), ": "),
 			". "
 		);
-		item.title = clean(item.title);
+		item.title = item.title;
 		
 		// Extract edition
 		this._associateDBField(item, "250", "a", "edition");
@@ -832,11 +832,36 @@ var testCases = [
 				"publisher": "Por Juan Micòn, Impressor",
 				"attachments": [],
 				"tags": [
-					"Cuellar y Mosquera, Gabriel de",
-					"Jesuits",
-					"Masseta, Simon",
-					"Missions",
-					"Paraguay"
+					{
+						"tag": "Biography Early works to 1800"
+					},
+					{
+						"tag": "Cuellar y Mosquera, Gabriel de"
+					},
+					{
+						"tag": "Early works to 1800"
+					},
+					{
+						"tag": "Early works to 1800"
+					},
+					{
+						"tag": "Jesuits"
+					},
+					{
+						"tag": "Jesuits"
+					},
+					{
+						"tag": "Masseta, Simon"
+					},
+					{
+						"tag": "Missions"
+					},
+					{
+						"tag": "Paraguay"
+					},
+					{
+						"tag": "Paraguay"
+					}
 				],
 				"notes": [
 					{
@@ -874,14 +899,36 @@ var testCases = [
 				"url": "http://dx.doi.org/10.1007/978-3-642-00230-4",
 				"attachments": [],
 				"tags": [
-					"Aufsatzsammlung",
-					"Constitutional law",
-					"Eigentum",
-					"Finanzkrise",
-					"Haftung",
-					"Law",
-					"Online-Publikation",
-					"Ordnungspolitik"
+					{
+						"tag": "Aufsatzsammlung"
+					},
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Eigentum"
+					},
+					{
+						"tag": "Finanzkrise"
+					},
+					{
+						"tag": "Haftung"
+					},
+					{
+						"tag": "Law"
+					},
+					{
+						"tag": "Law"
+					},
+					{
+						"tag": "Online-Publikation"
+					},
+					{
+						"tag": "Ordnungspolitik"
+					}
 				],
 				"notes": [
 					{
