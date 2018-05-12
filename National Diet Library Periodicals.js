@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-05-11 00:25:43"
+	"lastUpdated": "2018-05-12 12:59:14"
 }
 
 /*
@@ -102,7 +102,11 @@ function setCreators(details, item) {
 					for (var creatorPart of creatorParts) {
 						if (creatorPart[0] === "name") {
 							creatorSplit = creatorPart[2].split(/\s+/);
-							newCreator.lastName = creatorSplit[0];
+							if (creatorSplit.length > 2) {
+								creatorSplit[1] = creatorSplit.slice(1).join(" ");
+							}
+							if (creatorSplit[1] && creatorSplit[1].match(/[0-9]{4}-[0-9]{4}/)) continue;
+							newCreator.lastName = creatorSplit[0].replace(/,$/, "");
 							newCreator.firstName = creatorSplit[1];
 							newCreator.creatorType = creatorType;
 						} else if (creatorPart[0] === "transcription") {
@@ -122,7 +126,26 @@ function setCreators(details, item) {
 				}
 			}
 		}
-	}
+	} else if (details.responsibility) {
+		for (var name of details.responsibility) {
+			var nameSplit = name.split(/\s*,\s*/);
+			if (nameSplit.length === 2) {
+				item.creators.push({
+					lastName: nameSplit[0],
+					firstName: nameSplit[1],
+					creatorType: "author"
+				});
+			} else if (item.itemType === "report") {
+				item.institution = name;
+			} else {
+				item.creators.push({
+					lastName: name,
+					fieldMode: 1,
+					creatorType: item
+				});
+			}
+		}
+ 	}
 }
 
 function setPublisherInfo(details, item) {
@@ -281,6 +304,9 @@ function scrape(jsonTxt) {
 	}
 
 	setFields(details, item, altLang);
+	if (item.itemType === "standard" && !item.number) {
+		item.itemType = "report";
+	}
 	setCreators(details, item);
 	setPublisherInfo(details, item);
 	setPublicationName(details, item, altLang);
@@ -303,6 +329,9 @@ function scrape(jsonTxt) {
 		item.date = dateSplit.join("-");
 	}
 
+	if (item.title) {
+		item.title = item.title.replace(/^\[(.*)\]$/, "$1");
+	}
 	item.url = getPageUrl(obj.risGrouping_parentIssToken_ssd);
 
 	item.multi._keys.title = {};
@@ -541,7 +570,7 @@ function doWeb(doc, url) {
 	},
 	*/
 
-    /*
+	/*
 	 * Item type mismatch
 	 *
 	{
@@ -565,9 +594,77 @@ function doWeb(doc, url) {
 	}
 	*/
 
+	/*
+	 * Item type mismatch
+	 *
+	{
+		"type": "web",
+		"url": "https://ndlonline.ndl.go.jp/#!/detail/R300000001-I000004398242-00",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Technical report",
+				"creators": [
+					{
+						"lastName": "Van Hoven",
+						"firstName": "Raymond L",
+						"creatorType": "author",
+						"multi": {
+							"_key": {}
+						}
+					}
+				],
+				"libraryCatalog": "National Diet Library Periodicals",
+				"url": "https://ndlonline.ndl.go.jp/detail/R300000001-I000004398242-00",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+ 			}
+ 		]
+ 	}
+	*/
+
+	/*
+	 * Item type mismatch
+	 *
+	{
+		"type": "web",
+		"url": "https://ndlonline.ndl.go.jp/#!/detail/R300000001-I000008532777-00",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Het goede en het mooie : de geschiedenis van Kris-Kras : ter nagedachtenis aan Ilona Fennema-Zboray (1914-2001) / Peter van den Hoven",
+				"creators": [
+					{
+						"lastName": "Hoven",
+						"firstName": "Peter van den",
+						"creatorType": "author",
+						"multi": {
+							"_key": {}
+						}
+					}
+				],
+				"date": "2004",
+				"ISBN": "9789054835295",
+				"language": "dut",
+				"libraryCatalog": "National Diet Library Periodicals",
+				"place": "Leidschendam",
+				"publisher": "Biblion Uitgeverij",
+				"shortTitle": "Het goede en het mooie",
+				"url": "https://ndlonline.ndl.go.jp/detail/R300000001-I000008532777-00",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+    */
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
-
 	{
 		"type": "web",
 		"url": "https://ndlonline.ndl.go.jp/#!/detail/R300000002-I028926334-00",
