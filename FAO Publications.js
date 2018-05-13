@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-13 22:05:39"
+	"lastUpdated": "2018-05-13 22:32:37"
 }
 
 /*
@@ -68,14 +68,6 @@ function scrape(doc, url) {
 		//********** Begin fixed-location variables **********
 
 		//Some variables always appear and appear at the same location in all document pages.
-		//title: use colon to connect main title and subtitle (if subtitle exists)
-		var mainTitle = ZU.xpathText(doc, '//*[@id="headerN1"]/h1');
-		var subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
-		if (subTitle == null) {
-			newItem.title = mainTitle;
-		} else {
-			newItem.title = mainTitle + ': ' + subTitle;
-		}
 		//abstract
 		var abs = doc.getElementById("mainContentN1");
 		if (abs) {
@@ -110,6 +102,18 @@ function scrape(doc, url) {
 			newItem.language = 'es';
 		} else {
 			newItem.language = 'other';
+		}
+		//title: use colon to connect main title and subtitle (if subtitle exists)
+		var mainTitle = ZU.xpathText(doc, '//*[@id="headerN1"]/h1');
+		var subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
+		if (subTitle == null) {
+			newItem.title = mainTitle;
+		} else {
+			if (newItem.language == 'zh') {
+				newItem.title = mainTitle + '：' + subTitle;
+			} else {
+				newItem.title = mainTitle + ': ' + subTitle;				
+			}
 		}
 		
 		//********** End fixed-location variables **********
@@ -294,7 +298,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "迁移、农业和农村发展: 解决迁移的根源并利用迁移的潜力促进发展",
+				"title": "迁移、农业和农村发展：解决迁移的根源并利用迁移的潜力促进发展",
 				"creators": [
 					{
 						"lastName": "FAO",
@@ -308,7 +312,6 @@ var testCases = [
 				"numPages": "20",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
-				"shortTitle": "迁移、农业和农村发展",
 				"url": "www.fao.org/3/a-i6064c.pdf",
 				"attachments": [
 					{
