@@ -68,17 +68,19 @@ function scrape(doc, url) {
 		//********** Begin fixed-location variables **********
 
 		//Some variables always appear and appear at the same location in all document pages.
-		//title: use en dash to connect main title and subtitle (if subtitle exists)
+		//title: use colon to connect main title and subtitle (if subtitle exists)
 		var mainTitle = ZU.xpathText(doc, '//*[@id="headerN1"]/h1');
 		var subTitle = ZU.xpathText(doc, '//h4[@class="csc-firstHeader h1"]');
 		if (subTitle == null) {
 			newItem.title = mainTitle;
 		} else {
-			newItem.title = mainTitle + ' – ' + subTitle;
-		}		
+			newItem.title = mainTitle + ': ' + subTitle;
+		}
 		//abstract
 		var abs = ZU.xpath(doc, '//div[@id="mainContentN1"]')[0].innerText;
-		newItem.abstractNote = abs.slice(abs.indexOf(':')+3);
+		if (abs) {
+			newItem.abstractNote = abs.slice(abs.indexOf('\n\n'));
+		}
 		//attach PDF
 		var pdfUrl = ZU.xpath(doc, '//*[@id="mainRightN1"]/div[2]/a')[0].href;
 		newItem.attachments.push({
@@ -91,29 +93,22 @@ function scrape(doc, url) {
 		//language: according to the last one (old format) or two (new format) letters of PDF file name
 		var lang_old = pdfUrl.charAt(pdfUrl.indexOf('pdf')-2);
 		var lang_new = pdfUrl.slice(pdfUrl.indexOf('pdf')-3, pdfUrl.indexOf('pdf')-1);
-		switch(true) {
-			case ((lang_old == 'a') || (lang_new == 'AR') || (lang_new == 'ar')): 
-				newItem.language = 'ar';
-				break;
-			case ((lang_old == 'c') || (lang_new == 'ZH') || (lang_new == 'zh')):
-				newItem.language = 'zh';
-				break;
-			case ((lang_old == 'e') || (lang_new == 'EN') || (lang_new == 'en')):
-				newItem.language = 'en';
-				break;
-			case ((lang_old == 'f') || (lang_new == 'FR') || (lang_new == 'fr')): 
-				newItem.language = 'fr';
-				break;
-			case ((lang_old == 'r') || (lang_new == 'RU') || (lang_new == 'ru')): 
-				newItem.language = 'ru';
-				break;
-			case ((lang_old == 's') || (lang_new == 'ES') || (lang_new == 'es')): 
-				newItem.language = 'es';
-				break;
-			default: 
-				newItem.language = 'other';
+		if ((lang_old == 'a') || (lang_new == 'AR') || (lang_new == 'ar')) {
+			newItem.language = 'ar';
+		} else if ((lang_old == 'c') || (lang_new == 'ZH') || (lang_new == 'zh')) {
+			newItem.language = 'zh';
+		} else if ((lang_old == 'e') || (lang_new == 'EN') || (lang_new == 'en')) {
+			newItem.language = 'en';
+		} else if ((lang_old == 'f') || (lang_new == 'FR') || (lang_new == 'fr')) {
+			newItem.language = 'fr';
+		} else if ((lang_old == 'r') || (lang_new == 'RU') || (lang_new == 'ru')) {
+			newItem.language = 'ru';
+		} else if ((lang_old == 's') || (lang_new == 'ES') || (lang_new == 'es')) {
+			newItem.language = 'es';
+		} else {
+			newItem.language = 'other';
 		}
-
+		
 		//********** End fixed-location variables **********
 
 
@@ -248,6 +243,8 @@ function scrape(doc, url) {
 			newItem.itemType = 'book';
 		}
 		//********** End dynamic-location variables **********
+
+
 	}
 	newItem.complete();
 }
