@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-11 14:48:28"
+	"lastUpdated": "2018-05-13 22:05:39"
 }
 
 /*
@@ -77,8 +77,11 @@ function scrape(doc, url) {
 			newItem.title = mainTitle + ': ' + subTitle;
 		}
 		//abstract
-		var abs = ZU.xpath(doc, '//div[@id="mainContentN1"]')[0].innerText;
+		var abs = doc.getElementById("mainContentN1");
 		if (abs) {
+			// Take innerText for preserving line breaks
+			abs = abs.innerText;
+			// Delete "Abstract:\n\n" at the beginning
 			newItem.abstractNote = abs.slice(abs.indexOf('\n\n'));
 		}
 		//attach PDF
@@ -281,7 +284,9 @@ function doWeb(doc, url) {
 	} else {
 		scrape(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+//Note on test cases: Because the pages use dynamic elements (which is also why the translator doesn't work for multiple item pages), automatic test in Scaffold doesn't work. Every time a test is needed, use "New Web" to manually add it./** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -289,7 +294,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "迁移、农业和农村发展 – 解决迁移的根源并利用迁移的潜力促进发展",
+				"title": "迁移、农业和农村发展: 解决迁移的根源并利用迁移的潜力促进发展",
 				"creators": [
 					{
 						"lastName": "FAO",
@@ -303,6 +308,7 @@ var testCases = [
 				"numPages": "20",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
+				"shortTitle": "迁移、农业和农村发展",
 				"url": "www.fao.org/3/a-i6064c.pdf",
 				"attachments": [
 					{
@@ -404,7 +410,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Save Food for a Better Climate – Converting the food loss and waste challenge into climate action",
+				"title": "Save Food for a Better Climate: Converting the food loss and waste challenge into climate action",
 				"creators": [
 					{
 						"lastName": "FAO",
@@ -419,6 +425,7 @@ var testCases = [
 				"numPages": "38",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
+				"shortTitle": "Save Food for a Better Climate",
 				"url": "www.fao.org/3/a-i8000e.pdf",
 				"attachments": [
 					{
