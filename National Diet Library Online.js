@@ -38,34 +38,10 @@
 /*
   Some special conditions:
 	OK convert Imperial dates to Gregorian
-	if responsibility contains "edited" or "editor," set author as editor.
-	if type is Kikaku and no standardno, set as report.
-	responsibility as author (or Institution, if report), if no other evidence of authorship.
+	OK if responsibility contains "edited" or "editor," set author as editor.
+	OK if type is Kikaku and no standardno, set as report.
+	OK responsibility as author (or Institution, if report), if no other evidence of authorship.
 */
-
-function getCookies(doc) {
-	var ret = {};
-	if (doc.cookie) {
-		var lst = doc.cookie.split(/; */);
-		for (var i=0,ilen=lst.length; i<ilen; i++) {
-			var pair = lst[i].split('=');
-			if (pair[1]) {
-				pair[1] = pair.slice(1).join("=");
-			}
-			if ("object" === typeof pair && pair.length) {
-				pair[1] = pair[1].split("|");
-				if (pair[1].length === 1) {
-					pair[1] = pair[1][0];
-				} else if (!pair[1].slice(-1)[0]) {
-					pair[1].pop();
-				}
-			}
-			ret[pair[0]] = pair[1];
-		}
-	}
-	return ret;
-}
-
 
 
 var typeMap = {
@@ -399,21 +375,21 @@ function scrape(jsonTxt) {
 					}
 				}
 				ZU.processDocuments(attachmentUrls,
-					function(doc, url) {
-						// There has to be a better way to do this.
-						var urlNode = ZU.xpath(doc, "//meta[@http-equiv='Refresh']")[0];
-						var attachmentUrl = urlNode.getAttribute('content');
-						attachmentUrl = attachmentUrl.split(';').slice(-1)[0].slice(4);
-						attachmentUrl = "http://dl.ndl.go.jp" + attachmentUrl;
-						item.attachments.push({
-							title: item.title,
-							mimeType: "application/pdf",
-							url: attachmentUrl
-						});
-					},
-					function() {
-						item.complete();
-					});
+									function(doc, url) {
+										// There has to be a better way to do this.
+										var urlNode = ZU.xpath(doc, "//meta[@http-equiv='Refresh']")[0];
+										var attachmentUrl = urlNode.getAttribute('content');
+										attachmentUrl = attachmentUrl.split(';').slice(-1)[0].slice(4);
+										attachmentUrl = "http://dl.ndl.go.jp" + attachmentUrl;
+										item.attachments.push({
+											title: item.title,
+											mimeType: "application/pdf",
+											url: attachmentUrl
+										});
+									},
+									function() {
+										item.complete();
+									});
 			} else {
 				item.complete();
 			}
@@ -427,40 +403,37 @@ function checkPageType(doc, url, returnData) {
 	var info = {};
 	// materialTitle class occurws only in search-result pages.
 	var multipleNodes = ZU.xpath(doc, "//a[contains(@class, 'materialTitle')]");
-	// Exactly one anchor with class optAct-linker occurs in item pages. This is the sole
-	// source of the ID needed to build the JSON urls, apart from the URL (which isn't correct
-	// in this phase).)
 	if (multipleNodes.length) {
-		
 		info.multiple = {};
-		//if (returnData) {
-			info.multiple.urlMap = {};
-			var rowNodes = ZU.xpath(doc, "//div[contains(@class, 'rowContainer')]");
-			for (var rowNode of rowNodes) {
-				var titleNode = ZU.xpath(rowNode, ".//a[contains(@class, 'materialTitle')]")[0];
-				if (titleNode) {
-					var prefixNote = "";
-					var hasDigital = ZU.xpath(rowNode, ".//p[contains(@class, 'digital')]/a")[0];
-					if (hasDigital) {
-						prefixNote = "[PDF] ";
-					}
-					var childUrl = titleNode.getAttribute("href");
-					var val = titleNode.textContent.trim();
-						info.multiple.urlMap[childUrl] = prefixNote + val;
+		info.multiple.urlMap = {};
+		var rowNodes = ZU.xpath(doc, "//div[contains(@class, 'rowContainer')]");
+		for (var rowNode of rowNodes) {
+			var titleNode = ZU.xpath(rowNode, ".//a[contains(@class, 'materialTitle')]")[0];
+			if (titleNode) {
+				var prefixNote = "";
+				var hasDigital = ZU.xpath(rowNode, ".//p[contains(@class, 'digital')]/a")[0];
+				if (hasDigital) {
+					prefixNote = "[PDF] ";
 				}
+				var childUrl = titleNode.getAttribute("href");
+				var val = titleNode.textContent.trim();
+				info.multiple.urlMap[childUrl] = prefixNote + val;
 			}
-		//}
+		}
 	} else {
+		// Exactly one anchor with class optAct-linker occurs in item pages. This is the sole
+		// source of the ID needed to build the JSON urls, apart from the URL (which isn't correct
+		// in this phase).)
 		var singleNode = ZU.xpath(doc, "//a[contains(@class, 'optAct-linker')]")[0];
 		if (singleNode) {
 			info.single = {};
-			//if (returnData) {
-				var key = singleNode.getAttribute('href');
-				key = key.replace(/^.*issToken=/, "").replace(/\&.*$/, "");
-				var url = "detail/" + key
-				info.single.url = url;
-			//}
+			var key = singleNode.getAttribute('href');
+			key = key.replace(/^.*issToken=/, "").replace(/\&.*$/, "");
+			var url = "detail/" + key;
+			info.single.url = url;
 		} else if (url.match(/detail\//)) {
+			// If we still don't know the page type, check to see if
+			// it's obviously a single by the url.
 			info.single = {};
 			info.single.url = url;
 		}
@@ -471,39 +444,28 @@ function checkPageType(doc, url, returnData) {
 function detectWeb(doc, url) {
 	// URL is not properly updated, and doc is initially delivered as a bare skeleton.
 	// To make things work, we need to monitor ALL changes to body.
-	//if (url.match(/\/detail\//)) {
-	//	return "journalArticle";
-	//} else if (url.match(/\/search\//)) {
-	//	return "multiple";
-	//} else {
-		var info = checkPageType(doc, url);
-		if (info.multiple) {
-			Zotero.debug("MULTIPLE");
-			return "multiple";
-		} else if (info.single) {
+	var info = checkPageType(doc, url);
+	if (info.multiple) {
+		return "multiple";
+	} else if (info.single) {
+		return "journalArticle";
+	} else {
+		var body = ZU.xpath(doc, "//body")[0];
+		Z.monitorDOMChanges(body, {childList: true, subtree: true});
+		if (info.single) {
 			return "journalArticle";
-		} else {
-			var body = ZU.xpath(doc, "//body")[0];
-			Z.monitorDOMChanges(body, {childList: true, subtree: true});
-			if (info.single) {
-				Zotero.debug("SINGLE");
-				return "journalArticle";
-			}
 		}
-		return false;
-	//}
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
-	var info = checkPageType(doc, url, true)
+	var info = checkPageType(doc, url, true);
 	if (info.single) {
-		Zotero.debug("Using this url for single: " + info.single.url);
 		callData([info.single.url], headers);
 	} else if (info.multiple) {
 		var urlMap = info.multiple.urlMap;
-		Zotero.debug("urlMap: " + JSON.stringify(urlMap, null, 2));
 		Z.selectItems(urlMap, function(itemUrls) {
-			Zotero.debug("itemUrls: " + JSON.stringify(itemUrls, null, 2));
 			var urls = Object.keys(itemUrls);
 			callData(urls, headers);
 		});
