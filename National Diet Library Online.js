@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015 Philipp Zumstein
+	Copyright © 2018 Frank Bennett
 
 	This file is part of Zotero.
 
