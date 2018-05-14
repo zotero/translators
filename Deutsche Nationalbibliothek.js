@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-14 18:46:15"
+	"lastUpdated": "2018-05-14 19:08:02"
 }
 
 /*
@@ -145,11 +145,6 @@ function scrape(doc, url) {
 
 
 function finalize(doc, item) {
-	//clean title, publisher string (e.g. non-sorting symbols)
-	//e.g. &#152;Das&#156; Adam-Smith-Projekt
-	item.title = item.title.replace(/[\x80-\x9F]/g,"");
-	if (item.publisher) item.publisher = item.publisher.replace(/[\x80-\x9F]/g,"");
-	
 	var toc = ZU.xpath(doc, '//a[contains(@title, "Inhaltsverzeichnis")]');
 	if (toc.length) {
 		item.attachments.push( {
