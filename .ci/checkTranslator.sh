@@ -154,6 +154,20 @@ main() {
     [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found.\n$TRANSLATOR"; exit 2; }
     [[ -d $TRANSLATOR ]]   && { usage "Must be a file not a directory."; exit 3; }
 
+    # For newly commited translators not only a warning
+    # but an error is shown for a bad or missing license.
+    local IFS=$'\n'
+    declare -a newtranslators=()
+    newtranslators+=($(git diff-index --diff-filter=A --name-only --find-renames master|grep -v '\.ci'|grep 'js$'))
+    if (( ${#newtranslators[@]} > 0 ));then
+        for t in "${newtranslators[@]}";do
+            if [ "$TRANSLATOR_BASENAME" == "$t" ];then
+              ERROR_CHECKS+=("badLicense")
+              unset WARN_CHECKS[0]
+            fi
+        done
+    fi
+
     declare -a errors=() warnings=()
     for check in "${ERROR_CHECKS[@]}";do $check || errors+=($check); done
     if [[ -z "$SKIP_WARN" ]];then
