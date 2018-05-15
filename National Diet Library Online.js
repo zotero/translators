@@ -445,6 +445,32 @@ function checkPageType(doc, url, returnData) {
 	return info;
 }
 
+/*
+ * About detectWeb() in this translator ...
+ *
+ * The NDL Online pages do not push state at the completion of page load.
+ * As a result, in search pages, and in item pages accessed by clicking
+ * through from a search list, the URL exposed in the DOM is only a stub,
+ * without the "detail" or "search" elements needed to detect the type of
+ * resource. Also, when clicking through from a search list, the URL stub
+ * does not change, so detectWeb() does not run automatically.
+ *
+ * The state associated with the stub URL is only a tiny skeleton with
+ * no meaningful content. To get the full loaded page, we need to use
+ * monitorDOMChanges on the entire body element, tracking all children.
+ * That works, but it gives rise to an additional problem.
+ *
+ * If this monitorDOMChanges() is applied to item pages accessed via
+ * selectItems(), it forces a rerun of detectWeb() in the middle of the
+ * call, which clobbers the selection so that nothing is downloaded.
+ *
+ * The solution is to attempt to identify single items by their URL
+ * as a fallback, applying monitorDOMChanges() to the page only when
+ * absolutely necessary. When URL detection works, there is no need
+ * to acquire the full DOM, since the URL includes the key needed
+ * to retrieve the raw JSON data that we use for translation.
+ */
+
 function detectWeb(doc, url) {
 	// URL is not properly updated, and doc is initially delivered as a bare skeleton.
 	// To make things work, we need to monitor ALL changes to body.
