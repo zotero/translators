@@ -205,13 +205,6 @@ var zenkakuRex = function () {
 	return zenkakuNums;
 }();
 
-var eraOffsetMap = {
-	"\u660E\u6CBB": 1867,
-	"\u5927\u6B63": 1911,
-	"\u662D\u548C": 1925,
-	"\u5e73\u6210": 1988
-};
-
 function getItemType(details) {
 	var ndlType = details.risMaterialType[0];
 	var itemType = typeMap[ndlType] ? typeMap[ndlType] : "report";
@@ -219,13 +212,19 @@ function getItemType(details) {
 }
 
 function convertImperialDate(dateStr) {
+	var eraOffsetMap = {
+		"\u660E\u6CBB": 1867,
+		"\u5927\u6B63": 1911,
+		"\u662D\u548C": 1925,
+		"\u5e73\u6210": 1988
+	};
 	// 元年
 	dateStr = dateStr.replace("\u5143\u5E74", "1\u5E74");
 	for (var i=0,ilen=zenkakuRex.length; i<ilen; i++) {
 		dateStr = dateStr.replace(zenkakuRex[i], i);
 	}
 	// 明治|大正|昭和|平成...年...月...日
-	var m = dateStr.match(/(\u660E\u6CBB|\u5927\u6B63|\u662D\u548c|\u5e73\u6210)([0-9]+)\u5374(?:([0-9]+)(?:\u6708([0-9]+)\u65e5)*)*/);
+	var m = dateStr.match(/(\u660E\u6CBB|\u5927\u6B63|\u662D\u548c|\u5e73\u6210)([0-9]+)\u5e74(?:([0-9]+)(?:\u6708([0-9]+)\u65e5)*)*/);
 	if (m) {
 		var era = m[1];
 		var year = (parseInt(m[2], 10) + eraOffsetMap[m[1]]);
@@ -233,7 +232,12 @@ function convertImperialDate(dateStr) {
 			var dateStr = [year, m[3], m[4]]
 				.filter(function(elem){
 					return elem;
-				});
+				}).map(function(elem){
+					while (elem.length < 2) {
+						elem = "0" + elem;
+					}
+					return elem;
+				}).join("-");
 		}
 	}
 	return dateStr;
