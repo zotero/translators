@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-03 23:33:23"
+	"lastUpdated": "2018-04-24 22:49:12"
 }
 
 // attr()/text() v2
@@ -403,7 +403,7 @@ function getArticleList(doc) {
 			|//td[@class="nonSerialResultsList"]/h3/a\
 			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
 			|//h2/a[contains(@class, "result-list-title-link")]\
-			|//ol[@class="article-list"]//a[contains(@class, "article-content-title")]\
+			|//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]\
 		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
