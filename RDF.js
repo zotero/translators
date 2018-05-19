@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:39:38"
+	"lastUpdated": "2018-05-19 20:20:51"
 }
 
 /*
@@ -429,6 +429,11 @@ function detectType(newItem, node, ret) {
 			case 'datacatalog':
 			case 'dataset':
 				t.so = 'journalArticle'; break;  //until dataset gets implemented
+			// We don't want to detect items from these auxiliary containers,
+			// and therefore we return false in these cases.
+			case 'person':
+			case 'organization':
+				return false;
 			
 			// specials cases
 			case "article":
@@ -974,6 +979,14 @@ function importItem(newItem, node) {
 		if (typeof(publisher[0]) == "string") {
 			newItem.publisher = publisher[0];
 		} else {
+			// Publisher can be in another container
+			try {
+				p = Zotero.RDF.getContainerElements(publisher[0]);
+			} catch(e) {}
+			if (p && p.length) {
+				publisher = p;
+			}
+
 			var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
 			if (type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
@@ -1276,9 +1289,11 @@ function getNodes(skipCollections) {
 		// figure out if this is a part of another resource, or a linked
 		// attachment, or a creator
 		if(Zotero.RDF.getSources(node, n.dcterms+"isPartOf") ||
+		   Zotero.RDF.getSources(node, n.so+"isPartOf") ||
 		   Zotero.RDF.getSources(node, n.bib+"presentedAt") ||
 		   Zotero.RDF.getSources(node, n.link+"link") ||
-		   Zotero.RDF.getSources(node, n.dcterms+"creator")) {
+		   Zotero.RDF.getSources(node, n.dcterms+"creator") ||
+		   Zotero.RDF.getSources(node, n.so+"author")) {
 			continue;
 		}
 		

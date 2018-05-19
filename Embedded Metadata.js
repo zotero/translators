@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-13 19:20:46"
+	"lastUpdated": "2018-05-19 20:21:59"
 }
 
 /*
@@ -147,7 +147,7 @@ function getPrefixes(doc) {
 
 	//also look in html and head elements
 	var prefixes = (doc.documentElement.getAttribute('prefix') || '')
-		+ (doc.head.getAttribute('prefix') || '');
+		+ (doc.head ? doc.head.getAttribute('prefix') || '': '');
 	var prefixRE = /(\w+):\s+(\S+)/g;
 	var m;
 	while(m = prefixRE.exec(prefixes)) {
@@ -307,6 +307,102 @@ function init(doc, url, callback, forceLoadRDF) {
 			}
 		}
 	}
+	
+
+
+
+	// Scraping methods for microdata.
+
+	
+	var schemaItems = ZU.xpath(doc, '//*[@itemscope]');
+	
+	// Assign the itemid to each item first, which is by default the url,
+	// but auxiliary items like person, organization need a different itemid.
+	var auxiliaryItems = ["http://schema.org/Person",
+		"https://schema.org/Organization"];
+	for (let i=0; i<schemaItems.length; i++) {
+		let itemType = schemaItems[i].getAttribute("itemtype");Z.debug(itemType)
+		if (auxiliaryItems.includes(itemType)) {
+			schemaItems[i].itemid = schemaItems[i].getAttribute("itemid") ||
+				(schemaItems[i].getAttribute("id") ? url+"#"+schemaItems[i].getAttribute("id") : url+"#itemid="+i);
+		} else {
+			schemaItems[i].itemid = url;
+		}
+	}
+	
+	function microdataValue(propertyNode) {
+		//see also https://www.w3.org/TR/microdata/#values
+		if (propertyNode.hasAttribute("itemscope")) {
+			return {itemid: true, value: propertyNode.itemid};
+		}
+		switch(propertyNode.tagName.toLowerCase()) {
+			case "meta":
+				return propertyNode.getAttribute("content");
+			case "audio":
+			case "embed":
+			case "iframe":
+			case "img":
+			case "source":
+			case "track":
+			case "video":
+				return propertyNode.getAttribute("src");
+			case "a":
+			case "area":
+			case "link":
+				return propertyNode.getAttribute("href");
+			case "object":
+				return propertyNode.getAttribute("data");
+			case "data":
+			case "meter":
+				return propertyNode.getAttribute("value");
+			case "time":
+				return propertyNode.getAttribute("datetime");
+			case "span"://non-standard, but can occur
+				if (propertyNode.childNodes.length > 1 && propertyNode.getAttribute("content")) {
+					return propertyNode.getAttribute("content");
+				}
+			default:
+				return propertyNode.textContent;
+		}
+	}
+	
+	var structuralTypes = ["http://schema.org/BreadcrumbList",
+		"http://schema.org/ListItem", "https://schema.org/ImageObject"];//, "https://schema.org/Organization"
+	for (var i=0; i<schemaItems.length; i++) {
+		var refs = schemaItems[i].getAttribute("itemref");//Currently itemref are not handled
+		
+		var typesList = schemaItems[i].getAttribute("itemtype");
+		var baseUrl = "";
+		if (typesList) {
+			if (structuralTypes.includes(typesList)) continue;
+			var types = typesList.split(" ");
+			for (var k=0; k<types.length; k++) {
+				types[k] = types[k].replace("https://", "http://");
+				statements.push([schemaItems[i].itemid, _prefixes.rdf+"type", types[k]]);
+			}
+			var endSignal = Math.max(types[0].lastIndexOf('/'), types[0].lastIndexOf('#'));
+			baseUrl = types[0].substr(0, endSignal+1);
+		}
+		
+		//get all properties
+		var properties = ZU.xpath(schemaItems[i], './/*[@itemprop]');
+		var exclude = ZU.xpath(schemaItems[i], './/*[@itemscope]//*[@itemprop]');
+		for (let j=0; j<properties.length; j++) {
+			if (exclude.indexOf(properties[j]) == -1) {
+				var propertyList = properties[j].getAttribute("itemprop");
+				var propertyValue = microdataValue(properties[j]);
+				//it is possible to assign the same value to multiple
+				//properties (separated by space) at the same time
+				var propertyNames = propertyList.split(" ");
+				for (let k=0; k<propertyNames.length; k++) {
+					statements.push([schemaItems[i].itemid, baseUrl+propertyNames[k], propertyValue]);
+				}
+			}
+		}
+	}
+	
+	
+	Z.debug(statements);
 
 	if(statements.length || forceLoadRDF) {
 		// load RDF translator, so that we don't need to replicate import code
@@ -318,14 +414,17 @@ function init(doc, url, callback, forceLoadRDF) {
 		});
 
 		translator.getTranslatorObject(function(rdf) {
-			for(var i=0; i<statements.length; i++) {
-				var statement = statements[i];
-				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
+			for (let statement of statements) {
+				if (statement[2].itemid) {
+					rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2].value, false);
+				} else {
+					rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
+				}
 			}
 			var nodes = rdf.getNodes(true);
 			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
-				(nodes.length ? "webpage":false);
+				(nodes.length ? "webpage" : false);
 
 			//if itemType is overridden, no reason to run RDF.detectWeb
 			if(exports.itemType) {
@@ -1217,7 +1316,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "apps.who.int",
 				"publisher": "World Health Organization",
-				"url": "http://www.who.int/iris/handle/10665/97603",
+				"url": "http://apps.who.int/iris/handle/10665/97603",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1508,6 +1607,47 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.haaretz.com/islamic-jihad-if-hunger-striker-dies-we-ll-respond-with-force-1.5387076",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Islamic Jihad: If hunger striker dies, we'll respond with force against Israel",
+				"creators": [
+					{
+						"firstName": "Jack",
+						"lastName": "Khoury",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shirly",
+						"lastName": "Seidler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ido",
+						"lastName": "Efrati",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-08-14T19:26:10+0300",
+				"abstractNote": "Islamic Jihad says it will no longer be committed to maintaining calm if Mohammed Allaan, who lost consciousness after 60-day hunger strike, dies.",
+				"libraryCatalog": "www.haaretz.com",
+				"publicationTitle": "haaretz.com",
+				"shortTitle": "Islamic Jihad",
+				"url": "https://www.haaretz.com/islamic-jihad-if-hunger-striker-dies-we-ll-respond-with-force-1.5387076",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
