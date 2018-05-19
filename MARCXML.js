@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-05-14 19:18:37"
+	"lastUpdated": "2018-05-19 14:10:27"
 }
 
 function detectImport() {
@@ -57,7 +57,7 @@ function doImport() {
 			for (let j in fields) {
 				//go through every datafield (corresponds to a MARC field)
 				var subfields = ZU.xpath(fields[j], "./marc:subfield", ns);
-				var tag;
+				var tag = "";
 				for (let k in subfields) {
 					//get the subfields and their codes...
 					var code = ZU.xpathText(subfields[k], "./@code", ns);
@@ -65,8 +65,6 @@ function doImport() {
 					//delete non-sorting symbols
 					//e.g. &#152;Das&#156; Adam-Smith-Projekt
 					sf = sf.replace(/[\x80-\x9F]/g,"");
-					//set tag to an empty string if this is the first subfield
-					if (k == "0") tag = "";
 					//concat all subfields in one datafield, with subfield delimiter and code between them
 					tag = tag + marc.subfieldDelimiter + code + sf;
 				}
