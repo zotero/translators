@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-19 20:20:51"
+	"lastUpdated": "2018-05-20 15:11:03"
 }
 
 /*
@@ -385,6 +385,8 @@ function detectType(newItem, node, ret) {
 				break;
 			case 'discussionforumposting':
 				t.so = 'forumPost'; break;
+			case 'qapage'://e.g. stackoverflow
+				t.soGuess = 'forumPost'; break;
 			case 'techarticle':
 			case 'apireference':
 				t.soGuess = 'report'; break;
@@ -433,6 +435,8 @@ function detectType(newItem, node, ret) {
 			// and therefore we return false in these cases.
 			case 'person':
 			case 'organization':
+			case 'place':
+			case 'postaladdress':
 				return false;
 			
 			// specials cases
@@ -684,6 +688,9 @@ function detectType(newItem, node, ret) {
 		case "music.album":
 			t.og = "audioRecording";
 		break;
+		case "slideshare:presentation":
+			t.og = "presentation";
+		break;
 		case "website":
 			t.og = "webpage";
 		break;
@@ -874,15 +881,17 @@ function importItem(newItem, node) {
 				n.so+creatorType]);
 		//get presenters in unpublished conference papers on eprints
 		} else if(creatorType == "presenter") {
-			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
+			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name", n.so+"author"]);
+		} else if(creatorType == "director") {
+			creators = getFirstResults(node, [n.so+"director", n.z+creatorType+"s"]);
 		} else if(creatorType == "castMember") {
-			creators = getFirstResults(node, [n.video+"actor"]);
+			creators = getFirstResults(node, [n.video+"actor", n.so+"actor", n.so+"actors", n.z+creatorType+"s"]);
 		} else if(creatorType == "scriptwriter") {
-			creators = getFirstResults(node, [n.video+"writer"]);
+			creators = getFirstResults(node, [n.video+"writer", n.z+creatorType+"s"]);
 		} else if(creatorType == "producer") {
-			creators = getFirstResults(node, [n.so+"producer"]);
+			creators = getFirstResults(node, [n.so+"producer", n.z+creatorType+"s"]);
 		} else if(creatorType == "programmer") {
-			creators = getFirstResults(node, [n.so+"author", n.codemeta+"maintainer"]);
+			creators = getFirstResults(node, [n.so+"author", n.codemeta+"maintainer", n.z+creatorType+"s"]);
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}

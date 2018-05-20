@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-19 20:21:59"
+	"lastUpdated": "2018-05-20 15:34:21"
 }
 
 /*
@@ -309,22 +309,34 @@ function init(doc, url, callback, forceLoadRDF) {
 	}
 	
 
-
-
 	// Scraping methods for microdata.
 
-	
 	var schemaItems = ZU.xpath(doc, '//*[@itemscope]');
+	// Some websites have also data in itemprop outside any itemscope (sigh)
+	var overallDocument = ZU.xpath(doc, '//html[not(@itemscope)]');
+	if (overallDocument.length>0) {
+		schemaItems[schemaItems.length] = overallDocument[0];
+	}
 	
-	// Assign the itemid to each item first, which is by default the url,
-	// but auxiliary items like person, organization need a different itemid.
 	var auxiliaryItems = ["http://schema.org/Person",
-		"https://schema.org/Organization"];
-	for (let i=0; i<schemaItems.length; i++) {
-		let itemType = schemaItems[i].getAttribute("itemtype");Z.debug(itemType)
+		"http://schema.org/Organization", "http://schema.org/Place",
+		"http://schema.org/PostalAddress"];
+	var structuralTypes = ["http://schema.org/BreadcrumbList",
+		"http://schema.org/ListItem", "https://schema.org/ImageObject",
+		"http://schema.org/SiteNavigationElement", "http://schema.org/WPAdBlock"];
+	// Traverse in reverse order to delete the elements of structural types
+	for (let i=schemaItems.length-1; i>=0; i--) {
+		let itemType = schemaItems[i].getAttribute("itemtype");
+		if (itemType) itemType = itemType.replace("https://", "http://")
+		//Z.debug(itemType)
+		if (structuralTypes.includes(itemType)) {
+			schemaItems.splice(i, 1);
+			continue;
+		}
+		// Assign the itemid to each item, which is by default the url,
+		// but auxiliary items like person, organization need a different itemid.
 		if (auxiliaryItems.includes(itemType)) {
-			schemaItems[i].itemid = schemaItems[i].getAttribute("itemid") ||
-				(schemaItems[i].getAttribute("id") ? url+"#"+schemaItems[i].getAttribute("id") : url+"#itemid="+i);
+			schemaItems[i].itemid = url+"#itemid="+i;
 		} else {
 			schemaItems[i].itemid = url;
 		}
@@ -366,15 +378,14 @@ function init(doc, url, callback, forceLoadRDF) {
 		}
 	}
 	
-	var structuralTypes = ["http://schema.org/BreadcrumbList",
-		"http://schema.org/ListItem", "https://schema.org/ImageObject"];//, "https://schema.org/Organization"
+	
 	for (var i=0; i<schemaItems.length; i++) {
 		var refs = schemaItems[i].getAttribute("itemref");//Currently itemref are not handled
 		
 		var typesList = schemaItems[i].getAttribute("itemtype");
 		var baseUrl = "";
 		if (typesList) {
-			if (structuralTypes.includes(typesList)) continue;
+			//if (structuralTypes.includes(typesList)) continue;
 			var types = typesList.split(" ");
 			for (var k=0; k<types.length; k++) {
 				types[k] = types[k].replace("https://", "http://");
@@ -382,6 +393,8 @@ function init(doc, url, callback, forceLoadRDF) {
 			}
 			var endSignal = Math.max(types[0].lastIndexOf('/'), types[0].lastIndexOf('#'));
 			baseUrl = types[0].substr(0, endSignal+1);
+		} else {
+			baseUrl = "http://schema.org/";
 		}
 		
 		//get all properties
@@ -390,7 +403,12 @@ function init(doc, url, callback, forceLoadRDF) {
 		for (let j=0; j<properties.length; j++) {
 			if (exclude.indexOf(properties[j]) == -1) {
 				var propertyList = properties[j].getAttribute("itemprop");
-				var propertyValue = microdataValue(properties[j]);
+				var propertyValue = microdataValue(properties[j]) || "";
+				// A common error is to put the author data in a A-tag, which
+				// then consequently gets evaluated to the src-parameter.
+				if (propertyList == "author" && properties[j].tagName == "A") {
+					propertyValue = properties[j].textContent;
+				}
 				//it is possible to assign the same value to multiple
 				//properties (separated by space) at the same time
 				var propertyNames = propertyList.split(" ");
@@ -401,8 +419,8 @@ function init(doc, url, callback, forceLoadRDF) {
 		}
 	}
 	
-	
-	Z.debug(statements);
+	// For debugging microdata parsing
+	//Z.debug(statements);
 
 	if(statements.length || forceLoadRDF) {
 		// load RDF translator, so that we don't need to replicate import code
@@ -416,7 +434,9 @@ function init(doc, url, callback, forceLoadRDF) {
 		translator.getTranslatorObject(function(rdf) {
 			for (let statement of statements) {
 				if (statement[2].itemid) {
-					rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2].value, false);
+					if (statement[2].value) {
+						rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2].value, false);
+					}
 				} else {
 					rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 				}
@@ -1647,6 +1667,42 @@ var testCases = [
 				"publicationTitle": "haaretz.com",
 				"shortTitle": "Islamic Jihad",
 				"url": "https://www.haaretz.com/islamic-jihad-if-hunger-striker-dies-we-ll-respond-with-force-1.5387076",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Libyen: Rebellen bereiten Angriff auf Bani Walid vor",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "AFP",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "dpa",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-09-04T14:55:40+02:00",
+				"abstractNote": "Die von Gadhafi-Anhängern geführte Stadt ist von Rebellentruppen eingekreist. Gespräche über eine friedliche Übergabe sind gescheitert, ein Angriff steht offenbar bevor.",
+				"language": "de",
+				"shortTitle": "Libyen",
+				"url": "https://www.zeit.de/politik/ausland/2011-09/libyen-bani-walid",
+				"websiteTitle": "ZEIT ONLINE",
 				"attachments": [
 					{
 						"title": "Snapshot"
