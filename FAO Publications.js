@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-13 22:32:37"
+	"lastUpdated": "2018-05-21 10:14:37"
 }
 
 /*
@@ -68,13 +68,33 @@ function scrape(doc, url) {
 		//********** Begin fixed-location variables **********
 
 		//Some variables always appear and appear at the same location in all document pages.
+		
 		//abstract
 		var abs = doc.getElementById("mainContentN1");
+		// The childrens of `abs` are the label "Abstract:" in a strong-tag,
+		// the abstract in several p-tags or text nodes directly, and possibly
+		// a note about other languages which begins also with a strong-tag.
 		if (abs) {
-			// Take innerText for preserving line breaks
-			abs = abs.innerText;
-			// Delete "Abstract:\n\n" at the beginning
-			newItem.abstractNote = abs.slice(abs.indexOf('\n\n'));
+			var children = abs.childNodes;
+			var abstractFound = false;
+			for (let child of children) {
+				if (child.tagName == "STRONG" || (child.nodeType == 1 && ZU.xpathText(child, './/strong'))) {
+					if (abstractFound) {
+						break;// stop when another strong tag is found
+					} else {
+						abstractFound = true;
+						continue;// exclude the label "Abstract"
+					}
+				}
+				if (newItem.abstractNote) {
+					if (newItem.abstractNote.slice(-1) !== "\n") {
+						newItem.abstractNote += "\n\n";
+					}
+					newItem.abstractNote += child.textContent;
+				} else {
+					newItem.abstractNote = child.textContent;
+				}
+			}
 		}
 		//attach PDF
 		var pdfUrl = ZU.xpath(doc, '//*[@id="mainRightN1"]/div[2]/a')[0].href;
@@ -139,7 +159,7 @@ function scrape(doc, url) {
 			confCode: ['رمز/شفرة الاجتماع', '会议代码', 'Meeting symbol/code', 'Symbole/code de la réunion', 'Cимвол/код мероприятия', 'Código/Símbolo de la reunión'],
 			session: ['Session', 'undefined', 'session'], //web page bug: in Russian page, session name is 'undefined'
 			tags: ['المعجم الكلمات الموضوع', 'AGROVOC', 'Agrovoc', 'АГРОВОК']
-		}
+		};
 		var existingMeta = {};
 		for (var i = 0; i < metaText.length; i++) {
 			for (var key in textVariable) {
@@ -263,7 +283,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//*[@class="item-image"]');
 	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href
+		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].text);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
