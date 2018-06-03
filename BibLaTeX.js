@@ -354,13 +354,13 @@ var citeKeyConversions = {
 		if (item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g, "_").replace(/,/g, "");
 		}
-		return "";
+		return "noauthor";
 	},
 	"t": function (flags, item) {
 		if (item["title"]) {
 			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
-		return "";
+		return "notitle";
 	},
 	"y": function (flags, item) {
 		if (item.date) {
@@ -369,7 +369,7 @@ var citeKeyConversions = {
 				return date.year;
 			}
 		}
-		return "????";
+		return "nodate";
 	}
 }
 
