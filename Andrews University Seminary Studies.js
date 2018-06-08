@@ -3,10 +3,10 @@
 	"label": "Andrews University Seminary Studies",
 	"creator": "Madeesh Kannan",
 	"target": "^https?://(\\\\w+\\\\.)*digitalcommons.andrews.edu/auss/vol[0-9]+/iss[0-9]+",
-	"minVersion": "3.0",
+	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2018-06-08 14:05:50"
