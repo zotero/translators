@@ -17,33 +17,21 @@
 
 	Copyright © 2018 Madeesh Kannan
 
-	This file is part of Zotero.
+	TODO add license
 
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
 	***** END LICENSE BLOCK *****
 */
 
 
 function detectWeb(doc, url) {
-	// limited support for the time being
 	var type = ZU.xpathText(doc,'//div[@id="document_type"]/p');
-	if (type == "Article")
-		return "journalArticle";
+
+	if (type == "Article" || type == "Dissertation Abstract" || type == "Book Review")
+		return "journalArticle";		// kinda odd but they all appear in the journal, so it ought to fit
 }
 
-function postProcess(doc, url, item) {
+function postProcess(doc, url, type, item) {
 	item.abstractNote = ZU.xpathText(doc,'//div[@id="abstract"]/p');
 	item.journalAbbreviation = "AUSS";
 	item.attachments.push({
@@ -62,7 +50,7 @@ function doWeb(doc, url) {
 		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
 		translator.setDocument(doc);
 		translator.setHandler("itemDone", function (t, i) {
-			postProcess(doc, url, i);
+			postProcess(doc, url, type, i);
 		});
 		translator.translate();
 	} else {
