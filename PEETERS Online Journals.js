@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-13 10:05:42"
+	"lastUpdated": "2018-06-13 10:38:27"
 }
 
 /*
@@ -34,6 +34,7 @@
 */
 
 
+
 function detectWeb(doc, url) {
 	return "journalArticle";
 }
@@ -43,6 +44,8 @@ function getElementAndTrim(doc, xpath) {
 }
 
 function addAuthor(item, name) {
+	// anneal case
+	name = name.toLowerCase().replace(/(?:^|\s|\/|\-)\w/g, (match) => match.toUpperCase());
 	item.creators.push(ZU.cleanAuthor(ZU.capitalizeTitle(name),
 														 'author', true));
 }
@@ -53,11 +56,11 @@ function doWeb(doc, url) {
 	item.itemType = detectWeb(doc, url);
 	item.title = getElementAndTrim(doc,'//b[contains(text(), "Title:")]/following-sibling::text()[1]');
 	var authors = getElementAndTrim(doc,'//b[contains(text(), "Author(s):")]/following-sibling::text()[1]').split(" , ");
-	for (auth in authors)
+	for (var auth in authors)
 		addAuthor(item, authors[auth]);
 
-	item.publicationTitle = getElementAndTrim(doc, '//b[contains(text(), "Journal:")]/following-sibling::text()[1]');
-	item.volume = getElementAndTrim(doc,'//b[contains(text(), "Volume:")]/following-sibling::a/text()[1]');
+	item.publicationTitle = getElementAndTrim(doc, '//b[contains(text(), "Journal:")]/following-sibling::a[1]/text()[1]');
+	item.volume = getElementAndTrim(doc,'//b[contains(text(), "Volume:")]/following-sibling::a[1]/text()[1]');
 	item.issue = getElementAndTrim(doc, '//b[contains(text(), "Issue:")]/following-sibling::text()[1]');
 	item.date = getElementAndTrim(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = getElementAndTrim(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
@@ -69,34 +72,34 @@ function doWeb(doc, url) {
 
 
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://poj.peeters-leuven.be/content.php?url=article&id=3141800",
+		"url": "http://poj.peeters-leuven.be/content.php?url=article&id=3141798",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Perspectives spirituelle et éthique du processus d'individuation chez Jung et ses implications thérapeutiques",
+				"title": "La honte",
 				"creators": [
 					{
-						"firstName": "Stéphanie",
-						"lastName": "LARRUE",
+						"firstName": "Ramón",
+						"lastName": "Martínez De Pison",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Marie-Rose",
-						"lastName": "TANNOUS",
+						"firstName": "Cynthia",
+						"lastName": "Bilodeau",
 						"creatorType": "author"
 					}
 				],
 				"date": "2015",
-				"DOI": "10.2143/CS.34.2.3141800",
-				"abstractNote": "Cet article vise à approfondir le processus d’individuation personnel comme un cadre de référence thérapeutique, et à en dégager les volets spirituel et éthique. Pour ce faire, les auteures s’appuient sur le modèle de Jung, ainsi que sur la vision de divers jungiens et néo-jungiens. Elles présentent ce chemin de construction individuelle de la personnalité comme un processus continu de la naissance à la mort. Par ailleurs, elles soulignent ses effets éthiques sur le thérapeute et sur le client, ainsi que sur la relation et sur le processus thérapeutiques.",
+				"DOI": "10.2143/CS.34.2.3141798",
+				"abstractNote": "La honte est une expérience universelle qui remplit une fonction sociale importante dans le maintien de liens relationnels ainsi que dans les comportements moraux et sociaux. Mais les sentiments démesurés de honte peuvent avoir des conséquences dévastatrices dans la vie des gens et peuvent ainsi devenir sources d’affliction spirituelle. Dans la première partie de cet article, nous soulignons la double influence de la religion et de la spiritualité face aux effets néfastes de la honte. La deuxième partie souligne les implications de la honte dans la pratique du counseling et de la psychothérapie. Enfin, la troisième partie présente différentes façons de composer avec la honte.",
 				"issue": "2",
 				"libraryCatalog": "PEETERS Online Journals",
-				"pages": "101-129",
+				"pages": "61-76",
+				"publicationTitle": "Counseling et spiritualité / Counselling and Spirituality",
 				"volume": "34",
 				"attachments": [],
 				"tags": [],
