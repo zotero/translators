@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-13 10:38:27"
+	"lastUpdated": "2018-06-13 12:44:52"
 }
 
 /*
@@ -66,6 +66,7 @@ function doWeb(doc, url) {
 	item.pages = getElementAndTrim(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = getElementAndTrim(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
 	item.abstractNote = getElementAndTrim(doc,'//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
+	item.url = url;
 
 	item.complete();
 }
@@ -100,6 +101,7 @@ var testCases = [
 				"libraryCatalog": "PEETERS Online Journals",
 				"pages": "61-76",
 				"publicationTitle": "Counseling et spiritualité / Counselling and Spirituality",
+				"url": "http://poj.peeters-leuven.be/content.php?url=article&id=3141798",
 				"volume": "34",
 				"attachments": [],
 				"tags": [],
