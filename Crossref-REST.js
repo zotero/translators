@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-19 07:00:19"
+	"lastUpdated": "2018-06-15 07:00:19"
 }
 
 /*
@@ -272,15 +272,46 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
+	// Reduce network traffic by selecting only required fields
+	let selectedFields = [
+		'type',
+		'container-title',
+		'short-container-title',
+		'volume',
+		'issue',
+		'ISBN',
+		'ISSN',
+		'publisher',
+		'publisher-location',
+		'event',
+		'abstract',
+		'issued',
+		'page',
+		'DOI',
+		'link',
+		'title',
+		'subtitle',
+		'author',
+		'editor',
+		'chair',
+		'translator'
+	];
+	
 	let query = null;
-	// if (item.DOI) {
-	// 	query = '?filter=doi:' + ZU.cleanDOI(item.DOI.toString());
-	// }
-	// else
-	if (item.query) {
+	
+	if (item.DOI) {
+		if(Array.isArray(item.DOI)) {
+			query = '?filter=doi:' + item.DOI.map(x => ZU.cleanDOI(x)).filter(x => x).join(',doi:');
+		} else {
+			query = '?filter=doi:' + ZU.cleanDOI(item.DOI);
+		}
+	}
+	else if (item.query) {
 		query = '?query.bibliographic=' + encodeURIComponent(item.query);
 	}
 	else return;
+	
+	query += '&select=' + selectedFields.join(',');
 	
 	if(Z.getHiddenPref('CrossrefREST.email')) {
 		query += '&mailto=' + Z.getHiddenPref('CrossrefREST.email');
