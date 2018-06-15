@@ -36,7 +36,7 @@
 
 
 function detectWeb(doc, url) {
-	// thing wrapper around DOI
+	// thin wrapper around DOI
 	return "journalArticle";
 }
 
