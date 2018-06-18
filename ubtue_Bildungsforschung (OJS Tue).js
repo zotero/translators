@@ -2,7 +2,7 @@
 	"translatorID": "bd3d109b-d5e5-44d4-aee1-e54b734eac96",
 	"label": "Bildungsforschung (OJS Tue)",
 	"creator": "Madeesh Kannan",
-	"target": "^https?://(\\\\\\\\w+\\\\\\\\.)*ojs4.uni-tuebingen.de/ojs/index.php/bildungsforschung/issue/view/",
+	"target": "^https?://ojs4.uni-tuebingen.de/ojs/index.php/bildungsforschung/issue/view/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
