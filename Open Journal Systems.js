@@ -13,7 +13,7 @@
 }
 
 function detectWeb(doc, url) {
-	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
+	var pkpLibraries = ZU.xpathText(doc, '//script[contains(@src, "/lib/pkp/js/")]/@src');
 	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
 		pkpLibraries.length >= 10) {
 		return 'journalArticle';
@@ -30,11 +30,11 @@ function doWeb(doc, url) {
 		if (!item.itemType) {
 			item.itemType = "journalArticle";
 		}
-		
+
 		if (!item.title) {
 			item.title = doc.getElementById('articleTitle');
 		}
-		
+
 		if (item.creators.length==0) {
 			var authorString = doc.getElementById("authorString");
 			if (authorString) {
@@ -42,15 +42,15 @@ function doWeb(doc, url) {
 				for (var i=0; i<authorsList.length; i++) {
 					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 				}
-		
+
 			}
 		}
-		
+
 		var doiNode = doc.getElementById('pub-id::doi');
 		if (!item.DOI && doiNode) {
 			item.DOI = doiNode.textContent;
 		}
-		
+
 		//abstract is supplied in DC:description, so it ends up in extra
 		//abstractNote is pulled from description, which is same as title
 		item.abstractNote = item.extra;
@@ -60,7 +60,7 @@ function doWeb(doc, url) {
 		if(!item.abstractNote) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
 		}
-		
+
 		//some journals link to a PDF view page in the header, not the PDF itself
 		for(var i=0; i<item.attachments.length; i++) {
 			if(item.attachments[i].mimeType == 'application/pdf') {
