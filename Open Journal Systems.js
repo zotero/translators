@@ -14,7 +14,6 @@
 
 function detectWeb(doc, url) {
 	var pkpLibraries = ZU.xpathText(doc, '//script[contains(@src, "/lib/pkp/js/")]/@src');
-	Z.debug(pkpLibraries);
 	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
 		pkpLibraries.length >= 10) {
 		return 'journalArticle';
