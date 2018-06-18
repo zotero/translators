@@ -2,14 +2,14 @@
 	"translatorID": "bd3d109b-d5e5-44d4-aee1-e54b734eac96",
 	"label": "Bildungsforschung (OJS Tue)",
 	"creator": "Madeesh Kannan",
-	"target": "https://ojs4.uni-tuebingen.de/ojs/index.php/bildungsforschung/issue/view/25",
+	"target": "^https?://(\\\\\\\\w+\\\\\\\\.)*ojs4.uni-tuebingen.de/ojs/index.php/bildungsforschung/issue/view/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-18 08:13:19"
+	"lastUpdated": "2018-06-18 13:42:37"
 }
 
 /*
@@ -37,8 +37,9 @@
 // since the COinS translator doesn't correctly return URLs as identifiers in pages with multiple items
 // this wrapper fixes that and calls the OJS translator on the individual objects
 function detectWeb(doc, url) {
-	// it's a TOC
-	return "multiple";
+	// it should always be a TOC (which can optionally be empty)
+	var links = ZU.xpath(doc, '//div[@class="tocTitle"]/a');
+	return links.length > 0 ? "multiple" : false;
 }
 
 function getLinks(doc) {
@@ -63,6 +64,9 @@ function processDoc(doc) {
 }
 
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) == false)
+		return;
+
 	Zotero.selectItems(getLinks(doc), function (items) {
 		if (!items)
 			return true;
@@ -76,3 +80,6 @@ function doWeb(doc, url) {
 }
 
 
+/** BEGIN TEST CASES **/
+var testCases = []
+/** END TEST CASES **/
