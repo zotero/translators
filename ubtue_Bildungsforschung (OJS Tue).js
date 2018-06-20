@@ -1,6 +1,6 @@
 {
 	"translatorID": "bd3d109b-d5e5-44d4-aee1-e54b734eac96",
-	"label": "Bildungsforschung (OJS Tue)",
+	"label": "ubtue_Bildungsforschung (OJS Tue)",
 	"creator": "Madeesh Kannan",
 	"target": "^https?://ojs4.uni-tuebingen.de/ojs/index.php/bildungsforschung/issue/view/",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-18 13:42:37"
+	"lastUpdated": "2018-06-20 08:03:01"
 }
 
 /*

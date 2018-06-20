@@ -1,6 +1,6 @@
 {
 	"translatorID": "b1e10e64-d7a0-4f4e-bf17-3c5defd9afb7",
-	"label": "PEETERS Online Journals",
+	"label": "ubtue_PEETERS Online Journals",
 	"creator": "Madeesh Kannan",
 	"target": "^https?://(\\\\\\\\w+\\\\\\\\.)*poj.peeters-leuven.be/content.php\\?url=article",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-13 12:44:52"
+	"lastUpdated": "2018-06-20 08:04:05"
 }
 
 /*
