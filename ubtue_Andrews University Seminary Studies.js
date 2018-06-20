@@ -1,6 +1,6 @@
 {
 	"translatorID": "cf4c7715-dcd4-45a1-bbea-a6c387b3fabd",
-	"label": "Andrews University Seminary Studies",
+	"label": "ubtue_Andrews University Seminary Studies",
 	"creator": "Madeesh Kannan",
 	"target": "^https?://(\\\\w+\\\\.)*digitalcommons.andrews.edu/auss/vol[0-9]+/iss[0-9]+",
 	"minVersion": "5.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-08 14:05:50"
+	"lastUpdated": "2018-06-20 08:03:53"
 }
 
 /*
