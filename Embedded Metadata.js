@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-13 19:20:46"
+	"lastUpdated": "2018-06-28 20:28:31"
 }
 
 /*
@@ -578,12 +578,14 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
+
 		if(newItem.publicationTitle) {
 			//remove publication title from the end of title (see #604)
 			//this can occur if we have to doc.title, og:title etc.
+			//Make sure we escape all regex special characters in pub title
 			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
-				+ newItem.publicationTitle + '\\s*$','i');
-			newItem.title = newItem.title.replace(removePubTitleRegex, '');
+				+ newItem.publicationTitle.replace(/([()\[\]\$\^\*\+\.?\|])/g, '\\$1') + '\\s*$','i');
+			newItem.title = newItem.title.replace(removePubTitleRegex, '');	
 		}
 	}
 
@@ -623,7 +625,7 @@ function addLowQualityMetadata(doc, newItem) {
 		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces) ||
 			ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces) ||
 			ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces) ||
-			ZU.xpathText(doc, '//html/@lang') || 
+			ZU.xpathText(doc, '//html/@lang') ||
 			doc.documentElement.getAttribute('xml:lang');
 	}
 
