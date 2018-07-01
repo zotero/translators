@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-28 20:28:31"
+	"lastUpdated": "2018-07-01 18:02:27"
 }
 
 /*
@@ -582,10 +582,10 @@ function addLowQualityMetadata(doc, newItem) {
 		if(newItem.publicationTitle) {
 			//remove publication title from the end of title (see #604)
 			//this can occur if we have to doc.title, og:title etc.
-			//Make sure we escape all regex special characters in pub title
+			//Make sure we escape all regex special chars in publication title
 			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
 				+ newItem.publicationTitle.replace(/([()\[\]\$\^\*\+\.?\|])/g, '\\$1') + '\\s*$','i');
-			newItem.title = newItem.title.replace(removePubTitleRegex, '');	
+			newItem.title = newItem.title.replace(removePubTitleRegex, '');
 		}
 	}
 
