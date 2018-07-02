@@ -1,7 +1,7 @@
 {
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
-	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
+	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller, czar",
 	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,8 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2015-05-21 22:39:54"
+	"lastUpdated": "2018-07-02 02:12:50"
 }
+
+// attr()/text() v2 per https://github.com/zotero/translators/issues/1277
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
+function textr(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 function detectWeb(doc, url) {
 	// See if this is a search results or folder results page
@@ -31,7 +36,7 @@ function detectWeb(doc, url) {
 /*
  * given the text of the delivery page, downloads an item
  */
-function downloadFunction(text, url, prefs) {
+function downloadFunction(text, url, prefs, doc) {
 	if (text.search(/^TY\s\s?-/m) == -1) {
 		text = "\nTY  - JOUR\n" + text;	//this is probably not going to work if there is garbage text in the begining
 	}
@@ -115,7 +120,15 @@ function downloadFunction(text, url, prefs) {
 			item.abstractNote = item.abstractNote
 				.replace(/\s*\[[^\]\.]+\]$/, ''); //to be safe, don't strip sentences
 		}
-
+		
+		item.tags = []; // reset junk tags from RIS
+		item.tags = text.match(/Subject Term:\s([^;]+)/g)
+		if (item.tags) {
+			for (var q=0;q<item.tags.length;q++) {
+				item.tags[q] = item.tags[q].replace('Subject Term: ','');
+			}
+		}
+		
 		// Get the accession number from URL if not in RIS
 		var an = url.match(/_(\d+)_AN/);
 		if (!item.callNumber) {
@@ -137,16 +150,16 @@ function downloadFunction(text, url, prefs) {
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
 			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
 				.replace(/#.*$/,'');
-			if(!prefs.hasFulltext) {	
-				// For items without full text,
-				// move the stable link to a link attachment
-				item.attachments.push({
-					url: item.url+"&scope=cite",
-					title: "EBSCO Record",
-					mimeType: "text/html",
-					snapshot: false
-				});
-				item.url = undefined;
+
+			if(prefs.hasFulltext) {	 // download full text as note whenever available, even if PDF is available too; snapshot preferable, if possible
+				var fulltextP = doc.querySelectorAll('.full-text-container > section > p');
+				var fulltext = "";
+				for (var paragraph of fulltextP) {
+					fulltext = fulltext + paragraph.outerHTML;
+				}
+				if (fulltext) {
+					item.notes.push({note: fulltext});
+				}
 			}
 		}
 		
@@ -158,14 +171,15 @@ function downloadFunction(text, url, prefs) {
 			});
 			item.complete();
 		} else if(prefs.fetchPDF) {
-			var arguments = urlToArgs(url);
+			var urlarguments = urlToArgs(url);
 			if (prefs.mobile){
+				Z.debug("flag mobile");
 				//the PDF is not embedded in the mobile view
 				var id = url.match(/([^\/]+)\?sid/)[1];
 				var pdfurl = "/ehost/pdfviewer/pdfviewer/"
 					+ id 
-					+ "?sid=" + arguments["sid"]
-					+ "&vid=" + arguments["vid"];
+					+ "?sid=" + urlarguments["sid"]
+					+ "&vid=" + urlarguments["vid"];
 					item.attachments.push({
 						url:pdfurl,
 						title: "EBSCO Full Text",
@@ -174,10 +188,9 @@ function downloadFunction(text, url, prefs) {
 					item.complete();
 			}
 			else {
-			
 				var pdf = "/ehost/pdfviewer/pdfviewer?"
-					+ "sid=" + arguments["sid"]
-					+ "&vid=" + arguments["vid"];
+					+ "sid=" + urlarguments["sid"]
+					+ "&vid=" + urlarguments["vid"];
 				Z.debug("Fetching PDF from " + pdf);
 
 				ZU.processDocuments(pdf,
@@ -210,6 +223,11 @@ function downloadFunction(text, url, prefs) {
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
 			item.complete();
+		}
+		
+		if (!prefs.hasFulltext && !prefs.pdfURL) {
+			// if no full text or PDF, do not save citation URL
+			item.url = undefined;
 		}
 	});
 
@@ -313,13 +331,13 @@ function urlToArgs(url) {
 	//reset index
 	argumentsRE.lastIndex = 0;
 
-	var arguments = {};
+	var urlarguments = {};
 	var arg;
 	while(arg = argumentsRE.exec(url)) {
-		arguments[arg[1]] = arg[2];
+		urlarguments[arg[1]] = arg[2];
 	}
 
-	return arguments;
+	return urlarguments;
 }
 
 //given a pdfviewer page, extracts the PDF url
@@ -491,22 +509,21 @@ function doDelivery(doc, itemInfo) {
 	if(prefs.itemTitle) {
 		prefs.itemTitle = ZU.trimInternal(prefs.itemTitle).replace(/([^.])\.$/, '$1');
 	}
-	//Z.debug(prefs);
 
 	var postURL = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
 	if (!postURL){
 		postURL = doc.location.href; //fallback for mobile site 
 	}
-	var arguments = urlToArgs(postURL);
-
+	var urlarguments = urlToArgs(postURL);
+	
 	postURL = "/ehost/delivery/ExportPanelSave/"
 		+ urlSafeEncodeBase64(folderData.Db + "__" + folderData.Term + "__" + folderData.Tag)
-		+ "?sid=" + arguments["sid"]
-		+ "&vid=" + arguments["vid"]
-		+ "&bdata="+arguments["bdata"]
+		+ "?vid=" + urlarguments["vid"]
+		+ "&sid=" + urlarguments["sid"]
+		+ "&bdata="+urlarguments["bdata"]
 		+ "&theExportFormat=1";	//RIS file
 	ZU.doGet(postURL, function (text) {
-		downloadFunction(text, postURL, prefs);
+		downloadFunction(text, postURL, prefs, doc);
 	});
 }
 
