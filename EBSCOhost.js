@@ -12,10 +12,6 @@
 	"lastUpdated": "2018-07-02 02:12:50"
 }
 
-// attr()/text() v2 per https://github.com/zotero/translators/issues/1277
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
-function textr(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
 	// See if this is a search results or folder results page
@@ -150,7 +146,6 @@ function downloadFunction(text, url, prefs, doc) {
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
 			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
 				.replace(/#.*$/,'');
-
 			if(prefs.hasFulltext) {	 // download full text as note whenever available, even if PDF is available too; snapshot preferable, if possible
 				var fulltextP = doc.querySelectorAll('.full-text-container > section > p');
 				var fulltext = "";
@@ -222,12 +217,11 @@ function downloadFunction(text, url, prefs, doc) {
 				);}
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
+			if (!prefs.hasFulltext) {
+				// if no PDF or full text, do not save citation URL
+				item.url = undefined;
+			}
 			item.complete();
-		}
-		
-		if (!prefs.hasFulltext && !prefs.pdfURL) {
-			// if no full text or PDF, do not save citation URL
-			item.url = undefined;
 		}
 	});
 
@@ -515,7 +509,7 @@ function doDelivery(doc, itemInfo) {
 		postURL = doc.location.href; //fallback for mobile site 
 	}
 	var urlarguments = urlToArgs(postURL);
-	
+
 	postURL = "/ehost/delivery/ExportPanelSave/"
 		+ urlSafeEncodeBase64(folderData.Db + "__" + folderData.Term + "__" + folderData.Tag)
 		+ "?vid=" + urlarguments["vid"]
