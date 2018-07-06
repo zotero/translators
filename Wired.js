@@ -49,8 +49,6 @@ function detectWeb(doc, url) {
 	} else return null;
 }
 
-// to do: homepage at .co.uk; category/tag/search pages on .co.uk
-
 
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
