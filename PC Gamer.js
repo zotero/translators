@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-01 22:01:18"
+	"lastUpdated": "2018-07-07 03:30:19"
 }
 
 /*
@@ -61,6 +61,7 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) { // correct bad metadata in here
 		item.itemType = "blogPost";
 		item.publicationTitle = "PC Gamer";
+		item.language = "en-US";
 		item.creators = []; // reset bad author metadata
 		var authorMetadata = doc.querySelectorAll('a[rel="author"]');
 		for (var author of authorMetadata) {
@@ -81,9 +82,10 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('div.listingResults > div > a[href]');
+	var rows = doc.querySelectorAll('div#content > div.mainCarousel span.article-name, div.listingResults h3');
+	var links = doc.querySelectorAll('div#content > div.mainCarousel div.feature-block-item-wrapper > a:first-of-type, div.listingResults div.listingResult > a:first-of-type');
 	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
+		let href = links[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -132,7 +134,7 @@ var testCases = [
 				"date": "2017-02-09T22:22:41+00:00",
 				"abstractNote": "Anjali Bhimani is a self-proclaimed Chaotic Good who thinks Soldier: 76 and Ana are secretly hooking up.",
 				"blogTitle": "PC Gamer",
-				"language": "EN_GB",
+				"language": "en-US",
 				"url": "https://www.pcgamer.com/the-voice-behind-symmetra-on-working-with-blizzard-overwatch-dream-couples-and-dd/",
 				"attachments": [
 					{
@@ -177,7 +179,7 @@ var testCases = [
 				"date": "2018-02-01T20:52:00+00:00",
 				"abstractNote": "We've collected over 100 of our favorite mods for Bethesda's fantasy RPG.",
 				"blogTitle": "PC Gamer",
-				"language": "EN-US",
+				"language": "en-US",
 				"url": "https://www.pcgamer.com/best-skyrim-mods/",
 				"attachments": [
 					{
@@ -189,6 +191,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pcgamer.com/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
