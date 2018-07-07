@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-06 02:44:35"
+	"lastUpdated": "2018-07-07 19:31:28"
 }
 
 /*
@@ -44,7 +44,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (/\/(\d{4}\/\d{2}|story|article)\//.test(url)) {
 		return "magazineArticle";
-	} else if (/\/(category|tag|topic)\/|search\/?\?q=|wired\.com\/?$|wired\.co\.uk\/?$/.test(url)) {
+	} else if (/\/(category|tag|topic)\/|search\/?\?q=|wired\.com\/?$|wired\.co\.uk\/?$/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	} else return null;
 }
@@ -57,7 +57,7 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = "magazineArticle";
-		if (url.indexOf("wired.co.uk/article") != -1) {
+		if (url.includes("wired.co.uk/article")) {
 			item.publicationTitle = "Wired UK";
 			item.ISSN = "1357-0978";
 			item.date = Zotero.Utilities.strToISO(text(doc,'div.a-author__article-date')); // use LSON-LD when implemented in EM
@@ -72,7 +72,7 @@ function scrape(doc, url) {
 			}
 			if (item.tags) { // catch volume/issue if in tags
 				var match = null;
-				for (var tagCount in item.tags) {
+				for (let tagCount of item.tags) {
 					match = item.tags[tagCount].match(/^(\d{2})\.(\d{2})$/);
 					if (match) {
 						item.volume = match[1];
