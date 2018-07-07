@@ -72,7 +72,7 @@ function scrape(doc, url) {
 			}
 			if (item.tags) { // catch volume/issue if in tags
 				var match = null;
-				for (let tagCount of item.tags) {
+				for (let tagCount in item.tags) {
 					match = item.tags[tagCount].match(/^(\d{2})\.(\d{2})$/);
 					if (match) {
 						item.volume = match[1];
