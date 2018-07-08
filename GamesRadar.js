@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
-	} else return null;
+	}
 }
 
 
@@ -54,7 +54,9 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
 		item.itemType = "blogPost";
 		item.publicationTitle = "GamesRadar";
-		item.language = item.language.replace('EN','en').replace('_','-');
+		if (item.language) {
+			item.language = item.language.replace('EN','en').replace('_','-');
+		}
 		item.creators = []; // reset bad author metadata
 		var authorMetadata = doc.querySelectorAll('a[rel="author"]');
 		for (let author of authorMetadata) {
