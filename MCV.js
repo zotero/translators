@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 02:49:52"
+	"lastUpdated": "2018-07-08 02:58:59"
 }
 
 /*
@@ -56,8 +56,9 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		item.itemType = "blogPost";
+		item.itemType = "magazineArticle";
 		item.publicationTitle = "MCV";
+		item.ISSN = "1469-4832";
 		item.date = attr(doc,'meta[name="published"]','content');
 		item.title = item.title.replace(/- MCV$/,'');
 		item.language = item.language.replace('us','US');
