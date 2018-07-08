@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-07 19:31:28"
+	"lastUpdated": "2018-07-08 00:46:50"
 }
 
 /*
@@ -72,12 +72,12 @@ function scrape(doc, url) {
 			}
 			if (item.tags) { // catch volume/issue if in tags
 				var match = null;
-				for (let tagCount in item.tags) {
-					match = item.tags[tagCount].match(/^(\d{2})\.(\d{2})$/);
+				for (let tag of item.tags) {
+					match = tag.match(/^(\d{2})\.(\d{2})$/);
 					if (match) {
 						item.volume = match[1];
 						item.issue = parseInt(match[2]);
-						item.tags.splice(tagCount,1);
+						item.tags.splice(item.tags.indexOf(tag),1);
 						break;
 					}
 				}
