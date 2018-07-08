@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 18:09:39"
+	"lastUpdated": "2018-07-08 18:14:25"
 }
 
 /*
@@ -45,57 +45,7 @@ function detectWeb(doc, url) {
 	}
 }
 
-/*
-FW.Scraper({
-itemType         : 'blogPost',
-detect           : FW.Url().match(/\/news\//),
-title            : FW.Xpath('//meta[@property="og:title"]/@content').text(),
-attachments      : [{ url: FW.Url(),
-  title:  "Artforum snapshot",
-  type: "text/html" }],
-date             : FW.Xpath('//div[@id="NewsContent"]/h6').text().replace(/POSTED\s/,""),
-blogTitle        : "Artforum",
-language         : "en-US",
-abstractNote     : FW.Xpath('//meta[@property="og:description"]/@content').text()
-});
 
-FW.Scraper({
-itemType         : 'blogPost',
-detect           : FW.Url().match(/\/(diary|picks|video|film|passages|slant|museums|words)\/id=/),
-title            : FW.Xpath('//meta[@property="og:title"]/@content').text(),
-attachments      : [{ url: FW.Url(),
-  title:  "Artforum snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//meta[@name="author"]/@content').text().replace(/As told to\s/,"").cleanAuthor("author"), // /words/ uses "As told to" in the byline metadata, and better to regex it out than to pull from the HTML instead
-date             : FW.Xpath('//div[@class="Topper"]/h6').text().replace(/(\d{2})\.(\d{2})\.(\d{2})/, "20$3-$1-$2,"),
-blogTitle        : "Artforum",
-language         : "en-US",
-abstractNote     : FW.Xpath('//meta[@property="og:description"]/@content').text()
-});
-
-FW.Scraper({
-itemType         : 'magazineArticle',
-detect           : FW.Url().match(/\/inprint\/issue=\d{6}&id=/),
-title            : FW.Xpath('//div[@class="Text"]/h1').text(),
-attachments      : [{ url: FW.Url(),
-  title:  "Artforum snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//meta[@name="author"]/@content').text().cleanAuthor("author"),
-date             : FW.Xpath('//div[@class="Text"]/h6').text(),
-blogTitle        : "Artforum",
-language         : "en-US",
-abstractNote     : FW.Xpath('//meta[@property="og:description"]/@content').text()
-});
-
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/\/search\//),
-choices          : {
-  titles  :  FW.Xpath('//p[@class="Title"]/a').text().trim(),
-  urls    :  FW.Xpath('//p[@class="Title"]/a').key("href").trim()
-}
-});
-*/
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata (EM)
