@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 18:14:25"
+	"lastUpdated": "2018-07-08 19:56:36"
 }
 
 /*
@@ -39,6 +39,7 @@
 
 function detectWeb(doc, url) {
 	if (/-\d{5,}$/.test(url)) {
+		if (doc.querySelector('h3.print-article__issue-title')) return "magazineArticle";
 		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -113,11 +114,10 @@ function doWeb(doc, url) {
 				for (var i in items) {
 					articles.push(i);
 				}
-				Z.debug(articles);
 				ZU.processDocuments(articles, scrape);
 			});
 			break;
-		case "blogPost":
+		default:
 			scrape(doc, url);
 			break;
 	}
