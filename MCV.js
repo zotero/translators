@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-05 01:11:13"
+	"lastUpdated": "2018-07-08 02:49:52"
 }
 
 /*
@@ -44,7 +44,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (/\/(business|development|esports|influence)\//.test(url)) {
 		return "blogPost";
-	} else if (url.indexOf("/search?query=") != -1) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	} else return null;
 }
@@ -60,6 +60,7 @@ function scrape(doc, url) {
 		item.publicationTitle = "MCV";
 		item.date = attr(doc,'meta[name="published"]','content');
 		item.title = item.title.replace(/- MCV$/,'');
+		item.language = item.language.replace('us','US');
 		if (item.creators[0].lastName == "Editors") {
 			delete item.creators[0].firstName;                    // remove the firstName param
 			item.creators[0].lastName = "MCV Editors"; // write the desired name to lastName
@@ -76,8 +77,8 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.m-card--header > h2');
-	var links = doc.querySelectorAll('a.m-card--header');
+	var rows = doc.querySelectorAll('.m-image-hero--header-text, .m-card--header');
+	var links = doc.querySelectorAll('.m-image-hero--text-panel > a, .m-card--header');
 	for (let i=0; i<rows.length; i++) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
