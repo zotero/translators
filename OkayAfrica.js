@@ -1,6 +1,6 @@
 {
 	"translatorID": "c7c72227-22c0-42d2-8041-9edbfe598160",
-	"label": "Okay Africa",
+	"label": "OkayAfrica",
 	"creator": "czar",
 	"target": "^https?://(www\\.)?okayafrica\\.com",
 	"minVersion": "3.0",
