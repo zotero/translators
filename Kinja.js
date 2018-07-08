@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
-	} else return null;
+	}
 }
 
 
