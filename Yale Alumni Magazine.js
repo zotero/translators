@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 21:06:46"
+	"lastUpdated": "2018-07-08 21:24:00"
 }
 
 /*
@@ -90,7 +90,8 @@ function scrape(doc, url) {
 
 	item.attachments.push({
 		title: "Yale Alumni Magazine snapshot",
-		mimeType: "text/html"
+		mimeType: "text/html",
+		document: doc
 	});
 
 	item.complete();
