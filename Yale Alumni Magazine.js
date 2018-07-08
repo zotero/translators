@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 21:04:06"
+	"lastUpdated": "2018-07-08 21:06:46"
 }
 
 /*
@@ -257,6 +257,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://yalealumnimagazine.com/blogs/8-daily-snap/law",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://yalealumnimagazine.com/search?utf8=%E2%9C%93&site_search=zax&commit=Search",
 		"items": "multiple"
 	}
 ]
