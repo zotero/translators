@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-15 11:41:00"
+	"lastUpdated": "2018-07-08 11:41:00"
 }
 
 function detectSearch(items) {
@@ -54,9 +54,14 @@ function doSearch(items) {
 function fixJSON(text) {
 	try {
 		var item = JSON.parse(text);
-		
+	  //Z.debug(item)
 		if(item.type == 'misc') item.type = 'article-journal';
-		
+		if (item.type == 'dataset') {
+			item.note = "type: dataset";
+			if (item["container-title"]){
+			item.note += "\ncontainer-title: " + item["container-title"];
+		}
+		}
 		if(item.issued && item.issued.raw) item.issued.literal = item.issued.raw;
 		if(item.accessed && item.accessed.raw) item.accessed.literal = item.accessed.raw;
 		
@@ -80,7 +85,12 @@ function processDOIs(dois) {
 		trans.setString(text);
 		trans.setHandler("itemDone", function(obj, item) {
 			if (!item.DOI) {
-				item.extra = "DOI: " + doi;
+				if (item.extra) {
+						item.extra +="\nDOI: " + doi;
+				}
+				else {
+					item.extra = "DOI: " + doi;
+				}
 			}
 			item.complete();
 		});
