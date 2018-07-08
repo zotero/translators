@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 		return "magazineArticle";
 	} else if (/\/(category|tag|topic)\/|search\/?\?q=|wired\.com\/?$|wired\.co\.uk\/?$/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
-	} else return null;
+	}
 }
 
 
