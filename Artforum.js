@@ -9,14 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-03-14 23:11:18"
+	"lastUpdated": "2018-07-08 18:09:39"
 }
 
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 czar
+	Copyright © 2018 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
@@ -37,9 +36,16 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
+function detectWeb(doc, url) {
+	if (/-\d{5,}$/.test(url)) {
+		return "blogPost";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+}
+
+/*
 FW.Scraper({
 itemType         : 'blogPost',
 detect           : FW.Url().match(/\/news\//),
@@ -89,25 +95,101 @@ choices          : {
   urls    :  FW.Xpath('//p[@class="Title"]/a').key("href").trim()
 }
 });
+*/
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata (EM)
+	translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
+		item.itemType = "blogPost";
+		item.publicationTitle = "Artforum";
+		var json_ld = doc.querySelector('script[type="application/ld+json"]');
+		if (json_ld) {
+			json_ld = json_ld.textContent;
+			item.date = json_ld.match(/"datePublished"\s?:\s?"([^"]*)"/)[1].split(":")[0];
+		}
+		var authorMetadata = doc.querySelectorAll('.contrib-link a');
+		for (let author of authorMetadata) {
+			item.creators.push(ZU.cleanAuthor(author.text, "author"));
+		}
+		if (url.includes('/print/')) {
+			item.itemType = "magazineArticle";
+			item.ISSN = "0004-3532";
+			var issueDate = doc.querySelector('h3.print-article__issue-title');
+			if (issueDate) {
+				item.date = issueDate.textContent.trim().replace('PRINT ','');
+				/* are you feeling adventurous? could follow link to issue's page and scrape the volume/issue numbers...
+				item.volume = 
+				item.issue = 
+				*/
+			}
+		}
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
+}
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	// 1st for search page, 2nd for issue ToC, 3rd/4th/5th for sections, 5th+ for homepage
+	var rows = doc.querySelectorAll('h1.results-list__h1, .toc-article__title, .news-list h1, .reviews-list h1, .article-list h1, p.hp-singlefeature-author__writer, h3.hp-news__title, h3.hp-twocolumn__title a, h3.hp-artguide__title, p.hp-bloglist__teaser a');
+	var links = doc.querySelectorAll('h1.results-list__h1 a, .toc-article__title a, .news-list h1 a, .reviews-list h1 a, .article-list h1 a, h3.hp-singlefeature-author__title > a, a.hp-news__article, h3.hp-twocolumn__title a, .hp-artguide div.image-container > a, p.hp-bloglist__teaser a');
+	for (let i=0; i<rows.length; i++) {
+		let href = links[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	switch (detectWeb(doc, url)) {
+		case "multiple":
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) {
+					return true;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				Z.debug(articles);
+				ZU.processDocuments(articles, scrape);
+			});
+			break;
+		case "blogPost":
+			scrape(doc, url);
+			break;
+	}
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/news/id=40747",
+		"url": "https://www.artforum.com/news/ugochukwu-smooth-nzewi-appointed-curator-of-hood-museum-40747",
 		"items": [
 			{
 				"itemType": "blogPost",
 				"title": "Ugochukwu-Smooth Nzewi Appointed Curator of Hood Museum",
 				"creators": [],
-				"date": "May 6, 2013",
-				"abstractNote": "The Hood Museum of Art at Dartmouth College, Hanover, has appointed Ugochukwu-Smooth Nzewi as its first curator of African Art, reports Artdaily. Born in Nigeria,",
+				"date": "2013-05-06",
+				"abstractNote": "The Hood Museum of Art at Dartmouth College, Hanover, has appointed Ugochukwu-Smooth Nzewi as its first curator of African Art, reports Artdaily. Born in Nigeria, Nzewi received his PhD in Art History from Emory University. A specialist in modern and contemporary African and African Diaspora arts, he will be responsible in his new role for the documentation, preservation, and research of Hood’s African Art collection, which includes some 1,900 objects. He will also engage Dartmouth faculty and students in the development of curricular programming related to the museum’s African holdings. Nzewi",
 				"blogTitle": "Artforum",
 				"language": "en-US",
-				"url": "https://www.artforum.com/news/id=40747",
+				"url": "https://www.artforum.com/news/ugochukwu-smooth-nzewi-appointed-curator-of-hood-museum-40747",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -118,11 +200,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/diary/id=63626",
+		"url": "https://www.artforum.com/diary/kaitlin-phillips-at-the-11th-new-york-art-book-fair-63626",
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Kaitlin Phillips at the 11th New York Art Book Fair",
+				"title": "Fine Print",
 				"creators": [
 					{
 						"firstName": "Kaitlin",
@@ -130,15 +212,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-09-22,",
-				"abstractNote": "LAST THURSDAY, at the opening night preview of Printed Matter’s NY Book Fair at MoMA PS1, in the popup white dome in the courtyard, at one of the end-to-end",
+				"date": "2016-09-22",
+				"abstractNote": "LAST THURSDAY, at the opening night preview of Printed Matter’s NY Book Fair at MoMA PS1, in the popup white dome in the courtyard, at one of the end-to-end merchandise tables, V. Vale (“That’s the name I’m famous under”), founder of RE/Search, complains to a fan that the fair, in its eleventh year, and its host city, have lost their street cred:“I never come to New York. Yeah, I never come to New York. I never come to New York,” says Vale, beaming defiantly.“Well, New York may have jumped the shark.”“I don’t know what that means. Jump the shark.”“It means that something has hit its peak, and",
 				"blogTitle": "Artforum",
 				"language": "en-US",
-				"url": "https://www.artforum.com/diary/id=63626",
+				"url": "https://www.artforum.com/diary/kaitlin-phillips-at-the-11th-new-york-art-book-fair-63626",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -149,7 +230,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/picks/id=62421",
+		"url": "https://www.artforum.com/picks/alex-da-corte-62421",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -161,14 +242,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "As you enter this space, your senses are bombarded by Alex Da Corte’s scrambled, saturated landscape. A supersized witch’s hat fills the first area, lit by green",
+				"date": "2016-07-28",
+				"abstractNote": "As you enter this space, your senses are bombarded by Alex Da Corte’s scrambled, saturated landscape. A supersized witch’s hat fills the first area, lit by green and red neon from above. This is flanked by a stained-glass window depicting a red rose, referencing Disney’s Beauty and the Beast, and a floor-to-ceiling, blown-up image of a weeping bridesmaid. The exhibition is like a dream: Recognizable elements are mashed together, but something is off, and it gradually morphs into a surreal nightmare.The gallery buzzes with sound from three video works—the focal point of the second room—depicting",
 				"blogTitle": "Artforum",
 				"language": "en-US",
-				"url": "https://www.artforum.com/picks/id=62421",
+				"url": "https://www.artforum.com/picks/alex-da-corte-62421",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -179,11 +260,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/film/id=66885",
+		"url": "https://www.artforum.com/film/nick-pinkerton-on-gimme-shelter-hollywood-north-66885",
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Nick Pinkerton on “Gimme Shelter: Hollywood North”",
+				"title": "Canadian Makin’",
 				"creators": [
 					{
 						"firstName": "Nick",
@@ -191,16 +272,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-02-24,",
-				"abstractNote": "AFTER THE EMERGENCE of alluring Canadian production subsidies in the late 1990s, moviegoers of the aughts became inured to watching downtown Vancouver fill in",
+				"date": "2017-02-24",
+				"abstractNote": "AFTER THE EMERGENCE of alluring Canadian production subsidies in the late 1990s, moviegoers of the aughts became inured to watching downtown Vancouver fill in for AnyCity, USA, in a parade of multiplex productions that managed to extract bland back-lot anonymity from location shooting. But Anthology Film Archives’ twelve-film series “Gimme Shelter: Hollywood North” pays tribute to a very different, pioneering era of runaway production, part of an ongoing sesquicentennial celebration of our neighbors above to be followed by “1970s Canadian Independents,” beginning at Anthology on March 9.The",
 				"blogTitle": "Artforum",
 				"language": "en-US",
-				"shortTitle": "Nick Pinkerton on “Gimme Shelter",
-				"url": "https://www.artforum.com/film/id=66885",
+				"url": "https://www.artforum.com/film/nick-pinkerton-on-gimme-shelter-hollywood-north-66885",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -211,10 +290,10 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/museums/id=65484",
+		"url": "https://www.artforum.com/print/previews/201701/whitney-biennial-2017-65484",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "magazineArticle",
 				"title": "Whitney Biennial 2017 at Whitney Museum of American Art",
 				"creators": [
 					{
@@ -223,14 +302,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"abstractNote": "Curated by Christopher Y. Lew and Mia Locks Following a three-year hiatus to accommodate the museum’s move downtown, the Whitney Biennial makes its Gansevoort",
-				"blogTitle": "Artforum",
+				"date": "January 2017",
+				"ISSN": "0004-3532",
+				"abstractNote": "Curated by Christopher Y. Lew and Mia LocksFollowing a three-year hiatus to accommodate the museum’s move downtown, the Whitney Biennial makes its Gansevoort Street debut this March. As the republic falls before our very eyes, one hopes that this divisive survey of American art will react against, and not just reflect, the current state of affairs. This year’s roster of sixty-three artists and collectives is thankfully diverse in perspectives and refreshingly full of emerging and underrecognized voices&#151;absent are the many elder statesmen often gratuitously included in these affairs. The",
 				"language": "en-US",
-				"url": "https://www.artforum.com/museums/id=65484",
+				"libraryCatalog": "www.artforum.com",
+				"publicationTitle": "Artforum",
+				"url": "https://www.artforum.com/print/previews/201701/whitney-biennial-2017-65484",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -241,11 +322,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/words/id=66615",
+		"url": "https://www.artforum.com/interviews/jamie-stewart-talks-about-xiu-xiu-s-record-forget-and-recent-collaborations-66615",
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Jamie Stewart talks about Xiu Xiu’s record FORGET and recent collaborations",
+				"title": "Jamie Stewart",
 				"creators": [
 					{
 						"firstName": "Paige K.",
@@ -253,15 +334,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-02-21,",
-				"abstractNote": "Across thirteen albums and a handful of EPs, Xiu Xiu have remained a prickly, relentless force, inspiring loyalty, love, annoyance, and disgust in equal measure.",
+				"date": "2017-02-21",
+				"abstractNote": "Across thirteen albums and a handful of EPs, Xiu Xiu have remained a prickly, relentless force, inspiring loyalty, love, annoyance, and disgust in equal measure. Some people never get over their music, and some you couldn’t pay to even approach it. On the occasion of the release of their latest album, FORGET, the band’s mainstay Jamie Stewart discusses how he met Vaginal Davis (who performs on its last track), the band’s collaborations with Danh Vō, and the concept behind the record’s title. Polyvinyl will release FORGET on February 24, 2017.HOW I MET VAGINAL DAVIS is actually a long story and",
 				"blogTitle": "Artforum",
 				"language": "en-US",
-				"url": "https://www.artforum.com/words/id=66615",
+				"url": "https://www.artforum.com/interviews/jamie-stewart-talks-about-xiu-xiu-s-record-forget-and-recent-collaborations-66615",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -272,11 +352,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/inprint/issue=201408&id=48214",
+		"url": "https://www.artforum.com/print/reviews/201408/dak-art-2014-48214",
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Dak’Art 2014",
+				"title": "Chika Okeke-Agulu on Dak’Art 2014",
 				"creators": [
 					{
 						"firstName": "Chika",
@@ -285,14 +365,15 @@ var testCases = [
 					}
 				],
 				"date": "October 2014",
-				"abstractNote": "THE ELEVENTH EDITION of the Dak’Art Biennial of Contemporary African Art, which took place this past summer, may well have been the most ambitious since the",
+				"ISSN": "0004-3532",
+				"abstractNote": "THE ELEVENTH EDITION of the Dak’Art Biennial of Contemporary African Art, which took place this past summer, may well have been the most ambitious since the exhibition’s inception in 1992. It was the largest and most diverse yet, not only showcasing emerging artists from across Africa but also including the work of many superstars from the established biennial circuit. This roster showed that the global art world must reckon with Dak’Art, which seems poised to take its place among the most established international art shows. Yet this year’s iteration also suggested that the biennial is still",
 				"language": "en-US",
-				"libraryCatalog": "Artforum",
-				"url": "https://www.artforum.com/inprint/issue=201408&id=48214",
+				"libraryCatalog": "www.artforum.com",
+				"publicationTitle": "Artforum",
+				"url": "https://www.artforum.com/print/reviews/201408/dak-art-2014-48214",
 				"attachments": [
 					{
-						"title": "Artforum snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -303,7 +384,22 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.artforum.com/search/sort=newest&search=1%3A54",
+		"url": "https://www.artforum.com/search?search=1%3A54&sort=date",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.artforum.com/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.artforum.com/print/previews/current/new-york",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.artforum.com/print/201806",
 		"items": "multiple"
 	}
 ]
