@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 02:58:59"
+	"lastUpdated": "2018-07-08 13:11:39"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	if (/\/(business|development|esports|influence)\//.test(url)) {
-		return "blogPost";
+		return "magazineArticle";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -61,7 +61,9 @@ function scrape(doc, url) {
 		item.ISSN = "1469-4832";
 		item.date = attr(doc,'meta[name="published"]','content');
 		item.title = item.title.replace(/- MCV$/,'');
-		item.language = item.language.replace('us','US');
+		if (item.language) {
+			item.language = item.language.replace('us','US');
+		}
 		if (item.creators[0].lastName == "Editors") {
 			delete item.creators[0].firstName;                    // remove the firstName param
 			item.creators[0].lastName = "MCV Editors"; // write the desired name to lastName
@@ -106,7 +108,7 @@ function doWeb(doc, url) {
 				ZU.processDocuments(articles, scrape);
 			});
 			break;
-		case "blogPost":
+		case "magazineArticle":
 			scrape(doc, url);
 			break;
 	}
@@ -118,7 +120,7 @@ var testCases = [
 		"url": "https://www.mcvuk.com/business/no-dlc-for-rare-replay",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "magazineArticle",
 				"title": "No DLC for Rare Replay",
 				"creators": [
 					{
@@ -128,9 +130,11 @@ var testCases = [
 					}
 				],
 				"date": "2016-01-26T09:45:00Z",
+				"ISSN": "1469-4832",
 				"abstractNote": "No more games will be added to the Rare Replay collection, the studio has said.UK developer Rare hinted that more games could be added to its package of 30",
-				"blogTitle": "MCV",
-				"language": "en-us",
+				"language": "en-US",
+				"libraryCatalog": "www.mcvuk.com",
+				"publicationTitle": "MCV",
 				"url": "https://www.mcvuk.com/business/no-dlc-for-rare-replay",
 				"attachments": [
 					{
@@ -161,7 +165,7 @@ var testCases = [
 		"url": "https://www.mcvuk.com/esports/seagull-quits-pro-overwatch-in-favour-of-streaming",
 		"items": [
 			{
-				"itemType": "blogPost",
+				"itemType": "magazineArticle",
 				"title": "Seagull quits pro Overwatch in favour of streaming",
 				"creators": [
 					{
@@ -171,9 +175,11 @@ var testCases = [
 					}
 				],
 				"date": "2017-04-14T10:30:00Z",
+				"ISSN": "1469-4832",
 				"abstractNote": "Arguably the biggest name in professional Overwatch has quit his team in order to focus on streaming. Brandon \"Seagull\" Larned rose to fame when his Twitch",
-				"blogTitle": "MCV",
-				"language": "en-us",
+				"language": "en-US",
+				"libraryCatalog": "www.mcvuk.com",
+				"publicationTitle": "MCV",
 				"url": "https://www.mcvuk.com/esports/seagull-quits-pro-overwatch-in-favour-of-streaming",
 				"attachments": [
 					{
