@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-17 05:38:35"
+	"lastUpdated": "2018-07-09 02:43:28"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 czar
+	Copyright © 2018 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
@@ -36,58 +36,101 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text()
-function attr(doc,selector,attr,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.getAttribute(attr):null}var elem=doc.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(doc,selector,index){if(index>0){var elem=doc.querySelectorAll(selector).item(index);return elem?elem.textContent:null}var elem=doc.querySelector(selector);return elem?elem.textContent:null}
+
+// attr()/text() v2 per https://github.com/zotero/translators/issues/1277
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+function scrubLowercaseTags(tags) {
+	for (let tag of tags) {
+		if (tag == tag.toLowerCase()) {
+			tags[tags.indexOf(tag)] = ZU.capitalizeTitle(tag,true);	
+		}
+	}
+    return tags;
+}
+
 
 function detectWeb(doc, url) {
 	if (/\/(article|story)\//.test(url)) {
 		return "blogPost";
 	} else if (/\.vice\.com\/?($|\w\w(\_\w\w)?\/?$)|\/(search\?q=)|topic\/|category\/|(latest|read)($|\?page=)/.test(url) && getSearchResults(doc, true) ) {
 		return "multiple";
-	} else if (/amuse-i-d\.vice\.com\/[\w\d-]+\/$/.test(url)) { /* Amuse i-D */
+	} else if (attr(doc,'meta[property="og:type"]','content') == "article") { /* Amuse i-D */
 		return "blogPost";
 	}
 }
 
+
 function scrape(doc, url) {
-	var item = new Zotero.Item("blogPost");
-	item.blogTitle = attr(doc,'meta[property="og:site_name"]','content') || "Vice";
-	item.language = attr(doc,'html','lang');
-	item.url = url;
-	item.title = text(doc,'.id-title') || attr(doc,'meta[property="og:title"]','content')/* i-D */;
-	item.date = attr(doc,'meta[name="datePublished"]','content') || attr(doc,'meta[property="og:article:published_time"]','content')/* i-D */ || attr(doc,'meta[property="article:published_time"]','content')/* Amuse i-D */ || text(doc,'.post__date')/* Vice News */;
-	if (item.date && item.date.indexOf(" on ") != -1) // clean Vice News
-		item.date = ZU.strToISO(item.date.replace(' on ',''));
-	item.abstractNote = attr(doc,'meta[name="description"]','content');
-	// meta keywords has a bunch of junk, so scrape instead:
-	var keywords = doc.querySelectorAll('.topics li.topic');
-	var keywords_i_D = doc.querySelectorAll('meta[property="og:article:tag"]'); // i-D uses og
-	if (keywords.length) {
-		for (var i=0; i<keywords.length; i++) {
-			item.tags.push(keywords[i].textContent)
+	var jsonURL = url+'?json=true';
+	ZU.doGet(jsonURL, function(text) {
+		var isValidJSON = true;
+		try { JSON.parse(text) } catch (e) { isValidJSON = false }
+		if (isValidJSON) {
+			var json = JSON.parse(text);
+			var item = new Zotero.Item("blogPost");
+			item.url = url;
+			item.publicationTitle = json.data.channel.name;
+			item.publicationTitle = ZU.capitalizeTitle(item.publicationTitle,true);
+			item.title = json.metadata.share_title;
+			item.date = new Date(json.data.publish_date).toJSON();
+			item.abstractNote = json.metadata.description;
+			var tags = json.metadata.news_keywords.split(',');
+			for (let tag of tags) {
+				item.tags.push(tag);
+			}
+			var authorMetadata = json.data.contributions;
+			for (let author of authorMetadata) {
+				item.creators.push(ZU.cleanAuthor(author.contributor.full_name, "author"));
+			}
+			item.language = json.data.locale.replace('_','-').replace(/-\w{2}$/, c => c.toUpperCase());
+			item.tags = scrubLowercaseTags(item.tags);
+			item.complete();
+		} else {
+			// Embedded Metadata for News, i-D & Amuse
+			var translator = Zotero.loadTranslator('web');
+			translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // EM
+			translator.setDocument(doc);
+			
+			translator.setHandler('itemDone', function (obj, item) { // corrections to EM
+				item.itemType = "blogPost";
+				if (url.includes('news.vice.com')) {
+					item.publicationTitle = ZU.capitalizeTitle(item.publicationTitle.toLowerCase(),true);
+					var json_ld = doc.querySelector('script[type="application/ld+json"]');
+					if (json_ld) {
+						json_ld = json_ld.textContent;
+						item.date = json_ld.match(/"datePublished"\s?:\s?"([^"]*)"/)[1].split(":")[0];
+						var ld_authors = JSON.parse(json_ld.match(/"author"\s?:\s?\[([^\]]*)\]/)[0].replace(/"author"\s?:\s?/,''));
+						for (let author of ld_authors) {
+							item.creators.push(ZU.cleanAuthor(author.name, "author"));	
+						}
+						
+					}
+				} else {
+					item.publicationTitle = item.publicationTitle.replace('I-d','i-D');
+					var authorMetadata = doc.querySelectorAll('.header-info-module__info span');
+					for (let author of authorMetadata) {
+						item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
+					}
+				}
+				item.tags = scrubLowercaseTags(item.tags);
+				item.complete();
+			});
+		
+			translator.getTranslatorObject(function(trans) {
+				trans.doWeb(doc, url);
+			});
 		}
-	} else if (keywords_i_D.length) { 
-		for (var i=0; i<keywords_i_D.length; i++) {
-			item.tags.push(keywords_i_D[i].getAttribute('content'))
-		}		
-	}
-	// see PR#1366: dynamic pages don't archive well, so skipping
-
-	// Authors – I haven't found an article with more than one author, but share if you do
-	var authors = attr(doc,'.contributor__name .contributor__link','title') || attr(doc,'meta[property="og:article:author"]','content')/* i-D */ || text(doc,'.post__speaker a')/* Vice News? */ || text(doc,'.header-info-module__info span')/* Amuse i-D */;
-	if (authors) {
-		item.creators.push(ZU.cleanAuthor(authors, "author"));
-	}
-
-	item.complete();
+	});
 }
+
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.search__results__item__title, .grid__wrapper__card__text__title, .lede__content__title, .blog-grid__wrapper__card__text__title, .title-container h1.title, .item .item-title');
 	var links = doc.querySelectorAll('.search__results__item, .grid__wrapper__card, .lede__content__title, .blog-grid__wrapper__card, .title-container h1.title a, .item .item-title a, .item > a');
-	for (var i=0; i<rows.length; i++) {
+	for (let i=0; i<rows.length; i++) {
 		var href = links[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -98,20 +141,24 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
+
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} if (detectWeb(doc, url) == "blogPost") { // prevent unhandled pages
-		scrape(doc, url); 
+	switch (detectWeb(doc, url)) {
+		case "multiple":
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) {
+					return true;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
+			});
+			break;
+		default:
+			scrape(doc, url);
+			break;
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -129,19 +176,34 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-07-07T11:44:00-04:00",
+				"date": "2017-07-07T15:44:00.000Z",
 				"abstractNote": "\"My inflatable crocodile works as a shield against police batons, and as a seat. It also just lightens the mood.\"",
 				"blogTitle": "Vice",
-				"language": "en",
+				"language": "en-UK",
 				"url": "https://www.vice.com/en_us/article/padaqv/anti-g20-activists-told-us-what-they-brought-to-the-protest-in-hamburg",
+				"attachments": [],
 				"tags": [
-					"G20",
-					"Hamburg",
-					"VICE Germany",
-					"VICE International",
-					"demo",
-					"demonstration",
-					"protest"
+					{
+						"tag": "Demo"
+					},
+					{
+						"tag": "Demonstration"
+					},
+					{
+						"tag": "G20"
+					},
+					{
+						"tag": "Hamburg"
+					},
+					{
+						"tag": "Protest"
+					},
+					{
+						"tag": "VICE Germany"
+					},
+					{
+						"tag": "VICE International"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -162,19 +224,34 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-07-09T14:00:00-04:00",
+				"date": "2017-07-09T18:00:00.000Z",
 				"abstractNote": "And by rummaging around our own pasts through them, we can better understand where we are, and where we’ve been, on all things sexual.",
 				"blogTitle": "Waypoint",
-				"language": "en",
+				"language": "en-US",
 				"url": "https://waypoint.vice.com/en_us/article/bjxjbw/nina-freemans-games-really-get-millennial-romance",
+				"attachments": [],
 				"tags": [
-					"Awkward Teenage Rituals",
-					"How Do You Do It",
-					"Lost Memories Dot Net",
-					"Nina Freeman",
-					"cibelle",
-					"msn",
-					"romance"
+					{
+						"tag": "Awkward Teenage Rituals"
+					},
+					{
+						"tag": "Cibelle"
+					},
+					{
+						"tag": "How Do You Do It"
+					},
+					{
+						"tag": "Lost Memories Dot Net"
+					},
+					{
+						"tag": "Msn"
+					},
+					{
+						"tag": "Nina Freeman"
+					},
+					{
+						"tag": "Romance"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -195,18 +272,28 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-07-09T06:47:09-04:00",
+				"date": "2017-07-09T10:47:09.008Z",
 				"abstractNote": "Der Rüstungsgegner, die Umweltschützerin und die Hippiefrau: Ich glaube, eigentlich haben sie das gleiche Ziel. Sie haben es auf ihren Plakaten nur unterschiedlich formuliert.",
 				"blogTitle": "Vice",
 				"language": "de",
 				"url": "https://www.vice.com/de/article/59pdy5/wie-kaputte-handys-und-profite-die-g20-gegner-antreiben",
+				"attachments": [],
 				"tags": [
-					"G20",
-					"Hamburg",
-					"Laura Meschede",
-					"Meinung",
-					"Wirtschaft",
-					"kapitalismus"
+					{
+						"tag": "Hamburg"
+					},
+					{
+						"tag": "Kapitalismus"
+					},
+					{
+						"tag": "Laura Meschede"
+					},
+					{
+						"tag": "Meinung"
+					},
+					{
+						"tag": "Wirtschaft"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -225,7 +312,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://i-d.vice.com/en_us/article/anish-kapoor-has-been-banned-from-using-yet-another-rare-paint",
+		"url": "https://i-d.vice.com/en_us/article/j5mm37/anish-kapoor-has-been-banned-from-using-yet-another-rare-paint",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -237,17 +324,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-07-07T14:18:46+00:00",
+				"date": "2017-07-07T14:18:46.000Z",
 				"abstractNote": "Contemporary art's most bizarre feud heats up with the creation of a new color-changing paint available to all — except Kapoor.",
-				"blogTitle": "i-D",
-				"language": "en",
-				"url": "http://i-d.vice.com/en_us/article/anish-kapoor-has-been-banned-from-using-yet-another-rare-paint",
+				"blogTitle": "I-D",
+				"language": "en-US",
+				"url": "https://i-d.vice.com/en_us/article/j5mm37/anish-kapoor-has-been-banned-from-using-yet-another-rare-paint",
+				"attachments": [],
 				"tags": [
-					"Anish Kapoor",
-					"Art",
-					"News",
-					"Stuart Semple",
-					"Vantablack"
+					{
+						"tag": "Anish Kapoor"
+					},
+					{
+						"tag": "Art"
+					},
+					{
+						"tag": "Stuart Semple"
+					},
+					{
+						"tag": "Vantablack"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -261,7 +356,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://news.vice.com/story/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
+		"url": "https://news.vice.com/en_us/article/434pxm/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -273,37 +368,57 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-07-07",
-				"blogTitle": "Vice",
-				"language": "en-US",
-				"url": "https://news.vice.com/story/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://amuse-i-d.vice.com/exclusive-around-the-world-with-goshas-favourite-artist/",
-		"items": [
-			{
-				"itemType": "blogPost",
-				"title": "Exclusive: Around the World With Gosha’s Favourite Artist | Amuse",
-				"creators": [
+				"date": "2017-07-07T12",
+				"abstractNote": "Watch VICE News Tonight on HBO weekdays at 7:30.",
+				"blogTitle": "Vice News",
+				"language": "en",
+				"url": "https://news.vice.com/en_us/article/434pxm/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
+				"attachments": [
 					{
-						"firstName": "Katja",
-						"lastName": "Horvat",
-						"creatorType": "author"
+						"title": "Snapshot"
 					}
 				],
-				"date": "2017-07-06T10:00:25Z",
-				"abstractNote": "Julian Klincewicz on the importance of vacationing properly",
-				"blogTitle": "Amuse",
-				"language": "en-US",
-				"shortTitle": "Exclusive",
-				"url": "https://amuse-i-d.vice.com/exclusive-around-the-world-with-goshas-favourite-artist/",
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Ballot Initiative"
+					},
+					{
+						"tag": "Charleena Lyles"
+					},
+					{
+						"tag": "Che Taylor"
+					},
+					{
+						"tag": "Crime"
+					},
+					{
+						"tag": "Criminal Justice"
+					},
+					{
+						"tag": "Law Enforcement"
+					},
+					{
+						"tag": "News"
+					},
+					{
+						"tag": "Not This Time"
+					},
+					{
+						"tag": "Police"
+					},
+					{
+						"tag": "Police Deadly Force"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Seattle"
+					},
+					{
+						"tag": "Washington State"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
