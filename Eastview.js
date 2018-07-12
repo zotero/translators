@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-23 16:36:26"
+	"lastUpdated": "2018-07-12 01:12:22"
 }
 
 /*
@@ -36,6 +36,7 @@
 */
 function detectWeb(doc, url) {
 	if (url.includes("/search/simple/articles?") || url.includes("/search/advanced/articles") || url.search(/browse\/(favorites|issue)/) != -1) {
+		Z.monitorDOMChanges(doc.getElementById("container"), {childList: true});
 		if (ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a').length) return "multiple";
 	} else {
 		return "newspaperArticle"
