@@ -125,6 +125,12 @@ function downloadFunction(text, url, prefs, doc) {
 			}
 		}
 		
+		item.language = text.match(/Language:\s([^;\r]+)/g)
+		if (item.language) {
+			Z.debug(item.language);
+			item.language = item.language[0].replace(/Language:\s/,'');
+		}
+		
 		// Get the accession number from URL if not in RIS
 		var an = url.match(/_(\d+)_AN/);
 		if (!item.callNumber) {
