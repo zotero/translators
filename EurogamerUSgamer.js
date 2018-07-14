@@ -2,14 +2,14 @@
 	"translatorID": "e570f517-83f2-4735-97d2-44499aee0b21",
 	"label": "Eurogamer/USgamer",
 	"creator": "czar",
-	"target": "^https?://(www\\.)?(eurogamer|usgamer)\\.net",
+	"target": "^https?://(www\\.)?(eurogamer|usgamer)\\.(net|cz|de|es|it|nl|pl|pt)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-14 18:42:18"
+	"lastUpdated": "2018-07-14 19:42:21"
 }
 
 /*
@@ -59,9 +59,35 @@ function scrape(doc, url) {
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/&hellip;/,"...");
 		}
-		var authorMetadata = doc.querySelectorAll('.author .name a, .details .author a');
-		for (let author of authorMetadata) {
-			item.creators.push(ZU.cleanAuthor(author.text, "author"));
+		var json_ld = doc.querySelector('script[type="application/ld+json"]'); // JSON-LD not yet built into EM
+		if (json_ld) {
+			var json = JSON.parse(json_ld.textContent);
+			item.date = json.datePublished;
+			if (json.author && json.author.name) {
+				item.creators.push(ZU.cleanAuthor(json.author.name, "author"));
+			}
+		}
+		if (item.creators.length === 0) { // usgamer.net doesn't have JSON-LD and Eurogamer.de's didn't include authors
+			var authorMetadata = doc.querySelectorAll('.author .name a, .details .author a');
+			for (let author of authorMetadata) {
+				item.creators.push(ZU.cleanAuthor(author.text, "author"));
+			}
+		}
+		if (!item.date) { // usgamer.net doesn't have JSON-LD
+			var dateMetadata = doc.querySelector('span.published');
+			if (dateMetadata) {
+				item.date = ZU.strToISO(dateMetadata.getAttribute('content'));
+			}
+		}
+		var tags = doc.querySelectorAll('.tags a');
+		if (tags && url.includes('usgamer.net')) { // Eurogamer tags weren't worth it but USgamer's are good
+			for (let tagObj of tags) {
+				var tag = tagObj.textContent;
+				if (tag == tag.toLowerCase()) {
+					tag = tag.replace(/\w/, c => c.toUpperCase());
+				}
+				item.tags.push(tag);
+			}
 		}
 		item.complete();
 	});
@@ -122,6 +148,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2016-06-13T18:28:00+01:00",
 				"abstractNote": "As expected, the rumoured Witcher 3 card game Gwent has been announced as a standalone game at E3.This is the \"new type of video game format previously unex...",
 				"blogTitle": "Eurogamer",
 				"language": "en",
@@ -156,6 +183,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2016-11-09T11:44:00+00:00",
 				"abstractNote": "Jonny Cruz is the good-looking face behind the voice of Lucio in Overwatch, and he was at Blizzard HQ recently. With his camera phone. Cruz also happens to...",
 				"blogTitle": "Eurogamer",
 				"language": "en",
@@ -185,6 +213,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2018-07-11",
 				"abstractNote": "The other three Super Mario Odyssey-themed levels are a disappointment though.",
 				"blogTitle": "USgamer",
 				"language": "en",
@@ -195,7 +224,26 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": " Captain Toad: Treasure Tracker"
+					},
+					{
+						"tag": " Nintendo"
+					},
+					{
+						"tag": " Nintendo 3DS"
+					},
+					{
+						"tag": " Nintendo EAD Tokyo"
+					},
+					{
+						"tag": " Nintendo Switch"
+					},
+					{
+						"tag": " Ports"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -242,6 +290,91 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.eurogamer.net/switch",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.usgamer.net/articles/how-mother-3-escaped-development-hell-to-become-a-modern-classic",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "How Mother 3 Escaped Development Hell to Become a Modern Classic",
+				"creators": [
+					{
+						"firstName": "Bob",
+						"lastName": "Mackey",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-06-21",
+				"abstractNote": "While this EarthBound sequel may never see an official English release, it still stands as one of Nintendo's greatest achievements.",
+				"blogTitle": "USgamer",
+				"language": "en",
+				"url": "https://www.usgamer.net/articles/how-mother-3-escaped-development-hell-to-become-a-modern-classic",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Bob Mackey"
+					},
+					{
+						"tag": " Earthbound"
+					},
+					{
+						"tag": " Game Boy Advance"
+					},
+					{
+						"tag": " Jrpg"
+					},
+					{
+						"tag": " Mother"
+					},
+					{
+						"tag": " Mother 3"
+					},
+					{
+						"tag": " Nintendo"
+					},
+					{
+						"tag": " USgamer"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.eurogamer.de/articles/2013-07-26-was-die-naechste-generation-von-earthbound-lernen-kann",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Was die nächste Generation von Earthbound lernen kann",
+				"creators": [
+					{
+						"firstName": "Björn",
+						"lastName": "Balg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013-07-26T13:30:00+02:00",
+				"abstractNote": "Earthbound für die Wii U Virtual Console ist ein Spiel, das sich kommende Titel als Vorbild nehmen sollten.",
+				"blogTitle": "Eurogamer.de",
+				"language": "de",
+				"url": "https://www.eurogamer.de/articles/2013-07-26-was-die-naechste-generation-von-earthbound-lernen-kann",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
