@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-07-15 04:39:11"
+	"lastUpdated": "2018-07-15 05:04:26"
 }
 
 // attr()/text() v2 per https://github.com/zotero/translators/issues/1277
@@ -107,6 +107,15 @@ function downloadFunction(text, url, prefs, doc) {
 		//Sometimes EBSCOhost gives us year and season
 		if(season) {
 			item.date = season + ' ' + item.date;
+		}
+		
+		// resolves dates with double slashes per https://github.com/zotero/translators/issues/1008
+		item.date = '2005/07//Jul/Aug2005';
+		if (item.date.includes('//')) {
+			item.date = item.date.split('//')[1];
+			if (!/\s\d{4}/.test(item.date)) {
+				item.date = item.date.replace(/(\d{4})/, ' $1').replace('/','–');
+			}
 		}
 		
 		//The non-DOI values in M3 should never pass RIS translator,
