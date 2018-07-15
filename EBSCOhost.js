@@ -9,8 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-07-02 02:12:50"
+	"lastUpdated": "2018-07-15 04:39:11"
 }
+
+// attr()/text() v2 per https://github.com/zotero/translators/issues/1277
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
+function textr(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -118,16 +122,15 @@ function downloadFunction(text, url, prefs, doc) {
 		}
 		
 		item.tags = []; // reset junk tags from RIS
-		item.tags = text.match(/Subject Term:\s([^;]+)/g)
+		item.tags = text.match(/Subject( Term)?:\s[^;]+/g)
 		if (item.tags) {
 			for (var q=0;q<item.tags.length;q++) {
-				item.tags[q] = item.tags[q].replace('Subject Term: ','');
+				item.tags[q] = item.tags[q].replace(/Subject( Term)?:\s/,'');
 			}
 		}
 		
-		item.language = text.match(/Language:\s([^;\r]+)/g)
+		item.language = text.match(/Language:\s[^;\r\n]+/g)
 		if (item.language) {
-			Z.debug(item.language);
 			item.language = item.language[0].replace(/Language:\s/,'');
 		}
 		
@@ -152,6 +155,7 @@ function downloadFunction(text, url, prefs, doc) {
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
 			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
 				.replace(/#.*$/,'');
+
 			if(prefs.hasFulltext) {	 // download full text as note whenever available, even if PDF is available too; snapshot preferable, if possible
 				var fulltextP = doc.querySelectorAll('.full-text-container > section > p');
 				var fulltext = "";
@@ -515,7 +519,7 @@ function doDelivery(doc, itemInfo) {
 		postURL = doc.location.href; //fallback for mobile site 
 	}
 	var urlarguments = urlToArgs(postURL);
-
+	
 	postURL = "/ehost/delivery/ExportPanelSave/"
 		+ urlSafeEncodeBase64(folderData.Db + "__" + folderData.Term + "__" + folderData.Tag)
 		+ "?vid=" + urlarguments["vid"]
