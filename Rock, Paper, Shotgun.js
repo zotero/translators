@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-14 23:56:45"
+	"lastUpdated": "2018-07-15 00:09:20"
 }
 
 /*
@@ -74,12 +74,12 @@ function scrape(doc, url) {
 				var json = JSON.parse(text);
 				if (json.author_name) {
 					item.creators.push(ZU.cleanAuthor(json.author_name, "author"));
+					if (item.creators[0].lastName == "UK") {
+						delete item.creators[0].firstName;      // remove the firstName param
+						item.creators[0].lastName = "RPS UK";	// write the desired name to lastName
+						item.creators[0].fieldMode = 1;         // change to single-field mode
+					}
 				}
-			}
-			if (item.creators[0].lastName == "UK") {
-				delete item.creators[0].firstName;      // remove the firstName param
-				item.creators[0].lastName = "RPS UK";	// write the desired name to lastName
-				item.creators[0].fieldMode = 1;         // change to single-field mode
 			}
 			item.complete();
 		});
