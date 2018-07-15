@@ -110,7 +110,6 @@ function downloadFunction(text, url, prefs, doc) {
 		}
 		
 		// resolves dates with double slashes per https://github.com/zotero/translators/issues/1008
-		item.date = '2005/07//Jul/Aug2005';
 		if (item.date.includes('//')) {
 			item.date = item.date.split('//')[1];
 			if (!/\s\d{4}/.test(item.date)) {
