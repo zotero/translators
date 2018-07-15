@@ -59,6 +59,7 @@ function fixJSON(text) {
 		if (item.type == 'dataset') {
 			item.note = "type: dataset";
 			if (item["container-title"]) {
+				//see test case for 10.17171/2-3-1
 				item.note += "\ncontainer-title: " + item["container-title"];
 			}
 		}
@@ -129,6 +130,36 @@ var testCases = [
 				"institution": "de l'imprimerie de Claude Simon (A Paris)",
 				"libraryCatalog": "DataCite",
 				"extra": "DOI: 10.12763/ONA1045"
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"DOI": "10.17171/2-3-1"
+		},
+		"items": [
+			{
+				"itemType": "document",
+				"url": "http://repository.edition-topoi.org/collection/MAGN/object/V1.2-71",
+				"publisher": "Edition Topoi",
+				"date": "2016",
+				"extra": "type: dataset\ncontainer-title: Architectural Fragments from Magnesia on the Maeander\nDOI: 10.17171/2-3-1",
+				"accessDate": "2018-07-15 23:32:00",
+				"libraryCatalog": "DataCite",
+				"abstractNote": "About a quarter of the piece is preserved.",
+				"title": "Ionic capital",
+				"creators": [
+					{
+						"creatorType": "author",
+						"fieldMode": 1,
+						"lastName": "Staatliche Museen Zu Berlin-Antikensammlung"
+					}
+				],
+				"tags": [],
+				"attachments": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
