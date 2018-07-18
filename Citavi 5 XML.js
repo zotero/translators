@@ -244,7 +244,7 @@ function doImport() {
 			if (address) {
 				if (addressType == "Doi" && !item.DOI) {
 					item.DOI = address;
-				} else if (addressType == "PubMedId" && (item.extra && !item.extra.includes("PMID")|| !item.extra)) {
+				} else if (addressType == "PubMedId" && ((item.extra && !item.extra.includes("PMID"))|| !item.extra)) {
 					addExtraLine(item, "PMID", address);
 				} else {
 					// distinguish between local paths and internet addresses
