@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2018-07-16 11:43:28"
+	"lastUpdated": "2018-07-16 21:43:28"
 }
 
 /*
@@ -244,7 +244,7 @@ function doImport() {
 			if (address) {
 				if (addressType == "Doi" && !item.DOI) {
 					item.DOI = address;
-				} else if (addressType == "PubMedId" && item.extra && !item.extra.includes("PMID")) {
+				} else if (addressType == "PubMedId" && ((item.extra && !item.extra.includes("PMID"))|| !item.extra)) {
 					addExtraLine(item, "PMID", address);
 				} else {
 					// distinguish between local paths and internet addresses
