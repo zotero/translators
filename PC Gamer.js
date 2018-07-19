@@ -39,7 +39,7 @@
 
 function detectWeb(doc, url) {
 	var isBlogPost = ZU.xpath(doc,'//*[@id="main"]/article');
-	if (isBlogPost && isBlogPost.length) {
+	if (isBlogPost.length) {
 		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -58,7 +58,7 @@ function scrape(doc, url) {
 		item.language = "en-US";
 		item.creators = []; // reset bad author metadata
 		var authorMetadata = doc.querySelectorAll('a[rel="author"]');
-		for (var author of authorMetadata) {
+		for (let author of authorMetadata) {
 			item.creators.push(ZU.cleanAuthor(author.text, "author"));
 		}
 		item.complete();
