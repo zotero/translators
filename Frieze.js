@@ -42,8 +42,13 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (/\/article\//.test(url)) {		// does not handle /event/ or /media/ pages, which EM alone can handle
-		return "magazineArticle";
+	if (url.includes("/article/") {		// does not handle /event/ or /media/ pages, which EM alone can handle
+		if (text(doc,'.issue-name')) {
+			return "magazineArticle";
+		}
+		else {
+			return "blogPost";
+		}
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -114,6 +119,7 @@ function doWeb(doc, url) {
 			});
 			break;
 		case "magazineArticle":
+		case "blogPost":	
 			scrape(doc, url);
 			break;
 	}
