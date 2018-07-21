@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-15 00:09:20"
+	"lastUpdated": "2018-07-21 01:56:54"
 }
 
 /*
@@ -94,7 +94,7 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.content h1 a, .block td a');
+	var rows = doc.querySelectorAll('.content h1 a, .block td a, main p.title a, div.gsc-thumbnail-inside a.gs-title');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -201,7 +201,7 @@ var testCases = [
 					}
 				],
 				"date": "2012-02-23",
-				"abstractNote": "A cause of occasional, but rather fervent ire of recent times has been day one DLC. Why do people get pissed off? Because times were you'd buy a game, and get a",
+				"abstractNote": "A cause of occasional, but rather fervent ire of recent times has been day one DLC. Why do people get pissed off? Because times were you’d buy a game, and",
 				"blogTitle": "Rock, Paper, Shotgun",
 				"language": "en-US",
 				"shortTitle": "Thought",
