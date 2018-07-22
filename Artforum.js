@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 19:56:36"
+	"lastUpdated": "2018-07-22 18:06:54"
 }
 
 /*
@@ -70,13 +70,16 @@ function scrape(doc, url) {
 			var issueDate = doc.querySelector('h3.print-article__issue-title');
 			if (issueDate) {
 				item.date = issueDate.textContent.trim().replace('PRINT ','');
-				/* are you feeling adventurous? could follow link to issue's page and scrape the volume/issue numbers...
-				item.volume = 
-				item.issue = 
-				*/
-			}
-		}
-		item.complete();
+				var issueURL = [];
+				issueURL.push(issueDate.querySelector('a').href);
+				ZU.HTTP.doGet(issueURL, function (text) {
+					var voliss = text.match(/Vol\.\s(\d+),\sNo\.\s(\d+)/);
+					item.volume = voliss[1];
+					item.issue = voliss[2];
+					item.complete();
+				});
+			} else item.complete();
+		} else item.complete();
 	});
 
 	translator.getTranslatorObject(function(trans) {
