@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-07-15 05:04:26"
+	"lastUpdated": "2018-07-23 02:32:30"
 }
 
 // attr()/text() v2 per https://github.com/zotero/translators/issues/1277
@@ -113,8 +113,9 @@ function downloadFunction(text, url, prefs, doc) {
 		if (item.date.includes('//')) {
 			item.date = item.date.split('//')[1];
 			if (!/\s\d{4}/.test(item.date)) {
-				item.date = item.date.replace(/(\d{4})/, ' $1').replace('/','–');
+				item.date = item.date.replace(/(\d{4})/, ' $1');
 			}
+			item.date = item.date.replace('/','–');
 		}
 		
 		//The non-DOI values in M3 should never pass RIS translator,
@@ -140,6 +141,9 @@ function downloadFunction(text, url, prefs, doc) {
 		item.language = text.match(/Language:\s[^;\r\n]+/g)
 		if (item.language) {
 			item.language = item.language[0].replace(/Language:\s/,'');
+			if (item.language == "Undetermined") {
+				item.language = null;
+			}
 		}
 		
 		// Get the accession number from URL if not in RIS
