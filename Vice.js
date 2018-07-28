@@ -2,14 +2,14 @@
 	"translatorID": "131310dc-854c-4629-acad-521319ab9f19",
 	"label": "Vice",
 	"creator": "czar",
-	"target": "^https?://((www|broadly|creators|i-d|amuse-i-d|impact|motherboard|munchies|news|noisey|sports|thump|tonic|waypoint)\\.)?vice\\.com",
+	"target": "^https?://(.+?\\.)?vice\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-09 02:43:28"
+	"lastUpdated": "2018-07-28 16:37:12"
 }
 
 /*
@@ -46,14 +46,14 @@ function scrubLowercaseTags(tags) {
 			tags[tags.indexOf(tag)] = ZU.capitalizeTitle(tag,true);	
 		}
 	}
-    return tags;
+	return tags;
 }
 
 
 function detectWeb(doc, url) {
 	if (/\/(article|story)\//.test(url)) {
 		return "blogPost";
-	} else if (/\.vice\.com\/?($|\w\w(\_\w\w)?\/?$)|\/(search\?q=)|topic\/|category\/|(latest|read)($|\?page=)/.test(url) && getSearchResults(doc, true) ) {
+	} else if (/vice\.com\/?($|\w\w(\_\w\w)?\/?$)|\/(search\?q=)|topic\/|category\/|(latest|read)($|\?page=)/.test(url) && getSearchResults(doc, true) ) {
 		return "multiple";
 	} else if (attr(doc,'meta[property="og:type"]','content') == "article") { /* Amuse i-D */
 		return "blogPost";
@@ -62,6 +62,7 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, url) {
+	url = url.replace(/(\?|#).+/, '');
 	var jsonURL = url+'?json=true';
 	ZU.doGet(jsonURL, function(text) {
 		var isValidJSON = true;
@@ -128,8 +129,8 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.search__results__item__title, .grid__wrapper__card__text__title, .lede__content__title, .blog-grid__wrapper__card__text__title, .title-container h1.title, .item .item-title');
-	var links = doc.querySelectorAll('.search__results__item, .grid__wrapper__card, .lede__content__title, .blog-grid__wrapper__card, .title-container h1.title a, .item .item-title a, .item > a');
+	var rows = doc.querySelectorAll('.lede__content__title, .search__results__item__title, .grid__wrapper__card__text__title, .lede__content__title, .blog-grid__wrapper__card__text__title, .title-container h1.title, .item .item-title');
+	var links = doc.querySelectorAll('.lede__content__link > a, .search__results__item, .grid__wrapper__card, .lede__content__title, .blog-grid__wrapper__card, .title-container h1.title a, .item .item-title a, .item > a');
 	for (let i=0; i<rows.length; i++) {
 		var href = links[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
