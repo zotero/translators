@@ -131,11 +131,7 @@ function scrape(doc, url) {
 			item.abstractNote = abstractString.replace(/&nbsp;/g, " ");
 		}
 
-		var sectionString =
-			attr(doc, 'meta[property="article:section"]', "content");
-		if(sectionString) {
-			item.section = sectionString;
-		}
+		item.section = attr(doc, 'meta[property="article:section"]', "content");
 
 		var timeString =
 			attr(doc, 'meta[property="article:published_time"]', "content");
