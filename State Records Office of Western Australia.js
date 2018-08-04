@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2018-07-19 01:22:40"
 }
 
@@ -35,28 +35,11 @@
 	***** END LICENSE BLOCK *****
 */
 
-/** Two default functions per https://www.mediawiki.org/wiki/Citoid/Creating_Zotero_translators#Install_Scaffold**/
-
-function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
-
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
-/** Can replace above with this 'minimised code'
- * 
- * function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
- */
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 /** select a Mime type for the attachment **/ 
 function selectMimeType(url) {
-	theUrl = url;
-
-	fileType = theUrl.replace(/^.*(\..+)$/,'$1');
+	fileType = url.replace(/^.*(\..+?)$/,'$1');
 
 	switch (fileType) {
 		case ".jpg":
@@ -75,15 +58,15 @@ function selectMimeType(url) {
 function detectWeb(doc, url) {
 
 	// Adjust the inspection of url as required
-	if (url.indexOf('index.php/search?query=') != -1 && getSearchResults(doc, true)) {
+	if (url.includes('index.php/search?query=') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 		// Adjust the inspection of url as required
-	if (url.indexOf('index.php/search/advanced?') != -1 && getSearchResults(doc, true)) {
+	if (url.includes('index.php/search/advanced?') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	
-	if (url.indexOf('index.php/') != -1) {
+	if (url.includes('index.php/')) {
 		return 'single';
 	}
 }
@@ -91,13 +74,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// Adjust the CSS Selectors 
 
 	var rows = doc.querySelectorAll('.search-result-description a');
 	for (var i=0; i<rows.length; i++) {
-		// Adjust if required, use Zotero.debug(rows) to check
 		var href = rows[i].href;
-		// Adjust if required, use Zotero.debug(rows) to check
 		var title = ZU.trimInternal(rows[i].title);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -127,11 +107,8 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 			});
 			break;
-		default:
-		
-			
+		default:	
 	}
-
 }
 
 function scrape(doc,url) {
@@ -146,24 +123,24 @@ function scrape(doc,url) {
 		var identityFields = identityArea.querySelectorAll("div.field");
 		
 		if (identityFields) {
-			for (var i=0;i<identityFields.length;i++) {
+			for (let field of identityFields) {
 		
 			// Zotero.debug("nextFirstEC" + text(identityFields[i],"h3"));
 		
-				nextIdentityField = text(identityFields[i],"h3");
+				var nextIdentityField = text(field,"h3");
 		
 				switch(nextIdentityField)
 				{
 				case "Title":
-					item.title = ZU.trimInternal(text(identityFields[i],"div"));
+					item.title = ZU.trimInternal(text(field,"div"));
 					break;
 			
 				case "Reference code":
-					item.archiveLocation = ZU.trimInternal(text(identityFields[i],"div"));
+					item.archiveLocation = ZU.trimInternal(text(field,"div"));
 					break;
 				
 				case "Level of description":
-					item.manuscriptType = ZU.trimInternal(text(identityFields[i],"div"));
+					item.manuscriptType = ZU.trimInternal(text(field,"div"));
 					break;
 			
 				case "Date(s)":
@@ -173,18 +150,18 @@ function scrape(doc,url) {
 				// 1 item = either creation or accumulation dates. Use creation dates if available;
 				// 2 items = both creation and accumulation dates. Use creation dates;
 				
-					var dateList = identityFields[i].querySelectorAll("ul > li");
+					var dateList = field.querySelectorAll("ul > li");
 					
 					// Find which list items contain which date type
 
 					if (dateList.length > 0) {
-						for (var d=0;d<dateList.length;d++) {
+						for (let date of dateList) {
 						
-							dateStr = dateList[d].textContent;
-							dateRange = dateStr.split("(")[0].split(" - ");
+							let dateStr = date.textContent;
+							let dateRange = dateStr.split("(")[0].split(" - ");
 							
-							dr1 = ZU.trimInternal(dateRange[1]);
-							dr0 = ZU.trimInternal(dateRange[0]);
+							let dr1 = ZU.trimInternal(dateRange[1]);
+							let dr0 = ZU.trimInternal(dateRange[0]);
 								
 							if (dateStr.indexOf("(Creation)") > 0) {
 								
