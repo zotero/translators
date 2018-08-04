@@ -359,19 +359,20 @@ function generateItem(item, teiDoc) {
 			curCreator.appendChild(forename);
 		}
 		if (item.creators[i].lastName) {
-			var surname = null;
-			if (item.creators[i].firstName) {
-				surname = teiDoc.createElementNS(ns.tei, "surname");
-			}
-		else {
-			surname = teiDoc.createElementNS(ns.tei, "name");
-			}
-			
-			surname.appendChild(teiDoc.createTextNode(item.creators[i].lastName));
-			curCreator.appendChild(surname);
-			
-		}
-
+                                    var surname = null;
+                                    if (item.creators[i].firstName) {
+                                    surname = teiDoc.createElementNS(ns.tei, "surname");
+                                    } else {
+                                    surname = teiDoc.createElementNS(ns.tei, "name");
+                                    }
+                                    surname.appendChild(teiDoc.createTextNode(item.creators[i].lastName));
+                                    curCreator.appendChild(surname);
+                        }
+                        if (item.creators[i].name) {
+                                    name = teiDoc.createElementNS(ns.tei, "name");
+                                    name.appendChild(teiDoc.createTextNode(item.creators[i].name));
+                                    curCreator.appendChild(name);   
+                        }
 		// make sure the right thing gets added
 		if (curRespStmt) {
 			curCreator = curRespStmt;
