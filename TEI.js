@@ -105,8 +105,9 @@ function genXMLId(item) {
 				xmlid += date.year;
 			}
 		}
-		// Replace space and colon by "_"
-		xmlid = xmlid.replace(/([ \t\[\]:])+/g, "_");
+		// Replace space, tabulations, colon, punctuation, parenthesis and apostrophes by "_"
+		xmlid = xmlid.replace(/([ \t\[\]:\u00AD\u0021-\u002C\u2010-\u2021])+/g, "_");
+		
 
 		// Remove any non xml NCName characters
 
@@ -336,7 +337,7 @@ function generateItem(item, teiDoc) {
 		var curRespStmt = null;
 		var type = item.creators[i].creatorType;
 		if (type == "author") {
-			curCreator = teiDoc.createElementNS(ns.tei, "author");
+		            curCreator = teiDoc.createElementNS(ns.tei, "author");
 		} else if (type == "editor") {
 			curCreator = teiDoc.createElementNS(ns.tei, "editor");
 		} else if (type == "seriesEditor") {
@@ -361,11 +362,14 @@ function generateItem(item, teiDoc) {
 			var surname = null;
 			if (item.creators[i].firstName) {
 				surname = teiDoc.createElementNS(ns.tei, "surname");
-			} else {
-				surname = teiDoc.createElementNS(ns.tei, "name");
 			}
+		else {
+			surname = teiDoc.createElementNS(ns.tei, "name");
+			}
+			
 			surname.appendChild(teiDoc.createTextNode(item.creators[i].lastName));
 			curCreator.appendChild(surname);
+			
 		}
 
 		// make sure the right thing gets added
@@ -446,10 +450,14 @@ function generateItem(item, teiDoc) {
 		imprint.appendChild(imprintDate);
 	}
 
-	// flag unpublished if there is no date | publisher | place
+	// flag unpublished if there is no date | publisher | place by creating empty elements date | publisher | pubPlace
 	if (!(item.date || item.publisher || item.place)) {
-		publisher = teiDoc.createComment("  no publisher, publication date or place given  ");
+		var date = teiDoc.createElementNS(ns.tei, "date");
+		var publisher = teiDoc.createElementNS(ns.tei, "publisher");
+		var pubPlace = teiDoc.createElementNS(ns.tei, "pubPlace");
+		imprint.appendChild(date);
 		imprint.appendChild(publisher);
+		imprint.appendChild(pubPlace);
 	}
 	if (item.accessDate) {
 		var note = teiDoc.createElementNS(ns.tei, "note");
