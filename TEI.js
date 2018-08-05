@@ -331,11 +331,11 @@ function generateItem(item, teiDoc) {
 
 	// creators are all people only remotely involved into the creation of
 	// a resource
-	for (var i in item.creators) {
+	for (let creator of item.creators) {
 		var role = '';
 		var curCreator = '';
 		var curRespStmt = null;
-		var type = item.creators[i].creatorType;
+		var type = creator.creatorType;
 		if (type == "author") {
 		            curCreator = teiDoc.createElementNS(ns.tei, "author");
 		} else if (type == "editor") {
@@ -353,26 +353,26 @@ function generateItem(item, teiDoc) {
 			curRespStmt.appendChild(curCreator);
 		}
 		// add the names of a particular creator
-		if (item.creators[i].firstName) {
+		if (creator.firstName) {
 			var forename = teiDoc.createElementNS(ns.tei, "forename");
-			forename.appendChild(teiDoc.createTextNode(item.creators[i].firstName));
+			forename.appendChild(teiDoc.createTextNode(creator.firstName));
 			curCreator.appendChild(forename);
 		}
-		if (item.creators[i].lastName) {
+		if (creator.lastName) {
                                     var surname = null;
-                                    if (item.creators[i].firstName) {
+                                    if (creator.firstName) {
                                     surname = teiDoc.createElementNS(ns.tei, "surname");
                                     } else {
                                     surname = teiDoc.createElementNS(ns.tei, "name");
                                     }
-                                    surname.appendChild(teiDoc.createTextNode(item.creators[i].lastName));
+                                    surname.appendChild(teiDoc.createTextNode(creator.lastName));
                                     curCreator.appendChild(surname);
                         }
-                        if (item.creators[i].name) {
-                                    name = teiDoc.createElementNS(ns.tei, "name");
-                                    name.appendChild(teiDoc.createTextNode(item.creators[i].name));
-                                    curCreator.appendChild(name);   
-                        }
+                if (creator.name) {
+			let name = teiDoc.createElementNS(ns.tei, "name");
+			name.appendChild(teiDoc.createTextNode(creator.name));
+			curCreator.appendChild(name);
+		}
 		// make sure the right thing gets added
 		if (curRespStmt) {
 			curCreator = curRespStmt;
@@ -481,10 +481,10 @@ function generateItem(item, teiDoc) {
 
 	//export notes
 	if (item.notes && Zotero.getOption("exportNotes")) {
-		for (var n in item.notes) {
+		for (let singleNote of item.notes) {
 			// do only some basic cleaning of the html
 			// strip HTML tags
-			var noteText = Zotero.Utilities.cleanTags(item.notes[n].note);
+			var noteText = Zotero.Utilities.cleanTags(singleNote.note);
 			// unescape remaining entities -> no double escapes
 			noteText = Zotero.Utilities.unescapeHTML(noteText);
 			var note = teiDoc.createElementNS(ns.tei, "note");
@@ -497,10 +497,10 @@ function generateItem(item, teiDoc) {
 	if (Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
 		var tags = teiDoc.createElementNS(ns.tei, "note");
 		tags.setAttribute("type", "tags");
-		for (var n in item.tags) {
+		for (let singleTag of item.tags) {
 			var tag = teiDoc.createElementNS(ns.tei, "note");
 			tag.setAttribute("type", "tag");
-			tag.appendChild(teiDoc.createTextNode(item.tags[n].tag));
+			tag.appendChild(teiDoc.createTextNode(singleTag.tag));
 			tags.appendChild(tag);
 		}
 		bibl.appendChild(tags);
