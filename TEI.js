@@ -337,7 +337,7 @@ function generateItem(item, teiDoc) {
 		var curRespStmt = null;
 		var type = creator.creatorType;
 		if (type == "author") {
-		            curCreator = teiDoc.createElementNS(ns.tei, "author");
+			curCreator = teiDoc.createElementNS(ns.tei, "author");
 		} else if (type == "editor") {
 			curCreator = teiDoc.createElementNS(ns.tei, "editor");
 		} else if (type == "seriesEditor") {
@@ -359,16 +359,16 @@ function generateItem(item, teiDoc) {
 			curCreator.appendChild(forename);
 		}
 		if (creator.lastName) {
-                                    var surname = null;
-                                    if (creator.firstName) {
-                                    surname = teiDoc.createElementNS(ns.tei, "surname");
-                                    } else {
-                                    surname = teiDoc.createElementNS(ns.tei, "name");
-                                    }
-                                    surname.appendChild(teiDoc.createTextNode(creator.lastName));
-                                    curCreator.appendChild(surname);
-                        }
-                if (creator.name) {
+			var surname = null;
+			if (creator.firstName) {
+				surname = teiDoc.createElementNS(ns.tei, "surname");
+			} else {
+				surname = teiDoc.createElementNS(ns.tei, "name");
+			}
+			surname.appendChild(teiDoc.createTextNode(creator.lastName));
+			curCreator.appendChild(surname);
+		}
+		if (creator.name) {
 			let name = teiDoc.createElementNS(ns.tei, "name");
 			name.appendChild(teiDoc.createTextNode(creator.name));
 			curCreator.appendChild(name);
