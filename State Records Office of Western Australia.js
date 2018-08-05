@@ -36,10 +36,9 @@
 */
 
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
-
-/** select a Mime type for the attachment **/ 
+/** select a Mime type for the attachment **/
 function selectMimeType(url) {
-	fileType = url.replace(/^.*(\..+?)$/,'$1');
+	fileType = url.replace(/^.*(\..+?)$/, '$1');
 
 	switch (fileType) {
 		case ".jpg":
@@ -61,11 +60,11 @@ function detectWeb(doc, url) {
 	if (url.includes('index.php/search?query=') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-		// Adjust the inspection of url as required
+	// Adjust the inspection of url as required
 	if (url.includes('index.php/search/advanced?') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-	
+
 	if (url.includes('index.php/')) {
 		return 'single';
 	}
@@ -76,7 +75,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var rows = doc.querySelectorAll('.search-result-description a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].title);
 		if (!href || !title) continue;
@@ -88,127 +87,132 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	
-	var type = detectWeb(doc,url);
-	
+
+	var type = detectWeb(doc, url);
+
 	switch (type) {
 		case 'single':
 			scrape(doc, url);
 			break;
 		case 'multiple':
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			Zotero.selectItems(getSearchResults(doc, false), function(items) {
+				if (!items) {
+					return true;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
 			});
 			break;
-		default:	
+		default:
 	}
 }
 
-function scrape(doc,url) {
-	var type = detectWeb(doc,url);
-		
+function scrape(doc, url) {
+	var type = detectWeb(doc, url);
+
 	var item = new Zotero.Item('manuscript');
-		
+
 	var identityArea = doc.querySelector("section#identityArea");
-	
+
 	if (identityArea) {
-	
+
 		var identityFields = identityArea.querySelectorAll("div.field");
-		
+
 		if (identityFields) {
 			for (let field of identityFields) {
-		
-			// Zotero.debug("nextFirstEC" + text(identityFields[i],"h3"));
-		
-				var nextIdentityField = text(field,"h3");
-		
-				switch(nextIdentityField)
-				{
-				case "Title":
-					item.title = ZU.trimInternal(text(field,"div"));
-					break;
-			
-				case "Reference code":
-					item.archiveLocation = ZU.trimInternal(text(field,"div"));
-					break;
-				
-				case "Level of description":
-					item.manuscriptType = ZU.trimInternal(text(field,"div"));
-					break;
-			
-				case "Date(s)":
-				
-				// Dates stored in an unordered list of 0–2 items.
-				// 0 items = no dates ; store "" in item.date;
-				// 1 item = either creation or accumulation dates. Use creation dates if available;
-				// 2 items = both creation and accumulation dates. Use creation dates;
-				
-					var dateList = field.querySelectorAll("ul > li");
-					
-					// Find which list items contain which date type
 
-					if (dateList.length > 0) {
-						for (let date of dateList) {
-						
-							let dateStr = date.textContent;
-							let dateRange = dateStr.split("(")[0].split(" - ");
-							
-							let dr1 = ZU.trimInternal(dateRange[1]);
-							let dr0 = ZU.trimInternal(dateRange[0]);
-								
-							if (dateStr.indexOf("(Creation)") > 0) {
-								
-								//dateRange = ZU.trimInternal(dateStr.split("(")[0].split(" - "));
-								
-								if (dr1.length > 0) {
-									// assign TO date as item.date
-									item.date = dr1;
-								} else if (dr0.length > 0) {
-									// assign FROM date as item.date
-									item.date = dr0;
-								} else {
-									item.date = "";
+				// Zotero.debug("nextFirstEC" + text(identityFields[i],"h3"));
+
+				var nextIdentityField = text(field, "h3");
+
+				switch (nextIdentityField) {
+					case "Title":
+						item.title = ZU.trimInternal(text(field, "div"));
+						break;
+
+					case "Reference code":
+						item.archiveLocation = ZU.trimInternal(text(field, "div"));
+						break;
+
+					case "Level of description":
+						item.manuscriptType = ZU.trimInternal(text(field, "div"));
+						break;
+
+					case "Date(s)":
+
+						// Dates stored in an unordered list of 0–2 items.
+						// 0 items = no dates ; store "" in item.date;
+						// 1 item = either creation or accumulation dates. Use creation dates if available;
+						// 2 items = both creation and accumulation dates. Use creation dates;
+
+						var dateList = field.querySelectorAll("ul > li");
+
+						// Find which list items contain which date type
+
+						if (dateList.length > 0) {
+							for (let date of dateList) {
+
+								let dateStr = date.textContent;
+								let dateRange = dateStr.split("(")[0].split(" - ");
+
+								let dr1 = ZU.trimInternal(dateRange[1]);
+								let dr0 = ZU.trimInternal(dateRange[0]);
+
+								if (dateStr.indexOf("(Creation)") > 0) {
+
+									//dateRange = ZU.trimInternal(dateStr.split("(")[0].split(" - "));
+
+									if (dr1.length > 0) {
+										// assign TO date as item.date
+										item.date = dr1;
+									} else if (dr0.length > 0) {
+										// assign FROM date as item.date
+										item.date = dr0;
+									} else {
+										item.date = "";
+									}
+
+									if (item.date.length > 0) {
+										item.notes.push({
+											title: "Date(s)",
+											note: "Date(s): " + ZU.trimInternal(dateStr)
+										});
+									}
 								}
-								
-								if (item.date.length > 0) {
-									item.notes.push({title:"Date(s)",note:"Date(s): " + ZU.trimInternal(dateStr)});
+								if (dateStr.indexOf("(Accumulation)") > 0) {
+									// this is the Accumulation date list item
+									// Only use this date as the item date if no creation date exists
+
+									if (dr1.length > 0) {
+										// assign TO date as item.date
+										item.date = dr1;
+									} else if (dr0.length > 0) {
+										// assign FROM date as item.date
+										item.date = dr0;
+									} else {
+										item.date = "";
+									}
+									if (item.date.length > 0) {
+										item.notes.push({
+											title: "Date(s)",
+											note: "Date(s): " + ZU.trimInternal(dateStr)
+										});
+									}
 								}
 							}
-							if (dateStr.indexOf("(Accumulation)") > 0) {
-								// this is the Accumulation date list item
-								// Only use this date as the item date if no creation date exists
-								
-								if (dr1.length > 0) {
-									// assign TO date as item.date
-									item.date = dr1;
-								} else if (dr0.length > 0) {
-									// assign FROM date as item.date
-									item.date = dr0;
-								} else {
-									item.date = "";
-								}
-								if (item.date.length > 0) {
-									item.notes.push({title:"Date(s)",note:"Date(s): " + ZU.trimInternal(dateStr)});
-								}
-							}
+
+						} else {
+							item.date = "";
 						}
-					
-					} else {
-						item.date = "";
-					}
-					break;
-				
-				default:
-					break;
-			}
-		
+						break;
+
+					default:
+						break;
+				}
+
 			}
 		}
 	}
@@ -224,20 +228,19 @@ function scrape(doc,url) {
 	}
 
 	item.url = url;
-	
+
 	var contentArea = doc.querySelector("section#contentAndStructureArea");
-	
+
 	if (contentArea) {
 		var contentFields = contentArea.querySelectorAll("div.field");
-	
-		for (var j=0;j<contentFields.length;j++) {	
-			
-			nextContentField = text(contentFields[j],"h3");
-			
-			switch(nextContentField)
-			{
+
+		for (var j = 0; j < contentFields.length; j++) {
+
+			nextContentField = text(contentFields[j], "h3");
+
+			switch (nextContentField) {
 				case "Scope and content":
-					item.abstractNote = ZU.trimInternal(text(contentFields[j],"div"));
+					item.abstractNote = ZU.trimInternal(text(contentFields[j], "div"));
 					break;
 
 				default:
@@ -246,30 +249,29 @@ function scrape(doc,url) {
 					}
 					break;
 			}
-	
-		}			
+
+		}
 	}
 
 	var contextArea = doc.querySelector("section#contextArea");
-	
+
 	// all SROWA creators are organisations not individuals ; therefore remove the first part of the
 	// creator reference code eg. "AU WA A58 - ";
 
 	if (contextArea) {
 		var contextFields = contextArea.querySelectorAll("div.field");
-		
-		for (var k=0;k<contextFields.length;k++) {	
-			
-			nextContextField = text(contextFields[k],"h3");
-			
-			switch(nextContextField)
-			{
+
+		for (var k = 0; k < contextFields.length; k++) {
+
+			nextContextField = text(contextFields[k], "h3");
+
+			switch (nextContextField) {
 				case "Name of creator":
-					creatorName = text(contextFields[k],"div > a").split(" - ");
+					creatorName = text(contextFields[k], "div > a").split(" - ");
 					item.creators.push({
 						lastName: creatorName[1],
 						creatorType: "author",
-						fieldMode: 1
+						fieldMode: true 
 					})
 					break;
 
@@ -278,27 +280,26 @@ function scrape(doc,url) {
 						item.creatorName = '';
 					}
 			}
-	
-		}	
-		
+
+		}
+
 	}
-	
+
 	// attachment(s)
-	
+
 	var digitalObject = doc.querySelector("div.digital-object-reference");
-	
+
 	if (digitalObject) {
 		item.attachments.push({
-			title : '',
-			url : attr(digitalObject,'a','href'),
-			mimeType : selectMimeType(attr(digitalObject,'a','href')),
-			snapshot : true
+			title: 'SROWA Snapshot',
+			url: attr(digitalObject, 'a', 'href'),
+			mimeType: selectMimeType(attr(digitalObject, 'a', 'href')),
+			snapshot: true
 		});
 	}
-		
+
 	item.complete();
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
