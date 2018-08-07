@@ -51,7 +51,7 @@ function postProcess(doc, url, type, item) {
 
 	var keywords = ZU.xpath(doc, '//td[preceding-sibling::td[contains(text(), "Schlagwörter")]]/span/span/descendant::a');
 	keywords = keywords.map(function(a) { return a.textContent; });
-	for(var i in keywords)
+	for (var i in keywords)
 		item.tags.push(keywords[i]);
 
 	item.complete();
