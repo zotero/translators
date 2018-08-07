@@ -457,8 +457,8 @@ function generateItem(item, teiDoc) {
 		imprint.appendChild(imprintDate);
 	}
 
-	// flag unpublished if there is no date | publisher | place by creating empty element date | publisher | pubPlace
-	if (!(item.date)) {
+	// If no date exists, add an empty date node so that spec minimum requirement for one imprint element is met
+	else {
 		var date = teiDoc.createElementNS(ns.tei, "date");
 		imprint.appendChild(date);
 		}
