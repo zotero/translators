@@ -97,16 +97,22 @@ function replaceFormatting(title) {
 
 function genXMLId(item) {
 	var xmlid = '';
-	if (item.creators && item.creators[0] && item.creators[0].lastName) {
-		xmlid = item.creators[0].lastName;
+	if (item.creators && item.creators[0] && (item.creators[0].lastName || item.creators[0].name)) {
+		if (item.creators[0].lastName){
+		  xmlid = item.creators[0].lastName;  
+		}
+		if (item.creators[0].name){
+		  xmlid = item.creators[0].name;  
+		}
 		if (item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			if (date.year) {
 				xmlid += date.year;
 			}
 		}
-		// Replace space and colon by "_"
-		xmlid = xmlid.replace(/([ \t\[\]:])+/g, "_");
+		// Replace space, tabulations, colon, punctuation, parenthesis and apostrophes by "_"
+		xmlid = xmlid.replace(/([ \t\[\]:\u00AD\u0021-\u002C\u2010-\u2021])+/g, "_");
+		
 
 		// Remove any non xml NCName characters
 
@@ -166,7 +172,8 @@ function generateItem(item, teiDoc) {
 		"newspaperArticle": true,
 		"conferencePaper": true,
 		"encyclopediaArticle": true,
-		"dictionaryEntry": true
+		"dictionaryEntry": true,
+		"webpage": true
 	};
 
 	var isAnalytic = analyticItemTypes[item.itemType] ? true : false;
@@ -218,7 +225,7 @@ function generateItem(item, teiDoc) {
 		}
 
 		// publication title
-		var publicationTitle = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle;
+		var publicationTitle = item.bookTitle || item.proceedingsTitle || item.encyclopediaTitle || item.dictionaryTitle || item.publicationTitle || item.websiteTitle;
 		if (publicationTitle) {
 			var pubTitle = teiDoc.createElementNS(ns.tei, "title");
 			if (item.itemType == "journalArticle") {
@@ -330,11 +337,11 @@ function generateItem(item, teiDoc) {
 
 	// creators are all people only remotely involved into the creation of
 	// a resource
-	for (var i in item.creators) {
+	for (let creator of item.creators) {
 		var role = '';
 		var curCreator = '';
 		var curRespStmt = null;
-		var type = item.creators[i].creatorType;
+		var type = creator.creatorType;
 		if (type == "author") {
 			curCreator = teiDoc.createElementNS(ns.tei, "author");
 		} else if (type == "editor") {
@@ -352,22 +359,26 @@ function generateItem(item, teiDoc) {
 			curRespStmt.appendChild(curCreator);
 		}
 		// add the names of a particular creator
-		if (item.creators[i].firstName) {
+		if (creator.firstName) {
 			var forename = teiDoc.createElementNS(ns.tei, "forename");
-			forename.appendChild(teiDoc.createTextNode(item.creators[i].firstName));
+			forename.appendChild(teiDoc.createTextNode(creator.firstName));
 			curCreator.appendChild(forename);
 		}
-		if (item.creators[i].lastName) {
+		if (creator.lastName) {
 			var surname = null;
-			if (item.creators[i].firstName) {
+			if (creator.firstName) {
 				surname = teiDoc.createElementNS(ns.tei, "surname");
 			} else {
 				surname = teiDoc.createElementNS(ns.tei, "name");
 			}
-			surname.appendChild(teiDoc.createTextNode(item.creators[i].lastName));
+			surname.appendChild(teiDoc.createTextNode(creator.lastName));
 			curCreator.appendChild(surname);
 		}
-
+		if (creator.name) {
+			let name = teiDoc.createElementNS(ns.tei, "name");
+			name.appendChild(teiDoc.createTextNode(creator.name));
+			curCreator.appendChild(name);
+		}
 		// make sure the right thing gets added
 		if (curRespStmt) {
 			curCreator = curRespStmt;
@@ -446,11 +457,12 @@ function generateItem(item, teiDoc) {
 		imprint.appendChild(imprintDate);
 	}
 
-	// flag unpublished if there is no date | publisher | place
-	if (!(item.date || item.publisher || item.place)) {
-		publisher = teiDoc.createComment("  no publisher, publication date or place given  ");
-		imprint.appendChild(publisher);
-	}
+	// If no date exists, add an empty date node so that spec minimum requirement for one imprint element is met
+	else {
+		var date = teiDoc.createElementNS(ns.tei, "date");
+		imprint.appendChild(date);
+		}
+		
 	if (item.accessDate) {
 		var note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "accessed");
@@ -472,10 +484,10 @@ function generateItem(item, teiDoc) {
 
 	//export notes
 	if (item.notes && Zotero.getOption("exportNotes")) {
-		for (var n in item.notes) {
+		for (let singleNote of item.notes) {
 			// do only some basic cleaning of the html
 			// strip HTML tags
-			var noteText = Zotero.Utilities.cleanTags(item.notes[n].note);
+			var noteText = Zotero.Utilities.cleanTags(singleNote.note);
 			// unescape remaining entities -> no double escapes
 			noteText = Zotero.Utilities.unescapeHTML(noteText);
 			var note = teiDoc.createElementNS(ns.tei, "note");
@@ -488,10 +500,10 @@ function generateItem(item, teiDoc) {
 	if (Zotero.getOption("Export Tags") && item.tags && item.tags.length > 0) {
 		var tags = teiDoc.createElementNS(ns.tei, "note");
 		tags.setAttribute("type", "tags");
-		for (var n in item.tags) {
+		for (let singleTag of item.tags) {
 			var tag = teiDoc.createElementNS(ns.tei, "note");
 			tag.setAttribute("type", "tag");
-			tag.appendChild(teiDoc.createTextNode(item.tags[n].tag));
+			tag.appendChild(teiDoc.createTextNode(singleTag.tag));
 			tags.appendChild(tag);
 		}
 		bibl.appendChild(tags);
