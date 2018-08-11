@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-23 16:36:26"
+	"lastUpdated": "2018-07-15 20:34:03"
 }
 
 /*
@@ -36,6 +36,7 @@
 */
 function detectWeb(doc, url) {
 	if (url.includes("/search/simple/articles?") || url.includes("/search/advanced/articles") || url.search(/browse\/(favorites|issue)/) != -1) {
+		Z.monitorDOMChanges(doc.getElementById("container"), {childList: true});
 		if (ZU.xpath(doc, '//td[contains(@class, "title-cell")]/a').length) return "multiple";
 	} else {
 		return "newspaperArticle"
@@ -133,14 +134,18 @@ function scrape(doc, url) {
 	} else {
 		var title = ZU.xpathText(doc, '//div[@class="ArticleTitle"]');
 		//the "old" page format. We have very little structure here, doing the best we can.
-		//Z.debug(title);
 		var header = ZU.xpathText(doc, '//div[@class="Article"]/ul');
 		Z.debug(header);
 		var date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
 		if (date) item.date = date[1];
 		if (!item.publicationTitle) {
+			//most of the time the publication title is in quotation marks
 			var publication = header.match(/\"(.+?)\"/);
 			if (publication) item.publicationTitle = publication[1];
+			//if all else fails we just take the top of the file
+			else {
+				item.publicationTitle = header.trim().match(/^.+/);
+			}
 		}
 	}
 
@@ -156,6 +161,7 @@ function scrape(doc, url) {
 		title = ZU.capitalizeTitle(title, true);
 	}
 	item.title = title;
+	//Z.debug(item)
 	//sometimes items actually don't have a title: use the publication title instead.
 	if (!item.title) item.title = item.publicationTitle;
 	item.complete();
