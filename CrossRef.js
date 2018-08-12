@@ -240,9 +240,9 @@ function processCrossRef(xmlOutput) {
 		metadataXML = ZU.xpath(itemXML, 'c:proceedings_metadata', ns);
 		seriesXML = ZU.xpath(metadataXML, 'c:proceedings_metadata', ns);
 
-		item.publicationTitle = ZU.xpathText(metadataXML, 'c:publisher/c:proceedings_title', ns);
-		item.place = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_location', ns);
-		item.conferenceName = ZU.xpathText(metadataXML, 'c:event_metadata/c:conference_name', ns);
+		item.publicationTitle = ZU.xpathText(metadataXML, 'c:proceedings_title', ns);
+		item.place = ZU.xpathText(itemXML, 'c:event_metadata/c:conference_location', ns);
+		item.conferenceName = ZU.xpathText(itemXML, 'c:event_metadata/c:conference_name', ns);
 	}
 
 	else if((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:database', ns)).length) {
