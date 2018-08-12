@@ -2,7 +2,7 @@
 	"translatorID": "65c7ee26-eee7-442a-ba09-41da30cf2864",
 	"label": "Theses.fr",
 	"creator": "Pierre Payen",
-	"target": "https?://(www\\.)?theses.fr/[^?].*",
+	"target": "^https?://(www\\.)?theses.fr/[^?]",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -41,7 +41,6 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
 	if (!(url.includes('/?q='))) {
 		return "thesis";
 	} else if (getSearchResults(doc, true)) {
@@ -53,12 +52,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('div.informations>h2>a[href]');
 	for (let i=0; i<rows.length; i++) {
-		// TODO: check and maybe adjust
 		let href = rows[i].href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -89,19 +85,16 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		// TODO adjust if needed:
 		item.section = "Theses";
 		item.complete();
 	});
 
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = "thesis";
-		// TODO map additional meta tags here, or delete completely
 		trans.addCustomFields({
 			'twitter:description': 'abstractNote'
 		});
