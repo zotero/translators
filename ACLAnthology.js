@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-09 10:23:41"
+	"lastUpdated": "2018-08-12 16:36:03"
 }
 
 /*
@@ -46,14 +46,13 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	const WEBSITE_STUB = 'https://aclanthology.coli.uni-saarland.de/';
 	if (detectWeb(doc, url) === 'multiple') {
-		Zotero.selectItems(extractPapersFromListing(doc), function (selected) {
+		Zotero.selectItems(getSearchResults(doc), function (selected) {
 			if (!selected) {
 				return true;
 			}
 			
 			Object.keys(selected).forEach(function (id) {
-				let partialBibtexUrl = ZU.xpath(doc, '//p[contains(., "' + id + '")]/a[img[@alt = "Export"]]/@href')[0].value;
-				let bibtexUrl = WEBSITE_STUB + partialBibtexUrl;
+				let bibtexUrl = ZU.xpath(doc, '//p[contains(., "' + id + '")]/a[img[@alt = "Export"]]')[0].href;
 				ZU.doGet(bibtexUrl, function(responseString, responseObj) {
 					scrapeBibtex(responseString);
 				});
@@ -70,20 +69,14 @@ function doWeb(doc, url) {
 	}
 }
 
-function extractPapersFromListing(doc) {
+function getSearchResults(doc) {
 	let listing = ZU.xpath(doc, '//div[@id="content"]//p');
 	let items = {};
 	for (let i = 0; i < listing.length; i++) {
 		let title = ZU.xpath(listing[i], 'strong')[0].textContent;
-		let authors = ZU.xpath(listing[i], 'br/following-sibling::a');
-		authors = authors.map(function(author) { return author.textContent; });
 		let bibtexLink = ZU.xpath(listing[i], 'a[img[@alt = "Export"]]/@href')[0].value;
 		let id = bibtexLink.split('/')[2];
-		
-		let authorSurname = authors[0].split(' ').pop();
-		let etAl = authors.length > 1 ? ' et al.' : '';
-		let author = authorSurname + etAl;
-		items[id] = id + ' (' + author + '): ' + title;
+		items[id] = title;
 	}
 	return items;
 }
