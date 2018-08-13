@@ -2,14 +2,14 @@
 	"translatorID": "4c6d887e-341d-4edb-b651-ea702a8918d7",
 	"label": "SVT Nyheter",
 	"creator": "Sebastian Berlin",
-	"target": "^https?://www.svt.se/nyheter/",
+	"target": "^https?://www\\.svt\\.se/nyheter/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcibv",
-	"lastUpdated": "2018-07-05 14:15:52"
+	"browserSupport": "gcisbv",
+	"lastUpdated": "2018-08-13 09:15:36"
 }
 
 /*
@@ -58,17 +58,19 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		var nameNodes =
 			ZU.xpath(doc, '//a[@class="nyh_article__author-email"]/text()');
-		for(let nameNode of nameNodes) {
-			var nameString = nameNode.textContent;
-			var author = ZU.cleanAuthor(nameString, "author");
-			var firstNames = author.firstName.split(" ");
-			if(firstNames.length > 1) {
-				// Assume that there's only one first name and move any
-				// "extra" name to lastName.
-				author.firstName = firstNames[0];
-				author.lastName = firstNames[1] + " " + author.lastName;
+		if(nameNodes) {
+			for(let nameNode of nameNodes) {
+				let nameString = nameNode.textContent;
+				let author = ZU.cleanAuthor(nameString, "author");
+				let firstNames = author.firstName.split(" ");
+				if(firstNames.length > 1) {
+					// Assume that there's only one first name and move any
+					// "extra" name to lastName.
+					author.firstName = firstNames[0];
+					author.lastName = firstNames[1] + " " + author.lastName;
+				}
+				item.creators.push(author);
 			}
-			item.creators.push(author);
 		}
 		if(item.creators.length === 0) {
 			// No author was found, look for non-person authors, e.g. TT.
@@ -85,8 +87,10 @@ function scrape(doc, url) {
 
 		var dateString =
 			attr(doc, 'meta[property="article:published_time"]', "content");
-		// The date strings have the format "2018-02-28T02:24:59+01:00".
-		item.date = dateString.split("T")[0];
+		if(dateString) {
+			// The date strings have the format "2018-02-28T02:24:59+01:00".
+			item.date = dateString.split("T")[0];
+		}
 
 		if(url.match(/\/nyheter\/uutiset\/(?!svenska\/)/)) {
 			// Uutiset articles are in Finnish, except when in the Swedish
