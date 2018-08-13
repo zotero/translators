@@ -47,7 +47,18 @@ function postProcess(doc, url, type, item) {
 	item.issue = issue;
 	item.pages = page;
 	item.language = ZU.xpathText(doc, '//td[preceding-sibling::td[contains(text(), "Sprache")]]/text()');
-	item.abstractNote = ZU.xpathText(doc,'//div[@id="abstract"]/p');
+	item.abstractNote = ZU.xpathText(doc,'//blockquote[preceding-sibling::label[contains(text(), "Abstract:")]]/text()');
+
+	var title = ZU.xpathText(doc, '//td[preceding-sibling::td[contains(text(), "Titel")]]/h4/text()').trim();
+	title = title.slice(0, title.length - 1);
+	var subtitle = ZU.xpathText(doc, '//td[preceding-sibling::td[contains(text(), "Titelzusatz")]]/text()');
+
+	if (subtitle === undefined || subtitle === null)
+		subtitle = "";
+
+	var fullTitle = title + (subtitle.length > 0 ? " : " + subtitle : "");
+	item.shortTitle = title;
+	item.title = fullTitle;
 
 	var keywords = ZU.xpath(doc, '//td[preceding-sibling::td[contains(text(), "Schlagwörter")]]/span/span/descendant::a');
 	keywords = keywords.map(function(a) { return a.textContent; });
