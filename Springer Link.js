@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-02-13 19:20:12"
+	"lastUpdated": "2018-08-15 11:38:22"
 }
 
 function detectWeb(doc, url) {
@@ -89,6 +89,11 @@ function complementItem(doc, item) {
 					or @id="abstract-about-doi"][1]'
 		);
 	}
+	if (!item.language) {
+		item.language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content')
+	}	
+	
+	
 	if(!item.publisher) {
 		item.publisher = ZU.xpathText(doc, '//dd[@id="abstract-about-publisher"]');
 	}
@@ -106,11 +111,17 @@ function complementItem(doc, item) {
 			item.rights = '©' + year + ' ' + item.rights;
 		}
 	}
-	if(itemType == "journalArticle" && !item.ISSN) {
-		item.ISSN = ZU.xpathText(doc,
-			'//dd[@id="abstract-about-issn" or\
-					@id="abstract-about-electronic-issn"]'
-		);
+	
+	if(itemType == "journalArticle") {
+		if (!item.ISSN) {
+			item.ISSN = ZU.xpathText(doc,
+				'//dd[@id="abstract-about-issn" or\
+						@id="abstract-about-electronic-issn"]'
+			);
+		}
+		if (!item.journalAbbreviation || item.publicationTitle == item.journalAbbreviation) {
+			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content')
+		}
 	}
 	if(itemType == 'bookSection' || itemType == "conferencePaper") {
 		//look for editors
@@ -170,54 +181,20 @@ function complementItem(doc, item) {
 
 function scrape(doc, url) {
 	var itemType = detectWeb(doc, doc.location.href);
-	//we prefer embedded metadata, if missing try RIS
-	if(ZU.xpathText(doc, '//meta[@name="citation_title"]/@content')) {
-		//use Embeded Metadata translator
-		var translator = Zotero.loadTranslator("web");
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler("itemDone", function(obj, item) {
-			//sometimes we get an error about title not being set
-			if(!item.title) {
-				Z.debug("Springer Link: title not found");
-				Z.debug(item);
-				if(doc.head) {
-					//clean up and strip out uninteresting content
-					Z.debug(doc.head.innerHTML.replace(/<style[^<]+(?:<\/style>|\/>)/ig, '')
-						.replace(/<link[^>]+>/ig, '').replace(/(?:\s*[\r\n]\s*)+/g, '\n'));
-				} else {
-					Z.debug("Springer Link: no head tag");
-				}
-			}
-			item = complementItem(doc, item);
-			//add keywords
-			var keywords = ZU.xpath(doc,
-				'//ul[@class="abstract-about-subject" or @class="abstract-keywords"]\
-			/li'
-			);
-			keywords = keywords.map(function(node) {
-				return node.textContent.trim();
-			});
-			item.tags = keywords;
-			item.complete();
-		});
-		translator.getTranslatorObject(function(trans) {
-			if(itemType) trans.itemType = itemType;
-			trans.doWeb(doc, doc.location.href);
-		});
-	} else {
-		var risURL = url.replace(/springer\.com/, "springer.com/export-citation").replace(
-				/[#?].*/, "") + ".ris";
-			//Z.debug(risURL)
+
 		var DOI = url.match(/\/(10\.[^#?]+)/)[1];
+		var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
+		Z.debug("risURL" + risURL);
 		var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf";
 		Z.debug("pdfURL: " + pdfURL);
 		ZU.doGet(risURL, function(text) {
+			//Z.debug(text)
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function(obj, item) {
 				item = complementItem(doc, item);
+				
 				item.attachments.push({
 					url: pdfURL,
 					title: "Springer Full Text PDF",
@@ -227,7 +204,6 @@ function scrape(doc, url) {
 			});
 			translator.translate();
 		});
-	}
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -239,30 +215,39 @@ var testCases = [
 				"title": "Something Old, Something New, Something Borrowed, Something Blue",
 				"creators": [
 					{
-						"firstName": "Jan J.",
 						"lastName": "Koenderink",
+						"firstName": "Jan J.",
 						"creatorType": "author"
-					}
-				],
-				"date": "2008/10/12",
-				"DOI": "10.1007/978-3-540-88682-2_1",
-				"ISBN": "9783540886815 9783540886822",
-				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
-				"conferenceName": "European Conference on Computer Vision",
-				"language": "en",
-				"libraryCatalog": "link.springer.com",
-				"pages": "1-1",
-				"proceedingsTitle": "Computer Vision – ECCV 2008",
-				"publisher": "Springer, Berlin, Heidelberg",
-				"series": "Lecture Notes in Computer Science",
-				"url": "https://link.springer.com/chapter/10.1007/978-3-540-88682-2_1",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"lastName": "Forsyth",
+						"firstName": "David",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Torr",
+						"firstName": "Philip",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Zisserman",
+						"firstName": "Andrew",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2008",
+				"ISBN": "9783540886822",
+				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "1-1",
+				"proceedingsTitle": "Computer Vision – ECCV 2008",
+				"publisher": "Springer Berlin Heidelberg",
+				"series": "Lecture Notes in Computer Science",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -278,23 +263,32 @@ var testCases = [
 			{
 				"itemType": "bookSection",
 				"title": "Characterized by Commitment to Something Without Personal Exploration",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Goldstein",
+						"firstName": "Sam",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Naglieri",
+						"firstName": "Jack A.",
+						"creatorType": "editor"
+					}
+				],
 				"date": "2011",
-				"abstractNote": "Identity Foreclosure",
+				"ISBN": "9780387790619",
 				"bookTitle": "Encyclopedia of Child Behavior and Development",
 				"extra": "DOI: 10.1007/978-0-387-79061-9_5173",
 				"language": "en",
-				"libraryCatalog": "link.springer.com",
+				"libraryCatalog": "Springer Link",
 				"pages": "329-329",
-				"publisher": "Springer, Boston, MA",
-				"url": "https://link.springer.com/referenceworkentry/10.1007/978-0-387-79061-9_5173",
+				"place": "Boston, MA",
+				"publisher": "Springer US",
+				"url": "https://doi.org/10.1007/978-0-387-79061-9_5173",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Springer Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -312,30 +306,33 @@ var testCases = [
 				"title": "What Do We Know?: Simple Statistical Techniques that Help",
 				"creators": [
 					{
-						"firstName": "Anthony",
 						"lastName": "Nicholls",
+						"firstName": "Anthony",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Bajorath",
+						"firstName": "Jürgen",
+						"creatorType": "editor"
 					}
 				],
 				"date": "2011",
-				"ISBN": "9781607618386 9781607618393",
+				"ISBN": "9781607618393",
 				"abstractNote": "An understanding of simple statistical techniques is invaluable in science and in life. Despite this, and despite the sophistication of many concerning the methods and algorithms of molecular modeling, statistical analysis is usually rare and often uncompelling. I present here some basic approaches that have proved useful in my own work, along with examples drawn from the field. In particular, the statistics of evaluations of virtual screening are carefully considered.",
 				"bookTitle": "Chemoinformatics and Computational Chemical Biology",
 				"extra": "DOI: 10.1007/978-1-60761-839-3_22",
 				"language": "en",
-				"libraryCatalog": "link.springer.com",
+				"libraryCatalog": "Springer Link",
 				"pages": "531-581",
-				"publisher": "Humana Press, Totowa, NJ",
+				"place": "Totowa, NJ",
+				"publisher": "Humana Press",
 				"series": "Methods in Molecular Biology",
 				"shortTitle": "What Do We Know?",
-				"url": "https://link.springer.com/protocol/10.1007/978-1-60761-839-3_22",
+				"url": "https://doi.org/10.1007/978-1-60761-839-3_22",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Springer Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -366,53 +363,50 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://link.springer.com/article/10.1007/s10040-009-0439-x",
+		"url": "https://link.springer.com/article/10.1007/s10040-009-0439-x",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Tide-induced head fluctuations in a coastal aquifer: effects of the elastic storage and leakage of the submarine outlet-capping",
 				"creators": [
 					{
-						"firstName": "Xiaolong",
 						"lastName": "Geng",
+						"firstName": "Xiaolong",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Hailong",
 						"lastName": "Li",
+						"firstName": "Hailong",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Michel C.",
 						"lastName": "Boufadel",
+						"firstName": "Michel C.",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Shuang",
 						"lastName": "Liu",
+						"firstName": "Shuang",
 						"creatorType": "author"
 					}
 				],
-				"date": "2009/07/01",
+				"date": "July 1, 2009",
 				"DOI": "10.1007/s10040-009-0439-x",
-				"ISSN": "1431-2174, 1435-0157",
+				"ISSN": "1435-0157",
 				"abstractNote": "This paper considers the tidal head fluctuations in a single coastal confined aquifer which extends under the sea for a certain distance. Its submarine outlet is covered by a silt-layer with properties dissimilar to the aquifer. Recently, Li et al. (2007) gave an analytical solution for such a system which neglected the effect of the elastic storage (specific storage) of the outlet-capping. This article presents an analytical solution which generalizes their work by incorporating the elastic storage of the outlet-capping. It is found that if the outlet-capping is thick enough in the horizontal direction, its elastic storage has a significant enhancing effect on the tidal head fluctuation. Ignoring this elastic storage will lead to significant errors in predicting the relationship of the head fluctuation and the aquifer hydrogeological properties. Quantitative analysis shows the effect of the elastic storage of the outlet-capping on the groundwater head fluctuation. Quantitative conditions are given under which the effect of this elastic storage on the aquifer’s tide-induced head fluctuation is negligible. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724",
 				"issue": "5",
 				"journalAbbreviation": "Hydrogeol J",
 				"language": "en",
-				"libraryCatalog": "link.springer.com",
+				"libraryCatalog": "Springer Link",
 				"pages": "1289-1296",
 				"publicationTitle": "Hydrogeology Journal",
 				"shortTitle": "Tide-induced head fluctuations in a coastal aquifer",
-				"url": "https://link.springer.com/article/10.1007/s10040-009-0439-x",
+				"url": "https://doi.org/10.1007/s10040-009-0439-x",
 				"volume": "17",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
+						"title": "Springer Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
 					}
 				],
 				"tags": [],
