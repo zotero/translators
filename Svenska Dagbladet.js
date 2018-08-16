@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-16 12:11:48"
+	"lastUpdated": "2018-08-16 13:37:50"
 }
 
 /*
@@ -123,6 +123,8 @@ function scrape(doc, url) {
 
 		// Remove suffix not part of the title.
 		item.title = item.title.replace(/( \(SvD Premium\))? \| SvD$/, "");
+		
+ 		item.ISSN = "1101-2412";
 
 		item.complete();
 	});
@@ -152,6 +154,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-03-01",
+				"ISSN": "1101-2412",
 				"abstractNote": "Nya Karolinska-skandalen har blivit en nationell fråga som riskerar att skada Sveriges rykte som innovationsland. Det säger närings- och innovationsminister Mikael Damberg (S) till SvD.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
@@ -184,6 +187,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-03-01",
+				"ISSN": "1101-2412",
 				"abstractNote": "Alla som ger till tiggare riskerar att bidra till människohandel, enligt finansminister Magdalena Andersson (S). Miljöpartiets Maria Ferm slår nu tillbaka mot Andersson. ”Iskylan har trängt in långt in i den politiska debatten”, skriver Ferm på Facebook.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
@@ -221,6 +225,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-03-13",
+				"ISSN": "1101-2412",
 				"abstractNote": "Fentanyl betydde slutet för Prince, Tom Petty, Lil Peep – och svenska ungdomar som köpt sprayflaskor på nätet. Det här är berättelsen om hur en smärtstillande medicin ledde hundratusentals människor in i döden.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
