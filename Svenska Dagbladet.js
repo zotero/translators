@@ -2,14 +2,14 @@
 	"translatorID": "7adba17c-7e98-4a13-8325-e19383b09eab",
 	"label": "Svenska Dagbladet",
 	"creator": "Sebastian Berlin",
-	"target": "^https://www.svd.se/(sok\\?)?",
+	"target": "^https://www\\.svd\\.se/(sok\\?)?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-06 07:07:36"
+	"lastUpdated": "2018-08-16 12:11:48"
 }
 
 /*
@@ -99,21 +99,25 @@ function scrape(doc, url) {
 		item.creators = [];
 		// The author string is in the format:
 		// FirstName LastName | Email
-		var nameString =
-			attr(doc, 'meta[name="author"]', "content").split("|")[0];
-		var author = ZU.cleanAuthor(nameString, "author");
-		if(author.firstName === "") {
-			// If there's only one name, the author is not a person,
-			// e.g. "TT".
-			author.firstName = undefined;
-			author.fieldMode = true;
+		var authorString = attr(doc, 'meta[name="author"]', "content");
+		if(authorString) {
+			var nameString = authorString.split("|")[0];
+			var author = ZU.cleanAuthor(nameString, "author");
+			if(author.firstName === "") {
+				// If there's only one name, the author is not a person,
+				// e.g. "TT".
+				author.firstName = undefined;
+				author.fieldMode = true;
+			}
+			item.creators.push(author);
 		}
-		item.creators.push(author);
 
 		// Dates are in the format:
 		// Thu, 1 Mar 2018 12:05:53 +01:00
 		var dateString = attr(doc, 'meta[name="publishdate"]', "content");
-		item.date = new Date(dateString).toISOString().split("T")[0];
+		if(dateString) {
+			item.date = new Date(dateString).toISOString().split("T")[0];
+		}
 
 		item.shortTitle = "";
 
