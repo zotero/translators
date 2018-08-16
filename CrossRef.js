@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-08-13 12:17:00"
+	"lastUpdated": "2018-08-16 12:00:00"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -69,6 +69,11 @@ function detectSearch(item) {
 }
 
 function fixAuthorCapitalization(string) {
+	// Try to use capitalization function from Zotero Utilities,
+	// because the current one doesn't support unicode names.
+	// Can't fix this either because ZU.XRegExp.replace is
+	// malfunctioning when calling from translators.
+	if (ZU.capitalizeName) return ZU.capitalizeName(string);
 	if(typeof string === "string" && string.toUpperCase() === string) {
 		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase() });
 	}
