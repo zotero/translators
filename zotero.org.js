@@ -14,16 +14,6 @@
 
 var sessionKey;
 
-function textToXML(text) {
-	try {
-		var parser = new DOMParser();
-		return parser.parseFromString(text, 'text/xml');
-	} catch(e) {
-		Zotero.debug(e);
-		return null;
-	}
-}
-
 function scrape(text) {
 	var item = JSON.parse(text);
 	var newItem = new Zotero.Item();
@@ -51,7 +41,7 @@ function getListTitles(doc) {
 }
 
 function getLibraryURI(doc) {
-	var feed = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0]
+	var feed = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0];
 	if(!feed) return;
 	var url = feed.href.match(/^.+?\/(?:users|groups)\/\w+/);
 	if (!url) {

@@ -3,13 +3,13 @@
 	"label": "NYTimes.com",
 	"creator": "Philipp Zumstein",
 	"target": "^https?://(query\\.nytimes\\.com/(search|gst)/|(select\\.|www\\.|mobile\\.|[^\\/.]*\\.blogs\\.)?nytimes\\.com/)",
-	"minVersion": "4.0",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-11 13:49:31"
+	"lastUpdated": "2018-04-22 06:48:50"
 }
 
 /*
@@ -47,11 +47,8 @@ function detectWeb(doc, url) {
 
 
 function detectWebHere(doc, url) {
-	if (doc.getElementById("searchResults")) {
-		Z.monitorDOMChanges(doc.getElementById("searchResults"), {childList: true});
-		if (getSearchResults(doc, true)) {
-			return "multiple";
-		}
+	if (url.includes('/search/') && getSearchResults(doc, true)) {
+		return "multiple";
 	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type" and @content="article"]/@content')) {
 		if (url.indexOf('blog')>-1) {
@@ -76,7 +73,8 @@ function scrape(doc, url) {
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		} else {
-			item.date = doc.querySelector('time').getAttribute('datetime');
+			item.date = attr(doc, 'time', 'datetime')
+				|| attr(doc, 'meta[itemprop="dateModified"]', 'content');
 		}
 		if (item.itemType == "blogPost") {
 			item.blogTitle = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content');
@@ -84,9 +82,10 @@ function scrape(doc, url) {
 			item.publicationTitle = "The New York Times";
 			item.ISSN = "0362-4331";
 		}
-		//Multiple authors are just put into the same Metadata field
-		var authors = attr(doc,'meta[name="author"]','content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
-		if (authors) {
+		//Multiple authors are (sometimes) just put into the same Metadata field
+		var authors = attr(doc,'meta[name="author"]', 'content') || attr(doc, 'meta[name="byl"]', 'content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
+		if (authors && item.creators.length<=1) {
+			authors = authors.replace(/^By /, '');
 			if (authors == authors.toUpperCase()) // convert to title case if all caps
 				authors = ZU.capitalizeTitle(authors, true);
 			item.creators = [];
@@ -116,6 +115,8 @@ function scrape(doc, url) {
 				item.tags[i] = ZU.capitalizeTitle(item.tags[i], true);
 			}
 		}
+		/* TODO: Fix saving the PDF attachment which is currently broken
+		
 		// PDF attachments are in subURL with key & signature
 		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href | //a[@class="button download-pdf-button"]/@href');
 		if (pdfurl) {
@@ -139,9 +140,10 @@ function scrape(doc, url) {
 				}
 			);
 		} else {
+		*/
 			Z.debug("Not attempting PDF retrieval");
 			item.complete();
-		}
+		//}
 	});
 	
 	translator.getTranslatorObject(function(trans) {
@@ -157,10 +159,11 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '(//div[@id="^"]|//div[@id="searchResults"]|//div[@id="srchContent"])//li');
+	var rows = doc.querySelectorAll('li');// filter inside the loop
 	for (var i=0; i<rows.length; i++) {
+		if (!rows[i].className.includes('SearchResults-item')) continue;
 		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
-		var title = ZU.trimInternal(rows[i].textContent);
+		var title = ZU.xpathText(rows[i], './/h4');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -191,19 +194,25 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF&legacy=true",
+		"url": "https://www.nytimes.com/1912/03/05/archives/two-money-inquiries-hearings-of-trust-charges-and-aldrich-plan-at.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
 				"title": "TWO MONEY INQUIRIES.; Hearings of Trust Charges and Aldrich Plan at the Same Time.",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Special to The New York",
+						"lastName": "Times",
+						"creatorType": "author"
+					}
+				],
 				"date": "1912-03-05",
 				"ISSN": "0362-4331",
-				"abstractNote": "WASHINGTON, March 4. -- The Money Trust inquiry and consideration of the proposed Aldrich monetary legislation will probably be handled side by side by the House Banking and Currency Committee. The present tentative plan is to divide the committee into two parts, one of which, acting as a sub-committee, will investigate as far as it can those allegations of the Henry Money Trust resolution which fall within the jurisdiction of the Banking and Currency Committee.",
 				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"url": "http://query.nytimes.com/gst/abstract.html?res=9C07E4DC143CE633A25756C0A9659C946396D6CF",
+				"section": "Archives",
+				"url": "https://www.nytimes.com/1912/03/05/archives/two-money-inquiries-hearings-of-trust-charges-and-aldrich-plan-at.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -213,9 +222,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					""
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -262,7 +269,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://query.nytimes.com/search/sitesearch/#/marc+hauser",
+		"url": "https://www.nytimes.com/search/#/marc+hauser",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -563,6 +570,114 @@ var testCases = [
 					},
 					{
 						"tag": "Twitter"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/interactive/2017/11/10/us/men-accused-sexual-misconduct-weinstein.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "After Weinstein: 71 Men Accused of Sexual Misconduct and Their Fall From Power",
+				"creators": [
+					{
+						"firstName": "Sarah",
+						"lastName": "Almukhtar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Gold",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Larry",
+						"lastName": "Buchanan",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-11-10",
+				"ISSN": "0362-4331",
+				"abstractNote": "A list of men who have resigned, been fired or otherwise lost power since the Harvey Weinstein scandal broke.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "U.S.",
+				"shortTitle": "After Weinstein",
+				"url": "https://www.nytimes.com/interactive/2017/11/10/us/men-accused-sexual-misconduct-weinstein.html, https://www.nytimes.com/interactive/2017/11/10/us/men-accused-sexual-misconduct-weinstein.html",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "#MeToo Movement"
+					},
+					{
+						"tag": "Besh, John (1968- )"
+					},
+					{
+						"tag": "C K, Louis"
+					},
+					{
+						"tag": "Conyers, John Jr"
+					},
+					{
+						"tag": "Cornish, Tony"
+					},
+					{
+						"tag": "Franken, Al"
+					},
+					{
+						"tag": "Franks, Trent"
+					},
+					{
+						"tag": "Huff, Justin"
+					},
+					{
+						"tag": "Keillor, Garrison"
+					},
+					{
+						"tag": "Lauer, Matt"
+					},
+					{
+						"tag": "Levine, James"
+					},
+					{
+						"tag": "Lizza, Ryan"
+					},
+					{
+						"tag": "Masterson, Danny (1976- )"
+					},
+					{
+						"tag": "Price, Roy (1967- )"
+					},
+					{
+						"tag": "Rose, Charlie"
+					},
+					{
+						"tag": "Sex Crimes"
+					},
+					{
+						"tag": "Sexual Harassment"
+					},
+					{
+						"tag": "Simmons, Russell"
+					},
+					{
+						"tag": "Spacey, Kevin"
+					},
+					{
+						"tag": "Stein, Lorin"
+					},
+					{
+						"tag": "Weinstein, Harvey"
 					}
 				],
 				"notes": [],
