@@ -26,7 +26,7 @@ function doWeb(doc, url){
 	var dateRe = new RegExp("^https?://web.archive.org/web/([0-9]+)");
 	if (dateRe.test(url)){ //handle single item
 		scrape(doc, url)
-	} else{//handle multiple items
+	} else {//handle multiple items
 		var xpath = '//td[@class="mainBody"]/a';
 		var links = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var items=new Array();

@@ -305,7 +305,7 @@ function doSearch(item) {
 	let query = null;
 	
 	if (item.DOI) {
-		if(Array.isArray(item.DOI)) {
+		if (Array.isArray(item.DOI)) {
 			query = '?filter=doi:' + item.DOI.map(x => ZU.cleanDOI(x)).filter(x => x).join(',doi:');
 		} else {
 			query = '?filter=doi:' + ZU.cleanDOI(item.DOI);
@@ -318,7 +318,7 @@ function doSearch(item) {
 	
 	query += '&select=' + selectedFields.join(',');
 	
-	if(Z.getHiddenPref('CrossrefREST.email')) {
+	if (Z.getHiddenPref('CrossrefREST.email')) {
 		query += '&mailto=' + Z.getHiddenPref('CrossrefREST.email');
 	}
 	

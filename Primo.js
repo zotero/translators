@@ -42,41 +42,41 @@ function getSearchResults(doc) {
 }
 
 function detectWeb(doc, url) {
-	if(getSearchResults(doc).length) {
+	if (getSearchResults(doc).length) {
 		return 'multiple';
 	}
 	
 	var contentDiv = doc.getElementsByClassName('EXLFullResultsHeader');
-	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
-	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
-	if(contentDiv.length) return 'book';
+	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
+	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
+	if (contentDiv.length) return 'book';
 }
 
 function doWeb(doc, url) {
 	var searchResults = getSearchResults(doc);
-	if(searchResults.length) {
+	if (searchResults.length) {
 		var items = {}, itemIDs = {}, title, link,
 			linkXPaths = searchResults.linkXPaths;
-		for(var i=0, n=searchResults.length; i<n; i++) {
+		for (var i=0, n=searchResults.length; i<n; i++) {
 			title = ZU.xpathText(searchResults[i], searchResults.titleXPath);
-			for(var j=0, m=linkXPaths.length; j<m; j++) {
+			for (var j=0, m=linkXPaths.length; j<m; j++) {
 				link = ZU.xpath(searchResults[i], linkXPaths[j])[0];
-				if(link) {
+				if (link) {
 					break;
 				}
 			}
 			
-			if(!link || !title || !(title = ZU.trimInternal(title))) continue;
+			if (!link || !title || !(title = ZU.trimInternal(title))) continue;
 			
 			items[link.href] = title;
 			itemIDs[link.href] = {id: i, docID: getDocID(link.href)};
 		}
 		
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var urls = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
 			}
 			fetchPNX(urls);
@@ -88,7 +88,7 @@ function doWeb(doc, url) {
 
 function getDocID(url) {
 	var id = url.match(/\bdoc(?:Id)?=([^&]+)/i);
-	if(id) return id[1];
+	if (id) return id[1];
 }
 
 //keeps track of which URL format works for retrieving PNX record
@@ -110,7 +110,7 @@ var PNXUrlGenerator = new function() {
 		//simply add &showPnx=true
 		function(urlObj) {
 			var url = urlObj.url.split('#');
-			if(url[0].indexOf('?') == -1) {
+			if (url[0].indexOf('?') == -1) {
 				url[0] += '?';
 			} else {
 				url[0] += '&';
@@ -121,7 +121,7 @@ var PNXUrlGenerator = new function() {
 	
 	function getUrlWithId(url, id) {
 		var url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
-		if(!url) return;
+		if (!url) return;
 		return url[1] + 'showPNX.jsp?id=' + id;
 	}
 	
@@ -130,13 +130,13 @@ var PNXUrlGenerator = new function() {
 	
 	this.getUrl = function(data) {
 		var fun = functions[this.currentFunction];
-		if(!fun) return;
+		if (!fun) return;
 		
 		return fun(data);
 	};
 	
 	this.nextFunction = function() {
-		if(!this.confirmed && this.currentFunction < functions.length) {
+		if (!this.confirmed && this.currentFunction < functions.length) {
 			Z.debug("Function " + this.currentFunction + " did not work.");
 			this.currentFunction++;
 			return true;
@@ -146,14 +146,14 @@ var PNXUrlGenerator = new function() {
 
 //retrieve PNX records for given items sequentially
 function fetchPNX(itemData) {
-	if(!itemData.length) return; //do this until we run out of URLs
+	if (!itemData.length) return; //do this until we run out of URLs
 	
 	var data = itemData.shift();
 	var url = PNXUrlGenerator.getUrl(data); //format URL if still possible
-	if(!url) {
-		if(PNXUrlGenerator.nextFunction()) {
+	if (!url) {
+		if (PNXUrlGenerator.nextFunction()) {
 			itemData.unshift(data);
-		} else if(!PNXUrlGenerator.confirmed){
+		} else if (!PNXUrlGenerator.confirmed){
 			//in case we can't find PNX for a particular item,
 			//go to the next and start looking from begining
 			Z.debug("Could not determine PNX url from " + data.url);
@@ -169,7 +169,7 @@ function fetchPNX(itemData) {
 	ZU.doGet(url,
 		function(text) {
 			text = text.trim();
-			if(text.substr(0,5) != '<?xml' || text.search(/<error\b/i) !== -1) {
+			if (text.substr(0,5) != '<?xml' || text.search(/<error\b/i) !== -1) {
 				//try a different PNX url
 				gotPNX = false;
 				return;
@@ -181,7 +181,7 @@ function fetchPNX(itemData) {
 			importPNX(text, url);
 		},
 		function() {
-			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
+			if (!gotPNX && PNXUrlGenerator.nextFunction()) {
 				//if url function not confirmed, try another one on the same URL
 				//otherwise, we move on
 				itemData.unshift(data);

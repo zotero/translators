@@ -56,7 +56,7 @@
 
 //sets the rs cookie value to the provided ID and returns the old value
 function setCookie(doc, rsId) {
-	if(!rsId) return null;
+	if (!rsId) return null;
 
 	var matches = doc.cookie.match(/(?:$|; )rs=([^;]*)/);
 	var oldCookie = matches ? unescape(matches[1]) : null;
@@ -98,13 +98,13 @@ function detectType(code) {
 function getSearchResults(doc, checkOnly) {
 	var items = [], found = false
 		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
-	for(var i=0, n=lis.length; i<n; i++) {
+	for (var i=0, n=lis.length; i<n; i++) {
 		var a = lis[i].getElementsByTagName("a")[1];
 		var title = ZU.trimInternal( ZU.cleanTags(a.textContent) );
 		var link = a.getAttribute("href").match(/\/([^\/]+)\.aspx/)[1];
 		if (!link) continue;
 		
-		if(checkOnly) return true;
+		if (checkOnly) return true;
 		
 		items[link] = title;
 		found = true;
@@ -115,10 +115,10 @@ function getSearchResults(doc, checkOnly) {
 
 function getItemId(doc) {
 	var action = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
-	if(!action) return;
+	if (!action) return;
 	
 	var id = action.match(/(?:\?|&)ID=([^&]+)/);
-	if(!id) return;
+	if (!id) return;
 	
 	return id[1];
 }
@@ -135,7 +135,7 @@ function scrape(doc, id) {
 
 	ZU.doGet(exportUrl, function(text) {
 		var matches = text.match(/<div\s+id=["']export_container["']>((?:.|[\r\n])+?)<\/div>/i);
-		if(!matches) return false;
+		if (!matches) return false;
 
 		text = ZU.cleanTags( matches[1].replace(/[\r\n]/g,'') );
 
@@ -144,15 +144,15 @@ function scrape(doc, id) {
 		translator.setString(text);
 		translator.setHandler('itemDone', function(obj, item) {
 			//author first and last names are mixed up
-			for(var i=0, n=item.creators.length; i<n; i++) {
-				if(!item.creators[i].firstName) continue;
+			for (var i=0, n=item.creators.length; i<n; i++) {
+				if (!item.creators[i].firstName) continue;
 				var first = item.creators[i].lastName;
 				item.creators[i].lastName = item.creators[i].firstName;
 				item.creators[i].firstName = first;
 			}
 
 			//type is actually DOI
-			if(item.type) {
+			if (item.type) {
 				item.DOI = item.type;
 				delete item.type;
 			}
@@ -200,7 +200,7 @@ function doWeb(doc, url) {
 			if (!selectedItems) return true;
 		
 			var urls = new Array();
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 

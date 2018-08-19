@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 			type = text(doc, 'b[data-reactid]');
 		}
 		type = type.replace('(PDF Available)', '').trim();
-		switch(type) {
+		switch (type) {
 			case "Data"://until we have a data itemType
 			case "Article":
 				return "journalArticle";

@@ -429,13 +429,13 @@ function attachPersons(doc, item, ids, type) {
 		var lastName = ZU.xpathText(author, 'LastName');
 		var firstName = ZU.xpathText(author, 'FirstName');
 		var middleName = ZU.xpathText(author, 'MiddleName');
-		if(firstName && lastName) {
+		if (firstName && lastName) {
 			if (middleName) {
 				firstName += ' ' + middleName;
 			}
 			item.creators.push({ lastName : lastName, firstName : firstName, creatorType : type });
 		}
-		if(!firstName && lastName) {
+		if (!firstName && lastName) {
 			item.creators.push({ lastName : lastName, creatorType : type , fieldMode : true});
 		}
 	}

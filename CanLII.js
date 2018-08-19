@@ -65,7 +65,7 @@ function scrape(doc, url) {
 	}
 	
 	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
-	if(shortUrl) {
+	if (shortUrl) {
 		newItem.url = shortUrl.textContent.trim();
 	}
 

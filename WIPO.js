@@ -45,7 +45,7 @@ function detectWeb(doc,url) {
 }
 
 function fixCase(content){
-	if(content.toUpperCase() == content ||
+	if (content.toUpperCase() == content ||
 		content.toLowerCase() == content) {
 		return ZU.capitalizeTitle(content, true);
 	}

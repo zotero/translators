@@ -13,31 +13,31 @@
 }
 
 function detectSearch(items) {
-	if(!items) return false;
+	if (!items) return false;
 	
-	if(typeof items == 'string' || !items.length) items = [items];
+	if (typeof items == 'string' || !items.length) items = [items];
 	
-	for(var i=0, n=items.length; i<n; i++) {
-		if(!items[i]) continue;
+	for (var i=0, n=items.length; i<n; i++) {
+		if (!items[i]) continue;
 		
-		if(items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
-		if(typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
+		if (items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
+		if (typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
 	}
 	
 	return false;
 }
 
 function filterQuery(items) {
-	if(!items) return [];
+	if (!items) return [];
 	
-	if(typeof items == 'string' || !items.length) items = [items];
+	if (typeof items == 'string' || !items.length) items = [items];
 	
 	//filter out invalid queries
 	var dois = [], doi;
-	for(var i=0, n=items.length; i<n; i++) {
-		if(items[i].DOI && (doi = ZU.cleanDOI(items[i].DOI)) ) {
+	for (var i=0, n=items.length; i<n; i++) {
+		if (items[i].DOI && (doi = ZU.cleanDOI(items[i].DOI)) ) {
 			dois.push(doi);
-		} else if(typeof items[i] == 'string' && (doi = ZU.cleanDOI(items[i])) ) {
+		} else if (typeof items[i] == 'string' && (doi = ZU.cleanDOI(items[i])) ) {
 			dois.push(doi);
 		}
 	}
@@ -46,7 +46,7 @@ function filterQuery(items) {
 
 function doSearch(items) {
 	var dois = filterQuery(items);
-	if(!dois.length) return;
+	if (!dois.length) return;
 	
 	processDOIs(dois);
 }
@@ -63,8 +63,8 @@ function fixJSON(text) {
 				item.note += "\ncontainer-title: " + item["container-title"];
 			}
 		}
-		if(item.issued && item.issued.raw) item.issued.literal = item.issued.raw;
-		if(item.accessed && item.accessed.raw) item.accessed.literal = item.accessed.raw;
+		if (item.issued && item.issued.raw) item.issued.literal = item.issued.raw;
+		if (item.accessed && item.accessed.raw) item.accessed.literal = item.accessed.raw;
 		
 		return JSON.stringify([item]);
 	} catch(e) {
@@ -76,7 +76,7 @@ function processDOIs(dois) {
 	var doi = dois.pop();
 	ZU.doGet('https://data.datacite.org/application/citeproc+json/' + encodeURIComponent(doi), function(text) {
 		text = fixJSON(text);
-		if(!text) {
+		if (!text) {
 			return;
 		}
 		
@@ -97,7 +97,7 @@ function processDOIs(dois) {
 		});
 		trans.translate();
 	}, function() {
-		if(dois.length) processDOIs(dois);
+		if (dois.length) processDOIs(dois);
 	});
 }
 

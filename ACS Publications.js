@@ -15,7 +15,7 @@
 function getSearchResults(doc, checkOnly, itemOpts) {
 	var items = {}, found = false;
 	var titles = doc.getElementsByClassName('titleAndAuthor');
-	for(var i=0; i<titles.length; i++){
+	for (var i=0; i<titles.length; i++){
 		var a = ZU.xpath(titles[i], './/h2//a')[0];
 		if (!a) continue;
 		
@@ -37,7 +37,7 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 			continue;
 		}
 		
-		if(ZU.xpath(articleBox, './/a[text()="Supporting Info"]').length) {
+		if (ZU.xpath(articleBox, './/a[text()="Supporting Info"]').length) {
 			itemOpts[doi].hasSupp = true;
 		}
 		
@@ -52,9 +52,9 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 function getDoi(url) {
 	var m = url.match(/https?:\/\/[^\/]*\/doi\/(?:abs\/|full\/)?(10\.[^\?#]+)/);
 	
-	if(m) {
+	if (m) {
 		var doi = m[1];
-		if(doi.indexOf("prevSearch") != -1) {
+		if (doi.indexOf("prevSearch") != -1) {
 			doi = doi.substring(0,doi.indexOf("?"));
 		}
 		return decodeURIComponent(doi);
@@ -68,7 +68,7 @@ function getDoi(url) {
 function getSuppFiles(div) {
 	var fileNames = ZU.xpath(div, './/li//li');
 	var attach = [];
-	for(var i=0, n=fileNames.length; i<n; i++) {
+	for (var i=0, n=fileNames.length; i<n; i++) {
 		attach.push(fileNames[i].textContent.trim().replace(/\s[\s\S]+/, ''));
 	}
 	return attach;
@@ -88,16 +88,16 @@ function getSuppMimeType(fileName) {
 }
 
 function attachSupp(item, doi, opts) {
-	if(!opts.attach) return;
-	if(!item.attachments) item.attachments = [];
+	if (!opts.attach) return;
+	if (!item.attachments) item.attachments = [];
 	var attachment;
-	for(var i=0, n=opts.attach.length; i<n; i++) {
+	for (var i=0, n=opts.attach.length; i<n; i++) {
 		attachment = {
 			title: opts.attach[i]
 		};
 		attachment.url = '/doi/suppl/' + doi + '/suppl_file/' + attachment.title;	
 		attachment.mimeType = getSuppMimeType(attachment.title);
-		if(opts.attachAsLink || !attachment.mimeType) { //don't download unknown file types
+		if (opts.attachAsLink || !attachment.mimeType) { //don't download unknown file types
 			attachment.snapshot = false;
 		}
 		
@@ -116,7 +116,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	} else if (getDoi(url)) {
 		var type  = doc.getElementsByClassName("manuscriptType");
-		if(type.length && type[0].textContent.indexOf("Chapter") !=-1) {
+		if (type.length && type[0].textContent.indexOf("Chapter") !=-1) {
 			return "bookSection";
 		} else {
 			return "journalArticle";
@@ -131,7 +131,7 @@ function doWeb(doc, url){
 		opts.attachSupp = Z.getHiddenPref("attachSupplementary");
 		opts.attachAsLink = Z.getHiddenPref("supplementaryAsLink");
 		var highResPDF = Z.getHiddenPref("ACS.highResPDF"); //attach high res PDF?
-		if(highResPDF) {
+		if (highResPDF) {
 			opts.highResPDF = true;
 			opts.removePdfPlus = highResPDF === 1; //it can also be 2, which would mean attach both versions
 		}
@@ -156,7 +156,7 @@ function doWeb(doc, url){
 		Zotero.debug("DOI= "+doi);
 		//we can determine file names from the tooltip, which saves us an HTTP request
 		var suppTip = doc.getElementById('suppTipDiv');
-		if(opts.attachSupp && suppTip) {
+		if (opts.attachSupp && suppTip) {
 			try {
 				opts.attach = getSuppFiles(suppTip, opts);
 			} catch(e) {
@@ -167,7 +167,7 @@ function doWeb(doc, url){
 		
 		//if we couldn't find this on the individual item page,
 		//then it doesn't have supp info anyway. This way we know not to check later
-		if(!opts.attach) opts.attach = [];
+		if (!opts.attach) opts.attach = [];
 		
 		// See if we have pdfplus
 		var div = doc.getElementsByClassName('fulltext-formats')[0];
@@ -180,7 +180,7 @@ function doWeb(doc, url){
 }
 
 function scrape(items, opts){
-	for(var i=0, n=items.length; i<n; i++) {
+	for (var i=0, n=items.length; i<n; i++) {
 		processCallback(items[i], opts);
 	}
 }
@@ -195,7 +195,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 			// Fix the wrong mapping for journal abbreviations
 			text = text.replace("\nJO  -", "\nJ2  -");
 			// Use publication date when available
-			if(text.indexOf("\nDA  -") !== -1) {
+			if (text.indexOf("\nDA  -") !== -1) {
 				text = text.replace(/\nY1  - [^\n]*/, "")
 					.replace("\nDA  -", "\nY1  -");
 			}
@@ -234,14 +234,14 @@ function processCallback(fetchItem, opts, downloadFileName) {
 				
 				//supplementary data
 				try {
-					if(opts.attachSupp && opts.attach) {
+					if (opts.attachSupp && opts.attach) {
 						//came from individual item page
 						attachSupp(item, doi, opts);
-					} else if(opts.attachSupp && fetchItem.opts.hasSupp) {
+					} else if (opts.attachSupp && fetchItem.opts.hasSupp) {
 						//was a search result and has supp info
 						var suppUrl = '/doi/suppl/' + doi;
 						
-						if(opts.attachAsLink) {
+						if (opts.attachAsLink) {
 							//if we're only attaching links, it's not worth linking to each doc
 							item.attachments.push({
 								title: "Supporting Information",
@@ -253,7 +253,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 							ZU.processDocuments(suppUrl, function(suppDoc) {
 								try {
 									var div = suppDoc.getElementById('supInfoBox');
-									if(div) {
+									if (div) {
 										var files = getSuppFiles(div);
 										attachSupp(item, doi, {
 											attach: files,

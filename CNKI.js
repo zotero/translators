@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefworksByID(ids, next) {
 	var postData = "";
-	for(var i=0, n=ids.length; i<n; i++) {
+	for (var i=0, n=ids.length; i<n; i++) {
 		postData += ids[i].dbname + "!" + ids[i].filename + "!0!0,";
 	}
 	postData = "formfilenames=" + encodeURIComponent(postData);
@@ -57,7 +57,7 @@ function getRefworksByID(ids, next) {
 					//split authors
 					.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function(m, tag, authors) {
 						var authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
-						if(!authors[authors.length-1].trim()) authors.pop();
+						if (!authors[authors.length-1].trim()) authors.pop();
 						
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					});
@@ -69,11 +69,11 @@ function getRefworksByID(ids, next) {
 }
 
 function getIDFromURL(url) {
-	if(!url) return;
+	if (!url) return;
 	
 	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
-	if(!dbname || !dbname[1] || !filename || !filename[1]) return;
+	if (!dbname || !dbname[1] || !filename || !filename[1]) return;
 	
 	return {dbname: dbname[1], filename: filename[1], url: url};
 }
@@ -84,7 +84,7 @@ function getIDFromPage(doc, url) {
 }
 
 function getTypeFromDBName(dbname) {
-	switch(dbname.substr(0,4).toUpperCase()) {
+	switch (dbname.substr(0,4).toUpperCase()) {
 		case "CJFQ":
 		case "CJFD":
 		case "CAPJ":
@@ -113,55 +113,55 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	
 	var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
 	var aXpath = './/a[@class="fz14"]';
-	if(!links.length) {
+	if (!links.length) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
 	}
-	if(!links.length) return;
+	if (!links.length) return;
 	
 	var items = {};
 	var count = 0;
-	for(var i=0, n=links.length; i<n; i++) {
+	for (var i=0, n=links.length; i<n; i++) {
 		var a = ZU.xpath(links[i], aXpath)[0];
 		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
-		if(title) title = ZU.trimInternal(title);
+		if (title) title = ZU.trimInternal(title);
 		var id = getIDFromURL(a.href);
-		if(!title || !id) continue;
+		if (!title || !id) continue;
 		
 		count++;
-		if(itemInfo) {
+		if (itemInfo) {
 			itemInfo[a.href] = {id: id};
 			
 			/*var pdfLink = ZU.xpath(links[i], './/a[@class="brief_downloadIcon"]')[0];
-			if(pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
+			if (pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
 		}
 		items[a.href] = title;
 	}
 	
-	if(count) return items;
+	if (count) return items;
 }
 
 function detectWeb(doc, url) {
 	var id = getIDFromPage(doc, url);
 	Z.debug(id);
-	if(id) {
+	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
 	
 	var items = getItemsFromSearchResults(doc, url);
-	if(items) return "multiple";
+	if (items) return "multiple";
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var itemInfoByTitle = {};
 			var ids = [];
-			for(var url in selectedItems) {
+			for (var url in selectedItems) {
 				ids.push(itemInfo[url].id);
 				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
 				itemInfoByTitle[selectedItems[url]].url = url;
@@ -183,12 +183,12 @@ function scrape(ids, doc, url, itemInfo) {
 		var i = 0;		
 		translator.setHandler('itemDone', function(obj, newItem) {
 			//split names
-			for(var i=0, n=newItem.creators.length; i<n; i++) {
+			for (var i=0, n=newItem.creators.length; i<n; i++) {
 				var creator = newItem.creators[i];
-				if(creator.firstName) continue;
+				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
-				if(creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					//western name. split on last space
 					creator.firstName = creator.lastName.substr(0,lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace+1);
@@ -199,22 +199,22 @@ function scrape(ids, doc, url, itemInfo) {
 				}
 			}
 			
-			if(newItem.abstractNote) {
+			if (newItem.abstractNote) {
 				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
 			}
 			
 			//clean up tags. Remove numbers from end
-			for(var i=0, n=newItem.tags.length; i<n; i++) {
+			for (var i=0, n=newItem.tags.length; i<n; i++) {
 				newItem.tags[i] = newItem.tags[i].replace(/:\d+$/, '');
 			}
 			
 			newItem.title = ZU.trimInternal(newItem.title);
-			if(itemInfo) {
+			if (itemInfo) {
 				var info = itemInfo[newItem.title];
-				if(!info) {
+				if (!info) {
 					Z.debug('No item info for "' + newItem.title + '"');
 				} else {
-					/*if(!info.pdfURL) {
+					/*if (!info.pdfURL) {
 						Z.debug('No PDF URL passed from multiples page');
 					} else {
 						newItem.attachments.push({

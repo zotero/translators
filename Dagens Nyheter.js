@@ -100,23 +100,23 @@ function scrape(doc, url) {
 		var nameNodes =
 			ZU.xpath(doc, '//h6[@class="byline__author" and @itemprop="name"]');
 		var names = [];
-		for(let node of nameNodes) {
+		for (let node of nameNodes) {
 			names.push(node.textContent);
 		}
-		if(names.length === 0) {
+		if (names.length === 0) {
 			var name = attr(doc, 'div[class="js-article"]', "data-authors");
 			names.push(name);
 		}
 		item.creators = [];
-		for(let name of names) {
+		for (let name of names) {
 			let author = ZU.cleanAuthor(name, "author");
-			if(author.firstName === "") {
+			if (author.firstName === "") {
 				// If there's only one name, the author is not a person,
 				// e.g. "TT".
 				author.firstName = undefined;
 				author.fieldMode = true;
 			}
-			if(author.firstName && author.firstName.includes(" ")) {
+			if (author.firstName && author.firstName.includes(" ")) {
 				// Multiple names are most likely last names.
 				let multiNames = author.firstName.split(" ");
 				author.firstName = multiNames.shift();
@@ -127,7 +127,7 @@ function scrape(doc, url) {
 
 		var abstractString =
 			attr(doc, 'div[class="js-article"]', "data-article-description");
-		if(abstractString) {
+		if (abstractString) {
 			item.abstractNote = abstractString.replace(/&nbsp;/g, " ");
 		}
 
@@ -135,7 +135,7 @@ function scrape(doc, url) {
 
 		var timeString =
 			attr(doc, 'meta[property="article:published_time"]', "content");
-		if(timeString) {
+		if (timeString) {
 			item.date = timeString.split("T")[0];
 		}
 		

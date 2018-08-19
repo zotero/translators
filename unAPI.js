@@ -48,49 +48,49 @@ UnAPIFormat = function(aXML) {
 	// Loop through to determine format name
 	var nodes = doc.documentElement.getElementsByTagName("format");
 	var nNodes = nodes.length;
-	if(!nNodes) {
+	if (!nNodes) {
 		// Hack to fix for Firefox 10/Zotero 3.0.1
 		var i = 0;
-		while(i in nodes) nNodes = ++i;
+		while (i in nodes) nNodes = ++i;
 	}
 	var node, name, lowerName, format;
-	for(let i=0; i<nNodes; i++) {
+	for (let i=0; i<nNodes; i++) {
 		node = nodes[i];
 		name = node.getAttribute("name");
 		lowerName = name.toLowerCase();
 		format = false;
 		
 		// Look for formats we can recognize
-		if(["rdf_zotero", "rdf_bibliontology", "bibtex", "endnote", "rdf_dc"].indexOf(lowerName) != -1) {
+		if (["rdf_zotero", "rdf_bibliontology", "bibtex", "endnote", "rdf_dc"].indexOf(lowerName) != -1) {
 			format = lowerName;
-		} else if(lowerName == "rdf_bibliontology") {
+		} else if (lowerName == "rdf_bibliontology") {
 			format = "rdf_bibliontology";
-		} else if(lowerName === "mods"
+		} else if (lowerName === "mods"
 				|| node.getAttribute("namespace_uri") === "http://www.loc.gov/mods/v3"
 				|| node.getAttribute("docs") === "http://www.loc.gov/standards/mods/"
 				|| node.getAttribute("type") === "application/mods+xml") {
 			format = "mods";
-		} else if(lowerName.match(/^marc\b/)
+		} else if (lowerName.match(/^marc\b/)
 				|| node.getAttribute("type") === "application/marc") {
 			format = "marc";
-		} else if(lowerName.match(/^unimarc\b/)
+		} else if (lowerName.match(/^unimarc\b/)
 				|| node.getAttribute("type") === "application/unimarc") {
 			format = "unimarc";
-		} else if(lowerName.match(/^marcxml\b/)
+		} else if (lowerName.match(/^marcxml\b/)
 				|| node.getAttribute("type") === "application/marcxml+xml"
 				|| node.getAttribute("docs") === "http://www.loc.gov/marcxml/") {
 			format = "marcxml";
-		} else if(node.getAttribute("docs") === "http://www.refman.com/support/risformat_intro.asp"
+		} else if (node.getAttribute("docs") === "http://www.refman.com/support/risformat_intro.asp"
 				|| lowerName.match(/^ris\b/)) {
 			format = "ris";
 		}
 		
-		if(format) foundFormat[format] = name;
+		if (format) foundFormat[format] = name;
 	}
 	
 	// Loop through again to determine optimal supported format
-	for(let i=0; i<RECOGNIZABLE_FORMATS.length; i++) {
-		if(foundFormat[RECOGNIZABLE_FORMATS[i]]) {
+	for (let i=0; i<RECOGNIZABLE_FORMATS.length; i++) {
+		if (foundFormat[RECOGNIZABLE_FORMATS[i]]) {
 			this.isSupported = true;
 			this.name = foundFormat[RECOGNIZABLE_FORMATS[i]];
 			this.translatorID = FORMAT_GUIDS[RECOGNIZABLE_FORMATS[i]];
@@ -122,9 +122,9 @@ UnAPIID.prototype = {
 	"getItemType":function(callback) {
 		var me = this;
 		this.getItems(function(items) {
-			if(items.length === 0) {
+			if (items.length === 0) {
 				callback(false);
-			} else if(items.length === 1) {
+			} else if (items.length === 1) {
 				callback(items[0].itemType);
 			} else {
 				callback("multiple");
@@ -136,7 +136,7 @@ UnAPIID.prototype = {
 	 * @param {Function} callback Callback to be passed items when they have been retrieved
 	 */
 	"getItems":function(callback) {
-		if(this.items) {
+		if (this.items) {
 			callback(this.items);
 			return;
 		}
@@ -144,7 +144,7 @@ UnAPIID.prototype = {
 		var me = this;
 		this.items = [];
 		this.isSupported(function(isSupported) {
-			if(!isSupported) {
+			if (!isSupported) {
 				callback([]);
 				return;
 			}
@@ -175,7 +175,7 @@ UnAPIID.prototype = {
 	 * @param {Function} callback Callback to be passed isSupported when it is known
 	 */
 	"isSupported":function(callback) {
-		if(this.hasOwnProperty("format")) {
+		if (this.hasOwnProperty("format")) {
 			callback(this.format.isSupported);
 			return;
 		}
@@ -184,7 +184,7 @@ UnAPIID.prototype = {
 		
 		getDefaultFormat(function(defaultFormat) {
 			// first try default format, since this won't require >1 HTTP request
-			if(defaultFormat.isSupported) {
+			if (defaultFormat.isSupported) {
 				me.format = defaultFormat;
 				callback(true);
 			} else {
@@ -216,9 +216,9 @@ function nsResolver() {
 function getUnAPIIDs(doc) {
 	// look for a resolver
 	var newUnAPIResolver = doc.evaluate('//x:link[@rel="unapi-server"]', doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
-	if(!newUnAPIResolver) return [];
+	if (!newUnAPIResolver) return [];
 	newUnAPIResolver = newUnAPIResolver.getAttribute("href");
-	if(unAPIResolver !== newUnAPIResolver) {
+	if (unAPIResolver !== newUnAPIResolver) {
 		// if unAPI resolver has changed, clear
 		defaultFormat = false;
 		unAPIResolver = newUnAPIResolver;
@@ -230,7 +230,7 @@ function getUnAPIIDs(doc) {
 		doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var abbr;
 	var ids = [];
-	while(abbr = abbrs.iterateNext()) {
+	while (abbr = abbrs.iterateNext()) {
 		var id = abbr.getAttribute("title");
 		ids.push(unAPIIDs[id] ? unAPIIDs[id] : new UnAPIID(id));
 	}
@@ -244,7 +244,7 @@ function getUnAPIIDs(doc) {
  * @param {Function} callback A callback to be passed the format when it is available
  */
 function getDefaultFormat(callback) {
-	if(defaultFormat) {
+	if (defaultFormat) {
 		callback(defaultFormat);
 	} else {
 		Zotero.Utilities.HTTP.doGet(unAPIResolver, function(text) {
@@ -260,15 +260,15 @@ function getDefaultFormat(callback) {
 function determineDetectItemType(ids, supportedId) {
 	var id = ids.shift();
 	id.isSupported(function(isSupported) {
-		if(isSupported && supportedId !== undefined) {
+		if (isSupported && supportedId !== undefined) {
 			// If there are multiple items with valid itemTypes, use "multiple"
 			Zotero.done("multiple");
-		} else if(ids.length) {
+		} else if (ids.length) {
 			// If IDs remain to be handled, handle the next one
 			determineDetectItemType(ids, (isSupported ? id : supportedId));
 		} else {
 			// If all IDs have been handled, get foundItemType for only supported ID
-			if(isSupported) {
+			if (isSupported) {
 				id.getItemType(Zotero.done);
 			} else {
 				Zotero.done(false);
@@ -288,7 +288,7 @@ function getAllItems(ids, callback, items) {
 	id.getItems(function(retrievedItems) {
 		var collectedItems = (items ? items.concat(retrievedItems) : retrievedItems);
 		
-		if(ids.length) {
+		if (ids.length) {
 			getAllItems(ids, callback, collectedItems);
 		} else {
 			callback(collectedItems);
@@ -299,9 +299,9 @@ function getAllItems(ids, callback, items) {
 function detectWeb(doc, url) {
 	// get unAPI IDs
 	var ids = getUnAPIIDs(doc);
-	if(!ids.length) return false;
+	if (!ids.length) return false;
 	
-	if(!ids.length === 1) {
+	if (!ids.length === 1) {
 		// Only one item, so we will just get its item type
 		ids[0].getItemType(Zotero.done);
 	} else {
@@ -317,23 +317,23 @@ function doWeb(doc, url) {
 		// get the domain we're scraping, so we can use it for libraryCatalog
 		domain = doc.location.href.match(/https?:\/\/([^/]+)/);
 		
-		if(items.length == 1) {
+		if (items.length == 1) {
 			// If only one item, just complete it
 			items[0].libraryCatalog = domain[1];
 			items[0].complete();
-		} else if(items.length > 0) {
+		} else if (items.length > 0) {
 			// If multiple items, extract their titles
 			var itemTitles = {};
-			for(var i in items) {
+			for (var i in items) {
 				itemTitles[i] = items[i].title;
 			}
 			
 			// Show item selection dialog
 			Zotero.selectItems(itemTitles, function(chosenItems) {
-				if(!chosenItems) return true;
+				if (!chosenItems) return true;
 				
 				// Complete items
-				for(var i in chosenItems) {
+				for (var i in chosenItems) {
 					items[i].libraryCatalog = domain[1];
 					items[i].complete();
 				}
