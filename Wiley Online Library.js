@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-21 15:05:09"
+	"lastUpdated": "2018-06-08 10:58:19"
 }
 
 /*
@@ -32,7 +32,7 @@
 
 function fixCase(authorName) {
 	if(typeof authorName != 'string') return authorName;
-	
+
 	if(authorName.toUpperCase() == authorName ||
 		authorName.toLowerCase() == authorName) {
 		return ZU.capitalizeTitle(authorName, true);
@@ -69,7 +69,7 @@ function scrapeBook(doc, url, pdfUrl) {
 
 	var newItem = new Zotero.Item('book');
 	newItem.title = ZU.capitalizeTitle(title.textContent, true);
-	
+
 	var data = ZU.xpath(doc, '//div[@id="metaData"]/p');
 	var dataRe = /^(.+?):\s*(.+?)\s*$/;
 	var match;
@@ -119,9 +119,12 @@ function scrapeBook(doc, url, pdfUrl) {
 
 function scrapeEM(doc, url, pdfUrl) {
 	var itemType = detectWeb(doc, url);
-	
+
 	//fetch print publication date
 	var date = ZU.xpathText(doc, '//meta[@name="citation_date"]/@content');
+	if (!date) {
+		date = ZU.xpathText(doc, '//span[@class="epub-date" and preceding-sibling::span[@class="epub-state" and contains(text(), "First published:")]]/text()');
+	}
 
 	//remove duplicate meta tags
 	var metas = ZU.xpath(doc,
@@ -204,7 +207,7 @@ function scrapeEM(doc, url, pdfUrl) {
 			item.complete();
 		}
 	});
-	
+
 	translator.getTranslatorObject(function(em) {
 		em.itemType = itemType;
 		em.doWeb(doc, url);
@@ -222,20 +225,20 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		scrapeEM(doc, url, pdfUrl);
 		return;
 	}
-	
+
 	var postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';
 	var body = 'direct=direct' +
-				'&doi=' + encodeURIComponent(doi) + 
+				'&doi=' + encodeURIComponent(doi) +
 				'&downloadFileName=pericles_14619563AxA' +
 				'&format=bibtex' + //'&format=ris' +
 				'&include=abs' +
 				'&submit=Download';
-	
+
 	ZU.doPost(postUrl, body, function(text) {
 		// Replace uncommon dash (hex e2 80 90)
 		text = text.replace(/‐/g, '-');
 		//Z.debug(text);
-		
+
 		var translator = Zotero.loadTranslator('import');
 		//use BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -256,7 +259,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
 				item.creators[i].lastName = fixCase(item.creators[i].lastName);
 			}
-			
+
 			//delete nonsense author Null, Null
 			if (item.creators.length && item.creators[item.creators.length-1].lastName == "Null"
 				&& item.creators[item.creators.length-1].firstName == "Null") {
@@ -270,15 +273,19 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
 										'editor',false) );
 			}
-			
+
 			//title
 			if(item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
-			
+
 			if (!item.date) {
 				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
 			}
+			if (!item.date) {
+				item.date = ZU.xpathText(doc, '//span[@class="epub-date" and preceding-sibling::span[@class="epub-state" and contains(text(), "First published:")]]/text()')
+			}
+
 			//date in the cochraine library RIS is wrong
 			if (ZU.xpathText(doc, '//meta[@name="citation_book_title"]/@content') == "The Cochrane Library") {
 				item.date = ZU.xpathText(doc, '//meta[@name="citation_online_date"]/@content');
@@ -286,11 +293,11 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			if (item.date) {
 				item.date = ZU.strToISO(item.date);
 			}
-			
+
 			if (!item.ISSN) {
 				item.ISSN = ZU.xpathText(doc, '//meta[@name="citation_issn"]/@content');
 			}
-			
+
 			//tags
 			if(!item.tags.length) {
 				var keywords = ZU.xpathText(doc,
@@ -299,7 +306,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					item.tags = keywords.split(', ');
 				}
 			}
-			
+
 			//abstract should not start with "Abstract"
 			if (item.abstractNote) {
 				item.abstractNote = item.abstractNote.replace(/^(Abstract|Summary) /i, '');
@@ -370,7 +377,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 							}
 						}
 					}
-					
+
 					if (pdfUrl) {
 						item.attachments.push({
 							url: pdfUrl,
@@ -378,7 +385,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 							mimeType: 'application/pdf'
 						});
 					}
-					
+
 					item.complete();
 				});
 			} else {
@@ -405,6 +412,9 @@ function scrapeCochraneTrial(doc, url){
 	item.publicationTitle = ZU.xpathText(doc, '//meta[@name="source"]/@content');
 	item.abstractNote = ZU.xpathText(doc, '//meta[@name="abstract"]/@content');
 	item.date = ZU.xpathText(doc, '//meta[@name="simpleYear"]/@content');
+	if (!item.date) {
+		item.date = ZU.xpathText(doc, '//span[@class="epub-date" and preceding-sibling::span[@class="epub-state" and contains(text(), "First published:")]]')
+	}
 	item.volume = ZU.xpathText(doc, '//meta[@name="volume"]/@content');
 	item.pages = ZU.xpathText(doc, '//meta[@name="pages"]/@content');
 	item.issue = ZU.xpathText(doc, '//meta[@name="issue"]/@content');
@@ -419,7 +429,7 @@ function scrapeCochraneTrial(doc, url){
 	if (!authors) authors = ZU.xpathText(doc, '//meta[@name="Author"]/@content');
 
 	authors = authors.split(/\s*,\s*/);
-	
+
 	for (var i=0; i<authors.length; i++){
 		//authors are in the forms Smith AS
 		var authormatch = authors[i].match(/(.+?)\s+([A-Z]+(\s[A-Z])?)\s*$/);
@@ -473,7 +483,7 @@ function detectWeb(doc, url) {
 	if (doc.getElementsByClassName('cochraneSearchForm').length && doc.getElementById('searchResultOuter')) {
 		Zotero.monitorDOMChanges(doc.getElementById('searchResultOuter'));
 	}
-	
+
 	if (url.includes('/toc') ||
 		url.includes('/results') ||
 		url.includes('/doSearch') ||
@@ -1222,6 +1232,41 @@ var testCases = [
 				"publicationTitle": "New Directions for Evaluation",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436?af=R",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Book Reviews",
+				"creators": [],
+				"DOI": "10.1111/teth.12436",
+				"date": "2018-04-02",
+				"ISSN": "1467-9647",
+				"issue": "2",
+				"itemID": "doi:10.1111/teth.12436",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "158-158",
+				"publicationTitle": "Teaching Theology & Religion",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436",
+				"volume": "21",
 				"attachments": [
 					{
 						"title": "Snapshot",
