@@ -52,12 +52,9 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('.hed a');
 	for (let i=0; i<rows.length; i++) {
-		// TODO: check and maybe adjust
 		let href = rows[i].href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
