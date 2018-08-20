@@ -57,13 +57,13 @@ function doWeb(doc, url) {
 		item.extra = undefined;
 
 		//if we still don't have abstract, we can try scraping from page
-		if(!item.abstractNote) {
+		if (!item.abstractNote) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
 		}
 		
 		//some journals link to a PDF view page in the header, not the PDF itself
-		for(var i=0; i<item.attachments.length; i++) {
-			if(item.attachments[i].mimeType == 'application/pdf') {
+		for (var i=0; i<item.attachments.length; i++) {
+			if (item.attachments[i].mimeType == 'application/pdf') {
 				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
 			}
 		}

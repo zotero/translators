@@ -101,7 +101,7 @@ function doExport() {
 	writeColumnHeaders();
 	var item, line;
 	while (item = Zotero.nextItem()) {
-		if(item.itemType == "note" || item.itemType == "attachment") continue;
+		if (item.itemType == "note" || item.itemType == "attachment") continue;
 		line = '';
 		for (var i=0; i<exportedFields.length; i++) {
 			line += (i ? fieldDelimiter : recordDelimiter)

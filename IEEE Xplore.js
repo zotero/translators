@@ -13,7 +13,7 @@
 }
 
 function detectWeb(doc, url) {
-	if(doc.defaultView !== doc.defaultView.top) return;
+	if (doc.defaultView !== doc.defaultView.top) return;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		return "journalArticle";

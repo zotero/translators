@@ -135,7 +135,7 @@ function scrape(doc, url) {
 
 
 function addExtra(item, value) {
-	if(!item.extra) {
+	if (!item.extra) {
 		item.extra = '';
 	} else {
 		item.extra += "\n";

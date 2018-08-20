@@ -19,15 +19,15 @@ function doExport() {
 	Zotero.RDF.addNamespace("dc", dc);
 	
 	var item;
-	while(item = Zotero.nextItem()) {
-		if(item.itemType == "note" || item.itemType == "attachment") {
+	while (item = Zotero.nextItem()) {
+		if (item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 		
 		var resource;
-		if(item.ISBN) {
+		if (item.ISBN) {
 			resource = "urn:isbn:"+item.ISBN;
-		} else if(item.url) {
+		} else if (item.url) {
 			resource = item.url;
 		} else {
 			// just specify a node ID
@@ -37,7 +37,7 @@ function doExport() {
 		/** CORE FIELDS **/
 		
 		// title
-		if(item.title) {
+		if (item.title) {
 			Zotero.RDF.addStatement(resource, dc+"title", item.title, true);
 		}
 		
@@ -45,14 +45,14 @@ function doExport() {
 		Zotero.RDF.addStatement(resource, dc+"type", item.itemType, true);
 		
 		// creators
-		for(var j in item.creators) {
+		for (var j in item.creators) {
 			// put creators in lastName, firstName format (although DC doesn't specify)
 			var creator = item.creators[j].lastName;
-			if(item.creators[j].firstName) {
+			if (item.creators[j].firstName) {
 				creator += ", "+item.creators[j].firstName;
 			}
 			
-			if(item.creators[j].creatorType == "author") {
+			if (item.creators[j].creatorType == "author") {
 				Zotero.RDF.addStatement(resource, dc+"creator", creator, true);
 			} else {
 				Zotero.RDF.addStatement(resource, dc+"contributor", creator, true);
@@ -62,17 +62,17 @@ function doExport() {
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
 		
 		// source
-		if(item.source) {
+		if (item.source) {
 			Zotero.RDF.addStatement(resource, dc+"source", item.source, true);
 		}
 		
 		// accessionNumber as generic ID
-		if(item.accessionNumber) {
+		if (item.accessionNumber) {
 			Zotero.RDF.addStatement(resource, dc+"identifier", item.accessionNumber, true);
 		}
 		
 		// rights
-		if(item.rights) {
+		if (item.rights) {
 			Zotero.RDF.addStatement(resource, dc+"rights", item.rights, true);
 		}
 		
@@ -81,42 +81,42 @@ function doExport() {
 		// TODO - create text citation and OpenURL citation to handle volume, number, pages, issue, place
 		
 		// publisher/distributor
-		if(item.publisher) {
+		if (item.publisher) {
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.publisher, true);
-		} else if(item.distributor) {
+		} else if (item.distributor) {
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
-		} else if(item.institution) {
+		} else if (item.institution) {
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
 		}
 		
 		// date/year
-		if(item.date) {
+		if (item.date) {
 			Zotero.RDF.addStatement(resource, dc+"date", item.date, true);
 		}
 		
 		// ISBN/ISSN/DOI
-		if(item.ISBN) {
+		if (item.ISBN) {
 			Zotero.RDF.addStatement(resource, dc+"identifier", "ISBN "+item.ISBN, true);
 		}
-		if(item.ISSN) {
+		if (item.ISSN) {
 			Zotero.RDF.addStatement(resource, dc+"identifier", "ISSN "+item.ISSN, true);
 		}
-		if(item.DOI) {
+		if (item.DOI) {
 			Zotero.RDF.addStatement(resource, dc+"identifier", "DOI "+item.DOI, true);
 		}
 		
 		// callNumber
-		if(item.callNumber) {
+		if (item.callNumber) {
 			Zotero.RDF.addStatement(resource, dc+"identifier", item.callNumber, true);
 		}
 		
 		// archiveLocation
-		if(item.archiveLocation) {
+		if (item.archiveLocation) {
 			Zotero.RDF.addStatement(resource, dc+"coverage", item.archiveLocation, true);
 		}
 		
 		// medium
-		if(item.medium) {
+		if (item.medium) {
 			Zotero.RDF.addStatement(resource, dcterms+"medium", item.medium, true);
 		}
 	}

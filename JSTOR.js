@@ -134,8 +134,8 @@ function processRIS(text, jid) {
 		//we fix it here (note sure if still need with new RIS)
 	
  		var m;
-		for(var i=0, n=item.creators.length; i<n; i++) {
-			if(!item.creators[i].firstName
+		for (var i=0, n=item.creators.length; i<n; i++) {
+			if (!item.creators[i].firstName
 				&& (m = item.creators[i].lastName.match(/^(.+)\s+(\S+)$/))) {
 				item.creators[i].firstName = m[1];
 				item.creators[i].lastName = m[2];

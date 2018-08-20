@@ -137,7 +137,7 @@ function microdataValue(propertyNode, firstCall) {
 		}
 		return innerJson;
 	}
-	switch(propertyNode.tagName.toLowerCase()) {
+	switch (propertyNode.tagName.toLowerCase()) {
 		case "meta":
 			return propertyNode.getAttribute("content");
 			break;

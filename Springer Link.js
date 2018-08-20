@@ -14,17 +14,17 @@
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
-	if(!action) return;
-	if(!doc.head || !doc.head.getElementsByTagName('meta').length) {
+	if (!action) return;
+	if (!doc.head || !doc.head.getElementsByTagName('meta').length) {
 		Z.debug("Springer Link: No head or meta tags");
 		return;
 	}
-	switch(action[1]) {
+	switch (action[1]) {
 		case "search":
 		case "journal":
 		case "book":
 		case "referencework":
-			if(getResultList(doc).length > 0) {
+			if (getResultList(doc).length > 0) {
 				return "multiple";
 			}
 			return false;
@@ -44,15 +44,15 @@ function detectWeb(doc, url) {
 function getResultList(doc) {
 	var results = ZU.xpath(doc,
 		'//ol[@class="content-item-list"]/li/*[self::h3 or self::h2]/a');
-	if(!results.length) {
+	if (!results.length) {
 		results = ZU.xpath(doc,
 			'//div[@class="toc"]/ol//div[contains(@class,"toc-item")]/h3/a');
 	}
-	if(!results.length) {
+	if (!results.length) {
 		results = ZU.xpath(doc,
 			'//div[@class="book-toc-container"]/ol//div[contains(@class,"content-type-list__meta")]/div/a');
 	}
-	if(!results.length) {
+	if (!results.length) {
 		results = ZU.xpath(doc,
 			'//div[@class="toc"]/ol\
 			//li[contains(@class,"toc-item")]/p[@class="title"]/a'
@@ -63,15 +63,15 @@ function getResultList(doc) {
 
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
-	if(type == "multiple") {
+	if (type == "multiple") {
 		var list = getResultList(doc);
 		var items = {};
-		for(var i = 0, n = list.length; i < n; i++) {
+		for (var i = 0, n = list.length; i < n; i++) {
 			items[list[i].href] = list[i].textContent;
 		}
 		Zotero.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
-			for(var i in selectedItems) {
+			if (!selectedItems) return true;
+			for (var i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
 		});
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 function complementItem(doc, item) {
 	var itemType = detectWeb(doc, doc.location.href);
 	//in case we're missing something, we can try supplementing it from page
-	if(!item.DOI) {
+	if (!item.DOI) {
 		item.DOI = ZU.xpathText(doc,
 			'//dd[@id="abstract-about-book-chapter-doi"\
 					or @id="abstract-about-doi"][1]'
@@ -92,28 +92,28 @@ function complementItem(doc, item) {
 	if (!item.language) {
 		item.language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
 	}	
-	if(!item.publisher) {
+	if (!item.publisher) {
 		item.publisher = ZU.xpathText(doc, '//dd[@id="abstract-about-publisher"]');
 	}
-	if(!item.date) {
+	if (!item.date) {
 		item.date = ZU.xpathText(doc, '//dd[@id="abstract-about-cover-date"]') || ZU.xpathText(
 			doc, '//dd[@id="abstract-about-book-chapter-copyright-year"]');
 	}
-	if(item.date) {
+	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
 	//copyright
-	if(!item.rights) {
+	if (!item.rights) {
 		item.rights = ZU.xpathText(doc,
 			'//dd[@id="abstract-about-book-copyright-holder"]');
 		var year = ZU.xpathText(doc,
 			'//dd[@id="abstract-about-book-chapter-copyright-year"]');
-		if(item.rights && year) {
+		if (item.rights && year) {
 			item.rights = '©' + year + ' ' + item.rights;
 		}
 	}
 	
-	if(itemType == "journalArticle") {
+	if (itemType == "journalArticle") {
 		if (!item.ISSN) {
 			item.ISSN = ZU.xpathText(doc,
 				'//dd[@id="abstract-about-issn" or\
@@ -124,20 +124,20 @@ function complementItem(doc, item) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
 	}
-	if(itemType == 'bookSection' || itemType == "conferencePaper") {
+	if (itemType == 'bookSection' || itemType == "conferencePaper") {
 		//look for editors
 		var editors = ZU.xpath(doc,
 			'//ul[@class="editors"]/li[@itemprop="editor"]\
 					/a[@class="person"]');
 		var m = item.creators.length;
-		for(var i = 0, n = editors.length; i < n; i++) {
+		for (var i = 0, n = editors.length; i < n; i++) {
 			var editor = ZU.cleanAuthor(editors[i].textContent.replace(/\s+Ph\.?D\.?/,
 				''), 'editor');
 			//make sure we don't already have this person in the list
 			var haveEditor = false;
-			for(var j = 0; j < m; j++) {
+			for (var j = 0; j < m; j++) {
 				var creator = item.creators[j];
-				if(creator.creatorType == "editor" && creator.lastName == editor.lastName) {
+				if (creator.creatorType == "editor" && creator.lastName == editor.lastName) {
 					/* we should also check first name, but this could get
 					   messy if we only have initials in one case but not
 					   the other. */
@@ -145,38 +145,38 @@ function complementItem(doc, item) {
 					break;
 				}
 			}
-			if(!haveEditor) {
+			if (!haveEditor) {
 				item.creators.push(editor);
 			}
 		}
-		if(!item.ISBN) {
+		if (!item.ISBN) {
 			item.ISBN = ZU.xpathText(doc, '//dd[@id="abstract-about-book-print-isbn" or @id="abstract-about-book-online-isbn"]')
 				|| ZU.xpathText(doc, '//span[@id="print-isbn" or @id="electronic-isbn"]');
 		}
 		//series/seriesNumber
-		if(!item.series) {
+		if (!item.series) {
 			item.series = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-title"]')
 				|| ZU.xpathText(doc, '//div[contains(@class, "ArticleHeader")]//a[contains(@href, "/bookseries/")]');
 		}
-		if(!item.seriesNumber) {
+		if (!item.seriesNumber) {
 			item.seriesNumber = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-volume"]');
 		}
 	}
 	//add the DOI to extra for non journal articles
-	if(item.itemType != "journalArticle" && item.itemType != "conferencePaper" && item.DOI) {
+	if (item.itemType != "journalArticle" && item.itemType != "conferencePaper" && item.DOI) {
 		item.extra = "DOI: " + item.DOI;
 		item.DOI = "";
 	}
 	//series numbers get mapped to volume; fix this
-	if(item.volume == item.seriesNumber) {
+	if (item.volume == item.seriesNumber) {
 		item.volume = "";
 	}
 	//add abstract
 	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
-	if(!abs) {
+	if (!abs) {
 		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
 	}
-	if(abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+	if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
 	//add tags
 	var tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {

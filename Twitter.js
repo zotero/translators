@@ -32,7 +32,7 @@
 
 
 function detectWeb(doc, url) {
-	if(doc.getElementById('page-container')) {
+	if (doc.getElementById('page-container')) {
 		Z.monitorDOMChanges(doc.getElementById('page-container'), {childList: true});
 	}
 	if (ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]')) {

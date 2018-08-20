@@ -132,7 +132,7 @@ function scrape(doc, url) {
 		//Z.debug("label: " + label);
 		//Z.debug("value: " + value.textContent);
 		
-		switch(label) {
+		switch (label) {
 			case "TI":
 				newItem.title = cleanTitle(value);
 			break;

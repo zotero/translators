@@ -81,7 +81,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function(obj, item) {
-		if(item.date) item.date = ZU.strToISO(item.date);
+		if (item.date) item.date = ZU.strToISO(item.date);
 		var authors = ZU.xpath(doc, '//a[@rel="author"]');
 		for (var i = 0; i<authors.length; i++ ) {
 			if (authors[i].textContent != 'TV By The Numbers') {

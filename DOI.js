@@ -41,19 +41,19 @@ function getDOIs(doc) {
 
 	var node, m, DOI;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
-	while(node = results.iterateNext()) {
+	while (node = results.iterateNext()) {
 		//Z.debug(node.nodeValue)
 		DOIre.lastMatch = 0;
-		while(m = DOIre.exec(node.nodeValue)) {
+		while (m = DOIre.exec(node.nodeValue)) {
 			DOI = m[0];
-			if(DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
+			if (DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
 				DOI = DOI.substr(0, DOI.length-1);
 			}
-			if(DOI.substr(-1) == "}" && DOI.indexOf("{") == -1) {
+			if (DOI.substr(-1) == "}" && DOI.indexOf("{") == -1) {
 				DOI = DOI.substr(0, DOI.length-1);
 			}
 			// only add new DOIs
-			if(dois.indexOf(DOI) == -1) {
+			if (dois.indexOf(DOI) == -1) {
 				dois.push(DOI);
 			}
 		}
@@ -68,9 +68,9 @@ function detectWeb(doc, url) {
 	// This can be removed from blacklist when 5c324134c636a3a3e0432f1d2f277a6bc2717c2a hits all clients (Z 3.0+)
 	const blacklistRe = /^https?:\/\/[^/]*(?:google\.com|sciencedirect\.com\/science\/advertisement\/)/i;
 	
-	if(!blacklistRe.test(url)) {
+	if (!blacklistRe.test(url)) {
 		var DOIs = getDOIs(doc);
-		if(DOIs.length) {
+		if (DOIs.length) {
 			return "multiple";
 		}
 	}
@@ -81,17 +81,17 @@ function completeDOIs(doc) {
 	// all DOIs retrieved now
 	// check to see if there is more than one DOI
 	var numDOIs = 0;
-	for(var DOI in selectArray) {
+	for (var DOI in selectArray) {
 		numDOIs++;
-		if(numDOIs == 2) break;
+		if (numDOIs == 2) break;
 	}
-	if(numDOIs == 0) {
+	if (numDOIs == 0) {
 		throw "DOI Translator: could not find DOI";
 	} else {
 		Zotero.selectItems(selectArray, function(selectedDOIs) {
-			if(!selectedDOIs) return true;
+			if (!selectedDOIs) return true;
 
-			for(var DOI in selectedDOIs) {
+			for (var DOI in selectedDOIs) {
 				items[DOI].complete();
 			}
 		});
@@ -104,7 +104,7 @@ function retrieveDOIs(dois, doc, providers) {
 	
 	var remainingDOIs = dois.slice();//copy array but not by reference
 
-	for(var i=0, n=dois.length; i<n; i++) {
+	for (var i=0, n=dois.length; i<n; i++) {
 		(function(doc, DOI) {
 			var translate = Zotero.loadTranslator("search");
 			translate.setTranslator(provider.id);
@@ -132,7 +132,7 @@ function retrieveDOIs(dois, doc, providers) {
 	
 			translate.setHandler("done", function(translate) {
 				numDois--;
-				if(numDois <= 0) {
+				if (numDois <= 0) {
 					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
 					if (providers.length > 0 && remainingDOIs.length > 0) {
 						retrieveDOIs(remainingDOIs, doc, providers);

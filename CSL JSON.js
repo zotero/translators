@@ -21,7 +21,7 @@ function parseInput() {
 	// Read in the whole file at once, since we can't easily parse a JSON stream. The 
 	// chunk size here is pretty arbitrary, although larger chunk sizes may be marginally
 	// faster. We set it to 1MB.
-	while((str = Z.read(1048576)) !== false) json += str;
+	while ((str = Z.read(1048576)) !== false) json += str;
 	
 	try {
 		return JSON.parse(json);
@@ -42,14 +42,14 @@ function detectImport() {
 		"song":true, "speech":true, "thesis":true, "treaty":true, "webpage":true};
 		
 	var parsedData = parseInput();
-	if(!parsedData) return false;
+	if (!parsedData) return false;
 	
-	if(typeof parsedData !== "object") return false;
-	if(!(parsedData instanceof Array)) parsedData = [parsedData];
+	if (typeof parsedData !== "object") return false;
+	if (!(parsedData instanceof Array)) parsedData = [parsedData];
 	
-	for(var i=0; i<parsedData.length; i++) {
+	for (var i=0; i<parsedData.length; i++) {
 		var item = parsedData[i];
-		if(typeof item !== "object" || !item.type || !(item.type in CSL_TYPES)) {
+		if (typeof item !== "object" || !item.type || !(item.type in CSL_TYPES)) {
 			return false;
 		}
 	}
@@ -108,7 +108,7 @@ function importNext(data, resolve, reject) {
 
 function doExport() {
 	var item, data = [];
-	while(item = Z.nextItem()) data.push(ZU.itemToCSLJSON(item));
+	while (item = Z.nextItem()) data.push(ZU.itemToCSLJSON(item));
 	Z.write(JSON.stringify(data, null, "\t"));
 }
 /** BEGIN TEST CASES **/
