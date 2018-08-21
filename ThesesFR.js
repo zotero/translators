@@ -37,9 +37,9 @@
 
 function detectWeb(doc, url) {
  
-	if (url.indexOf("?q=") != -1) {
+	if (url.includes("?q=") ) {
 		return "multiple";
-	} else if (url.indexOf("?q=") == -1) {
+	}  else {
 		return "thesis";
 	}
 }
@@ -85,25 +85,18 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); //https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-		//add type
-		//converting internal info:eu-repo/semantics/doctoralThesis notation to "Ph.D. Thesis" only for collections and items
-		if (item.url.indexOf("/handle/") > -1) {
-			item.thesisType = "Ph.D. Thesis";
-		}
 
-		//add tags -> from rights
-		var rights = ZU.xpath(doc, '//meta[contains(@name, "DC.rights")]');
-		if (rights.length > 0) {
-			item.rights = [];
-			for (var t = 0; t < rights.length; t++) {
-				if (mappingRights[rights[t].content]) {
-					item.rights.push(mappingRights[rights[t].content]);
-				}
-			}
-			if (rights.length > 0) {
-				item.rights = item.rights.join(", ");
+		
+		//add Tags
+		var tags = ZU.xpath(doc, '//span[contains(@property, "dc:subject")]');
+		if (tags.length > 0) {
+			item.tags = [];
+			for (var x = 0; x < tags.length; x++) {
+			item.tags.push(tags[x].textContent.trim()) ;
 			}
 		}
+		
+		
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
@@ -115,35 +108,74 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.theses.fr/2012LYO10182",
+		"url": "http://theses.fr/?q=Mesure+de+masse+de+noyau#",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://theses.fr/2016SACLS590",
 		"items": [
 			{
 				"itemType": "thesis",
-				"title": "Développement et évaluation in vitro d’un dérivé de chitosan fonctionnalisé avec des peptides RGD pour la cicatrisation",
+				"title": "Measurement of the W boson mass with the ATLAS detector",
 				"creators": [
 					{
-						"firstName": "Annasara",
-						"lastName": "Hansson",
+						"firstName": "Oleh",
+						"lastName": "Kivernyk",
 						"creatorType": "author"
 					}
 				],
-				"date": "2012/10/19",
-				"abstractNote": "L’objectif du travail présenté dans cette thèse était de développer des nanoparticulesfonctionnelles ayant la capacité d’induire l’adhésion et la migration de kératinocyteshumains normaux. L’utilisation de systèmes particulaires pour favoriser l’adhésion etla migration cellulaire dans les processus de cicatrisation constitue une nouvelleapproche de l’ingéniérie tissulaire. Dans cette optique, un dérivé hydrosoluble du chitosan rendu fonctionnel par l’ajoutde peptides RGD a été développé. Les nanoparticules furent développées parcoacervation complexe entre le dérivé cationique du chitosan et le sulfate dechondroïtine anionique. La capacité du système particulaire à induire unchangement cellulaire phénotypique a été évaluée in vitro.Lors de l’évaluation de ce nouveau polymère, le succès de la synthèse a été montrépar l’absence de cytotoxicité et par la préservation de son activité biologique médiéepar les séquences RGD. Aussi bien les polymères que les nanoparticules ont induitl’adhésion et la mobilité de fibroblastes dermiques humains, confirmant le conceptde nanoparticules bio-actives. Cependant, concernant l’étude des interactions entreles nanoparticules et les kératinocytes, aucune conclusion n’a pu être tirée etd’autres travaux sont nécessaires. Pour résumer, un système particulaire bio-actif a été développé. Le choix despeptides RGD pour induire la migration des kératinocytes doit être réévalué, etl’utilisation de concentrations plus importantes, de mélange de peptides d’adhésionou l’utilisation de peptides d’adhésion différents doit être envisagée pour laréalisation d’études ultérieures.",
-				"libraryCatalog": "www.theses.fr",
+				"date": "2016/09/19",
+				"abstractNote": "Cette thèse décrit une mesure de la masse du boson W avec le détecteur ATLAS. La mesure exploite les données enregistrées par ATLAS en 2011, a une énergie dans le centre de masse de 7 TeV et correspondant à une luminosité intégrée de 4.6 inverse femtobarn. Les mesures sont faites par ajustement aux données de distributions en énergie transverse des leptons charges et en masse transverse du boson W obtenues par simulation, dans les canaux électron et muon, et dans plusieurs catégories cinématiques. Les différentes mesures sont en bon accord et leur combinaison donne une valeur de m_W = 80371.1 ± 18.6 MeV. La valeur mesurée est compatible avec la moyenne mondiale des mesures existantes, m_W = 80385 ± 15 MeV, et l'incertitude obtenue est compétitive avec les mesures les plus précises réalisées par les collaborations CDF et D0.",
+				"libraryCatalog": "theses.fr",
 				"thesisType": "thesis",
-				"university": "Lyon 1",
-				"url": "http://www.theses.fr/2012LYO10182",
+				"university": "Paris Saclay",
+				"url": "http://www.theses.fr/2016SACLS590",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot"
 					}
 				],
 				"tags": [
 					{
-						"tag": "RGD Chitosan Nanoparticles Cell adhesion Wound healing"
+						"tag": "ATLAS"
 					},
 					{
-						"tag": "RGD Chitosan Nanoparticules Adhésion cellulaire Cicatrisation  en français"
+						"tag": "ATLAS"
+					},
+					{
+						"tag": "Bosons W -- Masse"
+					},
+					{
+						"tag": "Grand collisionneur de hadrons"
+					},
+					{
+						"tag": "LHC"
+					},
+					{
+						"tag": "LHC"
+					},
+					{
+						"tag": "Masse du boson W"
+					},
+					{
+						"tag": "Modèle standard"
+					},
+					{
+						"tag": "Modèle standard (physique nucléaire)"
+					},
+					{
+						"tag": "Physique des particules"
+					},
+					{
+						"tag": "Standard Model"
+					},
+					{
+						"tag": "W boson mass"
 					}
 				],
 				"notes": [],
@@ -153,13 +185,53 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.theses.fr/?q=hansonn",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.theses.fr/?q=bleu",
-		"items": "multiple"
+		"url": "http://theses.fr/s188862",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Mesure des paramètres cosmologiques avec le catalogue d'amas de galaxies d'Euclid",
+				"creators": [
+					{
+						"firstName": "Emmanuel",
+						"lastName": "Artis",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "Euclid est un satellite de l'agence spatiale européenne dont le lancement est prévu en 2020. Outre l'observation de l'effet de lentille gravitationnelle (weak lensing WL) et des corrélations spatiales des galaxies (oscillations acoustiques des baryons BAO et redshift-space distortions RSD), Euclid détectera environ 100000 amas de galaxies (Clusters of Galaxies CG) entre redshift z=0 et z=2. Ces amas permettront de mesurer les paramètres cosmologiques indépendamment du WL, des BAO et des RSD.    La collaboration Euclid développe actuellement des outils d'extraction d'amas de galaxies sur simulations et compare leurs performances. L'objectif de cette thèse est de mettre au point l'étage supérieur qui permet de déduire la mesure des paramètres cosmologiques à partir du catalogue d'amas d'Euclid. Cet étage est appelé fonction de vraisemblance (likelihood).    Elle est au cœur de l'analyse cosmologique avec les amas. Elle demande une compréhension fine de la fonction de sélection du catalogue (proportion d'amas détectés sur le ciel par rapport au nombre total d'amas) et du lien entre la quantité observée par Euclid (nombre de galaxies dans chaque amas) et la quantité liée aux modèles théoriques (la masse). L'Irfu/SPP a développé une expertise sur la fonction de vraisemblance du catalogue d'amas du satellite Planck. Le travail proposé consiste à construire la fonction de vraisemblance Euclid en partant des acquis de Planck. Il faudra, dans un premier temps, adapter l'outil aux catalogues optiques puis, dans un second temps, le refondre pour dépasser les limites formelles actuelles. L'outil devra être capable d'ajuster à la fois paramètres cosmologiques et paramètres de nuisance liés à la physique des amas, qui étaient découplés pour l'analyse Planck.",
+				"libraryCatalog": "theses.fr",
+				"url": "http://www.theses.fr/s188862",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Amas de galaxies"
+					},
+					{
+						"tag": "Astroparticules et cosmologie"
+					},
+					{
+						"tag": "Clusters of galaxies"
+					},
+					{
+						"tag": "Cosmologie"
+					},
+					{
+						"tag": "Cosmology"
+					},
+					{
+						"tag": "Euclid"
+					},
+					{
+						"tag": "Euclid"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
