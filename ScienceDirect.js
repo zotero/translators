@@ -526,7 +526,7 @@ function scrape(doc, url) {
 	 * Also probably no longer necessary, since fetching via POST seems to cover
 	 * all test cases
 	 *
-	if(getISBN(doc)) {
+	if (getISBN(doc)) {
 		Z.debug("Scraping by ISBN");
 		scrapeByISBN(doc);
 	}
