@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv"
+	"browserSupport": "gcsv",
 	"lastUpdated": "2018-08-22 17:45:00"
 }
 
