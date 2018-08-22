@@ -474,7 +474,7 @@ function scrape(doc, url) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button[contains(@class, "ExportCitationButton")]')[0];
+	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
