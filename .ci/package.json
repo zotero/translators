@@ -1,6 +1,6 @@
 {
   "name": "translators-check",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Continuous integration of Zotero translators",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,6 @@
     "url": "https://github.com/zotero/translators/blob/master/.ci/"
   },
   "dependencies": {
-    "jshint": "^2.9.4",
-    "jsonlint": "^1.6.2"
+    "jshint": "^2.9.5"
   }
 }

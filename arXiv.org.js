@@ -7,15 +7,25 @@
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-03-22 21:23:25"
+	"lastUpdated": "2018-04-17 20:00:00"
+}
+
+function detectSearch(item) {
+	return !!item.arXiv;
+}
+
+function doSearch(item) {
+	var url = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
+		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
+	ZU.doGet(url, parseXML);
 }
 
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^\.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
 	
-	if(searchRe.test(url)) {
+	if (searchRe.test(url)) {
 		return "multiple";
 	} else {
 		return "journalArticle";
@@ -23,10 +33,10 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		var rows = ZU.xpath(doc, '//div[@id="dlpage"]/dl/dt');
 		var getTitleId;
-		if(rows.length) {
+		if (rows.length) {
 			// arXiv.org format
 			getTitleId = function(row) {
 				var id = ZU.xpathText(row, './/a[@title="Abstract"]').trim().substr(6); // Trim off arXiv:
@@ -37,7 +47,7 @@ function doWeb(doc, url) {
 					id: id
 				};
 			};
-		} else if( (rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length ) {
+		} else if ( (rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length ) {
 			// eprintweb.org format
 			getTitleId = function(row) {
 				var title = ZU.trimInternal(ZU.xpathText(row, './td'));
@@ -52,16 +62,16 @@ function doWeb(doc, url) {
 		}
 		
 		var items = {};
-		for(var i=0; i<rows.length; i++) {
+		for (var i=0; i<rows.length; i++) {
 			var row = getTitleId(rows[i]);
 			items[row.id] = row.title;
 		}
 		
 		Z.selectItems(items, function(items) {
-			if(!items) return;
+			if (!items) return;
 			
 			var urls = [];
-			for(var id in items) {
+			for (var id in items) {
 				urls.push('http://export.arxiv.org/oai2'
 					+ '?verb=GetRecord&metadataPrefix=oai_dc'
 					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
@@ -79,7 +89,7 @@ function doWeb(doc, url) {
 			id = ZU.xpathText(doc, '//td[contains(@class,"arxivid")]/a')
 				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
 		}
-		if(!id) throw new Error('Could not find arXiv ID on page.');
+		if (!id) throw new Error('Could not find arXiv ID on page.');
 		
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
 		var url = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
@@ -114,19 +124,19 @@ function parseXML(text) {
 	//Put the first description into abstract, all other into notes.
 	if (descriptions.length>0) {
 		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for(var j=1; j<descriptions.length; j++) {
+		for (var j=1; j<descriptions.length; j++) {
 			var noteStr = ZU.trimInternal(descriptions[j].textContent);
 			newItem.notes.push({note:noteStr});		
 		}	
 	}	
 	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for(var j=0; j<subjects.length; j++) {
+	for (var j=0; j<subjects.length; j++) {
 		var subject = ZU.trimInternal(subjects[j].textContent);
 		newItem.tags.push(subject);		
 	}	
 					
 	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for(var j=0; j<identifiers.length; j++) {
+	for (var j=0; j<identifiers.length; j++) {
 		var identifier = ZU.trimInternal(identifiers[j].textContent);
 		if (identifier.substr(0, 4) == "doi:") {
 			newItem.DOI = identifier.substr(4);
@@ -137,7 +147,7 @@ function parseXML(text) {
 	}
 
 	var articleID = ZU.xpath(xml, "//n:GetRecord/n:record/n:header/n:identifier", ns)[0];
-	if(articleID) articleID = ZU.trimInternal(articleID.textContent).substr(14); // Trim off oai:arXiv.org:
+	if (articleID) articleID = ZU.trimInternal(articleID.textContent).substr(14); // Trim off oai:arXiv.org:
 	
 	var articleField = ZU.xpathText(xml, '//n:GetRecord/n:record/n:header/n:setSpec', ns);
 	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
@@ -194,7 +204,7 @@ function parseXML(text) {
 
 function getXPathNodeTrimmed(dcMeta, name, ns) {
 	var node = ZU.xpath(dcMeta, './'+name, ns);
-	if(node.length) {
+	if (node.length) {
 		return ZU.trimInternal(node[0].textContent);
 	}
 	return '';
@@ -202,7 +212,7 @@ function getXPathNodeTrimmed(dcMeta, name, ns) {
 
 function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
 	var nodes = ZU.xpath(dcMeta, './'+name, ns);
-	for(var i=0; i<nodes.length; i++) {
+	for (var i=0; i<nodes.length; i++) {
 		newItem.creators.push(
 			ZU.cleanAuthor(nodes[i].textContent, creatorType, true)
 		);

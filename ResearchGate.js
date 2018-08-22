@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-15 14:15:09"
+	"lastUpdated": "2018-01-28 01:52:07"
 }
 
 /*
@@ -47,7 +47,8 @@ function detectWeb(doc, url) {
 			//for logged in users (yes, really...)
 			type = text(doc, 'b[data-reactid]');
 		}
-		switch(type) {
+		type = type.replace('(PDF Available)', '').trim();
+		switch (type) {
 			case "Data"://until we have a data itemType
 			case "Article":
 				return "journalArticle";

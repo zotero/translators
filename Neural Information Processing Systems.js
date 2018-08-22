@@ -44,7 +44,7 @@ function doWeb( doc, url ) {
 		var items = new Object();
 		var arts = new Array();
 		var titles =  doc.evaluate( titleRe, doc, null, XPathResult.ANY_TYPE, null);
-		while( title = titles.iterateNext()) {
+		while ( title = titles.iterateNext()) {
 			var art = new Object;
 			items[title.href] = title.textContent;
 		}
@@ -58,7 +58,7 @@ function doWeb( doc, url ) {
 			ZU.processDocuments(arts, scrape)
 		});
 	}
-	else{
+	else {
 		scrape(doc, url)
 	}
 }

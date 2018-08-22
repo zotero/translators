@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-07 09:42:13"
+	"lastUpdated": "2018-07-01 18:02:27"
 }
 
 /*
@@ -44,7 +44,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
-	"citation_inbook_title": "bookTitle", //used on RSC, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
+	"citation_inbook_title": "publicationTitle", //used as bookTitle or proceedingTitle, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
@@ -578,11 +578,13 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
+
 		if(newItem.publicationTitle) {
 			//remove publication title from the end of title (see #604)
 			//this can occur if we have to doc.title, og:title etc.
+			//Make sure we escape all regex special chars in publication title
 			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
-				+ newItem.publicationTitle + '\\s*$','i');
+				+ newItem.publicationTitle.replace(/([()\[\]\$\^\*\+\.?\|])/g, '\\$1') + '\\s*$','i');
 			newItem.title = newItem.title.replace(removePubTitleRegex, '');
 		}
 	}
@@ -623,7 +625,7 @@ function addLowQualityMetadata(doc, newItem) {
 		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces) ||
 			ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces) ||
 			ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces) ||
-			ZU.xpathText(doc, '//html/@lang') || 
+			ZU.xpathText(doc, '//html/@lang') ||
 			doc.documentElement.getAttribute('xml:lang');
 	}
 
@@ -922,7 +924,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
+		"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -940,7 +942,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
+				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -954,7 +956,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
+		"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -981,7 +983,7 @@ var testCases = [
 				"pages": "2",
 				"publicationTitle": "Landscapes of Violence",
 				"shortTitle": "Wabanaki Resistance and Healing",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
+				"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2",
 				"volume": "2",
 				"attachments": [
 					{
@@ -1000,7 +1002,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
+		"url": "https://scholarworks.umass.edu/open_access_dissertations/508/",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1017,7 +1019,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
+				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1454,7 +1456,7 @@ var testCases = [
 				"date": "1999/04/01",
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "0894-9875, 1572-9524",
-				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today.It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's...",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",

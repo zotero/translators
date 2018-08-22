@@ -9,26 +9,26 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-05-24 08:05:07"
+	"lastUpdated": "2018-04-17 21:16:52"
 }
 
 function detectWeb(doc, url) {
 	// How can we distinguish thesis from journal article??
-	if(ZU.xpathText(doc, '/html/head/meta[@name="citation_title"]/@content')) {
+	if (ZU.xpathText(doc, '/html/head/meta[@name="citation_title"]/@content')) {
 		return 'journalArticle';
 	}
 }
 
 function getDocId(url) {
 	var m = url.match(/\bDocID=([^&#]+)/);
-	if(!m) return;
+	if (!m) return;
 	return m[1];
 }
 
 function doWeb(doc, url) {
 	var docID = getDocId(url);
 	scrape([docID], function(item) {
-		if(!item.url) {
+		if (!item.url) {
 			// Maybe we shouldn't. Looks more like a catalog.
 			item.url = url;
 		}
@@ -36,14 +36,14 @@ function doWeb(doc, url) {
 		item.attachments.push({
 			title: 'Snapshot',
 			document: doc
-		})
+		});
 		
 		item.complete();
 	});
 }
 
 function scrape(docIDs, itemDoneHandler) {
-	var bibTeXUrl = buildQuery(docIDs)
+	var bibTeXUrl = buildQuery(docIDs);
 	ZU.doGet(bibTeXUrl, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		// BibTeX
@@ -52,30 +52,30 @@ function scrape(docIDs, itemDoneHandler) {
 		translator.setHandler('itemDone', function(obj, item) {
 			// Chinese names are not split correctly
 			// Sometimes, English name is provided as well in parentheses
-			for(var i=0, n=item.creators.length; i<n; i++) {
+			for (var i=0, n=item.creators.length; i<n; i++) {
 				var c = item.creators[i];
 				
 				var zhChar = /[\u4E00-\u9FFF]/;
-				if(!zhChar.test(c.firstName) && !zhChar.test(c.lastName)) continue;
+				if (!zhChar.test(c.firstName) && !zhChar.test(c.lastName)) continue;
 				
 				delete c.fieldMode;
 				
 				var name = (c.firstName || "") + (c.lastName || "");
 				var trimAt = name.indexOf('(');
 				
-				if(trimAt == 0) {
+				if (trimAt == 0) {
 					c.lastName = name;
 					delete c.firstName;
 					c.fieldMode = 1;
 					continue;
-				} else if(trimAt != -1) {
+				} else if (trimAt != -1) {
 					name = name.substr(0, trimAt);
 				}
 				
 				name = name.trim();
 				
 				c.lastName = name.substr(name.length-1);
-				if(name.length > 1) {
+				if (name.length > 1) {
 					c.firstName = name.substr(0, name.length-1);
 				} else {
 					delete c.firstName;
@@ -88,7 +88,7 @@ function scrape(docIDs, itemDoneHandler) {
 			item.language = "zh";
 			
 			// search- and web-specific itemDone handlers
-			if(itemDoneHandler) itemDoneHandler(item);
+			if (itemDoneHandler) itemDoneHandler(item);
 			else item.complete();
 		});
 		translator.translate();
@@ -96,9 +96,9 @@ function scrape(docIDs, itemDoneHandler) {
 }
 
 function buildQuery(docIDs) {
-	var url = '/publication/ExportTo?ExportType=BibTex'
-		+ '&parameter=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16'
-	for(var i=0; i<docIDs.length; i++) {
+	var url = 'http://www.airitilibrary.com/publication/ExportTo?ExportType=BibTex'
+		+ '&parameter=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16';
+	for (var i=0; i<docIDs.length; i++) {
 		url += '&DocIDs[' + i + ']=' + encodeURIComponent(docIDs[i]);
 	}
 	return url;
@@ -106,29 +106,29 @@ function buildQuery(docIDs) {
 
 // e.g. 10.6220/joq.2012.19(1).01
 function detectSearch(items) {
-	if(!items) return false;
+	if (!items) return false;
 	
-	if(typeof items == 'string' || !items.length) items = [items];
+	if (typeof items == 'string' || !items.length) items = [items];
 	
-	for(var i=0, n=items.length; i<n; i++) {
-		if(!items[i]) continue;
+	for (var i=0, n=items.length; i<n; i++) {
+		if (!items[i]) continue;
 		
-		if(items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
-		if(typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
+		if (items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
+		if (typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
 	}
 	
 	return false;
 }
 
 function filterQuery(items) {
-	if(!items) return [];
+	if (!items) return [];
 	
-	if(typeof items == 'string' || !items.length) items = [items];
+	if (typeof items == 'string' || !items.length) items = [items];
 	
 	//filter out invalid queries
 	var query = [];
-	for(var i=0, n=items.length; i<n; i++) {
-		if( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
+	for (var i=0, n=items.length; i<n; i++) {
+		if ( ( items[i].DOI && ZU.cleanDOI(items[i].DOI) )
 			|| ( typeof items[i] == 'string' && ZU.cleanDOI(items[i]) ) ) {
 			query.push(items[i]);
 		}
@@ -140,71 +140,22 @@ function doSearch(items) {
 	var query = filterQuery(items);
 	var queryTracker = {};
 	var dois = [];
-	for(var i=0, n=query.length; i<n; i++) {
+	for (let i=0, n=query.length; i<n; i++) {
 		var doi = ZU.cleanDOI(query[i].DOI || query[i]);
-		queryTracker[doi] = query[i];
-		dois.push(doi);
+		followDOI(doi);
 	}
-	
-	if(!dois.length) return;
-	
-	gatherDocIDs(dois, queryTracker);
 }
 
-function gatherDocIDs(dois, queryTracker) {
-	var doi = dois.pop();
-	var query = queryTracker[doi];
-	ZU.processDocuments('http://doi.org/' + encodeURIComponent(doi), function(doc, url) {
-		var trans = Zotero.loadTranslator('web');
-		trans.setTranslator('5f0ca39b-898a-4b1e-b98d-8cd0d6ce9801');
-		trans.setDocument(doc);
-		trans.setHandler('itemDone', function(obj, item) {
-			if(!item.DOI) item.DOI = doi;
-			item.complete();
-		});
-		trans.translate();
-	// we can do better, but we need to first expose ZU.doHead to translators
-/*	ZU.doHead('http://doi.org/' + encodeURIComponent(doi), function(headers) {
-		if(!headers.url) return; // Probably not Firefox
-		var docID = getDocId(header.url);
-		if(!docID) return;
-		queryTracker[doi]._airitiDocID = docID;
-		queryTracker[doi]._airitiUrl = header.url;
-*/	}, function() {
-		if(dois.length) processDOIs(dois, queryTracker);
-		else processDocIDs(queryTracker);
+function followDOI(doi) {
+	ZU.processDocuments('https://doi.org/' + encodeURIComponent(doi), function(doc, url) {
+		//var redirectedUrl = ZU.xpathText(doc, '//meta[@name="citation_abstract_html_url"]/@content');
+		var docID = ZU.xpathText(doc, '//a/@docid');
+		if (!docID) return;
+		scrape([docID]);
 	});
 }
 
-function processDocIDs(queryTracker) {
-	var docIdTracker = {}, docIDs = [];
-	for(var doi in queryTracker) {
-		if(queryTracker[doi]._airitiDocID) {
-			docIdTracker[queryTracker[doi]._airitiDocID] = doi;
-			docIDs.push(queryTracker[doi]._airitiDocID);
-		}
-	}
-	
-	if(docIDs.length) {
-		scrape(docIDs, function(item) {
-			var docID = item.itemID.match(/:([^:]+?)\s*$/);
-			if(docID) {
-				docID = docID[1];
-				doi = docIdTracker[docID];
-			}
-			
-			if(!item.DOI && docID) {
-				item.DOI = doi;
-			}
-			
-			if(!item.url && docID) {
-				item.url = queryTracker[doi]._airitiUrl;
-			}
-			
-			item.complete();
-		});
-	}
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

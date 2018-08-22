@@ -36,7 +36,7 @@
 function getSearchResults(doc) {
 	//Gale Virtual Reference Library
 	var results = ZU.xpath(doc, '//*[@id="SearchResults"]//section[@class="resultsBody"]/ul/li');
-	if(results.length) {
+	if (results.length) {
 		results.linkXPath = './p[@class="subTitle"]/a';
 		Z.debug("Using GVRL");
 		composeAttachment = composeAttachmentGVRL;
@@ -47,7 +47,7 @@ function getSearchResults(doc) {
 	//Academic OneFile
 	//Academic ASAP
 	results = ZU.xpath(doc, '//div[@id="resultsBox"]//li[@class="resrow"]');
-	if(results.length) {
+	if (results.length) {
 		results.linkXPath = './/div[@class="pic_Title"]/a';
 		Z.debug("Academic, but using GVRL");
 		composeAttachment = composeAttachmentGVRL;
@@ -57,7 +57,7 @@ function getSearchResults(doc) {
 	
 	//LegalTrac
 	results = ZU.xpath(doc, '//*[@id="sr_ul"]/li');
-	if(results.length) {
+	if (results.length) {
 		results.linkXPath = './/span[@class="title"]/a';
 		Z.debug("LegalTrac, but using GVRL");
 		composeAttachment = composeAttachmentGVRL;
@@ -67,7 +67,7 @@ function getSearchResults(doc) {
 	
 	//Literature Resource Center
 	results = ZU.xpath(doc, '//div[@id="resultsTable"]/div');
-	if(results.length) {
+	if (results.length) {
 		results.linkXPath = './/span[@class="title"]/a';
 		Z.debug("LRC, but using GVRL");
 		composeAttachment = composeAttachmentGVRL;
@@ -77,7 +77,7 @@ function getSearchResults(doc) {
 	
 	//Gale NewsVault
 	results = ZU.xpath(doc, '//*[@id="results_list"]/div[contains(@class,"resultList")]');
-	if(results.length) {
+	if (results.length) {
 		results.linkXPath = './div[@class="pub_details"]//li[@class="resultInfo"]/p//a';
 		Z.debug("Using GNV");
 		composeAttachment = composeAttachmentGNV;
@@ -88,7 +88,7 @@ function getSearchResults(doc) {
 	/** TODO: **/
 //	//19th century UK periodicals
 //	results = ZU.xpath(doc, '//*[@id="content"]//table[@class="resultstable"]//tr[@class="selectedRow" or @class="unselectedRow"]');
-//	if(results.length) {
+//	if (results.length) {
 //		results.linkXPath = './/b/a[contains(@href, "retrieve.do")]';
 //		composeAttachment = composeAttachmentUKPC;
 //		composeRisUrl = composeRisUrlUKPC;
@@ -115,20 +115,20 @@ function getSearchResults(doc) {
 }
 
 function detectWeb(doc, url) {
-	if(url.indexOf('/newspaperRetrieve.do') != -1) {
+	if (url.indexOf('/newspaperRetrieve.do') != -1) {
 		return "newspaperArticle";
 	}
 	
-	if(url.indexOf('/retrieve.do') != -1
+	if (url.indexOf('/retrieve.do') != -1
 		|| url.indexOf('/i.do') != -1
 		|| url.indexOf('/infomark.do') != -1) {
 		
-		if(url.indexOf('/ecco/') != -1) return "book";
+		if (url.indexOf('/ecco/') != -1) return "book";
 		
 		return "journalArticle";
 	}
 	
-	if(getSearchResults(doc).length) return "multiple";
+	if (getSearchResults(doc).length) return "multiple";
 }
 
 var composeRisUrl;
@@ -161,7 +161,7 @@ var composeAttachment;
 function composeAttachmentGVRL(doc, url) {
 	var pdf = !!(doc.getElementById('pdfLink') || doc.getElementById('docTools-pdf'));
 	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./@href]')[0];
-	if(attachment && pdf /* HTML currently pops up a download dialog for HTML attachments */) {
+	if (attachment && pdf /* HTML currently pops up a download dialog for HTML attachments */) {
 		url = attachment.href;
 		return {
 			url: url.replace(/#.*/, '').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
@@ -210,7 +210,7 @@ function parseRis(text, attachment) {
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function (obj, item) {
-		if(attachment) item.attachments.push(attachment);
+		if (attachment) item.attachments.push(attachment);
 		item.complete();
 	});
 	translator.translate();
@@ -218,7 +218,7 @@ function parseRis(text, attachment) {
 
 function processArticles(articles) {
 	var article;
-	while(article = articles.shift()) {
+	while (article = articles.shift()) {
 		ZU.processDocuments(article, function(doc, url) {
 			processPage(doc, url);
 			processArticles(articles);
@@ -235,31 +235,31 @@ function processPage(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var results = getSearchResults(doc);
 		var items = {};
-		for(var i=0, n=results.length; i<n; i++) {
+		for (var i=0, n=results.length; i<n; i++) {
 			var link = ZU.xpath(results[i], results.linkXPath)[0];
-			if(!link) continue;
+			if (!link) continue;
 			
 			items[link.href] = ZU.trimInternal(link.textContent);
 		}
 		
 		Zotero.selectItems(items, function (items) {
-			if(!items) return true;
+			if (!items) return true;
 			
 			var articles = [];
-			for(var i in items) {
+			for (var i in items) {
 				articles.push(i);
 			}
 			processArticles(articles);
 		});
 	} else {
-		if(doc.title.indexOf('NewsVault') != -1) {
+		if (doc.title.indexOf('NewsVault') != -1) {
 			Z.debug("Using GNV");
 			composeAttachment = composeAttachmentGNV;
 			composeRisUrl = composeRisUrlGNV;
-		} else if(doc.title.indexOf('The Times Digital Archive') != -1) {
+		} else if (doc.title.indexOf('The Times Digital Archive') != -1) {
 			Z.debug("Using TDA");
 			composeAttachment = composeAttachmentTDA;
 			composeRisUrl = composeRisUrlTDA;

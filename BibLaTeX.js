@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2017-08-28 10:55:00"
+	"lastUpdated": "2018-06-04 15:00:00"
 }
 
 
@@ -57,7 +57,8 @@ var revExtraIds = {
 	MR: 'mrnumber',
 	Zbl: 'zmnumber',
 	PMCID: 'pmcid',
-	PMID: 'pmid'
+	PMID: 'pmid',
+	DOI: 'doi'
 };
 
 // Imported by BibTeX. Exported by BibLaTeX only
@@ -75,11 +76,11 @@ var revEprintIds = {
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
 	var fields = [];
-	for(var i=0; i<lines.length; i++) {
+	for (var i=0; i<lines.length; i++) {
 		var rec = { raw: lines[i] };
 		var line = lines[i].trim();
 		var splitAt = line.indexOf(':');
-		if(splitAt > 1) {
+		if (splitAt > 1) {
 			rec.field = line.substr(0,splitAt).trim();
 			rec.value = line.substr(splitAt + 1).trim();
 		}
@@ -90,8 +91,8 @@ function parseExtraFields(extra) {
 
 function extraFieldsToString(extra) {
 	var str = '';
-	for(var i=0; i<extra.length; i++) {
-		if(!extra[i].raw) {
+	for (var i=0; i<extra.length; i++) {
+		if (!extra[i].raw) {
 			str += '\n' + extra[i].field + ': ' + extra[i].value;
 		} else {
 			str += '\n' + extra[i].raw;
@@ -353,13 +354,13 @@ var citeKeyConversions = {
 		if (item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g, "_").replace(/,/g, "");
 		}
-		return "";
+		return "noauthor";
 	},
 	"t": function (flags, item) {
 		if (item["title"]) {
 			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
-		return "";
+		return "notitle";
 	},
 	"y": function (flags, item) {
 		if (item.date) {
@@ -368,7 +369,7 @@ var citeKeyConversions = {
 				return date.year;
 			}
 		}
-		return "????";
+		return "nodate";
 	}
 }
 
@@ -464,11 +465,11 @@ function encodeFilePathComponent(value) {
 
 			//inbook is reasonable at times, using a bookauthor should
 			//indicate this
-			if(item.itemType == "bookSection" &&
+			if (item.itemType == "bookSection" &&
 			   creatorCheck(item, "bookAuthor")) type = "inbook";
 
 			//a book without author but with editors is a collection
-			if(item.itemType == "book" && !creatorCheck(item,"author") &&
+			if (item.itemType == "book" && !creatorCheck(item,"author") &&
 			   creatorCheck(item, "editor")) type = "collection";
 
 			//biblatex recommends us to use mvbook for multi-volume book
@@ -689,7 +690,7 @@ function encodeFilePathComponent(value) {
 			//if possible. See babelLanguageMap above for languagecodes to use
 			if (item.language) {
 				var langcode = item.language.match(/^([a-z]{2,3})(?:[^a-z](.+))?$/i); //not too strict
-				if(langcode){
+				if (langcode){
 					var lang = babelLanguageMap[langcode[1]];
 					if (typeof lang == 'string') {
 						//if there are no variants for this language
@@ -705,21 +706,21 @@ function encodeFilePathComponent(value) {
 				}
 			}
 
-			if(item.extra) {
+			if (item.extra) {
 				// Export identifiers
 				var extraFields = parseExtraFields(item.extra);
 				// Dedicated fields
-				for(var i=0; i<extraFields.length; i++) {
+				for (var i=0; i<extraFields.length; i++) {
 					var rec = extraFields[i];
-					if(!rec.field) continue;
+					if (!rec.field) continue;
 					
-					if(!revExtraIds[rec.field] && !revEprintIds[rec.field]) continue;
+					if (!revExtraIds[rec.field] && !revEprintIds[rec.field]) continue;
 					
 					var value = rec.value.trim();
-					if(!value) continue;
+					if (!value) continue;
 					
 					var label;
-					if(label = revExtraIds[rec.field]) {
+					if (label = revExtraIds[rec.field]) {
 						writeField(label, '{'+value+'}', true);
 					} else if (label = revEprintIds[rec.field]) {
 						writeField('eprinttype', label);
@@ -730,7 +731,7 @@ function encodeFilePathComponent(value) {
 				}
 				
 				var extra = extraFieldsToString(extraFields);
-				if(extra && !noteused) writeField("note", extra);
+				if (extra && !noteused) writeField("note", extra);
 			}
 
 			if (item.tags && item.tags.length) {

@@ -41,7 +41,7 @@ function parseSource(sourceStr) {
 	sourceStr = sourceStr.trim();
 	var matches = sourceStr.match(
 		/^(.*[^.])\.?\s+(\d+\w?)(?:\((\d+)\))?:\s*(\w?\d+(?:-\w?\d+)?)(?:\.?\s+\[[^\]]+\])?\s*\.?$/);
-	if(matches) {
+	if (matches) {
 		return {
 			type: 'journalArticle',
 			publicationTitle: matches[1],
@@ -50,7 +50,7 @@ function parseSource(sourceStr) {
 			pages: matches[4]
 		};
 	} else {
-		if(sourceStr.substr(0,3) == 'In:') {
+		if (sourceStr.substr(0,3) == 'In:') {
 			//book section
 			matches = sourceStr.match(/\d+-\d+/);
 			return {
@@ -84,7 +84,7 @@ function scrape(doc, url) {
 	item.url = url;
 
 	var authors = getFieldValue(entry, 'Author').split(/;\s+/);
-	for(var i=0, n=authors.length; i<n; i++) {
+	for (var i=0, n=authors.length; i<n; i++) {
 		item.creators.push(
 			ZU.cleanAuthor(
 				ZU.capitalizeTitle(authors[i].replace(/;$/, '')),
@@ -97,7 +97,7 @@ function scrape(doc, url) {
  	}
 
 	var pdfUrl = ZU.xpathText(entry,'/html/head/meta[@name="citation_pdf_url"]/@content');
-	if(pdfUrl) {
+	if (pdfUrl) {
 		item.attachments.push({
 			url: pdfUrl.trim(),
 			title: 'Full Text PDF',
@@ -109,13 +109,13 @@ function scrape(doc, url) {
 }
 
 function detectWeb(doc, url) {
-	if(url.match(/\/pubs\/\d+$/)) {
+	if (url.match(/\/pubs\/\d+$/)) {
 		var entry = doc.getElementById('publicationLayoutLeftSide');
 		if (!entry) return;
 		
 		var source = parseSource(getFieldValue(entry, 'Source'));
 		return source ? source.type : null;
-	} else if(url.indexOf('search.php') != -1 && getSearchResults(doc, true)) {
+	} else if (url.indexOf('search.php') != -1 && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 }
@@ -133,12 +133,12 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var urls = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 

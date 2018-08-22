@@ -132,7 +132,7 @@ function scrape(doc) {
 			delete item.archiveLocation;
 			
 			// some bibtext contains odd </kwd> tags - remove them
-			for(var i=0; i<item.tags.length; i++) {
+			for (var i=0; i<item.tags.length; i++) {
 				item.tags[i] = item.tags[i].replace("</kwd>", "");
 			}
 			

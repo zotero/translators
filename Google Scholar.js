@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-10-08 18:19:43"
+	"lastUpdated": "2018-01-27 15:12:16"
 }
 
 // attr()/text() v2
@@ -32,7 +32,7 @@ function detectWeb(doc, url) {
 		
 		//individual saved citation
 		var link = ZU.xpathText(doc, '//a[@class="gsc_vcd_title_link"]/@href');
-		if(!link) return;
+		if (!link) return;
 		if (link.indexOf('/scholar_case?') != -1) {
 			return 'case';
 		} else {
@@ -143,6 +143,12 @@ function scrapeIds(doc, ids) {
 		let context = doc.querySelector('.gs_r[data-cid="' + ids[i] + '"]');
 		if (!context && ids.length==1) context = doc;
 		var citeUrl = '/scholar?q=info:' + ids[i] + ':scholar.google.com/&output=cite&scirp=1';
+		// For 'My Library' we check the search field at the top
+		// and then in these cases change the citeUrl accordingly.
+		var scilib = attr(doc, '#gs_hdr_frm input[name="scilib"]', 'value')
+		if (scilib && scilib==1) {
+			var citeUrl = '/scholar?scila=' + ids[i] + '&output=cite&scirp=1';
+		}
 		ZU.doGet(citeUrl, function(citePage) {
 			var m = citePage.match(/href="((https?:\/\/[a-z\.]*)?\/scholar.bib\?[^"]+)/);
 			if (!m) {
@@ -185,7 +191,7 @@ function scrapeIds(doc, ids) {
 					if ((titleLink && titleLink.indexOf('google.com/patents/')>-1) || secondLine.indexOf('Google Patents')>-1) {
 						item.itemType = "patent";
 						//authors are inventors
-						for(var i=0, n=item.creators.length; i<n; i++) {
+						for (var i=0, n=item.creators.length; i<n; i++) {
 							item.creators[i].creatorType = 'inventor';
 						}
 						//country and patent number
@@ -199,7 +205,7 @@ function scrapeIds(doc, ids) {
 					}
 					
 					//fix titles in all upper case, e.g. some patents in search results
-					if(item.title.toUpperCase() == item.title) {
+					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title);
 					}
 					
@@ -412,7 +418,7 @@ ItemFactory.prototype.getDate = function () {
 	}
 	// If we can find a more specific date in the case's centered text then use it
 	var nodesSnapshot = this.doc.evaluate('//div[@id="gs_opinion"]/center', this.doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
-	for( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
+	for ( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
 		var specificDate = nodesSnapshot.snapshotItem(iNode).textContent.trim();
 		// Remove the first word through the first space 
 		//  if it starts with "Deci" or it doesn't start with the first three letters of a month

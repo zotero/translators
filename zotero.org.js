@@ -14,16 +14,6 @@
 
 var sessionKey;
 
-function textToXML(text) {
-	try {
-		var parser = new DOMParser();
-		return parser.parseFromString(text, 'text/xml');
-	} catch(e) {
-		Zotero.debug(e);
-		return null;
-	}
-}
-
 function scrape(text) {
 	var item = JSON.parse(text);
 	var newItem = new Zotero.Item();
@@ -51,13 +41,13 @@ function getListTitles(doc) {
 }
 
 function getLibraryURI(doc) {
-	var feed = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0]
-	if(!feed) return;
+	var feed = ZU.xpath(doc, '//a[@type="application/atom+xml" and @rel="alternate"]')[0];
+	if (!feed) return;
 	var url = feed.href.match(/^.+?\/(?:users|groups)\/\w+/);
 	if (!url) {
 		url = decodeURIComponent(feed.href)
 			.match(/https?:\/\/[^\/]+\/(?:users|groups)\/\w+/);
-		if(!url) return;
+		if (!url) return;
 	}
 	if (!url) return;
 	return (url[0] + '/items/').replace("https://api.zotero.org", "https://www.zotero.org/api");
@@ -70,10 +60,10 @@ function getSessionKey(doc) {
 
 function detectWeb(doc, url) {
 	//disable for libraries where we can't get a library URI or an apiKey
-	if(!getLibraryURI(doc)) return;
+	if (!getLibraryURI(doc)) return;
 	
 	//single item
-	if( url.match(/\/itemKey\/\w+/) ) {
+	if ( url.match(/\/itemKey\/\w+/) ) {
 		return ZU.xpathText(doc, '//div[@id="item-details-div"]//td[preceding-sibling::th[text()="Item Type"]]/@class')
 				|| false;
 	}
@@ -104,7 +94,7 @@ function doWeb(doc, url) {
 		var items = ZU.getItemArray(doc, elems);
 		
 		Zotero.selectItems(items, function(selectedItems) {
-			if( !selectedItems ) return true;
+			if ( !selectedItems ) return true;
 
 			var apiURIs = [], itemID;
 			for (var url in selectedItems) {

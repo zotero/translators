@@ -15,11 +15,11 @@
 function detectWeb(doc, url) {
 	Z.monitorDOMChanges(doc.getElementById("resultsarea"), {childList: true});
 	var downloadLink = doc.getElementById('oneclickDL');
-	if(downloadLink && getDocIDs(downloadLink.href)) {
+	if (downloadLink && getDocIDs(downloadLink.href)) {
 		return "journalArticle";
 	}
 	
-	if(getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }

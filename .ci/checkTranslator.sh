@@ -23,6 +23,7 @@ declare -a ERROR_CHECKS=(
 declare -a WARN_CHECKS=(
     "badLicense"
     "problematicJS"
+    "unnecessaryIndexOf"
 )
 
 #-----------------------------------------------------------------------
@@ -89,6 +90,14 @@ deprecatedForEach () {
     fi
 }
 
+unnecessaryIndexOf () {
+    if grep -qE '\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)' "$TRANSLATOR";then
+        warn "Unnecessary '.indexOf()', use '.includes()' instead:"
+        grep -nE '\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)' "$TRANSLATOR"
+        return 1
+    fi
+}
+
 badLicense () {
     if ! grep -q "GNU Affero General Public License" "$TRANSLATOR";then
         warn "Must be AGPL licensed"
@@ -97,7 +106,7 @@ badLicense () {
 }
 
 invalidJSON () {
-    jsonerror=$(sed -ne  '1,/^}/p' "$TRANSLATOR" | jsonlint 2>&1)
+    jsonerror=$(sed -ne  '1,/^}/p' "$TRANSLATOR" | jshint --config="$SCRIPT_DIR"/jsonhintrc --reporter=unix -)
     if (( $? > 0 ));then
       err "Parse error in JSON metadata part"
       err "$jsonerror"
@@ -112,7 +121,7 @@ problematicJS () {
         | sed '/BEGIN TEST/,$ d' \
         | jshint --config="$SCRIPT_DIR"/jshintrc --reporter=unix -)
     if (( $? > 0 ));then
-        warn "JSHint shows issues with this code"
+        warn "JSHint shows issues with this code:"
         warn "$jshint_error"
         return 1
     fi
@@ -128,7 +137,7 @@ usage () { (( $# > 0 )) && err "$*"; err "Usage: $0 [--skip-warn] <translator.js
 
 main() {
 
-    # Add './node_modules/.bin to PATH for jsonlint
+    # Add './node_modules/.bin to PATH for jshint
     PATH=$SCRIPT_DIR/node_modules/.bin:"$PATH"
 
     if [[ "$1" = "--skip-warn" ]];then
@@ -144,6 +153,20 @@ main() {
     fi
     [[ ! -e $TRANSLATOR ]] && { usage "File/Directory not found.\n$TRANSLATOR"; exit 2; }
     [[ -d $TRANSLATOR ]]   && { usage "Must be a file not a directory."; exit 3; }
+
+    # For newly commited translators not only a warning
+    # but an error is shown for a bad or missing license.
+    local IFS=$'\n'
+    declare -a newtranslators=()
+    newtranslators+=($(git diff-index --diff-filter=A --name-only --find-renames master|grep -v '\.ci'|grep 'js$'))
+    if (( ${#newtranslators[@]} > 0 ));then
+        for t in "${newtranslators[@]}";do
+            if [ "$TRANSLATOR_BASENAME" == "$t" ];then
+              ERROR_CHECKS+=("badLicense")
+              unset WARN_CHECKS[0]
+            fi
+        done
+    fi
 
     declare -a errors=() warnings=()
     for check in "${ERROR_CHECKS[@]}";do $check || errors+=($check); done
