@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-05 07:15:21"
+	"lastUpdated": "2018-08-23 11:15:21"
 }
 
 // attr()/text() v2
