@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/(science(/article/|/(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-21 08:53:02"
+	"lastUpdated": "2018-08-21 20:37:36"
 }
 
 // attr()/text() v2
@@ -404,6 +404,7 @@ function getArticleList(doc) {
 			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
 			|//h2/a[contains(@class, "result-list-title-link")]\
 			|//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]\
+			|//li[contains(@class, "list-chapter")]//h2//a\
 		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
@@ -473,7 +474,7 @@ function scrape(doc, url) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button[contains(@class, "ExportCitationButton")]')[0];
+	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
