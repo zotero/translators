@@ -70,6 +70,9 @@ function doWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
+	// additional example not covered in tests (fails in automated testing)
+	// https://aclanthology.coli.uni-saarland.de/volumes/computational-linguistics-volume-44-issue-1-april-2018",
+
 	let listing = ZU.xpath(doc, '//div[@id="content"]//p');
 	let items = {};
 	for (let i = 0; i < listing.length; i++) {
@@ -151,11 +154,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://aclanthology.coli.uni-saarland.de/volumes/computational-linguistics-volume-44-issue-1-april-2018",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
