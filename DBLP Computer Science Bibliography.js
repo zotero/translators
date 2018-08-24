@@ -87,9 +87,9 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 		//yet contain a doi, then save the doi and delete the url.
 		//If the item contains the doi corresponding to the url
 		//then just delete the url and keep the doi.
-		if(item.url && item.url.search(/^https?:\/\/(?:dx\.)?doi\.org\/10\./i) != -1) {
+		if (item.url && item.url.search(/^https?:\/\/(?:dx\.)?doi\.org\/10\./i) != -1) {
 			var doi = ZU.cleanDOI(item.url);
-			if(doi && (!item.DOI || item.DOI == doi)) {
+			if (doi && (!item.DOI || item.DOI == doi)) {
 				item.DOI = doi;
 				delete item.url;
 			}
@@ -107,7 +107,7 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var articles = new Array();
 		var rows = ZU.xpath(doc, '//body/ul/li|//li[contains(@class, "entry")]')
-		for(var i=0; i<rows.length; i++) {
+		for (var i=0; i<rows.length; i++) {
 			//Careful: If you get more than one node,
 			//ZU.xpathText will join the textContent of each with commas. 
 			var title = ZU.xpathText(rows[i], './b|./div/span[@class="title"]');

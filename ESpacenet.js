@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if(url.indexOf("searchResults?") !== -1
+	if (url.indexOf("searchResults?") !== -1
 		&& getSearchResults(doc).length) {
 			return "multiple";
 	}
@@ -55,8 +55,8 @@ function getSearchResults(doc) {
 
 function getTitle(doc) {
 	var title = ZU.xpathText(doc, '//div[@id="pagebody"]/h3[1]');
-	if(title) {
-		if(title.toUpperCase() == title) {
+	if (title) {
+		if (title.toUpperCase() == title) {
 			title = ZU.capitalizeTitle(title, true);
 		}
 		return title.trim();
@@ -91,7 +91,7 @@ var i18n = {
 
 function initLocale(url) {
 	var m = url.match(/[?&]locale=([^&]+)/);
-	if(m && i18n[m[1]]) {
+	if (m && i18n[m[1]]) {
 		i18n = i18n[m[1]];	
 	} else {
 		i18n = {};	//English
@@ -99,9 +99,9 @@ function initLocale(url) {
 }
 
 function L(label, fromEN) {
-	if(fromEN) {
-		for(var l in i18n) {
-			if(i18n[l] == label) {
+	if (fromEN) {
+		for (var l in i18n) {
+			if (i18n[l] == label) {
 				return l;
 			}
 		}
@@ -125,15 +125,15 @@ function applyValue(newItem, label, value) {
 
 //clean up names list and call callback with a clean name
 function cleanNames(names, callback) {
-	if(names) {
+	if (names) {
 		names = names.replace(/[()]/g, "").trim();
 
-		if(names == names.toUpperCase()) {
+		if (names == names.toUpperCase()) {
 			names = ZU.capitalizeTitle(names, true);
 		}
 
 		names = names.split(/\s*;\s*/);
-		for(var j=0, m=names.length; j<m; j++) {
+		for (var j=0, m=names.length; j<m; j++) {
 			callback(names[j].replace(/\s*,$/, ''));
 		}
 	}
@@ -149,10 +149,10 @@ function scrape(doc) {
 	for (var i=0, n=rows.length; i<n; i++) {
 		var label = L(rows[i].firstElementChild.textContent.trim());
 		var value = rows[i].firstElementChild.nextElementSibling;
-		if(!value) continue;
+		if (!value) continue;
 		//Z.debug("label: " + label);
 		//Z.debug("value: " + value.textContent);
-		switch(label) {
+		switch (label) {
 			case "Inventor(s):":
 				cleanNames(ZU.xpathText(value, './span[@id="secondaryInventors"]'),
 					function(name) {
@@ -177,10 +177,10 @@ function scrape(doc) {
 				var ECLA = ZU.trimInternal(ZU.xpathText(value,
 						'.//td[preceding-sibling::th[contains(text(),"'
 						+ L("Euro", true) + '")]]/a', null, '; ') || '');
-				if(CIB || ECLA) {
+				if (CIB || ECLA) {
 					newItem.extra = [];
-					if(CIB) newItem.extra.push('CIB: ' + CIB);
-					if(ECLA) newItem.extra.push('ECLA: ' + ECLA);
+					if (CIB) newItem.extra.push('CIB: ' + CIB);
+					if (ECLA) newItem.extra.push('ECLA: ' + ECLA);
 					newItem.extra = newItem.extra.join('\n');
 				}
 			break;
@@ -193,7 +193,7 @@ function scrape(doc) {
 	}
 
 	var date = ZU.xpathText(doc, '//div[@id="pagebody"]/h1[1]');
-	if(date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
+	if (date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
 		newItem.date = date[0];
 	}
 	

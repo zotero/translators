@@ -93,7 +93,7 @@ function scrape(doc, url) {
 
 		item.creators = [];
 		var nameNodes = ZU.xpath(doc, '//p[@class="byline"]/text()');
-		for(let node of nameNodes) {
+		for (let node of nameNodes) {
 			// Take the first two strings of non-spaces as the names. The byline
 			// can vary in format, including:
 			// First Last
@@ -104,7 +104,7 @@ function scrape(doc, url) {
 			var author = ZU.cleanAuthor(nameString, "author");
 			item.creators.push(author);
 		}
-		if(item.creators.length === 1 && item.creators[0].lastName === "Ekot") {
+		if (item.creators.length === 1 && item.creators[0].lastName === "Ekot") {
 			// Special case when only signed as "Ekot", i.e. no person
 			// specified as author.
 			item.creators[0].fieldMode = true;

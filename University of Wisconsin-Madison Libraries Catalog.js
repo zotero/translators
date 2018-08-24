@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 	} else if (url.indexOf('/catalog/')>-1) {
 		var format = ZU.xpathText(doc, '//span[@class="pub_title" and contains(., "Format")]/following-sibling::span[@class="pub_desc"]');
 		//Z.debug(format);
-		switch(format) {
+		switch (format) {
 			case "Sound Recordings":
 				return "audioRecording";
 			case "Videos, Slides, Films":

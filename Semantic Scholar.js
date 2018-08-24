@@ -171,7 +171,7 @@ function fixPageRange(pageRange) {
 		
 		// If the given pageRange doesn't make sense, just leave it as it has been given
 		// e.g. '95-10'
-		if(difference > numbers[1]) {
+		if (difference > numbers[1]) {
 			return pageRange;
 		}
 		

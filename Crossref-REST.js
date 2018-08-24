@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-19 07:00:19"
+	"lastUpdated": "2018-06-16 12:00:00"
 }
 
 /*
@@ -72,6 +72,11 @@ function removeUnsupportedMarkup(text) {
 }
 
 function fixAuthorCapitalization(string) {
+	// Try to use capitalization function from Zotero Utilities,
+	// because the current one doesn't support unicode names.
+	// Can't fix this either because ZU.XRegExp.replace is
+	// malfunctioning when calling from translators.
+	if (ZU.capitalizeName) return ZU.capitalizeName(string);
 	if (typeof string === "string" && string.toUpperCase() === string) {
 		string = string.toLowerCase().replace(/\b[a-z]/g, function (m) {
 			return m[0].toUpperCase();
@@ -272,17 +277,48 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
+	// Reduce network traffic by selecting only required fields
+	let selectedFields = [
+		'type',
+		'container-title',
+		'short-container-title',
+		'volume',
+		'issue',
+		'ISBN',
+		'ISSN',
+		'publisher',
+		'publisher-location',
+		'event',
+		'abstract',
+		'issued',
+		'page',
+		'DOI',
+		'link',
+		'title',
+		'subtitle',
+		'author',
+		'editor',
+		'chair',
+		'translator'
+	];
+	
 	let query = null;
-	// if (item.DOI) {
-	// 	query = '?filter=doi:' + ZU.cleanDOI(item.DOI.toString());
-	// }
-	// else
-	if (item.query) {
+	
+	if (item.DOI) {
+		if (Array.isArray(item.DOI)) {
+			query = '?filter=doi:' + item.DOI.map(x => ZU.cleanDOI(x)).filter(x => x).join(',doi:');
+		} else {
+			query = '?filter=doi:' + ZU.cleanDOI(item.DOI);
+		}
+	}
+	else if (item.query) {
 		query = '?query.bibliographic=' + encodeURIComponent(item.query);
 	}
 	else return;
 	
-	if(Z.getHiddenPref('CrossrefREST.email')) {
+	query += '&select=' + selectedFields.join(',');
+	
+	if (Z.getHiddenPref('CrossrefREST.email')) {
 		query += '&mailto=' + Z.getHiddenPref('CrossrefREST.email');
 	}
 	

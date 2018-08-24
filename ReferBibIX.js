@@ -19,12 +19,12 @@ function detectImport() {
 	var lineRe = /%[A-Z0-9\*\$] .+/;
 	var line;
 	var matched = 0;
-	while((line = Zotero.read()) !== false) {
+	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
-		if(line != "") {
-			if(lineRe.test(line)) {
+		if (line != "") {
+			if (lineRe.test(line)) {
 				matched++;
-				if(matched == 2) {
+				if (matched == 2) {
 					// threshold is two lines
 					return true;
 				}
@@ -126,58 +126,58 @@ var isEndNote = false;
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
-	if(fieldMap[tag]) {
+	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
-	} else if(inputFieldMap[tag]) {
+	} else if (inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
-	} else if(tag == "0") {
-		if(inputTypeMap[value]) {	// first check inputTypeMap
+	} else if (tag == "0") {
+		if (inputTypeMap[value]) {	// first check inputTypeMap
 			item.itemType = inputTypeMap[value]
 		} else {					// then check typeMap
-			for(var i in typeMap) {
-				if(value == typeMap[i]) {
+			for (var i in typeMap) {
+				if (value == typeMap[i]) {
 					item.itemType = i;
 					break;
 				}
 			}
 			// fall back to generic
-			if(!item.itemType) item.itemType = inputTypeMap["Generic"];
+			if (!item.itemType) item.itemType = inputTypeMap["Generic"];
 		}
-	} else if(tag == "A" || tag == "E" || tag == "?") {
-		if(tag == "A") {
+	} else if (tag == "A" || tag == "E" || tag == "?") {
+		if (tag == "A") {
 			var type = "author";
-		} else if(tag == "E") {
+		} else if (tag == "E") {
 			var type = "editor";
-		} else if(tag == "?") {
+		} else if (tag == "?") {
 			var type = "translator";
 		}
 		
 		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if(tag == "Q") {
+	} else if (tag == "Q") {
 		item.creators.push({creatorType:"author", lastName:value, fieldMode:true});
-	} else if(tag == "H" || tag == "O") {
-		if(!item.extra) item.extra = '';
+	} else if (tag == "H" || tag == "O") {
+		if (!item.extra) item.extra = '';
 		else item.extra += "\n";
 		item.extra += value;
-	} else if(tag == "Z") {
+	} else if (tag == "Z") {
 		item.notes.push({note:value});
-	} else if(tag == "D") {
-		if(item.date) {
-			if(item.date.indexOf(value) == -1) {
+	} else if (tag == "D") {
+		if (item.date) {
+			if (item.date.indexOf(value) == -1) {
 				item.date += " "+value;
 			}
 		} else {
 			item.date = value;
 		}
-	} else if(tag == "8") {
-		if(item.date) {
-			if(value.indexOf(item.date) == -1) {
+	} else if (tag == "8") {
+		if (item.date) {
+			if (value.indexOf(item.date) == -1) {
 				item.date += " "+value;
 			}
 		} else {
 			item.date = value;
 		}
-	} else if(tag == "K") {
+	} else if (tag == "K") {
 		item.tags = value.split("\n");
 	}
 }
@@ -189,16 +189,16 @@ function doImport() {
 		Zotero.debug("ignoring "+line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
-	} while(line !== false && line[0] != "%");
+	} while (line !== false && line[0] != "%");
 	
 	var item = new Zotero.Item();
 	
 	var tag = line[1];
 	var data = line.substr(3);
-	while((line = Zotero.read()) !== false) {	// until EOF
+	while ((line = Zotero.read()) !== false) {	// until EOF
 		line = line.replace(/^\s+/, "");
-		if(!line) {
-			if(tag) {
+		if (!line) {
+			if (tag) {
 				processTag(item, tag, data);
 				// unset info
 				tag = data = readRecordEntry = false;
@@ -206,10 +206,10 @@ function doImport() {
 				item.complete();
 				item = new Zotero.Item();
 			}
-		} else if(line[0] == "%" && line[2] == " ") {
+		} else if (line[0] == "%" && line[2] == " ") {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
-			if(tag) {
+			if (tag) {
 				processTag(item, tag, data);
 			}
 			
@@ -218,29 +218,29 @@ function doImport() {
 			data = line.substr(3);
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag) {
+			if (tag) {
 				data += "\n"+line;
 			}
 		}
 	}
 	
-	if(tag) {	// save any unprocessed tags
+	if (tag) {	// save any unprocessed tags
 		processTag(item, tag, data);
 		item.complete();
 	}
 }
 
 function addTag(tag, value) {
-	if(value) {
+	if (value) {
 		Zotero.write("%"+tag+" "+value+"\r\n");
 	}
 }
 
 function doExport() {
 	var item;
-	while(item = Zotero.nextItem()) {
+	while (item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
-		if(item.itemType == "note" || item.itemType == "attachment") {
+		if (item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 		
@@ -248,8 +248,8 @@ function doExport() {
 		addTag("0", typeMap[item.itemType] ? typeMap[item.itemType] : "Generic");
 		
 		// use field map
-		for(var j in fieldMap) {
-			if(item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
+		for (var j in fieldMap) {
+			if (item[fieldMap[j]]) addTag(j, item[fieldMap[j]]);
 		}
 		
 		//handle J & B tags correctly
@@ -262,11 +262,11 @@ function doExport() {
 		}
 		
 		// creators
-		for(var j in item.creators) {
+		for (var j in item.creators) {
 			var referTag = "A";
-			if(item.creators[j].creatorType == "editor") {
+			if (item.creators[j].creatorType == "editor") {
 				referTag = "E";
-			} else if(item.creators[j].creatorType == "translator") {
+			} else if (item.creators[j].creatorType == "translator") {
 				referTag = "?";
 			}
 			
@@ -277,7 +277,7 @@ function doExport() {
 		addTag("D", item.date);
 		
 		// tags
-		if(item.tags) {
+		if (item.tags) {
 			var keywordTag = "";
 			for (var i=0; i<item.tags.length; i++) {
 				keywordTag += "\r\n"+item.tags[i].tag;

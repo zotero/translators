@@ -64,27 +64,27 @@ function lookupPMIDs(ids, next) {
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
 	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
-	if(!uid.length) {
+	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
 
-	if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
+	if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
 		return uid[0].textContent;
 	}
 
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
-	if(!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
-	if(uid.length == 1) {
+	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
+	if (uid.length == 1) {
 		uid = uid[0].textContent.match(/\/(\d+)(?:\/|$)/);
-		if(uid) return uid[1];
+		if (uid) return uid[1];
 	}
 	
 	//PMID from a bookshelf entry
 	var maincontent = doc.getElementById('maincontent');
-	if(maincontent) {
+	if (maincontent) {
 		uid = ZU.xpath(maincontent,
 			'.//a[@title="PubMed record of this title" or @title="PubMed record of this page"]');
-		if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid;
+		if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid;
 	}
 
 	return false;
@@ -93,7 +93,7 @@ function getUID(doc) {
 // retrieve itemprop elements for scraping books directly from page where UID is not available
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
-	if(!main) return;
+	if (!main) return;
 	
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
@@ -115,13 +115,13 @@ function scrapeItemProps(itemprops) {
 	for (var i=0; i<itemprops.length; i++) {
 		var value = ZU.trimInternal(itemprops[i].textContent);
 		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
-		if(!field) continue;
+		if (!field) continue;
 		
-		if(field.indexOf('creator/') == 0) {
+		if (field.indexOf('creator/') == 0) {
 			field = field.substr(8);
 			item.creators.push(ZU.cleanAuthor(value, field, false));
-		} else if(field == 'ISBN') {
-			if(!item.ISBN) item.ISBN = '';
+		} else if (field == 'ISBN') {
+			if (!item.ISBN) item.ISBN = '';
 			else item.ISBN += '; ';
 			
 			item.ISBN += value;
@@ -157,10 +157,10 @@ function getSearchResults(doc, checkOnly) {
 			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
 			|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 		
-		if(!uid) {
+		if (!uid) {
 			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
-			if(uid) uid = uid.match(/\/(\d+)/);
-			if(uid) uid = uid[1];
+			if (uid) uid = uid.match(/\/(\d+)/);
+			if (uid) uid = uid[1];
 		}
 		
 		if (!uid || !title) continue;
@@ -185,8 +185,8 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	
-	if(!getUID(doc)) {
-		if(getBookProps(doc)) return 'book';
+	if (!getUID(doc)) {
+		if (getBookProps(doc)) return 'book';
 		
 		return;
 	}
@@ -194,7 +194,7 @@ function detectWeb(doc, url) {
 	//try to determine if this is a book
 	//"Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if(maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
+	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
 	{
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
@@ -203,8 +203,8 @@ function detectWeb(doc, url) {
 	
 	//from bookshelf page
 	var pdid = ZU.xpathText(doc, 'html/head/meta[@name="ncbi_pdid"]/@content');
-	if(pdid == "book-part") return 'bookSection';
-	if(pdid == "book-toc") return 'book';
+	if (pdid == "book-part") return 'bookSection';
+	if (pdid == "book-toc") return 'book';
 	
 	return "journalArticle";
 }
@@ -212,10 +212,10 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var uids = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				uids.push(i.substr(1));
 			}
 			lookupPMIDs(uids);
@@ -224,7 +224,7 @@ function doWeb(doc, url) {
 		var uid = getUID(doc), itemprops;
 		if (uid) {
 			lookupPMIDs([uid]);
-		} else if(itemprops = getBookProps(doc)) {
+		} else if (itemprops = getBookProps(doc)) {
 			scrapeItemProps(itemprops);
 		}
 	}
@@ -275,9 +275,9 @@ function getPMID(co) {
 	var coParts = co.split("&");
 	for (var i=0; i<coParts.length; i++) {
 		var part = coParts[i];
-		if(part.substr(0, 7) == "rft_id=") {
+		if (part.substr(0, 7) == "rft_id=") {
 			var value = unescape(part.substr(7));
-			if(value.substr(0, 10) == "info:pmid/") {
+			if (value.substr(0, 10) == "info:pmid/") {
 				return value.substr(10);
 			}
 		}
@@ -285,14 +285,14 @@ function getPMID(co) {
 }
 
 function detectSearch(item) {
-	if(item.contextObject) {
-		if(getPMID(item.contextObject)) {
+	if (item.contextObject) {
+		if (getPMID(item.contextObject)) {
 			return true;
 		}
 	}
 	
 	//supply PMID as a string or array
-	if(item.PMID
+	if (item.PMID
 		&& (typeof item.PMID == 'string' || item.PMID.length > 0) )  {
 		return true;
 	}
@@ -302,12 +302,12 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	var pmid;
-	if(item.contextObject) {
+	if (item.contextObject) {
 		pmid = getPMID(item.contextObject);
 	}
-	if(!pmid) pmid = item.PMID;
+	if (!pmid) pmid = item.PMID;
 	
-	if(typeof pmid == "string") pmid = [pmid];
+	if (typeof pmid == "string") pmid = [pmid];
 	
 	lookupPMIDs(pmid);
 }

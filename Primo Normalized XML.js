@@ -1,18 +1,18 @@
 {
 	"translatorID": "efd737c9-a227-4113-866e-d57fbc0684ca",
+	"translatorType": 1,
 	"label": "Primo Normalized XML",
 	"creator": "Philipp Zumstein",
 	"target": "xml",
 	"minVersion": "3.0",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
+	"inRepository": true,
+	"browserSupport": "gcsibv",
 	"configOptions": {
 		"dataMode": "xml/dom"
 	},
-	"inRepository": true,
-	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-02-05 07:13:43"
+	"lastUpdated": "2018-07-28 14:15:00"
 }
 
 /*
@@ -54,11 +54,11 @@ function doImport() {
 	
 	var item = new Zotero.Item();
 	var itemType = ZU.xpathText(doc, '//p:display/p:type', ns)  || ZU.xpathText(doc, '//p:facets/p:rsrctype', ns) || ZU.xpathText(doc, '//p:search/p:rsrctype', ns);
-	if(!itemType) {
+	if (!itemType) {
 		throw new Error('Could not locate item type');
 	}
 	
-	switch(itemType.toLowerCase()) {
+	switch (itemType.toLowerCase()) {
 		case 'book':
 		case 'ebook':
 		case 'pbook' :
@@ -115,7 +115,7 @@ function doImport() {
 			item.itemType = "document";
 			var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
 			if (risType) {
-				switch(risType.toUpperCase()) {
+				switch (risType.toUpperCase()) {
 					case 'THES':
 						item.itemType = "thesis";
 						break;
@@ -124,13 +124,13 @@ function doImport() {
 	}
 	
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
-	if(item.title) {
+	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
 		item.title = item.title.replace(/\s*:/, ":");
 	}
 	var creators = ZU.xpath(doc, '//p:display/p:creator', ns);
 	var contributors = ZU.xpath(doc, '//p:display/p:contributor', ns);
-	if(!creators.length && contributors.length) {
+	if (!creators.length && contributors.length) {
 		// <creator> not available using <contributor> as author instead
 		creators = contributors;
 		contributors = [];
@@ -156,19 +156,19 @@ function doImport() {
 
 	item.place = ZU.xpathText(doc, '//p:addata/p:cop', ns);
 	var publisher = ZU.xpathText(doc, '//p:addata/p:pub',ns);
-	if(!publisher) publisher = ZU.xpathText(doc, '//p:display/p:publisher', ns);
-	if(publisher) {
+	if (!publisher) publisher = ZU.xpathText(doc, '//p:display/p:publisher', ns);
+	if (publisher) {
 		publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
 		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
 		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 
-		if(pubplace && pubplace[1]) {
+		if (pubplace && pubplace[1]) {
 			var possibleplace = pubplace[0];
-			if(!item.place ) {
+			if (!item.place ) {
 				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
 				item.place = possibleplace;
 			}
-			if(item.place && item.place == possibleplace) {
+			if (item.place && item.place == possibleplace) {
 				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
 			}
 		}
@@ -180,7 +180,7 @@ function doImport() {
 	} else {
 		date = ZU.xpathText(doc, '//p:display/p:creationdate|//p:search/p:creationdate', ns);
 		var m;
-		if(date && (m = date.match(/\d+/))) {
+		if (date && (m = date.match(/\d+/))) {
 			item.date = m[0];
 		}
 	}
@@ -189,7 +189,7 @@ function doImport() {
 	item.language = ZU.xpathText(doc, '(//p:display/p:language|//p:facets/p:language)[1]', ns);
 	
 	var pages = ZU.xpathText(doc, '//p:display/p:format', ns);
-	if(item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
+	if (item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
 		item.numPages = extractNumPages(pages);
 	}
 	
@@ -210,7 +210,7 @@ function doImport() {
 	// the super-tolerant idCheck should be better than a regex.
 	// (although note that it will reject invalid ISBNs)
 	var locators = ZU.xpathText(doc, '//p:display/p:identifier', ns);
-	if(!(item.ISBN || item.ISSN) && locators) {
+	if (!(item.ISBN || item.ISSN) && locators) {
 		item.ISBN = ZU.cleanISBN(locators);
 		item.ISSN = ZU.cleanISSN(locators);
 	}
@@ -218,11 +218,11 @@ function doImport() {
 	item.edition = ZU.xpathText(doc, '//p:display/p:edition', ns);
 	
 	var subjects = ZU.xpath(doc, '//p:search/p:subject', ns);
-	if(!subjects.length) {
+	if (!subjects.length) {
 		subjects = ZU.xpath(doc, '//p:display/p:subject', ns);
 	}
 
-	for(var i=0, n=subjects.length; i<n; i++) {
+	for (var i=0, n=subjects.length; i<n; i++) {
 		item.tags.push(ZU.trimInternal(subjects[i].textContent));
 	}
 	
@@ -291,7 +291,9 @@ function doImport() {
 	var library;
 	var source = ZU.xpathText(doc, '//p:control/p:sourceid', ns);
 	if (source) {
-		library = source.match(/^(.+?)_/);
+		//The HVD library code is now preceded by $$V01 -- not seeing this in other catalogs like Princeton or UQAM
+		//so making it optional
+		library = source.match(/^(?:\$\$V)?(?:\d+)?(.+?)_/);
 		if (library) library = library[1];
 	}
 	// Z.debug(library)
@@ -299,8 +301,10 @@ function doImport() {
 		if (ZU.xpathText(doc, '//p:display/p:lds01', ns)) {
 			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//p:display/p:lds01', ns);
 		}
-		if (ZU.xpathText(doc, '//p:display/p:lds03', ns)) {
-			item.attachments.push({url: ZU.xpathText(doc, '//p:display/p:lds03', ns), title: "HOLLIS Permalink", snapshot: false});		
+		for (let lds03 of ZU.xpath(doc, '//p:display/p:lds03', ns)) {
+			if (lds03.textContent.match(/href=\"(.+?)\"/)) {
+				item.attachments.push({url: lds03.textContent.match(/href=\"(.+?)\"/)[1], title: "HOLLIS Permalink", snapshot: false});
+			}
 		}
 	}
 	// End Harvard-specific code
@@ -322,9 +326,9 @@ function stripAuthor(str) {
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
-	for(var i=0; i<creators.length; i++) {
+	for (var i=0; i<creators.length; i++) {
 		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
-		for(var j=0; j<creator.length; j++) {
+		for (var j=0; j<creator.length; j++) {
 			var c = stripAuthor(creator[j]);
 			c = ZU.cleanAuthor(
 				splitGuidance[c.toLowerCase()] || c,
@@ -362,7 +366,7 @@ function extractNumPages(str) {
 function dedupeArray(names) {
 	// via http://stackoverflow.com/a/15868720/1483360
 	return names.reduce(function(a,b){
-		if(a.indexOf(b)<0) {
+		if (a.indexOf(b)<0) {
 			a.push(b);
 		}
 		return a;

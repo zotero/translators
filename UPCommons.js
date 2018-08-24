@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
 	if (url.indexOf('/handle/')>-1 && type) {
-		if(itemTypes[type]!=null) return itemTypes[type];
+		if (itemTypes[type]!=null) return itemTypes[type];
 		else return "document";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";

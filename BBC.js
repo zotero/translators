@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 		}
 		return "newspaperArticle";
 	}
-	if(url.indexOf("/newsbeat/article") != -1){
+	if (url.indexOf("/newsbeat/article") != -1){
 		return "blogPost";
 	}
 	if (getSearchResults(doc, true)) {
@@ -60,7 +60,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
 	//for NewsBeat
-	if(!rows.length) {
+	if (!rows.length) {
 		var rows = ZU.xpath(doc, '//article/div/h1[@itemprop="headline"]/a');
 	}
 	for (var i = 0; i<rows.length; i++) {
@@ -120,7 +120,7 @@ function scrape(doc, url) {
 				item.date = date.toISOString();
 			} else {
 				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
-				if(!item.date) {
+				if (!item.date) {
 					item.date = ZU.xpathText(doc, '//p[@class="timestamp"]');
 					if (!item.date) {
 						item.date = ZU.xpathText(doc, '//meta[@name="OriginalPublicationDate"]/@content');
@@ -168,7 +168,7 @@ function scrape(doc, url) {
 		}
 
 		// description for old BBC pages
-		if(!item.abstractNote)
+		if (!item.abstractNote)
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="Description"]/@content');
 
 		for (var i in item.tags)
