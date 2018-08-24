@@ -17,7 +17,7 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	
-	if(getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -46,7 +46,7 @@ function doWeb(doc, url) {
 		}
 		var pdfCollection = {};
 				
-		if(pdf) pdfCollection[pmcid] = pdf;
+		if (pdf) pdfCollection[pmcid] = pdf;
 			
 		lookupPMCIDs([pmcid], doc, pdfCollection);
 	}
@@ -82,7 +82,7 @@ function getSearchResults(doc, checkOnly) {
 			
 			found = true;
 			
-			if(pdf) pdfCollection[pmcid[1]] = pdf;
+			if (pdf) pdfCollection[pmcid[1]] = pdf;
 		}
 	}
 	return found ? {"ids":ids,"pdfs":pdfCollection} : false;
@@ -104,7 +104,7 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 
 		var articles = ZU.xpath(doc, '/pmcarticleset/article');
 
-		for(var i in articles) {
+		for (var i in articles) {
 			var newItem = new Zotero.Item("journalArticle");
 			
 			var journal = ZU.xpath(articles[i], 'front/journalmeta');

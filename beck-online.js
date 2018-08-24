@@ -75,7 +75,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false,
 		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a');
-	for(var i=0; i<rows.length; i++) {
+	for (var i=0; i<rows.length; i++) {
 		//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
 		//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
 		//   Dr. iur. habil. Christian Hofmann: Haftung im Zahlungsverkehr

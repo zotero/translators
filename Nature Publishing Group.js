@@ -48,26 +48,26 @@ function attachSupplementary(doc, item, next) {
 	//nature's new website
 	var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
 	var suppDiv = doc.getElementById("supplementary-information");
-	if(suppDiv) {
+	if (suppDiv) {
 		var fileClasses = ZU.xpath(suppDiv, './/div[contains(@class, "supp-info")]/h2');
-		for(var i=0, n=fileClasses.length; i<n; i++) {
+		for (var i=0, n=fileClasses.length; i<n; i++) {
 			var type = fileClasses[i].classList.item(0);
-			if(type) type = suppTypeMap[type];
+			if (type) type = suppTypeMap[type];
 			
-			if(!fileClasses[i].nextElementSibling) continue;
+			if (!fileClasses[i].nextElementSibling) continue;
 			var dls = fileClasses[i].nextElementSibling.getElementsByTagName('dl');
-			for(var j=0, m=dls.length; j<m; j++) {
+			for (var j=0, m=dls.length; j<m; j++) {
 				var link = ZU.xpath(dls[j], './dt/a')[0];
-				if(!link) {
+				if (!link) {
 					continue;
 				}
 	
 				var title = dls[j].getElementsByTagName('dd')[0];
-				if(title) {
+				if (title) {
 					title = title.textContent.replace(
 						/^[\s\r\n]*(?:Th(?:is|e) )?file (?:contains|shows)\s+(\S+)/i,
 						function(m, firstWord) {	//fix capitalization of first word
-							if(firstWord.toLowerCase() == firstWord) {	//lower case word
+							if (firstWord.toLowerCase() == firstWord) {	//lower case word
 								return firstWord.charAt(0).toUpperCase() + firstWord.substr(1);
 							}
 							return firstWord;
@@ -80,15 +80,15 @@ function attachSupplementary(doc, item, next) {
 						+ ". " + (title || '');
 
 				//fallback if we fail miserably
-				if(!title) title = "Supplementary file";
+				if (!title) title = "Supplementary file";
 				
 				var attachment = {
 					title: title,
 					url: link.href
 				};
 				
-				if(type) attachment.mimeType = type;
-				if(attachAsLink || !type) {	//don't download unknown file types
+				if (type) attachment.mimeType = type;
+				if (attachAsLink || !type) {	//don't download unknown file types
 					attachment.snapshot = false;
 				}
 				
@@ -100,11 +100,11 @@ function attachSupplementary(doc, item, next) {
 	
 	//older websites, e.g. http://www.nature.com/onc/journal/v31/n6/full/onc2011282a.html
 	var suppLink = doc.getElementById('articlenav') || doc.getElementById('extranav');
-	if(suppLink) {
+	if (suppLink) {
 		suppLink = ZU.xpath(suppLink, './ul/li//a[text()="Supplementary info"]')[0]; //unfortunately, this is the best we can do
-		if(!suppLink) return;
+		if (!suppLink) return;
 		
-		if(attachAsLink) {	//we don't need to find links to individual files
+		if (attachAsLink) {	//we don't need to find links to individual files
 			item.attachments.push({
 				title: "Supplementary info",
 				url: suppLink.href,
@@ -114,16 +114,16 @@ function attachSupplementary(doc, item, next) {
 		} else {
 			ZU.processDocuments(suppLink.href, function(newDoc) {
 				var content = newDoc.getElementById('content');
-				if(content) {
+				if (content) {
 					var links = ZU.xpath(content, './div[@class="container-supplementary" or @id="general"]//a');
-					for(var i=0, n=links.length; i<n; i++) {
+					for (var i=0, n=links.length; i<n; i++) {
 						var title = ZU.trimInternal(links[i].textContent);
 						var type = title.match(/\((\w+)\s+\d+[^)]+\)\s*$/);
-						if(type) type = suppTypeMap[type[1]];
-						if(!type) {
+						if (type) type = suppTypeMap[type[1]];
+						if (!type) {
 							type = links[i].classList;
 							type = type.item(type.length-1);
-							if(type) type = suppTypeMap[type.replace(/^(?:i|all)-/, '')];
+							if (type) type = suppTypeMap[type.replace(/^(?:i|all)-/, '')];
 						}
 						
 						//clean up title a bit
@@ -147,8 +147,8 @@ function attachSupplementary(doc, item, next) {
 	
 	//e.g. http://www.nature.com/ng/journal/v38/n11/full/ng1901.html
 	var suppLink = ZU.xpath(doc, '(//a[text()="Supplementary info"])[last()]')[0];
-	if(suppLink) {
-		if(attachAsLink) {	//we don't need to find links to individual files
+	if (suppLink) {
+		if (attachAsLink) {	//we don't need to find links to individual files
 			item.attachments.push({
 				title: "Supplementary info",
 				url: suppLink.href,
@@ -160,14 +160,14 @@ function attachSupplementary(doc, item, next) {
 			ZU.processDocuments(suppLink.href, function(newDoc) {
 				var links = ZU.xpath(newDoc, './/p[@class="articletext"]');
 				Z.debug("Found " + links.length + " links");
-				for(var i=0, n=links.length; i<n; i++) {
+				for (var i=0, n=links.length; i<n; i++) {
 					var link = links[i].getElementsByTagName('a')[0];
-					if(!link) continue;
+					if (!link) continue;
 					
 					var title = ZU.trimInternal(link.textContent);
 					
 					var type = title.match(/\((\w+)\s+\d+[^)]+\)\s*$/);
-					if(type) type = suppTypeMap[type[1]];
+					if (type) type = suppTypeMap[type[1]];
 					
 					//clean up title a bit
 					title = title.replace(/\s*\([^()]+\)$/, '')
@@ -177,7 +177,7 @@ function attachSupplementary(doc, item, next) {
 					//can this be too long? I would probably make more sense to attach these as notes on the files
 					//how do we do that?
 					var desc = ZU.xpathText(links[i], './node()[last()][not(name())]');	//last text node
-					if(desc && (desc = ZU.trimInternal(desc))) {
+					if (desc && (desc = ZU.trimInternal(desc))) {
 						title += '. ' + desc;
 					}
 					
@@ -198,10 +198,10 @@ function attachSupplementary(doc, item, next) {
 
 //unescape Highwire's special html characters
 function unescape(str) {
-	if(!str || !str.includes('[')) return str;
+	if (!str || !str.includes('[')) return str;
 
 	return str.replace(/\|?\[([^\]]+)\]\|?/g, function(s, p1) {
-		if(ISO8879CharMap[p1] !== undefined) {
+		if (ISO8879CharMap[p1] !== undefined) {
 		  return ISO8879CharMap[p1];
 		} else {
 		  return s;
@@ -252,8 +252,8 @@ function getAbstract(doc) {
 	for (var i = 0, n = paragraphs.length; i < n; i++) {
 		//remove superscript references
 		p = ZU.xpathText(paragraphs[i], "./node()[not(self::sup and ./a)]", null, '');
-		if(p) p = ZU.trimInternal(p);
-		if(p) textArr.push(p);
+		if (p) p = ZU.trimInternal(p);
+		if (p) textArr.push(p);
 	}
 
 	return textArr.join("\n").trim() || null;
@@ -300,12 +300,12 @@ function scrapeEM(doc, url, next) {
 		//If we can find a publication year, that's better
 		var year = ZU.xpathText(doc,
 			'//dd[preceding-sibling::dt[1][text()="Year published:" or text()="Date published:"]]');
-		if(year && ( year = year.match(/\(\s*(.*?)\s*\)/) )) {
+		if (year && ( year = year.match(/\(\s*(.*?)\s*\)/) )) {
 			item.date = year[1];
-		} else if( (year = ZU.xpathText(doc,'//p[@id="cite"]')) &&
+		} else if ( (year = ZU.xpathText(doc,'//p[@id="cite"]')) &&
 			(year = year.match(/\((\d{4})\)/)) ) {
 			item.date = year[1];
-		} else if(
+		} else if (
 			(year = ZU.xpathText(doc, '//a[contains(@href,"publicationDate")]/@href')) &&
 			(year = year.match(/publicationDate=([^&]+)/)) &&
 			//check that we at least have a year
@@ -328,11 +328,11 @@ function scrapeEM(doc, url, next) {
 
 		if (item.notes) item.notes = [];
 		
-		if(item.ISSN && ZU.cleanISSN) {	//introduced in 3.0.12
+		if (item.ISSN && ZU.cleanISSN) {	//introduced in 3.0.12
 			var issn = ZU.cleanISSN(item.ISSN);
-			if(!issn) delete item.ISSN;
+			if (!issn) delete item.ISSN;
 			else item.ISSN = issn;
-		} else if(item.ISSN === "ERROR! NO ISSN") {
+		} else if (item.ISSN === "ERROR! NO ISSN") {
 			delete item.ISSN;
 		}
 
@@ -345,20 +345,20 @@ function scrapeEM(doc, url, next) {
 function scrapeRIS(doc, url, next) {
 	var navBar = doc.getElementById('articlenav') || doc.getElementById('extranav');
 	var risURL;
-	if(navBar) {
+	if (navBar) {
 		risURL = doc.evaluate('//li[@class="export"]/a', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
+		if (!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', navBar, null, XPathResult.ANY_TYPE, null).iterateNext();
 	}
 	
-	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="RIS" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if(!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if(!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-	if(!risURL) risURL = ZU.xpath(doc, '//ul[@data-component="article-info-list"]//a[@data-track-source="citation-download"]')[0];
+	if (!risURL) risURL = doc.evaluate('//a[normalize-space(text())="RIS" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
+	if (!risURL) risURL = ZU.xpath(doc, '//ul[@data-component="article-info-list"]//a[@data-track-source="citation-download"]')[0];
 
-	if(risURL) {
+	if (risURL) {
 		risURL = risURL.href;
 		ZU.doGet(risURL, function(text) {
-			if(text.search(/^TY /m) != -1) {
+			if (text.search(/^TY /m) != -1) {
 				var translator = Zotero.loadTranslator('import');
 				translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
 				translator.setString(text);
@@ -455,7 +455,7 @@ function getMultipleNodes(doc, url) {
 		}
 	}
 	
-	if(nodes.length) Z.debug("multiples found using: " + nodex);
+	if (nodes.length) Z.debug("multiples found using: " + nodex);
 	
 	return [nodes, titlex, linkx];
 }
@@ -489,8 +489,8 @@ function detectWeb(doc, url) {
 }
 
 function supplementItem(item, supp, prefer) {
-	for(var i in supp) {
-		if(!supp.hasOwnProperty(i)
+	for (var i in supp) {
+		if (!supp.hasOwnProperty(i)
 			|| (item.hasOwnProperty(i) && !prefer.includes(i))) {
 			continue;	//this also skips creators, tags, notes, and related
 		}
@@ -509,7 +509,7 @@ function runScrapers(scrapers, done) {
 
 	var run = function(item) {
 		items.push(item);
-		if(scrapers.length) {
+		if (scrapers.length) {
 			(scrapers.shift()).apply(null, args);
 		}
 	};
@@ -527,21 +527,21 @@ function runScrapers(scrapers, done) {
 function scrape(doc, url) {
 	runScrapers([scrapeEM, scrapeRIS], function(items) {
 		var item = items[0];
-		if(!item) {	//EM failed (unlikely)
+		if (!item) {	//EM failed (unlikely)
 			item = items[1];
-		} else if(items[1]) {
+		} else if (items[1]) {
 			var preferredRisFields = ['journalAbbreviation', 'date'];
 			//palgrave-macmillan journals
-			if(!isNature(url)) {
+			if (!isNature(url)) {
 				preferredRisFields.push('publisher'); //all others are going to be dropped since we only handle journalArticle
-				if(item.rights.includes('Nature Publishing Group')) {
+				if (item.rights.includes('Nature Publishing Group')) {
 					delete item.rights;
 				}
 			}
 			
 			item = supplementItem(item, items[1], preferredRisFields);
 			
-			if(items[1].tags.length) item.tags = items[1].tags;	//RIS doesn't seem to have tags, but we check just in case
+			if (items[1].tags.length) item.tags = items[1].tags;	//RIS doesn't seem to have tags, but we check just in case
 			
 			if (!item.creators.length) {
 				// E.g. http://www.nature.com/nprot/journal/v1/n1/full/nprot.2006.52.html
@@ -551,27 +551,27 @@ function scrape(doc, url) {
 				//but it does not (sometimes?) include accented letters
 				//We try to get best of both worlds by trying to re-split EM authors correctly
 				//hopefully the authors match up
-				for(var i=0, j=0, n=item.creators.length, m=items[1].creators.length; i<n && j<m; i++, j++) {
+				for (var i=0, j=0, n=item.creators.length, m=items[1].creators.length; i<n && j<m; i++, j++) {
 					//check if last names match, then we don't need to worry
 					var risLName = ZU.removeDiacritics(items[1].creators[j].lastName.toUpperCase());
 					
 					var emLName = ZU.removeDiacritics(item.creators[i].lastName.toUpperCase());
-					if(emLName == risLName) {
+					if (emLName == risLName) {
 						continue;
 					}
 	
 					var fullName = item.creators[i].firstName + ' ' + item.creators[i].lastName;
 					emLName = fullName.substring(fullName.length - risLName.length);
-					if(ZU.removeDiacritics(emLName.toUpperCase()) != risLName) {
+					if (ZU.removeDiacritics(emLName.toUpperCase()) != risLName) {
 						//corporate authors are sometimes skipped in RIS
-						if(i+1<n) {
+						if (i+1<n) {
 							var nextEMLName = item.creators[i+1].firstName + ' '
 								+ item.creators[i+1].lastName;
 							nextEMLName = ZU.removeDiacritics(
 								nextEMLName.substring(nextEMLName.length - risLName.length)
 									.toUpperCase()
 							);
-							if(nextEMLName == risLName) { //this is corporate author and it was skipped in RIS
+							if (nextEMLName == risLName) { //this is corporate author and it was skipped in RIS
 								item.creators[i].lastName = item.creators[i].firstName
 									+ ' ' + item.creators[i].lastName;
 								delete item.creators[i].firstName;
@@ -584,10 +584,10 @@ function scrape(doc, url) {
 						}
 						
 						//authors with same name are sometimes skipped in EM
-						if(j+1<m) {
+						if (j+1<m) {
 							var nextRisLName = ZU.removeDiacritics(items[1].creators[j+1].lastName.toUpperCase());
 							var resplitEmLName = ZU.removeDiacritics(fullName.substring(fullName.length - nextRisLName.length).toUpperCase());
-							if(resplitEmLName == nextRisLName) {
+							if (resplitEmLName == nextRisLName) {
 								item.creators.splice(i, 0, items[1].creators[j]); //insert missing author
 								Z.debug('It appears that "' + item.creators[i].lastName
 									+ '" was missing from EM.');
@@ -599,7 +599,7 @@ function scrape(doc, url) {
 						continue; //we failed
 					}
 	
-					if(items[1].creators[j].fieldMode !== 1) {
+					if (items[1].creators[j].fieldMode !== 1) {
 						item.creators[i].firstName = fullName.substring(0, fullName.length - emLName.length).trim();
 					} else {
 						delete item.creators[i].firstName;
@@ -613,7 +613,7 @@ function scrape(doc, url) {
 			}
 		}
 
-		if(!item) {
+		if (!item) {
 			Z.debug('Could not retrieve metadata.');
 			return;	//both translators failed
 		}
@@ -672,15 +672,15 @@ function scrape(doc, url) {
 		//GEO, GenBank, etc.
 		try {	//this shouldn't really fail, but... just in case
 			var accessionDiv = doc.getElementById('accessions');
-			if(accessionDiv) {
+			if (accessionDiv) {
 				var accessions = ZU.xpath(accessionDiv, './/div[@class="content"]//div[./h3]');
 				var repo, links;
-				for(var i=0, n=accessions.length; i<n; i++) {
+				for (var i=0, n=accessions.length; i<n; i++) {
 					repo = accessions[i].getElementsByTagName('h3')[0].textContent;
-					if(repo) repo += ' entry ';
+					if (repo) repo += ' entry ';
 					links = ZU.xpath(accessions[i], './ul[1]//a');
-					if(links.length) {
-						for(var j=0, m=links.length; j<m; j++) {
+					if (links.length) {
+						for (var j=0, m=links.length; j<m; j++) {
 							item.attachments.push({
 								title: repo + '(' + links[j].textContent + ')',
 								url: links[j].href,
@@ -698,7 +698,7 @@ function scrape(doc, url) {
 		
 		//attach supplementary data
 		var async;
-		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
 			try {	//don't fail if we can't attach supplementary data
 				async = attachSupplementary(doc, item, function(doc, item) {
 					item.complete();
@@ -706,9 +706,9 @@ function scrape(doc, url) {
 			} catch(e) {
 				Z.debug("Error attaching supplementary information.");
 				Z.debug(e);
-				if(async) item.complete();
+				if (async) item.complete();
 			}
-			if(!async) {
+			if (!async) {
 				item.complete();
 			}
 		} else {

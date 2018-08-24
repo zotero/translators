@@ -15,13 +15,13 @@
 function detectImport() {
 	var line;
 	var i = 0;
-	while((line = Zotero.read()) !== false) {
+	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
-		if(line != "") {
-			if(line.substr(0, 4).match(/^PT [A-Z]/)) {
+		if (line != "") {
+			if (line.substr(0, 4).match(/^PT [A-Z]/)) {
 				return true;
 			} else {
-				if(i++ > 3) {
+				if (i++ > 3) {
 					return false;
 				}
 			}
@@ -175,13 +175,13 @@ function doImport(text) {
 	var linesRead = 0, bufferMax = 100;
 	var line = Zotero.read();
 	// first valid line is type
-	while(line !== false && line.replace(/^\s+/, "").substr(0, 6).search(/^PT [A-Z]/) == -1) {
-		if(linesRead < bufferMax) debugBuffer += line + '\n';
+	while (line !== false && line.replace(/^\s+/, "").substr(0, 6).search(/^PT [A-Z]/) == -1) {
+		if (linesRead < bufferMax) debugBuffer += line + '\n';
 		linesRead++;
 		line = Zotero.read();
 	}
 
-	if(line === false) {
+	if (line === false) {
 		Z.debug("No valid data found\n" +
 			"Read " + linesRead + " lines.\n" +
 			"Here are the first " + (linesRead<bufferMax?linesRead:bufferMax) + " lines:\n" +
@@ -200,17 +200,17 @@ function doImport(text) {
 	var data = line.substr(3);
 	
 	var rawLine;
-	while((rawLine = Zotero.read()) !== false) {    // until EOF
+	while ((rawLine = Zotero.read()) !== false) {    // until EOF
 		// trim leading space if this line is not part of a note
 		line = rawLine.replace(/^\s+/, "");
 		//Z.debug("line: " + line);
 		var split = line.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
 		if (line == "ER") split = ["","ER",""];
-		if(split) {
+		if (split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
-			if(tag) {
+			if (tag) {
 				//Zotero.debug("tag: '"+tag+"'; data: '"+data+"'");
 				processTag(item, tag, data);
 			}
@@ -219,12 +219,12 @@ function doImport(text) {
 			tag = split[1];
 			data = split[2];
 			
-			if(tag == "ER") {	       // ER signals end of reference
+			if (tag == "ER") {	       // ER signals end of reference
 				// unset info
 				tag = data = false;
 				completeItem(item);
 			}
-			if(tag == "PT") {
+			if (tag == "PT") {
 				// new item
 				item = new Zotero.Item();
 				item.creators = [{"AU":[], "AF":[]}, []];
@@ -233,13 +233,13 @@ function doImport(text) {
 			}
 		} else {
 			// otherwise, assume this is data from the previous line continued
-			if(tag == "AU" || tag == "AF" || tag == "BE") {
+			if (tag == "AU" || tag == "AF" || tag == "BE") {
 				//Z.debug(rawLine);
 				// preserve line endings for AU fields
 				data += "\n" + rawLine;
-			} else if(tag) {
+			} else if (tag) {
 				// otherwise, concatenate and avoid extra spaces
-				if(data[data.length-1] == " " || rawLine[0] == " ") {
+				if (data[data.length-1] == " " || rawLine[0] == " ") {
 					data += rawLine;
 				} else {
 					data += " "+rawLine;
@@ -248,7 +248,7 @@ function doImport(text) {
 		}
 	}
 
-	if(tag && tag != "ER") {	// save any unprocessed tags
+	if (tag && tag != "ER") {	// save any unprocessed tags
 		//Zotero.debug(tag);
 		processTag(item, tag, data);
 		completeItem(item);

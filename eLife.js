@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if(getSearchResults(doc).length) {
+	if (getSearchResults(doc).length) {
 		return "multiple";
 	}
 	
@@ -49,18 +49,18 @@ function getSearchResults(doc) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var searchResults = getSearchResults(doc);
 		var items = {};
-		for(var i=0, n=searchResults.length; i<n; i++) {
+		for (var i=0, n=searchResults.length; i<n; i++) {
 			items[searchResults[i].href] = searchResults[i].textContent;
 		}
 		
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var urls = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 			ZU.processDocuments(urls, scrape);
@@ -80,7 +80,7 @@ function scrape(doc, url) {
 		if (item.extra) {
 			
 			var PMID = item.extra.match(/PMID:\s*\d+/);
-			if(!item.abstractNote) item.abstractNote = item.extra.replace(/PMID:\s*\d+/, "");
+			if (!item.abstractNote) item.abstractNote = item.extra.replace(/PMID:\s*\d+/, "");
 			delete item.extra;
 			if (PMID) item.extra = PMID[0];
 		}

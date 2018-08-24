@@ -32,7 +32,7 @@ function detectWeb(doc, url) {
 		
 		//individual saved citation
 		var link = ZU.xpathText(doc, '//a[@class="gsc_vcd_title_link"]/@href');
-		if(!link) return;
+		if (!link) return;
 		if (link.indexOf('/scholar_case?') != -1) {
 			return 'case';
 		} else {
@@ -191,7 +191,7 @@ function scrapeIds(doc, ids) {
 					if ((titleLink && titleLink.indexOf('google.com/patents/')>-1) || secondLine.indexOf('Google Patents')>-1) {
 						item.itemType = "patent";
 						//authors are inventors
-						for(var i=0, n=item.creators.length; i<n; i++) {
+						for (var i=0, n=item.creators.length; i<n; i++) {
 							item.creators[i].creatorType = 'inventor';
 						}
 						//country and patent number
@@ -205,7 +205,7 @@ function scrapeIds(doc, ids) {
 					}
 					
 					//fix titles in all upper case, e.g. some patents in search results
-					if(item.title.toUpperCase() == item.title) {
+					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title);
 					}
 					
@@ -418,7 +418,7 @@ ItemFactory.prototype.getDate = function () {
 	}
 	// If we can find a more specific date in the case's centered text then use it
 	var nodesSnapshot = this.doc.evaluate('//div[@id="gs_opinion"]/center', this.doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null );
-	for( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
+	for ( var iNode = 0; iNode < nodesSnapshot.snapshotLength; iNode++ ) {
 		var specificDate = nodesSnapshot.snapshotItem(iNode).textContent.trim();
 		// Remove the first word through the first space 
 		//  if it starts with "Deci" or it doesn't start with the first three letters of a month
