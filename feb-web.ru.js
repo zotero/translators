@@ -2,14 +2,14 @@
 	"translatorID": "e92c8359-c3fc-468b-bc6a-107b2744fd17",
 	"label": "feb-web.ru",
 	"creator": "Avram Lyon",
-	"target": "^https?://(?:www\\.)?feb-web\\.ru\\/.*cmd=2",
+	"target": "^https?://(www\\.)?feb-web\\.ru/.*cmd=2",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-08-08 22:38:57"
+	"lastUpdated": "2017-01-01 16:09:57"
 }
 
 /*
@@ -82,6 +82,7 @@ function doWeb(doc, url) {
 	}, function () { Zotero.done() });
 	Zotero.wait();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

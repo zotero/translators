@@ -2,7 +2,7 @@
 	"translatorID": "ecd1b7c6-8d31-4056-8c15-1807b2489254",
 	"label": "BOCC",
 	"creator": "José Antonio Meira da Rocha",
-	"target": "^https?:\\/\\/[^/]*bocc[^/]*/(?:_listas|_esp)",
+	"target": "^https?://[^/]*bocc[^/]*/(_listas|_esp)",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -144,7 +144,7 @@ function doWeb(doc, url) {
 				} else {
 					items[docurl[1]] = title;
 					autores = lines[n].match(reautor);
-					for(var i in autores){
+					for (var i in autores){
 						autores[i] = autores[i].split('>')[1];
 					}
 					itemsAutors[docurl[1]] = autores ;

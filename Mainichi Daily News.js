@@ -1,172 +1,176 @@
 {
 	"translatorID": "b56f856e-934e-4b46-bc58-d61dccc9f32f",
 	"label": "Mainichi Daily News",
-	"creator": "Frank Bennett",
-	"target": "^https?://((?:search\\.)*mdn\\.)?mainichi\\.jp/(?:$|result\\?|mdnnews/|perspectives/|features?/|arts/|travel/|search/|english/)",
-	"minVersion": "2.0b7",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://mainichi\\.jp/(?:english/)?(articles/|search\\?)",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2014-04-03 17:46:23"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2016-12-27 12:01:25"
 }
 
-// #################################
-// #### Local utility functions ####
-// #################################
+/*
+	***** BEGIN LICENSE BLOCK *****
 
-var itemRe = new RegExp('.*\/([0-9]{8})[a-z]{1}[a-z0-9]{2}[0-9]{2}[a-z]{1}[0-9a-z]{3}[0-9]{6}c(\/[0-9]*)?\.html');
+	Copyright © 2016 Philipp Zumstein
 
+	This file is part of Zotero.
 
-var cleanUp = function (str) {
-	var ret;
-	ret = str.replace(/[\u00a0\n]/g, " ");
-	ret = ret.replace(/^\s+/, "").replace(/\s+$/, "").replace(/\s+/g, " ");
-	ret = ret.replace(/\|.*/, "").replace(/<[^>]+>/g, "");;
-	ret = Zotero.Utilities.unescapeHTML(ret);
-	return ret;
-}
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-// #########################
-// ##### API functions #####
-// #########################
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
-var detectWeb = function (doc, url) {
-	if (itemRe.test(doc.location.href)) {
+	***** END LICENSE BLOCK *****
+*/
+
+function detectWeb(doc, url) {
+	if (url.indexOf('/articles/')>-1) {
 		return "newspaperArticle";
-	} else {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
 
-var doWeb = function (doc, url) {
-	var type, availableItems, xpath, found, nodes, headline, pos, myurl, m, title;
-	var articles = [];
-	type = detectWeb(doc, url);
-	if (type === "multiple") {
-		availableItems = {};
-		if (url.match(/^https?:\/\/search\.mdn\.mainichi\.jp\/result\?|mainichi.jp\/search/)){
-			xpath = '//div[@class="ResultTitle"]/a[contains(@href, "mdn.mainichi.jp")] | //div[@class="popIn_ArticleTitle"]/a[@class="popInLink"]';
-		} else {
-			xpath = '//h1[@class="NewsTitle"]/a[@href]|//ul[@class="Mark"]/li/a[@href]';
-		}
-		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		found = nodes.iterateNext();
-		while (found) {
-			if (!itemRe.test(found.href)) {
-				found = nodes.iterateNext();
-				continue;
-			}
-			headline = found.textContent;
-			//Z.debug(headline)
-			headline = cleanUp(headline);
-			availableItems[found.href] = headline;
-			found = nodes.iterateNext();
-		}
-		Zotero.selectItems(availableItems, function (availableItems) {
-			if (!availableItems) {
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//li/a[contains(@href, "/articles/")]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
 				return true;
 			}
-			for (var i in availableItems) {
-			scrapeAndParse(i, availableItems[i]);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
 			}
+			ZU.processDocuments(articles, scrape);
 		});
-
-	} else if (type === "newspaperArticle") {
-		xpath = '//h1[@class="NewsTitle"]';
-		nodes = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		title = nodes.iterateNext();
-		if (title) {
-			title = cleanUp(title.textContent);
-			scrapeAndParse(url, title);
-		}
+	} else {
+		scrape(doc, url);
 	}
-};
+}
 
-// ############################
-// ##### Scraper function #####
-// ############################
 
-var scrapeAndParse = function (url, title) {
-	var item, mytxt, m, val;
-	item = new Zotero.Item("newspaperArticle");
-	item.title = title;
+function scrape(doc, url) {
+	var item = new Zotero.Item("newspaperArticle");
+
+	item.title = ZU.xpathText(doc, '//header/h1');
+	
 	item.publicationTitle = "Mainichi Daily News";
-	item.edition = "online edition";
-	item.url = url;
-	m = itemRe.exec(url);
-	if (m) {
-		var year = m[1].slice(0,4);
-		var month = m[1].slice(4,6);
-		var day = m[1].slice(6,8);
-		item.date = [year, month, day].join("-");
+	
+	var start = url.indexOf("/articles/") + "/articles/".length;
+	var stop = url.indexOf("/", start);
+	var datestring = url.substring(start, stop);
+	if (datestring.length == 8) {
+		item.date = datestring.substring(0,4)+"-"+datestring.substring(4,6)+"-"+datestring.substring(6,8);
+	} else {
+		item.date = ZU.xpathText(doc, '//div[contains(@class, "article-info")]//time');
 	}
-	item.attachments.push({title:"Mainichi Daily News snapshot", mimeType:"text/html", url:url});
+	
+	if (url.indexOf("/english/")>-1) {
+		item.language = "en";
+	} else {
+		item.language = "jp";
+	}
+	
+	item.section = ZU.xpathText(doc, '//div[contains(@class, "container")]/ul/li[@class="active"]')
+	
+	item.url = url;
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
+	
 	item.complete();
-};
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/feature/news/20120410org00m040006000c.html",
+		"url": "http://mainichi.jp/articles/20160409/ddn/041/040/012000c",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "北野天満宮の桜、新品種？　住友林業・苗木増殖に成功",
 				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2016-04-09",
+				"language": "jp",
+				"libraryCatalog": "Mainichi Daily News",
+				"publicationTitle": "Mainichi Daily News",
+				"section": "地域, めっちゃ関西",
+				"url": "http://mainichi.jp/articles/20160409/ddn/041/040/012000c",
 				"attachments": [
 					{
-						"title": "Mainichi Daily News snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
-				"title": "サンデーらいぶらりぃ:小林 照幸・評『日本の「人魚」像』九頭見和夫・著",
-				"publicationTitle": "Mainichi Daily News",
-				"edition": "online edition",
-				"url": "http://mainichi.jp/feature/news/20120410org00m040006000c.html",
-				"date": "2012-04-10",
-				"libraryCatalog": "Mainichi Daily News",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "サンデーらいぶらりぃ"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"defer": true,
-		"url": "http://mainichi.jp/search/index.html?q=bank&imgsearch=off",
+		"url": "http://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Obama's origami cranes to go on display at Hiroshima Peace Memorial Museum",
+				"creators": [],
+				"date": "2016-06-08",
+				"language": "en",
+				"libraryCatalog": "Mainichi Daily News",
+				"publicationTitle": "Mainichi Daily News",
+				"section": "Japan",
+				"url": "http://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://mainichi.jp/search?q=%E5%AE%AE%E5%B4%8E+%E9%A7%BF&p=1",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/english/perspectives/news/20131230p2a00m0na010000c.html",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"creators": [],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Mainichi Daily News snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Editorial: Gov't compensation for nuclear disaster must respect range of choices",
-				"publicationTitle": "Mainichi Daily News",
-				"edition": "online edition",
-				"url": "http://mainichi.jp/english/english/perspectives/news/20131230p2a00m0na010000c.html",
-				"date": "2013-12-30",
-				"libraryCatalog": "Mainichi Daily News",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Editorial"
-			}
-		]
+		"url": "http://mainichi.jp/english/search?q=tokyo",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

@@ -1,0 +1,14 @@
+{
+  "esversion": 6,
+  "predef": [
+    "Zotero",
+    "Z",
+    "ZU",
+    "DOMParser",
+    "XPathResult"
+  ],
+  "laxbreak": true,
+  "multistr": true,
+  "shadow": true,
+  "undef": true
+}

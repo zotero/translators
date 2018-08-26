@@ -9,27 +9,33 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-06-24 14:22:53"
+	"lastUpdated": "2017-04-01 14:22:53"
 }
 
 
 /*
-ASCE Translator 
-Copyright (C) 2012 Sebastian Karcher
-Based on Taylor and Francis Translator
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	ASCE Translator
+	(Based on Taylor and Francis Translator)
+	Copyright © 2012 Sebastian Karcher
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -38,12 +44,14 @@ function getTitles(doc) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
+/*	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
 		return "journalArticle";
-	} else if(url.match(/\/action\/doSearch\?|\/toc\//))
+	} else if (url.match(/\/action\/doSearch\?|\/toc\//))
 		{
 		return "multiple";
-	}
+		} */
+    //currently this triggers a massive download that shuts down Zotero for a significant time; turning it off until I have a fix (which should be shortly)
+    return false;
 }
 
 
@@ -52,15 +60,15 @@ function doWeb(doc, url) {
 		var items = new Object();
 		var titles = getTitles(doc);
 		var doi;
-		for(var i=0, n=titles.length; i<n; i++) {
+		for (var i=0, n=titles.length; i<n; i++) {
 			doi = titles[i].href.match(/\/doi\/(?:abs|full)\/(10\.[^?#]+)/);
-			if(doi) {
+			if (doi) {
 				items[doi[1]] = titles[i].textContent;
 			}
 		}
 
 		Zotero.selectItems(items, function(selectedItems){
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var dois = new Array();
 			for (var i in selectedItems) {
@@ -84,7 +92,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		url: pdfurl + doi,
 		mimeType: 'application/pdf'
 	}];
-	if(doc) {
+	if (doc) {
 		item.attachments.push({
 			title: 'Snapshot',
 			document: doc
@@ -110,7 +118,7 @@ function scrape(doc, url, dois) {
 	var risFormat = '&format=ris';
 	var bibtexFormat = '&format=bibtex';
 
-	for(var i=0, n=dois.length; i<n; i++) {
+	for (var i=0, n=dois.length; i<n; i++) {
 		(function(doi) {
 			ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
 				var translator = Zotero.loadTranslator("import");
@@ -146,7 +154,7 @@ function scrape(doc, url, dois) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://ascelibrary.org/action/doSearch?type=advanced&displaySummary=true&text1=test&field1=all&logicalOpe1=AND&text2=&field2=all&logicalOpe2=NOT&text3=&field3=all&logicalOpe3=AND&text4=&field4=all&logicalOpe4=AND&text5=&field5=all&logicalOpe5=AND&text6=&field6=all&logicalOpe6=AND&text7=&field7=all&categoryId=&filter=multiple&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=",
+		"url": "http://ascelibrary.org/action/doSearch?text1=test&field1=AllField&logicalOpe1=AND&text2=&field2=AllField&logicalOpe2=NOT&text3=&field3=AllField&logicalOpe3=AND&text4=&field4=AllField&logicalOpe4=AND&text5=&field5=AllField&logicalOpe5=AND&text6=&field6=AllField&logicalOpe6=AND&text7=&field7=AllField&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=",
 		"items": "multiple"
 	},
 	{
@@ -155,6 +163,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Friction Measurement on Cycleways Using a Portable Friction Tester",
 				"creators": [
 					{
 						"firstName": "A.",
@@ -172,9 +181,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2003",
+				"DOI": "10.1061/(ASCE)0887-381X(2003)17:1(37)",
+				"ISSN": "0887-381X",
+				"abstractNote": "In seeking to promote cycling in wintertime, it is desirable to understand how important the winter maintenance service level is in people’s decision to cycle or not, and methods to compare different road conditions on cycleways are therefore needed. By measuring friction, an assessment of the service level can be achieved, but methods available often involve the use of large vehicles, which can lead to overloading damage on cycleways, and constitute a safety risk for cyclists and pedestrians. A portable friction tester (PFT), originally designed to measure friction on road markings, was thought to be an appropriate instrument for cycleways and was, therefore, tested on different winter road conditions, and on different cycleway pavement materials. In this study, it was found that the PFT is a valuable tool for measuring friction on cycleways. Different winter road conditions, as well as different pavement materials, can be distinguished from each other through PFT measurements. The PFT provides a good complement to visual inspections of cycleways in winter maintenance evaluation and can, for example, be used to determine if desired service levels have been achieved.",
+				"issue": "1",
+				"itemID": "doi:10.1061/(ASCE)0887-381X(2003)17:1(37)",
+				"libraryCatalog": "ASCE",
+				"pages": "37-57",
+				"publicationTitle": "Journal of Cold Regions Engineering",
+				"url": "http://dx.doi.org/10.1061/(ASCE)0887-381X(2003)17:1(37)",
+				"volume": "17",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -184,18 +201,9 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"itemID": "doi:10.1061/(ASCE)0887-381X(2003)17:1(37)",
-				"title": "Friction Measurement on Cycleways Using a Portable Friction Tester",
-				"publicationTitle": "Journal of Cold Regions Engineering",
-				"volume": "17",
-				"issue": "1",
-				"pages": "37-57",
-				"date": "2003",
-				"DOI": "10.1061/(ASCE)0887-381X(2003)17:1(37)",
-				"url": "http://ascelibrary.org/doi/abs/10.1061/%28ASCE%290887-381X%282003%2917%3A1%2837%29",
-				"abstractNote": "In seeking to promote cycling in wintertime, it is desirable to understand how important the winter maintenance service level is in people’s decision to cycle or not, and methods to compare different road conditions on cycleways are therefore needed. By measuring friction, an assessment of the service level can be achieved, but methods available often involve the use of large vehicles, which can lead to overloading damage on cycleways, and constitute a safety risk for cyclists and pedestrians. A portable friction tester (PFT), originally designed to measure friction on road markings, was thought to be an appropriate instrument for cycleways and was, therefore, tested on different winter road conditions, and on different cycleway pavement materials. In this study, it was found that the PFT is a valuable tool for measuring friction on cycleways. Different winter road conditions, as well as different pavement materials, can be distinguished from each other through PFT measurements. The PFT provides a good complement to visual inspections of cycleways in winter maintenance evaluation and can, for example, be used to determine if desired service levels have been achieved.",
-				"ISSN": "0887-381X",
-				"libraryCatalog": "ASCE"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2016-09-12 06:02:53"
 }
 
 /*
@@ -37,9 +37,9 @@ function detectWeb(doc, url) {
 	
 	var singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	var multipleRe = /.*dlibra\/(collectiondescription|results).*|.*\/dlibra\/?/;
-	if(singleRe.test(url)) 
+	if (singleRe.test(url)) 
 		return "book"; 
-	if(multipleRe.test(url)) 
+	if (multipleRe.test(url)) 
 		return "multiple";
 }
 
@@ -47,14 +47,14 @@ function detectWeb(doc, url) {
  
 
 function doWeb(doc, url) {
-	if(detectWeb(doc,url)=="multiple"){
+	if (detectWeb(doc,url)=="multiple"){
 
 var articles = new Array();
 		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
 		var titles = doc.evaluate(itemsXPath, doc, null, XPathResult.ANY_TYPE, null); 
 		var title;
 		var items= {};
-		while(title = titles.iterateNext()){
+		while (title = titles.iterateNext()){
 			items[title.href] = title.textContent;}
 		
 	Zotero.selectItems(items, function (items) {
@@ -67,7 +67,7 @@ var articles = new Array();
 			}
 			Zotero.Utilities.processDocuments(articles, scrape);	
 		});
-	}else
+	} else
 		scrape(doc, url);
 	
 }
@@ -76,33 +76,29 @@ function scrape(doc, url)
 {
 	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");	
 	var m = reSingle.exec(url);
-	if(!m)
+	if (!m)
 		return "";
 	var baseUrl = m[1];
 	var id = m[2];
 	var isPIA = baseUrl.match("lib.pia.org.pl|cyfrowaetnografia.pl");
 	Zotero.Utilities.HTTP.doGet( baseUrl + "/rdf.xml?type=e&id="+id, function(rdf){
-	
-	rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
-	//Z.debug(rdf)
-	var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-		translator.setString(rdf);
-		translator.setHandler("itemDone", function (obj, item) {
-			if (item.extra) item.notes.push(item.extra);
-			item.extra = "";
-			item.itemID = "";
-			item.complete();
+		
+		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
+		//Z.debug(rdf)
+		var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+			translator.setString(rdf);
+			translator.setHandler("itemDone", function (obj, item) {
+				if (item.extra) item.notes.push(item.extra);
+				item.extra = "";
+				item.itemID = "";
+				item.complete();
+			});
+			translator.getTranslatorObject(function(trans) {
+				trans.defaultUnknownType = 'book';
+				trans.doImport();
 		});
-		translator.getTranslatorObject(function(trans) {
-			trans.defaultUnknownType = 'book';
-			trans.doImport();
-	});
-
-//	Zotero.debug(item);
-	
-	//item.complete();
-	//return item;	})
+		
 	})
 }
 /** BEGIN TEST CASES **/
@@ -113,6 +109,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "D2. Special Karte von Südpreussen : mit Allergrösster Erlaubniss aus der Königlichen grossen topographischen Vermessungs-Karte, unter Mitwürkung des Directors Langner",
 				"creators": [
 					{
 						"firstName": "David",
@@ -120,33 +117,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					"Mapy topograficzne Prus Południowych.13 arkuszy o wymiarach 62 x 82 cm. Skala [ca 1:150000]. Miedzioryt, ręcznie kolorowany"
-				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "D2. Special Karte von Südpreussen : mit Allergrösster Erlaubniss aus der Königlichen grossen topographischen Vermessungs-Karte, unter Mitwürkung des Directors Langner",
-				"publicationTitle": "sygn. oryginału : K 159",
-				"rights": "Biblioteka Uniwersytetu Łódzkiego",
-				"publisher": "Simon Schropp u. Comp.",
-				"institution": "Simon Schropp u. Comp.",
-				"company": "Simon Schropp u. Comp.",
-				"label": "Simon Schropp u. Comp.",
-				"distributor": "Simon Schropp u. Comp.",
 				"date": "1802-1803",
-				"reportType": "mapa",
-				"letterType": "mapa",
-				"manuscriptType": "mapa",
-				"mapType": "mapa",
-				"thesisType": "mapa",
-				"websiteType": "mapa",
-				"presentationType": "mapa",
-				"postType": "mapa",
-				"audioFileType": "mapa",
+				"abstractNote": "Mapy topograficzne Prus Południowych.13 arkuszy o wymiarach 62 x 82 cm. Skala [ca 1:150000]. Miedzioryt, ręcznie kolorowany",
 				"language": "ger",
 				"libraryCatalog": "dLibra",
-				"shortTitle": "D2. Special Karte von Südpreussen"
+				"publisher": "Simon Schropp u. Comp.",
+				"rights": "Biblioteka Uniwersytetu Łódzkiego",
+				"shortTitle": "D2. Special Karte von Südpreussen",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

@@ -2,7 +2,7 @@
 	"translatorID": "c816f8ad-4c73-4f6d-914e-a6e7212746cf",
 	"label": "Neural Information Processing Systems",
 	"creator": "Fei Qi, Sebastian Karcher",
-	"target": "^https?://(?:books|papers)\\.nips\\.cc/",
+	"target": "^https?://(books|papers)\\.nips\\.cc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -44,7 +44,7 @@ function doWeb( doc, url ) {
 		var items = new Object();
 		var arts = new Array();
 		var titles =  doc.evaluate( titleRe, doc, null, XPathResult.ANY_TYPE, null);
-		while( title = titles.iterateNext()) {
+		while ( title = titles.iterateNext()) {
 			var art = new Object;
 			items[title.href] = title.textContent;
 		}
@@ -58,7 +58,7 @@ function doWeb( doc, url ) {
 			ZU.processDocuments(arts, scrape)
 		});
 	}
-	else{
+	else {
 		scrape(doc, url)
 	}
 }

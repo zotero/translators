@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-08 15:45:09"
+	"lastUpdated": "2017-06-24 21:11:06"
 }
 
 /*
@@ -99,7 +99,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	var dbName = ZU.xpath(doc, '//div[contains(@class, "header")]//div[contains(@class, "Logo")]//img/@alt')[0];
+	var dbName = ZU.xpath(doc, '//div[contains(@class, "header")]//img[contains(@class, "logo")]/@alt')[0];
 	if (dbName) dbName = dbName.value;
 	
 	if (detectWeb(doc, url) == 'multiple') {
@@ -113,7 +113,7 @@ function doWeb(doc, url) {
 				indexes.push(item.substr(1));
 			}
 			
-			fetchData(getApiData(url, indexes), dbName)
+			fetchData(getApiData(doc, url, indexes), dbName)
 		});
 	} else {
 		var id = getIDFromUrl(url);
@@ -155,7 +155,9 @@ function fetchData(apiData, dbName) {
 }
 
 var pageSize = 10; // Number of results to fetch per page
-function getApiData(url, indexes) {
+function getApiData(doc, url, indexes) {
+	url = doc.location.href;
+	//Z.debug(url)
 	var urlArray = url.split('?');
 	var apiURL = '/api/search?'
 		+ urlArray.pop().replace(/(^|&)fvf=([^&#]*)/, function(m, sep, fvf) {
@@ -349,7 +351,7 @@ function getAuthors(ref) {
 }
 
 function getRefType(ref) {
-	switch(ref.content_type) {
+	switch (ref.content_type) {
 		case "Audio Recording":
 		case "Music Recording":
 			return "audioRecording";
@@ -426,7 +428,7 @@ function getRefType(ref) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://dartmouth.summon.serialssolutions.com/?#!/search/document?ho=t&q=buddha&l=en&id=FETCHMERGED-dartmouth_catalog_b412227382",
+		"url": "http://dartmouth.summon.serialssolutions.com/?#!/search/document?ho=t&l=en&q=buddha&id=FETCHMERGED-dartmouth_catalog_b412227382",
 		"defer": true,
 		"items": [
 			{
@@ -440,7 +442,7 @@ var testCases = [
 					}
 				],
 				"date": "2003",
-				"ISBN": "1932234446",
+				"ISBN": "9781932234442",
 				"language": "English",
 				"libraryCatalog": "Dartmouth College Library, Summon 2.0",
 				"numPages": "8 v.",

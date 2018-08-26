@@ -7,6 +7,7 @@
 	"maxVersion": "",
 	"priority": 100,
 	"configOptions": {
+		"async": true,
 		"getCollections": "true"
 	},
 	"displayOptions": {
@@ -17,19 +18,19 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-02-25 11:16:03"
+	"lastUpdated": "2017-10-28 09:11:30"
 }
 
 function detectImport() {
 	var line;
 	var i = 0;
-	while((line = Zotero.read()) !== false) {
+	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
-		if(line != "") {
-			if(line.substr(0, 6).match(/^TY {1,2}- /)) {
+		if (line != "") {
+			if (line.substr(0, 6).match(/^TY {1,2}- /)) {
 				return true;
 			} else {
-				if(i++ > 3) {
+				if (i++ > 3) {
 					return false;
 				}
 			}
@@ -138,12 +139,12 @@ var importTypeMap = {
 
 //supplement input map with export
 var ty;
-for(ty in exportTypeMap) {
+for (ty in exportTypeMap) {
 	importTypeMap[exportTypeMap[ty]] = ty;
 }
 
 //merge degenerate export type map into main list
-for(ty in degenerateExportTypeMap) {
+for (ty in degenerateExportTypeMap) {
 	exportTypeMap[ty] = degenerateExportTypeMap[ty];
 }
 
@@ -152,7 +153,7 @@ for(ty in degenerateExportTypeMap) {
  *****************************/
 /** Syntax
  * {
- *   RIS-TAG: 
+ *   RIS-TAG:
  *     String, Zotero field used for any item type
  *     List, item-type dependent mapping
  *     {
@@ -476,48 +477,48 @@ var TagMapper = function(mapList) {
  * @return {String} Zotero field
  */
 TagMapper.prototype.getField = function(itemType, tag) {
-	if(!this.cache[itemType]) this.cache[itemType] = {};
+	if (!this.cache[itemType]) this.cache[itemType] = {};
 
 	//retrieve from cache if available
 	//it can be false if previous search did not find a mapping
-	if(this.cache[itemType][tag] !== undefined) {
+	if (this.cache[itemType][tag] !== undefined) {
 		return this.cache[itemType][tag];
 	}
 
 	var field = false;
-	for(var i=0, n=this.mapList.length; i<n; i++) {
+	for (var i=0, n=this.mapList.length; i<n; i++) {
 		var map = this.mapList[i];
-		if(typeof(map[tag]) == 'object') {
+		if (typeof(map[tag]) == 'object') {
 			var def, exclude = false;
-			for(var f in map[tag]) {
+			for (var f in map[tag]) {
 				//__ignore is not handled here. It's returned as a Zotero field so it
 				//can be explicitly excluded from the note attachment
-				if(f == "__default") {
+				if (f == "__default") {
 					//store default mapping in case we can't find anything explicit
 					def = map[tag][f];
 					continue;
 				}
 
-				if(f == "__exclude") {
-					if(map[tag][f].indexOf(itemType) != -1) {
+				if (f == "__exclude") {
+					if (map[tag][f].indexOf(itemType) != -1) {
 						exclude = true; //don't break. Let explicit mapping override this
 					}
 					continue;
 				}
 
-				if(map[tag][f].indexOf(itemType) != -1) {
+				if (map[tag][f].indexOf(itemType) != -1) {
 					field = f;
 					break;
 				}
 			}
 
 			//assign default value if not excluded
-			if(!field && def && !exclude) field = def;
-		} else if(typeof(map[tag]) == 'string') {
+			if (!field && def && !exclude) field = def;
+		} else if (typeof(map[tag]) == 'string') {
 			field = map[tag];
 		}
 
-		if(field) break; //no need to go on
+		if (field) break; //no need to go on
 	}
 
 	this.cache[itemType][tag] = field;
@@ -535,41 +536,41 @@ TagMapper.prototype.getField = function(itemType, tag) {
  * @return {String} RIS tag
  */
 TagMapper.prototype.reverseLookup = function(itemType, zField) {
-	if(!this.reverseCache[itemType]) this.reverseCache[itemType] = {};
+	if (!this.reverseCache[itemType]) this.reverseCache[itemType] = {};
 	
-	if(this.reverseCache[itemType][zField] !== undefined) {
+	if (this.reverseCache[itemType][zField] !== undefined) {
 		return this.reverseCache[itemType][zField];
 	}
 	
-	for(var i=0, n=this.mapList.length; i<n; i++) {
+	for (var i=0, n=this.mapList.length; i<n; i++) {
 		var risTag;
-		for(risTag in this.mapList[i]) {
+		for (risTag in this.mapList[i]) {
 			var typeMap = this.mapList[i][risTag];
-			if(typeMap == zField) {
+			if (typeMap == zField) {
 				// item type indepndent
 				this.reverseCache[itemType][zField] = risTag;
 				return risTag;
-			} else if(typeof(typeMap) == 'object') {
+			} else if (typeof(typeMap) == 'object') {
 				if (typeMap[zField] && typeMap[zField].indexOf(itemType) !== -1) {
 					//explicitly mapped
 					this.reverseCache[itemType][zField] = risTag;
 					return risTag;
 				}
-				if(!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
+				if (!(typeMap.__exclude && typeMap.__exclude.indexOf(itemType) !== -1)
 					&& typeMap.__default == zField
 				) {
 					// may be mapped via default, but make sure this item type is not
 					// explicitly mapped somewhere else
 					var preventDefault = false;
-					for(var field in typeMap) {
-						if(typeMap[field].indexOf(itemType) != -1) {
+					for (var field in typeMap) {
+						if (typeMap[field].indexOf(itemType) != -1) {
 							// mapped to something else
 							preventDefault = true;
 							break;
 						}
 					}
 					
-					if(!preventDefault) {
+					if (!preventDefault) {
 						this.reverseCache[itemType][zField] = risTag;
 						return risTag;
 					}
@@ -590,7 +591,7 @@ var importFields;
 
 //do not store unknwon fields in notes
 //configurable via RIS.import.ignoreUnknown hidden preference
-var ignoreUnknown = false;
+var ignoreUnknown = true;
 
 /**
  * @singleton Provides facilities to read one RIS entry at a time
@@ -613,25 +614,25 @@ var RISReader = new function() {
 			entry = []; //maintain tag order
 		entry.tags = {}; //tag list for convenience
 		
-		while(tagValue = (_tagValueBuffer.length && _tagValueBuffer.pop()) || _getTagValue()) {
-			if(tagValue.tag == 'TY' && entry.length) {
+		while (tagValue = (_tagValueBuffer.length && _tagValueBuffer.pop()) || _getTagValue()) {
+			if (tagValue.tag == 'TY' && entry.length) {
 				//we hit a new entry. ER was omitted, but we'll forgive
 				_tagValueBuffer.push(tagValue);
 				return entry;
 			}
 			
-			if(tagValue.tag == 'ER') {
-				if(!entry.length) continue; //weird, but keep going and ignore ER outside of entry
+			if (tagValue.tag == 'ER') {
+				if (!entry.length) continue; //weird, but keep going and ignore ER outside of entry
 				return entry;
 			}
 			
 			entry.push(tagValue);
 			//also add to the "tags" list for convenient access
-			if(!entry.tags[tagValue.tag]) entry.tags[tagValue.tag] = [];
+			if (!entry.tags[tagValue.tag]) entry.tags[tagValue.tag] = [];
 			entry.tags[tagValue.tag].push(tagValue);
 		}
 		
-		if(entry.length) return entry;
+		if (entry.length) return entry;
 	};
 	
 	var RIS_format = /^([A-Z][A-Z0-9]) {1,2}-(?: (.*))?$/, //allow empty entries
@@ -653,28 +654,28 @@ var RISReader = new function() {
 	 */
 	function _getTagValue() {
 		var line, tagValue, temp, lastLineLength = 0;
-		while((line = _nextLine()) !== false) { //could be reading empty lines
+		while ((line = _nextLine()) !== false) { //could be reading empty lines
 			temp = line.match(RIS_format);
 			
-			if(!temp && !tagValue) {
+			if (!temp && !tagValue) {
 				//doesn't match RIS format and we're not processing a tag-value pair,
 				//so this is not a multi-line tag-value pair
-				if(line.trim()) {
+				if (line.trim()) {
 					Z.debug("RIS: Dropping line outside of RIS record: " + line);
 				}
 				continue;
 			}
 			
-			if(line.length > _maxLineLength) _maxLineLength = line.length;
+			if (line.length > _maxLineLength) _maxLineLength = line.length;
 			
-			if(temp && tagValue) {
+			if (temp && tagValue) {
 				//if we are already processing a tag-value pair, then this is the next pair
 				//store this line for later and return
 				_lineBuffer.push(line);
 				return tagValue;
 			}
 			
-			if(temp) {
+			if (temp) {
 				//new tag-value pair
 				tagValue = {
 					tag: temp[1],
@@ -682,14 +683,14 @@ var RISReader = new function() {
 					raw: line
 				};
 				
-				if(tagValue.value === undefined) tagValue.value = '';
+				if (tagValue.value === undefined) tagValue.value = '';
 			} else {
 				//tagValue && !temp
 				//multi-line RIS tag-value pair
 				var newLineAdded = false;
 				var cleanLine = line.trim();
 				//new lines would probably only be meaningful in notes and abstracts
-				if((['AB', 'N1', 'N2']).indexOf(tagValue.tag) !== -1
+				if ((['AB', 'N1', 'N2', 'RN']).indexOf(tagValue.tag) !== -1
 					//if all lines are not trimmed to ~80 characters or previous line was
 					// short, this would probably be on a new line. Might want to consider
 					// looking for periods and capital letters to make a better call.
@@ -704,13 +705,13 @@ var RISReader = new function() {
 				}
 				
 				//don't remove new lines from keywords or attachments
-				if(!newLineAdded && preserveNewLines.indexOf(tagValue.tag) != -1) {
+				if (!newLineAdded && preserveNewLines.indexOf(tagValue.tag) != -1) {
 					cleanLine = "\n" + cleanLine;
 					newLineAdded = true;
 				}
 				
 				//check if we need to add a space before concatenating
-				if(!newLineAdded && tagValue.value.charAt(tagValue.value.length-1) != ' ') {
+				if (!newLineAdded && tagValue.value.charAt(tagValue.value.length-1) != ' ') {
 					cleanLine = ' ' + cleanLine;
 				}
 	
@@ -721,7 +722,7 @@ var RISReader = new function() {
 			lastLineLength = line.length;
 		}
 		
-		if(tagValue) return tagValue;
+		if (tagValue) return tagValue;
 	}
 	
 	var _lineBuffer = [];
@@ -734,7 +735,7 @@ var RISReader = new function() {
 	function _nextLine() {
 		// Don't use shortcuts like _lineBuffer.pop() || Zotero.read(),
 		//  because we may have an empty line, which could be meaningful
-		if(_lineBuffer.length) return _lineBuffer.pop();
+		if (_lineBuffer.length) return _lineBuffer.pop();
 		var line = Zotero.read();
 		if (line && (line.indexOf('\u2028') != -1 || line.indexOf('\u2029') != -1)) {
 			// Apparently some services think that it's cool to break up single
@@ -769,21 +770,21 @@ var TagCleaner = {
 		
 		//clean up "tags" list
 		byTag.splice(byTag.indexOf(source),1);
-		if(!byTag.length) delete entry.tags[source.tag];
+		if (!byTag.length) delete entry.tags[source.tag];
 		
-		if(!toTags || !toTags.length) {
+		if (!toTags || !toTags.length) {
 			//then we just remove
 			entry.splice(at,1);
 		} else {
 			source.tag = toTags[0]; //re-use the same pair for first tag
-			if(!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
+			if (!entry.tags[toTags[0]]) entry.tags[toTags[0]] = [];
 			entry.tags[toTags[0]].push(source);
 			//if we're changing to more than one tag, we need to add extras
-			for(var i=1, n=toTags.length; i<n; i++) {
+			for (var i=1, n=toTags.length; i<n; i++) {
 				var newSource = ZU.deepCopy(source);
 				newSource.tag = toTags[i];
 				entry.splice(at+i, 0, newSource);
-				if(!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
+				if (!entry.tags[toTags[i]]) entry.tags[toTags[i]] = [];
 				entry.tags[toTags[i]].push(newSource);
 			}
 		}
@@ -859,9 +860,9 @@ var ProCiteCleaner = new function() {
 		// We _must_ change some tags before mapping from notes, otherwise
 		// there will be ambiguity
 		var ty;
-		if(this.proCiteMode) {
+		if (this.proCiteMode) {
 			ty = entry.tags.TY && entry.tags.TY[0].value;
-			if((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL) {
+			if ((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL) {
 				// Edition in ET, not VL
 				_changeAllTags(entry, 'VL', 'ET');
 			}
@@ -870,14 +871,14 @@ var ProCiteCleaner = new function() {
 		
 		var notes = entry.tags.N1, extentOfWork, packagingMethod;
 		//go through all the notes
-		for(var i=0; notes && notes.length && i<entry.length; i++) {
+		for (var i=0; notes && notes.length && i<entry.length; i++) {
 			var m;
-			if(entry[i].tag !== 'N1'
+			if (entry[i].tag !== 'N1'
 				|| !(m = entry[i].value.trim().match(tagValueSplit)) ) {
 				continue;
 			}
 			
-			switch(m[1]) {
+			switch (m[1]) {
 				case 'Author, Subsidiary':
 				case 'Author, Monographic':
 					//seems to always come before "Author Role"
@@ -890,7 +891,7 @@ var ProCiteCleaner = new function() {
 					//authors are in firstName lastName format, we need to fix it
 					entry[i].value = _fixAuthor(authors[0]);
 					//subsequent authors need to have their own tag-value pairs
-					for(var j=1; j<authors.length; j++) {
+					for (var j=1; j<authors.length; j++) {
 						var newEntry = ZU.deepCopy(entry[i]);
 						newEntry.value = authors[j];
 						entry.splice(i+1,0,newEntry); //insert into tag-value array
@@ -910,32 +911,32 @@ var ProCiteCleaner = new function() {
 					var authorRoles = _normalizeAuthorRole(m[2]);
 					var risTags = [], fail = false;
 					//find a RIS tag for each author role
-					for(var j=0, k=authorRoles.length; j<k; j++) {
+					for (var j=0, k=authorRoles.length; j<k; j++) {
 						var role = this.proCiteMap['Author Role'][authorRoles[j]];
-						if(!role) {
+						if (!role) {
 							Z.debug('RIS: Unknown ProCite author role: ' + authorRoles[j]);
 							continue;
 						}
 						role = 'creators/' + role;
 						var risTag = importFields.reverseLookup(item.itemType, role);
-						if(!risTag) {
+						if (!risTag) {
 							Z.debug('RIS: Cannot map ProCite author role to RIS tag: ' + role + ' for ' + item.itemType);
 							Z.debug('RIS: Will not attempt a partial match: ' + m[0]);
 							fail = true;
 							break;
 						}
-						if(risTags.indexOf(risTag) === -1) risTags.push(risTag); //don't add same role
+						if (risTags.indexOf(risTag) === -1) risTags.push(risTag); //don't add same role
 					}
 					
-					if(fail || !risTags.length) continue;
+					if (fail || !risTags.length) continue;
 					
 					Z.debug('RIS: ' + m[0]);
 					Z.debug('RIS: Mapping preceeding authors to ' + risTags.join(', '));
 					var added;
-					if(added = this._remapPreceedingTags(entry, i, ['A1','A2','A3'], risTags)) {
+					if (added = this._remapPreceedingTags(entry, i, ['A1','A2','A3'], risTags)) {
 						this._changeTag(entry, i); //remove ProCite note
 						i--;
-						if(added !== true) {
+						if (added !== true) {
 							i += added;
 						}
 					}
@@ -949,7 +950,7 @@ var ProCiteCleaner = new function() {
 					entry[i].value = m[2];
 				break;
 				case 'Connective Phrase':
-					if(m[2].trim().toLowerCase() == 'in') {
+					if (m[2].trim().toLowerCase() == 'in') {
 						//this is somewhat meaningless, remove it
 						this._changeTag(entry, i);
 						i--;
@@ -962,9 +963,9 @@ var ProCiteCleaner = new function() {
 					packagingMethod = entry[i]; //processed later
 				break;
 				default:
-					if(this.proCiteMap[m[1]]) {
+					if (this.proCiteMap[m[1]]) {
 						var risTag = importFields.reverseLookup(item.itemType, this.proCiteMap[m[1]]);
-						if(!risTag) {
+						if (!risTag) {
 							Z.debug('RIS: Cannot map ProCite note to RIS tag: ' + this.proCiteMap[m[1]] + ' for ' + item.itemType);
 							continue;
 						}
@@ -974,16 +975,16 @@ var ProCiteCleaner = new function() {
 			}
 		}
 		
-		if(extentOfWork) {
+		if (extentOfWork) {
 			var extent = extentOfWork.value.match(tagValueSplit)[2],
 				m = extent.match(/^(\d+)\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?$/i), //e.g. 2 vols.
 				units, deletePackagingMethod = false;
-			if(m) {
+			if (m) {
 				//we have both extent and units in the same field
 				//packagingMethod will be useless
 				units = m[2].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
 				extent = m[1];
-			} else if(packagingMethod && /^\s*\d+\s*$/.test(extent) //numeric extent
+			} else if (packagingMethod && /^\s*\d+\s*$/.test(extent) //numeric extent
 				&& (m = packagingMethod.value.match(/:\s*(pages?|p(?:p|gs?)?|vols?|volumes?)\.?\s*$/i))
 			) {
 				units = m[1].charAt(0).toLowerCase() == 'p' ? 'numPages' : 'numberOfVolumes';
@@ -991,12 +992,12 @@ var ProCiteCleaner = new function() {
 				deletePackagingMethod = true; //we can delete it since we used it
 			}
 			
-			if(units) {
+			if (units) {
 				risTag = importFields.reverseLookup(item.itemType, units);
-				if(risTag) {
+				if (risTag) {
 					extentOfWork.value = extent;
 					this._changeTag(entry, entry.indexOf(extentOfWork), [risTag]);
-					if(deletePackagingMethod) {
+					if (deletePackagingMethod) {
 						this._changeTag(entry, entry.indexOf(packagingMethod));
 					}
 				}
@@ -1004,50 +1005,50 @@ var ProCiteCleaner = new function() {
 		}
 		
 		//the rest we only fix if we're sure this is ProCite
-		if(!this.proCiteMode) return;
+		if (!this.proCiteMode) return;
 		
 		ty = entry.tags.TY && entry.tags.TY[0].value;
 		
 		//fix titles in book sections.
 		//essentially, make sure there are no duplicate T tags and put them in order
-		if(ty == 'CHAP') {
+		if (ty == 'CHAP') {
 			var titleTags = ['T3', 'T2', 'TI'];
-			for(var i=0; i<entry.length && titleTags.length; i++) {
-				if((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
+			for (var i=0; i<entry.length && titleTags.length; i++) {
+				if ((['TI', 'T1', 'T2', 'T3']).indexOf(entry[i].tag) !== -1) {
 					var newTag = titleTags.pop();
-					if(entry[i].tag == newTag) continue; //already correct
+					if (entry[i].tag == newTag) continue; //already correct
 					this._changeTag(entry, i, [newTag]);
 				}
 			}
 		}
 		
-		if(ty == 'BOOK' && entry.tags.IS && entry.tags.IS.length) {
+		if (ty == 'BOOK' && entry.tags.IS && entry.tags.IS.length) {
 			_changeAllTags(entry, 'IS', 'VL');
 		}
 		
-		if((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL && entry.tags.VL.length > 1) {
+		if ((ty == 'CHAP' || ty == 'BOOK') && entry.tags.VL && entry.tags.VL.length > 1) {
 			// We try to fix this ahead of time, but we can't always
 			// 2 of these entries would indicate Edition and then Volume (maybe)
 			this._changeTag(entry, entry.indexOf(entry.tags.VL[0]), ['ET']);
 		}
 		
 		//fix publication place for conferences. Should be C1, not CY
-		if(ty == 'CONF' && entry.tags.CY && !entry.tags.C1) {
+		if (ty == 'CONF' && entry.tags.CY && !entry.tags.C1) {
 			_changeAllTags(entry, 'CY', 'C1');
 		}
 		
-		if(ty == 'COMP'&& entry.tags.IS) {
+		if (ty == 'COMP'&& entry.tags.IS) {
 			_changeAllTags(entry, 'IS', 'ET');
 		}
 		
-		if(ty == 'BILL') {
-			if(entry.tags.CY) _changeAllTags(entry, 'CY', 'T2');
-			if(entry.tags.VL) _changeAllTags(entry, 'VL', 'M1');
-			if(entry.tags.SP) _changeAllTags(entry, 'SP', 'SE');
+		if (ty == 'BILL') {
+			if (entry.tags.CY) _changeAllTags(entry, 'CY', 'T2');
+			if (entry.tags.VL) _changeAllTags(entry, 'VL', 'M1');
+			if (entry.tags.SP) _changeAllTags(entry, 'SP', 'SE');
 		}
 		
-		if(ty == 'ART') {
-			if(entry.tags.M1) _changeAllTags(entry, 'M1', 'M3');
+		if (ty == 'ART') {
+			if (entry.tags.M1) _changeAllTags(entry, 'M1', 'M3');
 		}
 	};
 	
@@ -1073,7 +1074,7 @@ var ProCiteCleaner = new function() {
 	 * @return (String)
 	 */
 	function _fixAuthor(author) {
-		if(author.indexOf(',') !== -1 || author.trim().indexOf(' ') === -1) return author;
+		if (author.indexOf(',') !== -1 || author.trim().indexOf(' ') === -1) return author;
 		author = author.trim();
 		return author.substr(author.lastIndexOf(' ')+1) + ', ' + author.substring(0,author.lastIndexOf(' '));
 	}
@@ -1087,9 +1088,9 @@ var ProCiteCleaner = new function() {
 	 * @param (String) to
 	 */
 	function _changeAllTags(entry, from, to) {
-		if(!from || !to) return;
+		if (!from || !to) return;
 		
-		for(var i=0; i<entry.tags[from].length; i++) {
+		for (var i=0; i<entry.tags[from].length; i++) {
 			entry.tags[from][i].tag = to;
 		}
 		
@@ -1126,15 +1127,15 @@ var ProCiteCleaner = new function() {
 	 */
 	this._remapPreceedingTags = function(entry, start, allowedTags, risTags) {
 		var tag, added = 0;
-		for(var i=start-1; i>=0; i--) {
+		for (var i=start-1; i>=0; i--) {
 			
-			if(tag && entry[i].tag !== tag) {
+			if (tag && entry[i].tag !== tag) {
 				//different from the tags we changed previously. Don't continue
 				return added ? added : true;
 			}
 			
 			tag = entry[i].tag;
-			if(allowedTags.indexOf(tag) === -1) {
+			if (allowedTags.indexOf(tag) === -1) {
 				//not allowed to remap this tag
 				Z.debug('RIS: nothing to remap');
 				return;
@@ -1146,7 +1147,7 @@ var ProCiteCleaner = new function() {
 		
 		//we should not end up at the begining of entry,
 		//since we will probably never be replacing TY, but just in case
-		if(tag) return added ? added : true;
+		if (tag) return added ? added : true;
 	};
 }
 /**
@@ -1161,8 +1162,8 @@ var EndNoteCleaner = new function() {
 	 */
 	this.cleanTags = function(entry, item) {
 		// for edited books, treat authors as editors
-		if(entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
-			for(var i = entry.tags.AU.length-1; i>=0; i--) {
+		if (entry.tags.TY && entry.tags.TY[0].value == 'EDBOOK' && entry.tags.AU) {
+			for (var i = entry.tags.AU.length-1; i>=0; i--) {
 				TagCleaner.changeTag(entry, entry.indexOf(entry.tags.AU[i]), ['A3']);
 			}
 		}
@@ -1214,27 +1215,28 @@ function processTag(item, tagValue, risEntry) {
 	if (value === "") return;
 	
 	var zField = importFields.getField(item.itemType, tag);
-	if(!zField) {
+	if (!zField) {
 		Z.debug("Unknown field " + tag + " in entry :\n" + rawLine);
 		zField = 'unknown'; //this will result in the value being added as note
 	}
 
 	zField = zField.split('/');
 
-	if (tag != "N1" && tag != "AB") {
+	if (tag != "N1" && tag != "RN" && tag != "AB") {
 		value = Zotero.Utilities.unescapeHTML(value);
 	}
 
 	//tag based manipulations
 	var processFields = true; //whether we should continue processing by zField
-	switch(tag) {
+	switch (tag) {
 		case "N1":
+		case "RN":
 			//seems that EndNote duplicates title in the note field sometimes
-			if(item.title == value) {
+			if (item.title == value) {
 				value = undefined;
 				processFields = false;
 			//do some HTML formatting in non-HTML notes
-			} else if(!value.match(/<[^>]+>/)) { //from cleanTags
+			} else if (!value.match(/<[^>]+>/)) { //from cleanTags
 				value = '<p>'
 					+ value.replace(/\n\n/g, '</p><p>')
 					 .replace(/\n/g, '<br/>')
@@ -1244,8 +1246,8 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		case "EP":
-			if(item.pages) {
-				if(item.pages.indexOf('-') == -1) {
+			if (item.pages) {
+				if (item.pages.indexOf('-') == -1) {
 					item.pages = item.pages + '-' + value;
 				} else {
 					item.backupNumPages = value;
@@ -1260,7 +1262,7 @@ function processTag(item, tagValue, risEntry) {
 			//Endnote exports access date for webpages to M1
 			//It makes much more sense to export to Y2
 			//We should make sure that M1 does not overwrite whatever may be in Y2
-			if(zField[0] == "accessDate") {
+			if (zField[0] == "accessDate") {
 				item.backupAccessDate = {
 					field: zField[0],
 					value: dateRIStoZotero(value, zField[0])
@@ -1282,9 +1284,9 @@ function processTag(item, tagValue, risEntry) {
 			}
 		break;
 		case "VL":
-			if(zField[0] == "accessDate") {
+			if (zField[0] == "accessDate") {
 				//EndNote screws up webpage entries. VL is access year, but access date is available
-				if(!item.backupAccessDate) {	//make sure we don't replace the M1 data
+				if (!item.backupAccessDate) {	//make sure we don't replace the M1 data
 					item.backupAccessDate = {
 						field: zField[0],
 						value: dateRIStoZotero(value, zField[0])
@@ -1305,7 +1307,7 @@ function processTag(item, tagValue, risEntry) {
 		break;
 		case "UR":
 			//REFMAN places PMIDS in UR sometimes
-			if(value.indexOf('PM:') != -1) {
+			if (value.indexOf('PM:') != -1) {
 				value = 'PMID: ' + value.substr(3);
 				zField = ['extra'];
 			}
@@ -1313,8 +1315,8 @@ function processTag(item, tagValue, risEntry) {
 	}
 
 	//zField based manipulations
-	if(processFields){
-		switch(zField[0]) {
+	if (processFields){
+		switch (zField[0]) {
 			case "__ignore":
 				value = undefined;
 			break;
@@ -1326,7 +1328,7 @@ function processTag(item, tagValue, risEntry) {
 				var lName = value.split(/\s*,\s*/)[0];
 				var fName = value.substr(lName.length).replace(/^\s*,\s*/, '');
 				value = {lastName: lName, firstName:fName, creatorType:zField[1]};
-				if(!value.firstName) {	//corporate
+				if (!value.firstName) {	//corporate
 					delete value.firstName;
 					value.fieldMode = 1;
 				}
@@ -1347,34 +1349,34 @@ function processTag(item, tagValue, risEntry) {
 				//the regex will take care of double semicolons and newlines
 				//but it will still allow a blank tag if there is a newline or
 				//semicolon at the begining or the end
-				if(!value[0]) value.shift();
-				if(value.length && !value[value.length-1]) value.pop();
+				if (!value[0]) value.shift();
+				if (value.length && !value[value.length-1]) value.pop();
 
-				if(!value.length) {
+				if (!value.length) {
 					value = undefined;
 				}
 			break;
 			case "notes":
 				value = {note:value};
 				//we can specify note title in the field mapping table
-				if(zField[1]) {
+				if (zField[1]) {
 					value.note = zField[1] + ': ' + value.note;
 				}
 			break;
 			case "attachments":
 				var values = value.split('\n');
 				var title, mimeType, url;
-				for(var i=0, n=values.length; i<n; i++) {
+				for (var i=0, n=values.length; i<n; i++) {
 					//support for EndNote's relative paths
 					url = values[i].replace(/^internal-pdf:\/\//i,'PDF/').trim();
-					if(!url) continue;
+					if (!url) continue;
 					
 					//get title from file name
 					title = url.match(/([^\/\\]+)(?:\.\w{1,8})$/);
-					if(title) title = decodeURIComponent(title[1]);
+					if (title) title = decodeURIComponent(title[1]);
 					else title = "Attachment";
 					
-					if(zField[1] == 'HTML') {
+					if (zField[1] == 'HTML') {
 						title = "Full Text (HTML)";
 						mimeType = "text/html";
 					}
@@ -1389,7 +1391,7 @@ function processTag(item, tagValue, risEntry) {
 			break;
 			case "unsupported":	//unsupported fields
 				//we can convert a RIS tag to something more useful though
-				if(zField[1]) {
+				if (zField[1]) {
 					value = zField[1] + ': ' + value;
 				}
 			break;
@@ -1400,18 +1402,18 @@ function processTag(item, tagValue, risEntry) {
 }
 
 function applyValue(item, zField, value, rawLine) {
-	if(!value) return;
+	if (!value) return;
 
-	if(!zField || zField == 'unknown') {
-		if(!ignoreUnknown && !Zotero.parentTranslator) {
+	if (!zField || zField == 'unknown') {
+		if (!ignoreUnknown && !Zotero.parentTranslator) {
 			Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 		}
 		return;
 	}
 
-	if(zField == 'unsupported') {
-		if(!ignoreUnknown && !Zotero.parentTranslator) {
+	if (zField == 'unsupported') {
+		if (!ignoreUnknown && !Zotero.parentTranslator) {
 			Z.debug("Unsupported field will be stored in note: " + value);
 			item.unsupportedFields.push(value);
 		}
@@ -1419,12 +1421,13 @@ function applyValue(item, zField, value, rawLine) {
 	}
 
 	//check if field is valid for item type
-	if(!Zotero.parentTranslator //cannot use this in connectors, plus we drop notes in most cases anyway
+	if (!Zotero.parentTranslator //cannot use this in connectors, plus we drop notes in most cases anyway
 		&& zField != 'creators' && zField != 'tags'
 		&& zField != 'notes' && zField != 'attachments'
+		&& zField != 'DOI'
 		&& !ZU.fieldIsValidForType(zField, item.itemType)) {
 		Z.debug("Invalid field '" + zField + "' for item type '" + item.itemType + "'.");
-		if(!ignoreUnknown && !Zotero.parentTranslator) {
+		if (!ignoreUnknown && !Zotero.parentTranslator) {
 			Z.debug("Entry stored in note: " + rawLine);
 			item.unknownFields.push(rawLine);
 			return;
@@ -1433,28 +1436,41 @@ function applyValue(item, zField, value, rawLine) {
 	}
 
 	//special processing for certain fields
-	switch(zField) {
+	switch (zField) {
 		case 'notes':
 		case 'attachments':
 		case 'creators':
 		case 'tags':
-			if(!(value instanceof Array)) {
+			if (!(value instanceof Array)) {
 				value = [value];
 			}
 			item[zField] = item[zField].concat(value);
 		break;
 		case 'extra':
-			if(item.extra) {
+			if (item.extra) {
 				item.extra += '\n' + value;
 			} else {
 				item.extra = value;
 			}
 		break;
+		case 'DOI':
+			value = ZU.cleanDOI(value);
+			//add DOI to extra field, 
+			if (!ZU.fieldIsValidForType("DOI", item.itemType) && value) {
+				if (item.extra) {
+					if (item.extra.search(/^DOI:/) == -1) {
+						item.extra += '\nDOI: ' + value;
+					}
+				} else {
+					item.extra = 'DOI: ' + value;
+				}
+				break;
+			}
 		default:
 			//check if value already exists. Don't overwrite existing values
-			if(item[zField]) {
+			if (item[zField]) {
 				//if the new value is not the same as existing value, store it as note
-				if(!ignoreUnknown && !Zotero.parentTranslator && item[zField] != value) {
+				if (!ignoreUnknown && !Zotero.parentTranslator && item[zField] != value) {
 					item.unsupportedFields.push(zField + ': ' + value);
 				}
 			} else {
@@ -1469,7 +1485,7 @@ function dateRIStoZotero(risDate, zField) {
 	//First, YYYY/MM/DD/other with everything but year optional
 	var m = risDate.match(/^(\d+)(?:\/(\d{0,2})(?:\/(\d{0,2})(?:(?:\/|\s)([^\/]*))?)?)?$/);
 	var timeCheck, part;
-	if(m) {
+	if (m) {
 		date[0] = m[1];	//year
 		date[1] = m[2];	//month
 		date[2] = m[3]; //day
@@ -1483,49 +1499,62 @@ function dateRIStoZotero(risDate, zField) {
 		var y = risDate.match(/\b\d{4}\b/);
 		var d = risDate.match(/\b(?:[1-3]\d|[1-9])\b/);
 		m = risDate.match(/[A-Za-z]+/);
-		if(!y && m) {
+		if (!y && m) {
 			return '0000 ' + m[0] + (d ? ' ' + d[0] : '');
 		}
-
-		//TODO: add more formats
-		return risDate;
+		
+		// Only try harder with access dates, since those get dropped otherwise
+		// For everything else, Zotero will go through the same algorithm later
+		// but at least we won't be discarding anything
+		if (zField != 'accessDate') return risDate;
+		
+		// Let Zotero try and figure this out
+		var parsedDate = ZU.strToDate(risDate);
+		if (!parsedDate || !parsedDate.year) {
+			return risDate;
+		}
+		
+		date[0] = parsedDate.year;
+		date[1] = '' + (parsedDate.month + 1);
+		date[2] = '' + parsedDate.day;
+		part = parsedDate.part;
 	}
 
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
-	for(var i=0; i<3; i++) {
-		if(date[i] !== undefined) date[i] = date[i].replace(/^0+/,'');	//drop leading 0s
+	for (var i=0; i<3; i++) {
+		if (date[i] !== undefined) date[i] = date[i].replace(/^0+/,'');	//drop leading 0s
 
-		if(!date[i]) {
+		if (!date[i]) {
 			date.splice(i);
 			break;
 		}
 	}
 
-	if(zField == "accessDate") {	//format this as SQL date
-		if(!date[0]) return risDate;	//this should never happed
+	if (zField == "accessDate") {	//format this as SQL date
+		if (!date[0]) return risDate;	//this should never happed
 
 		//adjust month to be 0 based
-		if(date[1]) {
+		if (date[1]) {
 			date[1] = parseInt(date[1], 10);
-			if(date[1]) date[1] = '' + (date[1] - 1);	//make it a string again to keep things simpler
+			if (date[1]) date[1] = '' + (date[1] - 1);	//make it a string again to keep things simpler
 			else date[1] = '0';	//the regex above should ensure this never happens. We don't even test the day
 		}
 
 		//make sure we have a month and day
-		if(!date[1]) date[1] = '0';	//0 based months
-		if(!date[2]) date[2] = '1';
+		if (!date[1]) date[1] = '0';	//0 based months
+		if (!date[2]) date[2] = '1';
 
 		var time;
-		if(timeCheck) {
+		if (timeCheck) {
 			time = timeCheck.match(/\b([0-2]?[1-9]):(\d{2})(?::(\d{2}))\s*(am|pm)?/i);
-			if(time) {
-				if(!time[3]) time[3] = '0';
+			if (time) {
+				if (!time[3]) time[3] = '0';
 
-				if(time[4]) {
+				if (time[4]) {
 					var hour = parseInt(time[1],10);	//this should not fail
-					if(time[4].toLowerCase() == 'pm' && hour < 12) {
+					if (time[4].toLowerCase() == 'pm' && hour < 12) {
 						time[1] = '' + (hour + 12);
-					} else if(time[4].toLowerCase() == 'am' && hour == 12) {
+					} else if (time[4].toLowerCase() == 'am' && hour == 12) {
 						time[1] = '0';
 					}
 				}
@@ -1544,7 +1573,7 @@ function dateRIStoZotero(risDate, zField) {
 		 * This is clearly not a problem with accessDate, but maybe this will
 		 * end up being used for something else later.
 		 */
-		if(time) {
+		if (time) {
 			d.setUTCFullYear(date[0], date[1], date[2]);
 			d.setUTCHours(time[1], time[2], time[3]);
 		} else {
@@ -1566,9 +1595,9 @@ function dateRIStoZotero(risDate, zField) {
 					: '');
 	} else {
 		//adjust month (it's 0 based)
-		if(date[1]) {
+		if (date[1]) {
 			date[1] = parseInt(date[1], 10);
-			if(date[1]) date[1]--;
+			if (date[1]) date[1]--;
 		}
 
 		return ZU.formatDate({
@@ -1582,34 +1611,34 @@ function dateRIStoZotero(risDate, zField) {
 function completeItem(item) {
 	// if backup publication title exists but not proper, use backup
 	// (hack to get newspaper titles from EndNote)
-	if(item.backupPublicationTitle) {
-		if(!item.publicationTitle) {
+	if (item.backupPublicationTitle) {
+		if (!item.publicationTitle) {
 			item.publicationTitle = item.backupPublicationTitle;
 		}
 		item.backupPublicationTitle = undefined;
 	}
 
-	if(item.backupNumPages) {
-		if(!item.numPages) {
+	if (item.backupNumPages) {
+		if (!item.numPages) {
 			item.numPages = item.backupNumPages;
 		}
 		item.backupNumPages = undefined;
 	}
 
-	if(item.backupEndPage) {
-		if(!item.pages) {
+	if (item.backupEndPage) {
+		if (!item.pages) {
 			item.pages = item.backupEndPage;
-		} else if(item.pages.indexOf('-') == -1) {
+		} else if (item.pages.indexOf('-') == -1) {
 			item.pages += '-' + item.backupEndPage;
-		} else if(!item.numPages) {	//should we do this?
+		} else if (!item.numPages) {	//should we do this?
 			item.numPages = item.backupEndPage;
 		}
 		item.backupEndPage = undefined;
 	}
 
 	//see if we have a backup date
-	if(item.backupDate) {
-		if(!item[item.backupDate.field]) {
+	if (item.backupDate) {
+		if (!item[item.backupDate.field]) {
 			item[item.backupDate.field] = item.backupDate.value;
 		} else {
 			item[item.backupDate.field] = item[item.backupDate.field]
@@ -1619,8 +1648,8 @@ function completeItem(item) {
 	}
 
 	//same for access date
-	if(item.backupAccessDate) {
-		if(!item[item.backupAccessDate.field]) {
+	if (item.backupAccessDate) {
+		if (!item[item.backupAccessDate.field]) {
 			item[item.backupAccessDate.field] = item.backupAccessDate.value;
 		}
 		item.backupAccessDate = undefined;
@@ -1633,39 +1662,39 @@ function completeItem(item) {
 	}
 
 	// hack for sites like Nature, which only use JA, journal abbreviation
-	if(item.journalAbbreviation && !item.publicationTitle){
+	if (item.journalAbbreviation && !item.publicationTitle){
 		item.publicationTitle = item.journalAbbreviation;
 	}
 
 	// Hack for Endnote exports missing full title
-	if(item.shortTitle && !item.title){
+	if (item.shortTitle && !item.title){
 		item.title = item.shortTitle;
 	}
 
 	//if we only have one tag, try splitting it by comma
 	//odds of this this backfiring are pretty low
-	if(item.tags.length == 1) {
+	if (item.tags.length == 1) {
 		item.tags = item.tags[0].split(/\s*(?:,\s*)+/);
-		if(!item.tags[0]) item.tags.shift();
-		if(item.tags.length && !item.tags[item.tags.length-1]) item.tags.pop();
+		if (!item.tags[0]) item.tags.shift();
+		if (item.tags.length && !item.tags[item.tags.length-1]) item.tags.pop();
 	}
 
 	//don't pass access date if this is called from (most likely) a web translator
-	if(Zotero.parentTranslator) {
+	if (Zotero.parentTranslator) {
 		item.accessDate = undefined;
 	}
 
 	//store unsupported and unknown fields in a single note
-	if(!Zotero.parentTranslator) {
+	if (!Zotero.parentTranslator) {
 		var note = '';
-		for(var i=0, n=item.unsupportedFields.length; i<n; i++) {
+		for (var i=0, n=item.unsupportedFields.length; i<n; i++) {
 			note += item.unsupportedFields[i] + '<br/>';
 		}
-		for(var i=0, n=item.unknownFields.length; i<n; i++) {
+		for (var i=0, n=item.unknownFields.length; i<n; i++) {
 			note += item.unknownFields[i] + '<br/>';
 		}
 	
-		if(note) {
+		if (note) {
 			note = "The following values have no corresponding Zotero field:<br/>" + note;
 			item.notes.push({note: note.trim(), tags: ['_RIS import']});
 		}
@@ -1673,7 +1702,7 @@ function completeItem(item) {
 	item.unsupportedFields = undefined;
 	item.unknownFields = undefined;
 
-	item.complete();
+	return item.complete();
 }
 
 //creates a new item of specified type
@@ -1685,62 +1714,101 @@ function getNewItem(type) {
 }
 
 function doImport() {
-	//set up import field mapper
-	var maps = [fieldMap, degenerateImportFieldMap];
-	if(exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
-	importFields = new TagMapper(maps);
-	
-	//prepare some configurable options
-	if(Zotero.getHiddenPref) {
-		if(Zotero.getHiddenPref("RIS.import.ignoreUnknown")) {
-			ignoreUnknown = true;
-		}
-		if(Zotero.getHiddenPref("RIS.import.keepID")) {
-			degenerateImportFieldMap.ID = undefined;
-		}
-	}
-	
-	var entry;
-	while(entry = RISReader.nextEntry()) {
-		//determine item type
-		var itemType = exportedOptions.itemType;
-		if(!itemType && entry.tags.TY) {
-			var risType = entry.tags.TY[0].value.trim().toUpperCase();
-			if(exportedOptions.typeMap) {
-				itemType = exportedOptions.typeMap[risType];
+	if (typeof Promise == 'undefined') {
+		startImport(
+			function () {},
+			function (e) {
+				throw e;
 			}
-			if(!itemType) {
-				itemType = importTypeMap[risType];
+		);
+	}
+	else {
+		return new Promise(function (resolve, reject) {
+			startImport(resolve, reject);
+		});
+	}
+}
+
+function startImport(resolve, reject) {
+	try {
+		//set up import field mapper
+		var maps = [fieldMap, degenerateImportFieldMap];
+		if (exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
+		importFields = new TagMapper(maps);
+		
+		//prepare some configurable options
+		if (Zotero.getHiddenPref) {
+			var pref = Zotero.getHiddenPref("RIS.import.ignoreUnknown");
+			if (pref != undefined) {
+				ignoreUnknown = pref;
+			}
+			var pref = Zotero.getHiddenPref("RIS.import.keepID");
+			if (pref === true) {
+				degenerateImportFieldMap.ID = pref;
 			}
 		}
 		
-		//we allow entries without TY and just use default type
-		if(!itemType) {
-			var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
-			if(entry.tags.TY) {
-				Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
-					+ ". Defaulting to " + defaultType);
-			} else {
-				Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+		importNext(resolve, reject);
+	}
+	catch (e) {
+		reject(e);
+	}
+}
+
+function importNext(resolve, reject) {
+	try {
+		var entry;
+		while (entry = RISReader.nextEntry()) {
+			//determine item type
+			var itemType = exportedOptions.itemType;
+			if (!itemType && entry.tags.TY) {
+				var risType = entry.tags.TY[0].value.trim().toUpperCase();
+				if (exportedOptions.typeMap) {
+					itemType = exportedOptions.typeMap[risType];
+				}
+				if (!itemType) {
+					itemType = importTypeMap[risType];
+				}
 			}
 			
-			itemType = defaultType;
-		}
-		
-		var item = getNewItem(itemType);
-		ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
-		EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
-		CitaviCleaner.cleanTags(entry, item);
-		
-		for(var i=0, n=entry.length; i<n; i++) {
-			if((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
-				processTag(item, entry[i], entry);
+			//we allow entries without TY and just use default type
+			if (!itemType) {
+				var defaultType = exportedOptions.defaultItemType || DEFAULT_IMPORT_TYPE;
+				if (entry.tags.TY) {
+					Z.debug("RIS: Unknown item type: " + entry.tags.TY[0].value
+						+ ". Defaulting to " + defaultType);
+				} else {
+					Z.debug("RIS: TY tag not specified. Defaulting to " + defaultType);
+				}
+				
+				itemType = defaultType;
+			}
+			
+			var item = getNewItem(itemType);
+			ProCiteCleaner.cleanTags(entry, item); //clean up ProCite "tags"
+			EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
+			CitaviCleaner.cleanTags(entry, item);
+			
+			for (var i=0, n=entry.length; i<n; i++) {
+				if ((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
+					processTag(item, entry[i], entry);
+				}
+			}
+			
+			var maybePromise = completeItem(item);
+			if (maybePromise) {
+				maybePromise.then(function () {
+					importNext(resolve, reject);
+				});
+				return;
 			}
 		}
-		
-		completeItem(item);
+	}
+	catch (e) {
+		reject(e);
 	}
 	
+	resolve();
 }
 
 /********************
@@ -1767,13 +1835,13 @@ var newLineChar = "\r\n"; //from spec
 var exportFields;
 
 function addTag(tag, value) {
-	if(!(value instanceof Array)) value = [value];
+	if (!(value instanceof Array)) value = [value];
 
-	for(var i=0, n=value.length; i<n; i++) {
-		if(value[i] === undefined) return;
+	for (var i=0, n=value.length; i<n; i++) {
+		if (value[i] === undefined) return;
 		//don't export empty strings
 		var v = (value[i] + '').trim();
-		if(!v) continue;
+		if (!v) continue;
 
 		Zotero.write(tag + "  - " + v + newLineChar);
 	}
@@ -1784,18 +1852,18 @@ function doExport() {
 	
 	//set up field mapper
 	var map = [fieldMap];
-	if(exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
+	if (exportedOptions.fieldMap) map.unshift(exportedOptions.fieldMap);
 	exportFields = new TagMapper(map);
 
-	while(item = Zotero.nextItem()) {
+	while (item = Zotero.nextItem()) {
 		// can't store independent notes in RIS
-		if(item.itemType == "note" || item.itemType == "attachment") {
+		if (item.itemType == "note" || item.itemType == "attachment") {
 			continue;
 		}
 
 		// type
 		var type = exportTypeMap[item.itemType];
-		if(!type) {
+		if (!type) {
 			type = DEFAULT_EXPORT_TYPE;
 			Z.debug("Unknown item type: " + item.itemType + ". Defaulting to " + type);
 		}
@@ -1808,8 +1876,8 @@ function doExport() {
 			other: []
 		};
 
-		for(var i=0, n=item.attachments.length; i<n; i++) {
-			switch(item.attachments[i].mimeType) {
+		for (var i=0, n=item.attachments.length; i<n; i++) {
+			switch (item.attachments[i].mimeType) {
 				case 'application/pdf':
 					attachments.PDF.push(item.attachments[i]);
 				break;
@@ -1822,37 +1890,39 @@ function doExport() {
 		}
 
 		order = exportOrder[item.itemType] || exportOrder["__default"];
-		for(var i=0, n=order.length; i<n; i++) {
+		for (var i=0, n=order.length; i<n; i++) {
 			tag = order[i];
 			//find the appropriate field to export for this item type
 			field = exportFields.getField(item.itemType, tag);
 
 			//if we didn't get anything, we don't need to export this tag for this item type
-			if(!field) continue;
+			if (!field) continue;
 
 			value = undefined;
 			//we can define fields that are nested (i.e. creators) using slashes
 			field = field.split('/');
 
 			//handle special cases based on item field
-			switch(field[0]) {
+			switch (field[0]) {
 				case "creators":
 					//according to spec, one author per line in the "Lastname, Firstname, Suffix" format
 					//Zotero does not store suffixes in a separate field
 					value = [];
 					var name;
-					for(var j=0, m=item.creators.length; j<m; j++) {
+					for (var j=0, m=item.creators.length; j<m; j++) {
 						name = [];
-						if(item.creators[j].creatorType == field[1]) {
+						if (item.creators[j].creatorType == field[1]) {
 							name.push(item.creators[j].lastName);
-							if(item.creators[j].firstName) name.push(item.creators[j].firstName);
+							if (item.creators[j].firstName) name.push(item.creators[j].firstName);
 							value.push(name.join(', '));
 						}
 					}
-					if(!value.length) value = undefined;
+					if (!value.length) value = undefined;
 				break;
 				case "notes":
-					value = item.notes.map(function(n) { return n.note.replace(/(?:\r\n?|\n)/g, "\r\n"); });
+					if (item.notes && Zotero.getOption("exportNotes")) {
+						value = item.notes.map(function(n) { return n.note.replace(/(?:\r\n?|\n)/g, "\r\n"); });
+					}
 				break;
 				case "tags":
 					value = item.tags.map(function(t) { return t.tag; });
@@ -1860,8 +1930,8 @@ function doExport() {
 				case "attachments":
 					value = [];
 					var att = attachments[field[1]];
-					for(var j=0, m=att.length; j<m; j++) {
-						if(att[j].saveFile) {	//local file
+					for (var j=0, m=att.length; j<m; j++) {
+						if (att[j].saveFile) {	//local file
 							value.push(att[j].defaultPath);
 							att[j].saveFile(att[j].defaultPath);
 						} else {	//link to remote file
@@ -1870,12 +1940,14 @@ function doExport() {
 					}
 				break;
 				case "pages":
-					if(tag == "SP" && item.pages) {
+					if (tag == "SP" && item.pages) {
 						var m = item.pages.trim().match(/(.+?)[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B\s]+(.+)/);
-						if(m) {
+						if (m) {
 							addTag(tag, m[1]);
 							tag = "EP";
 							value = m[2];
+						} else {
+							value = item.pages;
 						}
 					}
 				break;
@@ -1884,10 +1956,10 @@ function doExport() {
 			}
 
 			//handle special cases based on RIS tag
-			switch(tag) {
+			switch (tag) {
 				case "PY":
 					var date = ZU.strToDate(item[field]);
-					if(date.year) {
+					if (date.year) {
 						value = ('000' + date.year).substr(-4); //since this is in export, this should not be a problem with MS JavaScript implementation of substr
 					} else {
 						value = item[field];
@@ -1896,11 +1968,11 @@ function doExport() {
 				case "Y2":
 				case "DA":
 					var date = ZU.strToDate(item[field]);
-					if(date.year) {
+					if (date.year) {
 						date.year = ('000' + date.year).substr(-4);
 						date.month = (date.month || date.month===0 || date.month==="0")?('0' + (date.month+1)).substr(-2):'';
 						date.day = date.day?('0' + date.day).substr(-2):'';
-						if(!date.part) date.part = '';
+						if (!date.part) date.part = '';
 	
 						value = date.year + '/' + date.month + '/' + date.day + '/' + date.part;
 					} else {
@@ -1973,14 +2045,7 @@ var testCases = [
 					"horseradish peroxidase",
 					"rat"
 				],
-				"notes": [
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Not In File<br/>",
-						"tags": [
-							"_RIS import"
-						]
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -2018,21 +2083,14 @@ var testCases = [
 					"infection",
 					"virus"
 				],
-				"notes": [
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Patent Version Number: 877609<br/>IS  - 4,904,581<br/>RP  - Not In File<br/>",
-						"tags": [
-							"_RIS import"
-						]
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "import",
-		"input": "TY  - AGGR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Date Published\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Publication Number\nM3  - Type of Work\nN1  - Notes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - ResearchNotes\nSE  - Screens\nSN  - ISSN/ISBN\nSP  - Pages\nST  - Short Title\nT2  - Periodical\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 2\nER  - \n\n\nTY  - ANCIENT\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviated Publication\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Text Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - ResearchNotes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Publication Title\nT3  - Volume Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 3\nER  - \n\n\nTY  - ART\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Artist\nC3  - Size/Length\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDP  - Database Provider\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Size\nM3  - Type of Work\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nST  - Short Title\nTI  - Title\nTT  - Translated Title\nTA  - Author, Translated\nUR  - URL\nY2  - Access Date\nID  - 4\nER  - \n\n\nTY  - ADVS\nA2  - Performers\nA3  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Cast\nC2  - Credits\nC3  - Size/Length\nC5  - Format\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type\nN1  - Notes\nNV  - Extent of Work\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nST  - Short Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 5\nER  - \n\n\nTY  - BILL\nA2  - Sponsor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nM1  - Bill Number\nOP  - History\nPY  - Year\nRN  - Research Notes\nSE  - Code Section\nSP  - Code Pages\nST  - Short Title\nT2  - Code\nT3  - Legislative Body\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Code Volume\nY2  - Access Date\nID  - 6\nER  - \n\n\nTY  - BLOG\nA2  - Editor\nA3  - Illustrator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Author Affiliation\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Last Update Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Medium\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Message Number\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Title of WebLog\nT3  - Institution\nTA  - Author, Translated\nTI  - Title of Entry\nTT  - Translated Title\nUR  - URL\nVL  - Access Year\nY2  - Number\nID  - 7\nER  - \n\n\nTY  - BOOK\nA2  - Editor, Series\nA3  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC3  - Title Prefix\nC4  - Reviewer\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Pages\nSN  - ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 8\nER  - \n\n\nTY  - CHAP\nA2  - Editor\nA3  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number of Volumes\nOP  - Original Publication\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nSV  - Series Volume\nT2  - Book Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 9\nER  - \n\n\nTY  - CASE\nA2  - Reporter\nA3  - Court, Higher\nA4  - Counsel\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Action of Higher Court\nJ2  - Parallel Citation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Citation of Reversal\nN1  - Notes\nNV  - Reporter Abbreviation\nOP  - History\nPB  - Court\nPY  - Year Decided\nRN  - ResearchNotes\nSE  - Filed Date\nSP  - First Page\nST  - Abbreviated Case Name\nSV  - Docket Number\nT3  - Decision\nTA  - Author, Translated\nTI  - Case Name\nTT  - Translated Title\nUR  - URL\nVL  - Reporter Volume\nID  - 10\nER  - \n\n\nTY  - CTLG\nA2  - Institution\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Catalog Number\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Number of Pages\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 11\nER  - \n\n\nTY  - CHART\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 12\nER  - \n\n\nTY  - CLSWK\nA2  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Attribution\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 23\nER  - \n\n\nTY  - COMP\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Programmer\nC1  - Computer\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Edition\nY2  - Access Date\nID  - 14\nER  - \n\n\nTY  - CPAPER\nA2  - Editor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Place Published\nCA  - Caption\nCY  - Conference Location\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nM3  - Type\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nT2  - Conference Name\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 15\nER  - \n\n\nTY  - CONF\nA2  - Editor\nA3  - Editor, Series\nA4  - Sponsor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Place Published\nC2  - Year Published\nC3  - Proceedings Title\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Conference Location\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nN1  - Notes\nNV  - Number of Volumes\nOP  - Source\nPB  - Publisher\nPY  - Year of Conference\nRN  - Research Notes\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Conference Name\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 16\nER  - \n\n\nTY  - DATA\nA2  - Producer\nA4  - Agency, Funding\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Investigators\nC1  - Time Period\nC2  - Unit of Observation\nC3  - Data Type\nC4  - Dataset(s)\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date of Collection\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nNV  - Study Number\nOP  - Version History\nPB  - Distributor\nPY  - Year\nRI  - Geographic Coverage\nRN  - Research Notes\nSE  - Original Release Date\nSN  - ISSN\nST  - Short Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 17\nER  - \n\n\nTY  - DICT\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Term\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Version\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Dictionary Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 13\nER  - \n\n\nTY  - EDBOOK\nA2  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Editor Address\nAN  - Accession Number\nAU  - Editor\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 19\nER  - \n\n\nTY  - EJOUR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nC3  - PMCID\nC4  - Reviewer\nC5  - Issue Title\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nM3  - Type of Work\nN1  - Notes\nNV  - Document Number\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - E-Pub Date\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Periodical Title\nT3  - Website Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 20\nER  - \n\n\nTY  - EBOOK\nA2  - Editor\nA3  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Last Update Date\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Medium\nN1  - Notes\nNV  - Version\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Number of Pages\nT2  - Secondary Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 21\nER  - \n\n\nTY  - ECHAP\nA2  - Editor\nA3  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Book Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 22\nER  - \n\n\nTY  - ENCYC\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Term\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Encyclopedia Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 18\nER  - \n\n\nTY  - EQUA\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 24\nER  - \n\n\nTY  - FIGURE\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 25\nER  - \n\n\nTY  - MPCT\nA2  - Director, Series\nA3  - Producer\nA4  - Performers\nAB  - Synopsis\nAD  - Author Address\nAN  - Accession Number\nAU  - Director\nC1  - Cast\nC2  - Credits\nC4  - Genre\nC5  - Format\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date Released\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Medium\nN1  - Notes\nPB  - Distributor\nPY  - Year Released\nRN  - Research Notes\nRP  - Reprint Edition\nSP  - Running Time\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 26\nER  - \n\n\nTY  - GEN\nA2  - Author, Secondary\nA3  - Author, Tertiary\nA4  - Author, Subsidiary\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Custom 1\nC2  - Custom 2\nC3  - Custom 3\nC4  - Custom 4\nC5  - Custom 5\nC6  - Custom 6\nC7  - Custom 7\nC8  - Custom 8\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISSN/ISBN\nSP  - Pages\nST  - Short Title\nT2  - Secondary Title\nT3  - Tertiary Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 27\nER  - \n\n\nTY  - GOVDOC\nA2  - Department\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Government Body\nC2  - Congress Number\nC3  - Congress Session\nCA  - Caption\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section\nSN  - ISSN/ISBN\nSP  - Pages\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 28\nER  - \n\n\nTY  - GRANT\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Investigators\nC1  - Contact Name\nC2  - Contact Address\nC3  - Contact Phone\nC4  - Contact Fax\nC5  - Funding Number\nC6  - CFDA Number\nCA  - Caption\nCN  - Call Number\nCY  - Activity Location\nDA  - Deadline\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Requirements\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Status\nM3  - Funding Type\nN1  - Notes\nNV  - Amount Received\nOP  - Original Grant Number\nPB  - Sponsoring Agency\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Review Date\nSE  - Duration of Grant\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nTI  - Title of Grant\nTT  - Translated Title\nUR  - URL\nVL  - Amount Requested\nY2  - Access Date\nID  - 29\nER  - \n\n\nTY  - HEAR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nC2  - Congress Number\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nN1  - Notes\nNV  - Number of Volumes\nOP  - History\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Committee\nT3  - Legislative Body\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 30\nER  - \n\n\nTY  - JOUR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Legal Note\nC2  - PMCID\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCN  - Call Number\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Epub Date\nJ2  - Periodical Title\nLA  - Language\nLB  - Label\nIS  - Issue\nM3  - Type of Article\nOP  - Original Publication\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Journal\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 31\nER  - \n\n\nTY  - LEGAL\nA2  - Organization, Issuing\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date of Code Edition\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Work\nN1  - Notes\nNV  - Session Number\nOP  - History\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section Number\nSN  - ISSN/ISBN\nSP  - Pages\nT2  - Title Number\nT3  - Supplement No.\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Rule Number\nY2  - Access Date\nID  - 32\nER  - \n\n\nTY  - MGZN\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue Number\nM3  - Type of Article\nN1  - Notes\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Magazine\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 33\nER  - \n\n\nTY  - MANSCPT\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Description of Material\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Folio Number\nM3  - Type of Work\nN1  - Notes\nNV  - Manuscript Number\nPB  - Library/Archive\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSP  - Pages\nST  - Short Title\nT2  - Collection Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume/Storage Container\nY2  - Access Date\nID  - 34\nER  - \n\n\nTY  - MAP\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Cartographer\nC1  - Scale\nC2  - Area\nC3  - Size\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 35\nER  - \n\n\nTY  - MUSIC\nA2  - Editor\nA3  - Editor, Series\nA4  - Producer\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Composer\nC1  - Format of Music\nC2  - Form of Composition\nC3  - Music Parts\nC4  - Target Audience\nC5  - Accompanying Matter\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Form of Item\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Album Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 36\nER  - \n\n\nTY  - NEWS\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Reporter\nC1  - Column\nC2  - Issue\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Issue Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  -  Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Article\nN1  - Notes\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Newspaper\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 37\nER  - \n\n\nTY  - DBASE\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Date Published\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Work\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - Report Number\nSP  - Pages\nT2  - Periodical\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 38\nER  - \n\n\nTY  - MULTI\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nC1  - Year Cited\nC2  - Date Cited\nC5  - Format/Length\nCA  - Caption\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number of Screens\nM3  - Type of Work\nN1  - Notes\nPB  - Distributor\nPY  - Year\nRN  - Research Notes\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nID  - 39\nER  - \n\n\nTY  - PAMP\nA2  - Institution\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nM2  - Number of Pages\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Published Source\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Number\nY2  - Access Date\nID  - 40\nER  - \n\n\nTY  - PAT\nA2  - Organization, Issuing\nA3  - International Author\nAB  - Abstract\nAD  - Inventor Address\nAN  - Accession Number\nAU  - Inventor\nC2  - Issue Date\nC3  - Designated States\nC4  - Attorney/Agent\nC5  - References\nC6  - Legal Status\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - International Patent Classification\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Application Number\nM3  - Patent Type\nN1  - Notes\nNV  - US Patent Classification\nOP  - Priority Numbers\nPB  - Assignee\nPY  - Year\nRN  - Research Notes\nSE  - International Patent Number\nSN  - Patent Number\nSP  - Pages\nST  - Short Title\nT2  - Published Source\nT3  - Title, International\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Patent Version Number\nY2  - Access Date\nID  - 41\nER  - \n\n\nTY  - PCOMM\nA2  - Recipient\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Senders E-Mail\nC2  - Recipients E-Mail\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Description\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Folio Number\nM3  - Type\nN1  - Notes\nNV  - Communication Number\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 42\nER  - \n\n\nTY  - RPRT\nA2  - Editor, Series\nA3  - Publisher\nA4  - Department/Division\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC6  - Issue\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nM3  - Type\nN1  - Notes\nNV  - Series Volume\nOP  - Contents\nPB  - Institution\nPY  - Year\nRN  - Research Notes\nRP  - Notes\nSN  - Report Number\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nT2  - Series Title\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 43\nER  - \n\n\nTY  - SER\nA2  - Editor\nA3  - Editor, Series\nA4  - Editor, Volume\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC2  - Report Number\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Secondary Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 44\nER  - \n\n\nTY  - STAND\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Institution\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Work\nN1  - Notes\nNV  - Session Number\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section Number\nSN  - Document Number\nSP  - Pages\nT2  - Section Title\nT3  - Paper Number\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Rule Number\nY2  - Access Date\nID  - 45\nER  - \n\n\nTY  - STAT\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nC5  - Publisher\nC6  - Volume\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDA  - Date Enacted\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Public Law Number\nN1  - Notes\nNV  - Statute Number\nOP  - History\nPB  - Source\nPY  - Year\nRI  - Article Number\nRN  - Research Notes\nSE  - Sections\nSP  - Pages\nST  - Short Title\nT2  - Code\nT3  - International Source\nTA  - Author, Translated\nTI  - Name of Act\nTT  - Translated Title\nUR  - URL\nVL  - Code Number\nY2  - Access Date\nID  - 46\nER  - \n\n\nTY  - THES\nA3  - Advisor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nM3  - Thesis Type\nN1  - Notes\nPB  - University\nPY  - Year\nRN  - Research Notes\nSP  - Number of Pages\nST  - Short Title\nT2  - Academic Department\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Degree\nY2  - Access Date\nID  - 47\nER  - \n\n\nTY  - UNPB\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nPB  - Institution\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nST  - Short Title\nT2  - Series Title\nT3  - Department\nTA  - Author, Translated\nTI  - Title of Work\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 48\nER  - \n\n\nTY  - WEB\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Last Update Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Access Date\nM3  - Type of Medium\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Access Year\nID  - 49\nER  - \n\n\n",
+		"input": "TY  - AGGR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - 10.1234/123456\nDP  - Database Provider\nET  - Date Published\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Publication Number\nM3  - Type of Work\nN1  - Notes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - ResearchNotes\nSE  - Screens\nSN  - ISSN/ISBN\nSP  - Pages\nST  - Short Title\nT2  - Periodical\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 2\nER  - \n\n\nTY  - ANCIENT\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviated Publication\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Text Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - ResearchNotes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Publication Title\nT3  - Volume Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 3\nER  - \n\n\nTY  - ART\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Artist\nC3  - Size/Length\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDP  - Database Provider\nDO  - DOI\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Size\nM3  - Type of Work\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nST  - Short Title\nTI  - Title\nTT  - Translated Title\nTA  - Author, Translated\nUR  - URL\nY2  - Access Date\nID  - 4\nER  - \n\n\nTY  - ADVS\nA2  - Performers\nA3  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Cast\nC2  - Credits\nC3  - Size/Length\nC5  - Format\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type\nN1  - Notes\nNV  - Extent of Work\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nST  - Short Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 5\nER  - \n\n\nTY  - BILL\nA2  - Sponsor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nM1  - Bill Number\nOP  - History\nPY  - Year\nRN  - Research Notes\nSE  - Code Section\nSP  - Code Pages\nST  - Short Title\nT2  - Code\nT3  - Legislative Body\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Code Volume\nY2  - Access Date\nID  - 6\nER  - \n\n\nTY  - BLOG\nA2  - Editor\nA3  - Illustrator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Author Affiliation\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Last Update Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Medium\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Message Number\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Title of WebLog\nT3  - Institution\nTA  - Author, Translated\nTI  - Title of Entry\nTT  - Translated Title\nUR  - URL\nVL  - Access Year\nY2  - Number\nID  - 7\nER  - \n\n\nTY  - BOOK\nA2  - Editor, Series\nA3  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC3  - Title Prefix\nC4  - Reviewer\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Pages\nSN  - ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 8\nER  - \n\n\nTY  - CHAP\nA2  - Editor\nA3  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number of Volumes\nOP  - Original Publication\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nSV  - Series Volume\nT2  - Book Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 9\nER  - \n\n\nTY  - CASE\nA2  - Reporter\nA3  - Court, Higher\nA4  - Counsel\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nCA  - Caption\nCN  - Call Number\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Action of Higher Court\nJ2  - Parallel Citation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Citation of Reversal\nN1  - Notes\nNV  - Reporter Abbreviation\nOP  - History\nPB  - Court\nPY  - Year Decided\nRN  - ResearchNotes\nSE  - Filed Date\nSP  - First Page\nST  - Abbreviated Case Name\nSV  - Docket Number\nT3  - Decision\nTA  - Author, Translated\nTI  - Case Name\nTT  - Translated Title\nUR  - URL\nVL  - Reporter Volume\nID  - 10\nER  - \n\n\nTY  - CTLG\nA2  - Institution\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Catalog Number\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Number of Pages\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 11\nER  - \n\n\nTY  - CHART\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 12\nER  - \n\n\nTY  - CLSWK\nA2  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Attribution\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 23\nER  - \n\n\nTY  - COMP\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Programmer\nC1  - Computer\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Edition\nY2  - Access Date\nID  - 14\nER  - \n\n\nTY  - CPAPER\nA2  - Editor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Place Published\nCA  - Caption\nCY  - Conference Location\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nM3  - Type\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nT2  - Conference Name\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 15\nER  - \n\n\nTY  - CONF\nA2  - Editor\nA3  - Editor, Series\nA4  - Sponsor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Place Published\nC2  - Year Published\nC3  - Proceedings Title\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Conference Location\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nN1  - Notes\nNV  - Number of Volumes\nOP  - Source\nPB  - Publisher\nPY  - Year of Conference\nRN  - Research Notes\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Conference Name\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 16\nER  - \n\n\nTY  - DATA\nA2  - Producer\nA4  - Agency, Funding\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Investigators\nC1  - Time Period\nC2  - Unit of Observation\nC3  - Data Type\nC4  - Dataset(s)\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date of Collection\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nNV  - Study Number\nOP  - Version History\nPB  - Distributor\nPY  - Year\nRI  - Geographic Coverage\nRN  - Research Notes\nSE  - Original Release Date\nSN  - ISSN\nST  - Short Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 17\nER  - \n\n\nTY  - DICT\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Term\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Version\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Dictionary Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 13\nER  - \n\n\nTY  - EDBOOK\nA2  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Editor Address\nAN  - Accession Number\nAU  - Editor\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 19\nER  - \n\n\nTY  - EJOUR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nC3  - PMCID\nC4  - Reviewer\nC5  - Issue Title\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue\nM3  - Type of Work\nN1  - Notes\nNV  - Document Number\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - E-Pub Date\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Periodical Title\nT3  - Website Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 20\nER  - \n\n\nTY  - EBOOK\nA2  - Editor\nA3  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Last Update Date\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Medium\nN1  - Notes\nNV  - Version\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Number of Pages\nT2  - Secondary Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 21\nER  - \n\n\nTY  - ECHAP\nA2  - Editor\nA3  - Editor, Series\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC3  - Title Prefix\nC4  - Reviewer\nC5  - Packaging Method\nC6  - NIHMSID\nC7  - PMCID\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Number of Pages\nST  - Short Title\nT2  - Book Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 22\nER  - \n\n\nTY  - ENCYC\nA2  - Editor\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Term\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Encyclopedia Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 18\nER  - \n\n\nTY  - EQUA\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 24\nER  - \n\n\nTY  - FIGURE\nA2  - File, Name of\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Version\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Image\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Description\nT2  - Image Source Program\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Image Size\nY2  - Access Date\nID  - 25\nER  - \n\n\nTY  - MPCT\nA2  - Director, Series\nA3  - Producer\nA4  - Performers\nAB  - Synopsis\nAD  - Author Address\nAN  - Accession Number\nAU  - Director\nC1  - Cast\nC2  - Credits\nC4  - Genre\nC5  - Format\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date Released\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Medium\nN1  - Notes\nPB  - Distributor\nPY  - Year Released\nRN  - Research Notes\nRP  - Reprint Edition\nSP  - Running Time\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 26\nER  - \n\n\nTY  - GEN\nA2  - Author, Secondary\nA3  - Author, Tertiary\nA4  - Author, Subsidiary\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Custom 1\nC2  - Custom 2\nC3  - Custom 3\nC4  - Custom 4\nC5  - Custom 5\nC6  - Custom 6\nC7  - Custom 7\nC8  - Custom 8\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISSN/ISBN\nSP  - Pages\nST  - Short Title\nT2  - Secondary Title\nT3  - Tertiary Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 27\nER  - \n\n\nTY  - GOVDOC\nA2  - Department\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Government Body\nC2  - Congress Number\nC3  - Congress Session\nCA  - Caption\nCY  - Place Published\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section\nSN  - ISSN/ISBN\nSP  - Pages\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 28\nER  - \n\n\nTY  - GRANT\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Investigators\nC1  - Contact Name\nC2  - Contact Address\nC3  - Contact Phone\nC4  - Contact Fax\nC5  - Funding Number\nC6  - CFDA Number\nCA  - Caption\nCN  - Call Number\nCY  - Activity Location\nDA  - Deadline\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Requirements\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Status\nM3  - Funding Type\nN1  - Notes\nNV  - Amount Received\nOP  - Original Grant Number\nPB  - Sponsoring Agency\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Review Date\nSE  - Duration of Grant\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nTI  - Title of Grant\nTT  - Translated Title\nUR  - URL\nVL  - Amount Requested\nY2  - Access Date\nID  - 29\nER  - \n\n\nTY  - HEAR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nC2  - Congress Number\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nN1  - Notes\nNV  - Number of Volumes\nOP  - History\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Committee\nT3  - Legislative Body\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 30\nER  - \n\n\nTY  - JOUR\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Legal Note\nC2  - PMCID\nC6  - NIHMSID\nC7  - Article Number\nCA  - Caption\nCN  - Call Number\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Epub Date\nJ2  - Periodical Title\nLA  - Language\nLB  - Label\nIS  - Issue\nM3  - Type of Article\nOP  - Original Publication\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Journal\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 31\nER  - \n\n\nTY  - LEGAL\nA2  - Organization, Issuing\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date of Code Edition\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Work\nN1  - Notes\nNV  - Session Number\nOP  - History\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section Number\nSN  - ISSN/ISBN\nSP  - Pages\nT2  - Title Number\nT3  - Supplement No.\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Rule Number\nY2  - Access Date\nID  - 32\nER  - \n\n\nTY  - MGZN\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Issue Number\nM3  - Type of Article\nN1  - Notes\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Magazine\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 33\nER  - \n\n\nTY  - MANSCPT\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Description of Material\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Folio Number\nM3  - Type of Work\nN1  - Notes\nNV  - Manuscript Number\nPB  - Library/Archive\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Start Page\nSP  - Pages\nST  - Short Title\nT2  - Collection Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume/Storage Container\nY2  - Access Date\nID  - 34\nER  - \n\n\nTY  - MAP\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Cartographer\nC1  - Scale\nC2  - Area\nC3  - Size\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSN  - ISSN/ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 35\nER  - \n\n\nTY  - MUSIC\nA2  - Editor\nA3  - Editor, Series\nA4  - Producer\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Composer\nC1  - Format of Music\nC2  - Form of Composition\nC3  - Music Parts\nC4  - Target Audience\nC5  - Accompanying Matter\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Form of Item\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Album Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 36\nER  - \n\n\nTY  - NEWS\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Reporter\nC1  - Column\nC2  - Issue\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Issue Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  -  Edition\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Article\nN1  - Notes\nNV  - Frequency\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Section\nSN  - ISSN\nSP  - Pages\nST  - Short Title\nT2  - Newspaper\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 37\nER  - \n\n\nTY  - DBASE\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Date Published\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM3  - Type of Work\nN1  - Notes\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - Report Number\nSP  - Pages\nT2  - Periodical\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nID  - 38\nER  - \n\n\nTY  - MULTI\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - By, Created\nC1  - Year Cited\nC2  - Date Cited\nC5  - Format/Length\nCA  - Caption\nDA  - Date Accessed\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number of Screens\nM3  - Type of Work\nN1  - Notes\nPB  - Distributor\nPY  - Year\nRN  - Research Notes\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nID  - 39\nER  - \n\n\nTY  - PAMP\nA2  - Institution\nA4  - Translator\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nRP  - Reprint Edition\nM2  - Number of Pages\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Published Source\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Number\nY2  - Access Date\nID  - 40\nER  - \n\n\nTY  - PAT\nA2  - Organization, Issuing\nA3  - International Author\nAB  - Abstract\nAD  - Inventor Address\nAN  - Accession Number\nAU  - Inventor\nC2  - Issue Date\nC3  - Designated States\nC4  - Attorney/Agent\nC5  - References\nC6  - Legal Status\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - International Patent Classification\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Application Number\nM3  - Patent Type\nN1  - Notes\nNV  - US Patent Classification\nOP  - Priority Numbers\nPB  - Assignee\nPY  - Year\nRN  - Research Notes\nSE  - International Patent Number\nSN  - Patent Number\nSP  - Pages\nST  - Short Title\nT2  - Published Source\nT3  - Title, International\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Patent Version Number\nY2  - Access Date\nID  - 41\nER  - \n\n\nTY  - PCOMM\nA2  - Recipient\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Senders E-Mail\nC2  - Recipients E-Mail\nCN  - Call Number\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Description\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Folio Number\nM3  - Type\nN1  - Notes\nNV  - Communication Number\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 42\nER  - \n\n\nTY  - RPRT\nA2  - Editor, Series\nA3  - Publisher\nA4  - Department/Division\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC6  - Issue\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nM3  - Type\nN1  - Notes\nNV  - Series Volume\nOP  - Contents\nPB  - Institution\nPY  - Year\nRN  - Research Notes\nRP  - Notes\nSN  - Report Number\nSP  - Pages\nST  - Short Title\nTA  - Author, Translated\nT2  - Series Title\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 43\nER  - \n\n\nTY  - SER\nA2  - Editor\nA3  - Editor, Series\nA4  - Editor, Volume\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Section\nC2  - Report Number\nC5  - Packaging Method\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Series Volume\nM3  - Type of Work\nN1  - Notes\nNV  - Number of Volumes\nOP  - Original Publication\nPB  - Publisher\nPY  - Year\nRI  - Reviewed Item\nRN  - Research Notes\nRP  - Reprint Edition\nSE  - Chapter\nSN  - ISBN\nSP  - Pages\nST  - Short Title\nT2  - Secondary Title\nT3  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Volume\nY2  - Access Date\nID  - 44\nER  - \n\n\nTY  - STAND\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Institution\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Start Page\nM3  - Type of Work\nN1  - Notes\nNV  - Session Number\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSE  - Section Number\nSN  - Document Number\nSP  - Pages\nT2  - Section Title\nT3  - Paper Number\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Rule Number\nY2  - Access Date\nID  - 45\nER  - \n\n\nTY  - STAT\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nC5  - Publisher\nC6  - Volume\nCA  - Caption\nCN  - Call Number\nCY  - Country\nDA  - Date Enacted\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Session\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Public Law Number\nN1  - Notes\nNV  - Statute Number\nOP  - History\nPB  - Source\nPY  - Year\nRI  - Article Number\nRN  - Research Notes\nSE  - Sections\nSP  - Pages\nST  - Short Title\nT2  - Code\nT3  - International Source\nTA  - Author, Translated\nTI  - Name of Act\nTT  - Translated Title\nUR  - URL\nVL  - Code Number\nY2  - Access Date\nID  - 46\nER  - \n\n\nTY  - THES\nA3  - Advisor\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Document Number\nM3  - Thesis Type\nN1  - Notes\nPB  - University\nPY  - Year\nRN  - Research Notes\nSP  - Number of Pages\nST  - Short Title\nT2  - Academic Department\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Degree\nY2  - Access Date\nID  - 47\nER  - \n\n\nTY  - UNPB\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAU  - Name1, Author\nAU  - Name2, Author\nCA  - Caption\nCY  - Place Published\nDA  - Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nJ2  - Abbreviation\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Number\nM3  - Type of Work\nN1  - Notes\nPB  - Institution\nPY  - Year\nRN  - Research Notes\nSP  - Pages\nST  - Short Title\nT2  - Series Title\nT3  - Department\nTA  - Author, Translated\nTI  - Title of Work\nTT  - Translated Title\nUR  - URL\nY2  - Access Date\nID  - 48\nER  - \n\n\nTY  - WEB\nA2  - Editor, Series\nAB  - Abstract\nAD  - Author Address\nAN  - Accession Number\nAU  - Name1, Author\nAU  - Name2, Author\nC1  - Year Cited\nC2  - Date Cited\nCA  - Caption\nCN  - Call Number\nCY  - Place Published\nDA  - Last Update Date\nDB  - Name of Database\nDO  - DOI\nDP  - Database Provider\nET  - Edition\nJ2  - Periodical Title\nKW  - Keyword1, Keyword2, Keyword3\nKeyword4; Keyword5\nLA  - Language\nLB  - Label\nM1  - Access Date\nM3  - Type of Medium\nN1  - Notes\nOP  - Contents\nPB  - Publisher\nPY  - Year\nRN  - Research Notes\nSN  - ISBN\nSP  - Description\nST  - Short Title\nT2  - Series Title\nTA  - Author, Translated\nTI  - Title\nTT  - Translated Title\nUR  - URL\nVL  - Access Year\nID  - 49\nER  - \n\n\n",
 		"items": [
 			{
 				"itemType": "document",
@@ -2053,7 +2111,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
-				"extra": "Publication Number",
+				"extra": "DOI: 10.1234/123456\nPublication Number",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"publisher": "Publisher",
@@ -2070,13 +2128,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "ResearchNotes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>J2  - Periodical Title<br/>M3  - Type of Work<br/>SE  - Screens<br/>SN  - ISSN/ISBN<br/>SP  - Pages<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>ResearchNotes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2128,13 +2180,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "ResearchNotes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviated Publication<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>SP  - Pages<br/>T3  - Volume Title<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>ResearchNotes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2172,13 +2218,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Title: Translated Title<br/>Translated Author: Author, Translated<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>PB  - Publisher<br/>SP  - Description<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2226,13 +2266,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Content: Contents<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Performers<br/>C1  - Cast<br/>C2  - Credits<br/>C3  - Size/Length<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>M3  - Type<br/>NV  - Extent of Work<br/>SN  - ISBN<br/>T3  - Series Title<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2271,13 +2305,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>AN  - Accession Number<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2299,7 +2327,7 @@ var testCases = [
 				],
 				"date": "0000 Year Last",
 				"abstractNote": "Abstract",
-				"blogTitle": "Title of WebLog",
+				"blogTitle": "Periodical Title",
 				"language": "Language",
 				"shortTitle": "Short Title",
 				"url": "URL",
@@ -2315,13 +2343,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Content: Contents<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Editor<br/>A3  - Illustrator<br/>AN  - Accession Number<br/>C1  - Author Affiliation<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>PB  - Publisher<br/>SE  - Message Number<br/>SN  - ISBN<br/>SP  - Description<br/>T3  - Institution<br/>VL  - Access Year<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2385,13 +2407,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>DO  - DOI<br/>J2  - Abbreviation<br/>M3  - Type of Work<br/>RP  - Reprint Edition<br/>SE  - Pages<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2431,7 +2447,7 @@ var testCases = [
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
-				"bookTitle": "Book Title",
+				"bookTitle": "Abbreviation",
 				"callNumber": "Call Number",
 				"edition": "Edition",
 				"language": "Language",
@@ -2456,13 +2472,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>DO  - DOI<br/>J2  - Abbreviation<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2499,13 +2509,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "ResearchNotes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>File Date: Filed Date<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Court, Higher<br/>AN  - Accession Number<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Action of Higher Court<br/>J2  - Parallel Citation<br/>M3  - Citation of Reversal<br/>NV  - Reporter Abbreviation<br/>T3  - Decision<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>ResearchNotes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2555,13 +2559,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Institution<br/>C5  - Packaging Method<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>M3  - Type of Work<br/>NV  - Catalog Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Number of Pages<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2597,13 +2595,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - File, Name of<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>PB  - Publisher<br/>SP  - Description<br/>VL  - Image Size<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2657,13 +2649,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>DO  - DOI<br/>J2  - Periodical Title<br/>M3  - Type<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2703,13 +2689,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Content: Contents<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Editor, Series<br/>C1  - Computer<br/>DO  - DOI<br/>J2  - Periodical Title<br/>M3  - Type<br/>SP  - Description<br/>VL  - Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2735,7 +2715,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
@@ -2759,13 +2738,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Conference Location<br/>M3  - Type<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2801,7 +2774,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"ISBN": "ISBN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -2830,13 +2802,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Source<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C2  - Year Published<br/>C5  - Packaging Method<br/>CY  - Conference Location<br/>ET  - Edition<br/>NV  - Number of Volumes<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2882,13 +2848,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Version History<br/>Reviewed Item: Geographic Coverage<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Time Period<br/>C2  - Unit of Observation<br/>C3  - Data Type<br/>C4  - Dataset(s)<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>J2  - Abbreviation<br/>NV  - Study Number<br/>SE  - Original Release Date<br/>SN  - ISSN<br/>T3  - Series Title<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -2924,7 +2884,7 @@ var testCases = [
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
-				"dictionaryTitle": "Dictionary Title",
+				"dictionaryTitle": "Abbreviation",
 				"edition": "Edition",
 				"extra": "Number",
 				"language": "Language",
@@ -2947,13 +2907,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Term<br/>DO  - DOI<br/>J2  - Abbreviation<br/>M3  - Type of Work<br/>RP  - Reprint Edition<br/>SE  - Version<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3007,13 +2961,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Editor Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>DO  - DOI<br/>J2  - Periodical Title<br/>M3  - Type of Work<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3034,7 +2982,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"ISSN": "ISSN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3060,13 +3007,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - PMCID<br/>C4  - Reviewer<br/>C5  - Issue Title<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>CY  - Place Published<br/>ET  - Edition<br/>M3  - Type of Work<br/>NV  - Document Number<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - E-Pub Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3123,13 +3064,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>series: Series Title<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Last Update Date<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>DO  - DOI<br/>M3  - Type of Medium<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3193,13 +3128,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>numberOfVolumes: Number of Volumes<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Section<br/>C3  - Title Prefix<br/>C4  - Reviewer<br/>C5  - Packaging Method<br/>C6  - NIHMSID<br/>C7  - PMCID<br/>DO  - DOI<br/>M3  - Type of Work<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3236,7 +3165,7 @@ var testCases = [
 				"archiveLocation": "Accession Number",
 				"callNumber": "Call Number",
 				"edition": "Edition",
-				"encyclopediaTitle": "Encyclopedia Title",
+				"encyclopediaTitle": "Abbreviation",
 				"language": "Language",
 				"libraryCatalog": "Database Provider",
 				"numberOfVolumes": "Number of Volumes",
@@ -3257,13 +3186,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Term<br/>DO  - DOI<br/>J2  - Abbreviation<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3304,13 +3227,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>M3  - Type of Image<br/>SP  - Description<br/>VL  - Image Size<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3346,13 +3263,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - File, Name of<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Version<br/>PB  - Publisher<br/>SP  - Description<br/>VL  - Image Size<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3401,13 +3312,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Director, Series<br/>C1  - Cast<br/>C2  - Credits<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>M3  - Medium<br/>RP  - Reprint Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3438,7 +3343,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"ISSN": "ISSN/ISBN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3465,13 +3369,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Author, Tertiary<br/>C1  - Custom 1<br/>C2  - Custom 2<br/>C3  - Custom 3<br/>C4  - Custom 4<br/>C5  - Custom 5<br/>C6  - Custom 6<br/>C7  - Custom 7<br/>C8  - Custom 8<br/>CY  - Place Published<br/>ET  - Edition<br/>M3  - Type of Work<br/>NV  - Number of Volumes<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Section<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3519,13 +3417,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Government Body<br/>C2  - Congress Number<br/>C3  - Congress Session<br/>DO  - DOI<br/>ET  - Edition<br/>SE  - Section<br/>T3  - Series Title<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3546,7 +3438,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Deadline",
-				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"archiveLocation": "Accession Number",
@@ -3571,13 +3462,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Grant Number<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Contact Name<br/>C2  - Contact Address<br/>C3  - Contact Phone<br/>C4  - Contact Fax<br/>C5  - Funding Number<br/>C6  - CFDA Number<br/>CY  - Activity Location<br/>ET  - Requirements<br/>M3  - Funding Type<br/>NV  - Amount Received<br/>PB  - Sponsoring Agency<br/>RP  - Review Date<br/>SE  - Duration of Grant<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3611,13 +3496,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>AN  - Accession Number<br/>C2  - Congress Number<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>SN  - ISBN<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3638,7 +3517,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"ISSN": "ISSN",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
@@ -3657,13 +3535,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Legal Note<br/>C2  - PMCID<br/>C6  - NIHMSID<br/>C7  - Article Number<br/>ET  - Epub Date<br/>M3  - Type of Article<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3704,13 +3576,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>File Date: Section Number<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>AN  - Accession Number<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>M3  - Type of Work<br/>NV  - Session Number<br/>SN  - ISSN/ISBN<br/>T3  - Supplement No.<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3755,13 +3621,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>M3  - Type of Article<br/>NV  - Frequency<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3805,13 +3665,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>DO  - DOI<br/>ET  - Description of Material<br/>J2  - Periodical Title<br/>NV  - Manuscript Number<br/>PB  - Library/Archive<br/>RP  - Reprint Edition<br/>SE  - Start Page<br/>VL  - Volume/Storage Container<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3853,13 +3707,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Editor, Series<br/>C2  - Area<br/>C3  - Size<br/>C5  - Packaging Method<br/>DO  - DOI<br/>J2  - Periodical Title<br/>RP  - Reprint Edition<br/>SP  - Description<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3916,13 +3764,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Editor, Series<br/>C1  - Format of Music<br/>C2  - Form of Composition<br/>C3  - Music Parts<br/>DO  - DOI<br/>ET  - Edition<br/>M3  - Form of Item<br/>RP  - Reprint Edition<br/>SE  - Section<br/>SP  - Pages<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -3964,13 +3806,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Column<br/>C2  - Issue<br/>DO  - DOI<br/>M3  - Type of Article<br/>NV  - Frequency<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4009,13 +3845,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Date Published<br/>M3  - Type of Work<br/>SN  - Report Number<br/>SP  - Pages<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4056,13 +3886,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Editor, Series<br/>C2  - Date Cited<br/>DO  - DOI<br/>M3  - Type of Work<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4111,13 +3935,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Institution<br/>C5  - Packaging Method<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Abbreviation<br/>PB  - Publisher<br/>RP  - Reprint Edition<br/>SN  - ISBN<br/>VL  - Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4163,13 +3981,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Inventor Address: Inventor Address<br/>Caption: Caption<br/>issueDate: 0000 Date<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>Patent Version Number: Patent Version Number<br/>A3  - International Author<br/>AN  - Accession Number<br/>CN  - Call Number<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - International Patent Classification<br/>M3  - Patent Type<br/>NV  - US Patent Classification<br/>SE  - International Patent Number<br/>T3  - Title, International<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4216,13 +4028,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Senders E-Mail<br/>C2  - Recipients E-Mail<br/>CY  - Place Published<br/>DO  - DOI<br/>ET  - Description<br/>J2  - Abbreviation<br/>NV  - Communication Number<br/>PB  - Publisher<br/>SP  - Pages<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4279,13 +4085,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Content: Contents<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Publisher<br/>C6  - Issue<br/>DO  - DOI<br/>ET  - Edition<br/>J2  - Periodical Title<br/>NV  - Series Volume<br/>RP  - Notes<br/>VL  - Volume<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4349,13 +4149,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Original Publication: Original Publication<br/>Reviewed Item: Reviewed Item<br/>series: Series Title<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>C1  - Section<br/>C2  - Report Number<br/>C5  - Packaging Method<br/>DO  - DOI<br/>J2  - Abbreviation<br/>M3  - Type of Work<br/>RP  - Reprint Edition<br/>SE  - Chapter<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4396,13 +4190,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>DO  - DOI<br/>J2  - Abbreviation<br/>NV  - Session Number<br/>SE  - Section Number<br/>T3  - Paper Number<br/>VL  - Rule Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4434,13 +4222,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Article Number: Article Number<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>AN  - Accession Number<br/>C5  - Publisher<br/>C6  - Volume<br/>CN  - Call Number<br/>CY  - Country<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>J2  - Abbreviation<br/>NV  - Statute Number<br/>PB  - Source<br/>T3  - International Source<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4485,13 +4267,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A3  - Advisor<br/>DO  - DOI<br/>VL  - Degree<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4517,7 +4293,6 @@ var testCases = [
 					}
 				],
 				"date": "0000 Year Date",
-				"DOI": "DOI",
 				"abstractNote": "Abstract",
 				"archive": "Name of Database",
 				"issue": "Number",
@@ -4540,13 +4315,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>CY  - Place Published<br/>M3  - Type of Work<br/>PB  - Institution<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4571,7 +4340,7 @@ var testCases = [
 				"language": "Language",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"websiteTitle": "Series Title",
+				"websiteTitle": "Periodical Title",
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
@@ -4584,13 +4353,7 @@ var testCases = [
 						"note": "<p>Notes</p>"
 					},
 					{
-						"note": "Research Notes"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Author Address<br/>Caption: Caption<br/>Label: Label<br/>Content: Contents<br/>Translated Author: Author, Translated<br/>Translated Title: Translated Title<br/>A2  - Editor, Series<br/>AN  - Accession Number<br/>C1  - Year Cited<br/>C2  - Date Cited<br/>CN  - Call Number<br/>CY  - Place Published<br/>DB  - Name of Database<br/>DO  - DOI<br/>DP  - Database Provider<br/>ET  - Edition<br/>J2  - Periodical Title<br/>PB  - Publisher<br/>SN  - ISBN<br/>SP  - Description<br/>",
-						"tags": [
-							"_RIS import"
-						]
+						"note": "<p>Research Notes</p>"
 					}
 				],
 				"seeAlso": []
@@ -4671,12 +4434,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>10.1111/j.1755-0998.2009.02750.x</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Consortium for Comparative Genomics, Department of Biochemistry and Molecular Genetics, University of Colorado School of Medicine, Aurora, CO 80045, USA; Department of Biology, University of Central Florida, 4000 Central Florida Blvd., Orlando, FL 32816, USA; Department of Biology & Amphibian and Reptile Diversity Research Center, The University of Texas at Arlington, Arlington, TX 76019, USA<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -4712,12 +4469,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -4768,12 +4519,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>N1  - Author, Monographic: Monographic Author<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -4852,12 +4597,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>M3  - Medium Designator<br/>N1  - Author, Monographic: Monographic Author<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>CY  - Place of Publication<br/>IS  - Volume ID<br/>SN  - ISBN<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -4924,12 +4663,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5011,12 +4744,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5047,12 +4774,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Author Address: Address/Availability<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5083,12 +4804,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5154,12 +4869,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5191,12 +4900,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Reporter<br/>T3  - History<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5255,12 +4958,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5390,12 +5087,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>IS  - Version<br/>CY  - Place of Publication<br/>SP  - Location in Work<br/>T3  - Series Title<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5438,12 +5129,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5461,6 +5146,7 @@ var testCases = [
 				"date": "0000 Last",
 				"abstractNote": "Abstract",
 				"url": "Location/URL",
+				"websiteTitle": "Source",
 				"attachments": [],
 				"tags": [
 					"Keywords1, Keywords2, Keywords3",
@@ -5472,12 +5158,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>JO  - Source<br/>RP  - Reprint Status, Date<br/>IS  - Edition<br/>PB  - Publisher Name<br/>SP  - Page(s)<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5517,12 +5197,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5562,12 +5236,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>A3  - Series Editor<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5607,12 +5275,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Bill Number<br/>N1  - Issue ID: Issue ID<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5633,6 +5295,7 @@ var testCases = [
 				"callNumber": "Call Number",
 				"issue": "Issue ID",
 				"pages": "Page(s)",
+				"publicationTitle": "Magazine Title",
 				"url": "Location/URL",
 				"volume": "Volume ID",
 				"attachments": [],
@@ -5646,12 +5309,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>JO  - Magazine Title<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5682,12 +5339,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>JO  - Journal Title<br/>RP  - Reprint Status, Date<br/>N1  - Volume ID: Volume ID<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5733,12 +5384,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5794,12 +5439,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5832,12 +5471,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5881,12 +5514,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>N1  - Place of Publication: Place of Publication<br/>N1  - Publisher Name: Publisher Name<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5933,12 +5560,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Place of Publication: Place of Publication<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -5989,12 +5610,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6050,12 +5665,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Edition<br/>T3  - Series Title<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6090,12 +5699,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6184,12 +5787,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Author, Subsidiary: Subsidiary Author<br/>IS  - Volume ID<br/>A3  - Series Editor<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6239,12 +5836,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>U5  - Distributor<br/>T3  - Series Title<br/>SN  - ISBN<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6266,6 +5857,7 @@ var testCases = [
 				"extra": "Section",
 				"pages": "Page(s)",
 				"place": "Place of Publication",
+				"publicationTitle": "Newspaper Name",
 				"url": "Location/URL",
 				"attachments": [],
 				"tags": [
@@ -6287,12 +5879,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>JO  - Newspaper Name<br/>RP  - Reprint Status, Date<br/>PB  - Publisher Name<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6360,12 +5946,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Registry Number: Registry Number</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Patent Version Number: Application No./Date<br/>M3  - Document Type<br/>IS  - Patent Number<br/>AV  - Address/Availability<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6437,12 +6017,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>N1  - Author, Subsidiary: Subsidiary Author<br/>VL  - Report ID<br/>T3  - Series Title<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6521,12 +6095,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>N1  - Edition: Edition<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6554,12 +6122,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>CY  - Code<br/>T3  - History<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6601,12 +6163,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>issue: Issue ID<br/>RP  - Reprint Status, Date<br/>CY  - Place of Publication<br/>PB  - Publisher Name<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6635,12 +6191,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>VL  - Bill/Res Number<br/>T3  - History<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6676,12 +6226,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6737,12 +6281,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>T3  - Series Title<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6774,12 +6312,6 @@ var testCases = [
 					},
 					{
 						"note": "<p>Notes</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>RP  - Reprint Status, Date<br/>AV  - Address/Availability<br/>N1  - Call Number: Call Number<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6819,12 +6351,6 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.3109/07434618.2014.906498</p>"
-					},
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>PB  - Informa Allied Health<br/>",
-						"tags": [
-							"_RIS import"
-						]
 					}
 				],
 				"seeAlso": []
@@ -6849,6 +6375,7 @@ var testCases = [
 				"ISBN": "9783642002304",
 				"abstractNote": "In dem Buch befinden sich einzelne Beiträge zu ...",
 				"callNumber": "300 QN 100 D419",
+				"extra": "DOI: 10.1007/978-3-642-00230-4",
 				"language": "ger",
 				"libraryCatalog": "UB Mannheim",
 				"place": "Berlin, Heidelberg",
@@ -6867,14 +6394,7 @@ var testCases = [
 					"Finanzkrise / Eigentum / Haftung / Ordnungspolitik / Aufsatzsammlung / Online-Publikation",
 					"Law"
 				],
-				"notes": [
-					{
-						"note": "The following values have no corresponding Zotero field:<br/>Library Catalog: UB Leipzig<br/>Call Number: PL 415 D419<br/>TS  - BibTeX<br/>DO  - 10.1007/978-3-642-00230-4<br/>",
-						"tags": [
-							"_RIS import"
-						]
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

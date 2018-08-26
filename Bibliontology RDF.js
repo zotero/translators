@@ -1,17 +1,22 @@
 {
-	"translatorID":"14763d25-8ba0-45df-8f52-b8d1108e7ac9",
-	"translatorType":3,
-	"label":"Bibliontology RDF",
-	"creator":"Simon Kornblith",
-	"target":"rdf",
-	"minVersion":"2.0",
-	"maxVersion":"",
-	"priority":50,
-	"browserSupport":"gcs",
-	"configOptions":{"getCollections":"true", "dataMode":"rdf/xml"},
-	"displayOptions":{"exportNotes":true},
-	"inRepository":false,
-	"lastUpdated":"2015-01-02 03:33:15"
+	"translatorID": "14763d25-8ba0-45df-8f52-b8d1108e7ac9",
+	"label": "Bibliontology RDF",
+	"creator": "Simon Kornblith",
+	"target": "rdf",
+	"minVersion": "2.0",
+	"maxVersion": "",
+	"priority": 50,
+	"configOptions": {
+		"getCollections": "true",
+		"dataMode": "rdf/xml"
+	},
+	"displayOptions": {
+		"exportNotes": true
+	},
+	"inRepository": true,
+	"translatorType": 3,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-03 10:21:42"
 }
 
 var n = {
@@ -145,26 +150,26 @@ var SUBCONTAINER_SERIES = 6; 	// not used
 var CONTAINER_SERIES = 7;
 
 /**
-    Fields should be in the form
-    
-    <ZOTERO_FIELD>: ([<SUBJECT>, <PREDICATE>] | <FUNCTION>)
-    
-    If a <FUNCTION> is specified, then it is passed the item and should return a set of triples in
-    the form
-    
-    [[<SUBJECT>, <PREDICATE>, <OBJECT>, <LITERAL>]*]
-    
-    where <SUBJECT> refers to one of the constants defined above. If <LITERAL> is true, then
-    <OBJECT> is treated as a literal.
-    
-    If a <FUNCTION> is not used and <PREDICATE> is a string, then the parameters generate a triple
-    in the form
-    
-    <SUBJECT> 		<PREDICATE>				FIELD_CONTENT
-    
-    where <SUBJECT> refers to one of the constants defined above. Alternatively, <PREDICATE> may be
-    an array in the form
-    
+	Fields should be in the form
+	
+	<ZOTERO_FIELD>: ([<SUBJECT>, <PREDICATE>] | <FUNCTION>)
+	
+	If a <FUNCTION> is specified, then it is passed the item and should return a set of triples in
+	the form
+	
+	[[<SUBJECT>, <PREDICATE>, <OBJECT>, <LITERAL>]*]
+	
+	where <SUBJECT> refers to one of the constants defined above. If <LITERAL> is true, then
+	<OBJECT> is treated as a literal.
+	
+	If a <FUNCTION> is not used and <PREDICATE> is a string, then the parameters generate a triple
+	in the form
+	
+	<SUBJECT> 		<PREDICATE>				FIELD_CONTENT
+	
+	where <SUBJECT> refers to one of the constants defined above. Alternatively, <PREDICATE> may be
+	an array in the form
+	
 	[<ITEM_PREDICATE>, [<BLANK_NODE_PREDICATE>, <BLANK_NODE_OBJECT>]*, <PREDICATE>]
 	
 	This generates the triples
@@ -188,8 +193,9 @@ var FIELDS = {
 	"ISBN":					[function(item) {
 		var isbns = item.ISBN.split(/, ?| /g);
 		var triples = [];
-		for each(var isbn in isbns) {
-			if(isbn.length == 10) {
+		for (var i=0; i<isbns.length; i++) {
+			var isbn = isbns[i];
+			if (isbn.length == 10) {
 				triples.push([CONTAINER, n.bibo+"isbn10", isbn, true]);
 			} else {
 				triples.push([CONTAINER, n.bibo+"isbn13", isbn, true]);
@@ -198,15 +204,16 @@ var FIELDS = {
 		return triples;
 	}, function(nodes) {
 		var isbns = [];
-		for each(var prop in [n.bibo+"isbn13", n.bibo+"isbn10"]) {
-			var statements = Zotero.RDF.getStatementsMatching(nodes[CONTAINER], prop, null);
-			if(statements) {
-				for each(var statement in statements) {
-					isbns.push(statement[2]);
+		var propList = [n.bibo+"isbn13", n.bibo+"isbn10"];
+		for (var i=0; i<propList.length; i++) {
+			var statements = Zotero.RDF.getStatementsMatching(nodes[CONTAINER], propList[i], null);
+			if (statements) {
+				for (var j=0; j<statements.length; j++) {
+					isbns.push(statements[j][2]);
 				}
 			}
 		}
-		if(!isbns.length) return false;
+		if (!isbns.length) return false;
 		return isbns.join(", ");
 	}],
 	"publicationTitle":		[CONTAINER,		n.dcterms+"title"],
@@ -235,16 +242,16 @@ var FIELDS = {
 	"priorityNumbers": 		[function(item) {							// TODO
 		var priorityNumbers = item.priorityNumbers.split(/, ?| /g);
 		var returnNumbers = [];
-		for each(var number in priorityNumbers) {
-			returnNumbers.push([ITEM, n.z+"priorityNumber", number, true]);
+		for (var i=0; i<priorityNumbers.length; i++) {
+			returnNumbers.push([ITEM, n.z+"priorityNumber", priorityNumbers[i], true]);
 		}
 		return returnNumbers;
 	}, function(nodes) {
 		var statements = Zotero.RDF.getStatementsMatching(nodes[ITEM], n.z+"priorityNumber", null);
-		if(!statements) return false;
+		if (!statements) return false;
 		var predicates = [];
-		for each(var statement in statements) {
-			predicates.push(statement[2]);
+		for (var i=0; i<statements.length; i++) {
+			predicates.push(statements[i][2]);
 		}
 		return predicates.join(", ");
 	}],
@@ -322,15 +329,15 @@ function getBlankNode(attachToNode, itemPredicate, blankNodePairs, create) {
 	var blankNode = null;
 	// look for blank node
 	var statements1 = Zotero.RDF.getStatementsMatching(attachToNode, itemPredicate, undefined);
-	for each(var statement1 in statements1) {
+	for (var i=0; i<statements1.length; i++) {
 		// look for appropriate statements on the blank node
-		var testNode = statement1[2];
+		var testNode = statements1[i][2];
 		var statements2 = true;
-		for each(var pair in blankNodePairs) {
-			statements2 = Zotero.RDF.getStatementsMatching(testNode, pair[0], pair[1], false, true);
-			if(!statements2) break;
+		for (var j=0; j<blankNodePairs.length; j++) {
+			statements2 = Zotero.RDF.getStatementsMatching(testNode, blankNodePairs[j][0], blankNodePairs[j][1], false, true);
+			if (!statements2) break;
 		}
-		if(statements2) {
+		if (statements2) {
 			// if statements are good, then this is our node
 			blankNode = testNode;
 			break;
@@ -338,11 +345,11 @@ function getBlankNode(attachToNode, itemPredicate, blankNodePairs, create) {
 	}
 	
 	// if no suitable node exists, generate a new one and add blank node statements
-	if(!blankNode && create) {
+	if (!blankNode && create) {
 		blankNode = Zotero.RDF.newResource();
 		Zotero.RDF.addStatement(attachToNode, itemPredicate, blankNode, false);
-		for each(var pair in blankNodePairs) {
-			Zotero.RDF.addStatement(blankNode, pair[0], pair[1], false);
+		for (var i=0; i<blankNodePairs.length; i++) {
+			Zotero.RDF.addStatement(blankNode, blankNodePairs[i][0], blankNodePairs[i][1], false);
 		}
 	}
 	
@@ -374,8 +381,9 @@ Type.prototype.getMatchScore = function(node) {
 	
 	// check item (+2 for each match, -1 for each nonmatch)
 	var score = -this[ITEM].pairs.length;
-	for each(var pair in this[ITEM].pairs) {
-		if(Zotero.RDF.getStatementsMatching(node, pair[0], pair[1])) score += 3;
+	for (var i=0; i<this[ITEM].pairs.length; i++) {
+		var pair = this[ITEM].pairs[i];
+		if (Zotero.RDF.getStatementsMatching(node, pair[0], pair[1])) score += 3;
 	}
 	
 	// check subcontainer
@@ -390,8 +398,8 @@ Type.prototype.getMatchScore = function(node) {
 	score = sub[0];
 	nodes[CONTAINER] = sub[1];
 	
-	if(!nodes[CONTAINER]) nodes[CONTAINER] = nodes[ITEM];
-	if(!nodes[SUBCONTAINER]) nodes[SUBCONTAINER] = nodes[CONTAINER];
+	if (!nodes[CONTAINER]) nodes[CONTAINER] = nodes[ITEM];
+	if (!nodes[SUBCONTAINER]) nodes[SUBCONTAINER] = nodes[CONTAINER];
 	
 	return [score, nodes];
 }
@@ -402,24 +410,26 @@ Type.prototype.getMatchScore = function(node) {
  */
 Type.prototype._scoreNodeRelationship = function(node, definition, score) {
 	var subNode = null;
-	if(definition) {
+	if (definition) {
 		statements = Zotero.RDF.getStatementsMatching(node, definition.predicate, null);
-		if(statements) {
+		if (statements) {
 			var bestScore = -9999;
-			for each(var statement in statements) {
+			for (var i=0; i<statements.length; i++) {
+				var statement = statements[i];
 				// +2 for each match, -1 for each nonmatch
 				var testScore = -definition.pairs.length;
-				for each(var pair in definition.pairs) {
-					if(Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1])) testScore += 3;
+				for (var j=0; j<definition.pairs.length; j++) {
+					var pair = definition.pairs[j];
+					if (Zotero.RDF.getStatementsMatching(statement[2], pair[0], pair[1])) testScore += 3;
 				}
 				
-				if(testScore > bestScore) {
+				if (testScore > bestScore) {
 					subNode = statement[2];
 					bestScore = testScore;
 				}
 			}
 			score += bestScore;
-		} else if(definition.alwaysAdd) {
+		} else if (definition.alwaysAdd) {
 			score -= definition.pairs.length;
 		}
 	}
@@ -442,7 +452,7 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
 	var subNode = tmp[1];
 	
 	//Zotero.debug("got itemSeries with score "+score);
-	if(score >= 1) nodes[ITEM_SERIES] = subNode;
+	if (score >= 1) nodes[ITEM_SERIES] = subNode;
 	
 	// get SUBCONTAINER_SERIES node
 	tmp = this._scoreNodeRelationship(nodes[SUBCONTAINER], seriesDefinition, 0);
@@ -450,7 +460,7 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
 	subNode = tmp[1];
 	
 	//Zotero.debug("got subcontainerSeries with score "+score);
-	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
+	if (score >= 1) nodes[CONTAINER_SERIES] = subNode;
 	
 	// get CONTAINER_SERIES node
 	tmp = this._scoreNodeRelationship(nodes[CONTAINER], seriesDefinition, 0);
@@ -458,7 +468,7 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
 	subNode = tmp[1];
 	
 	//Zotero.debug("got containerSeries with score "+score);
-	if(score >= 1) nodes[CONTAINER_SERIES] = subNode;
+	if (score >= 1) nodes[CONTAINER_SERIES] = subNode;
 }
 
 /**
@@ -467,26 +477,30 @@ Type.prototype.getItemSeriesNodes = function(nodes) {
  */
 Type.prototype.addNodeRelations = function(nodes) {
 	// add node relations
-	for each(var i in [ITEM_SERIES, SUBCONTAINER_SERIES, CONTAINER_SERIES]) {
+	var list = [ITEM_SERIES, SUBCONTAINER_SERIES, CONTAINER_SERIES];
+	for (var h=0; h<list.length; h++) {
+		var i=list[h];
 		// don't add duplicate nodes
-		if(!this[i-3]) continue;
+		if (!this[i-3]) continue;
 		// don't add nodes with no arcs
-		if(!Zotero.RDF.getArcsOut(nodes[i])) continue;
+		if (!Zotero.RDF.getArcsOut(nodes[i])) continue;
 		Zotero.RDF.addStatement(nodes[i], RDF_TYPE, n.bibo+"Series", false);
 		Zotero.RDF.addStatement(nodes[i-3], n.dcterms+"isPartOf", nodes[i], false);
 	}
 	
-	for each(var i in [ITEM, SUBCONTAINER, CONTAINER]) {
-		if(nodes[i]) {
+	var list = [ITEM, SUBCONTAINER, CONTAINER];
+	for (var h=0; h<list.length; h++) {
+		var i=list[h];
+		if (nodes[i]) {
 			// find predicate
-			if(i == ITEM) {
+			if (i == ITEM) {
 				var j = 1;
 				var predicate = n.res+"resource";
-			} else if(i == SUBCONTAINER || i == CONTAINER) {
+			} else if (i == SUBCONTAINER || i == CONTAINER) {
 				// don't add duplicate nodes
-				if(!this[i]) continue;
+				if (!this[i]) continue;
 				// don't add nodes with no arcs
-				if(!this[i][0] && !Zotero.RDF.getArcsOut(nodes[i])) {
+				if (!this[i][0] && !Zotero.RDF.getArcsOut(nodes[i])) {
 					nodes[i] = nodes[i-1];
 					continue;
 				}
@@ -495,13 +509,14 @@ Type.prototype.addNodeRelations = function(nodes) {
 			}
 			
 			// add type
-			for each(var pair in this[i].pairs) {
+			for (var j=0; j<this[i].pairs.length; j++) {
+				var pair = this[i].pairs[j];
 				Zotero.RDF.addStatement(nodes[i], pair[0], pair[1], false)
 			}
 			
 			// add relation to parent
-			for(var j = i-1; j>1; j--) {
-				if(Zotero.RDF.getResourceURI(nodes[j]) != Zotero.RDF.getResourceURI(nodes[i])) {
+			for (var j = i-1; j>1; j--) {
+				if (Zotero.RDF.getResourceURI(nodes[j]) != Zotero.RDF.getResourceURI(nodes[i])) {
 					Zotero.RDF.addStatement(nodes[j], predicate, nodes[i], false);
 					break;
 				}
@@ -521,33 +536,33 @@ Type.prototype.createNodes = function(item) {
 	// come up with an item node URI
 	nodes[ITEM] = null;
 	// try the URL as URI
-	if(item.url) {
+	if (item.url) {
 		nodes[ITEM] = encodeURI(item.url);
-		if(usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
+		if (usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
 	}
 	// try the DOI as URI
-	if(!nodes[ITEM] && item.DOI) {
+	if (!nodes[ITEM] && item.DOI) {
 		var doi = item.DOI;
-		if(doi.substr(0, 4) == "doi:") {
+		if (doi.substr(0, 4) == "doi:") {
 			doi = doi.substr(4);
-		} else if(doi.substr(0, 8) == "urn:doi:") {
+		} else if (doi.substr(0, 8) == "urn:doi:") {
 			doi = doi.substr(8);
-		} else if(doi.substr(0, 9) == "info:doi/") {
+		} else if (doi.substr(0, 9) == "info:doi/") {
 			doi = doi.substr(9);
-		} else if(doi.substr(0, 18) == "http://dx.doi.org/") {
+		} else if (doi.substr(0, 18) == "http://dx.doi.org/") {
 			doi = doi.substr(18);
 		}
 		nodes[ITEM] = "info:doi/"+encodeURI(doi);
-		if(usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
+		if (usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
 	}
 	// try the ISBN as URI
-	if(!nodes[ITEM] && item.ISBN) {
+	if (!nodes[ITEM] && item.ISBN) {
 		var isbn = item.ISBN.split(/, ?| /g)[0];
 		nodes[ITEM] = "urn:isbn:"+encodeURI(isbn);
-		if(usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
+		if (usedURIs[nodes[ITEM]]) nodes[ITEM] = null;
 	}
 	// no suitable item URI; fall back to a blank node
-	if(!nodes[ITEM]) nodes[ITEM] = Zotero.RDF.newResource();
+	if (!nodes[ITEM]) nodes[ITEM] = Zotero.RDF.newResource();
 	usedURIs[Zotero.RDF.getResourceURI(nodes[ITEM])] = true;
 	
 	// attach item node to user item node
@@ -574,7 +589,7 @@ Type.prototype.createNodes = function(item) {
 LiteralProperty = function(field) {
 	this.field = field;
 	this.mapping = FIELDS[field];
-	if(!this.mapping) {
+	if (!this.mapping) {
 		//Zotero.debug("WARNING: unrecognized field "+field+" in Bibliontology RDF; mapping to Zotero namespace");
 		this.mapping = [ITEM, n.z+field];
 	}
@@ -584,20 +599,20 @@ LiteralProperty = function(field) {
  * Maps property from a set of RDF nodes to an item
  */
 LiteralProperty.prototype.mapToItem = function(newItem, nodes) {
-	if(typeof this.mapping[0] == "function") {		// function case: triples returned
+	if (typeof this.mapping[0] == "function") {		// function case: triples returned
 		// check function case
 		var content = this.mapping[1](nodes);
-		if(!content) return false;
+		if (!content) return false;
 		newItem[this.field] = content;
 	} else {
 		var node = nodes[this.mapping[0]];
-		if(!node) return false;
+		if (!node) return false;
 		var statements = getStatementsByDefinition(this.mapping[1], node);
-		if(!statements) return false;
+		if (!statements) return false;
 		
 		var content = [];
-		for each(var stmt in statements) {
-			content.push(stmt[2].toString());
+		for (var i=0; i<statements.length; i++) {
+			content.push(statements[i][2].toString());
 		}
 		newItem[this.field] = content.join(",");
 	}
@@ -608,12 +623,13 @@ LiteralProperty.prototype.mapToItem = function(newItem, nodes) {
  * Maps property from an item to a set of RDF nodes
  */
 LiteralProperty.prototype.mapFromItem = function(item, nodes) {
-	if(typeof this.mapping[0] == "function") {				// function case: triples returned
+	if (typeof this.mapping[0] == "function") {				// function case: triples returned
 		// check function case
-		for each(var triple in this.mapping[0](item)) {
-			Zotero.RDF.addStatement(nodes[triple[0]], triple[1], triple[2], triple[3])
+		var triples = this.mapping[0](item);
+		for (i=0; i<triples.length; i++) {
+			Zotero.RDF.addStatement(nodes[triples[i][0]], triples[i][1], triples[i][2], triples[i][3])
 		}
-	} else if(typeof this.mapping[1] == "string") {		// string case: simple predicate
+	} else if (typeof this.mapping[1] == "string") {		// string case: simple predicate
 		Zotero.RDF.addStatement(nodes[this.mapping[0]],
 			this.mapping[1], item.uniqueFields[this.field], true);
 	} else {										// array case: complex predicate
@@ -637,13 +653,13 @@ CreatorProperty = function(field) {
 CreatorProperty.prototype.mapToCreator = function(creatorNode, zoteroType) {
 	//Zotero.debug("mapping "+Zotero.RDF.getResourceURI(creatorNode)+" to a creator");
 	var lastNameStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"surname", null);
-	if(lastNameStmt) {		// look for a person with a last name
+	if (lastNameStmt) {		// look for a person with a last name
 		creator = {lastName:lastNameStmt[0][2].toString()};
 		var firstNameStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"givenname", null);
-		if(firstNameStmt) creator.firstName = firstNameStmt[0][2].toString();
+		if (firstNameStmt) creator.firstName = firstNameStmt[0][2].toString();
 	} else {
 		var nameStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"name", null);
-		if(nameStmt) {		// an organization
+		if (nameStmt) {		// an organization
 			creator = {lastName:nameStmt[0][2].toString(), fieldMode:1};
 		} else {			// an unnamed entity; ignore it
 			//Zotero.debug("Dropping unnamed creator "+creatorNode.toString());
@@ -653,14 +669,14 @@ CreatorProperty.prototype.mapToCreator = function(creatorNode, zoteroType) {
 	
 	// birthYear and shortName
 	var birthStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"birthday", null, true);
-	if(birthStmt) creator.birthYear = birthStmt[2].toString();
+	if (birthStmt) creator.birthYear = birthStmt[2].toString();
 	var nickStmt = Zotero.RDF.getStatementsMatching(creatorNode, n.foaf+"nick", null, true);
-	if(nickStmt) creator.shortName = nickStmt[2].toString();
+	if (nickStmt) creator.shortName = nickStmt[2].toString();
 	
-	if(this.field == "author") {
+	if (this.field == "author") {
 		// could be another primary creator
 		var creatorsForType = Zotero.Utilities.getCreatorsForType(zoteroType);
-		if(creatorsForType.indexOf("author") == -1) {
+		if (creatorsForType.indexOf("author") == -1) {
 			creator.creatorType = creatorsForType[0];
 		}
 	} else {
@@ -676,10 +692,11 @@ CreatorProperty.prototype.mapToCreators = function(node, zoteroType) {
 	var creators = [];
 	var creatorNodes = [];
 	var statements = getStatementsByDefinition(this.mapping[2], node);
-	if(statements) {
-		for each(var stmt in statements) {
+	if (statements) {
+		for (var i=0; i<statements.length; i++) {
+			var stmt = statements[i];
 			var creator = this.mapToCreator(stmt[2], zoteroType);
-			if(creator) {
+			if (creator) {
 				creators.push(creator);
 				creatorNodes.push(stmt[2]);
 			}
@@ -694,10 +711,10 @@ CreatorProperty.prototype.mapToCreators = function(node, zoteroType) {
 CreatorProperty.prototype.mapFromCreator = function(item, creator, nodes) {
 	var creatorsForType = Zotero.Utilities.getCreatorsForType(item.itemType);
 	var isPrimary = creatorsForType[0] == this.field;
-	if(this.mapping) {
+	if (this.mapping) {
 		var mapping = this.mapping;
 	} else {
-		if(isPrimary && creatorsForType.indexOf("author") == -1) {
+		if (isPrimary && creatorsForType.indexOf("author") == -1) {
 			// treat other primary creators as dcterms:creators
 			var mapping = CREATORS["author"];
 		} else {
@@ -707,20 +724,20 @@ CreatorProperty.prototype.mapFromCreator = function(item, creator, nodes) {
 	}
 	
 	var creatorNode = Zotero.RDF.newResource();
-	if(creator.fieldMode == 1) {
+	if (creator.fieldMode == 1) {
 		Zotero.RDF.addStatement(creatorNode, RDF_TYPE, n.foaf+"Organization");
-		if(creator.lastName) Zotero.RDF.addStatement(creatorNode, n.foaf+"name", creator.lastName, true);
+		if (creator.lastName) Zotero.RDF.addStatement(creatorNode, n.foaf+"name", creator.lastName, true);
 	} else {
 		Zotero.RDF.addStatement(creatorNode, RDF_TYPE, n.foaf+"Person");
-		if(creator.firstName) Zotero.RDF.addStatement(creatorNode, n.foaf+"givenname", creator.firstName, true);
-		if(creator.lastName) Zotero.RDF.addStatement(creatorNode, n.foaf+"surname", creator.lastName, true);
+		if (creator.firstName) Zotero.RDF.addStatement(creatorNode, n.foaf+"givenname", creator.firstName, true);
+		if (creator.lastName) Zotero.RDF.addStatement(creatorNode, n.foaf+"surname", creator.lastName, true);
 	}
-	if(creator.birthYear) Zotero.RDF.addStatement(creatorNode, n.foaf+"birthday", creator.birthYear, true);
-	if(creator.shortName) Zotero.RDF.addStatement(creatorNode, n.foaf+"nick", creator.shortName, true);
+	if (creator.birthYear) Zotero.RDF.addStatement(creatorNode, n.foaf+"birthday", creator.birthYear, true);
+	if (creator.shortName) Zotero.RDF.addStatement(creatorNode, n.foaf+"nick", creator.shortName, true);
 	
 	// attach creator node
 	var attachTo = nodes[mapping[0]];
-	if(typeof mapping[2] == "string") {
+	if (typeof mapping[2] == "string") {
 		var relation = mapping[2];
 	} else {
 		var relation = mapping[2][2];
@@ -730,14 +747,14 @@ CreatorProperty.prototype.mapFromCreator = function(item, creator, nodes) {
 	
 	// get appropriate creator list
 	var list = mapping[1];
-	if(list == CONTRIBUTOR_LIST && isPrimary) {
+	if (list == CONTRIBUTOR_LIST && isPrimary) {
 		// always attach primary to author list instead of contributor list
 		list = AUTHOR_LIST;
 	}
 	
 	// add to creator list
 	var creatorList = Zotero.RDF.getStatementsMatching(nodes[mapping[0]], CREATOR_LISTS[list], null);
-	if(creatorList) {
+	if (creatorList) {
 		var creatorList = creatorList[0][2];
 	} else {
 		var creatorList = Zotero.RDF.newResource();
@@ -754,11 +771,11 @@ CreatorProperty.prototype.mapFromCreator = function(item, creator, nodes) {
  */
 function getStatementsByDefinition(definition, node) {
 	var statements = null;
-	if(typeof definition == "string") {		// string case: simple predicate
+	if (typeof definition == "string") {		// string case: simple predicate
 		statements = Zotero.RDF.getStatementsMatching(node, definition, null);
 	} else {								// array case: complex 
 		var blankNode = getBlankNode(node, definition[0], definition[1], false);
-		if(blankNode) {
+		if (blankNode) {
 			statements = Zotero.RDF.getStatementsMatching(blankNode, definition[2], null);
 		}
 	}
@@ -768,9 +785,9 @@ function getStatementsByDefinition(definition, node) {
 function detectImport() {
 	// look for a bibo item type
 	var rdfTypes = Zotero.RDF.getStatementsMatching(null, RDF_TYPE, null);
-	if(rdfTypes) {
-		for each(var rdfType in rdfTypes) {
-			if(typeof rdfType[2] === "object" && Z.RDF.getResourceURI(rdfType[2]).substr(0, BIBO_NS_LENGTH) == n.bibo) return true;
+	if (rdfTypes) {
+		for (var i=0; i<rdfTypes.length; i++) {
+			if (typeof rdfTypes[i][2] === "object" && Z.RDF.getResourceURI(rdfTypes[i][2]).substr(0, BIBO_NS_LENGTH) == n.bibo) return true;
 		}
 	}
 	return false;
@@ -779,10 +796,10 @@ function detectImport() {
 function doImport() {
 	// collapse list of BIBO-only types
 	var collapsedTypes = {};
-	for(var unprefixedBiboType in BIBO_TYPES) {
+	for (var unprefixedBiboType in BIBO_TYPES) {
 		var biboType = n.bibo+unprefixedBiboType;
 		var type = new Type(BIBO_TYPES[unprefixedBiboType], [[[RDF_TYPE, n.bibo+biboType]], null, null]);
-		if(!collapsedTypes[biboType]) {
+		if (!collapsedTypes[biboType]) {
 			collapsedTypes[biboType] = [type];
 		} else {
 			collapsedTypes[biboType].push(type);
@@ -790,10 +807,11 @@ function doImport() {
 	}
 	
 	// collapse Zotero-to-BIBO type mappings
-	for(var zoteroType in TYPES) {
+	for (var zoteroType in TYPES) {
 		var type = new Type(zoteroType, TYPES[zoteroType]);
-		for each(var pair in TYPES[zoteroType][0]) {
-			if(!collapsedTypes[pair[1]]) {
+		for (var i=0; i<TYPES[zoteroType][0].length; i++) {
+			var pair = TYPES[zoteroType][0][i];
+			if (!collapsedTypes[pair[1]]) {
 				collapsedTypes[pair[1]] = [type];
 			} else {
 				collapsedTypes[pair[1]].push(type);
@@ -804,16 +822,16 @@ function doImport() {
 	// collapse list of field mappings
 	var collapsedProperties = {1:{}, 2:{}, 3:{}, 4:{}, 5:{}, 6:{}, 7:{}};
 	var functionProperties = {};
-	for(var zoteroField in FIELDS) {
-		if(typeof FIELDS[zoteroField][0] == "function") {
+	for (var zoteroField in FIELDS) {
+		if (typeof FIELDS[zoteroField][0] == "function") {
 			functionProperties[zoteroField] = new LiteralProperty(zoteroField);
 		} else {
 			var domain = FIELDS[zoteroField][0];
 			var predicate = FIELDS[zoteroField][1];
-			if(typeof predicate == "object") predicate = predicate[0];
+			if (typeof predicate == "object") predicate = predicate[0];
 			var prop = new LiteralProperty(zoteroField);
 		
-			if(collapsedProperties[domain][predicate]) {
+			if (collapsedProperties[domain][predicate]) {
 				collapsedProperties[domain][predicate].push(prop);
 			} else {
 				collapsedProperties[domain][predicate] = [prop];
@@ -822,13 +840,13 @@ function doImport() {
 	}
 	
 	// collapse list of creators
-	for(var creatorType in CREATORS) {
+	for (var creatorType in CREATORS) {
 		var domain = CREATORS[creatorType][0];
 		var predicate = CREATORS[creatorType][2];
-		if(typeof predicate == "object") predicate = predicate[0];
+		if (typeof predicate == "object") predicate = predicate[0];
 		var prop = new CreatorProperty(creatorType);
 		
-		if(collapsedProperties[domain][predicate]) {
+		if (collapsedProperties[domain][predicate]) {
 			collapsedProperties[domain][predicate].unshift(prop);
 		} else {
 			collapsedProperties[domain][predicate] = [prop];
@@ -839,49 +857,54 @@ function doImport() {
 	var itemNode, predicateNode, objectNode;
 	var rdfTypes = Zotero.RDF.getStatementsMatching(null, RDF_TYPE, null);
 	var itemNodes = {}, tmp;
-	for each(var rdfType in rdfTypes) {
+	for (var i=0; i<rdfTypes.length; i++) {
+		var rdfType = rdfTypes[i];
 		tmp = rdfType;
 		itemNode = tmp[0];
 		predicateNode = tmp[1];
 		objectNode = tmp[2];
-		if(typeof objectNode !== "object") continue;
+		if (typeof objectNode !== "object") continue;
 		var uri = Zotero.RDF.getResourceURI(itemNode);
-		if(!uri) continue;
+		if (!uri) continue;
 		itemNodes[uri] = itemNode;
 	}
 	
 	// Look through found items to see if their rdf:type matches a Zotero item type URI, and if so,
 	// subject to further processing
-	for each(var itemNode in itemNodes) {
+	for (var h in itemNodes) {
+		var itemNode = itemNodes[h];
 		// check whether the relationship to another item precludes us from extracting this as
 		// top-level
 		var skip = false;
-		for each(var arc in Zotero.RDF.getArcsIn(itemNode)) {
-			if(SAME_ITEM_RELATIONS.indexOf(arc) !== -1) {
+		var arcs = Zotero.RDF.getArcsIn(itemNode);
+		for (var j=0; j<arcs.length; j++) {
+			if (SAME_ITEM_RELATIONS.indexOf( arcs[j] ) !== -1) {
 				skip = true;
 				break;
 			}
 		}
-		if(skip) continue;
+		if (skip) continue;
 		
 		var itemRDFTypes = Zotero.RDF.getStatementsMatching(itemNode, RDF_TYPE, null);
 		
 		// score types by the number of triples they share with our types
 		var bestTypeScore = -9999;
 		var bestType, score, nodes, bestNodes;
-		for each(var rdfType in itemRDFTypes) {
-			if(typeof rdfType[2] !== "object") continue;
+		for (var j=0; j<itemRDFTypes.length; j++) {
+			var rdfType = itemRDFTypes[j];
+			if (typeof rdfType[2] !== "object") continue;
 			var collapsedTypesForItem = collapsedTypes[Z.RDF.getResourceURI(rdfType[2])];
-			if(!collapsedTypesForItem) continue;
+			if (!collapsedTypesForItem) continue;
 			
-			for each(var type in collapsedTypesForItem) {
+			for (var k=0; k<collapsedTypesForItem.length; k++) {
+				var type = collapsedTypesForItem[k];
 				tmp = type.getMatchScore(itemNode);
 				score = tmp[0];
 				nodes = tmp[1];
 				//Zotero.debug("Type "+type.zoteroType+" has score "+score);
 				
 				// check if this is the best we can do
-				if(score > bestTypeScore) {
+				if (score > bestTypeScore) {
 					bestTypeScore = score;
 					bestType = type;
 					bestNodes = nodes;
@@ -890,7 +913,7 @@ function doImport() {
 		}
 		
 		// skip if this doesn't fit any type very well
-		if(bestTypeScore < 1) {
+		if (bestTypeScore < 1) {
 			//Zotero.debug("No good type mapping; best type was "+bestType.zoteroType+" with score "+bestTypeScore);
 			continue;
 		}
@@ -905,29 +928,31 @@ function doImport() {
 		
 		// handle ordinary properties
 		var allCreators = {}
-		for(var i in nodes) {
+		for (var i in nodes) {
 			var propertiesHandled = {};
 			var properties = Zotero.RDF.getArcsOut(nodes[i]);
-			for each(var property in properties) {
+			for (var g=0; g<properties.length; g++) {
+				var property = properties[g];
 				// only handle each property once
-				if(propertiesHandled[property]) continue;
+				if (propertiesHandled[property]) continue;
 				propertiesHandled[property] = true;
 				//Zotero.debug("handling "+property);
 				
 				var propertyMappings = collapsedProperties[i][property];
-				if(propertyMappings) {
-					for each(var propertyMapping in propertyMappings) {
-						if(propertyMapping.mapToItem) {				// LiteralProperty
+				if (propertyMappings) {
+					for (var k=0; k<propertyMappings.length; k++) {
+						var propertyMapping = propertyMappings[k];
+						if (propertyMapping.mapToItem) {				// LiteralProperty
 							propertyMapping.mapToItem(newItem, nodes);
-						} else if(propertyMapping.mapToCreator) {	// CreatorProperty
+						} else if (propertyMapping.mapToCreator) {	// CreatorProperty
 							var creators, creatorNodes;
 							tmp = propertyMapping.mapToCreators(nodes[i], zoteroType);
 							creators = tmp[0];
 							creatorNodes = tmp[1];
-							if(creators.length) {
-								for(var j in creators) {
+							if (creators.length) {
+								for (var j in creators) {
 									var creatorNodeURI = Zotero.RDF.getResourceURI(creatorNodes[j]);
-									if(!allCreators[creatorNodeURI]) {
+									if (!allCreators[creatorNodeURI]) {
 										allCreators[creatorNodeURI] = creators[j];
 									}
 								}
@@ -939,62 +964,67 @@ function doImport() {
 		}
 		
 		// handle function properties
-		for each(var functionProperty in functionProperties) {
-			functionProperty.mapToItem(newItem, nodes);
+		for (var j in functionProperties) {
+			functionProperties[j].mapToItem(newItem, nodes);
 		}
 		
 		// handle creators and tags
 		var creatorLists = {};
 		var creatorsAdded = {};
-		for(var i in nodes) {
+		for (var i in nodes) {
 			// take DC subjects as tags
 			var statements = Zotero.RDF.getStatementsMatching(nodes[i], n.dcterms+"subject", null);
-			for each(var stmt in statements) {
+			for (var j=0; j<statements.length; j++) {
+				var stmt = statements[j];
 				// if attached to the user item, it's a user tag; otherwise, an automatic tag
 				newItem.tags.push({tag:stmt[2], type:(i == USERITEM ? 0 : 1)});
 			}
 			
 			// also take ctags as tags
 			var statements = Zotero.RDF.getStatementsMatching(nodes[i], n.ctag+"tagged", null);
-			for each(var stmt in statements) {
+			for (var j=0; j<statements.length; j++) {
+				var stmt = statements[j];
 				var tag = {type:0};
 				
 				// AutoTags are automatic tags
 				var types = Zotero.RDF.getStatementsMatching(stmt[2], n.rdf+"type", null);
-				for each(var type in types) {
+				for (var k=0; k<types.length; k++) {
+					var type = types[k];
 					var uri = Zotero.RDF.getResourceURI(type[2]);
-					if([n.ctag+"AutoTag", n.ctag+"AuthorTag"].indexOf(uri) != -1) tag.type = 1;
+					if ([n.ctag+"AutoTag", n.ctag+"AuthorTag"].indexOf(uri) != -1) tag.type = 1;
 					break;
 				}
 				
 				// labels are tag content
 				var labels = Zotero.RDF.getStatementsMatching(stmt[2], n.ctag+"label", null);
-				if(labels.length) {
+				if (labels.length) {
 					tag.tag = labels[0][2];
 					newItem.tags.push(tag);
 				}
 			}
 			
-			for(var j in CREATOR_LISTS) {
+			for (var j in CREATOR_LISTS) {
 				var statements = Zotero.RDF.getStatementsMatching(nodes[i], CREATOR_LISTS[j], null);
-				for each(var stmt in statements) {
+				for (var k=0; k<statements.length; k++) {
+					var stmt = statements[k];
 					var creatorListURI = Zotero.RDF.getResourceURI(stmt[2]);
-					if(creatorLists[creatorListURI]) continue;
+					if (creatorLists[creatorListURI]) continue;
 					creatorLists[creatorListURI] = true;
 					var creatorNodes = Zotero.RDF.getContainerElements(stmt[2]);
-					for each(var creatorNode in creatorNodes) {
+					for (var l=0; l<creatorNodes.length; l++) {
+						var creatorNode = creatorNodes[l];
 						var creatorNodeURI = Zotero.RDF.getResourceURI(creatorNode);
-						if(!creatorsAdded[creatorNodeURI]) {
+						if (!creatorsAdded[creatorNodeURI]) {
 							creatorsAdded[creatorNodeURI] = true;
-							if(allCreators[creatorNodeURI]) {
+							if (allCreators[creatorNodeURI]) {
 								// just add to creators list
 								newItem.creators.push(allCreators[creatorNodeURI]);
 							} else {
 								// creator not already processed, use default for this list type
-								if(j == AUTHOR_LIST) {
+								if (j == AUTHOR_LIST) {
 									//Zotero.debug("WARNING: creator in authorList lacks relationship to item in Bibliontology RDF; treating as primary creator");
 									var prop = new CreatorProperty("author");
-								} else if(j == EDITOR_LIST) {
+								} else if (j == EDITOR_LIST) {
 									//Zotero.debug("WARNING: creator in editorList lacks relationship to item in Bibliontology RDF; treating as editor");
 									var prop = new CreatorProperty("editor");
 								} else {
@@ -1002,7 +1032,7 @@ function doImport() {
 									var prop = new CreatorProperty("contributor");
 								}							
 								var creator = prop.mapToCreator(creatorNode, zoteroType);
-								if(creator) newItem.creators.push(creator);
+								if (creator) newItem.creators.push(creator);
 							}
 						}
 					}
@@ -1010,8 +1040,8 @@ function doImport() {
 			}
 		}
 		
-		for(var creatorNodeURI in allCreators) {
-			if(!creatorsAdded[creatorNodeURI]) {
+		for (var creatorNodeURI in allCreators) {
+			if (!creatorsAdded[creatorNodeURI]) {
 				newItem.creators.push(allCreators[creatorNodeURI]);
 			}
 		}
@@ -1026,26 +1056,27 @@ var usedURIs = {};
 
 function doExport() {
 	// add namespaces
-	for(var i in n) Zotero.RDF.addNamespace(i, n[i]);
+	for (var i in n) Zotero.RDF.addNamespace(i, n[i]);
 	
 	// compile references and create URIs
 	var item;
 	var items = {};
-	while(item = Zotero.nextItem()) {
+	while (item = Zotero.nextItem()) {
 		items[item.itemID] = item;
 	}
 	var autoTags = {};
 	var userTags = {};
 	
 	// now that we've collected our items, start building the RDF
-	for each(var item in items) {
+	for (var h in items) {
+		var item = items[h]; 
 		// set type on item node
 		var type = new Type(item.itemType, TYPES[item.itemType]);
 		var nodes = type.createNodes(item);
 		
 		// add fields
-		for(var field in item.uniqueFields) {
-			if(!item.uniqueFields[field] && item.uniqueFields[field] !== 0) continue;
+		for (var field in item.uniqueFields) {
+			if (!item.uniqueFields[field] && item.uniqueFields[field] !== 0) continue;
 			
 			var property = new LiteralProperty(field);
 			property.mapFromItem(item, nodes);
@@ -1054,7 +1085,8 @@ function doExport() {
 		
 		// add creators
 		var creatorLists = [];
-		for each(var creator in item.creators) {
+		for (var i=0; i<item.creators.length; i++) {
+			var creator = item.creators[i];
 			// create creator
 			var property = new CreatorProperty(creator.creatorType);
 			property.mapFromCreator(item, creator, nodes);
@@ -1062,10 +1094,11 @@ function doExport() {
 		//Zotero.debug("creators added");
 		
 		// add tags
-		for each(var tag in item.tags) {
+		for (var i=0; i<item.tags.length; i++) {
+			var tag = item.tags[i];
 			var tagCollection = tag.type == 0 ? userTags : autoTags;
 			
-			if(tagCollection[tag.tag]) {
+			if (tagCollection[tag.tag]) {
 				var tagNode = tagCollection[tag.tag];
 			} else {
 				var tagNode = Zotero.RDF.newResource();
@@ -1082,3 +1115,39 @@ function doExport() {
 		//Zotero.debug("relations added");
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:res=\"http://purl.org/vocab/resourcelist/schema#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:bibo=\"http://purl.org/ontology/bibo/\"\n xmlns:dcterms=\"http://purl.org/dc/terms/\"\n xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n    <z:UserItem rdf:about=\"http://zotero.org/users/96641/items/XW66MVF4\">\n        <res:resource rdf:resource=\"http://libreas.eu/ausgabe29/05kim/\"/>\n        <z:accessDate>2017-05-28 14:08:38</z:accessDate>\n        <z:repository>libreas.eu</z:repository>\n    </z:UserItem>\n    <bibo:AcademicArticle rdf:about=\"http://libreas.eu/ausgabe29/05kim/\">\n        <bibo:uri>http://libreas.eu/ausgabe29/05kim/</bibo:uri>\n        <dcterms:language>de</dcterms:language>\n        <dcterms:abstract>Im Folgenden soll aufgezeigt werden, wie derzeit das Literaturverwaltungsprogramm Zotero innerhalb des Index Theologicus genutzt wird, um unselbstständige Literatur in einem bibliothekarischen Katalogisierungssystem zu erfassen. Die modulare und flexible Architektur der Open Source Software erlaubt es, die bereits kollaborativ zusammengetragene Programmierarbeit zur Datenextraktion mitzunutzen. Das vorgestellte semiautomatische Verfahren bringt auch bei der Verknüpfung von Normdaten erhebliche Vorteile für die Medienbearbeitung. &lt;/br&gt; &lt;b&gt;Schlüsselwörter&lt;/b&gt;: Literaturverwaltungsprogramm, Zotero, Katalogisierung, Unselbständige Werke, Aufsatzliteratur, Index Theologicus, Online-Bibliographie, WinIBW, Fachinformationsdienst Theologie &lt;hr&gt; This article presents an approach to use the reference management software Zotero within the theological article database Index Theologicus to catalogue article metadata for a library management system. Zotero's Open Source nature and flexible architecture allowed us to seamlessly reuse the vast amount of data extraction routines collaboratively developed for the software. We will show how the semi-automatic workflow we developed will make authority linking fun again. &lt;/br&gt; &lt;b&gt;Keywords:&lt;/b&gt; Reference Management System, Zotero, Cataloguing, Journal articles, Index Theologicus, Theological database, Academic Information Services for Theology</dcterms:abstract>\n        <dcterms:title>Semiautomatische Katalogisierung und Normdatenverknüpfung mit Zotero im Index Theologicus</dcterms:title>\n        <dcterms:creator rdf:nodeID=\"n5\"/>\n        <bibo:authorList>\n           <rdf:Seq><rdf:li rdf:nodeID=\"n5\"/><rdf:li rdf:nodeID=\"n7\"/></rdf:Seq>\n        </bibo:authorList>\n        <dcterms:creator rdf:nodeID=\"n7\"/>\n        <dcterms:isPartOf>\n            <bibo:Issue>\n                <bibo:issue>29</bibo:issue>\n                <dcterms:date>2016</dcterms:date>\n                <dcterms:isPartOf>\n                    <bibo:Journal>\n                        <dcterms:title>LIBREAS. Library Ideas</dcterms:title>\n                        <bibo:issn>1860-7950</bibo:issn>\n                    </bibo:Journal>\n                </dcterms:isPartOf>\n            </bibo:Issue>\n        </dcterms:isPartOf>\n    </bibo:AcademicArticle>\n    <foaf:Person rdf:nodeID=\"n5\">\n        <foaf:givenname>Timotheus Chang-whae</foaf:givenname>\n        <foaf:surname>Kim</foaf:surname>\n    </foaf:Person>\n    <foaf:Person rdf:nodeID=\"n7\">\n        <foaf:givenname>Philipp</foaf:givenname>\n        <foaf:surname>Zumstein</foaf:surname>\n    </foaf:Person>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Semiautomatische Katalogisierung und Normdatenverknüpfung mit Zotero im Index Theologicus",
+				"creators": [
+					{
+						"lastName": "Kim",
+						"firstName": "Timotheus Chang-whae"
+					},
+					{
+						"lastName": "Zumstein",
+						"firstName": "Philipp"
+					}
+				],
+				"date": "2016",
+				"ISSN": "1860-7950",
+				"abstractNote": "Im Folgenden soll aufgezeigt werden, wie derzeit das Literaturverwaltungsprogramm Zotero innerhalb des Index Theologicus genutzt wird, um unselbstständige Literatur in einem bibliothekarischen Katalogisierungssystem zu erfassen. Die modulare und flexible Architektur der Open Source Software erlaubt es, die bereits kollaborativ zusammengetragene Programmierarbeit zur Datenextraktion mitzunutzen. Das vorgestellte semiautomatische Verfahren bringt auch bei der Verknüpfung von Normdaten erhebliche Vorteile für die Medienbearbeitung. </br> <b>Schlüsselwörter</b>: Literaturverwaltungsprogramm, Zotero, Katalogisierung, Unselbständige Werke, Aufsatzliteratur, Index Theologicus, Online-Bibliographie, WinIBW, Fachinformationsdienst Theologie <hr> This article presents an approach to use the reference management software Zotero within the theological article database Index Theologicus to catalogue article metadata for a library management system. Zotero's Open Source nature and flexible architecture allowed us to seamlessly reuse the vast amount of data extraction routines collaboratively developed for the software. We will show how the semi-automatic workflow we developed will make authority linking fun again. </br> <b>Keywords:</b> Reference Management System, Zotero, Cataloguing, Journal articles, Index Theologicus, Theological database, Academic Information Services for Theology",
+				"issue": "29",
+				"language": "de",
+				"libraryCatalog": "libreas.eu",
+				"publicationTitle": "LIBREAS. Library Ideas",
+				"url": "http://libreas.eu/ausgabe29/05kim/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/

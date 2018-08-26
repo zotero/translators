@@ -2,14 +2,14 @@
 	"translatorID": "b33af0e1-d122-45b2-b144-4b4eedd12d5d",
 	"label": "Wildlife Biology in Practice",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "http://[^/]*socpvs\\.org/journals/index\\.php/wbp",
+	"target": "^https?://[^/]*socpvs\\.org/journals/index\\.php/wbp",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-07-27 22:28:21"
+	"lastUpdated": "2017-01-01 15:47:15"
 }
 
 function scrape(doc) {
@@ -20,7 +20,7 @@ function scrape(doc) {
 	translator.setHandler("itemDone", function(obj, item) {
 		//keywords are all present in a single "subjct" entry, we need to split them up
 		var newTags = new Array();
-		for(var i=0, n=item.tags.length; i<n; i++) {
+		for (var i=0, n=item.tags.length; i<n; i++) {
 			//keywords may also contain html tags, so we strip them
 			newTags = newTags.concat( ZU.cleanTags(item.tags[i]).split('; ') );
 		}
@@ -28,7 +28,7 @@ function scrape(doc) {
 		item.tags = ZU.arrayUnique(newTags);
 
 		//abstract ends up in extra. Moving it to abstractNote
-		if(item.extra) {
+		if (item.extra) {
 			item.abstractNote = item.extra;
 			delete item.extra;
 		}
@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 		}
 
 		var results = ZU.xpath(doc, itemx);
-		for( var i=0, n=results.length; i<n; i++) {
+		for ( var i=0, n=results.length; i<n; i++) {
 			var result = results[i];
 			var title = ZU.xpathText(result, titlex);
 			var link = ZU.xpathText(result, linkx).replace(/\/view\//, '/viewArticle/');
@@ -71,10 +71,10 @@ function doWeb(doc, url) {
 		}
 
 		Zotero.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var urls = new Array();
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 

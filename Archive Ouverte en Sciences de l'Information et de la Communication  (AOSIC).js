@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2012-03-03 23:29:34"
+	"lastUpdated": "2015-06-02 05:58:49"
 }
 
 function detectWeb(doc, url) {
@@ -57,7 +57,8 @@ function doWeb(doc, url) {
 		for (var tag in metaTags) {
 			if (tag == "DC.creator") {
 				var authors = data['DC.creator'].split(";");
-				for each (var aut in authors) {
+				for (var i=0; i<authors.length; i++) {
+					var aut = authors[i];
 					aut = aut.replace(/^([^,]+),\s+(.*)$/, "$2 $1");
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 				}

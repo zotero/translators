@@ -13,31 +13,37 @@
 }
 
 /*
-	SFU IPinCH - translator for Zotero
-	Copyright (C) 2010 Aurimas Vinckevicius
+	***** BEGIN LICENSE BLOCK *****
 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
+	SFU IPinCH - translator for Zotero
+	Copyright © 2010 Aurimas Vinckevicius
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
+	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
-	if(url.indexOf('/browse/') != -1 || url.indexOf('/search/') != -1) {
-		if(ZU.xpath(doc, '//div[@class="citation"]').length) {
+	if (url.indexOf('/browse/') != -1 || url.indexOf('/search/') != -1) {
+		if (ZU.xpath(doc, '//div[@class="citation"]').length) {
 			return 'multiple';
 		}
 	} else if (url.indexOf('/records/') != -1) {
 		var type = ZU.xpathText(doc, '//meta[@name="itemType"]/@content');
-		if(type && ZU.itemTypeExists(type)) {
+		if (type && ZU.itemTypeExists(type)) {
 			return type;
 		}
 	}
@@ -50,8 +56,8 @@ function scrape(doc, url) {
 	var date = ['', '', ''];
 	var months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
 				'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-	for(var i=0, n=meta.length; i<n; i++) {
-		switch(meta[i].name) {
+	for (var i=0, n=meta.length; i<n; i++) {
+		switch (meta[i].name) {
 			case 'author':
 			case 'editor':
 			case 'persenter':
@@ -107,10 +113,10 @@ function scrape(doc, url) {
 		}
 	}
 
-	if(!item.title) item.title = ZU.xpathText(doc, '//title')
+	if (!item.title) item.title = ZU.xpathText(doc, '//title')
 									.split(/\s*\|/)[0].trim();
 
-	if(place[0]) item.place = place.join(', ');
+	if (place[0]) item.place = place.join(', ');
 	else item.place = place[1];
 
 	item.date = date.join('-').replace(/(^-.*|--.*|-$)/g,'');
@@ -120,13 +126,13 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		var links = ZU.xpath(doc, '//div[@class="citation"]');
 		Zotero.selectItems(ZU.getItemArray(doc, links), function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var urls = new Array();
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 			ZU.processDocuments(urls,

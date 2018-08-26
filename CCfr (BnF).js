@@ -2,7 +2,7 @@
 	"translatorID": "899d10f5-3f35-40e6-8dfb-f8ee2dfb1849",
 	"label": "CCfr (BnF)",
 	"creator": "Sylvain Machefert, Aurimas Vinckevicius",
-	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(?:action=search|menu=menu_view_grappage|search\\.jsp)\\b",
+	"target": "^https?://ccfr\\.bnf\\.fr/portailccfr/.*\\b(action=search|menu=menu_view_grappage|search\\.jsp)\\b",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -28,10 +28,10 @@ function doWeb(doc, url)
 	if (items)
 	{
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var links = new Array();
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				links.push(getMarcUrl(i));
 			}
 			ZU.processDocuments(links, scrape);

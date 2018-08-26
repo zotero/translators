@@ -13,22 +13,31 @@
 }
 
 /*
-Mango Library Translator
-Copyright (C) 2011 Sebastian Karcher and CHNM
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Mango Library Translator
+	Copyright © 2011 Sebastian Karcher and CHNM
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
+/*
 not tests working, should work e.g. here:
 http://fsu.catalog.fcla.edu/permalink.jsp?23FS000905416
 http://fgcu.catalog.fcla.edu/permalink.jsp?25GC000505950
@@ -66,7 +75,7 @@ function scrape(marc, newDoc) {
 	var xpath = '//table[@width="95%"]/tbody/tr[@class="trGenContent"]';
 	var elmts = newDoc.evaluate(xpath, newDoc, nsResolver, XPathResult.ANY_TYPE, null);
 	var elmt;
-	while(elmt = elmts.iterateNext()) {
+	while (elmt = elmts.iterateNext()) {
 
 	  var tag =	ZU.xpathText(elmt, './td[1]');
 	  var ind =   ZU.xpathText(elmt, './td[2]');
@@ -88,7 +97,7 @@ function scrape(marc, newDoc) {
 		if (extra){
 		  extra = extra + "\n" +newItem.notes[i].note;
 		}
-		else{
+		else {
 		  var	extra= newItem.notes[i].note;
 		}
 		}
@@ -155,22 +164,22 @@ else {	// Search results page
 			var tableRows = doc.evaluate('//td[@id="dimRecords3"]/table//table[@width="100%"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			// Go through table rows
 			var i = 0;
-			while(tableRow = tableRows.iterateNext()) {
+			while (tableRow = tableRows.iterateNext()) {
 				// get link
 				var links = doc.evaluate('.//div/a[contains(@id, "Title")]', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				var link = links.iterateNext();
-				if(!link) {
+				if (!link) {
 					var links = doc.evaluate('.//div/a[contains(@id, "Title")]/@href', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 					link = links.iterateNext();
 				}
 
-				if(link) {
-					if(availableItems[link.href]) {
+				if (link) {
+					if (availableItems[link.href]) {
 						continue;
 					}
 
 					// Go through links
-					while(link) {
+					while (link) {
 						if (link.textContent.match(/\w+/)) availableItems[link.href] = link.textContent;
 						link = links.iterateNext();
 					}
@@ -179,12 +188,12 @@ else {	// Search results page
 			};
 
 			 Zotero.selectItems(availableItems, function (items) {
-			if(!items) {
+			if (!items) {
 				return true;
 			}
 
 			var newUrls = new Array();
-			for(var itemURL in items) {
+			for (var itemURL in items) {
 				newUrls.push(itemURL.replace(/\&V=D\&/, "&V=M&"));
 			}
 			pageByPage(marc, newUrls);

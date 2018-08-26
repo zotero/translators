@@ -1,14 +1,15 @@
 {
-	"translatorID":"0dda3f89-15de-4479-987f-cc13f1ba7999",
-	"translatorType":4,
-	"label":"Ancestry.com US Federal Census",
-	"creator":"Elena Razlogova",
-	"target":"^https?://search.ancestry.com/(.*)usfedcen|1890orgcen|1910uscenindex",
-	"minVersion":"1.0.0b4.r1",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2011-01-11 04:31:00"
+	"translatorID": "0dda3f89-15de-4479-987f-cc13f1ba7999",
+	"label": "Ancestry.com US Federal Census",
+	"creator": "Elena Razlogova",
+	"target": "^https?://search\\.ancestry\\.com/.*(usfedcen|1890orgcen|1910uscenindex)",
+	"minVersion": "1.0.0b4.r1",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "g",
+	"lastUpdated": "2015-06-02 10:57:09"
 }
 
 function detectWeb(doc, url) {
@@ -23,27 +24,27 @@ function detectWeb(doc, url) {
 	var rows = doc.evaluate('//div[@class="g_container"]/div[@class="g_panelWrap"]/div[@class="g_panelCore"]/div[@class="s_container"]/div[@class="p_rsltList"]/table/tbody/tr[@class="tblrow record"]', 
 				doc, nsResolver, XPathResult.ANY_TYPE, null);
 	var row;
-	while(row = rows.iterateNext()) {
+	while (row = rows.iterateNext()) {
 		links = doc.evaluate('.//a', row, nsResolver, XPathResult.ANY_TYPE, null);
 		var linkNo=0;
-		while(link=links.iterateNext()) {
+		while (link=links.iterateNext()) {
 			linkNo=linkNo+1;
 		}
 		break;
 	}
 	
-	if(result && linkNo == 2) {
+	if (result && linkNo == 2) {
 		return "multiple";
 	} else {
 		var indivRe = /indiv=1/;
 		var m = indivRe.exec(doc.location.href);
 		var indiv = 0;
-		if(m) {
+		if (m) {
 			indiv = 1;
 			}
 
 		checkURL = doc.location.href.replace("pf=", "");
-		if(doc.location.href == checkURL && indiv == 1) {
+		if (doc.location.href == checkURL && indiv == 1) {
 			return "bookSection";
 		}
 	} 
@@ -65,19 +66,20 @@ function scrape(doc) {
 	var info = doc.evaluate('//div[@class="facets"][@id="connect"]/div[@class="g_box"]/p/a', 
 		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();	
 		
-	if(info) {	
+	if (info) {	
 		
 		info = info.toString();
 		var data = new Array();
 		var parts = info.split(/[?&]/);
-		for each(var part in parts) {
+		for (var i=0; i<parts.length; i++) {
+			var part = parts[i];
 			var index = part.indexOf("=");
-			if(index !== -1) {
+			if (index !== -1) {
 				data[part.substr(0, index)] = part.substr(index+1);
 			}
 		}
 		
-		if(data.ln) {
+		if (data.ln) {
 			var lastName = data.ln.replace(/\+/g, " ");
 			var firstName = data.fn.replace(/\+/g, " ");
 		} else { 
@@ -85,10 +87,10 @@ function scrape(doc) {
 			var firstName = ""; 
 		}
 		var dOb = data.by; // this does not get saved yet because no field is available; the info is in the snapshot
-		if(data.rfd) {
+		if (data.rfd) {
 			var yearRe = /([0-9]{4})/;
 			var m = yearRe.exec(data.rfd);
-			if(m) { 
+			if (m) { 
 				var year = m[1];
 			}
 		} else { var year = data.ry; }
@@ -103,9 +105,9 @@ function scrape(doc) {
 	var censusNo = "";
 	var censusNos = new Array("1790", "First", "1800", "Second", "1810", "Third", "1820", "Fourth", "1830", "Fifth", "1840", "Sixth", "1850", "Seventh", "1860", "Eighth", "1870", "Ninth", 
 			"1880", "Tenth", "1890", "Eleventh", "1900", "Twelfth", "1910", "Thirteenth", "1920", "Fourteenth", "1930", "Fifteenth")
-	for(var i in censusNos) {
-			if(censusYear == 1) { censusNo = censusNos[i] };
-			if(censusNos[i] == year) { censusYear = 1 } else {censusYear= 0 };
+	for (var i in censusNos) {
+			if (censusYear == 1) { censusNo = censusNos[i] };
+			if (censusNos[i] == year) { censusYear = 1 } else {censusYear= 0 };
 		}
 
 	//begin adding item
@@ -119,12 +121,12 @@ function scrape(doc) {
 	// get snapshot with all searchable text and a simplified link to the record for the URL field
 	var dbRe = /db=([0-9a-z]+)/;
 	var m = dbRe.exec(doc.location.href);
-	if(m) {
+	if (m) {
 		db = m[1];
 	}
 	var snapshotRe = /\&h=([0-9]+)/;
 	var m = snapshotRe.exec(doc.location.href);
-		if(m) {
+		if (m) {
 		snapshotURL = "http://search.ancestry.com/cgi-bin/sse.dll?db="+db+"&indiv=1&pf=1&h="+m[1];
 		newItem.attachments.push({title:"Ancestry.com Snapshot", mimeType:"text/html", url:snapshotURL, snapshot:true});
 		cleanURL = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+m[1];
@@ -148,22 +150,22 @@ function scrape(doc) {
 	var scanInfo = doc.evaluate('//div[@id="record-main"]/table[@class="p_recTable"]/tbody/tr/td[2][@class="recordTN"]/a', 
 		doc, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 	
-	if(scanInfo) {
+	if (scanInfo) {
 		var scanRe = /iid=([A-Z0-9_-]+)/;		
 		var m = scanRe.exec(scanInfo);
-		if(m) {
+		if (m) {
 			scanURL = "http://content.ancestry.com/Browse/print_u.aspx?dbid="+dbid+"&iid="+m[1];
 			Zotero.debug("scan url: " + scanURL);
 		}
 	}
 	
-	if(scanURL){
+	if (scanURL){
 		Zotero.Utilities.HTTP.doGet(scanURL, function(text) { 
 			Zotero.debug("running doGet");
 			Zotero.debug(text);
 			var imageRe = /950  src="([^"]+)"/;
 			var m = imageRe.exec(text);
-				if(m) {
+				if (m) {
 					imageURL = m[1];
 					Zotero.debug("image url: " + imageURL);
 					newItem.attachments.push({title:"Ancestry.com Image", mimeType:"image/jpeg", url:imageURL, snapshot:true});
@@ -180,7 +182,7 @@ function scrape(doc) {
 
 function doWeb(doc, url) {
 	var resultsRegexp = /&h=/;
-	if(resultsRegexp.test(url)) {
+	if (resultsRegexp.test(url)) {
 		scrape(doc);
 	} else {
 		var namespace = doc.documentElement.namespaceURI;
@@ -191,13 +193,13 @@ function doWeb(doc, url) {
 		// get census year for links to items
 		var yearRe = /db=([0-9]+)/;
 		var m = yearRe.exec(doc.location.href);
-		if(m) {
+		if (m) {
 			year = m[1];
 		}
 		
 		var dbRe = /db=([0-9a-z]+)/;
 		var m = dbRe.exec(doc.location.href);
-		if(m) {
+		if (m) {
 			db = m[1];
 		}
 
@@ -212,7 +214,7 @@ function doWeb(doc, url) {
 			recInfo = doc.evaluate('.//a', listElt, nsResolver, XPathResult.ANY_TYPE, null).iterateNext();
 			var recidRe = /recid=([0-9]+)/;
 			var m = recidRe.exec(recInfo);
-			if(m) {
+			if (m) {
 				recid = m[1];
 			}
 			link = "http://search.ancestry.com/cgi-bin/sse.dll?indiv=1&db="+db+"&fh=0&h="+recid;
@@ -221,10 +223,10 @@ function doWeb(doc, url) {
 		} 
 
 		items = Zotero.selectItems(items);
-		if(!items) return true;
+		if (!items) return true;
 
 		var urls = new Array();
-		for(var i in items) {
+		for (var i in items) {
 			urls.push(i);
 		}
 		

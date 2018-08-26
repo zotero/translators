@@ -8,8 +8,8 @@
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2014-12-08 05:03:12"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-24 09:40:05"
 }
 
 /*
@@ -26,9 +26,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 function detectWeb(doc, url) {
-	var nav = doc.getElementById("lefttoc");
-	if (nav && ZU.xpathText(nav,".//a[@class='current']")) {
+	if (ZU.xpathText(doc,"//div[@id='lefttoc']//a[@class='current']")) {
 		return "bookSection";
 	}
 	else if (url.indexOf("/book/") > -1 || /\/[0-9]{10}/.test(url)) {
@@ -50,7 +50,7 @@ function doWeb(doc, url) {
 			if (!ids) return true;
 			
 			var toProcess = [];
-			for(var id in ids){
+			for (var id in ids){
 				toProcess.push(id);
 			}
 			ZU.processDocuments(toProcess, importBook);
@@ -63,9 +63,9 @@ function getSearchResults(doc,quick) {
 		items = {},
 		found = false;
 		
-	if(quick) return titles.length;
+	if (quick) return titles.length;
 	
-	for(var i = 0; i < titles.length; i++) {
+	for (var i = 0; i < titles.length; i++) {
 		var title = ZU.xpathText(titles[i],"./a/@title");
 		var link = ZU.xpath(titles[i],"./a")[0].href;
 		items[link] = title;
@@ -85,7 +85,7 @@ function importBook(doc, url,section) {
 		var sectionTitle = nav ? ZU.xpathText(nav,".//a[@class='current']") : false;
 		var prefixes = /^(?:(?:Part|Chapter|Pt|Ch)\.? )?(?:[0-9]{1,3}\.?[0-9]{0,3}|(?:XC|XL|L?X{0,3})(?:IX|IV|V?I{0,3}))\b[.: ]+/;
 		
-		if(sectionTitle) sectionTitle = sectionTitle.replace(prefixes,"");
+		if (sectionTitle) sectionTitle = sectionTitle.replace(prefixes,"");
 		
 		ZU.processDocuments([parts[1]], function(newDoc,newUrl){
 			var section = sectionTitle ? 
@@ -109,19 +109,19 @@ function importBook(doc, url,section) {
 		props = ZU.xpath(doc, '//*[@itemprop]'),
 		isbn = {};
 		
-	for(var i = 0; i < props.length; i++) {
+	for (var i = 0; i < props.length; i++) {
 		var name = mapping[props[i].attributes["itemprop"].value];
 		
 		if (name) item[name] = ZU.trimInternal(props[i].textContent);
 		
-		if(name == "edition" 
+		if (name == "edition" 
 			&& (item.edition.toLowerCase() == "first" || item.edition == "1")) {
 			delete item.edition;
 		}
 		
-		if(name == "ISBN") {
+		if (name == "ISBN") {
 			var label = props[i].previousSibling
-			if(label) isbn[label.textContent] = item[name];
+			if (label) isbn[label.textContent] = item[name];
 		}
 	}
 	//many isbn, prefer web over print, and 13 over 10
@@ -133,22 +133,22 @@ function importBook(doc, url,section) {
 				
 	//author is poorly defined, have to search for it by text
 	var dataItems = ZU.xpath(doc, '//ul[@class="metadatalist"]//p[contains(@class,"data")]');
-	for(var i = 0; i < dataItems.length; i++) {
+	for (var i = 0; i < dataItems.length; i++) {
 		var field = dataItems[i].textContent,
 			label = ZU.trimInternal(field.substr(0, field.indexOf(":"))).toLowerCase(),
 			value = ZU.trimInternal(field.substr(field.indexOf(":") + 1));
 
 		if (label == "by") {
 			var authors = value.split(";")
-			for(var j = 0; j < authors.length; j++) {
-				if(authors[j]) item.creators.push(ZU.cleanAuthor(authors[j], 'author'));
+			for (var j = 0; j < authors.length; j++) {
+				if (authors[j]) item.creators.push(ZU.cleanAuthor(authors[j], 'author'));
 			}
 			break;
 		}
 	}
 	var itemUrl = section ? section.originalUrl : url;
 	item.url = itemUrl.replace(/[?#].*/, '');
-	if(section) {
+	if (section) {
 		item.bookTitle = item.title;
 		item.title = section.sectionTitle;
 	}
@@ -195,9 +195,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "May 07, 2014",
-				"ISBN": "978-0-13-392274-5",
-				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine. The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
+				"date": "May 7, 2014",
+				"ISBN": "9780133905908",
+				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine.The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
 				"bookTitle": "The Java® Virtual Machine Specification, Java SE 8 Edition",
 				"language": "en",
 				"libraryCatalog": "Safari Books Online",
@@ -239,9 +239,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "May 07, 2014",
-				"ISBN": "978-0-13-392274-5",
-				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine. The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
+				"date": "May 7, 2014",
+				"ISBN": "9780133905908",
+				"abstractNote": "Written by the inventors of the technology, The Java® Virtual Machine Specification, Java SE 8 Edition is the definitive technical reference for the Java Virtual Machine.The book provides complete, accurate, and detailed coverage of the Java Virtual Machine. It fully describes the new features added in Java SE 8, including the invocation of default methods and the class file extensions for type annotations and method parameters. The book also clarifies the interpretation of class file attributes and the rules of bytecode verification.",
 				"language": "en",
 				"libraryCatalog": "Safari Books Online",
 				"numPages": "600",
@@ -274,7 +274,7 @@ var testCases = [
 					}
 				],
 				"date": "June 26, 2007",
-				"ISBN": "0-596-51004-7",
+				"ISBN": "9780596510046",
 				"abstractNote": "How do the experts solve difficult problems in software development? In this unique and insightful book, leading computer scientists offer case studies that reveal how they found unusual, carefully designed solutions to high-profile projects. You will be able to look over the shoulder of major coding and design experts to see problems through their eyes. This is not simply another design patterns book, or another software engineering treatise on the right and wrong way to do things. The authors think aloud as they work through their project's architecture, the tradeoffs made in its construction, and when it was important to break rules. This book contains 33 chapters contributed by Brian Kernighan, Karl Fogel, Jon Bentley, Tim Bray, Elliotte Rusty Harold, Michael Feathers, Alberto Savoia, Charles Petzold, Douglas Crockford, Henry S. Warren, Jr., Ashish Gulhati, Lincoln Stein, Jim Kent, Jack Dongarra and Piotr Luszczek, Adam Kolawa, Greg Kroah-Hartman, Diomidis Spinellis, Andrew Kuchling, Travis E. Oliphant, Ronald Mak, Rogerio Atem de Carvalho and Rafael Monnerat, Bryan Cantrill, Jeff Dean and Sanjay Ghemawat, Simon Peyton Jones, Kent Dybvig, William Otte and Douglas C. Schmidt, Andrew Patzer, Andreas Zeller, Yukihiro Matsumoto, Arun Mehta, TV Raman, Laura Wingerd and Christopher Seiwald, and Brian Hayes. Beautiful Code is an opportunity for master coders to tell their story. All author royalties will be donated to Amnesty International.",
 				"bookTitle": "Beautiful Code",
 				"language": "en",
@@ -324,7 +324,7 @@ var testCases = [
 					}
 				],
 				"date": "August 28, 2012",
-				"ISBN": "978-1-118-28217-5",
+				"ISBN": "9781118282175",
 				"abstractNote": "Harness the powerful new SQL Server 2012 Microsoft SQL Server 2012 is the most significant update to this product since 2005, and it may change how database administrators and developers perform many aspects of their jobs. If you're a database administrator or developer, Microsoft SQL Server 2012 Bible teaches you everything you need to take full advantage of this major release. This detailed guide not only covers all the new features of SQL Server 2012, it also shows you step by step how to develop top-notch SQL Server databases and new data connections and keep your databases performing at peak. The book is crammed with specific examples, sample code, and a host of tips, workarounds, and best practices. In addition, downloadable code is available from the book's companion web site, which you can use to jumpstart your own projects. Serves as an authoritative guide to Microsoft's SQL Server 2012 for database administrators and developersCovers all the software's new features and capabilities, including SQL Azure for cloud computing, enhancements to client connectivity, and new functionality that ensures high-availability of mission-critical applicationsExplains major new changes to the SQL Server Business Intelligence tools, such as Integration, Reporting, and Analysis ServicesDemonstrates tasks both graphically and in SQL code to enhance your learningProvides source code from the companion web site, which you can use as a basis for your own projectsExplores tips, smart workarounds, and best practices to help you on the job Get thoroughly up to speed on SQL Server 2012 with Microsoft SQL Server 2012 Bible.",
 				"bookTitle": "Microsoft SQL Server 2012 Bible",
 				"language": "en",
@@ -373,7 +373,7 @@ var testCases = [
 					}
 				],
 				"date": "August 28, 2012",
-				"ISBN": "978-1-118-28217-5",
+				"ISBN": "9781118282175",
 				"abstractNote": "Harness the powerful new SQL Server 2012 Microsoft SQL Server 2012 is the most significant update to this product since 2005, and it may change how database administrators and developers perform many aspects of their jobs. If you're a database administrator or developer, Microsoft SQL Server 2012 Bible teaches you everything you need to take full advantage of this major release. This detailed guide not only covers all the new features of SQL Server 2012, it also shows you step by step how to develop top-notch SQL Server databases and new data connections and keep your databases performing at peak. The book is crammed with specific examples, sample code, and a host of tips, workarounds, and best practices. In addition, downloadable code is available from the book's companion web site, which you can use to jumpstart your own projects. Serves as an authoritative guide to Microsoft's SQL Server 2012 for database administrators and developersCovers all the software's new features and capabilities, including SQL Azure for cloud computing, enhancements to client connectivity, and new functionality that ensures high-availability of mission-critical applicationsExplains major new changes to the SQL Server Business Intelligence tools, such as Integration, Reporting, and Analysis ServicesDemonstrates tasks both graphically and in SQL code to enhance your learningProvides source code from the companion web site, which you can use as a basis for your own projectsExplores tips, smart workarounds, and best practices to help you on the job Get thoroughly up to speed on SQL Server 2012 with Microsoft SQL Server 2012 Bible.",
 				"bookTitle": "Microsoft SQL Server 2012 Bible",
 				"language": "en",

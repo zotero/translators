@@ -2,14 +2,14 @@
 	"translatorID": "9a0ecbda-c0e9-4a19-84a9-fc8e7c845afa",
 	"label": "Lulu",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://www.lulu.com/shop/",
+	"target": "^https?://www\\.lulu\\.com/shop/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 101,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-10-11 03:33:45"
+	"lastUpdated": "2016-11-04 21:18:44"
 }
 
 function getSearchResults(doc) {
@@ -17,11 +17,11 @@ function getSearchResults(doc) {
 }
 
 function detectWeb(doc, url) {
-	if(url.search(/\/product-\d+\.html/) != -1) {
+	if (url.search(/\/product-\d+\.html/) != -1) {
 		return 'book';
 	}
 	
-	if(url.indexOf('/search.ep?') != -1
+	if (url.indexOf('/search.ep?') != -1
 		&& getSearchResults(doc).length) {
 		return 'multiple';
 	}
@@ -29,17 +29,17 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var results = getSearchResults(doc);
-	if(results.length) {
+	if (results.length) {
 		var items = {};
-		for(var i=0, n=results.length; i<n; i++) {
+		for (var i=0, n=results.length; i<n; i++) {
 			items[results[i].href] = ZU.trimInternal(results[i].textContent);
 		}
 		
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var urls = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				urls.push(i);
 			}
 			ZU.processDocuments(urls, scrape);
@@ -62,23 +62,23 @@ function makeItem(doc, url) {
 	);
 	
 	var authors = ZU.xpath(doc, '//div[@class="product-information"]//span[@class="authors"]/a/span');
-	for(var i=0, n=authors.length; i<n; i++) {
+	for (var i=0, n=authors.length; i<n; i++) {
 		var name = ZU.trimInternal(authors[i].textContent).replace(/^(?:Dr|Prof)\.?\s|\s(?:M.?A|Ph\.?D|B\.?S|B\.?A|M\.?D(?:\.?\sPh\.?D)?)\.?$/gi, '');
 		item.creators.push(ZU.cleanAuthor(ZU.capitalizeTitle(name, true), 'author'));
 	}
 	
 	var description = doc.getElementsByClassName('description')[0];
-	if(description.getElementsByClassName('expandable-text').length) {
+	if (description.getElementsByClassName('expandable-text').length) {
 		description = ZU.xpathText(description, './span/text()[1]')
 			+ ' ' + ZU.xpathText(description, './span/span[@class="more-text"]/text()[1]');
 	} else {
 		description = description.textContent;
-		if(ZU.trimInternal(description) == 'No description supplied') {
+		if (ZU.trimInternal(description) == 'No description supplied') {
 			description = false;
 		}
 	}
 	
-	if(description) {
+	if (description) {
 		item.abstractNote = description.trim().replace(/ +/, ' ');
 	}
 	
@@ -87,7 +87,7 @@ function makeItem(doc, url) {
 	item.publisher = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="publisher"]') || '');
 	item.rights = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="copyright-info"]') || '');	
 	item.language = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="language"]') || '');
-	item.date = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="publication-date"]') || '');
+	item.date = ZU.strToISO(ZU.xpathText(productDetails, './dd[@class="publication-date"]') || '');
 	item.numPages = ZU.trimInternal(ZU.xpathText(productDetails, './dd[@class="pages"]') || '');
 	
 	item.attachments.push({
@@ -101,43 +101,43 @@ function makeItem(doc, url) {
 }
 
 function detectSearch(items) {
-	if(items.ISBN) return true;
+	if (items.ISBN) return true;
 	
-	if(!items.length) return;
+	if (!items.length) return;
 	
-	for(var i=0, n=items.length; i<n; i++) {
-		if(items[i].ISBN && ZU.cleanISBN('' + items[i].ISBN)) {
+	for (var i=0, n=items.length; i<n; i++) {
+		if (items[i].ISBN && ZU.cleanISBN('' + items[i].ISBN)) {
 			return true;
 		}
 	}
 }
 
 function doSearch(items) {
-	if(!items.length) items = [items];
+	if (!items.length) items = [items];
 	
 	var query = [];
-	for(var i=0, n=items.length; i<n; i++) {
+	for (var i=0, n=items.length; i<n; i++) {
 		var isbn;
-		if(items[i].ISBN && (isbn = ZU.cleanISBN('' + items[i].ISBN))) {
+		if (items[i].ISBN && (isbn = ZU.cleanISBN('' + items[i].ISBN))) {
 			(function(item, isbn) {
 				ZU.processDocuments('http://www.lulu.com/shop/search.ep?keyWords=' + isbn, function(doc, url) {
 					var results = getSearchResults(doc);
-					if(!results.length) {
-						if(item.complete) item.complete();
+					if (!results.length) {
+						if (item.complete) item.complete();
 						return;
 					}
 					
-					ZU.processDocuments('http://www.lulu.com' + ZU.xpathText(results[0], './@href'), function(doc, url) {
+					ZU.processDocuments(results[0].href, function(doc, url) {
 						var newItem = makeItem(doc, url);
-						if(newItem.ISBN == isbn) {
+						if (newItem.ISBN == isbn) {
 							newItem.complete();
 						} else {
-							if(item.complete) item.complete();
+							if (item.complete) item.complete();
 						}
 					});
 				})
 			})(items[i], isbn);
-		} else if(items[i].complete) {
+		} else if (items[i].complete) {
 			items[i].complete();
 		}
 	}
@@ -170,7 +170,7 @@ var testCases = [
 				"publisher": "Dr.SELVAKUMAR RAJAN",
 				"rights": "selvakumar (Standard Copyright License)",
 				"language": "English",
-				"date": "September 29, 2011",
+				"date": "2011-09-30",
 				"numPages": "15",
 				"libraryCatalog": "Lulu"
 			}
@@ -178,7 +178,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lulu.com/shop/search.ep?keyWords=zotero&categoryId=107110&sorter=relevance-desc",
+		"url": "http://www.lulu.com/shop/search.ep?keyWords=zotero",
 		"items": "multiple"
 	},
 	{
@@ -214,7 +214,7 @@ var testCases = [
 				"publisher": "Fitness Blender",
 				"rights": "Standard Copyright License",
 				"language": "English",
-				"date": "August 20, 2013",
+				"date": "2013-08-21",
 				"numPages": "63",
 				"libraryCatalog": "Lulu"
 			}
@@ -240,9 +240,9 @@ var testCases = [
 				"seeAlso": [],
 				"attachments": [
 					{
-					"title": "Lulu Link",
-					"mimeType": "text/html",
-					"snapshot": false
+						"title": "Lulu Link",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
 				"abstractNote": "ALL YOU NEED TO KNOW ABOUT GROWING VINES IN 123 PAGES. \n\nThis book is a basic introduction to growing grapes and aimed at the serious student in the wine trade, WSET Diploma student or Master of Wine candidate. It is also very useful for those thinking of setting up vineyards as it answers a lot of the basic questions. \n\nHas sold over 3,500 copies now and received LOTS of emails saying how helpful it has been. \n\n\"Couldn't have become an MW without your book\" was the latest endorsement!",
@@ -253,7 +253,7 @@ var testCases = [
 				"libraryCatalog": "Lulu",
 				"title": "Viticulture - An Introduction to Commercial Grape Growing for Wine Production",
 				"publisher": "Stephen Skelton",
-				"date": "May 24, 2014"
+				"date": "2017-03-06"
 			}
 		]
 	}

@@ -11,8 +11,7 @@
 	},
 	"inRepository": false,
 	"translatorType": 2,
-	"browserSupport": "g",
-	"lastUpdated": "2012-02-17 11:51:00"
+	"lastUpdated":"2015-07-20 06:39:12"
 }
 
 /*
@@ -40,7 +39,7 @@ function doExport() {
 
 	var item;
 
-	while(item = Zotero.nextItem()) {
+	while (item = Zotero.nextItem()) {
 
 		var itemString = "<note>";
 
@@ -49,9 +48,9 @@ function doExport() {
 		itemString += "<content><![CDATA[<?xml version='1.0' encoding='UTF-8'?><!DOCTYPE en-note SYSTEM 'http://xml.evernote.com/pub/enml2.dtd'>";
 
 		/** NOTES **/
-		if(Zotero.getOption("exportNotes")) {
+		if (item.notes && Zotero.getOption("exportNotes")) {
 			itemString += "<en-note>";
-			for(var i in item.notes) {
+			for (var i in item.notes) {
 				itemString += "<div>"+item.notes[i].note+"<br/></div>";
 			}
 			itemString += "</en-note>]]>";
@@ -63,7 +62,7 @@ function doExport() {
 		itemString += "</content><created>"+evernoteDate+"T000000Z</created>";	
 
 		/** TAGS **/
-		for(var j in item.tags) {
+		for (var j in item.tags) {
 			itemString += "<tag>"+item.tags[j].tag+"</tag>";
 		}
 

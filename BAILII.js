@@ -2,7 +2,7 @@
 	"translatorID": "5ae63913-669a-4792-9f45-e089a37de9ab",
 	"label": "BAILII",
 	"creator": "Bill McKinney",
-	"target": "^https?:\\/\\/www\\.bailii\\.org(?:\\/cgi\\-bin\\/markup\\.cgi\\?doc\\=)?\\/\\w+\\/cases\\/.+",
+	"target": "^https?://www\\.bailii\\.org(/cgi\\-bin/markup\\.cgi\\?doc\\=)?/\\w+/cases/.+",
 	"minVersion": "1.0.0b4.r1",
 	"maxVersion": "",
 	"priority": 100,
@@ -14,12 +14,12 @@
 
 function detectWeb(doc, url) {
 	var liiRegexp= /^https?:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+\.html/
-	if(liiRegexp.test(url)) {
+	if (liiRegexp.test(url)) {
 		return "case";
 	} else {
 		var aTags = doc.getElementsByTagName("a");
-		for(var i=0; i<aTags.length; i++) {
-			if(liiRegexp.test(aTags[i].href)) {
+		for (var i=0; i<aTags.length; i++) {
+			if (liiRegexp.test(aTags[i].href)) {
 				return "multiple";
 			}
 		}
@@ -73,7 +73,7 @@ function scrape(doc, url) {
 
 function doWeb(doc, url) {
 	var liiRegexp= /http:\/\/www\.bailii\.org(?:\/cgi\-bin\/markup\.cgi\?doc\=)?\/\w+\/cases\/.+\.html/
-	if(liiRegexp.test(url)) {
+	if (liiRegexp.test(url)) {
 		scrape(doc);
 	} else {
 		var items = Zotero.Utilities.getItemArray(doc, doc, liiRegexp);

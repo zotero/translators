@@ -98,15 +98,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15",
 				"creators": [],
-				"notes": [
-					"The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15, brought to you by The New York Public Library, Astor, Lenox and Tilden Foundation, and the National Digital Newspaper Program."
-				],
-				"tags": [
-					"New York (N.Y.)--Newspapers.",
-					"New York County (N.Y.)--Newspapers."
-				],
-				"seeAlso": [],
+				"date": "1912/02/14",
+				"ISSN": "1941-0654",
+				"language": "eng",
+				"libraryCatalog": "chroniclingamerica.loc.gov",
+				"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -116,29 +114,16 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"title": "The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15",
-				"publisher": "s.n.",
-				"institution": "s.n.",
-				"company": "s.n.",
-				"label": "s.n.",
-				"distributor": "s.n.",
-				"reportType": "text",
-				"letterType": "text",
-				"manuscriptType": "text",
-				"mapType": "text",
-				"thesisType": "text",
-				"websiteType": "text",
-				"presentationType": "text",
-				"postType": "text",
-				"audioFileType": "text",
-				"language": "eng",
-				"date": "1912/02/14",
-				"issue": "1912/02/14",
-				"ISSN": "1941-0654",
-				"url": "http://chroniclingamerica.loc.gov/lccn/sn83030193/1912-02-14/ed-1/seq-15/#words=Wilson&date1=1836&rows=20&searchType=basic&state=&date2=1922&proxtext=wilson&y=0&x=0&dateFilterType=yearRange&index=4",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"libraryCatalog": "chroniclingamerica.loc.gov",
-				"publication": "The evening world"
+				"tags": [
+					"New York (N.Y.)--Newspapers.",
+					"New York (State)--New York County.--fast--(OCoLC)fst01234953",
+					"New York (State)--New York.--fast--(OCoLC)fst01204333",
+					"New York County (N.Y.)--Newspapers."
+				],
+				"notes": [
+					"The evening world. (New York, N.Y.) 1887-1931, February 14, 1912, Image 15, brought to you by The New York Public Library, Astor, Lenox and Tilden Foundation, and the National Digital Newspaper Program."
+				],
+				"seeAlso": []
 			}
 		]
 	}
