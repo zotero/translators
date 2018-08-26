@@ -113,7 +113,7 @@ function scrapeNewspaper(doc, url) {
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
 				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a");
+					tag = ZU.xpathText(tags[i], "a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}
