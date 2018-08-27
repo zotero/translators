@@ -87,7 +87,6 @@ addPropertyHandler("Repeat_WVT30", "seriesNumber", function(element) {
 });
 // Kollationsvermerk
 addPropertyHandler("Repeat_WVD05", "", function(element, item) {
-	debugger;
 	var text = commonHandler_getRowCell(element);
 	var splits = text.split("\,");
 	if (splits.length > 1)
