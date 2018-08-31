@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2018-01-08 17:17:11"
+	"lastUpdated": "2018-08-31 16:00:29"
 }
 
 /*
@@ -47,8 +47,11 @@ var mappingClassNameToItemType = {
 	'ZINHALTVERZ' : 'multiple',//Inhaltsverzeichnis
 	'KOMMENTAR' : 'encyclopediaArticle',
 	'ALTEVERSION' : 'encyclopediaArticle',
-	'ALTEVERSION KOMMENTAR' : 'encyclopediaArticle'
-}
+	'ALTEVERSION KOMMENTAR' : 'encyclopediaArticle',
+	'HANDBUCH' : 'encyclopediaArticle',
+	'BUCH' : 'book',
+	// ? 'FESTSCHRIFT' : 'bookSection'
+};
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
 var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
@@ -125,20 +128,24 @@ function scrapeKommentar(doc, url) {
 	var authorText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="autor"]');
 	if (authorText) {
 		var authors = authorText.split("/");
-		for (var i=0; i<authors.length; i++) {
+		for (let i=0; i<authors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(authors[i], 'author', false));
 		}
 	}
 	
 	//e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	//e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
+	//e.g. c) Scherer, Münchener Anwaltshandbuch Erbrecht
 	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	var pos = citationFirst.lastIndexOf(",");
 	if (pos > 0) {
 		item.publicationTitle = ZU.trimInternal(citationFirst.substr(0, pos));
 		var editorString = citationFirst.substr(pos+1);
 		
-		if (editorString.indexOf("/") == -1 && item.publicationTitle.indexOf("/") > 0) {
+		if ((!editorString.includes("/") && item.publicationTitle.includes("/"))
+			|| editorString.toLowerCase().includes("handbuch")
+			|| editorString.toLowerCase().includes("kommentar")
+		) {
 			var temp = item.publicationTitle;
 			item.publicationTitle = editorString;
 			editorString = temp;
@@ -146,7 +153,7 @@ function scrapeKommentar(doc, url) {
 		editorString = editorString.replace(/, /g, '');
 		
 		var editors = editorString.trim().split("/");
-		for (var i=0; i<editors.length; i++) {
+		for (let i=0; i<editors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
 		}
 	} else {
@@ -246,7 +253,7 @@ function scrapeCase(doc, url) {
 	}
 	// if not, we have to extract it from the title
 	else {
-		caseDescription = ZU.xpathText(doc, '//div[@class="titel"]/h1 | //div[@class="titel sbin4"]/h1 | //div[@class="titel sbin4"]/h1/span');
+		var caseDescription = ZU.xpathText(doc, '//div[contains(@class, "titel")]/h1');
 		if (caseDescription) {
 			var tmp = caseDescription.match(/[^-–]*$/);	// everything after the last slash
 			if (tmp) caseName = ZU.trimInternal(tmp[0]);
@@ -342,12 +349,9 @@ function scrapeCase(doc, url) {
 		item.pages = beckRSsrc[3];*/
 	}
 
-	var otherCitations = ZU.xpath(doc, '//div[@id="verweiszettel-top"]//li[a[contains(text(), "Parallelfundstellen")]]')[0];
-	if (otherCitations) {
-		var otherCitationsText = ZU.xpathText(otherCitations, './following-sibling::li/ul/li',  null, " ; ");
-		if (otherCitationsText) {
-			note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + otherCitationsText.replace(/\n/g, "").replace(/\s+/g, ' ').trim() + "</p>");
-		}
+	var otherCitationsText = ZU.xpathText(doc, '//div[@id="verweiszettel-top"]//li[contains(@class, "parallelfundstellen")]//li',  null, " ; ");
+	if (otherCitationsText) {
+		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + otherCitationsText.replace(/\n/g, "").replace(/\s+/g, ' ').trim() + "</p>");
 	}
 	var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
 	if (basedOnRegulations) {
@@ -378,7 +382,7 @@ function scrapeCase(doc, url) {
 		if (pagesEnd) {
 			item.pages = pagesStart + "-" + pagesEnd;
 		} else {
-			item.pages = pagesStart
+			item.pages = pagesStart;
 		}
 		
 		item.reporterVolume = item.date;
@@ -396,7 +400,7 @@ function scrape(doc, url) {
 	var dokument = doc.getElementById("dokument");
 	if (!dokument) {
 		throw new Error("Could not find element with ID 'dokument'. "
-		+ "Probably attempting to scrape multiples with no access.")
+		+ "Probably attempting to scrape multiples with no access.");
 	}
 	var documentClassName = dokument.className.toUpperCase();
 
@@ -419,7 +423,8 @@ function scrape(doc, url) {
 		item = new Zotero.Item(mappingClassNameToItemType[documentClassName]);
 	}
 	
-	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0] || ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
+	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0]
+		|| ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
 	item.title = ZU.trimInternal(titleNode.textContent);
 	
 	// in some cases (e.g. NJW 2007, 3313) the title contains an asterisk with a footnote that is imported into the title
@@ -462,7 +467,7 @@ function scrape(doc, url) {
 				authorString = authorString.substr(0,posComma);
 			}
 			
-			authorArray = authorString.split(/und|,/);
+			var authorArray = authorString.split(/und|,/);
 			for (var k=0; k<authorArray.length; k++) {
 				var authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
 				item.creators.push(ZU.cleanAuthor(authorString, "author"));
@@ -492,7 +497,7 @@ function scrape(doc, url) {
 	if (pagesEnd) {
 		item.pages = pagesStart + "-" + pagesEnd;
 	} else {
-		item.pages = pagesStart
+		item.pages = pagesStart;
 	}
 	
 	item.abstractNote = ZU.xpathText(doc, '//div[@class="abstract"]') || ZU.xpathText(doc, '//div[@class="leitsatz"]');
@@ -574,7 +579,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 03964 ; EWiR 2001, 1049 (m. Anm. … ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer… ; ZIP 2001, 1881 (m. Anm.) ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; WuB 2001, 1269</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 3964 ; EWiR 2001, 1049 (m. Anm. Sch… ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer (m… ; ZIP 2001, 1881 (m. Anm.) ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; WuB 2001, 1269 ; WuB 2001, 1269 (m. Anm. Prof…</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -895,7 +900,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. A… ; MMR 2012, 387 (m. Anm. Ho… ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 ; MD 2012, 621 ; WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
+						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. Anm.… ; MMR 2012, 387 (m. Anm. Hoffm… ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 ; MD 2012, 621 ; WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
 					}
 				],
 				"seeAlso": []
@@ -926,7 +931,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. K… ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. A… ; MMR 2014, 397 (m. Anm. Ro… ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; EuGRZ 2014, 301 ; EWS 2014, 225 ; GRUR-Prax 2014, 157 ; K & R 2014, 329 ; MittdtPatA 2014, 335 ; MittdtPatA 2014, 335 L ; WRP 2014, 540 ; MMR-Aktuell 2014, 356790 ; MMR-Aktuell 2014, 356900</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. Karl) ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. Anm.… ; MMR 2014, 397 (m. Anm. Roth) ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; CELEX 62012CJ0314 ; EuGRZ 2014, 301 ; K & R 2014, 329 (m. Anm. Sim… ; MittdtPatA 2014, 335 (Ls.) ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 8 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -1036,6 +1041,40 @@ var testCases = [
 				"date": "2012",
 				"edition": "2",
 				"encyclopediaTitle": "BGB | Schuldrecht",
+				"libraryCatalog": "beck-online",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/Dokument?vpath=bibdata%2Fkomm%2Fscheanwhdb_5%2Fcont%2Fscheanwhdb.glsect19.glii.gl2.gla.htm&pos=2&hlwords=on",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "§ 19 Testamentsvollstreckung",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Lorz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Scherer",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2018",
+				"edition": "5",
+				"encyclopediaTitle": "Münchener Anwaltshandbuch Erbrecht",
 				"libraryCatalog": "beck-online",
 				"attachments": [
 					{
