@@ -2,14 +2,14 @@
 	"translatorID": "7adba17c-7e98-4a13-8325-e19383b09eab",
 	"label": "Svenska Dagbladet",
 	"creator": "Sebastian Berlin",
-	"target": "^https://www\\.svd\\.se/(sok\\?)?",
+	"target": "^https://www\\.svd\\.se/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-16 13:37:50"
+	"lastUpdated": "2018-08-31 11:59:13"
 }
 
 /*
@@ -125,6 +125,14 @@ function scrape(doc, url) {
 		item.title = item.title.replace(/( \(SvD Premium\))? \| SvD$/, "");
 		
  		item.ISSN = "1101-2412";
+ 		
+ 		item.publicationTitle = "Svenska Dagbladet";
+ 		
+ 		var articleTags = doc.querySelectorAll(".ArticleTags-tag-link");
+ 		for(let i = 0; i < articleTags.length; i++) {
+ 			let tag = articleTags[i].textContent;
+ 			item.tags.push(tag);
+ 		}
 
 		item.complete();
 	});
@@ -158,7 +166,7 @@ var testCases = [
 				"abstractNote": "Nya Karolinska-skandalen har blivit en nationell fråga som riskerar att skada Sveriges rykte som innovationsland. Det säger närings- och innovationsminister Mikael Damberg (S) till SvD.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
-				"publicationTitle": "SvD.se",
+				"publicationTitle": "Svenska Dagbladet",
 				"section": "Sverige",
 				"url": "https://www.svd.se/tung-s-minister-nks-skandalen-skadar-sveriges-rykte",
 				"attachments": [
@@ -166,7 +174,11 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Irene Svenonius",
+					"Mikael Damberg",
+					"Politik"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -191,7 +203,7 @@ var testCases = [
 				"abstractNote": "Alla som ger till tiggare riskerar att bidra till människohandel, enligt finansminister Magdalena Andersson (S). Miljöpartiets Maria Ferm slår nu tillbaka mot Andersson. ”Iskylan har trängt in långt in i den politiska debatten”, skriver Ferm på Facebook.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
-				"publicationTitle": "SvD.se",
+				"publicationTitle": "Svenska Dagbladet",
 				"section": "Sverige",
 				"url": "https://www.svd.se/andersson-avrader-fran-att-ge-till-tiggare",
 				"attachments": [
@@ -199,7 +211,12 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Magdalena Andersson",
+					"Människohandel",
+					"Politik",
+					"Tiggeri"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -229,7 +246,7 @@ var testCases = [
 				"abstractNote": "Fentanyl betydde slutet för Prince, Tom Petty, Lil Peep – och svenska ungdomar som köpt sprayflaskor på nätet. Det här är berättelsen om hur en smärtstillande medicin ledde hundratusentals människor in i döden.",
 				"language": "sv",
 				"libraryCatalog": "www.svd.se",
-				"publicationTitle": "SvD.se",
+				"publicationTitle": "Svenska Dagbladet",
 				"section": "Kultur",
 				"url": "https://www.svd.se/familjeforetaget-utloste-epidemi--tjanade-multum",
 				"attachments": [
@@ -237,7 +254,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					"Cancer",
+					"Missbruk",
+					"Narkotika",
+					"Prince",
+					"Rättsmedicinalverket",
+					"SvD Premium",
+					"Tom Petty",
+					"USA",
+					"Östberga",
+				],
 				"notes": [],
 				"seeAlso": []
 			}
