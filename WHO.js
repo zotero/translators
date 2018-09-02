@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-02 08:58:59"
+	"lastUpdated": "2018-09-02 14:34:27"
 }
 
 /*
@@ -98,8 +98,8 @@ function scrape(doc, url) {
 	// copy meta tags in body to head
 	var head = doc.getElementsByTagName('head');
 	var metasInBody = ZU.xpath(doc, '//body/meta');
-	for (let i=0; i<metasInBody.length; i++) {
-		head[0].append(metasInBody[i]);
+	for (let meta of metasInBody) {
+		head[0].append(meta);
 	}
 	
 	var type = detectWeb(doc, url);
@@ -124,14 +124,25 @@ function scrape(doc, url) {
 			};
 		}
 		
-		if (item.abstractNote) {
-			//extract possible roman numerals and number of pages without the p
-			var numPages = item.abstractNote.match(/(([lxiv]+,\s*)?\d+)\s*p/);
+		var descriptions = doc.querySelectorAll('meta[name="DC.description"]');
+		//description doesn't actually contain useful content
+		for (let description of descriptions) {
+			var numPages = description.content.match(/(([lxiv]+,\s*)?\d+)\s*p/);
 			if (numPages) {
-				item.numPages = numPages[1];
+				if (ZU.fieldIsValidForType("numPages", item.itemType)) {
+					item.numPages = numPages[1];
+
+				}
+				else if (!item.extra) {
+					item.extra = "number-of-pages: " + numPages[1];
+				}
+				else {
+					item.extra += "\nnumber-of-pages: " + numPages[1];
+				}
 				delete item.abstractNote;
 			}
 		}
+	
 		
 		item.complete();
 	});
@@ -160,7 +171,7 @@ var testCases = [
 					}
 				],
 				"date": "2003",
-				"abstractNote": "WHO/CDS/CSR/GAR/2003.11",
+				"extra": "number-of-pages: 46",
 				"institution": "World Health Organization",
 				"language": "en",
 				"libraryCatalog": "apps.who.int",
