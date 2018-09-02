@@ -125,7 +125,8 @@ function scrape(doc, url) {
 		}
 		
 		var descriptions = doc.querySelectorAll('meta[name="DC.description"]');
-		//description doesn't actually contain useful content
+		// DC.description doesn't actually contain other useful content,
+		// except possibly the number of pages
 		for (let description of descriptions) {
 			var numPages = description.content.match(/(([lxiv]+,\s*)?\d+)\s*p/);
 			if (numPages) {
