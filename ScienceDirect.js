@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-21 20:37:36"
+	"lastUpdated": "2018-09-02 01:19:42"
 }
 
 // attr()/text() v2
@@ -28,7 +28,7 @@ function detectWeb(doc, url) {
 	if ((url.includes("pdf") &&
 			!url.includes("_ob=ArticleURL") &&
 			!url.includes("/article/")) ||
-		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1) {
+		url.search(/\/(?:journal|bookseries|book|handbook|referenceworks)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
@@ -57,7 +57,7 @@ function detectWeb(doc, url) {
 
 function getPDFLink(doc, onDone) {
 	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
-	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text')) {
+	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text') || doc.querySelector('#check-access-popover')) {
 		Zotero.debug("PDF is not available");
 		onDone();
 		return;
@@ -474,7 +474,7 @@ function scrape(doc, url) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button')[0];
+	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
@@ -886,23 +886,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/referenceworks/9780080437484",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://www.sciencedirect.com/science/article/pii/0584853976801316",
 		"items": [
 			{
@@ -1055,6 +1038,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.sciencedirect.com/journal/le-pharmacien-hospitalier-et-clinicien/vol/52/issue/4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/handbook/handbook-of-complex-analysis/vol/1/suppl/C",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/bookseries/advances-in-computers/vol/111/suppl/C",
 		"items": "multiple"
 	}
 ]
