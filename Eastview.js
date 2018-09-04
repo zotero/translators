@@ -98,15 +98,13 @@ var typeMap = {
 function permaLink(URL) {
 	var id = URL.match(/id=(\d+)/);
 	if (id) return "/browse/doc/" + id[1];
-	else return URL
+	else return URL;
 }
 
 function pdfLink(URL) {
-	{
 	 var id = URL.match(/id=(\d+)/);
 	 if (id) return "/browse/pdf-download?articleid=" + id[1];
-	 else return URL
- }
+	 else return URL;
 }
 
 function scrape(doc, url) {
