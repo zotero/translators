@@ -58,7 +58,7 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		var nameNodes = ZU.xpath(doc, '//a[@class="nyh_article__author-email"]');
 
-		for(let nameNode of nameNodes) {
+		for (let nameNode of nameNodes) {
 			let nameString = nameNode.textContent;
 			let author = ZU.cleanAuthor(nameString, "author");
 			let firstNames = author.firstName.split(" ");
@@ -70,7 +70,7 @@ function scrape(doc, url) {
 			}
 			item.creators.push(author);
 		}
-		if(item.creators.length === 0) {
+		if (item.creators.length === 0) {
 			// No author was found, look for non-person authors, e.g. TT.
 			var authorString = ZU.xpathText(doc, '//span[@class="nyh_article__author-name"]');
 			var author = ZU.cleanAuthor(authorString, "author");
