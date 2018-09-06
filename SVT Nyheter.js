@@ -56,37 +56,32 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
 	translator.setHandler('itemDone', function (obj, item) {
-		var nameNodes =
-			ZU.xpath(doc, '//a[@class="nyh_article__author-email"]/text()');
-		if(nameNodes) {
-			for(let nameNode of nameNodes) {
-				let nameString = nameNode.textContent;
-				let author = ZU.cleanAuthor(nameString, "author");
-				let firstNames = author.firstName.split(" ");
-				if(firstNames.length > 1) {
-					// Assume that there's only one first name and move any
-					// "extra" name to lastName.
-					author.firstName = firstNames[0];
-					author.lastName = firstNames[1] + " " + author.lastName;
-				}
-				item.creators.push(author);
+		var nameNodes = ZU.xpath(doc, '//a[@class="nyh_article__author-email"]');
+
+		for(let nameNode of nameNodes) {
+			let nameString = nameNode.textContent;
+			let author = ZU.cleanAuthor(nameString, "author");
+			let firstNames = author.firstName.split(" ");
+			if(firstNames.length > 1) {
+				// Assume that there's only one first name and move any
+				// "extra" name to lastName.
+				author.firstName = firstNames[0];
+				author.lastName = firstNames[1] + " " + author.lastName;
 			}
+			item.creators.push(author);
 		}
 		if(item.creators.length === 0) {
 			// No author was found, look for non-person authors, e.g. TT.
-			var authorString =
-				ZU.xpathText(doc, '//span[@class="nyh_article__author-name"]');
+			var authorString = ZU.xpathText(doc, '//span[@class="nyh_article__author-name"]');
 			var author = ZU.cleanAuthor(authorString, "author");
 			author.firstName = undefined;
 			author.fieldMode = true;
 			item.creators.push(author);
 		}
 
-		item.section =
-			ZU.xpathText(doc, '//a[@class="nyh_section-header__link"]');
+		item.section =  ZU.xpathText(doc, '//a[@class="nyh_section-header__link"]');
 
-		var dateString =
-			attr(doc, 'meta[property="article:published_time"]', "content");
+		var dateString = attr(doc, 'meta[property="article:published_time"]', "content");
 		if(dateString) {
 			// The date strings have the format "2018-02-28T02:24:59+01:00".
 			item.date = dateString.split("T")[0];
