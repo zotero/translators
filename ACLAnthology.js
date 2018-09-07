@@ -2,14 +2,14 @@
 	"translatorID": "9b2f2d29-02e3-4693-b728-4cd435650669",
 	"label": "ACLAnthology",
 	"creator": "Guy Aglionby",
-	"target": "^https://aclanthology\\.coli\\.uni\\-saarland\\.de/(events|papers|volumes)/[^#]+",
+	"target": "^https://aclanthology(\\.coli\\.uni\\-saarland\\.de|\\.info)/(events|papers|volumes)/[^#]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-12 16:36:03"
+	"lastUpdated": "2018-09-07 18:10:44"
 }
 
 /*
