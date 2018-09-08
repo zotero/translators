@@ -257,10 +257,10 @@ function scrapeBook(doc, url) {
 			contributorsAreNext = true;
 		}
 	}
-	var editors = doc.querySelectorAll('#titelseitetext .tpauthor');
-	for (let editor of editors) {
-		editor = authorRemoveTitlesEtc(editor.textContent);
-		item.creators.push(ZU.cleanAuthor(editor, creatorType));
+	var creators = doc.querySelectorAll('#titelseitetext .tpauthor');
+	for (let creator of creators) {
+		creator = authorRemoveTitlesEtc(creator.textContent);
+		item.creators.push(ZU.cleanAuthor(creator, creatorType));
 	}
 	if (contributors) {
 		for (contributor of contributors) {
