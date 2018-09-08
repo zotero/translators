@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbooks|referenceworks)/\\d)|search\\?|journal/[^/]+/vol)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-21 20:37:36"
+	"lastUpdated": "2018-09-05 01:23:19"
 }
 
 // attr()/text() v2
@@ -28,7 +28,7 @@ function detectWeb(doc, url) {
 	if ((url.includes("pdf") &&
 			!url.includes("_ob=ArticleURL") &&
 			!url.includes("/article/")) ||
-		url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1) {
+		url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
@@ -57,7 +57,7 @@ function detectWeb(doc, url) {
 
 function getPDFLink(doc, onDone) {
 	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
-	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text')) {
+	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text') || doc.querySelector('#check-access-popover')) {
 		Zotero.debug("PDF is not available");
 		onDone();
 		return;
@@ -474,7 +474,7 @@ function scrape(doc, url) {
 	// On newer pages, there is an GET formular which is only there if
 	// the user click on the export button, but we know how the url
 	// in the end will be built.
-	form = ZU.xpath(doc, '//div[@class="ExportCitation"]//button')[0];
+	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0];
 	if (form) {
 		Z.debug("Fetching RIS via GET form (new)");
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
@@ -661,7 +661,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+		"url": "https://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -671,9 +671,34 @@ var testCases = [
 						"lastName": "Dierk",
 						"firstName": "Raabe",
 						"creatorType": "author"
+					},
+					{
+						"lastName": "Janssens",
+						"firstName": "KOENRAAD G. F.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Raabe",
+						"firstName": "DIERK",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Kozeschnik",
+						"firstName": "ERNST",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Miodownik",
+						"firstName": "MARK A.",
+						"creatorType": "editor"
+					},
+					{
+						"lastName": "Nestler",
+						"firstName": "BRITTA",
+						"creatorType": "editor"
 					}
 				],
-				"date": "2007",
+				"date": "January 1, 2007",
 				"ISBN": "9780123694683",
 				"bookTitle": "Computational Materials Engineering",
 				"extra": "DOI: 10.1016/B978-012369468-3/50008-3",
@@ -695,7 +720,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+		"url": "https://www.sciencedirect.com/science/article/pii/B9780123706263000508",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -712,9 +737,9 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "2009",
+				"date": "January 1, 2009",
 				"ISBN": "9780123706263",
-				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
+				"abstractNote": "The African continent (30.1million km2) extends from 37°17′N to 34°52S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7million km2) and Kalahari (0.9million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
 				"bookTitle": "Encyclopedia of Inland Waters",
 				"extra": "DOI: 10.1016/B978-012370626-3.00050-8",
 				"libraryCatalog": "ScienceDirect",
@@ -728,14 +753,30 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Africa",
-					"Damming",
-					"Endorheism",
-					"Human impacts",
-					"River quality",
-					"River regimes",
-					"Sediment fluxes",
-					"Tropical rivers"
+					{
+						"tag": "Africa"
+					},
+					{
+						"tag": "Damming"
+					},
+					{
+						"tag": "Endorheism"
+					},
+					{
+						"tag": "Human impacts"
+					},
+					{
+						"tag": "River quality"
+					},
+					{
+						"tag": "River regimes"
+					},
+					{
+						"tag": "Sediment fluxes"
+					},
+					{
+						"tag": "Tropical rivers"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -883,23 +924,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
-		"defer": true,
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/referenceworks/9780080437484",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
-		"defer": true,
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -1055,6 +1079,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.sciencedirect.com/journal/le-pharmacien-hospitalier-et-clinicien/vol/52/issue/4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/handbook/handbook-of-complex-analysis/vol/1/suppl/C",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/bookseries/advances-in-computers/vol/111/suppl/C",
 		"items": "multiple"
 	}
 ]
