@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2018-08-31 16:00:29"
+	"lastUpdated": "2018-09-08 12:20:47"
 }
 
 /*
@@ -55,10 +55,10 @@ var mappingClassNameToItemType = {
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
 var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
-		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'FAArbR',
-		'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
-		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote', 'LL\\.M\\.',
-		'^Von', "\\*"];
+		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'PD',
+		'FAArbR', 'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
+		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote',
+		'LL\\.\\s?M\\.(?: \\(UCLA\\))?', '^Von', "\\*"];
 var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 
@@ -225,6 +225,56 @@ function scrapeLSK(doc, url) {
 	}
 
 	finalize(doc, url, item);
+}
+
+
+function scrapeBook(doc, url) {
+	var item = new Zotero.Item("book");
+	item.title = text(doc, '#titelseitetext .tptitle');
+	item.shortTitle = attr(doc, '.bf_selected span[title]', 'title');
+	var creatorType = "author";
+	var contributorsAreNext = false;
+	var spaces = doc.querySelectorAll('#titelseitetext .tpspace');
+	for (let space of spaces) {
+		if (space.textContent.includes("Kommentar")) {
+			item.title += ": Kommentar";
+		}
+		if (space.textContent.includes("Herausgegeben")) {
+			creatorType = "editor";
+		}
+		// e.g. "2. Auflage 2018"
+		if (space.textContent.includes("Auflage")) {
+			let parts = space.textContent.split("Auflage");
+			item.edition = parts[0].replace('.', '');
+			item.date = parts[1];
+		}
+		
+		if (contributorsAreNext) {
+			var contributors = space.textContent.split("; ");
+			contributorsAreNext = false;
+		}
+		if (space.textContent.includes("Bearbeitet")) {
+			contributorsAreNext = true;
+		}
+	}
+	var editors = doc.querySelectorAll('#titelseitetext .tpauthor');
+	for (let editor of editors) {
+		editor = authorRemoveTitlesEtc(editor.textContent);
+		item.creators.push(ZU.cleanAuthor(editor, creatorType));
+	}
+	if (contributors) {
+		for (contributor of contributors) {
+			contributor = authorRemoveTitlesEtc(contributor);
+			item.creators.push(ZU.cleanAuthor(contributor, "contributor"));
+		}
+	}
+	item.ISBN = text(doc, '#titelseitetext .__beck_titelei_impressum_isbn');
+	item.rights = text(doc, '#titelseitetext .__beck_titelei_impressum_p');
+	if (item.rights.includes("Beck")) {
+		item.publisher = "Verlag C. H. Beck";
+		item.place = "München";
+	}
+	item.complete();
 }
 
 function addNote(originalNote, newNote) {
@@ -409,6 +459,10 @@ function scrape(doc, url) {
 		scrapeLSK(doc, url);
 		return;
 	}
+	if (documentClassName == 'BUCH') {
+		scrapeBook(doc, url);
+		return;
+	}
 	if (mappingClassNameToItemType[documentClassName] == 'case') {
 		scrapeCase(doc, url);
 		return;
@@ -492,7 +546,9 @@ function scrape(doc, url) {
 	
 	//e.g. ArbrAktuell 2014, 150
 	var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
-	var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+	if (shortCitation) {
+		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+	}
 	var pagesEnd = ZU.xpathText(doc, '(//span[@class="pg"])[last()]');
 	if (pagesEnd) {
 		item.pages = pagesStart + "-" + pagesEnd;
@@ -1081,6 +1137,145 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata/komm/KueBuchnerKoDSGVO_2/cont/KueBuchnerKoDSGVO.htm",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Datenschutz-Grundverordnung/BDSG: Kommentar",
+				"creators": [
+					{
+						"firstName": "Jürgen",
+						"lastName": "Kühling",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Buchner",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Bäcker",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Bergt",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Franziska",
+						"lastName": "Boehm",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Buchner",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Johannes",
+						"lastName": "Caspar",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Dix",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Sebastian",
+						"lastName": "Golla",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Hartung",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Tobias",
+						"lastName": "Herbst",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Silke",
+						"lastName": "Jandt",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Manuel",
+						"lastName": "Klar",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Kühling",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Frank",
+						"lastName": "Maschmann",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Petri",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Johannes",
+						"lastName": "Raab",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Florian",
+						"lastName": "Sackmann",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Schröder",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Simon",
+						"lastName": "Schwichtenberg",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Marie-Theres",
+						"lastName": "Tinnefeld",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Thilo",
+						"lastName": "Weichert",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Ri Mirko",
+						"lastName": "Wieczorek",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2018",
+				"ISBN": "9783406719325",
+				"edition": "2",
+				"libraryCatalog": "beck-online",
+				"place": "München",
+				"publisher": "Verlag C. H. Beck",
+				"rights": "© 2018 Verlag C. H. Beck oHG",
+				"shortTitle": "Kühling/Buchner, DS-GVO BDSG",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
