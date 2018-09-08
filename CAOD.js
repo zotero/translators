@@ -2,14 +2,14 @@
 	"translatorID": "d2a9e388-5b79-403a-b4ec-e7099ca1bb7f",
 	"label": "CAOD",
 	"creator": "Guy Aglionby",
-	"target": "^https?://caod\\.oriprobe\\.com/articles/[^#]+",
+	"target": "^https?://caod\\.oriprobe\\.com/articles/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-08 00:42:10"
+	"lastUpdated": "2018-09-08 13:38:50"
 }
 
 /*
@@ -36,7 +36,9 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('articles/found.htm?')) {
-		return 'multiple';
+		if (getSearchResults(doc, true)) {
+			return 'multiple';
+		}
 	} else {
 		return 'journalArticle';
 	}
@@ -64,21 +66,29 @@ function scrape(doc, url) {
 	translator.translate();
 }
 
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	let rows = ZU.xpath(doc, '//div[@class="searchlist"]/a[b]');
+	for (let i=0; i<rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) === 'multiple') {
-		let results = ZU.xpath(doc, '//div[@class="searchlist"]/a[b]');
-		if (results.length) {
-			let items = {};
-			results.forEach(function (res) {
-				items[res.href] = res.textContent;
-			});
-			Zotero.selectItems(items, function (selected) {
-				if (!selected) {
-					return true;
-				}
-				ZU.processDocuments(Object.keys(selected), scrape);
-			});
-		}
+		Zotero.selectItems(getSearchResults(doc, false), function (selected) {
+			if (!selected) {
+				return true;
+			}
+			ZU.processDocuments(Object.keys(selected), scrape);
+		});
 	} else {
 		scrape(doc, url);
 	}
