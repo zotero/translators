@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-09-02 11:17:43"
+	"lastUpdated": "2018-09-08 22:09:39"
 }
 
 /*
@@ -178,6 +178,7 @@ function scrape(ids, doc, url, itemInfo) {
 		Z.debug(text);
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
+		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
 		
 		var i = 0;		
@@ -237,3 +238,98 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.translate();
 	})
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "基于部分酸水解-亲水作用色谱-质谱的黄芪多糖结构表征",
+				"creators": [
+					{
+						"lastName": "梁",
+						"firstName": "图",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "傅",
+						"firstName": "青",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "辛",
+						"firstName": "华夏",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "李",
+						"firstName": "芳冰",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "金",
+						"firstName": "郁",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "梁",
+						"firstName": "鑫淼",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISSN": "1000-8713",
+				"abstractNote": "来自中药的水溶性多糖具有广谱治疗和低毒性特点,是天然药物及保健品研发中的重要组成部分。针对中药多糖结构复杂、难以表征的问题,本文以中药黄芪中的多糖为研究对象,采用\"自下而上\"法完成对黄芪多糖的表征。首先使用部分酸水解方法水解黄芪多糖,分别考察了水解时间、酸浓度和温度的影响。在适宜条件(4 h、1.5mol/L三氟乙酸、80℃)下,黄芪多糖被水解为特征性的寡糖片段。接下来,采用亲水作用色谱与质谱联用对黄芪多糖部分酸水解产物进行分离和结构表征。结果表明,提取得到的黄芪多糖主要为1→4连接线性葡聚糖,水解得到聚合度4~11的葡寡糖。本研究对其他中药多糖的表征具有一定的示范作用。",
+				"callNumber": "21-1185/O6",
+				"issue": "12",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "1306-1312",
+				"publicationTitle": "色谱",
+				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+				"volume": "32",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Astragalus"
+					},
+					{
+						"tag": "characterization"
+					},
+					{
+						"tag": "hydrophilic interaction liquid chromatography(HILIC)mass spectrometry(MS)"
+					},
+					{
+						"tag": "partial acid hydrolysis"
+					},
+					{
+						"tag": "polysaccharides"
+					},
+					{
+						"tag": "亲水作用色谱"
+					},
+					{
+						"tag": "多糖"
+					},
+					{
+						"tag": "表征"
+					},
+					{
+						"tag": "质谱"
+					},
+					{
+						"tag": "部分酸水解"
+					},
+					{
+						"tag": "黄芪"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
