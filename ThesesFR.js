@@ -2,7 +2,7 @@
 	"translatorID": "3f73f0aa-f91c-4192-b0d5-907312876cb9",
 	"label": "ThesesFR",
 	"creator": "TFU",
-	"target": "^https?://(www\\.)?(theses\\.fr)",
+	"target": "^https?://(www\\.)?theses\\.fr/.",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -45,7 +45,6 @@ function detectWeb(doc, url) {
 }
 
 
-
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
@@ -85,18 +84,16 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); //https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-
-		
+	
 		//add Tags
 		var tags = ZU.xpath(doc, '//span[contains(@property, "dc:subject")]');
 		if (tags.length > 0) {
 			item.tags = [];
-			for (var x = 0; x < tags.length; x++) {
-			item.tags.push(tags[x].textContent.trim()) ;
+			for (let tag of tags) {
+				item.tags.push(tag.textContent.trim());
 			}
 		}
-		
-		
+			
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
