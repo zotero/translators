@@ -562,28 +562,26 @@ function encodeFilePathComponent(value) {
 				// see https://tex.stackexchange.com/questions/447383/biblatex-biber-patent-citation-support-based-on-zoterobbl-output/447508
 				if (!item.patentNumber) {
 					writeField("type", "patent");
-				}	else if (item.patentNumber.startsWith("US")) {
-						writeField("type", "patentus");
-						writeField("number", item.patentNumber.replace(/^US/, ""));
+				} else if (item.patentNumber.startsWith("US")) {
+					writeField("type", "patentus");
+					writeField("number", item.patentNumber.replace(/^US/, ""));
 				} else if (item.patentNumber.startsWith("EP")) {
-						writeField("type", "patenteu");
-						writeField("number", item.patentNumber.replace(/^EP/, ""));
+					writeField("type", "patenteu");
+					writeField("number", item.patentNumber.replace(/^EP/, ""));
 				} else if (item.patentNumber.startsWith("GB")) {
-						writeField("type", "patentuk");
-						writeField("number", item.patentNumber.replace(/^GB/, ""));
+					writeField("type", "patentuk");
+					writeField("number", item.patentNumber.replace(/^GB/, ""));
 				} else if (item.patentNumber.startsWith("DE")) {
-						writeField("type", "patentde");
-						writeField("number", item.patentNumber.replace(/^DE/, ""));
+					writeField("type", "patentde");
+					writeField("number", item.patentNumber.replace(/^DE/, ""));
 				} else if (item.patentNumber.startsWith("FR")) {
-						writeField("type", "patentfr");
-						writeField("number", item.patentNumber.replace(/^FR/, ""));
-				}
-				else {
+					writeField("type", "patentfr");
+					writeField("number", item.patentNumber.replace(/^FR/, ""));
+				} else {
 					writeField("type", "patent");
 					writeField("number", item.patentNumber);
 				}
 			}
-			
 
 			if (item.presentationType || item.manuscriptType) {
 				writeField("howpublished", item.presentationType || item.manuscriptType);
