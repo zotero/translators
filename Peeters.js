@@ -117,7 +117,10 @@ function scrape(doc, url) {
 	
 	// e.g. Author(s): HANDAL, Boris , WATSON, Kevin , ..., VAN DER MERWE, W.L.
 	// but sometimes the space before the comma is also missing
-	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]').split(',');
+	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]');
+	if (authors) {
+		authors = authors.split(',');
+	}
 	var creator;
 	for (let i=0; i<authors.length; i++) {
 		let name = authors[i];
