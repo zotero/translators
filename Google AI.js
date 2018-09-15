@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-09 17:55:01"
+	"lastUpdated": "2018-09-15 16:07:25"
 }
 
 /*
@@ -53,8 +53,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	let detectType = detectWeb(doc, url);
-	if (detectType === 'multiple') {
+	if (detectWeb(doc, url) === 'multiple') {
 		// Test cases: (defer: true is broken so cannot currently use automated tests)
 		// https://ai.google/research/people/105197
 		// https://ai.google/research/pubs/
@@ -64,7 +63,7 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(Object.keys(selected), scrape);
 		});
-	} else if (detectType) {
+	} else {
 		scrape(doc, url);
 	}
 }
@@ -75,16 +74,13 @@ function scrape(doc, url) {
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(bibtex);
 	translator.setHandler("itemDone", function (obj, item) {
-		let downloadElement = ZU.xpath(doc, '//a[span[contains(@class, "icon--download")]]');
-		if (downloadElement.length) {
-			let downloadUrl = downloadElement[0].href;
-			if (downloadUrl.endsWith('.pdf')) {
-				item.attachments.push({
-					url: downloadUrl,
-					title: 'Full Text PDF',
-					mimeType: 'application/pdf'
-				});
-			}
+		let downloadUrl = ZU.xpathText(doc, '//a[span[contains(@class, "icon--download")]]/@href');
+		if (downloadUrl.endsWith('.pdf')) {
+			item.attachments.push({
+				url: downloadUrl,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
 		}
 		delete item.itemID;
 		item.complete();
@@ -93,10 +89,9 @@ function scrape(doc, url) {
 }
 
 function extractBibtex(doc) { 
-	let bibtexElement = ZU.xpath(doc, '//a[span[contains(@class, "icon--copy")]]')[0];
-	let escapedBibtex = bibtexElement.getAttribute('ng-click')
-										.replace("CopyCtrl.onClick($event, '", '')
-										.replace("', true)", '');
+	let escapedBibtex = ZU.xpathText(doc, '//a[span[contains(@class, "icon--copy")]]/@ng-click')
+							.replace("CopyCtrl.onClick($event, '", '')
+							.replace("', true)", '');
 	return decodeURIComponent(escapedBibtex);
 }
 
