@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-10-31 16:26:28"
+	"lastUpdated": "2018-09-21 14:23:22"
 }
 
 /*
@@ -37,6 +37,7 @@
 
 function detectWeb(doc, url) {
 	if (url.indexOf("searchResults?") !== -1
+	if(url.indexOf("searchResults?") !== -1
 		&& getSearchResults(doc).length) {
 			return "multiple";
 	}
@@ -55,8 +56,8 @@ function getSearchResults(doc) {
 
 function getTitle(doc) {
 	var title = ZU.xpathText(doc, '//div[@id="pagebody"]/h3[1]');
-	if (title) {
-		if (title.toUpperCase() == title) {
+	if(title) {
+		if(title.toUpperCase() == title) {
 			title = ZU.capitalizeTitle(title, true);
 		}
 		return title.trim();
@@ -90,8 +91,8 @@ var i18n = {
 }
 
 function initLocale(url) {
-	var m = url.match(/[?&]locale=([^&]+)/);
-	if (m && i18n[m[1]]) {
+	var m = url.match(/[?&]locale=([a-zA-Z_]+)/); // Previous version failed when URL ended with #
+	if(m && i18n[m[1]]) {
 		i18n = i18n[m[1]];	
 	} else {
 		i18n = {};	//English
@@ -99,15 +100,14 @@ function initLocale(url) {
 }
 
 function L(label, fromEN) {
-	if (fromEN) {
-		for (var l in i18n) {
-			if (i18n[l] == label) {
+	if(fromEN) {
+		for(var l in i18n) {
+			if(i18n[l] == label) {
 				return l;
 			}
 		}
 		return label;
 	}
-
 	return i18n[label] || label;
 }
 
@@ -125,15 +125,15 @@ function applyValue(newItem, label, value) {
 
 //clean up names list and call callback with a clean name
 function cleanNames(names, callback) {
-	if (names) {
-		names = names.replace(/[()]/g, "").trim();
+	if(names) {
+		//Z.debug(names)
+		names = names.replace(/\[[a-zA-Z]*\]/g, "").trim(); //modified to accomodate "inventors" instead of "secondaryInventors"
 
-		if (names == names.toUpperCase()) {
-			names = ZU.capitalizeTitle(names, true);
-		}
-
+		//if(names == names.toUpperCase()) { // does not work in case of mixed cases
+		names = ZU.capitalizeTitle(names.toLowerCase(), true);
+		//}
 		names = names.split(/\s*;\s*/);
-		for (var j=0, m=names.length; j<m; j++) {
+		for(var j=0, m=names.length; j<m; j++) {
 			callback(names[j].replace(/\s*,$/, ''));
 		}
 	}
@@ -149,12 +149,12 @@ function scrape(doc) {
 	for (var i=0, n=rows.length; i<n; i++) {
 		var label = L(rows[i].firstElementChild.textContent.trim());
 		var value = rows[i].firstElementChild.nextElementSibling;
-		if (!value) continue;
-		//Z.debug("label: " + label);
-		//Z.debug("value: " + value.textContent);
-		switch (label) {
+		if(!value) continue;
+//		Z.debug("label: " + label);
+//		Z.debug("value: " + value.textContent);
+		switch(label) {
 			case "Inventor(s):":
-				cleanNames(ZU.xpathText(value, './span[@id="secondaryInventors"]'),
+				cleanNames(ZU.xpathText(value, './span[@id="inventors"]'), // why secondaryInventors? It leads to duplications
 					function(name) {
 						newItem.creators.push(
 							ZU.cleanAuthor(name.replace(/,?\s/, ', '),	//format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
@@ -163,7 +163,7 @@ function scrape(doc) {
 			break;
 			case "Applicant(s):":
 				var assignees = [];
-				cleanNames(ZU.xpathText(value, './span[@id="secondaryApplicants"]'),
+				cleanNames(ZU.xpathText(value, './span[@id="applicants"]'),
 				  	function(name) {
 				  		assignees.push(name);
 				  	});
@@ -177,15 +177,18 @@ function scrape(doc) {
 				var ECLA = ZU.trimInternal(ZU.xpathText(value,
 						'.//td[preceding-sibling::th[contains(text(),"'
 						+ L("Euro", true) + '")]]/a', null, '; ') || '');
-				if (CIB || ECLA) {
+				if(CIB || ECLA) {
 					newItem.extra = [];
-					if (CIB) newItem.extra.push('CIB: ' + CIB);
-					if (ECLA) newItem.extra.push('ECLA: ' + ECLA);
+					if(CIB) newItem.extra.push('CIB: ' + CIB);
+					if(ECLA) newItem.extra.push('ECLA: ' + ECLA);
 					newItem.extra = newItem.extra.join('\n');
 				}
 			break;
 			case "Page bookmark":
 				applyValue(newItem, label, value.firstElementChild.href)
+			break;
+			case "Application number:":
+				applyValue(newItem, label, ZU.xpathText(value,'./node()[following-sibling::a]')); // eliminates "global dossier"
 			break;
 			default:
 				applyValue(newItem, label, ZU.trimInternal(value.textContent));
@@ -193,12 +196,14 @@ function scrape(doc) {
 	}
 
 	var date = ZU.xpathText(doc, '//div[@id="pagebody"]/h1[1]');
-	if (date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
+	if(date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
 		newItem.date = date[0];
 	}
 	
-	var patentnumber = ZU.xpathText(doc, '//div[@class="application article clearfix"]/h3');
-	if (patentnumber) newItem.patentNumber = ZU.trimInternal(patentnumber.replace(/Abstract (not available )?(of|for)|Abrégé (non disponible )?pour|(Keine )?Zusammenfassung (verfügbar )?(von|für)/, ""));
+	//var patentnumber = ZU.xpathText(doc, '//div[@class="application article clearfix"]/h3');
+	//if (patentnumber) newItem.patentNumber = ZU.trimInternal(patentnumber.replace(/Abstract (not available )?(of|for)|Abrégé (non disponible )?pour|(Keine )?Zusammenfassung (verfügbar )?(von|für)/, ""));
+	var patentnumber = ZU.xpathText(doc, '//span[@class="sel"]'); // direct access to patent number
+	newItem.patentNumber = patentnumber;
 	newItem.abstractNote = ZU.trimInternal(
 		ZU.xpathText(doc, '//p[@class="printAbstract"]') || '');
 
