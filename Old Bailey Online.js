@@ -55,17 +55,6 @@ function getSearchResults(doc, checkOnly) {
 
  
 
-
-// function to convert a string to Title Case to make names in all caps look better
-// https://gist.github.com/edmundojr/e16fef6cb0ebe6ed987aa2b0c636f57a
-function titleCase(str) {
-	return str.toLowerCase().split(' ').map(function(word) {
-		return (word.charAt(0).toUpperCase() + word.slice(1));
-  }).join(' ');
-}
-
-
-
 function scrape(doc, url) {
 
 if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('name=') ) ) {
@@ -84,8 +73,8 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	
 	newItem.date = ZU.strToISO(sessDate); 
 	
-	if ( newItem.itemType == "case") {
-		newItem.title = titleCase(trialTitle);  // todo tidying this up - sometimes no name, messy punctuation
+	if (newItem.itemType == "case" && newItem.title && newItem.title == newItem.title.toUpperCase()) {
+		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
 	} else if ( newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
 	}
