@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-01 18:02:27"
+	"lastUpdated": "2018-09-22 15:27:05"
 }
 
 /*
@@ -256,7 +256,6 @@ function init(doc, url, callback, forceLoadRDF) {
 			//if(delimIndex === -1) continue;
 
 			var prefix = tag.substr(0, delimIndex).toLowerCase();
-
 			if(_prefixes[prefix]) {
 				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
 				//bib and bibo types are special, they use rdf:type to define type
@@ -314,6 +313,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
+			// Z.debug(newItem)
 			completeItem(doc, newItem);
 		});
 
@@ -378,9 +378,10 @@ function addHighwireMetadata(doc, newItem) {
 	newItem.creators = [];
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
-		if (authors.length == 1) {
-			/* If we get nothing when splitting by semicolon, and at least two words on
-			* either side of the comma when splitting by comma, we split by comma. */
+		if (authors.length == 1 && authorNodes.length == 1) {
+			/* If there is only one author node and 
+			 we get nothing when splitting by semicolon, and at least two words on
+			 either side of the comma when splitting by comma, we split by comma. */
 			var authorsByComma = authors[0].split(/\s*,\s*/);
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].indexOf(" ") !== -1
@@ -1189,42 +1190,6 @@ var testCases = [
 				"language": "en-US",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/97603",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "WHO recommendations on postnatal care of the mother and newborn",
-				"creators": [
-					{
-						"firstName": "World Health",
-						"lastName": "Organization",
-						"creatorType": "author"
-					}
-				],
-				"date": "2014",
-				"ISBN": "9789241506649",
-				"abstractNote": "62 p.",
-				"language": "en",
-				"libraryCatalog": "apps.who.int",
-				"publisher": "World Health Organization",
-				"url": "http://www.who.int/iris/handle/10665/97603",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot"
 					}

@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:39:38"
+	"lastUpdated": "2018-09-21 19:39:38"
 }
 
 /*
@@ -888,7 +888,7 @@ function importItem(newItem, node) {
 	
 	// publicationTitle -- first try PRISM, then DC
 	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",
-		n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
+		n.dc+"source", n.dc1_0+"source", n.dcterms+"source"], true);
 	if (container) {
 		newItem.publicationTitle = getFirstResults(container, [n.dc+"title", n.dc1_0+"title", n.dcterms+"title", n.so+"name"], true);
 		// these fields mean the same thing
@@ -898,6 +898,11 @@ function importItem(newItem, node) {
 		newItem.publicationTitle = getFirstResults([containerPeriodical, containerPublicationVolume], [n.so+"name"], true);
 	}
 
+	var siteName = getFirstResults(node, [n.og+"site_name"], true)
+	if (siteName && !newItem.publicationTitle) {
+		newItem.blogTitle = siteName;
+		newItem.websiteTitle = siteName;
+	}
 	// rights
 	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.prism2_1+"copyright", n.dc+"rights", n.dc1_0+"rights", n.dcterms+"rights", n.so+"license"], true);
 	
