@@ -1,9 +1,9 @@
 {
-	"translatorID": "d7db89af-33cf-4ab9-8534-82afe10f81aa",
-	"label": "Old Bailey Online 201809",
-	"creator": "Adam Crymble",
+	"translatorID": "b10bf941-12e9-4188-be04-f6357fa594a0",
+	"label": "Old Bailey Online",
+	"creator": "Adam Crymble & Sharon Howard",
 	"target": "^https?://www\\.oldbaileyonline\\.org/",
-	"minVersion": "1.0.0b4.r5",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
@@ -12,13 +12,32 @@
 	"lastUpdated": "2018-09-16 14:06:13"
 }
 
-
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Copyright © 2018 Sharon Howard
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+	
 // URLs
 // trial: div=t18000115-12
 // session: name=16900430
 // OA: can use either name= or div=  !
 // div/name excludes dir= pages in browse.jsp
-// is includes() the best way to do these?
 
 function detectWeb(doc, url) {
 	if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('name=') ) ) {
@@ -59,7 +78,7 @@ function scrape(doc, url) {
 
 if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('name=') ) ) {
 		var newItem = new Zotero.Item("book");
-	} else if (url.includes('browse.jsp')  && ( url.includes('div=') ) ) {
+	} else {
 		var newItem = new Zotero.Item("case");
 	}
 
@@ -75,7 +94,7 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	
 	if (newItem.itemType == "case" && newItem.title && newItem.title == newItem.title.toUpperCase()) {
 		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
-	} else if ( newItem.itemType == "book") {
+	} else if (newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
 	}
 	
