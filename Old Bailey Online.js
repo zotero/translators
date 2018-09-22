@@ -110,16 +110,16 @@ if (newItem.itemType == "case") {
 // offence info is under sessions-paper-sub-title; verdicts/sentences under ob-info-table
 
 	var off = ZU.xpath(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-sub-title"]/a');
-	for (o in off){
-		newItem.tags.push(off[o].textContent)
+	for (let o of off){
+		newItem.tags.push(o.textContent)
 	}
 
 	var verdict = ZU.xpathText(doc, '//div[@class="ob-panel"]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Verdict")]]/td');
 
 	if(verdict) {
 		verdict = verdict.split(';');
-		for( v in verdict ) {
-			newItem.tags.push(verdict[v])
+		for (let v of verdict ) {
+			newItem.tags.push(v)
 		}
 	}
 
@@ -127,8 +127,8 @@ if (newItem.itemType == "case") {
 
 	if(sentence) {
 		sentence = sentence.split(';');
-		for( s in sentence ) {
-			newItem.tags.push(sentence[s])
+		for (let s of sentence ) {
+			newItem.tags.push(s)
 		}
 	}
 }
