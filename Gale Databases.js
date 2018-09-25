@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Galegroup Translator - Copyright © 2012 Sebastian Karcher 
+	Galegroup Translator - Copyright © 2018 Sebastian Karcher 
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -137,7 +137,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com.libezproxy2.syr.edu/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=8&docId=GALE%7CA213083272&docType=Report&sort=Relevance&contentSegment=&prodId=PROF&contentSet=GALE%7CA213083272&searchId=R1&userGroupName=nysl_ce_syr&inPS=true",
+		"url": "http://go.galegroup.com/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=8&docId=GALE%7CA213083272&docType=Report&sort=Relevance&contentSegment=&prodId=PROF&contentSet=GALE%7CA213083272&searchId=R1&userGroupName=nysl_ce_syr&inPS=true",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -163,7 +163,7 @@ var testCases = [
 				"pages": "122+",
 				"publicationTitle": "Counselor Education and Supervision",
 				"shortTitle": "Improving a counselor education Web site through usability testing",
-				"url": "http://link.galegroup.com.libezproxy2.syr.edu/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
+				"url": "http://link.galegroup.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
 				"volume": "49",
 				"attachments": [
 					{
