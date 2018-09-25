@@ -1,5 +1,5 @@
 {
-	"translatorID": "58ab2618-4a25-4b9b-83a7-80cd0259f896",
+	"translatorID": "e3748cf3-36dc-4816-bf86-95a0b63feb03",
 	"label": "Gale Databases",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://go\\.galegroup\\.com/",
