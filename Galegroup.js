@@ -55,7 +55,7 @@ function getSearchResults(doc) {
 		return results;
 	}
 	
-	// Time Literary Supplement 
+	// Time Literary Supplement & Times Digital Archive
 	results = ZU.xpath(doc, '//div[@id="results_list"]/ul[@class="resultsListBox"]');
 	if (results.length) {
 		results.linkXPath = './/p[@class="articleTitle"]//a';
@@ -309,64 +309,5 @@ function doWeb(doc, url) {
 		processPage(doc, url);
 	}
 }/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://go.galegroup.com.libezproxy2.syr.edu/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=8&docId=GALE%7CA213083272&docType=Report&sort=Relevance&contentSegment=&prodId=PROF&contentSet=GALE%7CA213083272&searchId=R1&userGroupName=nysl_ce_syr&inPS=true",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "Improving a counselor education Web site through usability testing: the bibliotherapy education project",
-				"creators": [
-					{
-						"lastName": "McMillen",
-						"firstName": "Paula S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Pehrsson",
-						"firstName": "Dale-Elizabeth",
-						"creatorType": "author"
-					}
-				],
-				"date": "December 2009",
-				"ISSN": "00110035",
-				"archive": "Educators Reference Complete",
-				"issue": "2",
-				"language": "English",
-				"libraryCatalog": "Gale",
-				"pages": "122+",
-				"publicationTitle": "Counselor Education and Supervision",
-				"shortTitle": "Improving a counselor education Web site through usability testing",
-				"url": "http://link.galegroup.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
-				"volume": "49",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Bibliotherapy"
-					},
-					{
-						"tag": "Counseling"
-					},
-					{
-						"tag": "Counselling"
-					},
-					{
-						"tag": "Usability testing"
-					},
-					{
-						"tag": "Web sites (World Wide Web)"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
