@@ -2,20 +2,20 @@
 	"translatorID": "4ea89035-3dc4-4ae3-b22d-726bc0d83a64",
 	"label": "Galegroup",
 	"creator": "Sebastian Karcher and Aurimas Vinckevicius",
-	"target": "^https?://go.galegroup\\.com/",
+	"target": "^https?://(find\\.galegroup\\.com/|go\\.galegroup\\.com/gdsc)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-24 00:54:53"
+	"browserSupport": "gcsib",
+	"lastUpdated": "2018-09-25 12:30:16"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Galegroup Translator - Copyright © 2012 Sebastian Karcher 
+	Galegroup Translator - Copyright © 2012-2018 Sebastian Karcher 
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -33,52 +33,196 @@
 	
 	***** END LICENSE BLOCK *****
 */
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
-
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-
-	var rows = doc.querySelectorAll('ul.SearchResultsList span.title a.documentLink');
-	if (!rows.length) {
-		rows = doc.querySelectorAll('ul.SearchResultsList p.subTitle a.title');
+function getSearchResults(doc) {
+	// Default
+	var results = ZU.xpath(doc, '//*[@id="SearchResults"]//section[@class="resultsBody"]/ul/li');
+	if (results.length) {
+		results.linkXPath = './p[@class="subTitle"]/a';
+		Z.debug("Default Layout");
+		composeAttachment = composeAttachmentDefault;
+		composeRisUrl = composeRisUrlDefault;
+		return results;
 	}
-	for (var i=0; i<rows.length; i++) {
-	    // Adjust if required, use Zotero.debug(rows) to check
-		var href = rows[i].href;
-		// Adjust if required, use Zotero.debug(rows) to check
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+	
+	//  Ecco
+	results = ZU.xpath(doc, '//div[@id="resultsBox"]//li[@class="resrow"]');
+	if (results.length) {
+		results.linkXPath = './/div[@class="pic_Title"]/a';
+		Z.debug("Ecco, but using Default");
+		composeAttachment = composeAttachmentEcco;
+		composeRisUrl = composeRisUrlDefault;
+		return results;
 	}
-	return found ? items : false;
+	
+	// Time Literary Supplement 
+	results = ZU.xpath(doc, '//div[@id="results_list"]/ul[@class="resultsListBox"]');
+	if (results.length) {
+		results.linkXPath = './/p[@class="articleTitle"]//a';
+		if (doc.title.includes("The Times Digital Archive")) {
+			Z.debug("Times Digital Archive");
+			composeRisUrl = composeRisUrlTDA;
+		}
+		else {
+			composeRisUrl = composeRisUrlGNV;
+			Z.debug("TLS, but using GNV/TDA combo");
+		}
+		composeAttachment = composeAttachmentTDA;
+
+		return results;
+	}
+	
+
+	//Archives Unbound
+	results = ZU.xpath(doc, '//div[@id="resultsTable"]/div');
+	if (results.length) {
+		results.linkXPath = './/span[@class="title"]//a';
+		Z.debug("Archives Unbound, but using Default");
+		composeAttachment = composeAttachmentDefault;
+		composeRisUrl = composeRisUrlDefault;
+		return results;
+	}
+	
+	//Gale NewsVault
+	results = ZU.xpath(doc, '//*[@id="results_list"]/div[contains(@class,"resultList")]');
+	if (results.length) {
+		results.linkXPath = './div[@class="pub_details"]//li[@class="resultInfo"]/p//a';
+		Z.debug("Using GNV");
+		composeAttachment = composeAttachmentGNV;
+		composeRisUrl = composeRisUrlGNV;
+		return results;
+	}
+	
+	//LegalTrac (not sure this still exists 2018-09-24)
+	results = ZU.xpath(doc, '//*[@id="sr_ul"]/li');
+	if (results.length) {
+		results.linkXPath = './/span[@class="title"]/a';
+		Z.debug("LegalTrac, but using Default");
+		composeAttachment = composeAttachmentDefault;
+		composeRisUrl = composeRisUrlDefault;
+		return results;
+	}
+	
+	return [];
 }
+
 function detectWeb(doc, url) {
-	if (url.includes('/retrieve.do')) {
-		// there is no reasonable way to get to real item types
+	if (url.includes('/newspaperRetrieve.do')) {
+		return "newspaperArticle";
+	}
+	
+	if (url.includes('/retrieve.do') || url.includes('/i.do') || url.includes('/infomark.do')) {
+		if (url.includes('/ecco/')) return "book";
 		return "journalArticle";
 	}
 	
-	else if (getSearchResults(doc, true)) return "multiple";
+	if (getSearchResults(doc).length) return "multiple";
 }
 
+var composeRisUrl;
 
-function composeAttachment(doc, url) {
-	var pdfurl = attr(doc, '#docTools-pdf a', 'href');
-	if(pdfurl) {
+function composeRisUrlGNV(url) {
+	let baseUrl = url.replace(/#.*/,'').replace(/\/[^\/?]+\?.+/, '/centralizedGenerateCitation.do?');
+	let userGroupName = url.match(/userGroupName=[^&]+/);
+	let prodId = url.match(/prodId=[^&]+/)[0];
+	let tabID  = url.match(/tabID=[^&]+/)[0];
+	let docId = url.match(/docId=[^&]+/);
+	if (docId) {
+		docId = docId[0];
+	}
+	else {
+		docId = url.match(/relevancePageBatch=[^&]+/)[0].replace(/relevancePageBatch/, "docId");
+	}
+	let contentSet= url.match(/contentSet=[^&]+/)[0];
+	return baseUrl + "actionString=FormatCitation&inPS=true&citationFormat=ENDNOTE" + "&" + userGroupName  + "&" + contentSet +"&" + docId + "&" + prodId + "&" + tabID;
+
+}
+
+function composeRisUrlDefault(url) {
+	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
+		.replace(/\bactionString=[^&]*&?/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
+		.replace(/\&u=/, "&userGroupName=").replace(/\&id=/, "&docId=") //for bookmarked pages
+		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
+}
+
+// The Times Digital Archive
+function composeRisUrlTDA(url) {
+	if (url.indexOf('relevancePageBatch=') != -1) {
+		url = url.replace(/\bdocId=[^&]*&?/g, "").replace(/\&relevancePageBatch=/, "&docId=");
+	}
+	return url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/generateCitation.do')
+		.replace(/\bactionString=[^&]*&?/g, '').replace(/\bcitationFormat=[^&]*&?/g, '')
+		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
+}
+
+var composeAttachment;
+
+function composeAttachmentDefault(doc, url) {
+	var pdf = !!(doc.getElementById('pdfLink') || doc.getElementById('docTools-pdf'));
+	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./@href]')[0];
+	if (attachment && pdf /* HTML currently pops up a download dialog for HTML attachments */) {
+		url = attachment.href;
 		return {
-			url: pdfurl,
-			title: "Full Text PDF",
-			mimeType:'application/pdf'
+			url: url.replace(/#.*/, '').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
+				.replace(/\b(?:actionCmd|downloadFormat)=[^&]*&?/g, '')
+				+ '&actionCmd=DO_DOWNLOAD_DOCUMENT&downloadFormat=' + (pdf?'PDF':'HTML'),
+			title: "Full Text " + (pdf?'PDF':'HTML'),
+			mimeType: pdf?'application/pdf':'text/html'
 		};
 	} else {
 		return {document: doc, title: "Snapshot"};
 	}
 }
 
+
+
+function composeAttachmentGNV(doc, url) {
+	var lowerLimit = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="pdfLowerLimit"]/@value') || '1';
+	var upperLimit = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="pdfHigherLimit"]/@value') || lowerLimit;
+	var numPages = ZU.xpathText(doc, '//form[@id="resultsForm"]/input[@name="noOfPages"]/@value') || (upperLimit - lowerLimit + 1);
+	var pdfUrl = url.replace(/#.*/,'').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
+			.replace(/\b(?:scale|orientation|docType|pageIndex|relatedDocId|isIllustration|imageId|aCmnd|recNum|pageRange|noOfPages)=[^&]*&?/g, '')
+			+ '&scale=&orientation=&docType=&pageIndex=1&relatedDocId=&isIllustration=false'
+			+ '&imageId=&aCmnd=PDFFormat&recNum=&' + 'noOfPages=' + numPages + '&pageRange=' + lowerLimit + '-' + upperLimit;
+	
+	Z.debug(pdfUrl);
+	return {
+		url: pdfUrl,
+		title: 'Full Text PDF',
+		mimeType: 'application/pdf'
+	};
+}
+
+function composeAttachmentTDA(doc, url) {
+	if (url.indexOf('relevancePageBatch=') != -1) {
+		url = url.replace(/\bdocId=[^&]*&?/g, "").replace(/\&relevancePageBatch=/, "&docId=");
+	}
+	return composeAttachmentGNV(doc, url);
+}
+
+function composeAttachmentEcco(doc, url) {
+	// This is the code for a post request for the PDF, not sure if this is possible, though?
+	
+	// let baseUrl = url.replace(/#.*/,'').replace(/\/[^\/?]+\?.+/, '/downloadDocument.do?');
+	/* let userGroupName = url.match(/userGroupName=[^&]+/);
+	let prodId = url.match(/prodId=[^&]+/)[0];
+	let tabID  = url.match(/tabID=[^&]+/)[0];
+	let docId = url.match(/docId=[^&]+/);
+	if (docId) {
+		docId = docId[0];
+	}
+	else {
+		docId = url.match(/relevancePageBatch=[^&]+/)[0].replace(/relevancePageBatch/, "docId");
+	}
+	let postUrl =  baseUrl + "actionCmd=DO_DOWNLOAD_DOCUMENT&inPS=true&downloadFormat=PDF&pageIndex=1&option=range&contentSet=ECCOArticles&" + prodId + "&" 
+		+ docId + "&" + tabID  + "&" + userGroupName;
+	
+	let noPages = ZU.xpathText(doc, '//input[@name="noOfPages"]/@value');
+	let postString = "downloadFormat=PDF&markedItems=&markedDownLoadItems=&pageIndex=1&noOfPages=" + noPages;
+	*/
+	return ({document: doc, title: "Snapshot"});
+
+}
 
 function parseRis(text, attachment) {
 	text = text.trim();
@@ -94,46 +238,135 @@ function parseRis(text, attachment) {
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function (obj, item) {
-		if(attachment) item.attachments.push(attachment);
+		if (attachment) item.attachments.push(attachment);
 		item.complete();
 	});
 	translator.translate();
 }
 
+function processArticles(articles) {
+	var article;
+	while (article = articles.shift()) {
+		ZU.processDocuments(article, function(doc, url) {
+			processPage(doc, url);
+			processArticles(articles);
+		});
+	}
+}
 
-function scrape(doc, url) {
-	var postURL = "/ps/citationtools/rest/cite/download";
-	
-	var docId = attr(doc, 'input.citationToolsData', 'data-docid');
-	var documentUrl = attr(doc, 'input.citationToolsData', 'data-url');
-	var productName = attr(doc, 'input.citationToolsData', 'data-productname');
- 
-	var documentData = '{"docId":"' + docId +'","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
-	var post = "citationFormat=RIS&documentData=" +encodeURIComponent(documentData).replace(/%20/g, "+");
+function processPage(doc, url) {
 	var attachment = composeAttachment(doc, url);
-	// Z.debug(post)
-	ZU.doPost(postURL, post, function(text){
-		// Z.debug(text);
+	Z.debug(composeRisUrl(url))
+	ZU.doGet(composeRisUrl(url), function(text) {
 		parseRis(text, attachment);
 	});
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
+	if (detectWeb(doc, url) == "multiple") {
+		var results = getSearchResults(doc);
+		var items = {};
+		for (var i=0, n=results.length; i<n; i++) {
+			var link = ZU.xpath(results[i], results.linkXPath)[0];
+			if (!link) continue;
+			
+			items[link.href] = ZU.trimInternal(link.textContent);
+		}
+		
+		Zotero.selectItems(items, function (items) {
+			if (!items) return true;
+			
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape);
+			processArticles(articles);
 		});
 	} else {
-		scrape(doc, url);
+		if (doc.title.includes('NewsVault')) {
+			Z.debug("Using GNV");
+			composeAttachment = composeAttachmentGNV;
+			composeRisUrl = composeRisUrlGNV;
+		} else if (doc.title.includes('Times Literary Supplement')) {
+			Z.debug("Times Literary Supplment Using GNV/TDA");
+			composeAttachment = composeAttachmentTDA;
+			composeRisUrl = composeRisUrlGNV;
+			
+		} else if (doc.title.includes('The Times Digital Archive')) {
+			Z.debug("Using TDA");
+			composeAttachment = composeAttachmentTDA;
+			composeRisUrl = composeRisUrlTDA;
+		} else if (doc.title.includes('Eighteenth Century Collections Online')) {
+			Z.debug("Using Ecco: Default RIS, Different Attachme nt");
+			composeAttachment = composeAttachmentEcco;
+			composeRisUrl = composeRisUrlDefault;
+		} else {
+			Z.debug("Using Default");
+			composeAttachment = composeAttachmentDefault;
+			composeRisUrl = composeRisUrlDefault;
+		}
+		
+		processPage(doc, url);
 	}
-}
-/** BEGIN TEST CASES **/
-var testCases = []
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://go.galegroup.com.libezproxy2.syr.edu/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=8&docId=GALE%7CA213083272&docType=Report&sort=Relevance&contentSegment=&prodId=PROF&contentSet=GALE%7CA213083272&searchId=R1&userGroupName=nysl_ce_syr&inPS=true",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Improving a counselor education Web site through usability testing: the bibliotherapy education project",
+				"creators": [
+					{
+						"lastName": "McMillen",
+						"firstName": "Paula S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pehrsson",
+						"firstName": "Dale-Elizabeth",
+						"creatorType": "author"
+					}
+				],
+				"date": "December 2009",
+				"ISSN": "00110035",
+				"archive": "Educators Reference Complete",
+				"issue": "2",
+				"language": "English",
+				"libraryCatalog": "Gale",
+				"pages": "122+",
+				"publicationTitle": "Counselor Education and Supervision",
+				"shortTitle": "Improving a counselor education Web site through usability testing",
+				"url": "http://link.galegroup.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bibliotherapy"
+					},
+					{
+						"tag": "Counseling"
+					},
+					{
+						"tag": "Counselling"
+					},
+					{
+						"tag": "Usability testing"
+					},
+					{
+						"tag": "Web sites (World Wide Web)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 /** END TEST CASES **/
