@@ -9,19 +9,20 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-02-12 17:40:59"
+	"lastUpdated": "2018-09-27 01:43:46"
 }
 
 function detectWeb(doc, url) {
-	Z.monitorDOMChanges(doc.getElementById("resultsarea"), {childList: true});
-	var downloadLink = doc.getElementById('oneclickDL');
-	if (downloadLink && getDocIDs(downloadLink.href)) {
+	Z.monitorDOMChanges(doc.getElementById("ev-application"), {childList: true});
+	var printlink = doc.getElementById('printlink');
+	if(url.includes("/search/doc/") && printlink && getDocIDs(printlink.href)) {
 		return "journalArticle";
 	}
-	
-	if (getSearchResults(doc, true)) {
+	if((url.includes("quick.url?") || url.includes("expert.url?") || url.includes("thesaurus.url?")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+
+
 }
 
 function getDocIDs(url) {
@@ -32,18 +33,15 @@ function getDocIDs(url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var rows = doc.getElementsByClassName('result'),
+	var rows = doc.querySelectorAll('div[class*=result-row]');
 		items = {},
 		found = false;
-	
 	for (var i=0; i<rows.length; i++) {
 		var checkbox = rows[i].querySelector('input[name="cbresult"]');
 		if (!checkbox) continue;
-		
 		var docid = checkbox.getAttribute('docid');
 		if (!docid) continue;
-		
-		var title = rows[i].querySelector('h3.resulttitle');
+		var title = rows[i].querySelector('h3.result-title');
 		if (!title) continue;
 		
 		if (checkOnly) return true;
@@ -71,8 +69,8 @@ function doWeb(doc, url) {
 			fetchRIS(doc, ids);
 		});
 	} else {
-		var downloadLink = doc.getElementById('oneclickDL');
-		fetchRIS(doc, getDocIDs(downloadLink.href));
+		var printlink = doc.getElementById('printlink');
+		fetchRIS(doc, getDocIDs(printlink.href));
 	}
 }
 
