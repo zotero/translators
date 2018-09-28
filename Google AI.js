@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-15 16:07:25"
+	"lastUpdated": "2018-09-28 12:10:45"
 }
 
 /*
@@ -34,19 +34,45 @@
 	***** END LICENSE BLOCK *****
 */
 
+// See BibTeX.js
 var bibtex2zoteroTypeMap = {
-	"inproceedings": "conferencePaper",
-	"conference"   : "conferencePaper",
-	"article"      : "journalArticle",
-	"techreport"   : "report",
-	"patent"       : "patent"
+	"book":"book", // or booklet, proceedings
+	"inbook":"bookSection",
+	"incollection":"bookSection",
+	"article":"journalArticle", // or magazineArticle or newspaperArticle
+	"patent" :"patent",
+	"phdthesis":"thesis",
+	"unpublished":"manuscript",
+	"inproceedings":"conferencePaper", // check for conference also
+	"conference":"conferencePaper",
+	"techreport":"report",
+	"booklet":"book",
+	"manual":"book",
+	"mastersthesis":"thesis",
+	"misc":"book",
+	"proceedings":"book",
+	"online":"webpage",
+	// from BibLaTeX translator:
+	"thesis":"thesis",
+	"letter":"letter",
+	"movie":"film",
+	"artwork":"artwork",
+	"report":"report",
+	"legislation":"bill",
+	"jurisdiction":"case",
+	"audio":"audioRecording",
+	"video":"videoRecording",
+	"software":"computerProgram",
+	"inreference":"encyclopediaArticle",
+	"collection":"book",
+	"mvbook":"book"
 };
 
 function detectWeb(doc, url) {
 	if (url.includes('/pubs/pub')) {
 		let bibtex = extractBibtex(doc);
 		let doctype = bibtex.split('{')[0].replace('@', '');
-		return bibtex2zoteroTypeMap[doctype];
+		return bibtex2zoteroTypeMap[doctype] || 'journalArticle';
 	} else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
