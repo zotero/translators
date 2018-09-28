@@ -20,15 +20,22 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	let pdfurl = url + ".pdf";
-	let bibtexurl = url+ "/bibtex";
+	//work on PDF pages
+	let baseurl = url.replace(/\.pdf$/, "");
+	let pdfurl = baseurl + ".pdf";
+	let bibtexurl = baseurl+ "/bibtex";
 	Zotero.Utilities.HTTP.doGet(bibtexurl, function( text ) {
 		let translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString( text );
 		translator.setHandler( "itemDone", function( obj, item ) {
-			item.attachments = [{url: pdfurl, title:"NIPS Full Text PDF", mimeType:"application/pdf"},
-								{document: doc, title: "NIPS Snapshort", mimeTYpe: "text/html"}];
+			item.attachments.push({url: pdfurl, title:"NIPS Full Text PDF", mimeType:"application/pdf"});
+			if (url.endsWith(".pdf")) {
+				item.attachments.push({url: baseurl, title:"NIPS Snapshot", mimeType: "text/html"});
+			}
+			else {
+				item.attachments.push({document: doc, title: "NIPS Snapshot"});
+			}
 			item.complete();
 		});
 		translator.translate();
@@ -46,9 +53,6 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		if (url.endsWith('.pdf')) {
-			url = url.substring(0, url.length - 4);
-		}
 		scrape(doc, url);
 	}
 }
