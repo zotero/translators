@@ -55,8 +55,8 @@ function getSearchResults(doc) {
 
 function getTitle(doc) {
 	var title = ZU.xpathText(doc, '//div[@id="pagebody"]/h3[1]');
-	if(title) {
-		if(title.toUpperCase() == title) {
+	if (title) {
+		if (title.toUpperCase() == title) {
 			title = ZU.capitalizeTitle(title, true);
 		}
 		return title.trim();
@@ -148,7 +148,7 @@ function scrape(doc) {
 	for (var i=0, n=rows.length; i<n; i++) {
 		var label = L(rows[i].firstElementChild.textContent.trim());
 		var value = rows[i].firstElementChild.nextElementSibling;
-		if(!value) continue;
+		if (!value) continue;
 		// Z.debug("label: " + label);
 		// Z.debug("value: " + value.textContent);
 		switch (label) {
@@ -169,17 +169,17 @@ function scrape(doc) {
 				newItem.assignee = assignees.join('; ');
 			break;
 			case "Classification:":
-				var	CIB = ZU.trimInternal(
+				var CIB = ZU.trimInternal(
 					ZU.xpathText(value,
 						'.//td[preceding-sibling::th[contains(text(),"'
 						+ L("international", true) + '")]]') || '');
 				var ECLA = ZU.trimInternal(ZU.xpathText(value,
 						'.//td[preceding-sibling::th[contains(text(),"'
 						+ L("Euro", true) + '")]]/a', null, '; ') || '');
-				if(CIB || ECLA) {
+				if (CIB || ECLA) {
 					newItem.extra = [];
-					if(CIB) newItem.extra.push('CIB: ' + CIB);
-					if(ECLA) newItem.extra.push('ECLA: ' + ECLA);
+					if (CIB) newItem.extra.push('CIB: ' + CIB);
+					if (ECLA) newItem.extra.push('ECLA: ' + ECLA);
 					newItem.extra = newItem.extra.join('\n');
 				}
 			break;
