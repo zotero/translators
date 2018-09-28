@@ -36,8 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("searchResults?") !== -1
-	if(url.indexOf("searchResults?") !== -1
+	if (url.includes("searchResults?")
 		&& getSearchResults(doc).length) {
 			return "multiple";
 	}
@@ -92,7 +91,7 @@ var i18n = {
 
 function initLocale(url) {
 	var m = url.match(/[?&]locale=([a-zA-Z_]+)/); // Previous version failed when URL ended with #
-	if(m && i18n[m[1]]) {
+	if (m && i18n[m[1]]) {
 		i18n = i18n[m[1]];	
 	} else {
 		i18n = {};	//English
@@ -100,9 +99,9 @@ function initLocale(url) {
 }
 
 function L(label, fromEN) {
-	if(fromEN) {
-		for(var l in i18n) {
-			if(i18n[l] == label) {
+	if (fromEN) {
+		for (var l in i18n) {
+			if (i18n[l] == label) {
 				return l;
 			}
 		}
@@ -125,7 +124,7 @@ function applyValue(newItem, label, value) {
 
 //clean up names list and call callback with a clean name
 function cleanNames(names, callback) {
-	if(names) {
+	if (names) {
 		//Z.debug(names)
 		names = names.replace(/\[[a-zA-Z]*\]/g, "").trim(); //modified to accomodate "inventors" instead of "secondaryInventors"
 
@@ -133,7 +132,7 @@ function cleanNames(names, callback) {
 		names = ZU.capitalizeTitle(names.toLowerCase(), true);
 		//}
 		names = names.split(/\s*;\s*/);
-		for(var j=0, m=names.length; j<m; j++) {
+		for (var j=0, m=names.length; j<m; j++) {
 			callback(names[j].replace(/\s*,$/, ''));
 		}
 	}
@@ -150,9 +149,9 @@ function scrape(doc) {
 		var label = L(rows[i].firstElementChild.textContent.trim());
 		var value = rows[i].firstElementChild.nextElementSibling;
 		if(!value) continue;
-//		Z.debug("label: " + label);
-//		Z.debug("value: " + value.textContent);
-		switch(label) {
+		// Z.debug("label: " + label);
+		// Z.debug("value: " + value.textContent);
+		switch (label) {
 			case "Inventor(s):":
 				cleanNames(ZU.xpathText(value, './span[@id="inventors"]'), // why secondaryInventors? It leads to duplications
 					function(name) {
@@ -196,7 +195,7 @@ function scrape(doc) {
 	}
 
 	var date = ZU.xpathText(doc, '//div[@id="pagebody"]/h1[1]');
-	if(date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
+	if (date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
 		newItem.date = date[0];
 	}
 	
