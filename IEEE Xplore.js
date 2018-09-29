@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-08-16 00:52:54"
+	"lastUpdated": "2018-09-29 01:57:25"
 }
 
 function detectWeb(doc, url) {
@@ -91,7 +91,7 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
-	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)\//))[1];
+	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
 	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	//Z.debug("arNumber = " + arnumber);
 	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
