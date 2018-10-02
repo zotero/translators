@@ -90,7 +90,7 @@ var i18n = {
 }
 
 function initLocale(url) {
-	var m = url.match(/[?&]locale=([a-zA-Z_]+)/); // Previous version failed when URL ended with #
+	var m = url.match(/[?&]locale=([a-zA-Z_]+)/);
 	if (m && i18n[m[1]]) {
 		i18n = i18n[m[1]];	
 	} else {
@@ -126,11 +126,8 @@ function applyValue(newItem, label, value) {
 function cleanNames(names, callback) {
 	if (names) {
 		//Z.debug(names)
-		names = names.replace(/\[[a-zA-Z]*\]/g, "").trim(); //modified to accomodate "inventors" instead of "secondaryInventors"
-
-		//if(names == names.toUpperCase()) { // does not work in case of mixed cases
+		names = names.replace(/\[[a-zA-Z]*\]/g, "").trim(); // to eliminate country code in square brackets after inventors' and applicants' names
 		names = ZU.capitalizeTitle(names.toLowerCase(), true);
-		//}
 		names = names.split(/\s*;\s*/);
 		for (var j=0, m=names.length; j<m; j++) {
 			callback(names[j].replace(/\s*,$/, ''));
@@ -149,11 +146,9 @@ function scrape(doc) {
 		var label = L(rows[i].firstElementChild.textContent.trim());
 		var value = rows[i].firstElementChild.nextElementSibling;
 		if (!value) continue;
-		// Z.debug("label: " + label);
-		// Z.debug("value: " + value.textContent);
 		switch (label) {
 			case "Inventor(s):":
-				cleanNames(ZU.xpathText(value, './span[@id="inventors"]'), // why secondaryInventors? It leads to duplications
+				cleanNames(ZU.xpathText(value, './span[@id="inventors"]'), 
 					function(name) {
 						newItem.creators.push(
 							ZU.cleanAuthor(name.replace(/,?\s/, ', '),	//format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
@@ -187,7 +182,7 @@ function scrape(doc) {
 				applyValue(newItem, label, value.firstElementChild.href)
 			break;
 			case "Application number:":
-				applyValue(newItem, label, ZU.xpathText(value,'./node()[following-sibling::a]')); // eliminates "global dossier"
+				applyValue(newItem, label, ZU.xpathText(value,'./node()[following-sibling::a]'));
 			break;
 			default:
 				applyValue(newItem, label, ZU.trimInternal(value.textContent));
@@ -198,11 +193,7 @@ function scrape(doc) {
 	if (date && (date = date.match(/\d{4}-\d{2}-\d{2}/))) {
 		newItem.date = date[0];
 	}
-	
-	//var patentnumber = ZU.xpathText(doc, '//div[@class="application article clearfix"]/h3');
-	//if (patentnumber) newItem.patentNumber = ZU.trimInternal(patentnumber.replace(/Abstract (not available )?(of|for)|Abrégé (non disponible )?pour|(Keine )?Zusammenfassung (verfügbar )?(von|für)/, ""));
-	var patentnumber = ZU.xpathText(doc, '//span[@class="sel"]'); // direct access to patent number
-	newItem.patentNumber = patentnumber;
+	newItem.patentNumber = ZU.xpathText(doc, '//span[@class="sel"]');
 	newItem.abstractNote = ZU.trimInternal(
 		ZU.xpathText(doc, '//p[@class="printAbstract"]') || '');
 
@@ -339,7 +330,7 @@ var testCases = [
 				"applicationNumber": "AU19890028143D 19891108",
 				"assignee": "William S. Filler",
 				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
-				"patentNumber": "AU2814389 (A) Zusammenfassung der korrespondierenden Patentschrift WO8904147 (A1)",
+				"patentNumber": "AU2814389 (A)",
 				"priorityNumbers": "US19870118325 19871109",
 				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=de_EP&CC=AU&NR=2814389A&KC=A&ND=4",
 				"attachments": [
@@ -372,7 +363,7 @@ var testCases = [
 				"applicationNumber": "AU19890028143D 19891108",
 				"assignee": "William S. Filler",
 				"extra": "CIB: A61B17/22; A61B17/225; G10K11/32; G10K15/04; (IPC1-7): A61B17/22",
-				"patentNumber": "AU2814389 (A) Abrégé du document correspondant WO8904147 (A1)",
+				"patentNumber": "AU2814389 (A)",
 				"priorityNumbers": "US19870118325 19871109",
 				"url": "https://worldwide.espacenet.com/publicationDetails/biblio?FT=D&date=19890601&DB=EPODOC&locale=fr_EP&CC=AU&NR=2814389A&KC=A&ND=4",
 				"attachments": [
