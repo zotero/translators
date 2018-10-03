@@ -1,21 +1,11 @@
-{
-	"translatorID": "8de7d616-0961-438b-b45b-d34bc80aabed",
-	"label": "State Records Office of Western Australia",
-	"creator": "Mike O'Connor",
-	"target": "^https://archive\\.sro\\.wa\\.gov\\.au/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-19 01:22:40"
-}
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017-18 Mike O'Connor
+	
+	This translator designed to be used with
+	the State Record Office of Western Australia
+	AtoM (accesstomemory.org) archive catalogue.
 	
 	This file is part of Zotero.
 
@@ -52,6 +42,66 @@ function selectMimeType(url) {
 	}
 
 	return mime;
+}
+
+function findDate(dateStr) {
+	
+	// Four date strings are possible in AtoM
+	// TYPE = 'Creation' or 'Accumulation'
+	// and should be ISO-8601 compliant:
+	// (1) single date: 
+	//		yyyy-mm-dd (TYPE)
+	// (2) single FROM date: 
+	//		yyyy-mm-dd - (TYPE)
+	// (3) single TO date:
+	//		- yyyy-mm-dd (TYPE)
+	// (4) range i.e. FROM and TO dates:
+	//		yyyy-mm-dd - YYYY-MM-DD (TYPE)
+	// N.B. Some dates in AtoM are yyyy only.
+	
+	
+	if (dateStr.indexOf(" - ") > 0) {
+		dateRange = dateStr.split("(")[0].split(" - ");
+		
+		if (dateRange[1].trim().length > 0) {
+			return ZU.trimInternal(dateRange[1].trim());
+		} else {
+			return ZU.trimInternal(dateRange[0].trim());
+		}
+
+	} else {
+		dateRange = dateStr.split("(")[0];
+		return ZU.trimInternal(dateRange);
+	}
+
+}
+
+function toTitleCase(titleStr) {
+	// In AtoM Agency names and Series titles are stored all-capitals.
+	// This fn. shifts them to(wards) title case
+	var newTitleStr = titleStr.toLowerCase().split(/ /);
+	for (var i = 0; i < newTitleStr.length; i++) {
+		if (newTitleStr[i].indexOf("-") > 0) {
+			var hyphenStr = newTitleStr[i].toLowerCase().split(/-/);
+			for (var j = 0; j < hyphenStr.length; j++) {
+				hyphenStr[j] = hyphenStr[j].charAt(0).toUpperCase() + hyphenStr[j].slice(1);
+			}
+			newTitleStr[i] = hyphenStr.join('-');
+		} else {
+			newTitleStr[i] = newTitleStr[i].charAt(0).toUpperCase() + newTitleStr[i].slice(1); 	
+		}
+		switch (newTitleStr[i]) {
+			case 'Of': 
+				newTitleStr[i] = 'of';
+				break;
+			case 'And':
+				newTitleStr[i] = 'and';
+				break;
+			default:
+			break;	
+		}
+	}
+	return newTitleStr.join(' ');
 }
 
 function detectWeb(doc, url) {
@@ -124,8 +174,6 @@ function scrape(doc, url) {
 		if (identityFields) {
 			for (let field of identityFields) {
 
-				// Zotero.debug("nextFirstEC" + text(identityFields[i],"h3"));
-
 				var nextIdentityField = text(field, "h3");
 
 				switch (nextIdentityField) {
@@ -150,61 +198,46 @@ function scrape(doc, url) {
 
 						var dateList = field.querySelectorAll("ul > li");
 
-						// Find which list items contain which date type
-
 						if (dateList.length > 0) {
+
+							var prefDate = "";
+							
 							for (let date of dateList) {
 
 								let dateStr = date.textContent;
-								let dateRange = dateStr.split("(")[0].split(" - ");
-
-								let dr1 = ZU.trimInternal(dateRange[1]);
-								let dr0 = ZU.trimInternal(dateRange[0]);
-
+								
 								if (dateStr.indexOf("(Creation)") > 0) {
-
-									//dateRange = ZU.trimInternal(dateStr.split("(")[0].split(" - "));
-
-									if (dr1.length > 0) {
-										// assign TO date as item.date
-										item.date = dr1;
-									} else if (dr0.length > 0) {
-										// assign FROM date as item.date
-										item.date = dr0;
-									} else {
-										item.date = "";
-									}
-
-									if (item.date.length > 0) {
+									var dateCreationStr = findDate(dateStr);
+									prefDate = "cr";
+									if (dateCreationStr.length > 0) {
 										item.notes.push({
-											title: "Date(s)",
+											title: "Creation Date(s)",
 											note: "Date(s): " + ZU.trimInternal(dateStr)
 										});
 									}
-								}
-								if (dateStr.indexOf("(Accumulation)") > 0) {
-									// this is the Accumulation date list item
-									// Only use this date as the item date if no creation date exists
-
-									if (dr1.length > 0) {
-										// assign TO date as item.date
-										item.date = dr1;
-									} else if (dr0.length > 0) {
-										// assign FROM date as item.date
-										item.date = dr0;
-									} else {
-										item.date = "";
+								} else if (dateStr.indexOf("(Accumulation)") > 0) {
+									var dateAccumStr = findDate(dateStr);
+									if (prefDate == "") {									
+										prefDate = "ac";
 									}
-									if (item.date.length > 0) {
+									if (dateAccumStr.length > 0) {
 										item.notes.push({
-											title: "Date(s)",
+											title: "Accumulation Date(s)",
 											note: "Date(s): " + ZU.trimInternal(dateStr)
 										});
+								} else {
+									item.date = "";
 									}
 								}
 							}
-
+							// Zotero entry date is Creation date, if available.
+							if (prefDate == "cr") {
+								item.date = dateCreationStr;
+							} else {
+								item.date = dateAccumStr;
+							}
 						} else {
+							// 0 items in date list
 							item.date = "";
 						}
 						break;
@@ -217,7 +250,10 @@ function scrape(doc, url) {
 		}
 	}
 
-
+	if (item.manuscriptType == "Series") {
+		item.title = toTitleCase(item.title);	
+	}
+	
 	item.date = ZU.trimInternal(item.date);
 	if (item.date == "-") {
 		item.date = "";
@@ -269,7 +305,7 @@ function scrape(doc, url) {
 				case "Name of creator":
 					creatorName = text(contextFields[k], "div > a").split(" - ");
 					item.creators.push({
-						lastName: creatorName[1],
+						lastName: toTitleCase(creatorName[1]),
 						creatorType: "author",
 						fieldMode: true 
 					})
@@ -291,9 +327,9 @@ function scrape(doc, url) {
 
 	if (digitalObject) {
 		item.attachments.push({
-			title: 'SROWA Snapshot',
 			url: attr(digitalObject, 'a', 'href'),
-			mimeType: selectMimeType(attr(digitalObject, 'a', 'href')),
+			title: 'Digital copy from SROWA.',
+			type: selectMimeType(attr(digitalObject, 'a', 'href')),
 			snapshot: true
 		});
 	}
@@ -313,7 +349,7 @@ var testCases = [
 					{
 						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
 						"creatorType": "author",
-						"fieldMode": 1
+						"fieldMode": true
 					}
 				],
 				"date": "1906-01-17",
@@ -325,7 +361,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"title": "Date(s)",
+						"title": "Accumulation Date(s)",
 						"note": "Date(s): - 1906-01-17 (Accumulation)"
 					}
 				],
@@ -344,7 +380,7 @@ var testCases = [
 					{
 						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
 						"creatorType": "author",
-						"fieldMode": 1
+						"fieldMode": true
 					}
 				],
 				"date": "1903-01-01",
@@ -357,12 +393,70 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"title": "Date(s)",
+						"title": "Accumulation Date(s)",
 						"note": "Date(s): 1896 - 1915 (Accumulation)"
 					},
 					{
-						"title": "Date(s)",
+						"title": "Creation Date(s)",
 						"note": "Date(s): 1893-01-01 - 1903-01-01 (Creation)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archive.sro.wa.gov.au/index.php/warramboo-locations-survey-of-road-from-magnet-towards-lawlers-by-a-e-arney-fieldbook-5-pp-28-40-scale-20-chains-to-an-inch-warramboo-6",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Warramboo Locations, survey of Road from Magnet towards Lawlers by A.E. Arney, Fieldbook 5 pp. 28-40 [scale: 20 chains to an inch].",
+				"creators": [
+					{
+						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "SURVEY OFFICE",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "SURVEYOR-GENERAL'S DEPARTMENT",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "CROWN LANDS AND SURVEYS DEPARTMENT",
+						"creatorType": "author",
+						"fieldMode": true
+					},
+					{
+						"lastName": "DEPARTMENT OF LAND ADMINISTRATION",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
+				"date": "1897-01-01",
+				"archiveLocation": "AU WA S236- cons3869 Warramboo 6",
+				"libraryCatalog": "State Records Office of Western Australia",
+				"manuscriptType": "Item",
+				"shortTitle": "Warramboo Locations, survey of Road from Magnet towards Lawlers by A.E. Arney, Fieldbook 5 pp. 28-40 [scale",
+				"url": "https://archive.sro.wa.gov.au/index.php/warramboo-locations-survey-of-road-from-magnet-towards-lawlers-by-a-e-arney-fieldbook-5-pp-28-40-scale-20-chains-to-an-inch-warramboo-6",
+				"attachments": [
+					{
+						"title": "Digital copy from SROWA.",
+						"type": "image/jpeg",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"title": "Accumulation Date(s)",
+						"note": "Date(s): 1897-01-01 - (Accumulation)"
 					}
 				],
 				"seeAlso": []
