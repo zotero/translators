@@ -74,7 +74,6 @@ function doWeb(doc, url) {
 		var pdfUrl = doc.querySelector("a.obj_galley_link.pdf");
 		//add linked PDF if there isn't one listed in the header
 		if (!pdfAttachment && pdfUrl) { 
-			Z.debug("hereherehere");
 			item.attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
