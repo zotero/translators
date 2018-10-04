@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-18 22:34:25"
+	"lastUpdated": "2018-10-04 03:01:31"
 }
 
 function detectWeb(doc, url) {
 	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
 	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
-		pkpLibraries.length >= 10) {
+		pkpLibraries.length >= 1) {
 		return 'journalArticle';
 	}
 }
@@ -61,11 +61,25 @@ function doWeb(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
 		}
 		
+		var pdfAttachment = false;
+		
 		//some journals link to a PDF view page in the header, not the PDF itself
 		for (var i=0; i<item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
+				pdfAttachment = true;
 				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
 			}
+		}
+		
+		var pdfUrl = doc.querySelector("a.obj_galley_link.pdf");
+		//add linked PDF if there isn't one listed in the header
+		if (!pdfAttachment && pdfUrl) { 
+			Z.debug("hereherehere");
+			item.attachments.push({
+				title: "Full Text PDF",
+				mimeType: "application/pdf",
+				url: pdfUrl.href.replace(/\/article\/view\//, '/article/download/')
+			});
 		}
 
 		item.complete();
@@ -720,6 +734,45 @@ var testCases = [
 					"storytelling",
 					"vanderbilt"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mennonites in Unexpected Places: Sociologist and Settler in Latin America",
+				"creators": [
+					{
+						"firstName": "Ben",
+						"lastName": "Nobbs-Thiessen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-12-18",
+				"ISSN": "08245053",
+				"language": "en",
+				"libraryCatalog": "jms.uwinnipeg.ca",
+				"pages": "203-224",
+				"publicationTitle": "Journal of Mennonite Studies",
+				"rights": "Copyright (c)",
+				"shortTitle": "Mennonites in Unexpected Places",
+				"url": "http://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
+				"volume": "28",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
