@@ -1,3 +1,16 @@
+{
+	"translatorID": "2b62db1e-1d49-4e2b-a409-a3f9f1870a41",
+	"label": "State Records Office of Western Australia",
+	"creator": "Mike O'Connor",
+	"target": "^https://archive\\.sro\\.wa\\.gov\\.au/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-10-05 03:30:23"
+}
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -217,7 +230,7 @@ function scrape(doc, url) {
 									}
 								} else if (dateStr.indexOf("(Accumulation)") > 0) {
 									var dateAccumStr = findDate(dateStr);
-									if (prefDate == "") {									
+									if (prefDate === "") {									
 										prefDate = "ac";
 									}
 									if (dateAccumStr.length > 0) {
@@ -231,7 +244,7 @@ function scrape(doc, url) {
 								}
 							}
 							// Zotero entry date is Creation date, if available.
-							if (prefDate == "cr") {
+							if (prefDate === "cr") {
 								item.date = dateCreationStr;
 							} else {
 								item.date = dateAccumStr;
@@ -250,12 +263,12 @@ function scrape(doc, url) {
 		}
 	}
 
-	if (item.manuscriptType == "Series") {
+	if (item.manuscriptType === "Series") {
 		item.title = toTitleCase(item.title);	
 	}
 	
 	item.date = ZU.trimInternal(item.date);
-	if (item.date == "-") {
+	if (item.date === "-") {
 		item.date = "";
 	}
 
@@ -308,13 +321,14 @@ function scrape(doc, url) {
 						lastName: toTitleCase(creatorName[1]),
 						creatorType: "author",
 						fieldMode: true 
-					})
+					});
 					break;
 
 				default:
 					if (item.creatorName === '') {
 						item.creatorName = '';
 					}
+					break;
 			}
 
 		}
@@ -328,7 +342,7 @@ function scrape(doc, url) {
 	if (digitalObject) {
 		item.attachments.push({
 			url: attr(digitalObject, 'a', 'href'),
-			title: 'Digital copy from SROWA.',
+			title: "Digital copy from SROWA.",
 			type: selectMimeType(attr(digitalObject, 'a', 'href')),
 			snapshot: true
 		});
