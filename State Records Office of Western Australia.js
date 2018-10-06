@@ -119,17 +119,20 @@ function toTitleCase(titleStr) {
 
 function detectWeb(doc, url) {
 
-	// Adjust the inspection of url as required
-	if (url.includes('index.php/search?query=') && getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-	// Adjust the inspection of url as required
-	if (url.includes('index.php/search/advanced?') && getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-
-	if (url.includes('index.php/')) {
-		return 'single';
+	if (url.includes("/index.php/") && !url.endsWith("/" || "/index.php")) {
+		if (!url.includes("/actor/") && !url.includes("/repository/") && !url.includes("/taxonomy/")) {
+			// This may be a search result of 0 or more items
+			if (url.includes("search?query=") && !url.endsWith("search?query=")) {
+				return 'multiple';
+			} else if (url.includes("search?advanced?f=" || "search/advanced?page=") && !url.endsWith("search?advanced?f=" || "search/advanced?page=")) {
+				return 'multiple';
+			} else if (url.endsWith("informationobject/browse") || url.includes("informationobject/browse?page=")) {
+				return 'multiple';
+			}	
+			else {
+				return 'single';
+			}			
+		}
 	}
 }
 
