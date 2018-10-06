@@ -99,7 +99,7 @@ function generateJSONUrl(url) {
 		return "https://data.historicaltexts.jisc.ac.uk/elasticsearch/es1/ht/ecco/publication/" + pubId[1];
 	}
 	else if (pubId[1].startsWith("eebo-")) {
-		return "";
+		return "https://data.historicaltexts.jisc.ac.uk/elasticsearch/es1/ht/eebo/publication/" + pubId[1];
 	}
 	else return false
 }
