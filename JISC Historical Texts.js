@@ -92,13 +92,13 @@ function generateJSONUrl(url) {
 	else if (pubId[1].startsWith("ukmhl")) {
 		return "https://data.ukmhl.historicaltexts.jisc.ac.uk/elasticsearch/ukmhl/publication/" + pubId[1];
 	}
-	else if (pubID[1].startsWith("bl-")) {
+	else if (pubId[1].startsWith("bl-")) {
 		return "https://data.historicaltexts.jisc.ac.uk/elasticsearch/es1/ht/bl/publication/" + pubId[1];
 	}
-	else if (pubID[1].startsWith("ecco-")) {
+	else if (pubId[1].startsWith("ecco-")) {
 		return "https://data.historicaltexts.jisc.ac.uk/elasticsearch/es1/ht/ecco/publication/" + pubId[1];
 	}
-	else if (pubID[1].startsWith("eebo-")) {
+	else if (pubId[1].startsWith("eebo-")) {
 		return "";
 	}
 	else return false
