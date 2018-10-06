@@ -513,7 +513,7 @@ function detectType(newItem, node, ret) {
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
-                case 'text.serial.journal':
+				case 'text.serial.journal':
 					t.dc = 'journalArticle';
 					break;
 				case 'newsitem':
