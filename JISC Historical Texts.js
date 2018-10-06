@@ -107,7 +107,7 @@ function generateJSONUrl(url) {
 function scrape(url) {
 	var JSONurl = generateJSONUrl(url);
 	if (!JSONurl) {
-		throw("Can generate JSON ID");
+		throw("Can't generate JSON ID");
 	}
 	
 	ZU.doGet(JSONurl, function(text){
