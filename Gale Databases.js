@@ -45,9 +45,7 @@ function getSearchResults(doc, checkOnly) {
 		rows = doc.querySelectorAll('ul.SearchResultsList p.subTitle a.title');
 	}
 	for (var i=0; i<rows.length; i++) {
-		// Adjust if required, use Zotero.debug(rows) to check
 		var href = rows[i].href;
-		// Adjust if required, use Zotero.debug(rows) to check
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
