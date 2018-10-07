@@ -65,7 +65,7 @@ function detectWeb(doc, url) {
 
 function composeAttachment(doc, url) {
 	var pdfurl = attr(doc, '#docTools-pdf a', 'href');
-	if(pdfurl) {
+	if (pdfurl) {
 		return {
 			url: pdfurl,
 			title: "Full Text PDF",
@@ -79,19 +79,19 @@ function composeAttachment(doc, url) {
 
 function parseRis(text, attachment) {
 	text = text.trim();
-	//gale puts issue numbers in M1
+	// gale puts issue numbers in M1
 	text = text.replace(/M1\s*\-/g, "IS  -");
-	//L2 is probably meant to be UR, but we can ignore it altogether
+	// L2 is probably meant to be UR, but we can ignore it altogether
 	text = text.replace(/^L2\s+-.+\n/gm, '');
-	//we can map copyright notes via CR
+	// we can map copyright notes via CR
 	text = text.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-	//Z.debug(text);
+	// Z.debug(text);
 	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function (obj, item) {
-		if(attachment) item.attachments.push(attachment);
+		if (attachment) item.attachments.push(attachment);
 		item.complete();
 	});
 	translator.translate();
@@ -106,7 +106,7 @@ function scrape(doc, url) {
 	var productName = attr(doc, 'input.citationToolsData', 'data-productname');
  
 	var documentData = '{"docId":"' + docId +'","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
-	var post = "citationFormat=RIS&documentData=" +encodeURIComponent(documentData).replace(/%20/g, "+");
+	var post = "citationFormat=RIS&documentData=" + encodeURIComponent(documentData).replace(/%20/g, "+");
 	var attachment = composeAttachment(doc, url);
 	// Z.debug(post)
 	ZU.doPost(postURL, post, function(text){
@@ -116,7 +116,7 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
