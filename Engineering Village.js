@@ -8,22 +8,23 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsb",
-	"lastUpdated": "2018-09-27 01:43:46"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-10-07 10:02:04"
 }
 
 function detectWeb(doc, url) {
 	Z.monitorDOMChanges(doc.getElementById("ev-application"), {childList: true});
 	var printlink = doc.getElementById('printlink');
-	if(url.includes("/search/doc/") && printlink && getDocIDs(printlink.href)) {
+	if (url.includes("/search/doc/") && printlink && getDocIDs(printlink.href)) {
 		return "journalArticle";
 	}
-	if((url.includes("quick.url?") || url.includes("expert.url?") || url.includes("thesaurus.url?")) && getSearchResults(doc, true)) {
+	if ((url.includes("quick.url?") || url.includes("expert.url?") || url.includes("thesaurus.url?")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
 
 }
+
 
 function getDocIDs(url) {
 	var m = url.match(/\bdocidlist=([^&#]+)/);
@@ -32,8 +33,9 @@ function getDocIDs(url) {
 	return decodeURIComponent(m[1]).split(',');
 }
 
+
 function getSearchResults(doc, checkOnly) {
-	var rows = doc.querySelectorAll('div[class*=result-row]');
+	var rows = doc.querySelectorAll('div[class*=result-row]'),
 		items = {},
 		found = false;
 	for (var i=0; i<rows.length; i++) {
@@ -49,8 +51,8 @@ function getSearchResults(doc, checkOnly) {
 		
 		items[docid] = {
 			title: ZU.trimInternal(title.textContent),
-			checked: checkbox.checked
-		}
+			checked: checkbox.checked // TODO is this still needed?
+		};
 	}
 	
 	return found ? items : false;
@@ -73,6 +75,7 @@ function doWeb(doc, url) {
 		fetchRIS(doc, getDocIDs(printlink.href));
 	}
 }
+
 
 function fetchRIS(doc, docIDs) {
 	Z.debug(docIDs);
@@ -111,7 +114,7 @@ function fetchRIS(doc, docIDs) {
 			item.notes = [];
 			
 			item.complete();
-		})
+		});
 		translator.translate();
 	});
 }/** BEGIN TEST CASES **/
