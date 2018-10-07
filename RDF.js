@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-04 02:07:05"
+	"lastUpdated": "2018-10-07 16:32:26"
 }
 
 /*
@@ -899,10 +899,9 @@ function importItem(newItem, node) {
 		newItem.publicationTitle = getFirstResults([containerPeriodical, containerPublicationVolume], [n.so+"name"], true);
 	}
 
-	var siteName = getFirstResults(node, [n.og+"site_name"], true)
-	if (siteName && !newItem.publicationTitle) {
-		newItem.blogTitle = siteName;
-		newItem.websiteTitle = siteName;
+	var siteName = getFirstResults(node, [n.og+"site_name"], true);
+	if (siteName && !newItem.publicationTitle && (newItem.itemType == "blogPost" || newItem.itemType == "webpage")) {
+		newItem.publicationTitle = siteName;
 	}
 	// rights
 	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.prism2_1+"copyright", n.dc+"rights", n.dc1_0+"rights", n.dcterms+"rights", n.so+"license"], true);
