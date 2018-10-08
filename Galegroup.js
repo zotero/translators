@@ -46,7 +46,7 @@ function getSearchResults(doc) {
 		return results;
 	}
 	
-	//  Ecco
+	// Ecco
 	results = ZU.xpath(doc, '//div[@id="resultsBox"]//li[@class="resrow"]');
 	if (results.length) {
 		results.linkXPath = './/div[@class="pic_Title"]/a';
@@ -72,7 +72,7 @@ function getSearchResults(doc) {
 	}
 	
 
-	//Archives Unbound
+	// Archives Unbound
 	results = ZU.xpath(doc, '//div[@id="resultsTable"]/div');
 	if (results.length) {
 		results.linkXPath = './/span[@class="title"]//a';
@@ -80,7 +80,7 @@ function getSearchResults(doc) {
 		return results;
 	}
 	
-	//Gale NewsVault
+	// Gale NewsVault
 	results = ZU.xpath(doc, '//*[@id="results_list"]/div[contains(@class,"resultList")]');
 	if (results.length) {
 		results.linkXPath = './div[@class="pub_details"]//li[@class="resultInfo"]/p//a';
@@ -158,7 +158,7 @@ function composeRisUrlTDA(url) {
 function composeAttachmentDefault(doc, url) {
 	var pdf = !!(doc.getElementById('pdfLink') || doc.getElementById('docTools-pdf'));
 	var attachment = ZU.xpath(doc, '//*[@id="docTools-download"]/a[./@href]')[0];
-	if (attachment && pdf /* HTML currently pops up a download dialog for HTML attachments */) {
+	if (attachment && pdf ) {
 		url = attachment.href;
 		return {
 			url: url.replace(/#.*/, '').replace(/\/[^\/?]+(?=\?|$)/, '/downloadDocument.do')
@@ -200,13 +200,13 @@ function composeAttachmentTDA(doc, url) {
 
 function parseRis(text, attachment) {
 	text = text.trim();
-	//gale puts issue numbers in M1
+	// gale puts issue numbers in M1
 	text = text.replace(/M1\s*\-/g, "IS  -");
-	//L2 is probably meant to be UR, but we can ignore it altogether
+	// L2 is probably meant to be UR, but we can ignore it altogether
 	text = text.replace(/^L2\s+-.+\n/gm, '');
-	//we can map copyright notes via CR
+	// we can map copyright notes via CR
 	text = text.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-	//Z.debug(text);
+	// Z.debug(text);
 	
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -286,7 +286,9 @@ function doWeb(doc, url) {
 		
 		processPage(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
