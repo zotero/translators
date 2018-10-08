@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-24 01:37:06"
+	"lastUpdated": "2018-10-07 15:50:14"
 }
 
 /*
@@ -55,46 +55,11 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 function detectWeb(doc, url) {
-	if (url.includes('/retrieve.do') && text(doc, 'li.docTools-citation')) {
+	if ((url.includes('/retrieve.do') || url.includes('/i.do?')) && text(doc, 'li#docTools-citation, li.docTools-citation')) {
 		return "journalArticle";
 	}
 	
 	else if (getSearchResults(doc, true)) return "multiple";
-}
-
-
-function composeAttachment(doc, url) {
-	var pdfurl = attr(doc, '#docTools-pdf a', 'href');
-	if (pdfurl) {
-		return {
-			url: pdfurl,
-			title: "Full Text PDF",
-			mimeType:'application/pdf'
-		};
-	} else {
-		return {document: doc, title: "Snapshot"};
-	}
-}
-
-
-function parseRis(text, attachment) {
-	text = text.trim();
-	// gale puts issue numbers in M1
-	text = text.replace(/M1\s*\-/g, "IS  -");
-	// L2 is probably meant to be UR, but we can ignore it altogether
-	text = text.replace(/^L2\s+-.+\n/gm, '');
-	// we can map copyright notes via CR
-	text = text.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-	// Z.debug(text);
-	
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-	translator.setString(text);
-	translator.setHandler("itemDone", function (obj, item) {
-		if (attachment) item.attachments.push(attachment);
-		item.complete();
-	});
-	translator.translate();
 }
 
 
@@ -107,11 +72,42 @@ function scrape(doc, url) {
  
 	var documentData = '{"docId":"' + docId +'","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
 	var post = "citationFormat=RIS&documentData=" + encodeURIComponent(documentData).replace(/%20/g, "+");
-	var attachment = composeAttachment(doc, url);
+	var pdfurl = attr(doc, '#docTools-pdf a', 'href');
+
 	// Z.debug(post)
 	ZU.doPost(postURL, post, function(text){
+
+		text = text.trim();
+		// gale puts issue numbers in M1
+		text = text.replace(/M1\s*\-/g, "IS  -");
+		// L2 is probably meant to be UR, but we can ignore it altogether
+		text = text.replace(/^L2\s+-.+\n/gm, '');
+		// we can map copyright notes via CR
+		text = text.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
 		// Z.debug(text);
-		parseRis(text, attachment);
+		
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			if (item.ISSN) {
+				item.ISSN = ZU.cleanISSN(item.ISSN);
+			}
+			if (item.pages && item.pages.endsWith("+")) {
+				item.pages = item.pages.replace(/\+/, "-");
+			}
+			if (pdfurl) {
+				item.attachments.push({
+					url: pdfurl,
+					title: "Full Text PDF",
+					mimeType:'application/pdf'
+				});
+			} else {
+				item.attachments.push({document: doc, title: "Snapshot"});
+			}
+			item.complete();
+		});
+		translator.translate();
 	});
 }
 
@@ -135,7 +131,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=8&docId=GALE%7CA213083272&docType=Report&sort=Relevance&contentSegment=&prodId=PROF&contentSet=GALE%7CA213083272&searchId=R1&userGroupName=nysl_ce_syr&inPS=true",
+		"url": "http://go.galegroup.com/ps/i.do?p=PROF&u=nysl_ce_syr&id=GALE|A213083272&v=2.1&it=r&sid=PROF&asid=a8973dd8",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -153,20 +149,19 @@ var testCases = [
 					}
 				],
 				"date": "December 2009",
-				"ISSN": "00110035",
+				"ISSN": "0011-0035",
 				"archive": "Educators Reference Complete",
 				"issue": "2",
 				"language": "English",
 				"libraryCatalog": "Gale",
-				"pages": "122+",
+				"pages": "122-",
 				"publicationTitle": "Counselor Education and Supervision",
 				"shortTitle": "Improving a counselor education Web site through usability testing",
 				"url": "http://link.galegroup.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
 				"volume": "49",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [

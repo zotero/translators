@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2018-09-25 12:30:16"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2018-10-07 16:06:56"
 }
 
 /*
@@ -34,14 +34,15 @@
 	***** END LICENSE BLOCK *****
 */
 
+var composeAttachment = composeAttachmentDefault;
+var composeRisUrl = composeRisUrlDefault;
+
 function getSearchResults(doc) {
 	// Default
 	var results = ZU.xpath(doc, '//*[@id="SearchResults"]//section[@class="resultsBody"]/ul/li');
 	if (results.length) {
 		results.linkXPath = './p[@class="subTitle"]/a';
 		Z.debug("Default Layout");
-		composeAttachment = composeAttachmentDefault;
-		composeRisUrl = composeRisUrlDefault;
 		return results;
 	}
 	
@@ -50,8 +51,6 @@ function getSearchResults(doc) {
 	if (results.length) {
 		results.linkXPath = './/div[@class="pic_Title"]/a';
 		Z.debug("Ecco, but using Default");
-		composeAttachment = composeAttachmentEcco;
-		composeRisUrl = composeRisUrlDefault;
 		return results;
 	}
 	
@@ -78,8 +77,6 @@ function getSearchResults(doc) {
 	if (results.length) {
 		results.linkXPath = './/span[@class="title"]//a';
 		Z.debug("Archives Unbound, but using Default");
-		composeAttachment = composeAttachmentDefault;
-		composeRisUrl = composeRisUrlDefault;
 		return results;
 	}
 	
@@ -93,13 +90,11 @@ function getSearchResults(doc) {
 		return results;
 	}
 	
-	//LegalTrac (not sure this still exists 2018-09-24)
+	// LegalTrac (not sure this still exists 2018-09-24)
 	results = ZU.xpath(doc, '//*[@id="sr_ul"]/li');
 	if (results.length) {
 		results.linkXPath = './/span[@class="title"]/a';
 		Z.debug("LegalTrac, but using Default");
-		composeAttachment = composeAttachmentDefault;
-		composeRisUrl = composeRisUrlDefault;
 		return results;
 	}
 	
@@ -113,17 +108,20 @@ function detectWeb(doc, url) {
 	
 	if (url.includes('/retrieve.do') || url.includes('/i.do') || url.includes('/infomark.do')) {
 		if (url.includes('/ecco/')) return "book";
+		else if (url.includes('prodId=TLSH') || url.includes('prodID=TTDA') || url.includes('prodID=DVNW')) {
+			return "newspaperArticle";
+		}
 		return "journalArticle";
 	}
 	
 	if (getSearchResults(doc).length) return "multiple";
 }
 
-var composeRisUrl;
+
 
 function composeRisUrlGNV(url) {
 	let baseUrl = url.replace(/#.*/,'').replace(/\/[^\/?]+\?.+/, '/centralizedGenerateCitation.do?');
-	let userGroupName = url.match(/userGroupName=[^&]+/);
+	let userGroupName = url.match(/userGroupName=[^&]+/)[0];
 	let prodId = url.match(/prodId=[^&]+/)[0];
 	let tabID  = url.match(/tabID=[^&]+/)[0];
 	let docId = url.match(/docId=[^&]+/);
@@ -155,7 +153,7 @@ function composeRisUrlTDA(url) {
 		+ '&actionString=FormatCitation&citationFormat=ENDNOTE';
 }
 
-var composeAttachment;
+
 
 function composeAttachmentDefault(doc, url) {
 	var pdf = !!(doc.getElementById('pdfLink') || doc.getElementById('docTools-pdf'));
@@ -200,30 +198,6 @@ function composeAttachmentTDA(doc, url) {
 	return composeAttachmentGNV(doc, url);
 }
 
-function composeAttachmentEcco(doc, url) {
-	// This is the code for a post request for the PDF, not sure if this is possible, though?
-	
-	// let baseUrl = url.replace(/#.*/,'').replace(/\/[^\/?]+\?.+/, '/downloadDocument.do?');
-	/* let userGroupName = url.match(/userGroupName=[^&]+/);
-	let prodId = url.match(/prodId=[^&]+/)[0];
-	let tabID  = url.match(/tabID=[^&]+/)[0];
-	let docId = url.match(/docId=[^&]+/);
-	if (docId) {
-		docId = docId[0];
-	}
-	else {
-		docId = url.match(/relevancePageBatch=[^&]+/)[0].replace(/relevancePageBatch/, "docId");
-	}
-	let postUrl =  baseUrl + "actionCmd=DO_DOWNLOAD_DOCUMENT&inPS=true&downloadFormat=PDF&pageIndex=1&option=range&contentSet=ECCOArticles&" + prodId + "&" 
-		+ docId + "&" + tabID  + "&" + userGroupName;
-	
-	let noPages = ZU.xpathText(doc, '//input[@name="noOfPages"]/@value');
-	let postString = "downloadFormat=PDF&markedItems=&markedDownLoadItems=&pageIndex=1&noOfPages=" + noPages;
-	*/
-	return ({document: doc, title: "Snapshot"});
-
-}
-
 function parseRis(text, attachment) {
 	text = text.trim();
 	//gale puts issue numbers in M1
@@ -239,6 +213,12 @@ function parseRis(text, attachment) {
 	translator.setString(text);
 	translator.setHandler("itemDone", function (obj, item) {
 		if (attachment) item.attachments.push(attachment);
+		if (item.ISSN) {
+			item.ISSN = ZU.cleanISSN(item.ISSN);
+		}
+		if (item.pages && item.pages.endsWith("+")) {
+			item.pages = item.pages.replace(/\+/, "-");
+		}
 		item.complete();
 	});
 	translator.translate();
@@ -297,17 +277,49 @@ function doWeb(doc, url) {
 			composeAttachment = composeAttachmentTDA;
 			composeRisUrl = composeRisUrlTDA;
 		} else if (doc.title.includes('Eighteenth Century Collections Online')) {
-			Z.debug("Using Ecco: Default RIS, Different Attachme nt");
-			composeAttachment = composeAttachmentEcco;
-			composeRisUrl = composeRisUrlDefault;
+			Z.debug("Using Ecco (Default)");
+			// keeping this separate as there is a different attachment logic
+			// we might want to use that in the future.
 		} else {
 			Z.debug("Using Default");
-			composeAttachment = composeAttachmentDefault;
-			composeRisUrl = composeRisUrlDefault;
 		}
 		
 		processPage(doc, url);
 	}
 }/** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://find.galegroup.com/tlsh/infomark.do?&source=gale&prodId=TLSH&userGroupName=nysl_ce_syr&tabID=T003&docPage=article&searchType=&docId=EX1200180081&type=multipage&contentSet=LTO&version=1.0",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Science in 1901",
+				"creators": [
+					{
+						"lastName": "Ross",
+						"firstName": "Hugh Munro",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 17, 1902",
+				"archive": "Times Literary Supplement Historical Archive",
+				"libraryCatalog": "Gale",
+				"pages": "5+",
+				"place": "London, England",
+				"publicationTitle": "The Times Literary Supplement",
+				"url": "http://find.galegroup.com/tlsh/infomark.do?&source=gale&prodId=TLSH&userGroupName=nysl_ce_syr&tabID=T003&docPage=article&searchType=&docId=EX1200180081&type=multipage&contentSet=LTO&version=1.0",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 /** END TEST CASES **/
