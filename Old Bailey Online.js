@@ -93,11 +93,11 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	
 	newItem.date = ZU.strToISO(sessDate); 
 	
-	if (newItem.itemType == "case" && trialTitle ) {
+	if (newItem.itemType == "case" && trialTitle && trialTitle == trialTitle.toUpperCase()) {
 		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
 	} else if (newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
-	} 
+	}
 	
 	var referenceNo = ZU.xpathText(doc, '//div[@class="ob-panel"][1]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Reference")]]/td').trim(); // changed fetching Reference number
 	
