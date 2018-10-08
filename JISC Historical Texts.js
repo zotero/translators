@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-06 01:47:18"
+	"lastUpdated": "2018-10-08 12:17:54"
 }
 
 /*
@@ -119,8 +119,8 @@ function scrape(url) {
 		var creation = data._source.lifecycle.creation[0];
 		var publication = data._source.lifecycle.publication[0];
 		var media = data._source.media[0];
-		var item = new Zotero.Item("book");
 		
+		var item = new Zotero.Item("book");
 		
 		var author = creation.author;
 		//Z.debug(author);
@@ -141,10 +141,14 @@ function scrape(url) {
 		if(data._source.edition) {
 			item.edition = data._source.edition[0].statement;
 		}
+		
+		
 		if (data._source.series) {
 			item.volume = data._source.series[0].volume;
 		}
 		var formats = media.format;
+		
+		item.url = url.replace(/&.+/, "");
 		var pdfUrl;
 		for (let format of formats) {
 			if (format.type == "pdf") {
@@ -163,5 +167,38 @@ function scrape(url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://data.ukmhl.historicaltexts.jisc.ac.uk/view?pubId=ukmhl-b20392497&pageId=ukmhl-b20392497-1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test types for determining the acuteness of vision",
+				"creators": [
+					{
+						"firstName": "George",
+						"lastName": "Cowell",
+						"creatorType": "author"
+					}
+				],
+				"date": "189-?",
+				"libraryCatalog": "JISC Historical Texts",
+				"numPages": 4,
+				"place": "London",
+				"publisher": "Printed And Sold By Harrison And Sons",
+				"url": "https://data.ukmhl.historicaltexts.jisc.ac.uk/view?pubId=ukmhl-b20392497",
+				"attachments": [
+					{
+						"title": "Historical Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 /** END TEST CASES **/
