@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-27 15:12:16"
+	"lastUpdated": "2018-10-08 07:50:18"
 }
 
 // attr()/text() v2
@@ -233,7 +233,8 @@ function scrapeIds(doc, ids) {
 					if (titleLink) {
 						item.attachments.push({
 							url: titleLink,
-							title: "Snapshot"
+							title: "Snapshot",
+							mimeType: "text/html"
 						});
 					}
 					//attach linked document as attachment if available
