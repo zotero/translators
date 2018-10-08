@@ -12,6 +12,28 @@
 	"lastUpdated": "2018-10-07 10:02:04"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+	
+	Engineering Village Translator - Copyright © 2018 Sebastian Karcher 
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	Z.monitorDOMChanges(doc.getElementById("ev-application"), {childList: true});
 	var printlink = doc.getElementById('printlink');
@@ -21,8 +43,6 @@ function detectWeb(doc, url) {
 	if ((url.includes("quick.url?") || url.includes("expert.url?") || url.includes("thesaurus.url?")) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-
-
 }
 
 
@@ -48,11 +68,7 @@ function getSearchResults(doc, checkOnly) {
 		
 		if (checkOnly) return true;
 		found = true;
-		
-		items[docid] = {
-			title: ZU.trimInternal(title.textContent),
-			checked: checkbox.checked // TODO is this still needed?
-		};
+		items[docid] = ZU.trimInternal(title.textContent);
 	}
 	
 	return found ? items : false;
@@ -87,8 +103,6 @@ function fetchRIS(doc, docIDs) {
 		handleList[i] = i+1;
 	}
 	
-	// The database we're currently using. Compendex is 1
-	// Not tested with multi-database search
 	var db = doc.getElementsByName('database')[0];
 	if (db) db = db.value;
 	if (!db) db = "1";
@@ -103,7 +117,7 @@ function fetchRIS(doc, docIDs) {
 	// Content-length parameters in the body, but seems like we can skip that
 	// part
 	ZU.doPost(url, "", function(text) {
-		Z.debug(text);
+		// Z.debug(text);
 		
 		var translator = Zotero.loadTranslator("import");
 		// RIS
@@ -117,6 +131,7 @@ function fetchRIS(doc, docIDs) {
 		});
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = []
 /** END TEST CASES **/
