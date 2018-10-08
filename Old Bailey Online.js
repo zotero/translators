@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-08 14:06:13"
+	"lastUpdated": "2018-10-08 14:15:17"
 }
 
 /*
@@ -86,17 +86,18 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	var trialTitle = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-main-title"]');   // updated @class name
 	
 	
+	
 	newItem.url = url;
 	
 	var sessDate = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-date"]'); // add session date, as the date is now in a gettable node
 	
 	newItem.date = ZU.strToISO(sessDate); 
 	
-	if (newItem.itemType == "case" && newItem.title && newItem.title == newItem.title.toUpperCase()) {
+	if (newItem.itemType == "case" && trialTitle ) {
 		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
 	} else if (newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
-	}
+	} 
 	
 	var referenceNo = ZU.xpathText(doc, '//div[@class="ob-panel"][1]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Reference")]]/td').trim(); // changed fetching Reference number
 	
@@ -292,6 +293,40 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": ".",
+				"creators": [],
+				"dateDecided": "1678-08-28",
+				"docketNumber": "t16780828-12",
+				"extra": "Reference Number: t16780828-12",
+				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+				"attachments": [
+					{
+						"title": "OBO Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Guilty"
+					},
+					{
+						"tag": "Theft"
+					},
+					{
+						"tag": "animal theft"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
