@@ -1,17 +1,3 @@
-{
-	"translatorID": "fc353b26-8911-4c34-9196-f6f567c93901",
-	"label": "Douban",
-	"creator": "Ace Strong<acestrong@gmail.com>",
-	"target": "^https?://(www|book)\\.douban\\.com/(subject|doulist|people/[a-zA-Z._]*/(do|wish|collect)|.*?status=(do|wish|collect)|group/[0-9]*?/collection|tag)",
-	"minVersion": "2.0rc1",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 16:52:39"
-}
-
 /*
    Douban Translator
    Copyright (C) 2009-2010 TAO Cheng, acestrong@gmail.com
@@ -62,7 +48,7 @@ function trimMultispace(text) {
 
 // #############################
 // ##### Scraper functions #####
-// ############################# 
+// #############################
 
 function scrapeAndParse(doc, url) {
 Zotero.Utilities.HTTP.doGet(url, function(page){
@@ -82,7 +68,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.title = Zotero.Utilities.trim(trimTags(title));
 //		Zotero.debug("title: "+title);
 	}
-	
+
 	// 又名
 	pattern = /<span [^>]*?>又名:(.*?)<\/span>/;
 	if (pattern.test(page)) {
@@ -92,7 +78,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 	}
 
 	// 作者
-	
+
 	page = page.replace(/\n/g, "")
 	//Z.debug(page)
 	pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
@@ -116,7 +102,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 				"author", useComma));
 		}
 	}
-	
+
 	// 译者
 	pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
 	if (pattern.test(page)) {
@@ -144,7 +130,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.ISBN = Zotero.Utilities.trim(isbn);
 //		Zotero.debug("isbn: "+isbn);
 	}
-	
+
 	// 页数
 	pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
 	if (pattern.test(page)) {
@@ -152,7 +138,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.numPages = Zotero.Utilities.trim(numPages);
 //		Zotero.debug("numPages: "+numPages);
 	}
-	
+
 	// 出版社
 	pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
 	if (pattern.test(page)) {
@@ -160,7 +146,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.publisher = Zotero.Utilities.trim(publisher);
 //		Zotero.debug("publisher: "+publisher);
 	}
-	
+
 	// 丛书
 	pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
 	if (pattern.test(page)) {
@@ -168,7 +154,7 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.series = Zotero.Utilities.trim(series);
 //		Zotero.debug("series: "+series);
 	}
-	
+
 	// 出版年
 	pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
 	if (pattern.test(page)) {
@@ -176,14 +162,14 @@ Zotero.Utilities.HTTP.doGet(url, function(page){
 		newItem.date = Zotero.Utilities.trim(date);
 //		Zotero.debug("date: "+date);
 	}
-	
+
 	// 简介
 	var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div//a');
 	for (i in tags){
 		newItem.tags.push(tags[i].textContent)
 	}
 	newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p')
-	
+
 	newItem.complete();
 });
 }
@@ -205,13 +191,27 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var articles = new Array();
-	if (detectWeb(doc, url) == "multiple") { 
+	Zotero.debug(url);
+	if(detectWeb(doc, url) == "multiple") {
 		var items = {};
-		var titles = doc.evaluate('//div/h2/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
+		//var titles = doc.evaluate('//div/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
+		//Modified by januschoi on 2018-10-08 begin
+		var titles = ZU.xpath(doc, '//div[@class="title"]/a');
+		//Zotero.debug(titles);
 		var title;
-		while (title = titles.iterateNext()) {
+		for (let i = 0; i < titles.length; i++){
+			title = titles[i];
+			Zotero.debug(title.href);
+			Zotero.debug(title.textContent);
 			items[title.href] = title.textContent;
 		}
+		//title = titles.iterateNext();
+		//Zotero.debug(title);
+		//while (title = titles.iterateNext()) {
+			//Zotero.debug(title);
+			//items[title.href] = title.textContent;
+		//}
+		//Modified by januschoi on 2018-10-08 end
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
@@ -226,54 +226,3 @@ function doWeb(doc, url) {
 		scrapeAndParse(doc, url);
 	}
 }
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "http://book.douban.com/subject_search?search_text=Murakami&cat=1001",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://book.douban.com/subject/1355643/",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Norwegian Wood",
-				"creators": [
-					{
-						"firstName": "Haruki",
-						"lastName": "Murakami",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jay",
-						"lastName": "Rubin",
-						"creatorType": "translator"
-					}
-				],
-				"date": "2003-06-30",
-				"ISBN": "9780099448822",
-				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
-				"libraryCatalog": "Douban",
-				"numPages": "400",
-				"publisher": "Vintage",
-				"url": "https://book.douban.com/subject/1355643/",
-				"attachments": [],
-				"tags": [
-					"HarukiMurakami",
-					"小说",
-					"挪威森林英文版",
-					"日本",
-					"村上春树",
-					"英文",
-					"英文原版",
-					"英文版"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
-]
-/** END TEST CASES **/
