@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-05 03:30:23"
+	"lastUpdated": "2018-10-09 15:42:45"
 }
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -96,12 +97,12 @@ function detectWeb(doc, url) {
 		if (!url.includes("/actor/") && !url.includes("/repository/") && !url.includes("/taxonomy/")) {
 			// This may be a search result of 0 or more items
 			
-			let conditions = ["search?query=", "search?advanced?f=", "search/advanced?page=", "informationobject/browse"];
+			let conditions = ["search?query=", "search/advanced?f=", "search/advanced?page=", "informationobject/browse"];
 			if (conditions.some(str => url.includes(str)) && getSearchResults(doc, true)) {
 				return 'multiple';
 			}	
 			else {
-				return 'single';
+				return 'manuscript';
 			}			
 		}
 	}
@@ -110,7 +111,6 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-
 	var rows = doc.querySelectorAll('.search-result-description a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
@@ -128,7 +128,7 @@ function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 
 	switch (type) {
-		case 'single':
+		case 'manuscript':
 			scrape(doc, url);
 			break;
 		case 'multiple':
@@ -202,7 +202,7 @@ function scrape(doc, url) {
 											note: "Date(s): " + ZU.trimInternal(dateStr)
 										});
 									}
-								} else if (dateStr.indexOf("(Accumulation)") > 0) {
+								} else if (dateStr.includes("(Accumulation)")) {
 									dateAccumStr = findDate(dateStr);
 									if (!prefDate) {									
 										prefDate = "ac";
@@ -237,14 +237,14 @@ function scrape(doc, url) {
 		}
 	}
 
-	if (item.manuscriptType === "Series" && item.title) {
+	if (item.title && item.title == item.title.toUpperCase()) {
 		item.title = ZU.capitalizeTitle(item.title, true);	
 	}
 	
 	if (item.date) {
 		item.date = ZU.trimInternal(item.date).replace(/^-$/, "");
 	}
-							       
+								   
 	if (!item.title) {
 		item.title = "[Title Not Found]";
 	}
@@ -314,7 +314,7 @@ var testCases = [
 				"title": "Northampton, Classification 4 [Tally No. 000782].",
 				"creators": [
 					{
-						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
+						"lastName": "Department of Lands and Surveys",
 						"creatorType": "author",
 						"fieldMode": true
 					}
@@ -342,10 +342,10 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "manuscript",
-				"title": "CANCELLED PUBLIC PLANS (DISTRICTS) - POST STANDARD SERIES",
+				"title": "Cancelled Public Plans (districts) - Post Standard Series",
 				"creators": [
 					{
-						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
+						"lastName": "Department of Lands and Surveys",
 						"creatorType": "author",
 						"fieldMode": true
 					}
@@ -381,27 +381,27 @@ var testCases = [
 				"title": "Warramboo Locations, survey of Road from Magnet towards Lawlers by A.E. Arney, Fieldbook 5 pp. 28-40 [scale: 20 chains to an inch].",
 				"creators": [
 					{
-						"lastName": "DEPARTMENT OF LANDS AND SURVEYS",
+						"lastName": "Department of Lands and Surveys",
 						"creatorType": "author",
 						"fieldMode": true
 					},
 					{
-						"lastName": "SURVEY OFFICE",
+						"lastName": "Survey Office",
 						"creatorType": "author",
 						"fieldMode": true
 					},
 					{
-						"lastName": "SURVEYOR-GENERAL'S DEPARTMENT",
+						"lastName": "Surveyor-General's Department",
 						"creatorType": "author",
 						"fieldMode": true
 					},
 					{
-						"lastName": "CROWN LANDS AND SURVEYS DEPARTMENT",
+						"lastName": "Crown Lands and Surveys Department",
 						"creatorType": "author",
 						"fieldMode": true
 					},
 					{
-						"lastName": "DEPARTMENT OF LAND ADMINISTRATION",
+						"lastName": "Department of Land Administration",
 						"creatorType": "author",
 						"fieldMode": true
 					}
@@ -429,6 +429,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://archive.sro.wa.gov.au/index.php/search/advanced?f=&so0=and&sq0=test&sf0=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
