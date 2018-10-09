@@ -101,7 +101,7 @@ function detectWeb(doc, url) {
 				return 'multiple';
 			}	
 			else {
-				return 'manuscript';
+				return 'single';
 			}			
 		}
 	}
@@ -187,14 +187,14 @@ function scrape(doc, url) {
 
 						if (dateList.length > 0) {
 
-							var prefDate = "";
+							var prefDate,dateCreationStr,dateAccumStr = "";
 							
 							for (let date of dateList) {
 
 								let dateStr = date.textContent;
 								
-								if (dateStr.includes("(Creation)") {
-									var dateCreationStr = findDate(dateStr);
+								if (dateStr.includes("(Creation)")) {
+									dateCreationStr = findDate(dateStr);
 									prefDate = "cr";
 									if (dateCreationStr.length > 0) {
 										item.notes.push({
@@ -203,8 +203,8 @@ function scrape(doc, url) {
 										});
 									}
 								} else if (dateStr.indexOf("(Accumulation)") > 0) {
-									var dateAccumStr = findDate(dateStr);
-									if (prefDate === "") {									
+									dateAccumStr = findDate(dateStr);
+									if (!prefDate) {									
 										prefDate = "ac";
 									}
 									if (dateAccumStr.length > 0) {
@@ -242,7 +242,7 @@ function scrape(doc, url) {
 	}
 	
 	if (item.date) {
-		item.date = ZU.trimInternal(item.date).replace(/^-$/, "";
+		item.date = ZU.trimInternal(item.date).replace(/^-$/, "");
 	}
 							       
 	if (!item.title) {
