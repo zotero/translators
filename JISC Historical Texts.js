@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-08 12:17:54"
+	"lastUpdated": "2018-10-09 02:32:08"
 }
 
 /*
@@ -45,6 +45,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/view?')) {
 		return "book";
 	} else if (url.includes("/results?terms")) {
+		// we don't use getSearchResults so we don't need the DOM object which loads after page load finishes
 		return "multiple";
 	}
 }
@@ -87,7 +88,7 @@ function doWeb(doc, url) {
 
 function generateJSONUrl(url) {
 	let pubId = url.match(/pubId=([^&]+)/);
-	if (!pubId)  return false;
+	if (!pubId) return false;
 	
 	else if (pubId[1].startsWith("ukmhl")) {
 		return "https://data.ukmhl.historicaltexts.jisc.ac.uk/elasticsearch/ukmhl/publication/" + pubId[1];
@@ -101,7 +102,7 @@ function generateJSONUrl(url) {
 	else if (pubId[1].startsWith("eebo-")) {
 		return "https://data.historicaltexts.jisc.ac.uk/elasticsearch/es1/ht/eebo/publication/" + pubId[1];
 	}
-	else return false
+	else return false;
 }
 
 function scrape(url) {
@@ -119,12 +120,12 @@ function scrape(url) {
 		var creation = data._source.lifecycle.creation[0];
 		var publication = data._source.lifecycle.publication[0];
 		var media = data._source.media[0];
-		
 		var item = new Zotero.Item("book");
+		
 		
 		var author = creation.author;
 		//Z.debug(author);
-		if(author) {
+		if (author) {
 			item.creators.push(ZU.cleanAuthor(author[0].name[0].value, "author", true));
 		}
 		if (publication.publisher) {
@@ -138,17 +139,23 @@ function scrape(url) {
 		}
 		item.title= data._source.summary_title;
 		item.numPages = media.page_count;
-		if(data._source.edition) {
+		if (data._source.edition) {
 			item.edition = data._source.edition[0].statement;
 		}
-		
-		
 		if (data._source.series) {
 			item.volume = data._source.series[0].volume;
 		}
-		var formats = media.format;
+		
+		var topics = data._source.subjects.topic;
+		if (topics) {
+			for (let topic of topics) {
+				item.tags.push(topic.name[0].value);
+			}
+		}
 		
 		item.url = url.replace(/&.+/, "");
+		
+		var formats = media.format;
 		var pdfUrl;
 		for (let format of formats) {
 			if (format.type == "pdf") {
@@ -158,7 +165,7 @@ function scrape(url) {
 			}
 		}
 		if (pdfUrl) {
-			item.attachments.push({url:pdfUrl, title: "Historical Text PDF", mimeType: "application/pdf"});
+			item.attachments.push({url: pdfUrl, title: "Historical Text PDF", mimeType: "application/pdf"});
 		}
 		item.complete();
 	});
@@ -194,7 +201,64 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Vision Tests"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://data.ukmhl.historicaltexts.jisc.ac.uk/view?pubId=ukmhl-b21304439_0003&pageId=ukmhl-b21304439_0003-1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A compendium of the anatomy of the human body",
+				"creators": [
+					{
+						"firstName": "Andrew",
+						"lastName": "Fyfe",
+						"creatorType": "author"
+					}
+				],
+				"date": "1812-18",
+				"edition": "Fifth edition, enlarged and improved. To which is now added, a fourth volume, containing Outlines of comparative anatomy.",
+				"libraryCatalog": "JISC Historical Texts",
+				"numPages": 350,
+				"place": "Edinburgh",
+				"publisher": "Printed By J. Pillans & Sons For Adam Black ... Etc",
+				"url": "https://data.ukmhl.historicaltexts.jisc.ac.uk/view?pubId=ukmhl-b21304439_0003",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Historical Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Anatomy"
+					},
+					{
+						"tag": "Anatomy, Comparative"
+					},
+					{
+						"tag": "Bones"
+					},
+					{
+						"tag": "Human anatomy"
+					},
+					{
+						"tag": "Ligaments"
+					},
+					{
+						"tag": "Muscles"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
