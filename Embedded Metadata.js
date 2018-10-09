@@ -197,6 +197,7 @@ function fixCase(authorName) {
 function processFields(doc, item, fieldMap, strict) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
+		// only concatenate values for ISSN and ISBN; otherwise take the first
 		var allValues = (zoteroName == "ISSN" || zoteroName == "ISBN");
 		var value = getContentText(doc, metaName, strict, allValues);
 		if(value && value.trim()) {
