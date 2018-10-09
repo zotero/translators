@@ -41,7 +41,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 /** select a Mime type for the attachment **/
 function selectMimeType(url) {
-	fileType = url.replace(/^.*(\..+?)$/, '$1');
+	let fileType = url.replace(/^.*(\..+?)$/, '$1');
 
 	switch (fileType) {
 		case ".jpg":
@@ -89,48 +89,19 @@ function findDate(dateStr) {
 
 }
 
-function toTitleCase(titleStr) {
-	// In AtoM Agency names and Series titles are stored all-capitals.
-	// This fn. shifts them to(wards) title case
-	var newTitleStr = titleStr.toLowerCase().split(/ /);
-	for (var i = 0; i < newTitleStr.length; i++) {
-		if (newTitleStr[i].indexOf("-") > 0) {
-			var hyphenStr = newTitleStr[i].toLowerCase().split(/-/);
-			for (var j = 0; j < hyphenStr.length; j++) {
-				hyphenStr[j] = hyphenStr[j].charAt(0).toUpperCase() + hyphenStr[j].slice(1);
-			}
-			newTitleStr[i] = hyphenStr.join('-');
-		} else {
-			newTitleStr[i] = newTitleStr[i].charAt(0).toUpperCase() + newTitleStr[i].slice(1); 	
-		}
-		switch (newTitleStr[i]) {
-			case 'Of': 
-				newTitleStr[i] = 'of';
-				break;
-			case 'And':
-				newTitleStr[i] = 'and';
-				break;
-			default:
-			break;	
-		}
-	}
-	return newTitleStr.join(' ');
-}
 
 function detectWeb(doc, url) {
 
 	if (url.includes("/index.php/") && !url.endsWith("/" || "/index.php")) {
 		if (!url.includes("/actor/") && !url.includes("/repository/") && !url.includes("/taxonomy/")) {
 			// This may be a search result of 0 or more items
-			if (url.includes("search?query=") && !url.endsWith("search?query=")) {
-				return 'multiple';
-			} else if (url.includes("search?advanced?f=" || "search/advanced?page=") && !url.endsWith("search?advanced?f=" || "search/advanced?page=")) {
-				return 'multiple';
-			} else if (url.endsWith("informationobject/browse") || url.includes("informationobject/browse?page=")) {
+			
+			let conditions = ["search?query=", "search?advanced?f=", "search/advanced?page=", "informationobject/browse"];
+			if (conditions.some(str => url.includes(str)) && getSearchResults(doc, true)) {
 				return 'multiple';
 			}	
 			else {
-				return 'single';
+				return 'manuscript';
 			}			
 		}
 	}
@@ -190,7 +161,7 @@ function scrape(doc, url) {
 		if (identityFields) {
 			for (let field of identityFields) {
 
-				var nextIdentityField = text(field, "h3");
+				let nextIdentityField = text(field, "h3");
 
 				switch (nextIdentityField) {
 					case "Title":
@@ -222,7 +193,7 @@ function scrape(doc, url) {
 
 								let dateStr = date.textContent;
 								
-								if (dateStr.indexOf("(Creation)") > 0) {
+								if (dateStr.includes("(Creation)") {
 									var dateCreationStr = findDate(dateStr);
 									prefDate = "cr";
 									if (dateCreationStr.length > 0) {
@@ -266,16 +237,15 @@ function scrape(doc, url) {
 		}
 	}
 
-	if (item.manuscriptType === "Series") {
-		item.title = toTitleCase(item.title);	
+	if (item.manuscriptType === "Series" && item.title) {
+		item.title = ZU.capitalizeTitle(item.title, true);	
 	}
 	
-	item.date = ZU.trimInternal(item.date);
-	if (item.date === "-") {
-		item.date = "";
+	if (item.date) {
+		item.date = ZU.trimInternal(item.date).replace(/^-$/, "";
 	}
-
-	if (item.title === "") {
+							       
+	if (!item.title) {
 		item.title = "[Title Not Found]";
 	}
 
@@ -287,21 +257,11 @@ function scrape(doc, url) {
 		var contentFields = contentArea.querySelectorAll("div.field");
 
 		for (var j = 0; j < contentFields.length; j++) {
-
-			nextContentField = text(contentFields[j], "h3");
-
-			switch (nextContentField) {
-				case "Scope and content":
-					item.abstractNote = ZU.trimInternal(text(contentFields[j], "div"));
-					break;
-
-				default:
-					if (item.abstractNote === "") {
-						item.abstractNote = "";
-					}
-					break;
+			let nextContentField = text(contentFields[j], "h3");
+			if (nextContentField == "Scope and content"){
+				item.abstractNote = ZU.trimInternal(text(contentFields[j], "div"));
+				break;
 			}
-
 		}
 	}
 
@@ -315,25 +275,15 @@ function scrape(doc, url) {
 
 		for (var k = 0; k < contextFields.length; k++) {
 
-			nextContextField = text(contextFields[k], "h3");
-
-			switch (nextContextField) {
-				case "Name of creator":
+			let nextContextField = text(contextFields[k], "h3");
+			if (nextContextField == "Name of creator") {
 					creatorName = text(contextFields[k], "div > a").split(" - ");
 					item.creators.push({
-						lastName: toTitleCase(creatorName[1]),
+						lastName: ZU.capitalizeTitle(creatorName[1], true),
 						creatorType: "author",
 						fieldMode: true 
 					});
-					break;
-
-				default:
-					if (item.creatorName === '') {
-						item.creatorName = '';
-					}
-					break;
 			}
-
 		}
 
 	}
