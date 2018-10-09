@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 16:32:26"
+	"lastUpdated": "2018-10-09 21:27:00"
 }
 
 /*
@@ -385,6 +385,8 @@ function detectType(newItem, node, ret) {
 				break;
 			case 'discussionforumposting':
 				t.so = 'forumPost'; break;
+			case 'qapage'://e.g. stackoverflow
+				t.soGuess = 'forumPost'; break;
 			case 'techarticle':
 			case 'apireference':
 				t.soGuess = 'report'; break;
@@ -429,6 +431,13 @@ function detectType(newItem, node, ret) {
 			case 'datacatalog':
 			case 'dataset':
 				t.so = 'journalArticle'; break;  //until dataset gets implemented
+			// We don't want to detect items from these auxiliary containers,
+			// and therefore we return false in these cases.
+			case 'person':
+			case 'organization':
+			case 'place':
+			case 'postaladdress':
+				return false;
 			
 			// specials cases
 			case "article":
@@ -680,6 +689,9 @@ function detectType(newItem, node, ret) {
 		case "music.album":
 			t.og = "audioRecording";
 		break;
+		case "slideshare:presentation":
+			t.og = "presentation";
+		break;
 		case "website":
 			t.og = "webpage";
 		break;
@@ -870,15 +882,17 @@ function importItem(newItem, node) {
 				n.so+creatorType]);
 		//get presenters in unpublished conference papers on eprints
 		} else if (creatorType == "presenter") {
-			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name"]);
+			creators = getFirstResults(node, [n.z+creatorType+"s", n.eprints+"creators_name", n.so+"author"]);
+		} else if (creatorType == "director") {
+			creators = getFirstResults(node, [n.so+"director", n.z+creatorType+"s"]);
 		} else if (creatorType == "castMember") {
-			creators = getFirstResults(node, [n.video+"actor"]);
+			creators = getFirstResults(node, [n.video+"actor", n.so+"actor", n.so+"actors", n.z+creatorType+"s"]);
 		} else if (creatorType == "scriptwriter") {
-			creators = getFirstResults(node, [n.video+"writer"]);
+			creators = getFirstResults(node, [n.video+"writer", n.z+creatorType+"s"]);
 		} else if (creatorType == "producer") {
-			creators = getFirstResults(node, [n.so+"producer"]);
+			creators = getFirstResults(node, [n.so+"producer", n.z+creatorType+"s"]);
 		} else if (creatorType == "programmer") {
-			creators = getFirstResults(node, [n.so+"author", n.codemeta+"maintainer"]);
+			creators = getFirstResults(node, [n.so+"author", n.codemeta+"maintainer", n.z+creatorType+"s"]);
 		} else {
 			creators = getFirstResults(node, [n.z+creatorType+"s"]);
 		}
@@ -979,6 +993,14 @@ function importItem(newItem, node) {
 		if (typeof(publisher[0]) == "string") {
 			newItem.publisher = publisher[0];
 		} else {
+			// Publisher can be in another container
+			try {
+				p = Zotero.RDF.getContainerElements(publisher[0]);
+			} catch(e) {}
+			if (p && p.length) {
+				publisher = p;
+			}
+
 			var type = Zotero.RDF.getTargets(publisher[0], rdf+"type");
 			if (type) {
 				type = Zotero.RDF.getResourceURI(type[0]);
@@ -1281,9 +1303,11 @@ function getNodes(skipCollections) {
 		// figure out if this is a part of another resource, or a linked
 		// attachment, or a creator
 		if (Zotero.RDF.getSources(node, n.dcterms+"isPartOf") ||
+		   Zotero.RDF.getSources(node, n.so+"isPartOf") ||
 		   Zotero.RDF.getSources(node, n.bib+"presentedAt") ||
 		   Zotero.RDF.getSources(node, n.link+"link") ||
-		   Zotero.RDF.getSources(node, n.dcterms+"creator")) {
+		   Zotero.RDF.getSources(node, n.dcterms+"creator") ||
+		   Zotero.RDF.getSources(node, n.so+"author")) {
 			continue;
 		}
 		
