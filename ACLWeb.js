@@ -65,7 +65,7 @@ function doWeb(doc, url) {
 				}
 			});
 		});
-	} else if(url.endsWith('.bib')) {
+	} else if (url.endsWith('.bib')) {
 		// e.g. http://www.aclweb.org/anthology/P10-4014.bib
 		let bibtex = ZU.xpath(doc, '//pre')[0].textContent;
 		scrapeBibtex(bibtex, url);

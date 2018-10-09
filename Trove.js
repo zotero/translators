@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-02-04 19:41:04"
+	"lastUpdated": "2018-09-03 19:41:04"
 }
 
 /*
@@ -113,7 +113,7 @@ function scrapeNewspaper(doc, url) {
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
 				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a");
+					tag = ZU.xpathText(tags[i], "a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}

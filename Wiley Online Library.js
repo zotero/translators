@@ -2,14 +2,14 @@
 	"translatorID": "fe728bc9-595a-4f03-98fc-766f1d8d0936",
 	"label": "Wiley Online Library",
 	"creator": "Sean Takats, Michael Berkowitz, Avram Lyon and Aurimas Vinckevicius",
-	"target": "^https?://(besjournals\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|toc|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
+	"target": "^https?://(\\w+\\.)?onlinelibrary\\.wiley\\.com[^/]*/(book|doi|toc|advanced/search|search-web/cochrane|cochranelibrary/search|o/cochrane/(clcentral|cldare|clcmr|clhta|cleed|clabout)/articles/.+/sect0\\.html)",
 	"minVersion": "3.1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-10 18:59:07"
+	"lastUpdated": "2018-05-21 15:05:09"
 }
 
 /*
@@ -31,9 +31,9 @@
  */
 
 function fixCase(authorName) {
-	if(typeof authorName != 'string') return authorName;
+	if (typeof authorName != 'string') return authorName;
 	
-	if(authorName.toUpperCase() == authorName ||
+	if (authorName.toUpperCase() == authorName ||
 		authorName.toLowerCase() == authorName) {
 		return ZU.capitalizeTitle(authorName, true);
 	}
@@ -42,13 +42,13 @@ function fixCase(authorName) {
 }
 
 function addCreators(item, creatorType, creators) {
-	if( typeof(creators) == 'string' ) {
+	if ( typeof(creators) == 'string' ) {
 		creators = [creators];
-	} else if( !(creators instanceof Array) ) {
+	} else if ( !(creators instanceof Array) ) {
 		return;
 	}
 
-	for(var i=0, n=creators.length; i<n; i++) {
+	for (var i=0, n=creators.length; i<n; i++) {
 		item.creators.push(ZU.cleanAuthor(fixCase(creators[i]),
 							creatorType, false));
 	}
@@ -65,7 +65,7 @@ function getAuthorName(text) {
 
 function scrapeBook(doc, url, pdfUrl) {
 	var title = doc.getElementById('productTitle');
-	if( !title ) return false;
+	if ( !title ) return false;
 
 	var newItem = new Zotero.Item('book');
 	newItem.title = ZU.capitalizeTitle(title.textContent, true);
@@ -74,11 +74,11 @@ function scrapeBook(doc, url, pdfUrl) {
 	var dataRe = /^(.+?):\s*(.+?)\s*$/;
 	var match;
 	var isbn = [];
-	for( var i=0, n=data.length; i<n; i++) {
+	for ( var i=0, n=data.length; i<n; i++) {
 		match = dataRe.exec(data[i].textContent);
-		if(!match) continue;
+		if (!match) continue;
 
-		switch(match[1].trim().toLowerCase()) {
+		switch (match[1].trim().toLowerCase()) {
 			case 'author(s)':
 				addCreators(newItem, 'author', match[2].split(', '));
 				break;
@@ -126,7 +126,7 @@ function scrapeEM(doc, url, pdfUrl) {
 	//remove duplicate meta tags
 	var metas = ZU.xpath(doc,
 		'//head/link[@media="screen,print"]/following-sibling::meta');
-	for(var i=0, n=metas.length; i<n; i++) {
+	for (var i=0, n=metas.length; i<n; i++) {
 		metas[i].parentNode.removeChild(metas[i]);
 	}
 	var translator = Zotero.loadTranslator('web');
@@ -134,11 +134,11 @@ function scrapeEM(doc, url, pdfUrl) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-		if( itemType == 'bookSection' ) {
+		if ( itemType == 'bookSection' ) {
 			//add authors if we didn't get them from embedded metadata
-			if(!item.creators.length) {
+			if (!item.creators.length) {
 				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
-				for(var i=0, n=authors.length; i<n; i++) {
+				for (var i=0, n=authors.length; i<n; i++) {
 					item.creators.push(
 						ZU.cleanAuthor( getAuthorName(authors[i].textContent),
 											'author',false) );
@@ -147,7 +147,7 @@ function scrapeEM(doc, url, pdfUrl) {
 
 			//editors
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
-			for(var i=0, n=editors.length; i<n; i++) {
+			for (var i=0, n=editors.length; i<n; i++) {
 				item.creators.push(
 					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
 										'editor',false) );
@@ -159,7 +159,7 @@ function scrapeEM(doc, url, pdfUrl) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="abstract"]/div[@class="para"]//p', null, "\n");
 		} else {
 			var keywords = ZU.xpathText(doc, '//meta[@name="citation_keywords"]/@content');
-			if(keywords) {
+			if (keywords) {
 				item.tags = keywords.split(', ');
 			}
 			item.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]//p[@class="copyright"]');
@@ -167,11 +167,11 @@ function scrapeEM(doc, url, pdfUrl) {
 		}
 
 		//set correct print publication date
-		if(date) item.date = date;
+		if (date) item.date = date;
 
 		//remove pdf attachments
-		for(var i=0, n=item.attachments.length; i<n; i++) {
-			if(item.attachments[i].mimeType == 'application/pdf') {
+		for (var i=0, n=item.attachments.length; i<n; i++) {
+			if (item.attachments[i].mimeType == 'application/pdf') {
 				item.attachments.splice(i,1);
 				i--;
 				n--;
@@ -180,19 +180,19 @@ function scrapeEM(doc, url, pdfUrl) {
 
 		//fetch pdf url. There seems to be some magic value that must be sent
 		// with the request
-		if(!pdfUrl) {
+		if (!pdfUrl) {
 			var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-			if(u) {
+			if (u) {
 				ZU.doGet(u, function(text) {
 					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-					if(m) {
+					if (m) {
 						m[1] = ZU.unescapeHTML(m[1]);
 						Z.debug(m[1]);
 						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
 					} else {
 						Z.debug('Could not determine PDF URL.');
 						m = text.match(/<iframe[^>]*>/i);
-						if(m) Z.debug(m[0]);
+						if (m) Z.debug(m[0]);
 					}
 					item.complete();
 				});
@@ -214,11 +214,11 @@ function scrapeEM(doc, url, pdfUrl) {
 function scrapeBibTeX(doc, url, pdfUrl) {
 	var doi = ZU.xpathText(doc, '(//meta[@name="citation_doi"])[1]/@content')
 		|| ZU.xpathText(doc, '(//input[@name="publicationDoi"])[1]/@value');
-	if(!doi) {
+	if (!doi) {
 		doi = ZU.xpathText(doc, '(//p[@id="doi"])[1]');
-		if(doi) doi = doi.replace(/^\s*doi:\s*/i, '');
+		if (doi) doi = doi.replace(/^\s*doi:\s*/i, '');
 	}
-	if(!doi) {
+	if (!doi) {
 		scrapeEM(doc, url, pdfUrl);
 		return;
 	}
@@ -252,7 +252,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				}
 			}
 			//fix author case
-			for(var i=0, n=item.creators.length; i<n; i++) {
+			for (var i=0, n=item.creators.length; i<n; i++) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
 				item.creators[i].lastName = fixCase(item.creators[i].lastName);
 			}
@@ -265,14 +265,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 
 			//editors
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
-			for(var i=0, n=editors.length; i<n; i++) {
+			for (var i=0, n=editors.length; i<n; i++) {
 				item.creators.push(
 					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
 										'editor',false) );
 			}
 			
 			//title
-			if(item.title && item.title.toUpperCase() == item.title) {
+			if (item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
 			
@@ -292,10 +292,10 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			}
 			
 			//tags
-			if(!item.tags.length) {
+			if (!item.tags.length) {
 				var keywords = ZU.xpathText(doc,
 					'//meta[@name="citation_keywords"][1]/@content');
-				if(keywords) {
+				if (keywords) {
 					item.tags = keywords.split(', ');
 				}
 			}
@@ -316,14 +316,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				url;
 
 			//bookTitle
-			if(!item.bookTitle) {
+			if (!item.bookTitle) {
 				item.bookTitle = item.publicationTitle ||
 					ZU.xpathText(doc,
 						'//meta[@name="citation_book_title"][1]/@content');
 			}
 
 			//language
-			if(!item.language) {
+			if (!item.language) {
 				item.language = ZU.xpathText(doc,
 					'//meta[@name="citation_language"][1]/@content');
 			}
@@ -341,7 +341,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 
 			//fetch pdf url. There seems to be some magic value that must be sent
 			// with the request
-			if(!pdfUrl &&
+			if (!pdfUrl &&
 				(pdfUrl =
 					ZU.xpathText(doc,'(//meta[@name="citation_pdf_url"]/@content)[1]')
 					|| ZU.xpathText(doc, '(//a[@class="pdfLink"]/@href)[1]')
@@ -351,14 +351,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					if (text) {
 						var m = text.match(
 							/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-						if(m) {
+						if (m) {
 							m[1] = ZU.unescapeHTML(m[1]);
 							Z.debug('PDF url: ' + m[1]);
 							pdfUrl = m[1];
 						} else {
 							Z.debug('Could not determine PDF URL.');
 							m = text.match(/<iframe[^>]*>/i);
-							if(m) {
+							if (m) {
 								Z.debug(m[0]);
 								pdfUrl = null; // Clearly not the PDF
 							} else {
@@ -382,7 +382,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 					item.complete();
 				});
 			} else {
-				if(pdfUrl) {
+				if (pdfUrl) {
 					item.attachments.push({
 						url: pdfUrl,
 						title: 'Full Text PDF',

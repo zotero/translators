@@ -50,7 +50,7 @@ function doWeb(doc, url){
 		var results = doc.evaluate('//table[@id="restab"]//tr[@bgcolor = "#f5f5f5"]/td[2]', doc, null,XPathResult.ANY_TYPE, null);
 		var items = {};
 		var result;
-		while(result = results.iterateNext()) {
+		while (result = results.iterateNext()) {
 			var link = doc.evaluate('./a', result, null,XPathResult.ANY_TYPE, null).iterateNext();
 			var title = link.textContent;
 			var uri = link.href;
@@ -117,7 +117,7 @@ function scrape (doc) {
 					 */
 					 var cleaned = authors[i].textContent;
 					 var useComma = false;
-					 if(cleaned.match(/[\s\u00A0]([A-Z\u0400-\u042f]\.?[\s\u00A0]*)+$/)) {
+					 if (cleaned.match(/[\s\u00A0]([A-Z\u0400-\u042f]\.?[\s\u00A0]*)+$/)) {
 						cleaned = cleaned.replace(/[\u00A0\s]/,', ');
 						useComma = true;
 					 }
@@ -216,7 +216,7 @@ function scrape (doc) {
 
 */
 
-		//if(pdf) item.attachments.push(pdf);
+		//if (pdf) item.attachments.push(pdf);
 
 		item.complete();
 }

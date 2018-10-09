@@ -39,20 +39,20 @@ function scrape(doc) {
 		//it would be nice to grab the title from the meta tags, but quotations are properly escaped and the tags are therefore malformed.
 		titlePath = '/html/body/table[4]/tbody/tr[2]/td[1]/h2';
 		title = doc.evaluate(titlePath, doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-		if( title ) {
+		if ( title ) {
 			newItem.title = Zotero.Utilities.trimInternal(Zotero.Utilities.superCleanString(title.textContent));
 		}
 	}
 
 	var authors = ZU.xpath(doc, '//meta[@name="Author"]/@content')
-		for(j in authors) {
+		for (j in authors) {
 			authors[j] = authors[j].textContent.replace("Reviewed by ", "");
 			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[j], "author"));
 		}
 	
 	var month = ZU.xpathText(doc, '//meta[@name="PublicationMonth"]/@content')
 	var year = ZU.xpathText(doc, '//meta[@name="PublicationYear"]/@content')
-	if(month || year) {
+	if (month || year) {
 		newItem.date = month +" "+ year;
 	}
 	
@@ -62,12 +62,12 @@ function scrape(doc) {
 }
 
 function detectWeb(doc, url) {
-	if(doc.title.indexOf("Contents") != -1 ) {
+	if (doc.title.indexOf("Contents") != -1 ) {
 		return 'multiple';
-	} else if( doc.title.indexOf("Search results") != -1 &&
+	} else if ( doc.title.indexOf("Search results") != -1 &&
 		Zotero.Utilities.xpath(doc, '/html/body/dl/dt/strong/a[starts-with(text(),"World History Connected | Vol.")]').length ) {
 		return 'multiple';
-	} else if( url.match(/\/\d+\.\d+\/[^\/]+/) ) {
+	} else if ( url.match(/\/\d+\.\d+\/[^\/]+/) ) {
 		return 'journalArticle';
 	}
 }
@@ -76,9 +76,9 @@ function doWeb(doc, url) {
 	
 	var searchLinks;
 	
-	if(doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
+	if (doc.title.indexOf("Contents") != -1 || doc.title.indexOf("Search results") != -1) {
 
-		if(doc.title.indexOf("Contents |") != -1) {
+		if (doc.title.indexOf("Contents |") != -1) {
 		searchLinks = doc.evaluate('//tbody/tr[2]/td[1]/table//a', doc, null, XPathResult.ANY_TYPE, null);	
 		} 
 		else if ( doc.title.indexOf("| Search results") != -1) {

@@ -36,13 +36,13 @@ function detectWeb(doc, url) {
 	// this doesn't work always, so we're only using it on single items. 
 	// if the translator doesn't detect there, we still get good EM import
 	// For multiples we check getSearchResults
-	if(ubiquitytest[0] && ubiquitytest[0].href.indexOf(
+	if (ubiquitytest[0] && ubiquitytest[0].href.indexOf(
 			"http://www.ubiquitypress.com") != -1) {
-		if(ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')) {
+		if (ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')) {
 			return "journalArticle";
 		}
 	}
-	if(getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple"
 	}
 	return false;
@@ -50,11 +50,11 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var itemType = detectWeb(doc, url);
-	if(itemType === 'multiple') {
+	if (itemType === 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function(items) {
-			if(!items) return true;
+			if (!items) return true;
 			var urls = [];
-			for(var i in items) {
+			for (var i in items) {
 				urls.push(i);
 			}
 			ZU.processDocuments(urls, scrape);
@@ -70,10 +70,10 @@ function getSearchResults(doc, checkOnly) {
 		),
 		items = {},
 		found = false;
-	for(var i = 0; i < results.length; i++) {
+	for (var i = 0; i < results.length; i++) {
 		var title = results[i].textContent;
-		if(!title) continue;
-		if(checkOnly) return true;
+		if (!title) continue;
+		if (checkOnly) return true;
 		found = true;
 		title = title.trim();
 		items[results[i].href] = title;
@@ -88,7 +88,7 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-		if(abstract) {
+		if (abstract) {
 			item.abstractNote = ZU.cleanTags(abstract.trim());
 		}
 		item.complete();

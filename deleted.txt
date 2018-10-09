@@ -1,4 +1,4 @@
-55  # Increment number when modifying file
+57  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -100,3 +100,5 @@ c0d7d260-d795-4782-9446-f6c403a7922c # ScienceLink Japan closed on 2014-03-31
 dfec8317-9b59-4cc5-8771-cdcef719d171 # Springer Science is now covered by BioMedCentral translator
 eb4cb148-b050-470c-9686-77d722efdbd7 # Tatar zamanı website does not exists anymore
 fef07360-ee97-4f67-b022-6f64d5ec0c25 # KOBV; included in new portal and shutdown announcement since 2016-01-14
+49cb85ac-4f5e-41df-948f-5ae479809b43 # USgamer combined into Eurogamer translator
+09e8f8a2-a7e6-4430-b86c-47c99ca40a38 # Remove old HAPI version
