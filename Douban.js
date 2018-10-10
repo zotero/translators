@@ -202,13 +202,10 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var articles = new Array();
-	Zotero.debug(url);
 	if(detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		//var titles = doc.evaluate('//div/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
 		Zotero.debug("Outputing title !!!")
 		var titles = ZU.xpath(doc, '//div[@class="title"]/a');
-		//Zotero.debug(titles);
 		var title;
 		for (let i = 0; i < titles.length; i++){
 			title = titles[i];
@@ -216,12 +213,6 @@ function doWeb(doc, url) {
 			Zotero.debug(title.textContent);
 			items[title.href] = title.textContent;
 		}
-		//title = titles.iterateNext();
-		//Zotero.debug(title);
-		//while (title = titles.iterateNext()) {
-			//Zotero.debug(title);
-			//items[title.href] = title.textContent;
-		//}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
