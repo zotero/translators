@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-31 09:26:37"
+	"lastUpdated": "2018-10-10 06:08:59"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 YOUR_NAME Philipp Zumstein
+	Copyright © 2018 Philipp Zumstein
 	
 	This file is part of Zotero.
 
@@ -42,9 +42,15 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	if (url.includes('/the-latest') || url.includes('/archive-toc/')) {
-		if (getSearchResults(doc, true)) return "multiple";
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
 	} else if (attr(doc, 'meta[property="og:type"]', 'content')=="article") {
-		return "magazineArticle";
+		if (getSearchResultsSamePage(doc, true)) {
+			return "multiple";
+		} else {
+			return "magazineArticle";
+		}
 	}
 }
 
@@ -65,44 +71,68 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
+function getSearchResultsSamePage(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var numberOfResults = 0;
+	var rows = doc.querySelectorAll('.article-hed');
+	let authors = doc.querySelectorAll('.article-hed+div.byline');
+	for (let i=0; i<rows.length; i++) {
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (i>authors.length) continue;
+		let currentAuthors = authors[i];
+		if (!currentAuthors || !title) continue;
+		numberOfResults++;
+		if (checkOnly && numberOfResults>1) return true;
+		items[i] = {"title": title, "authors": currentAuthors};
+	}
+	return numberOfResults>1 ? items : false;
+}
+
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
+		if (url.includes('/the-latest') || url.includes('/archive-toc/')) {
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) {
+					return true;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
+			});
+		} else { // multiples on the same page
+			let titles = getSearchResultsSamePage(doc, false);
+			let selects = {};
+			for (let i in titles) selects[i] = titles[i].title;
+			Zotero.selectItems(selects, function (items) {
+				if (!items) {
+					return true;
+				}
+				var articles = [];
+				for (var i in items) {
+					articles.push(titles[i]);
+				}
+				// call usual scrape function but with additional third parameter
+				scrape(doc, url, articles);
+			});
+			
+		}
 	} else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, url, titles) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
 	
-	// TODO there are sometimes also more than one article on the same page
-	// e.g. https://hbr.org/2017/07/the-trouble-with-cmos#the-power-partnership
-	
 	translator.setHandler('itemDone', function (obj, item) {
-		// sometimes the section is also falsly part of the title from EM
-		item.title = text(doc, 'h1.article-hed') || text(doc, 'h2.article-hed') || item.title;
-		// sometitmes the creators are not yet extracted by EM
-		if (item.creators.length===0) {
-			var authors = doc.querySelectorAll('h1.article-hed+div.byline li');
-			if (authors.length===0) authors = doc.querySelectorAll('h2.article-hed+div.byline li');
-			for (let author of authors) {
-				item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
-			}
-		}
 		// issue
 		var issueStatement = text(doc, '.publication-date');
 		if (!item.issue && issueStatement) {
@@ -112,7 +142,30 @@ function scrape(doc, url) {
 				item.issue = match[1];
 			}
 		}
-		item.complete();
+		if (!titles) { // i.e. only one article on that page
+			// sometimes the section is also falsly part of the title from EM
+			item.title = text(doc, 'h1.article-hed') || text(doc, 'h2.article-hed') || item.title;
+			// sometimes the creators are not yet extracted by EM
+			if (item.creators.length===0) {
+				let authors = doc.querySelectorAll('h1.article-hed+div.byline li');
+				if (authors.length===0) authors = doc.querySelectorAll('h2.article-hed+div.byline li');
+				for (let author of authors) {
+					item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
+				}
+			}
+			item.complete();
+		} else { // i.e. several articles on the same page
+			for (let title of titles) {
+				let itemCopy = item;
+				itemCopy.title = title.title;
+				itemCopy.creators = [];
+				let authors = title.authors.querySelectorAll('li');
+				for (let author of authors) {
+					itemCopy.creators.push(ZU.cleanAuthor(author.textContent, "author"));
+				}
+				itemCopy.complete();
+			}
+		}
 	});
 
 	translator.getTranslatorObject(function(trans) {
@@ -257,61 +310,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://hbr.org/2018/05/do-entrepreneurs-need-a-strategy#strategy-for-start-ups",
-		"items": [
-			{
-				"itemType": "magazineArticle",
-				"title": "Strategy for Start-ups",
-				"creators": [
-					{
-						"firstName": "Joshua",
-						"lastName": "Gans",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Erin L.",
-						"lastName": "Scott",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Scott",
-						"lastName": "Stern",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Carl",
-						"lastName": "Schramm",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Daniel",
-						"lastName": "McGinn",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Walter",
-						"lastName": "Frick",
-						"creatorType": "author"
-					}
-				],
-				"date": "2018-05-01T04:00:00Z",
-				"abstractNote": "Some start-up founders follow a business plan; others operate by the seat of their pants. This package looks at how entrepreneurs can carefully craft a strategy in advance—and whether that’s what they should do.",
-				"libraryCatalog": "hbr.org",
-				"publicationTitle": "Harvard Business Review",
-				"url": "https://hbr.org/2018/05/do-entrepreneurs-need-a-strategy",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Entrepreneurship"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://hbr.org/archive-toc/BR0205",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
