@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-11 15:36:09"
+	"lastUpdated": "2018-10-11 20:21:52"
 }
 
 /*
@@ -36,19 +36,6 @@
 */
 
 
-function getIds(doc,  url) {
-	var rows = ZU.xpath(doc, '//ul[@id="body-work-list"]//li[@orcid-put-code]');
-	var items = {};
-	for (var i=0; i<rows.length; i++) {
-		var id = rows[i].getAttribute("orcid-put-code");
-		var title = ZU.xpathText(rows[i], './/h3/span[@ng-bind="work.title.value"]');
-		items[id] = title;
-	}
-	//Z.debug(items);
-	return items;
-}
-
-
 function detectWeb(doc, url) {
 	//check that orcid can be found
 	var orcid = doc.getElementById("orcid-id");
@@ -56,8 +43,8 @@ function detectWeb(doc, url) {
 		Z.debug("Error: No ORCID found in this page");
 		return false;
 	}
-	//check that work ids can be found
-	if (getIds(doc, url) !== null) {
+	//check that some works are listed on that page
+	if (ZU.xpath(doc, '//ul[@id="body-work-list"]/li') !== null) {
 		return "multiple";
 	}
 }
@@ -66,9 +53,6 @@ function detectWeb(doc, url) {
 function lookupWork(workid, orcid) {
 	var callApi = 'https://pub.orcid.org/v2.0/' + orcid + '/work/' + workid;
 	ZU.doGet(callApi, function(text){
-		//Z.debug(callApi);
-		//Z.debug(text);
-		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7");//CSL JSON
 		translator.setString(text);
@@ -81,15 +65,35 @@ function lookupWork(workid, orcid) {
 function doWeb(doc, url) {
 	var orcid = doc.getElementById("orcid-id");
 	orcid = orcid.textContent.replace('https://orcid.org/', '');
-	Zotero.selectItems(getIds(doc, url), function (items) {
-		if (!items) {
-			return true;
+	var callApi = 'https://pub.orcid.org/v2.0/' + orcid + '/works';
+	ZU.doGet(callApi, function(text) {
+		// Z.debug(text);
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(text, "application/xml");
+		var namespace = {"work" : "http://www.orcid.org/ns/work"};
+		var items = ZU.xpath(doc, '//work:work-summary', namespace);
+		var putCodes = {};
+		for (let item of items) {
+			let code = item.getAttribute('put-code');
+			let title = ZU.xpathText(item, './work:title', namespace);
+			putCodes[code] = title.trim();
 		}
-		for (var i in items) {
-			lookupWork(i, orcid);
-		}
+		Zotero.selectItems(putCodes, function (items) {
+			if (!items) {
+				return true;
+			}
+			for (var i in items) {
+				lookupWork(i, orcid);
+			}
+		});
 	});
-}/** BEGIN TEST CASES **/
+	// The /works endpoint does currently not support CSL-JSON diretly,
+	// otherwise we could simplify with
+	// ZU.doGet(callApi, function(text) {
+	// }, undefined, undefined, {"Accept" : "application/vnd.citationstyles.csl+json"});
+	
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
