@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-10 06:08:59"
+	"lastUpdated": "2018-10-11 17:02:23"
 }
 
 /*
@@ -133,7 +133,6 @@ function scrape(doc, url, titles) {
 	// translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		// issue
 		var issueStatement = text(doc, '.publication-date');
 		if (!item.issue && issueStatement) {
 			// e.g. From the March 2014 Issue
@@ -142,6 +141,9 @@ function scrape(doc, url, titles) {
 				item.issue = match[1];
 			}
 		}
+		item.publicationTitle = "Harvard Business Review";
+		item.ISSN = "0017-8012";
+		
 		if (!titles) { // i.e. only one article on that page
 			// sometimes the section is also falsly part of the title from EM
 			item.title = text(doc, 'h1.article-hed') || text(doc, 'h2.article-hed') || item.title;
@@ -196,6 +198,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-05-30T14:00:33Z",
+				"ISSN": "0017-8012",
 				"abstractNote": "Companies need to invest in the right mix of data, systems, and people.",
 				"libraryCatalog": "hbr.org",
 				"publicationTitle": "Harvard Business Review",
@@ -233,6 +236,7 @@ var testCases = [
 					}
 				],
 				"date": "2018-05-01T04:00:00Z",
+				"ISSN": "0017-8012",
 				"abstractNote": "Does alcohol help unleash insights?",
 				"issue": "May–June 2018",
 				"libraryCatalog": "hbr.org",
@@ -281,6 +285,7 @@ var testCases = [
 					}
 				],
 				"date": "2014-03-01T05:00:00Z",
+				"ISSN": "0017-8012",
 				"abstractNote": "Many companies could persuade big spenders to buy even more.",
 				"issue": "March 2014",
 				"libraryCatalog": "hbr.org",
