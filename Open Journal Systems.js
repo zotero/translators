@@ -23,7 +23,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	// In OJS 3, up to at least version 3.1.1-2, the PDF view does not
 	// include metadata, so we must get it from the article landing page.
-	var urlParts = doc.location.href.match(/(.+\/article\/view\/)([^/]+)\/[^/]+/);
+	var urlParts = url.match(/(.+\/article\/view\/)([^/]+)\/[^/]+/);
 	if (urlParts) { //PDF view
 		ZU.processDocuments(urlParts[1] + urlParts[2], scrape);
 	} else { //Article view
