@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-26 20:45:23"
+	"lastUpdated": "2018-10-12 15:27:55"
 }
 
 /**
@@ -269,9 +269,12 @@ function getKeywords(doc) {
 }
 
 //get PDF url
-function getPdfUrl(url) {
+function getPdfUrl(doc, url) {
 	var m = url.match(/(^[^#?]+\/)(?:full|abs)(\/[^#?]+?\.)[a-zA-Z]+(?=$|\?|#)/);
 	if (m && m.length) return m[1] + 'pdf' + m[2] + 'pdf';
+	else if (attr(doc, 'a[data-track-action="download pdf"]', 'href')) {
+		return attr(doc, 'a[data-track-action="download pdf"]', 'href');
+	}
 }
 
 //add using embedded metadata
@@ -338,8 +341,12 @@ function scrapeEM(doc, url, next) {
 
 		next(item);
 	});
-
-	translator.translate();
+	translator.getTranslatorObject(function(trans) {
+		// Make sure we always import as journal article (sometimes missing from EM)
+		// e.g. https://www.nature.com/articles/sdata201618
+		trans.itemType = "journalArticle";
+		trans.doWeb(doc, url);
+	});
 }
 
 function scrapeRIS(doc, url, next) {
@@ -354,7 +361,7 @@ function scrapeRIS(doc, url, next) {
 	if (!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!risURL) risURL = ZU.xpath(doc, '//ul[@data-component="article-info-list"]//a[@data-track-source="citation-download"]')[0];
-
+	if (!risURL) risURL = doc.querySelectorAll('a[data-track-action="download article citation"]')[0];
 	if (risURL) {
 		risURL = risURL.href;
 		ZU.doGet(risURL, function(text) {
@@ -651,14 +658,20 @@ function scrape(doc, url) {
 			item.publicationTitle = 'Nature';// old articles mess this up
 		}
 		delete item.journalAbbreviation;
-		
-		if (!item.attachments) {
+		var hasPDF = false;
+		for (let attach of item.attachments){
+			if (attach.title.includes("PDF")) {
+				hasPDF = true;
+			}
+		}
+		if (!hasPDF) {
+			item.attachments=[];
 			item.attachments = [{
 				document: doc,
 				title: 'Snapshot'
 			}];
-	
-			var pdf = getPdfUrl(url);
+			
+			var pdf = getPdfUrl(doc, url);
 			if (pdf) {
 				item.attachments.push({
 					url: pdf,
@@ -852,7 +865,7 @@ var ISO8879CharMap = {
   "vartheta":"\u03D1", "Upsi":"\u03D2", "phis":"\u03D5", "straightphi":"\u03D5",
   "piv":"\u03D6", "varpi":"\u03D6", "b.Gammad":"\u03DC", "gammad":"\u03DD",
   "b.gammad":"\u03DD", "kappav":"\u03F0", "varkappa":"\u03F0", "rhov":"\u03F1",
-  "varrho":"\u03F1", "epsi":"\u03F5", "epsis":"\u03F5", 
+  "varrho":"\u03F1", "epsi":"\u03F5", "epsis":"\u03F5",
   "straightepsilon":"\u03F5", "bepsi":"\u03F6",
   "backepsilon":"\u03F6", "IOcy":"\u0401", "DJcy":"\u0402", "GJcy":"\u0403",
   "Jukcy":"\u0404", "DScy":"\u0405", "Iukcy":"\u0406", "YIcy":"\u0407",
@@ -885,7 +898,7 @@ var ISO8879CharMap = {
   "lsquor":"\u201A", "ldquo":"\u201C", "OpenCurlyDoubleQuote":"\u201C", "rdquo":"\u201D",
   "rdquor":"\u201D", "ldquor":"\u201E", "dagger":"\u2020", "Dagger":"\u2021",
   "ddagger":"\u2021", "bull":"\u2022", "bullet":"\u2022", "nldr":"\u2025",
-  "hellip":"\u2026", "mldr":"\u2026", 
+  "hellip":"\u2026", "mldr":"\u2026",
   "vprime":"\u2032", "bprime":"\u2035", "backprime":"\u2035", "caret":"\u2041",
   "hybull":"\u2043", "incare":"\u2105", "planck":"\u210F", "hbar":"\u210F",
   "hslash":"\u210F", "ell":"\u2113", "numero":"\u2116", "copysr":"\u2117",
@@ -939,16 +952,16 @@ var ISO8879CharMap = {
   "propto":"\u221D", "Proportional":"\u221D", "varpropto":"\u221D", "ang":"\u2220",
   "angle":"\u2220", "angmsd":"\u2221", "measuredangle":"\u2221", "mid":"\u2223",
   "smid":"\u2223", "VerticalBar":"\u2223",
-  "nmid":"\u2224", "nsmid":"\u2224", 
+  "nmid":"\u2224", "nsmid":"\u2224",
   "spar":"\u2225", "parallel":"\u2225", "DoubleVerticalBar":"\u2225",
-  "shortparallel":"\u2225", "npar":"\u2226", "nspar":"\u2226", 
-  "nparallel":"\u2226", "NotDoubleVerticalBar":"\u2226", 
+  "shortparallel":"\u2225", "npar":"\u2226", "nspar":"\u2226",
+  "nparallel":"\u2226", "NotDoubleVerticalBar":"\u2226",
   "thksim":"\u223C", "Tilde":"\u223C", "thicksim":"\u223C",
   "bsim":"\u223D", "backsim":"\u223D", "wreath":"\u2240", "VerticalTilde":"\u2240",
   "wr":"\u2240", "nsim":"\u2241", "NotTilde":"\u2241", "nsime":"\u2244",
   "nsimeq":"\u2244", "NotTildeEqual":"\u2244", "ncong":"\u2247", "NotTildeFullEqual":"\u2247",
   "asymp":"\u2248", "thkap":"\u2248", "TildeTilde":"\u2248",
-  "approx":"\u2248", 
+  "approx":"\u2248",
   "nap":"\u2249", "NotTildeTilde":"\u2249", "napprox":"\u2249", "ape":"\u224A",
   "approxeq":"\u224A", "bcong":"\u224C", "backcong":"\u224C", "bump":"\u224E",
   "HumpDownHump":"\u224E", "Bumpeq":"\u224E", "bumpe":"\u224F", "HumpEqual":"\u224F",
@@ -2268,8 +2281,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Maarten van de",
-						"lastName": "Guchte",
+						"firstName": "Maarten",
+						"lastName": "van de Guchte",
 						"creatorType": "author"
 					},
 					{
@@ -2288,8 +2301,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Johan van",
-						"lastName": "Hylckama-Vlieg",
+						"firstName": "Johan",
+						"lastName": "van Hylckama-Vlieg",
 						"creatorType": "author"
 					},
 					{
@@ -2328,8 +2341,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Karine Le",
-						"lastName": "Roux",
+						"firstName": "Karine",
+						"lastName": "Le Roux",
 						"creatorType": "author"
 					},
 					{
@@ -2343,8 +2356,8 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Raquel Melo",
-						"lastName": "Minardi",
+						"firstName": "Raquel",
+						"lastName": "Melo Minardi",
 						"creatorType": "author"
 					},
 					{
@@ -2580,7 +2593,7 @@ var testCases = [
 				"publicationTitle": "Nature Communications",
 				"rights": "2015 Nature Publishing Group",
 				"url": "https://www.nature.com/articles/ncomms7186",
-				"volume": "2",
+				"volume": "6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -2600,6 +2613,306 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.nature.com/search?q=zotero",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/sdata201618",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The FAIR Guiding Principles for scientific data management and stewardship",
+				"creators": [
+					{
+						"firstName": "Mark D.",
+						"lastName": "Wilkinson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michel",
+						"lastName": "Dumontier",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "IJsbrand Jan",
+						"lastName": "Aalbersberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gabrielle",
+						"lastName": "Appleton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Myles",
+						"lastName": "Axton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Arie",
+						"lastName": "Baak",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Niklas",
+						"lastName": "Blomberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jan-Willem",
+						"lastName": "Boiten",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luiz Bonino",
+						"lastName": "da Silva Santos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philip E.",
+						"lastName": "Bourne",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jildau",
+						"lastName": "Bouwman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony J.",
+						"lastName": "Brookes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tim",
+						"lastName": "Clark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mercè",
+						"lastName": "Crosas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ingrid",
+						"lastName": "Dillo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Olivier",
+						"lastName": "Dumon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Scott",
+						"lastName": "Edmunds",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chris T.",
+						"lastName": "Evelo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Finkers",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alejandra",
+						"lastName": "Gonzalez-Beltran",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alasdair J. G.",
+						"lastName": "Gray",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Groth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Carole",
+						"lastName": "Goble",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeffrey S.",
+						"lastName": "Grethe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jaap",
+						"lastName": "Heringa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter A. C.",
+						"lastName": "’t Hoen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rob",
+						"lastName": "Hooft",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tobias",
+						"lastName": "Kuhn",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben",
+						"lastName": "Kok",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joost",
+						"lastName": "Kok",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Scott J.",
+						"lastName": "Lusher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maryann E.",
+						"lastName": "Martone",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Albert",
+						"lastName": "Mons",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Abel L.",
+						"lastName": "Packer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bengt",
+						"lastName": "Persson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Rocca-Serra",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marco",
+						"lastName": "Roos",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rene",
+						"lastName": "van Schaik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Susanna-Assunta",
+						"lastName": "Sansone",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erik",
+						"lastName": "Schultes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thierry",
+						"lastName": "Sengstag",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ted",
+						"lastName": "Slater",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "George",
+						"lastName": "Strawn",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Morris A.",
+						"lastName": "Swertz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Thompson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Johan",
+						"lastName": "van der Lei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erik",
+						"lastName": "van Mulligen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jan",
+						"lastName": "Velterop",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andra",
+						"lastName": "Waagmeester",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Wittenburg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Katherine",
+						"lastName": "Wolstencroft",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jun",
+						"lastName": "Zhao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Barend",
+						"lastName": "Mons",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-03-15",
+				"DOI": "10.1038/sdata.2016.18",
+				"ISSN": "2052-4463",
+				"abstractNote": "There is an urgent need to improve the infrastructure supporting the reuse of scholarly data. A diverse set of stakeholders—representing academia, industry, funding agencies, and scholarly publishers—have come together to design and jointly endorse a concise and measureable set of principles that we refer to as the FAIR Data Principles. The intent is that these may act as a guideline for those wishing to enhance the reusability of their data holdings. Distinct from peer initiatives that focus on the human scholar, the FAIR Principles put specific emphasis on enhancing the ability of machines to automatically find and use the data, in addition to supporting its reuse by individuals. This Comment is the first formal publication of the FAIR Principles, and includes the rationale behind them, and some exemplar implementations in the community.",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "160018",
+				"publicationTitle": "Scientific Data",
+				"rights": "2016 Nature Publishing Group",
+				"url": "https://www.nature.com/articles/sdata201618",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
