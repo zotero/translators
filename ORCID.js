@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 		return false;
 	}
 	//check that some works are listed on that page
-	if (ZU.xpath(doc, '//ul[@id="body-work-list"]/li') !== null) {
+	if (ZU.xpath(doc, '//ul[@id="body-work-list"]/li').length) {
 		return "multiple";
 	}
 }
