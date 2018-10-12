@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-24 14:43:10"
+	"lastUpdated": "2018-10-12 23:03:20"
 }
 
 /*
@@ -40,11 +40,11 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
-function detectWeb(doc, url) {  
+function detectWeb(doc, url) {
 	return "newspaperArticle";
 }
 
-function doWeb(doc, url) { 
+function doWeb(doc, url) {
 	var newItem = new Zotero.Item("newspaperArticle");
 	var metaArr = {};
 	var metaTags = doc.getElementsByTagName("meta");
@@ -84,26 +84,20 @@ function doWeb(doc, url) {
 		title: "Image",
 		mimeType: "image/jpeg"
 	}];
-	
 
 	newItem.publicationTitle = text(doc, '.location span[class="paper-title"]');
-	newItem.place = text(doc, '.location span[itemprop="location"]');
-	newItem.date = attr(doc, '.location time', 'datetime');
-	/* 
-	One or two more links follow after the publication date with information about
-		1. (optional) Edition e.g. "Main Edition"
-		2. Page e.g. "Page 13"
-	*/
-	var editionPages = ZU.xpath(doc, '//span[contains(@class, "location")]/a[time]/following-sibling::a');
-	for (let i=0; i<editionPages.length; i++) {
-		let value = editionPages[i].textContent;
-		if (value.includes("Page")) {
-			newItem.pages = value.replace("Page", '');
-		} else {
-			newItem.edition = value;
-		}
+	// .location gives a string like "Star Tribune\n(Minneapolis, Minnesota)\n\n17 Jan 1937, Sun\n • Page 4"
+	// or The Sunday Leader\n(Wilkes-Barre, Pennsylvania)\n\n17 Jul 1887, Sun\n • Main Edition\n • Page 5
+	editiontokens = text(doc, '.location').split('•');
+	if (editiontokens.length == 3) { // there's an edition label
+		newItem.edition = editiontokens[1];
 	}
-	
+	newItem.pages = editiontokens.slice(-1)[0].replace("Page", '');
+	newItem.date = text(doc, '.source-info ol li:nth-child(2) a span', 'datetime').replace(/\, [A-Za-z]*$/, '');
+	if (newItem.date) {
+		newItem.date = ZU.strToISO(newItem.date)
+	}
+	newItem.place = text(doc, '.location').split(/\n/)[3].replace(/[\(\)]/g, '');
 	newItem.complete();
 }
 
