@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-02 13:42:35"
+	"lastUpdated": "2018-10-12 23:03:20"
 }
 
 /*
@@ -40,11 +40,11 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
-function detectWeb(doc, url) {  
+function detectWeb(doc, url) {
 	return "newspaperArticle";
 }
 
-function doWeb(doc, url) { 
+function doWeb(doc, url) {
 	var newItem = new Zotero.Item("newspaperArticle");
 	var metaArr = {};
 	var metaTags = doc.getElementsByTagName("meta");
@@ -94,6 +94,9 @@ function doWeb(doc, url) {
 	}
 	newItem.pages = editiontokens.slice(-1)[0].replace("Page", '');
 	newItem.date = text(doc, '.source-info ol li:nth-child(2) a span', 'datetime').replace(/\, [A-Za-z]*$/, '');
+	if (newItem.date) {
+		newItem.date = ZU.strToISO(newItem.date)
+	}
 	newItem.place = text(doc, '.location').split(/\n/)[3].replace(/[\(\)]/g, '');
 	newItem.complete();
 }
@@ -115,7 +118,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "30 Oct 1939",
+				"date": "1939-10-30",
 				"libraryCatalog": "newspapers.com",
 				"pages": "15",
 				"place": "Akron, Ohio",
@@ -141,7 +144,7 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "Clipped From The Sunday Leader",
 				"creators": [],
-				"date": "17 Jul 1887",
+				"date": "1887-07-17",
 				"edition": "Main Edition",
 				"libraryCatalog": "newspapers.com",
 				"pages": "5",
