@@ -272,7 +272,7 @@ function getKeywords(doc) {
 function getPdfUrl(doc, url) {
 	var m = url.match(/(^[^#?]+\/)(?:full|abs)(\/[^#?]+?\.)[a-zA-Z]+(?=$|\?|#)/);
 	if (m && m.length) return m[1] + 'pdf' + m[2] + 'pdf';
-	else if (attr(doc, 'a[data-track-action="download pdf"]', 'href')) {
+	else {
 		return attr(doc, 'a[data-track-action="download pdf"]', 'href');
 	}
 }
@@ -361,7 +361,7 @@ function scrapeRIS(doc, url, next) {
 	if (!risURL) risURL = doc.evaluate('//li[@class="download-citation"]/a', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!risURL) risURL = doc.evaluate('//a[normalize-space(text())="Export citation" and not(@href="#")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
 	if (!risURL) risURL = ZU.xpath(doc, '//ul[@data-component="article-info-list"]//a[@data-track-source="citation-download"]')[0];
-	if (!risURL) risURL = doc.querySelectorAll('a[data-track-action="download article citation"]')[0];
+	if (!risURL) risURL = doc.querySelector('a[data-track-action="download article citation"]');
 	if (risURL) {
 		risURL = risURL.href;
 		ZU.doGet(risURL, function(text) {
@@ -660,12 +660,11 @@ function scrape(doc, url) {
 		delete item.journalAbbreviation;
 		var hasPDF = false;
 		for (let attach of item.attachments){
-			if (attach.title.includes("PDF")) {
+			if (attach.mimeType && attach.mimeType == "application/pdf") {
 				hasPDF = true;
 			}
 		}
 		if (!hasPDF) {
-			item.attachments=[];
 			item.attachments = [{
 				document: doc,
 				title: 'Snapshot'
