@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-11 20:21:52"
+	"lastUpdated": "2018-10-12 18:52:49"
 }
 
 /*
@@ -70,12 +70,16 @@ function doWeb(doc, url) {
 		// Z.debug(text);
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(text, "application/xml");
-		var namespace = {"work" : "http://www.orcid.org/ns/work"};
-		var items = ZU.xpath(doc, '//work:work-summary', namespace);
+		var namespaces = {
+			"work": "http://www.orcid.org/ns/work",
+			"activities": "http://www.orcid.org/ns/activities"
+		};
+		var items = ZU.xpath(doc, '//activities:group', namespaces);
 		var putCodes = {};
 		for (let item of items) {
-			let code = item.getAttribute('put-code');
-			let title = ZU.xpathText(item, './work:title', namespace);
+			let work = ZU.xpath(item, './work:work-summary', namespaces)[0];
+			let code = work.getAttribute('put-code');
+			let title = ZU.xpathText(work, './/work:title', namespaces);
 			putCodes[code] = title.trim();
 		}
 		Zotero.selectItems(putCodes, function (items) {
@@ -87,12 +91,8 @@ function doWeb(doc, url) {
 			}
 		});
 	});
-	// The /works endpoint does currently not support CSL-JSON diretly,
-	// otherwise we could simplify with
-	// ZU.doGet(callApi, function(text) {
-	// }, undefined, undefined, {"Accept" : "application/vnd.citationstyles.csl+json"});
-	
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
