@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-04 03:01:31"
+	"lastUpdated": "2018-10-12 17:46:47"
 }
 
 function detectWeb(doc, url) {
@@ -21,6 +21,17 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
+	// In OJS 3, up to at least version 3.1.1-2, the PDF view does not
+	// include metadata, so we must get it from the article landing page.
+	var urlParts = url.match(/(.+\/article\/view\/)([^/]+)\/[^/]+/);
+	if (urlParts) { //PDF view
+		ZU.processDocuments(urlParts[1] + urlParts[2], scrape);
+	} else { //Article view
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	//use Embeded Metadata
 	var trans = Zotero.loadTranslator('web');
 	trans.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -85,7 +96,6 @@ function doWeb(doc, url) {
 	});
 
 	trans.translate();
-
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -769,6 +779,46 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100/115",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Value of Evaluation Standards: A Comparative Assessment",
+				"creators": [
+					{
+						"firstName": "Robert",
+						"lastName": "Picciotto",
+						"creatorType": "author"
+					}
+				],
+				"date": "2007/12/18",
+				"ISSN": "1556-8180",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "journals.sfu.ca",
+				"pages": "30-59",
+				"publicationTitle": "Journal of MultiDisciplinary Evaluation",
+				"rights": "Copyright (c)",
+				"shortTitle": "The Value of Evaluation Standards",
+				"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
