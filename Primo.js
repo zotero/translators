@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-01-21 17:43:32"
+	"lastUpdated": "2018-10-21 10:10:22"
 }
 
 /*
@@ -188,7 +188,10 @@ function fetchPNX(itemData) {
 			}
 			
 			fetchPNX(itemData);
-		}
+		},
+		null,
+		null,
+		[200, 404]
 	);
 }
 
