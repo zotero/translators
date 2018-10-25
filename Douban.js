@@ -15,17 +15,17 @@
 /*
    Douban Translator
    Copyright (C) 2009-2010 TAO Cheng, acestrong@gmail.com
-
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -207,9 +207,12 @@ function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//div/h2/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = ZU.xpath(doc, '//div[@class="title"]/a');
 		var title;
-		while (title = titles.iterateNext()) {
+		for (let i = 0; i < titles.length; i++){
+			title = titles[i];
+			Zotero.debug(title.href);
+			Zotero.debug(title.textContent);
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {
