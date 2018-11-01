@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 14:41:06"
+	"lastUpdated": "2018-11-01 18:12:21"
 }
 
 /*
@@ -98,6 +98,9 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var risURL = attr(doc, 'a.export', 'href');
 	ZU.doGet(risURL, function(text) {
+		// for coorperate bodies the place is in brackets sometimes
+		// e.g. AU  - Universität <Mannheim>
+		text = text.replace(/AU\s+-\s+(.*)\s+<(.*)>/g, "AU  - $1 $2");
 		// Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -107,12 +110,25 @@ function scrape(doc, url) {
 			// fixes the added author information in the title,
 			// which might be fixed by them in the future
 			item.title = item.title.replace(/\/[^\/]*$/, '').replace(/ : /g, ': ');
-			
+			// number of pages land in pages for a book
 			if (type == "book" && item.pages) {
-				var m = item.pages.match(/(\d+) Seiten/);
+				let m = item.pages.match(/(\d+) Seiten/);
 				if (m) {
 					item.numPages = m[1];
 					delete item.pages;
+				}
+			}
+			// for series time spans are tried to save as a date
+			// e.g. 1972/73 - 1999/2000(2001); 2001/02(2003) -
+			if (item.date && (item.date.includes(';') || item.date.includes('-'))) {
+				item.notes.push({
+					note: "Erscheinungsverlauf: " + item.date
+				});
+				let m = item.date.match(/(\d+)/);
+				if (m) {
+					item.date = m[1];
+				} else {
+					delete item.date;
 				}
 			}
 			item.attachments.push({
@@ -256,12 +272,12 @@ var testCases = [
 				"title": "Rechenschaftsbericht ... des Rektors",
 				"creators": [
 					{
-						"lastName": "Universität ",
+						"lastName": "Universität Mannheim",
 						"creatorType": "author",
 						"fieldMode": 1
 					}
 				],
-				"date": "2000///(2001); 2001/02(2003) -",
+				"date": "2000",
 				"libraryCatalog": "Landesbibliographie Baden-Württemberg",
 				"place": "Mannheim",
 				"attachments": [
@@ -293,6 +309,9 @@ var testCases = [
 					},
 					{
 						"note": "2000/01 u.d.T.: Universität <Mannheim>: Rechenschaftsbericht ... des geschäftsführenden Prorektors"
+					},
+					{
+						"note": "Erscheinungsverlauf: 2000///(2001); 2001/02(2003) -"
 					}
 				],
 				"seeAlso": []
