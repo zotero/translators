@@ -104,7 +104,7 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item.itemType = type;
-			// fixes the added ahtor information in the title,
+			// fixes the added author information in the title,
 			// which might be fixed by them in the future
 			item.title = item.title.replace(/\/[^\/]*$/, '');
 			
