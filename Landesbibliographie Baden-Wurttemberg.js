@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 11:35:17"
+	"lastUpdated": "2018-11-01 14:41:06"
 }
 
 /*
@@ -106,7 +106,7 @@ function scrape(doc, url) {
 			item.itemType = type;
 			// fixes the added author information in the title,
 			// which might be fixed by them in the future
-			item.title = item.title.replace(/\/[^\/]*$/, '');
+			item.title = item.title.replace(/\/[^\/]*$/, '').replace(/ : /g, ': ');
 			
 			if (type == "book" && item.pages) {
 				var m = item.pages.match(/(\d+) Seiten/);
@@ -135,7 +135,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Überfordert : Mozart: Don Giovanni : Mannheim, Nationaltheater",
+				"title": "Überfordert: Mozart: Don Giovanni: Mannheim, Nationaltheater",
 				"creators": [
 					{
 						"lastName": "Schweikert",
@@ -188,7 +188,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Hafen Mannheim 2018 : 150 Jahre Mannheimer Akte",
+				"title": "Hafen Mannheim 2018: 150 Jahre Mannheimer Akte",
 				"creators": [
 					{
 						"lastName": "Mardo",
