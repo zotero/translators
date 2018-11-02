@@ -61,4 +61,3 @@ function doWeb(doc, url) {
 	});
 	translator.translate();
 }
-
