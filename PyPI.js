@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-03 08:12:37"
+	"lastUpdated": "2018-11-03 08:21:27"
 }
 
 /*
@@ -87,7 +87,7 @@ function scrape(doc, url) {
 	var found = item.title.match(/\sv?([\d.]+)\s*$/);
 	if (found) {
 		item.title = item.title.slice(0,found.index);
-		item.versionNumber = found[1];
+		item.version = found[1];
 	}
 	var subtitle = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	if (subtitle) {
@@ -170,7 +170,6 @@ var testCases = [
 				"rights": "Academic Free License, MIT License",
 				"shortTitle": "simplejson",
 				"url": "http://github.com/simplejson/simplejson",
-				"versionNumber": "3.10.0",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -211,7 +210,6 @@ var testCases = [
 				"shortTitle": "lxml",
 				"system": "OS Independent",
 				"url": "http://lxml.de/",
-				"versionNumber": "3.7.3",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -253,7 +251,6 @@ var testCases = [
 				"shortTitle": "papis-zotero",
 				"system": "MacOS, POSIX, Unix",
 				"url": "https://github.com/papis/papis-zotero",
-				"versionNumber": "0.0.3",
 				"attachments": [
 					{
 						"title": "Snapshot"
