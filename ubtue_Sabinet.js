@@ -44,6 +44,9 @@ function doWeb(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
+        // add keywords
+        i.tags = ZU.xpath(doc, '//li/strong[contains(text(), "Keyword(s)")]/../a').map(n => n.textContent);
+
         // add the persistent handle
         var handleLink = ZU.xpathText(doc, '//a[contains(@href,"hdl.handle.net")]/@href').trim();
         if (!handleLink || handleLink.length < 24) {
