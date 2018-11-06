@@ -74,6 +74,18 @@ function doWeb(doc, url) {
 	}
 }
 
+function postProcess(item) {
+	// the author fields are repeated in the website's embedded metadata
+	// so, the duplicates need to be removed
+	item.creators = item.creators.reduce((unique, o) => {
+		if(!unique.some(obj => obj.firstName === o.firstName && obj.lastName === o.lastName &&
+			obj.creatorType === o.creatorType && obj.fieldMode === o.fieldMode)) {
+		  unique.push(o);
+		}
+		return unique;
+	},[]);
+}
+
 
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]')
@@ -84,6 +96,7 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function(obj, item) {
 		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/, "").replace(/[\n\t]/g, "");
 		item.libraryCatalog = "SciELO"
+		postProcess(item);
 		item.complete();
 	});
 	translator.translate();
