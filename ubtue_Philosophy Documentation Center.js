@@ -36,12 +36,8 @@
 
 function detectWeb(doc, url) {
 	var iframes = doc.getElementsByName("pdf");
-	if (iframes.length != 1) {
-		Z.debug("Multiple content frames! This is unexpected!");
-		return false;
-	}
-
-	return "journalArticle";
+	if (iframes.length == 1)
+		return "journalArticle";
 }
 
 function doWeb(doc, url) {

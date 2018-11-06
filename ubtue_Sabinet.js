@@ -36,7 +36,7 @@
 
 function detectWeb(doc, url) {
     // just a placeholder - the actual type is extracted by the Embedded Metadata translator
-	return "journalArticle";
+    return "journalArticle";
 }
 
 function doWeb(doc, url) {
@@ -55,11 +55,11 @@ function doWeb(doc, url) {
         }
 
         var handle = handleLink.substring(23);   // strip the the domain name
-        i.notes.push({
-            note: "hdl:" + handle,
-        });
+            i.notes.push({
+                note: "hdl:" + handle,
+            });
 
-		i.complete();
-	});
-	translator.translate();
+        i.complete();
+    });
+    translator.translate();
 }
