@@ -14,24 +14,24 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2016 Philipp Zumstein
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -91,20 +91,39 @@ function scrape(doc, url) {
 		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
 			delete item.abstractNote;
 		}
-		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3" 
+		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3"
 		// clean issue number in case of multiple download
 		var issue = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(text(), "Nº.")]');
 		if (issue) {
 			// e.g. Vol. 89, Nº. 3-4, 2012
 			item.issue = issue.split('Nº.')[1].split(',')[0];
 		}
- 		
+
  		// Delete generic keywords
  		if (item.tags);
  			delete item.tags;
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
+		// Remove Facebook's OpenGraph meta tags from the document before sending it to the Embedded Metadata handler
+		// Those break the aforementioned translator for some reason
+		var metaTags = doc.head.getElementsByTagName("meta");
+		var ogTags = [];
+		for (var i=0; i < metaTags.length; i++) {
+			var metaTag = metaTags[i];
+			var tags = metaTag.getAttribute("name");
+			if (!tags) tags = metaTag.getAttribute("property");
+			if(!tags) continue;
+
+			if (tags.startsWith("og:"))
+				ogTags.push(metaTag);
+		}
+
+		for (var i=0; i < ogTags.length; i++) {
+			var ogTag = ogTags[i];
+			ogTag.parentNode.removeChild(ogTag);
+		}
+
 		trans.doWeb(doc, url);
 	});
 }
