@@ -15,12 +15,12 @@
 function detectWeb(doc, url) {
 	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
 		return "journalArticle";
-	} 
+	}
 	//permalinks
 	else if (url.indexOf("/content/") != -1  && getRisUrl(doc) ) {
 		return "journalArticle";
 	}
-	
+
 	else if ((url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) && getSearchResults(doc)) {
 		return "multiple";
 	}
@@ -28,7 +28,7 @@ function detectWeb(doc, url) {
 
 
 function getRisUrl(doc) {
-	return ZU.xpathText(doc, '//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]/@href');
+	return ZU.xpathText(doc, '//div[contains(@class,"export-formats")]/ul/li/a[contains(@href, "format=ris")]/@href');
 }
 
 
@@ -52,9 +52,9 @@ function getSearchResults(doc) {
 function doWeb(doc, url) {
 	var articles = new Array();
 	if (detectWeb(doc, url) == "multiple") {
-		
+
 		var items = getSearchResults(doc);
-		
+
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
