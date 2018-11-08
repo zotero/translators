@@ -107,8 +107,8 @@ function scrape(doc, url) {
 		}
 
 		// clear language if multiple
-//		if (item.language && item.language === "mul")
-//			item.language = "";
+		if (item.language && item.language === "mul")
+			item.language = "";
 
  		// Delete generic keywords
  		if (item.tags);
