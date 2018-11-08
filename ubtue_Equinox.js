@@ -2,7 +2,7 @@
     "translatorID": "cf2973a7-5804-4e28-a684-04051122fcc0",
     "label": "EquinoxPub",
     "creator": "Madeesh Kannan",
-    "target": "^https:\/\/journals.equinoxpub.com\/index.php\/.+\/article\/view\/[0-9]+",
+    "target": "^https:\/\/journals.equinoxpub.com\/index.php\/.+\/article\/view(.)*\/[0-9]+",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
