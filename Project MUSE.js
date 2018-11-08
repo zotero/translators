@@ -52,6 +52,10 @@ function getSearchResults(doc, checkOnly) {
 	if (!rows.length) {
 		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	}
+	if (!rows.length) {
+		rows = ZU.xpath(doc, '//div[@class="card_text"]//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	}
+
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
