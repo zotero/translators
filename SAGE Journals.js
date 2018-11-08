@@ -98,7 +98,7 @@ function scrape(doc, url) {
 		if (text.indexOf("DA  - ")>-1) {
 			text = text.replace(/Y1  - .*\r?\n/, '');
 		}
-		
+
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -120,7 +120,7 @@ function scrape(doc, url) {
 			if (abstract) {
 				item.abstractNote = abstract;
 			}
-			
+
 			//Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i<item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
@@ -129,7 +129,20 @@ function scrape(doc, url) {
 					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
 				}
 			}
-			
+
+			// scrape tags
+			if (!item.tags || item.tags.length === 0) {
+				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+				if (embedded)
+					item.tags = embedded.split(",");
+
+				if (!item.tags) {
+					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
+					if (tags)
+						item.tags = tags.map(n => n.textContent);
+				}
+			}
+
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
