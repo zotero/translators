@@ -99,6 +99,17 @@ function scrape(doc, url) {
 			item.issue = issue.split('Nº.')[1].split(',')[0];
 		}
 
+		// restrict issues to just numbers
+		if (item.issue) {
+			var matchedIssue = item.issue.trim().match(/^([0-9]+).*/);
+			if (matchedIssue)
+				item.issue = matchedIssue[1];
+		}
+
+		// clear language if multiple
+//		if (item.language && item.language === "mul")
+//			item.language = "";
+
  		// Delete generic keywords
  		if (item.tags);
  			delete item.tags;
