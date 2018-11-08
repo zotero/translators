@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-25 17:50:03"
+	"lastUpdated": "2018-11-08 13:14:00"
 }
 
 /*
@@ -36,9 +36,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/article/')>-1) {
+	if (url.indexOf('/article/') > -1) {
 		return "journalArticle";
-	} else if (url.indexOf('/book/') >-1) {
+	} else if (url.indexOf('/book/') > -1) {
 		return "book";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -52,7 +52,11 @@ function getSearchResults(doc, checkOnly) {
 	if (!rows.length) {
 		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	}
-	for (var i=0; i<rows.length; i++) {
+	if (!rows.length) {
+		rows = ZU.xpath(doc, '//div[@class="card_text"]//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	}
+
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -92,19 +96,19 @@ function scrape(doc, url) {
 			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
 		}
 		if (url.indexOf("/article/") != -1) {
-	   		var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
-	   		//Z.debug(pdfurl);
-	   		//overwriting attachments: Snapshot isn't very useful, PDF link from EM is wrong
-	   		item.attachments = [{
-						"url": pdfurl,
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}]
+			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
+			//Z.debug(pdfurl);
+			//overwriting attachments: Snapshot isn't very useful, PDF link from EM is wrong
+			item.attachments = [{
+				"url": pdfurl,
+				"title": "Full Text PDF",
+				"mimeType": "application/pdf"
+			}]
 		}
 		item.libraryCatalog = "Project MUSE";
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }/** BEGIN TEST CASES **/

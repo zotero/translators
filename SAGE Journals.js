@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-14 20:53:20"
+	"lastUpdated": "2018-11-08 13:14:00"
 }
 
 /*
@@ -63,7 +63,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function(items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -89,20 +89,20 @@ function scrape(doc, url) {
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	//Z.debug(pdfurl);
 	//Z.debug(post);
-	ZU.doPost(risURL, post, function(text) {
+	ZU.doPost(risURL, post, function (text) {
 		//The publication date is saved in DA and the date first
 		//appeared online is in Y1. Thus, we want to prefer DA over T1
 		//and will therefore simply delete the later in cases both
 		//dates are present.
 		//Z.debug(text);
-		if (text.indexOf("DA  - ")>-1) {
+		if (text.indexOf("DA  - ") > -1) {
 			text = text.replace(/Y1  - .*\r?\n/, '');
 		}
-		
+
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			//The subtitle will be neglected in RIS and is only present in
 			//the website itself. Moreover, there can be problems with
 			//encodings of apostrophs.
@@ -120,16 +120,29 @@ function scrape(doc, url) {
 			if (abstract) {
 				item.abstractNote = abstract;
 			}
-			
+
 			//Workaround while Sage hopefully fixes RIS for authors
-			for (let i = 0; i<item.creators.length; i++) {
+			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
 					let type = item.creators[i].creatorType;
 					let comma = item.creators[i].lastName.includes(",");
 					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
 				}
 			}
-			
+
+			// scrape tags
+			if (!item.tags || item.tags.length === 0) {
+				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+				if (embedded)
+					item.tags = embedded.split(",");
+
+				if (!item.tags) {
+					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
+					if (tags)
+						item.tags = tags.map(n => n.textContent);
+				}
+			}
+
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
