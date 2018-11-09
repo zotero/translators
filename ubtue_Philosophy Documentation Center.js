@@ -58,12 +58,13 @@ function doWeb(doc, url) {
 	if (!iframes || iframes.length === 0)
 		throw "missing content frame!"
 
-	var content = iframes[0].contentDocument;
+	var sourceFrame = iframes[0];
+	var content = sourceFrame.contentDocument;
 	if (content && content.documentElement && content.documentElement.namespaceURI)
 		invokeEmbeddedMetadataTranslator(content);
 	else {
 		// attempt to load the frame contents
-		var iframeSource = iframes[0].getAttribute("src");
+		var iframeSource = sourceFrame.getAttribute("src");
 		if (!iframeSource)
 			throw "missing frame source!";
 
