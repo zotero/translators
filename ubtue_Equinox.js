@@ -71,14 +71,15 @@ function doWeb(doc, url) {
         throw "Missing content frame!"
 
     var content = iframe[0].contentDocument;
-    if (!content) {
+    if (content)
+        invokeEmbeddedMetadataTranslator(content);
+    else {
         // attempt to load the frame contents
         var iframeSource = iframe[0].getAttribute("src");
         if (!iframeSource)
             throw "missing frame source!";
 
-        ZU.processDocuments([ iframeSource ], invokeEmbeddedMetadataTranslator);
+        ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
         Zotero.wait();
-    } else
-        invokeEmbeddedMetadataTranslator(content);
+    }
 }
