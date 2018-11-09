@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 16:46:47"
+	"lastUpdated": "2018-11-01 19:46:46"
 }
 
 /*
@@ -383,9 +383,10 @@ function importRDF(doc, url) {
 function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
-
-	var authorNodes = getContent(doc, 'citation_author')
-						.concat(getContent(doc, 'citation_authors'));
+	var authorNodes = getContent(doc, 'citation_author');
+	if (authorNodes.length == 0) {
+		authorNodes = getContent(doc, 'citation_authors');
+	}
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
