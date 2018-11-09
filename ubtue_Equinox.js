@@ -9,7 +9,7 @@
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2018-11-08 13:14:00"
+    "lastUpdated": "2018-11-09 13:14:00"
 }
 
 /*
@@ -41,31 +41,44 @@ function detectWeb(doc, url) {
 
 function postProcess(item) {
     // sanitize page number ranges
-    var pages = item.pages.trim();
-    if (pages) {
-        var matched = pages.match(/^([0-9]+-[0-9]+)/);
-        if (matched)
-            item.pages = matched[1];
+    if (item.pages) {
+        var pages = item.pages.trim();
+        if (pages) {
+            var matched = pages.match(/^([0-9]+-[0-9]+)/);
+            if (matched)
+                item.pages = matched[1];
+        }
     }
 
     item.complete();
+}
+
+function invokeEmbeddedMetadataTranslator(doc) {
+    var translator = Zotero.loadTranslator("web");
+    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+    translator.setDocument(doc);
+    translator.setHandler("itemDone", function (t, i) {
+        postProcess(i);
+    });
+    translator.translate();
 }
 
 function doWeb(doc, url) {
     // The page contents are in a seperate HTML document inside an inline frame
     // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
     var iframe = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
-    if (iframe == null || iframe.length == 0 || iframe[0].contentDocument == null) {
-        Z.debug("Missing content frame!");
-        return false;
-    }
+    if (!iframe || iframe.length === 0)
+        throw "Missing content frame!"
 
     var content = iframe[0].contentDocument;
-    var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-    translator.setDocument(content);
-    translator.setHandler("itemDone", function (t, i) {
-        postProcess(i);
-    });
-    translator.translate();
+    if (!content) {
+        // attempt to load the frame contents
+        var iframeSource = iframe[0].getAttribute("src");
+        if (!iframeSource)
+            throw "missing frame source!";
+
+        ZU.processDocuments([ iframeSource ], invokeEmbeddedMetadataTranslator);
+        Zotero.wait();
+    } else
+        invokeEmbeddedMetadataTranslator(content);
 }
