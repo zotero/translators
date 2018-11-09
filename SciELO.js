@@ -89,6 +89,11 @@ function postProcess(doc, item) {
 	if (abstract)
 		item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/, "").replace(/[\n\t]/g, "");
 	item.libraryCatalog = "SciELO"
+
+	// the issue and volume fields need to be swapped
+	var volume = item.volume;
+	item.volume = item.issue;
+	item.issue = volume;
 }
 
 
