@@ -55,7 +55,7 @@ function doWeb(doc, url) {
     // The page contents are in a seperate HTML document inside an inline frame
     // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
     var iframe = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
-    if (!iframe) {
+    if (iframe == null || iframe.length == 0 || iframe[0].contentDocument == null) {
         Z.debug("Missing content frame!");
         return false;
     }

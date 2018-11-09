@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Timotheus Chang-Whae Kim, Johannes Ruscheinski, Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+function attr(docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; } function text(docOrElem, selector, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null; }
 
 
 function detectWeb(doc, url) {
@@ -53,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('tr');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = attr(rows[i], 'td a', 'href');
 		let title = text(rows[i], 'td', 1);
 		if (!href || !title) continue;
@@ -92,7 +92,7 @@ function ALLCaps(name) {
 function getValue(nodes) {
 	var value = "";
 	for (let part of nodes) {
-		if (part.tagName=="BR" || part.tagName=="B") break;
+		if (part.tagName == "BR" || part.tagName == "B") break;
 		value += ' ';
 		if (part.tagName) {
 			value += part.outerHTML;
@@ -106,7 +106,7 @@ function getValue(nodes) {
 
 function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
-	
+
 	var titleNodes = ZU.xpath(doc, '//b[contains(text(), "Title:")]/following-sibling::node()');
 	item.title = getValue(titleNodes);
 	var subtitleNodes = ZU.xpath(doc, '//b[contains(text(), "Subtitle:")]/following-sibling::node()');
@@ -114,7 +114,7 @@ function scrape(doc, url) {
 	if (subtitle) {
 		item.title += ': ' + subtitle;
 	}
-	
+
 	// e.g. Author(s): HANDAL, Boris , WATSON, Kevin , ..., VAN DER MERWE, W.L.
 	// but sometimes the space before the comma is also missing
 	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]');
@@ -122,29 +122,29 @@ function scrape(doc, url) {
 		authors = authors.split(',');
 	}
 	var creator;
-	for (let i=0; i<authors.length; i++) {
+	for (let i = 0; i < authors.length; i++) {
 		let name = authors[i];
 		if (ALLCaps(name)) name = ZU.capitalizeTitle(name, true);
-		if (i%2===0) {// last name
+		if (i % 2 === 0) {// last name
 			creator = {
 				creatorType: 'author',
 				lastName: ZU.capitalizeTitle(name, true)
 			};
 		} else {// first name
 			creator.firstName = name;
-			item.creators.push(creator); 
+			item.creators.push(creator);
 		}
 	}
 
-        item.publicationTitle = ZU.xpathText(doc, '//b[contains(text(), "Journal:")]/following-sibling::a[1]');
-        item.language = item.publicationTitle.toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
+	item.publicationTitle = ZU.xpathText(doc, '//b[contains(text(), "Journal:")]/following-sibling::a[1]');
+	item.language = item.publicationTitle.toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
 	item.volume = ZU.xpathText(doc, '//b[contains(text(), "Volume:")]/following-sibling::a[1]');
 	item.issue = ZU.xpathText(doc, '//b[contains(text(), "Issue:")]/following-sibling::text()[1]');
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
 	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
-	
+
 	item.attachments.push({
 		url: url,
 		title: "Snapshot",
