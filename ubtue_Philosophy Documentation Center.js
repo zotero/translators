@@ -36,7 +36,7 @@
 
 function detectWeb(doc, url) {
 	var iframes = doc.getElementsByName("pdf");
-	if (iframes.length == 1)
+	if (iframes.length === 1)
 		return "journalArticle";
 }
 
@@ -54,13 +54,17 @@ function invokeEmbeddedMetadataTranslator(doc) {
 function doWeb(doc, url) {
 	// The page contents are lazy-loaded as a seperate HTML document inside an inline frame
 	// The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
-	var iframe = doc.getElementsByName("pdf");
-	var content = iframe[0].contentDocument;
-	if (content)
+	var iframes = doc.getElementsByName("pdf");
+	if (!iframes || iframes.length === 0)
+		throw "missing content frame!"
+
+	var sourceFrame = iframes[0];
+	var content = sourceFrame.contentDocument;
+	if (content && content.documentElement && content.documentElement.namespaceURI)
 		invokeEmbeddedMetadataTranslator(content);
 	else {
 		// attempt to load the frame contents
-		var iframeSource = iframe[0].getAttribute("src");
+		var iframeSource = sourceFrame.getAttribute("src");
 		if (!iframeSource)
 			throw "missing frame source!";
 
