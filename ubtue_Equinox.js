@@ -66,16 +66,16 @@ function invokeEmbeddedMetadataTranslator(doc) {
 function doWeb(doc, url) {
     // The page contents are in a seperate HTML document inside an inline frame
     // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
-    var iframe = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
-    if (!iframe || iframe.length === 0)
-        throw "Missing content frame!"
+    var iframes = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
+    if (!iframes || iframes.length === 0)
+        throw "missing content frame!"
 
-    var content = iframe[0].contentDocument;
-    if (content)
-        invokeEmbeddedMetadataTranslator(content);
-    else {
+    var content = iframes[0].contentDocument;
+    if (content && content.documentElement && content.documentElement.namespaceURI)
+		invokeEmbeddedMetadataTranslator(content);
+	else {
         // attempt to load the frame contents
-        var iframeSource = iframe[0].getAttribute("src");
+        var iframeSource = iframes[0].getAttribute("src");
         if (!iframeSource)
             throw "missing frame source!";
 
