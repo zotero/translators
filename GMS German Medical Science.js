@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-02 18:56:42"
+	"lastUpdated": "2018-11-12 15:53:36"
 }
 
 /*
@@ -147,7 +147,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.egms.de/static/de/journals/gms/2017-15/000242.shtml",
+		"url": "https://www.egms.de/static/de/journals/gms/2017-15/000242.shtml",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -191,11 +191,21 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"chronic pain",
-					"music instruments",
-					"musician",
-					"orchestra",
-					"prevalence"
+					{
+						"tag": "chronic pain"
+					},
+					{
+						"tag": "music instruments"
+					},
+					{
+						"tag": "musician"
+					},
+					{
+						"tag": "orchestra"
+					},
+					{
+						"tag": "prevalence"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -204,7 +214,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.egms.de/static/de/journals/cpo/2017-13/cpo001859.shtml",
+		"url": "https://www.egms.de/static/de/journals/cpo/2017-13/cpo001859.shtml",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -245,7 +255,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.egms.de/static/de/meetings/dgnc2017/17dgnc026.shtml",
+		"url": "https://www.egms.de/static/de/meetings/dgnc2017/17dgnc026.shtml",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -302,7 +312,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.egms.de/dynamic/de/journals/mbi/volume16.htm",
+		"url": "https://www.egms.de/dynamic/de/journals/mbi/volume16.htm",
 		"items": "multiple"
 	}
 ]
