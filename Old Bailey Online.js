@@ -93,8 +93,12 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	
 	newItem.date = ZU.strToISO(sessDate);
 	
-	if (newItem.itemType == "case" && trialTitle && trialTitle == trialTitle.toUpperCase()) {
-		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
+	if (newItem.itemType == "case" && trialTitle) {
+ 		if (trialTitle == trialTitle.toUpperCase()) {
+  			newItem.title = ZU.capitalizeTitle(trialTitle, true);
+   		} else {
+      			newItem.title = trialTitle;
+   		}
 	} else if (newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
 	}
