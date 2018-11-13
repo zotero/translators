@@ -50,6 +50,15 @@ function postProcess(item) {
         }
     }
 
+    // And now for something completely Javascript(TM): The "It's freaking there!" problem
+    // https://stackoverflow.com/questions/17546953/cant-access-object-property-even-though-it-exists-returns-undefined
+
+    // we need to clear the abstractNote field in the case of editorials
+    // ideally, we'd look at the shortTitle field, but thanks to the above problem, the shortTitle field is undefined at this point
+    // so, we'll just check the abstract itself instead.
+    if (item.abstractNote.startsWith("Editorial"))
+        item.abstractNote = "";
+
     item.complete();
 }
 
