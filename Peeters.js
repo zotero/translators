@@ -137,13 +137,13 @@ function scrape(doc, url) {
 	}
 
 	item.publicationTitle = ZU.xpathText(doc, '//b[contains(text(), "Journal:")]/following-sibling::a[1]');
-	item.language = item.publicationTitle.toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
 	item.volume = ZU.xpathText(doc, '//b[contains(text(), "Volume:")]/following-sibling::a[1]');
 	item.issue = ZU.xpathText(doc, '//b[contains(text(), "Issue:")]/following-sibling::text()[1]');
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
 	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
+	item.language = (item.title + item.abstractNote).toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
 
 	item.attachments.push({
 		url: url,
