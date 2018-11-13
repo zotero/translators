@@ -91,7 +91,7 @@ function complementItem(doc, item) {
 	}
 	if (!item.language) {
 		item.language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
-	}	
+	}
 	if (!item.publisher) {
 		item.publisher = ZU.xpathText(doc, '//dd[@id="abstract-about-publisher"]');
 	}
@@ -112,7 +112,7 @@ function complementItem(doc, item) {
 			item.rights = '©' + year + ' ' + item.rights;
 		}
 	}
-	
+
 	if (itemType == "journalArticle") {
 		if (!item.ISSN) {
 			item.ISSN = ZU.xpathText(doc,
@@ -182,7 +182,27 @@ function complementItem(doc, item) {
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
+
 	return item;
+}
+
+function shouldPostprocessWithEmbeddedMetadata(item) {
+	if (!item.pages)
+		return true;
+
+	return false;
+}
+
+function postprocessWithEmbeddedMetadataTranslator(doc, originalItem) {
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, extractedMetadata) {
+		originalItem.pages = extractedMetadata.pages;
+
+		originalItem.complete();
+	});
+	translator.translate();
 }
 
 function scrape(doc, url) {
@@ -200,13 +220,17 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function(obj, item) {
 			item = complementItem(doc, item);
-			
+
 			item.attachments.push({
 				url: pdfURL,
 				title: "Springer Full Text PDF",
 				mimeType: "application/pdf"
 			});
-			item.complete();
+
+			if (shouldPostprocessWithEmbeddedMetadata(item))
+				postprocessWithEmbeddedMetadataTranslator(doc, item);
+			else
+				item.complete();
 		});
 		translator.translate();
 	});
