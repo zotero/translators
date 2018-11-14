@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-14 08:59:45"
+	"lastUpdated": "2018-11-14 09:17:33"
 }
 
 /*
@@ -49,43 +49,42 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("journalArticle");
+	var newItem = new Zotero.Item(detectWeb(doc, url));
+	
+	if (newItem.itemType == "journalArticle") {
+		// detect article ID
+		var tmp = "null";
+		if (url.match(/archiv\/\d+/)) { // normal article page
+			tmp = url.match(/archiv\/\d+/);
+		} else if (url.match(/aid\=\d+/)) { // article page in search results
+				tmp = url.match(/aid\=\d+/);
+		}
+		var articleID = String(tmp).match(/\d+/);
 
-	// detect article ID
-	var tmp = "null";
-	if (url.match(/archiv\/\d+/)) { // normal article page
-		tmp = url.match(/archiv\/\d+/);
-	} else if (url.match(/aid\=\d+/)) { // article page in search results
-			tmp = url.match(/aid\=\d+/);
-	}
-	aid = String(tmp).match(/\d+/);
-	//Z.debug("aid: " + aid);
-
-	// use BibTeX Translator
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-
-	translator.setHandler("itemDone", function(obj, item) {
-		item.attachments.push({
-			title:"Snapshot",
-			document:doc
+		// use BibTeX Translator
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	
+		translator.setHandler("itemDone", function(obj, item) {
+			item.attachments.push({
+				title:"Snapshot",
+				document:doc
+			});
+	
+			// PDFs are stored under https://www.aerzteblatt.de/pdf/<volume>/<issue>/pdfPageNum.pdf
+			// pdfPageNum is in the form a<firstpage> or m<firstpage>, depending on the journal part
+			// Don't fetch PDF by now
+			
+			item.complete();
 		});
-
-		// PDFs are stored under https://www.aerzteblatt.de/pdf/<volume>/<issue>/pdfPageNum.pdf
-		// pdfPageNum is in the form a<firstpage> or m<firstpage>, depending on the journal part
-		// Don't fetch PDF by now
-		
-		item.complete();
-	});
-
-	// Fetch BibTex file for article ID and set encoding to ISO-8859-15
-	var bibtexURL = "https://www.aerzteblatt.de/callback/citemgr.asp?fmt=bibtex&id=" + aid;
-	//Z.debug("bibtexURL :" + bibtexURL);
-	Zotero.Utilities.HTTP.doGet(bibtexURL, function(text) {
-		//Z.debug("BibTeX data: " + text);
-		translator.setString(text);
-		translator.translate();
-	}, null, "ISO-8859-15");
+	
+		// Fetch BibTex file for article ID and set encoding to ISO-8859-15
+		var bibtexURL = "https://www.aerzteblatt.de/callback/citemgr.asp?fmt=bibtex&id=" + articleID;
+		Zotero.Utilities.HTTP.doGet(bibtexURL, function(text) {
+			translator.setString(text);
+			translator.translate();
+		}, null, "ISO-8859-15");
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -115,10 +114,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -214,10 +209,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -252,10 +243,6 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
