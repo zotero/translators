@@ -91,7 +91,7 @@ function scrape(doc, url) {
 		}
 		var abstractImage = ZU.xpath(doc, '//div[@class="abstract-image-replacement"]');
 		if (abstractImage && abstractImage.length) {
-			// clear the abstract field, since it will contain an URL
+			// clear the abstract field, since it will contain a URL
 			item.abstractNote = "";
 		}
 
