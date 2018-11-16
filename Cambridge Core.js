@@ -89,6 +89,12 @@ function scrape(doc, url) {
 		if (abstract) {
 			item.abstractNote = abstract;
 		}
+		var abstractImage = ZU.xpath(doc, '//div[@class="abstract-image-replacement"]');
+		if (abstractImage && abstractImage.length) {
+			// clear the abstract field, since it will contain a URL
+			item.abstractNote = "";
+		}
+
 		item.title = ZU.unescapeHTML(item.title);
 		item.libraryCatalog = "Cambridge Core"
 		item.complete();
