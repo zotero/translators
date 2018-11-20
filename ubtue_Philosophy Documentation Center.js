@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-09 15:40:06"
+	"lastUpdated": "2018-11-20 15:40:06"
 }
 
 /*
@@ -35,8 +35,8 @@
 
 
 function detectWeb(doc, url) {
-	var iframes = doc.getElementsByName("pdf");
-	if (iframes.length === 1)
+	var metaUrl = doc.querySelector("meta[property='og:url']");
+	if (metaUrl && metaUrl.getAttribute("content"))
 		return "journalArticle";
 }
 
@@ -52,23 +52,14 @@ function invokeEmbeddedMetadataTranslator(doc) {
 }
 
 function doWeb(doc, url) {
-	// The page contents are lazy-loaded as a seperate HTML document inside an inline frame
-	// The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
-	var iframes = doc.getElementsByName("pdf");
-	if (!iframes || iframes.length === 0)
-		throw "missing content frame!"
+	// We need to get to the correct page by redirecting to the embedded metadata URL
+	var redirectUrl = doc.querySelector("meta[property='og:url']").getAttribute("content");
+	if (!redirectUrl)
+		throw "invalid redirect url!";
 
-	var sourceFrame = iframes[0];
-	var content = sourceFrame.contentDocument;
-	if (content && content.documentElement && content.documentElement.namespaceURI)
-		invokeEmbeddedMetadataTranslator(content);
-	else {
-		// attempt to load the frame contents
-		var iframeSource = sourceFrame.getAttribute("src");
-		if (!iframeSource)
-			throw "missing frame source!";
+	ZU.processDocuments([redirectUrl], function(doc) {
+		invokeEmbeddedMetadataTranslator(doc);
+	});
 
-		ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
-		Zotero.wait();
-	}
+	Zotero.wait();
 }
