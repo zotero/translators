@@ -85,9 +85,14 @@ function postProcess(doc, item) {
 		return unique;
 	},[]);
 
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]')
-	if (abstract)
-		item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/i, "").replace(/[\n\t]/g, "");
+	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")]');
+	if (abstractParagraphs && abstractParagraphs.length > 0) {
+		item.abstractNote = "";
+		for (var paragraph in abstractParagraphs) {
+			var node = abstractParagraphs[paragraph];
+			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
+		}
+	}
 	item.libraryCatalog = "SciELO"
 }
 
