@@ -87,7 +87,7 @@ function postProcess(doc, item) {
 
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]')
 	if (abstract)
-		item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/, "").replace(/[\n\t]/g, "");
+		item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/i, "").replace(/[\n\t]/g, "");
 	item.libraryCatalog = "SciELO"
 }
 
