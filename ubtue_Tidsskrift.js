@@ -66,7 +66,7 @@ function postProcess(doc, item) {
 
 function doWeb(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");   // Open Journal Systems
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         postProcess(doc, i);
