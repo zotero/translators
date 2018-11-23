@@ -1,8 +1,8 @@
 {
     "translatorID": "a288df9e-ce56-40ca-a205-bc32182ced4c",
-    "label": "Religionsvidenskabeligt Tidsskrift",
+    "label": "tidsskrift.dk",
     "creator": "Madeesh Kannan",
-    "target": "^https*:\/\/tidsskrift.dk\/rvt\/article\/view.*\/[0-9]+",
+    "target": "^https*:\/\/tidsskrift.dk\/[^/]+\/article\/view.*\/[0-9]+",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
@@ -42,14 +42,16 @@ function detectWeb(doc, url) {
 function postProcess(doc, item) {
     if (!item.abstractNote) {
         // iterate through the different abstracts until we find one in English
-        // if we don't find one for English, we'll just use the last one we processed
+        // if we don't find one for English, we'll just use the first one we processed
         var abstractParagraphs = ZU.xpath(doc, '//div[@class="item abstract"]//p');
         if (abstractParagraphs && abstractParagraphs.length > 0) {
             for (var paragraph in abstractParagraphs) {
-                item.abstractNote = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
+               var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
+                if (paragraph == 0)
+                    item.abstractNote = extractedText;
 
                 // check if it's in English
-                var prologue = item.abstractNote.match(/^(\w+)*\s\w*:(.*)/i);
+                var prologue = extractedText.match(/^(\w)*\s\w*:(.*)/i);
                 if (prologue) {
                     var language = prologue[1];
                     if (language.match(/english/i)) {
