@@ -46,7 +46,7 @@ function postProcess(doc, item) {
         var abstractParagraphs = ZU.xpath(doc, '//div[@class="item abstract"]//p');
         if (abstractParagraphs && abstractParagraphs.length > 0) {
             for (var paragraph in abstractParagraphs) {
-               var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
+                var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
                 if (paragraph == 0)
                     item.abstractNote = extractedText;
 
