@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-29 01:57:25"
+	"lastUpdated": "2018-11-18 13:57:41"
 }
 
 function detectWeb(doc, url) {
@@ -25,23 +25,32 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var search = ZU.xpath(doc, '//div[contains(@class, "article-list")]/div[@ng-transclude]')[0];
-	if (!search) {
-		Zotero.debug("No search scope");
+	// Search results
+	if (url.includes("/search/searchresult.jsp")) {
+		return "multiple";
+	}
+
+	// more generic method for other cases (is this still needed?)
+	/*
+	var scope = ZU.xpath(doc, '//div[contains(@class, "ng-scope")]')[0];
+	if (!scope) {
+		Zotero.debug("No scope");
 		return;
 	}
 	
-	Z.monitorDOMChanges(search, {childList: true});
-	
+	Z.monitorDOMChanges(scope, {childList: true});
+
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	*/
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[contains(@ng-bind-html, "::record.title")]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//h2/a|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
