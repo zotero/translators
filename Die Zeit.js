@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-25 19:23:46"
+	"lastUpdated": "2018-11-25 19:35:23"
 }
 
 /*
@@ -100,7 +100,7 @@ function scrape(doc, url) {
 		}
 	}
 	if (!found) {
-		exit;
+		return;
 	}
 	// Z.debug(json);
 	
