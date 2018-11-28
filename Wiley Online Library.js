@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-21 15:05:09"
+	"lastUpdated": "2018-11-28 08:40:37"
 }
 
 /*
@@ -223,7 +223,14 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		return;
 	}
 	
-	var postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';
+	// Use the current domain on Wiley subdomains (e.g., ascpt.) so that the
+	// download works even if third-party cookies are blocked. Otherwise, use
+	// the main domain.
+	var host = doc.location.host;
+	if (!host.endsWith('.onlinelibrary.wiley.com')) {
+		host = 'onlinelibrary.wiley.com';
+	}
+	var postUrl = `https://${host}/action/downloadCitation`;
 	var body = 'direct=direct' +
 				'&doi=' + encodeURIComponent(doi) + 
 				'&downloadFileName=pericles_14619563AxA' +
@@ -233,8 +240,13 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 	
 	ZU.doPost(postUrl, body, function(text) {
 		// Replace uncommon dash (hex e2 80 90)
-		text = text.replace(/‐/g, '-');
+		text = text.replace(/‐/g, '-').trim();
 		//Z.debug(text);
+		
+		var re = /^\s*@[a-zA-Z]+[\(\{]/;
+		if (text.startsWith('<') || !re.test(text)) {
+			throw new Error("Error retrieving BibTeX")
+		}
 		
 		var translator = Zotero.loadTranslator('import');
 		//use BibTeX translator
