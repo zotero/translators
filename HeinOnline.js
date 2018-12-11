@@ -120,9 +120,8 @@ function scrapePage(doc, url) {
 			+ "CitationFile?kind=ris&handle=" + docParams.handle
 			+ "&id=" + pageID
 			+ "&base=js";
-		// updatediv apparently gives us a page that will refresh itself to the PDF.
-	//	var pdfPageURLs = doc.getElementsByClassName("updatediv");
 		ZU.doGet(risURL, function(ris) {
+			// the PDF URL gives us a page that will refresh itself to the PDF.
 			var pdfPageURL = attr(doc, '[data-original-title*="Download PDF"]', 'href');
 			if (pdfPageURL) {
 				pdfPageURL = docParams.base + pdfPageURL;
