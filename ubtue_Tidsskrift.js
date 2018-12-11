@@ -61,7 +61,18 @@ function postProcess(doc, item) {
                 }
             }
         }
+
+        if (item.abstractNote) {
+            var matchExtraWords = item.abstractNote.match(/(english abstract:|svensk resume:|abstract:|resume:)(.*)/i);
+            if (matchExtraWords)
+                item.abstractNote = matchExtraWords[2].trim();
+        }
     }
+
+    // swap Band and Ausgabe
+    var issue = item.issue;
+    item.issue = item.volume;
+    item.volume = issue;
 
     item.complete();
 }
