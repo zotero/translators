@@ -78,6 +78,12 @@ function doWeb(doc, url) {
 	}
 }
 
+function postProcess(doc, item) {
+	// remove DOIs stored in the pages field of online-first articles
+	if (item.pages && item.DOI && item.DOI.includes(item.pages))
+		item.pages = "";
+}
+
 function scrape(doc, url) {
 	var risURL = "//journals.sagepub.com/action/downloadCitation";
 	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
@@ -150,6 +156,7 @@ function scrape(doc, url) {
 				title: "SAGE PDF Full Text",
 				mimeType: "application/pdf"
 			});
+			postProcess(doc, item);
 			item.complete();
 		});
 		translator.translate();
