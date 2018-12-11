@@ -79,9 +79,15 @@ function doWeb(doc, url) {
 }
 
 function postProcess(doc, item) {
-	// remove DOIs stored in the pages field of online-first articles
-	if (item.pages && item.DOI && item.DOI.includes(item.pages))
-		item.pages = "";
+	// remove partial DOIs stored in the pages field of online-first articles
+	if (item.DOI) {
+		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&\'<>])\S)+))\b/);
+		if (doiMatches) {
+			var secondPart = doiMatches[2];
+			if (item.pages === secondPart)
+				item.pages = "";
+		}
+	}
 }
 
 function scrape(doc, url) {
