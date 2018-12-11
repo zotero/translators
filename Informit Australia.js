@@ -2,7 +2,7 @@
 	"translatorID": "1fdc31af-065d-4923-9e90-ab4afe5cca8b",
 	"label": "Informit Australia",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://search\\.informit\\.com\\.au",
+	"target": "^https?://search\\.informit\\.com\\.au/search",
 	"minVersion": "1.0",
 	"maxVersion": "",
 	"priority": 100,
