@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-11 23:41:10"
+	"lastUpdated": "2018-12-13 10:42:07"
 }
 
 /*
@@ -202,7 +202,7 @@ function scrape(doc, url) {
 							if (!value && resource) {
 								//Z.debug("Internal look up resource: " + resource);
 								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
-									|| ZU.xpathText(xml, '//rdf:Description[ps:P50[rdf:resource="'+resource+'"]]/pq:P1545[1]', namespaces);
+									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[1]', namespaces);
 									
 								//Z.debug(value);
 							}
