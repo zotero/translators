@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-07 18:10:44"
+	"lastUpdated": "2018-12-14 15:12:34"
 }
 
 /*
@@ -51,22 +51,43 @@ function doWeb(doc, url) {
 				return true;
 			}
 			
+			let venue = getVenue(doc);
 			Object.keys(selected).forEach(function (id) {
 				let bibtexUrl = ZU.xpath(doc, '//p[contains(., "' + id + '")]/a[img[@alt = "Export"]]')[0].href;
 				ZU.doGet(bibtexUrl, function(responseString, responseObj) {
-					scrapeBibtex(responseString);
+					scrapeBibtex(responseString, venue);
 				});
 			});
 		});
 	} else if(url.endsWith('.bib')) {
-		scrapeBibtex(ZU.xpath(doc, '//pre')[0].innerHTML);
+		let paperUrl = url.replace('.bib', '');
+		ZU.processDocuments(paperUrl, function(responseBody) {
+			let venue = getVenue(responseBody);
+			scrapeBibtex(ZU.xpath(doc, '//pre')[0].innerHTML, venue);
+		});
 	} else {
 		let partialBibtexUrl = ZU.xpath(doc, '//a[contains(., "BibTeX")]/@href')[0].value;
 		let bibtexUrl = WEBSITE_STUB + partialBibtexUrl;
+		let venue = getVenue(doc);
 		ZU.doGet(bibtexUrl, function(responseString, responseObj) {
-			scrapeBibtex(responseString);
+			scrapeBibtex(responseString, venue);
 		});
 	}
+}
+
+function getVenue(doc) {
+	let venueElements = ZU.xpath(doc, '//dt[strong[contains(text(), "Venue")]]/following::dd[1]/a');
+	let venues = venueElements.map(function (v) {
+		return v.innerText.trim();
+	});
+	
+	if (venues.includes('WS')) {
+		return;
+	}
+	
+	let venueString = venues.join('-');
+	let year = ZU.xpath(doc, '//dt[strong[contains(text(), "Year")]]/following::dd[1]')[0].textContent;
+	return venueString + ' ' + year;
 }
 
 function getSearchResults(doc) {
@@ -84,7 +105,7 @@ function getSearchResults(doc) {
 	return items;
 }
 
-function scrapeBibtex(responseString) {
+function scrapeBibtex(responseString, venue) {
 	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 	translator.setString(responseString);
@@ -94,6 +115,13 @@ function scrapeBibtex(responseString) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
+		
+		if (venue && !item.publicationTitle.includes('Student') 
+				&& !item.publicationTitle.includes('Demonstration')
+				&& !item.publicationTitle.includes('Tutorial')) {
+			item.conferenceName = venue;
+		}
+		
 		delete item.itemID;
 		item.complete();
 	});
@@ -143,6 +171,110 @@ var testCases = [
 				"publicationTitle": "Computational Linguistics",
 				"url": "http://aclweb.org/anthology/J18-1002",
 				"volume": "44",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://aclanthology.coli.uni-saarland.de/papers/N18-3001/n18-3001",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Scalable Wide and Deep Learning for Computer Assisted Coding",
+				"creators": [
+					{
+						"firstName": "Marilisa",
+						"lastName": "Amoia",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frank",
+						"lastName": "Diehl",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jesus",
+						"lastName": "Gimenez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joel",
+						"lastName": "Pinto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raphael",
+						"lastName": "Schumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fabian",
+						"lastName": "Stemmer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul",
+						"lastName": "Vozila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yi",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"DOI": "10.18653/v1/N18-3001",
+				"conferenceName": "NAACL-HLT 2018",
+				"libraryCatalog": "ACLAnthology",
+				"pages": "1–7",
+				"place": "New Orleans - Louisiana",
+				"proceedingsTitle": "Proceedings of the 2018 Conference of the North American Chapter of the Association for Computational Linguistics: Human Language Technologies, Volume 3 (Industry Papers)",
+				"publisher": "Association for Computational Linguistics",
+				"url": "http://aclweb.org/anthology/N18-3001",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://aclanthology.coli.uni-saarland.de/papers/N12-2003/n12-2003",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Beauty Before Age? Applying Subjectivity to Automatic English Adjective Ordering",
+				"creators": [
+					{
+						"firstName": "Felix",
+						"lastName": "Hill",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"libraryCatalog": "ACLAnthology",
+				"pages": "11–16",
+				"place": "Montrèal, Canada",
+				"proceedingsTitle": "Proceedings of the NAACL HLT 2012 Student Research Workshop",
+				"publisher": "Association for Computational Linguistics",
+				"shortTitle": "Beauty Before Age?",
+				"url": "http://aclweb.org/anthology/N12-2003",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
