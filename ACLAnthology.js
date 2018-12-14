@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-14 15:12:34"
+	"lastUpdated": "2018-12-14 15:23:38"
 }
 
 /*
@@ -100,7 +100,7 @@ function getSearchResults(doc) {
 		let title = ZU.xpath(listing[i], 'strong')[0].textContent;
 		let bibtexLink = ZU.xpath(listing[i], 'a[img[@alt = "Export"]]/@href')[0].value;
 		let id = bibtexLink.split('/')[2];
-		items[id] = title;
+		items[id] = title.trim().replace(/\n\s*/g, ' ');
 	}
 	return items;
 }
