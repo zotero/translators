@@ -1,15 +1,15 @@
 {
-	"translatorID": "a685c846-fc0a-4988-8a25-56dbd550a516",
-	"label": "Berghahn Journals",
-	"creator": "Madeesh Kannan",
-	"target": "^https?://www.berghahnjournals.com/view/journals/.*/[0-9]+/[0-9]+/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": false,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-14 15:40:06"
+    "translatorID": "a685c846-fc0a-4988-8a25-56dbd550a516",
+    "label": "Berghahn Journals",
+    "creator": "Madeesh Kannan",
+    "target": "^https?://www.berghahnjournals.com/view/journals/.*/[0-9]+/[0-9]+/",
+    "minVersion": "3.0",
+    "maxVersion": "",
+    "priority": 100,
+    "inRepository": false,
+    "translatorType": 4,
+    "browserSupport": "gcsibv",
+    "lastUpdated": "2018-12-14 15:40:06"
 }
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -42,10 +42,10 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	var translator = Zotero.loadTranslator("web");
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");   // Embedded Metadata
-	translator.setDocument(doc);
-	translator.setHandler("itemDone", function (t, i) {
+    var translator = Zotero.loadTranslator("web");
+    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");   // Embedded Metadata
+    translator.setDocument(doc);
+    translator.setHandler("itemDone", function (t, i) {
         // add keywords
         var keywords;
         if (keywords = ZU.xpath(doc, '//p[contains(@class, "articleBody_keywords")]//a'))
