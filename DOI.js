@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-11-05 10:57:01"
+	"lastUpdated": "2018-12-14 20:57:01"
 }
 
 // The variables items and selectArray will be filled during the first
@@ -20,7 +20,17 @@ var selectArray = {};
 
 
 // builds a list of DOIs
-function getDOIs(doc) {
+function getDOIs(doc, url) {
+	var dois = [], m;
+	
+	// Extract DOIs from the current URL
+	var rx = /10.[0-9]{4,}?\/[^\s&"'?#,]*[^\s&"'?#\/.,]/g;
+	while (m = rx.exec(url)) {
+		if (dois.indexOf(m[0]) === -1) {
+			dois.push(m[0]);
+		}
+	}
+	
 	// TODO Detect DOIs more correctly.
 	// The actual rules for DOIs are very lax-- but we're more strict.
 	// Specifically, we should allow space characters, and all Unicode
@@ -36,10 +46,7 @@ function getDOIs(doc) {
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
 	const DOIXPath = "//text()[contains(., '10.')]\
 						[not(parent::script or parent::style)]";
-
-	var dois = [];
-
-	var node, m, DOI;
+	var node, DOI;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
 	while (node = results.iterateNext()) {
 		//Z.debug(node.nodeValue)
@@ -69,7 +76,7 @@ function detectWeb(doc, url) {
 	const blacklistRe = /^https?:\/\/[^/]*(?:google\.com|sciencedirect\.com\/science\/advertisement\/)/i;
 	
 	if (!blacklistRe.test(url)) {
-		var DOIs = getDOIs(doc);
+		var DOIs = getDOIs(doc, url);
 		if (DOIs.length) {
 			return "multiple";
 		}
@@ -151,7 +158,7 @@ function retrieveDOIs(dois, doc, providers) {
 }
 
 function doWeb(doc, url) {
-	var dois = getDOIs(doc);
+	var dois = getDOIs(doc, url);
 	Z.debug(dois);
 	var providers = [
 		{
@@ -190,6 +197,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://en.wikipedia.org/wiki/Template_talk:Doi",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://zotero.org/?d=10.7208/chicago/9780226924632.001.0001",
 		"items": "multiple"
 	}
 ]
