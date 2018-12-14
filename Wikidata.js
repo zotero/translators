@@ -186,7 +186,7 @@ function scrape(doc, url) {
 		
 		var item = new Zotero.Item(type);
 		var nodes = ZU.xpath(xml, '//rdf:Description', namespaces);
-		var creatorsArray = []
+		var creatorsArray = [];
 		for (var i=0; i<nodes.length; i++) {
 			var rdfabout = nodes[i].getAttribute("rdf:about");
 			if (rdfabout) {
