@@ -21,13 +21,14 @@ var selectArray = {};
 
 // builds a list of DOIs
 function getDOIs(doc, url) {
-	var dois = [], m;
+	var dois = [], m, DOI;
 	
 	// Extract DOIs from the current URL
-	var rx = /10.[0-9]{4,}?\/[^\s&"'?#,]*[^\s&"'?#\/.,]/g;
-	while (m = rx.exec(url)) {
-		if (dois.indexOf(m[0]) === -1) {
-			dois.push(m[0]);
+	var re = /10.[0-9]{4,}?\/[^\s&?#,]*[^\s&?#\/.,]/g;
+	while (m = re.exec(url)) {
+		DOI = decodeURIComponent(m[0]);
+		if (!dois.includes(DOI)) {
+			dois.push(DOI);
 		}
 	}
 	
@@ -46,7 +47,7 @@ function getDOIs(doc, url) {
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
 	const DOIXPath = "//text()[contains(., '10.')]\
 						[not(parent::script or parent::style)]";
-	var node, DOI;
+	var node;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
 	while (node = results.iterateNext()) {
 		//Z.debug(node.nodeValue)
