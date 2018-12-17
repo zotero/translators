@@ -11,7 +11,7 @@
 		"dataMode": "rdf/xml"
 	},
 	"inRepository": true,
-	"lastUpdated": "2011-07-08 04:51:41"
+	"lastUpdated": "2018-12-17 03:16:21"
 }
 
 function doExport() {
@@ -86,7 +86,7 @@ function doExport() {
 		} else if (item.distributor) {
 			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
 		} else if (item.institution) {
-			Zotero.RDF.addStatement(resource, dc+"publisher", item.distributor, true);
+			Zotero.RDF.addStatement(resource, dc+"publisher", item.institution, true);
 		}
 		
 		// date/year
