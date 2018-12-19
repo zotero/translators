@@ -63,9 +63,8 @@ function lookupPMIDs(ids, next) {
  ****************************/
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
-	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
-	// var bulk_uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
-	// var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
+	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content')
+	|| ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
 	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
