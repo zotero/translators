@@ -2,7 +2,7 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+[-.])?(www|preview)[-.]ncbi[-.]nlm[-.]nih[-.]gov[^/]*/(m/)?(books|pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
+	"target": "^https?://([^/]+[-.])?(www|preview)[-.]ncbi[-.]nlm[-.]nih[-.]gov[^/]*/(m/)?(books|pubmed|labs|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -63,7 +63,9 @@ function lookupPMIDs(ids, next) {
  ****************************/
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
-	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
+	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
+	// var bulk_uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
+	// var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
 	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
@@ -135,11 +137,13 @@ function scrapeItemProps(itemprops) {
 /**
  * Handles:
  * search results: http://www.ncbi.nlm.nih.gov/pubmed/?term=cell
+ * search results PML: https://www.ncbi.nlm.nih.gov/labs/pubmed/?term=cell
  * NCBI collections; http://www.ncbi.nlm.nih.gov/myncbi/browse/collection/40383442/?sort=&direction=
  * My Bibliography
  */
 function getSearchResults(doc, checkOnly) {
 	var results = doc.getElementsByClassName('rslt');
+	var docsums = doc.getElementsByClassName('labs-full-docsum');
 	if (!results.length) {
 		//My Bibliography
 		results = doc.getElementsByClassName('citationListItem');
@@ -175,6 +179,16 @@ function getSearchResults(doc, checkOnly) {
 			title: ZU.trimInternal(title),
 			checked: checkbox && checkbox.checked
 		};	
+	}
+
+	for (var i=0; i<docsums.length; i++) {
+		var docsum_title = ZU.xpathText(docsums[i], './/div[@class="docsum-wrap"]/div[@class="docsum-content"]/a[@class="labs-docsum-title"]')
+		|| ZU.xpathText(docsums[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+
+		var docsum_uid = ZU.xpathText(docsums[i], './/div[@class="selector-wrap"]/input[@class="search-result-selector"]/@value')
+		|| ZU.xpathText(docsums[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
+		|| ZU.xpathText(docsums[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+
 	}
 	
 	return found ? items : false;
@@ -314,6 +328,67 @@ function doSearch(item) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/28372534-panel-7-otitis-media-treatment-and-complications/?from_term=otitis+media+treatment&from_pos=1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Panel 7: Otitis Media: Treatment and Complications",
+				"creators": [
+					{
+						"firstName": "Anne G M",
+						"lastName": "Schilder",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tal",
+						"lastName": "Marom",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ellen M",
+						"lastName": "Mandel",
+						"creatorType": "author"
+					}
+				],
+				"date": "Apr 2017",
+				"DOI": "10.1177/0194599816633697",
+				"ISSN": "1097-6817",
+				"abstractNote": "Objective We aimed to summarize key articles published between 2011 and 2015 on the treatment of (recurrent) acute otitis media, otitis media with effusion, tympanostomy tube otorrhea, chronic suppurative otitis media and complications of otitis media, and their implications for clinical practice. D …",
+				"extra": "PMID: 28372534",
+				"issue": "4_suppl",
+				"journalAbbreviation": "Otolaryngol Head Neck Surg",
+				"language": "eng",
+				"libraryCatalog": "PubMed",
+				"pages": "S88-S105",
+				"publicationTitle": "Otolaryngol Head Neck Surg",
+				"shortTitle": "Panel 7",
+				"volume": "156",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					"Adenoidectomy",
+					"Anti-Bacterial Agents / therapeutic use",
+					"Otitis Media / therapy",
+					"Combined Modality Therapy",
+					"Congresses as Topic",
+					"Humans",
+					"Middle Ear Ventilation / adverse effects",
+					"Otitis Media / complications",
+					"Recurrence",
+					"Tympanic Membrane Perforation / etiology"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "https://www.ncbi.nlm.nih.gov/pubmed/20729678",
