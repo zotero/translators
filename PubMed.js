@@ -2,7 +2,7 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+[-.])?(www|preview)[-.]ncbi[-.]nlm[-.]nih[-.]gov[^/]*/(m/)?(books|pubmed|labs|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
+	"target": "^https?://([^/]+[-.])?(www|preview)[-.]ncbi[-.]nlm[-.]nih[-.]gov[^/]*/(m/)?(books|pubmed|labs/pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -143,51 +143,58 @@ function scrapeItemProps(itemprops) {
 function getSearchResults(doc, checkOnly) {
 	var results = doc.getElementsByClassName('rslt');
 	var docsums = doc.getElementsByClassName('labs-full-docsum');
-	if (!results.length) {
-		//My Bibliography
-		results = doc.getElementsByClassName('citationListItem');
-	}
-	
-	if (!results.length) return false;
-	
 	var items = {}, found = false;
-	
-	for (var i=0; i<results.length; i++) {
-		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
-			|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
-		
-		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
-			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-			|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
-		
-		if (!uid) {
-			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
-			if (uid) uid = uid.match(/\/(\d+)/);
-			if (uid) uid = uid[1];
+
+	if (!results.length || !docsums.length) {		
+		results = doc.getElementsByClassName('citationListItem'); //My Bibliography
+		return false;
+	} else if (results) {
+		for (var i=0; i<results.length; i++) {
+			var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+				|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+			
+			var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+				|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
+				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+			
+			if (!uid) {
+				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
+				if (uid) uid = uid.match(/\/(\d+)/);
+				if (uid) uid = uid[1];
+			}
+			
+			if (!uid || !title) continue;
+			
+			if (checkOnly) return true;
+			found = true;
+			
+			var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
+			
+			// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
+			items["u" + uid] = {
+				title: ZU.trimInternal(title),
+				checked: checkbox && checkbox.checked
+			};	
 		}
+	} else if (docsums) {
+		for (var i=0; i<docsums.length; i++) {
+			var docsum_title = ZU.xpathText(docsums[i], './/div[@class="docsum-wrap"]/div[@class="docsum-content"]/a[@class="labs-docsum-title"]')
+			|| ZU.xpathText(docsums[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+	
+			var docsum_uid = ZU.xpathText(docsums[i], './/div[@class="selector-wrap"]/input[@class="search-result-selector"]/@value')
+			|| ZU.xpathText(docsums[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
+			|| ZU.xpathText(docsums[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 		
-		if (!uid || !title) continue;
-		
-		if (checkOnly) return true;
-		found = true;
-		
-		var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
-		
-		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
-		items["u"+uid] = {
-			title: ZU.trimInternal(title),
-			checked: checkbox && checkbox.checked
-		};	
-	}
+			if (checkOnly) return true;
+			found = true;
 
-	for (var i=0; i<docsums.length; i++) {
-		var docsum_title = ZU.xpathText(docsums[i], './/div[@class="docsum-wrap"]/div[@class="docsum-content"]/a[@class="labs-docsum-title"]')
-		|| ZU.xpathText(docsums[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+			var docsum_checkbox = ZU.xpath(results[i], './div[@class="selector-wrap"]/input[@type="checkbox"]')[0];
 
-		var docsum_uid = ZU.xpathText(docsums[i], './/div[@class="selector-wrap"]/input[@class="search-result-selector"]/@value')
-		|| ZU.xpathText(docsums[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-		|| ZU.xpathText(docsums[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
-
+			items["u" + docsum_uid] = {
+				title: ZU.trimInternal(docsum_title),
+				checked: docsum_checkbox && docsum_checkbox.checked
+			}
+		}
 	}
 	
 	return found ? items : false;
