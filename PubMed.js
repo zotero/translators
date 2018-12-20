@@ -336,6 +336,11 @@ function doSearch(item) {
 var testCases = [
 	{
 		"type": "web",
+		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/?term=otitis+media+treatment",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/28372534-panel-7-otitis-media-treatment-and-complications/?from_term=otitis+media+treatment&from_pos=1",
 		"items": [
 			{
