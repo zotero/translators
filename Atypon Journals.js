@@ -41,7 +41,7 @@ function detectWeb(doc, url) {
 	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
-	
+
 	var citLinks = ZU.xpath(doc, '//a[contains(@href, "/action/showCitFormats")]');
 	if (citLinks.length > 0) {
 		if (url.includes('/doi/book/')) {
@@ -70,29 +70,29 @@ function getSearchResults(doc, checkOnly, extras) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
 		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
-		
+
 		var urlRow = rows[i];
 		var url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
-		
+
 		if (!url) {
 			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
 			urlRow = rows[i].nextElementSibling;
 			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
-			
+
 			url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
 		}
 		if (!url) continue;
-		
+
 		if (checkOnly) return true;
 		found = true;
-		
+
 		if (extras) {
 			extras[url] = { pdf: buildPdfUrl(url, urlRow) };
 		}
-		
+
 		articles[url] = title;
 	}
-	
+
 	if (!found){
 		Z.debug("Trying an alternate multiple format");
 		var rows = container.getElementsByClassName("item-details");
@@ -100,22 +100,22 @@ function getSearchResults(doc, checkOnly, extras) {
 			var title = ZU.xpathText(rows[i], './h3');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
-			
+
 			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
 				+ doiLink + ')[1]/@href');
 			if (!url) continue;
-			
+
 			if (checkOnly) return true;
 			found = true;
-			
+
 			if (extras) {
 				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
 			}
-			
+
 			articles[url] = title;
 		}
 	}
-	
+
 	return found ? articles : false;
 }
 
@@ -124,14 +124,14 @@ var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
-	
+
 	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
 	for (var i=0; i<pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
 			return url.replace(replURLRegExp, pdfPaths[i]);
 		}
 	}
-	
+
 	Z.debug('PDF link not found.');
 	if (root.nodeType != 9 /*DOCUMENT_NODE*/) {
 		Z.debug('Available links:');
@@ -141,7 +141,7 @@ function buildPdfUrl(url, root) {
 			Z.debug(links[i].href);
 		}
 	}
-	
+
 	return false;
 }
 
@@ -159,7 +159,7 @@ function doWeb(doc, url) {
 					extras: extras[itemurl]
 				});
 			}
-			
+
 			fetchArticles(articles);
 		});
 
@@ -170,17 +170,17 @@ function doWeb(doc, url) {
 
 function fixCase(str, titleCase) {
 	if (str.toUpperCase() != str) return str;
-	
+
 	if (titleCase) {
 		return ZU.capitalizeTitle(str, true);
 	}
-	
+
 	return str.charAt(0) + str.substr(1).toLowerCase();
 }
 
 function fetchArticles(articles) {
 	if (!articles.length) return;
-	
+
 	var article = articles.shift();
 	ZU.processDocuments(article.url, function(doc, url) {
 		scrape(doc, url, article.extras);
@@ -209,9 +209,15 @@ function scrape(doc, url, extras) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function (obj, item) {
+				// The RIS translator mixes up the title's language
+				// Ensure that the title is always in the correct language by grabbing it from the meta tag
+				var metaTitle = doc.querySelector("meta[name='dc.Title']");
+				if (metaTitle && metaTitle.getAttribute("content"))
+					item.title = metaTitle.getAttribute("content")
+
 				// Sometimes we get titles and authors in all caps
 				item.title = fixCase(item.title);
-				
+
 				for (var i=0; i<item.creators.length; i++) {
 					item.creators[i].lastName = fixCase(item.creators[i].lastName, true);
 					if (item.creators[i].firstName) {
@@ -221,7 +227,7 @@ function scrape(doc, url, extras) {
 						item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, item.creators[i].creatorType);
 					}
 				}
-				
+
 				item.url = url;
 				//for Emerald, get rid of the "null" that they add at the end of every title:
 				if (url.includes("www.emeraldinsight.com")){
@@ -231,7 +237,7 @@ function scrape(doc, url, extras) {
 				for (var i in tags){
 					item.tags.push(tags[i].textContent);
 				}
-				
+
 				if (abstract) {
 					// Drop "Abstract" prefix
 					// This is not excellent, since some abstracts could
@@ -239,7 +245,7 @@ function scrape(doc, url, extras) {
 					item.abstractNote = abstract.textContent
 						.replace(/^[^\w\d]*abstract\s*/i, '');
 				}
-				
+
 				item.attachments = [];
 				if (extras.pdf) {
 					item.attachments.push({
@@ -248,7 +254,7 @@ function scrape(doc, url, extras) {
 						mimeType: "application/pdf"
 					});
 				}
-				
+
 				item.attachments.push({
 					document: doc,
 					title: "Snapshot",
