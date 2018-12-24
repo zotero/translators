@@ -64,13 +64,18 @@ function lookupPMIDs(ids, next) {
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
 	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content')
-	|| ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
-	if (!uid.length) {
+	var labs_uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
+
+	if (!uid.length || !labs_uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
 
 	if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
 		return uid[0].textContent;
+	}
+
+	if (labs_uid.length == 1 && labs_uid[0].textContent.search(/^\d+$/) != -1) {
+		return labs_uid[0].textContent;
 	}
 
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
@@ -207,8 +212,6 @@ function detectWeb(doc, url) {
 	
 	if (!getUID(doc)) {
 		if (getBookProps(doc)) return 'book';
-		
-		return;
 	}
 	
 	//try to determine if this is a book
@@ -248,42 +251,7 @@ function doWeb(doc, url) {
 			scrapeItemProps(itemprops);
 		}
 	}
-/*
-		} else {
-			// Here, account for some articles and search results using spans for PMID
-			var uids= doc.evaluate('//p[@class="pmid"]', doc,
-					nsResolver, XPathResult.ANY_TYPE, null);
-			var uid = uids.iterateNext();
-			if (!uid) {
-				// Fall back on span 
-				uids = doc.evaluate('//span[@class="pmid"]', doc,
-						nsResolver, XPathResult.ANY_TYPE, null);
-				uid = uids.iterateNext();
-			}
-			if (!uid) {
-				// Fall back on <dl class="rprtid"> 
-				// See http://www.ncbi.nlm.nih.gov/pubmed?term=1173[page]+AND+1995[pdat]+AND+Morton[author]&cmd=detailssearch
-				// Discussed http://forums.zotero.org/discussion/17662
-				uids = doc.evaluate('//dl[@class="rprtid"]/dd[1]', doc,
-						nsResolver, XPathResult.ANY_TYPE, null);
-				uid = uids.iterateNext();
-			}
-			if (uid) {
-				ids.push(uid.textContent.match(/\d+/)[0]);
-				Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-				lookupPMIDs(ids, doc);
-			} else {
-				var uids= doc.evaluate('//meta[@name="ncbi_uidlist"]', doc,
-						nsResolver, XPathResult.ANY_TYPE, null);
-				var uid = uids.iterateNext()["content"].split(' ');
-				if (uid) {
-					ids.push(uid);
-					Zotero.debug("Found PMID: " + ids[ids.length - 1]);
-					lookupPMIDs(ids, doc);
-				}
-			}
-		}
-*/
+
 }
 
 
@@ -334,72 +302,6 @@ function doSearch(item) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/?term=otitis+media+treatment",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/28372534-panel-7-otitis-media-treatment-and-complications/?from_term=otitis+media+treatment&from_pos=1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Panel 7: Otitis Media: Treatment and Complications",
-				"creators": [
-					{
-						"firstName": "Anne G M",
-						"lastName": "Schilder",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tal",
-						"lastName": "Marom",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ellen M",
-						"lastName": "Mandel",
-						"creatorType": "author"
-					}
-				],
-				"date": "Apr 2017",
-				"DOI": "10.1177/0194599816633697",
-				"ISSN": "1097-6817",
-				"abstractNote": "Objective We aimed to summarize key articles published between 2011 and 2015 on the treatment of (recurrent) acute otitis media, otitis media with effusion, tympanostomy tube otorrhea, chronic suppurative otitis media and complications of otitis media, and their implications for clinical practice. D …",
-				"extra": "PMID: 28372534",
-				"issue": "4_suppl",
-				"journalAbbreviation": "Otolaryngol Head Neck Surg",
-				"language": "eng",
-				"libraryCatalog": "PubMed",
-				"pages": "S88-S105",
-				"publicationTitle": "Otolaryngol Head Neck Surg",
-				"shortTitle": "Panel 7",
-				"volume": "156",
-				"attachments": [
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"Adenoidectomy",
-					"Anti-Bacterial Agents / therapeutic use",
-					"Otitis Media / therapy",
-					"Combined Modality Therapy",
-					"Congresses as Topic",
-					"Humans",
-					"Middle Ear Ventilation / adverse effects",
-					"Otitis Media / complications",
-					"Recurrence",
-					"Tympanic Membrane Perforation / etiology"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
 	{
 		"type": "web",
 		"url": "https://www.ncbi.nlm.nih.gov/pubmed/20729678",
@@ -1206,6 +1108,69 @@ var testCases = [
 				"publicationTitle": "Nurse Educator",
 				"volume": "35",
 				"date": "2010 Sep-Oct"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/30572268-gamification-predicting-the-effectiveness-of-variety-game-design-elements-to-intrinsically-motivate-users-energy-conservation-behaviour/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Gamification: Predicting the effectiveness of variety game design elements to intrinsically motivate users' energy conservation behaviour",
+				"creators": [
+					{
+						"firstName": "Siaw-Chui",
+						"lastName": "Wee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Weng-Wai",
+						"lastName": "Choong",
+						"creatorType": "author"
+					}
+				],
+				"date": "Dec 17, 2018",
+				"DOI": "10.1016/j.jenvman.2018.11.127",
+				"ISSN": "1095-8630",
+				"abstractNote": "This research predicted the effectiveness of variety game design elements in enhancing the intrinsic motivation of users on energy conservation behaviour prior to its actual implementation to ensure cost-effective. Face-to-face questionnaire surveys were conducted at the five recognized Malaysian research universities and obtained a total of 1500 valid survey data. The collected data was run with Structural Equation Modeling (SEM) analysis using SmartPLS 3 software. The results predicted the positive effect of gamification on intrinsically motivate the users based on Self-Determination Theory (SDT). The identified nine core game design elements were found to be useful in satisfying users' autonomy, competence and relatedness need satisfactions specified by SDT. This research is useful to guide the campaign organizer in designing a gamified design energy-saving campaign and provide understanding on the causal relationships between game design elements and users' intrinsic motivation to engage on energy conservation. A game-like campaign environment is believed to be created to users by implementing the game design elements in energy-saving campaign, and subsequently users' intrinsic motivation to engage on energy conservation behaviour can be enhanced.",
+				"extra": "PMID: 30572268",
+				"journalAbbreviation": "J. Environ. Manage.",
+				"language": "eng",
+				"libraryCatalog": "PubMed",
+				"pages": "97-106",
+				"publicationTitle": "Journal of Environmental Management",
+				"shortTitle": "Gamification",
+				"volume": "233",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Energy conservation behaviour"
+					},
+					{
+						"tag": "Energy-saving campaign"
+					},
+					{
+						"tag": "Game design elements"
+					},
+					{
+						"tag": "Gamification"
+					},
+					{
+						"tag": "Intrinsic motivation"
+					},
+					{
+						"tag": "Self-determination theory"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
