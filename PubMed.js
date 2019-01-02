@@ -221,7 +221,7 @@ function detectWeb(doc, url) {
 	//try to determine if this is a book
 	//"Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if (maincontent.length && ZU.xpath(maincontent, './/div[@class="sections"]').length)
+	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
 	{
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
