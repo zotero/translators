@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-10-07 06:23:28"
+	"lastUpdated": "2019-01-07 08:14:17"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -63,6 +63,10 @@ function removeUnsupportedMarkup(text) {
 function detectSearch(item) {
 	// query: should we make this more forgiving?
 	if (item.itemType === "journalArticle" || item.DOI) {
+		// Don't try to look up PMIDs
+		if (item.contextObject && item.contextObject.startsWith('rft_id=info:pmid')) {
+			return false;
+		}
 		return true;
 	}
 	return false;
