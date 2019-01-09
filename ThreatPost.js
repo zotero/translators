@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 YOUR_NAME <- TODO
+	Copyright © 2019 Janiko
 	
 	This file is part of Zotero.
 
@@ -93,9 +93,7 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		item.section = "News";
-		//Zotero.debug(ZU.xpathText(doc, '//meta[@property="og:image"]/@content'));
 		var ld_json_rows = ZU.xpath(doc, '//script[@type="application/ld+json"]');
-		//Zotero.debug(ld_json_rows);
 		for (var i=0; i<ld_json_rows.length; i++) {
 			obj = ld_json_rows[i].text;
 			json_obj = JSON.parse(obj);
@@ -106,8 +104,6 @@ function scrape(doc, url) {
 					item.date = json_obj['datePublished'];
 					author = json_obj['author']['name'];
 					item.creators.push(ZU.cleanAuthor(author, "author"));
-					/*item.creators[0] = author['name'];
-					item.author = author['name'];*/
 					item.publisher = json_obj['publisher']['name'];
 				break;
 			}
