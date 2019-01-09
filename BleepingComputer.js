@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-09 12:43:09"
+	"lastUpdated": "2019-01-09 12:49:22"
 }
 
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Janiko
+	Copyright © 2019 Janiko <- TODO
 	
 	This file is part of Zotero.
 
@@ -97,7 +97,9 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		item.section = "News";
+		//Zotero.debug(ZU.xpathText(doc, '//meta[@property="og:image"]/@content'));
 		var ld_json_rows = ZU.xpath(doc, '//script[@type="application/ld+json"]');
+		//Zotero.debug(ld_json_rows);
 		for (var i=0; i<ld_json_rows.length; i++) {
 			obj = ld_json_rows[i].text;
 			json_obj = JSON.parse(obj);
@@ -127,3 +129,57 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.bleepingcomputer.com/news/security/2-percent-of-amazon-s3-public-buckets-arent-write-protected-exposed-to-ransom-attacks/",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "2% of Amazon S3 Public Buckets Aren't Write-Protected, Exposed to Ransom Attacks",
+				"creators": [
+					{
+						"firstName": "Catalin",
+						"lastName": "Cimpanu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-02-28T06:06:57-05:00",
+				"abstractNote": "New research published on Monday reveals that 5.8% of all Amazon S3 buckets are publicly readable, while 2% are publicly writeable —with the latter allowing anyone to add, edit, or delete data, and even hold a victim's data for ransom.",
+				"language": "en-us",
+				"libraryCatalog": "www.bleepingcomputer.com",
+				"publisher": "BleepingComputer.com",
+				"url": "https://www.bleepingcomputer.com/news/security/2-percent-of-amazon-s3-public-buckets-arent-write-protected-exposed-to-ransom-attacks/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "AWS"
+					},
+					{
+						"tag": "Amazon"
+					},
+					{
+						"tag": "InfoSec, Computer Security"
+					},
+					{
+						"tag": "Ransom Demand"
+					},
+					{
+						"tag": "Security"
+					},
+					{
+						"tag": "Server"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
