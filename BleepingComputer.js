@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Janiko <- TODO
+	Copyright © 2019 Janiko
 	
 	This file is part of Zotero.
 
