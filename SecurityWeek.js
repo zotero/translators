@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 20:13:59"
+	"lastUpdated": "2019-01-10 21:50:34"
 }
 
 /*
@@ -99,6 +99,7 @@ function scrape(doc, url) {
 		item.publisher = ZU.xpathText(doc, '//meta[@name="copyright"]/@content');
 		authors = doc.querySelectorAll('#content div a[href*="/authors/"]');
 		authors.forEach(function(element) {
+			Zotero.debug(element.text);
 			item.creators.unshift(ZU.cleanAuthor(element.text, "author"));
 		});
 		meta = doc.querySelectorAll('div.meta div.submitted div');
@@ -123,10 +124,18 @@ var testCases = [
 			{
 				"itemType": "document",
 				"title": "Thousands of Organizations Expose Sensitive Data via Google Groups | SecurityWeek.Com",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Eduard",
+						"lastName": "Kovacs",
+						"creatorType": "author"
+					}
+				],
+				"date": "June 04, 2018",
 				"abstractNote": "Google warns G Suite users after researchers find thousands of organizations exposing sensitive data through misconfigured Google Groups instances",
 				"language": "en",
 				"libraryCatalog": "www.securityweek.com",
+				"publisher": "SecurityWeek - A Wired Business Media Publication",
 				"url": "https://www.securityweek.com/thousands-organizations-expose-sensitive-data-google-groups",
 				"attachments": [
 					{

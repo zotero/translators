@@ -1,40 +1,16 @@
 {
-	"translatorID": "bb106305-d06f-46a0-af1f-b8d96a15a54a",
-	"label": "Next INpact",
+	"translatorID": "c1d53f0b-7c20-4be8-8486-334de98ffb51",
+	"label": "ZDNet.fr",
 	"creator": "Janiko",
-	"target": "https://www.nextinpact.com/news/[^#]+",
+	"target": "https://www.zdnet.fr/actualites/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 21:33:02"
+	"lastUpdated": "2019-01-10 21:15:01"
 }
-
-/*
-	***** BEGIN LICENSE BLOCK *****
-
-	Copyright © 2019 Janiko
-	
-	This file is part of Zotero.
-
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
-	***** END LICENSE BLOCK *****
-*/
-
 
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
@@ -42,7 +18,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (url.includes('/news/')) {
+	if (url.includes('/actualites/')) {
 		return "document";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -51,21 +27,7 @@ function detectWeb(doc, url) {
 
 
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2>a.title[href*="/news/"]');
-	for (let i=0; i<rows.length; i++) {
-		// TODO: check and maybe adjust
-		let href = rows[i].href;
-		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
+	return false;
 }
 
 
@@ -103,18 +65,32 @@ function scrape(doc, url) {
 			json_obj_type = json_obj['@type'];
 			switch (json_obj_type) {
 				case 'NewsArticle':
-					item.date = json_obj['datePublished'];
-					author = json_obj['author']['name'];
-					item.author = author;
-					/* In creators, an e-mail address if filled, let's remplace
-					   it with the correct author name */
-					author_email = item.creators[0]['lastName'];
-					item.extra = "e-mail: "+author_email;
-					item.rights = 'isAccessibleForFree: ' + json_obj['isAccessibleForFree'];
-					Zotero.debug(author_email);
-					item.creators.shift();
-					item.creators.unshift(ZU.cleanAuthor(author, "author"));
-					item.publisher = json_obj['publisher']['name'];
+					/* We prioritize the json ld information (if defined) */
+					
+					/* date of creation */
+					var the_date = json_obj['datePublished'];
+					if (typeof the_date !== 'undefined') {
+						item.date = the_date;
+					}
+
+					// creators may be a singleton or an array 
+					// if it exists here, it must be a more accurate guess of author's name
+					var the_creators = json_obj['author'];
+					if (the_creators) {
+						item.creators = [];  // now it's empty
+						if (the_creators.constructor === Array) {
+							// Array
+							the_creators.forEach(function(element) {
+								author_name = element['name'];
+								item.creators.push(ZU.cleanAuthor(author_name, "author"));
+							});
+						} else {
+							// Single value
+							author_name = the_creators['name'];
+							item.creators.push(ZU.cleanAuthor(author_name, "author"));
+						}
+					}
+					
 				break;
 			}
 		
@@ -163,6 +139,59 @@ var testCases = [
 					},
 					{
 						"tag": "Loi"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.zdnet.fr/actualites/etude-zdnetfr-la-securite-par-l-interdiction-encore-souvent-de-rigueur-39788233.htm",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Etude ZDNet.fr - La sécurité par l’interdiction encore souvent de rigueur",
+				"creators": [
+					{
+						"firstName": "Christophe",
+						"lastName": "Auffray",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-01-10T22:11:02Z",
+				"abstractNote": "Si l’attaque ciblée est citée comme le premier risque de sécurité par les professionnels IT interrogés par ZDNet.fr, les entreprises privilégient encore largement des outils classiques, tout en insistant sur la sensibilisation des utilisateurs. Et face au BYOD et aux réseaux sociaux, la politique demeure celle de l’interdiction.",
+				"language": "fr",
+				"libraryCatalog": "www.zdnet.fr",
+				"url": "https://www.zdnet.fr/actualites/etude-zdnetfr-la-securite-par-l-interdiction-encore-souvent-de-rigueur-39788233.htm",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Application"
+					},
+					{
+						"tag": "BYOD"
+					},
+					{
+						"tag": "Chiffres"
+					},
+					{
+						"tag": "IT Management"
+					},
+					{
+						"tag": "Priorités IT"
+					},
+					{
+						"tag": "Sécurité"
 					}
 				],
 				"notes": [],

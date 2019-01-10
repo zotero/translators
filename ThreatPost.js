@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 16:21:26"
+	"lastUpdated": "2019-01-10 21:33:30"
 }
 
 /*
@@ -102,9 +102,26 @@ function scrape(doc, url) {
 			Zotero.debug(json_obj_type);
 			switch (json_obj_type) {
 				case 'NewsArticle':
+					// Date
 					item.date = json_obj['datePublished'];
-					author = json_obj['author']['name'];
-					item.creators.push(ZU.cleanAuthor(author, "author"));
+					// creators may be a singleton or an array 
+					// if it exists here, it must be a more accurate guess of author's name
+					var the_creators = json_obj['author'];
+					if (the_creators) {
+						item.creators = [];  // now it's empty
+						if (the_creators.constructor === Array) {
+							// Array
+							the_creators.forEach(function(element) {
+								author_name = element['name'];
+								item.creators.push(ZU.cleanAuthor(author_name, "author"));
+							});
+						} else {
+							// Single value
+							author_name = the_creators['name'];
+							item.creators.push(ZU.cleanAuthor(author_name, "author"));
+						}
+					}
+					// Publisher/editor
 					item.publisher = json_obj['publisher']['name'];
 				break;
 			}

@@ -2,16 +2,15 @@
 	"translatorID": "181f47e6-203e-4929-985f-1bbe3b638d6e",
 	"label": "BleepingComputer",
 	"creator": "Janiko",
-	"target": "https://(www.)+bleepingcomputer.com/[^#]+",
+	"target": "https://(www.)+bleepingcomputer.com/news/[^#]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-09 12:49:22"
+	"lastUpdated": "2019-01-10 21:31:21"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -97,29 +96,45 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		item.section = "News";
-		//Zotero.debug(ZU.xpathText(doc, '//meta[@property="og:image"]/@content'));
 		var ld_json_rows = ZU.xpath(doc, '//script[@type="application/ld+json"]');
-		//Zotero.debug(ld_json_rows);
-		for (var i=0; i<ld_json_rows.length; i++) {
-			obj = ld_json_rows[i].text;
+		ld_json_rows.forEach(function(elem) {
+			obj = elem.text;
 			json_obj = JSON.parse(obj);
 			json_obj_type = json_obj['@type'];
 			switch (json_obj_type) {
 				case 'NewsArticle':
+					// Date
 					item.date = json_obj['datePublished'];
-					author = json_obj['author']['name'];
-					item.creators.unshift(ZU.cleanAuthor(author, "author"));
-					/*item.creators[0] = author['name'];
-					item.author = author['name'];*/
+					// creators may be a singleton or an array 
+					// if it exists here, it must be a more accurate guess of author's name
+					var the_creators = json_obj['author'];
+					if (the_creators) {
+						item.creators = [];  // now it's empty
+						if (the_creators.constructor === Array) {
+							// Array
+							the_creators.forEach(function(element) {
+								author_name = element['name'];
+								item.creators.push(ZU.cleanAuthor(author_name, "author"));
+							});
+						} else {
+							// Single value
+							author_name = the_creators['name'];
+							item.creators.push(ZU.cleanAuthor(author_name, "author"));
+						}
+					}
+					// Publisher/editor
 					item.publisher = json_obj['publisher']['name'];
+					// Tags
 					ld_tags = json_obj["keywords"];
-					for (var j=0; j<ld_tags.length; j++) {
-						item.tags.push(ld_tags[j]);
+					if (ld_tags) {
+						ld_tags.forEach(function(the_tag) { 
+							item.tags.push(the_tag);
+						})
 					}
 				break;
 			}
-
-		}
+			
+		});
 		item.complete();
 	});
 
@@ -174,6 +189,53 @@ var testCases = [
 					},
 					{
 						"tag": "Server"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bleepingcomputer.com/news/security/unprotected-mongodb-exposes-over-200-millions-resumes/",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Unprotected MongoDB Exposes Over 200 Millions Resumes",
+				"creators": [
+					{
+						"firstName": "Ionut",
+						"lastName": "Ilascu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-01-10T09:00:00-05:00",
+				"abstractNote": "A huge MongoDB database containing over 200 million records with resumes from job seekers in China stayed accessible without authentication for at least one week to anyone able to locate it. The size of the cache weighed 854GB.",
+				"language": "en-us",
+				"libraryCatalog": "www.bleepingcomputer.com",
+				"publisher": "BleepingComputer.com",
+				"url": "https://www.bleepingcomputer.com/news/security/unprotected-mongodb-exposes-over-200-millions-resumes/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Data Leak"
+					},
+					{
+						"tag": "Database"
+					},
+					{
+						"tag": "InfoSec, Computer Security"
+					},
+					{
+						"tag": "MongoDB"
+					},
+					{
+						"tag": "Security"
 					}
 				],
 				"notes": [],
