@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-07 07:52:09"
+	"lastUpdated": "2019-01-10 06:30:21"
 }
 
 /*
@@ -168,8 +168,9 @@ function getSearchResults(doc, checkOnly) {
 		if (checkOnly) return true;
 		found = true;
 		
-		var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
-		
+		// Checkbox is a descendant of the containing .rprt div
+		var checkbox = ZU.xpath(results[i].parentNode, './/input[@type="checkbox"]')[0];
+
 		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
 		items["u"+uid] = {
 			title: ZU.trimInternal(title),
