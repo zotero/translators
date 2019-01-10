@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-07 15:19:30"
+	"lastUpdated": "2019-01-10 16:21:26"
 }
 
 /*
@@ -42,17 +42,18 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (getSearchResults(doc, true)) {
-		return "multiple";
+	var rows = doc.querySelectorAll('h1[class="c-article__title"]');
+	if (rows.length == 1) {
+		return "document";
 	} 
-	return "document";
+	return "multiple";
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2[class="c-card__title"] a');
+	var rows = doc.querySelectorAll('div.c-border-layout h2[class="c-card__title"] a');
 	for (let i=0; i<rows.length; i++) {
 		// TODO: check and maybe adjust
 		let href = rows[i].href;
@@ -264,6 +265,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://threatpost.com/?s=toto",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
