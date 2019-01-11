@@ -58,18 +58,14 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
-    var DOI = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'DOI:')][1]/following-sibling::span[1]/a");
-    var ISSN = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'ISSN:')][1]/following-sibling::span[1]");
-    var keywords = ZU.xpath(doc, "//span[@class='list-item-type' and contains(text(), 'Subject:')][1]/following-sibling::span[1]//a")
-                     .map(i => i.textContent)
-
     if (!item.DOI)
-        item.DOI = DOI;
+        item.DOI = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'DOI:')][1]/following-sibling::span[1]/a");
 
     if (!item.ISSN)
-        item.ISSN = ISSN;
+        item.ISSN = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'ISSN:')][1]/following-sibling::span[1]");
 
-    item.tags = keywords;
+    item.tags = ZU.xpath(doc, "//span[@class='list-item-type' and contains(text(), 'Subject:')][1]/following-sibling::span[1]//a")
+                     .map(i => i.textContent)
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
