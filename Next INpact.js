@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 21:33:02"
+	"lastUpdated": "2019-01-11 13:37:17"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	if (url.includes('/news/')) {
-		return "document";
+		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -114,7 +114,8 @@ function scrape(doc, url) {
 					Zotero.debug(author_email);
 					item.creators.shift();
 					item.creators.unshift(ZU.cleanAuthor(author, "author"));
-					item.publisher = json_obj['publisher']['name'];
+					item.blogTitle = json_obj['publisher']['name'];
+					item.websiteType = "computer news";
 				break;
 			}
 		
@@ -123,7 +124,7 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "document";
+		trans.itemType = "blogPost";
 		// TODO map additional meta tags here, or delete completely
 		trans.doWeb(doc, url);
 	});
@@ -135,7 +136,7 @@ var testCases = [
 		"url": "https://www.nextinpact.com/news/107492-nouveau-retard-pour-teleservice-dattestation-numerique-diplomes.htm",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "blogPost",
 				"title": "Nouveau retard pour le téléservice « d’attestation numérique » des diplômes",
 				"creators": [
 					{
@@ -146,12 +147,12 @@ var testCases = [
 				],
 				"date": "2019-01-09T15:19:14.6911397",
 				"abstractNote": "Censé être opérationnel depuis deux ans, le « service d'attestation numérique des diplômes » ne sera pas lancé avant le printemps prochain.",
+				"blogTitle": "Next INpact",
 				"extra": "e-mail: xavier@nextinpact.com",
 				"language": "fr",
-				"libraryCatalog": "www.nextinpact.com",
-				"publisher": "Next INpact",
 				"rights": "isAccessibleForFree: False",
 				"url": "https://www.nextinpact.com/news/107492-nouveau-retard-pour-teleservice-dattestation-numerique-diplomes.htm",
+				"websiteType": "computer news",
 				"attachments": [
 					{
 						"title": "Snapshot"

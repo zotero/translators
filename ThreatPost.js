@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 21:33:30"
+	"lastUpdated": "2019-01-11 13:38:41"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	var rows = doc.querySelectorAll('h1[class="c-article__title"]');
 	if (rows.length == 1) {
-		return "document";
+		return "blogPost";
 	} 
 	return "multiple";
 }
@@ -122,7 +122,8 @@ function scrape(doc, url) {
 						}
 					}
 					// Publisher/editor
-					item.publisher = json_obj['publisher']['name'];
+					item.blogTitle = json_obj['publisher']['name'];
+					item.websiteType = "computer security";
 				break;
 			}
 
@@ -131,7 +132,7 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "document";
+		trans.itemType = "blogPost";
 		// TODO map additional meta tags here, or delete completely
 		trans.doWeb(doc, url);
 	});
@@ -146,7 +147,7 @@ var testCases = [
 		"url": "https://threatpost.com/new-ninth-gen-intel-cpus-shield-against-some-spectre-meltdown-variants/138152/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "blogPost",
 				"title": "New Ninth-Gen Intel CPUs Shield Against Some Spectre, Meltdown Variants",
 				"creators": [
 					{
@@ -157,10 +158,10 @@ var testCases = [
 				],
 				"date": "2018-10-09T15:37:35-04:00",
 				"abstractNote": "New Intel Coffee Lake CPUs offer hardware-based protections against some -but not all- Spectre and Meltdown variants.",
+				"blogTitle": "Threatpost",
 				"language": "en",
-				"libraryCatalog": "threatpost.com",
-				"publisher": "Threatpost",
 				"url": "https://threatpost.com/new-ninth-gen-intel-cpus-shield-against-some-spectre-meltdown-variants/138152/",
+				"websiteType": "computer security",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -217,7 +218,7 @@ var testCases = [
 		"url": "https://threatpost.com/adobe-december-2018-patch-tuesday/139792/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "blogPost",
 				"title": "Adobe December 2018 Security Update Fixes Reader, Acrobat",
 				"creators": [
 					{
@@ -228,10 +229,10 @@ var testCases = [
 				],
 				"date": "2018-12-11T12:42:50-05:00",
 				"abstractNote": "The update includes a raft of critical code-execution problems.",
+				"blogTitle": "Threatpost",
 				"language": "en",
-				"libraryCatalog": "threatpost.com",
-				"publisher": "Threatpost",
 				"url": "https://threatpost.com/adobe-december-2018-patch-tuesday/139792/",
+				"websiteType": "computer security",
 				"attachments": [
 					{
 						"title": "Snapshot"
