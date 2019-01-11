@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 21:15:01"
+	"lastUpdated": "2019-01-11 13:28:50"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -111,7 +110,7 @@ function scrape(doc, url) {
 							});
 						} else {
 							// Single value
-							author_name = the_creators['name'];
+							author_name = the_creators;
 							item.creators.push(ZU.cleanAuthor(author_name, "author"));
 						}
 					}
@@ -129,100 +128,3 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.nextinpact.com/news/107492-nouveau-retard-pour-teleservice-dattestation-numerique-diplomes.htm",
-		"items": [
-			{
-				"itemType": "document",
-				"title": "Nouveau retard pour le téléservice « d’attestation numérique » des diplômes",
-				"creators": [
-					{
-						"firstName": "Xavier",
-						"lastName": "Berne",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019-01-09T15:19:14.6911397",
-				"abstractNote": "Censé être opérationnel depuis deux ans, le « service d'attestation numérique des diplômes » ne sera pas lancé avant le printemps prochain.",
-				"extra": "e-mail: xavier@nextinpact.com",
-				"language": "fr",
-				"libraryCatalog": "www.nextinpact.com",
-				"publisher": "Next INpact",
-				"rights": "isAccessibleForFree: False",
-				"url": "https://www.nextinpact.com/news/107492-nouveau-retard-pour-teleservice-dattestation-numerique-diplomes.htm",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Audio"
-					},
-					{
-						"tag": "Loi"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
-]
-/** END TEST CASES **/
-/** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"url": "https://www.zdnet.fr/actualites/etude-zdnetfr-la-securite-par-l-interdiction-encore-souvent-de-rigueur-39788233.htm",
-		"items": [
-			{
-				"itemType": "document",
-				"title": "Etude ZDNet.fr - La sécurité par l’interdiction encore souvent de rigueur",
-				"creators": [
-					{
-						"firstName": "Christophe",
-						"lastName": "Auffray",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019-01-10T22:11:02Z",
-				"abstractNote": "Si l’attaque ciblée est citée comme le premier risque de sécurité par les professionnels IT interrogés par ZDNet.fr, les entreprises privilégient encore largement des outils classiques, tout en insistant sur la sensibilisation des utilisateurs. Et face au BYOD et aux réseaux sociaux, la politique demeure celle de l’interdiction.",
-				"language": "fr",
-				"libraryCatalog": "www.zdnet.fr",
-				"url": "https://www.zdnet.fr/actualites/etude-zdnetfr-la-securite-par-l-interdiction-encore-souvent-de-rigueur-39788233.htm",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Application"
-					},
-					{
-						"tag": "BYOD"
-					},
-					{
-						"tag": "Chiffres"
-					},
-					{
-						"tag": "IT Management"
-					},
-					{
-						"tag": "Priorités IT"
-					},
-					{
-						"tag": "Sécurité"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	}
-]
-/** END TEST CASES **/

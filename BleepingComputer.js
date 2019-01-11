@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 21:31:21"
+	"lastUpdated": "2019-01-11 13:19:40"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
 	if (url.includes('/news/')) {
-		return "document";
+		return "blogPost";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -139,7 +139,7 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "document";
+		trans.itemType = "blogPost";
 		// TODO map additional meta tags here, or delete completely
 		trans.doWeb(doc, url);
 	});
@@ -151,7 +151,7 @@ var testCases = [
 		"url": "https://www.bleepingcomputer.com/news/security/2-percent-of-amazon-s3-public-buckets-arent-write-protected-exposed-to-ransom-attacks/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "blogPost",
 				"title": "2% of Amazon S3 Public Buckets Aren't Write-Protected, Exposed to Ransom Attacks",
 				"creators": [
 					{
@@ -162,9 +162,8 @@ var testCases = [
 				],
 				"date": "2018-02-28T06:06:57-05:00",
 				"abstractNote": "New research published on Monday reveals that 5.8% of all Amazon S3 buckets are publicly readable, while 2% are publicly writeable —with the latter allowing anyone to add, edit, or delete data, and even hold a victim's data for ransom.",
+				"blogTitle": "BleepingComputer",
 				"language": "en-us",
-				"libraryCatalog": "www.bleepingcomputer.com",
-				"publisher": "BleepingComputer.com",
 				"url": "https://www.bleepingcomputer.com/news/security/2-percent-of-amazon-s3-public-buckets-arent-write-protected-exposed-to-ransom-attacks/",
 				"attachments": [
 					{
@@ -201,7 +200,7 @@ var testCases = [
 		"url": "https://www.bleepingcomputer.com/news/security/unprotected-mongodb-exposes-over-200-millions-resumes/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "blogPost",
 				"title": "Unprotected MongoDB Exposes Over 200 Millions Resumes",
 				"creators": [
 					{
@@ -212,9 +211,8 @@ var testCases = [
 				],
 				"date": "2019-01-10T09:00:00-05:00",
 				"abstractNote": "A huge MongoDB database containing over 200 million records with resumes from job seekers in China stayed accessible without authentication for at least one week to anyone able to locate it. The size of the cache weighed 854GB.",
+				"blogTitle": "BleepingComputer",
 				"language": "en-us",
-				"libraryCatalog": "www.bleepingcomputer.com",
-				"publisher": "BleepingComputer.com",
 				"url": "https://www.bleepingcomputer.com/news/security/unprotected-mongodb-exposes-over-200-millions-resumes/",
 				"attachments": [
 					{
