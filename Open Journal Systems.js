@@ -94,6 +94,7 @@ function scrape(doc, url) {
 		// remove superfluous last page number
 		if (item.pages) {
 			var matches = item.pages.match(/([0-9]+)-([0-9]+)-([0-9]+)/);
+			// only update if the last two captures are the same, otherwise it's ambiguous
 			if (matches && matches[2] === matches[3])
 				item.pages = matches[1] + "-" + matches[2];
 		}
