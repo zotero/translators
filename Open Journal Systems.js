@@ -53,7 +53,6 @@ function scrape(doc, url) {
 				for (var i=0; i<authorsList.length; i++) {
 					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 				}
-
 			}
 		}
 
@@ -90,6 +89,13 @@ function scrape(doc, url) {
 				mimeType: "application/pdf",
 				url: pdfUrl.href.replace(/\/article\/view\//, '/article/download/')
 			});
+		}
+
+		// remove superfluous last page number
+		if (item.pages) {
+			var matches = item.pages.match(/([0-9]+)-([0-9]+)-([0-9]+)/);
+			if (matches && matches[2] === matches[3])
+				item.pages = matches[1] + "-" + matches[2];
 		}
 
 		item.complete();
