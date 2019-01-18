@@ -145,6 +145,13 @@ function scrape(doc, url) {
 	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
 	item.language = (item.title + item.abstractNote).toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
 
+	// fixup date
+	if (item.date) {
+		var match = item.date.match(/^numéro [0-9]+, ([0-9]{4})/);
+		if (match)
+			item.date = match[1];
+	}
+
 	item.attachments.push({
 		url: url,
 		title: "Snapshot",
