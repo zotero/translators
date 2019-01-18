@@ -88,6 +88,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/abstract');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
+	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="abstract"]/p');
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -95,6 +96,7 @@ function scrape(doc, url) {
 		if (abstract) {
 			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
 		}
+
 		if (url.indexOf("/article/") != -1) {
 			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
 			//Z.debug(pdfurl);
@@ -106,6 +108,7 @@ function scrape(doc, url) {
 			}]
 		}
 		item.libraryCatalog = "Project MUSE";
+		item.tags = ZU.xpathText(doc, '//div[@class="kwd-group"]/p').split(",").map(function(x) { return x.trim();});
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {
