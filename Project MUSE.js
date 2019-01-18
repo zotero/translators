@@ -99,7 +99,7 @@ function scrape(doc, url) {
 
 		if (url.indexOf("/article/") != -1) {
 			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
-			//Z.debug(pdfurl);p
+			//Z.debug(pdfurl);
 			//overwriting attachments: Snapshot isn't very useful, PDF link from EM is wrong
 			item.attachments = [{
 				"url": pdfurl,
