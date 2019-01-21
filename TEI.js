@@ -182,7 +182,7 @@ function generateItem(item, teiDoc) {
 
 	if (Zotero.getOption("Generate XML IDs")) {
 		if (!generatedItems[item.uri]) {
-			var xmlid = genXMLId(item);
+			var xmlid = item.citekey || genXMLId(item); // use Better BibTeX for Zotero citation key if available
 			bibl.setAttributeNS(ns.xml, "xml:id", xmlid);
 			exportedXMLIds[xmlid] = bibl;
 		} else {
