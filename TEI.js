@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2017-11-18 10:45:00"
+	"lastUpdated": "2019-01-22 09:47:00"
 }
 
 // ********************************************************************
@@ -182,7 +182,7 @@ function generateItem(item, teiDoc) {
 
 	if (Zotero.getOption("Generate XML IDs")) {
 		if (!generatedItems[item.uri]) {
-			var xmlid = genXMLId(item);
+			var xmlid = item.citationKey || genXMLId(item); // use Better BibTeX for Zotero citation key if available
 			bibl.setAttributeNS(ns.xml, "xml:id", xmlid);
 			exportedXMLIds[xmlid] = bibl;
 		} else {
