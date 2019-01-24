@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2016-05-06 18:43:49"
+	"lastUpdated": "2018-09-11 07:17:21"
 }
 
 /*
@@ -45,15 +45,20 @@ var mappingClassNameToItemType = {
 	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
 	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
 	'ZINHALTVERZ' : 'multiple',//Inhaltsverzeichnis
-	'KOMMENTAR' : 'encyclopediaArticle'
-}
+	'KOMMENTAR' : 'encyclopediaArticle',
+	'ALTEVERSION' : 'encyclopediaArticle',
+	'ALTEVERSION KOMMENTAR' : 'encyclopediaArticle',
+	'HANDBUCH' : 'encyclopediaArticle',
+	'BUCH' : 'book',
+	// ? 'FESTSCHRIFT' : 'bookSection'
+};
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
 var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
-		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'FAArbR',
-		'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
-		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote', 'LL\\.M\\.',
-		'^Von', "\\*"];
+		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'PD',
+		'FAArbR', 'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
+		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote',
+		'LL\\.\\s?M\\.(?: \\(UCLA\\))?', '^Von', "\\*"];
 var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 
@@ -62,7 +67,7 @@ function detectWeb(doc, url) {
 	if (!dokument) return;
 	
 	var type = mappingClassNameToItemType[dokument.className.toUpperCase()];
-	
+	//Z.debug(dokument.className.toUpperCase());
 	if (type == 'multiple') {
 		return getSearchResults(doc, true) ? type : false;
 	}
@@ -73,7 +78,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false,
 		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a');
-	for(var i=0; i<rows.length; i++) {
+	for (var i=0; i<rows.length; i++) {
 		//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
 		//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
 		//   Dr. iur. habil. Christian Hofmann: Haftung im Zahlungsverkehr
@@ -123,20 +128,24 @@ function scrapeKommentar(doc, url) {
 	var authorText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="autor"]');
 	if (authorText) {
 		var authors = authorText.split("/");
-		for (var i=0; i<authors.length; i++) {
+		for (let i=0; i<authors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(authors[i], 'author', false));
 		}
 	}
 	
 	//e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	//e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
+	//e.g. c) Scherer, Münchener Anwaltshandbuch Erbrecht
 	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	var pos = citationFirst.lastIndexOf(",");
 	if (pos > 0) {
 		item.publicationTitle = ZU.trimInternal(citationFirst.substr(0, pos));
 		var editorString = citationFirst.substr(pos+1);
 		
-		if (editorString.indexOf("/") == -1 && item.publicationTitle.indexOf("/") > 0) {
+		if ((!editorString.includes("/") && item.publicationTitle.includes("/"))
+			|| editorString.toLowerCase().includes("handbuch")
+			|| editorString.toLowerCase().includes("kommentar")
+		) {
 			var temp = item.publicationTitle;
 			item.publicationTitle = editorString;
 			editorString = temp;
@@ -144,7 +153,7 @@ function scrapeKommentar(doc, url) {
 		editorString = editorString.replace(/, /g, '');
 		
 		var editors = editorString.trim().split("/");
-		for (var i=0; i<editors.length; i++) {
+		for (let i=0; i<editors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
 		}
 	} else {
@@ -178,7 +187,7 @@ function scrapeLSK(doc, url) {
 	// description example 1: "Marco Ganzhorn: Ist ein E-Book ein Buch?"
 	// description example 2: "Michael Fricke/Dr. Martin Gerecke: Informantenschutz und Informantenhaftung"
 	// description example 3: "Sara Sun Beale: Die Entwicklung des US-amerikanischen Rechts der strafrechtlichen Verantwortlichkeit von Unternehmen"
-	var description = ZU.xpathText(doc, "//*[@id='doktoccontent']/h1");
+	var description = ZU.xpathText(doc, "//*[@id='dokcontent']/h1");
 	var descriptionItems = description.split(':');
 
 	//authors
@@ -218,6 +227,56 @@ function scrapeLSK(doc, url) {
 	finalize(doc, url, item);
 }
 
+
+function scrapeBook(doc, url) {
+	var item = new Zotero.Item("book");
+	item.title = text(doc, '#titelseitetext .tptitle');
+	item.shortTitle = attr(doc, '.bf_selected span[title]', 'title');
+	var creatorType = "author";
+	var contributorsAreNext = false;
+	var spaces = doc.querySelectorAll('#titelseitetext .tpspace');
+	for (let space of spaces) {
+		if (space.textContent.includes("Kommentar")) {
+			item.title += ": Kommentar";
+		}
+		if (space.textContent.includes("Herausgegeben")) {
+			creatorType = "editor";
+		}
+		// e.g. "2. Auflage 2018"
+		if (space.textContent.includes("Auflage")) {
+			let parts = space.textContent.split("Auflage");
+			item.edition = parts[0].replace('.', '');
+			item.date = parts[1];
+		}
+		
+		if (contributorsAreNext) {
+			var contributors = space.textContent.split("; ");
+			contributorsAreNext = false;
+		}
+		if (space.textContent.includes("Bearbeitet")) {
+			contributorsAreNext = true;
+		}
+	}
+	var creators = doc.querySelectorAll('#titelseitetext .tpauthor');
+	for (let creator of creators) {
+		creator = authorRemoveTitlesEtc(creator.textContent);
+		item.creators.push(ZU.cleanAuthor(creator, creatorType));
+	}
+	if (contributors) {
+		for (contributor of contributors) {
+			contributor = authorRemoveTitlesEtc(contributor);
+			item.creators.push(ZU.cleanAuthor(contributor, "contributor"));
+		}
+	}
+	item.ISBN = text(doc, '#titelseitetext .__beck_titelei_impressum_isbn');
+	item.rights = text(doc, '#titelseitetext .__beck_titelei_impressum_p');
+	if (item.rights && item.rights.includes("Beck")) {
+		item.publisher = "Verlag C. H. Beck";
+		item.place = "München";
+	}
+	item.complete();
+}
+
 function addNote(originalNote, newNote) {
 	if (originalNote.length == 0) {
 		originalNote = "Additional Metadata: "+newNote;
@@ -244,7 +303,7 @@ function scrapeCase(doc, url) {
 	}
 	// if not, we have to extract it from the title
 	else {
-		caseDescription = ZU.xpathText(doc, '//div[@class="titel"]/h1 | //div[@class="titel sbin4"]/h1 | //div[@class="titel sbin4"]/h1/span');
+		var caseDescription = ZU.xpathText(doc, '//div[contains(@class, "titel")]/h1');
 		if (caseDescription) {
 			var tmp = caseDescription.match(/[^-–]*$/);	// everything after the last slash
 			if (tmp) caseName = ZU.trimInternal(tmp[0]);
@@ -285,14 +344,14 @@ function scrapeCase(doc, url) {
 		item.extra += "{:jurisdiction: de}";
 	}
 	
-	var decisionDateStr = ZU.xpathText(doc, '//span[@class="edat"] | //span[@class="EDAT"] | //span[@class="datum"]');
+	var decisionDateStr = ZU.xpathText(doc, '(//span[@class="edat"] | //span[@class="EDAT"] | //span[@class="datum"])[1]');
 	if (decisionDateStr == null) {
 		decisionDateStr = alternativeData[3];
 	}
 	//e.g. 24. 9. 2001 or 24-9-1990
 	item.dateDecided = decisionDateStr.replace(/(\d\d?)[\.-]\s*(\d\d?)[\.-]\s*(\d\d\d\d)/, "$3-$2-$1");
 	
-	item.docketNumber = ZU.xpathText(doc, '//span[@class="az"]');
+	item.docketNumber = ZU.xpathText(doc, '(//span[@class="az"])[1]');
 	if (item.docketNumber == null) {
 		item.docketNumber = alternativeData[4];
 	}
@@ -340,9 +399,9 @@ function scrapeCase(doc, url) {
 		item.pages = beckRSsrc[3];*/
 	}
 
-	var otherCitations = ZU.xpath(doc, '//li[contains(@id, "Parallelfundstellen")]')[0];
-	if (otherCitations) {
-		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + ZU.xpathText(otherCitations, './ul/li',  null, " ; ") + "</p>");
+	var otherCitationsText = ZU.xpathText(doc, '//div[@id="verweiszettel-top"]//li[contains(@class, "parallelfundstellen")]//li',  null, " ; ");
+	if (otherCitationsText) {
+		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + otherCitationsText.replace(/\n/g, "").replace(/\s+/g, ' ').trim() + "</p>");
 	}
 	var basedOnRegulations = ZU.xpathText(doc, '//div[contains(@class,"normenk")]');
 	if (basedOnRegulations) {
@@ -357,14 +416,14 @@ function scrapeCase(doc, url) {
 	// there is additional information if the case is published in a journal
 	if (documentClassName == 'ZRSPR') {
 		// short title of publication
-		item.reporter = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/a[2]');
+		item.reporter = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/a[2]');
 		// long title of publication
 		var publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
 		if (publicationTitle) {
 			note = addNote(note, "<h3>Zeitschrift Titel</h3><p>" + ZU.trimInternal(publicationTitle) + "</p>");
 		}
 		
-		item.date = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/a[2]');
+		item.date = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/a[2]');
 		
 		//e.g. ArbrAktuell 2014, 150
 		var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
@@ -373,7 +432,7 @@ function scrapeCase(doc, url) {
 		if (pagesEnd) {
 			item.pages = pagesStart + "-" + pagesEnd;
 		} else {
-			item.pages = pagesStart
+			item.pages = pagesStart;
 		}
 		
 		item.reporterVolume = item.date;
@@ -391,13 +450,17 @@ function scrape(doc, url) {
 	var dokument = doc.getElementById("dokument");
 	if (!dokument) {
 		throw new Error("Could not find element with ID 'dokument'. "
-		+ "Probably attempting to scrape multiples with no access.")
+		+ "Probably attempting to scrape multiples with no access.");
 	}
 	var documentClassName = dokument.className.toUpperCase();
 
 	// use different scraping function for documents in LSK
 	if (documentClassName == 'LSK') {
 		scrapeLSK(doc, url);
+		return;
+	}
+	if (documentClassName == 'BUCH') {
+		scrapeBook(doc, url);
 		return;
 	}
 	if (mappingClassNameToItemType[documentClassName] == 'case') {
@@ -414,7 +477,8 @@ function scrape(doc, url) {
 		item = new Zotero.Item(mappingClassNameToItemType[documentClassName]);
 	}
 	
-	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0] || ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
+	var titleNode = ZU.xpath(doc, '//div[@class="titel"]')[0]
+		|| ZU.xpath(doc, '//div[@class="dk2"]//span[@class="titel"]')[0];
 	item.title = ZU.trimInternal(titleNode.textContent);
 	
 	// in some cases (e.g. NJW 2007, 3313) the title contains an asterisk with a footnote that is imported into the title
@@ -457,7 +521,7 @@ function scrape(doc, url) {
 				authorString = authorString.substr(0,posComma);
 			}
 			
-			authorArray = authorString.split(/und|,/);
+			var authorArray = authorString.split(/und|,/);
 			for (var k=0; k<authorArray.length; k++) {
 				var authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
 				item.creators.push(ZU.cleanAuthor(authorString, "author"));
@@ -466,12 +530,12 @@ function scrape(doc, url) {
 	}
 	
 	item.publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
-	item.journalAbbreviation = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/a[2]');
+	item.journalAbbreviation = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/a[2]');
 	
-	item.date = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/a[2]');
+	item.date = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/a[2]');
 	
 	//e.g. Heft 6 (Seite 141-162)
-	var issueText = ZU.xpathText(doc, '//div[@id="doktoccontent"]/ul/li/ul/li/ul/li/a[2]');
+	var issueText = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/ul/li/a[2]');
 
 	if (issueText) {
 		item.issue = issueText.replace(/\([^\)]*\)/,"");
@@ -482,12 +546,14 @@ function scrape(doc, url) {
 	
 	//e.g. ArbrAktuell 2014, 150
 	var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
-	var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+	if (shortCitation) {
+		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+	}
 	var pagesEnd = ZU.xpathText(doc, '(//span[@class="pg"])[last()]');
 	if (pagesEnd) {
 		item.pages = pagesStart + "-" + pagesEnd;
 	} else {
-		item.pages = pagesStart
+		item.pages = pagesStart;
 	}
 	
 	item.abstractNote = ZU.xpathText(doc, '//div[@class="abstract"]') || ZU.xpathText(doc, '//div[@class="leitsatz"]');
@@ -569,7 +635,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BB 2001 Heft 42, 2130 ; BeckRS 9998, 03964 ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer... ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; EWiR 2001, 1049 ; WPM 2001, 1944 ; WuB 2001, 1269 ; ZIP 2001, 1881</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 3964 ; EWiR 2001, 1049 (m. Anm. Sch… ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer (m… ; ZIP 2001, 1881 (m. Anm.) ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; WuB 2001, 1269 ; WuB 2001, 1269 (m. Anm. Prof…</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -643,7 +709,7 @@ var testCases = [
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
 				"issue": "46",
 				"journalAbbreviation": "NJW",
 				"libraryCatalog": "beck-online",
@@ -712,7 +778,7 @@ var testCases = [
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
+				"abstractNote": "Nachdem die Selbstanzeige nach § AO § 371 AO bereits im Frühjahr 2011 nur knapp einer Abschaffung entging und (lediglich) verschärft wurde, plant der Gesetzgeber nun eine weitere Einschränkung. Dabei unterscheiden sich der Referentenentwurf vom 27.8.2014 und der Regierungsentwurf vom 26.9.2014 scheinbar kaum; Details legen aber die Vermutung nahe, dass dort noch einmal jemand „gebremst“ hat. zur Fussnote 1",
 				"issue": "46",
 				"journalAbbreviation": "DStR",
 				"libraryCatalog": "beck-online",
@@ -780,7 +846,7 @@ var testCases = [
 					}
 				],
 				"date": "2014",
-				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
+				"abstractNote": "Die Durchführung von Beweisverfahren ist mit Duldungs- und Mitwirkungspflichten von Beweisgegnern und Dritten verbunden, die nur über begrenzte Weigerungsrechte verfügen. Einen Sonderfall bildet der bei „Wohnungsbetroffenheit“ eingreifende letzte Halbsatz des § ZPO § 144 ZPO § 144 Absatz I 3 ZPO. Dessen Voraussetzungen und Reichweite bedürfen der Klärung. Ferner gibt die neuere Rechtsprechung Anlass zu untersuchen, inwieweit auch der Eigentumsschutz einer Beweisaufnahme entgegenstehen kann.",
 				"issue": "46",
 				"journalAbbreviation": "NJW",
 				"libraryCatalog": "beck-online",
@@ -871,13 +937,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://beck-online.beck.de/?vpath=bibdata%2fents%2furteile%2f2012%2fcont%2fbeckrs_2012_09546.htm",
+		"url": "https://beck-online.beck.de/Dokument?vpath=bibdata%2Fents%2Fbeckrs%2F2012%2Fcont%2Fbeckrs.2012.09546.htm&anchor=Y-300-Z-BECKRS-B-2012-N-09546",
 		"items": [
 			{
 				"itemType": "case",
 				"caseName": "OLG Köln, 23.03.2012 - 6 U 67/11",
 				"creators": [],
 				"dateDecided": "2012-03-23",
+				"abstractNote": "Leitsätze:\n\t\t\t\t\t1. Die Eltern eines 13-jährigen Sohnes, dem sie einen PC mit Internetanschluss überlassen haben, können ihrer aus § BGB § 832 BGB § 832 Absatz I BGB resultierenden Aufsichtspflicht zur Verhinderung der Teilnahme des Kindes an illegalen sog. Tauschbörsen durch die Installation einer Firewall und eines Passwortes sowie monatliche stichprobenmäßige Kontrollen genügen. Diese Kontrollen sind aber nicht hinreichend durchgeführt worden, wenn die Eltern über Monate das trotz der installierten Schutzmaßnahmen erfolgte Herunterladen zweier Filesharingprogramme nicht entdecken, für die Ikons auf dem Desktop sichtbar waren.\n\t\t\t\t\t2. Die Höhe des dem Rechteinhaber durch die Teilnahme an einer sog. Tauschbörse entstandenen, im Wege der Lizenzanalogie berechneten Schadens ist mangels besser geeigneter Grundlagen an dem GEMA Tarif zu orientieren, der dem zu beurteilenden Sachverhalt am nächsten kommt. Das ist nicht der Tarif VR W 1, sondern der (frühere) Tarif VR-OD 5. Es sind weiter alle in Betracht kommenden Umstände wie die Länge des Zeitraumes, in dem der Titel in die \"Tauschbörse\" eingestellt war, und die Höhe des Lizenzbetrages zu berücksichtigen, der für vergleichbare Titel nach Lizenzierung gezahlt wird. Sind gängige Titel über Monate durch die Tauschbörse öffentlich zugänglichgemacht worden, so kann ein Betrag von 200 € für jeden Titel geschuldet sein.",
 				"court": "OLG Köln",
 				"docketNumber": "6 U 67/11",
 				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
@@ -889,7 +956,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. A... ; MMR 2012, 387 (m. Anm. Ho... ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 L ; MD 2012, 621 ; WRP 2012, 1007</p>"
+						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. Anm.… ; MMR 2012, 387 (m. Anm. Hoffm… ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 ; MD 2012, 621 ; WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
 					}
 				],
 				"seeAlso": []
@@ -920,7 +987,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckEuRS 2014, 754042 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. K... ; GRUR 2014, 468 (m. Anm. M... ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. A... ; MMR 2014, 397 (m. Anm. Ro... ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; EWS 2014, 225 ; EuGRZ 2014, 301 ; K & R 2014, 329 ; MittdtPatA 2014, 335 L ; RiW 2014, 373 ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 3 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. Karl) ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. Anm.… ; MMR 2014, 397 (m. Anm. Roth) ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; CELEX 62012CJ0314 ; EuGRZ 2014, 301 ; K & R 2014, 329 (m. Anm. Sim… ; MittdtPatA 2014, 335 (Ls.) ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 8 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -952,7 +1019,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; BeckRS 9998, 169076 ; NStZ 1991, 188 ; BeckRS 9998, 170068 (Ls.) ; FHOeffR 42 Nr. 13711 (Ls.... ; FHOeffR 42 Nr. 13713 (Ls.... ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; BVerfGE 83, 130 ; Bespr.: , JZ 1991, 470 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
+						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; NStZ 1991, 188 ; FHOeffR 42 Nr. 13711 (Ls.) ; FHOeffR 42 Nr. 13713 (Ls.) ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; Bespr.: , JZ 1991, 470 ; BVerfGE 83, 130 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465 ; ZUM 1991, 310</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
 					}
 				],
 				"seeAlso": []
@@ -1036,6 +1103,179 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/Dokument?vpath=bibdata%2Fkomm%2Fscheanwhdb_5%2Fcont%2Fscheanwhdb.glsect19.glii.gl2.gla.htm&pos=2&hlwords=on",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "§ 19 Testamentsvollstreckung",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Lorz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Scherer",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2018",
+				"edition": "5",
+				"encyclopediaTitle": "Münchener Anwaltshandbuch Erbrecht",
+				"libraryCatalog": "beck-online",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://beck-online.beck.de/?vpath=bibdata/komm/KueBuchnerKoDSGVO_2/cont/KueBuchnerKoDSGVO.htm",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Datenschutz-Grundverordnung/BDSG: Kommentar",
+				"creators": [
+					{
+						"firstName": "Jürgen",
+						"lastName": "Kühling",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Buchner",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Bäcker",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Matthias",
+						"lastName": "Bergt",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Franziska",
+						"lastName": "Boehm",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Benedikt",
+						"lastName": "Buchner",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Johannes",
+						"lastName": "Caspar",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Dix",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Sebastian",
+						"lastName": "Golla",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Hartung",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Tobias",
+						"lastName": "Herbst",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Silke",
+						"lastName": "Jandt",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Manuel",
+						"lastName": "Klar",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jürgen",
+						"lastName": "Kühling",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Frank",
+						"lastName": "Maschmann",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Petri",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Johannes",
+						"lastName": "Raab",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Florian",
+						"lastName": "Sackmann",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Schröder",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Simon",
+						"lastName": "Schwichtenberg",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Marie-Theres",
+						"lastName": "Tinnefeld",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Thilo",
+						"lastName": "Weichert",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Ri Mirko",
+						"lastName": "Wieczorek",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2018",
+				"ISBN": "9783406719325",
+				"edition": "2",
+				"libraryCatalog": "beck-online",
+				"place": "München",
+				"publisher": "Verlag C. H. Beck",
+				"rights": "© 2018 Verlag C. H. Beck oHG",
+				"shortTitle": "Kühling/Buchner, DS-GVO BDSG",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []

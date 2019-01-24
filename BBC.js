@@ -2,14 +2,14 @@
 	"translatorID": "f4130157-93f7-4493-8f24-a7c85549013d",
 	"label": "BBC",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(?:www|news?)\\.bbc\\.(co\\.uk|com)",
-	"minVersion": "2.1",
+	"target": "^https?://(www|news?)\\.bbc\\.(co\\.uk|com)",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-20 19:58:56"
+	"lastUpdated": "2017-07-18 11:06:53"
 }
 
 /*
@@ -36,8 +36,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (/\d{8}$/.test(url)) {
-		var pageNode = doc.getElementById("page");;
+	url = url.replace(/[\?#].+/, "");
+	if (/\d{8}$/.test(url)||/\d{7}\.(stm)$/.test(url)) {
+		var pageNode = doc.getElementById("page");
 		if (pageNode) {
 			//Z.debug(pageNode.className);
 			if (pageNode.className.indexOf("media-asset-page")>-1 || pageNode.className.indexOf("vxp-headlines")>-1) {
@@ -45,6 +46,9 @@ function detectWeb(doc, url) {
 			}
 		}
 		return "newspaperArticle";
+	}
+	if (url.indexOf("/newsbeat/article") != -1){
+		return "blogPost";
 	}
 	if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -55,7 +59,11 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
-	for (var i=0; i<rows.length; i++) {
+	//for NewsBeat
+	if (!rows.length) {
+		var rows = ZU.xpath(doc, '//article/div/h1[@itemprop="headline"]/a');
+	}
+	for (var i = 0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -65,7 +73,6 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
-
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -85,7 +92,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	
+	url = url.replace(/[\?#].+/, "");
 	var itemType = detectWeb(doc, url);
 	
 	var translator = Zotero.loadTranslator('web');
@@ -95,10 +102,11 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		
-		//add date and time if missing by one of three attempts:
+		//add date and time if missing by one of four attempts:
 		// 1. look at the json-ld data
 		// 2. calculate it from the data-seconds attribute
 		// 3. extract it from a nonstandard meta field
+		// 4. for old pages, get from metadata
 		var jsonld = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
 		var data = JSON.parse(jsonld);
 		//Z.debug(data);
@@ -112,9 +120,18 @@ function scrape(doc, url) {
 				item.date = date.toISOString();
 			} else {
 				item.date = ZU.xpathText(doc, '//meta[@property="rnews:datePublished"]/@content');
+				if (!item.date) {
+					item.date = ZU.xpathText(doc, '//p[@class="timestamp"]');
+					if (!item.date) {
+						item.date = ZU.xpathText(doc, '//meta[@name="OriginalPublicationDate"]/@content');
+					}
+				}
 			}
 		}
 		
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
 		//delete wrongly attached creators like
 		//"firstName": "B. B. C.", "lastName": "News"
 		item.creators = [];
@@ -133,17 +150,43 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
 		}
+		else
+		{
+			var authorString = ZU.xpathText(doc, '//p[@class="byline"]');
+			var title = ZU.xpathText(doc, '//em[@class="title"]');
+			if (authorString) {
+				authorString = authorString.replace(title, '').replace('By', '');
+				var authors = authorString.split('&');
+				for (var i=0; i<authors.length; i++) {
+					item.creators.push(ZU.cleanAuthor(authors[i], "author"));
+				}
+			}	
+		}
 		
+		if (url.indexOf("/newsbeat/article") != -1) {
+  			item.blogTitle = "BBC Newsbeat";
+		}
+
+		// description for old BBC pages
+		if (!item.abstractNote)
+			item.abstractNote = ZU.xpathText(doc, '//meta[@name="Description"]/@content');
+
+		for (var i in item.tags)
+			item.tags[i] = item.tags[i].charAt(0).toUpperCase()+item.tags[i].substring(1);
+
 		item.language = "en-GB";
-		
+
+		if (url.substr(-4)==".stm") {
+			item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
+		}
+
 		item.complete();
 	});
-	
+
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = itemType;
 		trans.doWeb(doc, url);
-	});
-
+});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -160,64 +203,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-10-18T10:31:45+01:00",
+				"date": "2011-10-18",
 				"abstractNote": "Spanish society has been shaken by revelations of the mass trafficking of babies, dating back to the Franco era but continuing until the 1990s involving respected doctors, nuns and priests.",
 				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
 				"url": "http://www.bbc.com/news/magazine-15335899",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bbc.com/news/world-africa-37066738",
-		"items": [
-			{
-				"itemType": "videoRecording",
-				"title": "Drone photography captures South Africa inequality",
-				"creators": [],
-				"date": "2016-08-12T23:57:42.000Z",
-				"abstractNote": "Photographer Johnny Miller has been documenting the disparity between South Africa's rich and poor using a drone.",
-				"language": "en-GB",
-				"libraryCatalog": "www.bbc.com",
-				"url": "http://www.bbc.com/news/world-africa-37066738",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bbc.com/sport/olympics/37068610",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "Rio Olympics 2016: Joseph Schooling beats Michael Phelps in 100m butterfly",
-				"creators": [],
-				"date": "2016/08/13 1:43:21",
-				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
-				"language": "en-GB",
-				"libraryCatalog": "www.bbc.com",
-				"publicationTitle": "BBC Sport",
-				"section": "Olympics",
-				"shortTitle": "Rio Olympics 2016",
-				"url": "http://www.bbc.com/sport/olympics/37068610",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -242,7 +234,7 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "China staff fined for not liking boss's Weibo posts",
 				"creators": [],
-				"date": "2016-08-18T12:55:52+01:00",
+				"date": "2016-08-18",
 				"abstractNote": "Company in China punishes employees who don't comment on manager's social media posts.",
 				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
@@ -279,7 +271,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2016-08-17T00:49:43+01:00",
+				"date": "2016-08-17",
 				"abstractNote": "How a simple post on social media ended a Russian woman's 40-year search for her father.",
 				"language": "en-GB",
 				"libraryCatalog": "www.bbc.com",
@@ -292,6 +284,104 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/search?q=harry+potter",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Will new music streaming service Tidal make the waves artists want?",
+				"creators": [
+					{
+						"firstName": "Chi Chi",
+						"lastName": "Izundu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-03-31",
+				"abstractNote": "Big names in the world of music made it known that they wanted a change when they all stood on stage on Monday and announced the relaunch of streaming service Tidal.",
+				"blogTitle": "BBC Newsbeat",
+				"language": "en-GB",
+				"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.bbc.com/sport/olympics/37068610",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Rio Olympics 2016: Joseph Schooling beats Michael Phelps in 100m butterfly",
+				"creators": [],
+				"date": "2016-08-13",
+				"abstractNote": "Singapore's Joseph Schooling wins his nation's first ever gold medal with victory in the 100m butterfly as Michael Phelps finishes joint second.",
+				"language": "en-GB",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC Sport",
+				"section": "Olympics",
+				"shortTitle": "Rio Olympics 2016",
+				"url": "http://www.bbc.com/sport/olympics/37068610",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://news.bbc.co.uk/2/hi/uk_news/politics/2116949.stm",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "EU must expand, Straw warns",
+				"creators": [],
+				"date": "2002-07-08",
+				"abstractNote": "Debate on reform of the Common Agricultural Policy must not dilute support for EU enlargement, Foreign Secretary Jack Straw will warn.",
+				"language": "en-GB",
+				"libraryCatalog": "news.bbc.co.uk",
+				"url": "http://news.bbc.co.uk/2/hi/uk_news/politics/2116949.stm",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					"BBC",
+					"BBC News",
+					"British",
+					"Foreign",
+					"International",
+					"News",
+					"News online",
+					"Online",
+					"Service",
+					"Uk",
+					"World"
+				],
 				"notes": [],
 				"seeAlso": []
 			}

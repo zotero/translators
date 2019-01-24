@@ -2,39 +2,52 @@
 	"translatorID": "96b9f483-c44d-5784-cdad-ce21b984fe01",
 	"label": "Amazon",
 	"creator": "Sean Takats, Michael Berkowitz, and Simon Kornblith",
-	"target": "^https?://((?:www\\.)|(?:smile\\.))?amazon",
+	"target": "^https?://((www\\.)|(smile\\.))?amazon",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-03-12 17:57:05"
+	"lastUpdated": "2018-03-23 07:21:31"
 }
 
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 function detectWeb(doc, url) {
-	if(getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
-		var xpath = '//input[contains(@name, "ASIN")]';
-		if(doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			if(Zotero.isBookmarklet) return "server";
+		if (attr(doc, 'input[name*="ASIN"]', 'value')) {
+			if (Zotero.isBookmarklet) return "server";
 			
-			var elmt = doc.evaluate('//input[@name="storeID"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();
-			if(elmt) {
-				var storeID = elmt.value;
-				//Z.debug(storeID);
-				if (storeID=="music"|storeID=="dmusic"){
+			var storeID = attr(doc, 'input[name="storeID"]', 'value');
+			if (storeID) {
+				if (storeID.indexOf("books")>-1) {
+					return "book";
+				} else if (storeID=="music"|storeID=="dmusic"){
 					return "audioRecording";
 				} else if (storeID=="dvd"|storeID=="dvd-de"|storeID=="video"|storeID=="movies-tv"){
 					return "videoRecording";
 				} else if (storeID=="videogames"|storeID=="mobile-apps") {
 					return "computerProgram";
 				} else {
-					return "book";
+					Z.debug("Items in this store will be ignored by Zotero: " + storeID);
 				}
 			} else {
-				return "book";
+				//audio books are purchased as audible abo
+				if (text(doc, 'form[class="a-spacing-none"][action*="/audible/"]')) {
+					return "audioRecording";
+				}
+				var mainCategory = text(doc, '#wayfinding-breadcrumbs_container li a');
+				if (mainCategory && mainCategory.indexOf('Kindle')>-1) {
+					return "book";
+				} else {
+					Z.debug("Items in this category will be ignored by Zotero: " + mainCategory);
+				}
+				
 			}
 		}
 	}
@@ -52,28 +65,28 @@ function getSearchResults(doc, checkOnly) {
 		}
 	}
 	
-	if(!links.length) {
+	if (!links.length) {
 		//wish lists
 		container = doc.getElementById('item-page-wrapper');
-		if(container) {
+		if (container) {
 			links = ZU.xpath(container, './/a[starts-with(@id, "itemName_")]');
 		}
 	}
 	
-	if(!links.length) {
+	if (!links.length) {
 		//author pages
 		container = doc.getElementById('mainResults');
-		if(container) {
+		if (container) {
 			links = ZU.xpath(container, './/li[starts-with(@id, "result_")]//a[h2]');
 		}
 	}
 	
-	if(!links.length) return false;
+	if (!links.length) return false;
 	var availableItems = {}, found = false,
 		asinRe = /\/(?:dp|product)\/(?:[^?#]+)\//;
-	for(var i=0; i<links.length; i++) {
+	for (var i=0; i<links.length; i++) {
 		var elmt = links[i];
-		if(asinRe.test(elmt.href)) {
+		if (asinRe.test(elmt.href)) {
 			if (checkOnly) return true;
 			availableItems[elmt.href] = elmt.textContent.trim();
 			found = true;
@@ -84,12 +97,12 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function(items) {
-			if(!items) return true;
+			if (!items) return true;
 			
 			var links = [];
-			for(var i in items) links.push(i);
+			for (var i in items) links.push(i);
 			Zotero.Utilities.processDocuments(links, scrape);
 		});
 
@@ -125,7 +138,7 @@ var i15dFields = {
 	'Publisher': ['Publisher', 'Verlag', '出版社'],
 	'Hardcover': ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
 	'Paperback' : ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
-	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
+	'Print Length' : ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Poche', 'Broché', 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'],//TODO: Chinese label
 	'Language' : ['Language', 'Sprache', '语种', '言語', 'Langue', 'Lingua', 'Idioma'],
 	'Author' : ['Author', '著', '作者'],
 	'Actor' : ['Actors', 'Actor', 'Darsteller', 'Acteurs', 'Attori', 'Attore', 'Actores', '出演'],
@@ -146,36 +159,21 @@ function getField(info, field) {
 	//returns the value for the key 'field' or any of its
 	//corresponding (language specific) keys of the array 'info'
 	
-	if(!i15dFields[field]) return;
+	if (!i15dFields[field]) return;
 	
-	for(var i=0; i<i15dFields[field].length; i++) {
-		if(info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
+	for (var i=0; i<i15dFields[field].length; i++) {
+		if (info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
 	}
 }
 
 function translateField(str) {
-	for(var f in i15dFields) {
-		if(i15dFields[f].indexOf(str) != -1) {
+	for (var f in i15dFields) {
+		if (i15dFields[f].indexOf(str) != -1) {
 			return f;
 		}
 	}
 }
 
-function get_nextsibling(n) {
-	//returns next sibling of n, or if it was the last one
-	//returns next sibling of its parent node, or... --> while(x == null)
-	//accepts only element nodes (type 1) or nonempty textnode (type 3)
-	//and skips everything else
-	var x=n.nextSibling;
-	while (x == null || (x.nodeType != 1 && (x.nodeType != 3 || x.textContent.match(/^\s*$/) ))) {
-		if (x==null) {
-			x = get_nextsibling(n.parentNode);
-		} else {
-			x=x.nextSibling;
-		}
-	}
-	return x;	
-}
 
 function scrape(doc, url) {
 	var isAsian = url.search(/^https?:\/\/[^\/]+\.(?:jp|cn)[:\/]/) != -1;
@@ -197,7 +195,7 @@ function scrape(doc, url) {
 		.replace(/(?: [(\[].+[)\]])+$/, "");
 	
 	var baseNode = title.parentElement, bncl;
-	while(baseNode && (bncl = baseNode.classList) && 
+	while (baseNode && (bncl = baseNode.classList) && 
 		!(// ways to identify a node encompasing title and authors
 			baseNode.id == 'booksTitle'
 			|| baseNode.id == 'ppd-center'
@@ -211,30 +209,31 @@ function scrape(doc, url) {
 		baseNode = baseNode.parentElement;
 	}
 	
-	if(baseNode) {
+	if (baseNode) {
 		var authors = ZU.xpath(baseNode, './/span[@id="artistBlurb"]/a');
-		//if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
-		if(!authors.length) authors = ZU.xpath(baseNode, '(.//*[@id="byline"]/span[contains(@class, "author")] | .//*[@id="byline"]/span[contains(@class, "author")]/span)/a[contains(@class, "a-link-normal")][1]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
-			if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
-		for(var i=0; i<authors.length; i++) {
+		//if (!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
+		if (!authors.length) authors = ZU.xpath(baseNode, '(.//*[@id="byline"]/span[contains(@class, "author")] | .//*[@id="byline"]/span[contains(@class, "author")]/span)/a[contains(@class, "a-link-normal")][1]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/span[contains(@class, "author")]/a|.//span[contains(@class, "author")]/span/a');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
+		for (var i=0; i<authors.length; i++) {
 			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
-			if(role) {
+			if (role) {
 				role = CREATOR[translateField(
 					role.replace(/^.*\(\s*|\s*\).*$/g, '')
 						.split(',')[0] // E.g. "Actor, Primary Contributor"
 						.trim()
 				)];
 			}
-			if(!role) role = 'author';
+			if (!role) role = 'author';
 			
 			var name = ZU.trimInternal(authors[i].textContent)
 				.replace(/\s*\([^)]+\)/, '');
 			
-			if(item.itemType == 'audioRecording') {
+			if (item.itemType == 'audioRecording') {
 				item.creators.push({
 					lastName: name,
 					creatorType: 'performer',
@@ -258,7 +257,7 @@ function scrape(doc, url) {
 		item.abstractNote = abstractNode.textContent.trim();
 		if (!item.abstractNote) {
 			var iframe = abstractNode.getElementsByTagName('iframe')[0];
-			if(iframe) {
+			if (iframe) {
 				abstractNode = iframe.contentWindow.document.getElementById('iframeContent');
 				item.abstractNote = abstractNode.textContent.trim();
 			}
@@ -268,22 +267,22 @@ function scrape(doc, url) {
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
-	if(els.length) {
-		for(var i=0; i<els.length; i++) {
+	if (els.length) {
+		for (var i=0; i<els.length; i++) {
 			var el = els[i],
-				key = ZU.xpathText(el, 'b[1]').trim()
-			if(key) {
+				key = ZU.xpathText(el, 'b[1]').trim();
+			if (key) {
 				info[key.replace(/\s*:$/, "")] = el.textContent.substr(key.length+1).trim();
 			}
 		}
 	} else {
 		// New design encountered 06/30/2013
 		els = ZU.xpath(doc, '//tr[td[@class="a-span3"]][td[@class="a-span9"]]');
-		for(var i=0; i<els.length; i++) {
+		for (var i=0; i<els.length; i++) {
 			var el = els[i],
 				key = ZU.xpathText(el, 'td[@class="a-span3"]'),
 				value = ZU.xpathText(el, 'td[@class="a-span9"]');
-			if(key && value) info[key.trim()] = value.trim();
+			if (key && value) info[key.trim()] = value.trim();
 		}
 	}
 	
@@ -293,27 +292,27 @@ function scrape(doc, url) {
 	}
 	
 	// Date
-	for(var i=0; i<DATE.length; i++) {
+	for (var i=0; i<DATE.length; i++) {
 		item.date = info[DATE[i]];
-		if(item.date) break;
+		if (item.date) break;
 	}
-	if(!item.date) {
-		for(var i in info) {
+	if (!item.date) {
+		for (var i in info) {
 			var m = /\(([^)]+ [0-9]{4})\)/.exec(info[i]);
-			if(m) item.date = m[1];
+			if (m) item.date = m[1];
 		}
 	}
 	
 	// Books
 	var publisher = getField(info, 'Publisher') || getField(info, 'Editor');
-	if(publisher) {
+	if (publisher) {
 		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
 		item.publisher = m[1].trim();
-		if(m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
-		if(m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
+		if (m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
+		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
-	if(pages) item.numPages = parseInt(pages, 10);
+	if (pages) item.numPages = parseInt(pages, 10);
 	item.language = getField(info, 'Language');
 	//add publication place from ISBN translator, see at the end
 	
@@ -321,14 +320,14 @@ function scrape(doc, url) {
 	if (item.itemType == 'videoRecording') {
 		// This seems to only be worth it for videos
 		var clearedCreators = false;
-		for(var i in CREATOR) {
-			if(getField(info, i)) {
-				if(!clearedCreators) {
+		for (var i in CREATOR) {
+			if (getField(info, i)) {
+				if (!clearedCreators) {
 					item.creators = [];
 					clearedCreators = true;
 				}
 				var creators = getField(info, i).split(/ *, */);
-				for(var j=0; j<creators.length; j++) {
+				for (var j=0; j<creators.length; j++) {
 					item.creators.push(ZU.cleanAuthor(creators[j], CREATOR[i]));
 				}
 			}
@@ -340,10 +339,10 @@ function scrape(doc, url) {
 	item.language = getField(info, 'Language');
 	// Music
 	item.label = getField(info, 'Label');
-	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a')
-	if(getField(info, 'Audio CD')) {
+	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a');
+	if (getField(info, 'Audio CD')) {
 		item.audioRecordingFormat = "Audio CD";
-	} else if(department && department.trim() == "Amazon MP3 Store") {
+	} else if (department && department.trim() == "Amazon MP3 Store") {
 		item.audioRecordingFormat = "MP3";
 	}
 	
@@ -351,7 +350,7 @@ function scrape(doc, url) {
 	
 	//we search for translators for a given ISBN
 	//and try to figure out the missing publication place
-	if(item.ISBN && !item.place) {
+	if (item.ISBN && !item.place) {
 		Z.debug("Searching for additional metadata by ISBN: " + item.ISBN);
 		var search = Zotero.loadTranslator("search");
 		search.setHandler("translators", function(obj, translators) {
@@ -385,11 +384,12 @@ function scrape(doc, url) {
 	
 }
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/Test-William-Sleator/dp/0810989891/ref=sr_1_1?ie=UTF8&qid=1308010556&sr=8-1",
+		"url": "https://www.amazon.com/Test-William-Sleator/dp/0810989891/ref=sr_1_1?ie=UTF8&qid=1308010556&sr=8-1",
 		"items": [
 			{
 				"itemType": "book",
@@ -409,7 +409,7 @@ var testCases = [
 				"libraryCatalog": "Amazon",
 				"numPages": 320,
 				"place": "New York",
-				"publisher": "Amulet Paperbacks",
+				"publisher": "Harry N. Abrams",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -573,7 +573,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
+		"url": "https://www.amazon.de/Fiktionen-Erz%C3%A4hlungen-Jorge-Luis-Borges/dp/3596105811/ref=sr_1_1?ie=UTF8&qid=1362329791&sr=8-1",
 		"items": [
 			{
 				"itemType": "book",
@@ -592,6 +592,7 @@ var testCases = [
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon",
 				"numPages": 192,
+				"place": "Frankfurt am Main",
 				"publisher": "FISCHER Taschenbuch",
 				"shortTitle": "Fiktionen",
 				"attachments": [
@@ -642,11 +643,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.it/Emil-Astrid-Lindgren/dp/888203867X/ref=sr_1_1?s=books&ie=UTF8&qid=1362324961&sr=1-1",
+		"url": "https://www.amazon.it/Emil-Astrid-Lindgren/dp/888203867X/ref=sr_1_1?s=books&ie=UTF8&qid=1362324961&sr=1-1",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Emil",
+				"title": "Emil. Ediz. illustrata",
 				"creators": [
 					{
 						"firstName": "Astrid",
@@ -688,7 +689,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.cn/%E5%9B%BE%E4%B9%A6/dp/B007CUSP3A",
+		"url": "https://www.amazon.cn/%E5%9B%BE%E4%B9%A6/dp/B007CUSP3A",
 		"items": [
 			{
 				"itemType": "book",
@@ -721,7 +722,7 @@ var testCases = [
 				"edition": "第1版",
 				"libraryCatalog": "Amazon",
 				"numPages": 373,
-				"place": "北京",
+				"place": "Beijing",
 				"publisher": "科学出版社",
 				"shortTitle": "汉语语音合成",
 				"attachments": [
@@ -820,7 +821,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.co.jp/gp/product/0099578077/",
+		"url": "https://www.amazon.co.jp/gp/product/0099578077/",
 		"items": [
 			{
 				"itemType": "book",
@@ -832,13 +833,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012/8/2",
+				"date": "August 2, 2012",
 				"ISBN": "9780099578079",
-				"edition": "Combined volume版",
+				"edition": "Combined volume edition",
 				"language": "英語",
 				"libraryCatalog": "Amazon",
 				"numPages": 1328,
-				"place": "New York",
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
 				"attachments": [
@@ -903,7 +903,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/First-Quarto-Hamlet-Cambridge-Shakespeare/dp/0521653908/",
+		"url": "https://www.amazon.com/First-Quarto-Hamlet-Cambridge-Shakespeare/dp/0521653908/",
 		"items": [
 			{
 				"itemType": "book",
@@ -926,7 +926,7 @@ var testCases = [
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 144,
-				"place": "New York",
+				"place": "Cambridge",
 				"publisher": "Cambridge University Press",
 				"attachments": [
 					{
@@ -943,7 +943,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.co.jp/dp/4003314212",
+		"url": "https://www.amazon.co.jp/dp/4003314212",
 		"items": [
 			{
 				"itemType": "book",
@@ -955,7 +955,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1977/9/16",
+				"date": "September 16, 1977",
 				"ISBN": "9784003314210",
 				"language": "日本語",
 				"libraryCatalog": "Amazon",

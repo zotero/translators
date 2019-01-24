@@ -2,14 +2,14 @@
 	"translatorID": "9346ddef-126b-47ec-afef-8809ed1972ab",
 	"label": "Institute of Physics",
 	"creator": "Michael Berkowitz and Avram Lyon and Sebastian Karcher",
-	"target": "^https?://iopscience\\.iop\\.org/(?:(article/10\\.[^/]+/)?[0-9-X]+/.+|n?search\\?.+)",
+	"target": "^https?://iopscience\\.iop\\.org/((article/10\\.[^/]+/)?[0-9-X]+/.+|n?search\\?.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-10-06 04:11:11"
+	"lastUpdated": "2016-11-01 12:54:14"
 }
 
 /*
@@ -31,13 +31,9 @@
 */
 
 function detectWeb(doc,url) {
-	var xpath='//meta[@name="citation_journal_title"]';
-		
-	if (ZU.xpath(doc, xpath).length > 0) {
+	if (ZU.xpath(doc, '//meta[@name="citation_journal_title"]').length > 0) {
 		return "journalArticle";
-	}
-			
-	else if (!url.match(/\/pdf\//) && getResults(doc).length){
+	} else if (url.indexOf("/pdf/") == -1 && getResults(doc).length){
 		return "multiple";
 	}
 
@@ -45,15 +41,7 @@ function detectWeb(doc,url) {
 }
 
 function getResults(doc){
-	var results;
-	if (ZU.xpathText(doc, '//div[@class="searchResCol1"]')){
-			results = ZU.xpath(doc, '//div[@class="searchResCol1"]//h4/a')
-		}
-		//journal TOC
-		else if (ZU.xpathText(doc, '//div[contains(@class, "paperEntry")]')){
-			results = ZU.xpath(doc, '//div[contains(@class, "paperEntry")]//a[@class="title" and not(contains(@href, "fulltext"))]');
-		}
-	return results;	
+	return ZU.xpath(doc, '//div[@class="searchResCol1"]//h4/a|//a[contains(@class, "art-list-item-title")]');	
 }	
 
 function doWeb(doc,url)
@@ -108,10 +96,7 @@ function scrape (doc, url){
 		translator.translate();
 	});
 
-	}
-	
-
-
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

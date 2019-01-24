@@ -1,15 +1,15 @@
 {
 	"translatorID": "ed28758b-9c39-4e1c-af89-ce1c9202b70f",
-	"label": "National Gallery of Art - U.S.A.",
+	"label": "National Gallery of Art - USA",
 	"creator": "Adam Crymble",
-	"target": "^https?://www\\.nga\\.gov/content\\/ngaweb",
+	"target": "^https?://www\\.nga\\.gov/content/ngaweb",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-06-08 13:57:52"
+	"lastUpdated": "2016-12-28 11:55:43"
 }
 
 /* Multiple items examples (tests don't work)
@@ -80,6 +80,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "artwork",
+				"title": "Girl with a Flute",
 				"creators": [
 					{
 						"firstName": "Johannes",
@@ -87,21 +88,20 @@ var testCases = [
 						"creatorType": "artist"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "probably 1665/1675",
+				"artworkMedium": "oil on panel",
+				"artworkSize": "painted surface: 20 x 17.8 cm (7 7/8 x 7 in.), framed: 39.7 x 37.5 x 5.1 cm (15 5/8 x 14 3/4 x 2 in.)",
+				"callNumber": "1942.9.98",
+				"libraryCatalog": "National Gallery of Art - U.S.A.",
 				"attachments": [
 					{
 						"title": "US National Gallery Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Girl with a Flute",
-				"date": "probably 1665/1675",
-				"artworkSize": "painted surface: 20 x 17.8 cm (7 7/8 x 7 in.)\n, framed: 39.7 x 37.5 x 5.1 cm (15 5/8 x 14 3/4 x 2 in.)",
-				"callNumber": "1942.9.98",
-				"libraryCatalog": "National Gallery of Art - U.S.A.",
-				"artworkMedium": "oil on panel"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

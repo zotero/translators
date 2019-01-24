@@ -9,15 +9,15 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-05-20 00:05:55"
+	"lastUpdated": "2018-08-25 14:14:34"
 }
 
 function detectImport() {
 	var line;
 	var i = 0;
 	while ((line = Zotero.read()) !== false) {
-		if (line != "") {
-			if (line.match(/<(marc\:)?collection xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
+		if (line !== "") {
+			if (line.match(/<(marc\:)?(collection|record) xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
 				return true;
 			} else {
 				if (i++ > 5) {
@@ -43,35 +43,39 @@ function doImport() {
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(text, 'text/xml');
 		//define the marc namespace
-		ns = {
+		var ns = {
 			"marc": "http://www.loc.gov/MARC21/slim"
 		};
 		var records = ZU.xpath(xml, '//marc:record', ns);
-		for (var i in records) {
+		for (let rec of records) {
 
 			//create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
-			record.leader = ZU.xpathText(records[i], "./marc:leader", ns);
-			var fields = ZU.xpath(records[i], "./marc:datafield", ns);
-			for (var j in fields) {
+			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
+			var fields = ZU.xpath(rec, "./marc:datafield", ns);
+			for (let field of fields) {
 				//go through every datafield (corresponds to a MARC field)
-				var subfields = ZU.xpath(fields[j], "./marc:subfield", ns);
-				for (var k in subfields) {
+				var subfields = ZU.xpath(field, "./marc:subfield", ns);
+				var tag = "";
+				for (let subfield of subfields) {
 					//get the subfields and their codes...
-					var code = ZU.xpathText(subfields[k], "./@code", ns)
-					var sf = ZU.xpathText(subfields[k], "./text()", ns)
-					//set tag to an empty string if this is the first subfield
-					if (k == 0) var tag = "";
-					//concat all subfields in one datafield, with subfield delimiter and code between them
-					tag = tag + marc.subfieldDelimiter + code + sf;
+					var code = ZU.xpathText(subfield, "./@code", ns);
+					var sf = ZU.xpathText(subfield, "./text()", ns);
+					//delete non-sorting symbols
+					//e.g. &#152;Das&#156; Adam-Smith-Projekt
+					if (sf) {
+						sf = sf.replace(/[\x80-\x9F]/g,"");
+						//concat all subfields in one datafield, with subfield delimiter and code between them
+						tag = tag + marc.subfieldDelimiter + code + sf
+					}
 				}
-				record.addField(ZU.xpathText(fields[j], "./@tag", ns), ZU.xpathText(fields[j], "./@ind1", ns) + ZU.xpathText(fields[j], "./@ind2"), tag);
+				record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
 			}
 			record.translate(newItem);
 			newItem.complete();
 		}
-	}) //get Translator end
+	}); //get Translator end
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -96,9 +100,15 @@ var testCases = [
 				"place": "New York, N.Y",
 				"attachments": [],
 				"tags": [
-					"1951-1960",
-					"Jazz",
-					"Piano with jazz ensemble"
+					{
+						"tag": "1951-1960"
+					},
+					{
+						"tag": "Jazz"
+					},
+					{
+						"tag": "Piano with jazz ensemble"
+					}
 				],
 				"notes": [
 					{
@@ -123,17 +133,32 @@ var testCases = [
 				"date": "1994",
 				"abstractNote": "Features the White House. Highlights the Executive Office of the President, which includes senior policy advisors and offices responsible for the President's correspondence and communications, the Office of the Vice President, and the Office of the First Lady. Posts contact information via mailing address, telephone and fax numbers, and e-mail. Contains the Interactive Citizens' Handbook with information on health, travel and tourism, education and training, and housing. Provides a tour and the history of the White House. Links to White House for Kids",
 				"callNumber": "F204.W5",
+				"extra": "OCLC: ocm44279786",
 				"place": "Washington, D.C",
 				"publisher": "White House Web Team",
 				"attachments": [],
 				"tags": [
-					"Executive Office of the President",
-					"Office of the First Lady",
-					"Office of the Vice President",
-					"United States",
-					"United States",
-					"United States",
-					"White House (Washington, D.C.)"
+					{
+						"tag": "Executive Office of the President"
+					},
+					{
+						"tag": "Office of the First Lady"
+					},
+					{
+						"tag": "Office of the Vice President"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "White House (Washington, D.C.)"
+					}
 				],
 				"notes": [
 					{
@@ -206,6 +231,116 @@ var testCases = [
 						"note": "Theme: Population and social conditions Mode of access : World Wide Web (available in electronic format only) Description based on the Internet version on the World Wide Web"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n  <record xmlns=\"http://www.loc.gov/MARC21/slim\" type=\"Bibliographic\">\n    <leader>00000pam a2200000 c 4500</leader>\n    <controlfield tag=\"001\">1112218955</controlfield>\n    <controlfield tag=\"003\">DE-101</controlfield>\n    <controlfield tag=\"005\">20161020223122.0</controlfield>\n    <controlfield tag=\"007\">tu</controlfield>\n    <controlfield tag=\"008\">160824s2016    gw ||||| |||| 10||||ger  </controlfield>\n    <datafield tag=\"015\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">16,A43</subfield>\n      <subfield code=\"z\">16,N35</subfield>\n      <subfield code=\"2\">dnb</subfield>\n    </datafield>\n    <datafield tag=\"016\" ind1=\"7\" ind2=\" \">\n      <subfield code=\"2\">DE-101</subfield>\n      <subfield code=\"a\">1112218955</subfield>\n    </datafield>\n    <datafield tag=\"020\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">9783781521230</subfield>\n      <subfield code=\"c\">Broschur : EUR 27.90 (DE), EUR 28.70 (AT)</subfield>\n      <subfield code=\"9\">978-3-7815-2123-0</subfield>\n    </datafield>\n    <datafield tag=\"020\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">3781521230</subfield>\n      <subfield code=\"9\">3-7815-2123-0</subfield>\n    </datafield>\n    <datafield tag=\"024\" ind1=\"3\" ind2=\" \">\n      <subfield code=\"a\">9783781521230</subfield>\n    </datafield>\n    <datafield tag=\"035\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">(DE-599)DNB1112218955</subfield>\n    </datafield>\n    <datafield tag=\"035\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">(OCoLC)958469418</subfield>\n    </datafield>\n    <datafield tag=\"040\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">1245</subfield>\n      <subfield code=\"b\">ger</subfield>\n      <subfield code=\"c\">DE-101</subfield>\n      <subfield code=\"d\">9999</subfield>\n      <subfield code=\"e\">rda</subfield>\n    </datafield>\n    <datafield tag=\"041\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">ger</subfield>\n    </datafield>\n    <datafield tag=\"044\" ind1=\" \" ind2=\" \">\n      <subfield code=\"c\">XA-DE-BY</subfield>\n    </datafield>\n    <datafield tag=\"082\" ind1=\"0\" ind2=\"4\">\n      <subfield code=\"8\">1\\x</subfield>\n      <subfield code=\"a\">371.9046</subfield>\n      <subfield code=\"q\">DE-101</subfield>\n      <subfield code=\"2\">22/ger</subfield>\n    </datafield>\n    <datafield tag=\"083\" ind1=\"7\" ind2=\" \">\n      <subfield code=\"a\">370</subfield>\n      <subfield code=\"q\">DE-101</subfield>\n      <subfield code=\"2\">23sdnb</subfield>\n    </datafield>\n    <datafield tag=\"084\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">370</subfield>\n      <subfield code=\"q\">DE-101</subfield>\n      <subfield code=\"2\">sdnb</subfield>\n    </datafield>\n    <datafield tag=\"085\" ind1=\" \" ind2=\" \">\n      <subfield code=\"8\">1\\x</subfield>\n      <subfield code=\"b\">371.9046</subfield>\n    </datafield>\n    <datafield tag=\"090\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">b</subfield>\n    </datafield>\n    <datafield tag=\"111\" ind1=\"2\" ind2=\" \">\n      <subfield code=\"0\">(DE-588)1115266640</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/1115266640</subfield>\n      <subfield code=\"0\">(DE-101)1115266640</subfield>\n      <subfield code=\"a\">Deutsche Gesellschaft für Erziehungswissenschaft</subfield>\n      <subfield code=\"e\">Sektion Sonderpädagogik</subfield>\n      <subfield code=\"e\">Jahrestagung</subfield>\n      <subfield code=\"n\">50.</subfield>\n      <subfield code=\"d\">2015</subfield>\n      <subfield code=\"c\">Basel</subfield>\n      <subfield code=\"j\">Verfasser</subfield>\n      <subfield code=\"4\">aut</subfield>\n    </datafield>\n    <datafield tag=\"245\" ind1=\"0\" ind2=\"0\">\n      <subfield code=\"a\">Bildungs- und Erziehungsorganisatonen im Spannungsfeld von Inklusion und Ökonomisierung</subfield>\n      <subfield code=\"c\">Tanja Sturm, Andreas Köpfer, Benjamin Wagener (Hrsg.)</subfield>\n    </datafield>\n    <datafield tag=\"264\" ind1=\" \" ind2=\"1\">\n      <subfield code=\"a\">Bad Heilbrunn</subfield>\n      <subfield code=\"b\">Verlag Julius Klinkhardt</subfield>\n      <subfield code=\"c\">2016</subfield>\n    </datafield>\n    <datafield tag=\"300\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">417 Seiten</subfield>\n      <subfield code=\"b\">Illustrationen</subfield>\n      <subfield code=\"c\">21 cm</subfield>\n    </datafield>\n    <datafield tag=\"336\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Text</subfield>\n      <subfield code=\"b\">txt</subfield>\n      <subfield code=\"2\">rdacontent</subfield>\n    </datafield>\n    <datafield tag=\"337\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">ohne Hilfsmittel zu benutzen</subfield>\n      <subfield code=\"b\">n</subfield>\n      <subfield code=\"2\">rdamedia</subfield>\n    </datafield>\n    <datafield tag=\"338\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Band</subfield>\n      <subfield code=\"b\">nc</subfield>\n      <subfield code=\"2\">rdacarrier</subfield>\n    </datafield>\n    <datafield tag=\"490\" ind1=\"0\" ind2=\" \">\n      <subfield code=\"a\">Perspektiven sonderpädagogischer Forschung</subfield>\n    </datafield>\n    <datafield tag=\"500\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Tagungsband zur 50. Jahrestagung der DGfE-Sektion Sonderpädagogik 2015 in Basel (Vorwort)</subfield>\n    </datafield>\n    <datafield tag=\"650\" ind1=\" \" ind2=\"7\">\n      <subfield code=\"0\">(DE-588)7693876-1</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/7693876-1</subfield>\n      <subfield code=\"0\">(DE-101)100072185X</subfield>\n      <subfield code=\"a\">Inklusive Pädagogik</subfield>\n      <subfield code=\"2\">gnd</subfield>\n    </datafield>\n    <datafield tag=\"650\" ind1=\" \" ind2=\"7\">\n      <subfield code=\"0\">(DE-588)4126892-1</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4126892-1</subfield>\n      <subfield code=\"0\">(DE-101)04126892X</subfield>\n      <subfield code=\"a\">Schulentwicklung</subfield>\n      <subfield code=\"2\">gnd</subfield>\n    </datafield>\n    <datafield tag=\"650\" ind1=\" \" ind2=\"7\">\n      <subfield code=\"0\">(DE-588)4035093-9</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4035093-9</subfield>\n      <subfield code=\"0\">(DE-101)040350932</subfield>\n      <subfield code=\"a\">Lehrerbildung</subfield>\n      <subfield code=\"2\">gnd</subfield>\n    </datafield>\n    <datafield tag=\"650\" ind1=\" \" ind2=\"7\">\n      <subfield code=\"0\">(DE-588)4047376-4</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4047376-4</subfield>\n      <subfield code=\"0\">(DE-101)040473767</subfield>\n      <subfield code=\"a\">Professionalisierung</subfield>\n      <subfield code=\"2\">gnd</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">(Produktform)Book</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Inklusion</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Lehrerbildung</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">Sonderpädagogik</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">UN-Behindertenrechtskonvention</subfield>\n    </datafield>\n    <datafield tag=\"653\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">(VLB-WN)1572: Hardcover, Softcover / Pädagogik/Bildungswesen</subfield>\n    </datafield>\n    <datafield tag=\"655\" ind1=\" \" ind2=\"7\">\n      <subfield code=\"0\">(DE-588)1071861417</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/1071861417</subfield>\n      <subfield code=\"0\">(DE-101)1071861417</subfield>\n      <subfield code=\"a\">Konferenzschrift</subfield>\n      <subfield code=\"y\">2015</subfield>\n      <subfield code=\"z\">Basel</subfield>\n      <subfield code=\"2\">gnd-content</subfield>\n    </datafield>\n    <datafield tag=\"689\" ind1=\"0\" ind2=\"0\">\n      <subfield code=\"0\">(DE-588)7693876-1</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/7693876-1</subfield>\n      <subfield code=\"0\">(DE-101)100072185X</subfield>\n      <subfield code=\"D\">s</subfield>\n      <subfield code=\"a\">Inklusive Pädagogik</subfield>\n    </datafield>\n    <datafield tag=\"689\" ind1=\"0\" ind2=\"1\">\n      <subfield code=\"0\">(DE-588)4126892-1</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4126892-1</subfield>\n      <subfield code=\"0\">(DE-101)04126892X</subfield>\n      <subfield code=\"D\">s</subfield>\n      <subfield code=\"a\">Schulentwicklung</subfield>\n    </datafield>\n    <datafield tag=\"689\" ind1=\"0\" ind2=\"2\">\n      <subfield code=\"0\">(DE-588)4035093-9</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4035093-9</subfield>\n      <subfield code=\"0\">(DE-101)040350932</subfield>\n      <subfield code=\"D\">s</subfield>\n      <subfield code=\"a\">Lehrerbildung</subfield>\n    </datafield>\n    <datafield tag=\"689\" ind1=\"0\" ind2=\"3\">\n      <subfield code=\"0\">(DE-588)4047376-4</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/4047376-4</subfield>\n      <subfield code=\"0\">(DE-101)040473767</subfield>\n      <subfield code=\"D\">s</subfield>\n      <subfield code=\"a\">Professionalisierung</subfield>\n    </datafield>\n    <datafield tag=\"689\" ind1=\"0\" ind2=\" \">\n      <subfield code=\"5\">DE-101</subfield>\n      <subfield code=\"5\">DE-101</subfield>\n    </datafield>\n    <datafield tag=\"700\" ind1=\"1\" ind2=\" \">\n      <subfield code=\"0\">(DE-588)1027192416</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/1027192416</subfield>\n      <subfield code=\"0\">(DE-101)1027192416</subfield>\n      <subfield code=\"a\">Sturm, Tanja</subfield>\n      <subfield code=\"d\">1975-</subfield>\n      <subfield code=\"e\">Herausgeber</subfield>\n      <subfield code=\"4\">edt</subfield>\n    </datafield>\n    <datafield tag=\"700\" ind1=\"1\" ind2=\" \">\n      <subfield code=\"a\">Köpfer, Andreas</subfield>\n      <subfield code=\"e\">Herausgeber</subfield>\n      <subfield code=\"4\">edt</subfield>\n    </datafield>\n    <datafield tag=\"700\" ind1=\"1\" ind2=\" \">\n      <subfield code=\"a\">Wagener, Benjamin</subfield>\n      <subfield code=\"e\">Herausgeber</subfield>\n      <subfield code=\"4\">edt</subfield>\n    </datafield>\n    <datafield tag=\"710\" ind1=\"2\" ind2=\" \">\n      <subfield code=\"0\">(DE-588)2016917-6</subfield>\n      <subfield code=\"0\">(uri)http://d-nb.info/gnd/2016917-6</subfield>\n      <subfield code=\"0\">(DE-101)004754522</subfield>\n      <subfield code=\"a\">Verlag Julius Klinkhardt</subfield>\n      <subfield code=\"4\">pbl</subfield>\n    </datafield>\n    <datafield tag=\"850\" ind1=\" \" ind2=\" \">\n      <subfield code=\"a\">DE-101a</subfield>\n      <subfield code=\"a\">DE-101b</subfield>\n    </datafield>\n    <datafield tag=\"856\" ind1=\"4\" ind2=\"2\">\n      <subfield code=\"m\">B:DE-101</subfield>\n      <subfield code=\"q\">application/pdf</subfield>\n      <subfield code=\"u\">http://d-nb.info/1112218955/04</subfield>\n      <subfield code=\"3\">Inhaltsverzeichnis</subfield>\n    </datafield>\n    <datafield tag=\"925\" ind1=\"r\" ind2=\" \">\n      <subfield code=\"a\">ra</subfield>\n    </datafield>\n    <datafield tag=\"926\" ind1=\"1\" ind2=\" \">\n      <subfield code=\"a\">JNS</subfield>\n      <subfield code=\"o\">93</subfield>\n      <subfield code=\"q\">Publisher</subfield>\n      <subfield code=\"v\">1.1</subfield>\n      <subfield code=\"x\">Sonderpädagogik</subfield>\n    </datafield>\n    <datafield tag=\"926\" ind1=\"2\" ind2=\" \">\n      <subfield code=\"a\">JNK</subfield>\n      <subfield code=\"o\">93</subfield>\n      <subfield code=\"q\">Publisher</subfield>\n      <subfield code=\"v\">1.1</subfield>\n      <subfield code=\"x\">Bildungswesen: Organisation und Verwaltung</subfield>\n    </datafield>\n  </record>\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Bildungs- und Erziehungsorganisatonen im Spannungsfeld von Inklusion und Ökonomisierung",
+				"creators": [
+					{
+						"firstName": "Tanja",
+						"lastName": "Sturm",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Andreas",
+						"lastName": "Köpfer",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Benjamin",
+						"lastName": "Wagener",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2016",
+				"ISBN": "9783781521230 3781521230",
+				"callNumber": "b",
+				"language": "ger",
+				"numPages": "417",
+				"place": "Bad Heilbrunn",
+				"publisher": "Verlag Julius Klinkhardt",
+				"series": "Perspektiven sonderpädagogischer Forschung",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "(Produktform)Book"
+					},
+					{
+						"tag": "(VLB-WN)1572: Hardcover, Softcover / Pädagogik/Bildungswesen"
+					},
+					{
+						"tag": "2015"
+					},
+					{
+						"tag": "Basel"
+					},
+					{
+						"tag": "Inklusion"
+					},
+					{
+						"tag": "Inklusive Pädagogik"
+					},
+					{
+						"tag": "Konferenzschrift"
+					},
+					{
+						"tag": "Lehrerbildung"
+					},
+					{
+						"tag": "Lehrerbildung"
+					},
+					{
+						"tag": "Professionalisierung"
+					},
+					{
+						"tag": "Schulentwicklung"
+					},
+					{
+						"tag": "Sonderpädagogik"
+					},
+					{
+						"tag": "UN-Behindertenrechtskonvention"
+					}
+				],
+				"notes": [
+					{
+						"note": "Tagungsband zur 50. Jahrestagung der DGfE-Sektion Sonderpädagogik 2015 in Basel (Vorwort)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n           <marc:record xmlns:marc=\"http://www.loc.gov/MARC21/slim\">\n         \t<marc:leader>nm 22 uu 4500</marc:leader>\n         \t<marc:controlfield tag=\"008\">s ||||||||||||||||||||||</marc:controlfield>\n                 <marc:datafield tag=\"041\" ind1=\"0\" ind2=\"7\">\n         \t\t<marc:subfield code=\"a\"></marc:subfield>\n         \t        <marc:subfield code=\"2\">rfc3066</marc:subfield>\n         \t</marc:datafield>\n         \t<marc:datafield tag=\"245\" ind1=\"1\" ind2=\"0\">\n                 \t<marc:subfield code=\"a\">Adaptation: the Continuing Evolution of the New York Public Library&#8217;s Digital Design System</marc:subfield>\n         \t</marc:datafield>\n         \t<marc:datafield tag=\"260\" ind1=\"\" ind2=\"\">\n         \t\t<marc:subfield code=\"b\">The Code4Lib Journal</marc:subfield>\n         \t\t<marc:subfield code=\"c\">Fri, 17 Aug 2018 08:14:38 +0000</marc:subfield>\n         \t</marc:datafield>\n         \t<marc:datafield tag=\"520\" ind1=\"\" ind2=\"\">\n                         <marc:subfield code=\"a\">'A design system is crucial for sustaining both the continuity and the advancement of a website's design. But it's hard to create such a system when content, technology, and staff are constantly changing. This is the situation faced by the Digital team at the New York Public Library. When those are the conditions of the problem, the design system needs to be modular, distributed, and standardized, so that it can withstand constant change and provide a reliable foundation. NYPL's design system has gone through three major iterations, each a step towards the best way to manage design principles across an abundance of heterogeneous content and many contributors who brought different skills to the team and department at different times. Starting from an abstracted framework that provided a template for future systems, then a specific component system for a new project, and finally a system of interoperable components and layouts, NYPL's Digital team continues to grow and adapt its digital design resource.'</marc:subfield>\n         \t</marc:datafield>\n         \t<marc:datafield tag=\"650\" ind1=\"1\" ind2=\"\">\n                 <marc:subfield code=\"a\">Issue 41</marc:subfield>\n                 </marc:datafield>\n                 <marc:datafield tag=\"700\" ind1=\"1\" ind2=\"\">\n                 \t<marc:subfield code=\"a\">Jennifer L. Anderson &amp; Edwin Guzman</marc:subfield>\n         \t</marc:datafield>\n         \t<marc:datafield tag=\"856\" ind1=\"\" ind2=\"\">\n         \t\t<marc:subfield code=\"u\">https://journal.code4lib.org/articles/13657</marc:subfield>\n         \t</marc:datafield>\n           </marc:record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Adaptation: the Continuing Evolution of the New York Public Library’s Digital Design System",
+				"creators": [
+					{
+						"lastName": "Jennifer L. Anderson & Edwin Guzman",
+						"creatorType": "editor"
+					}
+				],
+				"date": "17",
+				"abstractNote": "'A design system is crucial for sustaining both the continuity and the advancement of a website's design. But it's hard to create such a system when content, technology, and staff are constantly changing. This is the situation faced by the Digital team at the New York Public Library. When those are the conditions of the problem, the design system needs to be modular, distributed, and standardized, so that it can withstand constant change and provide a reliable foundation. NYPL's design system has gone through three major iterations, each a step towards the best way to manage design principles across an abundance of heterogeneous content and many contributors who brought different skills to the team and department at different times. Starting from an abstracted framework that provided a template for future systems, then a specific component system for a new project, and finally a system of interoperable components and layouts, NYPL's Digital team continues to grow and adapt its digital design resource.'",
+				"publisher": "The Code4Lib Journal",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Issue 41"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

@@ -40,7 +40,7 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/abs\/10\.|\/doi\/full\/10\./)) {
 		return "journalArticle";
-	} else if(url.match(/\/action\/doSearch\?|\/toc\//))
+	} else if (url.match(/\/action\/doSearch\?|\/toc\//))
 		{
 		return "multiple";
 	}
@@ -53,17 +53,17 @@ function doWeb(doc, url) {
 		var rows = ZU.xpath(doc, '//table[@class="articleEntry"]');
 		var doi;
 		var title;
-		for(var i=0, n=rows.length; i<n; i++) {
+		for (var i=0, n=rows.length; i<n; i++) {
 			doi = ZU.xpathText(rows[i], './/a[contains(@href, "/doi/abs/10.")]/@href') //.match(/10\..+/)
 			//Z.debug(doi)
 			title = ZU.xpathText(rows[i], './/div[@class="art_title"]')
-			if(doi && title) {
+			if (doi && title) {
 				items[doi.match(/10\.[^\?]+/)[0]] = title;
 			}
 		}
 		//Z.debug(items)
 		Zotero.selectItems(items, function(selectedItems){
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var dois = new Array();
 			for (var i in selectedItems) {
@@ -87,7 +87,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		url: pdfurl + doi,
 		mimeType: 'application/pdf'
 	}];
-	if(doc) {
+	if (doc) {
 		item.attachments.push({
 			title: 'AIAA Snapshot',
 			document: doc
@@ -112,7 +112,7 @@ function scrape(doc, url, dois) {
 	var risFormat = '&format=ris';
 	var bibtexFormat = '&format=bibtex';
 
-	for(var i=0, n=dois.length; i<n; i++) {
+	for (var i=0, n=dois.length; i<n; i++) {
 		(function(doi) {
 			ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
 				var translator = Zotero.loadTranslator("import");
@@ -149,15 +149,16 @@ function scrape(doc, url, dois) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://arc.aiaa.org/action/doSearch?searchText=titanium",
+		"url": "https://arc.aiaa.org/action/doSearch?AllField=titanium",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744?prevSearch=&searchHistoryKey=",
+		"url": "https://arc.aiaa.org/doi/abs/10.2514/1.T3744?prevSearch=&searchHistoryKey=",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Solidification Characteristics of Titania Nanofluids",
 				"creators": [
 					{
 						"firstName": "Songping",
@@ -180,9 +181,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2012",
+				"DOI": "10.2514/1.T3744",
+				"ISSN": "0887-8722",
+				"issue": "1",
+				"itemID": "doi:10.2514/1.T3744",
+				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
+				"pages": "192-196",
+				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
+				"url": "https://doi.org/10.2514/1.T3744",
+				"volume": "26",
 				"attachments": [
 					{
 						"title": "AIAA Full Text PDF",
@@ -192,20 +200,9 @@ var testCases = [
 						"title": "AIAA Snapshot"
 					}
 				],
-				"itemID": "doi:10.2514/1.T3744",
-				"title": "Solidification Characteristics of Titania Nanofluids",
-				"publicationTitle": "Journal of Thermophysics and Heat Transfer",
-				"volume": "26",
-				"issue": "1",
-				"pages": "192-196",
-				"date": "2012",
-				"DOI": "10.2514/1.T3744",
-				"url": "http://arc.aiaa.org/doi/abs/10.2514/1.T3744",
-				"bookTitle": "Journal of Thermophysics and Heat Transfer",
-				"publisher": "American Institute of Aeronautics and Astronautics",
-				"ISSN": "0887-8722",
-				"libraryCatalog": "American Institute of Aeronautics and Astronautics",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

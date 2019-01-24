@@ -1,28 +1,22 @@
 {
 	"translatorID": "d1bf1c29-4432-4ada-8893-2e29fc88fd9e",
 	"label": "washingtonpost.com",
-	"creator": "Sebastian Karcher",
+	"creator": "Philipp Zumstein",
 	"target": "^https?://www\\.washingtonpost\\.com/",
-	"minVersion": "2.1.9",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-07-22 04:26:36"
+	"lastUpdated": "2017-06-18 17:39:48"
 }
-
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
-
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Washington Post Translator
-	Copyright (C) 2011-2016 Sebastian Karcher
-
+	Copyright © 2017 Philipp Zumstein
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -41,82 +35,96 @@ function doWeb(doc, url) { return FW.doWeb(doc, url); }
 	***** END LICENSE BLOCK *****
 */
 
-/** Blog Posts*/
-FW.Scraper({
-itemType         : 'blogPost',
-detect           : FW.Xpath('//div[@id="entryhead"]'),
-title            : FW.Xpath('//h1[@property="dc.title"]|//h1[@class="entry-title"]').text().trim(),
-attachments      : [{ url: FW.Url().replace(/_blog/,"_print"),
-  title:  "Washington Post Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//meta[@name="DC.creator"]/@content').text().split(" and ").cleanAuthor("author"),
-date             : FW.Xpath('//meta[@name="DC.date.issued"]/@content').text(),
-section			 : FW.Xpath('//a[@class="top on"]|//a[@class="top uc on"]').text(),
-language		 : FW.Xpath('//meta[@name="Content-Language"]/@content').text(),
-abstractNote	 : FW.Xpath('//meta[@name="description"]/@content').text(),
-ISSN			 : "0190-8286",
-publicationTitle : "The Washington Post - Blogs"
-});
 
-/** Articles New*/
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Xpath('//div[@id="article-topper"]/h1').text(),
-title            : FW.Xpath('//div[@id="article-topper"]/h1').text().trim(),
-attachments      : [{ url: FW.Url().replace(/_story/,"_print"),
-  title:  "Washington Post Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//span[@class="pb-byline"]').text().remove(/By\s/).split(" and ").cleanAuthor("author"),
-date             : FW.Url().match(/\/(\d{4}\/\d{2}\/\d{2})\//,1).replace(/\//g,'-'),
-section			 : FW.Xpath('//a[@class="top on"]|//a[@class="top uc on"]').text(),
-language		 : "en-US",
-abstractNote	 : FW.Xpath('//meta[@name="description"]/@content').text(),
-ISSN			 : "0190-8286",
-publicationTitle : "The Washington Post"
-});
-
-/** Articles Old*/
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Url().match(/wp-dyn\/content/),
-title            : FW.Xpath('//h1').text().trim(),
-attachments      : [{ url: FW.Url().replace(/\.html/,"_pf\.html"),
-  title:  "Washington Post Snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//div[@id="byline"]').text().remove(/By /).split(" and ").cleanAuthor("author"),
-date             : FW.Xpath('//meta[@name="DC.date.issued"]/@content').text(),
-section			 : FW.Xpath('//div[@id="bread_crumbs_inside"]/a[2]').text(),
-language		 : "en-US",
-abstractNote	 : FW.Xpath('//meta[@name="description"]/@content').text(),
-ISSN			 : "0190-8286",
-publicationTitle : "The Washington Post"
-});
-
-/**Articles Archice */
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Url().match(/archive/),
-title            : FW.Xpath('//meta[@property="og:title"]/@content').text().trim(),
-attachments      : [{ url: FW.Url(),
-  title:  "Washington Post snapshot",
-  type: "text/html" }],
-creators         : FW.Xpath('//span[@itemprop="name"]').text().cleanAuthor("author"),
-date             : FW.Xpath('//span[@itemprop="datePublished"]').text(),
-language		 : "en-US",
-ISSN			 : "0190-8286",
-publicationTitle : "The Washington Post"
-});
-
-
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/\/newsearch\/\?/) &&
-					FW.Xpath('//div[@class="pb-feed-headline"]//h3/a'),
-choices          : {
-  titles :  FW.Xpath('//div[@class="pb-feed-headline"]//h3/a').text().trim(),
-  urls    :  FW.Xpath('//div[@class="pb-feed-headline"]//h3/a').key("href")
+function detectWeb(doc, url) {
+	if (ZU.xpathText(doc, '//div[@id="topper-headline-wrapper"]/h1')) {
+		if (url.indexOf('/blogs/')>-1) { 
+			return "blogPost";
+		} else {
+			return "newspaperArticle";
+		}
+	}
+	if (url.indexOf('/archive/')>-1 || url.indexOf('/wp-dyn/content/')>-1) {
+		return "newspaperArticle";
+	}
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
-});
+
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "pb-feed-headline")]//a[not(contains(@href, "/video/"))]');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
+	var type = (url.indexOf('/blogs/')>-1) ? 'blogPost' : 'newspaperArticle';
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	//translator.setDocument(doc);
+	
+	translator.setHandler('itemDone', function (obj, item) {
+		item.itemType = type;
+		
+		//in the metadata there are only some facebook urls for the authors
+		item.creators = [];
+		var authors = ZU.xpath(doc, '//div/span[@itemprop="author"]//span[@itemprop="name"]');
+		for (var i=0; i<authors.length; i++) {
+			item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+		}
+		if (url.indexOf('/wp-dyn/content/')>-1) {
+			authors = ZU.xpathText(doc, '//div[@id="byline"]');
+			if (authors) {
+				item.creators.push(ZU.cleanAuthor(authors.replace(/^By /, ''), "author"));
+			}
+		}
+		item.date = ZU.xpathText(doc, '//span[@itemprop="datePublished"]/@content') || ZU.xpathText(doc, '//meta[@name="DC.date.issued"]/@content');
+
+		//the automatic added tags here are usually not really helpful
+		item.tags = [];
+		item.language = "en-US";
+		if (type=='newspaperArticle') {
+			item.ISSN = "0190-8286";
+		}
+		item.section = ZU.xpathText(doc, '(//div[contains(@class, "headline-kicker")])[1]');
+		
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(trans) {
+		trans.doWeb(doc, url);
+	});
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -138,14 +146,11 @@ var testCases = [
 				"ISSN": "0190-8286",
 				"abstractNote": "BERLIN, Nov. 7 -- Russia sent President-elect Barack Obama a message this week when it threatened to \"neutralize\" the proposed U.S. missile defense shield in Eastern Europe. But analysts said the tough talk from Moscow had another aim as well: to exploit a festering divide within Europe.",
 				"language": "en-US",
-				"libraryCatalog": "washingtonpost.com",
-				"publicationTitle": "The Washington Post",
-				"section": "World",
+				"libraryCatalog": "www.washingtonpost.com",
 				"url": "http://www.washingtonpost.com/wp-dyn/content/article/2008/11/07/AR2008110703296.html",
 				"attachments": [
 					{
-						"title": "Washington Post Snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -156,7 +161,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html?hpid=z1",
+		"url": "https://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html?hpid=z1",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -168,17 +173,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-09-30",
+				"date": "2011-09-30T08:06-500",
 				"ISSN": "0190-8286",
 				"abstractNote": "The Obama administration has refused to reveal the details of its legal rationale for targeting radical cleric Anwar al-Aulaqi.",
 				"language": "en-US",
-				"libraryCatalog": "washingtonpost.com",
-				"publicationTitle": "The Washington Post",
-				"url": "http://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html?hpid=z1",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"section": "National Security",
+				"url": "https://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html",
 				"attachments": [
 					{
-						"title": "Washington Post Snapshot",
-						"type": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -189,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.washingtonpost.com/blogs/wonkblog/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html?wprss=ezra-klein",
+		"url": "https://www.washingtonpost.com/blogs/ezra-klein/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -201,19 +206,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-11-07",
-				"ISSN": "0190-8286",
+				"date": "2011-11-07T09:49-500",
 				"abstractNote": "It’s easy if you know what to do.",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"blogTitle": "Washington Post",
 				"language": "en-US",
-				"libraryCatalog": "washingtonpost.com",
-				"publicationTitle": "The Washington Post - Blogs",
-				"section": "Business",
-				"url": "http://www.washingtonpost.com/blogs/wonkblog/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html?wprss=ezra-klein",
+				"url": "https://www.washingtonpost.com/blogs/ezra-klein/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html",
 				"attachments": [
 					{
-						"title": "Washington Post Snapshot",
-						"type": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],
@@ -236,16 +236,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "April 7, 1991",
+				"date": "1991-04-07T12:00-500",
 				"ISSN": "0190-8286",
 				"language": "en-US",
-				"libraryCatalog": "washingtonpost.com",
-				"publicationTitle": "The Washington Post",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
 				"url": "https://www.washingtonpost.com/archive/entertainment/books/1991/04/07/bombs-in-the-cause-of-brotherhood/fe590e29-8052-4086-b9a9-6fcabdbae4ba/",
 				"attachments": [
 					{
-						"title": "Washington Post snapshot",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [],

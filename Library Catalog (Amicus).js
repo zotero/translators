@@ -54,7 +54,7 @@ function scrape(marc, newDoc) {
 	var xpath = '//pre';
 	var elmts = newDoc.evaluate(xpath, newDoc, null, XPathResult.ANY_TYPE, null);
 	var elmt;
-	while(elmt = elmts.iterateNext()) {
+	while (elmt = elmts.iterateNext()) {
 		var text = elmt.textContent;
 		text = text.replace(/AMICUS No. [0-9]+\n\s+/, "");
 		//Z.debug(text);
@@ -65,23 +65,23 @@ function scrape(marc, newDoc) {
 		linee[0]=linee[0].replace(/^\s+/, "");
 		//Zotero.debug(linee[0]);
 		for (var i=0; i<linee.length; i++) {
-			if(!linee[i]) {
+			if (!linee[i]) {
 				continue;
 			}
 			
 			var value = linee[i].substr(7);
-			if(linee[i].substr(0, 6) == "      ") {
+			if (linee[i].substr(0, 6) == "      ") {
 				// add this onto previous value
 				tagValue += value;
 			} else {
-				if(linee[i].substr(0, 3) == "000") {
+				if (linee[i].substr(0, 3) == "000") {
 					// trap leader
 					record.leader = value;
 					//Zotero.debug("Leader: " + record.leader);
 				} else {
-					if(tagValue) {	// finish last tag
+					if (tagValue) {	// finish last tag
 						tagValue = tagValue.replace(/º/g, marc.subfieldDelimiter);
-						if(tagValue[0] != marc.subfieldDelimiter) {
+						if (tagValue[0] != marc.subfieldDelimiter) {
 							tagValue = marc.subfieldDelimiter+"a"+tagValue;
 						}
 						//Zotero.debug("tag: "+tag+" ind: " + ind+" tagValue: "+tagValue );
@@ -93,9 +93,9 @@ function scrape(marc, newDoc) {
 				}
 			}
 		}
-		if(tagValue) {
+		if (tagValue) {
 			tagValue = tagValue.replace(/º/g, marc.subfieldDelimiter);
-			if(tagValue[0] != marc.subfieldDelimiter) {
+			if (tagValue[0] != marc.subfieldDelimiter) {
 				//Z.debug("here")
 				tagValue = marc.subfieldDelimiter+"a"+tagValue;
 			}
@@ -177,22 +177,22 @@ function doWeb(doc, url) {
 			var tableRows = doc.evaluate('//table/tbody/tr[@valign="TOP"]', doc, nsResolver, XPathResult.ANY_TYPE, null);
 			// Go through table rows
 			var i = 0;
-			while(tableRow = tableRows.iterateNext()) {
+			while (tableRow = tableRows.iterateNext()) {
 				// get link
 				var links = doc.evaluate('.//td/a[0]', tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 				var link = links.iterateNext();
-				if(!link) {
+				if (!link) {
 					var links = doc.evaluate(".//a[@href]", tableRow, nsResolver, XPathResult.ANY_TYPE, null);
 					link = links.iterateNext();
 				}
 				
-				if(link) {
-					if(availableItems[link.href]) {
+				if (link) {
+					if (availableItems[link.href]) {
 						continue;
 					}
 					
 					// Go through links
-					while(link) {
+					while (link) {
 						if (link.textContent.match(/\w+/))
 							availableItems[link.href] = link.textContent;
 						link = links.iterateNext();
@@ -202,12 +202,12 @@ function doWeb(doc, url) {
 			};
 		
 			Zotero.selectItems(availableItems, function (items) {
-				if(!items) {
+				if (!items) {
 					return true;
 				}
 
 				var newUrls = new Array();
-				for(var itemURL in items) {
+				for (var itemURL in items) {
 					newUrls.push(itemURL + "&d=3");
 				}
 				 pageByPage(marc, newUrls);
@@ -221,10 +221,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://collectionscanada.gc.ca/ourl/res.php?url_ver=Z39.88-2004&url_tim=2012-09-28T06%3A28%3A22Z&url_ctx_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Actx&rft_dat=10442013&rfr_id=info%3Asid%2Fcollectionscanada.gc.ca%3Aamicus&lang=eng",
+		"url": "http://amicus.collectionscanada.ca/aaweb-bin/aamain/itemdisp?sessionKey=999999999_142&l=0&d=2&v=0&lvl=1&itm=10442013",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Adam Smith (1723-1790): ein Werk und seine Wirkungsgeschichte",
 				"creators": [
 					{
 						"firstName": "Heinz-Dieter",
@@ -232,21 +233,20 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"notes": [],
+				"date": "1990",
+				"ISBN": "9783926570260",
+				"callNumber": "HB103.S6 A6223 1990",
+				"libraryCatalog": "Library Catalog (Amicus)",
+				"numPages": "297",
+				"place": "Marburg",
+				"publisher": "Metropolis",
+				"shortTitle": "Adam Smith (1723-1790)",
+				"attachments": [],
 				"tags": [
 					"Smith, Adam"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "3926570261",
-				"title": "Adam Smith (1723-1790): ein Werk und seine Wirkungsgeschichte",
-				"place": "Marburg",
-				"publisher": "Metropolis",
-				"date": "1990",
-				"numPages": "297",
-				"callNumber": "HB103.S6 A6223 1990",
-				"libraryCatalog": "Library Catalog (Amicus)",
-				"shortTitle": "Adam Smith (1723-1790)"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

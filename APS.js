@@ -2,61 +2,59 @@
 	"translatorID": "2c310a37-a4dd-48d2-82c9-bd29c53c1c76",
 	"label": "APS",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://journals\\.aps\\.org/([^/]+/(abstract|supplemental|references|cited-by|issues)/|search\\?)",
+	"target": "^https?://journals\\.aps\\.org/([^/]+/(abstract|supplemental|references|cited-by|issues)/|search(\\?|/))",
 	"minVersion": "3.0.12",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-03-18 01:28:18"
-}
-
-function getSearchResults(doc) {
-	var articles = doc.getElementsByClassName('article-result');
-	var results = [];
-	for(var i=0; i<articles.length; i++) {
-		if(articles[i].getElementsByClassName('row').length) {
-			results.push(articles[i]);
-		}
-	}
-	
-	return results;
+	"lastUpdated": "2017-01-14 21:44:41"
 }
 
 function detectWeb(doc, url) {
-	if(getSearchResults(doc).length){
-		return "multiple";
-	}
-	
 	var title = doc.getElementById('title');
-	if(title && ZU.xpath(title, './/a[@data-reveal-id="export-article"]').length) {
+	if (title && ZU.xpath(title, './/a[@id="export-article-link"]').length) {
 		return "journalArticle";
+	} else if (getSearchResults(doc, true)){
+		return "multiple";
 	}
 }
 
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "search-results")]//div[contains(@class, "row")]//h5/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(cleanMath(rows[i].textContent));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
-		var results = getSearchResults(doc);
-		var items = {};
-		for(var i=0; i<results.length; i++) {
-			var title = ZU.xpath(results[i], './/h5[@class="title"]/a')[0];
-			items[title.href] = cleanMath(title.textContent);
-		}
-		
-		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
-			
-			var urls = [];
-			for(var i in selectedItems) {
-				urls.push(i);
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
 			}
-			ZU.processDocuments(urls, scrape);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		scrape(doc, url);
 	}
 }
+
 
 // Extension to mimeType mapping
 var suppTypeMap = {
@@ -112,7 +110,7 @@ function scrape(doc, url) {
 			));
 			
 			// attach PDF
-			if(ZU.xpath(doc, '//div[@class="article-nav-actions"]/a[contains(text(), "PDF")]').length) {
+			if (ZU.xpath(doc, '//div[@class="article-nav-actions"]/a[contains(text(), "PDF")]').length) {
 				item.attachments.push({
 					title: 'Full Text PDF',
 					url: url.replace('{REPLACE}', 'pdf'),
@@ -125,17 +123,17 @@ function scrape(doc, url) {
 				document: doc
 			});
 			
-			if(Z.getHiddenPref && Z.getHiddenPref('attachSupplementary')) {
+			if (Z.getHiddenPref && Z.getHiddenPref('attachSupplementary')) {
 				ZU.processDocuments(url.replace('{REPLACE}', 'supplemental'), function(doc) {
 					try {
 						var asLink = Z.getHiddenPref('supplementaryAsLink');
 						var suppFiles = doc.getElementsByClassName('supplemental-file');
-						for(var i=0; i<suppFiles.length; i++) {
+						for (var i=0; i<suppFiles.length; i++) {
 							var link = suppFiles[i].getElementsByTagName('a')[0];
 							if (!link || !link.href) continue;
 							var title = link.getAttribute('data-id') || 'Supplementary Data';
 							var type = suppTypeMap[link.href.split('.').pop()];
-							if(asLink || dontDownload.indexOf(type) != -1) {
+							if (asLink || dontDownload.indexOf(type) != -1) {
 								item.attachments.push({
 									title: title,
 									url: link.href,
@@ -171,7 +169,7 @@ function cleanMath(str) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prd/abstract/10.1103/PhysRevD.84.077701",
+		"url": "https://journals.aps.org/prd/abstract/10.1103/PhysRevD.84.077701",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -196,7 +194,7 @@ var testCases = [
 				"libraryCatalog": "APS",
 				"pages": "077701",
 				"publicationTitle": "Physical Review D",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevD.84.077701",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevD.84.077701",
 				"volume": "84",
 				"attachments": [
 					{
@@ -215,17 +213,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prd/issues/84/7",
+		"url": "https://journals.aps.org/prd/issues/84/7",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/search?field=all&q=test&sort=recent&date=&start_date=&end_date=",
+		"url": "https://journals.aps.org/search/results?sort=relevance&clauses=%5B%7B%22operator%22:%22AND%22,%22field%22:%22all%22,%22value%22:%22test%22%7D%5D",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.098105",
+		"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.114.098105",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -270,7 +268,7 @@ var testCases = [
 				"libraryCatalog": "APS",
 				"pages": "098105",
 				"publicationTitle": "Physical Review Letters",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevLett.114.098105",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevLett.114.098105",
 				"volume": "114",
 				"attachments": [
 					{
@@ -289,7 +287,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prx/supplemental/10.1103/PhysRevX.5.011029",
+		"url": "https://journals.aps.org/prx/supplemental/10.1103/PhysRevX.5.011029",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -329,7 +327,7 @@ var testCases = [
 				"libraryCatalog": "APS",
 				"pages": "011029",
 				"publicationTitle": "Physical Review X",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevX.5.011029",
 				"volume": "5",
 				"attachments": [
 					{
@@ -348,7 +346,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prx/references/10.1103/PhysRevX.5.011029",
+		"url": "https://journals.aps.org/prx/references/10.1103/PhysRevX.5.011029",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -388,7 +386,7 @@ var testCases = [
 				"libraryCatalog": "APS",
 				"pages": "011029",
 				"publicationTitle": "Physical Review X",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011029",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevX.5.011029",
 				"volume": "5",
 				"attachments": [
 					{
@@ -407,7 +405,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.aps.org/prx/cited-by/10.1103/PhysRevX.5.011003",
+		"url": "https://journals.aps.org/prx/cited-by/10.1103/PhysRevX.5.011003",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -447,7 +445,7 @@ var testCases = [
 				"libraryCatalog": "APS",
 				"pages": "011003",
 				"publicationTitle": "Physical Review X",
-				"url": "http://link.aps.org/doi/10.1103/PhysRevX.5.011003",
+				"url": "https://link.aps.org/doi/10.1103/PhysRevX.5.011003",
 				"volume": "5",
 				"attachments": [
 					{

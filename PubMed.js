@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-07 18:20:45"
+	"lastUpdated": "2019-01-10 06:30:21"
 }
 
 /*
@@ -40,7 +40,7 @@
  * General utility functions *
  *****************************/
 function lookupPMIDs(ids, next) {
-	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
@@ -64,27 +64,27 @@ function lookupPMIDs(ids, next) {
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
 	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
-	if(!uid.length) {
+	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
 
-	if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
+	if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
 		return uid[0].textContent;
 	}
 
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
-	if(!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
-	if(uid.length == 1) {
+	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
+	if (uid.length == 1) {
 		uid = uid[0].textContent.match(/\/(\d+)(?:\/|$)/);
-		if(uid) return uid[1];
+		if (uid) return uid[1];
 	}
 	
 	//PMID from a bookshelf entry
 	var maincontent = doc.getElementById('maincontent');
-	if(maincontent) {
+	if (maincontent) {
 		uid = ZU.xpath(maincontent,
 			'.//a[@title="PubMed record of this title" or @title="PubMed record of this page"]');
-		if(uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid;
+		if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid;
 	}
 
 	return false;
@@ -93,7 +93,7 @@ function getUID(doc) {
 // retrieve itemprop elements for scraping books directly from page where UID is not available
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
-	if(!main) return;
+	if (!main) return;
 	
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
@@ -115,13 +115,13 @@ function scrapeItemProps(itemprops) {
 	for (var i=0; i<itemprops.length; i++) {
 		var value = ZU.trimInternal(itemprops[i].textContent);
 		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
-		if(!field) continue;
+		if (!field) continue;
 		
-		if(field.indexOf('creator/') == 0) {
+		if (field.indexOf('creator/') == 0) {
 			field = field.substr(8);
 			item.creators.push(ZU.cleanAuthor(value, field, false));
-		} else if(field == 'ISBN') {
-			if(!item.ISBN) item.ISBN = '';
+		} else if (field == 'ISBN') {
+			if (!item.ISBN) item.ISBN = '';
 			else item.ISBN += '; ';
 			
 			item.ISBN += value;
@@ -157,10 +157,10 @@ function getSearchResults(doc, checkOnly) {
 			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
 			|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 		
-		if(!uid) {
+		if (!uid) {
 			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
-			if(uid) uid = uid.match(/\/(\d+)/);
-			if(uid) uid = uid[1];
+			if (uid) uid = uid.match(/\/(\d+)/);
+			if (uid) uid = uid[1];
 		}
 		
 		if (!uid || !title) continue;
@@ -168,8 +168,9 @@ function getSearchResults(doc, checkOnly) {
 		if (checkOnly) return true;
 		found = true;
 		
-		var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
-		
+		// Checkbox is a descendant of the containing .rprt div
+		var checkbox = ZU.xpath(results[i].parentNode, './/input[@type="checkbox"]')[0];
+
 		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
 		items["u"+uid] = {
 			title: ZU.trimInternal(title),
@@ -185,8 +186,8 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	
-	if(!getUID(doc)) {
-		if(getBookProps(doc)) return 'book';
+	if (!getUID(doc)) {
+		if (getBookProps(doc)) return 'book';
 		
 		return;
 	}
@@ -194,7 +195,7 @@ function detectWeb(doc, url) {
 	//try to determine if this is a book
 	//"Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if(maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
+	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
 	{
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
@@ -203,8 +204,8 @@ function detectWeb(doc, url) {
 	
 	//from bookshelf page
 	var pdid = ZU.xpathText(doc, 'html/head/meta[@name="ncbi_pdid"]/@content');
-	if(pdid == "book-part") return 'bookSection';
-	if(pdid == "book-toc") return 'book';
+	if (pdid == "book-part") return 'bookSection';
+	if (pdid == "book-toc") return 'book';
 	
 	return "journalArticle";
 }
@@ -212,10 +213,10 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var uids = [];
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				uids.push(i.substr(1));
 			}
 			lookupPMIDs(uids);
@@ -224,7 +225,7 @@ function doWeb(doc, url) {
 		var uid = getUID(doc), itemprops;
 		if (uid) {
 			lookupPMIDs([uid]);
-		} else if(itemprops = getBookProps(doc)) {
+		} else if (itemprops = getBookProps(doc)) {
 			scrapeItemProps(itemprops);
 		}
 	}
@@ -275,9 +276,9 @@ function getPMID(co) {
 	var coParts = co.split("&");
 	for (var i=0; i<coParts.length; i++) {
 		var part = coParts[i];
-		if(part.substr(0, 7) == "rft_id=") {
+		if (part.substr(0, 7) == "rft_id=") {
 			var value = unescape(part.substr(7));
-			if(value.substr(0, 10) == "info:pmid/") {
+			if (value.substr(0, 10) == "info:pmid/") {
 				return value.substr(10);
 			}
 		}
@@ -285,14 +286,14 @@ function getPMID(co) {
 }
 
 function detectSearch(item) {
-	if(item.contextObject) {
-		if(getPMID(item.contextObject)) {
+	if (item.contextObject) {
+		if (getPMID(item.contextObject)) {
 			return true;
 		}
 	}
 	
 	//supply PMID as a string or array
-	if(item.PMID
+	if (item.PMID
 		&& (typeof item.PMID == 'string' || item.PMID.length > 0) )  {
 		return true;
 	}
@@ -302,12 +303,12 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	var pmid;
-	if(item.contextObject) {
+	if (item.contextObject) {
 		pmid = getPMID(item.contextObject);
 	}
-	if(!pmid) pmid = item.PMID;
+	if (!pmid) pmid = item.PMID;
 	
-	if(typeof pmid == "string") pmid = [pmid];
+	if (typeof pmid == "string") pmid = [pmid];
 	
 	lookupPMIDs(pmid);
 }
@@ -316,7 +317,7 @@ function doSearch(item) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20729678",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/20729678",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -365,12 +366,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed?term=zotero",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed?term=zotero",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20821847",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/20821847",
 		"items": [
 			{
 				"itemType": "book",
@@ -396,7 +397,7 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Oxford",
 				"publisher": "BIOS Scientific Publishers",
-				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited",
+				"rights": "Copyright © 2001, BIOS Scientific Publishers Limited.",
 				"shortTitle": "Endocrinology",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK22/",
 				"attachments": [
@@ -414,7 +415,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed?term=21249754",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed?term=21249754",
 		"items": [
 			{
 				"itemType": "book",
@@ -449,7 +450,7 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"attachments": [
 					{
@@ -466,7 +467,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/?term=11109029",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/?term=11109029",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -531,7 +532,6 @@ var testCases = [
 					"Cost-Benefit Analysis",
 					"Decision Trees",
 					"Female",
-					"Great Britain",
 					"Humans",
 					"Hyperlipoproteinemia Type II",
 					"Male",
@@ -542,7 +542,8 @@ var testCases = [
 					"Needs Assessment",
 					"Practice Guidelines as Topic",
 					"Research Design",
-					"Technology Assessment, Biomedical"
+					"Technology Assessment, Biomedical",
+					"United Kingdom"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -551,7 +552,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/21249758",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/21249758",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -592,7 +593,7 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"attachments": [
 					{
@@ -614,7 +615,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
+		"url": "https://www.ncbi.nlm.nih.gov/books/NBK26374/",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -655,7 +656,7 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK26374/",
 				"attachments": [
 					{
@@ -677,7 +678,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
+		"url": "https://www.ncbi.nlm.nih.gov/books/NBK1825/",
 		"items": [
 			{
 				"itemType": "book",
@@ -712,7 +713,7 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
+				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson.",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1825/",
 				"attachments": [
 					{
@@ -729,7 +730,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/21249755",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/21249755",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -792,7 +793,6 @@ var testCases = [
 					}
 				],
 				"date": "2009",
-				"abstractNote": "PJS is a rare disease. (“Peutz-Jeghers syndrome is no frequent nosological unit”. (1)) There are no high-quality estimates of the prevalence or incidence of PJS. Estimates have included 1 in 8,500 to 23,000 live births (2), 1 in 50,000 to 1 in 100,000 in Finland (3), and 1 in 200,000 (4). A report on the incidence of PJS is available at www.peutz-jeghers.com. At Mayo Clinic from 1945 to 1996 the incidence of PJS was 0.9 PJS patients per 100,000 patients. PJS has been reported in Western Europeans (5), African Americans (5), Nigerians (6), Japanese (7), Chinese (8, 9), Indians (10, 11), and other populations (12-15). PJS occurs equally in males and females (7).",
 				"bookTitle": "Cancer Syndromes",
 				"callNumber": "NBK1826",
 				"extra": "PMID: 21249755",
@@ -800,7 +800,6 @@ var testCases = [
 				"libraryCatalog": "PubMed",
 				"place": "Bethesda (MD)",
 				"publisher": "National Center for Biotechnology Information (US)",
-				"rights": "Copyright © 2009-, Douglas L Riegert-Johnson",
 				"url": "http://www.ncbi.nlm.nih.gov/books/NBK1826/",
 				"attachments": [
 					{
@@ -822,12 +821,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/myncbi/browse/collection/40383442/?sort=&direction=",
+		"url": "https://www.ncbi.nlm.nih.gov/myncbi/browse/collection/40383442/?sort=&direction=",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/20981092",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/20981092",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -883,7 +882,7 @@ var testCases = [
 				"DOI": "10.1038/nature09534",
 				"ISSN": "1476-4687",
 				"abstractNote": "The 1000 Genomes Project aims to provide a deep characterization of human genome sequence variation as a foundation for investigating the relationship between genotype and phenotype. Here we present results of the pilot phase of the project, designed to develop and compare different strategies for genome-wide sequencing with high-throughput platforms. We undertook three projects: low-coverage whole-genome sequencing of 179 individuals from four populations; high-coverage sequencing of two mother-father-child trios; and exon-targeted sequencing of 697 individuals from seven populations. We describe the location, allele frequency and local haplotype structure of approximately 15 million single nucleotide polymorphisms, 1 million short insertions and deletions, and 20,000 structural variants, most of which were previously undescribed. We show that, because we have catalogued the vast majority of common variation, over 95% of the currently accessible variants found in any individual are present in this data set. On average, each person is found to carry approximately 250 to 300 loss-of-function variants in annotated genes and 50 to 100 variants previously implicated in inherited disorders. We demonstrate how these results can be used to inform association and functional studies. From the two trios, we directly estimate the rate of de novo germline base substitution mutations to be approximately 10(-8) per base pair per generation. We explore the data with regard to signatures of natural selection, and identify a marked reduction of genetic variation in the neighbourhood of genes, due to selection at linked sites. These methods and public data will support the next phase of human genetic research.",
-				"extra": "PMID: 20981092 \nPMCID: PMC3042601",
+				"extra": "PMID: 20981092\nPMCID: PMC3042601",
 				"issue": "7319",
 				"journalAbbreviation": "Nature",
 				"language": "eng",
@@ -932,7 +931,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/books/NBK21054/",
+		"url": "https://www.ncbi.nlm.nih.gov/books/NBK21054/",
 		"items": [
 			{
 				"itemType": "book",
@@ -984,7 +983,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/pubmed/14779137",
+		"url": "https://www.ncbi.nlm.nih.gov/pubmed/14779137",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1014,6 +1013,8 @@ var testCases = [
 					}
 				],
 				"tags": [
+					"Humans",
+					"PANCREATITIS",
 					"Pancreatitis"
 				],
 				"notes": [],
@@ -1039,7 +1040,7 @@ var testCases = [
 						"creatorType": "author",
 						"lastName": "Sewell",
 						"firstName": "Jeanne P."
-					}
+	}
 				],
 				"notes": [],
 				"tags": [

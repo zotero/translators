@@ -15,9 +15,8 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2016-06-21 08:45:20"
+	"lastUpdated": "2018-09-07 17:20:00"
 }
-
 
 //%a = first listed creator surname
 //%y = year
@@ -38,6 +37,7 @@ var fieldMap = {
 	doi: "DOI",
 	series: "series",
 	shorttitle: "shortTitle",
+	holder: "assignee",
 	abstract: "abstractNote",
 	volumes: "numberOfVolumes",
 	version: "version",
@@ -57,7 +57,8 @@ var revExtraIds = {
 	MR: 'mrnumber',
 	Zbl: 'zmnumber',
 	PMCID: 'pmcid',
-	PMID: 'pmid'
+	PMID: 'pmid',
+	DOI: 'doi'
 };
 
 // Imported by BibTeX. Exported by BibLaTeX only
@@ -75,11 +76,11 @@ var revEprintIds = {
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
 	var fields = [];
-	for(var i=0; i<lines.length; i++) {
+	for (var i=0; i<lines.length; i++) {
 		var rec = { raw: lines[i] };
 		var line = lines[i].trim();
 		var splitAt = line.indexOf(':');
-		if(splitAt > 1) {
+		if (splitAt > 1) {
 			rec.field = line.substr(0,splitAt).trim();
 			rec.value = line.substr(splitAt + 1).trim();
 		}
@@ -90,8 +91,8 @@ function parseExtraFields(extra) {
 
 function extraFieldsToString(extra) {
 	var str = '';
-	for(var i=0; i<extra.length; i++) {
-		if(!extra[i].raw) {
+	for (var i=0; i<extra.length; i++) {
+		if (!extra[i].raw) {
 			str += '\n' + extra[i].field + ': ' + extra[i].value;
 		} else {
 			str += '\n' + extra[i].raw;
@@ -309,7 +310,7 @@ function mapEscape(character) {
 	return alwaysMap[character];
 }
 
-// a little substitution function for BibTeX keys, where we don't want LaTeX 
+// a little substitution function for BibTeX keys, where we don't want LaTeX
 // escaping, but we do want to preserve the base characters
 
 function tidyAccents(s) {
@@ -344,7 +345,7 @@ var numberRe = /^[0-9]+/;
 // in includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
-var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)/g;
+var citeKeyTitleBannedRe = /\b(a|an|the|some|from|on|in|to|of|do|with|der|die|das|ein|eine|einer|eines|einem|einen|un|une|la|le|l\'|el|las|los|al|uno|una|unos|unas|de|des|del|d\')(\s+|\b)|(<\/?(i|b|sup|sub|sc|span style=\"small-caps\"|span)>)/g;
 var citeKeyConversionsRe = /%([a-zA-Z])/;
 var citeKeyCleanRe = /[^a-z0-9\!\$\&\*\+\-\.\/\:\;\<\>\?\[\]\^\_\`\|]+/g;
 
@@ -353,13 +354,13 @@ var citeKeyConversions = {
 		if (item.creators && item.creators[0] && item.creators[0].lastName) {
 			return item.creators[0].lastName.toLowerCase().replace(/ /g, "_").replace(/,/g, "");
 		}
-		return "";
+		return "noauthor";
 	},
 	"t": function (flags, item) {
 		if (item["title"]) {
 			return item["title"].toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
-		return "";
+		return "notitle";
 	},
 	"y": function (flags, item) {
 		if (item.date) {
@@ -368,7 +369,7 @@ var citeKeyConversions = {
 				return date.year;
 			}
 		}
-		return "????";
+		return "nodate";
 	}
 }
 
@@ -420,7 +421,7 @@ function creatorCheck(item, ctype) {
 		//
 		// no matter what, we want to make sure we exclude
 		// " # % ' ( ) , = { } ~ and backslash
-		// however, we want to keep the base characters 
+		// however, we want to keep the base characters
 
 		basekey = tidyAccents(basekey);
 		basekey = basekey.replace(citeKeyCleanRe, "");
@@ -464,11 +465,11 @@ function encodeFilePathComponent(value) {
 
 			//inbook is reasonable at times, using a bookauthor should
 			//indicate this
-			if(item.itemType == "bookSection" &&
+			if (item.itemType == "bookSection" &&
 			   creatorCheck(item, "bookAuthor")) type = "inbook";
 
 			//a book without author but with editors is a collection
-			if(item.itemType == "book" && !creatorCheck(item,"author") &&
+			if (item.itemType == "book" && !creatorCheck(item,"author") &&
 			   creatorCheck(item, "editor")) type = "collection";
 
 			//biblatex recommends us to use mvbook for multi-volume book
@@ -497,9 +498,9 @@ function encodeFilePathComponent(value) {
 			//e.g. where fieldname translation is dependent upon type, or special transformations
 			//has to be made
 
-			//all kinds of numbers
-			if (item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number) {
-				writeField("number", item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number);
+			//all kinds of numbers except patents, which need post-processing
+			if (item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number && !item.patentNumber) {
+				writeField("number", item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number);
 			}
 
 			//split numeric and nonnumeric issue specifications (for journals) into "number" and "issue"
@@ -557,6 +558,29 @@ function encodeFilePathComponent(value) {
 				writeField("type", "phdthesis");
 			} else if (item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType) {
 				writeField("type", item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType);
+			} else if (item.itemType == "patent") {
+				// see https://tex.stackexchange.com/questions/447383/biblatex-biber-patent-citation-support-based-on-zoterobbl-output/447508
+				if (!item.patentNumber) {
+					writeField("type", "patent");
+				} else if (item.patentNumber.startsWith("US")) {
+					writeField("type", "patentus");
+					writeField("number", item.patentNumber.replace(/^US/, ""));
+				} else if (item.patentNumber.startsWith("EP")) {
+					writeField("type", "patenteu");
+					writeField("number", item.patentNumber.replace(/^EP/, ""));
+				} else if (item.patentNumber.startsWith("GB")) {
+					writeField("type", "patentuk");
+					writeField("number", item.patentNumber.replace(/^GB/, ""));
+				} else if (item.patentNumber.startsWith("DE")) {
+					writeField("type", "patentde");
+					writeField("number", item.patentNumber.replace(/^DE/, ""));
+				} else if (item.patentNumber.startsWith("FR")) {
+					writeField("type", "patentfr");
+					writeField("number", item.patentNumber.replace(/^FR/, ""));
+				} else {
+					writeField("type", "patent");
+					writeField("number", item.patentNumber);
+				}
 			}
 
 			if (item.presentationType || item.manuscriptType) {
@@ -627,7 +651,7 @@ function encodeFilePathComponent(value) {
 						creatorString = creatorString.replace(/ (and) /gi, ' {$1} ');
 					}
 
-					if (creator.creatorType == "author" || creator.creatorType == "interviewer" || creator.creatorType == "director" || creator.creatorType == "programmer" || creator.creatorType == "artist" || creator.creatorType == "podcaster" || creator.creatorType == "presenter") {
+					if (creator.creatorType == "author" || creator.creatorType == "interviewer" || creator.creatorType == "inventor" || creator.creatorType == "director" || creator.creatorType == "programmer" || creator.creatorType == "artist" || creator.creatorType == "podcaster" || creator.creatorType == "presenter") {
 						author += " and " + creatorString;
 					} else if (creator.creatorType == "bookAuthor") {
 						bookauthor += " and " + creatorString;
@@ -635,8 +659,6 @@ function encodeFilePathComponent(value) {
 						commentator += " and " + creatorString;
 					} else if (creator.creatorType == "editor") {
 						editor += " and " + creatorString;
-					} else if (creator.creatorType == "inventor") {
-						holder += " and " + creatorString;
 					} else if (creator.creatorType == "translator") {
 						translator += " and " + creatorString;
 					} else if (creator.creatorType == "seriesEditor") { //let's call them redacors
@@ -689,7 +711,7 @@ function encodeFilePathComponent(value) {
 			//if possible. See babelLanguageMap above for languagecodes to use
 			if (item.language) {
 				var langcode = item.language.match(/^([a-z]{2,3})(?:[^a-z](.+))?$/i); //not too strict
-				if(langcode){
+				if (langcode){
 					var lang = babelLanguageMap[langcode[1]];
 					if (typeof lang == 'string') {
 						//if there are no variants for this language
@@ -705,21 +727,21 @@ function encodeFilePathComponent(value) {
 				}
 			}
 
-			if(item.extra) {
+			if (item.extra) {
 				// Export identifiers
 				var extraFields = parseExtraFields(item.extra);
 				// Dedicated fields
-				for(var i=0; i<extraFields.length; i++) {
+				for (var i=0; i<extraFields.length; i++) {
 					var rec = extraFields[i];
-					if(!rec.field) continue;
+					if (!rec.field) continue;
 					
-					if(!revExtraIds[rec.field] && !revEprintIds[rec.field]) continue;
+					if (!revExtraIds[rec.field] && !revEprintIds[rec.field]) continue;
 					
 					var value = rec.value.trim();
-					if(!value) continue;
+					if (!value) continue;
 					
 					var label;
-					if(label = revExtraIds[rec.field]) {
+					if (label = revExtraIds[rec.field]) {
 						writeField(label, '{'+value+'}', true);
 					} else if (label = revEprintIds[rec.field]) {
 						writeField('eprinttype', label);
@@ -730,7 +752,7 @@ function encodeFilePathComponent(value) {
 				}
 				
 				var extra = extraFieldsToString(extraFields);
-				if(extra && !noteused) writeField("note", extra);
+				if (extra && !noteused) writeField("note", extra);
 			}
 
 			if (item.tags && item.tags.length) {

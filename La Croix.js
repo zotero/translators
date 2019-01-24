@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-06-09 05:53:08"
+	"lastUpdated": "2016-11-03 20:18:42"
 }
 
 /*
@@ -85,7 +85,7 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		var bylineNodes = ZU.xpath(doc, '//div[contains(@class, "visible-xs")]//div[contains(@class, "meta-author")]');
+		var bylineNodes = ZU.xpath(doc, '//div[contains(@class, "visible-xs")]//div[contains(@class, "meta-author")]/a');
 		item.creators = [];
 		if (bylineNodes.length>0) {
 			var authorPart = bylineNodes[0].textContent.split(",")[0];

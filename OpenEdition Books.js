@@ -8,23 +8,23 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsi",
-	"lastUpdated": "2015-09-01 16:09:42"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-01-03 11:17:56"
 }
 
 function detectWeb(doc, url){
 	//testing if a link to a rdf file exist
-	if(doc.getElementById('zotero_rdf')){
+	if (doc.getElementById('zotero_rdf')){
 		//testing to know if we have a book or a chapter
 		var met = doc.getElementsByName('DC.type')[0];
 		var cont = met.content
 		Zotero.debug(cont);
-		if(cont == 'Book' || cont == 'book'){
+		if (cont == 'Book' || cont == 'book'){
 			return 'book';
-		}else{
+		} else {
 			return 'bookSection';
 		}
-	}else{
+	} else {
 		return false;
 	}
 }

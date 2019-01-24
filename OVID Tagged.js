@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcs",
-	"lastUpdated": "2015-10-22 05:25:37"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-03 11:41:00"
 }
 
 /*
@@ -290,7 +290,7 @@ function finalizeItem(item) {
 			}
 		}
 	}
-	if((item.itemType == "book" ||item.itemType == "bookSection")&& !item.publisher){
+	if ((item.itemType == "book" ||item.itemType == "bookSection")&& !item.publisher){
 		item.publisher = item.publishing;
 	}
 	

@@ -2,14 +2,14 @@
 	"translatorID": "3e684d82-73a3-9a34-095f-19b112d88bbf",
 	"label": "Google Books",
 	"creator": "Simon Kornblith, Michael Berkowitz and Rintze Zelle",
-	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(?:\\/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?(btnG=Search\\+Books|tbm=bks))|^https?://play\\.google\\.[a-z]+(\\.[a-z]+)?\\/(store\\/)?(books|search\\?.+&c=books)",
+	"target": "^https?://(books|www)\\.google\\.[a-z]+(\\.[a-z]+)?/(books(/.*)?\\?(.*id=.*|.*q=.*)|search\\?.*?(btnG=Search\\+Books|tbm=bks))|^https?://play\\.google\\.[a-z]+(\\.[a-z]+)?/(store/)?(books|search\\?.+&c=books)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-07-31 17:08:28"
+	"lastUpdated": "2017-12-03 04:20:33"
 }
 
 /*
@@ -42,7 +42,7 @@ https://play.google.com/store/search?q=doyle+arthur+conan&c=books
 var singleRe = /^https?:\/\/(?:books|www|play)\.google\.[a-z]+(?:\.[a-z]+)?(?:\/store)?\/books(?:\/.*)?\?(?:[^q].*&)?(id|vid)=([^&]+)/i;
 
 function detectWeb(doc, url) {
-	if(singleRe.test(url)) {
+	if (singleRe.test(url)) {
 		return "book";
 	} else {
 		return "multiple";
@@ -60,7 +60,7 @@ function doWeb(doc, url) {
 	itemUrlBase = "/books?id=";
 	
 	var m = singleRe.exec(url);
-	if(m && m[1] == "id") {
+	if (m && m[1] == "id") {
 		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else if (m && m[1] == "vid") {
 		var itemLinkWithID = ZU.xpath(doc, '/html/head/link[@rel="canonical"]')[0].href;
@@ -68,16 +68,15 @@ function doWeb(doc, url) {
 		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
 	} else {
 		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
-		//Zotero.debug(items);
 		// Drop " - Page" thing
-		for(var i in items) {
+		for (var i in items) {
 			items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
 		}
 		Zotero.selectItems(items, function(items) {
-			if(!items) Z.done();
+			if (!items) Z.done();
 			var baseurl = url.match(psRe)[0];
 			var newUris = [];
-			for(var i in items) {
+			for (var i in items) {
 				//the singleRe has the full URL - we may only be getting the URL w/o host correct for that.
 				if (i.search(psRe)===-1){
 					i = baseurl.replace(/\/$/, "") + i;
@@ -146,7 +145,7 @@ function parseXML(text) {
 	newItem.attachments = [{title:"Google Books Link", snapshot:false, mimeType:"text/html", url:url}];
 	
 	var subjects = ZU.xpath(xml, 'dc:subject', ns);
-	for(var i in subjects) {
+	for (var i in subjects) {
 		newItem.tags.push(subjects[i].textContent);
 	}
 	
@@ -170,12 +169,12 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	//quick check for new format
 	//As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
 	var bookList = ZU.xpath(doc, '//*[@id="rso"]/li|//*[@id="rso"]/div/li|//*[@id="rso"]/div/div[@class="g"]');
-	if(bookList.length) {
+	if (bookList.length) {
 		Z.debug("newFormat")
-		for(var i=0, n=bookList.length; i<n; i++) {
+		for (var i=0, n=bookList.length; i<n; i++) {
 			var link = ZU.xpathText(bookList[i], './/h3[@class="r"]/a/@href');
 			var title = ZU.xpathText(bookList[i], './/h3[@class="r"]/a');
-			if(link && title) {
+			if (link && title) {
 				availableItems[link] = title;
 			}
 		}
@@ -183,21 +182,21 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	}
 	var altformat = ZU.xpath(doc, '//div[@class="rsiwrapper"]//a[@class="primary"]' )
 	if (altformat.length){
-		for(var i=0, n=altformat.length; i<n; i++) {
+		for (var i=0, n=altformat.length; i<n; i++) {
 			var link = ZU.xpathText(altformat[i], './@href');
 			var title = altformat[i].textContent;
-			if(link && title) {
+			if (link && title) {
 				availableItems[link] = title;
 			}
 		}
 		return availableItems;
 	}
 	var googleplay = ZU.xpath(doc, '//div[contains(@class, "details")]//a[@class="title"]');
-	if(googleplay.length) {
-		for(var i=0, n=googleplay.length; i<n; i++) {
+	if (googleplay.length) {
+		for (var i=0, n=googleplay.length; i<n; i++) {
 			var link = ZU.xpathText(googleplay[i], './@href');
 			var title = googleplay[i].textContent;
-			if(link && title) {
+			if (link && title) {
 				availableItems[link] = title;
 			}
 		}
@@ -206,8 +205,8 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 
 
 	// Require link to match this
-	if(urlRe) {
-		if(urlRe.exec) {
+	if (urlRe) {
+		if (urlRe.exec) {
 			var urlRegexp = urlRe;
 		} else {
 			var urlRegexp = new RegExp();
@@ -215,8 +214,8 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 		}
 	}
 	// Do not allow text to match this
-	if(rejectRe) {
-		if(rejectRe.exec) {
+	if (rejectRe) {
+		if (rejectRe.exec) {
 			var rejectRegexp = rejectRe;
 		} else {
 			var rejectRegexp = new RegExp();
@@ -224,25 +223,25 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 		}
 	}
 	
-	if(!inHere.length) {
+	if (!inHere.length) {
 		inHere = new Array(inHere);
 	}
 	
-	for(var j=0; j<inHere.length; j++) {
+	for (var j=0; j<inHere.length; j++) {
 		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();//Detect Cover view
-		if(coverView){
+		if (coverView){
 			var links = inHere[j].getElementsByTagName("a");
-			for(var i=0; i<links.length; i++) {
-				if(!urlRe || urlRegexp.test(links[i].href)) {
+			for (var i=0; i<links.length; i++) {
+				if (!urlRe || urlRegexp.test(links[i].href)) {
 					var text = links[i].textContent;
-					if(!text) {
+					if (!text) {
 						var text = links[i].firstChild.alt;
 					}
-					if(text) {
+					if (text) {
 						text = Zotero.Utilities.trimInternal(text);
-						if(!rejectRe || !rejectRegexp.test(text)) {
-							if(availableItems[links[i].href]) {
-								if(text != availableItems[links[i].href]) {
+						if (!rejectRe || !rejectRegexp.test(text)) {
+							if (availableItems[links[i].href]) {
+								if (text != availableItems[links[i].href]) {
 									availableItems[links[i].href] += " "+text;
 								}
 							} else {
@@ -254,20 +253,20 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 			}
 		}
 		else {
-			var links = inHere[j].getElementsByTagName("img");//search for <img>-elements, scrape title from alt-attribute, href-link from parent <a>-element
-			for(var i=0; i<links.length; i++) {
-				if(!urlRe || urlRegexp.test(links[i].parentNode.href)) {
-					var text = links[i].alt;
+			var links = inHere[j].querySelectorAll("h3.r a");
+			for (var i=0; i<links.length; i++) {
+				if (!urlRe || urlRegexp.test(links[i].href)) {
+					var text = links[i].parentNode.textContent;
 					//Z.debug(text)
-					if(text) {
+					if (text) {
 						text = Zotero.Utilities.trimInternal(text);
-						if(!rejectRe || !rejectRegexp.test(text)) {
-							if(availableItems[links[i].href]) {
-								if(text != availableItems[links[i].href]) {
+						if (!rejectRe || !rejectRegexp.test(text)) {
+							if (availableItems[links[i].href]) {
+								if (text != availableItems[links[i].href]) {
 									availableItems[links[i].href] += " "+text;
 								}
 							} else {
-								availableItems[links[i].parentNode.href] = text;
+								availableItems[links[i].href] = text;
 							}
 						}
 					}

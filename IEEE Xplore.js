@@ -2,18 +2,18 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|document/|search/(searchresult|selected)\\.jsp|xpl\\/(mostRecentIssue|tocresult).jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-26 05:42:00"
+	"lastUpdated": "2018-11-18 13:57:41"
 }
 
 function detectWeb(doc, url) {
-	if(doc.defaultView !== doc.defaultView.top) return;
+	if (doc.defaultView !== doc.defaultView.top) return;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		return "journalArticle";
@@ -25,29 +25,32 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var search = ZU.xpath(doc, '//div[@ng-app="xpl.search"]')[0];
-	if (!search) {
-		Zotero.debug("No search scope");
+	// Search results
+	if (url.includes("/search/searchresult.jsp")) {
+		return "multiple";
+	}
+
+	// more generic method for other cases (is this still needed?)
+	/*
+	var scope = ZU.xpath(doc, '//div[contains(@class, "ng-scope")]')[0];
+	if (!scope) {
+		Zotero.debug("No scope");
 		return;
 	}
 	
-	Z.monitorDOMChanges(search, {childList: true});
-	
-	var searchResults = search.getElementsByClassName('search-results')[0];
-	if (!searchResults) {
-		Zotero.debug("no search results");
-		return;
-	}
-	
+	Z.monitorDOMChanges(scope, {childList: true});
+
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	*/
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//a[contains(@ng-bind-html, "::record.title")]|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+	var rows = ZU.xpath(doc, '//*[contains(@class, "article-list") or contains(@class, "List-results-items")]//h2/a|//*[@id="results-blk"]//*[@class="art-abs-url"]');
+
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -85,7 +88,7 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape); 
+			ZU.processDocuments(articles, scrape);
 		});
 	} else {
 		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
@@ -97,9 +100,8 @@ function doWeb(doc, url) {
 }
 
 function scrape (doc, url) {
-	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)\//))[1];
-	var pdf = ZU.xpathText(doc, '//a[i[contains(@class, "doc-act-icon-pdf")]]/@href');
-	//Z.debug(pdf);
+	var arnumber = (url.match(/arnumber=(\d+)/) || url.match(/\/document\/(\d+)/))[1];
+	var pdf = "/stamp/stamp.jsp?tp=&arnumber=" + arnumber;
 	//Z.debug("arNumber = " + arnumber);
 	var post = "recordIds=" + arnumber + "&fromPage=&citations-format=citation-abstract&download-format=download-bibtex";
 	ZU.doPost('/xpl/downloadCitations', post, function(text) {
@@ -110,7 +112,7 @@ function scrape (doc, url) {
 		if (text.search(/^@null/)!=-1){
 			earlyaccess=true;
 			text = text.replace(/^@null/, "@article");
-		} 
+		}
 		var translator = Zotero.loadTranslator("import");
 		// Calling the BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -141,7 +143,7 @@ function scrape (doc, url) {
 				ZU.doGet(pdf, function (src) {
 					// Either the PDF is embedded in the page, or (e.g. for iOS)
 					// the page has a redirect to the full-page PDF
-					var m = /<frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
+					var m = /<i?frame src="([^"]+\.pdf\b[^"]*)"|<meta HTTP-EQUIV="REFRESH" content="0; url=([^\s"]+\.pdf\b[^\s"]*)"/.exec(src);
 					var pdfUrl = m && (m[1] || m[2]);
 					if (pdfUrl) {
 						item.attachments.unshift({
@@ -554,6 +556,74 @@ var testCases = [
 					"interference cancellation",
 					"interference suppression",
 					"signal processing"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://ieeexplore.ieee.org/abstract/document/7696113/?reload=true",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "3D flexible antenna realization process using liquid metal and additive technology",
+				"creators": [
+					{
+						"firstName": "M.",
+						"lastName": "Cosker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "F.",
+						"lastName": "Ferrero",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L.",
+						"lastName": "Lizzi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "R.",
+						"lastName": "Staraj",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. M.",
+						"lastName": "Ribero",
+						"creatorType": "author"
+					}
+				],
+				"date": "June 2016",
+				"DOI": "10.1109/APS.2016.7696113",
+				"abstractNote": "This paper presents a method to design 3D flexible antennas using liquid metal and additive technology (3D printer based on Fused Deposition Modeling (FDM) technology). The fabricated antennas present flexible properties. The design method is first presented and validated using the example of a simple inverted F antenna (IFA) in Ultra High Frequency (UHF) band. The design, the fabrication and the obtained measured results are discussed.",
+				"conferenceName": "2016 IEEE International Symposium on Antennas and Propagation (APSURSI)",
+				"itemID": "7696113",
+				"libraryCatalog": "IEEE Xplore",
+				"pages": "809-810",
+				"proceedingsTitle": "2016 IEEE International Symposium on Antennas and Propagation (APSURSI)",
+				"attachments": [
+					{
+						"title": "IEEE Xplore Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "IEEE Xplore Abstract Record"
+					}
+				],
+				"tags": [
+					"3D printer",
+					"Antenna measurements",
+					"Antenna radiation patterns",
+					"IFA antenna",
+					"Liquids",
+					"Metals",
+					"Printers",
+					"Three-dimensional displays",
+					"additive technology",
+					"liquid metal"
 				],
 				"notes": [],
 				"seeAlso": []

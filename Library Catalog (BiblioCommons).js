@@ -2,7 +2,7 @@
 	"translatorID": "5d506fe3-dbde-4424-90e8-d219c63faf72",
 	"label": "Library Catalog (BiblioCommons)",
 	"creator": "Avram Lyon",
-	"target": "^https?://[^/]+\\.bibliocommons\\.com\\/",
+	"target": "^https?://[^/]+\\.bibliocommons\\.com/",
 	"minVersion": "2.1",
 	"maxVersion": "",
 	"priority": 250,
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 		var results = doc.evaluate('//div[@id="bibList"]/div/div//span[@class="title"]/a[1]', doc, ns, XPathResult.ANY_TYPE, null);
 		var items = new Array();
 		var result;
-		while(result = results.iterateNext()) {
+		while (result = results.iterateNext()) {
 				var title = result.textContent;
 				var url = result.href.replace(/\/show\//,"/catalogue_info/");
 				items[url] = title;

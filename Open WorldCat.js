@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-05-26 11:17:07"
+	"lastUpdated": "2017-03-19 23:26:57"
 }
 
 /**
@@ -49,8 +49,8 @@ function generateItem(doc, co) {
 
 function getSearchResults(doc) {
 	var results = doc.getElementsByClassName('result');
-	for(var i=0; i<results.length; i++) {
-		if(!results[i].getElementsByClassName('name').length) {
+	for (var i=0; i<results.length; i++) {
+		if (!results[i].getElementsByClassName('name').length) {
 			delete results[i];
 			i--;
 		}
@@ -69,12 +69,12 @@ function getFirstContextObj(doc) {
 function detectWeb(doc, url) {
 	//distinguish from Worldcat Discovery
 	if (doc.body.id == "worldcat") {
-		if(getSearchResults(doc).length) {
+		if (getSearchResults(doc).length) {
 			return "multiple";
 		}
 
 		var co = getFirstContextObj(doc);
-		if(!co) return false;
+		if (!co) return false;
 
 		// generate item and return type
 		return generateItem(doc, co).itemType;
@@ -86,7 +86,7 @@ function detectWeb(doc, url) {
  */
 function extractOCLCID(url) {
 	var id = url.match(/\/(\d+)(?=[&?]|$)/);
-	if(!id) return false;
+	if (!id) return false;
 	return id[1];
 }
 
@@ -125,9 +125,9 @@ function scrape(ids, data) {
 					.split(/[.,],/);
 			var replStr = '';
 			var author;
-			for(var i=0, n=authors.length; i<n; i++) {
+			for (var i=0, n=authors.length; i<n; i++) {
 					author = authors[i].trim();
-					if(author) replStr += tag + author + '\n';
+					if (author) replStr += tag + author + '\n';
 			}
 			return replStr.trim();
 		});
@@ -150,7 +150,7 @@ function scrape(ids, data) {
 			item.extra = undefined;
 			item.archive = undefined;
 
-			if(item.libraryCatalog == "http://worldcat.org") {
+			if (item.libraryCatalog == "http://worldcat.org") {
 				item.libraryCatalog = "Open WorldCat";
 			}
 			//remove space before colon
@@ -168,7 +168,7 @@ function scrape(ids, data) {
 			item.place = cleanBrackets(item.place);
 			item.publisher = cleanBrackets(item.publisher);
 			//attach notes
-			if(itemData && itemData.notes) {
+			if (itemData && itemData.notes) {
 				item.notes.push({note: itemData.notes});
 			}
 			if (oclcID) {
@@ -194,29 +194,29 @@ function scrape(ids, data) {
 
 function doWeb(doc, url) {
 	var results = getSearchResults(doc);
-	if(results.length) {
+	if (results.length) {
 		var items = {}, itemData = {};
-		for(var i=0, n=results.length; i<n; i++) {
+		for (var i=0, n=results.length; i<n; i++) {
 			var title = getTitleNode(results[i]);
-			if(!title || !title.href) continue;
+			if (!title || !title.href) continue;
 			var url = title.href;
 			var oclcID = extractOCLCID(url);
-			if(!oclcID) {
+			if (!oclcID) {
 				Zotero.debug("WorldCat: Failed to extract OCLC ID from URL: " + url);
 				continue;
 			}
 			items[oclcID] = title.textContent;
 			
 			var notes = ZU.xpath(results[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
-			if(!notes.length) {
+			if (!notes.length) {
 				//maybe we're looking at our own list
 				notes = ZU.xpath(results[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
 			}
-			if(notes.length) {
+			if (notes.length) {
 				notes = ZU.trimInternal(notes[0].innerHTML)
 					.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
 				
-				if(notes) {
+				if (notes) {
 					itemData[oclcID] = {
 						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
 					};
@@ -246,8 +246,7 @@ function doWeb(doc, url) {
 				oclcID = extractOCLCID(canonicalURL.href);
 			}
 		}
-		
-		if(!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		scrape([oclcID]);
 	}
 }
@@ -327,11 +326,11 @@ function fetchIDs(isbns, ids, callback) {
 	}
 	
 	var isbn = isbns.shift();
-	var url = "http://www.worldcat.org/search?qt=results_page&q=bn%3A"
+	var url = "http://www.worldcat.org/search?qt=results_page&q=isbn%3A"
 		+ encodeURIComponent(isbn);
 	ZU.processDocuments(url,
 		function (doc) {
-			//we take the first search result
+			//mostly these are search results; for those, we take the first search result
 			var results = getSearchResults(doc);
 			if (results.length) {
 				var title = getTitleNode(results[0]);
@@ -341,8 +340,17 @@ function fetchIDs(isbns, ids, callback) {
 				} else {
 					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
 				}
-			} else {
-				Z.debug("No search results found for ISBN " + isbn);
+			}
+			//but sometimes we have single items
+			else  {
+				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
+   				if (canonicalURL) {
+      					oclcID = extractOCLCID(canonicalURL);
+      					if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+         				scrape([oclcID]);
+   				} else {
+     					 Z.debug("No search results found for ISBN " + isbn);
+   				}
 			}
 		},
 		function() {
@@ -350,6 +358,7 @@ function fetchIDs(isbns, ids, callback) {
 		}
 	);
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -494,7 +503,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Newman's relation to modernism",
+				"title": "Newman's relation to modernism.",
 				"creators": [
 					{
 						"lastName": "Smith",
@@ -586,6 +595,7 @@ var testCases = [
 				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"extra": "OCLC: 793205903",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -624,6 +634,7 @@ var testCases = [
 				"place": "Cambridge, Mass.",
 				"date": "1996",
 				"ISBN": "9780585030159",
+				"extra": "OCLC: 42854423",
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
@@ -649,7 +660,7 @@ var testCases = [
 				],
 				"date": "2009",
 				"ISSN": "1049-0078",
-				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"abstractNote": "In recent years China has faced an increasing trilemma—how to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
 				"extra": "OCLC: 4933578953",
 				"issue": "3",
 				"language": "English",
@@ -684,9 +695,9 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2004",
+				"date": "2005",
 				"ISBN": "9787112062317",
-				"extra": "OCLC: 56290538",
+				"extra": "OCLC: 77641948",
 				"language": "Chinese",
 				"libraryCatalog": "Open WorldCat",
 				"place": "北京",

@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsib",
-	"lastUpdated": "2016-06-21 08:45:20"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2017-06-07 18:01:47"
 }
 
 /*
@@ -81,7 +81,7 @@ function cardList(doc) {
 }
 
 function cardListFindCards(doc) {
-	return ZU.xpath(doc, '//div[contains(@class,"card-list")]/div[contains(@class, "card")]//h2/a[contains(@class, "title")]');
+	return ZU.xpath(doc, '//div[contains(@class,"card-list")]//div[contains(@class, "card-content")]//a[@class="title"]');
 }
 
 function findProperty(doc, propertyKey) {
@@ -89,22 +89,24 @@ function findProperty(doc, propertyKey) {
 }
 
 function saveIndividual(doc, url) {
-	var title = findProperty(doc, "name");
-	var author = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
-
-	var date = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//div[contains(@class, "document-subtitle")]');
-	date = date.replace(/\s*-\s*/, '');
-
-	var description = findProperty(doc, "description");
-
-	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
-
 	var item = new Zotero.Item("computerProgram");
-	item.title = title;
-	item.url = url;
-	item.date = date;
-	item.abstractNote = description;
+	
+	item.title = ZU.xpathText(doc, '//h1[contains(@class, "document-title")]');
+	
+	var author = ZU.xpathText(doc, '//div[contains(@itemprop, "author")]//span[contains(@itemprop, "name")]');
+	if (author) {
+		item.creators.push(ZU.cleanAuthor(author, "author"));
+	}
 
+	item.url = url;
+	
+	var date = ZU.xpathText(doc, '//div[contains(@itemprop, "datePublished")]');
+	if (date) {
+		item.date = date.replace(/\s*-\s*/, '');
+	}
+	item.abstractNote = findProperty(doc, "description");
+	
+	var screenshots = ZU.xpath(doc, '//img[contains(@itemprop, "screenshot")]');
 	for (var index = 0; index < screenshots.length; index++) {
 		item.attachments.push({
 			url: screenshots[index].src,
@@ -122,10 +124,11 @@ function saveIndividual(doc, url) {
 		item.version = version;
 	}
 	
-	item.company = author;
+	item.company = ZU.xpathText(doc, '//div[contains(@itemtype, "http://schema.org/Organization")]//span[contains(@itemprop, "name")]');
 	
 	item.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -136,7 +139,13 @@ var testCases = [
 			{
 				"itemType": "computerProgram",
 				"title": "Zandy",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Avram",
+						"lastName": "Lyon",
+						"creatorType": "author"
+					}
+				],
 				"date": "October 1, 2014",
 				"abstractNote": "Access your Zotero library from your mobile device! Edit and view your library, sync, and work offline. Zandy provides a simple interface to all your research. Browse and modify the items in your library, add new items, view attachments, take and edit item notes, search your library, and add webpages from the Android browser, with more features coming soon!See http://www.gimranov.com/avram/w/zandy-user-guide for a complete guide to using Zandy. If you have Zandy 1.0 already, see the update note, http://wp.me/p1i2jM-2UFor more information on the Zotero project, the premier system for managing research and bibliographic data, see the project site at http://www.zotero.org/. Zandy is a free software project, licensed under the Affero GPL v3. By buying the paid application on Google Play, you support the future development of this app and ensure its further improvement. All future releases of the software will be free updates bringing new capabilities and bugfixes.To file bug reports or feature requests, please see the project repository at https://github.com/ajlyon/zandy/. The full source code is also available at that address.If you find that Zandy doesn't fit your needs, satisfaction is guaranteed: just send me an email at zandy@gimranov.com, and I'll refund the purchase price.Please note that Zandy has no official connection to the Zotero project and its home institution at the Center for History and New Media at George Mason University.",
 				"company": "Avram Lyon",

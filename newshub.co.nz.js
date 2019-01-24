@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-08-29 06:06:01"
+	"lastUpdated": "2016-12-28 20:22:36"
 }
 
 /*
@@ -37,10 +37,10 @@
 
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc, true)) {
-		return "multiple";
-	} else if (ZU.xpathText(doc, '//div[@id="article"]')) {
+	if (ZU.xpathText(doc, '//article[@itemtype="http://schema.org/NewsArticle"]')) {
 		return "newspaperArticle";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
 }
 
@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//ul[@id="searchResult" or @id="tagsArticles"]//h3/a|//a[descendant::div[@class="article-title"]]');
+	var rows = ZU.xpath(doc, '//section[contains(@class, "Story")]//a[contains(@class, "Story-link")]');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -87,18 +87,13 @@ function scrape(doc, url) {
 
 	translator.setHandler('itemDone', function (obj, item) {
 		
-		var author = ZU.xpathText(doc, '//div[@id="byline_author"]//span[@itemprop="name"]') || ZU.xpathText(doc, '//div[@id="article_start"]/p/strong[contains(text(), "By")]');
+		var author = ZU.xpathText(doc, '//p/strong[starts-with(text(), "By")]') || ZU.xpathText(doc, '//li[contains(@class, "c-ArticleHeader-author") and starts-with(text(), "By")]');
 		if (author) {
 			author = author.replace("By", '');
 			item.creators.push(ZU.cleanAuthor(author, "author"));
 		}
 		
-		item.date = ZU.strToISO(ZU.xpathText(doc, '//div[@id="byline_date"]'));
-		
-		var tags = ZU.xpath(doc, '//ul[@id="relatedTags"]/li/a');
-		for (var i=0; i<tags.length; i++) {
-			item.tags.push(tags[i].textContent);
-		}
+		item.date = ZU.strToISO(ZU.xpathText(doc, '//li[contains(@class, "c-ArticleHeader-timestamp")]'));
 		
 		item.publicationTitle = "Newshub";
 		
@@ -125,7 +120,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-08-16",
+				"date": "2011-08-15",
 				"abstractNote": "58,000 young people between the ages of 15-24 are not in education, training or work - this is National's biggest first term failure.",
 				"libraryCatalog": "www.newshub.co.nz",
 				"publicationTitle": "Newshub",
@@ -135,10 +130,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"John Key",
-					"Political Figures"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -169,12 +161,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Barack Obama",
-					"Elections",
-					"Political Figures",
-					"US Election"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -182,7 +169,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.newshub.co.nz/nznews/council-puts-stop-to-confusing-cuba-st-intersection-2016082614",
+		"url": "http://www.newshub.co.nz/home/new-zealand/2016/08/council-puts-stop-to-confusing-cuba-st-intersection.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -198,18 +185,13 @@ var testCases = [
 				"abstractNote": "A Wellington intersection that's confounded drivers for years is to have a $200,000 set of traffic lights installed.",
 				"libraryCatalog": "www.newshub.co.nz",
 				"publicationTitle": "Newshub",
-				"url": "http://www.newshub.co.nz/nznews/council-puts-stop-to-confusing-cuba-st-intersection-2016082614",
+				"url": "http://www.newshub.co.nz/home/new-zealand/2016/08/council-puts-stop-to-confusing-cuba-st-intersection.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Autos",
-					"Driving",
-					"New Zealand",
-					"Wellington"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -217,7 +199,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.newshub.co.nz/searchresults?q=zotero&submit=",
+		"url": "http://www.newshub.co.nz/home/new-zealand/marlborough.html",
 		"items": "multiple"
 	}
 ]

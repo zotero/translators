@@ -2,30 +2,30 @@
 	"translatorID": "fc353b26-8911-4c34-9196-f6f567c93901",
 	"label": "Douban",
 	"creator": "Ace Strong<acestrong@gmail.com>",
-	"target": "^https?://(?:www|book).douban.com/(?:subject|doulist|people/[a-zA-Z._]*/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group/[0-9]*?/collection|tag)",
+	"target": "^https?://(www|book)\\.douban\\.com/(subject|doulist|people/[a-zA-Z._]*/(do|wish|collect)|.*?status=(do|wish|collect)|group/[0-9]*?/collection|tag)",
 	"minVersion": "2.0rc1",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-05-12 18:08:35"
+	"lastUpdated": "2017-01-01 16:52:39"
 }
 
 /*
    Douban Translator
    Copyright (C) 2009-2010 TAO Cheng, acestrong@gmail.com
-
+   
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -205,11 +205,14 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var articles = new Array();
-	if(detectWeb(doc, url) == "multiple") { 
+	if (detectWeb(doc, url) == "multiple") { 
 		var items = {};
-		var titles = doc.evaluate('//div/h2/a[contains(@onclick, "moreurl")]', doc, null, XPathResult.ANY_TYPE, null);
+		var titles = ZU.xpath(doc, '//div[@class="title"]/a');
 		var title;
-		while (title = titles.iterateNext()) {
+		for (let i = 0; i < titles.length; i++){
+			title = titles[i];
+			Zotero.debug(title.href);
+			Zotero.debug(title.textContent);
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {
@@ -235,10 +238,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://book.douban.com/subject/1355643/",
+		"url": "https://book.douban.com/subject/1355643/",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Norwegian Wood",
 				"creators": [
 					{
 						"firstName": "Haruki",
@@ -251,7 +255,14 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"notes": [],
+				"date": "2003-06-30",
+				"ISBN": "9780099448822",
+				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
+				"libraryCatalog": "Douban",
+				"numPages": "400",
+				"publisher": "Vintage",
+				"url": "https://book.douban.com/subject/1355643/",
+				"attachments": [],
 				"tags": [
 					"HarukiMurakami",
 					"小说",
@@ -262,16 +273,8 @@ var testCases = [
 					"英文原版",
 					"英文版"
 				],
-				"seeAlso": [],
-				"attachments": [],
-				"url": "http://book.douban.com/subject/1355643/",
-				"title": "Norwegian Wood",
-				"ISBN": "9780099448822",
-				"numPages": "400",
-				"publisher": "Vintage",
-				"date": "2003-06-30",
-				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
-				"libraryCatalog": "Douban"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 19:57:18"
+	"lastUpdated": "2017-06-24 21:03:57"
 }
 
 /*
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	//don't parse things like image galleries
 	//e.g. http://www.sueddeutsche.de/kultur/thomas-manns-villa-in-los-angeles-weimar-am-pazifik-1.1301388
-	if(!ZU.xpathText(doc, '//h2/strong')) return;
+	if (!ZU.xpathText(doc, '//h2/strong')) return;
 
 	var newItem = new Zotero.Item("newspaperArticle");
 	newItem.url = url;
@@ -65,7 +65,7 @@ function scrape(doc, url) {
 
 	// Author. This is tricky, the SZ uses the author field for whatever they like.
 	// Sometimes, there is no author.
-	var author =  ZU.xpathText(doc, '//section[@class="authors"]//span[@class="moreInfo"]/strong')
+	var author =  ZU.xpathText(doc, '//section[contains(@class, "authors")]//span[contains(@class, "moreInfo")]/strong')
 
 	// One case i've seen: A full sentence as the "author", with no author in it.
 	if (author && author.trim().charAt(author.length - 1) != '.') {
@@ -84,7 +84,10 @@ function scrape(doc, url) {
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[contains(@property, "og:description")]/@content');
 
 	// Date
-	newItem.date = ZU.xpathText(doc, "//time[@class='timeformat']").replace(/\d{2}:\d{2}/, "");
+	newItem.date = ZU.xpathText(doc, "//time[@class='timeformat']");
+	if (newItem.date) {
+		newItem.date = ZU.strToISO(newItem.date);
+	}
 
 	// Section
 	var section = url.match(/sueddeutsche\.de\/([^\/]+)/);
@@ -92,7 +95,7 @@ function scrape(doc, url) {
 
 	// Tags
 	var tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-	if(tags) {
+	if (tags) {
 		tags = tags.split(/\s*,\s+/);
 		for (var i=0, n=tags.length; i<n; i++) {
 			newItem.tags.push(ZU.trimInternal(tags[i]));
@@ -106,10 +109,12 @@ function scrape(doc, url) {
 
 	// Attachment. inserting /2.220/ gives us a printable version
 	var printurl = url.replace(/(.*\/)(.*$)/, '$12.220/$2');
-	newItem.attachments.push( { url:printurl,
-								title:newItem.title,
-								mimeType:"text/html",
-								snapshot:true } );
+	newItem.attachments.push({
+		url: printurl,
+		title: "Snapshot",
+		mimeType: "text/html",
+		snapshot: true
+	});
 
 	newItem.complete()
 }
@@ -125,13 +130,13 @@ function doWeb(doc, url) {
 
 		var items = new Object();
 		var title;
-		for(var i=0, n=links.length; i<n; i++) {
+		for (var i=0, n=links.length; i<n; i++) {
 			title = ZU.xpathText(links[i], './node()[not(self::div)]', null, '');
 			items[links[i].href] = ZU.trimInternal(title);
 		}
 
 		Zotero.selectItems(items, function(items) {
-			if(!items) return true;
+			if (!items) return true;
 
 			var articles = new Array();
 			for (var i in items) {
@@ -150,6 +155,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Spitzname \"Kleiner Adolf\"",
 				"creators": [
 					{
 						"firstName": "Peter",
@@ -162,33 +168,31 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [
-					"Café",
-					"Internet",
-					"Polizei",
-					"SZ",
-					"Süddeutsche Zeitung",
-					"Wohnung"
-				],
-				"seeAlso": [],
+				"date": "2011-11-16",
+				"ISSN": "0174-4917",
+				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
+				"language": "de",
+				"libraryCatalog": "Sueddeutsche.de",
+				"publicationTitle": "sueddeutsche.de",
+				"section": "politik",
+				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
 				"attachments": [
 					{
-						"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
+						"title": "Snapshot",
 						"mimeType": "text/html",
 						"snapshot": true
 					}
 				],
-				"url": "http://www.sueddeutsche.de/politik/verdacht-gegen-hessischen-verfassungsschuetzer-spitzname-kleiner-adolf-1.1190178",
-				"title": "Verdacht gegen hessischen Verfassungsschützer: Spitzname \"Kleiner Adolf\"",
-				"abstractNote": "Als die Zwickauer Zelle in einem Kasseler Internet-Café Halit Y. hinrichtet, surft ein hessischer Verfassungsschützer dort im Netz. In seiner Wohnung findet die Polizei später Hinweise auf eine rechtsradikale Gesinnung - doch die Ermittlungen gegen den Mann werden eingestellt. Dabei bleiben viele Fragen offen.",
-				"date": "16. November 2011",
-				"section": "politik",
-				"publicationTitle": "sueddeutsche.de",
-				"ISSN": "0174-4917",
-				"language": "de",
-				"libraryCatalog": "Sueddeutsche.de",
-				"shortTitle": "Verdacht gegen hessischen Verfassungsschützer"
+				"tags": [
+					"Internet",
+					"Politik",
+					"Polizei",
+					"SZ",
+					"Süddeutsche Zeitung",
+					"rechter Terror"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

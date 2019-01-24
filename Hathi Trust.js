@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-02-24 00:03:36"
+	"lastUpdated": "2017-11-11 20:05:29"
 }
 
 /*
@@ -51,12 +51,12 @@ function getSearchResults(doc) {
 	var res = ZU.xpath(doc, '//div[@class="resultitem"]\
 					[.//a[@class="cataloglinkhref"][1]/@href]');
 	//collections
-	if(!res.length) res = ZU.xpath(doc, '//div[contains(@class,"row")]/div[.//div[contains(@class, "result")]//a[contains(@class, "cataloglinkhref")][1]/@href]');
+	if (!res.length) res = ZU.xpath(doc, '//div[contains(@class,"row")]/div[.//div[contains(@class, "result")]//a[contains(@class, "cataloglinkhref")][1]/@href]');
 	return res;
 }
 
 function doWeb(doc, url){
-	if(detectWeb(doc, url) == "multiple") { 
+	if (detectWeb(doc, url) == "multiple") { 
 		var items = {};
 		var rows = getSearchResults(doc);
 		var c=0;
@@ -65,21 +65,21 @@ function doWeb(doc, url){
 						ZU.xpathText(rows[i], './h4[@class="Title"]/text()[last()]');	//collection item
 			var id = ZU.xpathText(rows[i], './/a[contains(@class, "cataloglinkhref")][1]/@href');
 			//Z.debug(id + ": " + title)
-			if(id) {
+			if (id) {
 				id = (id.match(/\/(\d+)/) || [])[1];
 				//lists can display the same record, but with different titles
 				//(for different PDF versions), so we add a unique number to each
 				//record so they don't override each other. We strip it off later
-				if(id) id = c++ + '-' + id;
+				if (id) id = c++ + '-' + id;
 			}
-			if(title && id) items[id] = title;
+			if (title && id) items[id] = title;
 		}
 
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i.replace(/^\d+-/,''));
 			}
@@ -105,6 +105,9 @@ function scrape(ids){
 			item.extra="";
 			if (item.place)	item.place = item.place.replace(/[\[\]]/g, "");
 			if (item.tags.length) item.tags = item.tags.join("/").split("/");
+			if (item.url.substr(0,2)=="//") {
+				item.url = "https:" + item.url;
+			}
 			item.attachments = [{url:item.url, title: "Hathi Trust Record", mimeType: "text/html"}];
 			item.complete();
 		});	
@@ -122,10 +125,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://catalog.hathitrust.org/Record/001050654",
+		"url": "https://catalog.hathitrust.org/Record/001050654",
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Cervantes",
 				"creators": [
 					{
 						"lastName": "Entwistle",
@@ -133,23 +137,21 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1940",
+				"libraryCatalog": "Hathi Trust",
+				"numPages": "3 p.l., 192 p.",
+				"place": "Oxford",
+				"publisher": "The Clarendon press",
+				"url": "https://catalog.hathitrust.org/Record/001050654",
 				"attachments": [
 					{
 						"title": "Hathi Trust Record",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Cervantes",
-				"numPages": "3 p.l., 192 p.",
-				"place": "Oxford",
-				"publisher": "The Clarendon press",
-				"url": "http://catalog.hathitrust.org/Record/001050654",
-				"date": "1940",
-				"libraryCatalog": "Hathi Trust",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},

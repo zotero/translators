@@ -191,13 +191,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.ncbi.nlm.nih.gov/nuccore/NM_078524.4",
+		"url": "https://www.ncbi.nlm.nih.gov/nuccore/NM_078524.4",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Drosophila melanogaster smad on X (Smox), transcript variant A, mRNA",
+				"title": "Drosophila melanogaster smad on X, transcript variant A (Smox), mRNA",
 				"creators": [],
-				"date": "2014/08/05",
+				"date": "2016/12/13",
 				"archive": "NCBI Nucleotide Database",
 				"archiveLocation": "665390239",
 				"callNumber": "NM_078524.4",
@@ -214,7 +214,7 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Drosophila melanogaster",
+					"fruit fly",
 					"refseq",
 					"rna"
 				],

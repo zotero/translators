@@ -9,28 +9,28 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2016-04-05 04:14:23"
+	"lastUpdated": "2017-06-20 03:57:47"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Figshare translator Copyright © 2013-2016 Sebastian Karcher
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -47,7 +47,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 		var items = new Object();
 		var found = false;
-		var titles = ZU.xpath(doc, '//div[@class="item-title"]');
+		//skip collections here
+		var titles = ZU.xpath(doc, '//div[@class="item-title" and not(contains(@href, "/collections/"))]');
 		//Z.debug(titles.length)
 		for (var i = 0; i<titles.length; i++) {
 			//.href does not work -- can't quite follow why but appears related to path depths
@@ -60,6 +61,7 @@ function getSearchResults(doc, checkOnly) {
 		}
 	return found ? items : false;
 }
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
@@ -79,8 +81,6 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var risURL = ZU.xpathText(doc, '//div[@class="exports-wrap section"]/div/a[contains(text(), "Ref. manager")]/@href');
-	var DOI = ZU.xpathText(doc, '//meta[@name="DC.identifier"]/@content');
-	//Z.debug(DOI)
 	//Z.debug(risURL)
 	ZU.HTTP.doGet(risURL, function (text) {
 		//Z.debug(text)
@@ -91,7 +91,7 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			//Authors are firstName LastName - fix
-			for (i in item.creators) {
+			for (i = 0; i<item.creators.length; i++) {
 				//sometimes there _is_ a comma delimiter
 				if (!item.creators[i].firstName) {
 					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, "author");
@@ -104,22 +104,13 @@ function scrape(doc, url) {
 				title: "Figshare Snapshot",
 				mimeType: "text/html"
 			});
-			//place DOI in DOI field for journal articles, into Extra otherwise
-			if (DOI) {
-				DOI = DOI.replace(/^doi:?\s*/i, "")
-				if (item.itemType == "journalArticle") {
-					item.DOI = DOI;
-				}
-				else if (DOI) {
-					item.extra = "DOI:" + DOI;
-				}
-			}
-
+			
 			item.complete();
 		});
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -169,10 +160,6 @@ var testCases = [
 				"url": "https://figshare.com/articles/_Number_of_reported_pertussis_cases_per_week_in_Japan_from_2002_to_2012_/815480",
 				"attachments": [
 					{
-						"title": "Full Text (HTML)",
-						"mimeType": "text/html"
-					},
-					{
 						"title": "Figshare Snapshot",
 						"mimeType": "text/html"
 					}
@@ -190,7 +177,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://figshare.com/articles/search?q=labor&quick=1&x=0&y=0",
+		"url": "https://figshare.com/search?q=labor&quick=1&x=0&y=0",
 		"defer": true,
 		"items": "multiple"
 	},

@@ -2,42 +2,49 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/science(?:/article/|\\?.*\\b_ob=ArticleListURL|/(?:journal|bookseries|book|handbooks|referenceworks)/\\d)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\\d)|search\\?|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-12-08 05:47:08"
+	"lastUpdated": "2018-09-05 01:23:19"
 }
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return;
-	
-	if ((url.indexOf("_ob=DownloadURL") !== -1) 
-		|| doc.title == "ScienceDirect Login" 
-		|| doc.title == "ScienceDirect - Dummy"
-		|| (url.indexOf("/science/advertisement/") !== -1)) { 
+
+	if ((url.includes("_ob=DownloadURL")) ||
+		doc.title == "ScienceDirect Login" ||
+		doc.title == "ScienceDirect - Dummy" ||
+		(url.includes("/science/advertisement/"))) {
 		return false;
 	}
 
-	if((url.indexOf("pdf") !== -1
-			&& url.indexOf("_ob=ArticleURL") === -1
-			&& url.indexOf("/article/") === -1)
-		|| url.search(/\/(?:journal|bookseries|book|handbooks|referenceworks)\//) !== -1
-		|| url.indexOf("_ob=ArticleListURL") !== -1) {
+	if ((url.includes("pdf") &&
+			!url.includes("_ob=ArticleURL") &&
+			!url.includes("/article/")) ||
+		url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
 		} else {
 			return false;
 		}
-	} else if(url.indexOf("pdf") === -1) {
+	}
+
+	if (url.includes('/search?') && getArticleList(doc).length > 0) {
+		return "multiple";
+	}
+	if (!url.includes("pdf")) {
 		// Book sections have the ISBN in the URL
-		if (url.indexOf("/B978") !== -1) {
+		if (url.includes("/B978")) {
 			return "bookSection";
-		} else if(getISBN(doc)) {
-			if(getArticleList(doc).length) {
+		} else if (getISBN(doc)) {
+			if (getArticleList(doc).length) {
 				return "multiple";
 			} else {
 				return "book";
@@ -45,37 +52,122 @@ function detectWeb(doc, url) {
 		} else {
 			return "journalArticle";
 		}
-	} 
+	}
 }
 
-function getPDFLink(doc) {
-	var pdfLink = ZU.xpathText(doc, '//div[@id="articleNav"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
-	if (!pdfLink){
-		pdfLink = ZU.xpathText(doc, '//div[@class="extendedPdfBox"]//a[@id="pdfLink" and not(@title="Purchase PDF")]/@href');
+function getPDFLink(doc, onDone) {
+	// No PDF access ("Get Full Text Elsewhere" or "Check for this article elsewhere")
+	if (doc.querySelector('.accessContent') || doc.querySelector('.access-options-link-text') || doc.querySelector('#check-access-popover')) {
+		Zotero.debug("PDF is not available");
+		onDone();
+		return;
 	}
-	return pdfLink
+	
+	// Some pages still have the PDF link available
+	var pdfURL = attr(doc, '#pdfLink', 'href');
+	if (!pdfURL) pdfURL = attr(doc, '[name="citation_pdf_url"]', 'content');
+	if (pdfURL && pdfURL != '#') {
+		parseIntermediatePDFPage(pdfURL, onDone);
+		return;
+	}
+	
+	// If intermediate page URL is available, use that directly
+	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
+	if (intermediateURL) {
+		//Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
+		parseIntermediatePDFPage(intermediateURL, onDone);
+		return;
+	}
+	
+	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
+	// for the intermediate page, which doesn't seem to be available in the DOM after the page load.
+	// This is an awful hack, and we should look out for a better way to get the URL, but it beats
+	// refetching the original source as we do below.
+	var pdfLink = doc.querySelector('#pdfLink');
+	if (pdfLink) {
+		// Just in case
+		try {
+			pdfLink.click();
+			intermediateURL = attr(doc, '.PdfDropDownMenu a', 'href');
+			var clickEvent = doc.createEvent('MouseEvents');
+			clickEvent.initEvent('mousedown', true, true);
+			doc.dispatchEvent(clickEvent);
+		}
+		catch (e) {
+			Zotero.debug(e, 2);
+		}
+		if (intermediateURL) {
+			//Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
+			parseIntermediatePDFPage(intermediateURL, onDone);
+			return;
+		}
+	}
+	
+	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
+	// by fetching the page source again. Hopefully this is never actually used.
+	var url = doc.location.href;
+	Zotero.debug("Refetching HTML for PDF link");
+	ZU.doGet(url, function (html) {
+		// TODO: Switch to HTTP.request() and get a Document from the XHR
+		var dp = new DOMParser();
+		var doc = dp.parseFromString(html, 'text/html');
+		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
+		//Zotero.debug("Intermediate PDF URL: " + intermediateURL);
+		if (intermediateURL) {
+			parseIntermediatePDFPage(intermediateURL, onDone);
+			return;
+		}
+		onDone();
+	});
 }
+
+
+function parseIntermediatePDFPage(url, onDone) {
+	// Get the PDF URL from the meta refresh on the intermediate page
+	ZU.doGet(url, function (html) {
+		var dp = new DOMParser();
+		var doc = dp.parseFromString(html, 'text/html');
+		var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
+		var otherRedirect = attr(doc, '#redirect-message a', 'href');
+		//Zotero.debug("Meta refresh URL: " + pdfURL);
+		if (pdfURL) {
+			// Strip '0;URL='
+			var matches = pdfURL.match(/\d+;URL=(.+)/);
+			pdfURL = matches ? matches[1] : null;
+		} else if (otherRedirect) {
+			pdfURL = otherRedirect;
+		} else {
+			//Sometimes we are already on the PDF page here and therefore
+			//can simply use the original url as pdfURL.
+			if (url.includes('.pdf')) {
+				pdfURL = url;
+			}
+		}
+		onDone(pdfURL);
+	});
+}
+
 
 function getISBN(doc) {
 	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
 		//span[@class="txtSmall"]');
-	if(!isbn) return;
+	if (!isbn) return;
 
 	isbn = isbn.match(/ISBN:\s*([-\d]+)/);
-	if(!isbn) return;
+	if (!isbn) return;
 
 	return isbn[1].replace(/[-\s]/g, '');
 }
 
 function getFormValues(text, inputs) {
-	var re = new RegExp("<input[^>]+name=(['\"]?)("
-			+ inputs.join('|')
-			+ ")\\1[^>]*>", 'g');
+	var re = new RegExp("<input[^>]+name=(['\"]?)(" +
+		inputs.join('|') +
+		")\\1[^>]*>", 'g');
 
 	var input, val, params = {};
-	while(input = re.exec(text)) {
+	while (input = re.exec(text)) {
 		val = input[0].match(/value=(['"]?)(.*?)\1[\s>]/);
-		if(!val) continue;
+		if (!val) continue;
 
 		params[encodeURIComponent(input[2])] = encodeURIComponent(val[2]);
 	}
@@ -86,7 +178,7 @@ function getFormValues(text, inputs) {
 function getAbstract(doc) {
 	var p = ZU.xpath(doc, '//div[contains(@class, "abstract") and not(contains(@class, "abstractHighlights"))]/p');
 	var paragraphs = [];
-	for(var i=0; i<p.length; i++) {
+	for (var i = 0; i < p.length; i++) {
 		paragraphs.push(ZU.trimInternal(p[i].textContent));
 	}
 	return paragraphs.join('\n');
@@ -96,7 +188,7 @@ function getAbstract(doc) {
 //intentionally excluding potentially large files like videos and zip files
 var suppTypeMap = {
 	'pdf': 'application/pdf',
-//	'zip': 'application/zip',
+	//	'zip': 'application/zip',
 	'doc': 'application/msword',
 	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 	'xls': 'application/vnd.ms-excel',
@@ -108,31 +200,31 @@ function attachSupplementary(doc, item) {
 	var links = ZU.xpath(doc, './/span[starts-with(@class, "MMCvLABEL_SRC")]');
 	var link, title, url, type, snapshot;
 	var attachAsLink = Z.getHiddenPref("supplementaryAsLink");
-	for(var i=0, n=links.length; i<n; i++) {
+	for (var i = 0, n = links.length; i < n; i++) {
 		link = links[i].firstElementChild;
-		if(!link || link.nodeName.toUpperCase() !== 'A') continue;
-		
+		if (!link || link.nodeName.toUpperCase() !== 'A') continue;
+
 		url = link.href;
-		if(!url) continue;
-		
+		if (!url) continue;
+
 		title = ZU.trimInternal(link.textContent);
-		if(!title) title = 'Supplementary Data';
-		
-		type = suppTypeMap[url.substr(url.lastIndexOf('.')+1).toLowerCase()];
+		if (!title) title = 'Supplementary Data';
+
+		type = suppTypeMap[url.substr(url.lastIndexOf('.') + 1).toLowerCase()];
 		snapshot = !attachAsLink && type;
-		
+
 		var attachment = {
 			title: title,
 			url: url,
 			mimeType: type,
 			snapshot: !!snapshot
 		};
-		
+
 		var replaced = false;
-		if(snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
+		if (snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
 			//replace full text PDF
-			for(var j=0, m=item.attachments.length; j<m; j++) {
-				if(item.attachments[j].title == "ScienceDirect Full Text PDF") {
+			for (var j = 0, m = item.attachments.length; j < m; j++) {
+				if (item.attachments[j].title == "ScienceDirect Full Text PDF") {
 					attachment.title = "Article plus Supplemental Information";
 					item.attachments[j] = attachment;
 					replaced = true;
@@ -140,8 +232,8 @@ function attachSupplementary(doc, item) {
 				}
 			}
 		}
-		
-		if(!replaced) {
+
+		if (!replaced) {
 			item.attachments.push(attachment);
 		}
 	}
@@ -152,11 +244,11 @@ function scrapeByExport(doc) {
 	ZU.doGet(url, function(text) {
 		//select the correct form
 		var form = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/);
-		if(form) {
+		if (form) {
 			form = form[0];
 		} else {
 			form = text.match(/<form[^>]*>/g);
-			if(!form) {
+			if (!form) {
 				Z.debug('No forms found on page.');
 			} else {
 				Z.debug(form.join('\n*********\n'));
@@ -165,20 +257,22 @@ function scrapeByExport(doc) {
 		}
 
 		var postParams = getFormValues(form, [
-						//'_ArticleListID',	//do we still need this?
-						'_acct', '_docType', '_eidkey',
-						'_method', '_ob', '_uoikey', '_userid', 'count',
-						'Export', 'JAVASCRIPT_ON', 'md5'
-						]);
+			//'_ArticleListID',	//do we still need this?
+			'_acct', '_docType', '_eidkey',
+			'_method', '_ob', '_uoikey', '_userid', 'count',
+			'Export', 'JAVASCRIPT_ON', 'md5'
+		]);
 		postParams["format"] = "cite-abs";
 		postParams["citation-type"] = "RIS";
 
 		var post = '';
-		for(var key in postParams) {
+		for (var key in postParams) {
 			post += key + '=' + postParams[key] + "&";
 		}
 
-		ZU.doPost('/science', post, function(text) { processRIS(doc, text) });
+		ZU.doPost('/science', post, function(text) {
+			processRIS(doc, text);
+		});
 	});
 }
 
@@ -187,13 +281,13 @@ function processRIS(doc, text) {
 	//Sometimes has series title, so I'm mapping this to T3,
 	// although we currently don't recognize that in RIS
 	text = text.replace(/^T2\s/mg, 'T3 ');
-	
+
 	//Sometimes PY has some nonsensical value. Y2 contains the correct
 	// date in that case.
-	if(text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
+	if (text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
 		text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
-			if(m.search(/^PY\s+-\s+\d{4}\b/m) === -1
-				&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
+			if (m.search(/^PY\s+-\s+\d{4}\b/m) === -1 &&
+				m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
 			) {
 				return m.replace(/^PY\s+-.*\r?\n/mg, '')
 					.replace(/^Y2\s+-/mg, 'PY  -');
@@ -206,34 +300,43 @@ function processRIS(doc, text) {
 	// e.g. http://www.sciencedirect.com/science/article/pii/S0065260108602506
 	text = text.replace(/^((?:A[U\d]|ED)\s+-\s+)(?:Editor-in-Chief:\s+)?(.+)/mg,
 		function(m, pre, name) {
-			if (name.indexOf(',') == -1) {
+			if (!name.includes(',')) {
 				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
 			}
-			
+
 			return pre + name;
 		}
 	);
+	//The RIS sometimes has spaces at the beginning of lines, which break things
+	//as of 20170121 e.g. on http://www.sciencedirect.com/science/article/pii/B9780123706263000508 for A2
+	//remove them
+	text = text.replace(/\n\s+/g, "\n");
+	//Z.debug(text)
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function(obj, item) {
 		//issue sometimes is set to 0 for single issue volumes (?)
-		if(item.issue == 0) delete item.issue;
-		
+		if (item.issue === 0) delete item.issue;
+
 		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
-		
-		//add spaces after initials
-		for(var i=0, n=item.creators.length; i<n; i++) {
-			if(item.creators[i].firstName) {
+
+		for (var i = 0, n = item.creators.length; i < n; i++) {
+			//add spaces after initials
+			if (item.creators[i].firstName) {
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
 			}
+			//fix all uppercase lastnames
+			if (item.creators && item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
+				item.creators[i].lastName = item.creators[i].lastName.charAt(0) + item.creators[i].lastName.slice(1).toLowerCase();
+			}
 		}
-		
+
 		//abstract is not included with the new export form. Scrape from page
-		if(!item.abstractNote) {
+		if (!item.abstractNote) {
 			item.abstractNote = getAbstract(doc);
 		}
-		if (item.abstractNote){
+		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^Abstract[\s:\n]*/, "");
 		}
 		item.attachments.push({
@@ -241,37 +344,44 @@ function processRIS(doc, text) {
 			document: doc
 		});
 
-		var pdfLink = getPDFLink(doc);
-		if(pdfLink) item.attachments.push({
-			title: 'ScienceDirect Full Text PDF',
-			url: pdfLink,
-			mimeType: 'application/pdf'
-		});
-		
 		//attach supplementary data
-		if(Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
-			try {	//don't fail if we can't attach supplementary data
+		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
+			try { //don't fail if we can't attach supplementary data
 				attachSupplementary(doc, item);
-			} catch(e) {
-				Z.debug("Error attaching supplementary information.")
+			} catch (e) {
+				Z.debug("Error attaching supplementary information.");
 				Z.debug(e);
 			}
 		}
 
-		if(item.notes[0]) {
+		if (item.notes[0]) {
 			item.abstractNote = item.notes[0].note;
-			item.notes = new Array();
+			item.notes = [];
 		}
-		if(item.abstractNote) {
+		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.replace(/^\s*(?:abstract|publisher\s+summary)\s+/i, '');
 		}
-		
-		if (item.DOI) item.DOI = item.DOI.replace(/^doi:\s+/i, '');
-		
+
+		if (item.DOI) {
+			item.DOI = item.DOI.replace(/^doi:\s+/i, '');
+		}
 		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
-		
-		item.complete();
+
+		if (item.url && item.url.substr(0,2) == "//") {
+			item.url = "https:" + item.url;
+		}
+
+		getPDFLink(doc, function (pdfURL) {
+			if (pdfURL) {
+				item.attachments.push({
+					title: 'ScienceDirect Full Text PDF',
+					url: pdfURL,
+					mimeType: 'application/pdf'
+				});
+			}
+			item.complete();
+		});
 	});
 	translator.translate();
 }
@@ -280,7 +390,9 @@ function scrapeByISBN(doc) {
 	var isbn = getISBN(doc);
 	var translator = Zotero.loadTranslator("search");
 	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
-	translator.setSearch({ISBN: isbn});
+	translator.setSearch({
+		ISBN: isbn
+	});
 	translator.translate();
 }
 
@@ -290,40 +402,43 @@ function getArticleList(doc) {
 			|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
 			|//td[@class="nonSerialResultsList"]/h3/a\
 			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
+			|//h2/a[contains(@class, "result-list-title-link")]\
+			|//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]\
+			|//li[contains(@class, "list-chapter")]//h2//a\
 		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		//search page
 		var itemList = getArticleList(doc);
 		var items = {};
-		for(var i=0, n=itemList.length; i<n; i++) {
+		for (var i = 0, n = itemList.length; i < n; i++) {
 			items[itemList[i].href] = itemList[i].textContent;
 		}
 
 		Zotero.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 
 			var articles = [];
 			for (var i in selectedItems) {
 				//articles.push(i);
-				ZU.processDocuments(i, scrape);	//move this out of the loop when ZU.processDocuments is fixed
+				ZU.processDocuments(i, scrape); //move this out of the loop when ZU.processDocuments is fixed
 			}
 		});
 	} else {
-		scrape(doc);
+		scrape(doc, url);
 	}
 }
 
 function getFormInput(form) {
 	var inputs = form.elements;
-	var values = {}
-	for (var i=0; i<inputs.length; i++) {
+	var values = {};
+	for (var i = 0; i < inputs.length; i++) {
 		if (!inputs[i].name) continue;
 		values[inputs[i].name] = inputs[i].value;
 	}
-	
+
 	return values;
 }
 
@@ -332,16 +447,16 @@ function formValuesToPostData(values) {
 	for (var v in values) {
 		s += '&' + encodeURIComponent(v) + '=' + encodeURIComponent(values[v]);
 	}
-	
+
 	if (!s) {
 		Zotero.debug("No values provided for POST string");
 		return false;
 	}
-	
+
 	return s.substr(1);
 }
 
-function scrape(doc) {
+function scrape(doc, url) {
 	// On most page the export form uses the POST method
 	var form = ZU.xpath(doc, '//form[@name="exportCite"]')[0];
 	if (form) {
@@ -354,21 +469,51 @@ function scrape(doc) {
 		});
 		return;
 	}
-	
+
+
+	// On newer pages, there is an GET formular which is only there if
+	// the user click on the export button, but we know how the url
+	// in the end will be built.
+	form = ZU.xpath(doc, '//div[@id="export-citation"]//button')[0];
+	if (form) {
+		Z.debug("Fetching RIS via GET form (new)");
+		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
+		if (!pii) {
+			Z.debug("not finding pii in metatag; attempting to parse URL");
+			pii = url.match(/\/pii\/([^#\?]+)/);
+			if (pii) {
+				pii = pii[1];
+			} else {
+				Z.debug("cannot find pii");
+			}
+		}
+		if (pii) {
+			var risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
+			//Z.debug(risUrl)
+			ZU.doGet(risUrl, function(text) {
+				processRIS(doc, text);
+			});
+			return;
+		}
+	}
+
+
 	// On some older article pages, there seems to be a different form
 	// that uses GET
 	form = doc.getElementById('export-form');
 	if (form) {
-		Z.debug("Fetching RIS via GET form");
-		var url = form.action
-			+ '?export-format=RIS&export-content=cite-abs';
-		ZU.doGet(url, function(text) { processRIS(doc, text) });
+		Z.debug("Fetching RIS via GET form (old)");
+		var risUrl = form.action +
+			'?export-format=RIS&export-content=cite-abs';
+		ZU.doGet(risUrl, function(text) {
+			processRIS(doc, text);
+		});
 		return;
 	}
-	
+
 	/***
 	 * Probably deprecated. Let's see if we break anything
-	 * 
+	 *
 	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a')[0];
 	if (link) {
 		Z.debug("Fetching RIS via intermediate page");
@@ -376,20 +521,19 @@ function scrape(doc) {
 		return;
 	}
 	*/
-	
+
 	/***
 	 * Also probably no longer necessary, since fetching via POST seems to cover
 	 * all test cases
-	 * 
-	if(getISBN(doc)) {
+	 *
+	if (getISBN(doc)) {
 		Z.debug("Scraping by ISBN");
 		scrapeByISBN(doc);
 	}
 	*/
-	
-	throw new Error("Could not scrape metadata via known methods")
-}
-/** BEGIN TEST CASES **/
+
+	throw new Error("Could not scrape metadata via known methods");
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -415,7 +559,6 @@ var testCases = [
 				"DOI": "10.1016/j.neuron.2011.05.025",
 				"ISSN": "0896-6273",
 				"abstractNote": "In this issue, a pair of studies (Levy et al. and Sanders et al.) identify several de novo copy-number variants that together account for 5%–8% of cases of simplex autism spectrum disorders. These studies suggest that several hundreds of loci are likely to contribute to the complex genetic heterogeneity of this group of disorders. An accompanying study in this issue (Gilman et al.), presents network analysis implicating these CNVs in neural processes related to synapse development, axon targeting, and neuron motility.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "5",
 				"journalAbbreviation": "Neuron",
 				"libraryCatalog": "ScienceDirect",
@@ -518,47 +661,47 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+		"url": "https://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 		"items": [
 			{
 				"itemType": "bookSection",
-				"title": "8 - Introduction to discrete dislocation statics and dynamics",
+				"title": "8 - Introduction to Discrete Dislocation Statics and Dynamics",
 				"creators": [
 					{
-						"lastName": "Raabe",
-						"firstName": "Dierk",
+						"lastName": "Dierk",
+						"firstName": "Raabe",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Janssens",
-						"firstName": "Koenraad G. F.",
+						"firstName": "KOENRAAD G. F.",
 						"creatorType": "editor"
 					},
 					{
 						"lastName": "Raabe",
-						"firstName": "Dierk",
+						"firstName": "DIERK",
 						"creatorType": "editor"
 					},
 					{
 						"lastName": "Kozeschnik",
-						"firstName": "Ernst",
+						"firstName": "ERNST",
 						"creatorType": "editor"
 					},
 					{
 						"lastName": "Miodownik",
-						"firstName": "Mark A.",
+						"firstName": "MARK A.",
 						"creatorType": "editor"
 					},
 					{
 						"lastName": "Nestler",
-						"firstName": "Britta",
+						"firstName": "BRITTA",
 						"creatorType": "editor"
 					}
 				],
-				"date": "2007",
+				"date": "January 1, 2007",
 				"ISBN": "9780123694683",
-				"abstractNote": "This chapter provides an introduction to discrete dislocation statics and dynamics. The chapter deals with the simulation of plasticity of metals at the microscopic and mesoscopic scale using space- and time-discretized dislocation statics and dynamics. The complexity of discrete dislocation models is due to the fact that the mechanical interaction of ensembles of such defects is of an elastic nature and, therefore, involves long-range interactions. Space-discretized dislocation simulations idealize dislocations outside the dislocation cores as linear defects that are embedded within an otherwise homogeneous, isotropic or anisotropic, linear elastic medium. The aim of the chapter is to concentrate on those simulations that are discrete in both space and time. It explicitly incorporates the properties of individual lattice defects in a continuum formulation. The theoretical framework of linear continuum elasticity theory is overviewed as required for the formulation of basic dislocation mechanics. The chapter also discusses the dislocation statics, where the fundamentals of linear isotropic and anisotropic elasticity theory that are required in dislocation theory are reviewed. The chapter describes the dislocation dynamics, where it is concerned with the introduction of continuum dislocation dynamics. The last two sections deal with kinematics of discrete dislocation dynamics and dislocation reactions and annihilation.",
 				"bookTitle": "Computational Materials Engineering",
+				"extra": "DOI: 10.1016/B978-012369468-3/50008-3",
 				"libraryCatalog": "ScienceDirect",
 				"pages": "267-316",
 				"place": "Burlington",
@@ -577,7 +720,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+		"url": "https://www.sciencedirect.com/science/article/pii/B9780123706263000508",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -594,10 +737,11 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "2009",
+				"date": "January 1, 2009",
 				"ISBN": "9780123706263",
-				"abstractNote": "The African continent (30.1 million km2) extends from 37°17′N to 34°52 S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7 million km2) and Kalahari (0.9 million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
+				"abstractNote": "The African continent (30.1million km2) extends from 37°17′N to 34°52S and covers a great variety of climates except the polar climate. Although Africa is often associated to extended arid areas as the Sahara (7million km2) and Kalahari (0.9million km2), it is also characterized by a humid belt in its equatorial part and by few very wet regions as in Cameroon and in Sierra Leone. Some of the largest river basins are found in this continent such as the Congo, also termed Zaire, Nile, Zambezi, Orange, and Niger basins. Common features of Africa river basins are (i) warm temperatures, (ii) general smooth relief due to the absence of recent mountain ranges, except in North Africa and in the Rift Valley, (iii) predominance of old shields and metamorphic rocks with very developed soil cover, and (iv) moderate human impacts on river systems except for the recent spread of river damming. African rivers are characterized by very similar hydrochemical and physical features (ionic contents, suspended particulate matter, or SPM) but differ greatly by their hydrological regimes, which are more developed in this article.",
 				"bookTitle": "Encyclopedia of Inland Waters",
+				"extra": "DOI: 10.1016/B978-012370626-3.00050-8",
 				"libraryCatalog": "ScienceDirect",
 				"pages": "295-305",
 				"place": "Oxford",
@@ -609,14 +753,30 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Africa",
-					"Damming",
-					"Endorheism",
-					"Human impacts",
-					"River quality",
-					"River regimes",
-					"Sediment fluxes",
-					"Tropical rivers"
+					{
+						"tag": "Africa"
+					},
+					{
+						"tag": "Damming"
+					},
+					{
+						"tag": "Endorheism"
+					},
+					{
+						"tag": "Human impacts"
+					},
+					{
+						"tag": "River quality"
+					},
+					{
+						"tag": "River regimes"
+					},
+					{
+						"tag": "Sediment fluxes"
+					},
+					{
+						"tag": "Tropical rivers"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -662,7 +822,6 @@ var testCases = [
 				"DOI": "10.1016/j.bpj.2011.11.4028",
 				"ISSN": "0006-3495",
 				"abstractNote": "To permit access to DNA-binding proteins involved in the control and expression of the genome, the nucleosome undergoes structural remodeling including unwrapping of nucleosomal DNA segments from the nucleosome core. Here we examine the mechanism of DNA dissociation from the nucleosome using microsecond timescale coarse-grained molecular dynamics simulations. The simulations exhibit short-lived, reversible DNA detachments from the nucleosome and long-lived DNA detachments not reversible on the timescale of the simulation. During the short-lived DNA detachments, 9 bp dissociate at one extremity of the nucleosome core and the H3 tail occupies the space freed by the detached DNA. The long-lived DNA detachments are characterized by structural rearrangements of the H3 tail including the formation of a turn-like structure at the base of the tail that sterically impedes the rewrapping of DNA on the nucleosome surface. Removal of the H3 tails causes the long-lived detachments to disappear. The physical consistency of the CG long-lived open state was verified by mapping a CG structure representative of this state back to atomic resolution and performing molecular dynamics as well as by comparing conformation-dependent free energies. Our results suggest that the H3 tail may stabilize the nucleosome in the open state during the initial stages of the nucleosome remodeling process.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "4",
 				"journalAbbreviation": "Biophysical Journal",
 				"libraryCatalog": "ScienceDirect",
@@ -740,10 +899,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "January 24, 2014",
+				"date": "January 18, 2014",
 				"DOI": "10.1016/S0140-6736(13)62228-X",
 				"ISSN": "0140-6736",
-				"abstractNote": "Summary\nResearch publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
+				"abstractNote": "Research publication can both communicate and miscommunicate. Unless research is adequately reported, the time and resources invested in the conduct of research is wasted. Reporting guidelines such as CONSORT, STARD, PRISMA, and ARRIVE aim to improve the quality of research reports, but all are much less adopted and adhered to than they should be. Adequate reports of research should clearly describe which questions were addressed and why, what was done, what was shown, and what the findings mean. However, substantial failures occur in each of these elements. For example, studies of published trial reports showed that the poor description of interventions meant that 40–89% were non-replicable; comparisons of protocols with publications showed that most studies had at least one primary outcome changed, introduced, or omitted; and investigators of new trials rarely set their findings in the context of a systematic review, and cited a very small and biased selection of previous relevant trials. Although best documented in reports of controlled trials, inadequate reporting occurs in all types of studies—animal and other preclinical studies, diagnostic studies, epidemiological studies, clinical prediction research, surveys, and qualitative studies. In this report, and in the Series more generally, we point to a waste at all stages in medical research. Although a more nuanced understanding of the complex systems involved in the conduct, writing, and publication of research is desirable, some immediate action can be taken to improve the reporting of research. Evidence for some recommendations is clear: change the current system of research rewards and regulations to encourage better and more complete reporting, and fund the development and maintenance of infrastructure to support better reporting, linkage, and archiving of all elements of research. However, the high amount of waste also warrants future investment in the monitoring of and research into reporting of research, and active implementation of the findings to ensure that research reports better address the needs of the range of research users.",
 				"issue": "9913",
 				"journalAbbreviation": "The Lancet",
 				"libraryCatalog": "ScienceDirect",
@@ -765,29 +924,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://www.sciencedirect.com/science/journal/22126716",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://www.sciencedirect.com/science/handbooks/18745709",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.sciencedirect.com/science/referenceworks/9780080437484",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://www.sciencedirect.com/science/bookseries/00652458",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -832,6 +968,10 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -839,6 +979,117 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The modal density for flexural vibration of thick plates and bars",
+				"creators": [
+					{
+						"lastName": "Nelson",
+						"firstName": "H. M.",
+						"creatorType": "author"
+					}
+				],
+				"date": "November 22, 1972",
+				"DOI": "10.1016/0022-460X(72)90434-8",
+				"ISSN": "0022-460X",
+				"abstractNote": "The problem of estimating the modal density for flexurally vibrating plates and bars is approached by way of a travelling wave, rather than normal mode, decomposition. This viewpoint leads to simple expressions for modal densities in terms of the system geometry, surface wave velocity and a factor which is a function of the frequency-thickness product. Values of the multiplying factor are presented together with correction factors for existing thin-plate and thin-bar estimates. These factors are shown to involve only Poisson's ratio as a parameter, and to vary only slightly for a Poisson's ratio range of 0·25 to 0·35. The correction curve for plates is shown to be in general agreement with one proposed by Bolotin.",
+				"issue": "2",
+				"journalAbbreviation": "Journal of Sound and Vibration",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "255-261",
+				"publicationTitle": "Journal of Sound and Vibration",
+				"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+				"volume": "25",
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/science/article/pii/S2095311916614284",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Increased sink capacity enhances C and N assimilation under drought and elevated CO2 conditions in maize",
+				"creators": [
+					{
+						"lastName": "Zong",
+						"firstName": "Yu-zheng",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Shangguan",
+						"firstName": "Zhou-ping",
+						"creatorType": "author"
+					}
+				],
+				"date": "December 1, 2016",
+				"DOI": "10.1016/S2095-3119(16)61428-4",
+				"ISSN": "2095-3119",
+				"abstractNote": "The maintenance of rapid growth under conditions of CO2 enrichment is directly related to the capacity of new leaves to use or store the additional assimilated carbon (C) and nitrogen (N). Under drought conditions, however, less is known about C and N transport in C4 plants and the contributions of these processes to new foliar growth. We measured the patterns of C and N accumulation in maize (Zea mays L.) seedlings using 13C and 15N as tracers in CO2 climate chambers (380 or 750 μmol mol−1) under a mild drought stress induced with 10% PEG-6000. The drought stress under ambient conditions decreased the biomass production of the maize plants; however, this effect was reduced under elevated CO2. Compared with the water-stressed maize plants under atmospheric CO2, the treatment that combined elevated CO2 with water stress increased the accumulation of biomass, partitioned more C and N to new leaves as well as enhanced the carbon resource in ageing leaves and the carbon pool in new leaves. However, the C counterflow capability of the roots decreased. The elevated CO2 increased the time needed for newly acquired N to be present in the roots and increased the proportion of new N in the leaves. The maize plants supported the development of new leaves at elevated CO2 by altering the transport and remobilization of C and N. Under drought conditions, the increased activity of new leaves in relation to the storage of C and N sustained the enhanced growth of these plants under elevated CO2.",
+				"issue": "12",
+				"journalAbbreviation": "Journal of Integrative Agriculture",
+				"libraryCatalog": "ScienceDirect",
+				"pages": "2775-2785",
+				"publicationTitle": "Journal of Integrative Agriculture",
+				"url": "http://www.sciencedirect.com/science/article/pii/S2095311916614284",
+				"volume": "15",
+				"attachments": [
+					{
+						"title": "ScienceDirect Snapshot"
+					},
+					{
+						"title": "ScienceDirect Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					"allocation",
+					"carbon",
+					"drought",
+					"elevated CO",
+					"nitrogen"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.sciencedirect.com/search?qs=zotero&show=25&sortBy=relevance",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/journal/le-pharmacien-hospitalier-et-clinicien/vol/52/issue/4",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/handbook/handbook-of-complex-analysis/vol/1/suppl/C",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/bookseries/advances-in-computers/vol/111/suppl/C",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

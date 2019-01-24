@@ -2,14 +2,14 @@
 	"translatorID": "11614156-f421-4e89-8ce0-a5e69ce3ebed",
 	"label": "Library Genesis",
 	"creator": "Reverend Wicks Cherrycoke",
-	"target": "^https?://(libgen\\.io|lib\\.gen\\.rus\\.ec)/",
+	"target": "^https?://(libgen\\.io|gen\\.lib\\.rus\\.ec)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-05-07 08:21:47"
+	"lastUpdated": "2017-03-11 19:59:48"
 }
 
 /*
@@ -238,6 +238,32 @@ var testCases = [
 				"libraryCatalog": "Library Genesis",
 				"publisher": "MIT Press",
 				"url": "http://gen.lib.rus.ec/book/index.php?md5=a05be4942325aea362e2aff8c305b0de",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://gen.lib.rus.ec/book/index.php?md5=A2560CC676A29BD4B289A2034894AF69",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "African ivories",
+				"creators": [
+					{
+						"firstName": "Ezra",
+						"lastName": "Kate",
+						"creatorType": "author"
+					}
+				],
+				"date": "1984",
+				"itemID": "book:882539",
+				"libraryCatalog": "Library Genesis",
+				"publisher": "The Metropolitan Museum of Art",
+				"url": "http://gen.lib.rus.ec/book/index.php?md5=a2560cc676a29bd4b289a2034894af69",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

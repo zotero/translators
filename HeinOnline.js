@@ -2,14 +2,14 @@
 	"translatorID": "3dcbb947-f7e3-4bbd-a4e5-717f3701d624",
 	"label": "HeinOnline",
 	"creator": "Frank Bennett",
-	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(?:LuceneSearch|Page|IFLPMetaData)\\?",
+	"target": "^https?://(www\\.)?heinonline\\.org/HOL/(LuceneSearch|Page|IFLPMetaData)\\?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-08-10 09:29:21"
+	"lastUpdated": "2018-12-11 01:06:37"
 }
 
 /*
@@ -36,6 +36,7 @@
 	***************
 */
 
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 // Get any search results from current page
 // Used in detectWeb() and doWeb()
 function getSearchResults(doc) {
@@ -86,7 +87,7 @@ function translateRIS(ris, pdfURL) {
 		if (pdfURL) {
 			item.attachments = [{
 				title: "Full Text PDF",
-				url: ""+pdfURL,
+				url: pdfURL,
 				mimeType: "application/pdf"
 			}];
 		}
@@ -103,34 +104,41 @@ function translateCOinS(COinS) {
 
 // Build URL for RIS, and for PDF if available
 function scrapePage(doc, url) {
-	var risPopupURL = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
-	if (risPopupURL) {
-		// If page has RIS, use that
-		var docParams = extractQueryValues(risPopupURL);
-		var risURL = docParams.base 
-			+ "CitationFile?handle=" + docParams.handle 
-			+ "&div=" + docParams.div 
-			+ "&id=" + docParams.id 
+	// We need the id= and the handle= of the current target item.
+	// From that, we can build URL for RIS.
+
+	// Check for an RIS popup link in the page.
+	var risPopupLink = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
+	if (risPopupLink) {
+		// Get the id from pageSelect.
+		var pageID = doc.getElementById("pageSelect").value;
+		// Get other parameters from the page URL.
+		var docParams = extractQueryValues(url);
+		// Compose the RIS link.
+
+		var risURL = docParams.base
+			+ "CitationFile?kind=ris&handle=" + docParams.handle
+			+ "&id=" + pageID
 			+ "&base=js";
-		var pdfPageURLs = doc.getElementsByClassName("updatediv");
 		ZU.doGet(risURL, function(ris) {
-			if (pdfPageURLs) {
-				Array.prototype.filter.call(pdfPageURLs, function(pdfPageURL){
-					if (pdfPageURL){
-						// force string instead of object
-						pdfPageURL=""+pdfPageURL;
-						ZU.doGet(pdfPageURL, function(pdfPage) {
-							// Call to pdfPageURL prepares PDF for download via META refresh URL
-							var pdfURL = null;
-							var m = pdfPage.match(/<META.*URL=([^"]+)/);
-							if (m) {
-								pdfURL = m[1];
-							}
-							translateRIS(ris, pdfURL);
-						} , null );
-					}
-				});
-			} else {
+			// the PDF URL gives us a page that will refresh itself to the PDF.
+			var pdfPageURL = attr(doc, '[data-original-title*="Download PDF"]', 'href');
+			if (pdfPageURL) {
+				pdfPageURL = docParams.base + pdfPageURL;
+				// Z.debug(pdfPageURL)
+				ZU.doGet(pdfPageURL, function(pdfPage) {
+								// Call to pdfPageURL prepares PDF for download via META refresh URL
+								var pdfURL = null;
+								var m = pdfPage.match(/<META.*URL=\"([^"]+)/);
+								// Z.debug(pdfPage)
+								// Z.debug(m)
+								if (m) {
+									pdfURL = docParams.base + m[1];
+								}
+								translateRIS(ris, pdfURL);
+							} , null );
+			}
+			else {
 				translateRIS(ris);
 			}
 		} , null );
@@ -176,7 +184,7 @@ function doWeb (doc,url) {
 			ZU.processDocuments(urls, scrapePage);
 		});
 	} else {
-		scrapePage(doc);
+		scrapePage(doc, url);
 	}
 }
 

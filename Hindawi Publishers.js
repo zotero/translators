@@ -76,7 +76,7 @@ function doWeb(doc,url)
 		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 		translator.setDocument(doc);
 		translator.setHandler('itemDone', function(obj, item) {
-			if(!item.pages && item.DOI) {
+			if (!item.pages && item.DOI) {
 				// use article ID as a page (seems to be the last part of URL/DOI)
 				item.pages = 'e' + item.DOI.substr(item.DOI.lastIndexOf('/') + 1);
 			}
@@ -122,7 +122,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.hindawi.com/journals/ije/2015/210527/",
+		"url": "https://www.hindawi.com/journals/ije/2015/210527/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -163,7 +163,7 @@ var testCases = [
 				"libraryCatalog": "www.hindawi.com",
 				"pages": "e210527",
 				"publicationTitle": "International Journal of Endocrinology",
-				"url": "http://www.hindawi.com/journals/ije/2015/210527/abs/",
+				"url": "https://www.hindawi.com/journals/ije/2015/210527/abs/",
 				"volume": "2015",
 				"attachments": [
 					{

@@ -2,14 +2,14 @@
 	"translatorID": "5f22bd25-5b70-11e1-bb1d-c4f24aa18c1e",
 	"label": "Annual Reviews",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https?://[^/]*annualreviews\\.org(:[\\d]+)?(?=/)[^?]*(/(toc|journal|doi)/|showMost(Read|Cited)Articles|doSearch)",
+	"target": "^https?://[^/]*annualreviews\\.org(:[\\d]+)?(?=/)[^?]*(/(toc|journal|doi)/|showMost(Read|Cited)Articles|doSearch)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-08-26 03:31:19"
+	"lastUpdated": "2017-01-01 15:19:19"
 }
 
 /**
@@ -48,13 +48,13 @@ function addByBibTex(doi, tags) {
 
 		translator.setHandler('itemDone', function(obj, item) {
 			//title is sometimes in all caps
-			if(item.title == item.title.toUpperCase())
+			if (item.title == item.title.toUpperCase())
 				item.title = ZU.capitalizeTitle(item.title, true);
 			if (item.abstractNote){
 				item.abstractNote = item.abstractNote.replace(/^...?Abstract/, "")
 			}
 			//add tags
-			if(tags) {
+			if (tags) {
 				item.tags = tags;
 			}
 
@@ -75,11 +75,11 @@ function addByBibTex(doi, tags) {
 function detectWeb(doc, url) {
 	var title = doc.title.toLowerCase();
 
-	if( url.match(/\/doi\/(abs|full|pdf)\//) ) {
+	if ( url.match(/\/doi\/(abs|full|pdf)\//) ) {
 
 		return 'journalArticle';
 
-	} else if( title.match('- table of contents -') ||
+	} else if ( title.match('- table of contents -') ||
 		title.match('- most downloaded reviews') ||
 		title.match('- most cited reviews') ||
 		title.match('- forthcoming -') ||
@@ -91,36 +91,36 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if( detectWeb(doc, url) == 'multiple' ) {
+	if ( detectWeb(doc, url) == 'multiple' ) {
 		var articles = Zotero.Utilities.xpath(doc, '//div[@class="articleBoxWrapper"]');
 		var selectList = new Object();
 		var doi, title, article;
-		for( var i in articles ) {
+		for ( var i in articles ) {
 			article = articles[i];
 			doi = Zotero.Utilities.xpath(article, './div[@class="articleCheck"]/input');
 			title = Zotero.Utilities.xpathText(article, './div[@class="articleBoxMeta"]/h2/a');
-			if( doi && doi[0].value && title) {
+			if ( doi && doi[0].value && title) {
 				selectList[doi[0].value] = title;
 			}
 		}
 
 		Zotero.selectItems(selectList, function(selectedItems) {
-			if(selectedItems == null) return true;
-			for(var item in selectedItems) {
+			if (selectedItems == null) return true;
+			for (var item in selectedItems) {
 				addByBibTex(item);
 			}
 		});
 	} else {
 		var match = url.match(/\/(?:abs|full|pdf)\/([^?]+)/);
-		if(match) {
+		if (match) {
 			//get keywords before we leave
 			var tags, keywords = ZU.xpath(doc,
 				'//form[@id="frmQuickSearch"]\
 				/div[@class="pageTitle" and contains(text(), "KEYWORD")]\
 				/following-sibling::div/span[@class="data"]');
-			if(keywords) {
+			if (keywords) {
 				tags = new Array();
-				for(var i=0, n=keywords.length; i<n; i++) {
+				for (var i=0, n=keywords.length; i<n; i++) {
 					tags.push(keywords[i].textContent.trim());
 				}
 			}
@@ -134,7 +134,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/action/doSearch?pageSize=20&searchText=something&type=thisJournal&publication=1449&&",
+		"url": "http://www.annualreviews.org/action/doSearch?pageSize=20&sortBy=relevancy&text1=something&field1=AllField&logicalOpe1=and&text2=&field2=Abstract&logicalOpe2=and&text3=&field3=Title&filterByPub=all&publication=1449&AfterYear=&BeforeYear=",
 		"items": "multiple"
 	},
 	{
@@ -163,6 +163,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Molecular Mechanisms Controlling Actin Filament Dynamics in Nonmuscle Cells",
 				"creators": [
 					{
 						"firstName": "Thomas D.",
@@ -180,7 +181,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "2000",
+				"DOI": "10.1146/annurev.biophys.29.1.545",
+				"abstractNote": "We review how motile cells regulate actin filament assembly at their leading edge. Activation of cell surface receptors generates signals (including activated Rho family GTPases) that converge on integrating proteins of the WASp family (WASp, N-WASP, and Scar/WAVE). WASP family proteins stimulate Arp2/3 complex to nucleate actin filaments, which grow at a fixed 70° angle from the side of pre-existing actin filaments. These filaments push the membrane forward as they grow at their barbed ends. Arp2/3 complex is incorporated into the network, and new filaments are capped rapidly, so that activated Arp2/3 complex must be supplied continuously to keep the network growing. Hydrolysis of ATP bound to polymerized actin followed by phosphate dissociation marks older filaments for depolymerization by ADF/cofilins. Profilin catalyzes exchange of ADP for ATP, recycling actin back to a pool of unpolymerized monomers bound to profilin and thymosin-β4 that is poised for rapid elongation of new barbed ends.",
+				"extra": "PMID: 10940259",
+				"issue": "1",
+				"itemID": "doi:10.1146/annurev.biophys.29.1.545",
+				"libraryCatalog": "Annual Reviews",
+				"pages": "545-576",
+				"publicationTitle": "Annual Review of Biophysics and Biomolecular Structure",
+				"url": "http://dx.doi.org/10.1146/annurev.biophys.29.1.545",
+				"volume": "29",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					"ADF/cofilins",
 					"Arp2/3 complex",
@@ -188,25 +205,8 @@ var testCases = [
 					"cell motility",
 					"profilin"
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"extra": "PMID: 10940259",
-				"itemID": "doi:10.1146/annurev.biophys.29.1.545",
-				"title": "Molecular Mechanisms Controlling Actin Filament Dynamics in Nonmuscle Cells",
-				"publicationTitle": "Annual Review of Biophysics and Biomolecular Structure",
-				"volume": "29",
-				"issue": "1",
-				"pages": "545-576",
-				"date": "2000",
-				"DOI": "10.1146/annurev.biophys.29.1.545",
-				"url": "http://dx.doi.org/10.1146/annurev.biophys.29.1.545",
-				"abstractNote": "We review how motile cells regulate actin filament assembly at their leading edge. Activation of cell surface receptors generates signals (including activated Rho family GTPases) that converge on integrating proteins of the WASp family (WASp, N-WASP, and Scar/WAVE). WASP family proteins stimulate Arp2/3 complex to nucleate actin filaments, which grow at a fixed 70° angle from the side of pre-existing actin filaments. These filaments push the membrane forward as they grow at their barbed ends. Arp2/3 complex is incorporated into the network, and new filaments are capped rapidly, so that activated Arp2/3 complex must be supplied continuously to keep the network growing. Hydrolysis of ATP bound to polymerized actin followed by phosphate dissociation marks older filaments for depolymerization by ADF/cofilins. Profilin catalyzes exchange of ADP for ATP, recycling actin back to a pool of unpolymerized monomers bound to profilin and thymosin-β4 that is poised for rapid elongation of new barbed ends.",
-				"libraryCatalog": "Annual Reviews"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
