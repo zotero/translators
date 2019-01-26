@@ -110,15 +110,30 @@ function fixJSON(text) {
 
 function processDOIs(dois) {
 	var doi = dois.pop();
-	ZU.doGet('http://doi.org/' + encodeURIComponent(doi), function(text) {
+	ZU.doGet('https://doi.org/' + encodeURIComponent(doi), function(text) {
 		if(!text) {
 			return;
 		}
 		Z.debug(text)
+		
 		if (text.includes("<crossref")) {
 			var trans = Zotero.loadTranslator('import');
 			//Crossref Unixref
 			trans.setTranslator('93514073-b541-4e02-9180-c36d2f3bb401');
+			trans.setString(text);
+			trans.setHandler('itemDone', function(obj, item) {
+				//if (!item.libraryCatalog)
+				item.libraryCatalog = "DOI.org";
+
+				item.complete();
+			});
+			trans.translate();
+		}
+		else if (text.includes("http://datacite.org/schema")) {
+			Z.debug("Datacite JSON")
+			var trans = Zotero.loadTranslator('import');
+			//Datacite JSON
+			trans.setTranslator('b5b5808b-1c61-473d-9a02-e1f5ba7b8eef');
 			trans.setString(text);
 			trans.setHandler('itemDone', function(obj, item) {
 				//if (!item.libraryCatalog)
@@ -155,7 +170,7 @@ function processDOIs(dois) {
 	}
 	}, function() {
 		if(dois.length) processDOIs(dois, queryTracker);
-	}, undefined, {"Accept" : "application/vnd.crossref.unixref+xml;q=1, application/vnd.citationstyles.csl+json"})
+	}, undefined, {"Accept" : "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json"})
 }
 /** BEGIN TEST CASES **/
 var testCases = [
