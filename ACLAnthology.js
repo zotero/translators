@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-14 15:23:38"
+	"lastUpdated": "2019-01-26 15:05:16"
 }
 
 /*
@@ -52,10 +52,19 @@ function doWeb(doc, url) {
 			}
 			
 			let venue = getVenue(doc);
+			
 			Object.keys(selected).forEach(function (id) {
 				let bibtexUrl = ZU.xpath(doc, '//p[contains(., "' + id + '")]/a[img[@alt = "Export"]]')[0].href;
 				ZU.doGet(bibtexUrl, function(responseString, responseObj) {
-					scrapeBibtex(responseString, venue);
+					if (!venue) {
+						let paperUrl = bibtexUrl.replace('.bib', '');
+						ZU.processDocuments(paperUrl, function(responseBody) {
+							let thisVenue = getVenue(responseBody);
+							scrapeBibtex(responseString, thisVenue);
+						});
+					} else {
+						scrapeBibtex(responseString, venue);
+					}
 				});
 			});
 		});
@@ -81,7 +90,7 @@ function getVenue(doc) {
 		return v.innerText.trim();
 	});
 	
-	if (venues.includes('WS')) {
+	if (!venues.length) {
 		return;
 	}
 	
@@ -115,11 +124,28 @@ function scrapeBibtex(responseString, venue) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-		
-		if (venue && !item.publicationTitle.includes('Student') 
-				&& !item.publicationTitle.includes('Demonstration')
-				&& !item.publicationTitle.includes('Tutorial')) {
-			item.conferenceName = venue;
+		let publicationTitle = item.publicationTitle;
+		if (!publicationTitle.includes('Student') 
+				&& !publicationTitle.includes('Demonstration')
+				&& !publicationTitle.includes('Tutorial')) {
+			if (venue.includes('*SEMEVAL')) {
+				if (publicationTitle.includes('SENSEVAL')) {
+					venue = 'SENSEVAL';
+				} else if (publicationTitle.includes('Evaluation') && !publicationTitle.includes('Joint')) {
+					venue = 'SemEval';
+				} else if (!publicationTitle.includes('Evaluation') && publicationTitle.includes('Joint')) {
+					venue = '*SEM';
+				} else if (publicationTitle.includes('Volume 1') && publicationTitle.includes('Volume 2')) {
+					venue = '*SEM/SemEval';
+				} else if (publicationTitle.includes('SemEval')) {
+					venue = 'SemEval';
+				} else {
+					venue = '*SEM';
+				}
+			}
+			if (!venue.includes('WS')) {
+				item.conferenceName = venue;
+			}
 		}
 		
 		delete item.itemID;
