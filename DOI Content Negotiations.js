@@ -111,11 +111,24 @@ function fixJSON(text) {
 function processDOIs(dois) {
 	var doi = dois.pop();
 	ZU.doGet('http://doi.org/' + encodeURIComponent(doi), function(text) {
-		text = fixJSON(text);
 		if(!text) {
 			return;
 		}
-		//Z.debug(text)
+		Z.debug(text)
+		if (text.includes("<crossref")) {
+			var trans = Zotero.loadTranslator('import');
+			//Crossref Unixref
+			trans.setTranslator('93514073-b541-4e02-9180-c36d2f3bb401');
+			trans.setString(text);
+			trans.setHandler('itemDone', function(obj, item) {
+				//if (!item.libraryCatalog)
+				item.libraryCatalog = "DOI.org";
+
+				item.complete();
+			});
+			trans.translate();
+		}
+		else {
 		// use CSL JSON translator
 		var trans = Zotero.loadTranslator('import');
 		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
@@ -139,9 +152,10 @@ function processDOIs(dois) {
 			item.complete();
 		});
 		trans.translate();
+	}
 	}, function() {
 		if(dois.length) processDOIs(dois, queryTracker);
-	}, undefined, {"Accept" : "application/vnd.citationstyles.csl+json"})
+	}, undefined, {"Accept" : "application/vnd.crossref.unixref+xml;q=1, application/vnd.citationstyles.csl+json"})
 }
 /** BEGIN TEST CASES **/
 var testCases = [
