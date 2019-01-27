@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-26 14:20:57"
+	"lastUpdated": "2019-01-27 16:34:49"
 }
 
 /*
@@ -34,10 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 // copied from CSL JSON
@@ -114,12 +110,12 @@ function doImport() {
 	}
 	var title = "";
 	for (let titleElement of data.titles) {
-		if (!titleElement["title"]) {
+		if (!titleElement.title) {
 			continue;
 		}
-		if (!titleElement["titleType"]) {
-			title = titleElement["title"] + title;
-		} else if (titleElement["titleType"].toLowerCase() == "subtitle") {
+		if (!titleElement.titleType) {
+			title = titleElement.title + title;
+		} else if (titleElement.titleType.toLowerCase() == "subtitle") {
 			title = title + ": " + titleElement["title"];
 		}
 		
@@ -127,36 +123,46 @@ function doImport() {
 	item.title = title;
 	
 	for (let creator of data.creators) {
-		if (creator.nameType == "Personal" && creator.familyName && creator.givenName) {
-			item.creators.push({
-				"lastName": creator.familyName,
-				"firstName": creator.givenName,
-				"creatorType": "author"
-			});
+		if (creator.nameType == "Personal") {
+			if (creator.familyName && creator.givenName) {
+				item.creators.push({
+					"lastName": creator.familyName,
+					"firstName": creator.givenName,
+					"creatorType": "author"
+				});
+			} else {
+				item.creators.push(ZU.cleanAuthor(creator.name, "author"));
+			}
 		} else {
-			item.creators.push(ZU.cleanAuthor(creator.name, "author"));
+			item.creators.push({"lastName": creator.name, "creatorType": "author", "fieldMode": true});
 		}
 	}
 	for (let contributor of data.contributors) {
 		let role = "contributor";
-		switch(contributor.contributorRole.toLowerCase()) {
-			case "editor":
-				role = "editor";
-				break;
-			case "producer":
-				role = "producer";
-				break;
-			default:
-				// use the already assigned value
+		if (contributor.contributorRole) {
+			switch(contributor.contributorRole.toLowerCase()) {
+				case "editor":
+					role = "editor";
+					break;
+				case "producer":
+					role = "producer";
+					break;
+				default:
+					// use the already assigned value
+			}
 		}
-		if (contributor.nameType == "Personal" && contributor.familyName && contributor.givenName) {
-			item.creators.push({
-				"lastName": contributor.familyName,
-				"firstName": contributor.givenName,
-				"creatorType": role
-			});
+		if (contributor.nameType == "Personal") {
+			if (contributor.familyName && contributor.givenName) {
+				item.creators.push({
+					"lastName": contributor.familyName,
+					"firstName": contributor.givenName,
+					"creatorType": role
+				});
+			} else {
+				item.creators.push(ZU.cleanAuthor(contributor.name, role));
+			}
 		} else {
-			item.creators.push(ZU.cleanAuthor(contributor.name, role));
+			item.creators.push({"lastName": contributor.name, "creatorType": role, "fieldMode": true});
 		}
 	}
 	
@@ -183,7 +189,7 @@ function doImport() {
 		item.tags.push(subject.subject);
 	}
 	item.medium = data.formats.join();
-	item.pages = item.artworkSize = data.sizes.join();
+	item.pages = item.artworkSize = data.sizes.join(", ");
 	item.versionNumber = data.version;
 	item.rights = data.rightsList.map(x => x.rights).join(", ");
 	
