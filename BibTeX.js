@@ -1171,7 +1171,12 @@ var citeKeyConversions = {
 }
 
 
-function buildCiteKey (item,citekeys) {
+function buildCiteKey (item, extraFields, citekeys) {
+  const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key')
+  if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value
+
+  if (item.citationKey) return item.citationKey
+
 	var basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
@@ -1270,7 +1275,8 @@ function doExport() {
 		if (!type) type = "misc";
 		
 		// create a unique citation key
-		var citekey = buildCiteKey(item, citekeys);
+		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
+		var citekey = buildCiteKey(item, extraFields, citekeys);
 		
 		// write citation key
 		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
@@ -1374,9 +1380,8 @@ function doExport() {
 			}
 		}
 		
-		if (item.extra) {
+		if (extraFields) {
 			// Export identifiers
-			var extraFields = parseExtraFields(item.extra);
 			for (var i=0; i<extraFields.length; i++) {
 				var rec = extraFields[i];
 				if (!rec.field || !revExtraIds[rec.field]) continue;
