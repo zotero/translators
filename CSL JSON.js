@@ -116,7 +116,7 @@ function doExport() {
 			}).trim();
 		}
 		var cslItem = ZU.itemToCSLJSON(item);
-		cslItem.id = item.citationKey;
+		if (item.citationKey) cslItem.id = item.citationKey;
 		data.push(cslItem);
 	}
 	Z.write(JSON.stringify(data, null, "\t"));
