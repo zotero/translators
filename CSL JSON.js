@@ -108,7 +108,17 @@ function importNext(data, resolve, reject) {
 
 function doExport() {
 	var item, data = [];
-	while (item = Z.nextItem()) data.push(ZU.itemToCSLJSON(item));
+	while (item = Z.nextItem()) {
+		if (item.extra) {
+			item.extra = item.extra.replace(/(?:^|\n)citation key\s*:\s*([^\s]+)(?:\n|$)/i, (m, citationKey) => {
+				item.citationKey = citationKey;
+				return '\n';
+			}).trim();
+		}
+		var cslItem = ZU.itemToCSLJSON(item);
+		cslItem.id = item.citationKey;
+		data.push(cslItem);
+	}
 	Z.write(JSON.stringify(data, null, "\t"));
 }
 /** BEGIN TEST CASES **/
