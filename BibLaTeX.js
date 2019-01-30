@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2018-09-07 17:20:00"
+	"lastUpdated": "2019-01-30 17:16:00"
 }
 
 //%a = first listed creator surname
@@ -483,8 +483,8 @@ function encodeFilePathComponent(value) {
 
 			if (!type) type = "misc";
 
-			var citekey = buildCiteKey(item, extraFields, citekeys);
 			var extraFields = item.extra ? parseExtraFields(item.extra) : null;
+			var citekey = buildCiteKey(item, extraFields, citekeys);
 
 			// write citation key (removed the comma)
 			Zotero.write((first ? "" : "\n\n") + "@" + type + "{" + citekey);
