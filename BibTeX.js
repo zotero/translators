@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-01-30 17:16:00"
+	"lastUpdated": "2018-03-03 13:10:16"
 }
 
 function detectImport() {
@@ -1171,12 +1171,7 @@ var citeKeyConversions = {
 }
 
 
-function buildCiteKey (item, extraFields, citekeys) {
-  const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key')
-  if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value
-
-  if (item.citationKey) return item.citationKey
-
+function buildCiteKey (item,citekeys) {
 	var basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
@@ -1275,8 +1270,7 @@ function doExport() {
 		if (!type) type = "misc";
 		
 		// create a unique citation key
-		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
-		var citekey = buildCiteKey(item, extraFields, citekeys);
+		var citekey = buildCiteKey(item, citekeys);
 		
 		// write citation key
 		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
@@ -1380,8 +1374,9 @@ function doExport() {
 			}
 		}
 		
-		if (extraFields) {
+		if (item.extra) {
 			// Export identifiers
+			var extraFields = parseExtraFields(item.extra);
 			for (var i=0; i<extraFields.length; i++) {
 				var rec = extraFields[i];
 				if (!rec.field || !revExtraIds[rec.field]) continue;
