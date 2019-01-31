@@ -8,8 +8,8 @@
 	"priority": 400,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2016-11-05 10:57:01"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2019-01-27 14:06:07"
 }
 
 // The variables items and selectArray will be filled during the first
@@ -157,14 +157,6 @@ function doWeb(doc, url) {
 		{
 			id : "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
 			name : "DOI.org"
-		},
-		{
-			id : "11645bd1-0420-45c1-badb-53fb41eeb753",
-			name : "CrossRef"
-		},
-		{
-			id : "9f1fb86b-92c8-4db7-b8ee-0b481d456428",
-			name : "DataCite"
 		}
 	];
 	retrieveDOIs(dois, doc, providers);

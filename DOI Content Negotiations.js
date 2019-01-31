@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcs",
-	"lastUpdated": "2014-05-29 07:46:16"
+	"lastUpdated": "2019-01-26 18:00:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Philipp Zumstein
+	Copyright © 2019 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -36,20 +36,10 @@
 */
 
 function detectSearch(items) {
-	if(!items) return false;
-
-	if(typeof items == 'string' || !items.length) items = [items];
-
-	for(var i=0, n=items.length; i<n; i++) {
-		if(!items[i]) continue;
-
-		if(items[i].DOI && ZU.cleanDOI(items[i].DOI)) return true;
-		if(typeof items[i] == 'string' && ZU.cleanDOI(items[i])) return true;
-	}
-
-	return false;
+	return (filterQuery(items).length > 0);
 }
 
+// return an array of DOIs from the query (items or text)
 function filterQuery(items) {
 	if(!items) return [];
 
@@ -104,74 +94,67 @@ function fixJSON(text) {
 		if(item.accessed && item.accessed.raw) item.accessed.literal = item.accessed.raw;
 		return JSON.stringify([item]);
 	} catch(e) {
+		Z.debug(e);
 		return false;
 	}
 }
 
 function processDOIs(dois) {
 	var doi = dois.pop();
+	// by content negotiation we asked for datacite or crossref format, or CSL JSON
 	ZU.doGet('https://doi.org/' + encodeURIComponent(doi), function(text) {
 		if(!text) {
 			return;
 		}
 		Z.debug(text)
 		
+		var trans = Zotero.loadTranslator('import');
+		trans.setString(text);
 		if (text.includes("<crossref")) {
-			var trans = Zotero.loadTranslator('import');
 			//Crossref Unixref
 			trans.setTranslator('93514073-b541-4e02-9180-c36d2f3bb401');
-			trans.setString(text);
 			trans.setHandler('itemDone', function(obj, item) {
-				//if (!item.libraryCatalog)
-				item.libraryCatalog = "DOI.org";
-
+				item.libraryCatalog = "DOI.org (Crossref)";
 				item.complete();
 			});
 			trans.translate();
 		}
 		else if (text.includes("http://datacite.org/schema")) {
-			Z.debug("Datacite JSON")
-			var trans = Zotero.loadTranslator('import');
 			//Datacite JSON
 			trans.setTranslator('b5b5808b-1c61-473d-9a02-e1f5ba7b8eef');
-			trans.setString(text);
 			trans.setHandler('itemDone', function(obj, item) {
-				//if (!item.libraryCatalog)
-				item.libraryCatalog = "DOI.org";
-
+				item.libraryCatalog = "DOI.org (Datacite)";
 				item.complete();
 			});
 			trans.translate();
 		}
 		else {
-		// use CSL JSON translator
-		var trans = Zotero.loadTranslator('import');
-		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
-		trans.setString(text);
-		trans.setHandler('itemDone', function(obj, item) {
-			//if (!item.libraryCatalog)
-			item.libraryCatalog = "DOI.org";
-			//check if there are potential issues with character encoding and try to fix it
-			//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as escaped unicode)
-			for(var field in item) {
-				if(typeof item[field] != 'string') continue;
-				//check for control characters that should never be in strings from CrossRef
-				if(/[\u007F-\u009F]/.test(item[field])) {
-					item[field] = decodeURIComponent(escape(item[field]));
+			// use CSL JSON translator
+			trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
+			trans.setHandler('itemDone', function(obj, item) {
+				item.libraryCatalog = "DOI.org (CSL JSON)";
+				//check if there are potential issues with character encoding and try to fix it
+				//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as escaped unicode)
+				for(var field in item) {
+					if(typeof item[field] != 'string') continue;
+					//check for control characters that should never be in strings from CrossRef
+					if(/[\u007F-\u009F]/.test(item[field])) {
+						item[field] = decodeURIComponent(escape(item[field]));
+					}
 				}
-			}
-			Z.debug(item)
-			if (item.itemType == "report") {
-				item.reportType = item.publicationTitle;
-			}
-			item.complete();
-		});
-		trans.translate();
-	}
+				Z.debug(item)
+				if (item.itemType == "report") {
+					item.reportType = item.publicationTitle;
+				}
+				item.complete();
+			});
+			trans.translate();
+		}
 	}, function() {
 		if(dois.length) processDOIs(dois, queryTracker);
 	}, undefined, {"Accept" : "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json"})
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

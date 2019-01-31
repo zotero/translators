@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-26 14:34:07"
+	"lastUpdated": "2019-01-28 08:31:44"
 }
 
 /*
@@ -431,6 +431,9 @@ if (!metadataXML || !metadataXML.length) {
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
+	} 
+	if (!item.title || item.title == "") {
+		item.title = "[No title found]";
 	}
 	//Zotero.debug(JSON.stringify(item, null, 4));
 
@@ -654,6 +657,51 @@ var testCases = [
 				"notes": [
 					"Review of <a href=\"https://doi.org/10.21468/SciPostPhys.1.1.010\">https://doi.org/10.21468/SciPostPhys.1.1.010</a>"
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?> <doi_records> <doi_record owner=\"10.4086\" timestamp=\"2018-12-31 08:08:13\"> <crossref> <journal> <journal_metadata language=\"en\"> <full_title>Chicago Journal of Theoretical Computer Science</full_title> <abbrev_title>Chicago J. of Theoretical Comp. Sci.</abbrev_title> <abbrev_title>CJTCS</abbrev_title> <issn media_type=\"electronic\">1073-0486</issn> <coden>CJTCS</coden> <doi_data> <doi>10.4086/cjtcs</doi> <resource>http://cjtcs.cs.uchicago.edu/</resource> </doi_data> </journal_metadata> <journal_issue> <publication_date media_type=\"online\"> <year>2012</year> </publication_date> <journal_volume> <volume>18</volume> </journal_volume> <issue>1</issue> <doi_data> <doi>10.4086/cjtcs.2012.v018</doi> <resource>http://cjtcs.cs.uchicago.edu/articles/2012/contents.html</resource> </doi_data> </journal_issue> <journal_article publication_type=\"full_text\"> <titles> <title /> </titles> <contributors> <person_name sequence=\"first\" contributor_role=\"author\"> <given_name>Michael</given_name> <surname>Hoffman</surname> </person_name> <person_name sequence=\"additional\" contributor_role=\"author\"> <given_name>Jiri</given_name> <surname>Matousek</surname> </person_name> <person_name sequence=\"additional\" contributor_role=\"author\"> <given_name>Yoshio</given_name> <surname>Okamoto</surname> </person_name> <person_name sequence=\"additional\" contributor_role=\"author\"> <given_name>Phillipp</given_name> <surname>Zumstein</surname> </person_name> </contributors> <publication_date media_type=\"online\"> <year>2012</year> </publication_date> <pages> <first_page>1</first_page> <last_page>10</last_page> </pages> <doi_data> <doi>10.4086/cjtcs.2012.002</doi> <resource>http://cjtcs.cs.uchicago.edu/articles/2012/2/contents.html</resource> </doi_data> </journal_article> </journal> </crossref> </doi_record> </doi_records>",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "[No title found]",
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "Michael",
+						"lastName": "Hoffman"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Jiri",
+						"lastName": "Matousek"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Yoshio",
+						"lastName": "Okamoto"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "Phillipp",
+						"lastName": "Zumstein"
+					}
+				],
+				"date": "2012",
+				"DOI": "10.4086/cjtcs.2012.002",
+				"ISSN": "1073-0486",
+				"issue": "1",
+				"language": "en",
+				"pages": "1-10",
+				"publicationTitle": "Chicago Journal of Theoretical Computer Science",
+				"url": "http://cjtcs.cs.uchicago.edu/articles/2012/2/contents.html",
+				"volume": "18",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
