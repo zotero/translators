@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-03-03 13:10:16"
+	"lastUpdated": "2019-01-31 13:10:16"
 }
 
 function detectImport() {
