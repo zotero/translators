@@ -15,7 +15,7 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2019-01-30 17:16:00"
+	"lastUpdated": "2019-01-31 13:16:00"
 }
 
 //%a = first listed creator surname
@@ -387,8 +387,10 @@ function creatorCheck(item, ctype) {
 }
 
 function buildCiteKey (item, extraFields, citekeys) {
-		const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key')
-		if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value
+		if (extraFields) {
+			const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key')
+			if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
+		}
 
 		if (item.citationKey) return item.citationKey
 
