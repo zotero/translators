@@ -123,25 +123,26 @@ function scrape(doc, url) {
 		var dateString = ZU.xpathText(doc, '//div[@class="publication-metadata__item"]');
 		var dateParts =
 			dateString.match(/.*(\d{2}) (\w+) (\d{4}).*/);
-		var year = dateParts[3];
-		var months = {
-			januari: "01",
-			februari: "02",
-			mars: "03",
-			april: "04",
-			maj: "05",
-			juni: "06",
-			juli: "07",
-			augusti: "08",
-			september: "09",
-			oktober: "10",
-			november: "11",
-			december: "12"
-		};
-		var month = months[dateParts[2]];
-		var day = dateParts[1];
-		item.date = year + "-" + month + "-" + day;
-
+		if (dateParts) {
+			var year = dateParts[3];
+			var months = {
+				januari: "01",
+				februari: "02",
+				mars: "03",
+				april: "04",
+				maj: "05",
+				juni: "06",
+				juli: "07",
+				augusti: "08",
+				september: "09",
+				oktober: "10",
+				november: "11",
+				december: "12"
+			};
+			var month = months[dateParts[2]];
+			var day = dateParts[1];
+			item.date = year + "-" + month + "-" + day;
+		}
 		item.tags = [];
 
 		item.complete();
