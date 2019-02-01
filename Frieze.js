@@ -42,7 +42,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (url.includes("/article/") {		// does not handle /event/ or /media/ pages, which EM alone can handle
+	if (url.includes("/article/")) {		// does not handle /event/ or /media/ pages, which EM alone can handle
 		if (text(doc,'.issue-name')) {
 			return "magazineArticle";
 		}
