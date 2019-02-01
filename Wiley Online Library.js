@@ -63,6 +63,23 @@ function getAuthorName(text) {
 	return fixCase(text.trim());
 }
 
+function processSubtitles(doc, item) {
+	// add subtitle to the main title if not already present
+	var subtitle = ZU.xpathText(doc, '//h3[@class="citation__subtitle"]');
+	if (subtitle) {
+		var title = item.title;
+		if (!title)
+			title = ZU.xpathText(doc, '//h3[@class="citation__title"]');
+
+		if (!title.toLowerCase().includes(subtitle.toLowerCase())) {
+			item.shortTitle = title;
+			title = title + ": " + subtitle;
+		}
+
+		item.title = title;
+	}
+}
+
 function scrapeBook(doc, url, pdfUrl) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
@@ -114,6 +131,7 @@ function scrapeBook(doc, url, pdfUrl) {
 				/following-sibling::p', null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
+	processSubtitles(doc, newItem);
 	newItem.complete();
 }
 
@@ -171,6 +189,8 @@ function scrapeEM(doc, url, pdfUrl) {
 
 		//set correct print publication date
 		if (date) item.date = date;
+
+		processSubtitles(doc, item);
 
 		//remove pdf attachments
 		for (var i=0, n=item.attachments.length; i<n; i++) {
@@ -351,6 +371,8 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 
+			processSubtitles(doc, item);
+
 			//attachments
 			item.attachments = [{
 				title: 'Snapshot',
@@ -459,6 +481,9 @@ function scrapeCochraneTrial(doc, url){
 			});
 		}
 	}
+
+	processSubtitles(doc, item);
+
 	item.complete();
 }
 
