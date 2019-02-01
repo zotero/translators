@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-01-31 13:10:16"
+	"lastUpdated": "2019-01-31 20:37:00"
 }
 
 function detectImport() {
@@ -420,8 +420,8 @@ function processField(item, field, value, rawValue) {
 			}
 		}
 	
-	} 
-	//accept lastchecked or urldate for access date. These should never both occur. 
+	}
+	//accept lastchecked or urldate for access date. These should never both occur.
 	//If they do we don't know which is better so we might as well just take the second one
 	else if (field == "lastchecked"|| field == "urldate"){
 		item.accessDate = value;
@@ -1024,9 +1024,9 @@ function mapTeXmarkup(tex){
 	//italics and bold
 	tex = tex.replace(/\\textit\{([^\}]+\})/g, "<i>$1</i>").replace(/\\textbf\{([^\}]+\})/g, "<b>$1</b>");
 	//two versions of subscript the .* after $ is necessary because people m
-	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");	
+	tex = tex.replace(/\$[^\{\$]*_\{([^\}]+\})\$/g, "<sub>$1</sub>").replace(/\$[^\{]*_\{\\textrm\{([^\}]+\}\})/g, "<sub>$1</sub>");
 	//two version of superscript
-	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");	
+	tex = tex.replace(/\$[^\{]*\^\{([^\}]+\}\$)/g, "<sup>$1</sup>").replace(/\$[^\{]*\^\{\\textrm\{([^\}]+\}\})/g, "<sup>$1</sup>");
 	//small caps
 	tex = tex.replace(/\\textsc\{([^\}]+)/g, "<span style=\"small-caps\">$1</span>");
 	return tex;
@@ -1106,7 +1106,7 @@ function decodeFilePathComponent(value) {
 	return value.replace(/\\([^A-Za-z0-9.])/g, "$1");
 }
 
-// a little substitution function for BibTeX keys, where we don't want LaTeX 
+// a little substitution function for BibTeX keys, where we don't want LaTeX
 // escaping, but we do want to preserve the base characters
 
 function tidyAccents(s) {
@@ -1126,7 +1126,7 @@ function tidyAccents(s) {
 		r = r.replace(new RegExp("ç", 'g'),"c");
 		r = r.replace(new RegExp("[èéêë]", 'g'),"e");
 		r = r.replace(new RegExp("[ìíîï]", 'g'),"i");
-		r = r.replace(new RegExp("ñ", 'g'),"n");                            
+		r = r.replace(new RegExp("ñ", 'g'),"n");
 		r = r.replace(new RegExp("[òóôõ]", 'g'),"o");
 		r = r.replace(new RegExp("œ", 'g'),"oe");
 		r = r.replace(new RegExp("[ùúû]", 'g'),"u");
@@ -1138,7 +1138,7 @@ function tidyAccents(s) {
 
 var numberRe = /^[0-9]+/;
 // Below is a list of words that should not appear as part of the citation key
-// it includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose 
+// it includes the indefinite articles of English, German, French and Spanish, as well as a small set of English prepositions whose
 // force is more grammatical than lexical, i.e. which are likely to strike many as 'insignificant'.
 // The assumption is that most who want a title word in their key would prefer the first word of significance.
 // Also remove markup
@@ -1171,7 +1171,14 @@ var citeKeyConversions = {
 }
 
 
-function buildCiteKey (item,citekeys) {
+function buildCiteKey (item, extraFields, citekeys) {
+	if (extraFields) {
+		const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key');
+		if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
+	}
+	
+  	if (item.citationKey) return item.citationKey;
+	
 	var basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
@@ -1206,7 +1213,7 @@ function buildCiteKey (item,citekeys) {
 	//
 	// no matter what, we want to make sure we exclude
 	// " # % ' ( ) , = { } ~ and backslash
-	// however, we want to keep the base characters 
+	// however, we want to keep the base characters
 
 	basekey = tidyAccents(basekey);
 	basekey = basekey.replace(citeKeyCleanRe, "");
@@ -1270,7 +1277,8 @@ function doExport() {
 		if (!type) type = "misc";
 		
 		// create a unique citation key
-		var citekey = buildCiteKey(item, citekeys);
+		var extraFields = item.extra ? parseExtraFields(item.extra) : null;
+		var citekey = buildCiteKey(item, extraFields, citekeys);
 		
 		// write citation key
 		Zotero.write((first ? "" : "\n\n") + "@"+type+"{"+citekey);
@@ -1374,9 +1382,8 @@ function doExport() {
 			}
 		}
 		
-		if (item.extra) {
+		if (extraFields) {
 			// Export identifiers
-			var extraFields = parseExtraFields(item.extra);
 			for (var i=0; i<extraFields.length; i++) {
 				var rec = extraFields[i];
 				if (!rec.field || !revExtraIds[rec.field]) continue;
@@ -1409,7 +1416,7 @@ function doExport() {
 		//	writeField("pages", item.numPages);
 		//}
 		
-		/* We'll prefer url over howpublished see 
+		/* We'll prefer url over howpublished see
 		https://forums.zotero.org/discussion/24554/bibtex-doubled-url/#Comment_157802
 		
 		if (item.itemType == "webpage") {
@@ -1420,7 +1427,7 @@ function doExport() {
 				var note = item.notes[i];
 				writeField("annote", Zotero.Utilities.unescapeHTML(note["note"]));
 			}
-		}		
+		}
 		
 		if (item.attachments) {
 			var attachmentString = "";
@@ -2143,7 +2150,7 @@ var mappingTable = {
 
 /* These two require the "semtrans" package to work; uncomment to enable */
 /*	"\u02BF":"\{\\Ayn}", // MGR Ayn
-	"\u02BE":"\{\\Alif}", // MGR Alif/Hamza 
+	"\u02BE":"\{\\Alif}", // MGR Alif/Hamza
 */
 	"\u00C0":"{\\`A}", // LATIN CAPITAL LETTER A WITH GRAVE
 	"\u00C1":"{\\'A}", // LATIN CAPITAL LETTER A WITH ACUTE
