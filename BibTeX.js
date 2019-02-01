@@ -1172,13 +1172,13 @@ var citeKeyConversions = {
 
 
 function buildCiteKey (item, extraFields, citekeys) {
-  if (extraFields) {
+	if (extraFields) {
 		const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key');
-  	if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
+		if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
 	}
-		
-  if (item.citationKey) return item.citationKey
-
+	
+  	if (item.citationKey) return item.citationKey;
+	
 	var basekey = "";
 	var counter = 0;
 	citeKeyFormatRemaining = citeKeyFormat;
