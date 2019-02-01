@@ -63,7 +63,7 @@ function getAuthorName(text) {
 	return fixCase(text.trim());
 }
 
-function annealTitles(doc, item) {
+function processSubtitles(doc, item) {
 	// add subtitle to the main title if not already present
 	var subtitle = ZU.xpathText(doc, '//h3[@class="citation__subtitle"]');
 	if (subtitle) {
