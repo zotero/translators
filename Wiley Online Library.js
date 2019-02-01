@@ -131,7 +131,7 @@ function scrapeBook(doc, url, pdfUrl) {
 				/following-sibling::p', null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
-	annealTitles(doc, newItem);
+	processSubtitles(doc, newItem);
 	newItem.complete();
 }
 
@@ -190,7 +190,7 @@ function scrapeEM(doc, url, pdfUrl) {
 		//set correct print publication date
 		if (date) item.date = date;
 
-		annealTitles(doc, item);
+		processSubtitles(doc, item);
 
 		//remove pdf attachments
 		for (var i=0, n=item.attachments.length; i<n; i++) {
@@ -371,7 +371,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 
-			annealTitles(doc, item);
+			processSubtitles(doc, item);
 
 			//attachments
 			item.attachments = [{
@@ -482,7 +482,7 @@ function scrapeCochraneTrial(doc, url){
 		}
 	}
 
-	annealTitles(doc, item);
+	processSubtitles(doc, item);
 
 	item.complete();
 }
