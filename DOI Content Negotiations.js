@@ -63,42 +63,6 @@ function doSearch(items) {
 	processDOIs(dois);
 }
 
-var fixItemType = {
-	"journal-article": "article-journal", //http://doi.org/10.1136%2Fbmj.2.5914.335-a and crossref generally
-	"book-chapter": "chapter", //http://doi.org/10.1017/CBO9781316216453.176
-	"reference-entry": "chapter", //http://doi.org/10.1002/14651858.CD002966.pub3
-	"report-series": "report",
-	"misc": "article-journal" //DataCite
-}
-
-function fixJSON(text) {
-	try {
-		var item = JSON.parse(text);
-		//Z.debug("CSL_JSON" + text)
-		Z.debug(item)
-		if(fixItemType[item.type]) item.type = fixItemType[item.type];
-		//	Z.debug(item.container-title)
-		if (item.type == "report") {
-			Z.debug("here")
-			Z.debug(item['container-title'])
-			item.genre = item['container-title']
-		}
-		if (item.type != "article-journal" && item.type != "paper-conference") {
-			item.note = "DOI: " + item.DOI;
-		}
-		//Sometimes date is in created, not issued: 10.1017/CCOL0521858429.016
-		if (!item.issued.length && item.created) {
-			item.issued = item.created;
-		}
-		if(item.issued && item.issued.raw) item.issued.literal = item.issued.raw;
-		if(item.accessed && item.accessed.raw) item.accessed.literal = item.accessed.raw;
-		return JSON.stringify([item]);
-	} catch(e) {
-		Z.debug(e);
-		return false;
-	}
-}
-
 function processDOIs(dois) {
 	var doi = dois.pop();
 	// by content negotiation we asked for datacite or crossref format, or CSL JSON
@@ -142,10 +106,6 @@ function processDOIs(dois) {
 						item[field] = decodeURIComponent(escape(item[field]));
 					}
 				}
-				Z.debug(item)
-				if (item.itemType == "report") {
-					item.reportType = item.publicationTitle;
-				}
 				item.complete();
 			});
 			trans.translate();
@@ -156,33 +116,79 @@ function processDOIs(dois) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
+var testCases = [{
 		"type": "search",
 		"input": {
 			"DOI": "10.12763/ONA1045"
 		},
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Heiliges römisches Reich deutscher Nation",
-						"fieldMode": 1,
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses.",
-				"url": "http://dx.doi.org/10.12763/ONA1045",
-				"DOI": "10.12763/ONA1045",
-				"date": "1734",
-				"libraryCatalog": "DataCite"
-			}
-		]
+		"items": [{
+			"itemType": "journalArticle",
+			"url": "http://docnum.univ-lorraine.fr/pulsar/RCR_543952102_NA1045.pdf",
+			"pages": "39.79 MB, 402 pages",
+			"date": "1734",
+			"DOI": "10.12763/ona1045",
+			"accessDate": "2019-02-02T02:31:57Z",
+			"libraryCatalog": "DOI.org (Datacite)",
+			"language": "fre",
+			"title": "Code criminel de l'empereur Charles V vulgairement appellé la Caroline contenant les loix qui sont suivies dans les jurisdictions criminelles de l'Empire et à l'usage des conseils de guerre des troupes suisses.",
+			"creators": [{
+					"firstName": "",
+					"lastName": "Heiliges Römisches Reich Deutscher Nation",
+					"creatorType": "author"
+				},
+				{
+					"firstName": "Franz Adam. Éditeur Scientifique",
+					"lastName": "Vogel",
+					"creatorType": "contributor"
+				},
+				{
+					"firstName": "Simon, Claude (167 ?-1752) Éditeur",
+					"lastName": "Commercial",
+					"creatorType": "contributor"
+				},
+				{
+					"firstName": "",
+					"lastName": "Université De Lorraine-Direction De La Documentation Et De L'Edition",
+					"creatorType": "contributor"
+				}
+			],
+			"tags": [
+				"Droit"
+			],
+			"relations": [],
+			"attachments": [],
+			"notes": [
+				"<h2>Other</h2>\nLe code est accompagné de commentaires de F. A. Vogel, qui signe l'épitre dédicatoire<h2>Other</h2>\nReliure 18è siècle<h2>Other</h2>\nEx-libris manuscrit \"Ex libris Dufour\""
+			]
+		}]
+	},
+	{
+		"type": "search",
+		"input": {
+			"DOI": "10.7336/academicus.2014.09.05"
+		},
+		"items": [{
+			"itemType": "journalArticle",
+			"url": "http://academicus.edu.al/?subpage=volumes&nr=9",
+			"volume": "9",
+			"pages": "69-78",
+			"publicationTitle": "Academicus International Scientific Journal",
+			"ISSN": "20793715",
+			"date": "01/2014",
+			"DOI": "10.7336/academicus.2014.09.05",
+			"accessDate": "2019-02-02T03:28:48Z",
+			"libraryCatalog": "DOI.org (Crossref)",
+			"title": "Second world war, communism and post-communism in Albania, an equilateral triangle of a tragic trans-Adriatic story. The Eftimiadi’s Saga",
+			"creators": [{
+				"firstName": "Muner",
+				"lastName": "Paolo",
+				"creatorType": "author"
+			}],
+			"tags": [],
+			"relations": [],
+			"attachments": [],
+			"notes": [],
+		}]
 	}
 ]
 /** END TEST CASES **/
