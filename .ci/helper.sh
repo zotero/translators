@@ -18,4 +18,16 @@ grepTranslatorId () {
     fi
 }
 
+grepLastUpdated () {
+    if [[ -n "$1" ]];then
+        grep -r '"lastUpdated"' "$@" | sed -e 's/^.*lastUpdated": //' -e 's/ /T/' -e 's/"//g' | xargs -i date -d {} +%s
+    fi
+}
+
+gitGrepLastUpdated () {
+    if [[ -n "$1" ]];then
+        git grep '"lastUpdated"' master "$@" | sed -e 's/^.*lastUpdated": //' -e 's/ /T/' -e 's/"//g' | xargs -i date -d {} +%s
+    fi
+}
+
 # vim: ft=sh

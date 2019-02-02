@@ -67,6 +67,17 @@ reusingDeletedID () {
     fi
 }
 
+# update timestamp
+updateTimestamp () {
+    local newdate olddate
+    newdate=$(grepLastUpdated "$TRANSLATOR")
+    olddate=$(gitGrepLastUpdated "$TRANSLATOR")
+    if [ "$newdate" -eq "$olddate" ];then
+        err "Uses no updated timestamp but was modified, update lastUpdated field"
+        return 1
+    fi
+}
+
 # Translators should not be executable
 executableFile () {
     if [[ -x "$TRANSLATOR" ]];then
@@ -164,6 +175,18 @@ main() {
             if [ "$TRANSLATOR_BASENAME" == "$t" ];then
               ERROR_CHECKS+=("badLicense")
               unset WARN_CHECKS[0]
+            fi
+        done
+    fi
+
+    # For modified translators the timestamp must be updated
+    local IFS=$'\n'
+    declare -a modifiedtranslators=()
+    modifiedtranslators+=($(git diff-index --diff-filter=M --name-only --find-renames master|grep -v '\.ci'|grep 'js$'))
+    if (( ${#modifiedtranslators[@]} > 0 ));then
+        for t in "${modifiedtranslators[@]}";do
+            if [ "$TRANSLATOR_BASENAME" == "$t" ];then
+              ERROR_CHECKS+=("updateTimestamp")
             fi
         done
     fi
