@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	urlBibtex = url.replace('/article/view/', '/rt/captureCite/');
+	var urlBibtex = url.replace('/article/view/', '/rt/captureCite/');
 	if (!/\/article\/view\/.+\/.+/.test(url)) {
 		urlBibtex += '/0';
 	}
