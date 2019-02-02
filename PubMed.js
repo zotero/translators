@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-07 18:20:45"
+	"lastUpdated": "2019-01-10 06:30:21"
 }
 
  /*	
@@ -41,7 +41,7 @@
   *****************************/
 
 function lookupPMIDs(ids, next) {
-	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
@@ -184,7 +184,7 @@ function getSearchResults(doc, checkOnly) {
 				checked: checkbox && checkbox.checked
 			};	
 		}
-	}else if (docsums.length > 0) {
+	} else if (docsums.length > 0) {
 		for (var j=0; j<docsums.length; j++) {
 			var docsum_title = ZU.xpathText(docsums[j], './/a[@class="labs-docsum-title"]')
 			|| ZU.xpathText(docsums[j], './div[@class="docsumRightcol"]/a'); //My Bibliography
@@ -205,7 +205,6 @@ function getSearchResults(doc, checkOnly) {
 			}
 		}
 	}	
-	
 	return found ? items : false;
 }
 

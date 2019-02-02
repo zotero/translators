@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 19:32:38"
+	"lastUpdated": "2019-01-31 00:12:00"
 }
 
 function parseInput() {
@@ -108,7 +108,17 @@ function importNext(data, resolve, reject) {
 
 function doExport() {
 	var item, data = [];
-	while (item = Z.nextItem()) data.push(ZU.itemToCSLJSON(item));
+	while (item = Z.nextItem()) {
+		if (item.extra) {
+			item.extra = item.extra.replace(/(?:^|\n)citation key\s*:\s*([^\s]+)(?:\n|$)/i, (m, citationKey) => {
+				item.citationKey = citationKey;
+				return '\n';
+			}).trim();
+		}
+		var cslItem = ZU.itemToCSLJSON(item);
+		if (item.citationKey) cslItem.id = item.citationKey;
+		data.push(cslItem);
+	}
 	Z.write(JSON.stringify(data, null, "\t"));
 }
 /** BEGIN TEST CASES **/
