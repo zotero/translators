@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-02 12:25:00"
+	"lastUpdated": "2016-08-18 20:51:04"
 }
 
 /*
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var urlBibtex = url.replace('/article/view/', '/rt/captureCite/');
+	urlBibtex = url.replace('/article/view/', '/rt/captureCite/');
 	if (!/\/article\/view\/.+\/.+/.test(url)) {
 		urlBibtex += '/0';
 	}
