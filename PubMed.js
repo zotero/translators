@@ -12,32 +12,32 @@
 	"lastUpdated": "2019-01-10 06:30:21"
 }
 
- /*	
- 	***** BEGIN LICENSE BLOCK *****	
+ /*
+ 	***** BEGIN LICENSE BLOCK *****
  	
- 	Copyright © 2015 Philipp Zumstein	
+ 	Copyright © 2015 Philipp Zumstein
  	
- 	This file is part of Zotero.	
+ 	This file is part of Zotero.
  	
- 	Zotero is free software: you can redistribute it and/or modify	
- 	it under the terms of the GNU Affero General Public License as published by	
- 	the Free Software Foundation, either version 3 of the License, or	
- 	(at your option) any later version.	
+ 	Zotero is free software: you can redistribute it and/or modify
+ 	it under the terms of the GNU Affero General Public License as published by
+ 	the Free Software Foundation, either version 3 of the License, or
+ 	(at your option) any later version.
  	
- 	Zotero is distributed in the hope that it will be useful,	
- 	but WITHOUT ANY WARRANTY; without even the implied warranty of	
- 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the	
- 	GNU Affero General Public License for more details.	
+ 	Zotero is distributed in the hope that it will be useful,
+ 	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ 	GNU Affero General Public License for more details.
  	
- 	You should have received a copy of the GNU Affero General Public License	
- 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.	
+ 	You should have received a copy of the GNU Affero General Public License
+ 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
  	
- 	***** END LICENSE BLOCK *****	
- */	
+ 	***** END LICENSE BLOCK *****
+ */
  
   
-  /*****************************	
-  * General utility functions *	
+  /*****************************
+  * General utility functions *
   *****************************/
 
 function lookupPMIDs(ids, next) {
@@ -64,18 +64,13 @@ function lookupPMIDs(ids, next) {
  ****************************/
  //retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
-	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist"]/@content');
-	var labs_uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_article_id"]/@content');
-	if (!uid.length || !labs_uid.length) {
+	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist" or @name="ncbi_article_id"]/@content');
+	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
 
 	if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) {
 		return uid[0].textContent;
-	}
-
-	if (labs_uid.length == 1 && labs_uid[0].textContent.search(/^\d+$/) != -1) {
-		return labs_uid[0].textContent;
 	}
 	
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
@@ -100,8 +95,7 @@ function getUID(doc) {
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
 	var booksections = doc.getElementById('book-sections');
-	if (!main || !booksections) return;
-	
+	if (!main && !booksections) return;
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
 }
@@ -146,22 +140,19 @@ function scrapeItemProps(itemprops) {
  * My Bibliography
  */
 function getSearchResults(doc, checkOnly) {
-	var results = doc.getElementsByClassName('rslt');
-	var docsums = doc.getElementsByClassName('docsum-wrap');
+	var results = doc.querySelectorAll('.rslt, .docsum-wrap, citationListItem');
 	var items = {}, found = false;
+	
+	if (!results.length) return false;
 
-	if (!results.length && !docsums.length) {
-		//My Bibliography
-		results = doc.getElementsByClassName('citationListItem');
-	}
-	if (!results.length && !docsums.length) return false;
-
-	if (results.length > 0 && !docsums.length){
+	if (results.length > 0){
 		for (var i=0; i<results.length; i++) {
 			var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+				|| ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]')
 				|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
 			
 			var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+				|| ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]')
 				|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
 				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 			
@@ -183,29 +174,9 @@ function getSearchResults(doc, checkOnly) {
 			items["u" + uid] = {
 				title: ZU.trimInternal(title),
 				checked: checkbox && checkbox.checked
-			};	
+			};
 		}
-	} else if (docsums.length > 0) {
-		for (var j=0; j<docsums.length; j++) {
-			var docsum_title = ZU.xpathText(docsums[j], './/a[@class="labs-docsum-title"]')
-			|| ZU.xpathText(docsums[j], './div[@class="docsumRightcol"]/a'); //My Bibliography
-	
-			var docsum_uid = ZU.xpathText(docsums[j], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]')
-			|| ZU.xpathText(docsums[j], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-			|| ZU.xpathText(docsums[j], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
-		
-			if (checkOnly) return true;
-			found = true;
-			
-			//TODO: Items that are checked from the Search Results Page are not saved when Zotero dialog pops up
-			// var docsum_checkbox = ZU.xpath(results[j], './div[@class="selector-wrap"]/input[@type="checkbox"]/@value')[0];
-	
-			items["u" + docsum_uid] = {
-				title: ZU.trimInternal(docsum_title),
-				// checked: docsum_checkbox && docsum_checkbox.checked
-			}
-		}
-	}	
+	}
 	return found ? items : false;
 }
 
@@ -232,7 +203,7 @@ function detectWeb(doc, url) {
 	if (bookCitation.length > 0 && ZU.xpath(bookCitation, './/div[@class="affiliations"]')) {
 		var book_affiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
 		return book_affiliations ? "bookSection" : "book";
-	}	
+	}
 	
 	//from bookshelf page
 	var pdid = ZU.xpathText(doc, 'html/head/meta[@name="ncbi_pdid"]/@content');
