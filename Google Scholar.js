@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-27 15:12:16"
+	"lastUpdated": "2018-11-16 05:56:18"
 }
 
 // attr()/text() v2
@@ -229,20 +229,13 @@ function scrapeIds(doc, ids) {
 							true);
 					}
 					
-					//attach linked page as snapshot if available
-					if (titleLink) {
-						item.attachments.push({
-							url: titleLink,
-							title: "Snapshot"
-						});
-					}
 					//attach linked document as attachment if available
 					var documentLinkTarget = attr(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a', 'href');
 					var documentLinkTitle = text(context, '.gs_or_ggsm a, #gsc_vcd_title_gg a');
 					if (documentLinkTarget) {
 						//Z.debug(documentLinkTarget);
 						attachment = {
-							title: "Fulltext",
+							title: "Full Text",
 							url: documentLinkTarget
 						};
 						var m = documentLinkTitle.match(/^\[(\w+)\]/);
@@ -257,6 +250,15 @@ function scrapeIds(doc, ids) {
 							}
 						}
 						item.attachments.push(attachment);
+					}
+					
+					// Attach linked page as snapshot if available
+					if (titleLink && titleLink != documentLinkTarget) {
+						item.attachments.push({
+							url: titleLink,
+							title: "Snapshot",
+							mimeType: "text/html"
+						});
 					}
 
 					item.complete();

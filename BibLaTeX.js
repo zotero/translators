@@ -15,9 +15,8 @@
 		"exportFileData": false,
 		"useJournalAbbreviation": false
 	},
-	"lastUpdated": "2018-06-04 15:00:00"
+	"lastUpdated": "2019-01-31 13:16:00"
 }
-
 
 //%a = first listed creator surname
 //%y = year
@@ -38,6 +37,7 @@ var fieldMap = {
 	doi: "DOI",
 	series: "series",
 	shorttitle: "shortTitle",
+	holder: "assignee",
 	abstract: "abstractNote",
 	volumes: "numberOfVolumes",
 	version: "version",
@@ -310,7 +310,7 @@ function mapEscape(character) {
 	return alwaysMap[character];
 }
 
-// a little substitution function for BibTeX keys, where we don't want LaTeX 
+// a little substitution function for BibTeX keys, where we don't want LaTeX
 // escaping, but we do want to preserve the base characters
 
 function tidyAccents(s) {
@@ -386,7 +386,14 @@ function creatorCheck(item, ctype) {
 	return false;
 }
 
-	function buildCiteKey(item, citekeys) {
+function buildCiteKey (item, extraFields, citekeys) {
+		if (extraFields) {
+			const citationKey = extraFields.findIndex(field => field.field && field.value && field.field.toLowerCase() === 'citation key')
+			if (citationKey >= 0) return extraFields.splice(citationKey, 1)[0].value;
+		}
+
+		if (item.citationKey) return item.citationKey
+
 		var basekey = "";
 		var counter = 0;
 		citeKeyFormatRemaining = citeKeyFormat;
@@ -421,7 +428,7 @@ function creatorCheck(item, ctype) {
 		//
 		// no matter what, we want to make sure we exclude
 		// " # % ' ( ) , = { } ~ and backslash
-		// however, we want to keep the base characters 
+		// however, we want to keep the base characters
 
 		basekey = tidyAccents(basekey);
 		basekey = basekey.replace(citeKeyCleanRe, "");
@@ -478,11 +485,8 @@ function encodeFilePathComponent(value) {
 
 			if (!type) type = "misc";
 
-			var citekey = "";
-			if (!citekey) {
-				// create a unique citation key
-				citekey = buildCiteKey(item, citekeys);
-			}
+			var extraFields = item.extra ? parseExtraFields(item.extra) : null;
+			var citekey = buildCiteKey(item, extraFields, citekeys);
 
 			// write citation key (removed the comma)
 			Zotero.write((first ? "" : "\n\n") + "@" + type + "{" + citekey);
@@ -498,9 +502,9 @@ function encodeFilePathComponent(value) {
 			//e.g. where fieldname translation is dependent upon type, or special transformations
 			//has to be made
 
-			//all kinds of numbers
-			if (item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number) {
-				writeField("number", item.reportNumber || item.seriesNumber || item.patentNumber || item.billNumber || item.episodeNumber || item.number);
+			//all kinds of numbers except patents, which need post-processing
+			if (item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number && !item.patentNumber) {
+				writeField("number", item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number);
 			}
 
 			//split numeric and nonnumeric issue specifications (for journals) into "number" and "issue"
@@ -558,6 +562,29 @@ function encodeFilePathComponent(value) {
 				writeField("type", "phdthesis");
 			} else if (item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType) {
 				writeField("type", item.manuscriptType || item.thesisType || item.websiteType || item.presentationType || item.reportType || item.mapType);
+			} else if (item.itemType == "patent") {
+				// see https://tex.stackexchange.com/questions/447383/biblatex-biber-patent-citation-support-based-on-zoterobbl-output/447508
+				if (!item.patentNumber) {
+					writeField("type", "patent");
+				} else if (item.patentNumber.startsWith("US")) {
+					writeField("type", "patentus");
+					writeField("number", item.patentNumber.replace(/^US/, ""));
+				} else if (item.patentNumber.startsWith("EP")) {
+					writeField("type", "patenteu");
+					writeField("number", item.patentNumber.replace(/^EP/, ""));
+				} else if (item.patentNumber.startsWith("GB")) {
+					writeField("type", "patentuk");
+					writeField("number", item.patentNumber.replace(/^GB/, ""));
+				} else if (item.patentNumber.startsWith("DE")) {
+					writeField("type", "patentde");
+					writeField("number", item.patentNumber.replace(/^DE/, ""));
+				} else if (item.patentNumber.startsWith("FR")) {
+					writeField("type", "patentfr");
+					writeField("number", item.patentNumber.replace(/^FR/, ""));
+				} else {
+					writeField("type", "patent");
+					writeField("number", item.patentNumber);
+				}
 			}
 
 			if (item.presentationType || item.manuscriptType) {
@@ -628,7 +655,7 @@ function encodeFilePathComponent(value) {
 						creatorString = creatorString.replace(/ (and) /gi, ' {$1} ');
 					}
 
-					if (creator.creatorType == "author" || creator.creatorType == "interviewer" || creator.creatorType == "director" || creator.creatorType == "programmer" || creator.creatorType == "artist" || creator.creatorType == "podcaster" || creator.creatorType == "presenter") {
+					if (creator.creatorType == "author" || creator.creatorType == "interviewer" || creator.creatorType == "inventor" || creator.creatorType == "director" || creator.creatorType == "programmer" || creator.creatorType == "artist" || creator.creatorType == "podcaster" || creator.creatorType == "presenter") {
 						author += " and " + creatorString;
 					} else if (creator.creatorType == "bookAuthor") {
 						bookauthor += " and " + creatorString;
@@ -636,8 +663,6 @@ function encodeFilePathComponent(value) {
 						commentator += " and " + creatorString;
 					} else if (creator.creatorType == "editor") {
 						editor += " and " + creatorString;
-					} else if (creator.creatorType == "inventor") {
-						holder += " and " + creatorString;
 					} else if (creator.creatorType == "translator") {
 						translator += " and " + creatorString;
 					} else if (creator.creatorType == "seriesEditor") { //let's call them redacors
@@ -706,9 +731,8 @@ function encodeFilePathComponent(value) {
 				}
 			}
 
-			if (item.extra) {
+			if (extraFields) {
 				// Export identifiers
-				var extraFields = parseExtraFields(item.extra);
 				// Dedicated fields
 				for (var i=0; i<extraFields.length; i++) {
 					var rec = extraFields[i];

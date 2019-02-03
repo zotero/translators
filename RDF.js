@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:39:38"
+	"lastUpdated": "2018-10-07 16:32:26"
 }
 
 /*
@@ -513,6 +513,7 @@ function detectType(newItem, node, ret) {
 				case 'journalitem':
 				case 'journalarticle':
 				case 'submittedjournalarticle':
+				case 'text.serial.journal':
 					t.dc = 'journalArticle';
 					break;
 				case 'newsitem':
@@ -861,7 +862,7 @@ function importItem(newItem, node) {
 		var creatorType = possibleCreatorTypes[i];
 		if (creatorType == "author") {
 			creators = getFirstResults(node, [n.bib+"authors", n.so+"author",
-				n.so+"creator", n.dc+"creator", n.dc1_0+"creator",
+				n.so+"creator", n.dc+"creator", n.dc+"creator.PersonalName", n.dc1_0+"creator",
 				n.dcterms+"creator", n.eprints+"creators_name",
 				n.dc+"contributor", n.dc1_0+"contributor", n.dcterms+"contributor"]);
 		} else if (creatorType == "editor" || creatorType == "contributor") {
@@ -888,7 +889,7 @@ function importItem(newItem, node) {
 	
 	// publicationTitle -- first try PRISM, then DC
 	newItem.publicationTitle = getFirstResults(node, [n.prism+"publicationName", n.prism2_0+"publicationName", n.prism2_1+"publicationName", n.eprints+"publication", n.eprints+"book_title",
-		n.dc+"source", n.dc1_0+"source", n.dcterms+"source", n.og+"site_name"], true);
+		n.dc+"source", n.dc1_0+"source", n.dcterms+"source"], true);
 	if (container) {
 		newItem.publicationTitle = getFirstResults(container, [n.dc+"title", n.dc1_0+"title", n.dcterms+"title", n.so+"name"], true);
 		// these fields mean the same thing
@@ -898,6 +899,10 @@ function importItem(newItem, node) {
 		newItem.publicationTitle = getFirstResults([containerPeriodical, containerPublicationVolume], [n.so+"name"], true);
 	}
 
+	var siteName = getFirstResults(node, [n.og+"site_name"], true);
+	if (siteName && !newItem.publicationTitle && (newItem.itemType == "blogPost" || newItem.itemType == "webpage")) {
+		newItem.publicationTitle = siteName;
+	}
 	// rights
 	newItem.rights = getFirstResults(node, [n.prism+"copyright", n.prism2_0+"copyright", n.prism2_1+"copyright", n.dc+"rights", n.dc1_0+"rights", n.dcterms+"rights", n.so+"license"], true);
 	
@@ -921,12 +926,12 @@ function importItem(newItem, node) {
 	
 	// volume
 	newItem.volume = getFirstResults([container, node, containerPublicationVolume, containerPeriodical], [n.prism+"volume", n.prism2_0+"volume", n.prism2_1+"volume",
-			n.eprints+"volume", n.bibo+"volume", n.dcterms+"citation.volume", n.so+"volumeNumber"], true);
+			n.eprints+"volume", n.bibo+"volume", n.dc+"source.Volume", n.dcterms+"citation.volume", n.so+"volumeNumber"], true);
 	
 	// issue
 	if (container) {
 		newItem.issue = getFirstResults([container, node], [n.prism+"number", n.prism2_0+"number", n.prism2_1+"number",
-			n.eprints+"number", n.bibo+"issue", n.dcterms+"citation.issue", n.so+"issueNumber"], true);
+			n.eprints+"number", n.bibo+"issue", n.dc+"source.Issue", n.dcterms+"citation.issue", n.so+"issueNumber"], true);
 	}
 
 	// these mean the same thing
@@ -938,7 +943,7 @@ function importItem(newItem, node) {
 	newItem.versionNumber = newItem.edition;
 	
 	// pages
-	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange", n.bibo+"pages", n.so+"pagination"], true);
+	newItem.pages = getFirstResults(node, [n.bib+"pages", n.eprints+"pagerange", n.prism2_0+"pageRange", n.prism2_1+"pageRange", n.bibo+"pages", n.dc+"identifier.pageNumber", n.so+"pagination"], true);
 	if (!newItem.pages) {
 		var pages = [];
 		var spage = getFirstResults(node, [n.prism+"startingPage", n.prism2_0+"startingPage", n.prism2_1+"startingPage", n.bibo+"pageStart", n.dcterms+"relation.spage", n.so+"pageStart"], true),
@@ -1065,8 +1070,8 @@ function importItem(newItem, node) {
 		}
 	}
 	
-	// ISSN, if encoded per PRISM (DC uses "identifier")
-	newItem.ISSN = getFirstResults([container, node, containerPeriodical, containerPublicationVolume], [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn",
+	// ISSN, if encoded per PRISM
+	newItem.ISSN = getFirstResults([container, node, containerPeriodical, containerPublicationVolume], [n.prism+"issn", n.prism2_0+"issn", n.prism2_1+"issn", n.eprints+"issn", n.bibo+"issn", n.dc+"source.ISSN",
 		n.prism+"eIssn", n.prism2_0+"eIssn", n.prism2_1+"eIssn", n.bibo+"eissn", n.so+"issn"], true) || newItem.ISSN;
 	// ISBN from PRISM or OG
 	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1+"isbn", n.bibo+"isbn", n.bibo+"isbn13", n.bibo+"isbn10", n.book+"isbn", n.so+"isbn"], true) || newItem.ISBN;

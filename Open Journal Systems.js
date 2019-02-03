@@ -9,18 +9,29 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-18 22:34:25"
+	"lastUpdated": "2018-10-12 17:46:47"
 }
 
 function detectWeb(doc, url) {
 	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
 	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
-		pkpLibraries.length >= 10) {
+		pkpLibraries.length >= 1) {
 		return 'journalArticle';
 	}
 }
 
 function doWeb(doc, url) {
+	// In OJS 3, up to at least version 3.1.1-2, the PDF view does not
+	// include metadata, so we must get it from the article landing page.
+	var urlParts = url.match(/(.+\/article\/view\/)([^/]+)\/[^/]+/);
+	if (urlParts) { //PDF view
+		ZU.processDocuments(urlParts[1] + urlParts[2], scrape);
+	} else { //Article view
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	//use Embeded Metadata
 	var trans = Zotero.loadTranslator('web');
 	trans.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -61,18 +72,30 @@ function doWeb(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
 		}
 		
+		var pdfAttachment = false;
+		
 		//some journals link to a PDF view page in the header, not the PDF itself
 		for (var i=0; i<item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
+				pdfAttachment = true;
 				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
 			}
+		}
+		
+		var pdfUrl = doc.querySelector("a.obj_galley_link.pdf");
+		//add linked PDF if there isn't one listed in the header
+		if (!pdfAttachment && pdfUrl) { 
+			item.attachments.push({
+				title: "Full Text PDF",
+				mimeType: "application/pdf",
+				url: pdfUrl.href.replace(/\/article\/view\//, '/article/download/')
+			});
 		}
 
 		item.complete();
 	});
 
 	trans.translate();
-
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -720,6 +743,85 @@ var testCases = [
 					"storytelling",
 					"vanderbilt"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mennonites in Unexpected Places: Sociologist and Settler in Latin America",
+				"creators": [
+					{
+						"firstName": "Ben",
+						"lastName": "Nobbs-Thiessen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012-12-18",
+				"ISSN": "08245053",
+				"language": "en",
+				"libraryCatalog": "jms.uwinnipeg.ca",
+				"pages": "203-224",
+				"publicationTitle": "Journal of Mennonite Studies",
+				"rights": "Copyright (c)",
+				"shortTitle": "Mennonites in Unexpected Places",
+				"url": "http://jms.uwinnipeg.ca/index.php/jms/article/view/1369",
+				"volume": "28",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100/115",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Value of Evaluation Standards: A Comparative Assessment",
+				"creators": [
+					{
+						"firstName": "Robert",
+						"lastName": "Picciotto",
+						"creatorType": "author"
+					}
+				],
+				"date": "2007/12/18",
+				"ISSN": "1556-8180",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "journals.sfu.ca",
+				"pages": "30-59",
+				"publicationTitle": "Journal of MultiDisciplinary Evaluation",
+				"rights": "Copyright (c)",
+				"shortTitle": "The Value of Evaluation Standards",
+				"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

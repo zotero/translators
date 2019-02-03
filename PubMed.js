@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-09-07 18:20:45"
+	"lastUpdated": "2019-01-10 06:30:21"
 }
 
 /*
@@ -40,7 +40,7 @@
  * General utility functions *
  *****************************/
 function lookupPMIDs(ids, next) {
-	var newUri = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
 		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
 	Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
@@ -168,8 +168,9 @@ function getSearchResults(doc, checkOnly) {
 		if (checkOnly) return true;
 		found = true;
 		
-		var checkbox = ZU.xpath(results[i], './/input[@type="checkbox"]')[0];
-		
+		// Checkbox is a descendant of the containing .rprt div
+		var checkbox = ZU.xpath(results[i].parentNode, './/input[@type="checkbox"]')[0];
+
 		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
 		items["u"+uid] = {
 			title: ZU.trimInternal(title),

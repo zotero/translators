@@ -9,7 +9,7 @@
 	"priority": 90,
 	"inRepository": true,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-08-16 12:00:00"
+	"lastUpdated": "2019-01-07 08:14:17"
 }
 
 /* CrossRef uses unixref; documentation at http://www.crossref.org/schema/documentation/unixref1.0/unixref.html */
@@ -63,6 +63,10 @@ function removeUnsupportedMarkup(text) {
 function detectSearch(item) {
 	// query: should we make this more forgiving?
 	if (item.itemType === "journalArticle" || item.DOI) {
+		// Don't try to look up PMIDs
+		if (item.contextObject && item.contextObject.startsWith('rft_id=info:pmid')) {
+			return false;
+		}
 		return true;
 	}
 	return false;
@@ -166,12 +170,12 @@ function processCrossRef(xmlOutput) {
    	} else if ((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:report-paper', ns)).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
+		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'c:report-paper_metadata', ns);
 		if (refXML.length===0) {
-			//Example doi: 10.1787/5jzb6vwk338x-en
-			//http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.1787/5jzb6vwk338x-en&noredirect=true&format=unixref
+			// Example doi: 10.1787/5jzb6vwk338x-en
+			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.1787/5jzb6vwk338x-en&noredirect=true&format=unixref
 			refXML = ZU.xpath(itemXML, 'c:report-paper_series_metadata', ns);
 			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
 		}
@@ -184,13 +188,13 @@ function processCrossRef(xmlOutput) {
 	} else if ((itemXML = ZU.xpath(doiRecord, 'c:crossref/c:book', ns)).length) {
 		// Book chapter
 		// Example: doi: 10.1017/CCOL0521858429.016
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1017/CCOL0521858429.016&format=unixref&redirect=false
+		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1017/CCOL0521858429.016&format=unixref&redirect=false
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
+		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
 		// Entire edite book. This should _not_ be imported as bookSection
 		// Example: doi: 10.4135/9781446200957
-		// http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.4135/9781446200957&noredirect=true&format=unixref
+		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.4135/9781446200957&noredirect=true&format=unixref
 
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'c:content_item/@component_type', ns);
@@ -206,6 +210,7 @@ function processCrossRef(xmlOutput) {
 			if (isReference) {
 				metadataXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
 				if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
+				// TODO: Check book_set_metadata here too, as we do below?
 
 				item.bookTitle = ZU.xpathText(metadataXML, 'c:titles[1]/c:title[1]', ns);
 				item.seriesTitle = ZU.xpathText(metadataXML, 'c:series_metadata/c:titles[1]/c:title[1]', ns);
@@ -225,10 +230,14 @@ function processCrossRef(xmlOutput) {
 		} else {
 			item = new Zotero.Item("book");
 			refXML = ZU.xpath(itemXML, 'c:book_metadata', ns);
-			//Sometimes book data is in book_series_metadata
+			// Sometimes book data is in book_series_metadata
 			// doi: 10.1007/978-1-4419-9164-5
-			//http://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1007/978-1-4419-9164-5&format=unixref&redirect=false
+			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1007/978-1-4419-9164-5&format=unixref&redirect=false
+			// And sometimes in book_set_metadata
+			// doi: 10.7551/mitpress/9780262533287.003.0006
+			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.7551/mitpress/9780262533287.003.0006&noredirect=true&format=unixref
 			if (!refXML.length) refXML = ZU.xpath(itemXML, 'c:book_series_metadata', ns);
+			if (!refXML.length) refXML = ZU.xpath(itemXML, 'c:book_set_metadata', ns);
 			metadataXML = refXML;
 			seriesXML = ZU.xpath(refXML, 'c:series_metadata', ns);
 		}
@@ -288,7 +297,7 @@ function processCrossRef(xmlOutput) {
 	if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:publication_date', ns);
 	//dataset
 	if (!pubDateNode.length) pubDateNode = ZU.xpath(refXML, 'c:database_date/c:publication_date', ns);
-	if (!pubDateNode.length) pubDateNode = ZU.xpath(metaXML, 'c:database_date/c:publication_date', ns);
+	if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'c:database_date/c:publication_date', ns);
 
 	if (pubDateNode.length) {
 		var year = ZU.xpathText(pubDateNode[0], 'c:year', ns);
@@ -369,7 +378,7 @@ function doSearch(item) {
 		var co = Zotero.Utilities.createContextObject(item);
 	}
 
-	ZU.doGet("http://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
+	ZU.doGet("https://www.crossref.org/openurl/?pid=zter:zter321&"+co+"&noredirect=true&format=unixref", function(responseText) {
 		processCrossRef(responseText);
 	});
 }
