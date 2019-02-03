@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-28 08:31:44"
+	"lastUpdated": "2019-02-03 22:53:54"
 }
 
 /*
@@ -60,7 +60,6 @@ function innerXML(n) {
 				return escapedXMLcharacters[item];
 			}
 		);
-		
 }
 
 var markupRE = /<(\/?)(\w+)[^<>]*>/gi;
@@ -74,7 +73,7 @@ var transformMarkup = {
 function removeUnsupportedMarkup(text) {
 	return text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') // Remove CDATA markup
 		.replace(markupRE, function(m, close, name) {
-			if (supportedMarkup.indexOf(name.toLowerCase()) != -1) {
+			if (supportedMarkup.includes(name.toLowerCase())) {
 				return m;
 			}
 
@@ -95,7 +94,7 @@ function fixAuthorCapitalization(string) {
 	// malfunctioning when calling from translators.
 	if (ZU.capitalizeName) return ZU.capitalizeName(string);
 	if (typeof string === "string" && string.toUpperCase() === string) {
-		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase() });
+		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase(); });
 	}
 	return string;
 }
@@ -133,26 +132,25 @@ function parseCreators(node, item, typeOverrideMap) {
 }
 
 function parseDate (pubDateNode) {
-if (pubDateNode.length) {
-	var year = ZU.xpathText(pubDateNode[0], 'year');
-	var month = ZU.xpathText(pubDateNode[0], 'month');
-	var day = ZU.xpathText(pubDateNode[0], 'day');
-	
-	if (year) {
-		if (month) {
-			if (day) {
-				return year+"-"+month+"-"+day;
+	if (pubDateNode.length) {
+		var year = ZU.xpathText(pubDateNode[0], 'year');
+		var month = ZU.xpathText(pubDateNode[0], 'month');
+		var day = ZU.xpathText(pubDateNode[0], 'day');
+		
+		if (year) {
+			if (month) {
+				if (day) {
+					return year+"-"+month+"-"+day;
+				} else {
+					return month+"/"+year;
+				}
 			} else {
-				return month+"/"+year;
+				return  year;
 			}
-		} else {
-			return  year;
 		}
 	}
+	else return null;
 }
-else return null
-}
-
 
 
 function detectImport() {
@@ -172,23 +170,19 @@ function detectImport() {
 }
 
 
-
-
 function doImport() {
 	// XPath does not give us the ability to use the same XPaths regardless of whether or not
 	// there is a namespace, so we add an element to make sure that there will always be a
 	// namespace.
 
 	var doc = Zotero.getXML();
-
 	
 	var doiRecord = ZU.xpath(doc, "//doi_records/doi_record");
-//	Z.debug(doiRecord.length)
+	//	Z.debug(doiRecord.length)
 	// ensure this isn't an error
 	var errorString = ZU.xpathText(doiRecord, 'crossref/error');
 	if (errorString !== null) {
 		throw errorString;
-		return false;
 	}
 
 	var itemXML, item, refXML, metadataXML, seriesXML;
@@ -204,7 +198,7 @@ function doImport() {
 		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
 		if (!item.issue)
 			item.issue = ZU.xpathText(itemXML, 'journal_issue/issue');
-   	} else if ((itemXML = ZU.xpath(doiRecord, 'crossref/report-paper')).length) {
+  } else if ((itemXML = ZU.xpath(doiRecord, 'crossref/report-paper')).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
 		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
@@ -236,8 +230,8 @@ function doImport() {
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'content_item/@component_type');
 		//is this an entry in a reference book?
-		var isReference = ["reference", "other"].indexOf(bookType) !== -1
-				&& ["chapter", "reference_entry"].indexOf(componentType) !==-1;
+		var isReference = ["reference", "other"].includes(bookType)
+				&& ["chapter", "reference_entry"].includes(componentType);
 
 		//for items that are entry in reference books OR edited book types that have some type of a chapter entry.
 		if ((bookType === "edited_book"  && componentType) || isReference) {
@@ -335,11 +329,11 @@ function doImport() {
 		item = new Zotero.Item("manuscript"); //is this the best category
 		item.date = parseDate(ZU.xpath(itemXML, "reviewed_date"));
 		if (ZU.xpath(itemXML, "/contributors/anonymous")) {
-			item.creators.push({lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author"})
+			item.creators.push({lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author"});
 		}
-		item.type = "peer review"
-		var reviewOf;
-		if (reviewOf = ZU.xpathText(itemXML, "//related_item/inter_work_relation")) {
+		item.type = "peer review";
+		var reviewOf = ZU.xpathText(itemXML, "//related_item/inter_work_relation");
+		if (reviewOf) {
 			var identifierType = ZU.xpathText(itemXML, "//related_item/inter_work_relation/@identifier-type");
 			var identifier;
 			if  (identifierType == "doi") {
@@ -396,7 +390,7 @@ if (!metadataXML || !metadataXML.length) {
 
 	
 	if (pubDateNode.length) {
-		item.date = parseDate(pubDateNode)
+		item.date = parseDate(pubDateNode);
 	}
 
 	var pages = ZU.xpath(refXML, 'pages[1]');
@@ -417,7 +411,7 @@ if (!metadataXML || !metadataXML.length) {
 		}
 	}
 	item.url = ZU.xpathText(refXML, 'doi_data/resource');
-	var title = title = ZU.xpath(refXML, 'titles[1]/title[1]')[0];
+	var title = ZU.xpath(refXML, 'titles[1]/title[1]')[0];
 	if (!title && metadataXML) {
 		title = ZU.xpath(metadataXML, 'titles[1]/title[1]')[0];
 	}

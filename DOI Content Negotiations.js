@@ -41,16 +41,16 @@ function detectSearch(items) {
 
 // return an array of DOIs from the query (items or text)
 function filterQuery(items) {
-	if(!items) return [];
+	if (!items) return [];
 
-	if(typeof items == 'string' || !items.length) items = [items];
+	if (typeof items == 'string' || !items.length) items = [items];
 
-	//filter out invalid queries
+	// filter out invalid queries
 	var dois = [], doi;
-	for(var i=0, n=items.length; i<n; i++) {
-		if(items[i].DOI && (doi = ZU.cleanDOI(items[i].DOI)) ) {
+	for (var i=0, n=items.length; i<n; i++) {
+		if (items[i].DOI && (doi = ZU.cleanDOI(items[i].DOI)) ) {
 			dois.push(doi);
-		} else if(typeof items[i] == 'string' && (doi = ZU.cleanDOI(items[i])) ) {
+		} else if (typeof items[i] == 'string' && (doi = ZU.cleanDOI(items[i])) ) {
 			dois.push(doi);
 		}
 	}
@@ -59,7 +59,7 @@ function filterQuery(items) {
 
 function doSearch(items) {
 	var dois = filterQuery(items);
-	if(!dois.length) return;
+	if (!dois.length) return;
 	processDOIs(dois);
 }
 
@@ -67,15 +67,15 @@ function processDOIs(dois) {
 	var doi = dois.pop();
 	// by content negotiation we asked for datacite or crossref format, or CSL JSON
 	ZU.doGet('https://doi.org/' + encodeURIComponent(doi), function(text) {
-		if(!text) {
+		if (!text) {
 			return;
 		}
-		Z.debug(text)
+		Z.debug(text);
 		
 		var trans = Zotero.loadTranslator('import');
 		trans.setString(text);
 		if (text.includes("<crossref")) {
-			//Crossref Unixref
+			// Crossref Unixref
 			trans.setTranslator('93514073-b541-4e02-9180-c36d2f3bb401');
 			trans.setHandler('itemDone', function(obj, item) {
 				item.libraryCatalog = "DOI.org (Crossref)";
@@ -97,12 +97,12 @@ function processDOIs(dois) {
 			trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 			trans.setHandler('itemDone', function(obj, item) {
 				item.libraryCatalog = "DOI.org (CSL JSON)";
-				//check if there are potential issues with character encoding and try to fix it
-				//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as escaped unicode)
-				for(var field in item) {
-					if(typeof item[field] != 'string') continue;
-					//check for control characters that should never be in strings from CrossRef
-					if(/[\u007F-\u009F]/.test(item[field])) {
+				// check if there are potential issues with character encoding and try to fix it
+				// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as escaped unicode)
+				for (var field in item) {
+					if (typeof item[field] != 'string') continue;
+					// check for control characters that should never be in strings from CrossRef
+					if (/[\u007F-\u009F]/.test(item[field])) {
 						item[field] = decodeURIComponent(escape(item[field]));
 					}
 				}
@@ -111,8 +111,8 @@ function processDOIs(dois) {
 			trans.translate();
 		}
 	}, function() {
-		if(dois.length) processDOIs(dois, queryTracker);
-	}, undefined, {"Accept" : "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json"})
+		if(dois.length) processDOIs(dois);
+	}, undefined, {"Accept" : "application/vnd.datacite.datacite+json, application/vnd.crossref.unixref+xml, application/vnd.citationstyles.csl+json"});
 }
 
 /** BEGIN TEST CASES **/
