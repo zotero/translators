@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-02 06:30:21"
+	"lastUpdated": "2019-02-03 18:23:15"
 }
 
  /*
@@ -198,9 +198,11 @@ function detectWeb(doc, url) {
 		return inBook ? "bookSection" : "book";
 	}
 
-	//determine if book or bookSection for Pub Med Labs
+	//determine if book or bookSection for PubMed Labs
 	var bookCitation = doc.getElementsByClassName('book-citation');
 	if (bookCitation.length > 0 && ZU.xpath(bookCitation, './/div[@class="affiliations"]')) {
+		// For a bookSection there are the affiliations of the authors of this
+		// section as well as the affiliations of the book authors.
 		var book_affiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
 		return book_affiliations ? "bookSection" : "book";
 	}
@@ -225,11 +227,14 @@ function doWeb(doc, url) {
 			lookupPMIDs(uids);
 		});
 	} else {
-		var uid = getUID(doc), itemprops;
+		var uid = getUID(doc);
 		if (uid) {
 			lookupPMIDs([uid]);
-		} else if (itemprops = getBookProps(doc)) {
-			scrapeItemProps(itemprops);
+		} else {
+			var itemprops = getBookProps(doc);
+			if (itemprops) {
+				scrapeItemProps(itemprops);
+			}
 		}
 	}
 }
@@ -244,7 +249,7 @@ function getPMID(co) {
 	for (var i=0; i<coParts.length; i++) {
 		var part = coParts[i];
 		if (part.substr(0, 7) == "rft_id=") {
-			var value = unescape(part.substr(7));
+			var value = decodeURIComponent(part.substr(7));
 			if (value.substr(0, 10) == "info:pmid/") {
 				return value.substr(10);
 			}
@@ -1226,7 +1231,7 @@ var testCases = [
 						"creatorType": "author",
 						"lastName": "Sewell",
 						"firstName": "Jeanne P."
-	}
+					}
 				],
 				"notes": [],
 				"tags": [
