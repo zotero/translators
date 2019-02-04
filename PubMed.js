@@ -142,40 +142,38 @@ function scrapeItemProps(itemprops) {
 function getSearchResults(doc, checkOnly) {
 	var results = doc.querySelectorAll('.rslt, .docsum-wrap, citationListItem');
 	var items = {}, found = false;
-	
-	if (!results.length) return false;
 
-	if (results.length > 0){
-		for (var i=0; i<results.length; i++) {
-			var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
-				|| ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]')
-				|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
-			
-			var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
-				|| ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]')
-				|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-				|| ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
-			
-			if (!uid) {
-				uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
-				if (uid) uid = uid.match(/\/(\d+)/);
-				if (uid) uid = uid[1];
-			}
-			
-			if (!uid || !title) continue;
-			
-			if (checkOnly) return true;
-			found = true;
-			
-			// Checkbox is a descendant of the containing .rprt div
-			var checkbox = ZU.xpath(results[i].parentNode, './/input[@type="checkbox"]')[0];
-			
-			// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
-			items["u" + uid] = {
-				title: ZU.trimInternal(title),
-				checked: checkbox && checkbox.checked
-			};
+	if (!results.length) return false;
+	for (var i = 0; i < results.length; i++) {
+		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]') ||
+			ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]') ||
+			ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+
+		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value') ||
+			ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]') ||
+			ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
+			||
+			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+
+		if (!uid) {
+			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
+			if (uid) uid = uid.match(/\/(\d+)/);
+			if (uid) uid = uid[1];
 		}
+
+		if (!uid || !title) continue;
+
+		if (checkOnly) return true;
+		found = true;
+
+		// Checkbox is a descendant of the containing .rprt div
+		var checkbox = ZU.xpath(results[i].parentNode, './/input[@type="checkbox"]')[0];
+
+		// Keys must be strings. Otherwise, Chrome sorts numerically instead of by insertion order.
+		items["u" + uid] = {
+			title: ZU.trimInternal(title),
+			checked: checkbox && checkbox.checked
+		};
 	}
 	return found ? items : false;
 }
