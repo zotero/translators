@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-16 07:29:30"
+	"lastUpdated": "2019-06-15 16:21:59"
 }
 
 /*
@@ -47,11 +47,11 @@ function detectWeb(doc, url) {
 
 
 function detectWebHere(doc, url) {
-	if (url.includes('/search/') && getSearchResults(doc, true)) {
+	if (url.includes('/search') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type" and @content="article"]/@content')) {
-		if (url.indexOf('blog')>-1) {
+		if (url.includes('blog')) {
 			return "blogPost";
 		} else {
 			return "newspaperArticle";
@@ -69,11 +69,19 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = type;
-		item.language = ZU.xpathText(doc, '//meta[@itemprop="inLanguage"]/@content') || "en-US";
+		if (item.language) {
+			if (item.language === "en") {
+				item.language = "en-US";
+			}
+		}
+		else {
+			item.language = ZU.xpathText(doc, '//meta[@itemprop="inLanguage"]/@content') || "en-US";
+		}
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		} else {
-			item.date = attr(doc, 'time', 'datetime')
+			item.date = attr(doc, 'time[datetime]', 'datetime')
+				|| attr(doc, 'meta[itemprop="datePublished"]', 'content')
 				|| attr(doc, 'meta[itemprop="dateModified"]', 'content');
 		}
 		if (item.itemType == "blogPost") {
@@ -164,9 +172,8 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('li');// filter inside the loop
+	var rows = doc.querySelectorAll('li[data-testid*="result"]');
 	for (var i=0; i<rows.length; i++) {
-		if (!rows[i].className.includes('SearchResults-item')) continue;
 		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
 		var title = ZU.xpathText(rows[i], './/h4');
 		if (!href || !title) continue;
@@ -213,21 +220,18 @@ var testCases = [
 				],
 				"date": "1912-03-05",
 				"ISSN": "0362-4331",
+				"abstractNote": "com weighs holding simultaneous hearings on money trust and Aldrich plan",
 				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
 				"section": "Archives",
 				"url": "https://www.nytimes.com/1912/03/05/archives/two-money-inquiries-hearings-of-trust-charges-and-aldrich-plan-at.html",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "NYTimes Archive PDF",
-						"mimeType": "application/pdf"
+						"tag": "Banks and Banking"
 					}
 				],
-				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -235,7 +239,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nytimes.com/2010/08/21/education/21harvard.html?_r=1&scp=1&sq=marc%20hauser&st=cse",
+		"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html?_r=1&scp=1&sq=marc%20hauser&st=cse",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -255,17 +259,23 @@ var testCases = [
 				"publicationTitle": "The New York Times",
 				"section": "Education",
 				"url": "https://www.nytimes.com/2010/08/21/education/21harvard.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Ethics",
-					"Harvard University",
-					"Hauser, Marc D",
-					"Research",
-					"Science and Technology"
+					{
+						"tag": "Ethics"
+					},
+					{
+						"tag": "Harvard University"
+					},
+					{
+						"tag": "Hauser, Marc D"
+					},
+					{
+						"tag": "Research"
+					},
+					{
+						"tag": "Science and Technology"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -274,7 +284,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.nytimes.com/search/#/marc+hauser",
+		"url": "https://www.nytimes.com/search?query=marc%20hauser&sort=best",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -297,18 +307,26 @@ var testCases = [
 				"blogTitle": "Opinionator",
 				"language": "en-US",
 				"url": "https://opinionator.blogs.nytimes.com/2013/06/19/our-broken-social-contract/",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Economic Conditions and Trends",
-					"Income Inequality",
-					"Social Conditions and Trends",
-					"Thomas B. Edsall",
-					"United States",
-					"United States Economy"
+					{
+						"tag": "Economic Conditions and Trends"
+					},
+					{
+						"tag": "Income Inequality"
+					},
+					{
+						"tag": "Social Conditions and Trends"
+					},
+					{
+						"tag": "Thomas B. Edsall"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States Economy"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -335,20 +353,28 @@ var testCases = [
 				"language": "ko-KR",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"section": "N.Y. / Region",
+				"section": "New York",
 				"url": "https://www.nytimes.com/2015/05/10/nyregion/manicurists-in-new-york-area-are-underpaid-and-unprotected.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Beauty Salons",
-					"Discrimination",
-					"Korean-Americans",
-					"Labor and Jobs",
-					"New York City",
-					"Wages and Salaries"
+					{
+						"tag": "Beauty Salons"
+					},
+					{
+						"tag": "Discrimination"
+					},
+					{
+						"tag": "Korean-Americans"
+					},
+					{
+						"tag": "Labor and Jobs"
+					},
+					{
+						"tag": "New York City"
+					},
+					{
+						"tag": "Wages and Salaries"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -385,22 +411,34 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"section": "Politics",
+				"section": "U.S.",
 				"url": "https://www.nytimes.com/2017/05/24/us/politics/russia-trump-manafort-flynn.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Cyberwarfare and Defense",
-					"Espionage and Intelligence Services",
-					"Flynn, Michael T",
-					"Manafort, Paul J",
-					"Presidential Election of 2016",
-					"Russia",
-					"Trump, Donald J",
-					"United States Politics and Government"
+					{
+						"tag": "Cyberwarfare and Defense"
+					},
+					{
+						"tag": "Espionage and Intelligence Services"
+					},
+					{
+						"tag": "Flynn, Michael T"
+					},
+					{
+						"tag": "Manafort, Paul J"
+					},
+					{
+						"tag": "Presidential Election of 2016"
+					},
+					{
+						"tag": "Russia"
+					},
+					{
+						"tag": "Trump, Donald J"
+					},
+					{
+						"tag": "United States Politics and Government"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -409,7 +447,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://query.nytimes.com/gst/abstract.html?res=9406EFDF153DE532A25751C1A96F9C946791D6CF&login=email&auth=login-email&legacy=true",
+		"url": "https://www.nytimes.com/1966/09/12/archives/draft-deferment-scored-at-rutgers.html?login=email&auth=login-email",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -417,22 +455,29 @@ var testCases = [
 				"creators": [],
 				"date": "1966-09-12",
 				"ISSN": "0362-4331",
-				"abstractNote": "NEW BRUNSWICK, Sept. 11 (AP)--About 1,000 Rutgers University freshmen were urged today by Paul Goodman, author, to go out and campaign for the abolition of the student draft deferment.",
+				"abstractNote": "P Goodman urges Rutgers U students to campaign for abolition of student deferment, s, freshman orientation",
 				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"url": "http://query.nytimes.com/gst/abstract.html?res=9406EFDF153DE532A25751C1A96F9C946791D6CF",
-				"attachments": [
+				"section": "Archives",
+				"url": "https://www.nytimes.com/1966/09/12/archives/draft-deferment-scored-at-rutgers.html",
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Snapshot"
+						"tag": "Colleges and Universities"
 					},
 					{
-						"title": "NYTimes Archive PDF",
-						"mimeType": "application/pdf"
+						"tag": "Draft and Mobilization of Troops"
+					},
+					{
+						"tag": "Miscellaneous Section"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States Armament and Defense"
 					}
-				],
-				"tags": [
-					""
 				],
 				"notes": [],
 				"seeAlso": []
@@ -441,7 +486,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nytimes.com/1970/11/12/archives/ideological-labels-changing-along-with-the-labelmakers-ideological.html",
+		"url": "https://www.nytimes.com/1970/11/12/archives/ideological-labels-changing-along-with-the-labelmakers-ideological.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -461,27 +506,41 @@ var testCases = [
 				"publicationTitle": "The New York Times",
 				"section": "Archives",
 				"url": "https://www.nytimes.com/1970/11/12/archives/ideological-labels-changing-along-with-the-labelmakers-ideological.html",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Snapshot"
+						"tag": "Bell, Daniel"
 					},
 					{
-						"title": "NYTimes Archive PDF",
-						"mimeType": "application/pdf"
+						"tag": "Glazer, Nathan"
+					},
+					{
+						"tag": "Goodman, Paul"
+					},
+					{
+						"tag": "Howe, Irving"
+					},
+					{
+						"tag": "Intellectuals"
+					},
+					{
+						"tag": "Kristol, Irving"
+					},
+					{
+						"tag": "Macdonald, Dwight"
+					},
+					{
+						"tag": "Podhoretz, Norman"
+					},
+					{
+						"tag": "Politics and Government"
+					},
+					{
+						"tag": "Trilling, Lionel"
+					},
+					{
+						"tag": "United States"
 					}
-				],
-				"tags": [
-					"Bell, Daniel",
-					"Glazer, Nathan",
-					"Goodman, Paul",
-					"Howe, Irving",
-					"Intellectuals",
-					"Kristol, Irving",
-					"Macdonald, Dwight",
-					"Podhoretz, Norman",
-					"Politics and Government",
-					"Trilling, Lionel",
-					"United States"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -508,19 +567,25 @@ var testCases = [
 				"language": "en-US",
 				"libraryCatalog": "NYTimes.com",
 				"publicationTitle": "The New York Times",
-				"section": "Business Day",
+				"section": "Business",
 				"url": "https://www.nytimes.com/2017/07/03/business/oreo-new-flavors.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Contests and Prizes",
-					"Cookies",
-					"Mondelez International Inc",
-					"Oreo",
-					"Social Media"
+					{
+						"tag": "Contests and Prizes"
+					},
+					{
+						"tag": "Cookies"
+					},
+					{
+						"tag": "Mondelez International Inc"
+					},
+					{
+						"tag": "Oreo"
+					},
+					{
+						"tag": "Social Media"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -529,7 +594,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mobile.nytimes.com/2018/01/11/opinion/social-media-dumber-steven-pinker.html",
+		"url": "https://www.nytimes.com/2018/01/11/opinion/social-media-dumber-steven-pinker.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -549,11 +614,7 @@ var testCases = [
 				"publicationTitle": "The New York Times",
 				"section": "Opinion",
 				"url": "https://www.nytimes.com/2018/01/11/opinion/social-media-dumber-steven-pinker.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Anti-Semitism"
@@ -615,11 +676,7 @@ var testCases = [
 				"section": "U.S.",
 				"shortTitle": "After Weinstein",
 				"url": "https://www.nytimes.com/interactive/2017/11/10/us/men-accused-sexual-misconduct-weinstein.html, https://www.nytimes.com/interactive/2017/11/10/us/men-accused-sexual-misconduct-weinstein.html",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "#MeToo Movement"
@@ -683,6 +740,57 @@ var testCases = [
 					},
 					{
 						"tag": "Weinstein, Harvey"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nytimes.com/2017/05/22/world/europe/greece-athens-anarchy-austerity.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Anarchists Fill Services Void Left by Faltering Greek Governance",
+				"creators": [
+					{
+						"firstName": "Niki",
+						"lastName": "Kitsantonis",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-05-22",
+				"ISSN": "0362-4331",
+				"abstractNote": "Anarchist groups are taking matters into their own hands after years of austerity policies and a refugee crisis have undermined the Greek government.",
+				"language": "en-US",
+				"libraryCatalog": "NYTimes.com",
+				"publicationTitle": "The New York Times",
+				"section": "World",
+				"url": "https://www.nytimes.com/2017/05/22/world/europe/greece-athens-anarchy-austerity.html",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Coalition of the Radical Left (Greece)"
+					},
+					{
+						"tag": "Demonstrations, Protests and Riots"
+					},
+					{
+						"tag": "Greece"
+					},
+					{
+						"tag": "Politics and Government"
+					},
+					{
+						"tag": "Terrorism"
+					},
+					{
+						"tag": "Vandalism"
+					},
+					{
+						"tag": "vis-photo"
 					}
 				],
 				"notes": [],
