@@ -94,8 +94,7 @@ function getUID(doc) {
 // retrieve itemprop elements for scraping books directly from page where UID is not available
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
-	var booksections = doc.getElementById('book-sections');
-	if (!main && !booksections) return;
+	if (!main) return;
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
 }
@@ -185,6 +184,8 @@ function detectWeb(doc, url) {
 	
 	if (!getUID(doc)) {
 		if (getBookProps(doc)) return 'book';
+		// if we can't get the UID or the book itemprops, we can't import
+		else return false;
 	}
 	
 	//try to determine if this is a book
