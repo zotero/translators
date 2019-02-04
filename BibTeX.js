@@ -19,7 +19,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-01-31 20:37:00"
+	"lastUpdated": "2019-02-03 17:45:00"
 }
 
 function detectImport() {
@@ -167,10 +167,8 @@ function extraFieldsToString(extra) {
 var inputFieldMap = {
 	booktitle :"publicationTitle",
 	school:"publisher",
-	institution:"publisher",
 	publisher:"publisher",
 	issue:"issue",
-	location:"place",
 	// import also BibLaTeX fields:
 	journaltitle:"publicationTitle",
 	shortjournal:"journalAbbreviation",
@@ -351,7 +349,9 @@ function processField(item, field, value, rawValue) {
 		}
 	} else if (field == "institution" || field == "organization") {
 		item.backupPublisher = value;
-	} else if (field == "number"){ // fix for techreport
+	} else if (field == "location") {
+		item.backupLocation = value;
+	} else if (field == "number") { // fix for techreport
 		if (item.itemType == "report") {
 			item.reportNumber = value;
 		} else if (item.itemType == "book" || item.itemType == "bookSection") {
@@ -895,8 +895,18 @@ function beginRecord(type, closeChar) {
 				item.itemID = field; // itemID = citekey
 			}
 			field = "";
+
 		} else if (read == closeChar) {
 			if (item) {
+				if (item.backupLocation) {
+					if (item.itemType=="conferencePaper") {
+						item._extraFields.push({field: "event-place", value: item.backupLocation});
+					} else if (!item.place) {
+						item.place = item.backupLocation;
+					}
+					delete item.backupLocation;
+				}
+				
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
 				
@@ -3638,6 +3648,60 @@ var testCases = [
 				"url": "http://digital.ub.uni-paderborn.de/hs/content/titleinfo/1561",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@inproceedings{Giannotti:2007:TPM:1281192.1281230,\n          author = {Giannotti, Fosca and Nanni, Mirco and Pinelli, Fabio and Pedreschi, Dino},\n          title = {Trajectory Pattern Mining},\n          booktitle = {Proceedings of the 13th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},\n          series = {KDD '07},\n          year = {2007},\n          isbn = {978-1-59593-609-7},\n          location = {San Jose, California, USA},\n          pages = {330--339},\n          numpages = {10},\n          url = {http://doi.acm.org/10.1145/1281192.1281230},\n          doi = {10.1145/1281192.1281230},\n          acmid = {1281230},\n          publisher = {ACM},\n          address = {New York, NY, USA},\n          keywords = {spatio-temporal data mining, trajectory patterns},\n         }",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Trajectory Pattern Mining",
+				"creators": [
+					{
+						"firstName": "Fosca",
+						"lastName": "Giannotti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mirco",
+						"lastName": "Nanni",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fabio",
+						"lastName": "Pinelli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dino",
+						"lastName": "Pedreschi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2007",
+				"DOI": "10.1145/1281192.1281230",
+				"ISBN": "978-1-59593-609-7",
+				"extra": "event-place: San Jose, California, USA",
+				"itemID": "Giannotti:2007:TPM:1281192.1281230",
+				"pages": "330–339",
+				"place": "New York, NY, USA",
+				"proceedingsTitle": "Proceedings of the 13th ACM SIGKDD International Conference on Knowledge Discovery and Data Mining",
+				"publisher": "ACM",
+				"series": "KDD '07",
+				"url": "http://doi.acm.org/10.1145/1281192.1281230",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "spatio-temporal data mining"
+					},
+					{
+						"tag": "trajectory patterns"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
