@@ -108,7 +108,7 @@ function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
 
 	var titleNodes = ZU.xpath(doc, '//b[contains(text(), "Title:")]/following-sibling::node()');
-	item.title = getValue(titleNodes);
+	item.title = getValue(titleNodes).replace(/<[^>]*>/g, "");
 	var subtitleNodes = ZU.xpath(doc, '//b[contains(text(), "Subtitle:")]/following-sibling::node()');
 	var subtitle = getValue(subtitleNodes);
 	if (subtitle) {
@@ -142,8 +142,19 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
-	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
-	item.language = (item.title + item.abstractNote).toLowerCase().match(/é|è|ê|ç|ï|ë|ü|ÿ|à|ù|â|î|ô|û/g) ? "fr" : "en";
+
+	var abstractParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
+	if (abstractParts) {
+		item.abstractNote = "";
+
+		for (var part in abstractParts) {
+			if (abstractParts[part].textContent) {
+				var text = abstractParts[part].textContent.trim();
+				if (text && text.length > 0)
+					item.abstractNote += text;
+			}
+		}
+	}
 
 	// fixup date
 	if (item.date) {
