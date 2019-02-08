@@ -59,6 +59,10 @@ function postProcess(item) {
     if (item.abstractNote.startsWith("Editorial"))
         item.abstractNote = "";
 
+    // HTML escape sequences occasionally sneak into the abstract
+    if (item.abstractNote)
+        item.abstractNote = ZU.unescapeHTML(item.abstractNote)
+
     item.complete();
 }
 

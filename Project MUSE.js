@@ -94,7 +94,10 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
+			item.abstractNote = abstract.replace(/^,*\s*Abstract:*,*\s*/, "")
+										.replace(/show (less|more)$/, "")
+										.replace(/,\s*$/, "")
+										.trim();
 		}
 
 		if (url.indexOf("/article/") != -1) {
@@ -108,7 +111,9 @@ function scrape(doc, url) {
 			}]
 		}
 		item.libraryCatalog = "Project MUSE";
-		item.tags = ZU.xpathText(doc, '//div[@class="kwd-group"]/p').split(",").map(function(x) { return x.trim();});
+		var keywords = ZU.xpathText(doc, '//div[@class="kwd-group"]/p');
+		if (keywords)
+			item.tags = keywords.split(",").map(function(x) { return x.trim();});
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {

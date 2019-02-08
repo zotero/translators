@@ -71,6 +71,10 @@ function scrape(doc, url) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]');
 		}
 
+		// clear issue if it's zero
+		if (item.issue === "0")
+			item.issue = "";
+
 		var pdfAttachment = false;
 
 		//some journals link to a PDF view page in the header, not the PDF itself
