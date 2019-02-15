@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-26 16:14:54"
+	"lastUpdated": "2019-02-15 13:04:05"
 }
 
 /*
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 			default:
 				return "book";
 		}
-	} else if ((url.includes('/search?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
+	} else if ((url.includes('/search') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -115,7 +115,7 @@ function scrape(doc, url) {
 		if (uidURL) uid = uidURL[1];
 	}
 	uid = uid.replace('PB:', '');
-	var risURL = "https://www.researchgate.net/publicliterature.PublicationHeaderDownloadCitation.downloadCitation.html?publicationUid=" + uid + "&fileType=RIS&citation=citationAndAbstract";
+	var risURL = "https://www.researchgate.net/lite.publication.PublicationDownloadCitationModal.downloadCitation.html?publicationUid=" + uid + "&fileType=RIS&citation=citationAndAbstract";
 	var pdfURL = attr(doc, 'meta[property="citation_pdf_url"]', 'content');
 
 	ZU.doGet(risURL, function(text) {
