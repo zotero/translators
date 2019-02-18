@@ -26,7 +26,8 @@ module.exports = {
       // takes text of the file and filename
       preprocess: function(text, filename) {
         headers[filename] = {
-          raw: '',
+          // capture header
+          raw: text.replace(/\n}\n[\S\s]*/, '\n}'),
           errors: [],
         }
 
@@ -40,9 +41,6 @@ module.exports = {
             source: filename,
           })
         }
-
-        // capture header
-        headers[filename].raw = text.replace(/\n}\n[\S\s]*/, '\n}')
 
         try {
           headers[filename].json = JSON.parse(headers[filename].raw)
@@ -136,8 +134,14 @@ module.exports = {
           }
         })
 
-        text = `var __${filename.replace(/[^a-z]/gi, '')} = ${text.replace('\n', ' // eslint-disable-line no-unused-vars \n')}`
-        // fs.writeFileSync('tt.js', text, 'utf-8')
+        const varname = '__' + filename.replace(/[^a-z]/gi, '')
+        text = `var ${varname} = ` // assign header to variable to make valid JS
+          + text
+            .replace('\n', ' // eslint-disable-line no-unused-vars \n') // prevent eslint warnings about this variable being unused
+            .replace('\n}\n', '\n};\n') // add a semicolon after the header to pacify eslint
+
+        // fs.writeFileSync(varname + '.js', text, 'utf-8')
+
         return [text]
       },
 
