@@ -1,0 +1,25 @@
+{
+  "env": {
+    "browser": false,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 7
+  },
+  "globals": {
+    "Zotero",
+    "Z",
+    "ZU",
+    "DOMParser",
+    "XPathResult"
+  },
+  "rules": {
+    "linebreak-style": 2,
+    "no-multi-str": 1,
+    "no-shadow": 0,
+    "no-undef": 1
+  },
+  "plugins": [
+    "eslint-plugin-local"
+  ]
+}

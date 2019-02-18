@@ -4,8 +4,9 @@
   "description": "Continuous integration of Zotero translators",
   "main": "index.js",
   "scripts": {
-    "test": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P8 ./checkTranslator.sh --skip-warn",
-    "start": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 -n1 -P1 ./checkTranslator.sh"
+    "errors": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 eslint -c eslintrc --quiet",
+    "test": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 eslint -c eslintrc",
+    "start": "find .. -maxdepth 1 -name '*.js' -print0|xargs -0 eslint -c eslintrc --max-warnings 0"
   },
   "author": "kba+pz",
   "license": "CC0-1.0",
@@ -13,6 +14,8 @@
     "url": "https://github.com/zotero/translators/blob/master/.ci/"
   },
   "dependencies": {
-    "jshint": "^2.9.5"
+    "eslint": "^5.14.1",
+    "eslint-plugin-local": "^1.0.0",
+    "jshint": "^2.10.1"
   }
 }
