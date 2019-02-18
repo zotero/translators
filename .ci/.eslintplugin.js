@@ -32,7 +32,7 @@ module.exports = {
 
         if (isExecutable(filename)) {
           headers[filename].errors.push({
-            ruleId: 'header/executableFile',
+            ruleId: 'executableFile',
             severity: 2,
             message: 'Translator should not be executable',
             line: 1,
