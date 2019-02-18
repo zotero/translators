@@ -33,7 +33,7 @@ module.exports = {
 
 				if (isExecutable(filename)) {
 					headers[filename].errors.push({
-						ruleId: 'executableFile',
+						ruleId: 'zotero/executableFile',
 						severity: 2,
 						message: 'Translator should not be executable',
 						line: 1,
@@ -49,7 +49,7 @@ module.exports = {
 					console.log(headers[filename].raw, err)
 
 					headers[filename].errors.push({
-						ruleId: 'header/invalidJSON',
+						ruleId: 'zotero/header/invalidJSON',
 						severity: 2,
 						message: err.message,
 						line: 1,
@@ -62,7 +62,7 @@ module.exports = {
 				if (h) {
 					if (!h.translatorID) {
 						headers[filename].errors.push({
-							ruleId: 'header/notOneTranslatorID',
+							ruleId: 'zotero/header/notOneTranslatorID',
 							severity: 2,
 							message: 'No translator ID',
 							line: 1,
@@ -72,7 +72,7 @@ module.exports = {
 
 					} else if (translators.has(h.translatorID)) {
 						headers[filename].errors.push({
-							ruleId: 'header/nonUniqueTranslatorID',
+							ruleId: 'zotero/header/nonUniqueTranslatorID',
 							severity: 2,
 							message: 'Duplicate translator ID',
 							line: 1,
@@ -82,7 +82,7 @@ module.exports = {
 
 					} else if (deleted.has(h.translatorID)) {
 						headers[filename].errors.push({
-							ruleId: 'header/reusingDeletedID',
+							ruleId: 'zotero/header/reusingDeletedID',
 							severity: 2,
 							message: 'Uses deleted translator ID',
 							line: 1,
@@ -97,7 +97,7 @@ module.exports = {
 					const stats = fs.statSync(filename)
 					if (!h.lastUpdated) {
 						headers[filename].errors.push({
-							ruleId: 'header/noLastUpdated',
+							ruleId: 'zotero/header/noLastUpdated',
 							severity: 2,
 							message: 'No lastUpdated field',
 							line: 1,
@@ -108,7 +108,7 @@ module.exports = {
 					// git doesn't retain file modification dates, and it's too involved to hit the github API all the time
 					/* } else if (stats.mtime > (new Date(h.lastUpdated))) {
 						headers[filename].errors.push({
-							ruleId: 'header/lastUpdatedNotUpdated',
+							ruleId: 'zotero/header/lastUpdatedNotUpdated',
 							severity: 2,
 							message: 'lastUpdated field is older than file modification time',
 							line: 1,
@@ -119,6 +119,30 @@ module.exports = {
 					*/
 					}
 				}
+
+
+				// stuff for which I haven't yet found an eslint plugin
+				text.split('\n').forEach((line, lineno) => {
+					if (line.match(/for each *\(/)) {
+						headers[filename].errors.push({
+							ruleId: 'zotero/deprecatedForEach',
+							severity: 2,
+							message: "Deprecated JavaScript 'for each' is used",
+							line: lineno + 1,
+							filename,
+						})
+					}
+
+					if (line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/)) {
+						headers[filename].errors.push({
+							ruleId: 'zotero/unnecessaryIndexOf',
+							severity: 1,
+							message: "Unnecessary '.indexOf()', use '.includes()' instead",
+							line: lineno + 1,
+							filename,
+						})
+					}
+				})
 
 				const varname = '__' + filename.replace(/[^a-z]/gi, '')
 				text = `var ${varname} = ` // assign header to variable to make valid JS

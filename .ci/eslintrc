@@ -1,25 +1,33 @@
 {
-  "env": {
-    "browser": false,
-    "es6": true
-  },
-  "parserOptions": {
-    "ecmaVersion": 7
-  },
-  "globals": {
-    "Zotero",
-    "Z",
-    "ZU",
-    "DOMParser",
-    "XPathResult"
-  },
-  "rules": {
-    "linebreak-style": ["error", "unix"],
-    "no-multi-str": 1,
-    "no-shadow": 0,
-    "no-undef": 1
-  },
-  "plugins": [
-    "eslint-plugin-local"
-  ]
+	"env": {
+		"browser": false,
+		"es6": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 7
+	},
+	"globals": {
+		"Zotero",
+		"Z",
+		"ZU",
+		"DOMParser",
+		"XPathResult"
+	},
+	"rules": {
+		"linebreak-style": ["error", "unix"],
+		"no-multi-str": "warn",
+		"no-shadow": "off",
+		"no-undef": "warn",
+		"notice/notice": [ "warn", {
+			"mustMatch": "GNU Affero General Public License",
+			"template": "GNU Affero General Public License",
+			"messages": {
+				"whenFailedToMatch": "Must be AGPL licensed"
+			}
+		 }]
+	},
+	"plugins": [
+		"eslint-plugin-local",
+		"notice"
+	]
 }
