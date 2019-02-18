@@ -14,7 +14,7 @@
     "XPathResult"
   },
   "rules": {
-    "linebreak-style": 2,
+    "linebreak-style": ["error", "unix"],
     "no-multi-str": 1,
     "no-shadow": 0,
     "no-undef": 1

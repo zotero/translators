@@ -120,20 +120,6 @@ module.exports = {
           }
         }
 
-        text.split('\n').forEach((line, lineno) => {
-          const cr = line.indexOf('\r') + 1
-          if (cr) {
-            headers[filename].errors.push({
-              ruleId: 'withCarriageReturn',
-              severity: 2,
-              message: 'No carriage returns',
-              line: lineno + 1,
-              column: cr,
-              source: headers[filename].raw,
-            })
-          }
-        })
-
         const varname = '__' + filename.replace(/[^a-z]/gi, '')
         text = `var ${varname} = ` // assign header to variable to make valid JS
           + text
