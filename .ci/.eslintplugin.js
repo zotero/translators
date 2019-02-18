@@ -9,9 +9,6 @@ const deleted = new Set(
 const headers = {}
 
 const translators = new Set([])
-    "withCarriageReturn"
-    "deprecatedForEach"
-
 
 function isExecutable(filename) {
   try {
