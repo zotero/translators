@@ -194,7 +194,6 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = doc.getElementsByClassName('abstractSection')[0];
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
@@ -238,12 +237,19 @@ function scrape(doc, url, extras) {
 					item.tags.push(tags[i].textContent);
 				}
 
-				if (abstract) {
-					// Drop "Abstract" prefix
-					// This is not excellent, since some abstracts could
-					// conceivably begin with the word "abstract"
-					item.abstractNote = abstract.textContent
-						.replace(/^[^\w\d]*abstract\s*/i, '');
+				var abstracts = ZU.xpath(doc, '//div[@class="abstractSection"]/p/span');
+				if (abstracts) {
+					item.abstractNote = "";
+					for (var entry in abstracts)
+						item.abstractNote += abstracts[entry].textContent + "\n\n";
+
+					item.abstractNote.trim();
+				}
+
+				if (!item.language) {
+					var metaLang = doc.querySelector("meta[name='dc.Language']");
+					if (metaLang && metaLang.getAttribute("content"))
+						item.language = metaLang.getAttribute("content")
 				}
 
 				item.attachments = [];
