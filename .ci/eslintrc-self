@@ -4,14 +4,7 @@
 		"es6": true
 	},
 	"parserOptions": {
-		"ecmaVersion": 7
-	},
-	"globals": {
-		"Zotero",
-		"Z",
-		"ZU",
-		"DOMParser",
-		"XPathResult"
+		"ecmaVersion": 8
 	},
 	"rules": {
 		"semi": ["error", "always"],
