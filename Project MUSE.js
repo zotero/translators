@@ -111,7 +111,7 @@ function scrape(doc, url) {
 			}]
 		}
 		item.libraryCatalog = "Project MUSE";
-		var keywords = ZU.xpathText(doc, '//div[@class="kwd-group"]/p');
+		var keywords = ZU.xpathText(doc, '//div[@class="kwd-group"]/p/text()');
 		if (keywords)
 			item.tags = keywords.split(",").map(function(x) { return x.trim();});
 		item.complete();
