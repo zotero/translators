@@ -174,7 +174,7 @@ function scrape(doc, url) {
 		for (var i in item.tags)
 			item.tags[i] = item.tags[i].charAt(0).toUpperCase()+item.tags[i].substring(1);
 
-		item.language = "en-GB";
+		item.language = ZU.xpathText(doc, '//*/@lang/') or "en-GB";
 
 		if (url.substr(-4)==".stm") {
 			item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
