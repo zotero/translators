@@ -2,5 +2,5 @@ language: node_js
 node_js:
   - "8"
 script:
-  - cd .ci && npm install && npm test
-  - ./checkDeletedTxt.sh
+  - npm install && npm test
+  - cd .ci && ./checkDeletedTxt.sh
