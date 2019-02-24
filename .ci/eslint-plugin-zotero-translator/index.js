@@ -11,7 +11,7 @@ const header_var_name = '__eslint_zotero_translator_header';
 
 const headers = {};
 const deleted = new Set(
-	fs.readFileSync('../deleted.txt', 'utf-8')
+	fs.readFileSync('deleted.txt', 'utf-8')
 		.split('\n')
 		.map(line => line.split(' ')[0])
 		.filter(id => id && id.indexOf('-') > 0)
