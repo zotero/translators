@@ -4,7 +4,9 @@
   "description": "Continuous integration of Zotero translators",
   "main": "index.js",
   "scripts": {
-    "errors": "find .. -maxdepth 1 -name '*.js' -print0 | xargs -0 eslint -c eslintrc --quiet",
+    "eslint": "eslint",
+    "eslint:skip-warn": "eslint --quiet",
+    "errors": "find .. -maxdepth 1 -name '*.js' -print0 | xargs -0 eslint --quiet",
     "test": "find .. -maxdepth 1 -name '*.js' -print0 | xargs -0 eslint",
     "test:self": "find . -path ./node_modules -prune -o -name '*.js' -print0 | xargs -0 eslint -c eslintrc-self",
     "start": "find .. -maxdepth 1 -name '*.js' -print0 | xargs -0 eslint --max-warnings 0"
