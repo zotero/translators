@@ -30,7 +30,6 @@
 
 		"notice/notice": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",
-			"template": "GNU Affero General Public License",
 			"messages": {
 				"whenFailedToMatch": "Must be AGPL licensed"
 			}
