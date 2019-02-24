@@ -1,0 +1,16 @@
+{
+  "name": "eslint-plugin-zotero-translator",
+  "version": "0.0.0",
+  "description": "Checks Zotero translators for errors and recommended style",
+  "keywords": [
+    "eslint",
+    "eslintplugin",
+    "eslint-plugin"
+  ],
+  "author": "Emiliano Heyns",
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "license": "ISC"
+}

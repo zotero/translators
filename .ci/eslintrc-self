@@ -1,0 +1,17 @@
+{
+	"env": {
+		"node": true,
+		"es6": true
+	},
+	"parserOptions": {
+		"ecmaVersion": 8
+	},
+	"rules": {
+		"semi": ["error", "always"],
+		"indent": ["error", "tab"],
+		"linebreak-style": ["error", "unix"],
+		"no-multi-str": "error",
+		"no-shadow": "error",
+		"no-undef": "error"
+	}
+}
