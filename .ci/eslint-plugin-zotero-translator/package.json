@@ -8,17 +8,7 @@
     "eslint-plugin"
   ],
   "author": "Emiliano Heyns",
-  "main": "lib/index.js",
-  "scripts": {
-    "test": "mocha tests --recursive"
-  },
-  "dependencies": {
-    "requireindex": "~1.1.0"
-  },
-  "devDependencies": {
-    "eslint": "~3.9.1",
-    "mocha": "^3.1.2"
-  },
+  "main": "index.js",
   "engines": {
     "node": ">=0.10.0"
   },

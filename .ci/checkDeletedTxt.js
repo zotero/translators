@@ -25,7 +25,7 @@ main(async () => {
 	const term = await (require('terminal-kit').getDetectedTerminal());
 	const master = 'master';
 
-  // report message with colored status. terminal-kit will ignore coloring when the script is not ran in a terminal. Optionally exit with status.
+	// report message with colored status. terminal-kit will ignore coloring when the script is not ran in a terminal. Optionally exit with status.
 	function report(status, message, exit_status=null) {
 		term[{'ok': 'green', 'not ok': 'red', 'skip': 'yellow'}[status]](status);
 		term(` - ${message}\n`);
@@ -81,7 +81,7 @@ main(async () => {
 			}
 		}
 
-    // first field of the first line has the version
+		// first field of the first line has the version
 		const origVersion = int((await exec(`git show "${master}:deleted.txt"`)).stdout.split('\n')[0].split(' ')[0]);
 		if (curVersion <= origVersion) {
 			report('not ok', `version in deleted.txt needs to be increased`);
