@@ -66,7 +66,7 @@ function scrape(doc, url) {
 	var jsonURL = url+'?json=true';
 	ZU.doGet(jsonURL, function(text) {
 		var isValidJSON = true;
-		try { JSON.parse(text) } catch (e) { isValidJSON = false }
+		try { JSON.parse(text); } catch (e) { isValidJSON = false; }
 		if (isValidJSON) {
 			var json = JSON.parse(text);
 			var item = new Zotero.Item("blogPost");
@@ -145,21 +145,21 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	switch (detectWeb(doc, url)) {
-		case "multiple":
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return true;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
-			});
-			break;
-		default:
-			scrape(doc, url);
-			break;
+	case "multiple":
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+		break;
+	default:
+		scrape(doc, url);
+		break;
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -435,5 +435,5 @@ var testCases = [
 		"url": "https://thump.vice.com/en_us/search?q=venetian",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
