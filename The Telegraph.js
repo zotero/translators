@@ -75,7 +75,7 @@ function scrape(doc, url) {
 		var authors = ZU.xpathText(doc, '//meta[@name="GSAAuthor"]/@content') ||
 					ZU.xpathText(doc, '//meta[@name="DCSext.author"]/@content');
 		if (authors) {
-			authorsList = authors.split(';');
+			const authorsList = authors.split(';');
 			for (var i=0; i<authorsList.length; i++) {
 				//clean authors string
 				//e.g. "By Alex Spillius in Washington"
@@ -332,5 +332,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
