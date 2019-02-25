@@ -32,11 +32,11 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/result?') != -1 || url.indexOf('/newspaper/page') != -1) {
+	if (url.includes('/result?') || url.includes('/newspaper/page')) {
 		return getSearchResults(doc, url, true) ? 'multiple' : false;
-	} else if (url.indexOf('/newspaper/article') != -1) {
+	} else if (url.includes('/newspaper/article')) {
 		return "newspaperArticle";
-	} else if (url.indexOf('/work/') != -1) {
+	} else if (url.includes('/work/')) {
 		return "book";
 	}
 }
@@ -46,7 +46,7 @@ function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var results;
 	var found = false;
-	if (url.indexOf('/result?') != -1) {
+	if (url.includes('/result?')) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
 	} else {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
@@ -81,7 +81,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	if (url.indexOf('/newspaper/article/') != -1) {
+	if (url.includes('/newspaper/article/')) {
 		scrapeNewspaper(doc, url);
 	} else {
 		scrapeWork(doc, url);
@@ -113,7 +113,7 @@ function scrapeNewspaper(doc, url) {
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
 				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a[not(contains(@class,'anno-remove'))]");
+					const tag = ZU.xpathText(tags[i], "a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}
@@ -138,7 +138,7 @@ function scrapeNewspaper(doc, url) {
 
 			});
 		});
-	translator.translate();	
+		translator.translate();	
 	});
 }
 
@@ -198,7 +198,7 @@ function cleanCreators(creators) {
 		if (posParenthesis>-1) {
 			var first = name.substr(0, posParenthesis);
 			var second = name.substr(posParenthesis+1, name.length-posParenthesis-2);
-			if (second.indexOf( first.replace('.', '').trim() )>-1) {
+			if (second.includes( first.replace('.', '').trim() )) {
 				name = second;
 			} else {
 				name = first;
@@ -254,9 +254,9 @@ function scrapeWork(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 				
 				// Add tags
-				tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
+				const tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
 				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a");
+					const tag = ZU.xpathText(tags[i], "a");
 					item.tags.push(tag);
 				}
 			}
@@ -389,5 +389,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
