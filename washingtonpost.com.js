@@ -38,13 +38,13 @@
 
 function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//div[@id="topper-headline-wrapper"]/h1')) {
-		if (url.indexOf('/blogs/')>-1) { 
+		if (url.includes('/blogs/')) { 
 			return "blogPost";
 		} else {
 			return "newspaperArticle";
 		}
 	}
-	if (url.indexOf('/archive/')>-1 || url.indexOf('/wp-dyn/content/')>-1) {
+	if (url.includes('/archive/') || url.includes('/wp-dyn/content/')) {
 		return "newspaperArticle";
 	}
 	if (getSearchResults(doc, true)) {
@@ -87,7 +87,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var type = (url.indexOf('/blogs/')>-1) ? 'blogPost' : 'newspaperArticle';
+	var type = url.includes('/blogs/') ? 'blogPost' : 'newspaperArticle';
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -102,7 +102,7 @@ function scrape(doc, url) {
 		for (var i=0; i<authors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
 		}
-		if (url.indexOf('/wp-dyn/content/')>-1) {
+		if (url.includes('/wp-dyn/content/')) {
 			authors = ZU.xpathText(doc, '//div[@id="byline"]');
 			if (authors) {
 				item.creators.push(ZU.cleanAuthor(authors.replace(/^By /, ''), "author"));
@@ -253,5 +253,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
