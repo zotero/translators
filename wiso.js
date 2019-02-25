@@ -96,7 +96,7 @@ function scrape(doc, url) {
 				document:doc
 			}];
 			//the url for ebooks is sometimes wrong/incomplete
-			if (item.url.indexOf("DOKV_DB=&") != -1) {
+			if (item.url.includes("DOKV_DB=&")) {
 				item.url = ZU.xpathText(doc, '//a[@class="linkifyplus"]');
 			}
 			//Zotero.debug(item);
@@ -126,7 +126,7 @@ function cleanAuthorFields(m, tag, authorStr) {
 			//we have to distinguish the correct cases where the third part is
 			//just a suffix as "Jr." and wrong cases where this is a list of
 			//three authors ==> easiest is maybe to check for a space
-			if (ZU.superCleanString(authors[2]).indexOf(' ') == -1) {
+			if (!ZU.superCleanString(authors[2]).includes(' ')) {
 				return m;
 			}
 		}
@@ -138,7 +138,7 @@ function cleanAuthorFields(m, tag, authorStr) {
 	var str = '';
 	for (var i=0; i<authors.length; i++) {
 		var author = ZU.superCleanString(authors[i]).replace(/(?:Dr|Prof)\.\s*/,"");
-		if (fixName && author.indexOf(',') == -1 && author.indexOf(' ') != -1) {
+		if (fixName && !author.includes(',') && author.includes(' ')) {
 			//best guess: split at the last space
 			var splitAt = author.lastIndexOf(' ');
 			author = author.substring(splitAt+1) + ', ' + author.substring(0, splitAt);
@@ -310,5 +310,5 @@ var testCases = [
 		"url": "https://www.wiso-net.de/dosearch?explicitSearch=true&q=mannheim&x=0&y=0&dbShortcut=%3A3%3AALLEQUELLEN&searchMask=5461&TI%2CUT%2CDZ%2CBT%2COT%2CSE=&NN%2CAU%2CMM%2CZ2=&CO%2CC2%2CTA%2CKA%2CVA%2CZ1=&CT%2CDE%2CZ4=&BR%2CGW%2CN1%2CN2%2CNC%2CND%2CSC%2CWZ%2CZ5%2CAI=&Z3=&DT_from=&DT_to=&timeFilterType=selected&timeFilter=NONE",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
