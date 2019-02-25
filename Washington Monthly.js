@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	var header = ZU.xpath(doc, '//header[contains(@class, "entry-header")]');
 	if (header && header.length==1) {
-		if (url.indexOf('/magazine/')>-1) {
+		if (url.includes('/magazine/')) {
 			return 'magazineArticle';
 		} else {
 			return 'blogPost';
@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var type = (url.indexOf('/magazine/')>-1) ? 'magazineArticle' : 'blogPost';
+	var type = url.includes('/magazine/') ? 'magazineArticle' : 'blogPost';
 	
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -189,5 +189,5 @@ var testCases = [
 		"url": "http://washingtonmonthly.com/political-animal/",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
