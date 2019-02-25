@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/search?") !=-1 && getSearchResults(doc, true)){
+	if (url.includes("/search?") && getSearchResults(doc, true)){
 		return "multiple";
 	} 
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content')) {
@@ -52,7 +52,7 @@ function scrape(doc, url){
 	item.date = ZU.xpathText(doc, '(//div[contains(@class, "storyPage") and h1]//time)[1]');
 	if (item.date) {
 		if (item.date.match(/\d\d?:\d\d[pa]m/)) {
-			item.date = "Today"
+			item.date = "Today";
 		} else if (!item.date.match(/\d\d\d\d/)) {
 			item.date += " 2017";
 		}
@@ -165,5 +165,5 @@ var testCases = [
 		"url": "https://www.tvnz.co.nz/one-news/search?q=storm",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
