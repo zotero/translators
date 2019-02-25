@@ -96,7 +96,7 @@ function detectType(code) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var items = [], found = false
+	var items = [], found = false,
 		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
 	for (var i=0, n=lis.length; i<n; i++) {
 		var a = lis[i].getElementsByTagName("a")[1];
@@ -176,13 +176,13 @@ function scrape(doc, id) {
 // #########################
 
 function detectWeb(doc, url) {
-	if (url.toLowerCase().indexOf('paper.aspx') != -1
+	if (url.toLowerCase().includes('paper.aspx')
 		&& getSearchResults(doc, true)
 	) {
 		return "multiple";
 	}
 	
-	pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
+	const pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
 	if (pattern.test(url) && getItemId(doc)) {
 		var code = detectCode(url);
 		return detectType(code);
@@ -299,5 +299,5 @@ var testCases = [
 		"url": "http://s.wanfangdata.com.cn/Paper.aspx?q=zotero+DBID%3A%28NSTL_QK+OR+NSTL_HY%29&f=d.top",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
