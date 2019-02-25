@@ -367,5 +367,5 @@ var testCases = [
 		"url": "http://apps.who.int/iris/discover?query=acupuncture",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
