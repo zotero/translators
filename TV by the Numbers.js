@@ -36,9 +36,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/?s=') > -1 && getSearchResults(doc, true))
+	if (url.includes('/?s=') && getSearchResults(doc, true))
 		return "multiple";
-	else if (doc.body.className.indexOf("single-post") > -1)
+	else if (doc.body.className.includes("single-post"))
 		return "blogPost";
 }
 
@@ -191,5 +191,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
