@@ -151,18 +151,18 @@ function doWeb(doc, url){
 
 	//Keywords
 	if (keywordLine){
-		keywords = ZU.trimInternal(/Keywords:\s+(.*)/.exec(keywordLine)[1]);
-		keywordList = keywords.split(/,\s+/);
+		const keywords = ZU.trimInternal(/Keywords:\s+(.*)/.exec(keywordLine)[1]);
+		const keywordList = keywords.split(/,\s+/);
 		newItem.tags = keywordList;
 	}
 
 	//Author
 	if (authorLine){
 		authorLine = ZU.trimInternal(authorLine);
-		authors = /[^0-9]+[0-9]+\s+(.*)/.exec(authorLine)[1];
+		let authors = /[^0-9]+[0-9]+\s+(.*)/.exec(authorLine)[1];
 		authors = authors.replace(/,?\s+and\s+/, ", ");
-		authorList = authors.split(/\s*,\s+/);
-		for (author in authorList){
+		const authorList = authors.split(/\s*,\s+/);
+		for (const author in authorList){
 			newItem.creators.push(ZU.cleanAuthor(authorList[author], "author"));
 		}
 	}
@@ -171,10 +171,10 @@ function doWeb(doc, url){
 	if (topLine){
 		topLine = ZU.trimInternal(topLine);
 		if (type == "book"){
-			number = /Graduate Surveys\s+([0-9]+)/.exec(topLine)[1];
+			const number = /Graduate Surveys\s+([0-9]+)/.exec(topLine)[1];
 			newItem.seriesNumber = number;    
 		} else if (type == "journalArticle"){
-			volumeData = /Volume\s+([0-9]+).*Article\s+([0-9]+)\s+pp\.\s+([0-9]+)-([0-9]+)/.exec(topLine);
+			const volumeData = /Volume\s+([0-9]+).*Article\s+([0-9]+)\s+pp\.\s+([0-9]+)-([0-9]+)/.exec(topLine);
 			newItem.volume = volumeData[1];
 			newItem.number = volumeData[2];
 			newItem.pages = volumeData[3] + "–" + volumeData[4];
@@ -491,5 +491,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
