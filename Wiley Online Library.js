@@ -49,8 +49,7 @@ function addCreators(item, creatorType, creators) {
 	}
 
 	for (var i=0, n=creators.length; i<n; i++) {
-		item.creators.push(ZU.cleanAuthor(fixCase(creators[i]),
-							creatorType, false));
+		item.creators.push(ZU.cleanAuthor(fixCase(creators[i]), creatorType, false));
 	}
 }
 
@@ -79,29 +78,29 @@ function scrapeBook(doc, url, pdfUrl) {
 		if (!match) continue;
 
 		switch (match[1].trim().toLowerCase()) {
-			case 'author(s)':
-				addCreators(newItem, 'author', match[2].split(', '));
-				break;
-			case 'series editor(s)':
-				addCreators(newItem, 'seriesEditor', match[2].split(', '));
-				break;
-			case 'editor(s)':
-				addCreators(newItem, 'editor', match[2].split(', '));
-				break;
-			case 'published online':
-				var date = ZU.strToDate(match[2]);
-				date.part = null;
-				newItem.date = ZU.formatDate(date);
-				break;
-			case 'print isbn':
-			case 'online isbn':
-				isbn.push(match[2]);
-				break;
-			case 'doi':
-				newItem.DOI = match[2];
-				break;
-			case 'book series':
-				newItem.series = match[2];
+		case 'author(s)':
+			addCreators(newItem, 'author', match[2].split(', '));
+			break;
+		case 'series editor(s)':
+			addCreators(newItem, 'seriesEditor', match[2].split(', '));
+			break;
+		case 'editor(s)':
+			addCreators(newItem, 'editor', match[2].split(', '));
+			break;
+		case 'published online':
+			var date = ZU.strToDate(match[2]);
+			date.part = null;
+			newItem.date = ZU.formatDate(date);
+			break;
+		case 'print isbn':
+		case 'online isbn':
+			isbn.push(match[2]);
+			break;
+		case 'doi':
+			newItem.DOI = match[2];
+			break;
+		case 'book series':
+			newItem.series = match[2];
 		}
 	}
 
@@ -109,9 +108,10 @@ function scrapeBook(doc, url, pdfUrl) {
 	newItem.rights = ZU.xpathText(doc, '//div[@id="titleMeta"]/p[@class="copyright"]');
 	newItem.url = url;
 	newItem.abstractNote = ZU.trimInternal(
-			ZU.xpathText(doc, '//div[@id="homepageContent"]\
-				/h6[normalize-space(text())="About The Product"]\
-				/following-sibling::p', null, "\n") || "");
+		ZU.xpathText(doc, [
+			'//div[@id="homepageContent"]',
+			'/h6[normalize-space(text())="About The Product"]',
+			'/following-sibling::p'].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	newItem.complete();
@@ -140,8 +140,7 @@ function scrapeEM(doc, url, pdfUrl) {
 				var authors = ZU.xpath(doc, '//ol[@id="authors"]/li/node()[1]');
 				for (var i=0, n=authors.length; i<n; i++) {
 					item.creators.push(
-						ZU.cleanAuthor( getAuthorName(authors[i].textContent),
-											'author',false) );
+						ZU.cleanAuthor( getAuthorName(authors[i].textContent), 'author',false) );
 				}
 			}
 
@@ -149,8 +148,7 @@ function scrapeEM(doc, url, pdfUrl) {
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
 			for (var i=0, n=editors.length; i<n; i++) {
 				item.creators.push(
-					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
-										'editor',false) );
+					ZU.cleanAuthor( getAuthorName(editors[i].textContent), 'editor',false) );
 			}
 
 			item.rights = ZU.xpathText(doc, '//p[@id="copyright"]');
@@ -245,7 +243,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		
 		var re = /^\s*@[a-zA-Z]+[\(\{]/;
 		if (text.startsWith('<') || !re.test(text)) {
-			throw new Error("Error retrieving BibTeX")
+			throw new Error("Error retrieving BibTeX");
 		}
 		
 		var translator = Zotero.loadTranslator('import');
@@ -271,16 +269,16 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 			
 			//delete nonsense author Null, Null
 			if (item.creators.length && item.creators[item.creators.length-1].lastName == "Null"
-				&& item.creators[item.creators.length-1].firstName == "Null") {
-					item.creators = item.creators.slice(0, -1);
+				&& item.creators[item.creators.length-1].firstName == "Null"
+			) {
+				item.creators = item.creators.slice(0, -1);
 			}
 
 			//editors
 			var editors = ZU.xpath(doc, '//ol[@id="editors"]/li/node()[1]');
 			for (var i=0, n=editors.length; i<n; i++) {
 				item.creators.push(
-					ZU.cleanAuthor( getAuthorName(editors[i].textContent),
-										'editor',false) );
+					ZU.cleanAuthor( getAuthorName(editors[i].textContent), 'editor',false) );
 			}
 			
 			//title
@@ -1250,5 +1248,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
