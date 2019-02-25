@@ -12,6 +12,30 @@
 	"lastUpdated": "2017-10-20 20:50:32"
 }
 
+/*
+  ***** BEGIN LICENSE BLOCK *****
+
+  Copyright © 2017-2019 Dan Stillman and Aurimas Vinckevicius
+
+  This file is part of Zotero.
+
+  Zotero is free software: you can redistribute it and/or modify
+  it under the terms of the GNU Affero General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  Zotero is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+  GNU Affero General Public License for more details.
+
+  You should have received a copy of the GNU Affero General Public License
+  along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+  ***** END LICENSE BLOCK *****
+*/
+
+
 var sessionKey;
 
 function scrape(text) {
@@ -19,13 +43,13 @@ function scrape(text) {
 	var newItem = new Zotero.Item();
 	for (var prop in item.data) {
 		switch (prop) {
-			case 'key':
-			case 'version':
-			case 'collections':
-			case 'relations':
-			case 'dateAdded':
-			case 'dateModified':
-				continue;
+		case 'key':
+		case 'version':
+		case 'collections':
+		case 'relations':
+		case 'dateAdded':
+		case 'dateModified':
+			continue;
 		}
 		newItem[prop] = item.data[prop];
 	}
@@ -70,9 +94,9 @@ function detectWeb(doc, url) {
 
 	// Library and collections
 	if ( ( url.match(/\/items\/?([?#].*)?$/)
-		|| url.indexOf('/collectionKey/') != -1
+		|| url.includes('/collectionKey/')
 		|| url.match(/\/collection\/\w+/)
-		|| url.indexOf('/tag/') != -1 )	
+		|| url.includes('/tag/') )	
 		&& getListTitles(doc).length ) {
 		return "multiple";
 	}
@@ -156,5 +180,5 @@ var testCases = [
 		"defer": true,
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
