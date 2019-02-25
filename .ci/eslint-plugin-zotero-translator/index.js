@@ -105,12 +105,16 @@ module.exports.rules = {
 				const filename = path.resolve(context.getFilename());
 
 				let lineno = 0;
+				let m
 				for (const line of fs.readFileSync(filename, 'utf-8').split('\n')) {
 					lineno += 1;
 
-					if (line.match(/for each *\(/)) {
-						context.report(node, `Deprecated JavaScript 'for each' in line ${lineno}`);
-						break;
+					if (m = line.match(/for each *\(/)) {
+						context.report({
+							node,
+							message: "Deprecated JavaScript 'for each' statement",
+							loc: { start: { line: lineno, column: line.indexOf(m[0]) + 1 } },
+						});
 					}
 				}
 			}
@@ -141,12 +145,16 @@ module.exports.rules = {
 				const filename = path.resolve(context.getFilename());
 
 				let lineno = 0;
+				let m
 				for (const line of fs.readFileSync(filename, 'utf-8').split('\n')) {
 					lineno += 1;
 
-					if (line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/)) {
-						context.report(node, `Unnecessary '.indexOf()', use '.includes()' instead in line ${lineno}`);
-						break;
+					if (m = line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/)) {
+						context.report({
+							node,
+							message: "Unnecessary '.indexOf()', use '.includes()' instead",
+							loc: { start: { line: lineno, column: line.indexOf(m[0]) + 1 } },
+						});
 					}
 				}
 			}
