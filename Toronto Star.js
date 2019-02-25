@@ -37,11 +37,11 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("search") != -1 && url.indexOf("classifieds") == -1 && getSearchResults(doc, true)) {
+	if (url.includes("search") && !url.includes("classifieds") && getSearchResults(doc, true)) {
 		return "multiple";
 	} else if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content')=="article") {
 		var urlFolder = url.split('/').slice(0,-1).join('/');
-		if (urlFolder.indexOf('blog')>-1) {
+		if (urlFolder.includes('blog')) {
 			return "blogPost";
 		} else {
 			return "newspaperArticle";
@@ -257,5 +257,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
