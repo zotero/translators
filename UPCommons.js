@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
-	if (url.indexOf('/handle/')>-1 && type) {
+	if (url.includes('/handle/') && type) {
 		if (itemTypes[type]!=null) return itemTypes[type];
 		else return "document";
 	} else if (getSearchResults(doc, true)) {
@@ -54,7 +54,7 @@ var itemTypes = {
 	"Thesis":"thesis",
 	"Working Paper":"report",
 	"Technical Report":"report"
-}
+};
 
 
 function getSearchResults(doc, checkOnly) {
@@ -223,5 +223,5 @@ var testCases = [
 		"url": "http://upcommons.upc.edu/discover?scope=/&query=zotero&submit=",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
