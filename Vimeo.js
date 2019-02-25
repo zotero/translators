@@ -37,7 +37,7 @@ function detectWeb(doc, url) {
 		return "videoRecording";
 	}
 
-	if (url.indexOf('vimeo.com/search?q=')>-1 && getSearchResults(doc, true)) {
+	if (url.includes('vimeo.com/search?q=') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -65,7 +65,7 @@ function getSearchResults(doc, checkOnly) {
 			var data = script.substring(start+45, stop-2);
 			var json = JSON.parse(data);
 			if (json && json.api && json.api.initial_json && json.api.initial_json.data) {
-				var results = json.api.initial_json.data
+				var results = json.api.initial_json.data;
 				for (var entry of results) {
 					if (entry.clip && entry.clip.link && entry.clip.name) {
 						items[entry.clip.link] = entry.clip.name;
@@ -182,5 +182,5 @@ var testCases = [
 		"url": "https://vimeo.com/search?q=zotero",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
