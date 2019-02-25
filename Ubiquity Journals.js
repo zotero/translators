@@ -36,14 +36,13 @@ function detectWeb(doc, url) {
 	// this doesn't work always, so we're only using it on single items. 
 	// if the translator doesn't detect there, we still get good EM import
 	// For multiples we check getSearchResults
-	if (ubiquitytest[0] && ubiquitytest[0].href.indexOf(
-			"http://www.ubiquitypress.com") != -1) {
+	if (ubiquitytest[0] && ubiquitytest[0].href.includes("http://www.ubiquitypress.com")) {
 		if (ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')) {
 			return "journalArticle";
 		}
 	}
 	if (getSearchResults(doc, true)) {
-		return "multiple"
+		return "multiple";
 	}
 	return false;
 }
@@ -58,7 +57,7 @@ function doWeb(doc, url) {
 				urls.push(i);
 			}
 			ZU.processDocuments(urls, scrape);
-		})
+		});
 	} else {
 		scrape(doc, url);
 	}
@@ -154,5 +153,5 @@ var testCases = [
 		"url": "http://www.pediatricneurologybriefs.com/51/volume/29/issue/7/",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
