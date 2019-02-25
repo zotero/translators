@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/id/')>-1) {
+	if (url.includes('/id/')) {
 		return "book";
 		//something like archival material would be more appropriate...
 		//but for now we use this type to save some information
@@ -64,7 +64,7 @@ function doWeb(doc, url) {
 			var creators = json[0].creators;
 			for (var i=0; i<creators.length; i++) {
 				creators[i] = creators[i].replace('(Most Recent)', '');
-				if (creators[i].indexOf(", ")>-1) {
+				if (creators[i].includes(", ")) {
 					item.creators.push(ZU.cleanAuthor(creators[i], "author"));	
 				} else {
 					creators[i] = creators[i].replace(/\.? ?\d\d?\/\d\d?\/\d\d\d\d-\d\d?\/\d\d?\/\d\d\d\d/, '');
@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 			});
 
 			item.complete();
-		})
+		});
 	});
 	
 }
@@ -162,5 +162,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
