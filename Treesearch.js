@@ -32,8 +32,8 @@
 
 function getFieldValue(entry, name) {
 	var value = ZU.xpathText(entry,
-			'.//p/strong[normalize-space(text())="' + 
-			name + ':"]/following-sibling::node()', null, '');
+		'.//p/strong[normalize-space(text())="' + 
+		name + ':"]/following-sibling::node()', null, '');
 	return value ? value.trim() : '';
 }
 
@@ -56,14 +56,14 @@ function parseSource(sourceStr) {
 			return {
 				type: 'bookSection',
 				pages: matches ? matches[0] : null
-			}
+			};
 		}
 
 		matches = sourceStr.match(/\.\s+(\d+)\s+p\./);
 		return {
 			type: 'book',
 			numPages: matches ? matches[1] : null
-		}
+		};
 	}
 }
 
@@ -91,9 +91,9 @@ function scrape(doc, url) {
 				'author', true));
 	}
 
-	var keywords = ZU.xpath(entry, './/p[@id="keywords"]/a')
+	var keywords = ZU.xpath(entry, './/p[@id="keywords"]/a');
  	for (var i in keywords) {
-		item.tags.push(keywords[i].textContent.trim())
+		item.tags.push(keywords[i].textContent.trim());
  	}
 
 	var pdfUrl = ZU.xpathText(entry,'/html/head/meta[@name="citation_pdf_url"]/@content');
@@ -115,7 +115,7 @@ function detectWeb(doc, url) {
 		
 		var source = parseSource(getFieldValue(entry, 'Source'));
 		return source ? source.type : null;
-	} else if (url.indexOf('search.php') != -1 && getSearchResults(doc, true)) {
+	} else if (url.includes('search.php') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 }
@@ -527,5 +527,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
