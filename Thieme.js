@@ -323,5 +323,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
