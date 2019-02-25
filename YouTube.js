@@ -12,6 +12,29 @@
 	"lastUpdated": "2015-09-18 21:24:14"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2015-2019 Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
 		return "videoRecording";
@@ -38,7 +61,7 @@ function getSearchResults(doc, checkOnly) {
 
 		if (checkOnly) return true;
 
-		found = true
+		found = true;
 		items[link] = title;
 	}
 	return found ? items : false;
@@ -92,7 +115,7 @@ function scrape(doc, url) {
 
 	var author;
 	if (author = args.author) {
-		author = {"lastName": author, "creatorType": "author", "fieldMode": 1 }
+		author = {"lastName": author, "creatorType": "author", "fieldMode": 1 };
 		newItem.creators.push(author);
 	}
 
@@ -168,5 +191,5 @@ var testCases = [
 		"url": "http://www.youtube.com/user/Zoteron",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
