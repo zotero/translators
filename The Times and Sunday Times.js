@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/edition/')>-1 || url.indexOf('/article/')>-1) {
+	if (url.includes('/edition/') || url.includes('/article/')) {
 		return "newspaperArticle";
 	}
 }
@@ -174,5 +174,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
