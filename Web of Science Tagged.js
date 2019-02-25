@@ -12,6 +12,29 @@
 	"lastUpdated": "2015-06-02 21:33:13"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2015-2019 Michael Berkowitz, Avram Lyon
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectImport() {
 	var line;
 	var i = 0;
@@ -44,7 +67,7 @@ function processTag(item, field, content) {
 		}
 	} else if ((field == "AF" || field == "AU")) {
 		//Z.debug("author: " + content);
-		authors = content.split("\n");
+		const authors = content.split("\n");
 		for (var i=0; i<authors.length; i++) {
 			var author = authors[i];
 			author = author.replace(/\s+\(.*/, '');
@@ -52,7 +75,7 @@ function processTag(item, field, content) {
 		}
 	} else if ((field == "BE")) {
 		//Z.debug(content);
-		authors = content.split("\n");
+		const authors = content.split("\n");
 		for (var i=0; i<authors.length; i++) {
 			var author = authors[i];
 			item.creators[1].push(ZU.cleanAuthor(author, "editor", author.match(/,/)));
@@ -76,7 +99,7 @@ function processTag(item, field, content) {
 		}
 		var year = item.date.match(/\d{4}/);
 		// If we have a double year, eliminate one
-		if (year && item.date.replace(year[0],"").indexOf(year[0]) !== -1)
+		if (year && item.date.replace(year[0],"").includes(year[0]))
 			item.date = item.date.replace(year[0],"");
 	} else if (field == "VL") {
 		item.volume = content;
@@ -149,7 +172,7 @@ function completeItem(item) {
 	
 	if (item.articleNumber){
 		if (!item.pages) item.pages = item.articleNumber;
-		delete item.articleNumber
+		delete item.articleNumber;
 	}
 	
 	// Fix caps, trim in various places
@@ -856,5 +879,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
