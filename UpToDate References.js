@@ -43,10 +43,10 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		items = {}
+		const items = {};
 		var titles = ZU.xpath(doc, '//ol[@id="reference"]//a');
 		for (var i in titles) {
-			items[titles[i].href] = titles[i].textContent
+			items[titles[i].href] = titles[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
@@ -56,28 +56,28 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape)
+			ZU.processDocuments(articles, scrape);
 		});
-	} else scrape(doc, url)
+	} else scrape(doc, url);
 }
 
 function scrape(doc, url) {
 	var PMID = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "PMID")]/following-sibling::div');
 	if (PMID) PMID = PMID.trim();
-	Z.debug(PMID)
+	Z.debug(PMID);
 	if (!PMID) {
-		Z.debug("We don't have a PMID parsing item from page")
+		Z.debug("We don't have a PMID parsing item from page");
 		var item = new Zotero.Item("journalArticle");
 		item.title = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "TI")]/following-sibling::div');
-		var authors = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "AU")]/following-sibling::div')
+		var authors = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "AU")]/following-sibling::div');
 		authors = authors.split(/\s*,\s*/);
 		for (var i in authors) {
-			var author = authors[i].match(/^([^\s]+)\s+(.+)/)
+			var author = authors[i].match(/^([^\s]+)\s+(.+)/);
 			item.creators.push({
 				"creatorType": "author",
 				"lastName": author[1],
 				"firstName": author[2]
-			})
+			});
 		}
 		var citation = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "SO")]/following-sibling::div');
 		Z.debug(citation);
@@ -94,7 +94,7 @@ function scrape(doc, url) {
 			document: doc,
 			title: "UpToDate Record",
 			mimeType: "text/html"
-		})
+		});
 		item.complete();
 	} else {
 		var url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=" + PMID;
@@ -110,8 +110,8 @@ function scrape(doc, url) {
 					document: doc,
 					title: "UpToDate Record",
 					mimeType: "text/html"
-				})
-				item.complete()
+				});
+				item.complete();
 			});
 			translator.translate();
 		});
@@ -197,5 +197,5 @@ var testCases = [
 		"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults?source=search_result&search=back+pain&selectedTitle=1%7E150",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
