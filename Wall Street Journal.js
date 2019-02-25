@@ -36,9 +36,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('blogs.wsj.com')>-1) {
+	if (url.includes('blogs.wsj.com')) {
 		return "blogPost";
-	} else if (url.indexOf('articles')>-1) {
+	} else if (url.includes('articles')) {
 		return "newspaperArticle";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -305,5 +305,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
