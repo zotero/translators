@@ -74,7 +74,7 @@ function scrape(doc, url) {
 				for (var i=0; i<keywords.length; i++) {
 					item.tags.push( keywords[i].textContent );
 				}
-				var classifications = ZU.xpath(doc, '//div[@class="classification"]//tr')
+				var classifications = ZU.xpath(doc, '//div[@class="classification"]//tr');
 				for (var i=0; i<classifications.length; i++) {
 					item.extra = (item.extra ? item.extra + "\n" : '') + 'MSC2010: ' + ZU.xpathText(classifications[i], './td' , null , " = ");
 				}
@@ -259,5 +259,5 @@ var testCases = [
 		"url": "http://zbmath.org/?q=cc:35",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/

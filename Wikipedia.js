@@ -77,7 +77,7 @@ function doWeb(doc, url) {
 		item.url = doc.location.protocol + '//' + doc.location.hostname
 					+ item.url;
 	} else {
-		item.url = url
+		item.url = url;
 	}
 
 	item.attachments.push({
@@ -211,5 +211,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/

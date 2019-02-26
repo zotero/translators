@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2017-11-18 10:45:00"
+	"lastUpdated": "2019-01-31 00:12:00"
 }
 
 // ********************************************************************
@@ -35,17 +35,17 @@
 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
 // You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 // *********************************************************************
 //
 // This script does fairly well with papers, theses, websites and
-// books.  Some item properties, important for the more exotic
+// books. Some item properties, important for the more exotic
 // publication types, are still missing. That means, the first 30 are
 // implemented, the rest may be added when I need them. If you like to
 // see some particular item property and you also have a basic idea
@@ -96,13 +96,22 @@ function replaceFormatting(title) {
 }
 
 function genXMLId(item) {
+	// use Better BibTeX for Zotero citation key if available
+	if (item.extra) {
+		item.extra = item.extra.replace(/(?:^|\n)citation key\s*:\s*([^\s]+)(?:\n|$)/i, (m, citationKey) => {
+			item.citationKey = citationKey
+			return '\n'
+		}).trim()
+	}
+	if (item.citationKey) return item.citationKey
+
 	var xmlid = '';
 	if (item.creators && item.creators[0] && (item.creators[0].lastName || item.creators[0].name)) {
 		if (item.creators[0].lastName){
-		  xmlid = item.creators[0].lastName;  
+			xmlid = item.creators[0].lastName;
 		}
 		if (item.creators[0].name){
-		  xmlid = item.creators[0].name;  
+			xmlid = item.creators[0].name;
 		}
 		if (item.date) {
 			var date = Zotero.Utilities.strToDate(item.date);
@@ -122,13 +131,13 @@ function genXMLId(item) {
 		// [#x3001-#xD7FF] | [#xF900-#xFDCF] | [#xFDF0-#xFFFD] |
 		// [#x10000-#xEFFFF]
 
-		// Name =  NameStartChar | "-" | "." | [0-9] | #xB7 |
+		// Name = NameStartChar | "-" | "." | [0-9] | #xB7 |
 		// [#x0300-#x036F] | [#x203F-#x2040]
 
 		xmlid = xmlid.replace(/^[^A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF]/, "");
 		xmlid = xmlid.replace(/[^-A-Z_a-z\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD\u10000-\uEFFFF.0-9\u00B7\u0300-\u036F\u203F-\u2040]/g, "");
 	} else {
-		// "zoteroItem_item.key" as value for entries without creator     
+		// "zoteroItem_item.key" as value for entries without creator
 		var str = item.uri;
 		var n = str.lastIndexOf('/');
 		var result = str.substring(n + 1);

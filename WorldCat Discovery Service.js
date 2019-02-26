@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 	//single result
 	// generate item and return type
 	var co = getFirstContextObj(doc);
-	if (!co || url.indexOf("?databaseList") == -1) return false;
+	if (!co || !url.includes("?databaseList")) return false;
 
 	return generateItem(doc, co).itemType;
 }
@@ -56,13 +56,13 @@ function detectWeb(doc, url) {
  */
 function getZoteroType(iconSrc) {
 	// only specify types not specified in COinS
-	if (iconSrc.indexOf("icon-rec") != -1) {
+	if (iconSrc.includes("icon-rec")) {
 		return "audioRecording";
 	}
-	if (iconSrc.indexOf("icon-com") != -1) {
+	if (iconSrc.includes("icon-com")) {
 		return "computerProgram";
 	}
-	if (iconSrc.indexOf("icon-map") != -1) {
+	if (iconSrc.includes("icon-map")) {
 		return "map";
 	}
 	return false;
@@ -90,7 +90,7 @@ function generateItem(doc, co) {
 }
 
 function getSearchResults(doc) {
-	var results = ZU.xpath(doc, '//ol[@class="results"]/li[contains(@id, "record")]')
+	var results = ZU.xpath(doc, '//ol[@class="results"]/li[contains(@id, "record")]');
 	return results;
 }
 
@@ -142,7 +142,7 @@ function scrape(risURL) {
 			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
 				//authors are actually editors
 				.replace(/^A1\s+-\s+/mg, 'A3  - ');
-		})
+		});
 
 		//Zotero.debug("Importing corrected RIS: \n" + text);
 
@@ -164,7 +164,7 @@ function scrape(risURL) {
 				item.ISBN = ISBNarray.join(" ");
 			}
 			//remove space before colon
-			item.title = item.title.replace(/\s+:/, ":")
+			item.title = item.title.replace(/\s+:/, ":");
 
 			//remove trailing colon after place
 			if (item.place) {
@@ -235,7 +235,7 @@ function doWeb(doc, url) {
 			var databaseID = ZU.xpathText(results[i], './@data-database-list');
 			//Z.debug(databaseID)
 			var risURL = composeURL(oclcID, databaseID);
-			Z.debug(risURL)
+			Z.debug(risURL);
 			items[risURL] = title.trim();
 
 		}
@@ -253,7 +253,7 @@ function doWeb(doc, url) {
 		var databaseID = extractDatabaseID(url);
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		var risURL = composeURL(oclcID, databaseID);
-		Z.debug("risURL= " + risURL)
+		Z.debug("risURL= " + risURL);
 		scrape(risURL);
 	}
 }
@@ -332,5 +332,5 @@ var testCases = [
 			}
 		]
 	}
-]
+];
 /** END TEST CASES **/
