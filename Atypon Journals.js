@@ -240,13 +240,13 @@ function scrape(doc, url, extras) {
 				// save the first abstract to the expected field and the others in the notes field for later processing
 				var abstracts = ZU.xpath(doc, '//div[@class="abstractSection"]/p/span');
 				if (abstracts) {
-					item.abstractNote = abstracts[0].textContent;
+					abstracts = abstracts.map(function(x) { return x.textContent.replace(/\s+/g, " ").trim(); })
+					item.abstractNote = abstracts[0];
 					for (var i = 1; i < abstracts.length; ++i) {
 						item.notes.push({
-							note: "abs:" + abstracts[i].textContent,
+							note: "abs:" + abstracts[i],
 						});
 					}
-					item.abstractNote.trim();
 				}
 
 				if (!item.language) {
