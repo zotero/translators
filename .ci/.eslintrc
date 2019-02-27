@@ -1,17 +1,11 @@
 {
 	"env": {
-    "node": true,
+		"node": true,
 	},
 	"parserOptions": {
 		"ecmaVersion": 2018
 	},
 	"rules": {
-		"semi": ["warn", "always"],
-		"indent": ["warn", "tab"],
-		"linebreak-style": ["error", "unix"],
-		"no-multi-str": "warn",
-		"no-shadow": "off",
-		"no-undef": "warn",
-    "notice/notice": "off"
+		"notice/notice": "off"
 	}
 }
