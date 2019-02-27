@@ -4,8 +4,11 @@
   "description": "Continuous integration of Zotero translators",
   "main": "index.js",
   "scripts": {
-    "errors": "eslint --quiet .",
-    "test": "eslint ."
+    "errors": "teslint --quiet .",
+    "test": "teslint --no-ignore .",
+    "test:single": "teslint",
+    "fix:single": "teslint --fix",
+    "eslint": "teslint"
   },
   "author": "kba+pz",
   "license": "CC0-1.0",

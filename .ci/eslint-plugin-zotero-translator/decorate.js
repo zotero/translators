@@ -42,14 +42,14 @@ function decorate(source) {
 }
 
 function strip(source) {
-  let header = null
+	let header = null;
 	source = source.replace(decorated_header, (match, first_line, rest, close_brace) => {
-    header = first_line + rest + close_brace.replace(';', '')
-    return ''
-  });
+		header = first_line + rest + close_brace.replace(';', '');
+		return '';
+	});
 
 	if (!header) throw new Error('not a decorated source');
-  return header + source;
+	return header + source;
 }
 
 class Cache {

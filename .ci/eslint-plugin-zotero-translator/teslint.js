@@ -12,7 +12,7 @@ argv
 	.version(CLIEngine.version)
 	.option('-f, --fix', 'Automatically fix problems')
 	.option('--no-ignore', 'Disable use of ignore files and patterns')
-	.option('--disable-rule [rules]', 'Disable rules')
+	.option('--quiet', 'Report errors only - default: false')
 	.parse(process.argv);
 
 const Linter = require("eslint").Linter;
@@ -57,7 +57,7 @@ for (const js of argv.args) {
 		: [ js ];
 	for (const source of sources) {
 		if (path.dirname(path.resolve(source)) === repo) {
-			const decorated = decorator.get(js);
+			const decorated = decorator.get(source);
 			if (decorated.header) {
 				decorated.filename = source;
 				translators.push(decorated);
@@ -70,15 +70,25 @@ for (const js of argv.args) {
 	}
 }
 
+function maybeQuiet(results) {
+	if (argv.quiet) {
+		for (const result of results) {
+			result.messages = result.messages.filter(msg => msg.severity === 2);
+		}
+		results = results.filter(res => res.messages.length);
+	}
+	return results;
+}
+
 const cli = new CLIEngine({
 	cwd: repo,
 	fix: argv.fix,
 	ignore: argv.ignore, // otherwise you can't lint stuff in hidden dirs
 });
-let results = [];
+const formatter = cli.getFormatter();
+
 if (javascripts.length) {
 	const report = cli.executeOnFiles(javascripts);
-	results = results.concat(report.results);
 	if (argv.fix) {
 		for (const result of report.results) {
 			const config = cli.getConfigForFile(result.filePath);
@@ -89,16 +99,15 @@ if (javascripts.length) {
 		}
 		CLIEngine.outputFixes(report);
 	}
+	console.log(formatter(maybeQuiet(report.results)));
 }
+
 for (const translator of translators) {
 	const report = cli.executeOnText(translator.source, translator.filename);
-	results = results.concat(report.results);
 	if (argv.fix) {
 		for (const result of report.results) {
 			if (result.output) fs.writeFileSync(result.filePath, decorate.strip(result.output), 'utf-8');
 		}
 	}
+	console.log(formatter(maybeQuiet(report.results)));
 }
-
-var formatter = cli.getFormatter();
-console.log(formatter(results));
