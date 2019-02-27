@@ -2,18 +2,19 @@
  * @fileoverview Checks Zotero translators for errors and recommended style
  * @author Emiliano Heyns
  */
+
 "use strict";
 
 const fs = require('fs');
 const path = require('path');
-const child_process = require('child_process');
+const childProcess = require('child_process');
 const findRoot = require('find-root');
 const decorate = require('./decorate');
 
 const repo = findRoot(__dirname, dir => fs.existsSync(path.resolve(dir, '.git')));
 
-function exec(cmd, cwd=null) {
-	return child_process.execSync(cmd, { cwd: cwd || repo, encoding: 'utf8' });
+function exec(cmd, cwd = null) {
+	return childProcess.execSync(cmd, { cwd: cwd || repo, encoding: 'utf8' });
 }
 
 const deleted = new Set(
@@ -26,8 +27,10 @@ const deleted = new Set(
 const branch = exec('git rev-parse --abbrev-ref HEAD').trim();
 // branch to compare lastUpdated against -- assume that if you're not in CI, you have upstream/master
 
-const has_upstream = exec('git remote -v').split('\n').map(line => line.trim()).includes('upstream\thttps://github.com/zotero/translators.git');
-const master = has_upstream ? 'upstream/master' : 'master';
+const hasUpstream = exec('git remote -v').split('\n')
+	.map(line => line.trim())
+	.includes('upstream\thttps://github.com/zotero/translators.git');
+const master = hasUpstream ? 'upstream/master' : 'master';
 
 /*
 	`git diff --name-status ${master}` will fetch the names of the files
@@ -55,7 +58,7 @@ if (branch !== master) {
 		.filter(changed => changed)
 		.map(changed => changed[1]);
 
-	for (const lu of child_process.execSync(`git grep '"lastUpdated"' ${master} *.js`, { cwd: repo, encoding: 'utf8' }).split('\n')) {
+	for (const lu of childProcess.execSync(`git grep '"lastUpdated"' ${master} *.js`, { cwd: repo, encoding: 'utf8' }).split('\n')) {
 		const m = lu.match(/^[a-z\/]+:([^:]+):\s*"lastUpdated"\s*:\s*"([-0-9: ]+)"/);
 		if (m && updated.includes(m[1])) lastUpdated[m[1]] = m[2];
 	}
@@ -65,14 +68,14 @@ const decorator = new decorate.Cache(repo);
 
 module.exports.processors = {
 	'.js': {
-		preprocess: function(text, filename) {
+		preprocess: function (text, filename) {
 			const decorated = decorator.get(filename, text);
 
-			return [ (typeof decorated.source === 'string') ? decorated.source : text ];
+			return [(typeof decorated.source === 'string') ? decorated.source : text];
 		},
 
 		// takes a Message[][] and filename
-		postprocess: function(messages, filename) {
+		postprocess: function (messages, _filename) {
 			return messages[0].sort((a, b) => {
 				const la = a.line || 0;
 				const lb = b.line || 0;
@@ -84,9 +87,9 @@ module.exports.processors = {
 };
 
 module.exports.rules = {
-	'header-valid-json': function(context) {
+	'header-valid-json': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				const decorated = decorator.get(context.getFilename(), context);
 
 				if (!decorated.source) return; // regular js source
@@ -96,9 +99,9 @@ module.exports.rules = {
 		};
 	},
 
-	'last-updated': function(context) {
+	'last-updated': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				const decorated = decorator.get(context.getFilename(), context);
 				const header = decorated.header;
 				const basename = path.basename(context.getFilename());
@@ -107,17 +110,17 @@ module.exports.rules = {
 
 				if (!header.parsed.lastUpdated) {
 					context.report(node, 'Header needs lastUpdated field');
-
-				} else if (lastUpdated[basename] && lastUpdated[basename] >= header.parsed.lastUpdated) {
+				}
+				else if (lastUpdated[basename] && lastUpdated[basename] >= header.parsed.lastUpdated) {
 					context.report(node, `lastUpdated field must be updated to be > ${lastUpdated[basename]} to push to clients`);
 				}
 			}
 		};
 	},
 
-	'translator-id': function(context) {
+	'translator-id': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				const filename = path.resolve(context.getFilename());
 				const decorated = decorator.get(context.getFilename(), context);
 				const header = decorated.header;
@@ -126,11 +129,11 @@ module.exports.rules = {
 
 				if (!header.parsed.translatorID) {
 					context.report(node, 'Header has no translator ID');
-
-				} else if (deleted.has(header.parsed.translatorID)) {
+				}
+				else if (deleted.has(header.parsed.translatorID)) {
 					context.report(node, 'Header re-uses translator ID of deleted translator');
-
-				} else {
+				}
+				else {
 					const conflict = decorator.conflicts(filename, header.parsed.translatorID);
 					if (conflict) context.report(node, `Header re-uses translator ID of ${conflict.label}`);
 				}
@@ -139,12 +142,12 @@ module.exports.rules = {
 	},
 
 	// this is a very simplistic rule to find 'unnecesary use of indexOf' until I find a better eslint plugin that does this
-	'prefer-index-of': function(context) {
+	'prefer-index-of': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				let lineno = 0;
 				let m;
-				for (const line of context.getSourceCode().getText().split('\n')) {
+				for (const line of context.getSourceCode().getText().split('\n')) { // eslint-disable-line newline-per-chained-call
 					lineno += 1;
 
 					if (m = line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/)) {
@@ -160,12 +163,12 @@ module.exports.rules = {
 	},
 
 	// this is a very simplistic rule to find 'for each' until I find a better eslint plugin that does this
-	'no-for-each': function(context) {
+	'no-for-each': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				let lineno = 0;
 				let m;
-				for (const line of context.getSourceCode().getText().split('\n')) {
+				for (const line of context.getSourceCode().getText().split('\n')) { // eslint-disable-line newline-per-chained-call
 					lineno += 1;
 
 					if (m = line.match(/for each *\(/)) {
@@ -180,9 +183,9 @@ module.exports.rules = {
 		};
 	},
 
-	'not-executable': function(context) {
+	'not-executable': function (context) {
 		return {
-			Program: function(node) {
+			Program: function (node) {
 				const decorated = decorator.get(context.getFilename(), context);
 
 				if (!decorated.source) return; // only check translators
@@ -192,10 +195,8 @@ module.exports.rules = {
 				try {
 					fs.accessSync(filename, fs.constants.X_OK);
 					context.report(node, `Translator '${path.basename(filename)}' should not be executable.`);
-
-				} catch(err) {
-					return;
-
+				}
+				catch (err) {
 				}
 			}
 		};

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const decorate = require('eslint-plugin-zotero-translator/decorate');
@@ -13,10 +15,8 @@ argv
 	.option('-f, --fix', 'Automatically fix problems')
 	.option('--no-ignore', 'Disable use of ignore files and patterns')
 	.option('--quiet', 'Report errors only - default: false')
+	.option('--dump-decorated [file]', 'Dump decorated translator to file for inspection')
 	.parse(process.argv);
-
-const Linter = require("eslint").Linter;
-const linter = new Linter();
 
 const repo = path.resolve(findRoot(__dirname, dir => fs.existsSync(path.resolve(dir, '.git'))));
 
@@ -27,8 +27,8 @@ const decorator = new decorate.Cache(repo);
 function patch(object, method, patcher) {
 	object[method] = patcher(object[method]);
 }
-const eslint_plugin_notice_utils = require('eslint-plugin-notice/utils');
-patch(eslint_plugin_notice_utils, 'resolveOptions', original => function(options, fileName) {
+const eslintPluginNoticeUtils = require('eslint-plugin-notice/utils');
+patch(eslintPluginNoticeUtils, 'resolveOptions', original => function (options, fileName) {
 	if (!options.templateVars) options.templateVars = {};
 	const header = decorator.get(fileName).header;
 	if (header && header.parsed) {
@@ -37,34 +37,38 @@ patch(eslint_plugin_notice_utils, 'resolveOptions', original => function(options
 		const year = '' + ((new Date).getFullYear());
 		if (!copyright.includes(year)) copyright.push(year);
 		copyright = copyright.join('-');
-		options.templateVars = {...options.templateVars, ...header.parsed, copyright};
+		options.templateVars = { ...options.templateVars, ...header.parsed, copyright };
 	}
 	return original.call(this, options, fileName);
 });
 
 // disable the processor so that fixing works
-const eslint_plugin_zotero_translator = require('eslint-plugin-zotero-translator');
-delete eslint_plugin_zotero_translator.processors;
+const eslintPluginZoteroTranslator = require('eslint-plugin-zotero-translator');
+delete eslintPluginZoteroTranslator.processors;
 
 /* MAIN */
 // split sources to lint into regular javascript (handled by executeOnFiles) and translators (handled by executeOnText)
 let javascripts = [];
 let translators = [];
+function findIgnore(file, stats) {
+	if (stats.isDirectory()) return (path.basename(file) == "node_modules");
+	return !file.endsWith('.js');
+}
 for (const js of argv.args) {
 	if (!fs.existsSync(js)) continue;
-	const sources = (fs.lstatSync(js).isDirectory())
-		? find(js, [(file, stats) => stats.isDirectory() ? (path.basename(file) == "node_modules") : !file.endsWith('.js')])
-		: [ js ];
+	const sources = fs.lstatSync(js).isDirectory() ? find(js, [findIgnore]) : [js];
 	for (const source of sources) {
 		if (path.dirname(path.resolve(source)) === repo) {
 			const decorated = decorator.get(source);
 			if (decorated.header) {
 				decorated.filename = source;
 				translators.push(decorated);
-			} else {
+			}
+			else {
 				javascripts.push(source);
 			}
-		} else {
+		}
+		else {
 			javascripts.push(source);
 		}
 	}
@@ -78,9 +82,11 @@ const cli = new CLIEngine({
 const formatter = cli.getFormatter();
 function showResults(sources, results) {
 	if (argv.quiet) results = CLIEngine.getErrorResults(results);
+
 	if (results.length) {
 		console.log(formatter(results));
-	} else {
+	}
+	else {
 		if (Array.isArray(sources)) sources = sources.join(', ');
 		console.log(sources, 'OK');
 	}
@@ -92,7 +98,7 @@ if (javascripts.length) {
 		for (const result of report.results) {
 			if (result.messages.find(msg => msg.ruleId === 'notice/notice' && msg.fix)) {
 				console.log(`Not safe to apply 'notice/notice' to ${result.filePath}`);
-				process.exit(1);
+				process.exit(1); // eslint-disable-line no-process-exit
 			}
 		}
 		CLIEngine.outputFixes(report);
@@ -101,6 +107,7 @@ if (javascripts.length) {
 }
 
 for (const translator of translators) {
+	if (argv.dumpDecorated) fs.writeFileSync(argv.dumpDecorated, translator.source, 'utf-8');
 	const report = cli.executeOnText(translator.source, translator.filename);
 	if (argv.fix) {
 		for (const result of report.results) {
