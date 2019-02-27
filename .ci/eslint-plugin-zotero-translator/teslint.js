@@ -70,36 +70,34 @@ for (const js of argv.args) {
 	}
 }
 
-function maybeQuiet(results) {
-	if (argv.quiet) {
-		for (const result of results) {
-			result.messages = result.messages.filter(msg => msg.severity === 2);
-		}
-		results = results.filter(res => res.messages.length);
-	}
-	return results;
-}
-
 const cli = new CLIEngine({
 	cwd: repo,
 	fix: argv.fix,
 	ignore: argv.ignore, // otherwise you can't lint stuff in hidden dirs
 });
 const formatter = cli.getFormatter();
+function showResults(sources, results) {
+	if (argv.quiet) results = CLIEngine.getErrorResults(results);
+	if (results.length) {
+		console.log(formatter(results));
+	} else {
+		if (Array.isArray(sources)) sources = sources.join(', ');
+		console.log(sources, 'OK');
+	}
+}
 
 if (javascripts.length) {
 	const report = cli.executeOnFiles(javascripts);
 	if (argv.fix) {
 		for (const result of report.results) {
-			const config = cli.getConfigForFile(result.filePath);
-			if (config.rules && config.rules['notice/notice']) {
-				console.log(`Not safe to fix ${result.filePath} when 'notice/notice' is in place`);
+			if (result.messages.find(msg => msg.ruleId === 'notice/notice' && msg.fix)) {
+				console.log(`Not safe to apply 'notice/notice' to ${result.filePath}`);
 				process.exit(1);
 			}
 		}
 		CLIEngine.outputFixes(report);
 	}
-	console.log(formatter(maybeQuiet(report.results)));
+	showResults(javascripts, report.results);
 }
 
 for (const translator of translators) {
@@ -109,5 +107,5 @@ for (const translator of translators) {
 			if (result.output) fs.writeFileSync(result.filePath, decorate.strip(result.output), 'utf-8');
 		}
 	}
-	console.log(formatter(maybeQuiet(report.results)));
+	showResults(translator.filename, report.results);
 }
