@@ -1,4 +1,6 @@
 {
+  "root": true,
+
 	"env": {
 		"browser": false,
 		"es6": true
@@ -7,11 +9,11 @@
 		"ecmaVersion": 7
 	},
 	"globals": {
-		"Zotero",
-		"Z",
-		"ZU",
-		"DOMParser",
-		"XPathResult"
+		"Zotero": "readonly",
+		"Z": "readonly",
+		"ZU": "readonly",
+		"DOMParser": "readonly",
+		"XPathResult": "readonly"
 	},
 	"rules": {
 		"semi": ["warn", "always"],
@@ -30,6 +32,7 @@
 
 		"notice/notice": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",
+			"templateFile": ".ci/AGPL",
 			"messages": {
 				"whenFailedToMatch": "Must be AGPL licensed"
 			}

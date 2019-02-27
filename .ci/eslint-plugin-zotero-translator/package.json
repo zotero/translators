@@ -7,11 +7,5 @@
   "engines": {
     "node": ">=0.10.0"
   },
-  "license": "ISC",
-  "dependencies": {
-    "minimist": "^1.2.0"
-  },
-  "bin": {
-    "translator-split-merge": "./bin/split-merge"
-  }
+  "license": "ISC"
 }
