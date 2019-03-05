@@ -97,6 +97,7 @@ function scrape(doc, url) {
 			item.abstractNote = abstract.replace(/^,*\s*Abstract:*,*\s*/, "")
 										.replace(/show (less|more)$/, "")
 										.replace(/,\s*$/, "")
+										.replace(/\[End Page [0-9]+\]/g, "")
 										.trim();
 		}
 
