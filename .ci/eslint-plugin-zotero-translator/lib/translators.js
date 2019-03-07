@@ -87,7 +87,7 @@ function decorate(source) {
 	let [, header, code, testCasesPrefix, testCasesVar, testCases, testCasesPostfix] = m;
 
 	let useStrictUsed = '';
-	m = code.match(/\n((['"])use strict\2;?)\n/);
+	m = code.match(/^[\s\n]*\n((['"])use strict\2;?)\n/);
 	if (m) {
 		useStrictUsed = useStrict;
 		const useStrictPos = code.indexOf(m[1]);
