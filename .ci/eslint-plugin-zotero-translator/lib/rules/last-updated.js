@@ -1,8 +1,7 @@
 'use strict';
 
-const path = require('path');
-
 const translators = require('../translators').cache;
+const getHeaderFromAST = require('../translators').getHeaderFromAST;
 
 module.exports = {
 	meta: {
@@ -17,7 +16,7 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-				const header = translators.getHeaderFromAST(node);
+				const header = getHeaderFromAST(node);
 				if (!header.declaration) return;
 
 				const translator = translators.get(context.getFilename());
@@ -30,12 +29,7 @@ module.exports = {
 				if (!header.properties.lastUpdated) {
 					context.report({
 						node: header.declaration,
-						message: 'Header needs lastUpdated field',
-						fix: function (fixer) {
-							const comma = (Object.keys(header.properties).length) ? ',' : '';
-							const sourceCode = context.getSourceCode();
-							return fixer.insertTextBefore(sourceCode.getLastToken(header.body, t => t.value === '}'), `${comma}\n\t"lastUpdated": "${updated}"\n`);
-						}
+						message: 'Header needs lastUpdated field'
 					});
 				}
 				else if (translator.lastUpdated && translator.lastUpdated >= header.properties.lastUpdated.value) {

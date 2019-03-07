@@ -2,7 +2,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const jsonParse = require('jsonify').parse;
 const findRoot = require('find-root');
 const childProcess = require('child_process');
 
@@ -29,14 +28,16 @@ function jsonParseWithErrorInfo(raw, source) {
 	target.lines = target.raw.split('\n').length;
 
 	try {
-		target.parsed = jsonParse(target.raw);
+		target.parsed = JSON.parse(target.raw);
 	}
 	catch (err) {
+		const position = err.message.match(/at position ([0-9]+)/);
+		const at = position ? parseInt(position[1]) : 0;
 		target.error = {
 			message: err.message,
 			line: source.substring(0, source.indexOf(raw)).split('\n').length // start of raw JSON
-				+ target.raw.substring(0, err.at).split('\n').length, // line within raw JSON
-			column: err.at - target.raw.lastIndexOf('\n', err.at),
+				+ target.raw.substring(0, at).split('\n').length, // line within raw JSON
+			column: at - target.raw.lastIndexOf('\n', at),
 		};
 	}
 
@@ -107,7 +108,8 @@ function decorate(source) {
 function tryFormatJSON(raw) {
 	try {
 		return JSON.stringify(JSON.parse(raw), null, '\t');
-	} catch (_err) {
+	}
+	catch (_err) {
 		return raw;
 	}
 }
@@ -146,18 +148,18 @@ class Cache {
 		if (branch !== master) {
 			// `git diff --name-status ${master}` will fetch the names of the files that have changed against `${master}`
 			for (const file of exec(`git diff --name-status ${master}`).split('\n')) {
-				const m = file.match(/^M\t([^\/]+\.js)$/); // js files that are modified but don't have a / in their path to pick out files in the root
+				const m = file.match(/^M\t([^/]+\.js)$/); // js files that are modified but don't have a / in their path to pick out files in the root
 				if (m && this.decorated[m[1]]) this.decorated[m[1]].modified = true;
 			}
 
 			/*
 				We do a `git grep '"lastUpdated"' ${master} *.js` to get the
 				`lastUpdated` values from the `${master}` branch. For files that are
-				deemed changed, the lastUpdated is remembered (so the precense of lastUpdated implies modified).
+				deemed changed, the lastUpdated is remembered (so the presence of lastUpdated implies modified).
 				This info is used in the 'last-updated' rule.
 			*/
 			for (const lu of exec(`git grep '"lastUpdated"' ${master} *.js`).split('\n')) {
-				const m = lu.match(/^[a-z\/]+:([^:]+):\s*"lastUpdated"\s*:\s*"([-0-9: ]+)"/);
+				const m = lu.match(/^[a-z/]+:([^:]+):\s*"lastUpdated"\s*:\s*"([-0-9: ]+)"/);
 				if (!m) continue;
 				const translator = m[1];
 				if (this.decorated[translator] && this.decorated[translator].modified) this.decorated[translator].lastUpdated = m[2];
@@ -183,31 +185,32 @@ class Cache {
 		}
 		return false;
 	}
+}
 
-	getHeaderFromAST(programNode) {
-		const declaration = programNode.body.find(node => node.type === 'VariableDeclaration' && node.declarations.length === 1 && node.declarations[0].id.name === headerVar);
-		if (!declaration) return {};
+function getHeaderFromAST(programNode) {
+	const declaration = programNode.body.find(node => node.type === 'VariableDeclaration' && node.declarations.length === 1 && node.declarations[0].id.name === headerVar);
+	if (!declaration) return {};
 
-		const body = declaration.declarations[0].init;
-		if (!body || body.type !== 'ObjectExpression') return {};
+	const body = declaration.declarations[0].init;
+	if (!body || body.type !== 'ObjectExpression') return {};
 
-		const properties = {};
-		for (const property of body.properties) {
-			properties[property.key.value] = property.value;
-		}
-		return { declaration, body, properties };
+	const properties = {};
+	for (const property of body.properties) {
+		properties[property.key.value] = property.value;
 	}
+	return { declaration, body, properties };
 }
 
 module.exports = {
 	decorate,
 	strip,
 	cache: new Cache(),
+	getHeaderFromAST,
 };
 
 if (require.main === module) {
 	const orig = fs.readFileSync(path.join(__dirname, '../../../zotero.org.js'), 'utf-8');
 	const decorated = decorate(orig);
 	const stripped = strip(decorated.source);
-	console.log(stripped === orig);
+	console.log(stripped === orig); // eslint-disable-line no-console
 }

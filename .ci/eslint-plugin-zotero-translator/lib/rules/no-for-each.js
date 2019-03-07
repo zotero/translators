@@ -14,11 +14,11 @@ module.exports = {
 		return {
 			Program: function (node) {
 				let lineno = 0;
-				let m;
-				for (const line of context.getSourceCode().getText().split('\n')) { // eslint-disable-line newline-per-chained-call
+				for (const line of context.getSourceCode().getText().split('\n')) {
 					lineno += 1;
 
-					if (m = line.match(/for each *\(/)) {
+					const m = line.match(/for each *\(/);
+					if (m) {
 						context.report({
 							node,
 							message: "Deprecated JavaScript 'for each' statement",

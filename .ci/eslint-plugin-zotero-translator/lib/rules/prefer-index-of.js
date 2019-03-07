@@ -14,11 +14,11 @@ module.exports = {
 		return {
 			Program: function (node) {
 				let lineno = 0;
-				let m;
 				for (const line of context.getSourceCode().getText().split('\n')) { // eslint-disable-line newline-per-chained-call
 					lineno += 1;
 
-					if (m = line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/)) {
+					const m = line.match(/\.indexOf(.*) *(=+ *-1|!=+ *-1|> *-1|>= *0|< *0)/);
+					if (m) {
 						context.report({
 							node,
 							message: "Unnecessary '.indexOf()', use '.includes()' instead",

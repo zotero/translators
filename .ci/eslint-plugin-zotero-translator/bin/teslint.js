@@ -5,7 +5,6 @@
 const fs = require('fs');
 const path = require('path');
 const find = require('recursive-readdir-synchronous');
-const findRoot = require('find-root');
 const CLIEngine = require("eslint").CLIEngine;
 const argv = require('commander');
 
@@ -36,10 +35,6 @@ patch(eslintPluginNoticeUtils, 'resolveOptions', original => function (options, 
 		if (!copyright.includes(year)) copyright.push(year);
 		copyright = copyright.join('-');
 		options.templateVars = { ...options.templateVars, ...header.parsed, copyright };
-	}
-	else { // supply dummy variables
-		options.templateVars.copyright = '<parse error>';
-		options.templateVars.creator = '<parse error>';
 	}
 	return original.call(this, options, fileName);
 });
@@ -91,11 +86,11 @@ function showResults(files, results) {
 	if (argv.quiet) results = errorResults;
 
 	if (results.length) {
-		console.log(formatter(results));
+		console.log(formatter(results)); // eslint-disable-line no-console
 	}
 	else {
 		if (Array.isArray(files)) files = files.join(', ');
-		if (!argv.quiet) console.log(files, 'OK');
+		if (!argv.quiet) console.log(files, 'OK'); // eslint-disable-line no-console
 	}
 }
 
@@ -104,7 +99,7 @@ if (sources.javascripts.length) {
 	if (argv.fix) {
 		for (const result of report.results) {
 			if (result.messages.find(msg => msg.ruleId === 'notice/notice' && msg.fix)) {
-				console.log(`Not safe to apply 'notice/notice' to ${result.filePath}`);
+				console.log(`Not safe to apply 'notice/notice' to ${result.filePath}`); // eslint-disable-line no-console
 				process.exit(1); // eslint-disable-line no-process-exit
 			}
 		}
@@ -124,4 +119,4 @@ for (const translator of sources.translators) {
 	showResults(translator.filename, report.results);
 }
 
-process.exit(sources.errors);
+process.exit(sources.errors); // eslint-disable-line no-process-exit

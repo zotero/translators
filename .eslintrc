@@ -216,7 +216,6 @@
 		"no-self-compare": "error",
 		"no-sequences": "error",
 		"no-shadow": "off",
-		"no-undef": "off",
 		"no-shadow-restricted-names": "error",
 		"no-spaced-func": "error",
 		"no-sync": "off",
@@ -368,6 +367,10 @@
 		"notice/notice": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",
 			"templateFile": ".ci/AGPL",
+			"templateVars": {
+				"copyright": "<undefined>",
+				"creator": "<undefined>"
+			},
 			"chars": 2000,
 			"messages": {
 				"whenFailedToMatch": "Must be AGPL licensed"

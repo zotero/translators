@@ -1,6 +1,6 @@
 'use strict';
 
-const translators = require('../translators').cache;
+const getHeaderFromAST = require('../translators').getHeaderFromAST;
 
 function getFunction(programNode, name) {
 	return programNode.body.find((node) => {
@@ -28,7 +28,7 @@ module.exports = {
 	create: function (context) {
 		return {
 			Program: function (node) {
-				const header = translators.getHeaderFromAST(node);
+				const header = getHeaderFromAST(node);
 				if (!header.declaration) return;
 
 				const type = {

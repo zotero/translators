@@ -5,6 +5,7 @@ const path = require('path');
 const uuid = require('uuid/v4');
 
 const translators = require('../translators').cache;
+const getHeaderFromAST = require('../translators').getHeaderFromAST;
 
 const deleted = new Set(
 	fs.readFileSync(path.join(translators.repo, 'deleted.txt'), 'utf-8')
@@ -27,18 +28,13 @@ module.exports = {
 		return {
 			Program: function (node) {
 				const filename = context.getFilename();
-				const header = translators.getHeaderFromAST(node);
+				const header = getHeaderFromAST(node);
 				if (!header.declaration) return;
 
 				if (!header.properties.translatorID) {
 					context.report({
 						node: header.declaration,
 						message: 'Header has no translator ID',
-						fix: function (fixer) {
-							const comma = (Object.keys(header.properties).length) ? ',' : '';
-							const sourceCode = context.getSourceCode();
-							return fixer.insertTextAfter(sourceCode.getFirstToken(header.body, t => t.value === '{'), `\n\t"translatorID": "${uuid()}"${comma}`);
-						}
 					});
 				}
 				else if (deleted.has(header.properties.translatorID.value)) {
@@ -54,9 +50,6 @@ module.exports = {
 					context.report({
 						node: header.properties.translatorID,
 						message: 'Header has empty translator ID',
-						fix: function (fixer) {
-							return fixer.replaceText(header.properties.translatorID, `"${uuid()}"`);
-						}
 					});
 				}
 				else {
