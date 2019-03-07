@@ -10,11 +10,11 @@
 		"ecmaVersion": 7
 	},
 	"globals": {
-		"Zotero",
-		"Z",
-		"ZU",
-		"DOMParser",
-		"XPathResult"
+		"Zotero": "readonly",
+		"Z": "readonly",
+		"ZU": "readonly",
+		"DOMParser": "readonly",
+		"XPathResult": "readonly"
 	},
 	"rules": {
 		"accessor-pairs": "error",
@@ -216,6 +216,7 @@
 		"no-self-compare": "error",
 		"no-sequences": "error",
 		"no-shadow": "off",
+		"no-undef": "off",
 		"no-shadow-restricted-names": "error",
 		"no-spaced-func": "error",
 		"no-sync": "off",
@@ -352,14 +353,22 @@
 		"wrap-regex": "off",
 		"yield-star-spacing": "error",
 		
-		"zotero-translator/not-executable": ["error"],
-		"zotero-translator/header-valid-json": ["error"],
-		"zotero-translator/translator-id": ["error"],
-		"zotero-translator/last-updated": ["error"],
-		"zotero-translator/no-for-each": ["warn"],
-		"zotero-translator/prefer-index-of": ["warn"],
+		"zotero-translator/not-executable": "error",
+		"zotero-translator/header-valid-json": "error",
+		"zotero-translator/translator-id": "error",
+		"zotero-translator/last-updated": "error",
+		"zotero-translator/translator-type": "warn",
+
+		"zotero-translator/no-for-each": "warn",
+		"zotero-translator/prefer-index-of": "warn",
+
+		"zotero-translator/test-cases-valid-json": "error",
+		"zotero-translator/test-cases": "error",
+
 		"notice/notice": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",
+			"templateFile": ".ci/AGPL",
+			"chars": 2000,
 			"messages": {
 				"whenFailedToMatch": "Must be AGPL licensed"
 			}
