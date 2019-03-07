@@ -113,7 +113,15 @@ for (const translator of sources.translators) {
 	const report = cli.executeOnText(translator.source, translator.filename);
 	if (argv.fix) {
 		for (const result of report.results) {
-			if (result.output) fs.writeFileSync(result.filePath, translators.strip(result.output), 'utf-8');
+			if (result.output) {
+				try {
+					fs.writeFileSync(result.filePath, translators.strip(result.output), 'utf-8');
+				}
+				catch (err) {
+					console.log(`Error writing fixed ${result.filePath}: ${err.message}`); // eslint-disable-line no-console
+					process.exit(1); // eslint-disable-line no-process-exit
+				}
+			}
 		}
 	}
 	showResults(translator.filename, report.results);

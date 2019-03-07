@@ -20,8 +20,8 @@ const metaDataRules = [
 	'indent',
 ].join(', ');
 
-const headerVar = '__eslint_zotero_translator_header';
-const headerPrefix = `/* eslint-disable no-empty */;/* eslint-disable */;/* eslint-enable ${metaDataRules} */const ${headerVar} = `;
+const headerVar = '__eslintZoteroTranslatorHeader';
+const headerPrefix = `/* eslint-disable no-unused-vars */ const ${headerVar} = /* eslint-disable */(/* eslint-enable ${metaDataRules} */`;
 
 function jsonParseWithErrorInfo(raw, source) {
 	const target = { raw };
@@ -62,7 +62,7 @@ const re = {
 		/^([\s\S]*?)/.source // anything the fixer might have placed at the top
 		+ escapeRE(headerPrefix) // all the eslint junk we injected
 		+ /(\{[\s\S]+\})/.source // the header
-		+ escapeRE(';/* eslint-enable */') // more eslint stuff we injected
+		+ escapeRE(');/* eslint-enable */') // more eslint stuff we injected
 		+ /([\s\S]+?)/.source // the code
 		+ '(?:' // optional test cases
 		+ /(\/\*\* BEGIN TEST CASES \*\*\/)/.source
@@ -88,7 +88,7 @@ function decorate(source) {
 
 	decorated.source = headerPrefix
 		+ header // the JSON
-		+ ';/* eslint-enable */'
+		+ ');/* eslint-enable */'
 		+ code; // the actual code
 
 	if (testCasesPrefix) {
@@ -209,7 +209,7 @@ module.exports = {
 };
 
 if (require.main === module) {
-	const orig = fs.readFileSync(path.join(__dirname, '../../../zotero.org.js'), 'utf-8');
+	const orig = fs.readFileSync(path.join(__dirname, '../../../Amazon.js'), 'utf-8');
 	const decorated = decorate(orig);
 	const stripped = strip(decorated.source);
 	console.log(stripped === orig); // eslint-disable-line no-console
