@@ -57,17 +57,26 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
+function postProcess(doc, item) {
+	// update abstract from the webpage as the embedded data is often incomplete
+	var abstractText = ZU.xpathText(doc, '//section[@class="abstract"]');
+	if (abstractText)
+		item.abstractNote = abstractText;
+
+	// add the issue section as a keyword
+	var issueSection = ZU.xpathText(doc, '//div[@class="article-metadata-tocSections"]/a')
+	if (issueSection)
+		item.tags.push({ "tag" : issueSection });
+
+	item.complete();
+}
+
 function invokeEmbeddedMetadataTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
     translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
-        // update abstract from the webpage as the embedded data is often incomplete
-        var abstractText = ZU.xpathText(doc, '//section[@class="abstract"]');
-        if (abstractText)
-            i.abstractNote = abstractText;
-
-        i.complete();
+        postProcess(doc, i);
     });
     translator.translate();
 }
