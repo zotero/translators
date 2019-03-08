@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2019-03-07 13:39:00"
+	"lastUpdated": "2019-03-08 09:25:00"
 }
 
 'use strict';
@@ -79,7 +79,7 @@ function escapeXML(text) {
 }
 
 // replace formatting with TEI tags
-function replaceFormatting(title) {
+function assignFormattedTitle(node, title) {
 	var titleText = title;
 	// italics
 	titleText = titleText.replace(/<i>/g, '<hi rend="italics">');
@@ -104,16 +104,12 @@ function replaceFormatting(title) {
 	titleText = titleText.split(/(<.*?>)/).map(function (text, i) { return i % 2 ? text : escapeXML(text); }).join('');
 
 	try {
-		const parser = new DOMParser();
-		parser.parseFromString(`<span>${titleText}</span>`, 'text/xml');
-		return titleText;
+		node.innerHTML = titleText;
 	}
 	catch (_err) {
 		Zotero.debug(`Could not parse ${JSON.stringify(titleText)} as XML`);
+		node.innerHTML = escapeXML(title);
 	}
-
-	// fallback
-	return escapeXML(title);
 }
 
 function genXMLId(item) {
@@ -246,7 +242,7 @@ function generateItem(item, teiDoc) {
 		analyticTitle.setAttribute("level", "a");
 		analytic.appendChild(analyticTitle);
 		if (item.title) {
-			analyticTitle.innerHTML = replaceFormatting(item.title);
+			assignFormattedTitle(analyticTitle, item.title);
 		}
 		// A DOI is presumably for the article, not the journal.
 		if (item.DOI) {
@@ -266,7 +262,7 @@ function generateItem(item, teiDoc) {
 			else {
 				pubTitle.setAttribute("level", "m");
 			}
-			pubTitle.innerHTML = replaceFormatting(publicationTitle);
+			assignFormattedTitle(pubTitle, publicationTitle);
 			monogr.appendChild(pubTitle);
 		}
 
@@ -283,7 +279,7 @@ function generateItem(item, teiDoc) {
 		if (item.title) {
 			const title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "m");
-			title.innerHTML = replaceFormatting(item.title);
+			assignFormattedTitle(title, item.title);
 			monogr.appendChild(title);
 		}
 		else if (!item.conferenceName) {
@@ -311,7 +307,7 @@ function generateItem(item, teiDoc) {
 	if (item.conferenceName) {
 		var conferenceName = teiDoc.createElementNS(ns.tei, "title");
 		conferenceName.setAttribute("type", "conferenceName");
-		conferenceName.innerHTML = replaceFormatting(item.conferenceName);
+		assignFormattedTitle(conferenceName, item.conferenceName);
 		monogr.appendChild(conferenceName);
 	}
 
@@ -324,14 +320,14 @@ function generateItem(item, teiDoc) {
 		if (item.series) {
 			var title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "s");
-			title.innerHTML = replaceFormatting(item.series);
+			assignFormattedTitle(title, item.series);
 			series.appendChild(title);
 		}
 		if (item.seriesTitle) {
 			var seriesTitle = teiDoc.createElementNS(ns.tei, "title");
 			seriesTitle.setAttribute("level", "s");
 			seriesTitle.setAttribute("type", "alternative");
-			seriesTitle.innerHTML = replaceFormatting(item.seriesTitle);
+			assignFormattedTitle(seriesTitle, item.seriesTitle);
 			series.appendChild(seriesTitle);
 		}
 		if (item.seriesText) {
