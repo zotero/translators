@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-17 13:48:44"
+	"lastUpdated": "2019-03-14 13:48:44"
 }
 
 /*
@@ -31,44 +31,48 @@
 */
 
 function detectWeb(doc,url) {
-	breadcrumbPage = ZU.xpathText(doc, '//div[@id="breadcrump"]/a[last()]');
-	if (breadcrumbPage == "Ouvrage collectif") {
-		return "book";
-	} else if (breadcrumbPage == "Article") {
-		return "journalArticle";
-	} else if (breadcrumbPage == "Chapitre") {
-		return "bookSection";
-	} else if (breadcrumbPage == "Résumé") {
-		typeDocument = ZU.xpathText(doc, '//div[@id="breadcrump"]/a[2]');
-		if (typeDocument == "Revues") {
+	var breadcrumb = ZU.xpath(doc, '//ol[@class="breadcrumb"]/li');
+	if (breadcrumb && breadcrumb.length > 1) {
+		var last = breadcrumb[breadcrumb.length - 1].textContent;
+		var second = ZU.xpathText(breadcrumb[1], "./a");
+
+		if (last == "Ouvrage collectif") {
+			return "book";
+		} else if (last == "Article") {
 			return "journalArticle";
-		} else if (typeDocument == "Ouvrages") {
+		} else if (last == "Chapitre") {
 			return "bookSection";
+		} else if (last == "Résumé") {
+			if (second == "Revues") {
+				return "journalArticle";
+			} else if (second == "Ouvrages") {
+				return "bookSection";
+			}
 		}
 	}
 
-	if (ZU.xpathText(doc, '//div[contains(@class, "list_articles")]//div[contains(@class, "article") or contains(@class, "articleBookList")]')) {
+	var itemList = ZU.xpath(doc, "//div[contains(@class, 'article-list-item')]//li[@class='titre']/a");
+	if (itemList && itemList.length)
 		return "multiple";
-	}
 }
 
 
 function doWeb(doc,url) {
 	if (detectWeb(doc, url) == "multiple") {
+		var links = ZU.xpath(doc, "//div[contains(@class, 'article-list-item')]//li[@class='titre']/a/@href").map(function(x) {
+			return x.textContent;
+		});
+		var titles = ZU.xpath(doc, "//div[contains(@class, 'article-list-item')]//li[@class='titre']/a").map(function(x) {
+			return x.textContent;
+		});
+		if (links.length != titles.length)
+			throw "mismatching lengths. got " + links.length + " and " + titles.length;
+
 		var hits = {};
+		for (var i=0; i < links.length; ++i)
+			hits[links[i]] = titles[i];
+
 		var urls = [];
-		var title;
-		var link;
-		var resultsrow = ZU.xpath(doc, '//div[contains(@class, "list_articles")]/div[contains(@class, "article")]');
-		for (var i=0; i<resultsrow.length; i++) {
-			title = ZU.xpathText(resultsrow[i], './/div[@class="meta"]//div[@class="title"]');
-			if (!title) {
-				title = ZU.xpathText(resultsrow[i], './/div[@class="wrapper_title"]/h2/text()');
-			}
-			link = ZU.xpathText(resultsrow[i], './/div[@class="state"]/a[1]/@href');
-			//Z.debug(title + ": " + link)
-			hits[link] = title.replace(/^[\s\,]+/, "").trim();
-		}
 		Z.selectItems(hits, function(items) {
 			if (items == null) return true;
 			for (var j in items) {
@@ -89,16 +93,16 @@ function scrape(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function(obj, item) {
-		
+
 		item.itemType = type;
-		
+
 		item.title = item.title.replace(/^Chapitre \d+\./, '');
-		
+
 		if (type == "bookSection" && item.publicationTitle == "Cairn.info") {
 			delete item.publicationTitle;
 			// otherwise the bookTitle will be overwritten with that
 		}
-		
+
 		// Cairn.info uses non-standard keywords:
 		// we import them here, as the Embedded Metadata translator
 		// cannot catch them.
@@ -117,7 +121,7 @@ function scrape(doc, url) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
 				// attachment always contains a https url, error when user access through http. We need to use the current protocol
 				if (doc.location.protocol == "http") {
-					item.attachments[i].url = item.attachments[i].url.replace("https", "http");					
+					item.attachments[i].url = item.attachments[i].url.replace("https", "http");
 				}
 			}
 		}
@@ -136,18 +140,18 @@ function scrape(doc, url) {
 				item.issue = volume[1];
 			}
 		}
-		
+
 		if (!item.date || item.date == '0000-00-00') {
 			item.date = ZU.xpathText(doc, '//meta[@name="DCSext.annee_tomaison"]/@content');
 		}
-		
+
 		if (!item.pages) {
 			item.pages = ZU.xpathText(doc, '//meta[@name="DCSext.doc_nb_pages"]/@content');
 		}
-		
-		var doi = ZU.xpathText(doc, '//li[contains(., "DOI :")]');
+
+		var doi = ZU.xpathText(doc, "//div[@id='article-details']//a[contains(@href, 'doi.org')]/@href");
 		if (!item.DOI && doi) {
-			item.DOI = doi.replace('DOI :', '');
+			item.DOI = doi.replace('https://doi.org/', '');
 		}
 
 		// Other fixes
