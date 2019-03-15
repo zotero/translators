@@ -40,8 +40,8 @@ function detectWeb(doc, url) {
 }
 
 function postProcess(doc, item) {
-    // The author name returned by the embedded metadata translator includes the name of the
-    // institution to which the author belongs
+    // The author names returned by the embedded metadata translator includes the name of the
+    // institution to which the authors belong. So, we'll need to grab them from the DOM and clean it ourselves.
     var authors = ZU.xpath(doc, "//div[@class='authorBio']/em");
     if (authors)
         item.creators = authors.map(function(x) { return ZU.cleanAuthor(x.textContent, 'author'); })
