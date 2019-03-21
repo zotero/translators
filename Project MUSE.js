@@ -112,9 +112,14 @@ function scrape(doc, url) {
 			}]
 		}
 		item.libraryCatalog = "Project MUSE";
-		var keywords = ZU.xpathText(doc, '//div[@class="kwd-group"]/p/text()');
-		if (keywords)
-			item.tags = keywords.split(",").map(function(x) { return x.trim();});
+		var keywords = ZU.xpath(doc, '//div[@class="kwd-group"]//p');
+		if (keywords) {
+			item.tags = keywords.map(function(x) { return x.textContent.trim(); })
+								.join("")
+								.split(",")
+								.map(function(x) { return x.trim(); })
+		}
+
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {
