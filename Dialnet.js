@@ -112,7 +112,23 @@ function scrape(doc, url) {
 
  		// Delete generic keywords
  		if (item.tags);
- 			delete item.tags;
+			 delete item.tags;
+
+		// sometimes, the embedded metadata inverts the volume and issue information
+		// we need to check the DOM to see if there's information to the contrary and revert if necessary
+		var domVolume = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(@href, "ejemplar")]');
+		if (domVolume) {
+			var match = domVolume.match(/^Vol\.? (\d+)/i)
+			if (match) {
+				domVolume = match[1];
+				if (domVolume != item.volume && domVolume == item.issue) {
+					var temp = item.volume;
+					item.volume = item.issue;
+					item.issue = temp;
+				}
+			}
+		}
+
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
