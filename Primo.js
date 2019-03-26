@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-10-21 10:10:22"
+	"lastUpdated": "2019-03-26 01:29:32"
 }
 
 /*
@@ -191,7 +191,7 @@ function fetchPNX(itemData) {
 		},
 		null,
 		null,
-		[200, 404]
+		[200, 404, 500]
 	);
 }
 
@@ -238,72 +238,6 @@ var testCases = [
 					"Great Britain Foreign relations China.",
 					"Missions China."
 				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/default:default_scope:PURDUE_ALMA21505315560001081",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "War",
-				"creators": [
-					{
-						"firstName": "Lawrence",
-						"lastName": "Freedman",
-						"creatorType": "author"
-					}
-				],
-				"date": "1994",
-				"ISBN": "9780192892546",
-				"abstractNote": "Experience of war -- Causes of war -- War and the military establishment -- Ethics of war -- Strategy -- Total war and the great powers -- Limited war and developing countries., \"War makes headlines and history books. It has shaped the international system, prompted social change, and inspired literature, art, and music. It engenders some of the most intense as well as the most brutal human experiences, and it raises fundamental questions of human ethics.\" \"The ubiquitous, contradictory, and many-sided character of war is fully reflected in this reader. It addresses a wide range of questions: What are the causes of war? Which strategic as well as moral principles guide its conduct, and how have these changed? Has total war become unthinkable? What is the nature of contemporary conflict? How is war experienced by those on the front line?\" \"These and other key issues are examined through a variety of writings. Drawing on sources from numerous countries and disciplines, this reader includes accounts by generals, soldiers, historians, strategists, and poets, who consider conflicts from the Napoleonic Wars to Vietnam and Bosnia. The writing not only of great strategic thinkers but also of ordinary soldiers illustrates both the theory and the experience of war in its many guises.\"--BOOK JACKET.",
-				"callNumber": "355.02 W1945 1994",
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"numPages": "xi+385",
-				"place": "Oxford ; New York",
-				"publisher": "Oxford University Press",
-				"series": "Oxford readers",
-				"attachments": [],
-				"tags": [
-					"War."
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://limo.libis.be/LIBISnet:default_scope:32LIBIS_ALMA_DS71166851730001471",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "War",
-				"creators": [
-					{
-						"firstName": "Albert R.",
-						"lastName": "Leventhal",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Del",
-						"lastName": "Byrne",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1973",
-				"ISBN": "9780600393047",
-				"callNumber": "9B6655",
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"numPages": "252",
-				"publisher": "Hamlyn",
-				"attachments": [],
-				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -408,66 +342,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://hollis.harvard.edu/primo_library/libweb/action/dlDisplay.do?vid=HVD&search_scope=default_scope&docId=HVD_ALEPH002208563&fn=permalink",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Mastering the art of French cooking",
-				"creators": [
-					{
-						"firstName": "Simone",
-						"lastName": "Beck",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Louisette",
-						"lastName": "Bertholle",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Julia",
-						"lastName": "Child",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Barbara Ketcham",
-						"lastName": "Wheaton",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Avis",
-						"lastName": "DeVoto",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1961",
-				"abstractNote": "Illustrates the ways in which classic French dishes may be created with American foodstuffs and appliances.",
-				"callNumber": "641.64 C53m, c.1, 641.64 C53m, c. 3, 641.64 C53m, c.4, 641.64 C53m, c.5, 641.64 C53m, c.6, 641.64 C53m, c. 7, 641.64 C53m, c. 8, 641.64 C53m, c.2",
-				"edition": "[1st ed.]",
-				"extra": "HOLLIS number: 002208563",
-				"language": "eng",
-				"libraryCatalog": "hollis.harvard.edu",
-				"place": "New York",
-				"publisher": "Knopf",
-				"attachments": [
-					{
-						"title": "HOLLIS Permalink",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"Authors' inscriptions (Provenance)",
-					"Cookery, French",
-					"Cooking, French.",
-					"French cooking"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
 		"items": [
 			{
@@ -488,6 +362,53 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					"LEGGI;ITALIA - STORIA MEDIOEVALE"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bcujas-catalogue.univ-paris1.fr/CUJAS_V1:LSCOP_ALL:33CUJAS_ALEPH000070200",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test pattern for living",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					}
+				],
+				"date": "1972",
+				"callNumber": "203.206",
+				"language": "eng",
+				"libraryCatalog": "bcujas-catalogue.univ-paris1.fr",
+				"numPages": "xx+154",
+				"place": "Toronto New York",
+				"publisher": "Bantam Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "301.16/1/0973"
+					},
+					{
+						"tag": "Mass media"
+					},
+					{
+						"tag": "Mass media -- Social aspects -- United States"
+					},
+					{
+						"tag": "Social aspects"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States -- Social conditions -- 1960-"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
