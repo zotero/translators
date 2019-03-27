@@ -22,31 +22,24 @@ module.exports = {
 				if (!header.body) return; // if there's no file header, assume it's not a translator
 				if (!header.followingStatement) return; // if there's no following statement, there's more significant problems than just the license missing
 
-				const sourceCode = context.getSourceCode();
-				let licenseComment;
-				for (const comment of sourceCode.getAllComments()) {
-					if (comment.loc.start.line <= header.body.loc.end.line) continue; // decorator comment
-
-					if (comment.type !== 'Block') {
-						// licence comment must be block-comment
-					}
-					else if (comment.loc.start.line >= header.followingStatement.loc.start.line) {
-						// license comment must start before first statement
-					}
-					else if (comment.loc.end.line >= header.followingStatement.loc.start.line) {
-						// license comment must end before first statement
-					}
-					else {
-						licenseComment = comment;
-					}
-
-					break;
-				}
-
 				const options = context.options[0];
 				if (!options.mustMatch) throw new Error('mustMatch not set');
 
-				if (licenseComment && licenseComment.value.includes(options.mustMatch)) return; // license found
+				let firstComment = null;
+				for (const comment of context.getSourceCode().getAllComments()) {
+					if (comment.loc.start.line <= header.body.loc.end.line) continue; // skip decorator comments
+
+					if (comment.value.includes(options.mustMatch)) {
+						if (firstComment) {
+							context.report({
+								loc: comment.loc,
+								message: 'Preferred to have license block at the top'
+							});
+						}
+						return;
+					}
+					firstComment = firstComment || comment;
+				}
 
 				if (!options.templateFile) throw new Error('templateFile not set');
 				const templateFile = fs.existsSync(options.templateFile)
@@ -68,24 +61,13 @@ module.exports = {
 					return copyright[id] || `<undefined '${id}'>`;
 				}) + '\n\n';
 
-				if (!licenseComment) {
-					context.report({
-						node: header.followingStatement,
-						message: "Missing license block",
-						fix: function (fixer) {
-							return fixer.insertTextBefore(header.followingStatement, licenseText);
-						}
-					});
-				}
-				else {
-					context.report({
-						loc: licenseComment.loc,
-						message: `Block comment does not contain "${options.mustMatch}"`,
-						fix: function (fixer) {
-							return fixer.replaceTextRange(licenseComment.range, licenseText);
-						}
-					});
-				}
+				context.report({
+					node: header.followingStatement,
+					message: "Missing license block",
+					fix: (firstComment && firstComment.type === 'Block')
+						? undefined
+						: fixer => fixer.insertTextBefore(header.followingStatement, licenseText),
+				});
 			}
 		};
 	},

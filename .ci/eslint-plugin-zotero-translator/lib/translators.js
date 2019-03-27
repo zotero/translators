@@ -74,17 +74,8 @@ const re = {
 	),
 };
 
-function decorate(source) {
-	const decorated = {};
-
-	if (!source.startsWith('{')) return decorated;
-
-	let m = source.match(re.undecorated);
-	if (!m) throw new Error('no header');
-
-	let [, header, code, testCasesPrefix, testCasesVar, testCases, testCasesPostfix] = m;
-
-	const tfw = [
+const tfw = {
+	rules: [
 		'block-spacing',
 		'brace-style',
 		'comma-spacing',
@@ -105,8 +96,22 @@ function decorate(source) {
 		'space-before-blocks',
 		'space-before-function-paren',
 		'space-infix-ops',
-	];
-	code = code.replace(/(\n\/\* FW LINE 59:b820c6d \*\/[^\n]+)(\n)/, `$1 // eslint-disable-line ${tfw.join(', ')}$2`);
+	]
+};
+tfw.disable = ` // eslint-disable-line ${tfw.rules.join(', ')}`;
+tfw.disableRe = new RegExp('(\\n' + escapeRE('/* FW LINE 59:b820c6d */') + '[^\\n]+?)(' + escapeRE(tfw.disable) + ')?(\\n)');
+
+function decorate(source) {
+	const decorated = {};
+
+	if (!source.startsWith('{')) return decorated;
+
+	let m = source.match(re.undecorated);
+	if (!m) throw new Error('no header');
+
+	let [, header, code, testCasesPrefix, testCasesVar, testCases, testCasesPostfix] = m;
+
+	code = code.replace(tfw.disableRe, `$1${tfw.disable}$3`);
 
 	// decorate header
 	decorated.header = jsonParseWithErrorInfo(header, source);
@@ -142,7 +147,9 @@ function strip(source) {
 	const m = source.match(re.decorated);
 	if (!m) throw new Error('not decorated');
 
-	const [, prefix, header, code, testCasesPrefix, testCasesVar, testCases] = m;
+	let [, prefix, header, code, testCasesPrefix, testCasesVar, testCases] = m;
+
+	code = code.replace(tfw.disableRe, '$1$3');
 
 	return tryFormatJSON(header) + (prefix ? '\n\n' + prefix.replace(/^\s*/, '') : '') + code + (testCasesPrefix || '') + tryFormatJSON(testCasesVar || '') + (testCases || '');
 }
