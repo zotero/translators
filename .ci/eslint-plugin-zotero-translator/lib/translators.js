@@ -22,8 +22,6 @@ const metaDataRules = [
 
 const headerVar = '__eslintZoteroTranslatorHeader';
 const headerPrefix = `/* eslint-disable no-unused-vars */ const ${headerVar} = /* eslint-disable */(/* eslint-enable ${metaDataRules} */`;
-const useStrict = '/* eslint-disable lines-around-directive */"use strict";';
-const useStrictPrefix = '// moved up for eslint: ';
 
 function jsonParseWithErrorInfo(raw, source) {
 	const target = { raw };
@@ -86,19 +84,10 @@ function decorate(source) {
 
 	let [, header, code, testCasesPrefix, testCasesVar, testCases, testCasesPostfix] = m;
 
-	let useStrictUsed = '';
-	m = code.match(/^[\s\n]*\n((['"])use strict\2;?)\n/);
-	if (m) {
-		useStrictUsed = useStrict;
-		const useStrictPos = code.indexOf(m[1]);
-		code = code.substring(0, useStrictPos) + useStrictPrefix + code.substring(useStrictPos);
-	}
-
 	// decorate header
 	decorated.header = jsonParseWithErrorInfo(header, source);
 
-	decorated.source = useStrictUsed
-		+ headerPrefix
+	decorated.source = headerPrefix
 		+ header // the JSON
 		+ ');/* eslint-enable */'
 		+ code; // the actual code
@@ -126,9 +115,6 @@ function tryFormatJSON(raw) {
 	}
 }
 function strip(source) {
-	if (source.startsWith(useStrict)) source = source.substring(useStrict.length);
-	source = source.replace(useStrictPrefix, '');
-
 	const m = source.match(re.decorated);
 	if (!m) throw new Error('not decorated');
 
