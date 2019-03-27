@@ -81,9 +81,10 @@ const cli = new CLIEngine({
 });
 const formatter = cli.getFormatter();
 function showResults(files, results) {
-	const errorResults = CLIEngine.getErrorResults(results);
-	sources.errors += errorResults.length;
-	if (argv.quiet) results = errorResults;
+	if (argv.quiet) results = CLIEngine.getErrorResults(results);
+	for (const res of results) {
+		sources.errors += res.errorCount;
+	}
 
 	if (results.length) {
 		console.log(formatter(results)); // eslint-disable-line no-console

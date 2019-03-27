@@ -16,7 +16,7 @@
 		"url": "https://github.com/zotero/translators/blob/master/.ci/"
 	},
 	"devDependencies": {
-		"eslint": "^5.15.0",
+		"eslint": "^5.15.3",
 		"eslint-plugin-notice": "^0.7.8",
 		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator"
 	}
