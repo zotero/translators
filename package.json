@@ -4,9 +4,7 @@
 	"description": "Continuous integration of Zotero translators",
 	"main": "index.js",
 	"scripts": {
-		"errors": "teslint --quiet .",
 		"test": "teslint .",
-		"fix": "teslint --fix .",
 		"lint": "teslint",
 		"lint:linter": "eslint --no-ignore .ci"
 	},
