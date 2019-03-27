@@ -15,7 +15,6 @@
 	},
 	"devDependencies": {
 		"eslint": "^5.15.3",
-		"eslint-plugin-notice": "^0.7.8",
 		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator"
 	}
 }

@@ -19,26 +19,6 @@ argv
 	.parse(process.argv);
 
 /* PATCHES */
-// patches the notice rule to include translator variables
-function patch(object, method, patcher) {
-	object[method] = patcher(object[method]);
-}
-const eslintPluginNoticeUtils = require('eslint-plugin-notice/utils');
-patch(eslintPluginNoticeUtils, 'resolveOptions', original => function (options, fileName) {
-	if (!options.templateVars) options.templateVars = {};
-	const header = translators.cache.get(fileName).header;
-
-	if (header && header.parsed) {
-		let copyright = [];
-		if (header.parsed.lastUpdated) copyright.push(header.parsed.lastUpdated.split('-')[0]);
-		const year = '' + ((new Date).getFullYear());
-		if (!copyright.includes(year)) copyright.push(year);
-		copyright = copyright.join('-');
-		options.templateVars = { ...options.templateVars, ...header.parsed, copyright };
-	}
-	return original.call(this, options, fileName);
-});
-
 // disable the processor so that fixing works
 const eslintPluginZoteroTranslator = require('eslint-plugin-zotero-translator');
 delete eslintPluginZoteroTranslator.processors;

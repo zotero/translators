@@ -365,21 +365,12 @@
 		"zotero-translator/test-cases-valid-json": "error",
 		"zotero-translator/test-cases": "error",
 
-		"notice/notice": [ "warn", {
+		"zotero-translator/license": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",
-			"templateFile": ".ci/AGPL",
-			"templateVars": {
-				"copyright": "<undefined>",
-				"creator": "<undefined>"
-			},
-			"chars": 2000,
-			"messages": {
-				"whenFailedToMatch": "Must be AGPL licensed"
-			}
+			"templateFile": ".ci/AGPL"
 		 }]
 	},
 	"plugins": [
-		"zotero-translator",
-		"notice"
+		"zotero-translator"
 	]
 }

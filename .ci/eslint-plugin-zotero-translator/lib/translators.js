@@ -203,8 +203,9 @@ class Cache {
 }
 
 function getHeaderFromAST(programNode) {
-	const declaration = programNode.body.find(node => node.type === 'VariableDeclaration' && node.declarations.length === 1 && node.declarations[0].id.name === headerVar);
+	const declaration = programNode.body[0];
 	if (!declaration) return {};
+	if (declaration.type !== 'VariableDeclaration' || declaration.declarations.length !== 1 || declaration.declarations[0].id.name !== headerVar) return {};
 
 	const body = declaration.declarations[0].init;
 	if (!body || body.type !== 'ObjectExpression') return {};
@@ -213,7 +214,7 @@ function getHeaderFromAST(programNode) {
 	for (const property of body.properties) {
 		properties[property.key.value] = property.value;
 	}
-	return { declaration, body, properties };
+	return { declaration, body, properties, followingStatement: programNode.body[1] };
 }
 
 module.exports = {

@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"commander": "^2.19.0",
+		"find-root": "^1.1.0",
 		"recursive-readdir-synchronous": "0.0.4",
 		"require-dir": "^1.2.0",
 		"uuid": "^3.3.2"
