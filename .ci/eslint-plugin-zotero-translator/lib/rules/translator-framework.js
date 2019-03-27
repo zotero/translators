@@ -7,7 +7,7 @@ module.exports = {
 		type: 'problem',
 		fixable: 'code',
 		docs: {
-			description: 'checks for AGPL license',
+			description: 'checks use of deprecated Translator Framework',
 			category: 'Possible Errors',
 		},
 	},
@@ -23,7 +23,7 @@ module.exports = {
 					if (comment.value.match(/^\s*FW LINE [0-9]+:/)) {
 						context.report({
 							loc: comment.loc,
-							message: 'uses deprecated translator framework'
+							message: 'uses deprecated Translator Framework'
 						});
 					}
 				}
