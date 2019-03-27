@@ -84,6 +84,30 @@ function decorate(source) {
 
 	let [, header, code, testCasesPrefix, testCasesVar, testCases, testCasesPostfix] = m;
 
+	const tfw = [
+		'block-spacing',
+		'brace-style',
+		'comma-spacing',
+		'consistent-return',
+		'consistent-this',
+		'key-spacing',
+		'keyword-spacing',
+		'no-array-constructor',
+		'no-cond-assign',
+		'no-new-object',
+		'no-sequences',
+		'no-undef',
+		'no-unused-expressions',
+		'no-void',
+		'object-curly-spacing',
+		'semi',
+		'semi-spacing',
+		'space-before-blocks',
+		'space-before-function-paren',
+		'space-infix-ops',
+	];
+	code = code.replace(/(\n\/\* FW LINE 59:b820c6d \*\/[^\n]+)(\n)/, `$1 // eslint-disable-line ${tfw.join(', ')}$2`);
+
 	// decorate header
 	decorated.header = jsonParseWithErrorInfo(header, source);
 

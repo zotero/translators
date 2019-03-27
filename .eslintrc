@@ -363,6 +363,7 @@
 
 		"zotero-translator/test-cases-valid-json": "error",
 		"zotero-translator/test-cases": "error",
+		"zotero-translator/translator-framework": "warn",
 
 		"zotero-translator/license": [ "warn", {
 			"mustMatch": "GNU Affero General Public License",

@@ -79,7 +79,7 @@ module.exports = {
 				}
 				else {
 					context.report({
-						loc: licenseComment.loc.start,
+						loc: licenseComment.loc,
 						message: `Block comment does not contain "${options.mustMatch}"`,
 						fix: function (fixer) {
 							return fixer.replaceTextRange(licenseComment.range, licenseText);
