@@ -172,7 +172,6 @@
 		"no-extra-label": "error",
 		"no-extra-parens": "off",
 		"no-floating-decimal": "error",
-		"no-implicit-globals": "error",
 		"no-implied-eval": "error",
 		"no-inline-comments": "off",
 		"no-invalid-this": "off",
@@ -249,7 +248,8 @@
 		"no-unused-vars": [
 			"error",
 			{
-				"argsIgnorePattern": "^_"
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^doWeb$|^detectWeb$|^doImport$|^doExport$"
 			}
 		],
 		"no-use-before-define": "off",
