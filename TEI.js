@@ -22,8 +22,6 @@
 	"lastUpdated": "2019-03-08 09:25:00"
 }
 
-'use strict';
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -101,7 +99,9 @@ function assignFormattedTitle(node, title) {
 	titleText = titleText.replace(/<span class="nocase">(.*?)<\/span>/g, '<hi rend="nocase">$1</hi>');
 
 	// escape text between tags
-	titleText = titleText.split(/(<.*?>)/).map(function (text, i) { return i % 2 ? text : escapeXML(text); }).join('');
+	titleText = titleText.split(/(<.*?>)/).map(function (text, i) {
+		return i % 2 ? text : escapeXML(text);
+	}).join('');
 
 	try {
 		node.innerHTML = titleText;
