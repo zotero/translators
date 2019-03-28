@@ -40,7 +40,9 @@ module.exports = {
 						return;
 					}
 
-					if (comment.value.match(/copyright/i)) copyright = comment;
+					if (comment.value.match(/copyright/i)) {
+						copyright = comment;
+					}
 
 					firstComment = firstComment || comment;
 				}
