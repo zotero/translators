@@ -26,11 +26,12 @@ module.exports = {
 				if (!options.mustMatch) throw new Error('mustMatch not set');
 
 				let firstComment = null;
+				let copyright = null;
 				for (const comment of context.getSourceCode().getAllComments()) {
 					if (comment.loc.start.line <= header.body.loc.end.line) continue; // skip decorator comments
 
 					if (comment.value.includes(options.mustMatch)) {
-						if (firstComment) {
+						if (firstComment || comment.loc.start.line > header.followingStatement.start.line) {
 							context.report({
 								loc: comment.loc,
 								message: 'Preferred to have license block at the top'
@@ -38,7 +39,17 @@ module.exports = {
 						}
 						return;
 					}
+
+					if (comment.value.match(/copyright/i)) copyright = comment;
+
 					firstComment = firstComment || comment;
+				}
+				if (copyright) {
+					context.report({
+						loc: copyright.loc,
+						message: `Copyright preferred to be ${options.mustMatch}`,
+					});
+					return;
 				}
 
 				if (!options.templateFile) throw new Error('templateFile not set');
@@ -48,7 +59,7 @@ module.exports = {
 				if (!fs.existsSync(templateFile)) throw new Error(`cannot find ${templateFile}`);
 				const template = fs.readFileSync(templateFile, 'utf-8');
 
-				const copyright = {
+				copyright = {
 					holder: header.properties.creator ? header.properties.creator.value : null,
 					period: `${(new Date).getFullYear()}`,
 				};
