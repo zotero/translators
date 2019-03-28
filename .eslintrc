@@ -249,7 +249,7 @@
 			"error",
 			{
 				"argsIgnorePattern": "^_",
-				"varsIgnorePattern": "^doWeb$|^detectWeb$|^doImport$|^doExport$"
+				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$"
 			}
 		],
 		"no-use-before-define": "off",
