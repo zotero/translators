@@ -53,21 +53,24 @@ module.exports = {
 					}
 				}
 
-				const detectWeb = getFunction(node, 'doWeb');
-				const doWeb = getFunction(node, 'doWeb');
-				const detectImport = getFunction(node, 'detectImport');
-				const doImport = getFunction(node, 'doImport');
-				const doExport = getFunction(node, 'doExport');
+				const handlers = {
+					detectWeb: getFunction(node, 'doWeb'),
+					doWeb: getFunction(node, 'doWeb'),
+					detectImport: getFunction(node, 'detectImport'),
+					doImport: getFunction(node, 'doImport'),
+					doExport: getFunction(node, 'doExport'),
+				};
 
 				if (browserSupportNode && !(translatorType & type.web)) context.report(browserSupportNode, `browserSupport set, but translatorType (${translatorType}) does not include web (${type.web})`);
 
-				for (const [f, mode] of [[detectWeb, 'Web'], [doWeb, 'Web'], [detectImport, 'Import'], [doImport, 'Import'], [doExport, 'Export']]) {
-					const bit = type[mode.toLowerCase()];
-					if (f && !(translatorType & bit)) {
-						context.report(f, `do${mode} present, but translatorType (${translatorType}) does not specify ${mode.toLowerCase()} (${bit})`);
+				for (const [name, func] of Object.entries(handlers)) {
+					const mode = name.replace(/^(detect|do)/, '').toLowerCase();
+					const bit = type[mode];
+					if (func && !(translatorType & bit)) {
+						context.report(func, `${name} present, but translatorType (${translatorType}) does not specify ${mode} (${bit})`);
 					}
-					if (!f && (translatorType & bit)) {
-						context.report(translatorTypeNode, `translatorType specifies ${mode.toLowerCase()} (${bit}), but no do${mode} present`);
+					if (!func && (translatorType & bit)) {
+						context.report(translatorTypeNode, `translatorType specifies ${mode} (${bit}), but no ${name} present`);
 					}
 				}
 			}
