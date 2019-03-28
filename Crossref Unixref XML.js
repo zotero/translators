@@ -201,12 +201,12 @@ function doImport() {
   } else if ((itemXML = ZU.xpath(doiRecord, 'crossref/report-paper')).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
-		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.4271/2010-01-0907&format=unixref&redirect=false
+		
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'report-paper_metadata');
 		if (refXML.length===0) {
 			// Example doi: 10.1787/5jzb6vwk338x-en
-			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.1787/5jzb6vwk338x-en&noredirect=true&format=unixref
+		
 			refXML = ZU.xpath(itemXML, 'report-paper_series_metadata');
 			seriesXML = ZU.xpath(refXML, 'series_metadata');
 		}
@@ -219,14 +219,13 @@ function doImport() {
 	} else if ((itemXML = ZU.xpath(doiRecord, 'crossref/book')).length) {
 		// Book chapter
 		// Example: doi: 10.1017/CCOL0521858429.016
-		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1017/CCOL0521858429.016&format=unixref&redirect=false
+		
 		// Reference book entry
 		// Example: doi: 10.1002/14651858.CD002966.pub3
-		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1002/14651858.CD002966.pub3&format=unixref&redirect=false
+		
 		// Entire edite book. This should _not_ be imported as bookSection
 		// Example: doi: 10.4135/9781446200957
-		// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.4135/9781446200957&noredirect=true&format=unixref
-
+		
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'content_item/@component_type');
 		//is this an entry in a reference book?
@@ -263,10 +262,10 @@ function doImport() {
 			refXML = ZU.xpath(itemXML, 'book_metadata');
 			// Sometimes book data is in book_series_metadata
 			// doi: 10.1007/978-1-4419-9164-5
-			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&rft_id=info:doi/10.1007/978-1-4419-9164-5&format=unixref&redirect=false
+			
 			// And sometimes in book_set_metadata
 			// doi: 10.7551/mitpress/9780262533287.003.0006
-			// https://www.crossref.org/openurl/?pid=zter:zter321&url_ver=Z39.88-2004&&rft_id=info:doi/10.7551/mitpress/9780262533287.003.0006&noredirect=true&format=unixref
+			
 			if (!refXML.length) refXML = ZU.xpath(itemXML, 'book_series_metadata');
 			if (!refXML.length) refXML = ZU.xpath(itemXML, 'book_set_metadata');
 			metadataXML = refXML;
@@ -398,6 +397,10 @@ if (!metadataXML || !metadataXML.length) {
 		item.pages = ZU.xpathText(pages, 'first_page[1]');
 		var lastPage = ZU.xpathText(pages, 'last_page[1]');
 		if (lastPage) item.pages += "-"+lastPage;
+	}
+	else {
+		// use article Number instead
+		item.pages = ZU.xpathText(refXML, 'publisher_item/item_number')
 	}
 
 	item.DOI = ZU.xpathText(refXML, 'doi_data/doi');

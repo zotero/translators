@@ -5,7 +5,7 @@
 	"target": "",
 	"minVersion": "4.0.29.11",
 	"maxVersion": "",
-	"priority": 80,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcs",
@@ -103,7 +103,10 @@ function processDOIs(dois) {
 					if (typeof item[field] != 'string') continue;
 					// check for control characters that should never be in strings from CrossRef
 					if (/[\u007F-\u009F]/.test(item[field])) {
-						item[field] = decodeURIComponent(escape(item[field]));
+						var escaped = item[field].replace(/[^0-9A-Za-z ]/g, function(c) {
+							return "%" + c.charCodeAt(0).toString(16);
+						});
+						item[field] = decodeURIComponent(escaped);
 					}
 				}
 				item.complete();
