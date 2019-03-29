@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-04-17 20:00:00"
+	"lastUpdated": "2019-03-29 12:34:44"
 }
 
 function detectSearch(item) {
@@ -62,7 +62,7 @@ function doWeb(doc, url) {
 		}
 		
 		var items = {};
-		for (var i=0; i<rows.length; i++) {
+		for (let i=0; i<rows.length; i++) {
 			var row = getTitleId(rows[i]);
 			items[row.id] = row.title;
 		}
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 			}
 			
 			ZU.doGet(urls, parseXML);
-		})
+		});
 	} else {
 		var id;
 		var p = url.indexOf("/pdf/");
@@ -92,9 +92,9 @@ function doWeb(doc, url) {
 		if (!id) throw new Error('Could not find arXiv ID on page.');
 		
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		var url = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
+		var apiurl = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
-		ZU.doGet(url, parseXML);
+		ZU.doGet(apiurl, parseXML);
 	}
 }
 
@@ -124,19 +124,19 @@ function parseXML(text) {
 	//Put the first description into abstract, all other into notes.
 	if (descriptions.length>0) {
 		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for (var j=1; j<descriptions.length; j++) {
+		for (let j=1; j<descriptions.length; j++) {
 			var noteStr = ZU.trimInternal(descriptions[j].textContent);
 			newItem.notes.push({note:noteStr});		
 		}	
 	}	
 	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for (var j=0; j<subjects.length; j++) {
+	for (let j=0; j<subjects.length; j++) {
 		var subject = ZU.trimInternal(subjects[j].textContent);
 		newItem.tags.push(subject);		
 	}	
 					
 	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for (var j=0; j<identifiers.length; j++) {
+	for (let j=0; j<identifiers.length; j++) {
 		var identifier = ZU.trimInternal(identifiers[j].textContent);
 		if (identifier.substr(0, 4) == "doi:") {
 			newItem.DOI = identifier.substr(4);
@@ -175,7 +175,7 @@ function parseXML(text) {
 	if (newItem.DOI) {
 		var translate = Zotero.loadTranslator("search");
 		// CrossRef
-		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 		
 		var item = {"itemType":"journalArticle", "DOI": newItem.DOI};
 		translate.setSearch(item);
