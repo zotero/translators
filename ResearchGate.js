@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-26 16:14:54"
+	"lastUpdated": "2019-03-30 14:52:11"
 }
 
 /*
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 			default:
 				return "book";
 		}
-	} else if ((url.includes('/search?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
+	} else if ((url.match('/search(\\?|/)?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -74,7 +74,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('a.publication-title, a.js-publication-title-link, a[itemprop="mainEntityOfPage"]');
 	if (!rows.length) {
-		rows = ZU.xpath(doc, '//div[@itemprop="headline"]/a[contains(@class,"nova-e-link")]');
+		rows = ZU.xpath(doc, '//div[contains(@class, "nova-v-publication-item__stack-item")]//a[contains(@class,"nova-e-link")]');
 	}
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
@@ -115,7 +115,7 @@ function scrape(doc, url) {
 		if (uidURL) uid = uidURL[1];
 	}
 	uid = uid.replace('PB:', '');
-	var risURL = "https://www.researchgate.net/publicliterature.PublicationHeaderDownloadCitation.downloadCitation.html?publicationUid=" + uid + "&fileType=RIS&citation=citationAndAbstract";
+	var risURL = "https://www.researchgate.net/lite.publication.PublicationDownloadCitationModal.downloadCitation.html?fileType=RIS&citation=citationAndAbstract&publicationUid=" + uid;
 	var pdfURL = attr(doc, 'meta[property="citation_pdf_url"]', 'content');
 
 	ZU.doGet(risURL, function(text) {
