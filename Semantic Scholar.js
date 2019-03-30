@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www[.])?semanticscholar\\.org/(search|paper|author)",
+	"target": "^https?://(www\\.semanticscholar\\.org/(search|paper|author)|pdfs\\.semanticscholar\\.org/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-03-30 15:55:54"
+	"lastUpdated": "2019-03-30 16:44:44"
 }
 
 /*
@@ -45,6 +45,8 @@ var bibtex2zoteroTypeMap = {
 function detectWeb(doc, url) {
 	if (url.includes('/search') || url.includes('/author/')) {
 		return 'multiple';
+	} else if (url.includes('pdfs.semanticscholar.org')) {
+		return 'journalArticle';
 	} else {
 		let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
 		let type = citation.split('{')[0].replace('@', '');
@@ -59,6 +61,11 @@ function doWeb(doc, url) {
 				ZU.processDocuments(Object.keys(selected), parseDocument);
 			}
 		});
+	} else if (url.includes('pdfs.semanticscholar.org')) {
+		let urlComponents = url.split('/');
+		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
+		const API_URL = 'https://api.semanticscholar.org/';
+		ZU.processDocuments(API_URL + paperId, parseDocument);
 	} else {
 		parseDocument(doc, url);
 	}
