@@ -15,7 +15,8 @@
 		"ZU": "readonly",
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
-		"XMLSerializer": "readonly"
+		"XMLSerializer": "readonly",
+		"atob": "readonly"
 	},
 	"rules": {
 		"accessor-pairs": "error",
