@@ -15,279 +15,310 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-25 13:29:42"
+	"lastUpdated": "2019-03-30 09:05:38"
 }
+
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Simon Kornblith and Richard Karnesky
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 var fromMarcGenre = {
 //		"abstract or summary":XXX,
 //		"abstract":XXX,
 //		"summary":XXX,
-	"art reproduction":"artwork",
-	"article":"journalArticle",
-	"autobiography":"book",
-	"bibliography":"book",
-	"biography":"book",
-	"book":"book",
-//		"calendar":XXX,
-//		"catalog":XXX,
-	"chart":"artwork",
-	"comic or graphic novel":"book",
-	"comic":"book",
-	"graphic novel":"book",
-	"comic strip":"artwork",
-	"conference publication":"conferencePaper",
-//		"database":XXX,
-	"dictionary":"dictionaryEntry",
-	"diorama":"artwork",
-//		"directory":XXX,
-	"drama":"book",
-	"encyclopedia":"encyclopediaArticle",
-//		"essay":XXX,
-	"festschrift":"book",
-	"fiction":"book",
-//		"filmography":XXX,
-	"filmstrip":"videoRecording",
-//		"findingaid":XXX,
-//		"flash card":XXX,
-	"folktale":"book",
-//		"font":XXX,
-//		"game":XXX,
-	"government publication":"book",
-	"graphic":"artwork",
-	"globe":"map",
-	"handbook":"book",
-	"history":"book",
-	"hymnal":"book",
-	"humor,satire":"book",
-	"humor":"book",
-	"satire":"book",
-//		"index":XXX,
-//		"instruction":XXX,
-//		"interview":XXX,
-//		"issue":XXX,
-	"journal":"journalArticle",
-	"kit":"artwork",
-//		"language instruction":XXX,
-	"law report or digest":"journalArticle",
-	"law report":"journalArticle",
-	"digest":"journalArticle",
-	"law digest":"journalArticle",
-	"legal article":"journalArticle",
-	"legal case and case notes":"case",
-	"legal case":"case",
-	"case notes":"case",
-	"legislation":"statute",
-	"loose-leaf":"manuscript",
-	"map":"map",
-	"memoir":"book",
-	"microscope slide":"artwork",
-	"model":"artwork",
-//		"multivolume monograph":XXX,
-	"novel":"book",
-//		"numeric data":XXX,
-//		"offprint":XXX,
-	"online system or service":"webpage",
-	"online system":"webpage",
-	"service":"webpage",
-	"online service":"webpage",
-	"patent":"patent",
-	"periodical":"journalArticle",
-	"picture":"artwork",
-//		"poetry":XXX,
-//		"programmed text":XXX,
-	"realia":"artwork",
-//		"rehearsal":XXX,
-//		"remote sensing image":XXX,
-//		"reporting":XXX,
-//		"review":XXX,
-	"script":"book",
-//		"series":XXX,
-//		"short story":XXX,
-	"slide":"artwork",
-	"sound":"audioRecording",
-	"speech":"audioRecording",
-	"standard or specification":"report",
-	"standard":"report",
-//		"specification":XXX,
-//		"statistics":XXX,
-//		"survey of literature":XXX,
-	"technical report":"report",
-	"newspaper":"newspaperArticle",
-	"theses":"thesis",
-	"thesis":"thesis",
-//		"toy":XXX,
-	"transparency":"artwork",
-//		"treaty":XXX,
-	"videorecording":"videoRecording",
-	"letter":"letter",
-	"motion picture":"film",
-	"art original":"artwork",
-	"web site":"webpage",
-	"yearbook":"book"
+	"art reproduction": "artwork",
+	article: "journalArticle",
+	autobiography: "book",
+	bibliography: "book",
+	biography: "book",
+	book: "book",
+	//		"calendar":XXX,
+	//		"catalog":XXX,
+	chart: "artwork",
+	"comic or graphic novel": "book",
+	comic: "book",
+	"graphic novel": "book",
+	"comic strip": "artwork",
+	"conference publication": "conferencePaper",
+	//		"database":XXX,
+	dictionary: "dictionaryEntry",
+	diorama: "artwork",
+	//		"directory":XXX,
+	drama: "book",
+	encyclopedia: "encyclopediaArticle",
+	//		"essay":XXX,
+	festschrift: "book",
+	fiction: "book",
+	//		"filmography":XXX,
+	filmstrip: "videoRecording",
+	//		"findingaid":XXX,
+	//		"flash card":XXX,
+	folktale: "book",
+	//		"font":XXX,
+	//		"game":XXX,
+	"government publication": "book",
+	graphic: "artwork",
+	globe: "map",
+	handbook: "book",
+	history: "book",
+	hymnal: "book",
+	"humor,satire": "book",
+	humor: "book",
+	satire: "book",
+	//		"index":XXX,
+	//		"instruction":XXX,
+	//		"interview":XXX,
+	//		"issue":XXX,
+	journal: "journalArticle",
+	kit: "artwork",
+	//		"language instruction":XXX,
+	"law report or digest": "journalArticle",
+	"law report": "journalArticle",
+	digest: "journalArticle",
+	"law digest": "journalArticle",
+	"legal article": "journalArticle",
+	"legal case and case notes": "case",
+	"legal case": "case",
+	"case notes": "case",
+	legislation: "statute",
+	"loose-leaf": "manuscript",
+	map: "map",
+	memoir: "book",
+	"microscope slide": "artwork",
+	model: "artwork",
+	//		"multivolume monograph":XXX,
+	novel: "book",
+	//		"numeric data":XXX,
+	//		"offprint":XXX,
+	"online system or service": "webpage",
+	"online system": "webpage",
+	service: "webpage",
+	"online service": "webpage",
+	patent: "patent",
+	periodical: "journalArticle",
+	picture: "artwork",
+	//		"poetry":XXX,
+	//		"programmed text":XXX,
+	realia: "artwork",
+	//		"rehearsal":XXX,
+	//		"remote sensing image":XXX,
+	//		"reporting":XXX,
+	//		"review":XXX,
+	script: "book",
+	//		"series":XXX,
+	//		"short story":XXX,
+	slide: "artwork",
+	sound: "audioRecording",
+	speech: "audioRecording",
+	"standard or specification": "report",
+	standard: "report",
+	//		"specification":XXX,
+	//		"statistics":XXX,
+	//		"survey of literature":XXX,
+	"technical report": "report",
+	newspaper: "newspaperArticle",
+	theses: "thesis",
+	thesis: "thesis",
+	//		"toy":XXX,
+	transparency: "artwork",
+	//		"treaty":XXX,
+	videorecording: "videoRecording",
+	letter: "letter",
+	"motion picture": "film",
+	"art original": "artwork",
+	"web site": "webpage",
+	yearbook: "book"
 };
 
 var toMarcGenre = {
-	"artwork":"art original",
-	"audioRecording":"sound",
-	"bill":"legislation",
-	"blogPost":"web site",
-	"book":"book",
-	"bookSection":"book",
-	"case":"legal case and case notes",
-	//"computerProgram":XXX,
-	"conferencePaper":"conference publication",
-	"dictionaryEntry":"dictionary",
-	//"document":XXX,
-	"email":"letter",
-	"encyclopediaArticle":"encyclopedia",
-	"film":"motion picture",
-	"forumPost":"web site",
-	//"hearing":XXX,
-	"instantMessage":"letter",
-	"interview":"interview",
-	"journalArticle":"journal",
-	"letter":"letter",
-	"magazineArticle":"periodical",
-	//"manuscript":XXX,
-	"map":"map",
-	"newspaperArticle":"newspaper",
-	"patent":"patent",
-	"podcast":"speech",
-	//"presentation":XXX,
-	"radioBroadcast":"sound",
-	"report":"technical report",
-	"statute":"legislation",
-	"thesis":"thesis",
-	//"tvBroadcast":XXX,
-	"videoRecording":"videorecording",
-	"webpage":"web site"
+	artwork: "art original",
+	audioRecording: "sound",
+	bill: "legislation",
+	blogPost: "web site",
+	book: "book",
+	bookSection: "book",
+	case: "legal case and case notes",
+	// "computerProgram":XXX,
+	conferencePaper: "conference publication",
+	dictionaryEntry: "dictionary",
+	// "document":XXX,
+	email: "letter",
+	encyclopediaArticle: "encyclopedia",
+	film: "motion picture",
+	forumPost: "web site",
+	// "hearing":XXX,
+	instantMessage: "letter",
+	interview: "interview",
+	journalArticle: "journal",
+	letter: "letter",
+	magazineArticle: "periodical",
+	// "manuscript":XXX,
+	map: "map",
+	newspaperArticle: "newspaper",
+	patent: "patent",
+	podcast: "speech",
+	// "presentation":XXX,
+	radioBroadcast: "sound",
+	report: "technical report",
+	statute: "legislation",
+	thesis: "thesis",
+	// "tvBroadcast":XXX,
+	videoRecording: "videorecording",
+	webpage: "web site"
 };
 
 var dctGenres = {
-	//"collection":XXX,
-	//"dataset":XXX,
-	//"event":XXX,
-	"image":"artwork",
-	"interactiveresource":"webpage",
-	//"model":XXX,
-	"movingimage":"videoRecording",
-	//"physical object":XXX,
-	//"place":XXX,
-	//"resource":XXX,
-	//"service":XXX,
-	"software":"computerProgram",
-	"sound":"audioRecording",
-	"stillimage":"artwork"
-	//"text":XXX
+	// "collection":XXX,
+	// "dataset":XXX,
+	// "event":XXX,
+	image: "artwork",
+	interactiveresource: "webpage",
+	// "model":XXX,
+	movingimage: "videoRecording",
+	// "physical object":XXX,
+	// "place":XXX,
+	// "resource":XXX,
+	// "service":XXX,
+	software: "computerProgram",
+	sound: "audioRecording",
+	stillimage: "artwork"
+	// "text":XXX
 };
 
 var fromTypeOfResource = {
-	//"text":XXX,
-	"cartographic":"map",
-	//"notated music":XXX,
-	"sound recording-musical":"audioRecording",
-	"sound recording-nonmusical":"audioRecording",
-	"sound recording":"audioRecording",
-	"still image":"artwork",
-	"moving image":"videoRecording",
-	//"three dimensional object":XXX,
-	"software, multimedia":"computerProgram"
+	// "text":XXX,
+	cartographic: "map",
+	// "notated music":XXX,
+	"sound recording-musical": "audioRecording",
+	"sound recording-nonmusical": "audioRecording",
+	"sound recording": "audioRecording",
+	"still image": "artwork",
+	"moving image": "videoRecording",
+	// "three dimensional object":XXX,
+	"software, multimedia": "computerProgram"
 };
 
 var toTypeOfResource = {
-	"artwork":"still image",
-	"audioRecording":"sound recording",
-	"bill":"text",
-	"blogPost":"software, multimedia",
-	"book":"text",
-	"bookSection":"text",
-	"case":"text",
-	"computerProgram":"software, multimedia",
-	"conferencePaper":"text",
-	"dictionaryEntry":"text",
-	"document":"text",
-	"email":"text",
-	"encyclopediaArticle":"text",
-	"film":"moving image",
-	"forumPost":"text",
-	"hearing":"text",
-	"instantMessage":"text",
-	"interview":"text",
-	"journalArticle":"text",
-	"letter":"text",
-	"magazineArticle":"text",
-	"manuscript":"text",
-	"map":"cartographic",
-	"newspaperArticle":"text",
-	"patent":"text",
-	"podcast":"sound recording-nonmusical",
-	"presentation":"mixed material",
-	"radioBroadcast":"sound recording-nonmusical",
-	"report":"text",
-	"statute":"text",
-	"thesis":"text",
-	"tvBroadcast":"moving image",
-	"videoRecording":"moving image",
-	"webpage":"software, multimedia"
+	artwork: "still image",
+	audioRecording: "sound recording",
+	bill: "text",
+	blogPost: "software, multimedia",
+	book: "text",
+	bookSection: "text",
+	case: "text",
+	computerProgram: "software, multimedia",
+	conferencePaper: "text",
+	dictionaryEntry: "text",
+	document: "text",
+	email: "text",
+	encyclopediaArticle: "text",
+	film: "moving image",
+	forumPost: "text",
+	hearing: "text",
+	instantMessage: "text",
+	interview: "text",
+	journalArticle: "text",
+	letter: "text",
+	magazineArticle: "text",
+	manuscript: "text",
+	map: "cartographic",
+	newspaperArticle: "text",
+	patent: "text",
+	podcast: "sound recording-nonmusical",
+	presentation: "mixed material",
+	radioBroadcast: "sound recording-nonmusical",
+	report: "text",
+	statute: "text",
+	thesis: "text",
+	tvBroadcast: "moving image",
+	videoRecording: "moving image",
+	webpage: "software, multimedia"
 };
 
 var modsTypeRegex = {
-//	'artwork': 
+//	'artwork':
 //	'audioRecording': /\bmusic/i,
-//	'bill': 
-	'blogPost': /\bblog/i,
-//	'book': 
-//	'bookSection': 
-//	'case': 
-//	'computerProgram': 
-//	'conferencePaper': 
-//	'dictionaryEntry': 
-//	'email': 
-//	'encyclopediaArticle': 
-//	'film': 
-//	'forumPost': 
-//	'hearing': 
-//	'instantMessage': 
-//	'interview': 
-	'journalArticle': /journal\s*article/i,
-//	'letter': 
-	'magazineArticle': /magazine\s*article/i,
-//	'manuscript': 
-//	'map': 
-	'newspaperArticle': /newspaper\*article/i
-//	'patent': 
-//	'podcast': 
-//	'presentation': 
-//	'radioBroadcast': 
-//	'report': 
-//	'statute': 
-//	'thesis': 
-//	'tvBroadcast': 
-//	'videoRecording': 
-//	'webpage': 
+//	'bill':
+	blogPost: /\bblog/i,
+	//	'book':
+	//	'bookSection':
+	//	'case':
+	//	'computerProgram':
+	//	'conferencePaper':
+	//	'dictionaryEntry':
+	//	'email':
+	//	'encyclopediaArticle':
+	//	'film':
+	//	'forumPost':
+	//	'hearing':
+	//	'instantMessage':
+	//	'interview':
+	journalArticle: /journal\s*article/i,
+	//	'letter':
+	magazineArticle: /magazine\s*article/i,
+	//	'manuscript':
+	//	'map':
+	newspaperArticle: /newspaper\*article/i
+//	'patent':
+//	'podcast':
+//	'presentation':
+//	'radioBroadcast':
+//	'report':
+//	'statute':
+//	'thesis':
+//	'tvBroadcast':
+//	'videoRecording':
+//	'webpage':
 };
 
 var modsInternetMediaTypes = {
-	//a ton of types listed at http://www.iana.org/assignments/media-types/index.html
+	// a ton of types listed at http://www.iana.org/assignments/media-types/index.html
 	'text/html': 'webpage'
 };
 
 var marcRelators = {
-	"aut":"author",
-	"edt":"editor",
-	"ctb":"contributor",
-	"pbd":"seriesEditor",
-	"trl":"translator"
+	aut: "author",
+	edt: "editor",
+	ctb: "contributor",
+	pbd: "seriesEditor",
+	trl: "translator"
 };
 
 // Item types that are part of a larger work
-var partialItemTypes = ["blogPost", "bookSection", "conferencePaper", "dictionaryEntry",
-	"encyclopediaArticle", "forumPost", "journalArticle", "magazineArticle",
-	"newspaperArticle", "webpage"];
+var partialItemTypes = ["blogPost",
+	"bookSection",
+	"conferencePaper",
+	"dictionaryEntry",
+	"encyclopediaArticle",
+	"forumPost",
+	"journalArticle",
+	"magazineArticle",
+	"newspaperArticle",
+	"webpage"];
 
 // Namespace array for using ZU.xpath
 var ns = "http://www.loc.gov/mods/v3",
-	xns = {"m":ns};
+	xns = { m: ns };
 
 function detectImport() {
 	var doc = Zotero.getXML().documentElement;
@@ -312,7 +343,7 @@ function mapProperty(parentElement, elementName, property, attributes) {
 	var doc = parentElement.ownerDocument,
 		newElement = doc.createElementNS(ns, elementName);
 	if (attributes) {
-		for (var i in attributes) {
+		for (let i in attributes) {
 			newElement.setAttribute(i, attributes[i]);
 		}
 	}
@@ -327,12 +358,13 @@ function doExport() {
 	var doc = parser.parseFromString('<modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />', 'application/xml');
 	
 	var item;
-	while (item = Zotero.nextItem()) {
+	let titleInfo;
+	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
 		// Don't export notes or standalone attachments
 		if (item.itemType === "note" || item.itemType === "attachment") continue;
 		
 		var mods = doc.createElementNS(ns, "mods"),
-			isPartialItem = partialItemTypes.indexOf(item.itemType) !== -1,
+			isPartialItem = partialItemTypes.includes(item.itemType),
 			recordInfo = doc.createElementNS(ns, "recordInfo"),
 			host = doc.createElementNS(ns, "relatedItem"),
 			series = doc.createElementNS(ns, "relatedItem"),
@@ -342,13 +374,13 @@ function doExport() {
 		
 		// XML tag titleInfo; object field title
 		if (item.title) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.title);
 			mods.appendChild(titleInfo);
 		}
 		
 		if (item.shortTitle) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			titleInfo.setAttribute("type", "abbreviated");
 			mapProperty(titleInfo, "title", item.shortTitle);
 			mods.appendChild(titleInfo);
@@ -356,58 +388,64 @@ function doExport() {
 		
 		// XML tag typeOfResource/genre; object field type
 		mapProperty(mods, "typeOfResource", toTypeOfResource[item.itemType]);
-		mapProperty(mods, "genre", item.itemType, {"authority":"local"});
-		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], {"authority":"marcgt"});
+		mapProperty(mods, "genre", item.itemType, { authority: "local" });
+		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], { authority: "marcgt" });
 		
 		// XML tag genre; object field thesisType, type
 		if (item.thesisType) {
 			mapProperty(mods, "genre", item.thesisType);
-		} else if (item.type) {
+		}
+		else if (item.type) {
 			mapProperty(mods, "genre", item.type);
 		}
 		
 		// XML tag name; object field creators
-		for (var j=0; j<item.creators.length; j++) {
+		for (let j = 0; j < item.creators.length; j++) {
 			var creator = item.creators[j],
 				roleTerm = "";
 			if (creator.creatorType == "author") {
 				roleTerm = "aut";
-			} else if (creator.creatorType == "editor") {
+			}
+			else if (creator.creatorType == "editor") {
 				roleTerm = "edt";
-			} else if (creator.creatorType == "translator") {
+			}
+			else if (creator.creatorType == "translator") {
 				roleTerm = "trl";
-			} else if (creator.creatorType == "seriesEditor") {
+			}
+			else if (creator.creatorType == "seriesEditor") {
 				roleTerm = "pbd";
-			} else {
+			}
+			else {
 				roleTerm = "ctb";
 			}
 
-			var name = doc.createElementNS(ns, "name"), namePart;
+			const name = doc.createElementNS(ns, "name");
 			
 			if (creator.fieldMode == 1) {
 				name.setAttribute("type", "corporate");
 				
 				mapProperty(name, "namePart", creator.lastName);
-			} else {
+			}
+			else {
 				name.setAttribute("type", "personal");
 				
-				mapProperty(name, "namePart", creator.lastName, {"type":"family"});
-				mapProperty(name, "namePart", creator.firstName, {"type":"given"});
+				mapProperty(name, "namePart", creator.lastName, { type: "family" });
+				mapProperty(name, "namePart", creator.firstName, { type: "given" });
 			}
 			
 			var role = doc.createElementNS(ns, "role");
 			mapProperty(role, "roleTerm", roleTerm,
-				{"type":"code", "authority":"marcrelator"});
+				{ type: "code", authority: "marcrelator" });
 			name.appendChild(role);
 			
-			var creatorParent = creator.creatorType === "seriesEditor" ? series
-				: creator.creatorType === "editor" ? topOrHost
-				: mods;
+			var creatorParent = (creator.creatorType === "seriesEditor")
+				? series
+				: ((creator.creatorType === "editor") ? topOrHost : mods);
 			creatorParent.appendChild(name);
 		}
 		
 		// XML tag recordInfo.recordOrigin; used to store our generator note
-		//mods.recordInfo.recordOrigin = "Zotero for Firefox "+Zotero.Utilities.getVersion();
+		// mods.recordInfo.recordOrigin = "Zotero for Firefox "+Zotero.Utilities.getVersion();
 		
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
 		
@@ -423,9 +461,9 @@ function doExport() {
 		
 		// XML tag detail; object field volume
 		const details = ["volume", "issue", "section"];
-		for (var i=0; i<details.length; i++) {
+		for (let i = 0; i < details.length; i++) {
 			if (item[details[i]] || item[details[i]] === 0) {
-				var detail = doc.createElementNS(ns, "detail"),
+				const detail = doc.createElementNS(ns, "detail"),
 					number = doc.createElementNS(ns, "number");
 				detail.setAttribute("type", details[i]);
 				number.appendChild(doc.createTextNode(item[details[i]]));
@@ -450,7 +488,7 @@ function doExport() {
 			topOrHost.appendChild(part);
 		}
 		
-		var originInfo = doc.createElementNS(ns, "originInfo")
+		var originInfo = doc.createElementNS(ns, "originInfo");
 		
 		// XML tag originInfo; object fields edition, place, publisher, year, date
 		mapProperty(originInfo, "edition", item.edition);
@@ -464,26 +502,30 @@ function doExport() {
 		}
 		if (item.publisher) {
 			mapProperty(originInfo, "publisher", item.publisher);
-		} else if (item.distributor) {
+		}
+		else if (item.distributor) {
 			mapProperty(originInfo, "distributor", item.publisher);
 		}
 		if (item.date) {
-			if (["book", "bookSection"].indexOf(item.itemType) !== -1) {
+			let dateType;
+			if (["book", "bookSection"].includes(item.itemType)) {
 				// Assume year is copyright date
-				var dateType = "copyrightDate";
-			} else if (["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
+				dateType = "copyrightDate";
+			}
+			else if (["journalArticle", "magazineArticle", "newspaperArticle"].includes(item.itemType)) {
 				// Assume date is date issued
-				var dateType = "dateIssued";
-			} else {
+				dateType = "dateIssued";
+			}
+			else {
 				// Assume date is date created
-				var dateType = "dateCreated";
+				dateType = "dateCreated";
 			}
 			mapProperty(originInfo, dateType, item.date);
 		}
 
 		if (item.numPages) {
 			var physicalDescription = doc.createElementNS(ns, "physicalDescription");
-			mapProperty(physicalDescription, "extent", item.numPages+" p.");
+			mapProperty(physicalDescription, "extent", item.numPages + " p.");
 			mods.appendChild(physicalDescription);
 		}
 
@@ -491,14 +533,17 @@ function doExport() {
 			// eXist Solutions points out that these types are more often
 			// continuing than not & will use this internally.
 			// Perhaps comment this out in the main distribution, though.
-			if (["journalArticle", "magazineArticle", "newspaperArticle"].indexOf(item.itemType) !== -1) {
+			if (["journalArticle", "magazineArticle", "newspaperArticle"].includes(item.itemType)) {
 				mapProperty(originInfo, "issuance", "continuing");
 			}
-			else if (["bookSection", "conferencePaper", "dictionaryEntry",
-					"encyclopediaArticle"].indexOf(item.itemType) !== -1) {
+			else if (["bookSection",
+				"conferencePaper",
+				"dictionaryEntry",
+				"encyclopediaArticle"].includes(item.itemType)) {
 				mapProperty(originInfo, "issuance", "monographic");
 			}
-		} else {
+		}
+		else {
 			// eXist Solutions points out that most types are more often
 			// monographic than not & will use this internally.
 			// Perhaps comment this out in the main distribution, though.
@@ -511,27 +556,27 @@ function doExport() {
 		}
 		
 		// XML tag identifier; object fields ISBN, ISSN
-		mapProperty(topOrHost, "identifier", item.ISBN, {"type":"isbn"});
-		mapProperty(topOrHost, "identifier", item.ISSN, {"type":"issn"});
-		mapProperty(mods, "identifier", item.DOI, {"type":"doi"});
+		mapProperty(topOrHost, "identifier", item.ISBN, { type: "isbn" });
+		mapProperty(topOrHost, "identifier", item.ISSN, { type: "issn" });
+		mapProperty(mods, "identifier", item.DOI, { type: "doi" });
 		
 		// XML tag relatedItem.name; object field conferenceName
 		if (item.conferenceName) {
-			var name = doc.createElementNS(ns, "name");
+			const name = doc.createElementNS(ns, "name");
 			name.setAttribute("type", "conference");
 			mapProperty(name, "namePart", item.conferenceName);
 		}
 		
 		// XML tag relatedItem.titleInfo; object field publication
 		if (item.publicationTitle) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.publicationTitle);
 			host.appendChild(titleInfo);
 		}
 		
 		// XML tag relatedItem.titleInfo; object field journalAbbreviation
 		if (item.journalAbbreviation) {
-			var titleInfo = doc.createElementNS(ns, "titleInfo");
+			titleInfo = doc.createElementNS(ns, "titleInfo");
 			titleInfo.setAttribute("type", "abbreviated");
 			mapProperty(titleInfo, "title", item.journalAbbreviation);
 			host.appendChild(titleInfo);
@@ -542,15 +587,15 @@ function doExport() {
 
 		// XML tag location.url; object field url
 		if (item.url) {
-			var location = doc.createElementNS(ns, "location");
-			var url = mapProperty(location, "url", item.url, {"usage":"primary display"});
+			const location = doc.createElementNS(ns, "location");
+			var url = mapProperty(location, "url", item.url, { usage: "primary display" });
 			if (url && item.accessDate) url.setAttribute("dateLastAccessed", item.accessDate);
 			mods.appendChild(location);
 		}
 				
 		// XML tag location.physicalLocation; object field archiveLocation
 		if (item.archiveLocation) {
-			var location = doc.createElementNS(ns, "location");
+			const location = doc.createElementNS(ns, "location");
 			mapProperty(location, "physicalLocation", item.archiveLocation);
 			topOrHost.appendChild(location);
 		}
@@ -559,14 +604,14 @@ function doExport() {
 		mapProperty(mods, "abstract", item.abstractNote);
 		
 		// XML tag series/titleInfo; object field series, seriesTitle, seriesText, seriesNumber
-		var titleInfo = doc.createElementNS(ns, "titleInfo");
+		titleInfo = doc.createElementNS(ns, "titleInfo");
 		mapProperty(titleInfo, "title", item.series);
 		mapProperty(titleInfo, "title", item.seriesTitle);
 		mapProperty(titleInfo, "subTitle", item.seriesText);
 		if (titleInfo.hasChildNodes()) series.appendChild(titleInfo);
 		
 		if (item.seriesNumber) {
-			var seriesPart = doc.createElementNS(ns, "part"),
+			const seriesPart = doc.createElementNS(ns, "part"),
 				detail = doc.createElementNS(ns, "detail"),
 				number = doc.createElementNS(ns, "number");
 			detail.setAttribute("type", "volume");
@@ -579,14 +624,14 @@ function doExport() {
 		/** NOTES **/
 		
 		if (Zotero.getOption("exportNotes")) {
-			for (var j=0; j<item.notes.length; j++) {
+			for (let j = 0; j < item.notes.length; j++) {
 				mapProperty(mods, "note", item.notes[j].note);
 			}
 		}
 		
 		/** TAGS **/
 		
-		for (var j=0; j<item.tags.length; j++) {
+		for (let j = 0; j < item.tags.length; j++) {
 			var subject = doc.createElementNS(ns, "subject"),
 				topic = doc.createElementNS(ns, "topic");
 			topic.appendChild(doc.createTextNode(item.tags[j].tag));
@@ -598,7 +643,7 @@ function doExport() {
 		
 		if (item.language) {
 			var language = doc.createElementNS(ns, "language");
-			mapProperty(language, "languageTerm", item.language, {"type":"text"});
+			mapProperty(language, "languageTerm", item.language, { type: "text" });
 			mods.appendChild(language);
 		}
 
@@ -617,7 +662,7 @@ function doExport() {
 		doc.documentElement.appendChild(mods);
 	}
 	
-	Zotero.write('<?xml version="1.0"?>'+"\n");
+	Zotero.write('<?xml version="1.0"?>\n');
 	var serializer = new XMLSerializer();
 	Zotero.write(serializer.serializeToString(doc));
 }
@@ -625,14 +670,14 @@ function doExport() {
 function processTitleInfo(titleInfo) {
 	var title = ZU.xpathText(titleInfo, "m:title[1]", xns).trim();
 	var subtitle = ZU.xpathText(titleInfo, "m:subTitle[1]", xns);
-	if (subtitle) title = title.replace(/:$/,'') + ": "+ subtitle.trim();
+	if (subtitle) title = title.replace(/:$/, '') + ": " + subtitle.trim();
 	var nonSort = ZU.xpathText(titleInfo, "m:nonSort[1]", xns);
 	if (nonSort) title = nonSort.trim() + " " + title;
 	var partNumber = ZU.xpathText(titleInfo, "m:partNumber[1]", xns);
 	var partName = ZU.xpathText(titleInfo, "m:partName[1]", xns);
-	if (partNumber && partName) title = title.replace(/\.$/,'') + ". "+ partNumber.trim() + ": " + partName.trim()
-	else if (partNumber) title = title.replace(/\.$/,'') + ". " + partNumber.trim()
-	else if (partName) title = title.replace(/\.$/,'') + ". " + partName.trim();
+	if (partNumber && partName) title = title.replace(/\.$/, '') + ". " + partNumber.trim() + ": " + partName.trim();
+	else if (partNumber) title = title.replace(/\.$/, '') + ". " + partNumber.trim();
+	else if (partName) title = title.replace(/\.$/, '') + ". " + partName.trim();
 	return title;
 }
 
@@ -653,29 +698,29 @@ function processTitle(contextElement) {
 function processGenre(contextElement) {
 	// Try to get itemType by treating local genre as Zotero item type
 	var genre = ZU.xpath(contextElement, 'm:genre[@authority="local"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
 	}
 	
 	// Try to get MARC genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="marcgt"] | m:genre[@authority="marc"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		if (fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
 	}
 	
 	// Try to get DCT genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="dct"]', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent.replace(/\s+/g, "");
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent.replace(/\s+/g, "");
 		if (dctGenres[genreStr]) return dctGenres[genreStr];
 	}
 	
 	// Try unlabeled genres
 	genre = ZU.xpath(contextElement, 'm:genre', xns);
-	for (var i=0; i<genre.length; i++) {
-		var genreStr = genre[i].textContent;
+	for (let i = 0; i < genre.length; i++) {
+		const genreStr = genre[i].textContent;
 		
 		// Zotero
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
@@ -688,7 +733,7 @@ function processGenre(contextElement) {
 		if (dctGenres[dctGenreStr]) return dctGenres[dctGenreStr];
 		
 		// Try regexps
-		for (var type in modsTypeRegex) {
+		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(genreStr)) return type;
 		}
 	}
@@ -702,7 +747,7 @@ function processItemType(contextElement) {
 	
 	// Try to get type information from typeOfResource
 	var typeOfResource = ZU.xpath(contextElement, 'm:typeOfResource', xns);
-	for (var i=0; i<typeOfResource.length; i++) {
+	for (let i = 0; i < typeOfResource.length; i++) {
 		var typeOfResourceStr = typeOfResource[i].textContent.trim();
 		
 		// Try list
@@ -711,33 +756,30 @@ function processItemType(contextElement) {
 		}
 		
 		// Try regexps
-		for (var type in modsTypeRegex) {
+		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(typeOfResourceStr)) return type;
 		}
 	}
 	
-	var hasHost = false;
-	var periodical = false;
-	
 	// Try to get genre data from host
 	var hosts = ZU.xpath(contextElement, 'm:relatedItem[@type="host"]', xns);
-	for (var i=0; i<hosts.length; i++) {
+	for (let i = 0; i < hosts.length; i++) {
 		type = processGenre(hosts[i]);
 		if (type) return type;
 	}
 		
 	// Figure out if it's a periodical
-	var periodical = ZU.xpath(contextElement, 
+	var periodical = ZU.xpath(contextElement,
 		'm:relatedItem[@type="host"]/m:originInfo/m:issuance[text()="continuing" or text()="serial"]',
 		xns).length;
 
 	// Try physicalDescription/internetMediaType
 	var internetMediaTypes = ZU.xpath(contextElement, 'm:physicalDescription/m:internetMediaType', xns);
-	for (var i=0; i<internetMediaTypes.length; i++) {
+	for (let i = 0; i < internetMediaTypes.length; i++) {
 		var internetMediaTypeStr = internetMediaTypes[i].textContent.trim();
 		if (modsInternetMediaTypes[internetMediaTypeStr]) {
 			return modsInternetMediaTypes[internetMediaTypeStr];
-		};
+		}
 	}
 
 	// As a last resort, if it has a host, let's set it to book chapter, so we can import
@@ -752,7 +794,6 @@ function processItemType(contextElement) {
 
 function processCreator(name, itemType, defaultCreatorType) {
 	var creator = {};
-	var backupName = new Array();
 	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ") || undefined;
 	creator.lastName = ZU.xpathText(name, 'm:namePart[@type="family"]', xns, " ");
 	
@@ -763,10 +804,11 @@ function processCreator(name, itemType, defaultCreatorType) {
 		if (!backupName) return null;
 		
 		if (isPersonalName) {
-			creator = ZU.cleanAuthor(backupName.replace(/[\[\(][^A-Za-z]*[\]\)]/g, ''),
+			creator = ZU.cleanAuthor(backupName.replace(/[[(][^A-Za-z]*[\])]/g, ''),
 				"author", true);
 			delete creator.creatorType;
-		} else {
+		}
+		else {
 			creator.lastName = ZU.trimInternal(backupName);
 			creator.fieldMode = 1;
 		}
@@ -775,20 +817,20 @@ function processCreator(name, itemType, defaultCreatorType) {
 	if (!creator.lastName) return null;
 
 	// Look for roles
-	var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
+	let roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
 	var validCreatorsForItemType = ZU.getCreatorsForType(itemType);
-	for (var i=0; i<roles.length; i++) {
-		var roleStr = roles[i].textContent.toLowerCase();
-		if (validCreatorsForItemType.indexOf(roleStr) !== -1) {
+	for (let i = 0; i < roles.length; i++) {
+		const roleStr = roles[i].textContent.toLowerCase();
+		if (validCreatorsForItemType.includes(roleStr)) {
 			creator.creatorType = roleStr;
 		}
 	}
 	
 	if (!creator.creatorType) {
 		// Look for MARC roles
-		var roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
-		for (var i=0; i<roles.length; i++) {
-			var roleStr = roles[i].textContent.toLowerCase();
+		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
+		for (let i = 0; i < roles.length; i++) {
+			const roleStr = roles[i].textContent.toLowerCase();
 			if (marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
 		}
 		
@@ -801,36 +843,36 @@ function processCreator(name, itemType, defaultCreatorType) {
 
 function processCreators(contextElement, newItem, defaultCreatorType) {
 	var names = ZU.xpath(contextElement, 'm:name', xns);
-	for (var i=0; i<names.length; i++) {
+	for (let i = 0; i < names.length; i++) {
 		var creator = processCreator(names[i], newItem.itemType, defaultCreatorType);
 		if (creator) newItem.creators.push(creator);
 	}
 }
 
 function processExtent(extent, newItem) {
-	//try to parse extent according to
-	//http://www.loc.gov/standards/mods/v3/mods-userguide-elements.html#extent
-	//i.e. http://www.loc.gov/marc/bibliographic/bd300.html
-	//and http://www.loc.gov/marc/bibliographic/bd306.html
+	// try to parse extent according to
+	// http://www.loc.gov/standards/mods/v3/mods-userguide-elements.html#extent
+	// i.e. http://www.loc.gov/marc/bibliographic/bd300.html
+	// and http://www.loc.gov/marc/bibliographic/bd306.html
 	var extentRe = new RegExp(
-		'^(.*?)(?=(?:[:;]|$))' +	//extent [1]
-		'(?::.*?(?=(?:;|$)))?' +	//other physical details
-		'(?:;(.*))?' +				//dimensions [2]
-		'$'							//make sure to capture the rest of the line
-		);
+		'^(.*?)(?=(?:[:;]|$))'	// extent [1]
+		+ '(?::.*?(?=(?:;|$)))?'	// other physical details
+		+ '(?:;(.*))?'				// dimensions [2]
+		+ '$'							// make sure to capture the rest of the line
+	);
 
 	var ma = extentRe.exec(extent);
 	if (ma && ma[1]) {
-		//drop supplemental info (i.e. everything after +)
-		if (ma[1].indexOf('+') >= 0) {
+		// drop supplemental info (i.e. everything after +)
+		if (ma[1].includes('+')) {
 			ma[1] = ma[1].slice(0, ma[1].indexOf('+'));
 		}
 
 		// pages
 		if (!newItem.pages && ZU.fieldIsValidForType('pages', newItem.itemType)) {
-			var pages = ma[1].match(/\bp(?:ages?)?\.?\s+([a-z]?\d+(?:\s*-\s*[a-z]?\d+))/i);
+			const pages = ma[1].match(/\bp(?:ages?)?\.?\s+([a-z]?\d+(?:\s*-\s*[a-z]?\d+))/i);
 			if (pages) {
-				newItem.pages = pages[1].replace(/\s+/,'');
+				newItem.pages = pages[1].replace(/\s+/, '');
 			}
 		}
 
@@ -842,7 +884,7 @@ function processExtent(extent, newItem) {
 			}
 		}
 
-		//issue
+		// issue
 		if (!newItem.issue && ZU.fieldIsValidForType('issue', newItem.itemType)) {
 			var issue = ma[1].match(/\b(?:no?|iss(?:ue)?)\.?\s+(\d+)/i);
 			if (issue) {
@@ -852,7 +894,7 @@ function processExtent(extent, newItem) {
 
 		// numPages
 		if (!newItem.numPages && ZU.fieldIsValidForType('numPages', newItem.itemType)) {
-			var pages = ma[1].match(/(\d+)\s*p(?:ages?)?\b/i);
+			const pages = ma[1].match(/(\d+)\s*p(?:ages?)?\b/i);
 			if (pages) {
 				newItem.numPages = pages[1];
 			}
@@ -860,8 +902,8 @@ function processExtent(extent, newItem) {
 
 		// numberOfVolumes
 		if (!newItem.numberOfVolumes && ZU.fieldIsValidForType('numberOfVolumes', newItem.itemType)) {
-			//includes volumes, scores, sound (discs, but I think there could be others)
-			//video (cassette, but could have others)
+			// includes volumes, scores, sound (discs, but I think there could be others)
+			// video (cassette, but could have others)
 			var nVol = ma[1].match(/(\d+)\s+(?:v(?:olumes?)?|scores?|sound|video)\b/i);
 			if (nVol) {
 				newItem.numberOfVolumes = nVol[1];
@@ -870,32 +912,34 @@ function processExtent(extent, newItem) {
 
 		// runningTime
 		if (!newItem.runningTime && ZU.fieldIsValidForType('runningTime', newItem.itemType)) {
-			//several possible formats:
+			// several possible formats:
 			var rt;
 			// 002016 = 20 min., 16 sec.
-			if (rt = ma[1].match(/\b(\d{2,3})(\d{2})(\d{2})\b/)) {
+			if (rt = ma[1].match(/\b(\d{2,3})(\d{2})(\d{2})\b/)) { // eslint-disable-line no-cond-assign
 				newItem.runningTime = rt[1] + ':' + rt[2] + ':' + rt[3];
 			// (ca. 124 min.)
-			} else if (rt = ma[1].match(/((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?)/i)) {
-				var hrs=0, mins=0, secs=0;
-				for (var i=2; i<7; i+=2) {
+			}
+			// eslint-disable-next-line no-cond-assign
+			else if (rt = ma[1].match(/((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?\s+)?((\d+)\s*((?:hours?|hrs?)|(?:minutes?|mins?)|(?:seconds?|secs?))\.?)/i)) {
+				var hrs = 0, mins = 0, secs = 0;
+				for (let i = 2; i < 7; i += 2) {
 					if (!rt[i]) continue;
 
 					switch (rt[i].charAt(0).toLowerCase()) {
-						case 'h':
-							hrs = rt[i-1];
-							break;
-						case 'm':
-							mins = rt[i-1];
-							break;
-						case 's':
-							secs = rt[i-1];
-							break;
+					case 'h':
+						hrs = rt[i - 1];
+						break;
+					case 'm':
+						mins = rt[i - 1];
+						break;
+					case 's':
+						secs = rt[i - 1];
+						break;
 					}
 				}
 
 				if (secs > 59) {
-					mins += secs/60;
+					mins += secs / 60;
 					secs %= 60;
 				}
 				if (secs < 10) {
@@ -903,17 +947,18 @@ function processExtent(extent, newItem) {
 				}
 
 				if (mins > 59) {
-					hrs += hrs/60;
+					hrs += hrs / 60;
 					mins %= 60;
 				}
 				if (mins < 10) {
 					mins = '0' + mins;
 				}
 
-				newItem.runningTime = ( (hrs*1) ? hrs + ':' : '' ) + mins + ':' + secs;
+				newItem.runningTime = ((hrs * 1) ? hrs + ':' : '') + mins + ':' + secs;
 			// (46:00)
-			} else if (rt = ma[1].match(/\b(\d{0,3}:\d{1,2}:\d{2})\b/)) {
-				newItem.runningTime = rt[1];								
+			}
+			else if (rt = ma[1].match(/\b(\d{0,3}:\d{1,2}:\d{2})\b/)) { // eslint-disable-line no-cond-assign
+				newItem.runningTime = rt[1];
 			}
 		}
 	}
@@ -921,11 +966,11 @@ function processExtent(extent, newItem) {
 	// dimensions: artworkSize
 	// only part of artwork right now, but maybe will be in other types in the future
 	if (!newItem.artworkSize && ma && ma[2] && ZU.fieldIsValidForType('artworkSize', newItem.itemType)) {
-		//drop supplemental info (i.e. everything after +)
-		if (ma[2].indexOf('+') >= 0) {
+		// drop supplemental info (i.e. everything after +)
+		if (ma[2].includes('+')) {
 			ma[2] = ma[2].slice(0, ma[2].indexOf('+'));
 		}
-		//26 cm. or 33 x 15 cm. or 1/2 in. or 1 1/2 x 15/16 in.
+		// 26 cm. or 33 x 15 cm. or 1/2 in. or 1 1/2 x 15/16 in.
 		var dim = ma[2].match(/(?:(?:(?:\d+\s+)?\d+\/)?\d+\s*x\s*)?(?:(?:\d+\s+)?\d+\/)?\d+\s*(?:cm|mm|m|in|ft)\./i);
 		if (dim) newItem.artworkSize = dim[0];
 	}
@@ -934,16 +979,16 @@ function processExtent(extent, newItem) {
 function processIdentifiers(contextElement, newItem) {
 	var isbnNodes = ZU.xpath(contextElement, './/m:identifier[@type="isbn"]', xns),
 		isbns = [];
-	for (var i=0; i<isbnNodes.length; i++) {		
-		var m = isbnNodes[i].textContent.replace(/\s*-\s*/g,'').match(/(?:[\dX]{10}|\d{13})/i);
+	for (let i = 0; i < isbnNodes.length; i++) {
+		const m = isbnNodes[i].textContent.replace(/\s*-\s*/g, '').match(/(?:[\dX]{10}|\d{13})/i);
 		if (m) isbns.push(m[0]);
 	}
 	if (isbns.length) newItem.ISBN = isbns.join(", ");
 	
 	var issnNodes = ZU.xpath(contextElement, './/m:identifier[@type="issn"]', xns),
 		issns = [];
-	for (var i=0; i<issnNodes.length; i++) {		
-		var m = issnNodes[i].textContent.match(/\b\d{4}\s*-?\s*\d{4}\b/i);
+	for (let i = 0; i < issnNodes.length; i++) {
+		const m = issnNodes[i].textContent.match(/\b\d{4}\s*-?\s*\d{4}\b/i);
 		if (m) issns.push(m[0]);
 	}
 	if (issns.length) newItem.ISSN = issns.join(", ");
@@ -952,10 +997,11 @@ function processIdentifiers(contextElement, newItem) {
 }
 
 function getFirstResult(contextNode, xpaths) {
-	for (var i=0; i<xpaths.length; i++) {
+	for (let i = 0; i < xpaths.length; i++) {
 		var results = ZU.xpath(contextNode, xpaths[i], xns);
 		if (results.length) return results[0].textContent;
 	}
+	return null;
 }
 
 function doImport() {
@@ -963,8 +1009,8 @@ function doImport() {
 	
 	var modsElements = ZU.xpath(xml, "/m:mods | /m:modsCollection/m:mods", xns);
 	
-	for (var iModsElements=0, nModsElements=modsElements.length;
-			iModsElements<nModsElements; iModsElements++) {
+	for (let iModsElements = 0, nModsElements = modsElements.length;
+		iModsElements < nModsElements; iModsElements++) {
 		var modsElement = modsElements[iModsElements],
 			newItem = new Zotero.Item();
 		
@@ -979,8 +1025,6 @@ function doImport() {
 		
 		// itemType
 		newItem.itemType = processItemType(modsElement);
-		
-		var isPartialItem = partialItemTypes.indexOf(newItem.itemType) !== -1;
 		
 		// TODO: thesisType, type
 		
@@ -998,8 +1042,8 @@ function doImport() {
 		var part = [], originInfo = [];
 		
 		// host
-		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns)
-		for (var i=0; i<hostNodes.length; i++) {
+		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns);
+		for (let i = 0; i < hostNodes.length; i++) {
 			var host = hostNodes[i];
 			
 			// publicationTitle
@@ -1007,7 +1051,7 @@ function doImport() {
 			
 			// journalAbbreviation
 			if (!newItem.journalAbbreviation) {
-				var titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
+				const titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
 				if (titleInfo.length) {
 					newItem.journalAbbreviation = processTitleInfo(titleInfo[0]);
 				}
@@ -1025,17 +1069,18 @@ function doImport() {
 			originInfo = originInfo.concat(ZU.xpath(host, 'm:originInfo', xns));
 		}
 		
-		if (!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;		
+		if (!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;
 		
 		// series
 		var seriesNodes = ZU.xpath(modsElement, './/m:relatedItem[@type="series"]', xns);
-		for (var i=0; i<seriesNodes.length; i++) {
+		for (let i = 0; i < seriesNodes.length; i++) {
 			var seriesNode = seriesNodes[i];
 			var series = ZU.xpathText(seriesNode, 'm:titleInfo/m:title', xns);
 			
 			if (ZU.fieldIsValidForType('series', newItem.itemType)) {
 				newItem.series = series;
-			} else if (ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
+			}
+			else if (ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
 				newItem.seriesTitle = series;
 			}
 			
@@ -1058,16 +1103,16 @@ function doImport() {
 		if (part.length) {
 			// volume, issue, section
 			var details = ["volume", "issue", "section"];
-			for (var i=0; i<details.length; i++) {
+			for (let i = 0; i < details.length; i++) {
 				var detail = details[i];
 				
-				newItem[detail] = getFirstResult(part, ['m:detail[@type="'+detail+'"]/m:number',
-					'm:detail[@type="'+detail+'"]']);
+				newItem[detail] = getFirstResult(part, ['m:detail[@type="' + detail + '"]/m:number',
+					'm:detail[@type="' + detail + '"]']);
 			}
 
 			// pages and other extent information
-			var extents = ZU.xpath(part, "m:extent", xns);
-			for (var i=0; i<extents.length; i++) {
+			const extents = ZU.xpath(part, "m:extent", xns);
+			for (let i = 0; i < extents.length; i++) {
 				var extent = extents[i],
 					unit = extent.getAttribute("unit");
 				
@@ -1078,24 +1123,28 @@ function doImport() {
 					if (pagesStart || pagesEnd) {
 						if (pagesStart == pagesEnd) {
 							newItem.pages = pagesStart;
-						} else if (pagesStart && pagesEnd) {
-							newItem.pages = pagesStart+"-"+pagesEnd;
-						} else {
-							newItem.pages = pagesStart+pagesEnd;
+						}
+						else if (pagesStart && pagesEnd) {
+							newItem.pages = pagesStart + "-" + pagesEnd;
+						}
+						else {
+							newItem.pages = pagesStart + pagesEnd;
 						}
 					}
-				} else {
+				}
+				else {
 					processExtent(extent.textContent, newItem);
 				}
 			}
 			
 			newItem.date = getFirstResult(part, ['m:date[not(@point="end")][@encoding]',
-				'm:date[not(@point="end")]', 'm:date']);
+				'm:date[not(@point="end")]',
+				'm:date']);
 		}
 
 		// physical description
-		var extents = ZU.xpath(modsElement, "m:physicalDescription/m:extent", xns);
-		for (var i=0; i<extents.length; i++) {
+		const extents = ZU.xpath(modsElement, "m:physicalDescription/m:extent", xns);
+		for (let i = 0; i < extents.length; i++) {
 			processExtent(extents[i].textContent, newItem);
 		}
 
@@ -1122,9 +1171,12 @@ function doImport() {
 			
 			// date
 			newItem.date = getFirstResult(originInfo, ['m:copyrightDate[@encoding]',
-				'm:copyrightDate', 'm:dateIssued[not(@point="end")][@encoding]',
-				'm:dateIssued[not(@point="end")]', 'm:dateIssued',
-				'm:dateCreated[@encoding]',	'm:dateCreated']) || newItem.date;
+				'm:copyrightDate',
+				'm:dateIssued[not(@point="end")][@encoding]',
+				'm:dateIssued[not(@point="end")]',
+				'm:dateIssued',
+				'm:dateCreated[@encoding]',
+				'm:dateCreated']) || newItem.date;
 			
 			// lastModified
 			newItem.lastModified = getFirstResult(originInfo, ['m:dateModified[@encoding]',
@@ -1143,14 +1195,14 @@ function doImport() {
 
 		// attachments and url
 		var urlNodes = ZU.xpath(modsElement, 'm:location/m:url', xns);
-		for (var i=0; i<urlNodes.length; i++) {
+		for (let i = 0; i < urlNodes.length; i++) {
 			var urlNode = urlNodes[0],
 				access = urlNode.getAttribute("access"),
 				usage = urlNode.getAttribute("usage");
 			if (access === "raw object") {
 				var attachment = {
-					title:(urlNode.getAttribute("displayLabel") || "Attachment"),
-					path:urlNode.textContent
+					title: (urlNode.getAttribute("displayLabel") || "Attachment"),
+					path: urlNode.textContent
 				};
 				if (attachment.path.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
 				newItem.attachments.push(attachment);
@@ -1171,23 +1223,22 @@ function doImport() {
 		
 		/** NOTES **/
 		var noteNodes = ZU.xpath(modsElement, 'm:note', xns);
-		for (var i=0; i<noteNodes.length; i++) {
+		for (let i = 0; i < noteNodes.length; i++) {
 			var note = noteNodes[i];
 			newItem.notes.push({ note:
-				(note.hasAttribute("type") ? note.getAttribute("type") + ': ':'') +
-				note.textContent
-			});
+				(note.hasAttribute("type") ? note.getAttribute("type") + ': ' : '')
+				+ note.textContent });
 		}
 
 		// ToC - goes into notes
 		var tocNodes = ZU.xpath(modsElement, 'm:tableOfContents', xns);
-		for (var i=0; i<tocNodes.length; i++) {
-			newItem.notes.push({note:'Table of Contents: ' + tocNodes[i].textContent});
+		for (let i = 0; i < tocNodes.length; i++) {
+			newItem.notes.push({ note: 'Table of Contents: ' + tocNodes[i].textContent });
 		}
 
 		/** TAGS **/
 		var tagNodes = ZU.xpath(modsElement, 'm:subject/m:topic', xns);
-		for (var i=0; i<tagNodes.length; i++) {
+		for (let i = 0; i < tagNodes.length; i++) {
 			newItem.tags.push(ZU.trimInternal(tagNodes[i].textContent));
 		}
 
@@ -1204,12 +1255,12 @@ function doImport() {
 		// create an array of languages
 		var languages = [];
 		var languageNodes = ZU.xpath(modsElement, 'm:language', xns);
-		for (var i=0; i<languageNodes.length; i++) {
+		for (let i = 0; i < languageNodes.length; i++) {
 			var code = false,
 				languageNode = languageNodes[i],
 				languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
 				
-			for (var j=0; j<languageTerms.length; j++) {
+			for (let j = 0; j < languageTerms.length; j++) {
 				var term = languageTerms[j],
 					termType = term.getAttribute("type");
 				
@@ -1219,7 +1270,8 @@ function doImport() {
 					break;
 				// code authorities should be used, not ignored
 				// but we ignore them for now
-				} else if (termType === "code" || term.hasAttribute("authority")) {
+				}
+				else if (termType === "code" || term.hasAttribute("authority")) {
 					code = term.textContent;
 				}
 			}
@@ -1234,7 +1286,7 @@ function doImport() {
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
 		
-		Zotero.setProgress(iModsElements/nModsElements*100);
+		Zotero.setProgress(iModsElements / nModsElements * 100);
 		newItem.complete();
 	}
 }
