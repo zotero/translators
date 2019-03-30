@@ -37,9 +37,9 @@
 
 // See also https://github.com/zotero/translators/blob/master/BibTeX.js
 var bibtex2zoteroTypeMap = {
-	"inproceedings": "conferencePaper",
-	"conference"   : "conferencePaper",
-	"article"      : "journalArticle"
+	inproceedings: "conferencePaper",
+	conference: "conferencePaper",
+	article: "journalArticle"
 };
 
 function detectWeb(doc, url) {
@@ -67,7 +67,7 @@ function doWeb(doc, url) {
 function getSearchResults(doc) {
 	var titles = ZU.xpath(doc, '//a[@data-selenium-selector="title-link"]');
 	var results = {};
-	titles.forEach(function(linkElement) {
+	titles.forEach(function (linkElement) {
 		results[linkElement.href] = linkElement.textContent;
 	});
 	return results;
@@ -112,7 +112,9 @@ function parseDocument(doc, url) {
 		}
 		
 		if (rawData.hasPdf) {
-			let paperLink = rawData.links.filter(function(link) { return link.linkType === 's2'; })[0].url;
+			let paperLink = rawData.links.filter(function (link) {
+				return link.linkType === 's2';
+			})[0].url;
 			item.attachments.push({
 				url: paperLink,
 				title: "Full Text PDF",
@@ -146,7 +148,9 @@ function fixPageRange(pageRange) {
 		return pageRange;
 	}
 	
-	numbers = numbers.map(function(x) { return parseInt(x); });
+	numbers = numbers.map(function (x) {
+		return parseInt(x);
+	});
 	
 	// No change is needed if they're already correctly formatted
 	if (numbers[0] < numbers[1]) {
@@ -173,6 +177,7 @@ function fixPageRange(pageRange) {
 		return numbers[0] + '-' + numbers[1];
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
