@@ -53,23 +53,16 @@ module.exports = {
 					}
 				}
 
-				const handlers = {
-					detectWeb: getFunction(node, 'doWeb'),
-					doWeb: getFunction(node, 'doWeb'),
-					detectImport: getFunction(node, 'detectImport'),
-					doImport: getFunction(node, 'doImport'),
-					doExport: getFunction(node, 'doExport'),
-				};
-
 				if (browserSupportNode && !(translatorType & type.web)) context.report(browserSupportNode, `browserSupport set, but translatorType (${translatorType}) does not include web (${type.web})`);
 
-				for (const [name, func] of Object.entries(handlers)) {
+				for (const name of ['detectWeb', 'doWeb', 'detectImport', 'doImport', 'doExport']) {
+					const handler = getFunction(node, name);
 					const mode = name.replace(/^(detect|do)/, '').toLowerCase();
 					const bit = type[mode];
-					if (func && !(translatorType & bit)) {
-						context.report(func, `${name} present, but translatorType (${translatorType}) does not specify ${mode} (${bit})`);
+					if (handler && !(translatorType & bit)) {
+						context.report(handler, `${name} present, but translatorType (${translatorType}) does not specify ${mode} (${bit})`);
 					}
-					if (!func && (translatorType & bit)) {
+					if (!handler && (translatorType & bit)) {
 						context.report(translatorTypeNode, `translatorType specifies ${mode} (${bit}), but no ${name} present`);
 					}
 				}
