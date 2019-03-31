@@ -12,6 +12,7 @@
 		"teslint": "./bin/teslint.js"
 	},
 	"dependencies": {
+		"astring": "^1.4.0",
 		"commander": "^2.19.0",
 		"find-root": "^1.1.0",
 		"recursive-readdir-synchronous": "0.0.4",
