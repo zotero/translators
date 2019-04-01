@@ -13,6 +13,27 @@
 }
 
 /*
+	***** BEGIN LICENSE BLOCK *****
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
+
+/*
 Supports Primo 2:
 Université de Nice, France (http://catalogue.unice.fr/)  (looks like this is Primo3 now, too)
 Supports Primo 3
@@ -22,26 +43,25 @@ Oxford Libraries (http://solo.ouls.ox.ac.uk/)
 Primos with showPNX.jsp installed:
 (1) http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/search.do?vid=PURDUE
 (2) http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?vid=MAN_UB
-(3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
+(3) http://limo.libis.be/primo_libra ry/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
 (5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
 */
 
 function getSearchResults(doc) {
-	var linkXPaths = [ //order dictates preference
-		'.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', //details link
-		'.//h2[@class="EXLResultTitle"]/a[@href]' //title link
-	];
+	// order dictates preference
+	var linkXPaths = ['.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', // details link
+		'.//h2[@class="EXLResultTitle"]/a[@href]']; // title link
 	var resultsXPath = '//*[self::tr or self::div][starts-with(@id, "exlidResult") and '
 		+ 'number(substring(@id,12))=substring(@id,12)][' + linkXPaths.join(' or ') + ']';
-	//Z.debug(resultsXPath);
+	// Z.debug(resultsXPath);
 	var results = ZU.xpath(doc, resultsXPath);
 	results.titleXPath = './/h2[@class="EXLResultTitle"]';
 	results.linkXPaths = linkXPaths;
 	return results;
 }
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	if (getSearchResults(doc).length) {
 		return 'multiple';
 	}
@@ -50,6 +70,7 @@ function detectWeb(doc, url) {
 	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
 	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
 	if (contentDiv.length) return 'book';
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -57,9 +78,9 @@ function doWeb(doc, url) {
 	if (searchResults.length) {
 		var items = {}, itemIDs = {}, title, link,
 			linkXPaths = searchResults.linkXPaths;
-		for (var i=0, n=searchResults.length; i<n; i++) {
+		for (var i = 0, n = searchResults.length; i < n; i++) {
 			title = ZU.xpathText(searchResults[i], searchResults.titleXPath);
-			for (var j=0, m=linkXPaths.length; j<m; j++) {
+			for (var j = 0, m = linkXPaths.length; j < m; j++) {
 				link = ZU.xpath(searchResults[i], linkXPaths[j])[0];
 				if (link) {
 					break;
@@ -69,50 +90,54 @@ function doWeb(doc, url) {
 			if (!link || !title || !(title = ZU.trimInternal(title))) continue;
 			
 			items[link.href] = title;
-			itemIDs[link.href] = {id: i, docID: getDocID(link.href)};
+			itemIDs[link.href] = { id: i, docID: getDocID(link.href) };
 		}
 		
-		Z.selectItems(items, function(selectedItems) {
+		Z.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return true;
 			
 			var urls = [];
 			for (var i in selectedItems) {
-				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
+				urls.push({ url: i, id: itemIDs[i].id, docID: itemIDs[i].docID });
 			}
 			fetchPNX(urls);
+			return true;
 		});
-	} else {
-		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
+	}
+	else {
+		fetchPNX([{ url: url, id: 0, docID: getDocID(url) }]);
 	}
 }
 
 function getDocID(url) {
 	var id = url.match(/\bdoc(?:Id)?=([^&]+)/i);
 	if (id) return id[1];
+	else return false;
 }
 
-//keeps track of which URL format works for retrieving PNX record
-//and applies the correct transformation function
-var PNXUrlGenerator = new function() {
+// keeps track of which URL format works for retrieving PNX record
+// and applies the correct transformation function
+var PNXUrlGenerator = new function () {
 	var functions = [
-		//showPNX.js
-		//using docIDs instead of IDs tied to a session
-		//e.g. http://searchit.princeton.edu/primo_library/libweb/showPNX.jsp?id=PRN_VOYAGER7343340
-		function(urlObj) {
+		// showPNX.js
+		// using docIDs instead of IDs tied to a session
+		// e.g. http://searchit.princeton.edu/primo_library/libweb/showPNX.jsp?id=PRN_VOYAGER7343340
+		function (urlObj) {
 			return getUrlWithId(urlObj.url, urlObj.docID);
 		},
-		//fall back to IDs
-		//from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
-		//to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
-		function(urlObj) {
+		// fall back to IDs
+		// from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
+		// to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
+		function (urlObj) {
 			return getUrlWithId(urlObj.url, urlObj.id);
 		},
-		//simply add &showPnx=true
-		function(urlObj) {
+		// simply add &showPnx=true
+		function (urlObj) {
 			var url = urlObj.url.split('#');
-			if (url[0].indexOf('?') == -1) {
+			if (url[0].includes("?")) {
 				url[0] += '?';
-			} else {
+			}
+			else {
 				url[0] += '&';
 			}
 			return url[0] + 'showPnx=true';
@@ -120,42 +145,46 @@ var PNXUrlGenerator = new function() {
 	];
 	
 	function getUrlWithId(url, id) {
-		var url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
-		if (!url) return;
+		url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^/]*(?:[?#]|$)/);
+		if (!url) return false;
 		return url[1] + 'showPNX.jsp?id=' + id;
 	}
 	
 	this.currentFunction = 0;
 	this.confirmed = false;
 	
-	this.getUrl = function(data) {
+	this.getUrl = function (data) {
 		var fun = functions[this.currentFunction];
-		if (!fun) return;
+		if (!fun) return false;
 		
 		return fun(data);
 	};
 	
-	this.nextFunction = function() {
+	this.nextFunction = function () {
 		if (!this.confirmed && this.currentFunction < functions.length) {
 			Z.debug("Function " + this.currentFunction + " did not work.");
 			this.currentFunction++;
 			return true;
 		}
+		else {
+			return false;
+		}
 	};
 };
 
-//retrieve PNX records for given items sequentially
+// retrieve PNX records for given items sequentially
 function fetchPNX(itemData) {
-	if (!itemData.length) return; //do this until we run out of URLs
+	if (!itemData.length) return; // do this until we run out of URLs
 	
 	var data = itemData.shift();
-	var url = PNXUrlGenerator.getUrl(data); //format URL if still possible
+	var url = PNXUrlGenerator.getUrl(data); // format URL if still possible
 	if (!url) {
 		if (PNXUrlGenerator.nextFunction()) {
 			itemData.unshift(data);
-		} else if (!PNXUrlGenerator.confirmed){
-			//in case we can't find PNX for a particular item,
-			//go to the next and start looking from begining
+		}
+		else if (!PNXUrlGenerator.confirmed) {
+			// in case we can't find PNX for a particular item,
+			// go to the next and start looking from begining
 			Z.debug("Could not determine PNX url from " + data.url);
 			PNXUrlGenerator.currentFunction = 0;
 		}
@@ -167,23 +196,24 @@ function fetchPNX(itemData) {
 	var gotPNX = false;
 	Z.debug("Trying " + url);
 	ZU.doGet(url,
-		function(text) {
+		function (text) {
 			text = text.trim();
-			if (text.substr(0,5) != '<?xml' || text.search(/<error\b/i) !== -1) {
-				//try a different PNX url
+			if (text.substr(0, 5) != '<?xml' || text.search(/<error\b/i) !== -1) {
+				// try a different PNX url
 				gotPNX = false;
 				return;
-			} else {
+			}
+			else {
 				gotPNX = true;
 				PNXUrlGenerator.confirmed = true;
 			}
 			
 			importPNX(text, url);
 		},
-		function() {
+		function () {
 			if (!gotPNX && PNXUrlGenerator.nextFunction()) {
-				//if url function not confirmed, try another one on the same URL
-				//otherwise, we move on
+				// if url function not confirmed, try another one on the same URL
+				// otherwise, we move on
 				itemData.unshift(data);
 			}
 			
@@ -200,7 +230,7 @@ function importPNX(text, url) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("efd737c9-a227-4113-866e-d57fbc0684ca");
 	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
+	translator.setHandler("itemDone", function (obj, item) {
 		if (url) {
 			item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
 		}
