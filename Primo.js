@@ -134,7 +134,7 @@ var PNXUrlGenerator = new function () {
 		// simply add &showPnx=true
 		function (urlObj) {
 			var url = urlObj.url.split('#');
-			if (url[0].includes("?")) {
+			if (!url[0].includes("?")) {
 				url[0] += '?';
 			}
 			else {
