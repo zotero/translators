@@ -43,7 +43,7 @@ Oxford Libraries (http://solo.ouls.ox.ac.uk/)
 Primos with showPNX.jsp installed:
 (1) http://purdue-primo-prod.hosted.exlibrisgroup.com/primo_library/libweb/action/search.do?vid=PURDUE
 (2) http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?vid=MAN_UB
-(3) http://limo.libis.be/primo_libra ry/libweb/action/search.do?vid=LIBISnet&fromLogin=true
+(3) http://limo.libis.be/primo_library/libweb/action/search.do?vid=LIBISnet&fromLogin=true
 (4.a) http://virtuose.uqam.ca/primo_library/libweb/action/search.do?vid=UQAM
 (5) http://searchit.princeton.edu/primo_library/libweb/action/dlDisplay.do?docId=PRN_VOYAGER2778598&vid=PRINCETON&institution=PRN
 */
