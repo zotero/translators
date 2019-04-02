@@ -36,6 +36,8 @@
 	***** END LICENSE BLOCK *****
 */
 
+/* eslint-disable no-loop-func */
+
 // The variables items and selectArray will be filled during the first
 // as well as the second retrieveDOIs function call and therefore they
 // are defined global.
@@ -102,14 +104,10 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function completeDOIs(doc) {
+function completeDOIs(_doc) {
 	// all DOIs retrieved now
 	// check to see if there is more than one DOI
-	var numDOIs = 0;
-	for (var DOI in selectArray) {
-		numDOIs++;
-		if (numDOIs == 2) break;
-	}
+	var numDOIs = Object.keys(selectArray).length;
 	if (numDOIs == 0) {
 		throw new Error("DOI Translator: could not find DOI");
 	}
@@ -158,7 +156,7 @@ function retrieveDOIs(dois, doc, providers) {
 				}
 			});
 	
-			translate.setHandler("done", function (translate) {
+			translate.setHandler("done", function (_translate) {
 				numDois--;
 				if (numDois <= 0) {
 					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
