@@ -129,6 +129,19 @@ function scrape(doc, url) {
 			}
 		}
 
+		// get alternate titles and abstracts
+		var alternateTitle = ZU.xpathText(doc, '//strong[@class="concepto" and text()="Títulos paralelos:"]/../ul/li');
+		if (alternateTitle)
+			item.shortTitle = alternateTitle;
+
+		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li//p');
+		if (abstracts && abstracts.length > 0) {
+			var combinedAbstract = "";
+			for (var i in abstracts)
+				combinedAbstract += abstracts[i].textContent + "\n\n";
+			item.abstractNote = combinedAbstract.trim();
+		}
+
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
