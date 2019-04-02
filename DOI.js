@@ -59,21 +59,22 @@ function getDOIs(doc) {
 	// DOI should never end with a period or a comma (we hope)
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
-	const DOIXPath = "//text()[contains(., '10.')][not(parent::script or parent::style)]";
 
 	var dois = [];
 
-	var node, m, DOI;
-	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
-	while ((node = results.iterateNext())) {
+	var m, DOI;
+	var treeWalker = doc.createTreeWalker(doc.documentElement, 4, null, false);
+	var ignore = ['script', 'style'];
+	while (treeWalker.nextNode()) {
+		if (ignore.includes(treeWalker.currentNode.parentNode.tagName.toLowerCase())) continue;
 		// Z.debug(node.nodeValue)
 		DOIre.lastMatch = 0;
-		while ((m = DOIre.exec(node.nodeValue))) {
+		while ((m = DOIre.exec(treeWalker.currentNode.nodeValue))) {
 			DOI = m[0];
-			if (DOI.substr(-1) == ")" && !DOI.includes("(")) {
+			if (DOI.endsWith(")") && !DOI.includes("(")) {
 				DOI = DOI.substr(0, DOI.length - 1);
 			}
-			if (DOI.substr(-1) == "}" && !DOI.includes("{")) {
+			if (DOI.endsWith("}") && !DOI.includes("{")) {
 				DOI = DOI.substr(0, DOI.length - 1);
 			}
 			// only add new DOIs
