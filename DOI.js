@@ -12,9 +12,34 @@
 	"lastUpdated": "2019-01-27 14:06:07"
 }
 
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Simon Kornblith
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 // The variables items and selectArray will be filled during the first
 // as well as the second retrieveDOIs function call and therefore they
 // are defined global.
+
 var items = {};
 var selectArray = {};
 
@@ -27,33 +52,32 @@ function getDOIs(doc) {
 	// characters except for control characters. Here, we're cheating
 	// by not allowing ampersands, to fix an issue with getting DOIs
 	// out of URLs.
-  // Additionally, all content inside <noscript> is picked up as text()
-  // by the xpath, which we don't necessarily want to exclude, but
-  // that means that we can get DOIs inside node attributes and we should
+	// Additionally, all content inside <noscript> is picked up as text()
+	// by the xpath, which we don't necessarily want to exclude, but
+	// that means that we can get DOIs inside node attributes and we should
 	// exclude quotes in this case.
-  // DOI should never end with a period or a comma (we hope)
+	// DOI should never end with a period or a comma (we hope)
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
-	const DOIXPath = "//text()[contains(., '10.')]\
-						[not(parent::script or parent::style)]";
+	const DOIXPath = "//text()[contains(., '10.')][not(parent::script or parent::style)]";
 
 	var dois = [];
 
 	var node, m, DOI;
 	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
-	while (node = results.iterateNext()) {
-		//Z.debug(node.nodeValue)
+	while ((node = results.iterateNext())) {
+		// Z.debug(node.nodeValue)
 		DOIre.lastMatch = 0;
-		while (m = DOIre.exec(node.nodeValue)) {
+		while ((m = DOIre.exec(node.nodeValue))) {
 			DOI = m[0];
-			if (DOI.substr(-1) == ")" && DOI.indexOf("(") == -1) {
-				DOI = DOI.substr(0, DOI.length-1);
+			if (DOI.substr(-1) == ")" && !DOI.includes("(")) {
+				DOI = DOI.substr(0, DOI.length - 1);
 			}
-			if (DOI.substr(-1) == "}" && DOI.indexOf("{") == -1) {
-				DOI = DOI.substr(0, DOI.length-1);
+			if (DOI.substr(-1) == "}" && !DOI.includes("{")) {
+				DOI = DOI.substr(0, DOI.length - 1);
 			}
 			// only add new DOIs
-			if (dois.indexOf(DOI) == -1) {
+			if (!dois.includes(DOI)) {
 				dois.push(DOI);
 			}
 		}
@@ -86,14 +110,16 @@ function completeDOIs(doc) {
 		if (numDOIs == 2) break;
 	}
 	if (numDOIs == 0) {
-		throw "DOI Translator: could not find DOI";
-	} else {
-		Zotero.selectItems(selectArray, function(selectedDOIs) {
+		throw new Error("DOI Translator: could not find DOI");
+	}
+	else {
+		Zotero.selectItems(selectArray, function (selectedDOIs) {
 			if (!selectedDOIs) return true;
 
 			for (var DOI in selectedDOIs) {
 				items[DOI].complete();
 			}
+			return true;
 		});
 	}
 }
@@ -102,18 +128,18 @@ function retrieveDOIs(dois, doc, providers) {
 	var numDois = dois.length;
 	var provider = providers.shift();
 	
-	var remainingDOIs = dois.slice();//copy array but not by reference
+	var remainingDOIs = dois.slice();// copy array but not by reference
 
-	for (var i=0, n=dois.length; i<n; i++) {
-		(function(doc, DOI) {
+	for (var i = 0, n = dois.length; i < n; i++) {
+		(function (doc, DOI) {
 			var translate = Zotero.loadTranslator("search");
 			translate.setTranslator(provider.id);
 	
-			var item = {"itemType":"journalArticle", "DOI":DOI};
+			var item = { itemType: "journalArticle", DOI: DOI };
 			translate.setSearch(item);
 	
 			// don't save when item is done
-			translate.setHandler("itemDone", function(translate, item) {
+			translate.setHandler("itemDone", function (translate, item) {
 				selectArray[item.DOI] = item.title;
 				if (!item.title) {
 					Zotero.debug("No title available for " + item.DOI);
@@ -123,44 +149,47 @@ function retrieveDOIs(dois, doc, providers) {
 				items[item.DOI] = item;
 
 				// done means not remaining anymore
-				if (remainingDOIs.indexOf(item.DOI) > -1) {
+				if (remainingDOIs.includes(item.DOI))	 {
 					remainingDOIs.splice(remainingDOIs.indexOf(item.DOI), 1);
-				} else {
+				}
+				else {
 					Z.debug(item.DOI + " not anymore in the list of remainingDOIs = " + remainingDOIs);
 				}
 			});
 	
-			translate.setHandler("done", function(translate) {
+			translate.setHandler("done", function (translate) {
 				numDois--;
 				if (numDois <= 0) {
 					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
 					if (providers.length > 0 && remainingDOIs.length > 0) {
 						retrieveDOIs(remainingDOIs, doc, providers);
-					} else {
+					}
+					else {
 						completeDOIs(doc);
 					}
 				}
 			});
 	
 			// Don't throw on error
-			translate.setHandler("error", function() {});
+			translate.setHandler("error", function () {});
 	
 			translate.translate();
 		})(doc, dois[i]);
 	}
 }
 
-function doWeb(doc, url) {
+function doWeb(doc) {
 	var dois = getDOIs(doc);
 	Z.debug(dois);
 	var providers = [
 		{
-			id : "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
-			name : "DOI.org"
+			id: "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
+			name: "DOI.org"
 		}
 	];
 	retrieveDOIs(dois, doc, providers);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

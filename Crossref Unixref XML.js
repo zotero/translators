@@ -42,7 +42,7 @@
 /* CrossRef uses unixref; documentation at https://data.crossref.org/reports/help/schema_doc/unixref1.1/unixref1.1.html */
 
 
-/**********************
+/** ********************
  * Utilitiy Functions *
  **********************/
 
@@ -53,10 +53,10 @@ function innerXML(n) {
 		'&lt;': '<',
 		'&gt;': '>'
 	};
-	return n.innerHTML //outer XML
+	return n.innerHTML // outer XML
 		.replace(/\n/g, "")
 		.replace(/(&quot;|&lt;|&gt;|&amp;)/g,
-			function(str, item) {
+			function (str, item) {
 				return escapedXMLcharacters[item];
 			}
 		);
@@ -65,14 +65,14 @@ function innerXML(n) {
 var markupRE = /<(\/?)(\w+)[^<>]*>/gi;
 var supportedMarkup = ['i', 'b', 'sub', 'sup', 'span', 'sc'];
 var transformMarkup = {
-	'scp': {
+	scp: {
 		open: '<span style="font-variant:small-caps;">',
 		close: '</span>'
 	}
 };
 function removeUnsupportedMarkup(text) {
 	return text.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1') // Remove CDATA markup
-		.replace(markupRE, function(m, close, name) {
+		.replace(markupRE, function (m, close, name) {
 			if (supportedMarkup.includes(name.toLowerCase())) {
 				return m;
 			}
@@ -94,7 +94,9 @@ function fixAuthorCapitalization(string) {
 	// malfunctioning when calling from translators.
 	if (ZU.capitalizeName) return ZU.capitalizeName(string);
 	if (typeof string === "string" && string.toUpperCase() === string) {
-		string = string.toLowerCase().replace(/\b[a-z]/g, function(m) { return m[0].toUpperCase(); });
+		string = string.toLowerCase().replace(/\b[a-z]/g, function (m) {
+			return m[0].toUpperCase();
+		});
 	}
 	return string;
 }
@@ -111,9 +113,11 @@ function parseCreators(node, item, typeOverrideMap) {
 		var role = creatorXML.getAttribute("contributor_role");
 		if (typeOverrideMap && typeOverrideMap[role] !== undefined) {
 			creator.creatorType = typeOverrideMap[role];
-		} else if (role === "author" || role === "editor" || role === "translator") {
+		}
+		else if (role === "author" || role === "editor" || role === "translator") {
 			creator.creatorType = role;
-		} else {
+		}
+		else {
 			creator.creatorType = "contributor";
 		}
 
@@ -122,7 +126,8 @@ function parseCreators(node, item, typeOverrideMap) {
 		if (creatorXML.nodeName === "organization") {
 			creator.fieldMode = 1;
 			creator.lastName = creatorXML.textContent;
-		} else if (creatorXML.nodeName === "person_name") {
+		}
+		else if (creatorXML.nodeName === "person_name") {
 			creator.firstName = fixAuthorCapitalization(ZU.xpathText(creatorXML, 'given_name'));
 			creator.lastName = fixAuthorCapitalization(ZU.xpathText(creatorXML, 'surname'));
 			if (!creator.firstName) creator.fieldMode = 1;
@@ -131,7 +136,7 @@ function parseCreators(node, item, typeOverrideMap) {
 	}
 }
 
-function parseDate (pubDateNode) {
+function parseDate(pubDateNode) {
 	if (pubDateNode.length) {
 		var year = ZU.xpathText(pubDateNode[0], 'year');
 		var month = ZU.xpathText(pubDateNode[0], 'month');
@@ -140,14 +145,17 @@ function parseDate (pubDateNode) {
 		if (year) {
 			if (month) {
 				if (day) {
-					return year+"-"+month+"-"+day;
-				} else {
-					return month+"/"+year;
+					return year + "-" + month + "-" + day;
 				}
-			} else {
-				return  year;
+				else {
+					return month + "/" + year;
+				}
+			}
+			else {
+				return year;
 			}
 		}
+		else return null;
 	}
 	else return null;
 }
@@ -160,13 +168,13 @@ function detectImport() {
 		if (line !== "") {
 			if (line.includes("<crossref>")) {
 				return true;
-			} else {
-				if (i++ > 7) {
-					return false;
-				}
+			}
+			else if (i++ > 7) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -196,15 +204,15 @@ function doImport() {
 		item.volume = ZU.xpathText(itemXML, 'journal_issue/journal_volume/volume');
 		item.issue = ZU.xpathText(itemXML, 'journal_issue/journal_volume/issue');
 		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
-		if (!item.issue)
-			item.issue = ZU.xpathText(itemXML, 'journal_issue/issue');
-  } else if ((itemXML = ZU.xpath(doiRecord, 'crossref/report-paper')).length) {
+		if (!item.issue) item.issue = ZU.xpathText(itemXML, 'journal_issue/issue');
+	}
+	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/report-paper')).length) {
 		// Report Paper
 		// Example: doi: 10.4271/2010-01-0907
 		
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'report-paper_metadata');
-		if (refXML.length===0) {
+		if (refXML.length === 0) {
 			// Example doi: 10.1787/5jzb6vwk338x-en
 		
 			refXML = ZU.xpath(itemXML, 'report-paper_series_metadata');
@@ -216,7 +224,8 @@ function doImport() {
 		if (!item.reportNumber) item.reportNumber = ZU.xpathText(refXML, 'volume');
 		item.institution = ZU.xpathText(refXML, 'publisher/publisher_name');
 		item.place = ZU.xpathText(refXML, 'publisher/publisher_place');
-	} else if ((itemXML = ZU.xpath(doiRecord, 'crossref/book')).length) {
+	}
+	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/book')).length) {
 		// Book chapter
 		// Example: doi: 10.1017/CCOL0521858429.016
 		
@@ -228,12 +237,12 @@ function doImport() {
 		
 		var bookType = itemXML[0].hasAttribute("book_type") ? itemXML[0].getAttribute("book_type") : null;
 		var componentType = ZU.xpathText(itemXML[0], 'content_item/@component_type');
-		//is this an entry in a reference book?
+		// is this an entry in a reference book?
 		var isReference = ["reference", "other"].includes(bookType)
 				&& ["chapter", "reference_entry"].includes(componentType);
 
-		//for items that are entry in reference books OR edited book types that have some type of a chapter entry.
-		if ((bookType === "edited_book"  && componentType) || isReference) {
+		// for items that are entry in reference books OR edited book types that have some type of a chapter entry.
+		if ((bookType === "edited_book" && componentType) || isReference) {
 			item = new Zotero.Item("bookSection");
 			refXML = ZU.xpath(itemXML, 'content_item');
 
@@ -246,8 +255,9 @@ function doImport() {
 				item.seriesTitle = ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
 
 				var metadataSeriesXML = ZU.xpath(metadataXML, 'series_metadata');
-				if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, {"editor":"seriesEditor"});
-			} else {
+				if (metadataSeriesXML.length) parseCreators(metadataSeriesXML, item, { editor: "seriesEditor" });
+			}
+			else {
 				metadataXML = ZU.xpath(itemXML, 'book_series_metadata');
 				if (!metadataXML.length) metadataXML = ZU.xpath(itemXML, 'book_metadata');
 				item.bookTitle = ZU.xpathText(metadataXML, 'series_metadata/titles[1]/title[1]');
@@ -255,9 +265,10 @@ function doImport() {
 			}
 
 			// Handle book authors
-			parseCreators(metadataXML, item, {"author":"bookAuthor"});
+			parseCreators(metadataXML, item, { author: "bookAuthor" });
 		// Book
-		} else {
+		}
+		else {
 			item = new Zotero.Item("book");
 			refXML = ZU.xpath(itemXML, 'book_metadata');
 			// Sometimes book data is in book_series_metadata
@@ -273,12 +284,13 @@ function doImport() {
 		}
 
 		item.place = ZU.xpathText(metadataXML, 'publisher/publisher_place');
-	} else if ((itemXML = ZU.xpath(doiRecord, 'crossref/standard')).length) {
+	}
+	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/standard')).length) {
 		item = new Zotero.Item("report");
 		refXML = ZU.xpath(itemXML, 'standard_metadata');
 		metadataXML = ZU.xpath(itemXML, 'standard_metadata');
-
-	} else if ((itemXML = ZU.xpath(doiRecord, 'crossref/conference')).length) {
+	}
+	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/conference')).length) {
 		item = new Zotero.Item("conferencePaper");
 		refXML = ZU.xpath(itemXML, 'conference_paper');
 		metadataXML = ZU.xpath(itemXML, 'proceedings_metadata');
@@ -290,7 +302,7 @@ function doImport() {
 	}
 
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/database')).length) {
-		item = new Zotero.Item("report"); //should be dataset
+		item = new Zotero.Item("report"); // should be dataset
 		refXML = ZU.xpath(itemXML, 'dataset');
 		item.extra = "type: dataset";
 		metadataXML = ZU.xpath(itemXML, 'database_metadata');
@@ -317,25 +329,24 @@ function doImport() {
 	}
 	
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/posted_content')).length) {
-		item = new Zotero.Item("report"); //should be preprint
+		item = new Zotero.Item("report"); // should be preprint
 		item.type = ZU.xpathText(itemXML, "./@type");
 		item.institution = ZU.xpathText(itemXML, "group_title");
 		item.date = parseDate(ZU.xpath(itemXML, "posted_date"));
-
 	}
 	
 	else if ((itemXML = ZU.xpath(doiRecord, 'crossref/peer_review')).length) {
-		item = new Zotero.Item("manuscript"); //is this the best category
+		item = new Zotero.Item("manuscript"); // is this the best category
 		item.date = parseDate(ZU.xpath(itemXML, "reviewed_date"));
 		if (ZU.xpath(itemXML, "/contributors/anonymous")) {
-			item.creators.push({lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author"});
+			item.creators.push({ lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author" });
 		}
 		item.type = "peer review";
 		var reviewOf = ZU.xpathText(itemXML, "//related_item/inter_work_relation");
 		if (reviewOf) {
 			var identifierType = ZU.xpathText(itemXML, "//related_item/inter_work_relation/@identifier-type");
 			var identifier;
-			if  (identifierType == "doi") {
+			if (identifierType == "doi") {
 				identifier = "<a href=\"https://doi.org/" + reviewOf + "\">https://doi.org/" + reviewOf + "</a>";
 			}
 			else if (identifierType == "url") {
@@ -350,42 +361,42 @@ function doImport() {
 		}
 	}
 	
-else {
-	item = new Zotero.Item("document");
-}
+	else {
+		item = new Zotero.Item("document");
+	}
 
 
-if (!refXML || !refXML.length) {
-	refXML = itemXML;
-}
+	if (!refXML || !refXML.length) {
+		refXML = itemXML;
+	}
 
-if (!metadataXML || !metadataXML.length) {
-	metadataXML = refXML;
-}
+	if (!metadataXML || !metadataXML.length) {
+		metadataXML = refXML;
+	}
 
-		item.abstractNote = ZU.xpathText(refXML, 'description|abstract');
-		item.language = ZU.xpathText(metadataXML, './@language');
-		item.ISBN = ZU.xpathText(metadataXML, 'isbn');
-		item.ISSN = ZU.xpathText(metadataXML, 'issn');
-		item.publisher = ZU.xpathText(metadataXML, 'publisher/publisher_name');
+	item.abstractNote = ZU.xpathText(refXML, 'description|abstract');
+	item.language = ZU.xpathText(metadataXML, './@language');
+	item.ISBN = ZU.xpathText(metadataXML, 'isbn');
+	item.ISSN = ZU.xpathText(metadataXML, 'issn');
+	item.publisher = ZU.xpathText(metadataXML, 'publisher/publisher_name');
 
-		item.edition = ZU.xpathText(metadataXML, 'edition_number');
-		if (!item.volume) item.volume = ZU.xpathText(metadataXML, 'volume');
+	item.edition = ZU.xpathText(metadataXML, 'edition_number');
+	if (!item.volume) item.volume = ZU.xpathText(metadataXML, 'volume');
 	
 
-	parseCreators(refXML, item, (item.itemType == 'bookSection' ? {"editor": null} : "author") );
+	parseCreators(refXML, item, (item.itemType == 'bookSection' ? { editor: null } : "author"));
 
 	if (seriesXML && seriesXML.length) {
-		parseCreators(seriesXML, item, {"editor":"seriesEditor"});
+		parseCreators(seriesXML, item, { editor: "seriesEditor" });
 		item.series = ZU.xpathText(seriesXML, 'titles[1]/title[1]');
 		item.seriesNumber = ZU.xpathText(seriesXML, 'series_number');
 		item.reportType = ZU.xpathText(seriesXML, 'titles[1]/title[1]');
 	}
-	//prefer article to journal metadata and print to other dates
+	// prefer article to journal metadata and print to other dates
 	var pubDateNode = ZU.xpath(refXML, 'publication_date[@media_type="print"]');
 	if (!pubDateNode.length) pubDateNode = ZU.xpath(refXML, 'publication_date');
-		if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'publication_date[@media_type="print"]');
-		if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'publication_date');
+	if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'publication_date[@media_type="print"]');
+	if (!pubDateNode.length) pubDateNode = ZU.xpath(metadataXML, 'publication_date');
 
 	
 	if (pubDateNode.length) {
@@ -396,17 +407,17 @@ if (!metadataXML || !metadataXML.length) {
 	if (pages.length) {
 		item.pages = ZU.xpathText(pages, 'first_page[1]');
 		var lastPage = ZU.xpathText(pages, 'last_page[1]');
-		if (lastPage) item.pages += "-"+lastPage;
+		if (lastPage) item.pages += "-" + lastPage;
 	}
 	else {
 		// use article Number instead
-		item.pages = ZU.xpathText(refXML, 'publisher_item/item_number')
+		item.pages = ZU.xpathText(refXML, 'publisher_item/item_number');
 	}
 
 	item.DOI = ZU.xpathText(refXML, 'doi_data/doi');
-	//add DOI to extra for unsupprted items
+	// add DOI to extra for unsupprted items
 	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-		if (item.extra){
+		if (item.extra) {
 			item.extra += "\nDOI: " + item.DOI;
 		}
 		else {
@@ -428,23 +439,24 @@ if (!metadataXML || !metadataXML.length) {
 				removeUnsupportedMarkup(innerXML(subtitle))
 			);
 		}
-	} 
+	}
 	if (!item.title || item.title == "") {
 		item.title = "[No title found]";
 	}
-	//Zotero.debug(JSON.stringify(item, null, 4));
+	// Zotero.debug(JSON.stringify(item, null, 4));
 
-	//check if there are potential issues with character encoding and try to fix it
-	//e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
+	// check if there are potential issues with character encoding and try to fix it
+	// e.g. 10.1057/9780230391116.0016 (en dash in title is presented as <control><control>â)
 	for (var field in item) {
 		if (typeof item[field] != 'string') continue;
-		//check for control characters that should never be in strings from CrossRef
+		// check for control characters that should never be in strings from CrossRef
 		if (/[\u007F-\u009F]/.test(item[field])) {
 			item[field] = decodeURIComponent(escape(item[field]));
 		}
 	}
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
