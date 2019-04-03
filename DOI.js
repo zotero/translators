@@ -143,12 +143,6 @@ function retrieveDOIs(dois, doc) {
 	
 		translate.setHandler("done", function () {
 			numDois--;
-			/*
-				DOI resolution runs async, but updates of numDois run on the main thread, so if we are here that means:
-				* I am done and have marked this
-				* All other async resolves do the same
-				* if numDois is zero (should not be < zero, but let's be careful out there), that means everyone is done
-			*/
 			if (numDois <= 0) {
 				completeDOIs(doc);
 			}
