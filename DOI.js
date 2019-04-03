@@ -123,16 +123,13 @@ function completeDOIs(_doc) {
 	}
 }
 
-function retrieveDOIs(dois, doc, providers) {
+function retrieveDOIs(dois, doc) {
 	var numDois = dois.length;
-	var provider = providers.shift();
-	
-	var remainingDOIs = dois.slice();// copy array but not by reference
 
-	for (var i = 0, n = dois.length; i < n; i++) {
+	for (var DOI of dois) {
 		(function (doc, DOI) {
 			var translate = Zotero.loadTranslator("search");
-			translate.setTranslator(provider.id);
+			translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 	
 			var item = { itemType: "journalArticle", DOI: DOI };
 			translate.setSearch(item);
@@ -146,26 +143,18 @@ function retrieveDOIs(dois, doc, providers) {
 					selectArray[item.DOI] = "[" + item.DOI + "]";
 				}
 				items[item.DOI] = item;
-
-				// done means not remaining anymore
-				if (remainingDOIs.includes(item.DOI))	 {
-					remainingDOIs.splice(remainingDOIs.indexOf(item.DOI), 1);
-				}
-				else {
-					Z.debug(item.DOI + " not anymore in the list of remainingDOIs = " + remainingDOIs);
-				}
 			});
 	
 			translate.setHandler("done", function (_translate) {
 				numDois--;
+				/*
+					DOI resolution runs async, but updates of numDois run on the main thread, so if we are here that means:
+					* I am done and have marked this
+					* All other async resolves do the same
+					* if numDois is zero (should not be < zero, but let's be careful out there), that means everyone is done
+				*/
 				if (numDois <= 0) {
-					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
-					if (providers.length > 0 && remainingDOIs.length > 0) {
-						retrieveDOIs(remainingDOIs, doc, providers);
-					}
-					else {
-						completeDOIs(doc);
-					}
+					completeDOIs(doc);
 				}
 			});
 	
@@ -173,20 +162,14 @@ function retrieveDOIs(dois, doc, providers) {
 			translate.setHandler("error", function () {});
 	
 			translate.translate();
-		})(doc, dois[i]);
+		})(doc, DOI);
 	}
 }
 
 function doWeb(doc) {
 	var dois = getDOIs(doc);
 	Z.debug(dois);
-	var providers = [
-		{
-			id: "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
-			name: "DOI.org"
-		}
-	];
-	retrieveDOIs(dois, doc, providers);
+	retrieveDOIs(dois, doc);
 }
 
 /** BEGIN TEST CASES **/
