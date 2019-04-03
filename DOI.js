@@ -36,8 +36,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-/* eslint-disable no-loop-func */
-
 // The variables items and selectArray will be filled during the first
 // as well as the second retrieveDOIs function call and therefore they
 // are defined global.
@@ -124,45 +122,42 @@ function completeDOIs(_doc) {
 }
 
 function retrieveDOIs(dois, doc) {
-	var numDois = dois.length;
+	let numDois = dois.length;
 
-	for (var DOI of dois) {
-		(function (doc, DOI) {
-			var translate = Zotero.loadTranslator("search");
-			translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+	for (const DOI of dois) {
+		const translate = Zotero.loadTranslator("search");
+		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 	
-			var item = { itemType: "journalArticle", DOI: DOI };
-			translate.setSearch(item);
+		translate.setSearch({ itemType: "journalArticle", DOI: DOI });
 	
-			// don't save when item is done
-			translate.setHandler("itemDone", function (translate, item) {
-				selectArray[item.DOI] = item.title;
-				if (!item.title) {
-					Zotero.debug("No title available for " + item.DOI);
-					item.title = "[No Title]";
-					selectArray[item.DOI] = "[" + item.DOI + "]";
-				}
-				items[item.DOI] = item;
-			});
+		// don't save when item is done
+		translate.setHandler("itemDone", function (_translate, item) {
+			selectArray[item.DOI] = item.title;
+			if (!item.title) {
+				Zotero.debug("No title available for " + item.DOI);
+				item.title = "[No Title]";
+				selectArray[item.DOI] = "[" + item.DOI + "]";
+			}
+			items[item.DOI] = item;
+		});
 	
-			translate.setHandler("done", function (_translate) {
-				numDois--;
-				/*
-					DOI resolution runs async, but updates of numDois run on the main thread, so if we are here that means:
-					* I am done and have marked this
-					* All other async resolves do the same
-					* if numDois is zero (should not be < zero, but let's be careful out there), that means everyone is done
-				*/
-				if (numDois <= 0) {
-					completeDOIs(doc);
-				}
-			});
+		translate.setHandler("done", function () {
+			numDois--;
+			/*
+				DOI resolution runs async, but updates of numDois run on the main thread, so if we are here that means:
+				* I am done and have marked this
+				* All other async resolves do the same
+				* if numDois is zero (should not be < zero, but let's be careful out there), that means everyone is done
+			*/
+			if (numDois <= 0) {
+				completeDOIs(doc);
+			}
+		});
 	
-			// Don't throw on error
-			translate.setHandler("error", function () {});
+		// Don't throw on error
+		translate.setHandler("error", function () {});
 	
-			translate.translate();
-		})(doc, DOI);
+		translate.translate();
 	}
 }
 
