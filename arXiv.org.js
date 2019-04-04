@@ -130,7 +130,7 @@ function doWeb(doc, url) {
 
 function parseXML(text) {
 	// Z.debug(text);
-	
+	/* eslint camelcase: ["error", { allow: ["oai_dc"] }] */
 	var ns = {
 		oai_dc: 'http://www.openarchives.org/OAI/2.0/oai_dc/',
 		dc: 'http://purl.org/dc/elements/1.1/',
