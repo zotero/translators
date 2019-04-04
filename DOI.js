@@ -140,7 +140,7 @@ function retrieveDOIs(dois, doc) {
 			}
 			items[item.DOI] = item;
 		});
-	
+		/* eslint-disable no-loop-func */
 		translate.setHandler("done", function () {
 			numDois--;
 			if (numDois <= 0) {
