@@ -107,15 +107,9 @@ function scrape(doc, url) {
 		// we import them here, as the Embedded Metadata translator
 		// cannot catch them.
 		item.tags = [];
-		var keywords = ZU.xpathText(doc, '//meta[@name="article-mot_cle"]/@content');
-		if (keywords) {
-			keywords = keywords.split(/\s*[,;]\s*/);
-			for (var i=0; i<keywords.length; i++) {
-				if (keywords[i].trim()) {
-					item.tags.push(keywords[i]);
-				}
-			}
-		}
+		var keywords = ZU.xpath(doc, '//li[@class="motcle"]');
+		if (keywords)
+			item.tags = keywords.map(function(x) { return x.textContent.trim(); });
 
 		for (var i=0; i<item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
@@ -159,6 +153,15 @@ function scrape(doc, url) {
 		item.title = ZU.unescapeHTML(item.title);
 		if (item.abstractNote) {
 			item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+		} else {
+			var abstracts = ZU.xpath(doc, '//div[contains(@class, "resume")]/div[@class="corps"]/p');
+			if (abstracts) {
+				var combined = "";
+				for (var i in abstracts)
+					combined += abstracts[i].textContent + "\n\n";
+
+				item.abstractNote = ZU.unescapeHTML(combined.trim());
+			}
 		}
 
 		item.complete();
