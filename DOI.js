@@ -59,21 +59,22 @@ function getDOIs(doc) {
 	// DOI should never end with a period or a comma (we hope)
 	// Description at: http://www.doi.org/handbook_2000/appendix_1.html#A1-4
 	const DOIre = /\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/g;
-	const DOIXPath = "//text()[contains(., '10.')][not(parent::script or parent::style)]";
 
 	var dois = [];
 
-	var node, m, DOI;
-	var results = doc.evaluate(DOIXPath, doc, null, XPathResult.ANY_TYPE, null);
-	while ((node = results.iterateNext())) {
+	var m, DOI;
+	var treeWalker = doc.createTreeWalker(doc.documentElement, 4, null, false);
+	var ignore = ['script', 'style'];
+	while (treeWalker.nextNode()) {
+		if (ignore.includes(treeWalker.currentNode.parentNode.tagName.toLowerCase())) continue;
 		// Z.debug(node.nodeValue)
 		DOIre.lastMatch = 0;
-		while ((m = DOIre.exec(node.nodeValue))) {
+		while ((m = DOIre.exec(treeWalker.currentNode.nodeValue))) {
 			DOI = m[0];
-			if (DOI.substr(-1) == ")" && !DOI.includes("(")) {
+			if (DOI.endsWith(")") && !DOI.includes("(")) {
 				DOI = DOI.substr(0, DOI.length - 1);
 			}
-			if (DOI.substr(-1) == "}" && !DOI.includes("{")) {
+			if (DOI.endsWith("}") && !DOI.includes("{")) {
 				DOI = DOI.substr(0, DOI.length - 1);
 			}
 			// only add new DOIs
@@ -101,14 +102,10 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function completeDOIs(doc) {
+function completeDOIs(_doc) {
 	// all DOIs retrieved now
 	// check to see if there is more than one DOI
-	var numDOIs = 0;
-	for (var DOI in selectArray) {
-		numDOIs++;
-		if (numDOIs == 2) break;
-	}
+	var numDOIs = Object.keys(selectArray).length;
 	if (numDOIs == 0) {
 		throw new Error("DOI Translator: could not find DOI");
 	}
@@ -124,70 +121,44 @@ function completeDOIs(doc) {
 	}
 }
 
-function retrieveDOIs(dois, doc, providers) {
-	var numDois = dois.length;
-	var provider = providers.shift();
-	
-	var remainingDOIs = dois.slice();// copy array but not by reference
+function retrieveDOIs(dois, doc) {
+	let numDois = dois.length;
 
-	for (var i = 0, n = dois.length; i < n; i++) {
-		(function (doc, DOI) {
-			var translate = Zotero.loadTranslator("search");
-			translate.setTranslator(provider.id);
+	for (const DOI of dois) {
+		const translate = Zotero.loadTranslator("search");
+		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 	
-			var item = { itemType: "journalArticle", DOI: DOI };
-			translate.setSearch(item);
+		translate.setSearch({ itemType: "journalArticle", DOI: DOI });
 	
-			// don't save when item is done
-			translate.setHandler("itemDone", function (translate, item) {
-				selectArray[item.DOI] = item.title;
-				if (!item.title) {
-					Zotero.debug("No title available for " + item.DOI);
-					item.title = "[No Title]";
-					selectArray[item.DOI] = "[" + item.DOI + "]";
-				}
-				items[item.DOI] = item;
-
-				// done means not remaining anymore
-				if (remainingDOIs.includes(item.DOI))	 {
-					remainingDOIs.splice(remainingDOIs.indexOf(item.DOI), 1);
-				}
-				else {
-					Z.debug(item.DOI + " not anymore in the list of remainingDOIs = " + remainingDOIs);
-				}
-			});
+		// don't save when item is done
+		translate.setHandler("itemDone", function (_translate, item) {
+			selectArray[item.DOI] = item.title;
+			if (!item.title) {
+				Zotero.debug("No title available for " + item.DOI);
+				item.title = "[No Title]";
+				selectArray[item.DOI] = "[" + item.DOI + "]";
+			}
+			items[item.DOI] = item;
+		});
 	
-			translate.setHandler("done", function (translate) {
-				numDois--;
-				if (numDois <= 0) {
-					Z.debug("Done with " + provider.name + ". Remaining DOIs: " + remainingDOIs);
-					if (providers.length > 0 && remainingDOIs.length > 0) {
-						retrieveDOIs(remainingDOIs, doc, providers);
-					}
-					else {
-						completeDOIs(doc);
-					}
-				}
-			});
+		translate.setHandler("done", function () {
+			numDois--;
+			if (numDois <= 0) {
+				completeDOIs(doc);
+			}
+		});
 	
-			// Don't throw on error
-			translate.setHandler("error", function () {});
+		// Don't throw on error
+		translate.setHandler("error", function () {});
 	
-			translate.translate();
-		})(doc, dois[i]);
+		translate.translate();
 	}
 }
 
 function doWeb(doc) {
 	var dois = getDOIs(doc);
 	Z.debug(dois);
-	var providers = [
-		{
-			id: "b28d0d42-8549-4c6d-83fc-8382874a5cb9",
-			name: "DOI.org"
-		}
-	];
-	retrieveDOIs(dois, doc, providers);
+	retrieveDOIs(dois, doc);
 }
 
 /** BEGIN TEST CASES **/
