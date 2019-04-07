@@ -106,7 +106,11 @@ function getSearchResults(doc, checkOnly) {
 			var title = ZU.xpathText(article, './/div[@class="title"]');
 			var pdf = getPDF(article, './/div[@class="links"]/a'
 				+ '[@class="view" and contains(@href,".pdf")][1]');
-			ids[pmcid[1]] = title;
+			const cb = article.querySelector('input[type=checkbox]');
+			ids[pmcid[1]] = {
+				title,
+				checked: cb && cb.checked,
+			};
 			
 			found = true;
 			
