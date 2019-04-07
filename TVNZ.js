@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-05 06:37:09"
+	"lastUpdated": "2019-04-07 18:10:37"
 }
 
 /*
@@ -37,23 +37,25 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes("/search?") && getSearchResults(doc, true)){
+	if (url.includes("/search?") && getSearchResults(doc, true)) {
 		return "multiple";
-	} 
+	}
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content')) {
 		return "newspaperArticle";
-	} 
+	}
+	return false;
 }
 
 
-function scrape(doc, url){
+function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.date = ZU.xpathText(doc, '(//div[contains(@class, "storyPage") and h1]//time)[1]');
 	if (item.date) {
 		if (item.date.match(/\d\d?:\d\d[pa]m/)) {
 			item.date = "Today";
-		} else if (!item.date.match(/\d\d\d\d/)) {
+		}
+		else if (!item.date.match(/\d\d\d\d/)) {
 			item.date += " 2017";
 		}
 		item.date = ZU.strToISO(item.date);
@@ -75,7 +77,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[@class="tileContent"]/a[h3]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -98,8 +100,10 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
+			return true;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
