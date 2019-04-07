@@ -9,8 +9,32 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2018-04-17 20:00:00"
+	"lastUpdated": "2019-03-29 12:34:44"
 }
+
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Sean Takats and Michael Berkowitz
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectSearch(item) {
 	return !!item.arXiv;
@@ -23,11 +47,12 @@ function doSearch(item) {
 }
 
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^\.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
+	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
 	
 	if (searchRe.test(url)) {
 		return "multiple";
-	} else {
+	}
+	else {
 		return "journalArticle";
 	}
 }
@@ -38,7 +63,7 @@ function doWeb(doc, url) {
 		var getTitleId;
 		if (rows.length) {
 			// arXiv.org format
-			getTitleId = function(row) {
+			getTitleId = function (row) {
 				var id = ZU.xpathText(row, './/a[@title="Abstract"]').trim().substr(6); // Trim off arXiv:
 				var title = ZU.trimInternal(
 					ZU.xpathText(row, './following-sibling::dd[1]//div[contains(@class, "list-title")]/text()[last()]'));
@@ -47,9 +72,10 @@ function doWeb(doc, url) {
 					id: id
 				};
 			};
-		} else if ( (rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length ) {
+		}
+		else if ((rows = ZU.xpath(doc, '//table/tbody/tr[./td[@class="lti"]]')).length) {
 			// eprintweb.org format
-			getTitleId = function(row) {
+			getTitleId = function (row) {
 				var title = ZU.trimInternal(ZU.xpathText(row, './td'));
 				var id = ZU.xpathText(row, './following-sibling::tr[.//a][1]/td/b').trim().substr(6);
 				return {
@@ -57,17 +83,18 @@ function doWeb(doc, url) {
 					id: id
 				};
 			};
-		} else {
+		}
+		else {
 			throw new Error("Unrecognized multiples format");
 		}
 		
 		var items = {};
-		for (var i=0; i<rows.length; i++) {
+		for (let i = 0; i < rows.length; i++) {
 			var row = getTitleId(rows[i]);
 			items[row.id] = row.title;
 		}
 		
-		Z.selectItems(items, function(items) {
+		Z.selectItems(items, function (items) {
 			if (!items) return;
 			
 			var urls = [];
@@ -79,30 +106,31 @@ function doWeb(doc, url) {
 			}
 			
 			ZU.doGet(urls, parseXML);
-		})
-	} else {
+		});
+	}
+	else {
 		var id;
 		var p = url.indexOf("/pdf/");
-		if (p>-1) {
-			id = url.substring(p+5, url.length-4);
-		} else {
+		if (p > -1) {
+			id = url.substring(p + 5, url.length - 4);
+		}
+		else {
 			id = ZU.xpathText(doc, '//td[contains(@class,"arxivid")]/a')
 				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
 		}
 		if (!id) throw new Error('Could not find arXiv ID on page.');
 		
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		var url = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
+		var apiurl = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
-		ZU.doGet(url, parseXML);
+		ZU.doGet(apiurl, parseXML);
 	}
 }
 
 
-
 function parseXML(text) {
-	//Z.debug(text);
-	
+	// Z.debug(text);
+	/* eslint camelcase: ["error", { allow: ["oai_dc"] }] */
 	var ns = {
 		oai_dc: 'http://www.openarchives.org/OAI/2.0/oai_dc/',
 		dc: 'http://purl.org/dc/elements/1.1/',
@@ -115,28 +143,28 @@ function parseXML(text) {
 	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
 
 	newItem.title = getXPathNodeTrimmed(dcMeta, "dc:title", ns);
-	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);		
+	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);
 	newItem.date = getXPathNodeTrimmed(dcMeta, "dc:date", ns);
 	
 	
 	var descriptions = ZU.xpath(dcMeta, "./dc:description", ns);
 	
-	//Put the first description into abstract, all other into notes.
-	if (descriptions.length>0) {
+	// Put the first description into abstract, all other into notes.
+	if (descriptions.length > 0) {
 		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for (var j=1; j<descriptions.length; j++) {
+		for (let j = 1; j < descriptions.length; j++) {
 			var noteStr = ZU.trimInternal(descriptions[j].textContent);
-			newItem.notes.push({note:noteStr});		
-		}	
-	}	
+			newItem.notes.push({ note: noteStr });
+		}
+	}
 	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for (var j=0; j<subjects.length; j++) {
+	for (let j = 0; j < subjects.length; j++) {
 		var subject = ZU.trimInternal(subjects[j].textContent);
-		newItem.tags.push(subject);		
-	}	
+		newItem.tags.push(subject);
+	}
 					
 	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for (var j=0; j<identifiers.length; j++) {
+	for (let j = 0; j < identifiers.length; j++) {
 		var identifier = ZU.trimInternal(identifiers[j].textContent);
 		if (identifier.substr(0, 4) == "doi:") {
 			newItem.DOI = identifier.substr(4);
@@ -152,35 +180,36 @@ function parseXML(text) {
 	var articleField = ZU.xpathText(xml, '//n:GetRecord/n:record/n:header/n:setSpec', ns);
 	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
 	
-	if (articleID && articleID.indexOf("/") != -1) {
+	if (articleID && articleID.includes("/")) {
 		newItem.publicationTitle = "arXiv:" + articleID;
-	} else {
+	}
+	else {
 		newItem.publicationTitle = "arXiv:" + articleID + " " + articleField;
 	}
 	
 	newItem.extra = 'arXiv: ' + articleID;
 	
 	newItem.attachments.push({
-		title: 'arXiv:'+articleID + " PDF",
+		title: 'arXiv:' + articleID + " PDF",
 		url: "http://www.arxiv.org/pdf/" + articleID + ".pdf",
 		mimeType: "application/pdf"
 	});
 	newItem.attachments.push({
 		title: "arXiv.org Snapshot",
 		url: newItem.url,
-		mimeType:"text/html"
+		mimeType: "text/html"
 	});
 	
-	//retrieve and supplement publication data for published articles via DOI
+	// retrieve and supplement publication data for published articles via DOI
 	if (newItem.DOI) {
 		var translate = Zotero.loadTranslator("search");
 		// CrossRef
-		translate.setTranslator("11645bd1-0420-45c1-badb-53fb41eeb753");
+		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 		
-		var item = {"itemType":"journalArticle", "DOI": newItem.DOI};
+		var item = { itemType: "journalArticle", DOI: newItem.DOI };
 		translate.setSearch(item);
-		translate.setHandler("itemDone", function(obj, item) {
-			//Z.debug(item)
+		translate.setHandler("itemDone", function (obj, item) {
+			// Z.debug(item)
 			newItem.volume = item.volume;
 			newItem.issue = item.issue;
 			newItem.pages = item.pages;
@@ -191,19 +220,20 @@ function parseXML(text) {
 			}
 			newItem.date = item.date;
 		});
-		translate.setHandler("done", function() {
+		translate.setHandler("done", function () {
 			newItem.complete();
 		});
-		translate.setHandler("error", function() {});
+		translate.setHandler("error", function () {});
 		translate.translate();
-	} else {
+	}
+	else {
 		newItem.complete();
 	}
 }
 
 
 function getXPathNodeTrimmed(dcMeta, name, ns) {
-	var node = ZU.xpath(dcMeta, './'+name, ns);
+	var node = ZU.xpath(dcMeta, './' + name, ns);
 	if (node.length) {
 		return ZU.trimInternal(node[0].textContent);
 	}
@@ -211,8 +241,8 @@ function getXPathNodeTrimmed(dcMeta, name, ns) {
 }
 
 function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
-	var nodes = ZU.xpath(dcMeta, './'+name, ns);
-	for (var i=0; i<nodes.length; i++) {
+	var nodes = ZU.xpath(dcMeta, './' + name, ns);
+	for (var i = 0; i < nodes.length; i++) {
 		newItem.creators.push(
 			ZU.cleanAuthor(nodes[i].textContent, creatorType, true)
 		);

@@ -3,40 +3,49 @@
 		"browser": false,
 		"es6": true
 	},
+	"extends": [
+		"@zotero"
+	],
 	"parserOptions": {
 		"ecmaVersion": 7
 	},
 	"globals": {
-		"Zotero",
-		"Z",
-		"ZU",
-		"DOMParser",
-		"XPathResult"
+		"Zotero": "readonly",
+		"Z": "readonly",
+		"ZU": "readonly",
+		"DOMParser": "readonly",
+		"XPathResult": "readonly",
+		"XMLSerializer": "readonly",
+		"atob": "readonly"
 	},
 	"rules": {
-		"semi": ["warn", "always"],
-		"indent": ["warn", "tab"],
-		"linebreak-style": ["error", "unix"],
-		"no-multi-str": "warn",
-		"no-shadow": "off",
-		"no-undef": "warn",
-		"zotero-translator/not-executable": ["error"],
-		"zotero-translator/header-valid-json": ["error"],
-		"zotero-translator/translator-id": ["error"],
-		"zotero-translator/last-updated": ["error"],
-
-		"zotero-translator/no-for-each": ["warn"],
-		"zotero-translator/prefer-index-of": ["warn"],
-
-		"notice/notice": [ "warn", {
-			"mustMatch": "GNU Affero General Public License",
-			"messages": {
-				"whenFailedToMatch": "Must be AGPL licensed"
+		"no-unused-vars": [
+			"error",
+			{
+				"argsIgnorePattern": "^_",
+				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$"
 			}
+		],
+		
+		"zotero-translator/not-executable": "error",
+		"zotero-translator/header-valid-json": "error",
+		"zotero-translator/translator-id": "error",
+		"zotero-translator/last-updated": "warn",
+		"zotero-translator/translator-type": "warn",
+
+		"zotero-translator/no-for-each": "warn",
+		"zotero-translator/prefer-index-of": "warn",
+
+		"zotero-translator/test-cases-valid-json": "error",
+		"zotero-translator/test-cases": "error",
+		"zotero-translator/translator-framework": "warn",
+
+		"zotero-translator/license": [ "warn", {
+			"mustMatch": "GNU Affero General Public License",
+			"templateFile": ".ci/AGPL"
 		 }]
 	},
 	"plugins": [
-		"zotero-translator",
-		"notice"
+		"zotero-translator"
 	]
 }
