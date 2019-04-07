@@ -1,4 +1,4 @@
-57  # Increment number when modifying file
+58  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -72,9 +72,9 @@ f39dbd1c-229e-4abb-8414-a09fdbda37b7 # Archives Network of Alberta - new website
 f8765470-5ace-4a31-b4bd-4327b960ccd  # Springer Old doesn't exist anymore
 82174f4f-8c13-403b-99b2-affc7bc7769b # Cambridge Scientific Abstracts are now Proquest
 f1f3aa05-d752-4a46-b362-1d3dc87c7c36 # Princeton+ now (re-)unified with Primo
-31649d9d-8f7e-4b87-8678-b3e68ee98f39 # CARL/ABRC OAI Harvester - doesn't exist anymore 
+31649d9d-8f7e-4b87-8678-b3e68ee98f39 # CARL/ABRC OAI Harvester - doesn't exist anymore
 409c520b-0720-4011-8fce-70fcd9806493 # Inder Science - articles are on metapress, the translator on the publisher site is pointless
-ca6e95d1-46b9-4535-885c-df0c2d4b7f7a # Innovate Online - site defunct (and ownership transfered). 
+ca6e95d1-46b9-4535-885c-df0c2d4b7f7a # Innovate Online - site defunct (and ownership transfered).
 f880bf79-d42f-4337-b0d2-7a7de4a48b7d # X-OPAC - no more instances of this lib catalog
 0863b8ec-e717-4b6d-9e35-0b2db2ac6b0f # Physical Society of Japan - journals moved to IOP or Atypon system
 63c25c45-6257-4985-9169-35b785a2995e # InfoTrac OneFile - merged into Galegroup (see #482)
@@ -95,10 +95,12 @@ a77690cf-c5d1-8fc4-110f-d1fc765dcf88 # ProQuest Legacy.js, see issue #660
 291934d5-36ec-4b81-ac9c-c5ad5313dba4 # Pion publisher acquired by Sage
 cd77f1e5-507f-4c41-a6d2-bda5fa6f8694 # Readability was shut down on September 30, 2016
 6f5f1b24-7519-4314-880f-d7004fbcfe7e # ReliefWeb is now covered by Embedded Metadata translator
-882f70a8-b8ad-403e-bd76-cb160224999d # Vanderbilt eJournals is now coverd by OJS translator
+882f70a8-b8ad-403e-bd76-cb160224999d # Vanderbilt eJournals is now covered by OJS translator
 c0d7d260-d795-4782-9446-f6c403a7922c # ScienceLink Japan closed on 2014-03-31
 dfec8317-9b59-4cc5-8771-cdcef719d171 # Springer Science is now covered by BioMedCentral translator
 eb4cb148-b050-470c-9686-77d722efdbd7 # Tatar zamanı website does not exists anymore
 fef07360-ee97-4f67-b022-6f64d5ec0c25 # KOBV; included in new portal and shutdown announcement since 2016-01-14
 49cb85ac-4f5e-41df-948f-5ae479809b43 # USgamer combined into Eurogamer translator
 09e8f8a2-a7e6-4430-b86c-47c99ca40a38 # Remove old HAPI version
+9f1fb86b-92c8-4db7-b8ee-0b481d456428 # Remove Datacite search translator; now handled by DOI content negotiation with Datacite JSON import translator
+11645bd1-0420-45c1-badb-53fb41eeb753 # Remove Crossref search translator; now handled by DOI content negotiation with Crossref Unixref import translator
