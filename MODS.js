@@ -474,11 +474,17 @@ function doExport() {
 		
 		// XML tag detail; object field pages
 		if (item.pages) {
-			var range = Zotero.Utilities.getPageRange(item.pages),
-				extent = doc.createElementNS(ns, "extent");
+			var extent = doc.createElementNS(ns, "extent");
 			extent.setAttribute("unit", "pages");
-			mapProperty(extent, "start", range[0]);
-			mapProperty(extent, "end", range[1]);
+			if (item.pages.search(/^\d+[-–]\d+$/) != -1) {
+				var range = ZU.getPageRange(item.pages);
+				mapProperty(extent, "start", range[0]);
+				mapProperty(extent, "end", range[1]);
+			}
+			else {
+				extent.setAttribute("unit", "pages");
+				mapProperty(extent, "list", item.pages);
+			}
 			part.appendChild(extent);
 		}
 		
