@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-12 23:03:20"
+	"lastUpdated": "2019-04-12 03:06:00"
 }
 
 /*
@@ -46,15 +46,31 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var newItem = new Zotero.Item("newspaperArticle");
-	var metaArr = {};
-	var metaTags = doc.getElementsByTagName("meta");
-	for (var i = 0 ; i < metaTags.length ; i++) {
-		if (metaTags[i].getAttribute("property")) {
-			metaArr[metaTags[i].getAttribute("property")] = metaTags[i].getAttribute("content");
+	var scripts = doc.getElementsByTagName("script");
+	var json = '';
+	var testre = new RegExp('^(var staPageDetail).*', 'm');
+	var jsonre = /var staPageDetail = JSON.parse\(\"(.+?)\"\)\;/;
+	for (var i = 0 ; i < scripts.length ; i++) {
+		var arr = scripts[i].textContent.match(jsonre);
+		if (arr) {
+			// we have to unescape the json string this way, since javascript 
+			// unescape doesn't work here
+			json = arr[1].replace(/\\\//g,'/').replace(/\\\"/g,'"');
+			break;
 		}
 	}
-	newItem.title = doc.getElementById("spotTitle").textContent;
-	newItem.url = metaArr["og:url"];
+	details = JSON.parse(json);
+	
+	var metaArr = {};
+	var metaTags = doc.getElementsByTagName("meta");
+	for (var j = 0 ; j < metaTags.length ; j++) {
+		if (metaTags[j].getAttribute("property")) {
+			metaArr[metaTags[j].getAttribute("property")] = metaTags[j].getAttribute("content");
+		}
+	}
+	newItem.title = details.citation.title;
+	// remove the unnecessary xid param
+	newItem.url = details.citation.url.replace(/\?xid=[0-9]*$/, "");
 	
 	/*
 		The user can append the author to the title with a forward slash
@@ -71,10 +87,7 @@ function doWeb(doc, url) {
 		}
 	}
 
-	/*
-	<span id="spotBody" class="disc-body">This is the abstract</span>
-	*/
-	newItem.abstractNote = doc.getElementById("spotBody").innerHTML;
+	newItem.abstractNote = details.media.note;
 	
 	/*
 	<meta property="og:image" content="https://img0.newspapers.com/img/img?id=97710064&width=557&height=4616&crop=1150_215_589_4971&rotation=0&brightness=0&contrast=0&invert=0&ts=1467779959&h=e478152fd53dd7afc4e72a18c1dad4ea">
@@ -85,23 +98,23 @@ function doWeb(doc, url) {
 		mimeType: "image/jpeg"
 	}];
 
-	newItem.publicationTitle = text(doc, '.location span[class="paper-title"]');
-	// .location gives a string like "Star Tribune\n(Minneapolis, Minnesota)\n\n17 Jan 1937, Sun\n • Page 4"
-	// or The Sunday Leader\n(Wilkes-Barre, Pennsylvania)\n\n17 Jul 1887, Sun\n • Main Edition\n • Page 5
-	editiontokens = text(doc, '.location').split('•');
+	newItem.publicationTitle = details.source.publisherName;
+	// details["source"]["title"] gives a string like 
+	// "Newspapers.com - The Akron Beacon Journal - 1939-10-30 - Page Page 15"
+	editiontokens = details.source.title.replace(/ - /g, "|").split("|");
 	if (editiontokens.length == 3) { // there's an edition label
 		newItem.edition = editiontokens[1];
 	}
-	newItem.pages = editiontokens.slice(-1)[0].replace("Page", '');
-	newItem.date = text(doc, '.source-info ol li:nth-child(2) a span', 'datetime').replace(/\, [A-Za-z]*$/, '');
-	if (newItem.date) {
-		newItem.date = ZU.strToISO(newItem.date)
+	newItem.pages = editiontokens.slice(-1)[0].replace(/Page/g, '');
+	newItem.date = details.source.publishedDate;
+	newItem.place = details.source.publishedLocation;
+	
+	// handle empty title
+	if (newItem.title === "") {
+		newItem.title = "Clipped From " + newItem.publicationTitle;
 	}
-	newItem.place = text(doc, '.location').split(/\n/)[3].replace(/[\(\)]/g, '');
 	newItem.complete();
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -145,7 +158,6 @@ var testCases = [
 				"title": "Clipped From The Sunday Leader",
 				"creators": [],
 				"date": "1887-07-17",
-				"edition": "Main Edition",
 				"libraryCatalog": "newspapers.com",
 				"pages": "5",
 				"place": "Wilkes-Barre, Pennsylvania",
