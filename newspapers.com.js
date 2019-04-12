@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-12 03:06:00"
+	"lastUpdated": "2019-04-17 01:46:54"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Peter Binkley
+	Copyright © 2017-2019 Peter Binkley
 
 	This file is part of Zotero.
 
@@ -35,37 +35,31 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
-function detectWeb(doc, url) {
+function detectWeb(_doc, _url) {
 	return "newspaperArticle";
 }
 
-function doWeb(doc, url) {
+function doWeb(doc, _url) {
 	var newItem = new Zotero.Item("newspaperArticle");
 	var scripts = doc.getElementsByTagName("script");
 	var json = '';
-	var testre = new RegExp('^(var staPageDetail).*', 'm');
-	var jsonre = /var staPageDetail = JSON.parse\(\"(.+?)\"\)\;/;
-	for (var i = 0 ; i < scripts.length ; i++) {
+	var jsonre = /var staPageDetail = JSON.parse\((.+?)\);/;
+	for (var i = 0; i < scripts.length; i++) {
 		var arr = scripts[i].textContent.match(jsonre);
 		if (arr) {
-			// we have to unescape the json string this way, since javascript 
-			// unescape doesn't work here
-			json = arr[1].replace(/\\\//g,'/').replace(/\\\"/g,'"');
+			json = arr[1];
 			break;
 		}
 	}
-	details = JSON.parse(json);
 	
+	// one JSON.parse to unstringify the json string, and one to parse it into an object
+	var details = JSON.parse(JSON.parse(json));
+
 	var metaArr = {};
 	var metaTags = doc.getElementsByTagName("meta");
-	for (var j = 0 ; j < metaTags.length ; j++) {
-		if (metaTags[j].getAttribute("property")) {
-			metaArr[metaTags[j].getAttribute("property")] = metaTags[j].getAttribute("content");
+	for (let metaTag of metaTags) {
+		if (metaTag.getAttribute("property")) {
+			metaArr[metaTag.getAttribute("property")] = metaTag.getAttribute("content");
 		}
 	}
 	newItem.title = details.citation.title;
@@ -78,12 +72,12 @@ function doWeb(doc, url) {
 	*/
 	if (newItem.title.includes('/')) {
 		var tokens = newItem.title.split("/");
-		var author = tokens[1];
+		var authorString = tokens[1];
 		newItem.title = tokens[0].trim();
 		// multiple authors are separated with semicolons
-		var authors = author.split("; ");
-		for (i=0; i<authors.length; i++) {
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i], "author"));
+		var authors = authorString.split("; ");
+		for (let author of authors) {
+			newItem.creators.push(Zotero.Utilities.cleanAuthor(author, "author"));
 		}
 	}
 
@@ -99,9 +93,9 @@ function doWeb(doc, url) {
 	}];
 
 	newItem.publicationTitle = details.source.publisherName;
-	// details["source"]["title"] gives a string like 
+	// details["source"]["title"] gives a string like
 	// "Newspapers.com - The Akron Beacon Journal - 1939-10-30 - Page Page 15"
-	editiontokens = details.source.title.replace(/ - /g, "|").split("|");
+	var editiontokens = details.source.title.replace(/ - /g, "|").split("|");
 	if (editiontokens.length == 3) { // there's an edition label
 		newItem.edition = editiontokens[1];
 	}
@@ -115,6 +109,7 @@ function doWeb(doc, url) {
 	}
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
