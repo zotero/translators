@@ -372,6 +372,10 @@ function doExport() {
 		
 		/** CORE FIELDS **/
 		
+		recordInfo = doc.createElementNS(ns, "recordInfo");
+		mapProperty(recordInfo, "recordIdentifier", (item.uri ? item.uri : "#item_"+item.itemID));
+		mods.appendChild(recordInfo);
+
 		// XML tag titleInfo; object field title
 		if (item.title) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
