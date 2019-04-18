@@ -92,7 +92,28 @@ function postProcess(doc, item) {
 			var node = abstractParagraphs[paragraph];
 			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
 		}
+	} else {
+		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[2]');
+		if (abstractParagraphs && abstractParagraphs.length > 0)
+			item.abstractNote = abstractParagraphs[0].textContent;
 	}
+
+	var keywords = ZU.xpath(doc, '//strong[contains(text(), /keywords/i)]/..');
+	if (keywords) {
+		item.tags = keywords[0].textContent
+						.trim()
+						.replace(/\n/g, "")
+						.replace(/keywords\s*\:\s*/ig, "")
+						.split(";")
+						.map(function(x) { return x.trim(); });
+	}
+
+	if (item.date) {
+		var dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
+		if (dateMatches && dateMatches[1] == "00")
+			item.date = dateMatches[2];
+	}
+
 	item.libraryCatalog = "SciELO"
 }
 

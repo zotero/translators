@@ -35,7 +35,7 @@
 
 
 function detectWeb(doc, url) {
-    // placeholder, the Embedded Metadata translator fills in the correct item type
+    // placeholder, the OJS translator fills in the correct item type
     return "journalArticle";
 }
 
@@ -46,12 +46,22 @@ function postProcess(doc, item) {
     if (authors)
         item.creators = authors.map(function(x) { return ZU.cleanAuthor(x.textContent, 'author'); })
 
+    // get multiple abstracts
+    var abstracts = ZU.xpath(doc, '//meta[@name="DC.Description"]//@content');
+    if (abstracts && abstracts.length) {
+        var combinedAbstracts = "";
+        for (var i in abstracts)
+            combinedAbstracts += abstracts[i].textContent + "\n\n";
+
+        item.abstractNote = combinedAbstracts.trim();
+    }
+
     item.complete();
 }
 
-function invokeEmbeddedMetadataTranslator(doc) {
+function invokeOJSTranslator(doc) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         postProcess(doc, i);
@@ -60,5 +70,5 @@ function invokeEmbeddedMetadataTranslator(doc) {
 }
 
 function doWeb(doc, url) {
-    invokeEmbeddedMetadataTranslator(doc);
+    invokeOJSTranslator(doc);
 }
