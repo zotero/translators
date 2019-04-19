@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-25 17:50:03"
+	"lastUpdated": "2019-04-19 19:04:36"
 }
 
 /*
@@ -36,12 +36,17 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/article/')>-1) {
+	if (url.includes('/article/')) {
 		return "journalArticle";
-	} else if (url.indexOf('/book/') >-1) {
+	}
+	else if (url.includes('/book/')) {
 		return "book";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	else {
+		return false;
 	}
 }
 
@@ -52,7 +57,7 @@ function getSearchResults(doc, checkOnly) {
 	if (!rows.length) {
 		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	}
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -75,8 +80,10 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
+			return true;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -89,22 +96,21 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").trim();
+			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "")
+				.trim();
 		}
-		if (url.indexOf("/article/") != -1) {
-	   		var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
-	   		//Z.debug(pdfurl);
-	   		//overwriting attachments: Snapshot isn't very useful, PDF link from EM is wrong
-	   		item.attachments = [{
-						"url": pdfurl,
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}]
+		if (url.includes("/article/")) {
+			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
+			item.attachments = [{
+				url: pdfurl,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
+			}];
 		}
 		item.libraryCatalog = "Project MUSE";
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }/** BEGIN TEST CASES **/
