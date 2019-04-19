@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-19 19:04:36"
+	"lastUpdated": "2019-04-19 19:38:19"
 }
 
 /*
@@ -53,10 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[@class="single_result"]//h1/a[contains(@href, "/article/") or contains(@href, "/book/")]');
-	if (!rows.length) {
-		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
-	}
+	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -89,8 +86,9 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/abstract');
+	let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
+	if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -132,6 +130,7 @@ var testCases = [
 				"date": "2006-07-20",
 				"ISSN": "1477-464X",
 				"issue": "1",
+				"language": "en",
 				"libraryCatalog": "Project MUSE",
 				"pages": "121-164",
 				"publicationTitle": "Past & Present",
@@ -206,6 +205,7 @@ var testCases = [
 				"ISSN": "1097-3729",
 				"abstractNote": "This article uses coverage of the fiftieth anniversary of the Pill as an example of what Richard Hirsh describes as the “real world” role of historians of technology. It explores how the presentation of historical topics on the world wide web has complicated how the history of technology is conveyed to the public. The article shows that that the Pill is especially suited to demonstrating the public role of historians of technology because, as the most popular form of reversible birth control, it has touched the lives of millions of Americans. Thus, an exploration of how the Pill’s fiftieth anniversary was covered illustrates how historians can use their expertise to provide a nuanced interpretation of a controversial topic in the history of technology.",
 				"issue": "4",
+				"language": "en",
 				"libraryCatalog": "Project MUSE",
 				"pages": "735-745",
 				"publicationTitle": "Technology and Culture",
@@ -243,6 +243,7 @@ var testCases = [
 				"ISSN": "1542-4278",
 				"abstractNote": "This article highlights an important paradox: in Argentina between 2003 and 2013 the center-left Peronist government’s approach to governance mirrors that of the center-right Peronist administration of the 1990s. While the latter centralized authority to pursue neoliberal reforms, the former have centralized authority in the name of expanding government intervention in the economy. In both cases, corruption has tended to go unchecked due to insufficient government accountability. Therefore, although economic policies and political rhetoric have changed dramatically, government corruption remains a constant of the Argentine political system due to the executive branch’s ability to emasculate constitutional checks and balances.",
 				"issue": "2",
+				"language": "en",
 				"libraryCatalog": "Project MUSE",
 				"pages": "173-195",
 				"publicationTitle": "Latin American Research Review",
@@ -259,11 +260,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://muse.jhu.edu/results?&terms=content:labor:AND&m=1&items_per_page=10&limits=subscription:Y",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
