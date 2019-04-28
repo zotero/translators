@@ -1,18 +1,18 @@
 {
 	"translatorID": "93514073-b541-4e02-9180-c36d2f3bb401",
+	"translatorType": 1,
 	"label": "Crossref Unixref XML",
 	"creator": "Sebastian Karcher",
 	"target": "xml",
 	"minVersion": "3.0",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
+	"inRepository": true,
+	"browserSupport": "gcsibv",
 	"configOptions": {
 		"dataMode": "xml/dom"
 	},
-	"inRepository": true,
-	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-03 22:53:54"
+	"lastUpdated": "2019-04-27 02:15:00"
 }
 
 /*
@@ -200,7 +200,7 @@ function doImport() {
 		metadataXML = ZU.xpath(itemXML, 'journal_metadata');
 
 		item.publicationTitle = ZU.xpathText(metadataXML, 'full_title[1]');
-		item.journalAbbreviation = ZU.xpathText(refXML, 'abbrev_title[1]');
+		item.journalAbbreviation = ZU.xpathText(metadataXML, 'abbrev_title[1]');
 		item.volume = ZU.xpathText(itemXML, 'journal_issue/journal_volume/volume');
 		item.issue = ZU.xpathText(itemXML, 'journal_issue/journal_volume/issue');
 		// Sometimes the <issue> tag is not nested inside the volume tag; see 10.1007/BF00938486
