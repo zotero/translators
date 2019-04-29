@@ -2708,6 +2708,7 @@ var reversemappingTable = {
 	"{\\~A}"                          : "\u00C3", // LATIN CAPITAL LETTER A WITH TILDE
 	"{\\\"A}"                         : "\u00C4", // LATIN CAPITAL LETTER A WITH DIAERESIS
 	"{\\r A}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
+	"{\\AA}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
 	"{\\c C}"                          : "\u00C7", // LATIN CAPITAL LETTER C WITH CEDILLA
 	"{\\`E}"                          : "\u00C8", // LATIN CAPITAL LETTER E WITH GRAVE
 	"{\\'E}"                          : "\u00C9", // LATIN CAPITAL LETTER E WITH ACUTE
@@ -2734,6 +2735,7 @@ var reversemappingTable = {
 	"{\\~a}"                          : "\u00E3", // LATIN SMALL LETTER A WITH TILDE
 	"{\\\"a}"                         : "\u00E4", // LATIN SMALL LETTER A WITH DIAERESIS
 	"{\\r a}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
+	"{\\aa}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
 	"{\\c c}"                          : "\u00E7", // LATIN SMALL LETTER C WITH CEDILLA
 	"{\\`e}"                          : "\u00E8", // LATIN SMALL LETTER E WITH GRAVE
 	"{\\'e}"                          : "\u00E9", // LATIN SMALL LETTER E WITH ACUTE
