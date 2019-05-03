@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-11 23:28:19"
+	"lastUpdated": "2019-05-03 17:29:55"
 }
 
 /*
@@ -126,6 +126,24 @@ function scrape(doc, url) {
 			snapshot: false
 		});
 	}
+  var elmts = ZU.xpath(doc, '//div[contains(@class,"AdaptiveMedia-photoContainer")]');
+  if(elmts){
+    var imageNumber = 1;
+    for (var i=0; i<elmts.length; i++) {
+      for (var j=0; j<elmts[i].attributes.length; j++) {
+        if (elmts[i].attributes[j].name === "data-image-url") {
+          var imageMimeType = "image/" + /(?:\.([^.]+))?$/.exec(elmts[i].attributes[j].value)[1];
+          if (imageMimeType = "image/jpg") var imageMimeType = "image/jpeg";
+          var imageURL = elmts[i].attributes[j].value + ":large";
+          item.attachments.push({
+            title: "Image " + imageNumber++,
+            url: imageURL,
+            mimeType: imageMimeType,
+          });
+        }
+      }
+    }
+  }
 	item.complete();
 }
 
@@ -137,7 +155,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/ …",
+				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!  http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/ …",
 				"creators": [
 					{
 						"firstName": "",
