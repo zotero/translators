@@ -126,24 +126,24 @@ function scrape(doc, url) {
 			snapshot: false
 		});
 	}
-  var elmts = ZU.xpath(doc, '//div[contains(@class,"AdaptiveMedia-photoContainer")]');
-  if(elmts){
-    var imageNumber = 1;
-    for (var i=0; i<elmts.length; i++) {
-      for (var j=0; j<elmts[i].attributes.length; j++) {
-        if (elmts[i].attributes[j].name === "data-image-url") {
-          var imageMimeType = "image/" + /(?:\.([^.]+))?$/.exec(elmts[i].attributes[j].value)[1];
-          if (imageMimeType = "image/jpg") var imageMimeType = "image/jpeg";
-          var imageURL = elmts[i].attributes[j].value + ":large";
-          item.attachments.push({
-            title: "Image " + imageNumber++,
-            url: imageURL,
-            mimeType: imageMimeType,
-          });
-        }
-      }
-    }
-  }
+	var elmts = ZU.xpath(doc, '//div[contains(@class,"AdaptiveMedia-photoContainer")]');
+	if (elmts) {
+		var imageNumber = 1;
+		for (var i = 0; i < elmts.length; i++) {
+			for (var j = 0; j < elmts[i].attributes.length; j++) {
+				if (elmts[i].attributes[j].name === "data-image-url") {
+					var imageMimeType = "image/" + /(?:\.([^.]+))?$/.exec(elmts[i].attributes[j].value)[1];
+					if (imageMimeType === "image/jpg") var imageMimeType = "image/jpeg";
+					var imageURL = elmts[i].attributes[j].value + ":large";
+					item.attachments.push({
+						title: "Image " + imageNumber++,
+						url: imageURL,
+						mimeType: imageMimeType,
+					});
+				}
+			}
+		}
+	}
 	item.complete();
 }
 
