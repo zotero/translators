@@ -785,7 +785,15 @@ function getStatementsByDefinition(definition, node) {
 
 function detectImport() {
 	// look for a bibo item type
-	var rdfTypes = Zotero.RDF.getStatementsMatching(null, RDF_TYPE, null);
+	let rdfTypes = null;
+	try {
+		rdfTypes = Zotero.RDF.getStatementsMatching(null, RDF_TYPE, null);
+	}
+	catch (err) {
+		// probably just not RDF
+		return false;
+	}
+
 	if (rdfTypes) {
 		for (var i=0; i<rdfTypes.length; i++) {
 			if (typeof rdfTypes[i][2] === "object" && Z.RDF.getResourceURI(rdfTypes[i][2]).substr(0, BIBO_NS_LENGTH) == n.bibo) return true;
