@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-17 01:46:54"
+	"lastUpdated": "2019-05-09 03:46:53"
 }
 
 /*
@@ -51,9 +51,10 @@ function doWeb(doc, _url) {
 			break;
 		}
 	}
-	
+
 	// one JSON.parse to unstringify the json string, and one to parse it into an object
-	var details = JSON.parse(JSON.parse(json));
+	// the replace fixes escaped apostrophes in the source, which JSON.parse considers invalid
+	var details = JSON.parse(JSON.parse(json.replace(/\\'/g, "'")));
 
 	var metaArr = {};
 	var metaTags = doc.getElementsByTagName("meta");
@@ -158,6 +159,32 @@ var testCases = [
 				"place": "Wilkes-Barre, Pennsylvania",
 				"publicationTitle": "The Sunday Leader",
 				"url": "https://www.newspapers.com/clip/18535448/the_sunday_leader/",
+				"attachments": [
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.newspapers.com/clip/31333699/driven_from_governors_office_ohio/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Driven from Governor's Office, Ohio Relief Seekers Occupy a Church Today; Remain Defiant",
+				"creators": [],
+				"date": "1937-04-10",
+				"libraryCatalog": "newspapers.com",
+				"pages": "1",
+				"place": "Rushville, Indiana",
+				"publicationTitle": "Rushville Republican",
+				"url": "https://www.newspapers.com/clip/31333699/driven_from_governors_office_ohio/",
 				"attachments": [
 					{
 						"title": "Image",
