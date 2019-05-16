@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-18 17:39:48"
+	"lastUpdated": "2019-05-16 16:24:39"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, '//div[@id="topper-headline-wrapper"]/h1')) {
+	if (ZU.xpathText(doc, '//div[@id="topper-headline-wrapper"]//h1')) {
 		if (url.indexOf('/blogs/')>-1) { 
 			return "blogPost";
 		} else {
@@ -98,9 +98,9 @@ function scrape(doc, url) {
 		
 		//in the metadata there are only some facebook urls for the authors
 		item.creators = [];
-		var authors = ZU.xpath(doc, '//div/span[@itemprop="author"]//span[@itemprop="name"]');
+		var authors = doc.querySelectorAll('div.author-wrapper');
 		for (var i=0; i<authors.length; i++) {
-			item.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
+			item.creators.push(ZU.cleanAuthor(authors[i].getAttribute('data-authorname'), "author"));
 		}
 		if (url.indexOf('/wp-dyn/content/')>-1) {
 			authors = ZU.xpathText(doc, '//div[@id="byline"]');
