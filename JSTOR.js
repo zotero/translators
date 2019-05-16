@@ -21,7 +21,7 @@ function detectWeb(doc, url) {
 	) {
 		return "multiple";
 	}
-	
+
 	// If this is a view page, find the link to the citation
 	var favLink = getFavLink(doc);
 	if ( (favLink && getJID(favLink.href)) || getJID(url) ) {
@@ -40,12 +40,11 @@ function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false;
 	for (let i=0; i<resultsBlock.length; i++) {
 		let title = resultsBlock[i].querySelector('.title, .small-heading').textContent.trim();
-		let jid = getJID(resultsBlock[i].querySelector('a').href);
-		if (!jid || !title) continue;
+		let href = resultsBlock[i].querySelector('a').href;
+		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[jid] = title;
-		//Zotero.debug("Found title "+ title +" with JID "+ jid);
+		items[href] = title;
 	}
 	return found ? items : false;
 }
@@ -77,11 +76,11 @@ function doWeb(doc, url) {
 			if (!selectedItems) {
 				return true;
 			}
-			var jids = [];
+			var hrefs = [];
 			for (var j in selectedItems) {
-				jids.push(j);
+				hrefs.push(j);
 			}
-			scrape(jids)
+			scrape(hrefs)
 		});
 	} else {
 		// If this is a view page, find the link to the citation
@@ -89,25 +88,34 @@ function doWeb(doc, url) {
 		var jid;
 		if (favLink && (jid = getJID(favLink.href))) {
 			Zotero.debug("JID found 1 " + jid);
-			scrape([jid]);
+			scrape([favLink.href], doc);
 		}
 		else if (jid = getJID(url)) {
 			Zotero.debug("JID found 2 " + jid);
-			scrape([jid]);
+			scrape([url], doc);
 		}
 	}
 }
 
-function scrape(jids) {
+function scrape(urls, doc) {
 	var risURL = "/citation/ris/";
-	(function next() {
-		if (!jids.length) return;
-		var jid = jids.shift()
+	if (doc) {
+		// single page
+		var jid = getJID(urls[0]);
 		ZU.doGet(risURL + jid, function(text) {
-			processRIS(text, jid);
-			next();
-		})
-	})();
+			processRIS(text, jid, doc);
+		});
+	} else {
+		for (var i in urls) {
+			var url = urls[i];
+			ZU.processDocuments([url], function(doc, url) {
+				var jid = getJID(url);
+				ZU.doGet(risURL + jid, function(text, obj, url) {
+					processRIS(text, jid, doc);
+				});
+			});
+		}
+	}
 }
 
 function convertCharRefs(string) {
@@ -118,12 +126,12 @@ function convertCharRefs(string) {
 		});
 }
 
-function processRIS(text, jid) {
+function processRIS(text, jid, doc) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	//Z.debug(text);
-	
+
 	//Reviews have a RI tag now (official RIS for Reviewed Item)
 	var review = text.match(/^RI\s+-\s+(.+)/m);
 	//sometimes we have subtitles stored in T1. These are part of the title, we want to add them later
@@ -132,7 +140,7 @@ function processRIS(text, jid) {
 	translator.setHandler("itemDone", function(obj, item) {
 		//author names are not (always) supplied as lastName, firstName in RIS
 		//we fix it here (note sure if still need with new RIS)
-	
+
  		var m;
 		for (var i=0, n=item.creators.length; i<n; i++) {
 			if (!item.creators[i].firstName
@@ -142,15 +150,22 @@ function processRIS(text, jid) {
 				delete item.creators[i].fieldMode;
 			}
 		}
-		
+
 		//fix special characters in abstract, convert html linebreaks and italics, remove stray p tags; don't think they use anything else
 		if (item.abstractNote){
 			item.abstractNote = convertCharRefs(item.abstractNote);
-			item.abstractNote = item.abstractNote.replace(/<\/p><p>/g, "\n").replace(/<em>(.+?)<\/em>/g, " <i>$1</i> ").replace(/<\/?p>/g, "");
+			item.abstractNote = item.abstractNote
+									.replace(/<\/p><p>/g, "\n")
+									.replace(/<em>(.+?)<\/em>/g, " <i>$1</i> ")
+									.replace(/<\/?p>/g, "")
+									.replace(/^\[/, "")
+									.replace(/\]$/, "")
+									.replace(/ABSTRACT/, "")
+									.trim();
 		}
 		// Don't save HTML snapshot from 'UR' tag
 		item.attachments = [];
-		
+
 		if (/stable\/(\d+)/.test(item.url)) {
 			var pdfurl = "/stable/pdfplus/" + jid  + ".pdf?acceptTC=true";
 			item.attachments.push({
@@ -159,14 +174,14 @@ function processRIS(text, jid) {
 				mimeType:"application/pdf"
 			});
 		}
-		
+
 		if (item.ISSN) {
 			item.ISSN = ZU.cleanISSN(item.ISSN);
 		}
-		
-		//Only the DOIs mentioned in RIS are valid, and we don't
-		//add any other jid for DOI because they are only internal.
-		
+
+		item.DOI = ZU.xpathText(doc, '//div[@class="doi"]').replace(/DOI\:\s+/, "");
+		item.tags = ZU.xpath(doc, '//div[contains(@class,"topics-list")]//a').map(function(x) { return x.textContent.trim(); })
+
 		if (subtitle){
 			item.title = item.title + ": " + subtitle[1]
 		}
@@ -177,7 +192,7 @@ function processRIS(text, jid) {
 			var reviewedAuthors = []
 			for (i =0; i<item.creators.length; i++){
 				if (item.creators[i].creatorType == "editor"){
-					reviewedAuthors.push(item.creators[i].firstName + " " + item.creators[i].lastName); 
+					reviewedAuthors.push(item.creators[i].firstName + " " + item.creators[i].lastName);
 					item.creators[i].creatorType = "reviewedAuthor"
 				}
 			}
@@ -188,14 +203,14 @@ function processRIS(text, jid) {
 		  	reviewedTitle = reviewedTitle.replace(/[\s.,]+$/, "");
 		  	item.title =  "Review of " + reviewedTitle
 		}
-		
+
 		item.url = item.url.replace('http:','https:'); // RIS still lists http addresses while JSTOR's stable URLs use https
-		
+
 		item.complete();
 	});
-		
+
 	translator.getTranslatorObject(function (trans) {
-		trans.doImport();	
+		trans.doImport();
 	});
 }
 
