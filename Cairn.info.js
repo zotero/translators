@@ -121,6 +121,16 @@ function scrape(doc, url) {
 		}
 
 		// Correct volume and issue information
+		var issueVolText = ZU.xpath(doc, '//span[@class="in-revue"]//a').map(function(x) { return x.textContent; });
+		if (issueVolText && issueVolText.length > 1) {
+			issueVolText = issueVolText[1];
+			var match = issueVolText.match(/(\d{4})\/(\d)\s\((Tome|(?:(?:n|N)(?:°|o|O)))\s(\d+)\)/)
+			if (match) {
+				item.volume = match[4];
+				item.issue = match[2];
+			}
+		}
+
 		if (item.volume) {
 			if (item.volume.search(/^n°/i) != -1) {
 				item.issue = item.volume.split(/n°/i)[1].trim();
