@@ -114,6 +114,14 @@ function postProcess(doc, item) {
 			item.date = dateMatches[2];
 	}
 
+	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()')
+						   .match(/\d{4},\sn\.(\d+),\spp/);
+	if (titleSpanMatch) {
+		var volume = item.volume;
+		item.volume = item.issue;
+		item.issue = volume;
+	}
+
 	item.libraryCatalog = "SciELO"
 }
 
