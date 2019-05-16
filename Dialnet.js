@@ -106,6 +106,13 @@ function scrape(doc, url) {
 				item.issue = matchedIssue[1];
 		}
 
+		// if the issue on the webpage has a Nº prefix, it denotes the volume
+		if (issue) {
+			var volume = item.volume;
+			item.volume = item.issue;
+			item.issue = volume;
+		}
+
 		// clear language if multiple
 		if (item.language && item.language === "mul")
 			item.language = "";
