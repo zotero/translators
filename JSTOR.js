@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 			for (var j in selectedItems) {
 				hrefs.push(j);
 			}
-			scrape(hrefs)
+			scrapeMultiplePages(hrefs)
 		});
 	} else {
 		// If this is a view page, find the link to the citation
@@ -88,33 +88,33 @@ function doWeb(doc, url) {
 		var jid;
 		if (favLink && (jid = getJID(favLink.href))) {
 			Zotero.debug("JID found 1 " + jid);
-			scrape([favLink.href], doc);
+			scrapeSinglePage(doc, favLink.href);
 		}
 		else if (jid = getJID(url)) {
 			Zotero.debug("JID found 2 " + jid);
-			scrape([url], doc);
+			scrapeSinglePage(doc, url);
 		}
 	}
 }
 
-function scrape(urls, doc) {
-	var risURL = "/citation/ris/";
-	if (doc) {
-		// single page
-		var jid = getJID(urls[0]);
-		ZU.doGet(risURL + jid, function(text) {
-			processRIS(text, jid, doc);
-		});
-	} else {
-		for (var i in urls) {
-			var url = urls[i];
-			ZU.processDocuments([url], function(doc, url) {
-				var jid = getJID(url);
-				ZU.doGet(risURL + jid, function(text, obj, url) {
-					processRIS(text, jid, doc);
-				});
+var risURL = "/citation/ris/";
+
+function scrapeSinglePage(doc, url) {
+	var jid = getJID(urls[0]);
+	ZU.doGet(risURL + jid, function(text) {
+		processRIS(text, jid, doc);
+	});
+}
+
+function scrapeMultiplePages(urls) {
+	for (var i in urls) {
+		var url = urls[i];
+		ZU.processDocuments([url], function(doc, url) {
+			var jid = getJID(url);
+			ZU.doGet(risURL + jid, function(text, obj, url) {
+				processRIS(text, jid, doc);
 			});
-		}
+		});
 	}
 }
 
