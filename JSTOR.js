@@ -100,17 +100,16 @@ function doWeb(doc, url) {
 var risURL = "/citation/ris/";
 
 function scrapeSinglePage(doc, url) {
-	var jid = getJID(urls[0]);
+	let jid = getJID(urls[0]);
 	ZU.doGet(risURL + jid, function(text) {
 		processRIS(text, jid, doc);
 	});
 }
 
 function scrapeMultiplePages(urls) {
-	for (var i in urls) {
-		var url = urls[i];
-		ZU.processDocuments([url], function(doc, url) {
-			var jid = getJID(url);
+	for (let i in urls) {
+		ZU.processDocuments([urls[i]], function(doc, url) {
+			let jid = getJID(url);
 			ZU.doGet(risURL + jid, function(text, obj, url) {
 				processRIS(text, jid, doc);
 			});
