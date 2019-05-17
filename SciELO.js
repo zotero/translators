@@ -109,9 +109,17 @@ function postProcess(doc, item) {
 	}
 
 	if (item.date) {
-		var dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
+		let dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
 		if (dateMatches && dateMatches[1] == "00")
 			item.date = dateMatches[2];
+	}
+
+	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()')
+						   .match(/\d{4},\sn\.(\d+),\spp/);
+	if (titleSpanMatch) {
+		let volume = item.volume;
+		item.volume = item.issue;
+		item.issue = volume;
 	}
 
 	item.libraryCatalog = "SciELO"
