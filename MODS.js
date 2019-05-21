@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-03-30 09:05:38"
+	"lastUpdated": "2019-05-20 09:05:38"
 }
 
 
@@ -321,7 +321,15 @@ var ns = "http://www.loc.gov/mods/v3",
 	xns = { m: ns };
 
 function detectImport() {
-	var doc = Zotero.getXML().documentElement;
+	let doc;
+	try {
+		doc = Zotero.getXML().documentElement;
+	}
+	catch (err) {
+		// most likely just not XML
+		return false;
+	}
+
 	if (!doc) {
 		return false;
 	}
