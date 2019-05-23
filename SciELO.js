@@ -93,7 +93,7 @@ function postProcess(doc, item) {
 			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
 		}
 	} else {
-		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[2]');
+		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)]');
 		if (abstractParagraphs && abstractParagraphs.length > 0)
 			item.abstractNote = abstractParagraphs[0].textContent;
 	}

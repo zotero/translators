@@ -100,7 +100,7 @@ function doWeb(doc, url) {
 var risURL = "/citation/ris/";
 
 function scrapeSinglePage(doc, url) {
-	let jid = getJID(urls[0]);
+	let jid = getJID(url);
 	ZU.doGet(risURL + jid, function(text) {
 		processRIS(text, jid, doc);
 	});
