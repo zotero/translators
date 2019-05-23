@@ -58,6 +58,13 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
+	let articleSource = ZU.xpathText(doc, '//span[contains(text(), "Source:")]/following-sibling::span[1]').trim();
+	let pageMatch = articleSource.match(/(\d+-\d+)$/);
+	if (pageMatch) {
+		if (item.pages != pageMatch[1])
+			item.pages = pageMatch[1];
+	}
+
     if (!item.DOI)
         item.DOI = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'DOI:')][1]/following-sibling::span[1]/a");
 
