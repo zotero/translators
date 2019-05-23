@@ -35,12 +35,12 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/((journal)|(heft)|(issue))\//) ||
-		ZU.xpath(doc, '//h2[contains(@class, "issue-article-h2")]//a')) {
-		return "multiple";
- 	} else if (url.match(/\/arti((cle)|(kel))\//)) {
+	if (url.match(/\/arti((cle)|(kel))\//)) {
 		return "journalArticle";
-	}
+	} else if (url.match(/\/((journal)|(heft)|(issue))\//) ||
+		ZU.xpath(doc, '//h2[contains(@class, "issue-article-h2")]//a').length > 0) {
+		return "multiple";
+ 	}
 }
 
 function getSearchResults(doc) {

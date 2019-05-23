@@ -1,11 +1,11 @@
 {
-	"translatorID": "de2f3a0f-8b3f-47cd-a3ab-f0fdb1cb3c25",
-	"label": "Informit",
+	"translatorID": "9e186c48-48e4-4cbc-be69-289bda8359ad",
+	"label": "Journal of Ethics in Antiquity and Christianity",
 	"creator": "Madeesh Kannan",
-	"target": "https?://search.informit.com.au/",
+	"target": "https?://jeac.de/ojs/index.php",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 90,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
@@ -35,10 +35,10 @@
 
 
 function detectWeb(doc, url) {
-    if (url.match(/\/browsePublication;/))
+    if (url.match(/\/issue\/view\//))
         return "multiple";
-    else if (url.match(/\/documentSummary;/)) {
-        // placeholder, actual type determined by the embedded metadata translator
+    else if (url.match(/\/article\/view\//)) {
+        // placeholder, actual type determined by the OJS translator
         return "journalArticle";
     }
 }
@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, "//div[@class='listing-detail']/p//a")
+	var rows = ZU.xpath(doc, '//h3[@class="media-heading"]//a')
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -58,26 +58,19 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
-	let articleSource = ZU.xpathText(doc, '//span[contains(text(), "Source:")]/following-sibling::span[1]').trim();
-	let pageMatch = articleSource.match(/(\d+-\d+)$/);
-	if (pageMatch) {
-		if (item.pages != pageMatch[1])
-			item.pages = pageMatch[1];
-	}
+    var authors = ZU.xpath(doc, '//div[@class="authors"]//strong')
+    if (item.creators.length < authors.length)
+        item.creators = authors.map(i => ZU.cleanAuthor(i.textContent.trim(), 'author'));
 
-    if (!item.DOI)
-        item.DOI = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'DOI:')][1]/following-sibling::span[1]/a");
+    if (!item.abstractNote)
+        item.abstractNote = ZU.xpathText(doc, '//div[@class="article-abstract"]');
 
-    if (!item.ISSN)
-        item.ISSN = ZU.xpathText(doc, "//span[@class='list-item-type' and contains(text(), 'ISSN:')][1]/following-sibling::span[1]");
-
-    item.tags = ZU.xpath(doc, "//span[@class='list-item-type' and contains(text(), 'Subject:')][1]/following-sibling::span[1]//a")
-                     .map(i => i.textContent)
+    item.journalAbbreviation = "JEAC"
 }
 
-function invokeEmbeddedMetadataTranslator(doc, url) {
+function invokeOJSTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         postProcess(doc, i);
@@ -96,8 +89,8 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
+			ZU.processDocuments(articles, invokeOJSTranslator);
 		});
     } else
-        invokeEmbeddedMetadataTranslator(doc, url);
+        invokeOJSTranslator(doc, url);
 }

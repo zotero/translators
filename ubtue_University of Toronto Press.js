@@ -59,6 +59,20 @@ function getSearchResults(doc) {
 
 
 function postProcess(doc, item) {
+	var volIssue = ZU.xpathText(doc, '//div[@class="journalNavTitle"]');
+	var page = ZU.xpathText(doc, '//span[@class="articlePageRange"]');
+
+	if (!item.volume && (match = volIssue.match(/Volume\s(\d+)/)))
+		item.volume = match[1];
+	if (!item.issue && (match = volIssue.match(/Issue\s(\d+)/)))
+		item.issue = match[1];
+	if (!item.pages && (match = page.match(/^pp\.\s(\d+-\d+)/)))
+		item.pages = match[1];
+
+	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p');
+	if (!item.abstractNote || item.abstractNote.length < abstract.length)
+		item.abstractNote = abstract;
+
     var keywords = ZU.xpath(doc, '//kwd-group//a');
     if (keywords)
         item.tags = keywords.map(function(x) { return x.textContent.trim(); })
