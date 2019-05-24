@@ -44,7 +44,6 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
-	window.console.log("getting results");
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[@class="art_title linkable"]/a')
