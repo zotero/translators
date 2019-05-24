@@ -44,6 +44,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
+	window.console.log("getting results");
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[@class="art_title linkable"]/a')
@@ -70,7 +71,7 @@ function postProcess(doc, item) {
 		item.pages = match[1];
 
 	var abstract = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p');
-	if (!item.abstractNote || item.abstractNote.length < abstract.length)
+	if (abstract && (!item.abstractNote || item.abstractNote.length < abstract.length))
 		item.abstractNote = abstract;
 
     var keywords = ZU.xpath(doc, '//kwd-group//a');
