@@ -35,7 +35,6 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	debugger;
 	var resultsBlock = ZU.xpath(doc, '//div[contains(@class, "media-body")]')
 	if (!resultsBlock) return false;
 	var items = {}, found = false;
