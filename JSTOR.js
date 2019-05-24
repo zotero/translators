@@ -35,16 +35,25 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var resultsBlock = doc.querySelectorAll('.media-body.media-object-section');
+	debugger;
+	var resultsBlock = ZU.xpath(doc, '//div[contains(@class, "media-body")]')
 	if (!resultsBlock) return false;
 	var items = {}, found = false;
 	for (let i=0; i<resultsBlock.length; i++) {
-		let title = resultsBlock[i].querySelector('.title, .small-heading').textContent.trim();
-		let href = resultsBlock[i].querySelector('a').href;
+		let node = resultsBlock[i];
+		let link = ZU.xpath(node, './/a[@data-qa="content title"]');
+		let title = link[0].textContent.trim();
+		let href = link[0].href;
+		// need to copy the DOI from the main list as the DOI metadata in the target page will not
+		// be a part of the DOM after it's fetched with a GET request (it's lazy-loaded with Javascript)
+		let doi = ZU.xpathText(node, './/div[@class="doi"]');
+		if (doi)
+			doi = doi.replace(/DOI:/, "").trim();
+
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[href] = [title, doi];
 	}
 	return found ? items : false;
 }
@@ -76,16 +85,16 @@ function doWeb(doc, url) {
 			if (!selectedItems) {
 				return true;
 			}
-			var hrefs = [];
-			for (var j in selectedItems) {
-				hrefs.push(j);
+			let hrefsAndDoi = [];
+			for (let j in selectedItems) {
+				hrefsAndDoi.push([j, selectedItems[j][1]]);
 			}
-			scrapeMultiplePages(hrefs)
+			scrapeMultiplePages(hrefsAndDoi)
 		});
 	} else {
 		// If this is a view page, find the link to the citation
-		var favLink = getFavLink(doc);
-		var jid;
+		let favLink = getFavLink(doc);
+		let jid;
 		if (favLink && (jid = getJID(favLink.href))) {
 			Zotero.debug("JID found 1 " + jid);
 			scrapeSinglePage(doc, favLink.href);
@@ -106,12 +115,15 @@ function scrapeSinglePage(doc, url) {
 	});
 }
 
-function scrapeMultiplePages(urls) {
-	for (let i in urls) {
-		ZU.processDocuments([urls[i]], function(doc, url) {
+function scrapeMultiplePages(urlsAndDois) {
+	for (let i in urlsAndDois) {
+		let urlToFetch = urlsAndDois[i][0];
+		let doi = urlsAndDois[i][1];
+
+		ZU.processDocuments([urlToFetch], function(doc, url) {
 			let jid = getJID(url);
 			ZU.doGet(risURL + jid, function(text, obj, url) {
-				processRIS(text, jid, doc);
+				processRIS(text, jid, doc, doi);
 			});
 		});
 	}
@@ -125,7 +137,7 @@ function convertCharRefs(string) {
 		});
 }
 
-function processRIS(text, jid, doc) {
+function processRIS(text, jid, doc, doi) {
 	// load translator for RIS
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -178,7 +190,13 @@ function processRIS(text, jid, doc) {
 			item.ISSN = ZU.cleanISSN(item.ISSN);
 		}
 
-		item.DOI = ZU.xpathText(doc, '//div[@class="doi"]').replace(/DOI\:\s+/, "");
+		if (doi)
+			item.DOI = doi
+		else {
+			item.DOI = ZU.xpathText(doc, '//div[contains(@class,"doi")]');
+			if (item.DOI)
+				item.DOI = item.DOI.replace(/DOI\:\s+/, "");
+		}
 		item.tags = ZU.xpath(doc, '//div[contains(@class,"topics-list")]//a').map(function(x) { return x.textContent.trim(); })
 
 		if (subtitle){
