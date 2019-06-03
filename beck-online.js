@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-06-03 08:08:07"
+	"lastUpdated": "2019-06-03 15:12:35"
 }
 
 /*
@@ -36,40 +36,53 @@
 
 
 var mappingClassNameToItemType = {
-	'ZAUFSATZ' : 'journalArticle',
-	'ZRSPR' : 'case',//Rechtssprechung
-	'ZRSPRAKT' : 'case',
-	'BECKRS' : 'case',
-	'ZENTB' : 'journalArticle',//Entscheidungsbesprechung
-	'ZBUCHB' : 'journalArticle',//Buchbesprechung
-	'ZSONST' : 'journalArticle',//Sonstiges, z.B. Vorwort,
-	'LSK'	: 'journalArticle', // Artikel in Leitsatzkartei
-	'ZINHALTVERZ' : 'multiple',//Inhaltsverzeichnis
-	'KOMMENTAR' : 'encyclopediaArticle',
-	'ALTEVERSION' : 'encyclopediaArticle',
-	'ALTEVERSION KOMMENTAR' : 'encyclopediaArticle',
-	'HANDBUCH' : 'encyclopediaArticle',
-	'BUCH' : 'book',
+	ZAUFSATZ: 'journalArticle',
+	ZRSPR: 'case', // Rechtssprechung
+	ZRSPRAKT: 'case',
+	BECKRS: 'case',
+	ZENTB: 'journalArticle', // Entscheidungsbesprechung
+	ZBUCHB: 'journalArticle', // Buchbesprechung
+	ZSONST: 'journalArticle', // Sonstiges, z.B. Vorwort,
+	LSK: 'journalArticle', // Artikel in Leitsatzkartei
+	ZINHALTVERZ: 'multiple', // Inhaltsverzeichnis
+	KOMMENTAR: 'encyclopediaArticle',
+	ALTEVERSION: 'encyclopediaArticle',
+	'ALTEVERSION KOMMENTAR': 'encyclopediaArticle',
+	HANDBUCH: 'encyclopediaArticle',
+	BUCH: 'book',
 	// ? 'FESTSCHRIFT' : 'bookSection'
 };
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
-var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
-		'Professor(?:in)?', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'PD',
-		'FAArbR', 'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
-		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote',
-		'LL\\.\\s?M\\.(?: \\(UCLA\\))?', '^Von', "\\*"];
+var authorTitlesEtc = ['\\/',
+	'Dr\\.',
+	'\\b[ji]ur\\.',
+	'\\bh\\. c\\.',
+	'Prof\\.',
+	'Professor(?:in)?',
+	'\\bwiss\\.',
+	'Mitarbeiter(?:in)?',
+	'RA,?',
+	'PD',
+	'FAArbR',
+	'Fachanwalt für Insolvenzrecht',
+	'Rechtsanw[aä]lt(?:e|in)?',
+	'Richter am (?:AG|LG|OLG|BGH)',
+	'\\bzur Fussnote',
+	'LL\\.\\s?M\\.(?: \\(UCLA\\))?',
+	'^Von',
+	"\\*"];
 var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	var dokument = doc.getElementById("dokument");
 	if (!dokument) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
 	var type = mappingClassNameToItemType[dokument.className.toUpperCase()];
-	//Z.debug(dokument.className.toUpperCase());
+	// Z.debug(dokument.className.toUpperCase());
 	if (type == 'multiple') {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
@@ -81,11 +94,11 @@ function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false,
 		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a | //div[@id="trefferliste"]//a[@class="sndline"]');
 
-	for (var i=0; i<rows.length; i++) {
-		//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
+	for (var i = 0; i < rows.length; i++) {
+		// rows[i] contains an invisible span with some text, which we have to exclude, e.g.
 		//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
 		//   Dr. iur. habil. Christian Hofmann: Haftung im Zahlungsverkehr
-		var title = ZU.trimInternal( ZU.xpathText(rows[i], './text()[1]') );
+		var title = ZU.trimInternal(ZU.xpathText(rows[i], './text()[1]'));
 		var link = rows[i].href;
 		if (!link || !title) continue;
 		
@@ -102,7 +115,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -110,10 +123,10 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
-	
 }
 
 function authorRemoveTitlesEtc(authorStr) {
@@ -131,19 +144,19 @@ function scrapeKommentar(doc, url) {
 	var authorText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="autor"]');
 	if (authorText) {
 		var authors = authorText.split("/");
-		for (let i=0; i<authors.length; i++) {
+		for (let i = 0; i < authors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(authors[i], 'author', false));
 		}
 	}
 	
-	//e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
-	//e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
-	//e.g. c) Scherer, Münchener Anwaltshandbuch Erbrecht
-	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');//e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
+	// e.g. a) Beck'scher Online-Kommentar BGB, Bamberger/Roth
+	// e.g. b) Langenbucher/Bliesener/Spindler, Bankrechts-Kommentar
+	// e.g. c) Scherer, Münchener Anwaltshandbuch Erbrecht
+	var citationFirst = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[following-sibling::br and not(preceding-sibling::br)]', null, ' ');// e.g. Beck'scher Online-Kommentar BGB, Bamberger/Roth
 	var pos = citationFirst.lastIndexOf(",");
 	if (pos > 0) {
 		item.publicationTitle = ZU.trimInternal(citationFirst.substr(0, pos));
-		var editorString = citationFirst.substr(pos+1);
+		var editorString = citationFirst.substr(pos + 1);
 		
 		if ((!editorString.includes("/") && item.publicationTitle.includes("/"))
 			|| editorString.toLowerCase().includes("handbuch")
@@ -156,20 +169,22 @@ function scrapeKommentar(doc, url) {
 		editorString = editorString.replace(/, /g, '');
 		
 		var editors = editorString.trim().split("/");
-		for (let i=0; i<editors.length; i++) {
+		for (let i = 0; i < editors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
 		}
-	} else {
-		//e.g. Münchener Kommentar zum BGB
-		//from https://beck-online.beck.de/?vpath=bibdata%2fkomm%2fmuekobgb_7_band2%2fbgb%2fcont%2fmuekobgb.bgb.p305.htm
+	}
+	else {
+		// e.g. Münchener Kommentar zum BGB
+		// from https://beck-online.beck.de/?vpath=bibdata%2fkomm%2fmuekobgb_7_band2%2fbgb%2fcont%2fmuekobgb.bgb.p305.htm
 		item.publicationTitle = ZU.trimInternal(citationFirst);
 	}
 	
 	var editionText = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]/text()[preceding-sibling::br]');
 	if (editionText) {
-		if (editionText.search(/\d+/)>-1 ) {
+		if (editionText.search(/\d+/) > -1) {
 			item.edition = editionText.match(/\d+/)[0];
-		} else {
+		}
+		else {
 			item.edition = editionText;
 		}
 	}
@@ -182,10 +197,10 @@ function scrapeKommentar(doc, url) {
 }
 
 
-// scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e. 
+// scrape documents that are only in the beck-online "Leitsatz-Kartei", i.e.
 // where only information about the article, not the article itself is in beck-online
 function scrapeLSK(doc, url) {
-	var item = new Zotero.Item(mappingClassNameToItemType['LSK']);
+	var item = new Zotero.Item(mappingClassNameToItemType.LSK);
 	
 	// description example 1: "Marco Ganzhorn: Ist ein E-Book ein Buch?"
 	// description example 2: "Michael Fricke/Dr. Martin Gerecke: Informantenschutz und Informantenhaftung"
@@ -193,17 +208,17 @@ function scrapeLSK(doc, url) {
 	var description = ZU.xpathText(doc, "//*[@id='dokcontent']/h1");
 	var descriptionItems = description.split(':');
 
-	//authors
+	// authors
 	var authorsString = descriptionItems[0];
 	
 	var authors = authorsString.split("/");
 
 	for (var index = 0; index < authors.length; ++index) {
 		var author = authorRemoveTitlesEtc(ZU.trimInternal(authors[index]));
-		item.creators.push ( ZU.cleanAuthor(author, 'author', false) );
+		item.creators.push(ZU.cleanAuthor(author, 'author', false));
 	}
 	
-	//title
+	// title
 	item.title = ZU.trimInternal(descriptionItems[1]);
 	
 	// src => journalTitle, date and pages
@@ -214,12 +229,12 @@ function scrapeLSK(doc, url) {
 	var m = src.trim().match(/([^,]+?)(\b\d{4})?,\s*(\d+)$/);
 	if (m) {
 		item.pages = m[3];
-		if (m[2]) item.date = m[2];		
+		if (m[2]) item.date = m[2];
 		item.publicationTitle = ZU.trimInternal(m[1]);
 		item.journalAbbreviation = item.publicationTitle;
 		
 		// if src is like example 3, then extract the volume
-		var tmp = item.publicationTitle.match(/(^[A-Za-z]+)\ Bd\. (\d+)/);
+		var tmp = item.publicationTitle.match(/(^[A-Za-z]+) Bd\. (\d+)/);
 		if (tmp) {
 			item.publicationTitle = tmp[1];
 			item.journalAbbreviation = item.publicationTitle;
@@ -231,12 +246,13 @@ function scrapeLSK(doc, url) {
 }
 
 
-function scrapeBook(doc, url) {
+function scrapeBook(doc, _url) {
 	var item = new Zotero.Item("book");
 	item.title = text(doc, '#titelseitetext .tptitle');
 	item.shortTitle = attr(doc, '.bf_selected span[title]', 'title');
 	var creatorType = "author";
 	var contributorsAreNext = false;
+	var contributors;
 	var spaces = doc.querySelectorAll('#titelseitetext .tpspace');
 	for (let space of spaces) {
 		if (space.textContent.includes("Kommentar")) {
@@ -253,7 +269,7 @@ function scrapeBook(doc, url) {
 		}
 		
 		if (contributorsAreNext) {
-			var contributors = space.textContent.split("; ");
+			contributors = space.textContent.split("; ");
 			contributorsAreNext = false;
 		}
 		if (space.textContent.includes("Bearbeitet")) {
@@ -266,7 +282,7 @@ function scrapeBook(doc, url) {
 		item.creators.push(ZU.cleanAuthor(creator, creatorType));
 	}
 	if (contributors) {
-		for (contributor of contributors) {
+		for (let contributor of contributors) {
 			contributor = authorRemoveTitlesEtc(contributor);
 			item.creators.push(ZU.cleanAuthor(contributor, "contributor"));
 		}
@@ -284,8 +300,7 @@ function addNote(originalNote, newNote) {
 	if (originalNote.length == 0) {
 		originalNote = "<h2>Additional Metadata</h2>" + newNote;
 	}
-	else
-	{
+	else {
 		originalNote += newNote;
 	}
 	return originalNote;
@@ -300,15 +315,15 @@ function scrapeCase(doc, url) {
 	// case name
 	// in some cases, the caseName is in a separate <span>
 	var caseName = ZU.xpathText(doc, '//div[@class="titel sbin4"]/h1/span');
-// if not, we have to extract it from the title
+	// if not, we have to extract it from the title
 	if (!caseName) {
 		var caseDescription = ZU.xpathText(doc, '//div[contains(@class, "titel")]/h1');
 		if (caseDescription) {
 			// take everything after the last slash
 			var tmp = caseDescription.split(/\s[-–]\s/);
-			caseName = tmp[tmp.length-1];
+			caseName = tmp[tmp.length - 1];
 			// sometimes the caseName is enclosed in („”)
-			tmp = caseDescription.match(/\(\„([^”)]+)\”\)/);
+			tmp = caseDescription.match(/\(„([^”)]+)”\)/);
 			if (tmp) {
 				caseName = ZU.trimInternal(tmp[1]);
 			}
@@ -331,7 +346,7 @@ function scrapeCase(doc, url) {
 	else {
 		alternativeLine = ZU.xpathText(doc, '//span[@class="entscheidung"]');
 		// example: OLG Köln: Beschluss vom 23.03.2012 - 6 U 67/11
-		alternativeData = alternativeLine.match(/^([A-Za-zÖöÄäÜüß ]+): \b(.*?Urteil|.*?Urt\.|.*?Beschluss|.*?Beschl\.) vom (\d\d?\.\s*\d\d?\.\s*\d\d\d\d) - ([\w\s\/]*)/i);
+		alternativeData = alternativeLine.match(/^([A-Za-zÖöÄäÜüß ]+): \b(.*?Urteil|.*?Urt\.|.*?Beschluss|.*?Beschl\.) vom (\d\d?\.\s*\d\d?\.\s*\d\d\d\d) - ([\w\s/]*)/i);
 		item.court = ZU.trimInternal(alternativeData[1]);
 	}
 	
@@ -345,18 +360,18 @@ function scrapeCase(doc, url) {
 	}
 	
 	var decisionDateStr = ZU.xpathText(doc, '(//span[@class="edat"] | //span[@class="EDAT"] | //span[@class="datum"])[1]');
-	if (decisionDateStr == null) {
+	if (decisionDateStr === null) {
 		decisionDateStr = alternativeData[3];
 	}
-	//e.g. 24. 9. 2001 or 24-9-1990
-	item.dateDecided = decisionDateStr.replace(/(\d\d?)[\.-]\s*(\d\d?)[\.-]\s*(\d\d\d\d)/, "$3-$2-$1");
+	// e.g. 24. 9. 2001 or 24-9-1990
+	item.dateDecided = decisionDateStr.replace(/(\d\d?)[.-]\s*(\d\d?)[.-]\s*(\d\d\d\d)/, "$3-$2-$1");
 	
 	item.docketNumber = ZU.xpathText(doc, '(//span[@class="az"])[1]');
-	if (item.docketNumber == null) {
+	if (item.docketNumber === null) {
 		item.docketNumber = alternativeData[4];
 	}
 	
-	item.title = item.court+", "+decisionDateStr+" - "+item.docketNumber;
+	item.title = item.court + ", " + decisionDateStr + " - " + item.docketNumber;
 	if (item.shortTitle) {
 		item.title += " - " + item.shortTitle;
 	}
@@ -386,7 +401,7 @@ function scrapeCase(doc, url) {
 	// example: BeckRS 2013, 06445
 	// Since BeckRS is not suitable for citing, let's push it into the notes instead
 	var beckRSline = ZU.xpathText(doc, '//span[@class="fundstelle"]');
-	if (beckRSline) {		
+	if (beckRSline) {
 		note = addNote(note, "<h3>Fundstelle</h3><p>" + ZU.trimInternal(beckRSline) + "</p>");
 		
 		/* commented out, because we cannot use it for the CSL-stylesheet at the moment.
@@ -409,7 +424,7 @@ function scrapeCase(doc, url) {
 	}
 	
 	item.abstractNote = ZU.xpathText(doc, '//div[@class="abstract" or @class="leitsatz"]');
-	if (item.abstractNote){
+	if (item.abstractNote) {
 		item.abstractNote = item.abstractNote.replace(/\n\s*\n/g, "\n");
 	}
 
@@ -424,19 +439,20 @@ function scrapeCase(doc, url) {
 			note = addNote(note, "<h3>Zeitschrift Titel</h3><p>" + ZU.trimInternal(publicationTitle) + "</p>");
 		}
 		
-		//e.g. ArbrAktuell 2014, 150
+		// e.g. ArbrAktuell 2014, 150
 		var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
-		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",") + 1));
 		var pagesEnd = ZU.xpathText(doc, '(//span[@class="pg"])[last()]');
 		if (pagesEnd) {
 			item.pages = pagesStart + "-" + pagesEnd;
-		} else {
+		}
+		else {
 			item.pages = pagesStart;
 		}
 	}
 	
 	if (note.length != 0) {
-		item.notes.push( {note: note} );
+		item.notes.push({ note: note });
 	}
 	
 	finalize(doc, url, item);
@@ -481,21 +497,21 @@ function scrape(doc, url) {
 	// in some cases (e.g. NJW 2007, 3313) the title contains an asterisk with a footnote that is imported into the title
 	// therefore, this part should be removed from the title
 	var indexOfAdditionalText = item.title.indexOf("zur Fussnote");
-	if (indexOfAdditionalText !=-1) {
+	if (indexOfAdditionalText != -1) {
 		item.title = item.title.substr(0, indexOfAdditionalText);
 	}
 	
 	var authorNode = ZU.xpath(doc, '//div[@class="autor"]');
-	for (var i=0; i<authorNode.length; i++) {
-		//normally several authors are under the same authorNode
-		//and they occur in pairs with first and last names
+	for (var i = 0; i < authorNode.length; i++) {
+		// normally several authors are under the same authorNode
+		// and they occur in pairs with first and last names
 		
 		var authorFirstNames = ZU.xpath(authorNode[i], './/span[@class="vname"]');
 		var authorLastNames = ZU.xpath(authorNode[i], './/span[@class="nname"]');
-		for (var j=0; j<authorFirstNames.length; j++) {
+		for (let j = 0; j < authorFirstNames.length; j++) {
 			item.creators.push({
-				lastName : authorLastNames[j].textContent , 
-				firstName : authorFirstNames[j].textContent ,
+				lastName: authorLastNames[j].textContent,
+				firstName: authorFirstNames[j].textContent,
 				creatorType: "author"
 			});
 		}
@@ -503,24 +519,24 @@ function scrape(doc, url) {
 	
 	if (item.creators.length == 0) {
 		authorNode = ZU.xpath(doc, '//div[@class="autor"]/p | //p[@class="authorline"]/text() | //div[@class="authorline"]/p/text()');
-		for (var j=0; j<authorNode.length; j++) {
-			//first we delete some prefixes
+		for (let j = 0; j < authorNode.length; j++) {
+			// first we delete some prefixes
 			var authorString = authorRemoveTitlesEtc(authorNode[j].textContent);
-			//authors can be seperated by "und" and "," if there are 3 or more authors
-			//a comma can also mark the beginning of suffixes, which we want to delete
-			//therefore we have to distinguish these two cases in the following
+			// authors can be seperated by "und" and "," if there are 3 or more authors
+			// a comma can also mark the beginning of suffixes, which we want to delete
+			// therefore we have to distinguish these two cases in the following
 			var posUnd = authorString.indexOf("und");
 			var posComma = authorString.indexOf(",");
 			if (posUnd > posComma) {
-				var posComma = authorString.indexOf(",",posUnd);
+				posComma = authorString.indexOf(",", posUnd);
 			}
 			if (posComma > 0) {
-				authorString = authorString.substr(0,posComma);
+				authorString = authorString.substr(0, posComma);
 			}
 			
 			var authorArray = authorString.split(/und|,/);
-			for (var k=0; k<authorArray.length; k++) {
-				var authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
+			for (var k = 0; k < authorArray.length; k++) {
+				authorString = ZU.trimInternal(authorRemoveTitlesEtc(authorArray[k]));
 				item.creators.push(ZU.cleanAuthor(authorString, "author"));
 			}
 		}
@@ -531,30 +547,31 @@ function scrape(doc, url) {
 	
 	item.date = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/a[2]');
 	
-	//e.g. Heft 6 (Seite 141-162)
+	// e.g. Heft 6 (Seite 141-162)
 	var issueText = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/ul/li/a[2]');
 
 	if (issueText) {
-		item.issue = issueText.replace(/\([^\)]*\)/,"");
-		if (item.issue.search(/\d+/)>-1) {
+		item.issue = issueText.replace(/\([^)]*\)/, "");
+		if (item.issue.search(/\d+/) > -1) {
 			item.issue = item.issue.match(/\d+/)[0];
 		}
 	}
 	
-	//e.g. ArbrAktuell 2014, 150
+	// e.g. ArbrAktuell 2014, 150
 	var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
 	if (shortCitation) {
-		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",")+1));
+		var pagesStart = ZU.trimInternal(shortCitation.substr(shortCitation.lastIndexOf(",") + 1));
 	}
 	var pagesEnd = ZU.xpathText(doc, '(//span[@class="pg"])[last()]');
 	if (pagesEnd) {
 		item.pages = pagesStart + "-" + pagesEnd;
-	} else {
+	}
+	else {
 		item.pages = pagesStart;
 	}
 	
 	item.abstractNote = ZU.xpathText(doc, '//div[@class="abstract"]') || ZU.xpathText(doc, '//div[@class="leitsatz"]');
-	if (item.abstractNote){
+	if (item.abstractNote) {
 		item.abstractNote = item.abstractNote.replace(/\n\s*\n/g, "\n");
 	}
 
@@ -563,18 +580,18 @@ function scrape(doc, url) {
 	}
 	
 	finalize(doc, url, item);
-
 }
 
 function finalize(doc, url, item) {
-	
 	item.attachments = [{
 		title: "Snapshot",
 		document: doc
 	}];
-	
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
