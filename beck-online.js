@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2018-09-11 07:17:21"
+	"lastUpdated": "2019-06-03 08:08:07"
 }
 
 /*
@@ -55,7 +55,7 @@ var mappingClassNameToItemType = {
 
 // build a regular expression for author cleanup in authorRemoveTitlesEtc()
 var authorTitlesEtc = ['\\/','Dr\\.', '\\b[ji]ur\\.','\\bh\\. c\\.','Prof\\.',
-		'Professor', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'PD',
+		'Professor(?:in)?', '\\bwiss\\.', 'Mitarbeiter(?:in)?', 'RA,?', 'PD',
 		'FAArbR', 'Fachanwalt für Insolvenzrecht', 'Rechtsanw[aä]lt(?:e|in)?',
 		'Richter am (?:AG|LG|OLG|BGH)',	'\\bzur Fussnote',
 		'LL\\.\\s?M\\.(?: \\(UCLA\\))?', '^Von', "\\*"];
@@ -64,12 +64,14 @@ var authorRegEx = new RegExp(authorTitlesEtc.join('|'), 'g');
 
 function detectWeb(doc, url) {
 	var dokument = doc.getElementById("dokument");
-	if (!dokument) return;
+	if (!dokument) {
+		return getSearchResults(doc, true) ? "multiple" : false;
+	}
 	
 	var type = mappingClassNameToItemType[dokument.className.toUpperCase()];
 	//Z.debug(dokument.className.toUpperCase());
 	if (type == 'multiple') {
-		return getSearchResults(doc, true) ? type : false;
+		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
 	return type;
@@ -77,7 +79,8 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false,
-		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a');
+		rows = ZU.xpath(doc, '//div[@class="inh"]//span[@class="inhdok"]//a | //div[@class="autotoc"]//a | //div[@id="trefferliste"]//a[@class="sndline"]');
+
 	for (var i=0; i<rows.length; i++) {
 		//rows[i] contains an invisible span with some text, which we have to exclude, e.g.
 		//   <span class="unsichtbar">BKR Jahr 2014 Seite </span>
@@ -279,7 +282,7 @@ function scrapeBook(doc, url) {
 
 function addNote(originalNote, newNote) {
 	if (originalNote.length == 0) {
-		originalNote = "Additional Metadata: "+newNote;
+		originalNote = "<h2>Additional Metadata</h2>" + newNote;
 	}
 	else
 	{
@@ -297,16 +300,13 @@ function scrapeCase(doc, url) {
 	// case name
 	// in some cases, the caseName is in a separate <span>
 	var caseName = ZU.xpathText(doc, '//div[@class="titel sbin4"]/h1/span');
-
-	if (caseName) {
-		item.shortTitle = caseName;
-	}
-	// if not, we have to extract it from the title
-	else {
+// if not, we have to extract it from the title
+	if (!caseName) {
 		var caseDescription = ZU.xpathText(doc, '//div[contains(@class, "titel")]/h1');
 		if (caseDescription) {
-			var tmp = caseDescription.match(/[^-–]*$/);	// everything after the last slash
-			if (tmp) caseName = ZU.trimInternal(tmp[0]);
+			// take everything after the last slash
+			var tmp = caseDescription.split(/\s[-–]\s/);
+			caseName = tmp[tmp.length-1];
 			// sometimes the caseName is enclosed in („”)
 			tmp = caseDescription.match(/\(\„([^”)]+)\”\)/);
 			if (tmp) {
@@ -318,7 +318,7 @@ function scrapeCase(doc, url) {
 			}
 		}
 		if (caseName) {
-			item.shortTitle = caseName;
+			item.shortTitle = caseName.trim().replace(/^\*|\*$/, '').trim();
 		}
 	}
 	
@@ -399,7 +399,7 @@ function scrapeCase(doc, url) {
 		item.pages = beckRSsrc[3];*/
 	}
 
-	var otherCitationsText = ZU.xpathText(doc, '//div[@id="verweiszettel-top"]//li[contains(@class, "parallelfundstellen")]//li',  null, " ; ");
+	var otherCitationsText = ZU.xpathText(doc, '//div[@id="parallelfundstellenNachDokument"]');
 	if (otherCitationsText) {
 		note = addNote(note, "<h3>Parallelfundstellen</h3><p>" + otherCitationsText.replace(/\n/g, "").replace(/\s+/g, ' ').trim() + "</p>");
 	}
@@ -415,15 +415,14 @@ function scrapeCase(doc, url) {
 
 	// there is additional information if the case is published in a journal
 	if (documentClassName == 'ZRSPR') {
-		// short title of publication
+		// short title of publication, publication year
 		item.reporter = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/a[2]');
+		item.reporterVolume = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/a[2]');
 		// long title of publication
 		var publicationTitle = ZU.xpathText(doc, '//li[@class="breadcurmbelemenfirst"]');
 		if (publicationTitle) {
 			note = addNote(note, "<h3>Zeitschrift Titel</h3><p>" + ZU.trimInternal(publicationTitle) + "</p>");
 		}
-		
-		item.date = ZU.xpathText(doc, '//div[@id="toccontent"]/ul/li/ul/li/a[2]');
 		
 		//e.g. ArbrAktuell 2014, 150
 		var shortCitation = ZU.xpathText(doc, '//div[@class="dk2"]//span[@class="citation"]');
@@ -434,8 +433,6 @@ function scrapeCase(doc, url) {
 		} else {
 			item.pages = pagesStart;
 		}
-		
-		item.reporterVolume = item.date;
 	}
 	
 	if (note.length != 0) {
@@ -618,7 +615,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "LG Augsburg, 24. 9. 2001 - 3 O 4995/00 - Infomatec",
 				"creators": [],
-				"dateDecided": "2001",
+				"dateDecided": "2001-9-24",
 				"abstractNote": "Leitsätze der Redaktion:\n    1. Ad-hoc-Mitteilungen richten sich nicht nur an ein bilanz- und fachkundiges Publikum, sondern an alle tatsächlichen oder potenziellen Anleger und Aktionäre.\n    2. \n    § BOERSG § 88 Abs. BOERSG § 88 Absatz 1 Nr. 1 BörsG dient neben dem Schutz der Allgemeinheit gerade auch dazu, das Vermögen des einzelnen Kapitalanlegers vor möglichen Schäden durch eine unredliche Beeinflussung der Preisbildung an Börsen und Märkten zu schützen.",
 				"court": "LG Augsburg",
 				"docketNumber": "3 O 4995/00",
@@ -635,7 +632,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 3964 ; EWiR 2001, 1049 (m. Anm. Sch… ; NJOZ 2001, 1878 ; NJW-RR 2001, 1705 ; NZG 2002, 429 ; WM 2001 Heft 41, 1944 ; WuB I G 7. - 8.01 Schäfer (m… ; ZIP 2001, 1881 (m. Anm.) ; FHZivR 47 Nr. 2816 (Ls.) ; FHZivR 47 Nr. 6449 (Ls.) ; FHZivR 48 Nr. 2514 (Ls.) ; FHZivR 48 Nr. 6053 (Ls.) ; LSK 2001, 520032 (Ls.) ; NJW-RR 2003, 216 (Ls.) ; DB 2001, 2334 ; WuB 2001, 1269 ; WuB 2001, 1269 (m. Anm. Prof…</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Beschreibung</h3><p>Schadensersatz wegen fehlerhafter Ad-hoc-Mitteilungen („Infomatec”)</p><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:NJW-RR 2001, 1705 ◊NJOZ 2001, 1878 ◊NZG 2002, 429 ◊ZIP 2001, 1881 (m. Anm.) ◊WM 2001 Heft 41, 1944 ◊BeckRS 9998, 3964 ◊NJW-RR 2003, 216 (Ls.) ◊FHZivR 48 Nr. 6053 (Ls.) ◊FHZivR 47 Nr. 2816 (Ls.) ◊FHZivR 47 Nr. 6449 (Ls.) ◊FHZivR 48 Nr. 2514 (Ls.) ◊LSK 2001, 520032 (Ls.) Entscheidungsbesprechungen:WuB I G 7. - 8.01 ◊EWiR 2001, 1049 (Schwark, Eberhard) Weitere Fundstellen:DB 2001, 2334 ◊WuB 2001, 1269 ◊WuB 2001, 1269 (m. Anm. Professor Dr. Frank A. Schäfer)</p><h3>Normen</h3><p>§ WPHG § 15 WpHG; § BOERSG § 88 BörsG; §§ BGB § 823, BGB § 826 BGB</p><h3>Zeitschrift Titel</h3><p>Zeitschrift für Bank- und Kapitalmarktrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -944,7 +941,7 @@ var testCases = [
 				"caseName": "OLG Köln, 23.03.2012 - 6 U 67/11",
 				"creators": [],
 				"dateDecided": "2012-03-23",
-				"abstractNote": "Leitsätze:\n\t\t\t\t\t1. Die Eltern eines 13-jährigen Sohnes, dem sie einen PC mit Internetanschluss überlassen haben, können ihrer aus § BGB § 832 BGB § 832 Absatz I BGB resultierenden Aufsichtspflicht zur Verhinderung der Teilnahme des Kindes an illegalen sog. Tauschbörsen durch die Installation einer Firewall und eines Passwortes sowie monatliche stichprobenmäßige Kontrollen genügen. Diese Kontrollen sind aber nicht hinreichend durchgeführt worden, wenn die Eltern über Monate das trotz der installierten Schutzmaßnahmen erfolgte Herunterladen zweier Filesharingprogramme nicht entdecken, für die Ikons auf dem Desktop sichtbar waren.\n\t\t\t\t\t2. Die Höhe des dem Rechteinhaber durch die Teilnahme an einer sog. Tauschbörse entstandenen, im Wege der Lizenzanalogie berechneten Schadens ist mangels besser geeigneter Grundlagen an dem GEMA Tarif zu orientieren, der dem zu beurteilenden Sachverhalt am nächsten kommt. Das ist nicht der Tarif VR W 1, sondern der (frühere) Tarif VR-OD 5. Es sind weiter alle in Betracht kommenden Umstände wie die Länge des Zeitraumes, in dem der Titel in die \"Tauschbörse\" eingestellt war, und die Höhe des Lizenzbetrages zu berücksichtigen, der für vergleichbare Titel nach Lizenzierung gezahlt wird. Sind gängige Titel über Monate durch die Tauschbörse öffentlich zugänglichgemacht worden, so kann ein Betrag von 200 € für jeden Titel geschuldet sein.",
+				"abstractNote": "Amtliche Leitsätze:\n\t\t\t\t\t1. Die Eltern eines 13-jährigen Sohnes, dem sie einen PC mit Internetanschluss überlassen haben, können ihrer aus § BGB § 832 BGB § 832 Absatz I BGB resultierenden Aufsichtspflicht zur Verhinderung der Teilnahme des Kindes an illegalen sog. Tauschbörsen durch die Installation einer Firewall und eines Passwortes sowie monatliche stichprobenmäßige Kontrollen genügen. Diese Kontrollen sind aber nicht hinreichend durchgeführt worden, wenn die Eltern über Monate das trotz der installierten Schutzmaßnahmen erfolgte Herunterladen zweier Filesharingprogramme nicht entdecken, für die Ikons auf dem Desktop sichtbar waren.\n\t\t\t\t\t2. Die Höhe des dem Rechteinhaber durch die Teilnahme an einer sog. Tauschbörse entstandenen, im Wege der Lizenzanalogie berechneten Schadens ist mangels besser geeigneter Grundlagen an dem GEMA Tarif zu orientieren, der dem zu beurteilenden Sachverhalt am nächsten kommt. Das ist nicht der Tarif VR W 1, sondern der (frühere) Tarif VR-OD 5. Es sind weiter alle in Betracht kommenden Umstände wie die Länge des Zeitraumes, in dem der Titel in die \"Tauschbörse\" eingestellt war, und die Höhe des Lizenzbetrages zu berücksichtigen, der für vergleichbare Titel nach Lizenzierung gezahlt wird. Sind gängige Titel über Monate durch die Tauschbörse öffentlich zugänglichgemacht worden, so kann ein Betrag von 200 € für jeden Titel geschuldet sein.",
 				"court": "OLG Köln",
 				"docketNumber": "6 U 67/11",
 				"extra": "{:jurisdiction: de}\n{:genre: Urt.}",
@@ -956,7 +953,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Fundstelle</h3><p>BeckRS 2012, 09546</p><h3>Parallelfundstellen</h3><p>GRUR-Prax 2012, 238 (m. Anm.… ; MMR 2012, 387 (m. Anm. Hoffm… ; NJOZ 2013, 365 ; ZUM 2012, 697 ; LSK 2012, 250148 (Ls.) ; CR 2012, 397 ; K & R 2012, 437 ; MD 2012, 621 ; WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Fundstelle</h3><p>BeckRS 2012, 9546</p><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:MMR 2012, 387 (m. Anm. Hoffmann) ◊NJOZ 2013, 365 ◊ZUM 2012, 697 ◊LSK 2012, 250148 (Ls.) Entscheidungsbesprechung:GRUR-Prax 2012, 238 (Dr. Christian Dietrich) Weitere Fundstellen:CR 2012, 397 ◊K & R 2012, 437 (Ls.) ◊MD 2012, 621 ◊WRP 2012, 1007</p><h3>Normen</h3><p>Normenketten: BGB § BGB § 683 S. 1, § 670, § 832 Abs. 1 UrhG § URHG § 19a, § 97 Abs. 2</p>"
 					}
 				],
 				"seeAlso": []
@@ -971,7 +968,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "EuGH, 27.3.2014 - C-314/12 - UPC Telekabel/Constantin Film ua [kino.to]",
 				"creators": [],
-				"dateDecided": "2014",
+				"dateDecided": "2014-3-27",
 				"court": "EuGH",
 				"docketNumber": "C-314/12",
 				"extra": "{:jurisdiction: europa.eu}\n{:genre: Urt.}",
@@ -987,7 +984,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>BeckEuRS 2014, 417030 ; BeckRS 2014, 80615 ; EuZW 2014, 388 (m. Anm. Karl) ; GRUR Int. 2014, 469 ; GRUR-Prax 2014, 157 (m. Anm.… ; MMR 2014, 397 (m. Anm. Roth) ; NJW 2014, 1577 ; ZUM 2014, 494 ; LSK 2014, 160153 (Ls.) ; CELEX 62012CJ0314 ; EuGRZ 2014, 301 ; K & R 2014, 329 (m. Anm. Sim… ; MittdtPatA 2014, 335 (Ls.) ; WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 8 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Beschreibung</h3><p>EU-konforme unbestimmte Sperrverfügung gegen Internetprovider - UPC Telekabel/Constantin Film ua [kino.to]</p><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:MMR 2014, 397 (m. Anm. Roth) ◊GRUR Int. 2014, 469 ◊NJW 2014, 1577 ◊EuZW 2014, 388 (m. Anm. Karl) ◊ZUM 2014, 494 ◊BeckRS 2014, 80615 ◊BeckEuRS 2014, 417030 ◊LSK 2014, 160153 (Ls.) Entscheidungsbesprechung:GRUR-Prax 2014, 157 (Dr. Stefan Maaßen) Weitere Fundstellen:CELEX 62012CJ0314 ◊EuGRZ 2014, 301 ◊K & R 2014, 329 (m. Anm. Simon Assion) ◊MittdtPatA 2014, 335 (Ls.) ◊WRP 2014, 540</p><h3>Normen</h3><p>AEUV Art. AEUV Artikel 267; Richtlinie 2001/29/EG Art. EWG_RL_2001_29 Artikel 3 EWG_RL_2001_29 Artikel 3 Absatz II, EWG_RL_2001_29 Artikel 8 EWG_RL_2001_29 Artikel 8 Absatz III</p><h3>Zeitschrift Titel</h3><p>Gewerblicher Rechtsschutz und Urheberrecht</p>"
 					}
 				],
 				"seeAlso": []
@@ -1000,9 +997,9 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "BVerfG, 27-11-1990 - 1 BvR 402/87 - Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †",
+				"caseName": "BVerfG, 27-11-1990 - 1 BvR 402/87 - Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\")\n zur Fussnote †",
 				"creators": [],
-				"dateDecided": "1991",
+				"dateDecided": "1990-11-27",
 				"abstractNote": "1. Ein pornographischer Roman kann Kunst i. S. von Art. GG Artikel 5 GG Artikel 5 Absatz III 1 GG sein.\n    2. Die Indizierung einer als Kunstwerk anzusehenden Schrift setzt auch dann eine Abwägung mit der Kunstfreiheit voraus, wenn die Schrift offensichtlich geeignet ist, Kinder oder Jugendliche sittlich schwer zu gefährden (§ 6 Nr. 3 des Gesetzes über die Verbreitung jugendgefährdender Schriften - GjS).\n    3. Die Vorschrift des § 9 II GjS ist verfassungsrechtlich unzulänglich, weil die Auswahl der Beisitzer für die Bundesprüfstelle nicht ausreichend geregelt ist.",
 				"court": "BVerfG",
 				"docketNumber": "1 BvR 402/87",
@@ -1010,7 +1007,7 @@ var testCases = [
 				"firstPage": "1471-1475",
 				"reporter": "NJW",
 				"reporterVolume": "1991",
-				"shortTitle": "Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †",
+				"shortTitle": "Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\")\n zur Fussnote †",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1019,7 +1016,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Additional Metadata: <h3>Beschreibung</h3><p>Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\") zur Fussnote †</p><h3>Parallelfundstellen</h3><p>BeckRS 9998, 165476 ; NStZ 1991, 188 ; FHOeffR 42 Nr. 13711 (Ls.) ; FHOeffR 42 Nr. 13713 (Ls.) ; FHOeffR 42 Nr. 6327 (Ls.) ; FHOeffR 42 Nr. 7072 (Ls.) ; LSK 1991, 230089 (Ls.) ; NVwZ 1991, 663 (Ls.) ; AfP 1991, 379 ; AfP 1991, 384 ; Bespr.: , JZ 1991, 470 ; BVerfGE 83, 130 ; DVBl 1991, 261 ; EuGRZ 1991, 33 ; JZ 1991, 465 ; ZUM 1991, 310</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Parallelfundstellen</h3><p>Parallelfundstellen: Entscheidungen:NStZ 1991, 188 ◊BVerfGE Band 83, 130 ◊BeckRS 9998, 165476 ◊NVwZ 1991, 663 (Ls.) ◊LSK 1991, 230089 (Ls.) ◊FHOeffR 42 Nr. 13711 (Ls.) ◊FHOeffR 42 Nr. 6327 (Ls.) ◊FHOeffR 42 Nr. 7072 (Ls.) ◊FHOeffR 42 Nr. 13713 (Ls.) Weitere Fundstellen:AfP 1991, 379 ◊AfP 1991, 384 ◊Bespr.: , JZ 1991, 470 ◊BVerfGE 83, 130 ◊DVBl 1991, 261 ◊EuGRZ 1991, 33 ◊JZ 1991, 465 ◊ZUM 1991, 310</p><h3>Normen</h3><p>GG Art. GG Artikel 1 GG Artikel 1 Absatz I, GG Artikel 2 GG Artikel 2 Absatz I, GG Artikel 5 GG Artikel 5 Absatz III 1, GG Artikel 6 GG Artikel 6 Absatz II, GG Artikel 19 GG Artikel 19 Absatz I 2, GG Artikel 19 Absatz IV, GG Artikel 20 GG Artikel 20 Absatz III, GG Artikel 103 GG Artikel 103 Absatz I; GjS §§ 1, 6, 9 II</p><h3>Zeitschrift Titel</h3><p>Neue Juristische Wochenschrift</p>"
 					}
 				],
 				"seeAlso": []
