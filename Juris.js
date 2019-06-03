@@ -33,7 +33,6 @@
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
 
-
 ***** END LICENSE BLOCK *****
 
 */
@@ -45,18 +44,18 @@
 
 // Array with the different - recognized - types
 var mappingItemTypes = {
-	'MONOGRAPHIE' : 'book',
-	'SAMMELWERK' : 'book',
-	'AUFSATZ' : 'journalArticle',
-	'KONGRESSBERICHT' : 'conferencePaper',
-	'KONGRESSVORTRAG, AUFSATZ' : 'conferencePaper',
-	'URTEIL' : 'case',
-	'URT.' : 'case',
-	'BESCHLUSS' : 'case',
-	'BESCHL.' : 'case',
-	'ERLEDIGTES ANHÄNGIGES VERFAHREN' : 'case',
-	'GESETZ' : 'statute',
-	'SONSTIGES' : 'journalArticle'
+	MONOGRAPHIE: 'book',
+	SAMMELWERK: 'book',
+	AUFSATZ: 'journalArticle',
+	KONGRESSBERICHT: 'conferencePaper',
+	'KONGRESSVORTRAG, AUFSATZ': 'conferencePaper',
+	URTEIL: 'case',
+	'URT.': 'case',
+	BESCHLUSS: 'case',
+	'BESCHL.': 'case',
+	'ERLEDIGTES ANHÄNGIGES VERFAHREN': 'case',
+	GESETZ: 'statute',
+	SONSTIGES: 'journalArticle'
 };
 
 // most information in Juris is saved in tables where the description of the data is of class TD30 => gather this data
@@ -64,35 +63,37 @@ var scrapeData = {};
 
 function initData(doc) {
 	var nodes = doc.getElementsByClassName('TD30');
-	for (var i=0; i<nodes.length; i++) {
+	for (var i = 0; i < nodes.length; i++) {
 		var label = ZU.trimInternal(nodes[i].textContent);
-		label = label.substr(0, label.length-1);  // chop off ':', but .replace(/:$/, '') may be more reliable
+		label = label.substr(0, label.length - 1); // chop off ':', but .replace(/:$/, '') may be more reliable
 		var value = nodes[i].nextElementSibling;
 		if (label && value) {
 			scrapeData[label] = ZU.trimInternal(value.textContent);
 		}
 	}
-	if (scrapeData['Norm']) {
-		scrapeData['Normen'] = scrapeData['Norm'];
+	if (scrapeData.Norm) {
+		scrapeData.Normen = scrapeData.Norm;
 	}
 }
 	
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	initData(doc);		// gather data
 	
-	var type = scrapeData['Beitragstyp'] || scrapeData['Dokumenttyp'];
+	var type = scrapeData.Beitragstyp || scrapeData.Dokumenttyp;
 	if (type) {
 		type = type.toUpperCase();
 		if (mappingItemTypes[type]) {
 			return mappingItemTypes[type];
-		} else {
+		}
+		else {
 			Z.debug(type + " not yet suppported");
 		}
 	}
-	if (scrapeData['Werk'] && scrapeData['Zitiervorschlag']) {
-		if (scrapeData['Zitiervorschlag'].includes('Handbuch')) {
+	if (scrapeData.Werk && scrapeData.Zitiervorschlag) {
+		if (scrapeData.Zitiervorschlag.includes('Handbuch')) {
 			return 'bookSection';
-		} else {
+		}
+		else {
 			return 'encyclopediaArticle'; // for articles in commentary
 		}
 	}
@@ -102,16 +103,16 @@ function detectWeb(doc, url) {
 			return 'journalArticle';
 		}
 	}
-	//Z.debug(scrapeData)
+	// Z.debug(scrapeData)
 	Z.monitorDOMChanges(ZU.xpath(doc, '//div[@id="container"]/div')[0]);
+	return false;
 }
 
 function addNote(originalNote, newNote) {
 	if (originalNote.length === 0) {
 		originalNote = "<h2>Additional Metadata</h2>" + newNote;
 	}
-	else
-	{
+	else {
 		originalNote += newNote;
 	}
 	return originalNote;
@@ -121,7 +122,7 @@ function scrape(doc, url, itemType) {
 	var item = new Zotero.Item(itemType);
 	
 	// scrape authors
-	var myAuthorsString = scrapeData['Autor'];
+	var myAuthorsString = scrapeData.Autor;
 	// example: "Michael Fricke, Martin Gerecke"
 	if (myAuthorsString) {
 		var myAuthors = ZU.trimInternal(myAuthorsString).split(",");
@@ -131,60 +132,61 @@ function scrape(doc, url, itemType) {
 		}
 	}
 	
-	var editorString = scrapeData['Herausgeber'] || scrapeData['Gesamtherausgeber'];
+	var editorString = scrapeData.Herausgeber || scrapeData.Gesamtherausgeber;
 	if (editorString) {
 		var editors = ZU.trimInternal(editorString).split("/");
-		for (let i=0; i<editors.length; i++) {
+		for (let i = 0; i < editors.length; i++) {
 			item.creators.push(ZU.cleanAuthor(editors[i], 'editor', false));
 		}
 	}
 	
-	//scrape title
+	// scrape title
 	item.title = ZU.xpathText(doc, "//div[@class='docLayoutTitel']/h3")
 		|| ZU.xpathText(doc, "//div[contains(@class, 'docLayoutTitel')]//strong")
 		|| ZU.xpathText(doc, "//div[contains(@class, 'docLayoutTitel')]")
 		|| ZU.xpathText(doc, "//div[contains(@class, 'docbar__title')]");
 	
-	item.date = scrapeData['Erscheinungsjahr'] || scrapeData['Stand'];
-	item.edition = scrapeData['Ausgabe'] || scrapeData['Auflage'];
-	var isbn = scrapeData['Bestellnummer'];
+	item.date = scrapeData.Erscheinungsjahr || scrapeData.Stand;
+	item.edition = scrapeData.Ausgabe || scrapeData.Auflage;
+	var isbn = scrapeData.Bestellnummer;
 	if (isbn) {
 		item.ISBN = isbn.replace('ISBN', '').trim();
 	}
-	var pub = scrapeData['Verlag'];
+	var pub = scrapeData.Verlag;
 	if (pub) {
 		// e.g. de Gruyter, Berlin
 		var pubLoc = pub.split(',');
 		if (pubLoc.length === 2) {
 			item.publisher = pubLoc[0];
 			item.place = pubLoc[1];
-		} else {
+		}
+		else {
 			item.publisher = pub;
 		}
 	}
 	
-	item.conferenceName = scrapeData['Kongress'];
+	item.conferenceName = scrapeData.Kongress;
 	
-	item.publicLawNumber = scrapeData['FNA']; // Fundstellennachweis A (?)
+	item.publicLawNumber = scrapeData.FNA; // Fundstellennachweis A (?)
 	item.code = scrapeData['Amtliche Abkürzung'];
-	if (itemType === "statute" && scrapeData['Zitiervorschlag']) {
+	if (itemType === "statute" && scrapeData.Zitiervorschlag) {
 		// e.g. "Zitiervorschlag": "§ 154 VwGO in der Fassung vom 20.12.2001"
-		var m = scrapeData['Zitiervorschlag'].match(/in der Fassung vom ([\d\.]+)/);
+		var m = scrapeData.Zitiervorschlag.match(/in der Fassung vom ([\d.]+)/);
 		if (m) {
 			item.dateEnacted = ZU.strToISO(m[1]);
 		}
-		m = scrapeData['Zitiervorschlag'].match(/§ (.+?) /);
+		m = scrapeData.Zitiervorschlag.match(/§ (.+?) /);
 		if (m) {
 			item.codeNumber = m[1];
 		}
 	}
 	
 	item.publicationTitle = ZU.xpathText(doc, '(//table//img[contains(@alt,"Abkürzung Fundstelle")]/@title)[1]')
-		|| scrapeData['Werk'];
-	//scrape src
-	//example 1: "AfP 2014, 293-299"
-	//example 2: "ZStW 125, 259-298 (2013)"
-	var mySrcString = scrapeData['Fundstelle'];
+		|| scrapeData.Werk;
+	// scrape src
+	// example 1: "AfP 2014, 293-299"
+	// example 2: "ZStW 125, 259-298 (2013)"
+	var mySrcString = scrapeData.Fundstelle;
 
 	if (mySrcString) {
 		// match example 1
@@ -195,23 +197,25 @@ function scrape(doc, url, itemType) {
 			item.pages = matchSrc[3];
 		}
 		// match example 2
-		else if (matchSrc = mySrcString.match(/^([^,]+)\s(\d+)\s*,\s*(\d+(?:-\d+)?)\s*\((\d{4})\)\s*$/)) {
+		else {
+			matchSrc = mySrcString.match(/^([^,]+)\s(\d+)\s*,\s*(\d+(?:-\d+)?)\s*\((\d{4})\)\s*$/);
+			if (matchSrc) {
 				item.journalAbbreviation = ZU.trimInternal(matchSrc[1]);
 				item.issue = matchSrc[2];
 				item.pages = matchSrc[3];
 				item.date = matchSrc[4];
+			}
 		}
 	}
 	
 	finalize(doc, url, item);
-	
 }
 
 function finalize(doc, url, item) {
 	var note = "";
 	
 	// regulations cited in the database for the article
-	var citedRegulations = scrapeData['Normen'];
+	var citedRegulations = scrapeData.Normen;
 	if (citedRegulations) {
 		note = addNote(note, "<h3>Normen</h3><p>" + ZU.trimInternal(citedRegulations) + "</p>");
 	}
@@ -228,14 +232,14 @@ function finalize(doc, url, item) {
 	}
 	
 	if (note.length !== 0) {
-		item.notes.push( {note: note} );
+		item.notes.push({ note: note });
 	}
 	
 	// saving a snapshot is currently not working properly
-	//item.attachments = [{
+	// item.attachments = [{
 	//	title: "Snapshot",
 	//	document: doc
-	//}];
+	// }];
 	
 	var perma = ZU.xpathText(doc, '//span[contains(@class, "docLayoutPermalinkItemLink")]');
 	if (perma) {
@@ -251,20 +255,18 @@ function finalize(doc, url, item) {
 		item.attachments.push({
 			title: "Fulltext PDF",
 			url: pdfLink,
-			mimeType : "application/pdf"
+			mimeType: "application/pdf"
 		});
 	}
 
 	item.complete();
-	
 }
 
 function scrapeCase(doc, url) {
 	var item = new Zotero.Item('case');
-	var note = "";
 	
 	// court
-	item.court = scrapeData['Gericht'];
+	item.court = scrapeData.Gericht;
 	// if there is additional information about the body inside the court (starting with a number), disregard it
 	// examples:	BGH 1. Zivilsenat, LG Köln 26. Zivilkammer
 	var m = item.court.match(/^[A-Za-zÖöÄäÜüß ]+/);
@@ -280,30 +282,28 @@ function scrapeCase(doc, url) {
 	}
 	
 	// date
-	var myDateString = scrapeData['Entscheidungsdatum'];
+	var myDateString = scrapeData.Entscheidungsdatum;
 	if (myDateString) {
 		item.dateDecided = myDateString.replace(/(\d\d?)\.\s*(\d\d?)\.\s*(\d\d\d\d)/, "$3-$2-$1");
 	}
 	
 	// docketNumber
-	item.docketNumber = scrapeData['Aktenzeichen'];
+	item.docketNumber = scrapeData.Aktenzeichen;
 	
 	// type of decision. Save this in item.extra according to citeproc-js
-	var decisionType = scrapeData['Dokumenttyp'];
+	var decisionType = scrapeData.Dokumenttyp;
 	if (/(Beschluss)|Beschl\./i.test(decisionType)) {
 		item.extra += "\ngenre: Beschl.";
 	}
-	else {
-		if (/(Urteil)|(Urt\.)/i.test(decisionType)) {
-			item.extra += "\ngenre: Urt.";
-		}
+	else if (/(Urteil)|(Urt\.)/i.test(decisionType)) {
+		item.extra += "\ngenre: Urt.";
 	}
 	
 	// name of decision (caseName) if availabe
 	// since the CSL stylesheet does not have a "caseName" property, but uses only "title" we have to use other field => item.history (=CSL.references)
 	// also, item.caseName and item.title are identical in Zotero. Therefore, we should not use item.caseName at all
 	
-	var caseName = scrapeData['Entscheidungsname'];
+	var caseName = scrapeData.Entscheidungsname;
 	item.title = item.court + ", " + myDateString + " - " + item.docketNumber;
 	if (caseName) {
 		item.shortTitle = caseName;
@@ -311,15 +311,15 @@ function scrapeCase(doc, url) {
 	}
 	
 	finalize(doc, url, item);
-	
 }
 
 
-function doWeb (doc, url) {
+function doWeb(doc, url) {
 	var myType = detectWeb(doc, url);
 	if (myType == 'case') {
 		scrapeCase(doc, url);
-	} else {
+	}
+	else {
 		scrape(doc, url, myType);
 	}
 }
@@ -491,7 +491,7 @@ var testCases = [
 				"creators": [],
 				"notes": [
 					{
-					"note": "<h2>Additional Metadata</h2><h3>Normen</h3><p>§ 71a Abs 1 AsylVfG 1992</p><h3>Titel</h3><p>Behandlung eines Asylantrages als Folgeantrag, der nach Ablehnung eines in einem EU-Mitgliedstaat (hier: Ungarn) gestellten Asylantrages abgelehnt worden war</p>"
+						"note": "<h2>Additional Metadata</h2><h3>Normen</h3><p>§ 71a Abs 1 AsylVfG 1992</p><h3>Titel</h3><p>Behandlung eines Asylantrages als Folgeantrag, der nach Ablehnung eines in einem EU-Mitgliedstaat (hier: Ungarn) gestellten Asylantrages abgelehnt worden war</p>"
 					}
 				],
 				"tags": [],
