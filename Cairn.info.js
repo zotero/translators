@@ -160,19 +160,20 @@ function scrape(doc, url) {
 
 		// Other fixes
 		delete item.libraryCatalog;
-		item.title = ZU.unescapeHTML(item.title);
-		if (item.abstractNote) {
-			item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-		} else {
-			var abstracts = ZU.xpath(doc, '//div[contains(@class, "resume")]/div[@class="corps"]/p');
-			if (abstracts) {
-				var combined = "";
-				for (var i in abstracts)
-					combined += abstracts[i].textContent + "\n\n";
 
-				item.abstractNote = ZU.unescapeHTML(combined.trim());
-			}
+		var abstracts = ZU.xpath(doc, '//div[contains(@class, "resume")]/div[@class="corps"]/p');
+		if (abstracts) {
+			var combined = "";
+			for (var i in abstracts)
+				combined += abstracts[i].textContent + "\n\n";
+
+			item.abstractNote = combined.trim();
 		}
+
+		item.title = ZU.unescapeHTML(item.title);
+		if (item.abstractNote)
+			item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+
 
 		item.complete();
 	});

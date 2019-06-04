@@ -238,7 +238,7 @@ function scrape(doc, url, extras) {
 				}
 
 				// save the first abstract to the expected field and the others in the notes field for later processing
-				var abstracts = ZU.xpath(doc, '//div[@class="abstractSection"]/p/span');
+				var abstracts = ZU.xpath(doc, '//div[@class="abstractSection"]/p/span[not(./i)]');
 				if (abstracts) {
 					abstracts = abstracts.map(function(x) { return x.textContent.replace(/\s+/g, " ").trim(); })
 					item.abstractNote = abstracts[0];

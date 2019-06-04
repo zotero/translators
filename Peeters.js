@@ -115,6 +115,8 @@ function scrape(doc, url) {
 		item.title += ': ' + subtitle;
 	}
 
+	item.title = ZU.unescapeHTML(item.title.replace(/<(.|\n)*?>/g, ''));
+
 	// e.g. Author(s): HANDAL, Boris , WATSON, Kevin , ..., VAN DER MERWE, W.L.
 	// but sometimes the space before the comma is also missing
 	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]');
