@@ -2,7 +2,7 @@
     "translatorID": "cf2973a7-5804-4e28-a684-04051122fcc0",
     "label": "EquinoxPub",
     "creator": "Madeesh Kannan",
-    "target": "^https:\/\/journals.equinoxpub.com\/(index.php\/)?.+\/article\/view.*\/[0-9]+",
+    "target": "^https:\/\/(www)|(journals).equinoxpub.com\/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
@@ -35,16 +35,36 @@
 
 
 function detectWeb(doc, url) {
-    // placeholder, the Embedded Metadata translator fills in the correct item type
-    return "journalArticle";
+    // except for "multiple", the return values of this function are placeholders that
+    // will be replaced by the Embedded Metadata translator's results
+    if (/\/article\/view\//.test(url) || /-view-abstract\//.test(url))
+        return "journalArticle";
+    else if (/\/issue\/.+/.test(url) || /-view-issue\//.test(url))
+        return "multiple";
+}
+
+function getSearchResults(doc) {
+    let items = {};
+    let found = false;
+    let rows = ZU.xpath(doc, '//span[@class="chapter-title"]/a');
+    if (!rows || rows.length == 0)
+        rows = ZU.xpath(doc, '//td[@class="tocTitle"]/a');
+    for (let i = 0; i < rows.length; i++) {
+        let href = rows[i].href;
+        let title = ZU.trimInternal(rows[i].textContent);
+        if (!href || !title) continue;
+        found = true;
+        items[href] = title;
+    }
+    return found ? items : false;
 }
 
 function postProcess(item) {
     // sanitize page number ranges
     if (item.pages) {
-        var pages = item.pages.trim();
+        let pages = item.pages.trim();
         if (pages) {
-            var matched = pages.match(/^([0-9]+-[0-9]+)/);
+            let matched = pages.match(/^([0-9]+-[0-9]+)/);
             if (matched)
                 item.pages = matched[1];
         }
@@ -67,7 +87,7 @@ function postProcess(item) {
 }
 
 function invokeEmbeddedMetadataTranslator(doc) {
-    var translator = Zotero.loadTranslator("web");
+    let translator = Zotero.loadTranslator("web");
     translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
@@ -76,24 +96,50 @@ function invokeEmbeddedMetadataTranslator(doc) {
     translator.translate();
 }
 
-function doWeb(doc, url) {
-    // The page contents are in a seperate HTML document inside an inline frame
-    // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
-    var iframes = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
-    if (!iframes || iframes.length === 0)
-        throw "missing content frame!"
+function scrape(doc, url) {
+    if (/\/article\/view\//.test(url)) {
+        // The page contents are in a seperate HTML document inside an inline frame
+        // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
+        let iframes = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
+        if (!iframes || iframes.length === 0)
+            throw "missing content frame!"
 
-    var sourceFrame = iframes[0];
-    var content = sourceFrame.contentDocument;
-    if (content && content.documentElement && content.documentElement.namespaceURI)
-		invokeEmbeddedMetadataTranslator(content);
-	else {
-        // attempt to load the frame contents
-        var iframeSource = sourceFrame.getAttribute("src");
-        if (!iframeSource)
-            throw "missing frame source!";
+        let sourceFrame = iframes[0];
+        let content = sourceFrame.contentDocument;
+        if (content && content.documentElement && content.documentElement.namespaceURI)
+            invokeEmbeddedMetadataTranslator(content);
+        else {
+            // attempt to load the frame contents
+            let iframeSource = sourceFrame.getAttribute("src");
+            if (!iframeSource)
+                throw "missing frame source!";
 
-        ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
-        Zotero.wait();
+            ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
+            Zotero.wait();
+        }
+    } else if (/-view-abstract\//.test(url)) {
+        // find the correct URL and pass that on to the translator
+        let citationText = ZU.xpathText(doc, '//em[preceding-sibling::h4[text()="Citation"]]');
+        if (citationText) {
+            let articleUrlMatch = citationText.match(/(https?:\/\/journals.*?)\.\s/);
+            if (articleUrlMatch)
+                ZU.processDocuments([articleUrlMatch[1]], scrape);
+        }
     }
+}
+
+function doWeb(doc, url) {
+    if (detectWeb(doc, url) === "multiple") {
+        Zotero.selectItems(getSearchResults(doc), function (items) {
+            if (!items) {
+                return true;
+            }
+            let articles = [];
+            for (let i in items) {
+                articles.push(i);
+            }
+            ZU.processDocuments(articles, scrape);
+        });
+    } else
+        scrape(doc, url);
 }
