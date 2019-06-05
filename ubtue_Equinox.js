@@ -2,7 +2,7 @@
     "translatorID": "cf2973a7-5804-4e28-a684-04051122fcc0",
     "label": "EquinoxPub",
     "creator": "Madeesh Kannan",
-    "target": "^https:\/\/journals.equinoxpub.com\/(index.php\/)?.+\/article\/view.*\/[0-9]+",
+    "target": "^https:\/\/(www)|(journals).equinoxpub.com\/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
@@ -35,8 +35,28 @@
 
 
 function detectWeb(doc, url) {
-    // placeholder, the Embedded Metadata translator fills in the correct item type
-    return "journalArticle";
+    // except for "multiple", the return values of this function are placeholders that
+    // will be replaced by the Embedded Metadata translator's results
+    if (/\/article\/view\//.test(url) || /-view-abstract\//.test(url))
+        return "journalArticle";
+    else if (/\/issue\/.+/.test(url) || /-view-issue\//.test(url))
+        return "multiple";
+}
+
+function getSearchResults(doc) {
+	var items = {};
+	var found = false;
+    var rows = ZU.xpath(doc, '//span[@class="chapter-title"]/a');
+    if (!rows)
+        rows = ZU.xpath(doc, '//td[@class="tocTitle"]/a');
+	for (let i=0; i<rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function postProcess(item) {
@@ -49,6 +69,9 @@ function postProcess(item) {
                 item.pages = matched[1];
         }
     }
+
+    if (!item.abstractNote)
+        item.abstractNote = ZU.xpathText(doc, '//p[@class="abstract"]');
 
     // and now for something completely Javascript(TM): The "It's freaking there!" problem!
     // https://stackoverflow.com/questions/17546953/cant-access-object-property-even-though-it-exists-returns-undefined
@@ -76,24 +99,54 @@ function invokeEmbeddedMetadataTranslator(doc) {
     translator.translate();
 }
 
-function doWeb(doc, url) {
-    // The page contents are in a seperate HTML document inside an inline frame
-    // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
-    var iframes = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
-    if (!iframes || iframes.length === 0)
-        throw "missing content frame!"
+function scrape(doc, url) {
+    if (/\/article\/view\//.test(url)) {
+        // The page contents are in a seperate HTML document inside an inline frame
+        // The frame source contains the required metadata that can be parsed by the Embedded Metadata translator
+        var iframes = ZU.xpath(doc, '//frame[contains(@src, "viewArticle")]');
+        if (!iframes || iframes.length === 0)
+            throw "missing content frame!"
 
-    var sourceFrame = iframes[0];
-    var content = sourceFrame.contentDocument;
-    if (content && content.documentElement && content.documentElement.namespaceURI)
-		invokeEmbeddedMetadataTranslator(content);
-	else {
-        // attempt to load the frame contents
-        var iframeSource = sourceFrame.getAttribute("src");
-        if (!iframeSource)
-            throw "missing frame source!";
+        var sourceFrame = iframes[0];
+        var content = sourceFrame.contentDocument;
+        if (content && content.documentElement && content.documentElement.namespaceURI)
+            invokeEmbeddedMetadataTranslator(content);
+        else {
+            // attempt to load the frame contents
+            var iframeSource = sourceFrame.getAttribute("src");
+            if (!iframeSource)
+                throw "missing frame source!";
 
-        ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
-        Zotero.wait();
+            ZU.processDocuments([iframeSource], invokeEmbeddedMetadataTranslator);
+            Zotero.wait();
+        }
+    } else if (/-view-abstract\//.test(url)) {
+        // find the correct URL and pass that on to the translator
+        var metadataURL = ZU.xpathText(doc, '//button[text()="View Metadata"]/parent::a/@href')
+        if (metadataURL) {
+            window.console.log("metadata: " + metadataURL);
+            metadataURL = metadataURL.replace(/^https/, "http");
+            ZU.processDocuments([metadataURL], function(doc, url) {
+                var articleURL = ZU.xpathText(doc, '//a[parent::td/preceding-sibling::td[text()="Uniform Resource Identifier"]]/@href')
+                if (articleURL)
+                    ZU.processDocuments([articleURL], scrape);
+            });
+        }
     }
+}
+
+function doWeb(doc, url) {
+    if (detectWeb(doc, url) === "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+    } else
+        scrape(doc, url);
 }
