@@ -47,7 +47,7 @@ function getSearchResults(doc) {
 	var items = {};
 	var found = false;
     var rows = ZU.xpath(doc, '//span[@class="chapter-title"]/a');
-    if (!rows)
+    if (!rows || rows.length == 0)
         rows = ZU.xpath(doc, '//td[@class="tocTitle"]/a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
@@ -122,15 +122,11 @@ function scrape(doc, url) {
         }
     } else if (/-view-abstract\//.test(url)) {
         // find the correct URL and pass that on to the translator
-        var metadataURL = ZU.xpathText(doc, '//button[text()="View Metadata"]/parent::a/@href')
-        if (metadataURL) {
-            window.console.log("metadata: " + metadataURL);
-            metadataURL = metadataURL.replace(/^https/, "http");
-            ZU.processDocuments([metadataURL], function(doc, url) {
-                var articleURL = ZU.xpathText(doc, '//a[parent::td/preceding-sibling::td[text()="Uniform Resource Identifier"]]/@href')
-                if (articleURL)
-                    ZU.processDocuments([articleURL], scrape);
-            });
+        let citationText = ZU.xpathText(doc, '//em[preceding-sibling::h4[text()="Citation"]]');
+        if (citationText) {
+            let articleUrlMatch = citationText.match(/(https?:\/\/journals.*?)\.\s/);
+            if (articleUrlMatch)
+    			ZU.processDocuments([articleUrlMatch[1]], scrape);
         }
     }
 }
