@@ -70,9 +70,6 @@ function postProcess(item) {
         }
     }
 
-    if (!item.abstractNote)
-        item.abstractNote = ZU.xpathText(doc, '//p[@class="abstract"]');
-
     // and now for something completely Javascript(TM): The "It's freaking there!" problem!
     // https://stackoverflow.com/questions/17546953/cant-access-object-property-even-though-it-exists-returns-undefined
 
