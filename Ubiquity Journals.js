@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-19 05:23:30"
+	"lastUpdated": "2019-06-10 23:10:24"
 }
 
 /*
@@ -31,9 +31,9 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 */
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	var ubiquitytest = doc.getElementsByClassName("press-logo");
-	// this doesn't work always, so we're only using it on single items. 
+	// this doesn't work always, so we're only using it on single items.
 	// if the translator doesn't detect there, we still get good EM import
 	// For multiples we check getSearchResults
 	if (ubiquitytest[0] && ubiquitytest[0].href.includes("http://www.ubiquitypress.com")) {
@@ -50,7 +50,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	var itemType = detectWeb(doc, url);
 	if (itemType === 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function(items) {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) return true;
 			var urls = [];
 			for (var i in items) {
@@ -58,7 +58,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(urls, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -86,13 +87,13 @@ function scrape(doc, url) {
 	// use the Embedded Metadata translator
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
 			item.abstractNote = ZU.cleanTags(abstract.trim());
 		}
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }/** BEGIN TEST CASES **/
