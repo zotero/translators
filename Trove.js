@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-03 19:41:04"
+	"lastUpdated": "2019-06-10 23:08:00"
 }
 
 /*
@@ -34,11 +34,14 @@
 function detectWeb(doc, url) {
 	if (url.includes('/result?') || url.includes('/newspaper/page')) {
 		return getSearchResults(doc, url, true) ? 'multiple' : false;
-	} else if (url.includes('/newspaper/article')) {
+	}
+	else if (url.includes('/newspaper/article')) {
 		return "newspaperArticle";
-	} else if (url.includes('/work/')) {
+	}
+	else if (url.includes('/work/')) {
 		return "book";
 	}
+	return false;
 }
 
 
@@ -48,10 +51,11 @@ function getSearchResults(doc, url, checkOnly) {
 	var found = false;
 	if (url.includes('/result?')) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
-	} else {
+	}
+	else {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
 	}
-	for (var i=0; i<results.length; i++) {
+	for (var i = 0; i < results.length; i++) {
 		var link = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
 		if (!title || !link) continue;
@@ -73,28 +77,28 @@ function doWeb(doc, url) {
 				scrape(null, i);
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
-
 }
 
 
 function scrape(doc, url) {
 	if (url.includes('/newspaper/article/')) {
 		scrapeNewspaper(doc, url);
-	} else {
+	}
+	else {
 		scrapeWork(doc, url);
 	}
 }
 
 
 function scrapeNewspaper(doc, url) {
-
 	var articleID = url.match(/newspaper\/article\/(\d+)/)[1];
 	var bibtexURL = "http://trove.nla.gov.au/newspaper/citations/bibtex-article-" + articleID + ".bibtex";
 
-	ZU.HTTP.doGet(bibtexURL, function(bibtex) {
+	ZU.HTTP.doGet(bibtexURL, function (bibtex) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
@@ -120,56 +124,55 @@ function scrapeNewspaper(doc, url) {
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
 			var proxyURL = "http://trove-proxy.herokuapp.com/pdf/" + articleID;
-			ZU.HTTP.doGet(proxyURL, function(pdfURL) {
+			ZU.HTTP.doGet(proxyURL, function (pdfURL) {
 				item.attachments.push({
-					url: pdfURL, 
-					title: 'Trove newspaper PDF', 
-					mimeType:'application/pdf'
+					url: pdfURL,
+					title: 'Trove newspaper PDF',
+					mimeType: 'application/pdf'
 				});
 
 				// Get the OCRd text and save in a note.
 				var textURL = "http://trove.nla.gov.au/newspaper/rendition/nla.news-article" + articleID + ".txt";
-				ZU.HTTP.doGet(textURL, function(text) {
+				ZU.HTTP.doGet(textURL, function (text) {
 					item.notes.push({
 						note: text.trim()
 					});
 					item.complete();
 				});
-
 			});
 		});
-		translator.translate();	
+		translator.translate();
 	});
 }
 
 
 var troveTypes = {
-	"Book": "book",
+	Book: "book",
 	"Article Article/Book chapter": "bookSection",
-	"Thesis": "thesis",
+	Thesis: "thesis",
 	"Archived website": "webpage",
 	"Conference Proceedings": "book",
 	"Audio book": "book",
-	"Article": "journalArticle",
+	Article: "journalArticle",
 	"Article Article/Journal or magazine article": "journalArticle",
 	"Article Article/Conference paper": "conferencePaper",
 	"Article Article/Report": "report",
-	"Photograph": "artwork",
+	Photograph: "artwork",
 	"Poster, chart, other": "artwork",
 	"Art work": "artwork",
-	"Object": "artwork",
+	Object: "artwork",
 	"Microform Photograph": "artwork",
 	"Microform Object": "artwork",
-	"Sound": "audioRecording",
-	"Video": "videoRecording",
+	Sound: "audioRecording",
+	Video: "videoRecording",
 	"Printed music": "book",
-	"Map": "map",
-	"Unpublished": "manuscript",
-	"Published": "document"
+	Map: "map",
+	Unpublished: "manuscript",
+	Published: "document"
 };
 
 
-//The function ...
+// The function ...
 function checkType(string) {
 	var types = string.split("; ");
 	var newString;
@@ -179,15 +182,14 @@ function checkType(string) {
 			return troveTypes[newString];
 		}
 		types.pop();
-
 	}
 	return "book";
 }
 
 
-//Sometimes authors are a little messy and we need to clean them
-//e.g. author = { Bayley, William A. (William Alan), 1910-1981 },
-//results in
+// Sometimes authors are a little messy and we need to clean them
+// e.g. author = { Bayley, William A. (William Alan), 1910-1981 },
+// results in
 //   "firstName": "1910-1981, William A. (William Alan)",
 //   "lastName": "Bayley"
 function cleanCreators(creators) {
@@ -195,12 +197,13 @@ function cleanCreators(creators) {
 		var name = creators[i].firstName;
 		name = name.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
 		var posParenthesis = name.indexOf("(");
-		if (posParenthesis>-1) {
+		if (posParenthesis > -1) {
 			var first = name.substr(0, posParenthesis);
-			var second = name.substr(posParenthesis+1, name.length-posParenthesis-2);
-			if (second.includes( first.replace('.', '').trim() )) {
+			var second = name.substr(posParenthesis + 1, name.length - posParenthesis - 2);
+			if (second.includes(first.replace('.', '').trim())) {
 				name = second;
-			} else {
+			}
+			else {
 				name = first;
 			}
 		}
@@ -219,18 +222,19 @@ function scrapeWork(doc, url) {
 	
 	if (doc) {
 		// Need to get version identifier for the BibText url
-		var versionID = doc.body.innerHTML.match(/displayCiteDialog\(\'(.+?)\'/);
+		var versionID = doc.body.innerHTML.match(/displayCiteDialog\('(.+?)'/);
 		if (versionID !== null) {
 			bibtexURL += '&selectedversion=' + versionID[1];
 			thumbnailURL = ZU.xpathText(doc, "//a/img[@class='mosaic ui-shdw']/@src");
-		} else {
+		}
+		else {
 			// It's a work -- so thumbnails are different
 			thumbnailURL = ZU.xpathText(doc, "//li[@class='imgfirst']//img/@src");
 		}
 	}
 
 	// Get the BibTex and feed it to the translator.
-	ZU.HTTP.doGet(bibtexURL, function(bibtex) {
+	ZU.HTTP.doGet(bibtexURL, function (bibtex) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
@@ -263,9 +267,9 @@ function scrapeWork(doc, url) {
 
 			if (thumbnailURL !== null) {
 				item.attachments.push({
-					url: thumbnailURL, 
-					title: 'Trove thumbnail image', 
-					mimeType:'image/jpeg'
+					url: thumbnailURL,
+					title: 'Trove thumbnail image',
+					mimeType: 'image/jpeg'
 				});
 			}
 			item.complete();
