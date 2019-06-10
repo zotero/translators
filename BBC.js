@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-18 11:06:53"
+	"lastUpdated": "2019-06-10 21:15:29"
 }
 
 /*
@@ -58,7 +58,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//a[h3[@class="title-link__title"]]');
+	var rows = ZU.xpath(doc, '//a[h3]');
 	//for NewsBeat
 	if (!rows.length) {
 		var rows = ZU.xpath(doc, '//article/div/h1[@itemprop="headline"]/a');
@@ -174,7 +174,9 @@ function scrape(doc, url) {
 		for (var i in item.tags)
 			item.tags[i] = item.tags[i].charAt(0).toUpperCase()+item.tags[i].substring(1);
 
-		item.language = "en-GB";
+		if (!item.language || item.language === "en") {
+			item.language = "en-GB";
+		}
 
 		if (url.substr(-4)==".stm") {
 			item.title = ZU.xpathText(doc, '//meta[@name="Headline"]/@content');
@@ -191,11 +193,11 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.bbc.com/news/magazine-15335899",
+		"url": "https://www.bbc.com/news/magazine-15335899",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Spain's stolen babies and the families who lived a lie",
+				"title": "Spain's stolen babies",
 				"creators": [
 					{
 						"firstName": "Katya",
@@ -209,7 +211,7 @@ var testCases = [
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
-				"url": "http://www.bbc.com/news/magazine-15335899",
+				"url": "https://www.bbc.com/news/magazine-15335899",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -228,11 +230,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+		"url": "https://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "China staff fined for not liking boss's Weibo posts",
+				"title": "Fines for not liking boss's Weibo posts",
 				"creators": [],
 				"date": "2016-08-18",
 				"abstractNote": "Company in China punishes employees who don't comment on manager's social media posts.",
@@ -240,7 +242,7 @@ var testCases = [
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC News",
 				"section": "News from Elsewhere",
-				"url": "http://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
+				"url": "https://www.bbc.com/news/blogs-news-from-elsewhere-37117404",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -254,7 +256,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bbc.com/news/magazine-36287752",
+		"url": "https://www.bbc.com/news/magazine-36287752",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -277,7 +279,7 @@ var testCases = [
 				"libraryCatalog": "www.bbc.com",
 				"publicationTitle": "BBC News",
 				"section": "Magazine",
-				"url": "http://www.bbc.com/news/magazine-36287752",
+				"url": "https://www.bbc.com/news/magazine-36287752",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -300,7 +302,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Will new music streaming service Tidal make the waves artists want?",
+				"title": "Will new music streaming service Tidal make the waves artists want? - BBC Newsbeat",
 				"creators": [
 					{
 						"firstName": "Chi Chi",
@@ -309,9 +311,10 @@ var testCases = [
 					}
 				],
 				"date": "2015-03-31",
-				"abstractNote": "Big names in the world of music made it known that they wanted a change when they all stood on stage on Monday and announced the relaunch of streaming service Tidal.",
+				"abstractNote": "Exclusive music news, big interviews, entertainment, social media trends and video from the news people at BBC Radio 1 and 1Xtra.",
 				"blogTitle": "BBC Newsbeat",
 				"language": "en-GB",
+				"shortTitle": "Will new music streaming service Tidal make the waves artists want?",
 				"url": "http://www.bbc.co.uk/newsbeat/article/32129457/will-new-music-streaming-service-tidal-make-the-waves-artists-want",
 				"attachments": [
 					{
@@ -326,7 +329,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bbc.com/sport/olympics/37068610",
+		"url": "https://www.bbc.com/sport/olympics/37068610",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -339,7 +342,7 @@ var testCases = [
 				"publicationTitle": "BBC Sport",
 				"section": "Olympics",
 				"shortTitle": "Rio Olympics 2016",
-				"url": "http://www.bbc.com/sport/olympics/37068610",
+				"url": "https://www.bbc.com/sport/olympics/37068610",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -382,6 +385,38 @@ var testCases = [
 					"Uk",
 					"World"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bbc.com/portuguese/internacional-48562081",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Como peixes e até camarões podem ser 'recrutados' como espiões",
+				"creators": [
+					{
+						"firstName": "Emma",
+						"lastName": "Woollacott",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-06-10",
+				"abstractNote": "Animais são usados ​​há muito tempo para fins militares, mas agora um projeto americano quer saber se as criaturas marinhas também podem agir como sensores.",
+				"language": "pt",
+				"libraryCatalog": "www.bbc.com",
+				"publicationTitle": "BBC News Brasil",
+				"section": "Internacional",
+				"url": "https://www.bbc.com/portuguese/internacional-48562081",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

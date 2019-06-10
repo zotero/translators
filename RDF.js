@@ -900,7 +900,7 @@ function importItem(newItem, node) {
 	}
 
 	var siteName = getFirstResults(node, [n.og+"site_name"], true);
-	if (siteName && !newItem.publicationTitle && (newItem.itemType == "blogPost" || newItem.itemType == "webpage")) {
+	if (siteName && !newItem.publicationTitle && (newItem.itemType == "blogPost" || newItem.itemType == "webpage" || newItem.itemType == "newspaperArticle")) {
 		newItem.publicationTitle = siteName;
 	}
 	// rights
