@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-07-04 20:50:27"
+	"lastUpdated": "2019-06-10 23:05:56"
 }
 
 /**
@@ -32,8 +32,8 @@
 
 function getFieldValue(entry, name) {
 	var value = ZU.xpathText(entry,
-		'.//p/strong[normalize-space(text())="' + 
-		name + ':"]/following-sibling::node()', null, '');
+		'.//p/strong[normalize-space(text())="'
+		+ name + ':"]/following-sibling::node()', null, '');
 	return value ? value.trim() : '';
 }
 
@@ -49,9 +49,10 @@ function parseSource(sourceStr) {
 			issue: matches[3],
 			pages: matches[4]
 		};
-	} else {
-		if (sourceStr.substr(0,3) == 'In:') {
-			//book section
+	}
+	else {
+		if (sourceStr.substr(0, 3) == 'In:') {
+			// book section
 			matches = sourceStr.match(/\d+-\d+/);
 			return {
 				type: 'bookSection',
@@ -84,7 +85,7 @@ function scrape(doc, url) {
 	item.url = url;
 
 	var authors = getFieldValue(entry, 'Author').split(/;\s+/);
-	for (var i=0, n=authors.length; i<n; i++) {
+	for (let i = 0, n = authors.length; i < n; i++) {
 		item.creators.push(
 			ZU.cleanAuthor(
 				ZU.capitalizeTitle(authors[i].replace(/;$/, '')),
@@ -92,11 +93,11 @@ function scrape(doc, url) {
 	}
 
 	var keywords = ZU.xpath(entry, './/p[@id="keywords"]/a');
- 	for (var i in keywords) {
+	for (let i in keywords) {
 		item.tags.push(keywords[i].textContent.trim());
- 	}
+	}
 
-	var pdfUrl = ZU.xpathText(entry,'/html/head/meta[@name="citation_pdf_url"]/@content');
+	var pdfUrl = ZU.xpathText(entry, '/html/head/meta[@name="citation_pdf_url"]/@content');
 	if (pdfUrl) {
 		item.attachments.push({
 			url: pdfUrl.trim(),
@@ -111,13 +112,15 @@ function scrape(doc, url) {
 function detectWeb(doc, url) {
 	if (url.match(/\/pubs\/\d+$/)) {
 		var entry = doc.getElementById('publicationLayoutLeftSide');
-		if (!entry) return;
+		if (!entry) return false;
 		
 		var source = parseSource(getFieldValue(entry, 'Source'));
 		return source ? source.type : null;
-	} else if (url.includes('search.php') && getSearchResults(doc, true)) {
+	}
+	else if (url.includes('search.php') && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -125,7 +128,7 @@ function getSearchResults(doc, checkOnly) {
 	if (checkOnly || !links.length) return !!links.length;
 	
 	var items = {};
-	for (var i=0; i<links.length; i++) {
+	for (var i = 0; i < links.length; i++) {
 		items[links[i].href] = ZU.trimInternal(links[i].textContent);
 	}
 	
@@ -134,7 +137,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
+		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
 			if (!selectedItems) return true;
 
 			var urls = [];
@@ -144,7 +147,8 @@ function doWeb(doc, url) {
 
 			ZU.processDocuments(urls, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
