@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-19 06:31:59"
+	"lastUpdated": "2019-06-11 13:37:31"
 }
 
 /*
@@ -31,7 +31,7 @@
 */
 
 function detectWeb(doc, url) {
-	//the meta properties are missing once you're logged in
+	// the meta properties are missing once you're logged in
 	var xpath = '//meta[@property="og:video:type"]|//div[@class="video_meta"]';
 	if (ZU.xpath(doc, xpath).length > 0) {
 		return "videoRecording";
@@ -40,6 +40,8 @@ function detectWeb(doc, url) {
 	if (url.includes('vimeo.com/search?q=') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+
+	return false;
 }
 
 
@@ -47,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[contains(@class, "iris_p_infinite__item")]//a[div/h5 and contains(@href, "//vimeo.com/")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.xpathText(rows[i], './/h5');
 		if (!href || !title) continue;
@@ -55,14 +57,14 @@ function getSearchResults(doc, checkOnly) {
 		found = true;
 		items[href] = title;
 	}
-	//Due to some dynamic loading the DOM might not be ready for the method above
-	//but the data is also saved in some JSON object in a script tag of the website.
+	// Due to some dynamic loading the DOM might not be ready for the method above
+	// but the data is also saved in some JSON object in a script tag of the website.
 	if (!found) {
 		var script = ZU.xpathText(doc, '//body/script[contains(., "vimeo.config")]');
 		if (script) {
 			var start = script.indexOf('vimeo.config');
 			var stop = script.indexOf('\n', start);
-			var data = script.substring(start+45, stop-2);
+			var data = script.substring(start + 45, stop - 2);
 			var json = JSON.parse(data);
 			if (json && json.api && json.api.initial_json && json.api.initial_json.data) {
 				var results = json.api.initial_json.data;
@@ -82,26 +84,26 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc) {
 	var json = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
 	var objects = JSON.parse(json);
 	var videoObject;
-	for (var i=0; i<objects.length; i++) {
+	for (var i = 0; i < objects.length; i++) {
 		if (objects[i]["@type"] == "VideoObject") {
 			videoObject = objects[i];
 		}
@@ -119,13 +121,13 @@ function scrape(doc, url) {
 	var keywords = videoObject.keywords;
 	if (keywords) {
 		var tags = keywords.replace('[', '').replace(']', '').split(',');
-		for (var j=0; j<tags.length; j++) {
+		for (var j = 0; j < tags.length; j++) {
 			item.tags.push(tags[j]);
 		}
 	}
 	item.attachments.push({
-		title:"Snapshot",
-		document:doc
+		title: "Snapshot",
+		document: doc
 	});
 	
 	item.complete();
