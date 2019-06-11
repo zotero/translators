@@ -817,7 +817,7 @@ function detectType(newItem, node, ret) {
 	ret.container = container;
 	ret.containerPeriodical = containerPeriodical;
 	ret.containerPublicationVolume = containerPublicationVolume;
-	ret.containerPublicationIssue = containerPublicationVolume;
+	ret.containerPublicationIssue = containerPublicationIssue;
 	ret.isPartOf = isPartOf;
 
 	return 	itemType;
