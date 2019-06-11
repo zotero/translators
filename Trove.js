@@ -70,9 +70,8 @@ function getSearchResults(doc, url, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, url), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			for (var i in items) {
 				scrape(null, i);
 			}
