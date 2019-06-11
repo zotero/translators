@@ -72,9 +72,8 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
@@ -192,5 +191,5 @@ var testCases = [
 		"url": "http://washingtonmonthly.com/political-animal/",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
