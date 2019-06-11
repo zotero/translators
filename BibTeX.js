@@ -935,7 +935,7 @@ function beginRecord(type, closeChar) {
 				return item.complete();
 			}
 			return;
-		} else if (" \n\r\t".includes(read)) {		// skip whitespace
+		} else if (!" \n\r\t".includes(read)) {		// skip whitespace
 			field += read;
 		}
 	}

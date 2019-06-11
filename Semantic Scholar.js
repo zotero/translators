@@ -2,14 +2,14 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www[.])?semanticscholar\\.org/(search|paper|author)",
+	"target": "^https?://(www\\.semanticscholar\\.org/(search|paper|author)|pdfs\\.semanticscholar\\.org/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-11 19:58:38"
+	"lastUpdated": "2019-03-30 16:44:44"
 }
 
 /*
@@ -37,14 +37,16 @@
 
 // See also https://github.com/zotero/translators/blob/master/BibTeX.js
 var bibtex2zoteroTypeMap = {
-	"inproceedings": "conferencePaper",
-	"conference"   : "conferencePaper",
-	"article"      : "journalArticle"
+	inproceedings: "conferencePaper",
+	conference: "conferencePaper",
+	article: "journalArticle"
 };
 
 function detectWeb(doc, url) {
 	if (url.includes('/search') || url.includes('/author/')) {
 		return 'multiple';
+	} else if (url.includes('pdfs.semanticscholar.org')) {
+		return 'journalArticle';
 	} else {
 		let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
 		let type = citation.split('{')[0].replace('@', '');
@@ -59,6 +61,11 @@ function doWeb(doc, url) {
 				ZU.processDocuments(Object.keys(selected), parseDocument);
 			}
 		});
+	} else if (url.includes('pdfs.semanticscholar.org')) {
+		let urlComponents = url.split('/');
+		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
+		const API_URL = 'https://api.semanticscholar.org/';
+		ZU.processDocuments(API_URL + paperId, parseDocument);
 	} else {
 		parseDocument(doc, url);
 	}
@@ -67,7 +74,7 @@ function doWeb(doc, url) {
 function getSearchResults(doc) {
 	var titles = ZU.xpath(doc, '//a[@data-selenium-selector="title-link"]');
 	var results = {};
-	titles.forEach(function(linkElement) {
+	titles.forEach(function (linkElement) {
 		results[linkElement.href] = linkElement.textContent;
 	});
 	return results;
@@ -96,7 +103,7 @@ function parseDocument(doc, url) {
 			if (scripts[i].innerHTML.startsWith(DATA_INDICATOR)) {
 				let dataText = scripts[i].innerHTML.replace(DATA_INDICATOR, '').slice(0, -2);
 				dataText = decodeURIComponent(atob(dataText));
-				rawData = JSON.parse(dataText)[0].resultData.paper;
+				rawData = JSON.parse(dataText)[1].resultData.paper;
 				break;
 			}
 		}
@@ -112,7 +119,9 @@ function parseDocument(doc, url) {
 		}
 		
 		if (rawData.hasPdf) {
-			let paperLink = rawData.links.filter(function(link) { return link.linkType === 's2'; })[0].url;
+			let paperLink = rawData.links.filter(function (link) {
+				return link.linkType === 's2';
+			})[0].url;
 			item.attachments.push({
 				url: paperLink,
 				title: "Full Text PDF",
@@ -146,7 +155,9 @@ function fixPageRange(pageRange) {
 		return pageRange;
 	}
 	
-	numbers = numbers.map(function(x) { return parseInt(x); });
+	numbers = numbers.map(function (x) {
+		return parseInt(x);
+	});
 	
 	// No change is needed if they're already correctly formatted
 	if (numbers[0] < numbers[1]) {
@@ -173,6 +184,7 @@ function fixPageRange(pageRange) {
 		return numbers[0] + '-' + numbers[1];
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -206,10 +218,6 @@ var testCases = [
 						"title": "Semantic Scholar Link",
 						"mimeType": "text/html",
 						"snapshot": false
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -281,12 +289,12 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "S. R.",
+						"firstName": "Shelley",
 						"lastName": "Bibby",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ralph C.",
+						"firstName": "Ralph Charles",
 						"lastName": "Kester",
 						"creatorType": "author"
 					},
@@ -340,14 +348,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2000",
+				"date": "1999",
 				"DOI": "10.1023/A:1011424425034",
-				"abstractNote": "In 1993, Eugene Charniak published a slim volume entitled Statistical Language Learning. At the time, empirical techniques for natural language processing were on the rise; that year, Computational Linguistics published a special issue on such methods, and Charniak’s text was the first to treat the emerging field. Nowadays, the revolution has become the establishment; in 1998, nearly half the papers in Computational Linguistics concerned empirical methods (Hirschberg 1998). Indeed, Christopher Manning and Hinrich Schütze’s new, by-no-means slim textbook on statistical NLP—strangely, the first since Charniak’s—begins “The need for a thorough textbook for Statistical Natural Language Processing hardly needs to be argued for.” Indubitably so; the question is, is this it? Foundations of Statistical Natural Language Processing (henceforth FSNLP) is certainly ambitious in scope. True to its name, it contains a great deal of preparatory material, including: gentle introductions to probability and information theory; a chapter on linguistic concepts; and (a most welcome addition) discussion of the nitty-gritty of doing empirical work, ranging from lists of available corpora to in-depth discussion of the critical issue of smoothing. Scattered throughout are also topics fundamental to doing good experimental work in general, such as hypothesis testing, cross-validation, and baselines. Along with these preliminaries, FSNLP covers traditional tools of the trade: Markov models, probabilistic grammars, supervised and unsupervised classification, and the vector-space model. Finally, several chapters are devoted to specific problems, among them lexicon acquisition, word sense disambiguation, parsing, machine translation, and information retrieval. (The companion website contains further useful material, including links to programs and a list of errata.) In short, this is a Big Book, and this fact alone confers some benefits. For the researcher, FSNLP offers the convenience of one-stop shopping: at present, there is no other NLP reference in which standard empirical techniques, statistical tables, definitions of linguistic terms, and elements of information retrieval appear together; furthermore, the text also summarizes and critiques many individual research papers. Similarly, someone teaching a course on statistical NLP will appreciate the large number of topics FSNLP covers, allowing the tailoring of a syllabus to individual in-",
-				"itemID": "Manning2000FoundationsOS",
+				"abstractNote": "(6.24) Briefly noted Bell et al. (1990) and and Bell (1991) introduce a number of smoothing algorithms for the goal of improving text compression. Their “Method is normally referred to as smoothing and has been used for smoothing speech language models. The idea is to model the probability of a previously unseen event by estimating the probability of seeing such a new (previously unseen) event at each point as one proceeds through the training corpus. In particular, this probability is worked out relative to a certain history. So to calculate the probability of seeing a new word after, say, sat in one is calculating from the training data how often one saw a new word after sat in, which is just the count of the number of types seen which begin with sat in. It is thus an instance of generalized linear interpolation: where the probability mass given to new n-grams is given by:",
+				"itemID": "Manning1999FoundationsOS",
 				"libraryCatalog": "Semantic Scholar",
-				"pages": "277-279",
-				"publicationTitle": "Computational Linguistics",
-				"volume": "26",
+				"pages": "80-81",
+				"publicationTitle": "Information Retrieval",
+				"volume": "4",
 				"attachments": [
 					{
 						"title": "Semantic Scholar Link",
@@ -490,7 +498,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Angelo",
+						"firstName": "A. Germán",
 						"lastName": "Barbato",
 						"creatorType": "author"
 					},
@@ -568,9 +576,6 @@ var testCases = [
 						"tag": "Surgical Wound Infection"
 					},
 					{
-						"tag": "Surgical operation note:Find:Pt:Outpatient:Doc:Nurse"
-					},
-					{
 						"tag": "Urinary Calculi"
 					}
 				],
@@ -583,6 +588,48 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.semanticscholar.org/author/Jane-Holmes/3023517",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.semanticscholar.org/paper/Superpower-Your-Browser-with-LibX-and-Zotero-Puckett/ac7caef334a4296503cc062529290d4c3ef6be32",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Superpower Your Browser with LibX and Zotero",
+				"creators": [
+					{
+						"firstName": "J.",
+						"lastName": "Puckett",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010",
+				"abstractNote": "© 2010 Jason Puckett the providers of either program discontinued supporting them, another institution could simply download the source code and take over development. As Firefox plugins, both LibX and Zotero are self-updating. Firefox periodically checks for new versions of all its add-ons and prompts the user to update with a few clicks. This process is unlikely to confuse even users who have never installed software. (The Internet Explorer version of LibX must be updated manually by downloading a new version from the library’s Web site and running an executable fi le.) This allows the library to push out new search options, and Zotero’s developers to push updates ranging from new features to updated bibliographic styles. It also allows for far more frequent improvements to the software than most commercial programs provide.",
+				"itemID": "Puckett2010SuperpowerYB",
+				"libraryCatalog": "Semantic Scholar",
+				"attachments": [
+					{
+						"title": "Semantic Scholar Link",
+						"mimeType": "text/html",
+						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "LibX"
+					},
+					{
+						"tag": "Zotero"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
