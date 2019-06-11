@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcv",
-	"lastUpdated": "2014-06-12 18:56:25"
+	"lastUpdated": "2019-06-11 13:44:39"
 }
 
 /*
@@ -36,9 +36,10 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	if (ZU.xpathText(doc, '//ol[@id="reference"]//a')) return "multiple";
 	else if (ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "TI")]')) return "journalArticle";
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -49,16 +50,16 @@ function doWeb(doc, url) {
 			items[titles[i].href] = titles[i].textContent;
 		}
 		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else scrape(doc, url);
+	}
+	else scrape(doc, url);
 }
 
 function scrape(doc, url) {
@@ -74,9 +75,9 @@ function scrape(doc, url) {
 		for (var i in authors) {
 			var author = authors[i].match(/^([^\s]+)\s+(.+)/);
 			item.creators.push({
-				"creatorType": "author",
-				"lastName": author[1],
-				"firstName": author[2]
+				creatorType: "author",
+				lastName: author[1],
+				firstName: author[2]
 			});
 		}
 		var citation = ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "SO")]/following-sibling::div');
@@ -88,7 +89,7 @@ function scrape(doc, url) {
 		if (volume) item.volume = volume[1];
 		var issue = citation.match(/\((\d+)\)/);
 		if (issue) item.issue = issue[1];
-		var pages = citation.match(/\:([\d\-]+)/);
+		var pages = citation.match(/:([\d-]+)/);
 		if (pages) item.pages = pages[1];
 		item.attachments.push({
 			document: doc,
@@ -96,10 +97,11 @@ function scrape(doc, url) {
 			mimeType: "text/html"
 		});
 		item.complete();
-	} else {
-		var url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=" + PMID;
+	}
+	else {
+		url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=" + PMID;
 		Zotero.Utilities.HTTP.doGet(url, function (text) {
-			// load translator for PubMed	
+			// load translator for PubMed
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");
 			translator.setString(text);
@@ -116,8 +118,8 @@ function scrape(doc, url) {
 			translator.translate();
 		});
 	}
+}
 
-} 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
