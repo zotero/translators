@@ -140,7 +140,7 @@ function scrape(doc, id) {
 
 	ZU.doGet(exportUrl, function (text) {
 		var matches = text.match(/<div\s+id=["']export_container["']>((?:.|[\r\n])+?)<\/div>/i);
-		if (!matches) return false;
+		if (!matches) return;
 
 		text = ZU.cleanTags(matches[1].replace(/[\r\n]/g, ''));
 
@@ -202,7 +202,7 @@ function doWeb(doc, url) {
 		var items = getSearchResults(doc);
 
 		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return true;
+			if (!selectedItems) return;
 		
 			var urls = [];
 			for (var i in selectedItems) {
