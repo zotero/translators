@@ -51,7 +51,7 @@ function doWeb(doc, url) {
 	var itemType = detectWeb(doc, url);
 	if (itemType === 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) return true;
+			if (!items) return;
 			var urls = [];
 			for (var i in items) {
 				urls.push(i);
