@@ -110,21 +110,21 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	switch (detectWeb(doc, url)) {
-		case "multiple":
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return true;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
-			});
-			break;
-		case "magazineArticle":
-			scrape(doc, url);
-			break;
+	case "multiple":
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+		break;
+	case "magazineArticle":
+		scrape(doc, url);
+		break;
 	}
 }
 /** BEGIN TEST CASES **/
@@ -296,5 +296,5 @@ var testCases = [
 		"url": "https://www.wired.co.uk/search?q=kickstarter",
 		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/
