@@ -121,5 +121,5 @@ var testCases = [
 		"url": "http://www.voxeu.org/search/node/Are%20migrants%20paid%20more%3F",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
