@@ -36,7 +36,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc) {
+function detectWeb(doc, _url) {
 	if (ZU.xpathText(doc, '//ol[@id="reference"]//a')) return "multiple";
 	else if (ZU.xpathText(doc, '//div[@class="abstractRow"]/div[@class="label" and contains(text(), "TI")]')) return "journalArticle";
 	return false;
@@ -199,5 +199,5 @@ var testCases = [
 		"url": "http://www.uptodate.com/contents/approach-to-the-diagnosis-and-evaluation-of-low-back-pain-in-adults?source=search_result&search=back+pain&selectedTitle=1%7E150",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
