@@ -184,5 +184,5 @@ var testCases = [
 		"url": "https://vimeo.com/search?q=zotero",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
