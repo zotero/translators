@@ -281,5 +281,5 @@ var testCases = [
 		"url": "https://search.library.wisc.edu/search/catalog?q=zotero",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
