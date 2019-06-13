@@ -99,7 +99,7 @@ function doWeb(doc, url) {
 }
 
 
-function scrape(doc) {
+function scrape(doc, _url) {
 	var json = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
 	var objects = JSON.parse(json);
 	var videoObject;
