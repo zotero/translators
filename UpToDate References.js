@@ -44,7 +44,7 @@ function detectWeb(doc, _url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		const items = {};
+		let items = {};
 		var titles = ZU.xpath(doc, '//ol[@id="reference"]//a');
 		for (var i in titles) {
 			items[titles[i].href] = titles[i].textContent;
