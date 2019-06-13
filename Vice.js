@@ -164,20 +164,20 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	switch (detectWeb(doc, url)) {
-	case "multiple":
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return;
+		case "multiple":
+			Zotero.selectItems(getSearchResults(doc, false), function (items) {
+				if (!items) return;
 
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-		break;
-	default:
-		scrape(doc, url);
-		break;
+				var articles = [];
+				for (var i in items) {
+					articles.push(i);
+				}
+				ZU.processDocuments(articles, scrape);
+			});
+			break;
+		default:
+			scrape(doc, url);
+			break;
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
