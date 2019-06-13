@@ -154,5 +154,5 @@ var testCases = [
 		"url": "http://www.pediatricneurologybriefs.com/51/volume/29/issue/7/",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
