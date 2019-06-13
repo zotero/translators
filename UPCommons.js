@@ -224,5 +224,5 @@ var testCases = [
 		"url": "http://upcommons.upc.edu/discover?scope=/&query=zotero&submit=",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
