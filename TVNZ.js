@@ -169,5 +169,5 @@ var testCases = [
 		"url": "https://www.tvnz.co.nz/one-news/search?q=storm",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
