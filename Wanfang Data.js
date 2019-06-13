@@ -306,5 +306,5 @@ var testCases = [
 		"url": "http://s.wanfangdata.com.cn/Paper.aspx?q=zotero+DBID%3A%28NSTL_QK+OR+NSTL_HY%29&f=d.top",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
