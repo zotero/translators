@@ -50,21 +50,21 @@ function detectWeb(doc, url) {
 		var format = ZU.xpathText(doc, '//span[@class="pub_title" and contains(., "Format")]/following-sibling::span[@class="pub_desc"]');
 		// Z.debug(format);
 		switch (format) {
-		case "Sound Recordings":
-			return "audioRecording";
-		case "Videos, Slides, Films":
-			return "videoRecording";
-		case "Maps, Atlases":
-			return "map";
-		case "Computer software":
-			return "computerProgramm";
-		case "Photos, Drawings, Prints":
-			return "artwork";
-		// case "Journals, Magazines, Newspapers":
+			case "Sound Recordings":
+				return "audioRecording";
+			case "Videos, Slides, Films":
+				return "videoRecording";
+			case "Maps, Atlases":
+				return "map";
+			case "Computer software":
+				return "computerProgramm";
+			case "Photos, Drawings, Prints":
+				return "artwork";
+				// case "Journals, Magazines, Newspapers":
 			// there is no such itemType yet
-		case "Music Scores":
-		default:
-			return "book";
+			case "Music Scores":
+			default:
+				return "book";
 		}
 	}
 	return false;
