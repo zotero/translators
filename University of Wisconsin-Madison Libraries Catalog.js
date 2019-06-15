@@ -52,17 +52,21 @@ function detectWeb(doc, url) {
 		switch (format) {
 			case "Sound Recordings":
 				return "audioRecording";
+
 			case "Videos, Slides, Films":
 				return "videoRecording";
+
 			case "Maps, Atlases":
 				return "map";
+
 			case "Computer software":
 				return "computerProgramm";
+
 			case "Photos, Drawings, Prints":
 				return "artwork";
-				// case "Journals, Magazines, Newspapers":
-			// there is no such itemType yet
+
 			case "Music Scores":
+			case "Journals, Magazines, Newspapers": // there is no such itemType yet
 			default:
 				return "book";
 		}
