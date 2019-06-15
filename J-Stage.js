@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	J-Stage translator - Copyright © 2012 Sebastian Karcher 
+	J-Stage translator - Copyright © 2012 Sebastian Karcher
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -39,17 +39,18 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	else if ((url.includes("/result/") || url.includes("/browse/"))
-	 		&& getSearchResults(doc, true)) {
+			&& getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('li>.searchlist-title>a, a.ci-article-name, a.feature-article-title')
-	for (var i=0; i<rows.length; i++) {
+	var rows = doc.querySelectorAll('li>.searchlist-title>a, a.ci-article-name, a.feature-article-title');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -66,7 +67,8 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -74,7 +76,7 @@ function doWeb(doc, url) {
 
 // help function
 function scrape(doc, url) {
-	//get abstract and tags from article plage
+	// get abstract and tags from article plage
 	var abs = text("#article-overiew-abstract-wrap");
 	var tagNodes = doc.querySelectorAll("meta[name='citation_keywords']");
 	var tags = [];
@@ -82,18 +84,18 @@ function scrape(doc, url) {
 		tags.push(tagNode.content);
 	}
 	
-	//get BibTex Link
+	// get BibTex Link
 	var bibtexurl = ZU.xpathText(doc, '//a[contains(text(), "BIB TEX")]/@href');
 	ZU.doGet(bibtexurl, function (text) {
 		var bibtex = text;
-		//Zotero.debug(bibtex)
+		// Zotero.debug(bibtex)
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (abs) item.abstractNote = abs.replace(/^\s*(?:Abstract|抄録)\s*/, '');
 			if (tags) item.tags = tags;
-			for (var i=0; i<item.creators.length; i++) {
+			for (var i = 0; i < item.creators.length; i++) {
 				if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
 				}
