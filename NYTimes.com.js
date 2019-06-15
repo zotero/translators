@@ -35,13 +35,10 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
-	//we use another function name to avoid confusions with the
-	//same function from the called EM translator (sigh)
+	// we use another function name to avoid confusions with the
+	// same function from the called EM translator (sigh)
 	return detectWebHere(doc, url);
 }
 
@@ -53,10 +50,12 @@ function detectWebHere(doc, url) {
 	if (ZU.xpathText(doc, '//meta[@property="og:type" and @content="article"]/@content')) {
 		if (url.includes('blog')) {
 			return "blogPost";
-		} else {
+		}
+		else {
 			return "newspaperArticle";
 		}
 	}
+	return false;
 }
 
 
@@ -65,7 +64,7 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
+	// translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = type;
@@ -79,47 +78,51 @@ function scrape(doc, url) {
 		}
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
-		} else {
+		}
+		else {
 			item.date = attr(doc, 'time[datetime]', 'datetime')
 				|| attr(doc, 'meta[itemprop="datePublished"]', 'content')
 				|| attr(doc, 'meta[itemprop="dateModified"]', 'content');
 		}
 		if (item.itemType == "blogPost") {
 			item.blogTitle = ZU.xpathText(doc, '//meta[@property="og:site_name"]/@content');
-		} else {
+		}
+		else {
 			item.publicationTitle = "The New York Times";
 			item.ISSN = "0362-4331";
 		}
-		//Multiple authors are (sometimes) just put into the same Metadata field
-		var authors = attr(doc,'meta[name="author"]', 'content') || attr(doc, 'meta[name="byl"]', 'content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
-		if (authors && item.creators.length<=1) {
+		// Multiple authors are (sometimes) just put into the same Metadata field
+		var authors = attr(doc, 'meta[name="author"]', 'content') || attr(doc, 'meta[name="byl"]', 'content') || text(doc, '*[class^="Byline-bylineAuthor--"]');
+		if (authors && item.creators.length <= 1) {
 			authors = authors.replace(/^By /, '');
-			if (authors == authors.toUpperCase()) // convert to title case if all caps
+			if (authors == authors.toUpperCase()) { // convert to title case if all caps
 				authors = ZU.capitalizeTitle(authors, true);
+			}
 			item.creators = [];
 			var authorsList = authors.split(/,|\band\b/);
-			for (let i=0; i<authorsList.length; i++) {
+			for (let i = 0; i < authorsList.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 			}
 		}
 		item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
-		if (item.url && item.url.substr(0,2)=="//") {
+		if (item.url && item.url.substr(0, 2) == "//") {
 			item.url = "https:" + item.url;
 		}
 		item.libraryCatalog = "NYTimes.com";
 		// Convert all caps title of NYT archive pages to title case
-		if (item.title == item.title.toUpperCase())
-				item.title = ZU.capitalizeTitle(item.title, true);
+		if (item.title == item.title.toUpperCase()) {
+			item.title = ZU.capitalizeTitle(item.title, true);
+		}
 		// Only force all caps to title case when all tags are all caps
 		var allcaps = true;
-		for (let i=0; i < item.tags.length; i++) {
+		for (let i = 0; i < item.tags.length; i++) {
 			if (item.tags[i] != item.tags[i].toUpperCase()) {
 				allcaps = false;
 				break;
 			}
 		}
 		if (allcaps) {
-			for (let i=0; i < item.tags.length; i++) {
+			for (let i = 0; i < item.tags.length; i++) {
 				item.tags[i] = ZU.capitalizeTitle(item.tags[i], true);
 			}
 		}
@@ -133,7 +136,7 @@ function scrape(doc, url) {
 		// PDF attachments are in subURL with key & signature
 		var pdfurl = ZU.xpathText(doc, '//div[@id="articleAccess"]//span[@class="downloadPDF"]/a[contains(@href, "/pdf")]/@href | //a[@class="button download-pdf-button"]/@href');
 		if (pdfurl) {
-			ZU.processDocuments(pdfurl, 
+			ZU.processDocuments(pdfurl,
 				function(pdfDoc) {
 					authenticatedPDFURL = pdfDoc.getElementById('archivePDF').src;
 					if (authenticatedPDFURL) {
@@ -154,26 +157,25 @@ function scrape(doc, url) {
 			);
 		} else {
 		*/
-			Z.debug("Not attempting PDF retrieval");
-			item.complete();
-		//}
+		Z.debug("Not attempting PDF retrieval");
+		item.complete();
+		// }
 	});
 	
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.splitTags = false;
 		trans.addCustomFields({
-			'dat': 'date',
+			dat: 'date',
 		});
 		trans.doWeb(doc, url);
 	});
-	
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('li[data-testid*="result"]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = ZU.xpathText(rows[i], '(.//a)[1]/@href');
 		var title = ZU.xpathText(rows[i], './/h4');
 		if (!href || !title) continue;
@@ -189,7 +191,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -197,7 +199,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
