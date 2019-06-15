@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc) {
+function detectWeb(doc, _url) {
 	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article") {
 		if (ZU.xpathText(doc, '//meta[@name="tmgads.channel"]/@content') == 'blogs') {
 			return 'blogPost';
