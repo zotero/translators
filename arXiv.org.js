@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-03-29 12:34:44"
+	"lastUpdated": "2019-04-28 01:57:56"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -115,11 +114,10 @@ function doWeb(doc, url) {
 			id = url.substring(p + 5, url.length - 4);
 		}
 		else {
-			id = ZU.xpathText(doc, '//td[contains(@class,"arxivid")]/a')
+			id = ZU.xpathText(doc, '(//span[@class="arxivid"]/a)[1]')
 				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
 		}
 		if (!id) throw new Error('Could not find arXiv ID on page.');
-		
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
 		var apiurl = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
 			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
@@ -217,6 +215,7 @@ function parseXML(text) {
 			newItem.ISSN = item.ISSN;
 			if (item.publicationTitle) {
 				newItem.publicationTitle = item.publicationTitle;
+				newItem.journalAbbreviation = item.journalAbbreviation;
 			}
 			newItem.date = item.date;
 		});
