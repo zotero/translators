@@ -31,7 +31,7 @@
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 */
-function detectWeb(doc) {
+function detectWeb(doc, _url) {
 	var ubiquitytest = doc.getElementsByClassName("press-logo");
 	// this doesn't work always, so we're only using it on single items.
 	// if the translator doesn't detect there, we still get good EM import
