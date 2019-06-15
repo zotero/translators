@@ -145,7 +145,9 @@ function doExport() {
 		
 		// medium
 		if (item.medium) {
-			Zotero.RDF.addStatement(resource, dc + "medium", item.medium, true);
+			// The "medium" property is only part of the qualified DC terms,
+			// therefore we use here the "format" property.
+			Zotero.RDF.addStatement(resource, dc + "format", item.medium, true);
 		}
 	}
 }
