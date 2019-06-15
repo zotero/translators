@@ -36,19 +36,6 @@
 */
 
 
-function detectWeb(doc, url) {
-	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
-	if (url.includes('/handle/') && type) {
-		if (itemTypes[type] != null) return itemTypes[type]; // eslint-disable-line no-eq-null
-		else return "document";
-	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	return false;
-}
-
-
 var itemTypes = {
 	Article: "journalArticle",
 	Audiovisual: "film",
@@ -57,6 +44,18 @@ var itemTypes = {
 	"Working Paper": "report",
 	"Technical Report": "report"
 };
+
+
+function detectWeb(doc, url) {
+	var type = ZU.xpathText(doc, '//meta[@name="DC.type"]/@content');
+	if (url.includes('/handle/') && type) {
+    return itemTypes[type] || "document";
+	}
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	return false;
+}
 
 
 function getSearchResults(doc, checkOnly) {
