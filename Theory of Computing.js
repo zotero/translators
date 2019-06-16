@@ -12,7 +12,7 @@
 	"lastUpdated": "2019-06-10 22:52:50"
 }
 
-/** ***
+/*
    Copyright 2013, Piyush Srivastava.
 
    This program is free software: you can redistribute it and/or modify it
@@ -28,10 +28,10 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-*****/
+*/
 
 
-/** ***
+/*
   Theory of Computing translator
   *****************************
 
@@ -62,7 +62,7 @@
  The theory of computing journal provides the PDF file for a given article (say
  gs001) at the url DOMAIN/article/gs001/gs001.pdf.
 
- ******/
+*/
 
 
 // A Regexp for extracting the Domain
@@ -94,12 +94,15 @@ function doWeb(doc, url) {
 	var newItem = new Zotero.Item(type);
 
 	// Store the snapshot and the PDF file
-	newItem.attachments.push({ title: "Theory of Computing Snapshot",
-		document: doc });
+	newItem.attachments.push({
+		title: "Theory of Computing Snapshot", document: doc
+	});
 	var pdfLink = articleID + ".pdf";
-	newItem.attachments.push({ title: "Theory of computing Full Text PDF",
+	newItem.attachments.push({
+		title: "Theory of computing Full Text PDF",
 		mimeType: "application/pdf",
-		url: pdfLink });
+		url: pdfLink
+	});
 
 	// Get the article topLine
 	var topLine = ZU.xpathText(doc, '//div[@id="articletopline"]');
