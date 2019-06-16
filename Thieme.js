@@ -43,12 +43,6 @@
 */
 
 
-// attr()/text() v2
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null;
-}
-
-
 function detectWeb(doc, url) {
 	if (url.includes('/abstract/') || url.includes('/html/') || url.includes('/DOI/DOI?')) {
 		return "journalArticle";
@@ -97,7 +91,7 @@ function doWeb(doc, url) {
 }
 
 
-function scrape(doc) {
+function scrape(doc, _url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
