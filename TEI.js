@@ -131,7 +131,7 @@ function genXMLId(item) {
 			xmlid = item.creators[0].name;
 		}
 		if (item.date) {
-			const date = Zotero.Utilities.strToDate(item.date);
+			let date = Zotero.Utilities.strToDate(item.date);
 			if (date.year) {
 				xmlid += date.year;
 			}
@@ -209,12 +209,12 @@ function generateItem(item, teiDoc) {
 
 	if (Zotero.getOption("Generate XML IDs")) {
 		if (!generatedItems[item.uri]) {
-			const xmlid = genXMLId(item);
+			let xmlid = genXMLId(item);
 			bibl.setAttributeNS(ns.xml, "xml:id", xmlid);
 			exportedXMLIds[xmlid] = bibl;
 		}
 		else {
-			const xmlid = "#" + generatedItems[item.uri].getAttributeNS(ns.xml, "id");
+			let xmlid = "#" + generatedItems[item.uri].getAttributeNS(ns.xml, "id");
 			var myXmlid = "zoteroItem_" + item.uri;
 
 			bibl.setAttribute("sameAs", xmlid);
@@ -246,7 +246,7 @@ function generateItem(item, teiDoc) {
 		}
 		// A DOI is presumably for the article, not the journal.
 		if (item.DOI) {
-			const idno = teiDoc.createElementNS(ns.tei, "idno");
+			let idno = teiDoc.createElementNS(ns.tei, "idno");
 			idno.setAttribute("type", "DOI");
 			idno.appendChild(teiDoc.createTextNode(item.DOI));
 			analytic.appendChild(idno);
@@ -268,7 +268,7 @@ function generateItem(item, teiDoc) {
 
 		// short title
 		if (item.shortTitle) {
-			const shortTitle = teiDoc.createElementNS(ns.tei, "title");
+			let shortTitle = teiDoc.createElementNS(ns.tei, "title");
 			shortTitle.setAttribute("type", "short");
 			shortTitle.appendChild(teiDoc.createTextNode(item.shortTitle));
 			analytic.appendChild(shortTitle);
@@ -277,25 +277,25 @@ function generateItem(item, teiDoc) {
 	else {
 		bibl.appendChild(monogr);
 		if (item.title) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
+			let title = teiDoc.createElementNS(ns.tei, "title");
 			title.setAttribute("level", "m");
 			assignFormattedTitle(title, item.title);
 			monogr.appendChild(title);
 		}
 		else if (!item.conferenceName) {
-			const title = teiDoc.createElementNS(ns.tei, "title");
+			let title = teiDoc.createElementNS(ns.tei, "title");
 			monogr.appendChild(title);
 		}
 		// short title
 		if (item.shortTitle) {
-			const shortTitle = teiDoc.createElementNS(ns.tei, "title");
+			let shortTitle = teiDoc.createElementNS(ns.tei, "title");
 			shortTitle.setAttribute("type", "short");
 			shortTitle.appendChild(teiDoc.createTextNode(item.shortTitle));
 			monogr.appendChild(shortTitle);
 		}
 		// A DOI where there's no analytic must be for the monogr.
 		if (item.DOI) {
-			const idno = teiDoc.createElementNS(ns.tei, "idno");
+			let idno = teiDoc.createElementNS(ns.tei, "idno");
 			idno.setAttribute("type", "DOI");
 			idno.appendChild(teiDoc.createTextNode(item.DOI));
 			analytic.appendChild(idno);
@@ -347,20 +347,20 @@ function generateItem(item, teiDoc) {
 
 	// Other canonical ref nos come right after the title(s) in monogr.
 	if (item.ISBN) {
-		const idno = teiDoc.createElementNS(ns.tei, "idno");
+		let idno = teiDoc.createElementNS(ns.tei, "idno");
 		idno.setAttribute("type", "ISBN");
 		idno.appendChild(teiDoc.createTextNode(item.ISBN));
 		monogr.appendChild(idno);
 	}
 	if (item.ISSN) {
-		const idno = teiDoc.createElementNS(ns.tei, "idno");
+		let idno = teiDoc.createElementNS(ns.tei, "idno");
 		idno.setAttribute("type", "ISSN");
 		idno.appendChild(teiDoc.createTextNode(item.ISSN));
 		monogr.appendChild(idno);
 	}
 
 	if (item.callNumber) {
-		const idno = teiDoc.createElementNS(ns.tei, "idno");
+		let idno = teiDoc.createElementNS(ns.tei, "idno");
 		idno.setAttribute("type", "callNumber");
 		idno.appendChild(teiDoc.createTextNode(item.callNumber));
 		monogr.appendChild(idno);
@@ -433,13 +433,13 @@ function generateItem(item, teiDoc) {
 	}
 
 	if (item.edition) {
-		const edition = teiDoc.createElementNS(ns.tei, "edition");
+		let edition = teiDoc.createElementNS(ns.tei, "edition");
 		edition.appendChild(teiDoc.createTextNode(item.edition));
 		monogr.appendChild(edition);
 	}
 	// software
 	else if (item.versionNumber) {
-		const edition = teiDoc.createElementNS(ns.tei, "edition");
+		let edition = teiDoc.createElementNS(ns.tei, "edition");
 		edition.appendChild(teiDoc.createTextNode(item.versionNumber));
 		monogr.appendChild(edition);
 	}
@@ -484,7 +484,7 @@ function generateItem(item, teiDoc) {
 		imprint.appendChild(publisher);
 	}
 	if (item.date) {
-		const date = Zotero.Utilities.strToDate(item.date);
+		let date = Zotero.Utilities.strToDate(item.date);
 		var imprintDate = teiDoc.createElementNS(ns.tei, "date");
 		if (date.year) {
 			imprintDate.appendChild(teiDoc.createTextNode(date.year));
@@ -497,24 +497,24 @@ function generateItem(item, teiDoc) {
 
 	// If no date exists, add an empty date node so that spec minimum requirement for one imprint element is met
 	else {
-		const date = teiDoc.createElementNS(ns.tei, "date");
+		let date = teiDoc.createElementNS(ns.tei, "date");
 		imprint.appendChild(date);
 	}
 		
 	if (item.accessDate) {
-		const note = teiDoc.createElementNS(ns.tei, "note");
+		let note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "accessed");
 		note.appendChild(teiDoc.createTextNode(item.accessDate));
 		imprint.appendChild(note);
 	}
 	if (item.url) {
-		const note = teiDoc.createElementNS(ns.tei, "note");
+		let note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "url");
 		note.appendChild(teiDoc.createTextNode(item.url));
 		imprint.appendChild(note);
 	}
 	if (item.thesisType) {
-		const note = teiDoc.createElementNS(ns.tei, "note");
+		let note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "thesisType");
 		note.appendChild(teiDoc.createTextNode(item.thesisType));
 		imprint.appendChild(note);
@@ -528,7 +528,7 @@ function generateItem(item, teiDoc) {
 			var noteText = Zotero.Utilities.cleanTags(singleNote.note);
 			// unescape remaining entities -> no double escapes
 			noteText = Zotero.Utilities.unescapeHTML(noteText);
-			const note = teiDoc.createElementNS(ns.tei, "note");
+			let note = teiDoc.createElementNS(ns.tei, "note");
 			note.appendChild(teiDoc.createTextNode(noteText));
 			bibl.appendChild(note);
 		}
@@ -616,7 +616,7 @@ function doExport() {
 	}
 	else {
 		var listBibl = teiDoc.createElementNS(ns.tei, "listBibl");
-		for (const i in allItems) {
+		for (let i in allItems) {
 			item = allItems[i];
 			// skip attachments
 			if (item.itemType == "attachment") {
