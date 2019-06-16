@@ -13,7 +13,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 16:32:26"
+	"lastUpdated": "2019-02-20 12:32:26"
 }
 
 /*
@@ -143,7 +143,7 @@ function handleCreators(newItem, creators, creatorType) {
 			if (c.firstName || c.lastName) return c;
 
 			c = getFirstResults(obj, [n.so+"name"], true);
-			if (c) return ZU.cleanAuthor(c, creatorType);
+			if (c) return ZU.cleanAuthor(c, creatorType, c.includes(','));
 		}
 	}
 
