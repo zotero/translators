@@ -200,5 +200,5 @@ var testCases = [
 		"url": "http://www.winnipegfreepress.com/search/?keywords=chocolate&searchSubmitted=y&sortBy=-startDate",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

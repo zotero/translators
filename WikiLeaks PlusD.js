@@ -178,5 +178,5 @@ var testCases = [
 		"url": "https://search.wikileaks.org/plusd/?qproject[]=ps&qproject[]=cc&qproject[]=fp&qproject[]=cg&q=&qtfrom=1975-01-01#result",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

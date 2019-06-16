@@ -181,5 +181,5 @@ var testCases = [
 		"url": "http://worldhistoryconnected.press.illinois.edu/cgi-bin/htsearch?method=and&format=builtin-long&sort=score&config=whc&restrict=&exclude=&words=world",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

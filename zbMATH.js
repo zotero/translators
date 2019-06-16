@@ -259,5 +259,5 @@ var testCases = [
 		"url": "http://zbmath.org/?q=cc:35",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

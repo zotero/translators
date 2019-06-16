@@ -310,5 +310,5 @@ var testCases = [
 		"url": "https://www.wiso-net.de/dosearch?explicitSearch=true&q=mannheim&x=0&y=0&dbShortcut=%3A3%3AALLEQUELLEN&searchMask=5461&TI%2CUT%2CDZ%2CBT%2COT%2CSE=&NN%2CAU%2CMM%2CZ2=&CO%2CC2%2CTA%2CKA%2CVA%2CZ1=&CT%2CDE%2CZ4=&BR%2CGW%2CN1%2CN2%2CNC%2CND%2CSC%2CWZ%2CZ5%2CAI=&Z3=&DT_from=&DT_to=&timeFilterType=selected&timeFilter=NONE",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

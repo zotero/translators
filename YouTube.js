@@ -191,5 +191,5 @@ var testCases = [
 		"url": "http://www.youtube.com/user/Zoteron",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
