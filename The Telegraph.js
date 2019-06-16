@@ -77,12 +77,12 @@ function scrape(doc, url) {
 		var authors = ZU.xpathText(doc, '//meta[@name="GSAAuthor"]/@content')
 					|| ZU.xpathText(doc, '//meta[@name="DCSext.author"]/@content');
 		if (authors) {
-			const authorsList = authors.split(';');
-			for (var i = 0; i < authorsList.length; i++) {
+			let authorsList = authors.split(';');
+			for (let author of authorsList) {
 				// clean authors string
 				// e.g. "By Alex Spillius in Washington"
-				authorsList[i] = authorsList[i].replace(/^By /, '').replace(/ in .*/, '');
-				item.creators.push(ZU.cleanAuthor(authorsList[i], 'author'));
+				author = author.replace(/^By /, '').replace(/ in .*/, '');
+				item.creators.push(ZU.cleanAuthor(author, 'author'));
 			}
 		}
 		
