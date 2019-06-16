@@ -187,7 +187,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	
-	const pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
+	let pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
 	if (pattern.test(url) && getItemId(doc)) {
 		var code = detectCode(url);
 		return detectType(code);
