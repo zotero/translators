@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-23 11:16:01"
+	"lastUpdated": "2019-06-10 22:54:53"
 }
 
 /*
@@ -36,10 +36,10 @@
 */
 
 function detectWeb(doc, url) {
- 
-	if (url.includes("?q=") ) {
+	if (url.includes("?q=")) {
 		return "multiple";
-	}  else {
+	}
+	else {
 		return "thesis";
 	}
 }
@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[contains(@class, "encart arrondi-10")]//h2/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -62,30 +62,28 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function(items) {
-			if (!items) {
-				return true;
-			}
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) return;
+
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
-			//Z.debug(articles)
+			// Z.debug(articles)
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 function scrape(doc, url) {
-
 	var translator = Zotero.loadTranslator('web');
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); //https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // https://github.com/zotero/translators/blob/master/Embedded%20Metadata.js
 	translator.setDocument(doc);
-	translator.setHandler('itemDone', function(obj, item) {
-	
-		//add Tags
+	translator.setHandler('itemDone', function (obj, item) {
+		// add Tags
 		var tags = ZU.xpath(doc, '//span[contains(@property, "dc:subject")]');
 		if (tags.length > 0) {
 			item.tags = [];
@@ -96,11 +94,12 @@ function scrape(doc, url) {
 			
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "thesis";
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
