@@ -1,17 +1,17 @@
 {
 	"translatorID": "93514073-b541-4e02-9180-c36d2f3bb401",
-	"translatorType": 1,
 	"label": "Crossref Unixref XML",
 	"creator": "Sebastian Karcher",
 	"target": "xml",
 	"minVersion": "3.0",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
-	"browserSupport": "gcsibv",
 	"configOptions": {
 		"dataMode": "xml/dom"
 	},
+	"inRepository": true,
+	"translatorType": 1,
+	"browserSupport": "gcsibv",
 	"lastUpdated": "2019-04-27 02:15:00"
 }
 
@@ -547,6 +547,7 @@ var testCases = [
 				"DOI": "10.1111/1574-6941.12040",
 				"ISSN": "01686496",
 				"issue": "1",
+				"journalAbbreviation": "FEMS Microbiol Ecol",
 				"language": "en",
 				"pages": "60-74",
 				"publicationTitle": "FEMS Microbiology Ecology",
@@ -577,6 +578,7 @@ var testCases = [
 				"DOI": "10.2747/1539-7216.50.2.197",
 				"ISSN": "1538-7216, 1938-2863",
 				"issue": "2",
+				"journalAbbreviation": "Eurasian Geography and Economics",
 				"language": "en",
 				"pages": "197-221",
 				"publicationTitle": "Eurasian Geography and Economics",
@@ -703,6 +705,7 @@ var testCases = [
 				"DOI": "10.4086/cjtcs.2012.002",
 				"ISSN": "1073-0486",
 				"issue": "1",
+				"journalAbbreviation": "Chicago J. of Theoretical Comp. Sci.",
 				"language": "en",
 				"pages": "1-10",
 				"publicationTitle": "Chicago Journal of Theoretical Computer Science",
