@@ -140,8 +140,8 @@ function doWeb(doc, url) {
 
 	// Keywords
 	if (keywordLine) {
-		const keywords = ZU.trimInternal(/Keywords:\s+(.*)/.exec(keywordLine)[1]);
-		const keywordList = keywords.split(/,\s+/);
+		let keywords = ZU.trimInternal(/Keywords:\s+(.*)/.exec(keywordLine)[1]);
+		let keywordList = keywords.split(/,\s+/);
 		newItem.tags = keywordList;
 	}
 
@@ -150,8 +150,8 @@ function doWeb(doc, url) {
 		authorLine = ZU.trimInternal(authorLine);
 		let authors = /[^0-9]+[0-9]+\s+(.*)/.exec(authorLine)[1];
 		authors = authors.replace(/,?\s+and\s+/, ", ");
-		const authorList = authors.split(/\s*,\s+/);
-		for (const author in authorList) {
+		let authorList = authors.split(/\s*,\s+/);
+		for (let author in authorList) {
 			newItem.creators.push(ZU.cleanAuthor(authorList[author], "author"));
 		}
 	}
@@ -160,11 +160,11 @@ function doWeb(doc, url) {
 	if (topLine) {
 		topLine = ZU.trimInternal(topLine);
 		if (type == "book") {
-			const number = /Graduate Surveys\s+([0-9]+)/.exec(topLine)[1];
+			let number = /Graduate Surveys\s+([0-9]+)/.exec(topLine)[1];
 			newItem.seriesNumber = number;
 		}
 		else if (type == "journalArticle") {
-			const volumeData = /Volume\s+([0-9]+).*Article\s+([0-9]+)\s+pp\.\s+([0-9]+)-([0-9]+)/.exec(topLine);
+			let volumeData = /Volume\s+([0-9]+).*Article\s+([0-9]+)\s+pp\.\s+([0-9]+)-([0-9]+)/.exec(topLine);
 			newItem.volume = volumeData[1];
 			newItem.number = volumeData[2];
 			newItem.pages = volumeData[3] + "–" + volumeData[4];
