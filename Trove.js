@@ -115,8 +115,8 @@ function scrapeNewspaper(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
-				for (var i = 0; i < tags.length; i++) {
-					const tag = ZU.xpathText(tags[i], "a[not(contains(@class,'anno-remove'))]");
+				for (let tag of tags) {
+					tag = ZU.xpathText(tag, "a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}
@@ -257,9 +257,9 @@ function scrapeWork(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 				
 				// Add tags
-				const tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
+				let tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
 				for (var i = 0; i < tags.length; i++) {
-					const tag = ZU.xpathText(tags[i], "a");
+					let tag = ZU.xpathText(tags[i], "a");
 					item.tags.push(tag);
 				}
 			}
