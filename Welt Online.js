@@ -13,28 +13,33 @@
 }
 
 /*
-Welt Online Translator
-Copyright (C) 2011 Martin Meyerhoff
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Copyright © 2011-2019 Martin Meyerhoff, Philipp Zumstein
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	This file is part of Zotero.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 /*
-"Multiple" doesn't work on the search pages, because that's another host. However, every other page does it:
-http://www.welt.de/themen/Fukushima/
-http://www.welt.de/wirtschaft/
-http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html
+  "Multiple" doesn't work on the search pages, because that's another host. However, every other page does it:
+  http://www.welt.de/themen/Fukushima/
+  http://www.welt.de/wirtschaft/
+  http://www.welt.de/wirtschaft/article12962920/Krankenkassen-werfen-Aerzten-Gewinnstreben-vor.html
 */
 
 function detectWeb(doc, _url) {
@@ -43,7 +48,6 @@ function detectWeb(doc, _url) {
 		return "newspaperArticle";
 	}
 	else if (getSearchResults(doc, true)) {
-		Zotero.debug("multiple");
 		return "multiple";
 	}
 	return false;
