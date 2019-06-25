@@ -16,9 +16,7 @@
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
 		"XMLSerializer": "readonly",
-		"atob": "readonly",
-		"text": "readonly",
-		"attr": "readonly"
+		"atob": "readonly"
 	},
 	"rules": {
 		"no-unused-vars": [
