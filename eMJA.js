@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-11-01 18:30:00"
+	"lastUpdated": "2019-06-26 23:04:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	eMJA Translator - Copyright © 2012 Sebastian Karcher 
+	eMJA Translator - Copyright © 2012 Sebastian Karcher
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,78 +35,79 @@
 */
 
 function getSearchResults(doc, checkOnly) {
-  let items = {}
-  let found = false;
-  for (let item of doc.querySelectorAll('div.views-field-title a, div.mja-search-results-container a')) {
-    let title = (item.textContent || '').trim();
-    if (!title) continue;
-    let href = item.getAttribute('href');
-    if (!href) continue;
+	let items = {};
+	let found = false;
+	for (let item of doc.querySelectorAll('div.views-field-title a, div.mja-search-results-container a')) {
+		let title = (item.textContent || '').trim();
+		if (!title) continue;
+		let href = item.getAttribute('href');
+		if (!href) continue;
 
-    if (checkOnly) return true;
-    found = true;
-    items[href] = title;
-  }
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
 
-  return found && items;
+	return found && items;
 }
 
 function match(t, r, n) {
-  if (!t) return '';
-  let m = t.match(r);
-  return (m && m[typeof n === 'number' ? n : 1]) || '';
+	if (!t) return '';
+	let m = t.match(r);
+	return (m && m[typeof n === 'number' ? n : 1]) || '';
 }
 
+// eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function scrape(doc, url) {
-  Zotero.debug(url);
-  let item = new Zotero.Item('journalArticle')
-  item.url = url;
-  item.title = (text(doc, 'h1.article-heading') || '').trim()
-  item.attachments = [
-    { url, title: 'Snapshot', mimeType: 'text/html' },
-    { url: attr(doc, 'a.pdf', 'href'), title: 'Full Text PDF', mimeType: 'application/pdf' },
-  ];
+	Zotero.debug(url);
+	let item = new Zotero.Item('journalArticle');
+	item.url = url;
+	item.title = (text(doc, 'h1.article-heading') || '').trim();
+	item.attachments = [
+		{ url, title: 'Snapshot', mimeType: 'text/html' },
+		{ url: attr(doc, 'a.pdf', 'href'), title: 'Full Text PDF', mimeType: 'application/pdf' },
+	];
 
-  item.creators = Array.from(doc.querySelectorAll('ul#authors-list li')).map(author => ZU.cleanAuthor(author.getAttribute('data-author'), 'author'));
-  item.volume = match(text(doc, 'div#meta-container div div.field-items div'), /;\s*\d+\s*\(/, 0).replace(/\(|;\s*/g, '');
+	item.creators = Array.from(doc.querySelectorAll('ul#authors-list li')).map(author => ZU.cleanAuthor(author.getAttribute('data-author'), 'author'));
+	item.volume = match(text(doc, 'div#meta-container div div.field-items div'), /;\s*\d+\s*\(/, 0).replace(/\(|;\s*/g, '');
 
-  for (let citation of doc.querySelectorAll('span.citation')) {
-    if (citation.textContent.includes('Published online:')) item.date = citation.textContent.replace(/Published online:/, '');
-  }
+	for (let citation of doc.querySelectorAll('span.citation')) {
+		if (citation.textContent.includes('Published online:')) item.date = citation.textContent.replace(/Published online:/, '');
+	}
 
-  item.issue = attr(doc, 'a.article-issue', 'data-issue');
-  item.volume = (text(doc, 'a.article-volume') || '').replace(/Volume\s*/, '');
+	item.issue = attr(doc, 'a.article-issue', 'data-issue');
+	item.volume = (text(doc, 'a.article-volume') || '').replace(/Volume\s*/, '');
 
-  for (let comment of doc.querySelectorAll('div.comment')) {
-    let abstr = comment.querySelector('h2');
-    if (!abstr || abstr.textContent.trim() !== 'Abstract') continue;
+	for (let comment of doc.querySelectorAll('div.comment')) {
+		let abstr = comment.querySelector('h2');
+		if (!abstr || abstr.textContent.trim() !== 'Abstract') continue;
 
-    item.abstractNote = comment.textContent.replace('Abstract', '').trim();
-  }
+		item.abstractNote = comment.textContent.replace('Abstract', '').trim();
+	}
 
-  item.journalAbbreviation = "Med. J. Aust.";
-  item.ISSN = "0025-729X";
-  item.publicationTitle = "Medical Journal of Australia";
-  item.complete();
+	item.journalAbbreviation = "Med. J. Aust.";
+	item.ISSN = "0025-729X";
+	item.publicationTitle = "Medical Journal of Australia";
+	item.complete();
 }
 
-function detectWeb(doc, url) {
-  if (getSearchResults(doc, true)) return 'multiple';
-  if (doc.querySelector('h1.article-heading')) return 'journalArticle';
-  return false;
+function detectWeb(doc, _url) {
+	if (getSearchResults(doc, true)) return 'multiple';
+	if (doc.querySelector('h1.article-heading')) return 'journalArticle';
+	return false;
 }
 
 function doWeb(doc, url) {
-  if (detectWeb(doc, url) === 'multiple') {
-    Zotero.selectItems(getSearchResults(doc), function (items) {
-      if (items) ZU.processDocuments(Object.keys(items), scrape);
-    });
-  }
-  else {
-    scrape(doc, url);
-  }
+	if (detectWeb(doc, url) === 'multiple') {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
 }
  
 /** BEGIN TEST CASES **/
