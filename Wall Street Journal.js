@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-11 13:48:59"
+	"lastUpdated": "2019-06-23 22:38:11"
 }
 
 /*
@@ -98,6 +98,17 @@ function scrape(doc, url) {
 		// correct this by using the JSON-LD data.
 		var jsonld = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
 		if (jsonld) {
+			var firstContext = jsonld.indexOf("@context");
+			if (firstContext > 0) {
+				var secondContext = jsonld.indexOf("@context", firstContext + 1);
+				// sometimes there is a second context at the end, which makes the
+				// json non-valid, therefore we delete that before
+				// e.g. https://www.wsj.com/articles/the-turnabout-on-religious-freedom-11561155218
+				if (secondContext > -1) {
+					Z.debug("Delete second context from JSON data");
+					jsonld = jsonld.substr(0, secondContext - 1).replace(/[, {"]*$/, '');
+				}
+			}
 			var data = JSON.parse(jsonld);
 			if (data.creator && data.creator.length) {
 				item.creators = [];
@@ -287,22 +298,49 @@ var testCases = [
 				"libraryCatalog": "www.wsj.com",
 				"publicationTitle": "Wall Street Journal",
 				"section": "World",
-				"url": "http://www.wsj.com/articles/american-detained-in-north-korea-to-face-trial-next-sunday-1410053845",
+				"url": "https://www.wsj.com/articles/american-detained-in-north-korea-to-face-trial-next-sunday-1410053845",
 				"attachments": [
 					{
 						"title": "Snapshot"
 					}
 				],
 				"tags": [
-					"Matthew Miller",
-					"american detained in north korea",
-					"american in north korea",
-					"courts",
-					"crime",
-					"general news",
-					"matthew miller",
-					"north korea",
-					"political"
+					{
+						"tag": "Matthew Miller"
+					},
+					{
+						"tag": "american detained in north korea"
+					},
+					{
+						"tag": "american in north korea"
+					},
+					{
+						"tag": "courts"
+					},
+					{
+						"tag": "crime"
+					},
+					{
+						"tag": "general news"
+					},
+					{
+						"tag": "matthew miller"
+					},
+					{
+						"tag": "north korea"
+					},
+					{
+						"tag": "oasn"
+					},
+					{
+						"tag": "onew"
+					},
+					{
+						"tag": "political"
+					},
+					{
+						"tag": "world news"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
