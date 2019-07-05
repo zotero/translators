@@ -159,7 +159,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	}
 
 	//add "Book Reviews" tag, if found
-	var sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
+	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
 	if (sectionheading) {
 		sectionheading = sectionheading.trim();
 		if (sectionheading.match(/^Book Reviews$/))
