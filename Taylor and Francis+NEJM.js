@@ -113,7 +113,7 @@ function scrape(doc, url) {
 					item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
 				}
 			}
-			
+
 			item.bookTitle = item.publicationTitle;
 
 			//unfortunately, bibtex is missing some data
@@ -123,7 +123,7 @@ function scrape(doc, url) {
 				if (/^DA\s+-\s+/m.test(text)) {
 					text = text.replace(/^Y1(\s+-.*)/gm, '');
 				}
-				
+
 				risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
@@ -151,13 +151,21 @@ function scrape(doc, url) {
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
-	
+
 	//add keywords
 	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
 	for (var i=0; i<keywords.length; i++) {
 		item.tags.push(keywords[i].textContent);
 	}
-	
+
+	//add "Book Reviews" tag, if found
+	var sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
+	if (sectionheading) {
+		sectionheading = sectionheading.trim();
+		if (sectionheading.match(/^Book Reviews$/))
+			item.tags.push(sectionheading);
+	}
+
 	//add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
