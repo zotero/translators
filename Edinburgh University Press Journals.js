@@ -106,6 +106,10 @@ function scrape(doc, url) {
 				mimeType: "text/html"
 			}];
 
+			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+			if (docType === "book-review")
+				item.tags.push("Book Reviews");
+
 			var pdfurl = ZU.xpath(doc, '//div[@class="article_link"]/a')[0];
 			if (pdfurl) {
 				pdfurl = pdfurl.href;
