@@ -58,6 +58,13 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
+	let abstract = ZU.xpathText(doc, '//div[@id="abstract"]');
+	if (abstract) {
+		abstract = abstract.trim().replace("Abstract:", "");
+		if (item.abstractNote && item.abstractNote.length < abstract.length)
+			item.abstractNote = abstract;
+	}
+
 	let articleSource = ZU.xpathText(doc, '//span[contains(text(), "Source:")]/following-sibling::span[1]').trim();
 	let pageMatch = articleSource.match(/(\d+-\d+)$/);
 	if (pageMatch) {
