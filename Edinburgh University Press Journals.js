@@ -96,6 +96,9 @@ function scrape(doc, url) {
 				}
 			}
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
+			let abstractFromDOM = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p[not(@class="summary-title")]');
+			if (abstractFromDOM && item.abstractNote.length < abstractFromDOM.length)
+				item.abstractNote = abstractFromDOM;
 
 			item.attachments = [{
 				document: doc,
