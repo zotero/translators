@@ -34,7 +34,7 @@
 
 
 function detectWeb(doc, url) {
-    var articleTitle = ZU.xpath(doc, "//h1[@id='mainTitle']")
+    var articleTitle = ZU.xpathText(doc, '//meta[@property="og:title"]/@content')
     if (articleTitle && articleTitle.length > 0) {
         // just a placeholder - the actual type is extracted by the Embedded Metadata translator
         return "journalArticle";
@@ -47,9 +47,13 @@ function doWeb(doc, url) {
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         // add keywords
-        var keywords;
-        if (keywords = ZU.xpath(doc, '//p[contains(@class, "articleBody_keywords")]//a'))
+        let keywords = ZU.xpath(doc, '//dl[contains(@class, "keywords")]//a');
+        if (keywords)
             i.tags = keywords.map(n => n.textContent);
+
+        let abstract = ZU.xpathText(doc, '//section[@class="abstract"]//p');
+        if (abstract && !i.abstractNote)
+            i.abstractNote = abstract;
 
         i.complete();
     });

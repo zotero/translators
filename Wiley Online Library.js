@@ -79,6 +79,15 @@ function processSubtitles(doc, item) {
 	}
 }
 
+function addBookReviewTag(doc, item) {
+	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
+	if (primaryHeading) {
+		primaryHeading = primaryHeading.trim();
+		if (primaryHeading.match(/^Book Review$/))
+			item.tags.push(primaryHeading);
+	}
+}
+
 function scrapeBook(doc, url, pdfUrl) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
@@ -215,16 +224,14 @@ function scrapeEM(doc, url, pdfUrl) {
 						m = text.match(/<iframe[^>]*>/i);
 						if (m) Z.debug(m[0]);
 					}
-					item.complete();
 				});
-			} else {
-				item.complete();
 			}
-		} else {
+		} else
 			item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
-			item.complete();
-		}
 	});
+
+	addBookReviewTag(doc, item);
+	item.complete();
 
 	translator.getTranslatorObject(function(em) {
 		em.itemType = itemType;
@@ -417,8 +424,6 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 							mimeType: 'application/pdf'
 						});
 					}
-
-					item.complete();
 				});
 			} else {
 				if (pdfUrl) {
@@ -428,8 +433,10 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 						mimeType: 'application/pdf'
 					});
 				}
-				item.complete();
 			}
+
+			addBookReviewTag(doc, item);
+			item.complete();
 		});
 
 		translator.translate();
@@ -481,6 +488,7 @@ function scrapeCochraneTrial(doc, url){
 	}
 
 	processSubtitles(doc, item);
+	addBookReviewTag(doc, item);
 
 	item.complete();
 }
