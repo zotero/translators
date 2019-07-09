@@ -39,12 +39,12 @@ function detectWeb(doc, url) {
 	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
 		return "videoRecording";
 	}
-
-	//Search results
+	// Search results
 	if ((url.includes("/results?") || url.includes("/playlist?") || url.includes("/user/"))
 			&& getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -67,9 +67,10 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) != 'multiple') {
 		scrape(doc, url);
-	} else {
-		Zotero.selectItems(getSearchResults(doc), function(items) {
-			if (!items) return true;
+	}
+	else {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) return;
 
 			var ids = [];
 			for (var i in items) {
@@ -82,13 +83,14 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var newItem = new Zotero.Item("videoRecording");
-	//grab the JSON in the header of the page and remove JS code
+	// grab the JSON in the header of the page and remove JS code
 	var data = ZU.xpathText(doc, '//script[contains(text(), "ytplayer.config")]');
 	data = data.match(/ytplayer\.config\s*=(.+?);\s*ytplayer\.load/)[1];
-	//Z.debug(data)
+	// Z.debug(data)
 	try {
 		var obj = JSON.parse(data);
-	} catch (e) {
+	}
+	catch (e) {
 		Zotero.debug("JSON parse error trying to parse: " + data);
 		throw e;
 	}
@@ -114,24 +116,25 @@ function scrape(doc, url) {
 		newItem.date = ZU.strToISO(newItem.date);
 	}
 
-	var author;
-	if (author = args.author) {
-		author = {"lastName": author, "creatorType": "author", "fieldMode": 1 };
+	var author = args.author;
+	if (author) {
+		author = { lastName: author, creatorType: "author", fieldMode: 1 };
 		newItem.creators.push(author);
 	}
 
 	newItem.url = url;
-	var runningTime;
-	if (runningTime = args.length_seconds) {
+	var runningTime = args.length_seconds;
+	if (runningTime) {
 		newItem.runningTime = runningTime + " seconds";
 	}
-	//the description is not in the JSON
-	var description;
-	if (description = doc.getElementById("description")) {
+	// the description is not in the JSON
+	var description = doc.getElementById("description");
+	if (description) {
 		newItem.abstractNote = ZU.cleanTags(description.innerHTML);
 	}
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
