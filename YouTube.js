@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-09-18 21:24:14"
+	"lastUpdated": "2019-07-09 06:17:22"
 }
 
 /*
@@ -41,17 +41,14 @@ function detectWeb(doc, url) {
 	}
 
 	//Search results
-	if (getSearchResults(doc, true)) {
+	if ((url.includes("/results?") || url.includes("/playlist?") || url.includes("/user/"))
+			&& getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
 
 function getSearchResults(doc, checkOnly) {
-	var container = doc.getElementById('results') || doc.getElementById('browse-items-primary');
-	if (!container) return false;
-
-	var links = container.getElementsByClassName('yt-uix-tile-link');
-
+	var links = doc.querySelectorAll('a.ytd-video-renderer, a.ytd-playlist-video-renderer');
 	var items = {},
 		found = false;
 	for (var i = 0, n = links.length; i < n; i++) {
@@ -111,7 +108,11 @@ function scrape(doc, url) {
 		}
 	}
 
-	newItem.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content');
+	newItem.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content')
+		|| ZU.xpathText(doc, '//span[contains(@class, "date")]');
+	if (newItem.date) {
+		newItem.date = ZU.strToISO(newItem.date);
+	}
 
 	var author;
 	if (author = args.author) {
@@ -126,7 +127,7 @@ function scrape(doc, url) {
 	}
 	//the description is not in the JSON
 	var description;
-	if (description = doc.getElementById("watch-description-text")) {
+	if (description = doc.getElementById("description")) {
 		newItem.abstractNote = ZU.cleanTags(description.innerHTML);
 	}
 	newItem.complete();
@@ -136,11 +137,13 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/results?search_query=zotero&oq=zotero&aq=f&aqi=g4&aql=&gs_sm=3&gs_upl=60204l61268l0l61445l6l5l0l0l0l0l247l617l1.2.1l4l0",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "videoRecording",
@@ -158,24 +161,7 @@ var testCases = [
 				"runningTime": "172 seconds",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
 				"attachments": [],
-				"tags": [
-					"2.0",
-					"Center",
-					"George",
-					"History",
-					"Mason",
-					"Media",
-					"Mozilia",
-					"New",
-					"Reference",
-					"Research",
-					"University",
-					"Web",
-					"Zotero",
-					"and",
-					"bibliography",
-					"for"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -184,12 +170,14 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/playlist?list=PL793CABDF042A9514",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/user/Zoteron",
+		"defer": true,
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
