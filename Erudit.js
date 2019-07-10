@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -83,6 +83,14 @@ function doWeb(doc, url) {
 	}
 }
 
+function addBookReviewTag(doc, item) {
+	var primaryHeading = ZU.xpathText(doc, '//span[@class="surtitre"]');
+	if (primaryHeading) {
+		primaryHeading = primaryHeading.trim();
+		if (primaryHeading.match(/^Recensions$/))
+			item.tags.push(primaryHeading);
+	}
+}
 
 function scrape(doc, url) {
 	var abstractFR = text(doc, '#resume-fr>p');
@@ -97,7 +105,7 @@ function scrape(doc, url) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
 			item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
@@ -105,6 +113,8 @@ function scrape(doc, url) {
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
 		}
+
+		addBookReviewTag(doc, item);
 		item.complete();
 	});
 

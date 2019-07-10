@@ -56,6 +56,8 @@ function postProcess(doc, item) {
         item.abstractNote = combinedAbstracts.trim();
     }
 
+    item.shortTitle = ZU.xpathText(doc, '//meta[@name="DC.Title.Alternative"]/@content');
+
     item.complete();
 }
 
