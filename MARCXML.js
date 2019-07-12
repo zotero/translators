@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-08-25 14:14:34"
+	"lastUpdated": "2019-07-11 13:12:18"
 }
 
 function detectImport() {
@@ -17,7 +16,7 @@ function detectImport() {
 	var i = 0;
 	while ((line = Zotero.read()) !== false) {
 		if (line !== "") {
-			if (line.match(/<(marc\:)?(collection|record) xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
+			if (line.match(/xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
 				return true;
 			} else {
 				if (i++ > 5) {

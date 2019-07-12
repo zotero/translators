@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-01-30 09:40:41"
+	"lastUpdated": "2019-07-12 05:44:41"
 }
 
 function detectImport() {
@@ -663,6 +662,12 @@ record.prototype.translate = function(item) {
 		if (this.getFieldSubfields("335")[0]) {
 			item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
 		}
+		var otherIds = this.getFieldSubfields("024");
+		for (let id of otherIds) {
+			if (id['2'] == "doi") {
+				item.DOI = id['a'];
+			}
+		}
 		var container;
 		if (container = this.getFieldSubfields("773")[0]) {
 			var type = container['7'];
@@ -740,11 +745,11 @@ record.prototype.translate = function(item) {
 					if (date){
 						item.date = date[0];
 					}
-					if (locators.match(/vol\.\s*(\d+)/)) {
-						item.volume = locators.match(/vol\.\s*(\d+)/i)[1];
+					if (locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)) {
+						item.volume = locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)[1];
 					}
-					if (locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)) {
-						item.issue = locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)[1];
+					if (locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d\/]*)/i)) {
+						item.issue = locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d\/]*)/i)[1];
 					}
 					if (!item.volume && locators.match(/\d+:\d+/)){
 						item.volume = locators.match(/(\d+):\d+/)[1];
