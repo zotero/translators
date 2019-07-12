@@ -83,7 +83,7 @@ function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
 	if (primaryHeading) {
 		primaryHeading = primaryHeading.trim();
-		if (primaryHeading.match(/^Book Review$/))
+		if (primaryHeading.match(/(Book Review)|(Review Essays?)|(reviews?)/))
 			item.tags.push(primaryHeading);
 	}
 }

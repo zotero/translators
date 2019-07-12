@@ -249,6 +249,10 @@ function scrape(doc, url, extras) {
 					}
 				}
 
+				let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+				if (docType === "book-review")
+					item.tags.push("Book Reviews");
+
 				if (!item.language) {
 					var metaLang = doc.querySelector("meta[name='dc.Language']");
 					if (metaLang && metaLang.getAttribute("content"))

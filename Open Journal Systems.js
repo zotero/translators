@@ -14,7 +14,7 @@
 
 function detectWeb(doc, url) {
 	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
-	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
+	if (ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
 		pkpLibraries.length >= 1) {
 		return 'journalArticle';
 	}
@@ -37,7 +37,7 @@ function scrape(doc, url) {
 	trans.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	trans.setDocument(doc);
 
-	trans.setHandler('itemDone', function(obj, item) {
+	trans.setHandler('itemDone', function (obj, item) {
 		if (!item.itemType) {
 			item.itemType = "journalArticle";
 		}
@@ -46,11 +46,11 @@ function scrape(doc, url) {
 			item.title = doc.getElementById('articleTitle');
 		}
 
-		if (item.creators.length==0) {
+		if (item.creators.length == 0) {
 			var authorString = doc.getElementById("authorString");
 			if (authorString) {
 				var authorsList = authorString.textContent.split(',');
-				for (var i=0; i<authorsList.length; i++) {
+				for (var i = 0; i < authorsList.length; i++) {
 					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 				}
 			}
@@ -78,7 +78,7 @@ function scrape(doc, url) {
 		var pdfAttachment = false;
 
 		//some journals link to a PDF view page in the header, not the PDF itself
-		for (var i=0; i<item.attachments.length; i++) {
+		for (var i = 0; i < item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
 				pdfAttachment = true;
 				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
@@ -101,6 +101,13 @@ function scrape(doc, url) {
 			// only update if the last two captures are the same, otherwise it's ambiguous
 			if (matches && matches[2] === matches[3])
 				item.pages = matches[1] + "-" + matches[2];
+		}
+
+		let articleType = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content');
+		if (articleType) {
+			articleType = articleType.trim();
+			if (articleType.match(/Book Reviews?/))
+				item.tags.push("Book Reviews");
 		}
 
 		item.complete();
