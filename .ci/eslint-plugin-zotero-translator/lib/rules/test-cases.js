@@ -1,6 +1,7 @@
 'use strict';
 
 const translators = require('../translators').cache;
+const astUtils = require("eslint/lib/util/ast-utils");
 
 module.exports = {
 	meta: {
@@ -23,6 +24,16 @@ module.exports = {
 					&& declaration.declarations[0].init.type === 'ArrayExpression'
 						? declaration.declarations[0].init.elements
 						: [];
+
+				if (declaration) {
+					const sourceCode = context.getSourceCode();
+					if (astUtils.isSemicolonToken(sourceCode.getLastToken(node))) {
+						context.report({
+							message: 'testcases should not have trailing semicolon',
+							loc: declaration.loc.end,
+						});
+					}
+				}
 
 				if (!translator.testCases || translator.testCases.error) return; // regular js or no test cases
 
