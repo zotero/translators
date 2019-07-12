@@ -184,7 +184,7 @@ function complementItem(doc, item) {
 	}
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
-	if (docType.match(/Book Reviews?/))
+	if (docType.match(/(Book Reviews?)|(Review Paper)/))
 		item.tags.push("Book Reviews");
 
 	return item;
