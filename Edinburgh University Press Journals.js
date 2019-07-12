@@ -107,7 +107,7 @@ function scrape(doc, url) {
 			}];
 
 			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
-			if (docType === "book-review")
+			if (docType === "book-review" || docType === "review-article")
 				item.tags.push("Book Reviews");
 
 			var pdfurl = ZU.xpath(doc, '//div[@class="article_link"]/a')[0];
