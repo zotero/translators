@@ -9,26 +9,24 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-01 14:51:41"
+	"lastUpdated": "2019-07-13 16:38:39"
 }
 
 function getSearchResults(doc, checkOnly, itemOpts) {
 	var items = {}, found = false;
-	var titles = doc.getElementsByClassName('titleAndAuthor');
-	for (var i=0; i<titles.length; i++){
-		var a = ZU.xpath(titles[i], './/h2//a')[0];
-		if (!a) continue;
-		
-		var title = ZU.trimInternal(a.textContent);
-		var doi = getDoi(a.href);
-		if (!title || !doi) continue;
-		
+	var rows = doc.querySelectorAll('.issue-item_title a, .teaser_title a');
+	for (let i=0; i<rows.length; i++){
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		var doi = getDoi(href);
+		if (!href || !title || !doi) continue;
 		if (checkOnly) return true;
-		
 		found = true;
 		items[doi] = title;
 		
+		// Not sure if this is still working on the new websites...
 		itemOpts[doi] = {};
+		/*
 		//check if article contains supporting info,
 		//so we don't have to waste an HTTP request later if it doesn't
 		var articleBox = titles[i].parentNode.parentNode;
@@ -44,6 +42,7 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 		// Check which versions of the PDF we have
 		itemOpts[doi].highRes = !!articleBox.getElementsByClassName('pdf-high-res').length;
 		itemOpts[doi].pdfPlus = !!articleBox.getElementsByClassName('pdf-low-res').length;
+		*/
 	}
 	
 	return found ? items : false;
@@ -110,13 +109,11 @@ function attachSupp(item, doi, opts) {
  ***************************/
 
 function detectWeb(doc, url) {
-	if (doc.getElementsByClassName('articleBoxMeta').length
-		&& getSearchResults(doc, true)
-	) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	} else if (getDoi(url)) {
-		var type  = doc.getElementsByClassName("manuscriptType");
-		if (type.length && type[0].textContent.indexOf("Chapter") !=-1) {
+		var type  = doc.getElementsByClassName("content-navigation__contentType");
+		if (type.length && type[0].textContent.includes("Chapter")) {
 			return "bookSection";
 		} else {
 			return "journalArticle";
@@ -174,6 +171,7 @@ function doWeb(doc, url){
 		var itemOpts = {};
 		itemOpts.highRes = ZU.xpathText(doc, '//a[contains(@title, "High-Res PDF")]');
 		itemOpts.pdfPlus = ZU.xpathText(doc, '//a[contains(@title, "Low-Res PDF")]');
+		itemOpts.pdf = ZU.xpathText(doc, '//a[i[contains(@class, "icon-file-pdf-o")]]/@href');
 		
 		scrape([{doi: doi, opts: itemOpts}], opts);
 	}
@@ -206,6 +204,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 			translator.setHandler("itemDone", function(obj, item) {
 				item.attachments = [];
 				
+				// might be outdated
 				if (fetchItem.opts.pdfPlus
 					&& (!opts.removePdfPlus || !fetchItem.opts.highRes)
 				) {
@@ -216,6 +215,7 @@ function processCallback(fetchItem, opts, downloadFileName) {
 					});
 				}
 				
+				// might be outdated
 				if (fetchItem.opts.highRes
 					&& (opts.highResPDF	|| !fetchItem.opts.pdfPlus)
 				) {
@@ -226,6 +226,14 @@ function processCallback(fetchItem, opts, downloadFileName) {
 					});
 				}
 				
+				// standard pdf and snapshot
+				if (item.attachments.length == 0 && fetchItem.opts.pdf) {
+					item.attachments.push({
+						title: "Full Text PDF",
+						url: fetchItem.opts.pdf,
+						mimeType:"application/pdf"
+					});
+				}
 				item.attachments.push({
 					title: "ACS Full Text Snapshot",
 					url: '/doi/full/' + doi,
@@ -291,7 +299,8 @@ function processCallback(fetchItem, opts, downloadFileName) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/doi/full/10.1021/es103607c",
+		"url": "https://pubs.acs.org/doi/full/10.1021/es103607c",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -313,22 +322,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "May 15, 2011",
+				"date": "Mai 15, 2011",
 				"DOI": "10.1021/es103607c",
 				"ISSN": "0013-936X",
 				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "10",
 				"journalAbbreviation": "Environ. Sci. Technol.",
 				"libraryCatalog": "ACS Publications",
 				"pages": "4548-4554",
 				"publicationTitle": "Environmental Science & Technology",
-				"publisher": "American Chemical Society",
-				"url": "http://dx.doi.org/10.1021/es103607c",
+				"url": "https://doi.org/10.1021/es103607c",
 				"volume": "45",
 				"attachments": [
 					{
-						"title": "ACS Full Text PDF w/ Links",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -344,12 +351,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/toc/nalefd/12/6",
+		"url": "https://pubs.acs.org/toc/nalefd/12/6",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/doi/abs/10.1021/bk-2011-1071.ch005",
+		"url": "https://pubs.acs.org/doi/abs/10.1021/bk-2011-1071.ch005",
 		"items": [
 			{
 				"itemType": "bookSection",
