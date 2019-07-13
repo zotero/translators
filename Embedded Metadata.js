@@ -586,10 +586,10 @@ function addOtherMetadata(doc, newItem) {
 function addLowQualityMetadata(doc, newItem) {
 	//if we don't have a creator, look for byline on the page
 	//but first, we're desperate for a title
-	if(!newItem.title) {
-		Z.debug("Title was not found in meta tags. Using document title as title");
-		newItem.title = doc.title;
-	}
+	// if(!newItem.title) {
+	// 	Z.debug("Title was not found in meta tags. Using document title as title");
+	// 	newItem.title = doc.title;
+	// }
 
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
