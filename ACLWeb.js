@@ -180,6 +180,9 @@ function getVenue(doc, pubTitle) {
 		// better to use full proceedingsTitle to cite these publications
 		return '';
 	}
+	else if (!venueString.includes("HLT") && pubTitle.match('HLT|Human Language Technolog(y|ies)')) {
+		return venues.join('-') + '-HLT ' + year;
+	}
 	return venueString;
 }
 
@@ -478,7 +481,7 @@ var testCases = [
 				"date": "2018-06",
 				"DOI": "10.18653/v1/N18-1001",
 				"abstractNote": "We study the problem of named entity recognition (NER) from electronic medical records, which is one of the most fundamental and critical problems for medical text mining. Medical records which are written by clinicians from different specialties usually contain quite different terminologies and writing styles. The difference of specialties and the cost of human annotation makes it particularly difficult to train a universal medical NER system. In this paper, we propose a label-aware double transfer learning framework (La-DTL) for cross-specialty NER, so that a medical NER system designed for one specialty could be conveniently applied to another one with minimal annotation efforts. The transferability is guaranteed by two components: (i) we propose label-aware MMD for feature representation transfer, and (ii) we perform parameter transfer with a theoretical upper bound which is also label aware. We conduct extensive experiments on 12 cross-specialty NER tasks. The experimental results demonstrate that La-DTL provides consistent accuracy improvement over strong baselines. Besides, the promising experimental results on non-medical NER scenarios indicate that La-DTL is potential to be seamlessly adapted to a wide range of NER tasks.",
-				"conferenceName": "NAACL 2018",
+				"conferenceName": "NAACL-HLT 2018",
 				"libraryCatalog": "ACLWeb",
 				"pages": "1–15",
 				"place": "New Orleans, Louisiana",
