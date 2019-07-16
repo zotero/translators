@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-06-15 18:01:30"
+	"lastUpdated": "2019-07-16 23:00:00"
 }
 
 /*
@@ -919,7 +919,7 @@ function importItem(newItem, node) {
 			creators = getFirstResults(node, [n.so + "producer"]);
 		}
 		else if (creatorType == "programmer") {
-			creators = getFirstResults(node, [n.so + "author", n.codemeta + "maintainer"]);
+			creators = getFirstResults(node, [n.z+"programmers", n.so + "author", n.codemeta + "maintainer"]);
 		}
 		else {
 			creators = getFirstResults(node, [n.z + creatorType + "s"]);
