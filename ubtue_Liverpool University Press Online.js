@@ -2,7 +2,7 @@
     "translatorID": "0c5a7d92-1a1e-407f-a139-d68abbac163c",
     "label": "Liverpool University Press Online",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/online.liverpooluniversitypress.co.uk\/doi\/",
+    "target": "^https?:\/\/online.liverpooluniversitypress.co.uk\/(doi)|(toc)\/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
@@ -35,8 +35,26 @@
 
 
 function detectWeb(doc, url) {
-    // placeholder, filled in by the Atypon translator
-    return "journalArticle";
+    if (url.match(/\/toc\//))
+        return "multiple";
+    else {
+        // placeholder, filled in by the Atypon translator
+        return "journalArticle";
+    }
+}
+
+function getSearchResults(doc) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]//a')
+	for (let i=0; i<rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function postProcess(doc, item) {
@@ -57,5 +75,17 @@ function invokeAtyponTranslator(doc) {
 }
 
 function doWeb(doc, url) {
-    invokeAtyponTranslator(doc);
+    if (detectWeb(doc, url) === "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, invokeAtyponTranslator);
+		});
+	} else
+        invokeAtyponTranslator(doc, url);
 }
