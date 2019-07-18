@@ -1,15 +1,15 @@
 {
-    "translatorID": "0c5a7d92-1a1e-407f-a139-d68abbac163c",
-    "label": "Liverpool University Press Online",
+    "translatorID": "649b3328-3e6c-4c1f-b469-cb17235a7b93",
+    "label": "Ruhr Universität Bochum",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/online.liverpooluniversitypress.co.uk\/(doi)|(toc)\/",
+    "target": "https?://er.ceres.rub.de/index.php/.+/(article)|(issue)/view/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-03-22 13:14:00"
+    "lastUpdated": "2019-07-18 14:20:25"
 }
 
 /*
@@ -35,57 +35,54 @@
 
 
 function detectWeb(doc, url) {
-    if (url.match(/\/toc\//))
+    if (url.match(/\/issue\/view/))
         return "multiple";
-    else {
-        // placeholder, filled in by the Atypon translator
+    else
         return "journalArticle";
-    }
 }
 
 function getSearchResults(doc) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]//a')
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
+    var items = {};
+    var found = false;
+    var rows = ZU.xpath(doc, '//div[@class="title"]//a')
+    for (let i = 0; i < rows.length; i++) {
+        let href = rows[i].href;
+        let title = ZU.trimInternal(rows[i].textContent);
+        if (!href || !title) continue;
+        found = true;
+        items[href] = title;
+    }
+    return found ? items : false;
 }
 
 function postProcess(doc, item) {
-    item.abstractNote = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p[not(@class="summary-title")]');
-    item.tags = ZU.xpath(doc, '//div[@class= "abstractKeywords"]//a').map(x => x.textContent.trim());
-
-    item.complete();
+    if (!item.abstractNote)
+        item.abstractNote = ZU.xpathText(doc, '//div[@class="item abstract"]//p');
 }
 
-function invokeAtyponTranslator(doc) {
+function invokeOJSTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("5af42734-7cd5-4c69-97fc-bc406999bdba");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         postProcess(doc, i);
+        i.complete();
     });
     translator.translate();
 }
 
 function doWeb(doc, url) {
     if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, invokeAtyponTranslator);
-		});
-	} else
-        invokeAtyponTranslator(doc, url);
+        Zotero.selectItems(getSearchResults(doc), function (items) {
+            if (!items) {
+                return true;
+            }
+            var articles = [];
+            for (var i in items) {
+                articles.push(i);
+            }
+            ZU.processDocuments(articles, invokeOJSTranslator);
+        });
+    } else
+        invokeOJSTranslator(doc, url);
 }

@@ -88,6 +88,12 @@ function addBookReviewTag(doc, item) {
 	}
 }
 
+function validatePageCount(item) {
+	// clear page count if invalid
+	if (item.pages && item.pages.match(/e[0-9]+/))
+		item.pages = "";
+}
+
 function scrapeBook(doc, url, pdfUrl) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
@@ -141,6 +147,7 @@ function scrapeBook(doc, url, pdfUrl) {
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	processSubtitles(doc, newItem);
+	validatePageCount(newItem);
 	newItem.complete();
 }
 
@@ -231,6 +238,7 @@ function scrapeEM(doc, url, pdfUrl) {
 	});
 
 	addBookReviewTag(doc, item);
+	validatePageCount(item);
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -377,6 +385,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				'//p[@class="copyright" or @id="copyright"]');
 
 			processSubtitles(doc, item);
+			validatePageCount(item);
 
 			//attachments
 			item.attachments = [{
@@ -489,6 +498,7 @@ function scrapeCochraneTrial(doc, url){
 
 	processSubtitles(doc, item);
 	addBookReviewTag(doc, item);
+	validatePageCount(item);
 
 	item.complete();
 }
