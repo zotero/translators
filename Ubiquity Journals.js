@@ -2,7 +2,7 @@
 	"translatorID": "5c11e3bd-caf5-4da6-95d8-e67c57929098",
 	"label": "Ubiquity Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^/]+(/articles/10\\.\\d{4,9}/[-._;()/:a-z0-9A-Z]+|/articles/?$|/\\d+/volume/\\d+/issue/\\d+)",
+	"target": "^https?://[^/]+(/articles?/10\\.\\d{4,9}/[-._;()/:a-z0-9A-Z]+|/articles/?$|/\\d+/volume/\\d+/issue/\\d+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
@@ -33,7 +33,7 @@
 */
 function detectWeb(doc, url) {
 	var ubiquitytest = doc.getElementsByClassName("press-logo");
-	// this doesn't work always, so we're only using it on single items. 
+	// this doesn't work always, so we're only using it on single items.
 	// if the translator doesn't detect there, we still get good EM import
 	// For multiples we check getSearchResults
 	if (ubiquitytest[0] && ubiquitytest[0].href.indexOf(
