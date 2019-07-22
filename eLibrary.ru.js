@@ -43,6 +43,7 @@ function detectWeb(doc, url) {
 	else if (url.match(/\/(query_results|contents|org_items|itembox_items)\.asp/)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -173,16 +174,16 @@ function scrape(doc, url) {
 	}
 
 	var mapping = {
-		"Издательство": "publisher",
+		Издательство: "publisher",
 		"Дата депонирования": "date",
 		"Год издания": "date",
-		"Год": "date",
-		"Том": "volume",
-		"Номер": "issue",
-		"ISSN": "ISSN",
+		Год: "date",
+		Том: "volume",
+		Номер: "issue",
+		ISSN: "ISSN",
 		"Число страниц": "pages", // e.g. "83"
-		"Страницы": "pages", // e.g. "10-16"
-		"Язык": "language",
+		Страницы: "pages", // e.g. "10-16"
+		Язык: "language",
 		"Место издания": "place"
 	};
 	
@@ -212,7 +213,7 @@ function scrape(doc, url) {
 		item.tags.push(fixCasing(tags[j].textContent));
 	}
 
-	item.abstractNote = ZU.xpathText(datablock, './table/tbody/tr[td/font[text() = "АННОТАЦИЯ:"]]/following-sibling::*[1]');;
+	item.abstractNote = ZU.xpathText(datablock, './table/tbody/tr[td/font[text() = "АННОТАЦИЯ:"]]/following-sibling::*[1]');
 	
 	// Language to RFC-4646 code
 	switch (item.language) {
