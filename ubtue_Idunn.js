@@ -35,20 +35,20 @@
 
 
 function detectWeb(doc, url) {
-    var toc = ZU.xpath(doc, '//div[@class="listofContent"]');
-    if (toc && toc.length == 1)
-        return "multiple";
-    else {
-        // placeholder, actual type determined by the embedded metadata translator
-        return "journalArticle";
-    }
+	var toc = ZU.xpath(doc, '//div[@class="listofContent"]');
+	if (toc && toc.length == 1)
+		return "multiple";
+	else {
+		// placeholder, actual type determined by the embedded metadata translator
+		return "journalArticle";
+	}
 }
 
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[@class="artTitle"]//a')
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -59,17 +59,20 @@ function getSearchResults(doc) {
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
-    var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-    translator.setDocument(doc);
-    translator.setHandler("itemDone", function (t, i) {
-        i.complete();
-    });
-    translator.translate();
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, i) {
+		if (!i.abstractNote)
+			i.abstractNote = ZU.xpathText(doc, '//div[@class="abstract articleBody"]//p')
+
+		i.complete();
+	});
+	translator.translate();
 }
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) === "multiple") {
+	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
@@ -80,6 +83,6 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
 		});
-    } else
-        invokeEmbeddedMetadataTranslator(doc, url);
+	} else
+		invokeEmbeddedMetadataTranslator(doc, url);
 }
