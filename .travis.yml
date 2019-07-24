@@ -2,6 +2,6 @@ language: node_js
 node_js:
   - "8"
 script:
-  - npm run lint -- `git diff --name-only $TRAVIS_COMMIT_RANGE | grep -v '\\/' | grep '\.js$'`
+  - git diff -z --name-only $TRAVIS_COMMIT_RANGE *.js | xargs -0 npm run lint --
   - cd .ci && ./checkDeletedTxt.sh
 cache: npm
