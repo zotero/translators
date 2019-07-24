@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2015-09-18 21:24:14"
+	"lastUpdated": "2019-07-09 06:17:22"
 }
 
 /*
@@ -39,19 +39,16 @@ function detectWeb(doc, url) {
 	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
 		return "videoRecording";
 	}
-
-	//Search results
-	if (getSearchResults(doc, true)) {
+	// Search results
+	if ((url.includes("/results?") || url.includes("/playlist?") || url.includes("/user/"))
+			&& getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-	var container = doc.getElementById('results') || doc.getElementById('browse-items-primary');
-	if (!container) return false;
-
-	var links = container.getElementsByClassName('yt-uix-tile-link');
-
+	var links = doc.querySelectorAll('a.ytd-video-renderer, a.ytd-playlist-video-renderer');
 	var items = {},
 		found = false;
 	for (var i = 0, n = links.length; i < n; i++) {
@@ -70,9 +67,10 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) != 'multiple') {
 		scrape(doc, url);
-	} else {
-		Zotero.selectItems(getSearchResults(doc), function(items) {
-			if (!items) return true;
+	}
+	else {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) return;
 
 			var ids = [];
 			for (var i in items) {
@@ -85,13 +83,14 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var newItem = new Zotero.Item("videoRecording");
-	//grab the JSON in the header of the page and remove JS code
+	// grab the JSON in the header of the page and remove JS code
 	var data = ZU.xpathText(doc, '//script[contains(text(), "ytplayer.config")]');
 	data = data.match(/ytplayer\.config\s*=(.+?);\s*ytplayer\.load/)[1];
-	//Z.debug(data)
+	// Z.debug(data)
 	try {
 		var obj = JSON.parse(data);
-	} catch (e) {
+	}
+	catch (e) {
 		Zotero.debug("JSON parse error trying to parse: " + data);
 		throw e;
 	}
@@ -111,36 +110,43 @@ function scrape(doc, url) {
 		}
 	}
 
-	newItem.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content');
+	newItem.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content')
+		|| ZU.xpathText(doc, '//span[contains(@class, "date")]');
+	if (newItem.date) {
+		newItem.date = ZU.strToISO(newItem.date);
+	}
 
-	var author;
-	if (author = args.author) {
-		author = {"lastName": author, "creatorType": "author", "fieldMode": 1 };
+	var author = args.author;
+	if (author) {
+		author = { lastName: author, creatorType: "author", fieldMode: 1 };
 		newItem.creators.push(author);
 	}
 
 	newItem.url = url;
-	var runningTime;
-	if (runningTime = args.length_seconds) {
+	var runningTime = args.length_seconds;
+	if (runningTime) {
 		newItem.runningTime = runningTime + " seconds";
 	}
-	//the description is not in the JSON
-	var description;
-	if (description = doc.getElementById("watch-description-text")) {
+	// the description is not in the JSON
+	var description = doc.getElementById("description");
+	if (description) {
 		newItem.abstractNote = ZU.cleanTags(description.innerHTML);
 	}
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/results?search_query=zotero&oq=zotero&aq=f&aqi=g4&aql=&gs_sm=3&gs_upl=60204l61268l0l61445l6l5l0l0l0l0l247l617l1.2.1l4l0",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "videoRecording",
@@ -158,24 +164,7 @@ var testCases = [
 				"runningTime": "172 seconds",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
 				"attachments": [],
-				"tags": [
-					"2.0",
-					"Center",
-					"George",
-					"History",
-					"Mason",
-					"Media",
-					"Mozilia",
-					"New",
-					"Reference",
-					"Research",
-					"University",
-					"Web",
-					"Zotero",
-					"and",
-					"bibliography",
-					"for"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -184,12 +173,14 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/playlist?list=PL793CABDF042A9514",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "http://www.youtube.com/user/Zoteron",
+		"defer": true,
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

@@ -26,7 +26,9 @@
 				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$"
 			}
 		],
-		
+
+		"no-redeclare": ["error", {"builtinGlobals": true}],
+
 		"zotero-translator/not-executable": "error",
 		"zotero-translator/header-valid-json": "error",
 		"zotero-translator/translator-id": "error",
