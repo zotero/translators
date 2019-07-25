@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
     var items = {};
     var found = false;
     //TODO: adjust the xpath
-    var rows = ZU.xpath(doc, '//li[@class="title"]/a[contains(@href, "/article/") or contains(@href, "/product/")]');
+    var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/product/")]');
     for (var i=0; i<rows.length; i++) {
         var href = rows[i].href;
         var title = ZU.trimInternal(rows[i].textContent);
