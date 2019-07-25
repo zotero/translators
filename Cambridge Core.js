@@ -38,52 +38,51 @@
 detectWeb, getSearchResults, doWeb
 
 function detectWeb(doc, url) {
-    if (url.indexOf('/article/')>-1) {
-        return "journalArticle"; //we'll want to add book chapter and books eventually using /books/
-    } else if (getSearchResults(doc, true)) {
-        return "multiple";
-    }
+	if (url.indexOf('/article/') > -1) {
+		return "journalArticle"; //we'll want to add book chapter and books eventually using /books/
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
-    var items = {};
-    var found = false;
-    //TODO: adjust the xpath
-    var rows = ZU.xpath(doc, '//li[@class="title"]/a[contains(@href, "/article/") or contains(@href, "/product/")]');
-    for (var i=0; i<rows.length; i++) {
-        var href = rows[i].href;
-        var title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
-        if (checkOnly) return true;
-        found = true;
-        items[href] = title;
-    }
-    return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/product/")]');
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) == "multiple") {
-        Zotero.selectItems(getSearchResults(doc, false), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = [];
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, scrape);
-        });
-    } else {
-        scrape(doc, url);
-    }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 		item.url = url;
 		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
 		if (abstract) {
@@ -100,7 +99,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "journalArticle";
 		trans.doWeb(doc, url);
 	});
