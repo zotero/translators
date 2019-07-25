@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-02 23:10:00"
+	"lastUpdated": "2019-07-25 19:25:26"
 }
 
 /*
@@ -35,13 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-	if (url.includes("/search/simple/articles?") || url.includes("/search/advanced/articles") || url.search(/browse\/(favorites|issue)/) != -1) {
+	if (url.search(/\/search\/simple\/(articles$|articles\?)/) != -1 || url.includes("/search/advanced/articles") || url.search(/browse\/(favorites|issue)/) != -1) {
 		Z.monitorDOMChanges(doc.getElementById("articleSearchContainer"), {
 			childList: true
 		});
 		if (getSearchResults(doc, true)) return "multiple";
 	} else {
-		return "newspaperArticle"
+		return "newspaperArticle";
 	}
 }
 
@@ -93,7 +93,7 @@ var typeMap = {
 	"Vecherniaia Moskva": "newspaperArticle",
 	"Vedomosti": "newspaperArticle",
 	"Zavtra": "newspaperArticle"
-}
+};
 
 function permaLink(URL) {
 	var id = URL.match(/id=(\d+)/);
@@ -113,6 +113,7 @@ function scrape(doc, url) {
 	var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
 	item.publicationTitle = publication;
 	var voliss = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/issue/")]');
+	var title, date;
 	if (voliss) {
 		var issue = voliss.match(/No\. (\d+)/);
 		if (issue) item.issue = issue[1];
@@ -124,15 +125,15 @@ function scrape(doc, url) {
 	if (ZU.xpathText(doc, '//table[@class="table table-condensed Table Table-noTopBorder"]//td[contains(text(), "Article")]')) {
 		//we have the metadata in a table
 		var metatable = ZU.xpath(doc, '//table[tbody/tr/td[contains(text(), "Article")]]');
-		var title = ZU.xpathText(metatable, './/td[contains(text(), "Article")]/following-sibling::td');
+		title = ZU.xpathText(metatable, './/td[contains(text(), "Article")]/following-sibling::td');
 		var source = ZU.xpathText(metatable, './/td[contains(text(), "Source")]/following-sibling::td');
 		if (source) {
-			var date = source.match(/(January|February|March|April|May|Juni|July|August|September|October|November|December)\s+(\d{1,2},\s+)?\d{4}/);
+			date = source.match(/(January|February|March|April|May|Juni|July|August|September|October|November|December)\s+(\d{1,2},\s+)?\d{4}/);
 			if (date) item.date = ZU.trimInternal(date[0]);
 			var pages = source.match(/page\(s\): (\d+(?:-\d+)?)/);
 			if (pages) item.page = pages[1];
 			if (!item.publicationTitle) {
-				var publication = source.match(/^(.+?),/);
+				publication = source.match(/^(.+?),/);
 				if (publication) item.publicationTitle = publication[1];
 			}
 		}
@@ -155,15 +156,15 @@ function scrape(doc, url) {
 		var place = ZU.xpathText(metatable, './/td[contains(text(), "Place of Publication")]/following-sibling::td');
 		if (place) item.place = ZU.trimInternal(place);
 	} else {
-		var title = ZU.xpathText(doc, '//div[@class="table-responsive"]/div[@class="change_font"]');
+		title = ZU.xpathText(doc, '//div[@class="table-responsive"]/div[@class="change_font"]');
 		//the "old" page format. We have very little structure here, doing the best we can.
 		var header = ZU.xpathText(doc, '//div[@class="table-responsive"]/ul[1]');
 		//Z.debug(header);
-		var date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
+		date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
 		if (date) item.date = date[1];
 		if (!item.publicationTitle) {
 			//most of the time the publication title is in quotation marks
-			var publication = header.match(/\"(.+?)\"/);
+			publication = header.match(/\"(.+?)\"/);
 			if (publication) item.publicationTitle = publication[1];
 			//if all else fails we just take the top of the file
 			else {
@@ -206,7 +207,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function(items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
