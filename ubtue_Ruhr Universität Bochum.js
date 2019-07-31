@@ -2,14 +2,14 @@
     "translatorID": "649b3328-3e6c-4c1f-b469-cb17235a7b93",
     "label": "Ruhr Universität Bochum",
     "creator": "Madeesh Kannan",
-    "target": "https?://er.ceres.rub.de/index.php/.+/(article)|(issue)/view/",
+    "target": "https?://er.ceres.rub.de/index.php/.+/((article)|(issue))/view/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-07-18 14:20:25"
+    "lastUpdated": "2019-07-31 16:50:25"
 }
 
 /*
