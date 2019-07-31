@@ -2,7 +2,7 @@
     "translatorID": "0c5a7d92-1a1e-407f-a139-d68abbac163c",
     "label": "Liverpool University Press Online",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/online.liverpooluniversitypress.co.uk\/(doi)|(toc)\/",
+    "target": "^https?:\/\/online.liverpooluniversitypress.co.uk\/((doi)|(toc))\/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
