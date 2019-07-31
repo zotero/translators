@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 15:40:06"
+	"lastUpdated": "2019-07-31 11:29:00"
 }
 
 /*
@@ -62,16 +62,16 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-        var abstracts = ZU.xpath(doc, '//p[@class="resume"]');
-        if (abstracts)
-            i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
+		var abstracts = ZU.xpath(doc, '//p[@class="resume"]');
+		if (abstracts)
+			i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
 
-        i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
-        var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
-        if (issueAndVol) {
-            i.volume = issueAndVol[1];
-            i.issue = issueAndVol[2];
-        }
+		i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
+		var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
+		if (issueAndVol) {
+			i.volume = issueAndVol[1];
+			i.issue = issueAndVol[2];
+		}
 
 		i.complete();
 	});
