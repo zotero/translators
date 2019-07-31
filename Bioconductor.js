@@ -2,21 +2,21 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "^https?://bioconductor.org/(packages|help)/",
+	"target": "^https?://bioconductor.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-31 19:31:29"
+	"lastUpdated": "2019-07-31 21:02:28"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
 	Bioconductor Packages Translator
-	Copyright © 2019 Qiang Hu
+	Copyright © 2018 Qiang Hu
 	
 	This file is part of Zotero.
 
@@ -86,6 +86,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
 	item.title = text(doc, '#PageContent > div.do_not_rebase > h2');
+	item.extra = "DOI: " + text(doc, '#PageContent > div.do_not_rebase > a:nth-child(1)');
 	
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i=0; i<rows.length; i++){
@@ -153,6 +154,7 @@ var testCases = [
 					}
 				],
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
@@ -216,6 +218,7 @@ var testCases = [
 					}
 				],
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
