@@ -13,16 +13,12 @@
 }
 
 function detectWeb(doc, url) {
-	if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
-		return "journalArticle";
-	}
-	//permalinks
-	else if (url.indexOf("/content/") != -1  && getRisUrl(doc) ) {
-		return "journalArticle";
-	}
-
-	else if ((url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) && getSearchResults(doc)) {
+	if (getSearchResults(doc)) {
 		return "multiple";
+	} else  if (url.indexOf("article?") != -1 || url.indexOf("article;") != -1 || url.indexOf("/art") != -1) {
+		return "journalArticle";
+	} else if (url.indexOf("/content/") != -1  && getRisUrl(doc) ) {
+		return "journalArticle";
 	}
 }
 
@@ -33,17 +29,15 @@ function getRisUrl(doc) {
 
 
 function getSearchResults(doc) {
-	var items = {}, found = false;
-	var rows = doc.getElementsByClassName('searchResultTitle');
-	for (var i=0; i<rows.length; i++) {
-		var id = ZU.xpathText(rows[i], './a/@href');
-		var title = ZU.xpathText(rows[i], './a/@title');
-		if (!id || !title) {
-			continue;
-		} else {
-			found = true;
-			items[id] = title;
-		}
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//div[@class="data"]//a')
+	for (let i = 0; i < rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		found = true;
+		items[href] = title;
 	}
 	return found ? items : false;
 }
@@ -112,6 +106,10 @@ function scrape(newDoc, url){
 						item.DOI = item.DOI.substr(4);
 					}
 				}
+
+				if (item.abstractNote)
+					item.abstractNote = item.abstractNote.replace(/\bAbstract\b/g, "");
+
 				item.complete();
 			});
 			translator.translate();
