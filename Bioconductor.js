@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-01 14:33:27"
+	"lastUpdated": "2019-08-01 15:28:32"
 }
 
 /*
@@ -115,7 +115,7 @@ function scrape(doc, url) {
 	item.versionNumber = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Version")]/following-sibling::td');
 	item.date = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Published")]/following-sibling::td');
 	item.rights = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "License")]/following-sibling::td');
-	item.url = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Package Short Url")]/following-sibling::td');
+	item.url = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Package Short Url")]/following-sibling::td') || url;
 	item.company = 'Bioconductor';
 	var year = new Date().getFullYear();
 	item.date = ZU.strToISO(year);
