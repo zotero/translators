@@ -2,14 +2,14 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "^https?://bioconductor.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
+	"target": "bioconductor.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-31 21:02:28"
+	"lastUpdated": "2019-08-01 14:33:27"
 }
 
 /*
@@ -93,8 +93,8 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
-	item.title = text(doc, '#PageContent > div.do_not_rebase > h2');
-	item.extra = "DOI: " + text(doc, '#PageContent > div.do_not_rebase > a:nth-child(1)');
+	item.title = text(doc, '#PageContent > h1') + ": " + text(doc, '#PageContent > div.do_not_rebase > h2');
+	item.extra = 'DOI: ' + text(doc, '#PageContent > div.do_not_rebase > a:nth-child(1)');
 
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i = 0; i < rows.length; i++) {
@@ -116,6 +116,9 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Published")]/following-sibling::td');
 	item.rights = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "License")]/following-sibling::td');
 	item.url = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Package Short Url")]/following-sibling::td');
+	item.company = 'Bioconductor';
+	var year = new Date().getFullYear();
+	item.date = ZU.strToISO(year);
 
 	var tags = ZU.xpath(doc, '//td[contains(text(), "biocViews")]/following-sibling::td/a');
 	for (let i = 0; i < tags.length; i++) {
@@ -126,7 +129,8 @@ function scrape(doc, url) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [{
+var testCases = [
+	{
 		"type": "web",
 		"url": "https://bioconductor.org/help/search/index.html?q=SummarizedExperiment/",
 		"items": "multiple"
@@ -134,122 +138,136 @@ var testCases = [{
 	{
 		"type": "web",
 		"url": "https://bioconductor.org/packages/release/bioc/html/SummarizedExperiment.html",
-		"items": [{
-			"itemType": "computerProgram",
-			"title": "SummarizedExperiment container",
-			"creators": [{
-					"firstName": "Martin",
-					"lastName": "Morgan",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Valerie",
-					"lastName": "Obenchain",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Jim",
-					"lastName": "Hester",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Hervé",
-					"lastName": "Pagès",
-					"creatorType": "author"
-				}
-			],
-			"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
-			"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
-			"libraryCatalog": "Bioconductor",
-			"rights": "Artistic-2.0",
-			"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-			"versionNumber": "1.14.0",
-			"attachments": [],
-			"tags": [{
-					"tag": "Annotation"
-				},
-				{
-					"tag": "Coverage"
-				},
-				{
-					"tag": "Genetics"
-				},
-				{
-					"tag": "GenomeAnnotation"
-				},
-				{
-					"tag": "Infrastructure"
-				},
-				{
-					"tag": "Sequencing"
-				},
-				{
-					"tag": "Software"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "SummarizedExperiment: SummarizedExperiment container",
+				"creators": [
+					{
+						"firstName": "Martin",
+						"lastName": "Morgan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Valerie",
+						"lastName": "Obenchain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jim",
+						"lastName": "Hester",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hervé",
+						"lastName": "Pagès",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"company": "Bioconductor",
+				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
+				"libraryCatalog": "Bioconductor",
+				"rights": "Artistic-2.0",
+				"shortTitle": "SummarizedExperiment",
+				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
+				"versionNumber": "1.14.0",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Annotation"
+					},
+					{
+						"tag": "Coverage"
+					},
+					{
+						"tag": "Genetics"
+					},
+					{
+						"tag": "GenomeAnnotation"
+					},
+					{
+						"tag": "Infrastructure"
+					},
+					{
+						"tag": "Sequencing"
+					},
+					{
+						"tag": "Software"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	},
 	{
 		"type": "web",
 		"url": "https://bioconductor.org/packages/devel/bioc/html/SummarizedExperiment.html",
-		"items": [{
-			"itemType": "computerProgram",
-			"title": "SummarizedExperiment container",
-			"creators": [{
-					"firstName": "Martin",
-					"lastName": "Morgan",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Valerie",
-					"lastName": "Obenchain",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Jim",
-					"lastName": "Hester",
-					"creatorType": "author"
-				},
-				{
-					"firstName": "Hervé",
-					"lastName": "Pagès",
-					"creatorType": "author"
-				}
-			],
-			"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
-			"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
-			"libraryCatalog": "Bioconductor",
-			"rights": "Artistic-2.0",
-			"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-			"versionNumber": "1.15.5",
-			"attachments": [],
-			"tags": [{
-					"tag": "Annotation"
-				},
-				{
-					"tag": "Coverage"
-				},
-				{
-					"tag": "Genetics"
-				},
-				{
-					"tag": "GenomeAnnotation"
-				},
-				{
-					"tag": "Infrastructure"
-				},
-				{
-					"tag": "Sequencing"
-				},
-				{
-					"tag": "Software"
-				}
-			],
-			"notes": [],
-			"seeAlso": []
-		}]
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "SummarizedExperiment: SummarizedExperiment container",
+				"creators": [
+					{
+						"firstName": "Martin",
+						"lastName": "Morgan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Valerie",
+						"lastName": "Obenchain",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jim",
+						"lastName": "Hester",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hervé",
+						"lastName": "Pagès",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"company": "Bioconductor",
+				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
+				"libraryCatalog": "Bioconductor",
+				"rights": "Artistic-2.0",
+				"shortTitle": "SummarizedExperiment",
+				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
+				"versionNumber": "1.15.5",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Annotation"
+					},
+					{
+						"tag": "Coverage"
+					},
+					{
+						"tag": "Genetics"
+					},
+					{
+						"tag": "GenomeAnnotation"
+					},
+					{
+						"tag": "Infrastructure"
+					},
+					{
+						"tag": "Sequencing"
+					},
+					{
+						"tag": "Software"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
