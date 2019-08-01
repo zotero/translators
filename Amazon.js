@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-03-23 07:21:31"
+	"lastUpdated": "2019-08-01 06:16:18"
 }
 
 // attr()/text() v2
@@ -24,8 +24,13 @@ function detectWeb(doc, url) {
 			if (Zotero.isBookmarklet) return "server";
 			
 			var storeID = attr(doc, 'input[name="storeID"]', 'value');
+			if (storeID && storeID == "gateway") {
+				storeID = attr(doc, 'div[id="dp"]', 'class');
+				// delete language code
+				storeID = storeID.replace(/[a-z][a-z]_[A-Z][A-Z]/, "").trim();
+			}
 			if (storeID) {
-				if (storeID.indexOf("books")>-1) {
+				if (storeID.indexOf("book")>-1) {
 					return "book";
 				} else if (storeID=="music"|storeID=="dmusic"){
 					return "audioRecording";
