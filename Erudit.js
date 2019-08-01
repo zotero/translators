@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.result h3 a, .article-item h6 a');
+	var rows = ZU.xpath(doc, '//h6[@class="bib-record__title"]//a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
