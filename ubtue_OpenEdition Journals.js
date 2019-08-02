@@ -37,7 +37,7 @@
 function detectWeb(doc, url) {
 	if (getSearchResults(doc))
 		return "multiple";
-	else {
+	else if (ZU.xpath(doc, '//h1[@id="docTitle"]').length === 1) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
