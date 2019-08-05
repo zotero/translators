@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-25 19:25:26"
+	"lastUpdated": "2019-08-05 20:12:04"
 }
 
 /*
@@ -51,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	var rows = ZU.xpath(doc, '//div[@id="articleSearchContainer"]//a[@class="Link" and contains(@href, "doc?")]');
 
 	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
+		var href = permaLink(rows[i].href);
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -102,13 +102,18 @@ function permaLink(URL) {
 }
 
 function pdfLink(URL) {
+	// from regular link
 	 var id = URL.match(/id=(\d+)/);
+	 if (!id & URL.includes("/browse/doc/")) {
+	 	// from permalink
+	 	id = URL.match(/\/browse\/doc\/(\d+)/);
+	 }
 	 if (id) return "/browse/pdf-download?articleid=" + id[1];
 	 else return URL;
 }
 
 function scrape(doc, url) {
-	//Z.debug(url);
+	Z.debug(url);
 	var item = new Zotero.Item("newspaperArticle");
 	var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
 	item.publicationTitle = publication;
