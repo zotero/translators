@@ -11,8 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 11:41:00"
+	"lastUpdated": "2019-08-07 11:11:24"
 }
 
 function detectImport() {
@@ -127,7 +126,11 @@ var isEndNote = false;
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
 	if (fieldMap[tag]) {
-		item[fieldMap[tag]] = value;
+		if (item[fieldMap[tag]]) {
+			item[fieldMap[tag]] += ", " + value;
+		} else {
+			item[fieldMap[tag]] = value;
+		}
 	} else if (inputFieldMap[tag]) {
 		item[inputFieldMap[tag]] = value;
 	} else if (tag == "0") {
@@ -143,12 +146,12 @@ function processTag(item, tag, value) {
 			// fall back to generic
 			if (!item.itemType) item.itemType = inputTypeMap["Generic"];
 		}
-	} else if (tag == "A" || tag == "E" || tag == "?") {
+	} else if (tag == "A" || tag == "E" || tag == "Y") {
 		if (tag == "A") {
 			var type = "author";
 		} else if (tag == "E") {
 			var type = "editor";
-		} else if (tag == "?") {
+		} else if (tag == "Y") {
 			var type = "translator";
 		}
 		
@@ -178,7 +181,10 @@ function processTag(item, tag, value) {
 			item.date = value;
 		}
 	} else if (tag == "K") {
-		item.tags = value.split("\n");
+		if (!item.tags || item.tags.length == 0) {
+			item.tags = [];
+		}
+		item.tags.push(...value.split("\n"));
 	}
 }
 
@@ -327,6 +333,57 @@ var testCases = [
 					"参考文献管理 文献管理软件 学术书签网站 Zotero"
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "%0 Book\n%R oai:nb.bibsys.no:998320569524702202\n%R URN:NBN:no-nb_digibok_2016062048105\n%U https://urn.nb.no/URN:NBN:no-nb_digibok_2016062048105\n%T Usynlige byer\n%A Calvino, Italo\n%Y Aardal, Jorunn\n%E Stender Clausen, Jørgen\n%D 1982\n%G Flerspråklig\n%G Norsk (Bokmål)\n%G Italiensk\n%G Dansk\n%Z Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2016-11-03\n%I Aschehoug\n%C Oslo\n%@ 8203107354\n%K Italiensk litteratur\n%K Idealbyer\n%K kjernelitteratur\n%P 173 s.",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Usynlige byer",
+				"creators": [
+					{
+						"firstName": "Italo",
+						"lastName": "Calvino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jorunn",
+						"lastName": "Aardal",
+						"creatorType": "translator"
+					},
+					{
+						"firstName": "Jørgen",
+						"lastName": "Stender Clausen",
+						"creatorType": "editor"
+					}
+				],
+				"date": "1982",
+				"ISBN": "8203107354",
+				"language": "Flerspråklig, Norsk (Bokmål), Italiensk, Dansk",
+				"place": "Oslo",
+				"publisher": "Aschehoug",
+				"url": "https://urn.nb.no/URN:NBN:no-nb_digibok_2016062048105",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Idealbyer"
+					},
+					{
+						"tag": "Italiensk litteratur"
+					},
+					{
+						"tag": "kjernelitteratur"
+					}
+				],
+				"notes": [
+					{
+						"note": "Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2016-11-03"
+					}
+				],
 				"seeAlso": []
 			}
 		]
