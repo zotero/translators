@@ -49,7 +49,7 @@ function getSearchResults(doc) {
 
         if (!href || !title)
             continue;
-        if (title.match(/^PDF/i))
+        if (title.match(/^PDF|EPUB|XML|HTML/i))
             continue;
         found = true;
         items[href] = title;
