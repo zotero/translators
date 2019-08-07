@@ -2,14 +2,14 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "bioconductor.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
+	"target": "bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-01 15:28:32"
+	"lastUpdated": "2019-08-07 15:32:21"
 }
 
 /*
@@ -51,8 +51,12 @@ function text(docOrElem, selector, index) {
 function detectWeb(doc, url) {
 	if (url.includes('/bioc/html/')) {
 		return "computerProgram";
-	} else if (url.includes('/search/index.html') && getSearchResults(doc, true)) {
+	}
+	else if (url.includes('/search/index.html') && getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	else {
+		return "webpage";
 	}
 }
 
@@ -85,7 +89,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else if (detectWeb(doc, url) == "computerProgram") {
 		scrape(doc, url);
 	}
 }
@@ -172,7 +177,7 @@ var testCases = [
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-				"versionNumber": "1.14.0",
+				"versionNumber": "1.14.1",
 				"attachments": [],
 				"tags": [
 					{
@@ -239,7 +244,7 @@ var testCases = [
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-				"versionNumber": "1.15.5",
+				"versionNumber": "1.15.6",
 				"attachments": [],
 				"tags": [
 					{
