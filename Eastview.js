@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-05 20:12:04"
+	"lastUpdated": "2019-08-07 20:23:09"
 }
 
 /*
@@ -161,9 +161,12 @@ function scrape(doc, url) {
 		var place = ZU.xpathText(metatable, './/td[contains(text(), "Place of Publication")]/following-sibling::td');
 		if (place) item.place = ZU.trimInternal(place);
 	} else {
-		title = ZU.xpathText(doc, '//div[@class="table-responsive"]/div[@class="change_font"]');
+		title = ZU.xpathText(doc, '//div[@class="ArticleTitle"]');
+		if (!title) {
+			title = ZU.xpathText(doc, '//div[contains(@class, "table-responsive")]/div[@class="change_font"]');
+		}	
 		//the "old" page format. We have very little structure here, doing the best we can.
-		var header = ZU.xpathText(doc, '//div[@class="table-responsive"]/ul[1]');
+		var header = ZU.xpathText(doc, '//div[contains(@class, "table-responsive")]/ul[1]');
 		//Z.debug(header);
 		date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
 		if (date) item.date = date[1];
@@ -173,7 +176,7 @@ function scrape(doc, url) {
 			if (publication) item.publicationTitle = publication[1];
 			//if all else fails we just take the top of the file
 			else {
-				item.publicationTitle = header.trim().match(/^.+/);
+				item.publicationTitle = header.trim().match(/^.+/)[0];
 			}
 		}
 	}
