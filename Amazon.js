@@ -9,41 +9,44 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-08-01 06:16:18"
+	"lastUpdated": "2019-08-11 10:33:35"
 }
 
 // attr()/text() v2
+// eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	}
 	else if (attr(doc, 'input[name*="ASIN"]', 'value')) {
 		if (Zotero.isBookmarklet) return "server";
-			
-		var storeID = attr(doc, 'input[name="storeID"]', 'value');
-		if (storeID && storeID == "gateway") {
-			storeID = attr(doc, 'div[id="dp"]', 'class');
-			// delete language code
-			storeID = storeID.replace(/[a-z][a-z]_[A-Z][A-Z]/, "").trim();
+		
+		var productClass = attr(doc, 'div[id="dp"]', 'class');
+		if (!productClass) {
+			Z.debug("No product class found, try store ID instead.");
+			productClass = attr(doc, 'input[name="storeID"]', 'value');
 		}
-		if (storeID) {
-			if (storeID.includes("book")) {
+		// delete language code
+		productClass = productClass.replace(/[a-z][a-z]_[A-Z][A-Z]/, "").trim();
+		
+		if (productClass) {
+			if (productClass.includes("book")) { // also ebooks
 				return "book";
 			}
-			else if (storeID == "music" | storeID == "dmusic") {
+			else if (productClass == "music" | productClass == "dmusic") {
 				return "audioRecording";
 			}
-			else if (storeID == "dvd" | storeID == "dvd-de" | storeID == "video" | storeID == "movies-tv") {
+			else if (productClass == "dvd" | productClass == "dvd-de" | productClass == "video" | productClass == "movies-tv") {
 				return "videoRecording";
 			}
-			else if (storeID == "videogames" | storeID == "mobile-apps") {
+			else if (productClass == "videogames" | productClass == "mobile-apps") {
 				return "computerProgram";
 			}
 			else {
-				Z.debug("Items in this store will be ignored by Zotero: " + storeID);
+				Z.debug("Unknown product class" + productClass + "will be ignored by Zotero");
 			}
 		}
 		else {
@@ -65,18 +68,11 @@ function detectWeb(doc, url) {
 
 function getSearchResults(doc, checkOnly) {
 	// search results
-	var links = [],
-		container = doc.getElementById('searchTemplate');
-	if (container) {
-		links = container.getElementsByClassName('s-access-detail-page');
-		if (!links.length) {
-			links = ZU.xpath(container, './/div[contains(@class,"results")]/div[starts-with(@id,"result_")]//h3/a');
-		}
-	}
+	var links = doc.querySelectorAll('div.s-result-list h2>a');
 	
 	if (!links.length) {
 		// wish lists
-		container = doc.getElementById('item-page-wrapper');
+		var container = doc.getElementById('item-page-wrapper');
 		if (container) {
 			links = ZU.xpath(container, './/a[starts-with(@id, "itemName_")]');
 		}
@@ -84,10 +80,7 @@ function getSearchResults(doc, checkOnly) {
 	
 	if (!links.length) {
 		// author pages
-		container = doc.getElementById('mainResults');
-		if (container) {
-			links = ZU.xpath(container, './/li[starts-with(@id, "result_")]//a[h2]');
-		}
+		links = ZU.xpath(doc, '//div[@id="searchWidget"]//a[span[contains(@class, "a-size-medium")]]');
 	}
 	
 	if (!links.length) return false;
@@ -138,7 +131,9 @@ var CREATOR = {
 
 var DATE = [
 	"Original Release Date",
-	"DVD Release Date"
+	"DVD Release Date",
+	"Erscheinungstermin",
+	"Date de sortie du DVD"
 ];
 
 // localization
@@ -197,7 +192,8 @@ function scrape(doc, url) {
 		|| doc.getElementById('title_row')
 		|| doc.getElementById('productTitle')
 		|| doc.getElementById('ebooksProductTitle')
-		|| doc.getElementById('title_feature_div');
+		|| doc.getElementById('title_feature_div')
+		|| doc.getElementById('dmusicProductTitle_feature_div');
 	// get first non-empty text node (other text nodes are things like [Paperback] and dates)
 	item.title = ZU.trimInternal(
 		ZU.xpathText(title, '(.//text()[normalize-space(self::text())])[1]')
@@ -258,7 +254,7 @@ function scrape(doc, url) {
 					if (!name.includes(' ')) name = name.replace(/.$/, ' $&');
 					name = name.replace(/\s+/, ', '); // Surname comes first
 				}
-				item.creators.push(ZU.cleanAuthor(name, role, invertName));
+				item.creators.push(ZU.cleanAuthor(name, role, name.includes(',')));
 			}
 		}
 	}
@@ -416,13 +412,13 @@ var testCases = [
 				],
 				"date": "April 1, 2010",
 				"ISBN": "9780810989894",
-				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” —School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” —Booklist",
-				"edition": "Reprint edition",
+				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” ―School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” ―Booklist",
+				"edition": "Reprint",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 320,
 				"place": "New York",
-				"publisher": "Harry N. Abrams",
+				"publisher": "Amulet Paperbacks",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -443,7 +439,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/Loveless-My-Bloody-Valentine/dp/B000002LRJ/ref=ntt_mus_ep_dpi_1",
+		"url": "https://www.amazon.com/Loveless-My-Bloody-Valentine/dp/B000002LRJ/ref=ntt_mus_ep_dpi_1",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -451,7 +447,7 @@ var testCases = [
 				"creators": [],
 				"date": "November 5, 1991",
 				"audioRecordingFormat": "Audio CD",
-				"label": "Sire / London/Rhino",
+				"label": "Sire",
 				"libraryCatalog": "Amazon",
 				"attachments": [
 					{
@@ -473,7 +469,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/Adaptation-Superbit-Collection-Nicholas-Cage/dp/B00005JLRE/ref=sr_1_1?ie=UTF8&qid=1309683150&sr=8-1",
+		"url": "https://www.amazon.com/Adaptation-Superbit-Collection-Nicholas-Cage/dp/B00005JLRE/ref=sr_1_1?ie=UTF8&qid=1309683150&sr=8-1",
 		"items": [
 			{
 				"itemType": "videoRecording",
@@ -508,21 +504,6 @@ var testCases = [
 						"firstName": "Spike",
 						"lastName": "Jonze",
 						"creatorType": "director"
-					},
-					{
-						"firstName": "Ed",
-						"lastName": "Saxon",
-						"creatorType": "producer"
-					},
-					{
-						"firstName": "Jonathan",
-						"lastName": "Demme",
-						"creatorType": "producer"
-					},
-					{
-						"firstName": "Vincent",
-						"lastName": "Landay",
-						"creatorType": "producer"
 					}
 				],
 				"date": "May 20, 2003",
@@ -600,8 +581,8 @@ var testCases = [
 				],
 				"date": "1. Mai 1992",
 				"ISBN": "9783596105816",
-				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«.   »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"edition": "13",
+				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«. »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
+				"edition": "14",
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon",
 				"numPages": 192,
@@ -673,8 +654,8 @@ var testCases = [
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "A. Palme",
-						"lastName": "Sanavio",
+						"firstName": "A.",
+						"lastName": "Palme Larussa Sanavio",
 						"creatorType": "translator"
 					}
 				],
@@ -846,9 +827,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "August 2, 2012",
+				"date": "2012/8/2",
 				"ISBN": "9780099578079",
-				"edition": "Combined volume edition",
+				"edition": "Combined volume版",
 				"language": "英語",
 				"libraryCatalog": "Amazon",
 				"numPages": 1328,
@@ -874,49 +855,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/About-Nothing-Shakespeares-Globe-Theatre/dp/B00AJER4EM/ref=sr_1_1/175-9708720-8034706?ie=UTF8&qid=1409188213&sr=8-1&keywords=globe+shakespeare",
-		"items": [
-			{
-				"itemType": "videoRecording",
-				"title": "Much Ado About Nothing",
-				"creators": [
-					{
-						"firstName": "Charles",
-						"lastName": "Edwards",
-						"creatorType": "castMember"
-					},
-					{
-						"firstName": "Eve",
-						"lastName": "Best",
-						"creatorType": "castMember"
-					},
-					{
-						"firstName": "Shakespeare's Globe",
-						"lastName": "Theatre",
-						"creatorType": "director"
-					}
-				],
-				"date": "February 26, 2013",
-				"language": "English",
-				"libraryCatalog": "Amazon",
-				"runningTime": "166 minutes",
-				"studio": "Kultur",
-				"attachments": [
-					{
-						"title": "Amazon.com Link",
-						"snapshot": false,
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.amazon.com/First-Quarto-Hamlet-Cambridge-Shakespeare/dp/0521653908/",
+		"url": "https://www.amazon.com/First-Quarto-Hamlet-Cambridge-Shakespeare-dp-0521418194/dp/0521418194/ref=mt_hardcover?_encoding=UTF8&me=&qid=",
 		"items": [
 			{
 				"itemType": "book",
@@ -933,13 +872,14 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "April 13, 1999",
-				"ISBN": "9780521653909",
+				"date": "28. April 1998",
+				"ISBN": "9780521418195",
 				"abstractNote": "The first printed text of Shakespeare's Hamlet is about half the length of the more familiar second quarto and Folio versions. It reorders and combines key plot elements to present its own workable alternatives. This is the only modernized critical edition of the 1603 quarto in print. Kathleen Irace explains its possible origins, special features and surprisingly rich performance history, and while describing textual differences between it and other versions, offers alternatives that actors or directors might choose for specific productions.",
+				"edition": "First Edition",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 144,
-				"place": "Cambridge",
+				"place": "New York",
 				"publisher": "Cambridge University Press",
 				"attachments": [
 					{
@@ -968,7 +908,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "September 16, 1977",
+				"date": "1977/9/16",
 				"ISBN": "9784003314210",
 				"language": "日本語",
 				"libraryCatalog": "Amazon",
@@ -988,7 +928,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/gp/product/B00TWK3NFS",
+		"url": "https://www.amazon.com/gp/product/B00TWK3NFS",
 		"items": [
 			{
 				"itemType": "book",
@@ -1002,12 +942,47 @@ var testCases = [
 				],
 				"date": "April 3, 2015",
 				"abstractNote": "Streamline KPIs to craft a simpler, more effective system of performance measurement Key Performance Indicators provides an in-depth look at how KPIs can be most effectively used to assess and drive organizational performance. Now in its third edition, this bestselling guide provides a model for simplifying KPIs and avoiding the pitfalls ready to trap the unprepared organization. New information includes guidance toward defining critical success factors, project leader essentials, new tools including worksheets and questionnaires, and real-world case studies that illustrate the practical application of the strategies presented. The book includes a variety of templates, checklists, and performance measures to help streamline processes, and is fully supported by the author’s website to provide even more in-depth information. Key Performance Indicators are a set of measures that focus on the factors most critical to an organization’s success. Most companies have too many, rendering the strategy ineffective due to overwhelming complexity. Key Performance Indicators guides readers toward simplification, paring down to the most fundamental issues to better define and measure progress toward goals. Readers will learn to:  separate out performance measures between those that can be tied to a team and result in a follow-up phone call (performance measures) and those that are a summation of a number of teams working together (result indicators) look for and eradicate those measures that have a damaging unintended consequence, a major darkside Sell a KPI project to the Board, the CEO, and the senior management team using best practice leading change techniques Develop and use KPIs effectively with a simple five stage  model Ascertain essential performance measures, and develop a reporting strategy   Learn the things that a KPI project leader needs to know  A KPI project is a chance at a legacy – the project leader, facilitator, or coordinator savvy enough to craft a winning strategy can affect the organization for years to come. KPI projects entail some risk, but this book works to minimize that risk by arming stakeholders with the tools and information they need up front. Key Performance Indicators helps leaders shape a performance measurement initiative that works.",
-				"edition": "3 edition",
+				"edition": "3",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 412,
 				"publisher": "Wiley",
 				"shortTitle": "Key Performance Indicators",
+				"attachments": [
+					{
+						"title": "Amazon.com Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.amazon.com/Studies-Saiva-Siddhanta-Classic-Reprint-Nallasvami/dp/1333821387/ref=sr_1_1?keywords=saiva+siddhanta&s=gateway",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Studies in Saiva-Siddhanta",
+				"creators": [
+					{
+						"firstName": "J. M. Nallasvami",
+						"lastName": "Pillai",
+						"creatorType": "author"
+					}
+				],
+				"date": "24. April 2018",
+				"ISBN": "9781333821388",
+				"abstractNote": "Excerpt from Studies in Saiva-SiddhantaEuropean Sanskritist, unaware perhaps of the bearings of the expression, rendered the collocation Parama-hamsa' into 'great goose'. The strictly pedagogic purist may endeavour to justify such puerile versions on etymological grounds, but they stand Self-condemned as mal-interpretations reﬂecting anything but the sense and soul of the original. Such lapses into unwitting ignorance, need never be expected in any of the essays contained in the present collection, as our author is not only a sturdy and indefatigable researcher in Tamil philosophic literature illuminative Of the Agamic religion, but has also, in his quest after Truth, freely utilised the services of those Indigenous savam's, who represent the highest water-mark of Hindu traditional learning and spiritual associations at the present-day.About the PublisherForgotten Books publishes hundreds of thousands of rare and classic books. Find more at www.forgottenbooks.comThis book is a reproduction of an important historical work. Forgotten Books uses state-of-the-art technology to digitally reconstruct the work, preserving the original format whilst repairing imperfections present in the aged copy. In rare cases, an imperfection in the original, such as a blemish or missing page, may be replicated in our edition. We do, however, repair the vast majority of imperfections successfully; any imperfections that remain are intentionally left to preserve the state of such historical works.",
+				"language": "English",
+				"libraryCatalog": "Amazon",
+				"numPages": 398,
+				"place": "Place of publication not identified",
+				"publisher": "Forgotten Books",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
