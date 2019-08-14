@@ -467,10 +467,14 @@ function addHighwireMetadata(doc, newItem) {
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
-	var firstpage = getContentText(doc, 'citation_firstpage') ||
-					rdfPages[0];
-	var lastpage = getContentText(doc, 'citation_lastpage') ||
-					rdfPages[1];
+	var firstpage = getContentText(doc, 'citation_firstpage');
+	var lastpage = getContentText(doc, 'citation_lastpage');
+	if (firstpage && firstpage.includes("-")) {
+		firstpage = firstpage.split(/\s*-\s*/)[0];
+		lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+	}
+	firstpage = firstpage || rdfPages[0];
+	var lastpage = lastpage || rdfPages[1];
 	if(firstpage && ( firstpage = firstpage.trim() )) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
