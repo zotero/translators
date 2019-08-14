@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-07-09 06:17:22"
+	"lastUpdated": "2019-08-11 18:43:54"
 }
 
 /*
@@ -34,6 +34,12 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 
 function detectWeb(doc, url) {
 	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
@@ -82,57 +88,30 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var newItem = new Zotero.Item("videoRecording");
-	// grab the JSON in the header of the page and remove JS code
-	var data = ZU.xpathText(doc, '//script[contains(text(), "ytplayer.config")]');
-	data = data.match(/ytplayer\.config\s*=(.+?);\s*ytplayer\.load/)[1];
-	// Z.debug(data)
-	try {
-		var obj = JSON.parse(data);
-	}
-	catch (e) {
-		Zotero.debug("JSON parse error trying to parse: " + data);
-		throw e;
-	}
+	var item = new Zotero.Item("videoRecording");
+	item.title = text(doc, '#info-contents h1.title');
+	item.url = url;
+	item.runningTime = text(doc, '#movie_player .ytp-time-duration');
 	
-	var args = obj.args;
-	if (!args.title) {
-		Z.debug(args);
-		throw new Error("args.title is missing");
-	}
-	
-	newItem.title = args.title;
-	if (args.keywords) {
-		Z.debug(args.keywords);
-		var keywords = args.keywords.split(/\s*,\s*/);
-		for (var i = 0; i < keywords.length; i++) {
-			newItem.tags.push(Zotero.Utilities.trimInternal(keywords[i]));
-		}
-	}
-
-	newItem.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content')
+	item.date = ZU.xpathText(doc, '//meta[@itemProp="datePublished"]/@content')
 		|| ZU.xpathText(doc, '//span[contains(@class, "date")]');
-	if (newItem.date) {
-		newItem.date = ZU.strToISO(newItem.date);
+	if (item.date) {
+		item.date = ZU.strToISO(item.date);
 	}
-
-	var author = args.author;
+	var author = text(doc, '#meta-contents #owner-name');
 	if (author) {
-		author = { lastName: author, creatorType: "author", fieldMode: 1 };
-		newItem.creators.push(author);
+		item.creators.push({
+			lastName: author,
+			creatorType: "author",
+			fieldMode: 1
+		});
 	}
-
-	newItem.url = url;
-	var runningTime = args.length_seconds;
-	if (runningTime) {
-		newItem.runningTime = runningTime + " seconds";
-	}
-	// the description is not in the JSON
 	var description = doc.getElementById("description");
 	if (description) {
-		newItem.abstractNote = ZU.cleanTags(description.innerHTML);
+		item.abstractNote = ZU.cleanTags(description.innerHTML);
 	}
-	newItem.complete();
+	
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
@@ -161,7 +140,7 @@ var testCases = [
 				"date": "2007-01-01",
 				"abstractNote": "Zotero is a free, easy-to-use research tool that helps you gather and organize resources (whether bibliography or the full text of articles), and then lets you to annotate, organize, and share the results of your research. It includes the best parts of older reference manager software (like EndNote)—the ability to store full reference information in author, title, and publication fields and to export that as formatted references—and the best parts of modern software such as del.icio.us or iTunes, like the ability to sort, tag, and search in advanced ways. Using its unique ability to sense when you are viewing a book, article, or other resource on the web, Zotero will—on many major research sites—find and automatically save the full reference information for you in the correct fields.",
 				"libraryCatalog": "YouTube",
-				"runningTime": "172 seconds",
+				"runningTime": "2:52",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
 				"attachments": [],
 				"tags": [],
