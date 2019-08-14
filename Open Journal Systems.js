@@ -12,32 +12,58 @@
 	"lastUpdated": "2019-08-14 12:53:38"
 }
 
-function detectWeb(doc, url) {
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2012 Aurimas Vinckevicius
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+function detectWeb(doc, _url) {
 	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
-	if ( ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||	//some sites remove this
-		pkpLibraries.length >= 1) {
+	if (ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/'	// some sites remove this
+		|| pkpLibraries.length >= 1) {
 		return 'journalArticle';
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
 	// In OJS 3, up to at least version 3.1.1-2, the PDF view does not
 	// include metadata, so we must get it from the article landing page.
 	var urlParts = url.match(/(.+\/article\/view\/)([^/]+)\/[^/]+/);
-	if (urlParts) { //PDF view
+	if (urlParts) { // PDF view
 		ZU.processDocuments(urlParts[1] + urlParts[2], scrape);
-	} else { //Article view
+	}
+	else { // Article view
 		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	//use Embeded Metadata
+function scrape(doc, _url) {
+	// use Embeded Metadata
 	var trans = Zotero.loadTranslator('web');
 	trans.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	trans.setDocument(doc);
 
-	trans.setHandler('itemDone', function(obj, item) {
+	trans.setHandler('itemDone', function (obj, item) {
 		if (!item.itemType) {
 			item.itemType = "journalArticle";
 		}
@@ -46,18 +72,17 @@ function scrape(doc, url) {
 			item.title = doc.getElementById('articleTitle');
 		}
 		
-		if (item.creators.length==0) {
+		if (item.creators.length == 0) {
 			var authorString = doc.getElementById("authorString");
 			if (authorString) {
 				var authorsList = authorString.textContent.split(',');
-				for (var i=0; i<authorsList.length; i++) {
+				for (let i = 0; i < authorsList.length; i++) {
 					item.creators.push(ZU.cleanAuthor(authorsList[i], "author"));
 				}
-		
 			}
 		}
 		
-		if (item.journalAbbreviation && item.journalAbbreviation=="1") {
+		if (item.journalAbbreviation && item.journalAbbreviation == "1") {
 			delete item.journalAbbreviation;
 		}
 		
@@ -66,12 +91,12 @@ function scrape(doc, url) {
 			item.DOI = doiNode.textContent;
 		}
 		
-		//abstract is supplied in DC:description, so it ends up in extra
-		//abstractNote is pulled from description, which is same as title
+		// abstract is supplied in DC:description, so it ends up in extra
+		// abstractNote is pulled from description, which is same as title
 		item.abstractNote = item.extra;
 		item.extra = undefined;
 
-		//if we still don't have abstract, we can try scraping from page
+		// if we still don't have abstract, we can try scraping from page
 		if (!item.abstractNote) {
 			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]')
 				|| ZU.xpathText(doc, '//div[contains(@class, "main_entry")]/div[contains(@class, "abstract")]');
@@ -82,8 +107,8 @@ function scrape(doc, url) {
 		
 		var pdfAttachment = false;
 		
-		//some journals link to a PDF view page in the header, not the PDF itself
-		for (var i=0; i<item.attachments.length; i++) {
+		// some journals link to a PDF view page in the header, not the PDF itself
+		for (let i = 0; i < item.attachments.length; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
 				pdfAttachment = true;
 				item.attachments[i].url = item.attachments[i].url.replace(/\/article\/view\//, '/article/download/');
@@ -91,8 +116,8 @@ function scrape(doc, url) {
 		}
 		
 		var pdfUrl = doc.querySelector("a.obj_galley_link.pdf");
-		//add linked PDF if there isn't one listed in the header
-		if (!pdfAttachment && pdfUrl) { 
+		// add linked PDF if there isn't one listed in the header
+		if (!pdfAttachment && pdfUrl) {
 			item.attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
