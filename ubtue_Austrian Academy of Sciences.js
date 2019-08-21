@@ -1,15 +1,15 @@
 {
-	"translatorID": "55275811-58f4-4f5e-b711-a043f1fc50da",
-	"label": "OpenEdition Journals",
+	"translatorID": "a54b6c57-0127-495b-8bd7-7eaa98f35d61",
+	"label": "Austrian Academy of Sciences",
 	"creator": "Madeesh Kannan",
-	"target": "https?://journals.openedition.org",
+	"target": "^https?:\/\/www.austriaca.at\/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 90,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-31 11:29:00"
+	"lastUpdated": "2019-08-21 13:14:00"
 }
 
 /*
@@ -35,9 +35,9 @@
 
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc))
+	if (url.match(/inhalt$/))
 		return "multiple";
-	else if (ZU.xpath(doc, '//h1[@id="docTitle"]').length === 1) {
+	else if (url.match(/\/\?arp=/)) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
@@ -46,11 +46,15 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//li[contains(@class,"textes")]//div[@class="title"]//a')
+	var rows = ZU.xpath(doc, '//a[contains(@href, "?arp=")]')
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
+		if (!href || !title)
+			continue;
+		else if (title.match(/^\(A|abstract\)$/))
+			continue;
+
 		found = true;
 		items[href] = title;
 	}
@@ -62,17 +66,6 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-		var abstracts = ZU.xpath(doc, '//p[@class="resume"]');
-		if (abstracts)
-			i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
-
-		i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
-		var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
-		if (issueAndVol) {
-			i.volume = issueAndVol[1];
-			i.issue = issueAndVol[2];
-		}
-
 		i.complete();
 	});
 	translator.translate();

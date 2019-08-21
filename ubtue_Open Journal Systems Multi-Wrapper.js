@@ -1,15 +1,15 @@
 {
-    "translatorID": "649b3328-3e6c-4c1f-b469-cb17235a7b93",
-    "label": "Ruhr Universität Bochum",
+    "translatorID": "b60e74db-2e5d-4b2a-94ac-f484737364b1",
+    "label": "Open Journal Systems Multi-Wrapper",
     "creator": "Madeesh Kannan",
-    "target": "https?://er.ceres.rub.de/index.php/.+/((article)|(issue))/view/",
+    "target": "/issue/view/",
     "minVersion": "3.0",
     "maxVersion": "",
-    "priority": 90,
+    "priority": 100,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-07-31 16:50:25"
+    "lastUpdated": "2019-07-31 17:00:25"
 }
 
 /*
@@ -37,27 +37,24 @@
 function detectWeb(doc, url) {
     if (url.match(/\/issue\/view/))
         return "multiple";
-    else
-        return "journalArticle";
 }
 
 function getSearchResults(doc) {
     var items = {};
     var found = false;
-    var rows = ZU.xpath(doc, '//div[@class="title"]//a')
+    var rows = ZU.xpath(doc, '//a[contains(@href, "/article/view/") and not(contains(@href, "/pdf"))]')
     for (let i = 0; i < rows.length; i++) {
         let href = rows[i].href;
         let title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title) continue;
+
+        if (!href || !title)
+            continue;
+        if (title.match(/^PDF|EPUB|XML|HTML|Download Full Text/i))
+            continue;
         found = true;
         items[href] = title;
     }
     return found ? items : false;
-}
-
-function postProcess(doc, item) {
-    if (!item.abstractNote)
-        item.abstractNote = ZU.xpathText(doc, '//div[@class="item abstract"]//p');
 }
 
 function invokeOJSTranslator(doc, url) {
@@ -65,24 +62,20 @@ function invokeOJSTranslator(doc, url) {
     translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
-        postProcess(doc, i);
         i.complete();
     });
     translator.translate();
 }
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) === "multiple") {
-        Zotero.selectItems(getSearchResults(doc), function (items) {
-            if (!items) {
-                return true;
-            }
-            var articles = [];
-            for (var i in items) {
-                articles.push(i);
-            }
-            ZU.processDocuments(articles, invokeOJSTranslator);
-        });
-    } else
-        invokeOJSTranslator(doc, url);
+    Zotero.selectItems(getSearchResults(doc), function (items) {
+        if (!items) {
+            return true;
+        }
+        var articles = [];
+        for (var i in items) {
+            articles.push(i);
+        }
+        ZU.processDocuments(articles, invokeOJSTranslator);
+    });
 }

@@ -1,15 +1,15 @@
 {
-    "translatorID": "649b3328-3e6c-4c1f-b469-cb17235a7b93",
-    "label": "Ruhr Universität Bochum",
+    "translatorID": "b0a407d6-6e53-43c3-b434-c691b2d646ef",
+    "label": "Theo Web",
     "creator": "Madeesh Kannan",
-    "target": "https?://er.ceres.rub.de/index.php/.+/((article)|(issue))/view/",
+    "target": "https?://www.theo-web.de/",
     "minVersion": "3.0",
     "maxVersion": "",
-    "priority": 90,
+    "priority": 100,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-07-31 16:50:25"
+    "lastUpdated": "2019-07-31 11:29:00"
 }
 
 /*
@@ -34,17 +34,30 @@
 */
 
 
+function getDOI(doc) {
+    if (ZU.xpath(doc, '//*[text()="DOI:"]').length === 1) {
+        let doi = ZU.xpath(doc, '//*[text()="DOI:"]/following-sibling::text()');
+        if (doi && doi.length > 0) {
+            let match = doi[0].textContent.match(/\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/);
+            if (match)
+                return match[0];
+        }
+    }
+
+    return false;
+}
+
 function detectWeb(doc, url) {
-    if (url.match(/\/issue\/view/))
+    if (getSearchResults(doc))
         return "multiple";
-    else
+    else if (ZU.xpath(doc, '//meta[@property="og:type"]').length === 1 && getDOI(doc))
         return "journalArticle";
 }
 
 function getSearchResults(doc) {
     var items = {};
     var found = false;
-    var rows = ZU.xpath(doc, '//div[@class="title"]//a')
+    var rows = ZU.xpath(doc, '//a[@class="newslist--article"]')
     for (let i = 0; i < rows.length; i++) {
         let href = rows[i].href;
         let title = ZU.trimInternal(rows[i].textContent);
@@ -55,17 +68,22 @@ function getSearchResults(doc) {
     return found ? items : false;
 }
 
-function postProcess(doc, item) {
-    if (!item.abstractNote)
-        item.abstractNote = ZU.xpathText(doc, '//div[@class="item abstract"]//p');
-}
+function invokeDOITranslator(doc, url) {
+    let doi = getDOI(doc);
+    if (!doi)
+        return;
 
-function invokeOJSTranslator(doc, url) {
-    var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
-    translator.setDocument(doc);
+    let translator = Zotero.loadTranslator("search");
+    translator.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+    translator.setSearch({ itemType: "journalArticle", DOI: doi });
     translator.setHandler("itemDone", function (t, i) {
-        postProcess(doc, i);
+        if (!i.abstractNote)
+            i.abstractNote = ZU.xpathText(doc, '//p[@itemprop="description"]');
+
+        let keywords = ZU.xpathText(doc, '//p[@class="artikel-keyword"]');
+        if (keywords)
+            i.tags = keywords.split(/,/).map(x => x.trim());
+
         i.complete();
     });
     translator.translate();
@@ -77,12 +95,12 @@ function doWeb(doc, url) {
             if (!items) {
                 return true;
             }
-            var articles = [];
-            for (var i in items) {
+            let articles = [];
+            for (let i in items) {
                 articles.push(i);
             }
-            ZU.processDocuments(articles, invokeOJSTranslator);
+            ZU.processDocuments(articles, invokeDOITranslator);
         });
     } else
-        invokeOJSTranslator(doc, url);
+        invokeDOITranslator(doc, url);
 }
