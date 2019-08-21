@@ -46,33 +46,33 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-        if (i.itemType === "webpage")
-            i.itemType = "journalArticle";
+		if (i.itemType === "webpage")
+			i.itemType = "journalArticle";
 
-        let keywords = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Keywords:")]/../following-sibling::div/div');
-        if (keywords)
-            i.tags = keywords.split(/;/).map(x => x.trim());
+		let keywords = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Keywords:")]/../following-sibling::div/div');
+		if (keywords)
+			i.tags = keywords.split(/;/).map(x => x.trim());
 
 		if (!i.abstractNote)
-            i.abstractNote = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Abstract(s):")]/../following-sibling::div/div');
+			i.abstractNote = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Abstract(s):")]/../following-sibling::div/div');
 
-        let issn = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "ISSN:")]/../following-sibling::td');
-        let matches = issn.match(/(\d{4}-\d{3}[0-9Xx])/g);
-        if (matches && matches.length === 2)
-            i.ISSN = matches[1];
-        else if (matches && matches.length === 3) {
-            matches = issn.match(/(\d{4}-\d{3}[0-9Xx])\s+\(online\)/);
-            if (matches)
-                i.ISSN = matches[1];
-        }
+		let issn = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "ISSN:")]/../following-sibling::td');
+		let matches = issn.match(/(\d{4}-\d{3}[0-9Xx])/g);
+		if (matches && matches.length === 2)
+			i.ISSN = matches[1];
+		else if (matches && matches.length === 3) {
+			matches = issn.match(/(\d{4}-\d{3}[0-9Xx])\s+\(online\)/);
+			if (matches)
+				i.ISSN = matches[1];
+		}
 
-        let source = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Source document:")]/../following-sibling::td');
-        matches = source.match(/vol\.\s+(\d+),\s+iss\.\s+(\d+),\s+pp\.\s+(\[?\d+\]?-\[?\d+\]?)/);
-        if (matches) {
-            i.volume = matches[1];
-            i.issue = matches[2];
-            i.pages = matches[3].replace(/\[/g, "").replace(/\]/g, "");
-        }
+		let source = ZU.xpathText(doc, '//span[@id="article_head_text" and contains(text(), "Source document:")]/../following-sibling::td');
+		matches = source.match(/vol\.\s+(\d+),\s+iss\.\s+(\d+),\s+pp\.\s+(\[?\d+\]?-\[?\d+\]?)/);
+		if (matches) {
+			i.volume = matches[1];
+			i.issue = matches[2];
+			i.pages = matches[3].replace(/\[/g, "").replace(/\]/g, "");
+		}
 
 		i.complete();
 	});

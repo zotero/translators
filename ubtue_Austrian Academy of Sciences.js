@@ -1,21 +1,21 @@
 {
-    "translatorID": "a54b6c57-0127-495b-8bd7-7eaa98f35d61",
-    "label": "Austrian Academy of Sciences",
-    "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/www.austriaca.at\/",
-    "minVersion": "3.0",
-    "maxVersion": "",
-    "priority": 90,
-    "inRepository": false,
-    "translatorType": 4,
-    "browserSupport": "gcsibv",
-    "lastUpdated": "2019-08-01 13:14:00"
+	"translatorID": "a54b6c57-0127-495b-8bd7-7eaa98f35d61",
+	"label": "Austrian Academy of Sciences",
+	"creator": "Madeesh Kannan",
+	"target": "^https?:\/\/www.austriaca.at\/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 90,
+	"inRepository": false,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2019-08-21 13:14:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -50,10 +50,10 @@ function getSearchResults(doc) {
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
-        if (!href || !title)
-            continue;
-        else if (title.match(/^\(A|abstract\)$/))
-            continue;
+		if (!href || !title)
+			continue;
+		else if (title.match(/^\(A|abstract\)$/))
+			continue;
 
 		found = true;
 		items[href] = title;
