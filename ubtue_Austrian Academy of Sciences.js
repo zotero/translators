@@ -66,6 +66,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
+		i.itemType = "journalArticle";
 		i.complete();
 	});
 	translator.translate();
