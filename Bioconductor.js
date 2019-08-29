@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-07 15:32:21"
+	"lastUpdated": "2019-08-29 16:34:36"
 }
 
 /*
@@ -109,7 +109,8 @@ function scrape(doc, url) {
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Author')) {
 			var authorString = ZU.trimInternal(rows[i].textContent);
 			if (authorString) {
-				var creators = authorString.replace(/Author:\s*/, '').replace(/\[.+?\]/g, '').split(/,\s*/);
+				var creators = authorString.replace(/Author:\s*/, '').replace(/\[.+?\]/g, '').replace(/\(.+?\)/g, '');
+				creators = creators.split(/,\s*/);
 				for (let i = 0; i < creators.length; i++) {
 					item.creators.push(ZU.cleanAuthor(creators[i], 'author'));
 				}
@@ -244,7 +245,7 @@ var testCases = [
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-				"versionNumber": "1.15.6",
+				"versionNumber": "1.15.8",
 				"attachments": [],
 				"tags": [
 					{
