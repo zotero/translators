@@ -36,9 +36,11 @@ function detectWeb(doc, url) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
-	} else if (ZU.xpathText(doc, '/html/head/meta[@property="og:type" and @content="object"]/@content')) {
+	}
+	else if (ZU.xpathText(doc, '/html/head/meta[@property="og:type" and @content="object"]/@content')) {
 		return "computerProgram";
 	}
+	return false;
 }
 
 
@@ -46,7 +48,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//*[contains(@class, "repo-list-item")]//h3/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -62,7 +64,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -70,24 +72,25 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {	
+function scrape(doc, _url) {
 	var item = new Z.Item("computerProgram");
 	
 	var repo = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	
-	//basic metadata from the meta tags in the head
+	// basic metadata from the meta tags in the head
 	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0];
 	item.libraryCatalog = "GitHub";
 	var topics = doc.getElementsByClassName('topic-tag');
-	for (var i=0; i<topics.length; i++) {
+	for (var i = 0; i < topics.length; i++) {
 		item.tags.push(topics[i].textContent.trim());
 	}
 
@@ -96,54 +99,37 @@ function scrape(doc, url) {
 		delete item.rights;
 	}
 	
-	//api calls for more information (owner, date, programming language)
+	// api calls for more information (owner, date, programming language)
 	var apiUrl = "https://api.github.com/";
-	ZU.doGet(apiUrl+"repos/"+repo, function(result) {
+	ZU.doGet(apiUrl + "repos/" + repo, function (result) {
 		var json = JSON.parse(result);
-		//Z.debug(json);
+		// Z.debug(json);
 		if (json.message && json.message.includes("API rate limit exceeded")) {
-			//finish and stop in this case
+			// finish and stop in this case
 			item.complete();
 			return;
 		}
-		var name = json.name;
 		var owner = json.owner.login;
 		
 		item.programmingLanguage = json.language;
 		item.extra = "original-date: " + json.created_at;
 		item.date = json.updated_at;
 		
-		ZU.doGet(apiUrl+"users/"+owner, function(user) {
+		ZU.doGet(apiUrl + "users/" + owner, function (user) {
 			var jsonUser = JSON.parse(user);
 			var ownerName = jsonUser.name || jsonUser.login;
 			if (jsonUser.type == "User") {
 				item.creators.push(ZU.cleanAuthor(ownerName, "programmer"));
-			} else {
+			}
+			else {
 				item.company = ownerName;
 			}
 			
 			item.complete();
 		});
-
 	});
-	
-
 }
 
-
-// get the full name from the author profile page
-function getAuthor(username) {
-	var url = "https://github.com/" + encodeURIComponent(username);	
-	ZU.processDocuments(url, function(text) {
-		var author = ZU.xpathText(text, '//span[contains(@class, "vcard-fullname")]');
-		if (!author) { author = ZU.xpathText(text, '//span[contains(@class, "vcard-username")]'); }
-		if (!author) { author = ZU.xpathText(text, '/html/head/meta[@property="profile:username"]/@content'); }
-		Z.debug(author);
-		author = ZU.cleanAuthor(author, "author");
-	});
-	// temporary, until we get the author string out of the closure
-	return ZU.cleanAuthor(username, "author");
-}
 
 /** BEGIN TEST CASES **/
 var testCases = [
