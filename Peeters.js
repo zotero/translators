@@ -144,6 +144,7 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
+	item.url = url;
 
 	var abstractParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
 	if (abstractParts) {
