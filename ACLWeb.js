@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-31 13:36:00"
+	"lastUpdated": "2019-08-31 13:46:00"
 }
 
 /*
@@ -421,7 +421,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/N18-1001/",
+		"url": "https://www.aclweb.org/anthology/N18-1001qqqqqqqqqqq/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
