@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-14 19:22:00"
+	"lastUpdated": "2019-08-31 13:36:00"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -422,7 +421,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/papers/N/N18/N18-1001/",
+		"url": "https://www.aclweb.org/anthology/N18-1001/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
