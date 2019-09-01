@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-14 19:22:00"
+	"lastUpdated": "2019-08-31 18:53:37"
 }
 
 /*
@@ -58,7 +58,9 @@ var ext2mime = {
 };
 
 function detectWeb(doc, url) {
-	if (doc.contentType === 'application/pdf' || url.endsWith('.bib') || url.includes('/papers/')) {
+	let paperIdUrl = /[/][A-Z][0-9]{2}-[0-9]{4}[/]?$/;
+	if (doc.contentType === 'application/pdf' || url.endsWith('.pdf') || url.endsWith('.bib')
+		|| url.match(paperIdUrl)) {
 		if (url.endsWith('/')) {
 			url = url.slice(0, -1);
 		}
@@ -86,7 +88,7 @@ function doWeb(doc, url) {
 		let paperURL = url.replace('.bib', '');
 		ZU.processDocuments(paperURL, scrape);
 	}
-	else if (doc.contentType === 'application/pdf') {
+	else if (doc.contentType === 'application/pdf' || url.endsWith('.pdf')) {
 		// e.g. http://aclweb.org/anthology/P18-1001.pdf
 		let paperID = url.split('/').pop().match(/[A-Z]\d{2}-\d{4}/)[0];
 		let paperURL = constructPaperURL(paperID);
@@ -231,7 +233,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://aclweb.org/anthology/papers/Q/Q18/Q18-1001/",
+		"url": "https://aclweb.org/anthology/Q18-1001/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -276,7 +278,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/papers/W/W04/W04-0801/",
+		"url": "https://www.aclweb.org/anthology/W04-0801/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -335,7 +337,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/papers/W/W19/W19-0101/",
+		"url": "https://www.aclweb.org/anthology/W19-0101/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -372,7 +374,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/papers/N/N12/N12-2001/",
+		"url": "https://www.aclweb.org/anthology/N12-2001/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -421,7 +423,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.aclweb.org/anthology/papers/N/N18/N18-1001/",
+		"url": "https://www.aclweb.org/anthology/N18-1001/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
