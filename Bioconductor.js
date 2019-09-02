@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	else {
-		return "webpage";
+		return false;
 	}
 }
 
