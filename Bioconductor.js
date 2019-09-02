@@ -5,7 +5,7 @@
 	"target": "https?://(www\\.)?bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help/search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 150,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
