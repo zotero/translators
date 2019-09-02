@@ -2,7 +2,7 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help)/",
+	"target": "https?://(www\\.)?bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help/search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 150,
