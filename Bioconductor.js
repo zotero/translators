@@ -36,8 +36,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2 
-// eslint-disable-next-line 
+// attr()/text() v2
+// eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;} 
 
 
@@ -92,7 +92,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
 	item.title = text(doc, '#PageContent > h1') + ": " + text(doc, '#PageContent > div.do_not_rebase > h2');
-	item.extra = 'DOI: ' + ZU.xpathText(doc, '//*[@id="PageContent"]/div[2]/a[contains(@href, "https://doi.org/")]')
+	item.extra = 'DOI: ' + ZU.xpathText(doc, '//*[@id="PageContent"]/div[2]/a[contains(@href, "https://doi.org/")]');
 
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i = 0; i < rows.length; i++) {
