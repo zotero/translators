@@ -2,14 +2,14 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "https?://(www\\.)?bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help/search)/",
+	"target": "https?://(www\\.)?bioconductor\\.org/(packages/.*/bioc/html|help/search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-29 16:34:36"
+	"lastUpdated": "2019-09-02 19:22:46"
 }
 
 /*
@@ -97,15 +97,16 @@ function scrape(doc, url) {
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i = 0; i < rows.length; i++) {
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Bioconductor version:')) {
+			item.system = ZU.trimInternal(rows[i].textContent);
 			item.abstractNote = ZU.trimInternal(rows[i + 1].textContent);
 		}
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Author')) {
 			var authorString = ZU.trimInternal(rows[i].textContent);
 			if (authorString) {
 				var creators = authorString.replace(/Author:\s*/, '').replace(/\[.+?\]/g, '').replace(/\(.+?\)/g, '');
-				creators = creators.split(/,\s*/);
+				creators = creators.split(/,|and\s*/);
 				for (let i = 0; i < creators.length; i++) {
-					item.creators.push(ZU.cleanAuthor(creators[i], 'author'));
+					item.creators.push(ZU.cleanAuthor(creators[i], 'programmer'));
 				}
 			}
 		}
@@ -115,8 +116,8 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Published")]/following-sibling::td');
 	item.rights = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "License")]/following-sibling::td');
 	item.url = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Package Short Url")]/following-sibling::td') || url;
-	item.company = 'Bioconductor';
-	var year = new Date().getFullYear();
+	var year = ZU.xpathText(doc, '//*[@id="SiteGlobalFooter"]/div/p[contains(text(), "Copyright")]');
+	year = year.match(/\d+/g)[1];
 	item.date = ZU.strToISO(year);
 
 	var tags = ZU.xpath(doc, '//td[contains(text(), "biocViews")]/following-sibling::td/a');
@@ -145,31 +146,31 @@ var testCases = [
 					{
 						"firstName": "Martin",
 						"lastName": "Morgan",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Valerie",
 						"lastName": "Obenchain",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Jim",
 						"lastName": "Hester",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Hervé",
 						"lastName": "Pagès",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
 				"date": "2019",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
-				"company": "Bioconductor",
 				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
+				"system": "Bioconductor version: Release (3.9)",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
 				"versionNumber": "1.14.1",
 				"attachments": [],
@@ -212,33 +213,100 @@ var testCases = [
 					{
 						"firstName": "Martin",
 						"lastName": "Morgan",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Valerie",
 						"lastName": "Obenchain",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Jim",
 						"lastName": "Hester",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"firstName": "Hervé",
 						"lastName": "Pagès",
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
 				"date": "2019",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
-				"company": "Bioconductor",
 				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
+				"system": "Bioconductor version: Development (3.10)",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
 				"versionNumber": "1.15.8",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Annotation"
+					},
+					{
+						"tag": "Coverage"
+					},
+					{
+						"tag": "Genetics"
+					},
+					{
+						"tag": "GenomeAnnotation"
+					},
+					{
+						"tag": "Infrastructure"
+					},
+					{
+						"tag": "Sequencing"
+					},
+					{
+						"tag": "Software"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://bioconductor.org/packages/3.2/bioc/html/SummarizedExperiment.html",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "SummarizedExperiment: SummarizedExperiment container",
+				"creators": [
+					{
+						"firstName": "Martin",
+						"lastName": "Morgan",
+						"creatorType": "programmer"
+					},
+					{
+						"firstName": "Valerie",
+						"lastName": "Obenchain",
+						"creatorType": "programmer"
+					},
+					{
+						"firstName": "Jim",
+						"lastName": "Hester",
+						"creatorType": "programmer"
+					},
+					{
+						"firstName": "Hervé",
+						"lastName": "Pagès",
+						"creatorType": "programmer"
+					}
+				],
+				"date": "2016",
+				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"extra": "DOI: null",
+				"libraryCatalog": "Bioconductor",
+				"rights": "Artistic-2.0",
+				"shortTitle": "SummarizedExperiment",
+				"system": "Bioconductor version: 3.2",
+				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
+				"versionNumber": "1.0.2",
 				"attachments": [],
 				"tags": [
 					{
