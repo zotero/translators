@@ -2,14 +2,14 @@
 	"translatorID": "21f62926-4343-4518-b6f2-a284e650e64a",
 	"label": "Bioconductor",
 	"creator": "Qiang Hu",
-	"target": "https?://(www\\.)?bioconductor\\.org/(packages/.*/bioc/html|help/search)/",
+	"target": "https?://(www\\.)?bioconductor\\.org/(packages/release/bioc/html|packages/devel/bioc/html|help/search)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-02 19:22:46"
+	"lastUpdated": "2019-09-02 22:20:05"
 }
 
 /*
@@ -92,8 +92,10 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
 	item.title = text(doc, '#PageContent > h1') + ": " + text(doc, '#PageContent > div.do_not_rebase > h2');
-	item.extra = 'DOI: ' + ZU.xpathText(doc, '//*[@id="PageContent"]/div[2]/a[contains(@href, "https://doi.org/")]');
-
+	var doi = ZU.xpathText(doc, '//*[@id="PageContent"]/div[2]/a[contains(@href, "https://doi.org/")]');
+	if (doi !== null) {
+		item.extra = 'DOI: ' + doi;
+	}
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i = 0; i < rows.length; i++) {
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Bioconductor version:')) {
@@ -300,7 +302,6 @@ var testCases = [
 				],
 				"date": "2016",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
-				"extra": "DOI: null",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
