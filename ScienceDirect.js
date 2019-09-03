@@ -13,25 +13,28 @@
 }
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;} 
+
 
 function detectWeb(doc, url) {
-	if (!doc.body.textContent.trim()) return;
+	if (!doc.body.textContent.trim()) return false;
 
-	if ((url.includes("_ob=DownloadURL")) ||
-		doc.title == "ScienceDirect Login" ||
-		doc.title == "ScienceDirect - Dummy" ||
-		(url.includes("/science/advertisement/"))) {
+	if ((url.includes("_ob=DownloadURL"))
+		|| doc.title == "ScienceDirect Login"
+		|| doc.title == "ScienceDirect - Dummy"
+		|| (url.includes("/science/advertisement/"))) {
 		return false;
 	}
 
-	if ((url.includes("pdf") &&
-			!url.includes("_ob=ArticleURL") &&
-			!url.includes("/article/")) ||
-		url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1) {
+	if ((url.includes("pdf")
+			&& !url.includes("_ob=ArticleURL")
+			&& !url.includes("/article/"))
+		|| url.search(/\/(?:journal|bookseries|book|handbook)\//) !== -1) {
 		if (getArticleList(doc).length > 0) {
 			return "multiple";
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
@@ -43,16 +46,20 @@ function detectWeb(doc, url) {
 		// Book sections have the ISBN in the URL
 		if (url.includes("/B978")) {
 			return "bookSection";
-		} else if (getISBN(doc)) {
+		}
+		else if (getISBN(doc)) {
 			if (getArticleList(doc).length) {
 				return "multiple";
-			} else {
+			}
+			else {
 				return "book";
 			}
-		} else {
+		}
+		else {
 			return "journalArticle";
 		}
 	}
+	return false;
 }
 
 function getPDFLink(doc, onDone) {
@@ -74,7 +81,7 @@ function getPDFLink(doc, onDone) {
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
-		//Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
+		// Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
 		parseIntermediatePDFPage(intermediateURL, onDone);
 		return;
 	}
@@ -97,7 +104,7 @@ function getPDFLink(doc, onDone) {
 			Zotero.debug(e, 2);
 		}
 		if (intermediateURL) {
-			//Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
+			// Zotero.debug("Intermediate PDF URL from drop-down: " + intermediateURL);
 			parseIntermediatePDFPage(intermediateURL, onDone);
 			return;
 		}
@@ -112,7 +119,7 @@ function getPDFLink(doc, onDone) {
 		var dp = new DOMParser();
 		var doc = dp.parseFromString(html, 'text/html');
 		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
-		//Zotero.debug("Intermediate PDF URL: " + intermediateURL);
+		// Zotero.debug("Intermediate PDF URL: " + intermediateURL);
 		if (intermediateURL) {
 			parseIntermediatePDFPage(intermediateURL, onDone);
 			return;
@@ -129,19 +136,19 @@ function parseIntermediatePDFPage(url, onDone) {
 		var doc = dp.parseFromString(html, 'text/html');
 		var pdfURL = attr(doc, 'meta[HTTP-EQUIV="Refresh"]', 'CONTENT');
 		var otherRedirect = attr(doc, '#redirect-message a', 'href');
-		//Zotero.debug("Meta refresh URL: " + pdfURL);
+		// Zotero.debug("Meta refresh URL: " + pdfURL);
 		if (pdfURL) {
 			// Strip '0;URL='
 			var matches = pdfURL.match(/\d+;URL=(.+)/);
 			pdfURL = matches ? matches[1] : null;
-		} else if (otherRedirect) {
+		}
+		else if (otherRedirect) {
 			pdfURL = otherRedirect;
-		} else {
-			//Sometimes we are already on the PDF page here and therefore
-			//can simply use the original url as pdfURL.
-			if (url.includes('.pdf')) {
-				pdfURL = url;
-			}
+		}
+		else if (url.includes('.pdf')) {
+			// Sometimes we are already on the PDF page here and therefore
+			// can simply use the original url as pdfURL.
+			pdfURL = url;
 		}
 		onDone(pdfURL);
 	});
@@ -149,31 +156,15 @@ function parseIntermediatePDFPage(url, onDone) {
 
 
 function getISBN(doc) {
-	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]\
-		//span[@class="txtSmall"]');
-	if (!isbn) return;
+	var isbn = ZU.xpathText(doc, '//td[@class="tablePubHead-Info"]//span[@class="txtSmall"]');
+	if (!isbn) return false;
 
 	isbn = isbn.match(/ISBN:\s*([-\d]+)/);
-	if (!isbn) return;
+	if (!isbn) return false;
 
 	return isbn[1].replace(/[-\s]/g, '');
 }
 
-function getFormValues(text, inputs) {
-	var re = new RegExp("<input[^>]+name=(['\"]?)(" +
-		inputs.join('|') +
-		")\\1[^>]*>", 'g');
-
-	var input, val, params = {};
-	while (input = re.exec(text)) {
-		val = input[0].match(/value=(['"]?)(.*?)\1[\s>]/);
-		if (!val) continue;
-
-		params[encodeURIComponent(input[2])] = encodeURIComponent(val[2]);
-	}
-
-	return params;
-}
 
 function getAbstract(doc) {
 	var p = ZU.xpath(doc, '//div[contains(@class, "abstract") and not(contains(@class, "abstractHighlights"))]/p');
@@ -184,18 +175,18 @@ function getAbstract(doc) {
 	return paragraphs.join('\n');
 }
 
-//mimetype map for supplementary attachments
-//intentionally excluding potentially large files like videos and zip files
+// mimetype map for supplementary attachments
+// intentionally excluding potentially large files like videos and zip files
 var suppTypeMap = {
-	'pdf': 'application/pdf',
+	pdf: 'application/pdf',
 	//	'zip': 'application/zip',
-	'doc': 'application/msword',
-	'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-	'xls': 'application/vnd.ms-excel',
-	'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+	doc: 'application/msword',
+	docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+	xls: 'application/vnd.ms-excel',
+	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 };
 
-//attach supplementary information
+// attach supplementary information
 function attachSupplementary(doc, item) {
 	var links = ZU.xpath(doc, './/span[starts-with(@class, "MMCvLABEL_SRC")]');
 	var link, title, url, type, snapshot;
@@ -222,7 +213,7 @@ function attachSupplementary(doc, item) {
 
 		var replaced = false;
 		if (snapshot && title.search(/Article plus Supplemental Information/i) != -1) {
-			//replace full text PDF
+			// replace full text PDF
 			for (var j = 0, m = item.attachments.length; j < m; j++) {
 				if (item.attachments[j].title == "ScienceDirect Full Text PDF") {
 					attachment.title = "Article plus Supplemental Information";
@@ -239,55 +230,19 @@ function attachSupplementary(doc, item) {
 	}
 }
 
-function scrapeByExport(doc) {
-	var url = getExportLink(doc);
-	ZU.doGet(url, function(text) {
-		//select the correct form
-		var form = text.match(/<form[^>]+name=(['"])exportCite\1[\s\S]+?<\/form>/);
-		if (form) {
-			form = form[0];
-		} else {
-			form = text.match(/<form[^>]*>/g);
-			if (!form) {
-				Z.debug('No forms found on page.');
-			} else {
-				Z.debug(form.join('\n*********\n'));
-			}
-			throw new Error('exportCite form could not be found.');
-		}
-
-		var postParams = getFormValues(form, [
-			//'_ArticleListID',	//do we still need this?
-			'_acct', '_docType', '_eidkey',
-			'_method', '_ob', '_uoikey', '_userid', 'count',
-			'Export', 'JAVASCRIPT_ON', 'md5'
-		]);
-		postParams["format"] = "cite-abs";
-		postParams["citation-type"] = "RIS";
-
-		var post = '';
-		for (var key in postParams) {
-			post += key + '=' + postParams[key] + "&";
-		}
-
-		ZU.doPost('/science', post, function(text) {
-			processRIS(doc, text);
-		});
-	});
-}
 
 function processRIS(doc, text) {
-	//T2 doesn't appear to hold the short title anymore.
-	//Sometimes has series title, so I'm mapping this to T3,
+	// T2 doesn't appear to hold the short title anymore.
+	// Sometimes has series title, so I'm mapping this to T3,
 	// although we currently don't recognize that in RIS
 	text = text.replace(/^T2\s/mg, 'T3 ');
 
-	//Sometimes PY has some nonsensical value. Y2 contains the correct
+	// Sometimes PY has some nonsensical value. Y2 contains the correct
 	// date in that case.
 	if (text.search(/^Y2\s+-\s+\d{4}\b/m) !== -1) {
-		text = text.replace(/TY\s+-[\S\s]+?ER/g, function(m) {
-			if (m.search(/^PY\s+-\s+\d{4}\b/m) === -1 &&
-				m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
+		text = text.replace(/TY\s+-[\S\s]+?ER/g, function (m) {
+			if (m.search(/^PY\s+-\s+\d{4}\b/m) === -1
+				&& m.search(/^Y2\s+-\s+\d{4}\b/m) !== -1
 			) {
 				return m.replace(/^PY\s+-.*\r?\n/mg, '')
 					.replace(/^Y2\s+-/mg, 'PY  -');
@@ -299,7 +254,7 @@ function processRIS(doc, text) {
 	// Certain authors sometimes have "role" prefixes or are in the wrong order
 	// e.g. http://www.sciencedirect.com/science/article/pii/S0065260108602506
 	text = text.replace(/^((?:A[U\d]|ED)\s+-\s+)(?:Editor-in-Chief:\s+)?(.+)/mg,
-		function(m, pre, name) {
+		function (m, pre, name) {
 			if (!name.includes(',')) {
 				name = name.trim().replace(/^(.+?)\s+(\S+)$/, '$2, $1');
 			}
@@ -307,32 +262,32 @@ function processRIS(doc, text) {
 			return pre + name;
 		}
 	);
-	//The RIS sometimes has spaces at the beginning of lines, which break things
-	//as of 20170121 e.g. on http://www.sciencedirect.com/science/article/pii/B9780123706263000508 for A2
-	//remove them
+	// The RIS sometimes has spaces at the beginning of lines, which break things
+	// as of 20170121 e.g. on http://www.sciencedirect.com/science/article/pii/B9780123706263000508 for A2
+	// remove them
 	text = text.replace(/\n\s+/g, "\n");
-	//Z.debug(text)
+	// Z.debug(text)
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
-		//issue sometimes is set to 0 for single issue volumes (?)
+	translator.setHandler("itemDone", function (obj, item) {
+		// issue sometimes is set to 0 for single issue volumes (?)
 		if (item.issue === 0) delete item.issue;
 
 		if (item.volume) item.volume = item.volume.replace(/^\s*volume\s*/i, '');
 
 		for (var i = 0, n = item.creators.length; i < n; i++) {
-			//add spaces after initials
+			// add spaces after initials
 			if (item.creators[i].firstName) {
 				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
 			}
-			//fix all uppercase lastnames
+			// fix all uppercase lastnames
 			if (item.creators && item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
 				item.creators[i].lastName = item.creators[i].lastName.charAt(0) + item.creators[i].lastName.slice(1).toLowerCase();
 			}
 		}
 
-		//abstract is not included with the new export form. Scrape from page
+		// abstract is not included with the new export form. Scrape from page
 		if (!item.abstractNote) {
 			item.abstractNote = getAbstract(doc);
 		}
@@ -344,11 +299,12 @@ function processRIS(doc, text) {
 			document: doc
 		});
 
-		//attach supplementary data
+		// attach supplementary data
 		if (Z.getHiddenPref && Z.getHiddenPref("attachSupplementary")) {
-			try { //don't fail if we can't attach supplementary data
+			try { // don't fail if we can't attach supplementary data
 				attachSupplementary(doc, item);
-			} catch (e) {
+			}
+			catch (e) {
 				Z.debug("Error attaching supplementary information.");
 				Z.debug(e);
 			}
@@ -370,7 +326,7 @@ function processRIS(doc, text) {
 		
 		item.language = item.language || attr(doc, 'article[role="main"]', 'lang');
 
-		if (item.url && item.url.substr(0,2) == "//") {
+		if (item.url && item.url.substr(0, 2) == "//") {
 			item.url = "https:" + item.url;
 		}
 
@@ -389,48 +345,44 @@ function processRIS(doc, text) {
 	translator.translate();
 }
 
-function scrapeByISBN(doc) {
-	var isbn = getISBN(doc);
-	var translator = Zotero.loadTranslator("search");
-	translator.setTranslator("c73a4a8c-3ef1-4ec8-8229-7531ee384cc4");
-	translator.setSearch({
-		ISBN: isbn
-	});
-	translator.translate();
-}
 
 function getArticleList(doc) {
-	return ZU.xpath(doc,
-		'(//table[@class="resultRow"]/tbody/tr/td[2]/a\
-			|//table[@class="resultRow"]/tbody/tr/td[2]/h3/a\
-			|//td[@class="nonSerialResultsList"]/h3/a\
-			|//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a\
-			|//h2//a[contains(@class, "result-list-title-link")]\
-			|//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]\
-			|//li[contains(@class, "list-chapter")]//h2//a\
-			|//h4[contains(@class, "chapter-title")]/a\
-		)\[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]');
+	let articlePaths = [
+		'//table[@class="resultRow"]/tbody/tr/td[2]/a',
+		'//table[@class="resultRow"]/tbody/tr/td[2]/h3/a',
+		'//td[@class="nonSerialResultsList"]/h3/a',
+		'//div[@id="bodyMainResults"]//li[contains(@class,"title")]//a',
+		'//h2//a[contains(@class, "result-list-title-link")]',
+		'//ol[contains(@class, "article-list") or contains(@class, "article-list-items")]//a[contains(@class, "article-content-title")]',
+		'//li[contains(@class, "list-chapter")]//h2//a',
+		'//h4[contains(@class, "chapter-title")]/a'
+	];
+	return ZU.xpath(doc, '('
+		+ articlePaths.join('|')
+		+ ')[not(contains(text(),"PDF (") or contains(text(), "Related Articles"))]'
+	);
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		//search page
+		// search page
 		var itemList = getArticleList(doc);
 		var items = {};
 		for (var i = 0, n = itemList.length; i < n; i++) {
 			items[itemList[i].href] = itemList[i].textContent;
 		}
 
-		Zotero.selectItems(items, function(selectedItems) {
-			if (!selectedItems) return true;
+		Zotero.selectItems(items, function (selectedItems) {
+			if (!selectedItems) return;
 
-			var articles = [];
+			// var articles = [];
 			for (var i in selectedItems) {
-				//articles.push(i);
-				ZU.processDocuments(i, scrape); //move this out of the loop when ZU.processDocuments is fixed
+				// articles.push(i);
+				ZU.processDocuments(i, scrape); // move this out of the loop when ZU.processDocuments is fixed
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -468,7 +420,7 @@ function scrape(doc, url) {
 		var values = getFormInput(form);
 		values['citation-type'] = 'RIS';
 		values.format = 'cite-abs';
-		ZU.doPost(form.action, formValuesToPostData(values), function(text) {
+		ZU.doPost(form.action, formValuesToPostData(values), function (text) {
 			processRIS(doc, text);
 		});
 		return;
@@ -484,17 +436,18 @@ function scrape(doc, url) {
 		var pii = ZU.xpathText(doc, '//meta[@name="citation_pii"]/@content');
 		if (!pii) {
 			Z.debug("not finding pii in metatag; attempting to parse URL");
-			pii = url.match(/\/pii\/([^#\?]+)/);
+			pii = url.match(/\/pii\/([^#?]+)/);
 			if (pii) {
 				pii = pii[1];
-			} else {
+			}
+			else {
 				Z.debug("cannot find pii");
 			}
 		}
 		if (pii) {
-			var risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
-			//Z.debug(risUrl)
-			ZU.doGet(risUrl, function(text) {
+			let risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
+			// Z.debug(risUrl)
+			ZU.doGet(risUrl, function (text) {
 				processRIS(doc, text);
 			});
 			return;
@@ -507,37 +460,19 @@ function scrape(doc, url) {
 	form = doc.getElementById('export-form');
 	if (form) {
 		Z.debug("Fetching RIS via GET form (old)");
-		var risUrl = form.action +
-			'?export-format=RIS&export-content=cite-abs';
-		ZU.doGet(risUrl, function(text) {
+		let risUrl = form.action
+			+ '?export-format=RIS&export-content=cite-abs';
+		ZU.doGet(risUrl, function (text) {
 			processRIS(doc, text);
 		});
 		return;
 	}
 
-	/***
-	 * Probably deprecated. Let's see if we break anything
-	 *
-	var link = ZU.xpath(doc, '//div[@class="icon_exportarticlesci_dir"]/a')[0];
-	if (link) {
-		Z.debug("Fetching RIS via intermediate page");
-		scrapeByExport(doc);
-		return;
-	}
-	*/
-
-	/***
-	 * Also probably no longer necessary, since fetching via POST seems to cover
-	 * all test cases
-	 *
-	if (getISBN(doc)) {
-		Z.debug("Scraping by ISBN");
-		scrapeByISBN(doc);
-	}
-	*/
-
 	throw new Error("Could not scrape metadata via known methods");
-}/** BEGIN TEST CASES **/
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
