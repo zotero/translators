@@ -71,14 +71,27 @@ function invokeBestTranslator(doc, url) {
 }
 
 function doWeb(doc, url) {
-    Zotero.selectItems(getSearchResults(doc), function (items) {
-        if (!items) {
-            return true;
+    let items = getSearchResults(doc);
+    if (items) {
+        Zotero.selectItems(getSearchResults(doc), function (items) {
+            if (!items) {
+                return true;
+            }
+            let articles = [];
+            for (let i in items) {
+                articles.push(i);
+            }
+            ZU.processDocuments(articles, invokeBestTranslator);
+        });
+    } else {
+        // attempt to skip landing pages for issues
+        let tocLinks = ZU.xpath(doc, '//a[contains(@href, "/issue/view/") and not(contains(@href, "/pdf"))]')
+        for (let entry in tocLinks) {
+            let link = tocLinks[entry].href;
+            if (link.match(/\/issue\/view\/\d+\/showToc$/i)) {
+                ZU.processDocuments([link], invokeBestTranslator);
+                break;
+            }
         }
-        var articles = [];
-        for (var i in items) {
-            articles.push(i);
-        }
-        ZU.processDocuments(articles, invokeBestTranslator);
-    });
+    }
 }
