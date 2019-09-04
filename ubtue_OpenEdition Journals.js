@@ -58,19 +58,21 @@ function getSearchResults(doc) {
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
-	var translator = Zotero.loadTranslator("web");
+	let translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-		var abstracts = ZU.xpath(doc, '//p[@class="resume"]');
+		let abstracts = ZU.xpath(doc, '//p[@class="resume"]');
 		if (abstracts)
 			i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
 
 		i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
-		var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
-		if (issueAndVol) {
-			i.volume = issueAndVol[1];
-			i.issue = issueAndVol[2];
+		if (i.issue) {
+			let issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
+			if (issueAndVol) {
+				i.volume = issueAndVol[1];
+				i.issue = issueAndVol[2];
+			}
 		}
 
 		i.complete();
@@ -84,8 +86,8 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			var articles = [];
-			for (var i in items) {
+			let articles = [];
+			for (let i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);

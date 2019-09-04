@@ -57,25 +57,41 @@ function getSearchResults(doc) {
     return found ? items : false;
 }
 
-function invokeOJSTranslator(doc, url) {
+function invokeBestTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
+    translator.setHandler("translators", function (o, t) {
+        translator.setTranslator(t);
+        translator.translate();
+    });
     translator.setHandler("itemDone", function (t, i) {
         i.complete();
     });
-    translator.translate();
+    translator.getTranslators();
 }
 
 function doWeb(doc, url) {
-    Zotero.selectItems(getSearchResults(doc), function (items) {
-        if (!items) {
-            return true;
+    let items = getSearchResults(doc);
+    if (items) {
+        Zotero.selectItems(items, function (items) {
+            if (!items) {
+                return true;
+            }
+            let articles = [];
+            for (let i in items) {
+                articles.push(i);
+            }
+            ZU.processDocuments(articles, invokeBestTranslator);
+        });
+    } else {
+        // attempt to skip landing pages for issues
+        let tocLinks = ZU.xpath(doc, '//a[contains(@href, "/issue/view/") and not(contains(@href, "/pdf"))]')
+        for (let entry in tocLinks) {
+            let link = tocLinks[entry].href;
+            if (link.match(/\/issue\/view\/\d+\/showToc$/i)) {
+                ZU.processDocuments([link], invokeBestTranslator);
+                break;
+            }
         }
-        var articles = [];
-        for (var i in items) {
-            articles.push(i);
-        }
-        ZU.processDocuments(articles, invokeOJSTranslator);
-    });
+    }
 }

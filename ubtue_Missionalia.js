@@ -1,15 +1,15 @@
 {
-    "translatorID": "37a84f2d-2708-4adf-bb64-27c345d764fe",
-    "label": "Faculdade Jesuita de Filosofia e Teologia",
+    "translatorID": "94163c3f-d555-4e4e-aef6-b1d788772c2f",
+    "label": "Missionalia",
     "creator": "Madeesh Kannan",
-    "target": "https?://www.faje.edu.br",
+    "target": "^https?:\/\/missionalia.journals.ac.za\/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-08-28 11:29:00"
+    "lastUpdated": "2019-09-05 13:14:00"
 }
 
 /*
@@ -34,34 +34,27 @@
 */
 
 
-function getDOI(doc) {
-    let doi = ZU.xpathText(doc, '//div[@class="item doi"]/span[@class="value"]');
-    if (doi && doi.length > 0) {
-        let match = doi.match(/\b10\.[0-9]{4,}\/[^\s&"']*[^\s&"'.,]/);
-        if (match)
-            return match[0];
-    }
-
-    return false;
-}
-
 function detectWeb(doc, url) {
-    if (url.match(/\/article\/view\//) && getDOI(doc))
+    // placeholder, the OJS translator fills in the correct item type
+    if (url.match(/\/article\/view\//))
         return "journalArticle";
 }
 
-function invokeDOITranslator(doc, url) {
-    let doi = getDOI(doc);
-    let translator = Zotero.loadTranslator("search");
-    translator.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-    translator.setSearch({ itemType: "journalArticle", DOI: doi });
+function postProcess(doc, item) {
+    item.title = ZU.xpathText(doc, '//div[@id="articleTitle"]/h3');
+    item.complete();
+}
+
+function invokeOJSTranslator(doc) {
+    let translator = Zotero.loadTranslator("web");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
+    translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
-        i.title = ZU.capitalizeTitle(i.title, true);
-        i.complete();
+        postProcess(doc, i);
     });
     translator.translate();
 }
 
 function doWeb(doc, url) {
-    invokeDOITranslator(doc, url);
+    invokeOJSTranslator(doc);
 }
