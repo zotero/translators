@@ -46,7 +46,7 @@ function postProcess(doc, item) {
 }
 
 function invokeOJSTranslator(doc) {
-    var translator = Zotero.loadTranslator("web");
+    let translator = Zotero.loadTranslator("web");
     translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {

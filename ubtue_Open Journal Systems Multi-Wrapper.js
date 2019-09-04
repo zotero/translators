@@ -73,7 +73,7 @@ function invokeBestTranslator(doc, url) {
 function doWeb(doc, url) {
     let items = getSearchResults(doc);
     if (items) {
-        Zotero.selectItems(getSearchResults(doc), function (items) {
+        Zotero.selectItems(items, function (items) {
             if (!items) {
                 return true;
             }
