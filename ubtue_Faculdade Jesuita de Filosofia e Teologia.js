@@ -56,6 +56,7 @@ function invokeDOITranslator(doc, url) {
     translator.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
     translator.setSearch({ itemType: "journalArticle", DOI: doi });
     translator.setHandler("itemDone", function (t, i) {
+        i.title = ZU.capitalizeTitle(i.title, true);
         i.complete();
     });
     translator.translate();
