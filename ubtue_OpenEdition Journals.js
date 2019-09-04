@@ -67,10 +67,12 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 			i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
 
 		i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
-		var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
-		if (issueAndVol) {
-			i.volume = issueAndVol[1];
-			i.issue = issueAndVol[2];
+		if (i.issue) {
+			var issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
+			if (issueAndVol) {
+				i.volume = issueAndVol[1];
+				i.issue = issueAndVol[2];
+			}
 		}
 
 		i.complete();
