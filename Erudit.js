@@ -101,6 +101,12 @@ function scrape(doc, url) {
 	} else {
 		abstract = abstractFR || abstractEN;
 	}
+	var secondAbstract;
+	if (abstract == abstractEN)
+		secondAbstract = abstractFR;
+	else
+		secondAbstract = abstractEN;
+
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -112,6 +118,12 @@ function scrape(doc, url) {
 		}
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
+		}
+
+		if (secondAbstract) {
+			item.notes.push({
+				note: "abs:" + secondAbstract.replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+			});
 		}
 
 		addBookReviewTag(doc, item);
