@@ -467,10 +467,14 @@ function addHighwireMetadata(doc, newItem) {
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
-	var firstpage = getContentText(doc, 'citation_firstpage') ||
-					rdfPages[0];
-	var lastpage = getContentText(doc, 'citation_lastpage') ||
-					rdfPages[1];
+	var firstpage = getContentText(doc, 'citation_firstpage');
+	var lastpage = getContentText(doc, 'citation_lastpage');
+	if (firstpage && firstpage.includes("-")) {
+		firstpage = firstpage.split(/\s*-\s*/)[0];
+		lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+	}
+	firstpage = firstpage || rdfPages[0];
+	var lastpage = lastpage || rdfPages[1];
 	if(firstpage && ( firstpage = firstpage.trim() )) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
@@ -1031,6 +1035,7 @@ var testCases = [
 				],
 				"date": "2012",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
+				"extra": "DOI: https://doi.org/10.7275/n8e9-xy93",
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
