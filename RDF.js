@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-07-16 23:00:00"
+	"lastUpdated": "2019-09-08 11:33:52"
 }
 
 /*
@@ -1170,8 +1170,8 @@ function importItem(newItem, node) {
 	newItem.ISBN = getFirstResults((container ? container : node), [n.prism2_1 + "isbn", n.bibo + "isbn", n.bibo + "isbn13", n.bibo + "isbn10", n.book + "isbn", n.so + "isbn"], true) || newItem.ISBN;
 	// ISBN from eprints
 	newItem.ISBN = getFirstResults(node, [n.eprints + "isbn"], true) || newItem.ISBN;
-	// DOI from PRISM
-	newItem.DOI = getFirstResults(node, [n.prism2_0 + "doi", n.prism2_1 + "doi", n.bibo + "doi"], true) || newItem.DOI;
+	// DOI from nonstandard DC, PRISM, or BIBO
+	newItem.DOI = getFirstResults(node, [n.dc + "identifier.DOI", n.prism2_0 + "doi", n.prism2_1 + "doi", n.bibo + "doi"], true) || newItem.DOI;
 	
 	if (!newItem.url) {
 		var url = getFirstResults(node, [n.eprints + "official_url",

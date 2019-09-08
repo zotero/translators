@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-14 12:53:38"
+	"lastUpdated": "2019-09-08 11:33:52"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -214,28 +213,49 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013/11/19",
+				"date": "2013-11-21",
 				"DOI": "10.2218/ijdc.v8i2.263",
 				"ISSN": "1746-8256",
-				"abstractNote": "Academic librarians are increasingly engaging in data curation by providing infrastructure (e.g., institutional repositories) and offering services (e.g., data management plan consultations) to support the management of research data on their campuses. Efforts to develop these resources may benefit from a greater understanding of disciplinary differences in research data management needs. After conducting a survey of data management practices and perspectives at our research university, we categorized faculty members into four research domainsâ€”arts and humanities, social sciences, medical sciences, and basic sciencesâ€”and analyzed variations in their patterns of survey responses. We found statistically significant differences among the four research domains for nearly every survey item, revealing important disciplinary distinctions in data management actions, attitudes, and interest in support services. Serious consideration of both the similarities and dissimilarities among disciplines will help guide academic librarians and other data curation professionals in developing a range of data-management services that can be tailored to the unique needs of different scholarly researchers.",
-				"issue": "2",
+				"abstractNote": "Academic librarians are increasingly engaging in data curation by providing infrastructure (e.g., institutional repositories) and offering services (e.g., data management plan consultations) to support the management of research data on their campuses. Efforts to develop these resources may benefit from a greater understanding of disciplinary differences in research data management needs. After conducting a survey of data management practices and perspectives at our research university, we categorized faculty members into four research domains—arts and humanities, social sciences, medical sciences, and basic sciences—and analyzed variations in their patterns of survey responses. We found statistically significant differences among the four research domains for nearly every survey item, revealing important disciplinary distinctions in data management actions, attitudes, and interest in support services. Serious consideration of both the similarities and dissimilarities among disciplines will help guide academic librarians and other data curation professionals in developing a range of data-management services that can be tailored to the unique needs of different scholarly researchers.",
 				"language": "en",
 				"libraryCatalog": "www.ijdc.net",
 				"pages": "5-26",
 				"publicationTitle": "International Journal of Digital Curation",
 				"rights": "Copyright (c)",
-				"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5",
+				"url": "http://www.ijdc.net/index.php/ijdc/article/view/8.2.5/",
 				"volume": "8",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "DCC"
+					},
+					{
+						"tag": "IJDC"
+					},
+					{
+						"tag": "International Journal of Digital Curation"
+					},
+					{
+						"tag": "curation"
+					},
+					{
+						"tag": "digital curation"
+					},
+					{
+						"tag": "digital preservation"
+					},
+					{
+						"tag": "preservation"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
