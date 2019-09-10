@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-08 15:38:13"
+	"lastUpdated": "2019-09-10 06:19:00"
 }
 
 /*
@@ -40,6 +40,35 @@
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
+
+// convert a roman number, e.g. XLVIII into an arabic number, e.g. 48
+function roman2arabic(roman) {
+	let mapping = {
+		M: 1000,
+		D: 500,
+		C: 100,
+		L: 50,
+		X: 10,
+		V: 5,
+		I: 1
+	};
+	let result = 0;
+	for (let i = 0; i < roman.length; i++) {
+		let value = mapping[roman[i]];
+		if (i + 1 < roman.length) {
+			if (value >= mapping[roman[i + 1]]) {
+				result += mapping[roman[i]];
+			}
+			else {
+				result -= mapping[roman[i]];
+			}
+		}
+		else {
+			result += mapping[roman[i]];
+		}
+	}
+	return result;
+}
 
 function detectWeb(doc, url) {
 	// TODO: can wo do this better?
@@ -84,6 +113,13 @@ function scrape(doc, url) {
 	item.issue = text(doc, 'h1.page-title');
 	if (item.issue) {
 		item.date = ZU.strToISO(item.issue);
+		// convert the issue numbers into arabic numbers
+		if (item.issue.includes(' - ')) {
+			let conversion = roman2arabic(item.issue.split(' - ')[0]);
+			if (conversion !== 0) {
+				item.issue = conversion;
+			}
+		}
 	}
 	var authors = text(doc, 'section.article-content em');
 	if (authors) {
@@ -104,11 +140,15 @@ function scrape(doc, url) {
 	
 	item.url = url;
 	item.ISSN = '1824-5463';
+	item.language = 'en';
 	item.publicationTitle = 'Advances in Transportation Studies';
 	item.journalAbbreviation = 'ATS';
 	item.extra = 'pusblisher:Aracne Editrice\nplace:Roma';
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -138,8 +178,9 @@ var testCases = [
 				"ISSN": "1824-5463",
 				"abstractNote": "Drivers encounter a variety of outdoor advertising including fixed and wrap advertisement and large amounts of information and data in different locations, which can sometimes confuse the audience due to congestion, accumulation, and non-compliance with the standards and diversity of concepts. Fully understanding how small distractions can influence the ability to drive could prevent a serious accident. Despite the enormous amount of effort has been devoted to evaluating the impact of fix advertising on traffic safety, the importance of investing wrap advertisements seems to be disregarded. Therefore, the present study seeks firstly to compare the importance of distraction caused by wrap advertisement with other parameters affecting drivers’ awareness, then to find out which aspects of wrap advertisement may distract drivers while driving. To address this objective, at first, a questionnaire-based accidents database was prepared regarding those occurred because of distraction, and then the weight of distraction caused by wrap advertisement was identified using AHP. Subsequently, accidents that occurred because of this specific issue were modeled using the discrete choice technique. The results showed that in contrast with the prevailing opinion of drivers, the probability of distraction while driving caused by wrap advertisement is relatively high which can be considered as an alarming issue. Moreover, according to the results of discrete choice modeling, drivers with different characteristics, such as age or gender can be affected by wrap advertisement in different ways.",
 				"extra": "pusblisher:Aracne Editrice\nplace:Roma",
-				"issue": "XLVIII - July 2019",
+				"issue": 48,
 				"journalAbbreviation": "ATS",
+				"language": "en",
 				"libraryCatalog": "ATS International Journal",
 				"pages": "19-30",
 				"publicationTitle": "Advances in Transportation Studies",
@@ -177,6 +218,68 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.atsinternationaljournal.com/index.php/paper-search?q=reference+management",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.atsinternationaljournal.com/index.php/2018-issues/special-issue-2018-vol2/989-dynamic-traffic-safety-grade-evaluation-model-for-road-sections-based-on-gray-fixed-weight-clustering",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Dynamic traffic safety grade evaluation model for road sections based on gray fixed weight clustering",
+				"creators": [
+					{
+						"firstName": "H. L.",
+						"lastName": "Jing",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "L. T.",
+						"lastName": "Ye",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. Z.",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Z.",
+						"lastName": "Xie",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Brown",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"ISSN": "1824-5463",
+				"abstractNote": "The conventional gray predication model GM (1, 1) cannot accurately analyze the dynamic traffic index information of complex and scattered road sections because it may cause relatively large error and performs not well in stability. In order to solve this problem, a dynamic traffic safety grade evaluation model for road sections based on gray fixed weight clustering is designed. In this method, In this method, the gray clustering evaluation method is adopted for gray clustering to complex and scattered traffic safety grade evaluation indexes, and the gray fixed weight clustering method is adopted to weight each clustering index in advance; the clustering weight of each index is set by a fuzzy consistent matrix, on which the fixed weight coefficient of the index is calculated and the clustering vector is constructed; the cluster coefficients and cluster vectors are combined to obtain the clustering indexes of traffic safety evaluation; then a BP neural network dynamic traffic safety grade evaluation model for road sections is constructed according to the indexes, so as to accurately evaluate the dynamic traffic safety grade of road sections. The experiment results show that the designed model method can effectively evaluate the dynamic traffic safety grade of 31 road sections in areas with a high probability of traffic congestion with small evaluation error and high stability, so it meets the design requirements.",
+				"extra": "pusblisher:Aracne Editrice\nplace:Roma",
+				"issue": "Special Issue 2018 Vol2",
+				"journalAbbreviation": "ATS",
+				"language": "en",
+				"libraryCatalog": "ATS International Journal",
+				"pages": "15-24",
+				"publicationTitle": "Advances in Transportation Studies",
+				"url": "http://www.atsinternationaljournal.com/index.php/2018-issues/special-issue-2018-vol2/989-dynamic-traffic-safety-grade-evaluation-model-for-road-sections-based-on-gray-fixed-weight-clustering",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Models"
+					},
+					{
+						"tag": "Road Safety"
+					},
+					{
+						"tag": "Traffic"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
