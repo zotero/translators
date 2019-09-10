@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-10 06:19:00"
+	"lastUpdated": "2019-09-10 19:50:28"
 }
 
 /*
@@ -110,15 +110,21 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item('journalArticle');
 	item.title = text(doc, 'h1.article-title');
-	item.issue = text(doc, 'h1.page-title');
-	if (item.issue) {
-		item.date = ZU.strToISO(item.issue);
-		// convert the issue numbers into arabic numbers
-		if (item.issue.includes(' - ')) {
-			let conversion = roman2arabic(item.issue.split(' - ')[0]);
+	// we use volume here because the issues are numbered
+	// consecutively over years
+	item.volume = text(doc, 'h1.page-title');
+	if (item.volume) {
+		item.date = ZU.strToISO(item.volume);
+		// convert the volume numbers into arabic numbers
+		if (item.volume.includes(' - ')) {
+			let conversion = roman2arabic(item.volume.split(' - ')[0]);
 			if (conversion !== 0) {
-				item.issue = conversion;
+				item.volume = conversion;
 			}
+		}
+		else {
+			// Special Issue 2018 Vol2 --> Special Issue 2
+			item.volume = item.volume.replace(/\d\d\d\d(\s+Vol\.?\s*)?/, '');
 		}
 	}
 	var authors = text(doc, 'section.article-content em');
@@ -133,7 +139,6 @@ function scrape(doc, url) {
 	item.pages = ZU.xpathText(doc, '//section[contains(@class, "article-content")]//strong[contains(., "Pages")]/following-sibling::text()[1]');
 	item.abstractNote = ZU.xpathText(doc, '//section[contains(@class, "article-content")]//strong[contains(., "Abstract")]/following-sibling::text()[1]');
 	var keywords = ZU.xpathText(doc, '//section[contains(@class, "article-content")]//strong[contains(., "Keywords")]/following-sibling::text()[1]');
-	// TODO anything else we should do with these keywords?
 	if (keywords && item.tags.length === 0) {
 		item.tags = keywords.split(';');
 	}
@@ -178,7 +183,6 @@ var testCases = [
 				"ISSN": "1824-5463",
 				"abstractNote": "Drivers encounter a variety of outdoor advertising including fixed and wrap advertisement and large amounts of information and data in different locations, which can sometimes confuse the audience due to congestion, accumulation, and non-compliance with the standards and diversity of concepts. Fully understanding how small distractions can influence the ability to drive could prevent a serious accident. Despite the enormous amount of effort has been devoted to evaluating the impact of fix advertising on traffic safety, the importance of investing wrap advertisements seems to be disregarded. Therefore, the present study seeks firstly to compare the importance of distraction caused by wrap advertisement with other parameters affecting drivers’ awareness, then to find out which aspects of wrap advertisement may distract drivers while driving. To address this objective, at first, a questionnaire-based accidents database was prepared regarding those occurred because of distraction, and then the weight of distraction caused by wrap advertisement was identified using AHP. Subsequently, accidents that occurred because of this specific issue were modeled using the discrete choice technique. The results showed that in contrast with the prevailing opinion of drivers, the probability of distraction while driving caused by wrap advertisement is relatively high which can be considered as an alarming issue. Moreover, according to the results of discrete choice modeling, drivers with different characteristics, such as age or gender can be affected by wrap advertisement in different ways.",
 				"extra": "pusblisher:Aracne Editrice\nplace:Roma",
-				"issue": 48,
 				"journalAbbreviation": "ATS",
 				"language": "en",
 				"libraryCatalog": "ATS International Journal",
@@ -186,6 +190,7 @@ var testCases = [
 				"publicationTitle": "Advances in Transportation Studies",
 				"shortTitle": "Do drivers have a good understanding of distraction by wrap advertisements?",
 				"url": "http://www.atsinternationaljournal.com/index.php/2019-issues/xlviii-july-2019/1056-do-drivers-have-a-good-understanding-of-distraction-by-wrap-advertisements-investigating-the-impact-of-wrap-advertisement-on-distraction-related-driver-s-accidents",
+				"volume": 48,
 				"attachments": [],
 				"tags": [
 					{
@@ -257,13 +262,13 @@ var testCases = [
 				"ISSN": "1824-5463",
 				"abstractNote": "The conventional gray predication model GM (1, 1) cannot accurately analyze the dynamic traffic index information of complex and scattered road sections because it may cause relatively large error and performs not well in stability. In order to solve this problem, a dynamic traffic safety grade evaluation model for road sections based on gray fixed weight clustering is designed. In this method, In this method, the gray clustering evaluation method is adopted for gray clustering to complex and scattered traffic safety grade evaluation indexes, and the gray fixed weight clustering method is adopted to weight each clustering index in advance; the clustering weight of each index is set by a fuzzy consistent matrix, on which the fixed weight coefficient of the index is calculated and the clustering vector is constructed; the cluster coefficients and cluster vectors are combined to obtain the clustering indexes of traffic safety evaluation; then a BP neural network dynamic traffic safety grade evaluation model for road sections is constructed according to the indexes, so as to accurately evaluate the dynamic traffic safety grade of road sections. The experiment results show that the designed model method can effectively evaluate the dynamic traffic safety grade of 31 road sections in areas with a high probability of traffic congestion with small evaluation error and high stability, so it meets the design requirements.",
 				"extra": "pusblisher:Aracne Editrice\nplace:Roma",
-				"issue": "Special Issue 2018 Vol2",
 				"journalAbbreviation": "ATS",
 				"language": "en",
 				"libraryCatalog": "ATS International Journal",
 				"pages": "15-24",
 				"publicationTitle": "Advances in Transportation Studies",
 				"url": "http://www.atsinternationaljournal.com/index.php/2018-issues/special-issue-2018-vol2/989-dynamic-traffic-safety-grade-evaluation-model-for-road-sections-based-on-gray-fixed-weight-clustering",
+				"volume": "Special Issue 2",
 				"attachments": [],
 				"tags": [
 					{
