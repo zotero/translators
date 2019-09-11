@@ -1,0 +1,63 @@
+{
+	"translatorID": "b74f048d-b7c7-48f9-bbc7-2df6d1c1fd90",
+	"label": "Asahi Shimbun",
+	"creator": "Kkairri",
+	"target": "https?://(?:www\\.)?asahi\\.com/articles/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2019-09-11 03:56:12"
+}
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Kkairri
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
+function detectWeb(doc, url) {
+  return "newspaperArticle";
+}
+
+function doWeb(doc, url) {
+  scrape(doc, url);
+}
+
+function scrape(doc, url) {
+  var item = new Zotero.Item('newspaperArticle');
+  if(doc.querySelector('script[type="application/ld+json"]') != null){
+	  var strjson = doc.querySelector('script[type="application/ld+json"]').innerHTML;
+	  var json = JSON.parse(strjson);
+	  var obj = [ json ];
+	  if(obj[0].creator != undefined) item.author = obj[0].creator.toString();
+  }
+  item.rights = 'Copyright © The Asahi Shimbun Company. All rights reserved.';
+  item.title = doc.querySelector('meta[name="TITLE"]').getAttribute('content');
+  item.shortTitle = doc.querySelector('meta[name="SHORTTITLE"]').getAttribute('content');
+  item.date = doc.querySelector('meta[name="pubdate"]').getAttribute('content');
+  item.publicationTitle = '朝日新聞デジタル';
+  item.language = 'ja';
+  item.url = url;
+  item.complete();
+}
