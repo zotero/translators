@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:05:28"
+	"lastUpdated": "2019-09-12 20:25:43"
 }
 
 /*
@@ -437,7 +437,8 @@ function scrape(doc, url, type) {
 		item.attachments.push({
 			title: 'Full Text PDF',
 			url: doc.getElementById('downloadPDFLink').href,
-			mimeType: 'application/pdf'
+			mimeType: 'application/pdf',
+			proxy: false
 		});
 	} else {
 		var fullText = ZU.xpath(doc, '//li[@id="tab-Fulltext-null"]/a')[0];
