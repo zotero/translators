@@ -96,6 +96,9 @@ function scrape(doc, url) {
 				}
 			}
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
+			let abstractFromDOM = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p[not(@class="summary-title")]');
+			if (abstractFromDOM && item.abstractNote.length < abstractFromDOM.length)
+				item.abstractNote = abstractFromDOM;
 
 			item.attachments = [{
 				document: doc,
@@ -103,8 +106,12 @@ function scrape(doc, url) {
 				mimeType: "text/html"
 			}];
 
+			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+			if (docType === "book-review" || docType === "review-article")
+				item.tags.push("Book Reviews");
+
 			var pdfurl = ZU.xpath(doc, '//div[@class="article_link"]/a')[0];
-			if(pdfurl) {
+			if (pdfurl) {
 				pdfurl = pdfurl.href;
 				item.attachments.push({
 					url: pdfurl,

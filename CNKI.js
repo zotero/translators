@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-09-02 11:17:43"
+	"lastUpdated": "2018-09-08 22:09:39"
 }
 
 /*
@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefworksByID(ids, next) {
 	var postData = "";
-	for(var i=0, n=ids.length; i<n; i++) {
+	for (var i=0, n=ids.length; i<n; i++) {
 		postData += ids[i].dbname + "!" + ids[i].filename + "!0!0,";
 	}
 	postData = "formfilenames=" + encodeURIComponent(postData);
@@ -57,7 +57,7 @@ function getRefworksByID(ids, next) {
 					//split authors
 					.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function(m, tag, authors) {
 						var authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
-						if(!authors[authors.length-1].trim()) authors.pop();
+						if (!authors[authors.length-1].trim()) authors.pop();
 						
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					});
@@ -69,11 +69,11 @@ function getRefworksByID(ids, next) {
 }
 
 function getIDFromURL(url) {
-	if(!url) return;
+	if (!url) return;
 	
 	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
-	if(!dbname || !dbname[1] || !filename || !filename[1]) return;
+	if (!dbname || !dbname[1] || !filename || !filename[1]) return;
 	
 	return {dbname: dbname[1], filename: filename[1], url: url};
 }
@@ -84,7 +84,7 @@ function getIDFromPage(doc, url) {
 }
 
 function getTypeFromDBName(dbname) {
-	switch(dbname.substr(0,4).toUpperCase()) {
+	switch (dbname.substr(0,4).toUpperCase()) {
 		case "CJFQ":
 		case "CJFD":
 		case "CAPJ":
@@ -113,55 +113,55 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	
 	var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
 	var aXpath = './/a[@class="fz14"]';
-	if(!links.length) {
+	if (!links.length) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
 	}
-	if(!links.length) return;
+	if (!links.length) return;
 	
 	var items = {};
 	var count = 0;
-	for(var i=0, n=links.length; i<n; i++) {
+	for (var i=0, n=links.length; i<n; i++) {
 		var a = ZU.xpath(links[i], aXpath)[0];
 		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
-		if(title) title = ZU.trimInternal(title);
+		if (title) title = ZU.trimInternal(title);
 		var id = getIDFromURL(a.href);
-		if(!title || !id) continue;
+		if (!title || !id) continue;
 		
 		count++;
-		if(itemInfo) {
+		if (itemInfo) {
 			itemInfo[a.href] = {id: id};
 			
 			/*var pdfLink = ZU.xpath(links[i], './/a[@class="brief_downloadIcon"]')[0];
-			if(pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
+			if (pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
 		}
 		items[a.href] = title;
 	}
 	
-	if(count) return items;
+	if (count) return items;
 }
 
 function detectWeb(doc, url) {
 	var id = getIDFromPage(doc, url);
 	Z.debug(id);
-	if(id) {
+	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
 	
 	var items = getItemsFromSearchResults(doc, url);
-	if(items) return "multiple";
+	if (items) return "multiple";
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
 		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+			if (!selectedItems) return true;
 			
 			var itemInfoByTitle = {};
 			var ids = [];
-			for(var url in selectedItems) {
+			for (var url in selectedItems) {
 				ids.push(itemInfo[url].id);
 				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
 				itemInfoByTitle[selectedItems[url]].url = url;
@@ -178,17 +178,18 @@ function scrape(ids, doc, url, itemInfo) {
 		Z.debug(text);
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
+		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
 		
 		var i = 0;		
 		translator.setHandler('itemDone', function(obj, newItem) {
 			//split names
-			for(var i=0, n=newItem.creators.length; i<n; i++) {
+			for (var i=0, n=newItem.creators.length; i<n; i++) {
 				var creator = newItem.creators[i];
-				if(creator.firstName) continue;
+				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
-				if(creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					//western name. split on last space
 					creator.firstName = creator.lastName.substr(0,lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace+1);
@@ -199,22 +200,22 @@ function scrape(ids, doc, url, itemInfo) {
 				}
 			}
 			
-			if(newItem.abstractNote) {
+			if (newItem.abstractNote) {
 				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
 			}
 			
 			//clean up tags. Remove numbers from end
-			for(var i=0, n=newItem.tags.length; i<n; i++) {
+			for (var i=0, n=newItem.tags.length; i<n; i++) {
 				newItem.tags[i] = newItem.tags[i].replace(/:\d+$/, '');
 			}
 			
 			newItem.title = ZU.trimInternal(newItem.title);
-			if(itemInfo) {
+			if (itemInfo) {
 				var info = itemInfo[newItem.title];
-				if(!info) {
+				if (!info) {
 					Z.debug('No item info for "' + newItem.title + '"');
 				} else {
-					/*if(!info.pdfURL) {
+					/*if (!info.pdfURL) {
 						Z.debug('No PDF URL passed from multiples page');
 					} else {
 						newItem.attachments.push({
@@ -237,3 +238,98 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.translate();
 	})
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "基于部分酸水解-亲水作用色谱-质谱的黄芪多糖结构表征",
+				"creators": [
+					{
+						"lastName": "梁",
+						"firstName": "图",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "傅",
+						"firstName": "青",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "辛",
+						"firstName": "华夏",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "李",
+						"firstName": "芳冰",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "金",
+						"firstName": "郁",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "梁",
+						"firstName": "鑫淼",
+						"creatorType": "author"
+					}
+				],
+				"date": "2014",
+				"ISSN": "1000-8713",
+				"abstractNote": "来自中药的水溶性多糖具有广谱治疗和低毒性特点,是天然药物及保健品研发中的重要组成部分。针对中药多糖结构复杂、难以表征的问题,本文以中药黄芪中的多糖为研究对象,采用\"自下而上\"法完成对黄芪多糖的表征。首先使用部分酸水解方法水解黄芪多糖,分别考察了水解时间、酸浓度和温度的影响。在适宜条件(4 h、1.5mol/L三氟乙酸、80℃)下,黄芪多糖被水解为特征性的寡糖片段。接下来,采用亲水作用色谱与质谱联用对黄芪多糖部分酸水解产物进行分离和结构表征。结果表明,提取得到的黄芪多糖主要为1→4连接线性葡聚糖,水解得到聚合度4~11的葡寡糖。本研究对其他中药多糖的表征具有一定的示范作用。",
+				"callNumber": "21-1185/O6",
+				"issue": "12",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "1306-1312",
+				"publicationTitle": "色谱",
+				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
+				"volume": "32",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Astragalus"
+					},
+					{
+						"tag": "characterization"
+					},
+					{
+						"tag": "hydrophilic interaction liquid chromatography(HILIC)mass spectrometry(MS)"
+					},
+					{
+						"tag": "partial acid hydrolysis"
+					},
+					{
+						"tag": "polysaccharides"
+					},
+					{
+						"tag": "亲水作用色谱"
+					},
+					{
+						"tag": "多糖"
+					},
+					{
+						"tag": "表征"
+					},
+					{
+						"tag": "质谱"
+					},
+					{
+						"tag": "部分酸水解"
+					},
+					{
+						"tag": "黄芪"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/

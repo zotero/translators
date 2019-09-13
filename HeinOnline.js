@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-04-27 02:53:31"
+	"lastUpdated": "2018-12-11 01:06:37"
 }
 
 /*
@@ -36,6 +36,7 @@
 	***************
 */
 
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 // Get any search results from current page
 // Used in detectWeb() and doWeb()
 function getSearchResults(doc) {
@@ -86,7 +87,7 @@ function translateRIS(ris, pdfURL) {
 		if (pdfURL) {
 			item.attachments = [{
 				title: "Full Text PDF",
-				url: ""+pdfURL,
+				url: pdfURL,
 				mimeType: "application/pdf"
 			}];
 		}
@@ -114,30 +115,30 @@ function scrapePage(doc, url) {
 		// Get other parameters from the page URL.
 		var docParams = extractQueryValues(url);
 		// Compose the RIS link.
-		var risURL = docParams.base 
-			+ "CitationFile?kind=ris&handle=" + docParams.handle 
-			+ "&id=" + pageID 
+
+		var risURL = docParams.base
+			+ "CitationFile?kind=ris&handle=" + docParams.handle
+			+ "&id=" + pageID
 			+ "&base=js";
-		// updatediv apparently gives us a page that will refresh itself to the PDF.
-		var pdfPageURLs = doc.getElementsByClassName("updatediv");
 		ZU.doGet(risURL, function(ris) {
-			if (pdfPageURLs) {
-				Array.prototype.filter.call(pdfPageURLs, function(pdfPageURL){
-					if (pdfPageURL){
-						// force string instead of object
-						pdfPageURL=""+pdfPageURL;
-						ZU.doGet(pdfPageURL, function(pdfPage) {
-							// Call to pdfPageURL prepares PDF for download via META refresh URL
-							var pdfURL = null;
-							var m = pdfPage.match(/<META.*URL=([^"]+)/);
-							if (m) {
-								pdfURL = m[1];
-							}
-							translateRIS(ris, pdfURL);
-						} , null );
-					}
-				});
-			} else {
+			// the PDF URL gives us a page that will refresh itself to the PDF.
+			var pdfPageURL = attr(doc, '[data-original-title*="Download PDF"]', 'href');
+			if (pdfPageURL) {
+				pdfPageURL = docParams.base + pdfPageURL;
+				// Z.debug(pdfPageURL)
+				ZU.doGet(pdfPageURL, function(pdfPage) {
+								// Call to pdfPageURL prepares PDF for download via META refresh URL
+								var pdfURL = null;
+								var m = pdfPage.match(/<META.*URL=\"([^"]+)/);
+								// Z.debug(pdfPage)
+								// Z.debug(m)
+								if (m) {
+									pdfURL = docParams.base + m[1];
+								}
+								translateRIS(ris, pdfURL);
+							} , null );
+			}
+			else {
 				translateRIS(ris);
 			}
 		} , null );

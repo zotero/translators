@@ -1,7 +1,7 @@
 {
 	"translatorID": "cd587058-6125-4b33-a876-8c6aae48b5e8",
 	"label": "WHO",
-	"creator": "Mario Trojan",
+	"creator": "Mario Trojan, Philipp Zumstein",
 	"target": "^http://apps\\.who\\.int/iris/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-20 12:45:21"
+	"lastUpdated": "2018-09-02 14:34:27"
 }
 
 /*
@@ -40,19 +40,20 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
 function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-// same as attr() and text(), but returns the whole node instead
-function node(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem:null;}
 
 function detectWeb(doc, url) {
-	var headlines = ["Página de inicio de la colección", "Главная страница коллекции", "Page d'accueil de la collection", "Collection home page", "文献类型主页", " الصفحة الرئيسية للمحتوى"];
-	if (url.includes('/simple-search') || (headlines.indexOf(text(doc, "h2 > small")) != -1)) {
-		if (getSearchResults(doc, true) !== false) {
-			return "multiple";
+	if (url.includes("/handle/") && text(doc, 'div.item-summary-view-metadata')) {
+		var type = attr(doc, 'meta[name="DC.type"]', 'content');
+		//Z.debug(type);
+		if (type && type.includes("articles")) {
+			return "journalArticle";
 		}
-	}
-
-	if (url.includes("/handle/")) {
+		if (type && (type.includes("Book") || type.includes("Publications"))) {
+			return "book";
+		}
 		return "report";
+	} else if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
 }
 
@@ -61,12 +62,12 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	var rows = doc.querySelectorAll('a.list-group-item');
+	var rows = doc.querySelectorAll('h4.artifact-title>a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		var title = rows[i].textContent;
 		if (!href || !title) continue;
-		if (checkOnly) return;
+		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
@@ -92,124 +93,70 @@ function doWeb(doc, url) {
 	}
 }
 
+
 function scrape(doc, url) {
+	// copy meta tags in body to head
+	var head = doc.getElementsByTagName('head');
+	var metasInBody = ZU.xpath(doc, '//body/meta');
+	for (let meta of metasInBody) {
+		head[0].append(meta);
+	}
+	
 	var type = detectWeb(doc, url);
-	var item = new Zotero.Item(type);
+	
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
-	// fields
-	var rows = doc.querySelectorAll("table.itemDisplayTable > tbody > tr");
-	for (let i=0;i<rows.length;i++) {
-		let key = text(rows[i], "td.metadataFieldLabel").trim();
-		let value = text(rows[i], "td.metadataFieldValue");
-
-		switch (key) {
-			case 'Título :':
-			case 'Название:':
-			case 'Titre:':
-			case 'Title:':
-			case '标题:':
-			case 'العنوان:':
-				item.title = value;
-				break;
-			case 'Idioma:':
-			case 'Язык:':
-			case 'Langue:':
-			case 'Language:':
-			case '语言:':
-			case 'اللغة:':
-				let languages = getBrValues(node(rows[i], "td.metadataFieldValue"));
-				languages.forEach(function (value) {
-					if (item.language === undefined) {
-						item.language = value;
-					} else {
-						item.language += ', ' + value;
-					}
-				});
-				break;
-			case 'Autores :':
-			case 'Авторы:':
-			case 'Auteurs :':
-			case 'Authors:':
-			case '作者:':
-			case 'المؤلفون:':
-				var authors = rows[i].querySelectorAll("a");
-				for (let author of authors) {
-					item.creators.push({lastName: author.textContent,
-										type: "author",
-										fieldMode: 1
-										}
-					);
-				}
-				break;
-			case 'Editorial :':
-			case 'Издатель':
-			case 'Editeur:':
-			case '出版人:':
-			case 'Publisher:':
-			case 'الناشر:':
-				if (value.match(/:/g).length == 1) {
-					let parts = value.split(":");
-					item.place = parts[0];
-					item.institution = parts[1];
-				} else {
-					item.institution = value;
-				}
-				break;
-			case 'URI :':
-			case 'URI (Унифицированный идентификатор ресурса):':
-			case 'URI:':
-			case '网址:':
-				item.url = value;
-				break;
-			case 'Resumen:':
-			case 'Реферат:':
-			case 'Résumé:':
-			case 'Abstract:':
-			case '提要:':
-			case 'ملخص:':
-				item.abstractNote = value;
-				break;
+	translator.setHandler('itemDone', function (obj, item) {
+		if (item.publisher && !item.place && item.publisher.includes(' : ')) {
+			let placePublisher = item.publisher.split(' : ');
+			item.place = placePublisher[0];
+			item.publisher = placePublisher[1];
 		}
-	}
-
-	// attachments
-	var attachments = doc.querySelectorAll("div.panel-info > table.panel-body > tbody > tr > td > a");
-	var saved_attachments = [];
-	for (let attachment of attachments) {
-		var href = attachment.getAttribute("href");
-		var name = attachment.textContent;
-		if (name.endsWith(".pdf") && saved_attachments.indexOf(href) == -1) {
-			item.attachments.push({url: href,
-								   title: name,
-								   "mimeType": "application/pdf"
-			});
-			saved_attachments.push(href);
+		
+		var firstAuthor = attr(doc, 'meta[name="DC.creator"]', 'content');
+		if (firstAuthor && !firstAuthor.includes(',')) {
+			item.creators[0] = {
+				"lastName": firstAuthor,
+				"creatorType": "author",
+				"fieldMode": true
+			};
 		}
-	}
+		
+		var descriptions = doc.querySelectorAll('meta[name="DC.description"]');
+		// DC.description doesn't actually contain other useful content,
+		// except possibly the number of pages
+		for (let description of descriptions) {
+			var numPages = description.content.match(/(([lxiv]+,\s*)?\d+)\s*p/);
+			if (numPages) {
+				if (ZU.fieldIsValidForType("numPages", item.itemType)) {
+					item.numPages = numPages[1];
 
-	item.complete();
+				}
+				else if (!item.extra) {
+					item.extra = "number-of-pages: " + numPages[1];
+				}
+				else {
+					item.extra += "\nnumber-of-pages: " + numPages[1];
+				}
+				delete item.abstractNote;
+			}
+		}
+	
+		
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function(trans) {
+		trans.itemType = type;
+		trans.doWeb(doc, url);
+	});
 }
 
-// get child text nodes of element separated by <br> and convert into string list
-function getBrValues(element) {
-	var child = element.firstChild;
-	var values = [];
-	while (child !== null) {
-		if (child.nodeType == 3) { // Text
-			values.push(child.textContent);
-		}
-		child = child.nextSibling;
-	}
-	return values;
-}
 
 /** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "http://apps.who.int/iris/simple-search?query=acupuncture",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "http://apps.who.int/iris/handle/10665/70863?locale=ar",
@@ -220,22 +167,41 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "World Health Organization",
-						"type": "author",
-						"fieldMode": 1
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
+				"date": "2003",
+				"extra": "number-of-pages: 46",
 				"institution": "World Health Organization",
-				"language": "English",
-				"libraryCatalog": "WHO",
+				"language": "en",
+				"libraryCatalog": "apps.who.int",
 				"place": "Geneva",
-				"url": "http://www.who.int/iris/handle/10665/70863",
+				"reportNumber": "WHO/CDS/CSR/GAR/2003.11",
+				"url": "http://apps.who.int/iris/handle/10665/70863",
 				"attachments": [
 					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Communicable Diseases and their Control"
+					},
+					{
+						"tag": "Disease outbreaks"
+					},
+					{
+						"tag": "Epidemiologic surveillance"
+					},
+					{
+						"tag": "Severe acute respiratory syndrome"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -243,30 +209,86 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/70863?locale=en",
+		"url": "http://apps.who.int/iris/handle/10665/272081",
 		"items": [
 			{
-				"itemType": "report",
-				"title": "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
+				"itemType": "journalArticle",
+				"title": "Providing oxygen to children in hospitals: a realist review",
 				"creators": [
 					{
-						"lastName": "World Health Organization",
-						"type": "author",
-						"fieldMode": 1
+						"firstName": "Hamish",
+						"lastName": "Graham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shidan",
+						"lastName": "Tosif",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Amy",
+						"lastName": "Gray",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shamim",
+						"lastName": "Qazi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Harry",
+						"lastName": "Campbell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Peel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Barbara",
+						"lastName": "McPake",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Trevor",
+						"lastName": "Duke",
+						"creatorType": "author"
 					}
 				],
-				"institution": "World Health Organization",
-				"language": "English",
-				"libraryCatalog": "WHO",
-				"place": "Geneva",
-				"url": "http://www.who.int/iris/handle/10665/70863",
+				"date": "2017-4-01",
+				"DOI": "10.2471/BLT.16.186676",
+				"ISSN": "0042-9686",
+				"abstractNote": "288",
+				"extra": "PMID: 28479624",
+				"issue": "4",
+				"language": "en",
+				"libraryCatalog": "apps.who.int",
+				"pages": "288-302",
+				"publicationTitle": "Bulletin of the World Health Organization",
+				"rights": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
+				"shortTitle": "Providing oxygen to children in hospitals",
+				"url": "http://apps.who.int/iris/handle/10665/272081",
+				"volume": "95",
 				"attachments": [
 					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Systematic Reviews"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -274,30 +296,62 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/70863?locale=es",
+		"url": "http://apps.who.int/iris/handle/10665/273678",
 		"items": [
 			{
-				"itemType": "report",
-				"title": "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
+				"itemType": "book",
+				"title": "Сборник руководящих принципов и стандартов ВОЗ: обеспечение оптимального оказания медицинских услуг пациентам с туберкулезом",
 				"creators": [
 					{
-						"lastName": "World Health Organization",
-						"type": "author",
-						"fieldMode": 1
+						"lastName": "Всемирная организация здравоохранения",
+						"creatorType": "author",
+						"fieldMode": true
 					}
 				],
-				"institution": "World Health Organization",
-				"language": "inglés",
-				"libraryCatalog": "WHO",
-				"place": "Geneva",
-				"url": "http://www.who.int/iris/handle/10665/70863",
+				"date": "2018",
+				"ISBN": "9789244514108",
+				"language": "ru",
+				"libraryCatalog": "apps.who.int",
+				"numPages": "47",
+				"publisher": "Всемирная организация здравоохранения",
+				"rights": "CC BY-NC-SA 3.0 IGO",
+				"shortTitle": "Сборник руководящих принципов и стандартов ВОЗ",
+				"url": "http://apps.who.int/iris/handle/10665/273678",
 				"attachments": [
 					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Delivery of Health Care"
+					},
+					{
+						"tag": "Disease Management"
+					},
+					{
+						"tag": "Guideline"
+					},
+					{
+						"tag": "Infection Control"
+					},
+					{
+						"tag": "Multidrug-Resistant"
+					},
+					{
+						"tag": "Patient Care"
+					},
+					{
+						"tag": "Reference Standards"
+					},
+					{
+						"tag": "Tuberculosis"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -305,88 +359,13 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/70863?locale=fr",
-		"items": [
-			{
-				"itemType": "report",
-				"title": "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
-				"creators": [],
-				"institution": "World Health Organization",
-				"language": "anglais",
-				"libraryCatalog": "WHO",
-				"place": "Geneva",
-				"url": "http://www.who.int/iris/handle/10665/70863",
-				"attachments": [
-					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"url": "http://apps.who.int/iris/handle/10665/165097",
+		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/70863?locale=ru",
-		"items": [
-			{
-				"itemType": "report",
-				"title": "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
-				"creators": [
-					{
-						"lastName": "World Health Organization",
-						"type": "author",
-						"fieldMode": 1
-					}
-				],
-				"language": "английский",
-				"libraryCatalog": "WHO",
-				"url": "http://www.who.int/iris/handle/10665/70863",
-				"attachments": [
-					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/70863?locale=zh",
-		"items": [
-			{
-				"itemType": "report",
-				"title": "Consensus document on the epidemiology of severe acute respiratory syndrome (SARS)",
-				"creators": [
-					{
-						"lastName": "World Health Organization",
-						"type": "author",
-						"fieldMode": 1
-					}
-				],
-				"institution": "World Health Organization",
-				"language": "英文",
-				"libraryCatalog": "WHO",
-				"place": "Geneva",
-				"url": "http://www.who.int/iris/handle/10665/70863",
-				"attachments": [
-					{
-						"title": "WHO_CDS_CSR_GAR_2003.11_eng.pdf",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"url": "http://apps.who.int/iris/discover?query=acupuncture",
+		"items": "multiple"
 	}
-]
+];
 /** END TEST CASES **/

@@ -17,7 +17,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if(getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	} else {
 		if (attr(doc, 'input[name*="ASIN"]', 'value')) {
@@ -65,28 +65,28 @@ function getSearchResults(doc, checkOnly) {
 		}
 	}
 	
-	if(!links.length) {
+	if (!links.length) {
 		//wish lists
 		container = doc.getElementById('item-page-wrapper');
-		if(container) {
+		if (container) {
 			links = ZU.xpath(container, './/a[starts-with(@id, "itemName_")]');
 		}
 	}
 	
-	if(!links.length) {
+	if (!links.length) {
 		//author pages
 		container = doc.getElementById('mainResults');
-		if(container) {
+		if (container) {
 			links = ZU.xpath(container, './/li[starts-with(@id, "result_")]//a[h2]');
 		}
 	}
 	
-	if(!links.length) return false;
+	if (!links.length) return false;
 	var availableItems = {}, found = false,
 		asinRe = /\/(?:dp|product)\/(?:[^?#]+)\//;
-	for(var i=0; i<links.length; i++) {
+	for (var i=0; i<links.length; i++) {
 		var elmt = links[i];
-		if(asinRe.test(elmt.href)) {
+		if (asinRe.test(elmt.href)) {
 			if (checkOnly) return true;
 			availableItems[elmt.href] = elmt.textContent.trim();
 			found = true;
@@ -97,12 +97,12 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	if(detectWeb(doc, url) == 'multiple') {
+	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function(items) {
-			if(!items) return true;
+			if (!items) return true;
 			
 			var links = [];
-			for(var i in items) links.push(i);
+			for (var i in items) links.push(i);
 			Zotero.Utilities.processDocuments(links, scrape);
 		});
 
@@ -159,16 +159,16 @@ function getField(info, field) {
 	//returns the value for the key 'field' or any of its
 	//corresponding (language specific) keys of the array 'info'
 	
-	if(!i15dFields[field]) return;
+	if (!i15dFields[field]) return;
 	
-	for(var i=0; i<i15dFields[field].length; i++) {
-		if(info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
+	for (var i=0; i<i15dFields[field].length; i++) {
+		if (info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];	
 	}
 }
 
 function translateField(str) {
-	for(var f in i15dFields) {
-		if(i15dFields[f].indexOf(str) != -1) {
+	for (var f in i15dFields) {
+		if (i15dFields[f].indexOf(str) != -1) {
 			return f;
 		}
 	}
@@ -195,7 +195,7 @@ function scrape(doc, url) {
 		.replace(/(?: [(\[].+[)\]])+$/, "");
 	
 	var baseNode = title.parentElement, bncl;
-	while(baseNode && (bncl = baseNode.classList) && 
+	while (baseNode && (bncl = baseNode.classList) && 
 		!(// ways to identify a node encompasing title and authors
 			baseNode.id == 'booksTitle'
 			|| baseNode.id == 'ppd-center'
@@ -209,31 +209,31 @@ function scrape(doc, url) {
 		baseNode = baseNode.parentElement;
 	}
 	
-	if(baseNode) {
+	if (baseNode) {
 		var authors = ZU.xpath(baseNode, './/span[@id="artistBlurb"]/a');
-		//if(!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
-		if(!authors.length) authors = ZU.xpath(baseNode, '(.//*[@id="byline"]/span[contains(@class, "author")] | .//*[@id="byline"]/span[contains(@class, "author")]/span)/a[contains(@class, "a-link-normal")][1]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/span[contains(@class, "author")]/a|.//span[contains(@class, "author")]/span/a');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
-		if(!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
-		for(var i=0; i<authors.length; i++) {
+		//if (!authors.length) authors = baseNode.getElementsByClassName('contributorNameID');
+		if (!authors.length) authors = ZU.xpath(baseNode, '(.//*[@id="byline"]/span[contains(@class, "author")] | .//*[@id="byline"]/span[contains(@class, "author")]/span)/a[contains(@class, "a-link-normal")][1]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/span[@class="contributorNameTrigger"]/a[not(@href="#")]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/span[contains(@class, "author")]/a|.//span[contains(@class, "author")]/span/a');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[following-sibling::*[1][@class="byLinePipe"]]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[contains(@href, "field-author=")]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
+		if (!authors.length) authors = ZU.xpath(baseNode, './/a[@id="ProductInfoArtistLink"]');
+		for (var i=0; i<authors.length; i++) {
 			var role = ZU.xpathText(authors[i], '(.//following::text()[normalize-space(self::text())])[1]');
-			if(role) {
+			if (role) {
 				role = CREATOR[translateField(
 					role.replace(/^.*\(\s*|\s*\).*$/g, '')
 						.split(',')[0] // E.g. "Actor, Primary Contributor"
 						.trim()
 				)];
 			}
-			if(!role) role = 'author';
+			if (!role) role = 'author';
 			
 			var name = ZU.trimInternal(authors[i].textContent)
 				.replace(/\s*\([^)]+\)/, '');
 			
-			if(item.itemType == 'audioRecording') {
+			if (item.itemType == 'audioRecording') {
 				item.creators.push({
 					lastName: name,
 					creatorType: 'performer',
@@ -257,7 +257,7 @@ function scrape(doc, url) {
 		item.abstractNote = abstractNode.textContent.trim();
 		if (!item.abstractNote) {
 			var iframe = abstractNode.getElementsByTagName('iframe')[0];
-			if(iframe) {
+			if (iframe) {
 				abstractNode = iframe.contentWindow.document.getElementById('iframeContent');
 				item.abstractNote = abstractNode.textContent.trim();
 			}
@@ -267,22 +267,22 @@ function scrape(doc, url) {
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
-	if(els.length) {
-		for(var i=0; i<els.length; i++) {
+	if (els.length) {
+		for (var i=0; i<els.length; i++) {
 			var el = els[i],
 				key = ZU.xpathText(el, 'b[1]').trim();
-			if(key) {
+			if (key) {
 				info[key.replace(/\s*:$/, "")] = el.textContent.substr(key.length+1).trim();
 			}
 		}
 	} else {
 		// New design encountered 06/30/2013
 		els = ZU.xpath(doc, '//tr[td[@class="a-span3"]][td[@class="a-span9"]]');
-		for(var i=0; i<els.length; i++) {
+		for (var i=0; i<els.length; i++) {
 			var el = els[i],
 				key = ZU.xpathText(el, 'td[@class="a-span3"]'),
 				value = ZU.xpathText(el, 'td[@class="a-span9"]');
-			if(key && value) info[key.trim()] = value.trim();
+			if (key && value) info[key.trim()] = value.trim();
 		}
 	}
 	
@@ -292,27 +292,27 @@ function scrape(doc, url) {
 	}
 	
 	// Date
-	for(var i=0; i<DATE.length; i++) {
+	for (var i=0; i<DATE.length; i++) {
 		item.date = info[DATE[i]];
-		if(item.date) break;
+		if (item.date) break;
 	}
-	if(!item.date) {
-		for(var i in info) {
+	if (!item.date) {
+		for (var i in info) {
 			var m = /\(([^)]+ [0-9]{4})\)/.exec(info[i]);
-			if(m) item.date = m[1];
+			if (m) item.date = m[1];
 		}
 	}
 	
 	// Books
 	var publisher = getField(info, 'Publisher') || getField(info, 'Editor');
-	if(publisher) {
+	if (publisher) {
 		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
 		item.publisher = m[1].trim();
-		if(m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
-		if(m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
+		if (m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
+		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
-	if(pages) item.numPages = parseInt(pages, 10);
+	if (pages) item.numPages = parseInt(pages, 10);
 	item.language = getField(info, 'Language');
 	//add publication place from ISBN translator, see at the end
 	
@@ -320,14 +320,14 @@ function scrape(doc, url) {
 	if (item.itemType == 'videoRecording') {
 		// This seems to only be worth it for videos
 		var clearedCreators = false;
-		for(var i in CREATOR) {
-			if(getField(info, i)) {
-				if(!clearedCreators) {
+		for (var i in CREATOR) {
+			if (getField(info, i)) {
+				if (!clearedCreators) {
 					item.creators = [];
 					clearedCreators = true;
 				}
 				var creators = getField(info, i).split(/ *, */);
-				for(var j=0; j<creators.length; j++) {
+				for (var j=0; j<creators.length; j++) {
 					item.creators.push(ZU.cleanAuthor(creators[j], CREATOR[i]));
 				}
 			}
@@ -340,9 +340,9 @@ function scrape(doc, url) {
 	// Music
 	item.label = getField(info, 'Label');
 	var department = ZU.xpathText(doc, '//li[contains(@class, "nav-category-button")]/a');
-	if(getField(info, 'Audio CD')) {
+	if (getField(info, 'Audio CD')) {
 		item.audioRecordingFormat = "Audio CD";
-	} else if(department && department.trim() == "Amazon MP3 Store") {
+	} else if (department && department.trim() == "Amazon MP3 Store") {
 		item.audioRecordingFormat = "MP3";
 	}
 	
@@ -350,7 +350,7 @@ function scrape(doc, url) {
 	
 	//we search for translators for a given ISBN
 	//and try to figure out the missing publication place
-	if(item.ISBN && !item.place) {
+	if (item.ISBN && !item.place) {
 		Z.debug("Searching for additional metadata by ISBN: " + item.ISBN);
 		var search = Zotero.loadTranslator("search");
 		search.setHandler("translators", function(obj, translators) {

@@ -9,13 +9,37 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2017-05-23 21:37:25"
+	"lastUpdated": "2019-06-10 23:02:32"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2008 Michael Berkowitz
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-	if (url.indexOf('results.html') != -1) {
+	if (url.includes('results.html')) {
 		return "multiple";
-	} else if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./) != -1
+	}
+	else if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./) != -1
 		|| ZU.xpath(doc, '//section[@class="article-body"]/div[@class="issue-date"]').length
 		|| doc.getElementsByClassName('active').length
 	) {
@@ -23,20 +47,22 @@ function detectWeb(doc, url) {
 	}
 	// TODO: detect new content on scroll, beacause we should not detect on
 	// ads and ToC content
+	return false;
 }
 
 function handleAuthors(authors) {
 	if (authors && (authors = authors.trim())) {
-		var matches = authors.match(/^\s*([^\/]+?)\s*\/\s*(.+?)\s*$/);
+		var matches = authors.match(/^\s*([^/]+?)\s*\/\s*(.+?)\s*$/);
 		if (matches) {
 			if (matches[1] == 'AP' || matches[1] == 'Fortune') {
 				authors = matches[2];
-			} else {
+			}
+			else {
 				authors = matches[1];
 			}
 		}
 		
-		//x, y and z
+		// x, y and z
 		authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/\s*,\s*|\s+and\s+/i);
 		var authArr = [];
 		for (var i = 0, n = authors.length; i < n; i++) {
@@ -58,7 +84,7 @@ function scrape(doc, url) {
 	var article = ZU.xpath(doc, '//section/div[@class="wrapper"]/article[contains(@class, "active")]')[0],
 		metaUrl = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
 
-	if (article && metaUrl && doc.location.href.indexOf(metaUrl) == -1) {
+	if (article && metaUrl && !doc.location.href.includes(metaUrl)) {
 		var item = new Zotero.Item("magazineArticle");
 		item.title = ZU.trimInternal(article.getElementsByClassName('article-title')[0].textContent);
 		item.publicationTitle = "Time";
@@ -69,7 +95,9 @@ function scrape(doc, url) {
 		var authors = article.getElementsByClassName('byline');
 		if (authors.length) {
 			item.creators = handleAuthors(authors
-				.map(function(a) { return ZU.trimInternal(a.textContent) })
+				.map(function (a) {
+					return ZU.trimInternal(a.textContent);
+				})
 				.join(', ')
 			);
 		}
@@ -81,12 +109,13 @@ function scrape(doc, url) {
 		item.date = ZU.xpathText(article, 'header//time[@class="publish-date"]/@datetime');
 		
 		item.complete();
-	} else {
+	}
+	else {
 		var translator = Zotero.loadTranslator('web');
 		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 		translator.setDocument(doc);
 		
-		translator.setHandler('itemDone', function(obj, item) {
+		translator.setHandler('itemDone', function (obj, item) {
 			item.itemType = "magazineArticle";
 			item.publicationTitle = "Time";
 			item.url = url;
@@ -96,8 +125,7 @@ function scrape(doc, url) {
 			var authors = ZU.xpathText(doc, '//meta[@name="byline"]/@content')
 				|| ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ')
 				|| ZU.xpathText(doc, '//span[@class="entry-byline"]')
-				|| ZU.xpathText(doc, '//header[@class="article-header"]\
-					//ul[@class="article-authors"]//span[@class="byline"]/a');
+				|| ZU.xpathText(doc, '//header[@class="article-header"]//ul[@class="article-authors"]//span[@class="byline"]/a');
 			if (authors) item.creators = handleAuthors(authors);
 
 			var title = ZU.xpathText(doc, '//h1[@class="entry-title"]');
@@ -113,9 +141,9 @@ function scrape(doc, url) {
 			item.complete();
 		});
 		
-		translator.getTranslatorObject(function(em) {
+		translator.getTranslatorObject(function (em) {
 			em.addCustomFields({
-				'date': 'date'
+				date: 'date'
 			});
 		});
 
@@ -125,20 +153,20 @@ function scrape(doc, url) {
 
 
 function doWeb(doc, url) {
-	var urls = new Array();
 	if (detectWeb(doc, url) == 'multiple') {
 		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"));
-		Zotero.selectItems(items, function(selectedItems) {
-			if (!selectedItems) return true;
+		Zotero.selectItems(items, function (selectedItems) {
+			if (!selectedItems) return;
 		
-			var urls = new Array();
+			var urls = [];
 			for (var i in selectedItems) {
 				urls.push(i);
 			}
-			Z.debug(urls)
+			Z.debug(urls);
 			ZU.processDocuments(urls, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/

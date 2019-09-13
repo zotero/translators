@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.result h3 a, .article-item h6 a');
+	var rows = ZU.xpath(doc, '//h6[@class="bib-record__title"]//a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -83,6 +83,14 @@ function doWeb(doc, url) {
 	}
 }
 
+function addBookReviewTag(doc, item) {
+	var primaryHeading = ZU.xpathText(doc, '//span[@class="surtitre"]');
+	if (primaryHeading) {
+		primaryHeading = primaryHeading.trim();
+		if (primaryHeading.match(/^Recensions$/))
+			item.tags.push(primaryHeading);
+	}
+}
 
 function scrape(doc, url) {
 	var abstractFR = text(doc, '#resume-fr>p');
@@ -93,11 +101,17 @@ function scrape(doc, url) {
 	} else {
 		abstract = abstractFR || abstractEN;
 	}
+	var secondAbstract;
+	if (abstract == abstractEN)
+		secondAbstract = abstractFR;
+	else
+		secondAbstract = abstractEN;
+
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
 			item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
@@ -105,6 +119,14 @@ function scrape(doc, url) {
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
 		}
+
+		if (secondAbstract) {
+			item.notes.push({
+				note: "abs:" + secondAbstract.replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+			});
+		}
+
+		addBookReviewTag(doc, item);
 		item.complete();
 	});
 

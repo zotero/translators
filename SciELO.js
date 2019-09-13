@@ -74,16 +74,65 @@ function doWeb(doc, url) {
 	}
 }
 
+function postProcess(doc, item) {
+	// the author fields are repeated in the website's embedded metadata
+	// so, the duplicates need to be removed
+	item.creators = item.creators.reduce((unique, o) => {
+		if(!unique.some(obj => obj.firstName === o.firstName && obj.lastName === o.lastName &&
+			obj.creatorType === o.creatorType && obj.fieldMode === o.fieldMode)) {
+		  unique.push(o);
+		}
+		return unique;
+	},[]);
+
+	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")]');
+	if (abstractParagraphs && abstractParagraphs.length > 0) {
+		item.abstractNote = "";
+		for (var paragraph in abstractParagraphs) {
+			var node = abstractParagraphs[paragraph];
+			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
+		}
+	} else {
+		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)]');
+		if (abstractParagraphs && abstractParagraphs.length > 0)
+			item.abstractNote = abstractParagraphs[0].textContent;
+	}
+
+	var keywords = ZU.xpath(doc, '//strong[contains(text(), /keywords/i)]/..');
+	if (keywords) {
+		item.tags = keywords[0].textContent
+						.trim()
+						.replace(/\n/g, "")
+						.replace(/keywords\s*\:\s*/ig, "")
+						.split(";")
+						.map(function(x) { return x.trim(); });
+	}
+
+	if (item.date) {
+		let dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
+		if (dateMatches && dateMatches[1] == "00")
+			item.date = dateMatches[2];
+	}
+
+	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()')
+						   .match(/\d{4},\sn\.(\d+),\spp/);
+	if (titleSpanMatch) {
+		let volume = item.volume;
+		item.volume = item.issue;
+		item.issue = volume;
+	}
+
+	item.libraryCatalog = "SciELO"
+}
+
 
 function scrape(doc, url) {
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]')
 	var translator = Zotero.loadTranslator('web');
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-		if(abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/, "").replace(/[\n\t]/g, "");
-		item.libraryCatalog = "SciELO"
+		postProcess(doc, item);
 		item.complete();
 	});
 	translator.translate();
