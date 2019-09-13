@@ -69,26 +69,27 @@ function getPagesFromString(pagesString) {
 }
 
 
-function getVolumeFromString(volumeString) {
-	let match = volumeString.match(/Volume (.+)/);
+function getVolumeAndYearFromString(volumeString) {
+	let match = volumeString.match(/Volume ([A-Z]+)\s*-\s*([0-9]+)/);
 	if (match !== null)
-		return match[1];
-	return '';
+		return {volume: match[1], year: match[2]};
+	return null;
 }
 
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
-		var volume = '';
+		var volumeAndYear = null;
 		let headings = ZU.xpath(doc, '//div[@id="heading"]/h2/text()');
 		headings.forEach(function(heading) {
-			volume = getVolumeFromString(heading.nodeValue);
+			volumeAndYear = getVolumeAndYearFromString(heading.nodeValue);
 		});
-		
+
 		let tocEntries = ZU.xpath(doc,'//ul[@class="toc"]/li');
 		tocEntries.forEach(function(tocEntry) {
 			let item = new Zotero.Item();
 			item.itemType = 'journalArticle';
+			item.issn = '0081-6175';
 			for (let child = tocEntry.firstChild; child !== null; child = child.nextSibling) {
 				if (child.nodeType == 1) {
 					if (child.tagName == 'A') {
@@ -102,8 +103,10 @@ function doWeb(doc, url) {
 						item.pages = pages;
 				}
 			}
-			if (volume !== '')
-				item.volume = volume;
+			if (volumeAndYear !== null) {
+				item.volume = volumeAndYear.volume;
+				item.date = volumeAndYear.year;
+			}
 			item.complete();
 		});
 	}
