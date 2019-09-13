@@ -1,3 +1,17 @@
+{
+	"translatorID": "df3af862-0860-4988-8fa1-6a597753e679",
+	"label": "Studi e Materiali di Storia delle Religioni",
+	"creator": "Mario Trojan",
+	"target": "^https?://cisadu2.let.uniroma1.it/smsr/issues/[0-9]+/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": false,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2019-09-13 15:10:57"
+}
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
