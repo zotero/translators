@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-02 22:20:05"
+	"lastUpdated": "2019-09-16 15:14:13"
 }
 
 /*
@@ -91,7 +91,11 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
-	item.title = text(doc, '#PageContent > h1') + ": " + text(doc, '#PageContent > div.do_not_rebase > h2');
+	item.title = text(doc, '#PageContent > h1');
+	var subtitle = text(doc, '#PageContent > div.do_not_rebase > h2');
+	if (subtitle) {
+		item.title += ": " + subtitle;
+	}
 	var doi = ZU.xpathText(doc, '//*[@id="PageContent"]/div[2]/a[contains(@href, "https://doi.org/")]');
 	if (doi !== null) {
 		item.extra = 'DOI: ' + doi;
@@ -104,24 +108,22 @@ function scrape(doc, url) {
 		}
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Author')) {
 			var authorString = ZU.trimInternal(rows[i].textContent);
-			if (authorString) {
-				var creators = authorString.replace(/Author:\s*/, '').replace(/\[.+?\]/g, '').replace(/\(.+?\)/g, '');
-				creators = creators.split(/,|and\s*/);
-				for (let i = 0; i < creators.length; i++) {
-					item.creators.push(ZU.cleanAuthor(creators[i], 'programmer'));
-				}
+			var creators = authorString.replace(/Author:\s*/, '').replace(/\[.+?\]/g, '').replace(/\(.+?\)/g, '');
+			creators = creators.split(/,|and\s*/);
+			for (let i = 0; i < creators.length; i++) {
+				item.creators.push(ZU.cleanAuthor(creators[i], 'programmer'));
 			}
 		}
 	}
 
 	item.versionNumber = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Version")]/following-sibling::td');
-	item.date = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Published")]/following-sibling::td');
 	item.rights = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "License")]/following-sibling::td');
 	item.url = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Package Short Url")]/following-sibling::td') || url;
 	var year = ZU.xpathText(doc, '//*[@id="SiteGlobalFooter"]/div/p[contains(text(), "Copyright")]');
-	year = year.match(/\d+/g)[1];
-	item.date = ZU.strToISO(year);
-
+	if (year) {
+		item.date = year.match(/\d+/g)[1];
+	}
+	
 	var tags = ZU.xpath(doc, '//td[contains(text(), "biocViews")]/following-sibling::td/a');
 	for (let i = 0; i < tags.length; i++) {
 		item.tags.push(tags[i].textContent);
@@ -241,7 +243,7 @@ var testCases = [
 				"shortTitle": "SummarizedExperiment",
 				"system": "Bioconductor version: Development (3.10)",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
-				"versionNumber": "1.15.8",
+				"versionNumber": "1.15.9",
 				"attachments": [],
 				"tags": [
 					{
