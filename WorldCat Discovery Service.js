@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-25 19:26:46"
+	"lastUpdated": "2019-09-16 05:47:18"
 }
 
 /*
@@ -45,9 +45,10 @@ function detectWeb(doc, url) {
 	//single result
 	// generate item and return type
 	var co = getFirstContextObj(doc);
-	if (!co || !url.includes("?databaseList")) return false;
-
-	return generateItem(doc, co).itemType;
+	if (co) {
+		return generateItem(doc, co).itemType;
+	}
+	return false;
 }
 
 
@@ -117,10 +118,8 @@ function extractOCLCID(url) {
 /**
  * Given an item URL, extract database ID
  */
-function extractDatabaseID(url) {
-	var id = url.match(/databaseList=([^&#]+)/);
-	if (!id) return false;
-	return decodeURIComponent(id[1]);
+function extractDatabaseID(doc) {
+	return ZU.xpathText(doc, '//input[@id="dbList"]/@value');
 }
 
 function composeURL(oclcID, databaseID) {
@@ -198,10 +197,12 @@ function scrape(risURL) {
 			//"url": "Table of contents http://bvbr.bib-bvb.de:8991/...
 			if (item.url) {
 				var posUrl = item.url.indexOf('http');
-				if (posUrl>0) {
+				if (posUrl>0
+					|| item.url.includes("http://bvbr.bib-bvb.de:8991")
+				) {
 					item.attachments.push({
 						url: item.url.substr(posUrl),
-						title: item.url.substr(0, posUrl),
+						title: posUrl > 0 ? item.url.substr(0, posUrl) : "Table of contents",
 						snapshot: false
 					});
 					delete item.url;
@@ -250,7 +251,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		var oclcID = extractOCLCID(url);
-		var databaseID = extractDatabaseID(url);
+		var databaseID = extractDatabaseID(doc);
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
 		var risURL = composeURL(oclcID, databaseID);
 		Z.debug("risURL= " + risURL);
@@ -289,12 +290,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
+		"url": "https://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
+		"url": "https://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
 		"items": "multiple"
 	},
 	{
@@ -318,11 +319,11 @@ var testCases = [
 				"numPages": "xx, 404",
 				"place": "Peabody, Mass.",
 				"publisher": "Hendrickson Publishers Marketing",
-				"series": "Lexham Bible reference series; Lexham Bible reference series.",
+				"series": "Lexham Bible reference series",
 				"shortTitle": "Discourse grammar of the Greek New Testament",
 				"attachments": [
 					{
-						"title": "Table of contents ",
+						"title": "Table of contents",
 						"snapshot": false
 					}
 				],
@@ -332,5 +333,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
