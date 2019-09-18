@@ -98,8 +98,8 @@ function postProcess(doc, item) {
 			item.abstractNote = abstractParagraphs[0].textContent;
 	}
 
-	var keywords = ZU.xpath(doc, '//strong[contains(text(), /keywords/i)]/..');
-	if (keywords) {
+	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:")]/..');
+	if (keywords && keywords.length > 0) {
 		item.tags = keywords[0].textContent
 						.trim()
 						.replace(/\n/g, "")
@@ -114,8 +114,10 @@ function postProcess(doc, item) {
 			item.date = dateMatches[2];
 	}
 
-	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()')
-						   .match(/\d{4},\sn\.(\d+),\spp/);
+	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()');
+	if (titleSpanMatch)
+		titleSpanMatch = titleSpanMatch.match(/\d{4},\sn\.(\d+),\spp/);
+
 	if (titleSpanMatch) {
 		let volume = item.volume;
 		item.volume = item.issue;
