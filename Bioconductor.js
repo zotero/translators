@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-16 15:14:13"
+	"lastUpdated": "2019-09-17 16:47:07"
 }
 
 /*
@@ -103,7 +103,7 @@ function scrape(doc, url) {
 	var rows = doc.querySelectorAll('#PageContent > div.do_not_rebase > p');
 	for (let i = 0; i < rows.length; i++) {
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Bioconductor version:')) {
-			item.system = ZU.trimInternal(rows[i].textContent);
+			item.company = ZU.trimInternal(rows[i].textContent);
 			item.abstractNote = ZU.trimInternal(rows[i + 1].textContent);
 		}
 		if (ZU.trimInternal(rows[i].textContent).startsWith('Author')) {
@@ -170,11 +170,11 @@ var testCases = [
 				],
 				"date": "2019",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"company": "Bioconductor version: Release (3.9)",
 				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
-				"system": "Bioconductor version: Release (3.9)",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
 				"versionNumber": "1.14.1",
 				"attachments": [],
@@ -237,11 +237,11 @@ var testCases = [
 				],
 				"date": "2019",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"company": "Bioconductor version: Development (3.10)",
 				"extra": "DOI: 10.18129/B9.bioc.SummarizedExperiment",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
-				"system": "Bioconductor version: Development (3.10)",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
 				"versionNumber": "1.15.9",
 				"attachments": [],
@@ -304,10 +304,10 @@ var testCases = [
 				],
 				"date": "2016",
 				"abstractNote": "The SummarizedExperiment container contains one or more assays, each represented by a matrix-like object of numeric or other mode. The rows typically represent genomic ranges of interest and the columns represent samples.",
+				"company": "Bioconductor version: 3.2",
 				"libraryCatalog": "Bioconductor",
 				"rights": "Artistic-2.0",
 				"shortTitle": "SummarizedExperiment",
-				"system": "Bioconductor version: 3.2",
 				"url": "http://bioconductor.org/packages/SummarizedExperiment/",
 				"versionNumber": "1.0.2",
 				"attachments": [],
