@@ -1,7 +1,7 @@
 {
 	"translatorID": "e40a27bc-0eef-4c50-b78b-37274808d7d2",
 	"label": "J-Stage",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Satoshi Ando",
 	"target": "^https?://www\\.jstage\\.jst\\.go\\.jp/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-15 19:04:11"
+	"lastUpdated": "2019-09-19 05:58:40"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	J-Stage translator - Copyright © 2012 Sebastian Karcher
+	J-Stage translator - Copyright © 2012 Sebastian Karcher, Satoshi Ando
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -221,13 +221,13 @@ var testCases = [
 				"title": "フラックスタワーデータを用いた各種植生指標の季節変化の検討",
 				"creators": [
 					{
-						"firstName": "田中",
-						"lastName": "博春",
+						"firstName": "博春",
+						"lastName": "田中",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "小熊",
-						"lastName": "宏之",
+						"firstName": "宏之",
+						"lastName": "小熊",
 						"creatorType": "author"
 					}
 				],
