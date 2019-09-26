@@ -2,18 +2,18 @@
 	"translatorID": "92d4ed84-8d0-4d3c-941f-d4b9124cfbb",
 	"label": "IEEE Xplore",
 	"creator": "Simon Kornblith, Michael Berkowitz, Bastian Koenings, and Avram Lyon",
-	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?)",
+	"target": "^https?://([^/]+\\.)?ieeexplore\\.ieee\\.org/([^#]+[&?]arnumber=\\d+|(abstract/)?document/|search/(searchresult|selected)\\.jsp|xpl/(mostRecentIssue|tocresult)\\.jsp\\?|xpl/conhome/\\d+/proceeding)",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-18 13:57:41"
+	"lastUpdated": "2019-09-30 01:44:41"
 }
 
 function detectWeb(doc, url) {
-	if (doc.defaultView !== doc.defaultView.top) return;
+	if (doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		return "journalArticle";
@@ -27,6 +27,11 @@ function detectWeb(doc, url) {
 	
 	// Search results
 	if (url.includes("/search/searchresult.jsp")) {
+		return "multiple";
+	}
+	
+	// conference list results
+	if (url.includes("xpl/conhome") && url.includes("proceeding")) {
 		return "multiple";
 	}
 
@@ -44,6 +49,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 	*/
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -90,12 +96,10 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
+	} else if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
+		ZU.processDocuments([fixUrl(url)], scrape);
 	} else {
-		if (url.indexOf("/search/") !== -1 || url.indexOf("/stamp/") !== -1 || url.indexOf("/ielx4/") !== -1 || url.indexOf("/ielx5/") !== -1) {
-			ZU.processDocuments([fixUrl(url)], scrape);
-		} else {
-			scrape(doc, url);
-		}
+		scrape(doc, url);
 	}
 }
 
@@ -123,10 +127,12 @@ function scrape (doc, url) {
 			// Rearrange titles, per http://forums.zotero.org/discussion/8056
 			// If something has a comma or a period, and the text after comma ends with
 			//"of", "IEEE", or the like, then we switch the parts. Prefer periods.
-			if (res = (item.publicationTitle.indexOf(".") !== -1) ?
-				item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/) :
-				item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/))
-			item.publicationTitle = res[2]+" "+res[1];
+			res = (item.publicationTitle.indexOf(".") !== -1)
+				? item.publicationTitle.trim().match(/^(.*)\.(.*(?:of|on|IEE|IEEE|IET|IRE))$/)
+				: item.publicationTitle.trim().match(/^(.*),(.*(?:of|on|IEE|IEEE|IET|IRE))$/);
+			if (res) {
+				item.publicationTitle = res[2]+" "+res[1];
+			}
 			item.proceedingsTitle = item.conferenceName = item.publicationTitle;
 			if (earlyaccess){
 				item.volume = "Early Access Online";
@@ -317,6 +323,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://ieeexplore.ieee.org/xpl/conhome/7048058/proceeding",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
 		"url": "http://ieeexplore.ieee.org/xpl/mostRecentIssue.jsp?punumber=6221021",
 		"items": "multiple"
 	},
@@ -499,7 +511,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ieeexplore.ieee.org/document/80767/",
+		"url": "https://ieeexplore.ieee.org/document/80767/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -518,8 +530,7 @@ var testCases = [
 				],
 				"date": "January 1991",
 				"DOI": "10.1109/78.80767",
-				"ISSN": "1053-587X",
-				"abstractNote": "Eigenanalysis methods are applied to interference cancellation problems. While with common array processing methods the cancellation is effected by global optimization procedures that include the interferences and the background noise, the proposed technique focuses on the interferences only, resulting in superior cancellation performance. Furthermore, the method achieves full effectiveness even for short observation times, when the number of samples used for processing is of the the order of the number of interferences. Adaptive implementation is obtained with a simple, fast converging algorithm",
+				"abstractNote": "Eigenanalysis methods are applied to interference cancellation problems. While with common array processing methods the cancellation is effected by global optimization procedures that include the interferences and the background noise, the proposed technique focuses on the interferences only, resulting in superior cancellation performance. Furthermore, the method achieves full effectiveness even for short observation times, when the number of samples used for processing is of the the order of the number of interferences. Adaptive implementation is obtained with a simple, fast converging algorithm.<>",
 				"issue": "1",
 				"itemID": "80767",
 				"libraryCatalog": "IEEE Xplore",
@@ -536,26 +547,66 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Array signal processing",
-					"Background noise",
-					"Direction of arrival estimation",
-					"Interference cancellation",
-					"Jamming",
-					"Noise cancellation",
-					"Optimization methods",
-					"Sensor arrays",
-					"Signal to noise ratio",
-					"Steady-state",
-					"adaptive filters",
-					"adaptive implementation",
-					"array processing",
-					"eigenanalysis methods",
-					"eigenvalues and eigenfunctions",
-					"fast converging algorithm",
-					"filtering and prediction theory",
-					"interference cancellation",
-					"interference suppression",
-					"signal processing"
+					{
+						"tag": "Array signal processing"
+					},
+					{
+						"tag": "Background noise"
+					},
+					{
+						"tag": "Direction of arrival estimation"
+					},
+					{
+						"tag": "Interference cancellation"
+					},
+					{
+						"tag": "Jamming"
+					},
+					{
+						"tag": "Noise cancellation"
+					},
+					{
+						"tag": "Optimization methods"
+					},
+					{
+						"tag": "Sensor arrays"
+					},
+					{
+						"tag": "Signal to noise ratio"
+					},
+					{
+						"tag": "Steady-state"
+					},
+					{
+						"tag": "adaptive filters"
+					},
+					{
+						"tag": "adaptive implementation"
+					},
+					{
+						"tag": "array processing"
+					},
+					{
+						"tag": "eigenanalysis methods"
+					},
+					{
+						"tag": "eigenvalues and eigenfunctions"
+					},
+					{
+						"tag": "fast converging algorithm"
+					},
+					{
+						"tag": "filtering and prediction theory"
+					},
+					{
+						"tag": "interference cancellation"
+					},
+					{
+						"tag": "interference suppression"
+					},
+					{
+						"tag": "signal processing"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
