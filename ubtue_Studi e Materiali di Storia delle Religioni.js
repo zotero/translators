@@ -9,13 +9,13 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-13 15:10:57"
+	"lastUpdated": "2019-09-30 09:22:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -89,6 +89,7 @@ function doWeb(doc, url) {
 		tocEntries.forEach(function(tocEntry) {
 			let item = new Zotero.Item();
 			item.itemType = 'journalArticle';
+			item.publicationTitle = 'Studi e Materiali di Storia delle Religioni';
 			item.issn = '0081-6175';
 			for (let child = tocEntry.firstChild; child !== null; child = child.nextSibling) {
 				if (child.nodeType == 1) {
