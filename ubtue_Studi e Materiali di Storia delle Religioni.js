@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-30 09:22:00"
+	"lastUpdated": "2019-09-30 09:28:00"
 }
 
 /*
@@ -90,7 +90,7 @@ function doWeb(doc, url) {
 			let item = new Zotero.Item();
 			item.itemType = 'journalArticle';
 			item.publicationTitle = 'Studi e Materiali di Storia delle Religioni';
-			item.issn = '0081-6175';
+			item.ISSN = '0081-6175';
 			for (let child = tocEntry.firstChild; child !== null; child = child.nextSibling) {
 				if (child.nodeType == 1) {
 					if (child.tagName == 'A') {
