@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-28 08:40:37"
+	"lastUpdated": "2019-10-01 20:37:08"
 }
 
 /*
@@ -176,22 +176,26 @@ function scrapeEM(doc, url, pdfUrl) {
 			}
 		}
 
-		//fetch pdf url. There seems to be some magic value that must be sent
-		// with the request
 		if (!pdfUrl) {
-			var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-			if (u) {
-				ZU.doGet(u, function(text) {
-					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-					if (m) {
-						m[1] = ZU.unescapeHTML(m[1]);
-						Z.debug(m[1]);
-						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
-					} else {
-						Z.debug('Could not determine PDF URL.');
-						m = text.match(/<iframe[^>]*>/i);
-						if (m) Z.debug(m[0]);
+			pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+			if (pdfUrl) {
+				ZU.doGet(pdfUrl, function (text) {
+					if (text) {
+						let m = text.match(/<object[^>]*data="([^"]+)" type="application\/pdf"[^>]*>/i);
+						if (m) {
+							pdfUrl = ZU.unescapeHTML(m[1]);
+							Z.debug('PDF URL: ' + pdfUrl);
+						}
+						else {
+							// Maybe this was the real PDF URL, but probably not
+							Z.debug('Could not determine PDF URL');
+						}
 					}
+					item.attachments.push({
+						url: pdfUrl,
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf'
+					});
 					item.complete();
 				});
 			} else {
@@ -349,46 +353,29 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				mimeType: 'text/html'
 			}];
 
-			//fetch pdf url. There seems to be some magic value that must be sent
-			// with the request
 			if (!pdfUrl &&
 				(pdfUrl =
 					ZU.xpathText(doc,'(//meta[@name="citation_pdf_url"]/@content)[1]')
 					|| ZU.xpathText(doc, '(//a[@class="pdfLink"]/@href)[1]')
 				)
 			) {
-				ZU.doGet(pdfUrl, function(text) {
+				ZU.doGet(pdfUrl, function (text) {
 					if (text) {
-						var m = text.match(
-							/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
+						let m = text.match(/<object[^>]*data="([^"]+)" type="application\/pdf"[^>]*>/i);
 						if (m) {
-							m[1] = ZU.unescapeHTML(m[1]);
-							Z.debug('PDF url: ' + m[1]);
-							pdfUrl = m[1];
-						} else {
-							Z.debug('Could not determine PDF URL.');
-							m = text.match(/<iframe[^>]*>/i);
-							if (m) {
-								Z.debug(m[0]);
-								pdfUrl = null; // Clearly not the PDF
-							} else {
-								Z.debug('No iframe found. This may be the PDF');
-								// It seems that on Mac, Wiley serves the PDF
-								// directly, not in an iframe, so try using this URL.
-								// TODO: detect whether this is a case before trying
-								// to fetch the PDF page above. See https://github.com/zotero/translators/pull/442
-							}
+							pdfUrl = ZU.unescapeHTML(m[1]);
+							Z.debug('PDF URL: ' + pdfUrl);
+						}
+						else {
+							// Maybe this was the real PDF URL, but probably not
+							Z.debug('Could not determine PDF URL');
 						}
 					}
-					
-					if (pdfUrl) {
-						item.attachments.push({
-							url: pdfUrl,
-							title: 'Full Text PDF',
-							mimeType: 'application/pdf'
-						});
-					}
-					
+					item.attachments.push({
+						url: pdfUrl,
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf'
+					});
 					item.complete();
 				});
 			} else {
@@ -1248,5 +1235,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
