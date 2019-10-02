@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-02 00:10:12"
+	"lastUpdated": "2019-10-02 00:36:24"
 }
 
 /*
@@ -65,7 +65,7 @@ function getAuthorName(text) {
 	return fixCase(text.trim());
 }
 
-function scrapeBook(doc, url, pdfUrl) {
+function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
 
@@ -120,7 +120,7 @@ function scrapeBook(doc, url, pdfUrl) {
 	newItem.complete();
 }
 
-function scrapeEM(doc, url, pdfUrl) {
+function scrapeEM(doc, url) {
 	var itemType = detectWeb(doc, url);
 	
 	//fetch print publication date
@@ -179,16 +179,12 @@ function scrapeEM(doc, url, pdfUrl) {
 			}
 		}
 		
-		if (!pdfUrl) {
-			pdfUrl = attr(doc, 'meta[name="citation_pdf_url"]', "content");
-			if (pdfUrl) {
-				pdfUrl = pdfUrl.replace('/pdf/', '/pdfdirect/');
-				Z.debug("PDF URL: " + pdfUrl);
-			}
-		}
-		if (pdfUrl) {
+		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+		if (pdfURL) {
+			pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
+			Z.debug("PDF URL: " + pdfURL);
 			item.attachments.push({
-				url: pdfUrl,
+				url: pdfURL,
 				title: 'Full Text PDF',
 				mimeType: 'application/pdf'
 			});
@@ -202,7 +198,7 @@ function scrapeEM(doc, url, pdfUrl) {
 	});
 }
 
-function scrapeBibTeX(doc, url, pdfUrl) {
+function scrapeBibTeX(doc, url) {
 	var doi = ZU.xpathText(doc, '(//meta[@name="citation_doi"])[1]/@content')
 		|| ZU.xpathText(doc, '(//input[@name="publicationDoi"])[1]/@value');
 	if (!doi) {
@@ -210,7 +206,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		if (doi) doi = doi.replace(/^\s*doi:\s*/i, '');
 	}
 	if (!doi) {
-		scrapeEM(doc, url, pdfUrl);
+		scrapeEM(doc, url);
 		return;
 	}
 	
@@ -342,16 +338,12 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				mimeType: 'text/html'
 			}];
 
-			if (!pdfUrl) {
-				pdfUrl = attr(doc, 'meta[name="citation_pdf_url"]', "content");
-				if (pdfUrl) {
-					pdfUrl = pdfUrl.replace('/pdf/', '/pdfdirect/');
-					Z.debug("PDF URL: " + pdfUrl);
-				}
-			}
-			if (pdfUrl) {
+			var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+			if (pdfURL) {
+				pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
+				Z.debug("PDF URL: " + pdfURL);
 				item.attachments.push({
-					url: pdfUrl,
+					url: pdfURL,
 					title: 'Full Text PDF',
 					mimeType: 'application/pdf'
 				});
@@ -406,15 +398,15 @@ function scrapeCochraneTrial(doc, url){
 	item.complete();
 }
 
-function scrape(doc, url, pdfUrl) {
+function scrape(doc, url) {
 	var itemType = detectWeb(doc,url);
 
 	if (itemType == 'book') {
-		scrapeBook(doc, url, pdfUrl);
+		scrapeBook(doc, url);
 	} else if (/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/.test(url)) {
 		scrapeCochraneTrial(doc, url);
 	} else {
-		scrapeBibTeX(doc, url, pdfUrl);
+		scrapeBibTeX(doc, url);
 	}
 }
 
@@ -474,17 +466,18 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else { //single article
-		if (url.includes("/pdf")) {
-			//redirect needs to work where URL end in /pdf and where it end in /pdf/something
-			url = url.replace(/\/pdf(.+)?$/,'/abstract');
-			//Zotero.debug("Redirecting to abstract page: "+url);
-			//grab pdf url before leaving
-			var pdfUrl = ZU.xpathText(doc, '//iframe[@id="pdfDocument"]/@src');
+	}
+	// Single article
+	else {
+		// /pdf/, /epdf/, or /pdfdirect/
+		if (/\/e?pdf(direct)?\//.test(url)) {
+			url = url.replace(/\/e?pdf(direct)?\//,'/');
+			Zotero.debug("Redirecting to abstract page: "+url);
 			ZU.processDocuments(url, function(doc, url) {
-				scrape(doc, url, pdfUrl);
+				scrape(doc, url);
 			});
-		} else {
+		}
+		else {
 			scrape(doc, url);
 		}
 	}
