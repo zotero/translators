@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-01 20:54:57"
+	"lastUpdated": "2019-10-02 00:10:12"
 }
 
 /*
@@ -178,38 +178,22 @@ function scrapeEM(doc, url, pdfUrl) {
 				n--;
 			}
 		}
-
+		
 		if (!pdfUrl) {
-			pdfUrl = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
+			pdfUrl = attr(doc, 'meta[name="citation_pdf_url"]', "content");
 			if (pdfUrl) {
-				ZU.doGet(pdfUrl, function (text) {
-					if (text) {
-						let parser = new DOMParser();
-						let doc = parser.parseFromString(text, 'text/html');
-						let url = attr(doc, 'object[type="application/pdf"]', 'data');
-						if (url) {
-							pdfUrl = ZU.unescapeHTML(url);
-							Z.debug('PDF URL: ' + pdfUrl);
-						}
-						else {
-							// Maybe this was the real PDF URL, but probably not
-							Z.debug('Could not determine PDF URL');
-						}
-					}
-					item.attachments.push({
-						url: pdfUrl,
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf'
-					});
-					item.complete();
-				});
-			} else {
-				item.complete();
+				pdfUrl = pdfUrl.replace('/pdf/', '/pdfdirect/');
+				Z.debug("PDF URL: " + pdfUrl);
 			}
-		} else {
-			item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
-			item.complete();
 		}
+		if (pdfUrl) {
+			item.attachments.push({
+				url: pdfUrl,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		item.complete();
 	});
 	
 	translator.getTranslatorObject(function(em) {
@@ -358,43 +342,21 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				mimeType: 'text/html'
 			}];
 
-			if (!pdfUrl &&
-				(pdfUrl =
-					ZU.xpathText(doc,'(//meta[@name="citation_pdf_url"]/@content)[1]')
-					|| ZU.xpathText(doc, '(//a[@class="pdfLink"]/@href)[1]')
-				)
-			) {
-				ZU.doGet(pdfUrl, function (text) {
-					if (text) {
-						let parser = new DOMParser();
-						let doc = parser.parseFromString(text, 'text/html');
-						let url = attr(doc, 'object[type="application/pdf"]', 'data');
-						if (url) {
-							pdfUrl = ZU.unescapeHTML(url);
-							Z.debug('PDF URL: ' + pdfUrl);
-						}
-						else {
-							// Maybe this was the real PDF URL, but probably not
-							Z.debug('Could not determine PDF URL');
-						}
-					}
-					item.attachments.push({
-						url: pdfUrl,
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf'
-					});
-					item.complete();
-				});
-			} else {
+			if (!pdfUrl) {
+				pdfUrl = attr(doc, 'meta[name="citation_pdf_url"]', "content");
 				if (pdfUrl) {
-					item.attachments.push({
-						url: pdfUrl,
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf'
-					});
+					pdfUrl = pdfUrl.replace('/pdf/', '/pdfdirect/');
+					Z.debug("PDF URL: " + pdfUrl);
 				}
-				item.complete();
 			}
+			if (pdfUrl) {
+				item.attachments.push({
+					url: pdfUrl,
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf'
+				});
+			}
+			item.complete();
 		});
 
 		translator.translate();
