@@ -103,6 +103,36 @@ function getValue(nodes) {
 	return value;
 }
 
+function parseAbstract(doc, item) {
+	// the abstract text can be interspersed by inline <i> tags that break
+	// the flow of text. So, we need to iterate through the text nodes and
+	// <i> nodes in sequence
+	let textParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
+	let italicsParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::i');
+
+	if (textParts && textParts.length > 0) {
+		item.abstractNote = "";
+
+		let fullAbstract = "";
+		let i = 0, j = 0;
+		do {
+			let text = textParts[i].textContent;
+			if (text && text.length > 0)
+				fullAbstract += text;
+
+			if (j < italicsParts.length) {
+				let text = italicsParts[j].textContent;
+				if (text && text.length > 0)
+					fullAbstract += text;
+				++j;
+			}
+
+			++i;
+		} while (i < textParts.length);
+
+		item.abstractNote = fullAbstract.trim();
+	}
+}
 
 function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
@@ -146,18 +176,7 @@ function scrape(doc, url) {
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
 	item.url = url;
 
-	var abstractParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
-	if (abstractParts) {
-		item.abstractNote = "";
-
-		for (var part in abstractParts) {
-			if (abstractParts[part].textContent) {
-				var text = abstractParts[part].textContent.trim();
-				if (text && text.length > 0)
-					item.abstractNote += text;
-			}
-		}
-	}
+	parseAbstract(doc, item);
 
 	// fixup date
 	if (item.date) {
