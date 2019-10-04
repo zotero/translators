@@ -10,7 +10,7 @@
     "translatorType": 4,
     "browserSupport": "gcsibv",
     "lastUpdated": "2019-10-04 13:14:00"
-}0
+}
 
 /*
 	***** BEGIN LICENSE BLOCK *****
