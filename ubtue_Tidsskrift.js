@@ -70,9 +70,20 @@ function postProcess(doc, item) {
     }
 
     // swap Band and Ausgabe
-    var issue = item.issue;
+    let issue = item.issue;
     item.issue = item.volume;
     item.volume = issue;
+
+    let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
+    if (sidebarVals && sidebarVals.length) {
+        for (let val in sidebarVals) {
+            let node = sidebarVals[val];
+            if (node.textContent.trim().match(/Anmeldelser/)) {
+                item.tags.push('Book Review');
+                break;
+            }
+        }
+    }
 
     item.complete();
 }
