@@ -66,7 +66,7 @@ function handleAuthors(authors) {
 		authors = authors.replace(/^\s*By\s+/, "").split(/\s*,\s*|\s+and\s+/i);
 		var authArr = [];
 		for (var i = 0, n = authors.length; i < n; i++) {
-			let author = authors[i].replace(/\s*[@\/].+/, "");
+			let author = authors[i].replace(/\s*[@/].+/, "");
 			if (author.toUpperCase() == author) {
 				author = ZU.capitalizeTitle(author);
 			}
@@ -146,7 +146,7 @@ function scrape(doc, url) {
 			if (!item.date) {
 				item.date = ZU.xpathText(doc, '//time[@class="publish-date"]/@datetime')
 					|| ZU.xpathText(doc, '//div[contains(@class, "published-date")]')
-					|| ZU.xpathText(doc, '//span[contains(@class, "entry-date")]')
+					|| ZU.xpathText(doc, '//span[contains(@class, "entry-date")]');
 			}
 			if (item.date) {
 				item.date = ZU.strToISO(item.date);
@@ -170,7 +170,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('article .headline>a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -186,7 +186,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
