@@ -1,21 +1,21 @@
 {
-    "translatorID": "a288df9e-ce56-40ca-a205-bc32182ced4c",
-    "label": "tidsskrift.dk",
+    "translatorID": "3ac22bcf-818c-4ec0-9707-c41a2e09acf2",
+    "label": "Protokolle zur Bibel",
     "creator": "Madeesh Kannan",
-    "target": "^https*:\/\/tidsskrift.dk\/[^/]+\/article\/view.*\/[0-9]+",
+    "target": "^https?:\/\/(www\.)?protokollezurbibel.at\/index.php\/.+\/article\/view.*\/[0-9]+",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2018-11-23 13:14:00"
+    "lastUpdated": "2019-10-04 13:14:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -41,46 +41,13 @@ function detectWeb(doc, url) {
 
 function postProcess(doc, item) {
     if (!item.abstractNote) {
-        // iterate through the different abstracts until we find one in English
-        // if we don't find one for English, we'll just use the first one we processed
         var abstractParagraphs = ZU.xpath(doc, '//div[@class="item abstract"]//p');
         if (abstractParagraphs && abstractParagraphs.length > 0) {
+            item.abstractNote = "";
+
             for (var paragraph in abstractParagraphs) {
                 var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
-                if (paragraph == 0)
-                    item.abstractNote = extractedText;
-
-                // check if it's in English
-                var prologue = extractedText.match(/^(\w)*\s\w*:(.*)/i);
-                if (prologue) {
-                    var language = prologue[1];
-                    if (language.match(/english/i)) {
-                        item.abstractNote = prologue[2].trim();
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (item.abstractNote) {
-            var matchExtraWords = item.abstractNote.match(/(english abstract:|svensk resume:|abstract:|resume:)(.*)/i);
-            if (matchExtraWords)
-                item.abstractNote = matchExtraWords[2].trim();
-        }
-    }
-
-    // swap Band and Ausgabe
-    let issue = item.issue;
-    item.issue = item.volume;
-    item.volume = issue;
-
-    let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
-    if (sidebarVals && sidebarVals.length) {
-        for (let val in sidebarVals) {
-            let node = sidebarVals[val];
-            if (node.textContent.trim().match(/Anmeldelser/)) {
-                item.tags.push('Book Review');
-                break;
+                item.abstractNote += extractedText + "\n\n";
             }
         }
     }
