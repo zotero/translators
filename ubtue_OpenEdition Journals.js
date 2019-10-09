@@ -61,21 +61,32 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	let translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	translator.setHandler("itemDone", function (t, i) {
+	translator.setHandler("itemDone", function (t, item) {
 		let abstracts = ZU.xpath(doc, '//p[@class="resume"]');
-		if (abstracts)
-			i.abstractNote = abstracts.map(x => x.textContent.trim()).join("\n\n");
-
-		i.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
-		if (i.issue) {
-			let issueAndVol = i.issue.match(/(\d+)\/(\d+)/);
-			if (issueAndVol) {
-				i.volume = issueAndVol[1];
-				i.issue = issueAndVol[2];
+		if (abstracts) {
+			abstracts = abstracts.map(x => x.textContent.trim());
+			for (let i = 0; i < abstracts.length; ++i) {
+				if (i == 0)
+					item.abstractNote = abstracts[i];
+				else
+					item.notes.push({ note: "abs:" + abstracts[i] });
 			}
 		}
 
-		i.complete();
+		item.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
+		if (item.issue) {
+			let issueAndVol = item.issue.match(/(\d+)\/(\d+)/);
+			if (issueAndVol) {
+				item.volume = issueAndVol[1];
+				item.issue = issueAndVol[2];
+			}
+		}
+
+		let section = ZU.xpathText(doc, '//div[contains(@class, "souspartie")]//span[@class="title"]');
+		if (section && section.match(/Recensions/))
+			item.tags.push("Book Review");
+
+		item.complete();
 	});
 	translator.translate();
 }
