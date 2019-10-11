@@ -2,7 +2,7 @@
     "translatorID": "0d039f84-52cc-45ab-9266-cb99f85b97ed",
     "label": "Protokolle zur Bibel",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/(www.)?protokollezurbibel.at\/index.php\/.+\/article\/view.*\/[0-9]+",
+    "target": "^https?:\/\/(www\\.)?protokollezurbibel.at\/index.php\/.+\/article\/view.*\/[0-9]+",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
