@@ -2,7 +2,7 @@
 	"translatorID": "af110456-03a1-4335-9b39-613f2814cdd2",
 	"label": "Sabinet",
 	"creator": "Madeesh Kannan",
-	"target": "^https://journals.co.za/content/journal/[0-9]+/",
+	"target": "^https://journals.co.za/content/journal/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -39,7 +39,29 @@ function detectWeb(doc, url) {
     return "journalArticle";
 }
 
-function doWeb(doc, url) {
+function detectWeb(doc, url) {
+	var bodyId = ZU.xpathText(doc, '//body/@id');
+	if (bodyId == "issue" && getSearchResults(doc))
+		return "multiple";
+	else if (bodyId == "article")
+		return "journalArticle";
+}
+
+function getSearchResults(doc) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//span[@class="articleTitle title"]/a')
+	for (let i=0; i<rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function invokeEMDTranslator(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
@@ -62,4 +84,20 @@ function doWeb(doc, url) {
         i.complete();
     });
     translator.translate();
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) === "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
+			if (!items) {
+				return true;
+			}
+			let articles = [];
+			for (let i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, invokeEMDTranslator);
+		});
+	} else
+		invokeEMDTranslator(doc, url);
 }
