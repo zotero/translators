@@ -92,8 +92,8 @@ function doWeb(doc, url) {
 			if (!items) {
 				return true;
 			}
-			var articles = [];
-			for (var i in items) {
+			let articles = [];
+			for (let i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, invokeEMDTranslator);
