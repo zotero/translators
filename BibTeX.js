@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-10-12 12:29:19"
+	"lastUpdated": "2019-10-12 17:11:49"
 }
 
 /*
@@ -882,37 +882,55 @@ function beginRecord(type, closeChar) {
 		//    = {42},
 		//    = name,  (where this is defined as a string)
 		if (read == "=") {
-			var read = Zotero.read(1);
-			// skip whitespaces
-			while (" \n\r\t".includes(read)) {
-				read = Zotero.read(1);
-			}
-			
-			if (keyRe.test(read)) {
-				// read numeric data here, since we might get an end bracket
-				// that we should care about
-				value = "";
-				value += read;
-				
-				// character is a number
-				while ((read = Zotero.read(1)) && keyRe.test(read)) {
-					value += read;
+			var valueArray = [];
+			var rawValueArray = [];
+			// concatenation is possible with # and for that we
+			// do this do-while-loop here, e.g.
+			//     = name # " and " # "Adam Smith",
+			do {
+				var read = Zotero.read(1);
+				// skip whitespaces
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
 				}
 				
-				// don't read the next char; instead, process the character
-				// we already read past the end of the string
-				dontRead = true;
+				if (keyRe.test(read)) {
+					// read numeric data here, since we might get an end bracket
+					// that we should care about
+					value = "";
+					value += read;
+					
+					// character is a number
+					while ((read = Zotero.read(1)) && keyRe.test(read)) {
+						value += read;
+					}
+					
+					// don't read the next char; instead, process the character
+					// we already read past the end of the string
+					dontRead = true;
+					
+					// see if there's a defined string
+					if (strings[value]) value = strings[value];
+					
+					// rawValue has to be set for some fields to process
+					// thus, in this case, we set it equal to value
+					rawValue = value;
+				} else {
+					rawValue = getFieldValue(read);
+					value = unescapeBibTeX(rawValue);
+				}
 				
-				// see if there's a defined string
-				if (strings[value]) value = strings[value];
+				valueArray.push(value);
+				rawValueArray.push(rawValue);
 				
-				// rawValue has to be set for some fields to process
-				// thus, in this case, we set it equal to value
-				rawValue = value;
-			} else {
-				rawValue = getFieldValue(read);
-				value = unescapeBibTeX(rawValue);
-			}
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
+				}
+			
+			} while (read === "#");
+			
+			value = valueArray.join('');
+			rawValue = rawValueArray.join('');
 			
 			if (item) {
 				processField(item, field.toLowerCase(), value, rawValue);
@@ -3859,6 +3877,35 @@ var testCases = [
 				"date": "2019",
 				"itemID": "example-electronic-string",
 				"url": "https://www.zotero.org/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {maintainer = \"Xavier D\\\\'ecoret\"}\n\n@\n  %a\npreamble\n  %a\n{ \"Maintained by \" # maintainer }\n@String(stefan = \"Stefan Swe{\\\\i}g\")\n@String(and = \" and \")\n\n@Book{sweig42,\n  Author =\t stefan # and # maintainer,\n  title =\t { The {impossible} TEL---book },\n  publisher =\t { D\\\\\"ead Po$_{eee}$t Society},\n  year =\t 1942,\n  month =        mar\n}",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The impossible ℡—book",
+				"creators": [
+					{
+						"firstName": "Stefan",
+						"lastName": "Swe\\ıg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xavier",
+						"lastName": "D\\écoret",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 1942",
+				"itemID": "sweig42",
+				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
