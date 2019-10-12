@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-09-17 15:09:07"
+	"lastUpdated": "2019-10-12 12:29:19"
 }
 
 /*
@@ -229,6 +229,8 @@ var bibtex2zoteroTypeMap = {
 	"misc":"book",
 	"proceedings":"book",
 	"online":"webpage",
+	// alias for online from BibLaTeX:
+	"electronic":"webpage",
 	// from BibLaTeX translator:
 	"thesis":"thesis",
 	"letter":"letter",
@@ -848,7 +850,7 @@ function processComment() {
 
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.trimInternal(type.toLowerCase());
-	if (type != "string") {
+	if (type !== "string" && type !== "preamble") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
@@ -872,9 +874,16 @@ function beginRecord(type, closeChar) {
 	while (dontRead || (read = Zotero.read(1))) {
 		dontRead = false;
 		
-		if (read == "=") {								// equals begin a field
-		// read whitespace
+		// the equal sign indicate the start of the value
+		// which will be handled in the following part
+		// possible formats are:
+		//    = 42,
+		//    = "42",
+		//    = {42},
+		//    = name,  (where this is defined as a string)
+		if (read == "=") {
 			var read = Zotero.read(1);
+			// skip whitespaces
 			while (" \n\r\t".includes(read)) {
 				read = Zotero.read(1);
 			}
@@ -896,6 +905,10 @@ function beginRecord(type, closeChar) {
 				
 				// see if there's a defined string
 				if (strings[value]) value = strings[value];
+				
+				// rawValue has to be set for some fields to process
+				// thus, in this case, we set it equal to value
+				rawValue = value;
 			} else {
 				rawValue = getFieldValue(read);
 				value = unescapeBibTeX(rawValue);
@@ -907,13 +920,18 @@ function beginRecord(type, closeChar) {
 				strings[field] = value;
 			}
 			field = "";
-		} else if (read == ",") {						// commas reset
+		}
+		// commas reset, i.e. we are not reading a field
+		// but rather we are reading the bibkey
+		else if (read == ",") {
 			if (item.itemID == null) {
 				item.itemID = field; // itemID = citekey
 			}
 			field = "";
 
-		} else if (read == closeChar) {
+		}
+		// closing character
+		else if (read == closeChar) {
 			if (item) {
 				if (item.backupLocation) {
 					if (item.itemType=="conferencePaper") {
@@ -934,7 +952,10 @@ function beginRecord(type, closeChar) {
 				return item.complete();
 			}
 			return;
-		} else if (!" \n\r\t".includes(read)) {		// skip whitespace
+		}
+		// skip whitespaces; the rest will become
+		// the field name (or bibkey)
+		else if (!" \n\r\t".includes(read)) {
 			field += read;
 		}
 	}
@@ -3814,6 +3835,30 @@ var testCases = [
 				"pages": "36–44",
 				"place": "Reykjavik",
 				"publisher": "Félagsvísindastofnun Háskóla Íslands",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {zotero-url = {https://www.zotero.org/}}\n@string(zotero-creator = \"Corporation for Digital Scholarship\"))\n\n@Electronic{example-electronic-string,\n  author = zotero-creator,\n  title= {Zotero's Homepage},\n  year = 2019,\n  url       =zotero-url,\n  urldate=\"2019-10-12\"\n}\n",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Zotero's Homepage",
+				"creators": [
+					{
+						"firstName": "Corporation for Digital",
+						"lastName": "Scholarship",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"itemID": "example-electronic-string",
+				"url": "https://www.zotero.org/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
