@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-10-12 17:11:49"
+	"lastUpdated": "2019-10-12 20:32:44"
 }
 
 /*
@@ -900,8 +900,8 @@ function beginRecord(type, closeChar) {
 					value = "";
 					value += read;
 					
-					// character is a number
-					while ((read = Zotero.read(1)) && keyRe.test(read)) {
+					// character is a number or part of a string name
+					while ((read = Zotero.read(1)) && /[a-zA-Z0-9\-:_]/.test(read)) {
 						value += read;
 					}
 					
@@ -910,7 +910,7 @@ function beginRecord(type, closeChar) {
 					dontRead = true;
 					
 					// see if there's a defined string
-					if (strings[value]) value = strings[value];
+					if (strings[value.toLowerCase()]) value = strings[value.toLowerCase()];
 					
 					// rawValue has to be set for some fields to process
 					// thus, in this case, we set it equal to value
@@ -935,7 +935,7 @@ function beginRecord(type, closeChar) {
 			if (item) {
 				processField(item, field.toLowerCase(), value, rawValue);
 			} else if (type == "string") {
-				strings[field] = value;
+				strings[field.toLowerCase()] = value;
 			}
 			field = "";
 		}
@@ -3886,7 +3886,7 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "@String {maintainer = \"Xavier D\\\\'ecoret\"}\n\n@\n  %a\npreamble\n  %a\n{ \"Maintained by \" # maintainer }\n@String(stefan = \"Stefan Swe{\\\\i}g\")\n@String(and = \" and \")\n\n@Book{sweig42,\n  Author =\t stefan # and # maintainer,\n  title =\t { The {impossible} TEL---book },\n  publisher =\t { D\\\\\"ead Po$_{eee}$t Society},\n  year =\t 1942,\n  month =        mar\n}",
+		"input": "@String {meta:maintainer = \"Xavier D\\\\'ecoret\"}\n\n@\n  %a\npreamble\n  %a\n{ \"Maintained by \" # meta:maintainer }\n@String(Stefan = \"Stefan Swe{\\\\i}g\")\n@String(and = \" and \")\n\n@Book{sweig42,\n  Author =\t stefan # And # meta:maintainer,\n  title =\t { The {impossible} TEL---book },\n  publisher =\t { D\\\\\"ead Po$_{eee}$t Society},\n  yEAr =\t 1942,\n  month =        mar\n}",
 		"items": [
 			{
 				"itemType": "book",
