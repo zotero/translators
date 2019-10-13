@@ -17,11 +17,12 @@ const metaDataRules = [
 	'zotero-translator/prefer-index-of',
 	'zotero-translator/no-for-each',
 	'zotero-translator/not-executable',
+	'linebreak-style',
 	'indent',
 ].join(', ');
 
 const headerVar = '__eslintZoteroTranslatorHeader';
-const headerPrefix = `/* eslint-disable no-unused-vars */ const ${headerVar} = /* eslint-disable */(/* eslint-enable ${metaDataRules} */`;
+const headerPrefix = `/* eslint-disable *//* eslint-enable ${metaDataRules} */const ${headerVar} = `;
 
 function jsonParseWithErrorInfo(raw, source) {
 	const target = { raw };
@@ -49,8 +50,8 @@ function escapeRE(string) {
 }
 const re = {
 	undecorated: new RegExp(
-		/^(\{[\s\S]+?\n\})/.source // the header
-		+ /(\n[\s\S]+?)/.source // the code
+		/^(\{[\s\S]+?\r?\n\})/.source // the header
+		+ /(\r?\n[\s\S]+?)/.source // the code
 		+ '(?:' // test cases
 		+ /(\/\*\* BEGIN TEST CASES \*\*\/)([\s\S]+?)/.source // var testCases =
 		+ /(\[[\s\S]+\])/.source // the test cases
@@ -62,13 +63,12 @@ const re = {
 		/^([\s\S]*?)/.source // anything the fixer might have placed at the top
 		+ escapeRE(headerPrefix) // all the eslint junk we injected
 		+ /(\{[\s\S]+\})/.source // the header
-		+ escapeRE(');/* eslint-enable */') // more eslint stuff we injected
+		+ escapeRE(';/* eslint-enable */') // more eslint stuff we injected
 		+ /([\s\S]+?)/.source // the code
 		+ '(?:' // optional test cases
+		+ escapeRE(`/* eslint-disable *//* eslint-enable ${metaDataRules} */`) // more eslint stuff we injected
 		+ /(\/\*\* BEGIN TEST CASES \*\*\/)/.source
-		+ escapeRE('/* eslint-disable */') // more eslint stuff we injected
 		+ /([\s\S]+?)/.source // var testCases =
-		+ escapeRE(`/* eslint-enable ${metaDataRules} */`)
 		+ /([\s\S]+)/.source
 		+ ')?$'
 	),
@@ -99,7 +99,7 @@ const tfw = {
 	]
 };
 tfw.disable = ` // eslint-disable-line ${tfw.rules.join(', ')}`;
-tfw.disableRe = new RegExp('(\\n' + escapeRE('/* FW LINE 59:b820c6d */') + '[^\\n]+?)(' + escapeRE(tfw.disable) + ')?(\\n)');
+tfw.disableRe = new RegExp('(\\r?\\n' + escapeRE('/* FW LINE 59:b820c6d */') + '[^\\n]+?)(' + escapeRE(tfw.disable) + ')?(\\r?\\n)');
 
 function decorate(source) {
 	const decorated = {};
@@ -118,16 +118,14 @@ function decorate(source) {
 
 	decorated.source = headerPrefix
 		+ header // the JSON
-		+ ');/* eslint-enable */'
+		+ ';/* eslint-enable */'
 		+ code; // the actual code
 
 	if (testCasesPrefix) {
 		decorated.testCases = jsonParseWithErrorInfo(testCases, source);
 
-		decorated.source += testCasesPrefix // the prefix
-			+ '/* eslint-disable */' // disable all the rules
+		decorated.source += `/* eslint-disable *//* eslint-enable ${metaDataRules} */` + testCasesPrefix // the prefix
 			+ testCasesVar
-			+ `/* eslint-enable ${metaDataRules} */` // enable JSON rules
 			+ testCases
 			+ testCasesPostfix;
 	}
@@ -242,7 +240,7 @@ module.exports = {
 };
 
 if (require.main === module) {
-	const orig = fs.readFileSync(path.join(__dirname, '../../../Amazon.js'), 'utf-8');
+	const orig = fs.readFileSync(path.join(__dirname, '../../../ACLWeb.js'), 'utf-8');
 	const decorated = decorate(orig);
 	const stripped = strip(decorated.source);
 	console.log(stripped === orig); // eslint-disable-line no-console
