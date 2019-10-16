@@ -65,6 +65,12 @@ function invokeBestTranslator(doc, url) {
         translator.translate();
     });
     translator.setHandler("itemDone", function (t, i) {
+        if (item.issue === "0")
+            item.issue = "";
+
+        if (item.volume === "0")
+            item.volume = "";
+
         i.complete();
     });
     translator.getTranslators();

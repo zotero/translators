@@ -58,6 +58,11 @@ function postProcess(doc, item) {
 
     item.shortTitle = ZU.xpathText(doc, '//meta[@name="DC.Title.Alternative"]/@content');
 
+    if (item.issue === "0")
+        item.issue = "";
+    if (item.volume === "0")
+        item.volume = "";
+
     item.complete();
 }
 
