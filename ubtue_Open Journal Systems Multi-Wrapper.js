@@ -65,11 +65,11 @@ function invokeBestTranslator(doc, url) {
         translator.translate();
     });
     translator.setHandler("itemDone", function (t, i) {
-        if (item.issue === "0")
-            item.issue = "";
+        if (i.issue === "0")
+            i.issue = "";
 
-        if (item.volume === "0")
-            item.volume = "";
+        if (i.volume === "0")
+            i.volume = "";
 
         i.complete();
     });
