@@ -49,13 +49,13 @@ function getRefworksByID(ids, next) {
 			'https://epub.cnki.net/KNS/ViewPage/SaveSelectedNoteFormat.aspx?type=txt',
 			'CurSaveModeType=REFWORKS',
 			function(text) {
-				//fix item types
+				// fix item types
 				text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
-					//Zotero doesn't do well with mixed line endings. Make everything \n
+					// Zotero doesn't do well with mixed line endings. Make everything \n
 					.replace(/\r\n?/g, '\n')
-					//split authors
+					// split authors
 					.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function(m, tag, authors) {
-						var authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
+						authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
 						if (!authors[authors.length-1].trim()) authors.pop();
 						
 						return tag + ' ' + authors.join('\n' + tag + ' ');
@@ -68,23 +68,23 @@ function getRefworksByID(ids, next) {
 }
 
 function getIDFromURL(url) {
-	if (!url) return;
+	if (!url) return false;
 	
 	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
-	if (!dbname || !dbname[1] || !filename || !filename[1]) return;
+	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
 	
-	return {dbname: dbname[1], filename: filename[1], url: url};
+	return { dbname: dbname[1], filename: filename[1], url: url };
 }
 
 
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
-function getIDFromRef(doc, url){
-	var func = ZU.xpath(doc, '//div[@class="link"]/a')[0].onclick + ''
+function getIDFromRef(doc, url) {
+	var func = ZU.xpath(doc, '//div[@class="link"]/a')[0].onclick + '';
 	var tmp = func.split(',')[1].split('!');
-	//Z.debug(func + tmp[0].slice(1));
-	return {dbname: tmp[0].slice(1), filename: tmp[1], url: url};
+	// Z.debug(func + tmp[0].slice(1));
+	return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
 }
 
 function getIDFromPage(doc, url) {
@@ -108,7 +108,7 @@ function getTypeFromDBName(dbname) {
 		case "CCND":
 			return "newspaperArticle";
 		default:
-			return;
+			return false;
 	}
 }
 
@@ -127,7 +127,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
 	}
-	if (!links.length) return;
+	if (!links.length) return false;
 	
 	var items = {};
 	var count = 0;
@@ -140,7 +140,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		
 		count++;
 		if (itemInfo) {
-			itemInfo[a.href] = {id: id};
+			itemInfo[a.href] = { id: id };
 			
 			/*var pdfLink = ZU.xpath(links[i], './/a[@class="brief_downloadIcon"]')[0];
 			if (pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
@@ -191,20 +191,20 @@ function scrape(ids, doc, url, itemInfo) {
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
 		
-		var i = 0;		
+		// var i = 0;		
 		translator.setHandler('itemDone', function(obj, newItem) {
-			//split names
+			// split names
 			for (var i=0, n=newItem.creators.length; i<n; i++) {
 				var creator = newItem.creators[i];
 				if (creator.firstName) continue;
 				
 				var lastSpace = creator.lastName.lastIndexOf(' ');
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
-					//western name. split on last space
+					// western name. split on last space
 					creator.firstName = creator.lastName.substr(0,lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace+1);
 				} else {
-					//Chinese name. first character is last name, the rest are first name
+					// Chinese name. first character is last name, the rest are first name
 					creator.firstName = creator.lastName.substr(1);
 					creator.lastName = creator.lastName.charAt(0);
 				}
@@ -214,8 +214,8 @@ function scrape(ids, doc, url, itemInfo) {
 				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
 			}
 			
-			//clean up tags. Remove numbers from end
-			for (var i=0, n=newItem.tags.length; i<n; i++) {
+			// clean up tags. Remove numbers from end
+			for (var i=0, l=newItem.tags.length; i<l; i++) {
 				newItem.tags[i] = newItem.tags[i].replace(/:\d+$/, '');
 			}
 			
@@ -224,24 +224,14 @@ function scrape(ids, doc, url, itemInfo) {
 				var info = itemInfo[newItem.title];
 				if (!info) {
 					Z.debug('No item info for "' + newItem.title + '"');
-				} else {
-					/*if (!info.pdfURL) {
-						Z.debug('No PDF URL passed from multiples page');
-					} else {
-						newItem.attachments.push({
-							title: 'Full Text PDF',
-							mimeType: 'application/pdf',
-							url: info.pdfURL
-						})
-					}*/
-					
+				} else {			
 					newItem.url = info.url;
 				}
 			} else {
 				newItem.url = url;
 			}
 			
-			i++;
+			// i++;
 			
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
@@ -273,11 +263,11 @@ function getCAJ(doc, itemType) {
 		var caj = ZU.xpath(doc, "//a[@name='cajDown']");
 	}
 	return caj.length ? caj[0].href : false;
-};
+}
 
 // add pdf or caj to attachments, default is pdf
 function getAttachments(doc, item){
-	attachments = [{
+	var attachments = [{
 		url: item.url,
 		title: item.title,
 		mimeType: "text/html",
@@ -285,13 +275,13 @@ function getAttachments(doc, item){
 		}];
 	var pdfurl = getPDF(doc);
 	var cajurl = getCAJ(doc, item.itemType);
-	//Z.debug('pdf' + pdfurl);
-	//Z.debug('caj' + cajurl);
+	// Z.debug('pdf' + pdfurl);
+	// Z.debug('caj' + cajurl);
 	
 	// login or not 
 	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
-	//logged = ZU.trimInternal(logged.textContent);
-	//Z.debug("*****" + logged.style.display);
+	// logged = ZU.trimInternal(logged.textContent);
+	// Z.debug("*****" + logged.style.display);
 
 	// get pdf or caj after you login
 	if (logged.style.display != 'none'){
@@ -299,17 +289,21 @@ function getAttachments(doc, item){
 			attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
-				url: pdfurl});
+				url: pdfurl
+			});
 		} else if (cajurl) {
 			attachments.push({
 				title: "Full Text CAJ",
 				mimeType: "application/caj",
-				url: cajurl});
+				url: cajurl
+			});
 		};
 	}
 	
 	return attachments;
-};/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
