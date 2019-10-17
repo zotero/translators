@@ -105,7 +105,7 @@ function getTypeFromDBName(dbname) {
 		return "newspaperArticle";
 	} else {
 		return false;
-	};
+	}
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
@@ -151,8 +151,8 @@ function detectWeb(doc, url) {
 	if (id) {
 		return getTypeFromDBName(id.dbname);
 	} else if (items) {
-		return "multiple"
-	}	
+		return "multiple";
+	}
 }
 
 function doWeb(doc, url) {
@@ -183,7 +183,6 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
-		
 		// var i = 0;		
 		translator.setHandler('itemDone', function(obj, newItem) {
 			// split names
@@ -208,8 +207,8 @@ function scrape(ids, doc, url, itemInfo) {
 			}
 			
 			// clean up tags. Remove numbers from end
-			for (var i=0, l=newItem.tags.length; i<l; i++) {
-				newItem.tags[i] = newItem.tags[i].replace(/:\d+$/, '');
+			for (var j=0, l=newItem.tags.length; j<l; j++) {
+				newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
 			}
 			
 			newItem.title = ZU.trimInternal(newItem.title);
@@ -217,7 +216,7 @@ function scrape(ids, doc, url, itemInfo) {
 				var info = itemInfo[newItem.title];
 				if (!info) {
 					Z.debug('No item info for "' + newItem.title + '"');
-				} else {			
+				} else {
 					newItem.url = info.url;
 				}
 			} else {
@@ -225,27 +224,27 @@ function scrape(ids, doc, url, itemInfo) {
 			}
 			
 			// i++;
-			
+
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
 			if (newItem.callNumber){
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
-			};
+			}
 			
 			newItem.attachments = getAttachments(doc, newItem);
 			newItem.complete();
 		});
 		
 		translator.translate();
-	})
+	});
 }
 
 // get pdf download link
 function getPDF(doc) {
 	var pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
 	return pdf.length ? pdf[0].href : false;
-};
+}
 
 // caj download link, default is the whole article for thesis.
 function getCAJ(doc, itemType) {
@@ -253,7 +252,7 @@ function getCAJ(doc, itemType) {
 	if (itemType == 'thesis') {
 		var caj = ZU.xpath(doc, "//div[@id='DownLoadParts']/a");
 	} else {
-		var caj = ZU.xpath(doc, "//a[@name='cajDown']");
+		caj = ZU.xpath(doc, "//a[@name='cajDown']");
 	}
 	return caj.length ? caj[0].href : false;
 }
@@ -265,12 +264,11 @@ function getAttachments(doc, item){
 		title: item.title,
 		mimeType: "text/html",
 		snapshot: true
-		}];
+	}];
 	var pdfurl = getPDF(doc);
 	var cajurl = getCAJ(doc, item.itemType);
 	// Z.debug('pdf' + pdfurl);
 	// Z.debug('caj' + cajurl);
-	
 	// login or not 
 	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
 	// logged = ZU.trimInternal(logged.textContent);
@@ -290,7 +288,7 @@ function getAttachments(doc, item){
 				mimeType: "application/caj",
 				url: cajurl
 			});
-		};
+		}
 	}
 	
 	return attachments;
