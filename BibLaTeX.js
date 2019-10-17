@@ -13,6 +13,11 @@
 		"exportCharset": "UTF-8",
 		"exportNotes": false,
 		"exportFileData": false,
+		"exportAbstract": false,
+		"exportUrl": false,
+		"exportDOI": false,
+		"exportExtraInfo": false,
+		"exportKeywords": false,
 		"useJournalAbbreviation": false
 	},
 	"lastUpdated": "2019-01-31 13:16:00"
@@ -46,7 +51,6 @@
 //%t = first word of title
 var citeKeyFormat = "%a_%t_%y";
 
-
 var fieldMap = {
 	location: "place",
 	chapter: "chapter",
@@ -67,6 +71,31 @@ var fieldMap = {
 	eventtitle: "conferenceName",
 	pages: "pages",
 	pagetotal: "numPages"
+};
+
+var blockFieldsExtra = {
+	location: "place",
+	rights: "rights", //it's rights in zotero nowadays
+	isbn: "ISBN",
+	issn: "ISSN",
+	series: "series",
+	shorttitle: "shortTitle",
+	holder: "assignee",
+	volumes: "numberOfVolumes",
+	version: "version",
+	pagetotal: "numPages"
+};
+
+var blockFieldsUrl = {
+	url: "url"
+};
+
+var blockFieldsDOI = {
+	doi: "DOI"
+};
+
+var blockFieldsAbstract = {
+	abstract: "abstractNote"
 };
 //more conversions done below with special rules
 
@@ -516,7 +545,9 @@ function doExport() {
 		first = false;
 
 		for (var field in fieldMap) {
-			if (item[fieldMap[field]]) {
+			if (blockFieldsUrl[field] && Zotero.getOption("exportUrl") || blockFieldsDOI[field] && Zotero.getOption("exportDOI") || blockFieldsExtra[field] && Zotero.getOption("exportExtraInfo") || blockFieldsAbstract[field] && Zotero.getOption("exportAbstract")) {
+				continue;
+			} else if (item[fieldMap[field]]) {
 				writeField(field, item[fieldMap[field]]);
 			}
 		}
@@ -526,7 +557,7 @@ function doExport() {
 		//has to be made
 
 		//all kinds of numbers except patents, which need post-processing
-		if (item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number && !item.patentNumber) {
+		if (Zotero.getOption("exportExtraInfo") && (item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number && !item.patentNumber)) {
 			writeField("number", item.reportNumber || item.seriesNumber || item.billNumber || item.episodeNumber || item.number);
 		}
 
@@ -724,19 +755,21 @@ function doExport() {
 			}
 		}
 
-		if (item.accessDate) {
-			writeField("urldate", Zotero.Utilities.strToISO(item.accessDate));
+		if (Zotero.getOption("exportUrl")) {
+			if (item.accessDate) {
+				writeField("urldate", Zotero.Utilities.strToISO(item.accessDate));
+			}
 		}
 
 		//TODO enable handling of date ranges when that's added to zotero
-		if (item.date) {
+		if (Zotero.getOption("exportExtraInfo")) {
 			writeField("date", Zotero.Utilities.strToISO(item.date));
 		}
 
 		//Map Languages to biblatex-field "langid" (used for
 		//hyphenation with a correct setting of the "autolang" option)
 		//if possible. See babelLanguageMap above for languagecodes to use
-		if (item.language) {
+		if (item.language && Zotero.getOption("exportExtraInfo")) {
 			var langcode = item.language.match(/^([a-z]{2,3})(?:[^a-z](.+))?$/i); //not too strict
 			if (langcode){
 				var lang = babelLanguageMap[langcode[1]];
@@ -754,7 +787,7 @@ function doExport() {
 			}
 		}
 
-		if (extraFields) {
+		if (extraFields && Zotero.getOption("exportExtraInfo")) {
 			// Export identifiers
 			// Dedicated fields
 			for (var i=0; i<extraFields.length; i++) {
@@ -781,7 +814,7 @@ function doExport() {
 			if (extra && !noteused) writeField("note", extra);
 		}
 
-		if (item.tags && item.tags.length) {
+		if (item.tags && item.tags.length && Zotero.getOption("exportKeywords")) {
 			var tagString = "";
 			for (var i=0; i<item.tags.length; i++) {
 				tagString += ", " + item.tags[i].tag;
@@ -797,12 +830,12 @@ function doExport() {
 			}
 		}
 
-		if (item.attachments) {
+		if (item.attachments && Zotero.getOption("exportFileData")) {
 			var attachmentString = "";
 
 			for (var i=0; i<item.attachments.length; i++) {
 				var attachment = item.attachments[i];
-				if (Zotero.getOption("exportFileData") && attachment.saveFile) {
+				if (attachment.saveFile) {
 					attachment.saveFile(attachment.defaultPath, true);
 					attachmentString += ";" + encodeFilePathComponent(attachment.title) + ":"
 						+ encodeFilePathComponent(attachment.defaultPath) + ":"
