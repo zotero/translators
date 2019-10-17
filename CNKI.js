@@ -2,14 +2,14 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://([^/]+\\.)?cnki\\.net",
+	"target": "^https?://kns",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2018-09-08 22:09:39"
+	"lastUpdated": "2019-10-16 04:32:14"
 }
 
 /*
@@ -44,10 +44,9 @@ function getRefworksByID(ids, next) {
 		postData += ids[i].dbname + "!" + ids[i].filename + "!0!0,";
 	}
 	postData = "formfilenames=" + encodeURIComponent(postData);
-	
-	ZU.doPost('http://epub.cnki.net/kns/ViewPage/viewsave.aspx?TablePre=SCDB', postData, function() {
+	ZU.doPost('https://epub.cnki.net/kns/ViewPage/viewsave.aspx?TablePre=SCDB', postData, function() {
 		ZU.doPost(
-			'http://epub.cnki.net/KNS/ViewPage/SaveSelectedNoteFormat.aspx?type=txt',
+			'https://epub.cnki.net/KNS/ViewPage/SaveSelectedNoteFormat.aspx?type=txt',
 			'CurSaveModeType=REFWORKS',
 			function(text) {
 				//fix item types
@@ -78,9 +77,19 @@ function getIDFromURL(url) {
 	return {dbname: dbname[1], filename: filename[1], url: url};
 }
 
+
+// 网络首发期刊信息并不能从URL获取dbname和filename信息
+function getIDFromRef(doc, url){
+	var func = ZU.xpath(doc, '//div[@class="link"]/a')[0].onclick + ''
+	var tmp = func.split(',')[1].split('!');
+	//Z.debug(func + tmp[0].slice(1));
+	return {dbname: tmp[0].slice(1), filename: tmp[1], url: url};
+}
+
 function getIDFromPage(doc, url) {
 	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'));
+		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
+		|| getIDFromRef(doc, url);
 }
 
 function getTypeFromDBName(dbname) {
@@ -232,13 +241,73 @@ function scrape(ids, doc, url, itemInfo) {
 			}
 			
 			i++;
+			
+			// CN 中国刊物编号，非refworks中的callNumber
+			if (newItem.callNumber){
+				newItem.extra = 'CN ' + newItem.callNumber;
+				newItem.callNumber = "";
+			};
+			
+			newItem.attachments = getAttachments(doc, newItem);
 			newItem.complete();
 		});
 		
 		translator.translate();
 	})
 }
-/** BEGIN TEST CASES **/
+
+// pdf 下载链接
+function getPDF(doc) {
+	var pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
+	return pdf.length ? pdf[0].href : false;
+};
+
+// caj 下载链接，学位论文默认是整本下载
+function getCAJ(doc, itemType) {
+	// //div[@id='DownLoadParts']
+	if (itemType == 'thesis') {
+		var caj = ZU.xpath(doc, "//div[@id='DownLoadParts']/a");
+	} else {
+		var caj = ZU.xpath(doc, "//a[@name='cajDown']");
+	}
+	return caj.length ? caj[0].href : false;
+};
+
+// 将pdf, caj 或 网页快照添加到attachments中. 有pdf的优先保存pdf
+function getAttachments(doc, item){
+	attachments = [{
+		url: item.url,
+		title: item.title,
+		mimeType: "text/html",
+		snapshot: true
+		}];
+	var pdfurl = getPDF(doc);
+	var cajurl = getCAJ(doc, item.itemType);
+	//Z.debug('pdf' + pdfurl);
+	//Z.debug('caj' + cajurl);
+	
+	// login or not 
+	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
+	//logged = ZU.trimInternal(logged.textContent);
+	//Z.debug("*****" + logged.style.display);
+
+	// 只有登录的时候，才有附件
+	if (logged.style.display != 'none'){
+		if (pdfurl){
+			attachments.push({
+				title: "Full Text PDF",
+				mimeType: "application/pdf",
+				url: pdfurl});
+		} else if (cajurl) {
+			attachments.push({
+				title: "Full Text CAJ",
+				mimeType: "application/caj",
+				url: cajurl});
+		};
+	}
+	
+	return attachments;
+};/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -282,7 +351,7 @@ var testCases = [
 				"date": "2014",
 				"ISSN": "1000-8713",
 				"abstractNote": "来自中药的水溶性多糖具有广谱治疗和低毒性特点,是天然药物及保健品研发中的重要组成部分。针对中药多糖结构复杂、难以表征的问题,本文以中药黄芪中的多糖为研究对象,采用\"自下而上\"法完成对黄芪多糖的表征。首先使用部分酸水解方法水解黄芪多糖,分别考察了水解时间、酸浓度和温度的影响。在适宜条件(4 h、1.5mol/L三氟乙酸、80℃)下,黄芪多糖被水解为特征性的寡糖片段。接下来,采用亲水作用色谱与质谱联用对黄芪多糖部分酸水解产物进行分离和结构表征。结果表明,提取得到的黄芪多糖主要为1→4连接线性葡聚糖,水解得到聚合度4~11的葡寡糖。本研究对其他中药多糖的表征具有一定的示范作用。",
-				"callNumber": "21-1185/O6",
+				"extra": "CN 21-1185/O6",
 				"issue": "12",
 				"language": "中文;",
 				"libraryCatalog": "CNKI",
@@ -290,7 +359,17 @@ var testCases = [
 				"publicationTitle": "色谱",
 				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&dbname=CJFDLAST2015&filename=SPZZ201412003&v=MTU2MzMzcVRyV00xRnJDVVJMS2ZidVptRmkva1ZiL09OajNSZExHNEg5WE5yWTlGWjRSOGVYMUx1eFlTN0RoMVQ=",
 				"volume": "32",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "基于部分酸水解-亲水作用色谱-质谱的黄芪多糖结构表征",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Astragalus"
@@ -324,6 +403,69 @@ var testCases = [
 					},
 					{
 						"tag": "黄芪"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&uid=WEEvREcwSlJHSldRa1FhdXNXaEhobmc3WGN3MjRrc1RnZWJhQ1d2YUZSdz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!&v=MDc4NDZPZVorZHBGaURoVkx6SlZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "黄瓜共表达基因模块的识别及其特点分析",
+				"creators": [
+					{
+						"lastName": "林",
+						"firstName": "行众",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"abstractNote": "黄瓜(Cucumis sativus L.)是我国最大的保护地栽培蔬菜作物,也是植物性别发育和维管束运输研究的重要模式植物。黄瓜基因组序列图谱已经构建完成,并且在此基础上又完成了全基因组SSR标记开发和涵盖330万个变异位点变异组图谱,成为黄瓜功能基因研究的重要平台和工具,相关转录组研究也有很多报道,不过共表达网络研究还是空白。本实验以温室型黄瓜9930为研究对象,选取10个不同组织,进行转录组测序,获得10份转录组原始数据。在对原始数据去除接头与低质量读段后,将高质量读段用Tophat2回贴到已经发表的栽培黄瓜基因组序列上。用Cufflinks对回贴后的数据计算FPKM值,获得10份组织的24274基因的表达量数据。计算结果中的回贴率比较理想,不过有些基因的表达量过低。为了防止表达量低的基因对结果的影响,将10份组织中表达量最大小于5的基因去除,得到16924个基因,进行下一步分析。共表达网络的构建过程是将上步获得的表达量数据,利用R语言中WGCNA(weighted gene co-expression network analysis)包构建共表达网络。结果得到的共表达网络包括1134个模块。这些模块中的基因表达模式类似,可以认为是共表达关系。不过结果中一些模块内基因间相关性同其他模块相比比较低,在分析过程中,将模块中基因相关性平均值低于0.9的模块都去除,最终得到839个模块,一共11,844个基因。共表达的基因因其表达模式类似而聚在一起,这些基因可能与10份组织存在特异性关联。为了计算模块与组织间的相关性,首先要对每个模块进行主成分分析(principle component analysis,PCA),获得特征基因(module eigengene,ME),特征基因可以表示这个模块所有基因共有的表达趋势。通过计算特征基因与组织间的相关性,从而挑选出组织特异性模块,这些模块一共有323个。利用topGO功能富集分析的结果表明这些特异性模块所富集的功能与组织相关。共表达基因在染色体上的物理位置经常是成簇分布的。按照基因间隔小于25kb为标准。分别对839个模块进行分析,结果发现在71个模块中共有220个cluster,这些cluster 一般有2～5个基因,cluster中的基因在功能上也表现出一定的联系。共表达基因可能受到相同的转录调控,这些基因在启动子前2kb可能会存在有相同的motif以供反式作用元件的结合起到调控作用。对839个模块中的基因,提取启动子前2kb的序列,上传到PLACE网站进行motif分析。显著性分析的结果表明一共有367个motif存在富集,其中6个motif已经证实在黄瓜属植物中发挥作用。最后结合已经发表的黄瓜苦味生物合成途径研究,找到了 3个模块,已经找到的11个基因中,有10个基因在这4个模块中。这些模块的功能富集也显示与苦味合成相关,同时这些参与合成的基因在染色体上也成簇分布。本论文所描述的方法结合了转录组测序与网络分析方法,发现了黄瓜中的共表达基因模块,为黄瓜基因的共表达分析提供了非常重要的研究基础和数据支持。",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"thesisType": "硕士",
+				"university": "南京农业大学",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&uid=WEEvREcwSlJHSldRa1FhdXNXaEhobmc3WGN3MjRrc1RnZWJhQ1d2YUZSdz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!&v=MDc4NDZPZVorZHBGaURoVkx6SlZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
+				"attachments": [
+					{
+						"title": "黄瓜共表达基因模块的识别及其特点分析",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text CAJ",
+						"mimeType": "application/caj"
+					}
+				],
+				"tags": [
+					{
+						"tag": "co-expression"
+					},
+					{
+						"tag": "cucumber"
+					},
+					{
+						"tag": "network"
+					},
+					{
+						"tag": "transcriptome"
+					},
+					{
+						"tag": "共表达"
+					},
+					{
+						"tag": "网络"
+					},
+					{
+						"tag": "转录组"
+					},
+					{
+						"tag": "黄瓜"
 					}
 				],
 				"notes": [],
