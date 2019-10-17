@@ -1,15 +1,15 @@
 {
-    "translatorID": "6f895480-9405-40f8-9177-90a3c969fe9a",
-    "label": "Universidad de Navarra",
+    "translatorID": "6b7e6702-c97b-4cb5-8d16-14f4b4da2161",
+    "label": "Cauriensia",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/www.unav.edu\/publicaciones\/revistas\/index.php\/.+\/article\/view",
+    "target": "^https?:\/\/(www\\.)?cauriensia.es\/index.php\/.+\/article\/view.*\/[0-9]+",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-03-15 13:14:00"
+    "lastUpdated": "2019-10-15 13:14:00"
 }
 
 /*
@@ -40,42 +40,24 @@ function detectWeb(doc, url) {
 }
 
 function postProcess(doc, item) {
-    // The author names returned by the embedded metadata translator includes the name of the
-    // institution to which the authors belong. So, we'll need to grab them from the DOM and clean it ourselves.
-    var authors = ZU.xpath(doc, "//div[@class='authorBio']/em");
-    if (authors)
-        item.creators = authors.map(function(x) { return ZU.cleanAuthor(x.textContent, 'author'); })
-
-    // get multiple abstracts
-    var abstracts = ZU.xpath(doc, '//meta[@name="DC.Description"]//@content');
-    if (abstracts && abstracts.length) {
-        var combinedAbstracts = "";
-        for (var i in abstracts)
-            combinedAbstracts += abstracts[i].textContent + "\n\n";
-
-        item.abstractNote = combinedAbstracts.trim();
+    var keywordNodes = ZU.xpath(doc, '//strong[contains(text(), "Keywords") or contains(text(), "Palavras") or contains(text(), "Palabras")]//parent::p//text()');
+    if (keywordNodes) {
+        item.tags = keywordNodes
+                        .map(x => x.textContent.trim())
+                        .filter(x => x.trim().length > 0 && !x.match(/keywords|palavras chave|palabras clave/ig))
+                        .flatMap(x => x.split(","))
+                        .map(x => x.trim().replace(/\.$/g, ""))
     }
-
-    item.shortTitle = ZU.xpathText(doc, '//meta[@name="DC.Title.Alternative"]/@content');
-
-    if (item.issue === "0")
-        item.issue = "";
-    if (item.volume === "0")
-        item.volume = "";
 
     item.complete();
 }
 
-function invokeOJSTranslator(doc) {
+function doWeb(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");
+    translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");   // Open Journal Systems
     translator.setDocument(doc);
     translator.setHandler("itemDone", function (t, i) {
         postProcess(doc, i);
     });
     translator.translate();
-}
-
-function doWeb(doc, url) {
-    invokeOJSTranslator(doc);
 }
