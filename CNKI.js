@@ -92,24 +92,20 @@ function getIDFromPage(doc, url) {
 		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
 		|| getIDFromRef(doc, url);
 }
-
+// dbname unknown typeCJFQ, CJFD, CDFD, CMFD
 function getTypeFromDBName(dbname) {
-	switch (dbname.substr(0,4).toUpperCase()) {
-		case "CJFQ":
-		case "CJFD":
-		case "CAPJ":
-			return "journalArticle";
-		case "CDFD":
-		case "CMFD":
-		case "CLKM":
-			return "thesis";
-		case "CPFD":
-			return "conferencePaper";
-		case "CCND":
-			return "newspaperArticle";
-		default:
-			return false;
-	}
+	var dbtype = dbname.substr(0,4).toUpperCase();
+	if (dbtype == "CAPJ") {
+		return "journalArticle";
+	} else if (dbtype == "CLKM") {
+		return "thesis";
+	} else if (dbtype == 'CPFD') {
+		return "conferencePaper";
+	} else if (dbtype == "CCND") {
+		return "newspaperArticle";
+	} else {
+		return false;
+	};
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
@@ -141,9 +137,6 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		count++;
 		if (itemInfo) {
 			itemInfo[a.href] = { id: id };
-			
-			/*var pdfLink = ZU.xpath(links[i], './/a[@class="brief_downloadIcon"]')[0];
-			if (pdfLink) itemInfo[a.href].pdfURL = pdfLink.href;*/
 		}
 		items[a.href] = title;
 	}
@@ -153,13 +146,13 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 
 function detectWeb(doc, url) {
 	var id = getIDFromPage(doc, url);
+	var items = getItemsFromSearchResults(doc, url);
 	Z.debug(id);
 	if (id) {
 		return getTypeFromDBName(id.dbname);
-	}
-	
-	var items = getItemsFromSearchResults(doc, url);
-	if (items) return "multiple";
+	} else if (items) {
+		return "multiple"
+	}	
 }
 
 function doWeb(doc, url) {
@@ -176,10 +169,10 @@ function doWeb(doc, url) {
 				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
 				itemInfoByTitle[selectedItems[url]].url = url;
 			}
-			scrape(ids, doc, url, itemInfoByTitle);
+			return scrape(ids, doc, url, itemInfoByTitle);
 		});
 	} else {
-		scrape([getIDFromPage(doc, url)], doc, url);
+		return scrape([getIDFromPage(doc, url)], doc, url);
 	}
 }
 
