@@ -2,7 +2,7 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://kns",
+	"target": "^?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -79,6 +79,7 @@ function getIDFromURL(url) {
 
 
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
+// Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url){
 	var func = ZU.xpath(doc, '//div[@class="link"]/a')[0].onclick + ''
 	var tmp = func.split(',')[1].split('!');
@@ -243,8 +244,9 @@ function scrape(ids, doc, url, itemInfo) {
 			i++;
 			
 			// CN 中国刊物编号，非refworks中的callNumber
+			// CN in CNKI refworks format explains Chinese version of ISSN
 			if (newItem.callNumber){
-				newItem.extra = 'CN ' + newItem.callNumber;
+			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
 			};
 			
@@ -256,13 +258,13 @@ function scrape(ids, doc, url, itemInfo) {
 	})
 }
 
-// pdf 下载链接
+// get pdf download link
 function getPDF(doc) {
 	var pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
 	return pdf.length ? pdf[0].href : false;
 };
 
-// caj 下载链接，学位论文默认是整本下载
+// caj download link, default is the whole article for thesis.
 function getCAJ(doc, itemType) {
 	// //div[@id='DownLoadParts']
 	if (itemType == 'thesis') {
@@ -273,7 +275,7 @@ function getCAJ(doc, itemType) {
 	return caj.length ? caj[0].href : false;
 };
 
-// 将pdf, caj 或 网页快照添加到attachments中. 有pdf的优先保存pdf
+// add pdf or caj to attachments, default is pdf
 function getAttachments(doc, item){
 	attachments = [{
 		url: item.url,
@@ -291,7 +293,7 @@ function getAttachments(doc, item){
 	//logged = ZU.trimInternal(logged.textContent);
 	//Z.debug("*****" + logged.style.display);
 
-	// 只有登录的时候，才有附件
+	// get pdf or caj after you login
 	if (logged.style.display != 'none'){
 		if (pdfurl){
 			attachments.push({
