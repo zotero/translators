@@ -123,25 +123,26 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 		aXpath = './td[2]/a';
 	}
-	if (!links.length) return false;
-	
-	var items = {};
-	var count = 0;
-	for (var i=0, n=links.length; i<n; i++) {
-		var a = ZU.xpath(links[i], aXpath)[0];
-		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
-		if (title) title = ZU.trimInternal(title);
-		var id = getIDFromURL(a.href);
-		if (!title || !id) continue;
-		
-		count++;
-		if (itemInfo) {
-			itemInfo[a.href] = { id: id };
+
+	if (!links.length) {
+		return false;
+	} else {
+		var items = {};
+		for (var i=0, n=links.length; i<n; i++) {
+			var a = ZU.xpath(links[i], aXpath)[0];
+			var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
+			if (title) title = ZU.trimInternal(title);
+			var id = getIDFromURL(a.href);
+			if (!title || !id) continue;
+
+			if (itemInfo) {
+				itemInfo[a.href] = { id: id };
+			}
+			items[a.href] = title;
 		}
-		items[a.href] = title;
+
+		return items;
 	}
-	
-	if (count) return items;
 }
 
 function detectWeb(doc, url) {
@@ -152,6 +153,8 @@ function detectWeb(doc, url) {
 		return getTypeFromDBName(id.dbname);
 	} else if (items) {
 		return "multiple";
+	} else {
+		return false;
 	}
 }
 
@@ -169,10 +172,10 @@ function doWeb(doc, url) {
 				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
 				itemInfoByTitle[selectedItems[url]].url = url;
 			}
-			return scrape(ids, doc, url, itemInfoByTitle);
+			scrape(ids, doc, url, itemInfoByTitle);
 		});
 	} else {
-		return scrape([getIDFromPage(doc, url)], doc, url);
+		scrape([getIDFromPage(doc, url)], doc, url);
 	}
 }
 
@@ -183,7 +186,7 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
-		// var i = 0;		
+		// var i = 0;	
 		translator.setHandler('itemDone', function(obj, newItem) {
 			// split names
 			for (var i=0, n=newItem.creators.length; i<n; i++) {
@@ -269,7 +272,7 @@ function getAttachments(doc, item){
 	var cajurl = getCAJ(doc, item.itemType);
 	// Z.debug('pdf' + pdfurl);
 	// Z.debug('caj' + cajurl);
-	// login or not 
+	// login or not
 	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
 	// logged = ZU.trimInternal(logged.textContent);
 	// Z.debug("*****" + logged.style.display);
