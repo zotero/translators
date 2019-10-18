@@ -55,8 +55,8 @@ function getRefworksByID(ids, next) {
 					.replace(/\r\n?/g, '\n')
 					// split authors
 					.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function(m, tag, authors) {
-						authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
-						if (!authors[authors.length-1].trim()) authors.pop();
+						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
+						if (!authors[authors.length - 1].trim()) authors.pop();
 						
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					});
@@ -138,7 +138,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	} else {
 		var items = {};
 		for (var i = 0, n = links.length; i < n; i++) {
-			//Z.debug(links[i].innerHTML)
+			// Z.debug(links[i].innerHTML)
 			var a = ZU.xpath(links[i], aXpath)[0];
 			var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
 			if (title) title = ZU.trimInternal(title);
@@ -163,7 +163,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 }
 
 function detectWeb(doc, url) {
-	//Z.debug(doc);
+	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
 	Z.debug(id);
@@ -215,7 +215,7 @@ function scrape(ids, doc, url, itemInfo) {
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					// western name. split on last space
 					creator.firstName = creator.lastName.substr(0,lastSpace);
-					creator.lastName = creator.lastName.substr(lastSpace+1);
+					creator.lastName = creator.lastName.substr(lastSpace + 1);
 				} else {
 					// Chinese name. first character is last name, the rest are first name
 					creator.firstName = creator.lastName.substr(1);
@@ -255,7 +255,7 @@ function scrape(ids, doc, url, itemInfo) {
 			newItem.complete();
 		});
 		
-		return translator.translate();
+		translator.translate();
 	});
 }
 
@@ -277,7 +277,7 @@ function getCAJ(doc, itemType) {
 }
 
 // add pdf or caj to attachments, default is pdf
-function getAttachments(doc, item){
+function getAttachments(doc, item) {
 	var attachments = [{
 		url: item.url,
 		title: item.title,
@@ -293,8 +293,8 @@ function getAttachments(doc, item){
 
 	// get pdf or caj after you login
 	// this element will display after login
-	if (logged.style.display != 'none'){
-		if (pdfurl){
+	if (logged.style.display != 'none') {
+		if (pdfurl) {
 			attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
