@@ -100,14 +100,14 @@ function getIDFromPage(doc, url) {
 
 function getTypeFromDBName(dbname) {
 	var dbType = {
-		"CJFQ": "journalArticle",
-		"CJFD": "journalArticle",
-		"CAPJ": "journalArticle",
-		"CDFD": "thesis",
-		"CMFD": "thesis",
-		"CLKM": "thesis",
-		"CCND": "newspaperArticle",
-		"CPFD": "conferencePaper",
+		CJFQ: "journalArticle",
+		CJFD: "journalArticle",
+		CAPJ: "journalArticle",
+		CDFD: "thesis",
+		CMFD: "thesis",
+		CLKM: "thesis",
+		CCND: "newspaperArticle",
+		CPFD: "conferencePaper",
 	};
 	var db = dbname.substr(0, 4).toUpperCase();
 	if (dbType[db]) {
