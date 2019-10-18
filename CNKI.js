@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-10-16 04:32:14"
+	"lastUpdated": "2019-10-18 02:21:15"
 }
 
 /*
@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefworksByID(ids, next) {
 	var postData = "";
-	for (var i=0, n=ids.length; i<n; i++) {
+	for (var i = 0, n = ids.length; i < n; i++) {
 		postData += ids[i].dbname + "!" + ids[i].filename + "!0!0,";
 	}
 	postData = "formfilenames=" + encodeURIComponent(postData);
@@ -81,10 +81,15 @@ function getIDFromURL(url) {
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
-	var func = ZU.xpath(doc, '//div[@class="link"]/a')[0].onclick + '';
-	var tmp = func.split(',')[1].split('!');
-	// Z.debug(func + tmp[0].slice(1));
-	return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
+	var func = ZU.xpath(doc, '//div[@class="link"]/a')
+	if (!func.length) {
+		return false;
+	} else {
+		fun = func[0].onclick + '';
+		var tmp = func.split(',')[1].split('!');
+		// Z.debug(func + tmp[0].slice(1));
+		return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
+	}
 }
 
 function getIDFromPage(doc, url) {
@@ -92,19 +97,23 @@ function getIDFromPage(doc, url) {
 		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
 		|| getIDFromRef(doc, url);
 }
-// dbname unknown typeCJFQ, CJFD, CDFD, CMFD
+
 function getTypeFromDBName(dbname) {
-	var dbtype = dbname.substr(0,4).toUpperCase();
-	if (dbtype == "CAPJ") {
-		return "journalArticle";
-	} else if (dbtype == "CLKM") {
-		return "thesis";
-	} else if (dbtype == 'CPFD') {
-		return "conferencePaper";
-	} else if (dbtype == "CCND") {
-		return "newspaperArticle";
+	dbType = {
+		"CJFQ": "journalArticle",
+		"CJFD": "journalArticle",
+		"CAPJ": "journalArticle",
+		"CDFD": "thesis",
+		"CMFD": "thesis",
+		"CLKM": "thesis",
+		"CCND": "newspaperArticle",
+		"CPFD": "conferencePaper",
+	};
+	db = dbname.substr(0,4).toUpperCase();
+	if (dbType[db]) {
+		return dbType[db];
 	} else {
-		return false;
+		return false
 	}
 }
 
@@ -128,11 +137,19 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		return false;
 	} else {
 		var items = {};
-		for (var i=0, n=links.length; i<n; i++) {
+		for (var i = 0, n = links.length; i < n; i++) {
+			//Z.debug(links[i].innerHTML)
 			var a = ZU.xpath(links[i], aXpath)[0];
 			var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
 			if (title) title = ZU.trimInternal(title);
 			var id = getIDFromURL(a.href);
+			// pre-released item can not get ID from URL, try to get ID from element.value
+			if (!id) {
+				var td1 = ZU.xpath(links[i], './td')[0]
+				var tmp = td1.value.split('!');
+				id = { dbname: tmp[0], filename: tmp[1], url: a.href };
+			}
+			Z.debug('links' + i);
 			if (!title || !id) continue;
 
 			if (itemInfo) {
@@ -146,6 +163,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 }
 
 function detectWeb(doc, url) {
+	//Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
 	Z.debug(id);
@@ -186,10 +204,10 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
-		// var i = 0;	
+		
 		translator.setHandler('itemDone', function(obj, newItem) {
 			// split names
-			for (var i=0, n=newItem.creators.length; i<n; i++) {
+			for (var i = 0, n = newItem.creators.length; i < n; i++) {
 				var creator = newItem.creators[i];
 				if (creator.firstName) continue;
 				
@@ -210,7 +228,7 @@ function scrape(ids, doc, url, itemInfo) {
 			}
 			
 			// clean up tags. Remove numbers from end
-			for (var j=0, l=newItem.tags.length; j<l; j++) {
+			for (var j = 0, l = newItem.tags.length; j < l; j++) {
 				newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
 			}
 			
@@ -225,8 +243,6 @@ function scrape(ids, doc, url, itemInfo) {
 			} else {
 				newItem.url = url;
 			}
-			
-			// i++;
 
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
@@ -239,7 +255,7 @@ function scrape(ids, doc, url, itemInfo) {
 			newItem.complete();
 		});
 		
-		translator.translate();
+		return translator.translate();
 	});
 }
 
@@ -274,10 +290,9 @@ function getAttachments(doc, item){
 	// Z.debug('caj' + cajurl);
 	// login or not
 	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
-	// logged = ZU.trimInternal(logged.textContent);
-	// Z.debug("*****" + logged.style.display);
 
 	// get pdf or caj after you login
+	// this element will display after login
 	if (logged.style.display != 'none'){
 		if (pdfurl){
 			attachments.push({
