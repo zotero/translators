@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-12 20:25:43"
+	"lastUpdated": "2019-10-18 10:39:01"
 }
 
 /*
@@ -111,8 +111,9 @@ function getSearchResults(doc, checkOnly, extras) {
 	// if the first result is Ebrary, they all are - we're looking at the Ebrary results tab
 	
 	for (var i=0, n=results.length; i<n; i++) {
-		var title = results[i].querySelectorAll('.resultTitle, .previewTitle')[0];
-		if (!title || title.nodeName != 'A') continue;
+		var title = results[i].querySelectorAll('h3')[0];
+		//Z.debug(title)
+		if (!title || !attr(title, 'a', 'href')) continue;
 		
 		if (checkOnly) return true;
 		found = true;
@@ -126,7 +127,7 @@ function getSearchResults(doc, checkOnly, extras) {
 			};
 		}
 		
-		items[title.href] = item;
+		items[attr(title, 'a', 'href')] = item;
 		
 		if (isEbrary && Zotero.isBookmarklet) {
 			extras[title.href] = {
@@ -379,7 +380,7 @@ function scrape(doc, url, type) {
 		if (place.publicationCountry) {
 			item.place = item.place + ', ' + place.publicationCountry;
 		}
-	} 
+	}
 
 	item.date = dates.pop();
 
