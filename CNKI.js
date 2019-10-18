@@ -81,11 +81,11 @@ function getIDFromURL(url) {
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
 // Get dbname and filename from pre-released article web page.
 function getIDFromRef(doc, url) {
-	var func = ZU.xpath(doc, '//div[@class="link"]/a')
+	var func = ZU.xpath(doc, '//div[@class="link"]/a');
 	if (!func.length) {
 		return false;
 	} else {
-		fun = func[0].onclick + '';
+		func = func[0].onclick + '';
 		var tmp = func.split(',')[1].split('!');
 		// Z.debug(func + tmp[0].slice(1));
 		return { dbname: tmp[0].slice(1), filename: tmp[1], url: url };
@@ -99,7 +99,7 @@ function getIDFromPage(doc, url) {
 }
 
 function getTypeFromDBName(dbname) {
-	dbType = {
+	var dbType = {
 		"CJFQ": "journalArticle",
 		"CJFD": "journalArticle",
 		"CAPJ": "journalArticle",
@@ -109,11 +109,11 @@ function getTypeFromDBName(dbname) {
 		"CCND": "newspaperArticle",
 		"CPFD": "conferencePaper",
 	};
-	db = dbname.substr(0,4).toUpperCase();
+	var db = dbname.substr(0, 4).toUpperCase();
 	if (dbType[db]) {
 		return dbType[db];
 	} else {
-		return false
+		return false;
 	}
 }
 
@@ -145,7 +145,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 			var id = getIDFromURL(a.href);
 			// pre-released item can not get ID from URL, try to get ID from element.value
 			if (!id) {
-				var td1 = ZU.xpath(links[i], './td')[0]
+				var td1 = ZU.xpath(links[i], './td')[0];
 				var tmp = td1.value.split('!');
 				id = { dbname: tmp[0], filename: tmp[1], url: a.href };
 			}
