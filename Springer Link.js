@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-08-19 11:39:42"
+	"lastUpdated": "2019-10-19 16:00:07"
 }
 
 function detectWeb(doc, url) {
@@ -84,10 +84,7 @@ function complementItem(doc, item) {
 	var itemType = detectWeb(doc, doc.location.href);
 	//in case we're missing something, we can try supplementing it from page
 	if (!item.DOI) {
-		item.DOI = ZU.xpathText(doc,
-			'//dd[@id="abstract-about-book-chapter-doi"\
-					or @id="abstract-about-doi"][1]'
-		);
+		item.DOI = ZU.xpathText(doc, '//meta[@name="citation_doi"]/@content');
 	}
 	if (!item.language) {
 		item.language = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
@@ -162,11 +159,11 @@ function complementItem(doc, item) {
 			item.seriesNumber = ZU.xpathText(doc, '//dd[@id="abstract-about-book-series-volume"]');
 		}
 	}
-	//add the DOI to extra for non journal articles
+		//add the DOI to extra for non journal articles
 	if (item.itemType != "journalArticle" && item.itemType != "conferencePaper" && item.DOI) {
-		item.extra = "DOI: " + item.DOI;
-		item.DOI = "";
-	}
+			item.extra = "DOI: " + item.DOI;
+			item.DOI = "";
+		}
 	//series numbers get mapped to volume; fix this
 	if (item.volume == item.seriesNumber) {
 		item.volume = "";
@@ -242,6 +239,7 @@ var testCases = [
 					}
 				],
 				"date": "2008",
+				"DOI": "10.1007/978-3-540-88682-2_1",
 				"ISBN": "9783540886822",
 				"abstractNote": "My first paper of a “Computer Vision” signature (on invariants related to optic flow) dates from 1975. I have published in Computer Vision (next to work in cybernetics, psychology, physics, mathematics and philosophy) till my retirement earlier this year (hence the slightly blue feeling), thus my career roughly covers the history of the field. “Vision” has diverse connotations. The fundamental dichotomy is between “optically guided action” and “visual experience”. The former applies to much of biology and computer vision and involves only concepts from science and engineering (e.g., “inverse optics”), the latter involves intention and meaning and thus additionally involves concepts from psychology and philosophy. David Marr’s notion of “vision” is an uneasy blend of the two: On the one hand the goal is to create a “representation of the scene in front of the eye” (involving intention and meaning), on the other hand the means by which this is attempted are essentially “inverse optics”. Although this has nominally become something of the “Standard Model” of CV, it is actually incoherent. It is the latter notion of “vision” that has always interested me most, mainly because one is still grappling with basic concepts. It has been my aspiration to turn it into science, although in this I failed. Yet much has happened (something old) and is happening now (something new). I will discuss some of the issues that seem crucial to me, mostly illustrated through my own work, though I shamelessly borrow from friends in the CV community where I see fit.",
 				"language": "en",
