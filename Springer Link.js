@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-10-19 16:00:07"
+	"lastUpdated": "2019-10-19 17:03:34"
 }
 
 function detectWeb(doc, url) {
@@ -91,6 +91,14 @@ function complementItem(doc, item) {
 	}
 	if (!item.publisher) {
 		item.publisher = ZU.xpathText(doc, '//dd[@id="abstract-about-publisher"]');
+	}
+	if (item.publisher && item.place) {
+		// delete places in publisher's name
+		// e.g. Springer Berlin Heidelberg
+		var places = item.place.split(/[\s,;]/);
+		for (let place of places) {
+			item.publisher = item.publisher.replace(place, '');
+		}
 	}
 	if (!item.date) {
 		item.date = ZU.xpathText(doc, '//dd[@id="abstract-about-cover-date"]') || ZU.xpathText(
@@ -241,8 +249,9 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Springer Link",
 				"pages": "1-1",
+				"place": "Berlin, Heidelberg",
 				"proceedingsTitle": "Computer Vision – ECCV 2008",
-				"publisher": "Springer Berlin Heidelberg",
+				"publisher": "Springer",
 				"series": "Lecture Notes in Computer Science",
 				"attachments": [
 					{
