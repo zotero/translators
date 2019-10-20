@@ -23,7 +23,7 @@
 			"error",
 			{
 				"argsIgnorePattern": "^_",
-				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$"
+				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$|^exports$"
 			}
 		],
 
