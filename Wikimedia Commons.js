@@ -273,5 +273,5 @@ var testCases = [
 		"url": "http://commons.wikimedia.org/wiki/Commons:Valued_images_by_topic/Science",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

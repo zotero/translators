@@ -263,5 +263,5 @@ var testCases = [
 		"url": "https://www.zip-online.de/heft-23-24-1987/",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

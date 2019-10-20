@@ -328,5 +328,5 @@ function doSearch(item) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [];
+var testCases = []
 /** END TEST CASES **/

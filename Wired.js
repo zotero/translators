@@ -296,5 +296,5 @@ var testCases = [
 		"url": "https://www.wired.co.uk/search?q=kickstarter",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

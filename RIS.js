@@ -2119,9 +2119,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2171,9 +2177,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2209,9 +2221,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2257,9 +2275,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2296,9 +2320,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2334,9 +2364,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2398,9 +2434,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2463,9 +2505,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2496,13 +2544,18 @@ var testCases = [
 				"language": "Language",
 				"reporter": "Reporter",
 				"reporterVolume": "Reporter Volume",
-				"shortTitle": "Abbreviated Case Name",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2550,9 +2603,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2586,9 +2645,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2640,9 +2705,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2677,12 +2748,17 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"version": "Version",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2729,9 +2805,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2793,9 +2875,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2839,9 +2927,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2898,9 +2992,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2952,9 +3052,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2998,9 +3104,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3055,9 +3167,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3119,9 +3237,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3177,9 +3301,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3218,9 +3348,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3254,9 +3390,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3303,9 +3445,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3360,9 +3508,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3408,9 +3562,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3453,9 +3613,15 @@ var testCases = [
 				"volume": "Amount Requested",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3487,9 +3653,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3567,9 +3739,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3612,9 +3790,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3656,9 +3840,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3698,9 +3888,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3755,9 +3951,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3797,9 +3999,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3836,9 +4044,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3877,9 +4091,15 @@ var testCases = [
 				"videoRecordingFormat": "Format/Length",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3926,9 +4146,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3972,9 +4198,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4019,9 +4251,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4076,9 +4314,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4140,9 +4384,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4181,9 +4431,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4209,13 +4465,18 @@ var testCases = [
 				"publicLawNumber": "Public Law Number",
 				"section": "Sections",
 				"session": "Session",
-				"shortTitle": "Short Title",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4258,9 +4519,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4306,9 +4573,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4344,9 +4617,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4409,7 +4688,6 @@ var testCases = [
 				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
 				"issue": "9999",
 				"publicationTitle": "Molecular Ecology Resources",
-				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"attachments": [

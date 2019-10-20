@@ -168,5 +168,5 @@ var testCases = [
 		"url": "http://socpvs.org/journals/index.php/wbp/search/results?query=habitat",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/

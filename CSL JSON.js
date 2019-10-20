@@ -134,6 +134,7 @@ var testCases = [
 					{
 						"lastName": "Bachar",
 						"firstName": "Mostafa",
+						"creatorTypeID": 1,
 						"creatorType": "author"
 					}
 				],

@@ -180,5 +180,5 @@ var testCases = [
 		"defer": true,
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
