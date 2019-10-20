@@ -18,8 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2019-02-03 17:45:00"
+	"lastUpdated": "2019-09-17 15:09:07"
 }
 
 /*
@@ -654,8 +653,8 @@ function unescapeBibTeX(value) {
 	
 	// replace accented characters (yucky slow)
 	value = value.replace(/{?(\\[`"'^~=]){?\\?([A-Za-z])}/g, "{$1$2}");
-	//for special characters rendered by \[a-z] we need a space
-	value = value.replace(/{?(\\[a-z]){?\\?([A-Za-z])}/g, "{$1 $2}");
+	// normalize some special characters, e.g. caron \v{c} -> {\v c}
+	value = value.replace(/(\\[a-z]){(\\?[A-Za-z])}/g, "{$1 $2}");
 	//convert tex markup into permitted HTML
 	value = mapTeXmarkup(value);
 	for (var mapped in reversemappingTable) { // really really slow!
@@ -3724,6 +3723,103 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "import",
+		"input": "@article{madoc40756,\n          author = {Elias Naumann and Moritz He{\\ss} and Leander Steinkopf},\n          number = {6},\n        language = {Deutsch},\n          volume = {44},\n       publisher = {Lucius \\& Lucius},\n         address = {Stuttgart},\n           pages = {426--446},\n         journal = {Zeitschrift f{\\\"u}r Soziologie : ZfS},\n            year = {2015},\n             doi = {10.1515/zfsoz-2015-0604},\n           title = {Die Alterung der Gesellschaft und der Generationenkonflikt in Europa},\n             url = {https://madoc.bib.uni-mannheim.de/40756/}\n}\n\n@article {MR3077863,\nAUTHOR = {Eli{\\'a}{\\v{s}}, Marek and Matou{\\v{s}}ek, Ji{\\v{r}}{\\'{\\i}}},\nTITLE = {Higher-order {E}rd{\\H o}s-{S}zekeres theorems},\nJOURNAL = {Adv. Math.},\nFJOURNAL = {Advances in Mathematics},\nVOLUME = {244},\nYEAR = {2013},\nPAGES = {1--15},\nISSN = {0001-8708},\nMRCLASS = {05C65 (05C55 52C10)},\nMRNUMBER = {3077863},\nMRREVIEWER = {David Conlon},\nDOI = {10.1016/j.aim.2013.04.020},\nURL = {http://dx.doi.org/10.1016/j.aim.2013.04.020},\n}",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Die Alterung der Gesellschaft und der Generationenkonflikt in Europa",
+				"creators": [
+					{
+						"firstName": "Elias",
+						"lastName": "Naumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Moritz",
+						"lastName": "Heß",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Leander",
+						"lastName": "Steinkopf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015",
+				"DOI": "10.1515/zfsoz-2015-0604",
+				"issue": "6",
+				"itemID": "madoc40756",
+				"language": "Deutsch",
+				"pages": "426–446",
+				"publicationTitle": "Zeitschrift für Soziologie : ZfS",
+				"url": "https://madoc.bib.uni-mannheim.de/40756/",
+				"volume": "44",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"title": "Higher-order Erdős-Szekeres theorems",
+				"creators": [
+					{
+						"firstName": "Marek",
+						"lastName": "Eliáš",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jiří",
+						"lastName": "Matoušek",
+						"creatorType": "author"
+					}
+				],
+				"date": "2013",
+				"DOI": "10.1016/j.aim.2013.04.020",
+				"ISSN": "0001-8708",
+				"extra": "MR: 3077863",
+				"itemID": "MR3077863",
+				"journalAbbreviation": "Adv. Math.",
+				"pages": "1–15",
+				"publicationTitle": "Advances in Mathematics",
+				"url": "http://dx.doi.org/10.1016/j.aim.2013.04.020",
+				"volume": "244",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@incollection{madoc44942,\n        language = {isl},\n          author = {Eva H. {\\\"O}nnud{\\'o}ttir},\n           title = {B{\\'u}s{\\'a}haldabyltingin : P{\\'o}lit{\\'i}skt jafnr{\\ae}{\\dh}i og {\\th}{\\'a}tttaka almennings {\\'i} m{\\'o}tm{\\ae}lum},\n            year = {2011},\n       publisher = {F{\\'e}lagsv{\\'i}sindastofnun H{\\'a}sk{\\'o}la {\\'I}slands},\n         address = {Reykjavik},\n           pages = {36--44}\n}\n",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Búsáhaldabyltingin : Pólitískt jafnræði og þátttaka almennings í mótmælum",
+				"creators": [
+					{
+						"firstName": "Eva H.",
+						"lastName": "Önnudóttir",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"itemID": "madoc44942",
+				"language": "isl",
+				"pages": "36–44",
+				"place": "Reykjavik",
+				"publisher": "Félagsvísindastofnun Háskóla Íslands",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
-];
+]
 /** END TEST CASES **/

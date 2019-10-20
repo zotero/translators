@@ -16,16 +16,14 @@
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
 		"XMLSerializer": "readonly",
-		"atob": "readonly",
-		"text": "readonly",
-		"attr": "readonly"
+		"atob": "readonly"
 	},
 	"rules": {
 		"no-unused-vars": [
 			"error",
 			{
 				"argsIgnorePattern": "^_",
-				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$"
+				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$|^exports$"
 			}
 		],
 
