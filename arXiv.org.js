@@ -115,7 +115,7 @@ function doWeb(doc, url) {
 	}
 	else {
 		var id;
-		var versionMatch = url.match(/v(\d+)(\.pdf)?$/);
+		var versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
 		if (versionMatch) {
 			version = versionMatch[1];
 		}
