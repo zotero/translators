@@ -39,6 +39,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/raksts/')) {
 		return "newspaperArticle";
 	}
+	return false;
 }
 
 
@@ -59,7 +60,7 @@ function scrape(doc, url) {
 
 	translator.setHandler('itemDone', function (obj, item) {
 		item.publicationTitle = ZU.xpathText(doc, '//section[@class="globalnav__item globalnav__item-sitename"]');
-		item.section = ZU.xpathText(doc, '//div[@class="article__info"]/section[3]');;
+		item.section = ZU.xpathText(doc, '//div[@class="article__info"]/section[3]');
 
 		item.creators = [];
 		
@@ -78,11 +79,11 @@ function scrape(doc, url) {
 			for (let author of authors) {
 				author = author.trim();
 				if (author === 'LSM.lv ziņu redakcija' || author === 'LETA' || author === 'BNS') {
-					item.creators.push({ lastName: author, creatorType: "author", fieldMode: true})
+					item.creators.push({ lastName: author, creatorType: "author", fieldMode: true});
 				} else {
 					// Zanda Ozola-Balode (Panorāma)
 					if (author.indexOf('(') > 0) {
-						author = author.substring(0, author.indexOf('(')); 
+						author = author.substring(0, author.indexOf('('));
 					}
 					item.creators.push(ZU.cleanAuthor(author, "author"));
 				}
@@ -96,13 +97,13 @@ function scrape(doc, url) {
 		if (dateString.indexOf('Šodien') > 0) {
 			item.date = formatDate(new Date());
 		} else if (dateString.indexOf('Vakar') > 0) {
-			item.date = formatDate(new Date(new Date().setDate(new Date().getDate()-1)));
+			item.date = formatDate(new Date(new Date().setDate(new Date().getDate() - 1)));
 		} else {
 			// 14. jūlijs, 2014, 16:07
 			// 12. oktobris, 20:29
 			var dateParts = dateString.match(/(\d{1,2})\. (\w+), (\d{4}), .*/);
 			if (!dateParts) {
-				dateParts = dateString.match(/(\d{1,2})\. (\w+),.*/)
+				dateParts = dateString.match(/(\d{1,2})\. (\w+),.*/);
 				if (dateParts) {
 					dateParts[3] = new Date().getFullYear();
 				}
@@ -137,8 +138,8 @@ function scrape(doc, url) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
-
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
