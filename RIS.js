@@ -17,8 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2017-10-28 09:11:30"
+	"lastUpdated": "2019-10-19 17:04:49"
 }
 
 function detectImport() {
@@ -405,6 +404,7 @@ var degenerateImportFieldMap = {
 	CA: "unsupported/Caption",
 	CR: "rights",
 	CT: "title",
+	CY: "place", // ProCite and Springer are using CY instead of C1 also for conferencePapers
 	ED: "creators/editor",
 	EP: "pages",
 	H1: "unsupported/Library Catalog", //Citavi specific (possibly multiple occurences)
@@ -1030,11 +1030,6 @@ var ProCiteCleaner = new function() {
 			// We try to fix this ahead of time, but we can't always
 			// 2 of these entries would indicate Edition and then Volume (maybe)
 			this._changeTag(entry, entry.indexOf(entry.tags.VL[0]), ['ET']);
-		}
-		
-		//fix publication place for conferences. Should be C1, not CY
-		if (ty == 'CONF' && entry.tags.CY && !entry.tags.C1) {
-			_changeAllTags(entry, 'CY', 'C1');
 		}
 		
 		if (ty == 'COMP'&& entry.tags.IS) {
