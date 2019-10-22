@@ -79,7 +79,7 @@ function scrape(doc, url) {
 			for (let author of authors) {
 				author = author.trim();
 				if (author === 'LSM.lv ziņu redakcija' || author === 'LETA' || author === 'BNS') {
-					item.creators.push({ lastName: author, creatorType: "author", fieldMode: true});
+					item.creators.push({ lastName: author, creatorType: "author", fieldMode: true });
 				} else {
 					// Zanda Ozola-Balode (Panorāma)
 					if (author.indexOf('(') > 0) {
@@ -134,7 +134,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 	
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
