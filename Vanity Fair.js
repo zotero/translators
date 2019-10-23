@@ -36,14 +36,20 @@
 	***** END LICENSE BLOCK *****
 */
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 function detectWeb(doc, _url) {
-	if (doc.querySelector('.component-search-results')) return 'multiple';
-	if (doc.querySelector('h5')) return 'magazineArticle';
-	if (doc.querySelector('article')) return 'blogPost';
+	// if (doc.querySelector('.component-search-results')) return 'multiple';
+	if (doc.querySelector('.content-header__rubric--issue-date')) return 'magazineArticle';
+	if (doc.querySelector('time.content-header__publish-date')) return 'blogPost';
 	return false;
 }
 
 function doWeb(doc, url) {
+	// eslint-disable-next-line:lines-around-comment
+	/* remove multiple scraping - Vanity Fair seems to detect headless browsers and gives a 402 error
 	if (detectWeb(doc, url) === 'multiple') {
 		let items = {};
 		for (let item of doc.querySelectorAll('.component-search-results .hed a')) {
@@ -55,8 +61,8 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
-	}
+	*/
+	scrape(doc, url);
 }
 
 function scrape(doc, url) {
@@ -64,22 +70,30 @@ function scrape(doc, url) {
 	let item = new Zotero.Item(itemType);
 	item.url = url;
 	item.attachments = [{ document: doc, title: 'Snapshot', type: 'text/html' }];
-	item.creators = [ZU.cleanAuthor(text('.author'), 'author')];
-	item.date = ZU.strToISO(text('time.publish-date').replace(/[0-9]{2}:[0-9]{2}.*/, ''));
+
+	let author = text('.byline__name');
+	if (author) item.creators = [ZU.cleanAuthor(author, 'author')];
+
+	let date = text('time.content-header__publish-date');
+	if (date) item.date = ZU.strToISO(date);
+
 	item.language = "en-US";
 	item.ISSN = "0733-8899";
+	item.title = text('h1');
 
+	let issue;
 	switch (itemType) {
 		case 'magazineArticle':
-			item.title = text('h1');
 			item.abstractNote = text('.dek');
-			item.issue = text('time.publish-date').replace(/\s.*/, '');
+
+			issue = text('.content-header__rubric--issue-date');
+			if (issue) item.issue = issue.replace(/\s.*/, '');
+
 			item.publicationTitle = "Vanity Fair";
 			item.tags = attr('meta[name="keywords"]', 'content').split(',').filter(tag => !tag.startsWith('_legacy_/'));
 			break;
 
 		case 'blogPost':
-			item.title = text('h1.hed');
 			item.blogTitle = "Vanity Fair Blogs";
 			break;
 
@@ -143,7 +157,6 @@ var testCases = [
 				"tags": [
 					{ "tag": "americans" },
 					{ "tag": "archive" },
-					{ "tag": "article" },
 					{ "tag": "magazine" },
 					{ "tag": "one percent" },
 					{ "tag": "society" },
@@ -157,7 +170,7 @@ var testCases = [
 					}
 				],
 				"url": "https://www.vanityfair.com/news/2011/05/top-one-percent-201105",
-				"date": "2011-05",
+				"date": "2011-03-31",
 				"ISSN": "0733-8899",
 				"issue": "May",
 				"language": "en-US",
@@ -167,11 +180,6 @@ var testCases = [
 				"accessDate": "CURRENT_TIMESTAMP"
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.vanityfair.com/search?query=dummkopf&sort=score+desc",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
