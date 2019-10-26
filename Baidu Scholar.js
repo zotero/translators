@@ -37,22 +37,25 @@
 
 
 // attr()/text() v2
+// eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('paperid=')>-1) {
+	if (url.includes('paperid=')) {
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('h3>a[href*="show?paperid="]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -68,7 +71,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -76,35 +79,36 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var dataUrl = attr(doc, 'i.reqdata', 'url');
 	var diversion = attr(doc, 'i.reqdata', 'diversion');
-	var sign = attr(doc, 'a.sc_q' , 'data-sign');
+	var sign = attr(doc, 'a.sc_q', 'data-sign');
 	var risUrl = "http://xueshu.baidu.com/u/citation?&url=" + encodeURIComponent(dataUrl) + "&sign=" + sign + "&diversion=" + diversion + "&t=ris";
-	var title = doc.title.replace('_百度学术', '')
+	var title = doc.title.replace('_百度学术', '');
 
-	var tags = []
-	doc.querySelectorAll('p.kw_main span a').forEach(e => tags.push(ZU.trimInternal(e.textContent)))
+	var tags = [];
+	doc.querySelectorAll('p.kw_main span a').forEach(e => tags.push(ZU.trimInternal(e.textContent)));
 
-	ZU.doGet(risUrl, function(ris) {
+	ZU.doGet(risUrl, function (ris) {
 		// Z.debug({ ris });
-		//delete parenthesis in pages information, e.g. SP  - 5-7(3)
+		// delete parenthesis in pages information, e.g. SP  - 5-7(3)
 		ris = ris.replace(/(SP\s+-\s\d+-\d+)\(\d+\)$/m, "$1");
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(ris);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item.url = dataUrl;
 			var doiLink = attr(doc, 'a.dl_item[data-url*="doi.org/"]', 'data-url');
 			if (!item.DOI && doiLink) {
-				item.DOI = doiLink.substr(doiLink.indexOf('doi.org/')+8);
+				item.DOI = doiLink.substr(doiLink.indexOf('doi.org/') + 8);
 			}
 			if (!item.abstractNote) {
 				item.abstractNote = text(doc, 'div.sc_abstract') || text(doc, 'p.abstract');
@@ -113,24 +117,24 @@ function scrape(doc, url) {
 				title: "Snapshot",
 				document: doc
 			});
-			item.tags = tags
+			item.tags = tags;
 			if (!item.title) {
-				item.title = title
+				item.title = title;
 			}
 			if (!item.creators || item.creators.length == 0) {
-				item.creators = []
-				doc.querySelectorAll('p.author_text a').forEach(e => {
-					item.creators.push(ZU.cleanAuthor(e.textContent, 'author', true))
-				})
+				item.creators = [];
+				doc.querySelectorAll('p.author_text a').forEach((e) => {
+					item.creators.push(ZU.cleanAuthor(e.textContent, 'author', true));
+				});
 			}
 			if (!item.publicationTitle) {
-				item.publicationTitle = attr(doc, 'a.journal_title', 'title')
+				item.publicationTitle = attr(doc, 'a.journal_title', 'title');
 			}
 			if (!item.date) {
-				item.date = ZU.trimInternal(text(doc, 'div.year_wr p.kw_main'))
+				item.date = ZU.trimInternal(text(doc, 'div.year_wr p.kw_main'));
 			}
 			if (!item.DOI) {
-				item.DOI = ZU.trimInternal(text(doc, 'div.doi_wr p.kw_main'))
+				item.DOI = ZU.trimInternal(text(doc, 'div.doi_wr p.kw_main'));
 			}
 
 			item.complete();
