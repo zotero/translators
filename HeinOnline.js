@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2018-12-11 01:06:37"
+	"lastUpdated": "2019-10-26 13:45:08"
 }
 
 /*
@@ -93,7 +93,12 @@ function translateRIS(ris, pdfURL) {
 		}
 		item.complete();
 	});
-	trans.translate();
+	trans.getTranslatorObject(function(transObject) {
+		transObject.options.fieldMap = {
+			VO: "volume"
+		};
+		transObject.doImport();
+	});
 }
 
 function translateCOinS(COinS) {
@@ -192,7 +197,7 @@ function doWeb (doc,url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp&men_tab=srchresults&set_as_cursor=8",
+		"url": "https://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp&men_tab=srchresults&set_as_cursor=8",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -208,7 +213,7 @@ var testCases = [
 				"libraryCatalog": "HeinOnline",
 				"pages": "38",
 				"publicationTitle": "International Financial Law Review",
-				"url": "http://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp",
+				"url": "https://heinonline.org/HOL/IFLPMetaData?type=article&id=53254&collection=iflp",
 				"volume": "26",
 				"attachments": [],
 				"tags": [],
@@ -219,12 +224,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://heinonline.org/HOL/LuceneSearch?terms=test&collection=all&searchtype=advanced&typea=text&tabfrom=&submit=Go&all=true",
+		"url": "https://heinonline.org/HOL/LuceneSearch?terms=test&collection=all&searchtype=advanced&typea=text&tabfrom=&submit=Go&all=true",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://heinonline.org/HOL/Page?handle=hein.journals/alterlj18&div=22&start_page=76&collection=journals&set_as_cursor=4&men_tab=srchresults",
+		"url": "https://heinonline.org/HOL/Page?handle=hein.journals/alterlj18&div=22&start_page=76&collection=journals&set_as_cursor=4&men_tab=srchresults",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -237,11 +242,13 @@ var testCases = [
 					}
 				],
 				"date": "1993",
+				"issue": "2",
 				"journalAbbreviation": "Alternative L.J.",
 				"language": "eng",
 				"libraryCatalog": "HeinOnline",
 				"pages": "76-85",
 				"publicationTitle": "Alternative Law Journal",
+				"url": "https://heinonline.org/HOL/P?h=hein.journals/alterlj18&i=80",
 				"volume": "18",
 				"attachments": [
 					{
