@@ -36,19 +36,22 @@
 	***************
 */
 
+// attr()/text() v2
+// eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+
 // Get any search results from current page
 // Used in detectWeb() and doWeb()
 function getSearchResults(doc) {
 	var results = doc.getElementsByClassName("lucene_search_result_b"),
 		items = {},
 		found = false;
-	for (var i=0, ilen=results.length; i<ilen; i++) {
+	for (var i = 0, ilen = results.length; i < ilen; i++) {
 		var url = getXPathStr("href", results[i], './/a[1]');
 
 		var title = getXPathStr("textContent", results[i], './/a[1]');
 		title = ZU.trimInternal(title);
-		//title = title.replace(/\s*\[[^\]]*\]$/, '');
+		// title = title.replace(/\s*\[[^\]]*\]$/, '');
 
 		if (!title || !url) continue;
 		
@@ -71,7 +74,7 @@ function extractQueryValues(url) {
 	ret.base = url.replace(/[a-zA-Z]+\?.*/, "");
 	var query = url.replace(/.*?\?/, "");
 	query = query.split("&");
-	for (var i=0,ilen=query.length;i<ilen;i++) {
+	for (var i = 0, ilen = query.length; i < ilen; i++) {
 		var pair = query[i].split("=");
 		ret[pair[0]] = pair[1];
 	}
@@ -81,7 +84,7 @@ function extractQueryValues(url) {
 // Not all pages have a downloadable PDF
 function translateRIS(ris, pdfURL) {
 	var trans = Zotero.loadTranslator('import');
-	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');//https://github.com/zotero/translators/blob/master/RIS.js
+	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');// https://github.com/zotero/translators/blob/master/RIS.js
 	trans.setString(ris);
 	trans.setHandler('itemDone', function (obj, item) {
 		if (pdfURL) {
@@ -93,7 +96,7 @@ function translateRIS(ris, pdfURL) {
 		}
 		item.complete();
 	});
-	trans.getTranslatorObject(function(transObject) {
+	trans.getTranslatorObject(function (transObject) {
 		transObject.options.fieldMap = {
 			VO: "volume"
 		};
@@ -125,29 +128,30 @@ function scrapePage(doc, url) {
 			+ "CitationFile?kind=ris&handle=" + docParams.handle
 			+ "&id=" + pageID
 			+ "&base=js";
-		ZU.doGet(risURL, function(ris) {
+		ZU.doGet(risURL, function (ris) {
 			// the PDF URL gives us a page that will refresh itself to the PDF.
 			var pdfPageURL = attr(doc, '[data-original-title*="Download PDF"]', 'href');
 			if (pdfPageURL) {
 				pdfPageURL = docParams.base + pdfPageURL;
 				// Z.debug(pdfPageURL)
-				ZU.doGet(pdfPageURL, function(pdfPage) {
-								// Call to pdfPageURL prepares PDF for download via META refresh URL
-								var pdfURL = null;
-								var m = pdfPage.match(/<META.*URL=\"([^"]+)/);
-								// Z.debug(pdfPage)
-								// Z.debug(m)
-								if (m) {
-									pdfURL = docParams.base + m[1];
-								}
-								translateRIS(ris, pdfURL);
-							} , null );
+				ZU.doGet(pdfPageURL, function (pdfPage) {
+					// Call to pdfPageURL prepares PDF for download via META refresh URL
+					var pdfURL = null;
+					var m = pdfPage.match(/<META.*URL="([^"]+)/);
+					// Z.debug(pdfPage)
+					// Z.debug(m)
+					if (m) {
+						pdfURL = docParams.base + m[1];
+					}
+					translateRIS(ris, pdfURL);
+				}, null);
 			}
 			else {
 				translateRIS(ris);
 			}
-		} , null );
-	} else {
+		}, null);
+	}
+	else {
 		// No RIS available in page, try COinS
 		var COinS = getXPathStr("title", doc, '//span[contains(@class, "Z3988")]');
 		if (COinS) {
@@ -162,25 +166,25 @@ function scrapePage(doc, url) {
 	*********
 */
 
-function detectWeb (doc, url) {
+function detectWeb(doc, url) {
 	var COinS = getXPathStr("title", doc, '//span[contains(@class, "Z3988")]');
 	var RIS = getXPathStr("href", doc, '//form[@id="pagepicker"]//a[contains(@href, "PrintRequest")][1]');
-	if (url.indexOf("/LuceneSearch?") > -1) {
+	if (url.includes("/LuceneSearch?")) {
 		if (getSearchResults(doc)) {
 			return "multiple";
 		}
-	} else if (COinS || RIS) {
-		return "journalArticle"
+	}
+	else if (COinS || RIS) {
+		return "journalArticle";
 	}
 	return false;
 }
 
-function doWeb (doc,url) {
-	if (detectWeb(doc,url) === "multiple") {
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
-
 			if (!items) {
-				return true;
+				return;
 			}
 			var urls = [];
 			for (var i in items) {
@@ -188,7 +192,8 @@ function doWeb (doc,url) {
 			}
 			ZU.processDocuments(urls, scrapePage);
 		});
-	} else {
+	}
+	else {
 		scrapePage(doc, url);
 	}
 }
