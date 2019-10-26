@@ -123,7 +123,7 @@ function parseJSON(text) {
 
 		var version = data.accessionversion.match(/\.(\d{1,2})$/);
 		if (version && version[1] != '1') {
-			item.extra += "\nversion: " + version[1];
+			item.extra += "\nVersion: " + version[1];
 		}
 
 		item.url = "http://www.ncbi.nlm.nih.gov/nuccore/" + encodeURIComponent(data.accessionversion);
@@ -201,7 +201,7 @@ var testCases = [
 				"archive": "NCBI Nucleotide Database",
 				"archiveLocation": "665390239",
 				"callNumber": "NM_078524.4",
-				"extra": "type: dataset\nversion: 4",
+				"extra": "type: dataset\nVersion: 4",
 				"language": "en-US",
 				"libraryCatalog": "NCBI Nucleotide",
 				"rights": "Public domain",
