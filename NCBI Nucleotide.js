@@ -119,7 +119,7 @@ function parseJSON(text) {
 		item.archiveLocation = uid;
 
 		// indicate that this is in fact a dataset
-		item.extra = "type: dataset";
+		item.extra = "Type: dataset";
 
 		var version = data.accessionversion.match(/\.(\d{1,2})$/);
 		if (version && version[1] != '1') {
@@ -168,7 +168,7 @@ var testCases = [
 				"archive": "NCBI Nucleotide Database",
 				"archiveLocation": "270186",
 				"callNumber": "I01425.1",
-				"extra": "type: dataset",
+				"extra": "Type: dataset",
 				"language": "en-US",
 				"libraryCatalog": "NCBI Nucleotide",
 				"rights": "Public domain",
@@ -201,7 +201,7 @@ var testCases = [
 				"archive": "NCBI Nucleotide Database",
 				"archiveLocation": "665390239",
 				"callNumber": "NM_078524.4",
-				"extra": "type: dataset\nVersion: 4",
+				"extra": "Type: dataset\nVersion: 4",
 				"language": "en-US",
 				"libraryCatalog": "NCBI Nucleotide",
 				"rights": "Public domain",

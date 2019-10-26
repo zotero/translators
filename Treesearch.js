@@ -43,7 +43,7 @@ function parseSource(sourceStr) {
 		/^(.*[^.])\.?\s+(\d+\w?)(?:\((\d+)\))?:\s*(\w?\d+(?:-\w?\d+)?)(?:\.?\s+\[[^\]]+\])?\s*\.?$/);
 	if (matches) {
 		return {
-			type: 'journalArticle',
+			Type: 'journalArticle',
 			publicationTitle: matches[1],
 			volume: matches[2],
 			issue: matches[3],
@@ -55,14 +55,14 @@ function parseSource(sourceStr) {
 			// book section
 			matches = sourceStr.match(/\d+-\d+/);
 			return {
-				type: 'bookSection',
+				Type: 'bookSection',
 				pages: matches ? matches[0] : null
 			};
 		}
 
 		matches = sourceStr.match(/\.\s+(\d+)\s+p\./);
 		return {
-			type: 'book',
+			Type: 'book',
 			numPages: matches ? matches[1] : null
 		};
 	}
