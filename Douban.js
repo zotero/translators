@@ -56,137 +56,133 @@ function trimTags(text) {
 	return text.replace(/(<.*?>)/g, "");
 }
 
-function trimMultispace(text) {
-	return text.replace(/\n\s+/g, "\n");
-}
-
 // #############################
 // ##### Scraper functions #####
 // #############################
 
 function scrapeAndParse(doc, url) {
 	// Z.debug({ url })
-Zotero.Utilities.HTTP.doGet(url, function(page){
-	//Z.debug(page)
-	var pattern;
+	Zotero.Utilities.HTTP.doGet(url, function (page) {
+		// Z.debug(page)
+		var pattern;
 
-	// 类型 & URL
-	var itemType = "book";
-	var newItem = new Zotero.Item(itemType);
-//	Zotero.debug(itemType);
-	newItem.url = url;
+		// 类型 & URL
+		var itemType = "book";
+		var newItem = new Zotero.Item(itemType);
+		// Zotero.debug(itemType);
+		newItem.url = url;
 
-	// 标题
-	pattern = /<h1>([\s\S]*?)<\/h1>/;
-	if (pattern.test(page)) {
-		var title = pattern.exec(page)[1];
-		newItem.title = Zotero.Utilities.trim(trimTags(title));
-//		Zotero.debug("title: "+title);
-	}
+		// 标题
+		pattern = /<h1>([\s\S]*?)<\/h1>/;
+		if (pattern.test(page)) {
+			var title = pattern.exec(page)[1];
+			newItem.title = Zotero.Utilities.trim(trimTags(title));
+			// Zotero.debug("title: "+title);
+		}
 
-	// 又名
-	pattern = /<span [^>]*?>又名:(.*?)<\/span>/;
-	if (pattern.test(page)) {
-		var shortTitle = pattern.exec(page)[1];
-		newItem.shortTitle = Zotero.Utilities.trim(shortTitle);
-//		Zotero.debug("shortTitle: "+shortTitle);
-	}
+		// 又名
+		pattern = /<span [^>]*?>又名:(.*?)<\/span>/;
+		if (pattern.test(page)) {
+			var shortTitle = pattern.exec(page)[1];
+			newItem.shortTitle = Zotero.Utilities.trim(shortTitle);
+			// Zotero.debug("shortTitle: "+shortTitle);
+		}
 
-	// 作者
+		// 作者
 
-	page = page.replace(/\n/g, "")
-	//Z.debug(page)
-	pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
-	if (pattern.test(page)) {
-		var authorNames = trimTags(pattern.exec(page)[1]);
-		pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
-		authorNames = authorNames.replace(pattern, "").split("/");
-//		Zotero.debug(authorNames);
-		for (var i=0; i<authorNames.length; i++) {
-			var useComma = true;
-			pattern = /[A-Za-z]/;
-			if (pattern.test(authorNames[i])) {
+		page = page.replace(/\n/g, "");
+		// Z.debug(page)
+		pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
+		if (pattern.test(page)) {
+			var authorNames = trimTags(pattern.exec(page)[1]);
+			pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
+			authorNames = authorNames.replace(pattern, "").split("/");
+			// Zotero.debug(authorNames);
+			for (let i = 0; i < authorNames.length; i++) {
+				let useComma = true;
+				pattern = /[A-Za-z]/;
+				if (pattern.test(authorNames[i])) {
 				// 外文名
-				pattern = /,/;
-				if (!pattern.test(authorNames[i])) {
+					pattern = /,/;
+					if (!pattern.test(authorNames[i])) {
+						useComma = false;
+					}
+				}
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(
+					Zotero.Utilities.trim(authorNames[i]),
+					"author", useComma));
+			}
+		}
+
+		// 译者
+		pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
+		if (pattern.test(page)) {
+			var translatorNames = trimTags(pattern.exec(page)[1]);
+			pattern = /(\[.*?\])/g;
+			translatorNames = translatorNames.replace(pattern, "").split("/");
+			//		Zotero.debug(translatorNames);
+			for (let i = 0; i < translatorNames.length; i++) {
+				let useComma = true;
+				pattern = /[A-Za-z]/;
+				if (pattern.test(translatorNames[i])) {
+				// 外文名
 					useComma = false;
 				}
+				newItem.creators.push(Zotero.Utilities.cleanAuthor(
+					Zotero.Utilities.trim(translatorNames[i]),
+					"translator", useComma));
 			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(
-				Zotero.Utilities.trim(authorNames[i]),
-				"author", useComma));
 		}
-	}
 
-	// 译者
-	pattern = /<span>\s*<span [^>]*?>\s*译者<\/span>:(.*?)<\/span>/;
-	if (pattern.test(page)) {
-		var translatorNames = trimTags(pattern.exec(page)[1]);
-		pattern = /(\[.*?\])/g;
-		translatorNames = translatorNames.replace(pattern, "").split("/");
-//		Zotero.debug(translatorNames);
-		for (var i=0; i<translatorNames.length; i++) {
-			var useComma = true;
-			pattern = /[A-Za-z]/;
-			if (pattern.test(translatorNames[i])) {
-				// 外文名
-				useComma = false;
-			}
-			newItem.creators.push(Zotero.Utilities.cleanAuthor(
-				Zotero.Utilities.trim(translatorNames[i]),
-				"translator", useComma));
+		// ISBN
+		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var isbn = pattern.exec(page)[1];
+			newItem.ISBN = Zotero.Utilities.trim(isbn);
+			// Zotero.debug("isbn: "+isbn);
 		}
-	}
 
-	// ISBN
-	pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
-	if (pattern.test(page)) {
-		var isbn = pattern.exec(page)[1];
-		newItem.ISBN = Zotero.Utilities.trim(isbn);
-//		Zotero.debug("isbn: "+isbn);
-	}
+		// 页数
+		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var numPages = pattern.exec(page)[1];
+			newItem.numPages = Zotero.Utilities.trim(numPages);
+			// Zotero.debug("numPages: "+numPages);
+		}
 
-	// 页数
-	pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
-	if (pattern.test(page)) {
-		var numPages = pattern.exec(page)[1];
-		newItem.numPages = Zotero.Utilities.trim(numPages);
-//		Zotero.debug("numPages: "+numPages);
-	}
+		// 出版社
+		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var publisher = pattern.exec(page)[1];
+			newItem.publisher = Zotero.Utilities.trim(publisher);
+			// Zotero.debug("publisher: "+publisher);
+		}
 
-	// 出版社
-	pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
-	if (pattern.test(page)) {
-		var publisher = pattern.exec(page)[1];
-		newItem.publisher = Zotero.Utilities.trim(publisher);
-//		Zotero.debug("publisher: "+publisher);
-	}
+		// 丛书
+		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var series = trimTags(pattern.exec(page)[1]);
+			newItem.series = Zotero.Utilities.trim(series);
+			// Zotero.debug("series: "+series);
+		}
 
-	// 丛书
-	pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
-	if (pattern.test(page)) {
-		var series = trimTags(pattern.exec(page)[1]);
-		newItem.series = Zotero.Utilities.trim(series);
-//		Zotero.debug("series: "+series);
-	}
+		// 出版年
+		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
+		if (pattern.test(page)) {
+			var date = pattern.exec(page)[1];
+			newItem.date = Zotero.Utilities.trim(date);
+			// Zotero.debug("date: "+date);
+		}
 
-	// 出版年
-	pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
-	if (pattern.test(page)) {
-		var date = pattern.exec(page)[1];
-		newItem.date = Zotero.Utilities.trim(date);
-//		Zotero.debug("date: "+date);
-	}
+		// 简介
+		var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div//a');
+		for (let i in tags) {
+			newItem.tags.push(tags[i].textContent);
+		}
+		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
 
-	// 简介
-	var tags = ZU.xpath(doc, '//div[@id="db-tags-section"]/div//a');
-	for (i in tags){
-		newItem.tags.push(tags[i].textContent)
-	}
-	newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p')
-
-	newItem.complete();
-});
+		newItem.complete();
+	});
 }
 // #########################
 // ##### API functions #####
@@ -197,33 +193,32 @@ function detectWeb(doc, url) {
 
 	if (pattern.test(url)) {
 		return "multiple";
-	} else {
+	}
+	else {
 		return "book";
 	}
-
-	return false;
 }
 
 function doWeb(doc, url) {
-	var articles = new Array();
-	let r = /douban.com\/url\//
+	var articles = [];
+	let r = /douban.com\/url\//;
 	if (detectWeb(doc, url) == "multiple") {
 		// also searches but they don't work as test cases in Scaffold
 		// e.g. https://book.douban.com/subject_search?search_text=Murakami&cat=1001
 		var items = {};
 		var titles = ZU.xpath(doc, '//div[@class="title"]/a');
 		var title;
-		for (let i = 0; i < titles.length; i++){
+		for (let i = 0; i < titles.length; i++) {
 			title = titles[i];
-			//Zotero.debug({ href: title.href, title: title.textContent });
+			// Zotero.debug({ href: title.href, title: title.textContent });
 			if (r.test(title.href)) { // Ignore links
-				continue
+				continue;
 			}
 			items[title.href] = title.textContent;
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			for (var i in items) {
 				articles.push(i);
@@ -231,7 +226,7 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
 		});
 	}
- 	else {
+	else {
 		scrapeAndParse(doc, url);
 	}
 }
