@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-24 02:38:30"
+	"lastUpdated": "2019-10-28 02:10:06"
 }
 
 /*
@@ -40,7 +40,8 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/content/doi/')) {
+	// ensure that we only detect on items where Scrape will (most likely) work
+	if (url.includes('/content/doi/') && (url.search(/\/(10\.[^#?/]+\/[^#?/]+)\//) != -1 || url.includes("/full"))) {
 		if (attr(doc, 'meta[name="dc.Type"]', 'content') == "book-part") {
 			return "bookSection";
 		}
@@ -62,12 +63,8 @@ function getSearchResults(doc, url, checkOnly) {
 		rows = doc.querySelectorAll('h2>a.intent_link');
 	}
 	else {
-		// journal issue
-		rows = doc.querySelectorAll('.intent_issue_item h4>a');
-		if (!rows.length) {
-			// book
-			rows = doc.querySelectorAll('li.intent_book_chapter>a');
-		}
+		// journal issue or books,
+		rows = doc.querySelectorAll('.intent_issue_item h4>a, li.intent_book_chapter>a');
 	}
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
@@ -101,19 +98,34 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var DOI = url.match(/\/(10\.[^#?/]+\/[^#?/]+)\//)[1];
-	var risURL = "/insight/content/doi/" + DOI + "/full/ris";
+	var DOI = url.match(/\/(10\.[^#?/]+\/[^#?/]+)\//);
+	var risURL;
+	if (DOI) {
+		risURL = "/insight/content/doi/" + DOI[1] + "/full/ris";
+	}
+	else {
+		Z.debug("can't find DOI, trying alternative approach for risURL");
+		risURL = url.replace(/\/full.*/, "/full/ris");
+	}
 	// Z.debug(risURL);
-	var pdfURL = attr(doc, 'a.intent_pdf_link', 'href');
+	
+	var pdfURL;
+	// make this works on PDF pages
+	if (url.includes("full/pdf?")) {
+		pdfURL = url;
+	}
+	else {
+		pdfURL = attr(doc, 'a.intent_pdf_link', 'href');
+	}
+
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function (text) {
 		// they number authors in their RIS...
 		text = text.replace(/A\d+\s+-/g, "AU  -");
-		// add a comma after the last name
-		text = text.replace(/AU\s\s-\s(\w+)/g, "AU  - $1,");
-		// Z.debug(text);
-		
+
+		var abstract = doc.getElementById('abstract');
 		var translator = Zotero.loadTranslator("import");
+		var tags = doc.querySelectorAll('li .intent_text');
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
@@ -129,6 +141,25 @@ function scrape(doc, url) {
 					title: "Snapshot",
 					document: doc
 				});
+			}
+			
+			for (let tag of tags) {
+				item.tags.push(tag.textContent);
+			}
+			// authors are in RIS as lastname firstname(s), though not necessarily correctly so
+			// trying to correct for this
+			for (let i = 0; i < item.creators.length; i++) {
+				if (!item.creators[i].firstName && item.creators[i].lastName.includes(" ")) {
+					item.creators[i].firstName = item.creators[i].lastName.match(/^\w+\s+(.+)/)[1];
+					item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
+					delete item.creators[i].fieldMode;
+				}
+			}
+			if (item.date) {
+				item.date = ZU.strToISO(item.date);
+			}
+			if (abstract) {
+				item.abstractNote = ZU.trimInternal(abstract.textContent).replace(/^Abstract\s*/, "");
 			}
 			item.complete();
 		});
