@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-28 02:10:06"
+	"lastUpdated": "2019-10-29 01:43:27"
 }
 
 /*
@@ -40,7 +40,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	// ensure that we only detect on items where Scrape will (most likely) work
+	// ensure that we only detect where scrape will (most likely) work
 	if (url.includes('/content/doi/') && (url.search(/\/(10\.[^#?/]+\/[^#?/]+)\//) != -1 || url.includes("/full"))) {
 		if (attr(doc, 'meta[name="dc.Type"]', 'content') == "book-part") {
 			return "bookSection";
@@ -179,24 +179,24 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Morris",
-						"firstName": "Meghan D.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Meghan D."
 					},
 					{
 						"lastName": "Brown",
-						"firstName": "Brandon",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Brandon"
 					},
 					{
 						"lastName": "Allen",
-						"firstName": "Scott A.",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Scott A."
 					}
 				],
-				"date": "January 1, 2017",
+				"date": "2017-01-01",
 				"DOI": "10.1108/IJPH-07-2016-0028",
 				"ISSN": "1744-9200",
-				"abstractNote": "Purpose Worldwide efforts to identify individuals infected with the hepatitis C virus (HCV) focus almost exclusively on community healthcare systems, thereby failing to reach high-risk populations and those with poor access to primary care. In the USA, community-based HCV testing policies and guidelines overlook correctional facilities, where HCV rates are believed to be as high as 40 percent. This is a missed opportunity: more than ten million Americans move through correctional facilities each year. Herein, the purpose of this paper is to examine HCV testing practices in the US correctional system, California and describe how universal opt-out HCV testing could expand early HCV detection, improve public health in correctional facilities and communities, and prove cost-effective over time.Design/methodology/approach A commentary on the value of standardizing screening programs across facilities by mandating all facilities (universal) to implement opt-out testing policies for all prisoners upon entry to the correctional facilities.Findings Current variability in facility-level testing programs results in inconsistent testing levels across correctional facilities, and therefore makes estimating the actual number of HCV-infected adults in the USA difficult. The authors argue that universal opt-out testing policies ensure earlier diagnosis of HCV among a population most affected by the disease and is more cost-effective than selective testing policies.Originality/value The commentary explores the current limitations of selective testing policies in correctional systems and provides recommendations and implications for public health and correctional organizations.",
+				"abstractNote": "Purpose Worldwide efforts to identify individuals infected with the hepatitis C virus (HCV) focus almost exclusively on community healthcare systems, thereby failing to reach high-risk populations and those with poor access to primary care. In the USA, community-based HCV testing policies and guidelines overlook correctional facilities, where HCV rates are believed to be as high as 40 percent. This is a missed opportunity: more than ten million Americans move through correctional facilities each year. Herein, the purpose of this paper is to examine HCV testing practices in the US correctional system, California and describe how universal opt-out HCV testing could expand early HCV detection, improve public health in correctional facilities and communities, and prove cost-effective over time. Design/methodology/approach A commentary on the value of standardizing screening programs across facilities by mandating all facilities (universal) to implement opt-out testing policies for all prisoners upon entry to the correctional facilities. Findings Current variability in facility-level testing programs results in inconsistent testing levels across correctional facilities, and therefore makes estimating the actual number of HCV-infected adults in the USA difficult. The authors argue that universal opt-out testing policies ensure earlier diagnosis of HCV among a population most affected by the disease and is more cost-effective than selective testing policies. Originality/value The commentary explores the current limitations of selective testing policies in correctional systems and provides recommendations and implications for public health and correctional organizations.",
 				"issue": "3/4",
 				"libraryCatalog": "Emerald Insight",
 				"pages": "192-199",
@@ -209,7 +209,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "California"
+					},
+					{
+						"tag": "Criminal justice system"
+					},
+					{
+						"tag": "Epidemiology"
+					},
+					{
+						"tag": "HCV testing"
+					},
+					{
+						"tag": "Hepatitis C virus (HCV)"
+					},
+					{
+						"tag": "Public health"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -230,18 +249,18 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Menk",
-						"firstName": "K. Bryan",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "K. Bryan"
 					},
 					{
 						"lastName": "Malone",
-						"firstName": "Stephanie",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "Stephanie"
 					}
 				],
-				"date": "January 1, 2015",
+				"date": "2015-01-01",
 				"ISBN": "9781784415877 9781784415884",
-				"abstractNote": "AbstractOriginality/value\nThis technique creates opportunities for students to have unique assignments encouraging student to student teaching and can be applied to assignments in any accounting course (undergraduate and graduate). This testing method has been used in Intermediate I and II, Individual Taxation, and Corporate Taxation.",
+				"abstractNote": "Originality/value This technique creates opportunities for students to have unique assignments encouraging student to student teaching and can be applied to assignments in any accounting course (undergraduate and graduate). This testing method has been used in Intermediate I and II, Individual Taxation, and Corporate Taxation.",
 				"bookTitle": "Advances in Accounting Education: Teaching and Curriculum Innovations",
 				"extra": "DOI: 10.1108/S1085-462220150000016007",
 				"libraryCatalog": "Emerald Insight",
@@ -256,7 +275,17 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Accounting education"
+					},
+					{
+						"tag": "Tax"
+					},
+					{
+						"tag": "Testing procedures"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
