@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-10-30 09:22:20"
+	"lastUpdated": "2019-10-30 14:10:40"
 }
 
 /*
@@ -289,6 +289,7 @@ function getAttachments(doc, item) {
 	// Z.debug('pdf' + pdfurl);
 	// Z.debug('caj' + cajurl);
 	var loginUser = ZU.xpath(doc, "//input[@id='loginuserid']");
+	// Z.debug(doc.body.innerHTML);
 	// Z.debug(loginUser[0].value);
 	// Z.debug(loginUser.length);
 	if (loginUser.length && loginUser[0].value) { 
@@ -410,7 +411,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&uid=WEEvREcwSlJHSldRa1FhdXNXaEhobmc3WGN3MjRrc1RnZWJhQ1d2YUZSdz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!&v=MDc4NDZPZVorZHBGaURoVkx6SlZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
+		"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&v=MDc3ODZPZVorVnZGQ3ZrV3JyT1ZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -428,7 +429,7 @@ var testCases = [
 				"libraryCatalog": "CNKI",
 				"thesisType": "硕士",
 				"university": "南京农业大学",
-				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&uid=WEEvREcwSlJHSldRa1FhdXNXaEhobmc3WGN3MjRrc1RnZWJhQ1d2YUZSdz0=$9A4hF_YAuvQ5obgVAqNKPCYcEjKensW4IQMovwHtwkF4VYPoHbKxJw!!&v=MDc4NDZPZVorZHBGaURoVkx6SlZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
+				"url": "https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFD201701&filename=1017045605.nh&v=MDc3ODZPZVorVnZGQ3ZrV3JyT1ZGMjZHYk84RzlmTXFwRWJQSVI4ZVgxTHV4WVM3RGgxVDNxVHJXTTFGckNVUkw=",
 				"attachments": [
 					{
 						"title": "黄瓜共表达基因模块的识别及其特点分析",
