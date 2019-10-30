@@ -1,7 +1,7 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius",
+	"creator": "lin xingzhong",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-10-18 02:21:15"
+	"lastUpdated": "2019-10-30 09:22:20"
 }
 
 /*
@@ -288,12 +288,10 @@ function getAttachments(doc, item) {
 	var cajurl = getCAJ(doc, item.itemType);
 	// Z.debug('pdf' + pdfurl);
 	// Z.debug('caj' + cajurl);
-	// login or not
-	var logged = ZU.xpath(doc, "//div[@id='Ecp_top_logout']")[0];
-
-	// get pdf or caj after you login
-	// this element will display after login
-	if (logged.style.display != 'none') {
+	var loginUser = ZU.xpath(doc, "//input[@id='loginuserid']");
+	// Z.debug(loginUser[0].value);
+	// Z.debug(loginUser.length);
+	if (loginUser.length && loginUser[0].value) { 
 		if (pdfurl) {
 			attachments.push({
 				title: "Full Text PDF",
@@ -356,7 +354,6 @@ var testCases = [
 				"date": "2014",
 				"ISSN": "1000-8713",
 				"abstractNote": "来自中药的水溶性多糖具有广谱治疗和低毒性特点,是天然药物及保健品研发中的重要组成部分。针对中药多糖结构复杂、难以表征的问题,本文以中药黄芪中的多糖为研究对象,采用\"自下而上\"法完成对黄芪多糖的表征。首先使用部分酸水解方法水解黄芪多糖,分别考察了水解时间、酸浓度和温度的影响。在适宜条件(4 h、1.5mol/L三氟乙酸、80℃)下,黄芪多糖被水解为特征性的寡糖片段。接下来,采用亲水作用色谱与质谱联用对黄芪多糖部分酸水解产物进行分离和结构表征。结果表明,提取得到的黄芪多糖主要为1→4连接线性葡聚糖,水解得到聚合度4~11的葡寡糖。本研究对其他中药多糖的表征具有一定的示范作用。",
-				"extra": "CN 21-1185/O6",
 				"issue": "12",
 				"language": "中文;",
 				"libraryCatalog": "CNKI",
@@ -369,10 +366,6 @@ var testCases = [
 						"title": "基于部分酸水解-亲水作用色谱-质谱的黄芪多糖结构表征",
 						"mimeType": "text/html",
 						"snapshot": true
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -441,10 +434,6 @@ var testCases = [
 						"title": "黄瓜共表达基因模块的识别及其特点分析",
 						"mimeType": "text/html",
 						"snapshot": true
-					},
-					{
-						"title": "Full Text CAJ",
-						"mimeType": "application/caj"
 					}
 				],
 				"tags": [
