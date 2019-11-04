@@ -9,8 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-12-03 04:20:33"
+	"lastUpdated": "2019-11-04 02:31:27"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Sebastian Karcher
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 /*
 The various types of Google Books URLs are:
@@ -44,45 +66,46 @@ var singleRe = /^https?:\/\/(?:books|www|play)\.google\.[a-z]+(?:\.[a-z]+)?(?:\/
 function detectWeb(doc, url) {
 	if (singleRe.test(url)) {
 		return "book";
-	} else {
+	}
+	else {
 		return "multiple";
 	}
 }
 
 var itemUrlBase;
 function doWeb(doc, url) {
-	
 	// get local domain suffix
-	var psRe = new RegExp("https?://(books|www|play)\.google\.([^/]+)/");
+	var psRe = new RegExp("https?://(books|www|play).google.([^/]+)/");
 	var psMatch = psRe.exec(url);
 	var suffix = psMatch[2];
-	var prefix = "books"; //Where is it not books? psMatch[1];
 	itemUrlBase = "/books?id=";
 	
 	var m = singleRe.exec(url);
 	if (m && m[1] == "id") {
-		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
-	} else if (m && m[1] == "vid") {
+		ZU.doGet("//books.google.com/books/feeds/volumes/" + m[2], parseXML);
+	}
+	else if (m && m[1] == "vid") {
 		var itemLinkWithID = ZU.xpath(doc, '/html/head/link[@rel="canonical"]')[0].href;
-		var m = singleRe.exec(itemLinkWithID);
-		ZU.doGet("//books.google.com/books/feeds/volumes/"+m[2], parseXML);
-	} else {
+		m = singleRe.exec(itemLinkWithID);
+		ZU.doGet("//books.google.com/books/feeds/volumes/" + m[2], parseXML);
+	}
+	else {
 		var items = getItemArrayGB(doc, doc, 'google\\.' + suffix + '/books\\?id=([^&]+)', '^(?:All matching pages|About this Book|Table of Contents|Index)');
 		// Drop " - Page" thing
-		for (var i in items) {
+		for (let i in items) {
 			items[i] = items[i].replace(/- Page [0-9]+\s*$/, "");
 		}
-		Zotero.selectItems(items, function(items) {
+		Zotero.selectItems(items, function (items) {
 			if (!items) Z.done();
 			var baseurl = url.match(psRe)[0];
 			var newUris = [];
-			for (var i in items) {
-				//the singleRe has the full URL - we may only be getting the URL w/o host correct for that.
-				if (i.search(psRe)===-1){
+			for (let i in items) {
+				// the singleRe has the full URL - we may only be getting the URL w/o host correct for that.
+				if (i.search(psRe) === -1) {
 					i = baseurl.replace(/\/$/, "") + i;
 				}
 				var m = singleRe.exec(i);
-				newUris.push("//books.google.com/books/feeds/volumes/"+m[2]);
+				newUris.push("//books.google.com/books/feeds/volumes/" + m[2]);
 			}
 			ZU.doGet(newUris, parseXML);
 		});
@@ -90,27 +113,28 @@ function doWeb(doc, url) {
 }
 	
 function parseXML(text) {
-	//Z.debug(text)
+	// Z.debug(text)
 	// Remove xml parse instruction and doctype
 	var parser = new DOMParser();
 	var xml = parser.parseFromString(text, "text/xml").documentElement;
 	
-	var ns = {"dc":"http://purl.org/dc/terms",
-		"atom":"http://www.w3.org/2005/Atom"};
+	var ns = { dc: "http://purl.org/dc/terms",
+		atom: "http://www.w3.org/2005/Atom" };
 		
 	var newItem = new Zotero.Item("book");
 	
 	var authors = ZU.xpath(xml, "dc:creator", ns);
-	for (var i in authors) {
-		newItem.creators.push(Zotero.Utilities.cleanAuthor(authors[i].textContent, "author"));
+	for (let author of authors) {
+		newItem.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 	}
 	
 	var pages = ZU.xpathText(xml, "dc:format", ns);
 	const pagesRe = /(\d+)( pages)/;
 	var pagesMatch = pagesRe.exec(pages);
-	if (pagesMatch!=null) {
+	if (pagesMatch !== null) {
 		newItem.numPages = pagesMatch[1];
-	} else {
+	}
+	else {
 		newItem.numPages = pages;
 	}
 	
@@ -119,17 +143,17 @@ function parseXML(text) {
 	const ISBN13Re = /(?:ISBN:)(\w{13})$/;
 	const booksIDRe = /^(\w{12})$/;
 	var identifiers = ZU.xpath(xml, "dc:identifier", ns);
-	for (var i in identifiers) {
-		var ISBN10Match = ISBN10Re.exec(identifiers[i].textContent);
-		var ISBN13Match = ISBN13Re.exec(identifiers[i].textContent);
-		var booksIDMatch = booksIDRe.exec(identifiers[i].textContent);
-		if (ISBN10Match != null) {
+	for (let identifier of identifiers) {
+		var ISBN10Match = ISBN10Re.exec(identifier.textContent);
+		var ISBN13Match = ISBN13Re.exec(identifier.textContent);
+		var booksIDMatch = booksIDRe.exec(identifier.textContent);
+		if (ISBN10Match !== null) {
 			ISBN = ISBN10Match[1];
 		}
-		if (ISBN13Match != null) {
+		if (ISBN13Match !== null) {
 			ISBN = ISBN13Match[1];
 		}
-		if (booksIDMatch != null) {
+		if (booksIDMatch !== null) {
 			newItem.extra = "Google-Books-ID: " + booksIDMatch[1];
 		}
 	}
@@ -142,11 +166,11 @@ function parseXML(text) {
 	newItem.date = ZU.xpathText(xml, "dc:date", ns);
 
 	var url = itemUrlBase + identifiers[0].textContent;
-	newItem.attachments = [{title:"Google Books Link", snapshot:false, mimeType:"text/html", url:url}];
+	newItem.attachments = [{ title: "Google Books Link", snapshot: false, mimeType: "text/html", url: url }];
 	
 	var subjects = ZU.xpath(xml, 'dc:subject', ns);
-	for (var i in subjects) {
-		newItem.tags.push(subjects[i].textContent);
+	for (let subject of subjects) {
+		newItem.tags.push(subject.textContent);
 	}
 	
 	newItem.complete();
@@ -162,29 +186,29 @@ function parseXML(text) {
  * @return {Object} Associative array of link => textContent pairs, suitable for passing to
  *	Zotero.selectItems from within a translator
  */
-function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
-	
-	var availableItems = new Object();	// Technically, associative arrays are objects
+function getItemArrayGB(doc, inHere, urlRe, rejectRe) {
+	var availableItems = {};	// Technically, associative arrays are objects
 
-	//quick check for new format
-	//As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
+	// quick check for new format
+	// As of 09/23/2015 I only see the last of these options, but leaving the others in for now to be safe.
 	var bookList = ZU.xpath(doc, '//*[@id="rso"]/li|//*[@id="rso"]/div/li|//*[@id="rso"]/div/div[@class="g"]');
+	var link, title;
 	if (bookList.length) {
-		Z.debug("newFormat")
-		for (var i=0, n=bookList.length; i<n; i++) {
-			var link = ZU.xpathText(bookList[i], './/h3[@class="r"]/a/@href');
-			var title = ZU.xpathText(bookList[i], './/h3[@class="r"]/a');
+		Z.debug("newFormat");
+		for (let i = 0; i < bookList.length; i++) {
+			link = ZU.xpathText(bookList[i], './/h3[@class="r"]/a/@href');
+			title = ZU.xpathText(bookList[i], './/h3[@class="r"]/a');
 			if (link && title) {
 				availableItems[link] = title;
 			}
 		}
 		return availableItems;
 	}
-	var altformat = ZU.xpath(doc, '//div[@class="rsiwrapper"]//a[@class="primary"]' )
-	if (altformat.length){
-		for (var i=0, n=altformat.length; i<n; i++) {
-			var link = ZU.xpathText(altformat[i], './@href');
-			var title = altformat[i].textContent;
+	var altformat = ZU.xpath(doc, '//div[@class="rsiwrapper"]//a[@class="primary"]');
+	if (altformat.length) {
+		for (var i = 0, n = altformat.length; i < n; i++) {
+			link = ZU.xpathText(altformat[i], './@href');
+			title = altformat[i].textContent;
 			if (link && title) {
 				availableItems[link] = title;
 			}
@@ -193,9 +217,9 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	}
 	var googleplay = ZU.xpath(doc, '//div[contains(@class, "details")]//a[@class="title"]');
 	if (googleplay.length) {
-		for (var i=0, n=googleplay.length; i<n; i++) {
-			var link = ZU.xpathText(googleplay[i], './@href');
-			var title = googleplay[i].textContent;
+		for (let i = 0; i < googleplay.length; i++) {
+			link = ZU.xpathText(googleplay[i], './@href');
+			title = googleplay[i].textContent;
 			if (link && title) {
 				availableItems[link] = title;
 			}
@@ -205,20 +229,23 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 
 
 	// Require link to match this
+	var urlRegexp, rejectRegexp;
 	if (urlRe) {
 		if (urlRe.exec) {
-			var urlRegexp = urlRe;
-		} else {
-			var urlRegexp = new RegExp();
+			urlRegexp = urlRe;
+		}
+		else {
+			urlRegexp = new RegExp();
 			urlRegexp.compile(urlRe, "i");
 		}
 	}
 	// Do not allow text to match this
 	if (rejectRe) {
 		if (rejectRe.exec) {
-			var rejectRegexp = rejectRe;
-		} else {
-			var rejectRegexp = new RegExp();
+			rejectRegexp = rejectRe;
+		}
+		else {
+			rejectRegexp = new RegExp();
 			rejectRegexp.compile(rejectRe, "i");
 		}
 	}
@@ -226,25 +253,26 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 	if (!inHere.length) {
 		inHere = new Array(inHere);
 	}
-	
-	for (var j=0; j<inHere.length; j++) {
-		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();//Detect Cover view
-		if (coverView){
-			var links = inHere[j].getElementsByTagName("a");
-			for (var i=0; i<links.length; i++) {
+	var links, text;
+	for (let j = 0; j < inHere.length; j++) {
+		var coverView = doc.evaluate('//div[@class="thumbotron"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext();// Detect Cover view
+		if (coverView) {
+			links = inHere[j].getElementsByTagName("a");
+			for (let i = 0; i < links.length; i++) {
 				if (!urlRe || urlRegexp.test(links[i].href)) {
-					var text = links[i].textContent;
+					text = links[i].textContent;
 					if (!text) {
-						var text = links[i].firstChild.alt;
+						text = links[i].firstChild.alt;
 					}
 					if (text) {
 						text = Zotero.Utilities.trimInternal(text);
 						if (!rejectRe || !rejectRegexp.test(text)) {
 							if (availableItems[links[i].href]) {
 								if (text != availableItems[links[i].href]) {
-									availableItems[links[i].href] += " "+text;
+									availableItems[links[i].href] += " " + text;
 								}
-							} else {
+							}
+							else {
 								availableItems[links[i].href] = text;
 							}
 						}
@@ -253,27 +281,28 @@ function getItemArrayGB (doc, inHere, urlRe, rejectRe) {
 			}
 		}
 		else {
-			var links = inHere[j].querySelectorAll("h3.r a");
-			for (var i=0; i<links.length; i++) {
+			links = inHere[j].querySelectorAll("h3.r a");
+			for (let i = 0; i < links.length; i++) {
 				if (!urlRe || urlRegexp.test(links[i].href)) {
-					var text = links[i].parentNode.textContent;
-					//Z.debug(text)
+					text = links[i].parentNode.textContent;
+					// Z.debug(text)
 					if (text) {
 						text = Zotero.Utilities.trimInternal(text);
 						if (!rejectRe || !rejectRegexp.test(text)) {
 							if (availableItems[links[i].href]) {
 								if (text != availableItems[links[i].href]) {
-									availableItems[links[i].href] += " "+text;
+									availableItems[links[i].href] += " " + text;
 								}
-							} else {
+							}
+							else {
 								availableItems[links[i].href] = text;
 							}
 						}
 					}
 					else {
-							var imagelink = links[i];
-							var booktitle = ZU.xpathText(imagelink, './*');
-							Z.debug(booktitle)
+						var imagelink = links[i];
+						var booktitle = ZU.xpathText(imagelink, './*');
+						Z.debug(booktitle);
 					}
 				}
 			}
