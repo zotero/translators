@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-10-30 14:10:40"
+	"lastUpdated": "2019-11-06 08:22:27"
 }
 
 /*
@@ -61,7 +61,7 @@ function getRefworksByID(ids, next) {
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					});
 
-				next(text);
+				next(text, ids);
 			}
 		);
 	});
@@ -198,8 +198,11 @@ function doWeb(doc, url) {
 }
 
 function scrape(ids, doc, url, itemInfo) {
-	getRefworksByID(ids, function(text) {
-		Z.debug(text);
+	getRefworksByID(ids, function(text, ids) {
+		var resultNum = 'single';
+		if (ids && ids.length > 1) {
+			resultNum = 'multiple';
+		}
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
@@ -250,8 +253,17 @@ function scrape(ids, doc, url, itemInfo) {
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
 			}
-			
-			newItem.attachments = getAttachments(doc, newItem);
+			// don't download PDF/CAJ on searchResult(multiple)
+			if (resultNum == 'single'){
+				newItem.attachments = getAttachments(doc, newItem);
+			} else if (resultNum == 'multiple') {
+				newItem.attachments = [{
+					url: newItem.url,
+					title: newItem.title,
+					mimeType: "text/html",
+					snapshot: true
+				}];
+			}
 			newItem.complete();
 		});
 		
