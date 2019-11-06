@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-06 10:39:55"
+	"lastUpdated": "2019-11-06 10:56:38"
 }
 
 /*
@@ -42,11 +42,10 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	// TODO: adjust the logic here
-	if (url.includes('\/vol\\d+\/iss\\d+\/')) {
+	if (url.match(/\/vol\d+\/iss\d+\/\d+/))
+		return "journalArticle";
+	else if (getSearchResults(doc, true))
 		return "multiple";
-	} else if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
 }
 
 
@@ -90,21 +89,11 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
+	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		// TODO adjust if needed:
-		item.section = "News";
 		item.complete();
 	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "journalArticle";
-		// TODO map additional meta tags here, or delete completely
-		trans.addCustomFields({
-			'twitter:description': 'abstractNote'
-		});
-		trans.doWeb(doc, url);
-	});
+	translator.translate();
 }
 
