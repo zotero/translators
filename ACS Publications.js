@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-13 16:38:39"
+	"lastUpdated": "2019-10-07 09:04:25"
 }
 
 
@@ -40,10 +40,6 @@ function getSearchResults(doc, checkOnly, itemOpts) {
 		if (ZU.xpath(articleBox, './/a[text()="Supporting Info"]').length) {
 			itemOpts[doi].hasSupp = true;
 		}
-		
-		// Check which versions of the PDF we have
-		itemOpts[doi].highRes = !!articleBox.getElementsByClassName('pdf-high-res').length;
-		itemOpts[doi].pdfPlus = !!articleBox.getElementsByClassName('pdf-low-res').length;
 		*/
 	}
 	
@@ -82,6 +78,7 @@ var suppTypeMap = {
 	xls: 'application/vnd.ms-excel',
 	xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 };
+
 function getSuppMimeType(fileName) {
 	var ext = fileName.substr(fileName.lastIndexOf('.') + 1);
 	var mimeType = suppTypeMap[ext];
@@ -132,11 +129,6 @@ function doWeb(doc, url) {
 	if (Z.getHiddenPref) {
 		opts.attachSupp = Z.getHiddenPref("attachSupplementary");
 		opts.attachAsLink = Z.getHiddenPref("supplementaryAsLink");
-		var highResPDF = Z.getHiddenPref("ACS.highResPDF"); // attach high res PDF?
-		if (highResPDF) {
-			opts.highResPDF = true;
-			opts.removePdfPlus = highResPDF === 1; // it can also be 2, which would mean attach both versions
-		}
 	}
 	
 	var itemOpts = {};
@@ -147,7 +139,8 @@ function doWeb(doc, url) {
 			}
 			
 			var dois = [];
-			for (var i in items) {
+			for (let i in items) {
+				itemOpts[i].pdf = '/doi/pdf/' + i;
 				dois.push({ doi: i, opts: itemOpts[i] });
 			}
 			
@@ -173,10 +166,7 @@ function doWeb(doc, url) {
 		// then it doesn't have supp info anyway. This way we know not to check later
 		if (!opts.attach) opts.attach = [];
 		
-		// See if we have pdfplus
-		itemOpts.highRes = ZU.xpathText(doc, '//a[contains(@title, "High-Res PDF")]');
-		itemOpts.pdfPlus = ZU.xpathText(doc, '//a[contains(@title, "Low-Res PDF")]');
-		itemOpts.pdf = ZU.xpathText(doc, '//a[i[contains(@class, "icon-file-pdf-o")]]/@href');
+		itemOpts.pdf = ZU.xpathText(doc, '(//a[i[contains(@class, "icon-file-pdf-o")]]/@href)[1]') || '/doi/pdf/' + doi;
 		
 		scrape([{ doi: doi, opts: itemOpts }], opts);
 	}
@@ -207,32 +197,13 @@ function processCallback(fetchItem, opts) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.date) {
+				item.date = ZU.strToISO(item.date);
+			}
 			item.attachments = [];
-				
-			// might be outdated
-			if (fetchItem.opts.pdfPlus
-					&& (!opts.removePdfPlus || !fetchItem.opts.highRes)
-			) {
-				item.attachments.push({
-					title: "ACS Full Text PDF w/ Links",
-					url: '/doi/pdfplus/' + doi,
-					mimeType: "application/pdf"
-				});
-			}
-				
-			// might be outdated
-			if (fetchItem.opts.highRes
-					&& (opts.highResPDF	|| !fetchItem.opts.pdfPlus)
-			) {
-				item.attachments.push({
-					title: "ACS Full Text PDF",
-					url: '/doi/pdf/' + doi,
-					mimeType: "application/pdf"
-				});
-			}
-				
+
 			// standard pdf and snapshot
-			if (item.attachments.length == 0 && fetchItem.opts.pdf) {
+			if (fetchItem.opts.pdf) {
 				item.attachments.push({
 					title: "Full Text PDF",
 					url: fetchItem.opts.pdf,
@@ -312,8 +283,7 @@ function processCallback(fetchItem, opts) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://pubs.acs.org/doi/full/10.1021/es103607c",
-		"defer": true,
+		"url": "https://pubs.acs.org/doi/10.1021/es103607c",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -335,7 +305,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Mai 15, 2011",
+				"date": "2011-05-15",
 				"DOI": "10.1021/es103607c",
 				"ISSN": "0013-936X",
 				"abstractNote": "This study presents the life cycle assessment (LCA) of three batteries for plug-in hybrid and full performance battery electric vehicles. A transparent life cycle inventory (LCI) was compiled in a component-wise manner for nickel metal hydride (NiMH), nickel cobalt manganese lithium-ion (NCM), and iron phosphate lithium-ion (LFP) batteries. The battery systems were investigated with a functional unit based on energy storage, and environmental impacts were analyzed using midpoint indicators. On a per-storage basis, the NiMH technology was found to have the highest environmental impact, followed by NCM and then LFP, for all categories considered except ozone depletion potential. We found higher life cycle global warming emissions than have been previously reported. Detailed contribution and structural path analyses allowed for the identification of the different processes and value-chains most directly responsible for these emissions. This article contributes a public and detailed inventory, which can be easily be adapted to any powertrain, along with readily usable environmental performance assessments.",
@@ -386,10 +356,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "January 1, 2011",
+				"date": "2011-01-01",
 				"ISBN": "9780841226524",
 				"abstractNote": "Natural organic matter (NOM) is an inherently complex mixture of polyfunctional organic molecules. Because of their universality and chemical reversibility, oxidation/reductions (redox) reactions of NOM have an especially interesting and important role in geochemistry. Variabilities in NOM composition and chemistry make studies of its redox chemistry particularly challenging, and details of NOM-mediated redox reactions are only partially understood. This is in large part due to the analytical difficulties associated with NOM characterization and the wide range of reagents and experimental systems used to study NOM redox reactions. This chapter provides a summary of the ongoing efforts to provide a coherent comprehension of aqueous redox chemistry involving NOM and of techniques for chemical characterization of NOM. It also describes some attempts to confirm the roles of different structural moieties in redox reactions. In addition, we discuss some of the operational parameters used to describe NOM redox capacities and redox states, and describe nomenclature of NOM redox chemistry. Several relatively facile experimental methods applicable to predictions of the NOM redox activity and redox states of NOM samples are discussed, with special attention to the proposed use of fluorescence spectroscopy to predict relevant redox characteristics of NOM samples.",
 				"bookTitle": "Aquatic Redox Chemistry",
+				"extra": "DOI: 10.1021/bk-2011-1071.ch005",
 				"libraryCatalog": "ACS Publications",
 				"numberOfVolumes": "0",
 				"pages": "85-111",
@@ -397,11 +368,11 @@ var testCases = [
 				"series": "ACS Symposium Series",
 				"seriesNumber": "1071",
 				"shortTitle": "Redox Chemistry and Natural Organic Matter (NOM)",
-				"url": "http://dx.doi.org/10.1021/bk-2011-1071.ch005",
+				"url": "https://doi.org/10.1021/bk-2011-1071.ch005",
 				"volume": "1071",
 				"attachments": [
 					{
-						"title": "ACS Full Text PDF w/ Links",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -417,7 +388,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/doi/abs/10.1021/jp000606%2B",
+		"url": "https://pubs.acs.org/doi/abs/10.1021/jp000606%2B",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -449,7 +420,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "August 1, 2000",
+				"date": "2000-08-01",
 				"DOI": "10.1021/jp000606+",
 				"ISSN": "1520-6106",
 				"abstractNote": "We have derived phase space and diffusion theories for a new hopping model of charge transport in polypeptides and thence for distal chemical kinetics. The charge is transferred between two carbamide groups on each side of the Cα atom hinging two amino acid groups. When the torsional angles on the hinge approach a certain region of the Ramachandran plot, the charge transfer has zero barrier height and makes charge transfer the result of strong electronic correlation. The mean first passage time calculated from this analytic model of some 164 fs is in reasonable agreement with prior molecular dynamics calculation of some 140 fs and supports this new bifunctional model for charge transport and chemical reactions in polypeptides.",
@@ -458,11 +429,11 @@ var testCases = [
 				"libraryCatalog": "ACS Publications",
 				"pages": "7790-7794",
 				"publicationTitle": "The Journal of Physical Chemistry B",
-				"url": "http://dx.doi.org/10.1021/jp000606+",
+				"url": "https://doi.org/10.1021/jp000606+",
 				"volume": "104",
 				"attachments": [
 					{
-						"title": "ACS Full Text PDF w/ Links",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -478,22 +449,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/isbn/9780841239999",
+		"url": "https://pubs.acs.org/isbn/9780841239999",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/journal/acbcct",
+		"url": "https://pubs.acs.org/journal/acbcct",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.acs.org/action/doSearch?text1=zotero&field1=AllField",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://pubs.acs.org/topic/pharmacology",
+		"url": "https://pubs.acs.org/action/doSearch?text1=zotero&field1=AllField",
 		"items": "multiple"
 	}
 ]

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-16 21:49:57"
+	"lastUpdated": "2019-10-03 09:45:46"
 }
 
 /*
@@ -106,7 +106,12 @@ function scrape(doc) {
 	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
 		.replace(/citation\.cfm/, 'downformats.cfm')
 		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
-	Zotero.debug('bibtex URL: ' + bibtexURL);
+	// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
+	if (bibtexURL.startsWith('http:') && doc.location.href.startsWith('https')) {
+		Z.debug("Forcing BibTeX URL to HTTPS")
+		bibtexURL = bibtexURL.replace(/^http:/, 'https:');
+	}
+	Zotero.debug('BibTeX URL: ' + bibtexURL);
 	
 	ZU.doGet(bibtexURL, function (text) {
 		var translator = Zotero.loadTranslator("import");
@@ -117,7 +122,12 @@ function scrape(doc) {
 			var pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content')[0];
 			if (pdfURL) {
 				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); //deproxify URL
-				Z.debug("pdfURL: " + pdfURL);
+				// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
+				if (pdfURL.startsWith('http:') && doc.location.href.startsWith('https')) {
+					Z.debug("Forcing PDF URL to HTTPS")
+					pdfURL = pdfURL.replace(/^http:/, 'https:');
+				}
+				Z.debug("PDF URL: " + pdfURL);
 				item.attachments = [{
 					url: pdfURL,
 					title: "ACM Full Text PDF",

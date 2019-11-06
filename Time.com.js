@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-06-10 23:02:32"
+	"lastUpdated": "2019-10-06 18:12:01"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('results.html')) {
+	if (url.includes('/search/?q=') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else if (url.search(/\/article\/|\d{4}\/\d{2}\/\d{2}\/./) != -1
@@ -63,10 +63,14 @@ function handleAuthors(authors) {
 		}
 		
 		// x, y and z
-		authors = authors.replace(/^By\s+|\sBy\s+/, "").split(/\s*,\s*|\s+and\s+/i);
+		authors = authors.replace(/^\s*By\s+/, "").split(/\s*,\s*|\s+and\s+/i);
 		var authArr = [];
 		for (var i = 0, n = authors.length; i < n; i++) {
-			authArr.push(ZU.cleanAuthor(ZU.capitalizeTitle(authors[i].replace(/\s+@.+/, "")), 'author'));
+			let author = authors[i].replace(/\s*[@/].+/, "");
+			if (author.toUpperCase() == author) {
+				author = ZU.capitalizeTitle(author);
+			}
+			authArr.push(ZU.cleanAuthor(author, 'author'));
 		}
 		if (authArr.length) return authArr;
 	}
@@ -75,16 +79,18 @@ function handleAuthors(authors) {
 
 function handleKeywords(keywords) {
 	if (keywords && (keywords = keywords.trim())) {
-		return keywords.split(', ');
+		return keywords.split(/,\s*/);
 	}
 	return [];
 }
 
 function scrape(doc, url) {
-	var article = ZU.xpath(doc, '//section/div[@class="wrapper"]/article[contains(@class, "active")]')[0],
-		metaUrl = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
-
+	var article = ZU.xpath(doc, '//section/div[@class="wrapper"]/article[contains(@class, "active")]')[0];
+	var metaUrl = ZU.xpathText(doc, '/html/head/meta[@property="og:url"]/@content');
+	
 	if (article && metaUrl && !doc.location.href.includes(metaUrl)) {
+		// time has a feature where you scroll to the next article
+		// in this case we have to use the active article instead
 		var item = new Zotero.Item("magazineArticle");
 		item.title = ZU.trimInternal(article.getElementsByClassName('article-title')[0].textContent);
 		item.publicationTitle = "Time";
@@ -125,18 +131,26 @@ function scrape(doc, url) {
 			var authors = ZU.xpathText(doc, '//meta[@name="byline"]/@content')
 				|| ZU.xpathText(doc, '//span[@class="author vcard"]/a', null, ' and ')
 				|| ZU.xpathText(doc, '//span[@class="entry-byline"]')
-				|| ZU.xpathText(doc, '//header[@class="article-header"]//ul[@class="article-authors"]//span[@class="byline"]/a');
+				|| ZU.xpathText(doc, '//header[@class="article-header"]//ul[@class="article-authors"]//span[@class="byline"]/a')
+				|| ZU.xpathText(doc, '//div[contains(@class, "author-text")]/a');
 			if (authors) item.creators = handleAuthors(authors);
 
 			var title = ZU.xpathText(doc, '//h1[@class="entry-title"]');
-			if (title) item.title = title;
+			if (!item.title && title) item.title = title;
 			
 			var keywords = ZU.xpathText(doc, '/html/head/meta[@name="keywords"]/@content')
 				|| ZU.xpathText(doc, 'header//a[@class="topic-tag" or @class="section-tag"]');
-			if (keywords) item.tags = handleKeywords(keywords);
+			if (item.tags.length == 0 && keywords) item.tags = handleKeywords(keywords);
 			
 			if (!item.abstractNote) item.abstractNote = ZU.xpathText(doc, '//h2[@class="article-excerpt"]');
-			if (!item.date) item.date = ZU.xpathText(doc, '//time[@class="publish-date"]/@datetime');
+			if (!item.date) {
+				item.date = ZU.xpathText(doc, '//time[@class="publish-date"]/@datetime')
+					|| ZU.xpathText(doc, '//div[contains(@class, "published-date")]')
+					|| ZU.xpathText(doc, '//span[contains(@class, "entry-date")]');
+			}
+			if (item.date) {
+				item.date = ZU.strToISO(item.date);
+			}
 			
 			item.complete();
 		});
@@ -152,24 +166,42 @@ function scrape(doc, url) {
 }
 
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('article .headline>a');
+	for (var i = 0; i < rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == 'multiple') {
-		var items = ZU.getItemArray(doc, doc.getElementsByTagName("h3"));
-		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
-		
-			var urls = [];
-			for (var i in selectedItems) {
-				urls.push(i);
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return;
 			}
-			Z.debug(urls);
-			ZU.processDocuments(urls, scrape);
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
 		});
 	}
 	else {
 		scrape(doc, url);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -338,6 +370,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012-03-04",
 				"ISSN": "0040-781X",
 				"abstractNote": "Obama rejected any notion that his administration has not been in Israel's corner. “Over the last three years, as President of the United States, I have kept my commitments to the state of Israel.\" The President then ticked off the number of ways he has supported Israel in the last year.",
 				"language": "en-US",
@@ -350,16 +383,36 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"aipac",
-					"barack obama",
-					"bibi",
-					"iran",
-					"israel",
-					"mahmoud ahamadinejad",
-					"netanyahu",
-					"obama",
-					"speech",
-					"washington"
+					{
+						"tag": "aipac"
+					},
+					{
+						"tag": "barack obama"
+					},
+					{
+						"tag": "bibi"
+					},
+					{
+						"tag": "iran"
+					},
+					{
+						"tag": "israel"
+					},
+					{
+						"tag": "mahmoud ahamadinejad"
+					},
+					{
+						"tag": "netanyahu"
+					},
+					{
+						"tag": "obama"
+					},
+					{
+						"tag": "speech"
+					},
+					{
+						"tag": "washington"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -380,6 +433,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012-03-02",
 				"ISSN": "0040-781X",
 				"abstractNote": "Despite signs that some housing markets are improving, the overall trend is for home prices (and values) to keep dropping—and dropping. As values shrink, more and more homeowners find themselves underwater, the unfortunate scenario in which one owes more on the mortgage than the home is worth.",
 				"language": "en-US",
@@ -393,24 +447,60 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"arizona",
-					"baltimore",
-					"california",
-					"california real estate",
-					"dallas",
-					"economics & policy",
-					"florida",
-					"florida real estate",
-					"georgia",
-					"mortgages",
-					"nevada",
-					"personal finance",
-					"real estate & homes",
-					"real estate markets",
-					"sunbelt",
-					"the economy",
-					"underwater",
-					"upside-down"
+					{
+						"tag": "arizona"
+					},
+					{
+						"tag": "baltimore"
+					},
+					{
+						"tag": "california"
+					},
+					{
+						"tag": "california real estate"
+					},
+					{
+						"tag": "dallas"
+					},
+					{
+						"tag": "economics & policy"
+					},
+					{
+						"tag": "florida"
+					},
+					{
+						"tag": "florida real estate"
+					},
+					{
+						"tag": "georgia"
+					},
+					{
+						"tag": "mortgages"
+					},
+					{
+						"tag": "nevada"
+					},
+					{
+						"tag": "personal finance"
+					},
+					{
+						"tag": "real estate & homes"
+					},
+					{
+						"tag": "real estate markets"
+					},
+					{
+						"tag": "sunbelt"
+					},
+					{
+						"tag": "the economy"
+					},
+					{
+						"tag": "underwater"
+					},
+					{
+						"tag": "upside-down"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -419,8 +509,49 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.time.com/results.html?Ntt=labor&N=0&Nty=1&p=0&cmd=tags",
+		"url": "https://time.com/search/?q=labor",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://time.com/5691641/trump-conspiracy-fears/",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "How Trump's Obsession With a Conspiracy Theory Led to the Impeachment Crisis",
+				"creators": [
+					{
+						"firstName": "Simon",
+						"lastName": "Shuster",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vera",
+						"lastName": "Bergengruen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-10-03",
+				"ISSN": "0040-781X",
+				"abstractNote": "The warning signs were there",
+				"language": "en-US",
+				"libraryCatalog": "time.com",
+				"publicationTitle": "Time",
+				"url": "https://time.com/5691641/trump-conspiracy-fears/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "White House"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
