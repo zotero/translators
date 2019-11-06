@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-28 08:40:37"
+	"lastUpdated": "2019-10-02 00:36:24"
 }
 
 /*
@@ -29,6 +29,9 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function fixCase(authorName) {
 	if (typeof authorName != 'string') return authorName;
@@ -94,7 +97,7 @@ function validatePageCount(item) {
 		item.pages = "";
 }
 
-function scrapeBook(doc, url, pdfUrl) {
+function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
 
@@ -151,7 +154,7 @@ function scrapeBook(doc, url, pdfUrl) {
 	newItem.complete();
 }
 
-function scrapeEM(doc, url, pdfUrl) {
+function scrapeEM(doc, url) {
 	var itemType = detectWeb(doc, url);
 
 	//fetch print publication date
@@ -215,26 +218,17 @@ function scrapeEM(doc, url, pdfUrl) {
 			}
 		}
 
-		//fetch pdf url. There seems to be some magic value that must be sent
-		// with the request
-		if (!pdfUrl) {
-			var u = ZU.xpathText(doc, '//meta[@name="citation_pdf_url"]/@content');
-			if (u) {
-				ZU.doGet(u, function(text) {
-					var m = text.match(/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-					if (m) {
-						m[1] = ZU.unescapeHTML(m[1]);
-						Z.debug(m[1]);
-						item.attachments.push({url: m[1], title: 'Full Text PDF', mimeType: 'application/pdf'});
-					} else {
-						Z.debug('Could not determine PDF URL.');
-						m = text.match(/<iframe[^>]*>/i);
-						if (m) Z.debug(m[0]);
-					}
-				});
-			}
-		} else
-			item.attachments.push({url: pdfUrl, title: 'Full Text PDF', mimeType: 'application/pdf'});
+		var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+		if (pdfURL) {
+			pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
+			Z.debug("PDF URL: " + pdfURL);
+			item.attachments.push({
+				url: pdfURL,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		item.complete();
 	});
 
 	addBookReviewTag(doc, item);
@@ -247,7 +241,7 @@ function scrapeEM(doc, url, pdfUrl) {
 	});
 }
 
-function scrapeBibTeX(doc, url, pdfUrl) {
+function scrapeBibTeX(doc, url) {
 	var doi = ZU.xpathText(doc, '(//meta[@name="citation_doi"])[1]/@content')
 		|| ZU.xpathText(doc, '(//input[@name="publicationDoi"])[1]/@value');
 	if (!doi) {
@@ -255,7 +249,7 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 		if (doi) doi = doi.replace(/^\s*doi:\s*/i, '');
 	}
 	if (!doi) {
-		scrapeEM(doc, url, pdfUrl);
+		scrapeEM(doc, url);
 		return;
 	}
 
@@ -394,56 +388,16 @@ function scrapeBibTeX(doc, url, pdfUrl) {
 				mimeType: 'text/html'
 			}];
 
-			//fetch pdf url. There seems to be some magic value that must be sent
-			// with the request
-			if (!pdfUrl &&
-				(pdfUrl =
-					ZU.xpathText(doc,'(//meta[@name="citation_pdf_url"]/@content)[1]')
-					|| ZU.xpathText(doc, '(//a[@class="pdfLink"]/@href)[1]')
-				)
-			) {
-				ZU.doGet(pdfUrl, function(text) {
-					if (text) {
-						var m = text.match(
-							/<iframe id="pdfDocument"[^>]+?src="([^"]+)"/i);
-						if (m) {
-							m[1] = ZU.unescapeHTML(m[1]);
-							Z.debug('PDF url: ' + m[1]);
-							pdfUrl = m[1];
-						} else {
-							Z.debug('Could not determine PDF URL.');
-							m = text.match(/<iframe[^>]*>/i);
-							if (m) {
-								Z.debug(m[0]);
-								pdfUrl = null; // Clearly not the PDF
-							} else {
-								Z.debug('No iframe found. This may be the PDF');
-								// It seems that on Mac, Wiley serves the PDF
-								// directly, not in an iframe, so try using this URL.
-								// TODO: detect whether this is a case before trying
-								// to fetch the PDF page above. See https://github.com/zotero/translators/pull/442
-							}
-						}
-					}
-
-					if (pdfUrl) {
-						item.attachments.push({
-							url: pdfUrl,
-							title: 'Full Text PDF',
-							mimeType: 'application/pdf'
-						});
-					}
+			var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
+			if (pdfURL) {
+				pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
+				Z.debug("PDF URL: " + pdfURL);
+				item.attachments.push({
+					url: pdfURL,
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf'
 				});
-			} else {
-				if (pdfUrl) {
-					item.attachments.push({
-						url: pdfUrl,
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf'
-					});
-				}
 			}
-
 			addBookReviewTag(doc, item);
 			item.complete();
 		});
@@ -503,15 +457,15 @@ function scrapeCochraneTrial(doc, url){
 	item.complete();
 }
 
-function scrape(doc, url, pdfUrl) {
+function scrape(doc, url) {
 	var itemType = detectWeb(doc,url);
 
 	if (itemType == 'book') {
-		scrapeBook(doc, url, pdfUrl);
+		scrapeBook(doc, url);
 	} else if (/\/o\/cochrane\/(clcentral|cldare|clcmr|clhta|cleed|clabout)/.test(url)) {
 		scrapeCochraneTrial(doc, url);
 	} else {
-		scrapeBibTeX(doc, url, pdfUrl);
+		scrapeBibTeX(doc, url);
 	}
 }
 
@@ -571,17 +525,18 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else { //single article
-		if (url.includes("/pdf")) {
-			//redirect needs to work where URL end in /pdf and where it end in /pdf/something
-			url = url.replace(/\/pdf(.+)?$/,'/abstract');
-			//Zotero.debug("Redirecting to abstract page: "+url);
-			//grab pdf url before leaving
-			var pdfUrl = ZU.xpathText(doc, '//iframe[@id="pdfDocument"]/@src');
+	}
+	// Single article
+	else {
+		// /pdf/, /epdf/, or /pdfdirect/
+		if (/\/e?pdf(direct)?\//.test(url)) {
+			url = url.replace(/\/e?pdf(direct)?\//,'/');
+			Zotero.debug("Redirecting to abstract page: "+url);
 			ZU.processDocuments(url, function(doc, url) {
-				scrape(doc, url, pdfUrl);
+				scrape(doc, url);
 			});
-		} else {
+		}
+		else {
 			scrape(doc, url);
 		}
 	}
@@ -1336,5 +1291,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/

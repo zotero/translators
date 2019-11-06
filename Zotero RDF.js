@@ -16,7 +16,7 @@
 		"exportFileData": false
 	},
 	"inRepository": true,
-	"lastUpdated": "2019-01-14 05:55:13"
+	"lastUpdated": "2019-08-11 12:58:13"
 }
 
 var item;
@@ -295,7 +295,7 @@ function generateItem(item, zoteroType, resource) {
 			// standardized in it. oh well. using them anyway.
 			Zotero.RDF.addStatement(creator, n.foaf+"surname", item.creators[j].lastName, true);
 			if (item.creators[j].firstName) {
-				Zotero.RDF.addStatement(creator, n.foaf+"givenname", item.creators[j].firstName, true);
+				Zotero.RDF.addStatement(creator, n.foaf+"givenName", item.creators[j].firstName, true);
 			}
 			
 			if (biblioCreatorTypes.indexOf(item.creators[j].creatorType) != -1) {

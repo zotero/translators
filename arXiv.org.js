@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-04-28 01:57:56"
+	"lastUpdated": "2019-10-22 05:31:06"
 }
 
 /*
@@ -44,6 +44,12 @@ function doSearch(item) {
 		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
 	ZU.doGet(url, parseXML);
 }
+
+
+var version;
+// this variable will be set in doWeb and
+// can be used then afterwards in the parseXML
+
 
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:arxiv\.org|xxx\.lanl\.gov)\/(?:find|list|catchup)/;
@@ -109,6 +115,10 @@ function doWeb(doc, url) {
 	}
 	else {
 		var id;
+		var versionMatch = url.match(/v(\d+)(\.pdf)?([?#].+)?$/);
+		if (versionMatch) {
+			version = versionMatch[1];
+		}
 		var p = url.indexOf("/pdf/");
 		if (p > -1) {
 			id = url.substring(p + 5, url.length - 4);
@@ -142,7 +152,18 @@ function parseXML(text) {
 
 	newItem.title = getXPathNodeTrimmed(dcMeta, "dc:title", ns);
 	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);
-	newItem.date = getXPathNodeTrimmed(dcMeta, "dc:date", ns);
+	var dates = ZU.xpath(dcMeta, './dc:date', ns)
+		.map(element => element.textContent)
+		.sort();
+	if (dates.length > 0) {
+		if (version && version < dates.length) {
+			newItem.date = dates[version - 1];
+		}
+		else {
+			// take the latest date
+			newItem.date = dates[dates.length - 1];
+		}
+	}
 	
 	
 	var descriptions = ZU.xpath(dcMeta, "./dc:description", ns);
@@ -186,10 +207,14 @@ function parseXML(text) {
 	}
 	
 	newItem.extra = 'arXiv: ' + articleID;
+	if (version) {
+		newItem.extra += '\nversion: ' + version;
+	}
 	
+	var pdfUrl = "https://arxiv.org/pdf/" + articleID + (version ? "v" + version : "") + ".pdf";
 	newItem.attachments.push({
-		title: 'arXiv:' + articleID + " PDF",
-		url: "http://www.arxiv.org/pdf/" + articleID + ".pdf",
+		title: "arXiv Fulltext PDF",
+		url: pdfUrl,
 		mimeType: "application/pdf"
 	});
 	newItem.attachments.push({
@@ -250,12 +275,12 @@ function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://arxiv.org/list/astro-ph/new",
+		"url": "https://arxiv.org/list/astro-ph/new",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://arxiv.org/abs/1107.4612",
+		"url": "https://arxiv.org/abs/1107.4612",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -295,7 +320,7 @@ var testCases = [
 				"volume": "419",
 				"attachments": [
 					{
-						"title": "arXiv:1107.4612 PDF",
+						"title": "arXiv Fulltext PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -304,8 +329,12 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Astrophysics - Astrophysics of Galaxies",
-					"Astrophysics - Cosmology and Nongalactic Astrophysics"
+					{
+						"tag": "Astrophysics - Astrophysics of Galaxies"
+					},
+					{
+						"tag": "Astrophysics - Cosmology and Nongalactic Astrophysics"
+					}
 				],
 				"notes": [
 					{
@@ -318,7 +347,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://arxiv.org/abs/astro-ph/0603274",
+		"url": "https://arxiv.org/abs/astro-ph/0603274",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -386,6 +415,7 @@ var testCases = [
 				"abstractNote": "We present optical $WBVR$ and infrared $JHKL$ photometric observations of the Be binary system $\\delta$ Sco, obtained in 2000--2005, mid-infrared (10 and $18 \\mu$m) photometry and optical ($\\lambda\\lambda$ 3200--10500 \\AA) spectropolarimetry obtained in 2001. Our optical photometry confirms the results of much more frequent visual monitoring of $\\delta$ Sco. In 2005, we detected a significant decrease in the object's brightness, both in optical and near-infrared brightness, which is associated with a continuous rise in the hydrogen line strenghts. We discuss possible causes for this phenomenon, which is difficult to explain in view of current models of Be star disks. The 2001 spectral energy distribution and polarization are succesfully modeled with a three-dimensional non-LTE Monte Carlo code which produces a self-consistent determination of the hydrogen level populations, electron temperature, and gas density for hot star disks. Our disk model is hydrostatically supported in the vertical direction and radially controlled by viscosity. Such a disk model has, essentially, only two free parameters, viz., the equatorial mass loss rate and the disk outer radius. We find that the primary companion is surrounded by a small (7 $R_\\star$), geometrically-thin disk, which is highly non-isothermal and fully ionized. Our model requires an average equatorial mass loss rate of $1.5\\times 10^{-9} M_{\\sun}$ yr$^{-1}$.",
 				"extra": "arXiv: astro-ph/0603274",
 				"issue": "2",
+				"journalAbbreviation": "ApJ",
 				"libraryCatalog": "arXiv.org",
 				"pages": "1617-1625",
 				"publicationTitle": "The Astrophysical Journal",
@@ -393,7 +423,7 @@ var testCases = [
 				"volume": "652",
 				"attachments": [
 					{
-						"title": "arXiv:astro-ph/0603274 PDF",
+						"title": "arXiv Fulltext PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -402,7 +432,9 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Astrophysics"
+					{
+						"tag": "Astrophysics"
+					}
 				],
 				"notes": [
 					{
@@ -415,7 +447,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://arxiv.org/abs/1307.1469",
+		"url": "https://arxiv.org/abs/1307.1469",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -443,6 +475,7 @@ var testCases = [
 				"abstractNote": "We have designed, constructed, and tested an InGaAs near-infrared camera to explore whether low-cost detectors can make small (<1 m) telescopes capable of precise (<1 mmag) infrared photometry of relatively bright targets. The camera is constructed around the 640x512 pixel APS640C sensor built by FLIR Electro-Optical Components. We designed custom analog-to-digital electronics for maximum stability and minimum noise. The InGaAs dark current halves with every 7 deg C of cooling, and we reduce it to 840 e-/s/pixel (with a pixel-to-pixel variation of +/-200 e-/s/pixel) by cooling the array to -20 deg C. Beyond this point, glow from the readout dominates. The single-sample read noise of 149 e- is reduced to 54 e- through up-the-ramp sampling. Laboratory testing with a star field generated by a lenslet array shows that 2-star differential photometry is possible to a precision of 631 +/-205 ppm (0.68 mmag) hr^-0.5 at a flux of 2.4E4 e-/s. Employing three comparison stars and de-correlating reference signals further improves the precision to 483 +/-161 ppm (0.52 mmag) hr^-0.5. Photometric observations of HD80606 and HD80607 (J=7.7 and 7.8) in the Y band shows that differential photometry to a precision of 415 ppm (0.45 mmag) hr^-0.5 is achieved with an effective telescope aperture of 0.25 m. Next-generation InGaAs detectors should indeed enable Poisson-limited photometry of brighter dwarfs with particular advantage for late-M and L types. In addition, one might acquire near-infrared photometry simultaneously with optical photometry or radial velocity measurements to maximize the return of exoplanet searches with small telescopes.",
 				"extra": "arXiv: 1307.1469",
 				"issue": "931",
+				"journalAbbreviation": "Publications of the Astronomical Society of the Pacific",
 				"libraryCatalog": "arXiv.org",
 				"pages": "1021-1030",
 				"publicationTitle": "Publications of the Astronomical Society of the Pacific",
@@ -450,7 +483,7 @@ var testCases = [
 				"volume": "125",
 				"attachments": [
 					{
-						"title": "arXiv:1307.1469 PDF",
+						"title": "arXiv Fulltext PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -459,8 +492,12 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Astrophysics - Earth and Planetary Astrophysics",
-					"Astrophysics - Instrumentation and Methods for Astrophysics"
+					{
+						"tag": "Astrophysics - Earth and Planetary Astrophysics"
+					},
+					{
+						"tag": "Astrophysics - Instrumentation and Methods for Astrophysics"
+					}
 				],
 				"notes": [
 					{
@@ -531,7 +568,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
+		"url": "https://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
 		"items": "multiple"
 	},
 	{
@@ -578,6 +615,118 @@ var testCases = [
 						"note": "Comment: 17 pages"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/abs/1810.04805v1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+				"creators": [
+					{
+						"firstName": "Jacob",
+						"lastName": "Devlin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ming-Wei",
+						"lastName": "Chang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kenton",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristina",
+						"lastName": "Toutanova",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-10-10",
+				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+				"extra": "arXiv: 1810.04805\nversion: 1",
+				"libraryCatalog": "arXiv.org",
+				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"shortTitle": "BERT",
+				"url": "http://arxiv.org/abs/1810.04805",
+				"attachments": [
+					{
+						"title": "arXiv Fulltext PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Computation and Language"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://arxiv.org/abs/1810.04805v2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+				"creators": [
+					{
+						"firstName": "Jacob",
+						"lastName": "Devlin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ming-Wei",
+						"lastName": "Chang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kenton",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kristina",
+						"lastName": "Toutanova",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-05-24",
+				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+				"extra": "arXiv: 1810.04805\nversion: 2",
+				"libraryCatalog": "arXiv.org",
+				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"shortTitle": "BERT",
+				"url": "http://arxiv.org/abs/1810.04805",
+				"attachments": [
+					{
+						"title": "arXiv Fulltext PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "arXiv.org Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Computation and Language"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

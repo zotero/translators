@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-06-30 16:20:13"
+	"lastUpdated": "2019-10-19 17:28:01"
 }
 
 /*
@@ -119,7 +119,7 @@ function scrape(doc, url) {
 	
 	var rightPart = doc.getElementById("leftcol").nextSibling;
 	var centralColumn = ZU.xpath(rightPart, './table/tbody/tr[2]/td[@align="left"]');
-	var datablock = ZU.xpath(centralColumn, './div[2]');
+	var datablock = ZU.xpath(centralColumn, './div[1]');
 	
 	var authors = ZU.xpath(datablock, './/table[1]//b');
 	// Zotero.debug('authors.length: ' + authors.length);
@@ -323,8 +323,8 @@ var testCases = [
 					}
 				],
 				"date": "2012",
-				"abstractNote": "На основе полученных новых знаний по формированию и проявлению ценных селекционных признаков выделены новые доноры и комплексные доноры значимых признаков яблони.",
 				"ISSN": "2219-5335",
+				"abstractNote": "На основе полученных новых знаний по формированию и проявлению ценных селекционных признаков выделены новые доноры и комплексные доноры значимых признаков яблони.",
 				"issue": "13 (1)",
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
@@ -333,14 +333,30 @@ var testCases = [
 				"url": "https://elibrary.ru/item.asp?id=17339044",
 				"attachments": [],
 				"tags": [
-					"Apple-Tree",
-					"Immunity",
-					"Scab",
-					"Variety",
-					"Иммунитет",
-					"Парша",
-					"Сорт",
-					"Яблоня"
+					{
+						"tag": "Apple-Tree"
+					},
+					{
+						"tag": "Immunity"
+					},
+					{
+						"tag": "Scab"
+					},
+					{
+						"tag": "Variety"
+					},
+					{
+						"tag": "Иммунитет"
+					},
+					{
+						"tag": "Парша"
+					},
+					{
+						"tag": "Сорт"
+					},
+					{
+						"tag": "Яблоня"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -527,9 +543,9 @@ var testCases = [
 					}
 				],
 				"date": "2019",
-				"abstractNote": "Для классов графиков -отображений нильпотентных градуированных групп доказана формула площади на сублоренцевых структурах произвольной глубины с многомерным временем.",
 				"DOI": "10.31857/S0869-56524863275-279",
 				"ISSN": "0869-5652",
+				"abstractNote": "Для классов графиков -отображений нильпотентных градуированных групп доказана формула площади на сублоренцевых структурах произвольной глубины с многомерным временем.",
 				"issue": "3",
 				"language": "ru",
 				"libraryCatalog": "eLibrary.ru",
