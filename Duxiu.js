@@ -46,12 +46,11 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
-		});		
+		});
 	}
 	else {
 		scrapeAndParse(doc, url);
-	}
-	return
+	};
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -135,14 +134,14 @@ function scrapeAndParse(doc, url) {
 				
 				var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
 				
-				switch (assignedRole) {					
+				switch (assignedRole) {
 					// Not all conditions listed since 编,译,著 catch most of their variations already.
 
 					// series/chief editor
 					case '总主编':
 					case '总编辑':
 					case '总编':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "seriesEditor",
 							fieldMode: 1 });
 						break;
@@ -152,7 +151,7 @@ function scrapeAndParse(doc, url) {
 					case '辑':
 					case '选编':
 					case '整理':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "editor",
 							fieldMode: 1 });
 						break;
@@ -164,41 +163,41 @@ function scrapeAndParse(doc, url) {
 					case '纂':
 					case '集解':
 					case '集注':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "author",
 							fieldMode: 1 });
 						break;
 
 					// translator
 					case '译':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "translator",
 							fieldMode: 1 });
 						break;
 					
 					// multiple roles
 					case '编著':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "author",
 							fieldMode: 1 });
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "editor",
 							fieldMode: 1 });
 						break;
 					case '编译':
-						newItem.creators.push({lastName: assignedName,
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "editor",
-							fieldMode: 1 });	
-						newItem.creators.push({lastName: assignedName,
+							fieldMode: 1 });
+						newItem.creators.push({ lastName: assignedName,
 							creatorType: "translator",
 							fieldMode: 1 });
 						break;
 
 					// default as author
 					default:
-						newItem.creators.push({lastName: assignedName,
-						creatorType: "author",
-						fieldMode: 1 });
+						newItem.creators.push({ lastName: assignedName,
+							creatorType: "author",
+							fieldMode: 1 });
 				}
 			}
 		}
@@ -212,7 +211,7 @@ function scrapeAndParse(doc, url) {
 				newItem.publisher = Zotero.Utilities.trim(place.substring(0, place.indexOf(",")));
 				place = "";
 			}
-			else if (Zotero.Utilities.trim(place).match(/^\d/)){
+			else if (Zotero.Utilities.trim(place).match(/^\d/)) {
 				place = "";
 			}
 			else {
@@ -240,7 +239,7 @@ function scrapeAndParse(doc, url) {
 			newItem.date = Zotero.Utilities.trim(date);
 		}
 		
-		// ISBN		
+		// ISBN
 		pattern = /<dd>[\s\S]*?ISBN号[\D]*(.*[\d])/;
 		if (pattern.test(page)) {
 			var isbn = pattern.exec(page)[1];
@@ -304,12 +303,12 @@ function scrapeAndParse(doc, url) {
 			newItem.refFormat = Zotero.Utilities.trim(refFormat);
 			
 			newItem.extra = "参考格式: " + newItem.refFormat + "\n" + newItem.extra;
-		}			
+		}
 		
 		// 内容提要 abstract.
 		pattern = /<dd>[\s\S]*内容提要[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
-			var abstractNote = trimTags(pattern.exec(page)[1])
+			var abstractNote = trimTags(pattern.exec(page)[1]);
 			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
 		}
 		
@@ -326,7 +325,7 @@ function scrapeAndParse(doc, url) {
 		// SSID
 		pattern = /<input name = "ssid" id = "forumssid" {2}value = "([\s\S]*?)"/;
 		if (pattern.test(page)) {
-			var SSID = trimTags(pattern.exec(page)[1])
+			var SSID = trimTags(pattern.exec(page)[1]);
 			newItem.SSID = Zotero.Utilities.trim(SSID);
 			newItem.extra = newItem.extra + "SSID: " + newItem.SSID;
 		}
@@ -344,9 +343,9 @@ function trimTags(text) {
 
 // pick a role for a creator.
 function determineRoles(name) {
-	var role = ""
-	for (var t = 0; t < rolelist.length; t++){
-		if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length){
+	var role = "";
+	for (var t = 0; t < rolelist.length; t++) {
+		if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length) {
 			role = rolelist[t];
 		}
 	}
@@ -355,8 +354,8 @@ function determineRoles(name) {
 
 // pick the closest role when the given creator has none.
 function pickClosestRole(namelist, index) {
-	var role = ""
-	var i = index + 1
+	var role = "";
+	var i = index + 1;
 	while (i < namelist.length && !role) {
 		role = determineRoles(namelist[i]);
 		i++;
