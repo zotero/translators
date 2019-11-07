@@ -40,17 +40,18 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
-				}
+			}
 			var articles = [];
 			for (var i in items) {
 				articles.push(i);
-				}
+			}
 			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
 		});		
 	}
 	else {
 		scrapeAndParse(doc, url);
 	}
+	return
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -125,7 +126,7 @@ function scrapeAndParse(doc, url) {
 			for (let i = 0; i < authorNames.length; i++) {
 				var assignedRole = "";
 
-				if (!determineRoles(authorNames[i])){
+				if (!determineRoles(authorNames[i])) {
 					assignedRole = pickClosestRole(authorNames, i);
 				}
 				else {
@@ -134,16 +135,14 @@ function scrapeAndParse(doc, url) {
 				
 				var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
 				
-				switch (assignedRole) {
-					
+				switch (assignedRole) {					
 					// Not all conditions listed since 编,译,著 catch most of their variations already.
 
 					// series/chief editor
 					case '总主编':
 					case '总编辑':
 					case '总编':
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "seriesEditor",
 							fieldMode: 1 });
 						break;
@@ -153,8 +152,7 @@ function scrapeAndParse(doc, url) {
 					case '辑':
 					case '选编':
 					case '整理':
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "editor",
 							fieldMode: 1 });
 						break;
@@ -166,46 +164,39 @@ function scrapeAndParse(doc, url) {
 					case '纂':
 					case '集解':
 					case '集注':
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "author",
 							fieldMode: 1 });
 						break;
 
 					// translator
 					case '译':
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "translator",
 							fieldMode: 1 });
-							break;
+						break;
 					
 					// multiple roles
 					case '编著':
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "author",
 							fieldMode: 1 });
-						newItem.creators.push({
-							lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 							creatorType: "editor",
 							fieldMode: 1 });
 						break;
 					case '编译':
-						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "editor",
-						fieldMode: 1});	
-						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "translator",
-						fieldMode: 1 });
+						newItem.creators.push({lastName: assignedName,
+							creatorType: "editor",
+							fieldMode: 1 });	
+						newItem.creators.push({lastName: assignedName,
+							creatorType: "translator",
+							fieldMode: 1 });
 						break;
 
 					// default as author
 					default:
-						newItem.creators.push({
-						lastName: assignedName,
+						newItem.creators.push({lastName: assignedName,
 						creatorType: "author",
 						fieldMode: 1 });
 				}
@@ -233,7 +224,7 @@ function scrapeAndParse(doc, url) {
 		pattern = /<dd>[\s\S]*出版发行[\s\S]*?：([\s\S]*?),[\s\S]*?<\/dd>/;
 		if (pattern.test(page)) {
 			var publisher = pattern.exec(page)[1];
-			if (place){
+			if (place) {
 				newItem.publisher = Zotero.Utilities.trim(publisher);
 			}
 		}
@@ -257,7 +248,7 @@ function scrapeAndParse(doc, url) {
 			if (newItem.ISBN.length < 13) {
 				newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra;
 			}
-			
+
 			// Zotero does not allow non-standard but correct ISBN such as one that starts with 7
 			else if (newItem.ISBN.length == 13 && newItem.ISBN.startsWith("7")) {
 				newItem.ISBN = "978-" + newItem.ISBN;
@@ -291,7 +282,7 @@ function scrapeAndParse(doc, url) {
 			var format = trimTags(pattern.exec(page)[1]);
 			newItem.format = Zotero.Utilities.trim(format);
 			newItem.extra += "开本: " + newItem.format + "\n";
-		};
+		}
 		// 主题词 subject terms.
 		pattern = /<dd>[\s\S]*主题词[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
@@ -318,14 +309,14 @@ function scrapeAndParse(doc, url) {
 		// 内容提要 abstract.
 		pattern = /<dd>[\s\S]*内容提要[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
-			var abstractNote = trimTags(pattern.exec(page)[1]);
+			var abstractNote = trimTags(pattern.exec(page)[1])
 			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
 		}
 		
 		// use subject terms to populate abstract
 		if (newItem.subjectTerms) {
 			newItem.abstractNote = newItem.abstractNote + "主题词: " + newItem.subjectTerms;
-		};
+		}
 			
 		// start the abstract with the foreign language title if available.
 		if (newItem.foreignTitle) {
@@ -333,9 +324,9 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// SSID
-		pattern = /<input name = "ssid" id = "forumssid" {2}value \= "([\s\S]*?)"/;
+		pattern = /<input name = "ssid" id = "forumssid" {2}value = "([\s\S]*?)"/;
 		if (pattern.test(page)) {
-			var SSID = trimTags(pattern.exec(page)[1]);
+			var SSID = trimTags(pattern.exec(page)[1])
 			newItem.SSID = Zotero.Utilities.trim(SSID);
 			newItem.extra = newItem.extra + "SSID: " + newItem.SSID;
 		}
@@ -356,7 +347,7 @@ function determineRoles(name) {
 	var role = ""
 	for (var t = 0; t < rolelist.length; t++){
 		if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length){
-			role = rolelist[t]        
+			role = rolelist[t];
 		}
 	}
 	return role;
