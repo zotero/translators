@@ -12,18 +12,40 @@
 	"lastUpdated": "2019-11-05 14:51:51"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Bo An
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function doWeb(doc, url) {
-	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
+		if (!items) {
+			return true;
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
+		var articles = [];
+		for (var i in items) {
+			articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
+		Zotero.Utilities.processDocuments(articles, scrapeAndParse);
 		});
 		
 	}
@@ -36,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('dt a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -60,16 +82,14 @@ function detectWeb(doc, url) {
 function scrapeAndParse(doc, url) {
 	Zotero.Utilities.HTTP.doGet(url, function (page) {
 		var pattern;
+
 		// 类型 item Type & URL
 		var itemType = "book";
 		var newItem = new Zotero.Item(itemType);
 		newItem.url = url;
 		newItem.abstractNote = ""
-		// extra field to store extra data from Duxiu such as format, price, and/or non-standard id.
+		// extra field to store extra data from Duxiu such as format, price, and/or identifiers.
 		newItem.extra = "";
-		
-		// nonStandardId to store non-standard identifiers such as ISSN.
-		newItem.nonStandardId
 		
 		// 标题 title.
 		pattern = /bookname=\"([\s\S]*?)\"/;
@@ -90,10 +110,10 @@ function scrapeAndParse(doc, url) {
 		pattern = /<dd>[\s\S]*?作[\s]*者[\s\S]*?：([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
 			var authorNames = trimTags(pattern.exec(page)[1]);
-			
+
 			// prevent English name from being split.
 			authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2")
-			
+
 			authorNames = authorNames.replace(/；/g, "，")
 			authorNames = Zotero.Utilities.trim(authorNames)
 
@@ -117,83 +137,84 @@ function scrapeAndParse(doc, url) {
 				
 				switch (assignedRole) {
 					
-					// Not all conditions listed since 编,译,著 cache most of their variations already.
+					// Not all conditions listed since 编,译,著 catch most of their variations already.
+
 					// series/chief editor
-				case '总主编':
-				case '总编辑':
-				case '总编':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "seriesEditor",
-					fieldMode: 1});	
-					break;
-				
-				// editor
-				case '编':
-				case '辑':
-				case '选编':
-				case '整理':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "editor",
-					fieldMode: 1});	
-					break;
+					case '总主编':
+					case '总编辑':
+					case '总编':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "seriesEditor",
+						fieldMode: 1});	
+						break;
 					
-				// author
-				case '著':
-				case '执笔':
-				case '撰':
-				case '纂':
-				case '集解':
-				case '集注':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "author",
-					fieldMode: 1});	
-					break;
+					// editor
+					case '编':
+					case '辑':
+					case '选编':
+					case '整理':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "editor",
+						fieldMode: 1});	
+						break;
+						
+					// author
+					case '著':
+					case '执笔':
+					case '撰':
+					case '纂':
+					case '集解':
+					case '集注':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "author",
+						fieldMode: 1});	
+						break;
 
-				// translator
-				case '译':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "translator",
-					fieldMode: 1});	
-					break;
-				
-				// multiple roles
-				case '编著':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "author",
-					fieldMode: 1});	
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "editor",
-					fieldMode: 1});	
-					break;
-				case '编译':
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "editor",
-					fieldMode: 1});	
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "translator",
-					fieldMode: 1});	
-					break;
+					// translator
+					case '译':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "translator",
+						fieldMode: 1});	
+						break;
+					
+					// multiple roles
+					case '编著':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "author",
+						fieldMode: 1});	
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "editor",
+						fieldMode: 1});	
+						break;
+					case '编译':
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "editor",
+						fieldMode: 1});	
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "translator",
+						fieldMode: 1});	
+						break;
 
-				// default as author
-				default:
-					newItem.creators.push({
-					lastName: assignedName,
-					creatorType: "author",
-					fieldMode: 1});	
+					// default as author
+					default:
+						newItem.creators.push({
+						lastName: assignedName,
+						creatorType: "author",
+						fieldMode: 1});	
 				}
 			}
 		}
 		
 		// 出版地点 publication place.
-		pattern =  /<dd>[\s\S]*出版发行[\s\S]*?<\/span>([\s\S]*?)：[\s\S]*?<\/dd>/;
+		pattern = /<dd>[\s\S]*出版发行[\s\S]*?<\/span>([\s\S]*?)：[\s\S]*?<\/dd>/;
 		if (pattern.test(page)) {
 			var place = pattern.exec(page)[1];
 			if (place.includes(",")){
@@ -233,7 +254,6 @@ function scrapeAndParse(doc, url) {
 		pattern = /<dd>[\s\S]*?ISBN号[\D]*(.*[\d])/;
 		if (pattern.test(page)) {
 			var isbn = pattern.exec(page)[1];
-			// newItem.ISBN = Zotero.Utilities.trim(isbn);
 			newItem.ISBN = Zotero.Utilities.trim(isbn);
 			if (newItem.ISBN.length < 13){
 				newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra
@@ -303,25 +323,23 @@ function scrapeAndParse(doc, url) {
 			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g,"-") + "\n\n";
 		}
 		
-			// use subject terms to populate abstract
+		// use subject terms to populate abstract
 		if (newItem.subjectTerms) {
 			newItem.abstractNote = newItem.abstractNote + "主题词: " + newItem.subjectTerms
 			}
 			
-			// start the abstract with the foreign language title if available.
+		// start the abstract with the foreign language title if available.
 		if (newItem.foreignTitle) {
 			newItem.abstractNote = "外文题名: " + newItem.foreignTitle + "\n\n" + newItem.abstractNote
 			}
 
 		// SSID
-		
 		pattern = /\<input name \= \"ssid\" id \= \"forumssid\"  value \= \"([\s\S]*?)\"/;
 			if (pattern.test(page)) {
 			var SSID = trimTags(pattern.exec(page)[1]);
 			newItem.SSID = Zotero.Utilities.trim(SSID)
 			newItem.extra = newItem.extra + "SSID: " + newItem.SSID
 			}
-	
 
 		newItem.complete();
 	});
@@ -337,11 +355,11 @@ function trimTags(text) {
 // pick a role for a creator.
 function determineRoles(name){
 	var role = ""
-		for (var t=0; t < rolelist.length; t++){
-			if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length){
-				role = rolelist[t]        
-			}
+	for (var t = 0; t < rolelist.length; t++){
+		if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length){
+			role = rolelist[t]        
 		}
+	}
 	return role
 }
 
