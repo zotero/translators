@@ -38,16 +38,15 @@
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-		if (!items) {
-			return true;
-			}
-		var articles = [];
-		for (var i in items) {
-			articles.push(i);
-			}
-		Zotero.Utilities.processDocuments(articles, scrapeAndParse);
-		});
-		
+			if (!items) {
+				return true;
+				}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+				}
+			Zotero.Utilities.processDocuments(articles, scrapeAndParse);
+		});		
 	}
 	else {
 		scrapeAndParse(doc, url);
@@ -87,12 +86,12 @@ function scrapeAndParse(doc, url) {
 		var itemType = "book";
 		var newItem = new Zotero.Item(itemType);
 		newItem.url = url;
-		newItem.abstractNote = ""
+		newItem.abstractNote = "";
 		// extra field to store extra data from Duxiu such as format, price, and/or identifiers.
 		newItem.extra = "";
 		
 		// 标题 title.
-		pattern = /bookname=\"([\s\S]*?)\"/;
+		pattern = /bookname="([\s\S]*?)"/;
 		if (pattern.test(page)) {
 			var title = pattern.exec(page)[1];
 			newItem.title = Zotero.Utilities.trim(title);
@@ -112,28 +111,28 @@ function scrapeAndParse(doc, url) {
 			var authorNames = trimTags(pattern.exec(page)[1]);
 
 			// prevent English name from being split.
-			authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2")
+			authorNames = authorNames.replace(/([a-z])，([A-Z])/g, "$1" + " " + "$2");
 
-			authorNames = authorNames.replace(/；/g, "，")
-			authorNames = Zotero.Utilities.trim(authorNames)
+			authorNames = authorNames.replace(/；/g, "，");
+			authorNames = Zotero.Utilities.trim(authorNames);
 
 			authorNames = authorNames.split("，");
 			// Zotero.debug(authorNames);
 			
 			// list of role titles. used to remove the role title from the name of the creator.
-			var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$/
+			var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$/;
 
 			for (let i = 0; i < authorNames.length; i++) {
-				var assignedRole = ""
+				var assignedRole = "";
 
 				if (!determineRoles(authorNames[i])){
-					assignedRole = pickClosestRole(authorNames,i)
+					assignedRole = pickClosestRole(authorNames, i);
 				}
 				else {
-					assignedRole = determineRoles(authorNames[i]) 
+					assignedRole = determineRoles(authorNames[i]);
 				}
 				
-				var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask,"")
+				var assignedName = Zotero.Utilities.trim(authorNames[i]).replace(titleMask, "");
 				
 				switch (assignedRole) {
 					
@@ -144,9 +143,9 @@ function scrapeAndParse(doc, url) {
 					case '总编辑':
 					case '总编':
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "seriesEditor",
-						fieldMode: 1});	
+							lastName: assignedName,
+							creatorType: "seriesEditor",
+							fieldMode: 1 });
 						break;
 					
 					// editor
@@ -155,9 +154,9 @@ function scrapeAndParse(doc, url) {
 					case '选编':
 					case '整理':
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "editor",
-						fieldMode: 1});	
+							lastName: assignedName,
+							creatorType: "editor",
+							fieldMode: 1 });
 						break;
 						
 					// author
@@ -168,29 +167,29 @@ function scrapeAndParse(doc, url) {
 					case '集解':
 					case '集注':
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "author",
-						fieldMode: 1});	
+							lastName: assignedName,
+							creatorType: "author",
+							fieldMode: 1 });
 						break;
 
 					// translator
 					case '译':
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "translator",
-						fieldMode: 1});	
-						break;
+							lastName: assignedName,
+							creatorType: "translator",
+							fieldMode: 1 });
+							break;
 					
 					// multiple roles
 					case '编著':
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "author",
-						fieldMode: 1});	
+							lastName: assignedName,
+							creatorType: "author",
+							fieldMode: 1 });
 						newItem.creators.push({
-						lastName: assignedName,
-						creatorType: "editor",
-						fieldMode: 1});	
+							lastName: assignedName,
+							creatorType: "editor",
+							fieldMode: 1 });
 						break;
 					case '编译':
 						newItem.creators.push({
@@ -200,7 +199,7 @@ function scrapeAndParse(doc, url) {
 						newItem.creators.push({
 						lastName: assignedName,
 						creatorType: "translator",
-						fieldMode: 1});	
+						fieldMode: 1 });
 						break;
 
 					// default as author
@@ -208,7 +207,7 @@ function scrapeAndParse(doc, url) {
 						newItem.creators.push({
 						lastName: assignedName,
 						creatorType: "author",
-						fieldMode: 1});	
+						fieldMode: 1 });
 				}
 			}
 		}
@@ -217,13 +216,13 @@ function scrapeAndParse(doc, url) {
 		pattern = /<dd>[\s\S]*出版发行[\s\S]*?<\/span>([\s\S]*?)：[\s\S]*?<\/dd>/;
 		if (pattern.test(page)) {
 			var place = pattern.exec(page)[1];
-			if (place.includes(",")){
+			if (place.includes(",")) {
 				// if publication place not provided, replace publisher with trimed info. from place field.
 				newItem.publisher = Zotero.Utilities.trim(place.substring(0, place.indexOf(",")));
-				place = ""
+				place = "";
 			}
 			else if (Zotero.Utilities.trim(place).match(/^\d/)){
-				place = ""
+				place = "";
 			}
 			else {
 				newItem.place = Zotero.Utilities.trim(place);
@@ -231,7 +230,7 @@ function scrapeAndParse(doc, url) {
 		}
 		
 		// 出版社 publisher.
-		pattern =  /<dd>[\s\S]*出版发行[\s\S]*?：([\s\S]*?)\,[\s\S]*?<\/dd>/;
+		pattern = /<dd>[\s\S]*出版发行[\s\S]*?：([\s\S]*?),[\s\S]*?<\/dd>/;
 		if (pattern.test(page)) {
 			var publisher = pattern.exec(page)[1];
 			if (place){
@@ -240,13 +239,13 @@ function scrapeAndParse(doc, url) {
 		}
 		
 		// 出版时间 publication date.
-		pattern =  /<dd>[\s\S]*出版发行[\s\S]*?,([\s\S]*?)<\/dd>/;
+		pattern = /<dd>[\s\S]*出版发行[\s\S]*?,([\s\S]*?)<\/dd>/;
 		if (!pattern.test(page)) {
-			pattern =  /<dd>[\s\S]*出版发行[\s\S]*?([\s\S]*?)<\/dd>/;
+			pattern = /<dd>[\s\S]*出版发行[\s\S]*?([\s\S]*?)<\/dd>/;
 		}
 		if (pattern.test(page)) {
 		// preserve Chinese characters used for the publication date of old books.
-		var date = pattern.exec(page)[1].replace(/[^\.\d民国清光绪宣统一二三四五六七八九年\-]/g,"");
+			var date = pattern.exec(page)[1].replace(/[^.\d民国清光绪宣统一二三四五六七八九年-]/g, "");
 			newItem.date = Zotero.Utilities.trim(date);
 		}
 		
@@ -255,13 +254,13 @@ function scrapeAndParse(doc, url) {
 		if (pattern.test(page)) {
 			var isbn = pattern.exec(page)[1];
 			newItem.ISBN = Zotero.Utilities.trim(isbn);
-			if (newItem.ISBN.length < 13){
-				newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra
+			if (newItem.ISBN.length < 13) {
+				newItem.extra = "出版号: " + newItem.ISBN + "\n" + newItem.extra;
 			}
 			
 			// Zotero does not allow non-standard but correct ISBN such as one that starts with 7
-			else if (newItem.ISBN.length == 13 && newItem.ISBN.startsWith("7")){
-			newItem.ISBN = "978-" + newItem.ISBN
+			else if (newItem.ISBN.length == 13 && newItem.ISBN.startsWith("7")) {
+				newItem.ISBN = "978-" + newItem.ISBN;
 			}
 		}
 
@@ -283,7 +282,7 @@ function scrapeAndParse(doc, url) {
 		if (pattern.test(page)) {
 			var price = pattern.exec(page)[1];
 			newItem.price = Zotero.Utilities.trim(price);
-			newItem.extra += "原书定价: " + newItem.price + "\n"
+			newItem.extra += "原书定价: " + newItem.price + "\n";
 		}
 		
 		// 开本 edition format.
@@ -291,8 +290,8 @@ function scrapeAndParse(doc, url) {
 		if (pattern.test(page)) {
 			var format = trimTags(pattern.exec(page)[1]);
 			newItem.format = Zotero.Utilities.trim(format);
-			newItem.extra += "开本: " + newItem.format + "\n"
-		}		
+			newItem.extra += "开本: " + newItem.format + "\n";
+		};
 		// 主题词 subject terms.
 		pattern = /<dd>[\s\S]*主题词[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
@@ -313,65 +312,65 @@ function scrapeAndParse(doc, url) {
 			var refFormat = trimTags(pattern.exec(page)[1]);
 			newItem.refFormat = Zotero.Utilities.trim(refFormat);
 			
-			newItem.extra = "参考格式: " + newItem.refFormat + "\n" + newItem.extra
+			newItem.extra = "参考格式: " + newItem.refFormat + "\n" + newItem.extra;
 		}			
 		
 		// 内容提要 abstract.
 		pattern = /<dd>[\s\S]*内容提要[\s\S]*?>([\s\S]*?)<\/dd>/;
 		if (pattern.test(page)) {
 			var abstractNote = trimTags(pattern.exec(page)[1]);
-			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g,"-") + "\n\n";
+			newItem.abstractNote = Zotero.Utilities.trim(abstractNote).replace(/&mdash;/g, "-") + "\n\n";
 		}
 		
 		// use subject terms to populate abstract
 		if (newItem.subjectTerms) {
-			newItem.abstractNote = newItem.abstractNote + "主题词: " + newItem.subjectTerms
-			}
+			newItem.abstractNote = newItem.abstractNote + "主题词: " + newItem.subjectTerms;
+		};
 			
 		// start the abstract with the foreign language title if available.
 		if (newItem.foreignTitle) {
-			newItem.abstractNote = "外文题名: " + newItem.foreignTitle + "\n\n" + newItem.abstractNote
-			}
+			newItem.abstractNote = "外文题名: " + newItem.foreignTitle + "\n\n" + newItem.abstractNote;
+		}
 
 		// SSID
-		pattern = /\<input name \= \"ssid\" id \= \"forumssid\"  value \= \"([\s\S]*?)\"/;
-			if (pattern.test(page)) {
+		pattern = /<input name = "ssid" id = "forumssid" {2}value \= "([\s\S]*?)"/;
+		if (pattern.test(page)) {
 			var SSID = trimTags(pattern.exec(page)[1]);
-			newItem.SSID = Zotero.Utilities.trim(SSID)
-			newItem.extra = newItem.extra + "SSID: " + newItem.SSID
-			}
+			newItem.SSID = Zotero.Utilities.trim(SSID);
+			newItem.extra = newItem.extra + "SSID: " + newItem.SSID;
+		}
 
 		newItem.complete();
 	});
 }
 
 // the list from which to pick the best role for a given creator. Do not add variants of strings that end with 著,译，编
-var rolelist = ["总主编","总编辑","总编",,"编著","编译","编","整理","执笔","译","著","撰","纂","集解","辑","编辑","集注"]
+var rolelist = ["总主编", "总编辑", "总编", "编著", "编译", "编", "整理", "执笔", "译", "著", "撰", "纂", "集解", "辑", "编辑", "集注"];
 
 function trimTags(text) {
 	return text.replace(/(<.*?>)|\t|\r|(隐藏更多)|&nbsp;|/g, "");
 }
 
 // pick a role for a creator.
-function determineRoles(name){
+function determineRoles(name) {
 	var role = ""
 	for (var t = 0; t < rolelist.length; t++){
 		if (name.endsWith(rolelist[t]) && rolelist[t].length > role.length){
 			role = rolelist[t]        
 		}
 	}
-	return role
+	return role;
 }
 
 // pick the closest role when the given creator has none.
-function pickClosestRole(namelist,index){
+function pickClosestRole(namelist, index) {
 	var role = ""
 	var i = index + 1
 	while (i < namelist.length && !role) {
-		role = determineRoles(namelist[i])
-		i++
+		role = determineRoles(namelist[i]);
+		i++;
 	}
-	return role
+	return role;
 }
 
 /** BEGIN TEST CASES **/
