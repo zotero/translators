@@ -1,15 +1,15 @@
 {
 	"translatorID": "ac277fbe-000c-46da-b145-fbe799d17eda",
-	"label": "MIT Press",
+	"label": "MIT Press Books",
 	"creator": "Guy Aglionby",
-	"target": "https://(www\\.)?mitpress\\.mit\\.edu/",
+	"target": "https://(www\\.)?mitpress\\.mit\\.edu/(mit-press-open|contributors|search|series|books)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-27 22:08:32"
+	"lastUpdated": "2019-11-07 18:08:52"
 }
 
 /*
@@ -59,28 +59,44 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	let authorsElement = ZU.xpath(doc, '//span[@class = "book__authors"]/p[1]/a');
-	let authors = authorsElement.map(function (author) {
-		return ZU.cleanAuthor(author.text, 'author');
-	});
-	let openAccessUrl = ZU.xpathText(doc, '//div[contains(@class, "open-access")]/a/@href');
-	let series = ZU.xpathText(doc, '//p[@class = "book__series"]/a');
-	
 	let item = new Zotero.Item('book');
-	item.creators = authors;
 	item.url = url;
 	item.place = 'Cambridge, MA, USA';
 	item.publisher = 'MIT Press';
 	item.language = 'en';
-	item.title = ZU.xpathText(doc, '//h1[@class = "book__title"]').trim();
 	item.date = ZU.xpathText(doc, '(//time[@property = "publishDate"]/@content)[1]');
 	item.ISBN = ZU.xpathText(doc, '(//span[@property = "isbn"])[1]');
 	item.numPages = ZU.xpathText(doc, '(//span[@property = "numPages"])[1]');
 	
+	let title = ZU.xpathText(doc, '//h1[@class = "book__title"]').trim();
+	let subtitle = ZU.xpathText(doc, '//h2[@class = "book__subtitle"]').trim();
+	if (subtitle) {
+		item.title = [title, subtitle].join(': ');
+	}
+	else {
+		item.title = title;
+	}
+	
+	const contributorTypes = [['By', 'author'], ['Translated by', 'translator'], ['Edited by', 'editor']];
+	let allContributors = ZU.xpath(doc, '//span[@class = "book__authors"]/p');
+	allContributors.forEach(function (contributorLine) {
+		contributorLine = contributorLine.textContent;
+		contributorTypes.forEach(function (contributorType) {
+			if (contributorLine.startsWith(contributorType[0])) {
+				let contributors = contributorLine.replace(contributorType[0], '').split(/ and |,/);
+				contributors.forEach(function (contributorName) {
+					item.creators.push(ZU.cleanAuthor(contributorName, contributorType[1]));
+				});
+			}
+		});
+	});
+	
+	let series = ZU.xpathText(doc, '//p[@class = "book__series"][1]/a');
 	if (series) {
 		item.series = series.trim();
 	}
 	
+	let openAccessUrl = ZU.xpathText(doc, '//div[contains(@class, "open-access")]/a/@href');
 	if (openAccessUrl) {
 		if (openAccessUrl.endsWith('.pdf') || openAccessUrl.endsWith('.pdf?dl=1')) {
 			item.attachments.push({
@@ -128,7 +144,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Elements of Causal Inference",
+				"title": "Elements of Causal Inference: Foundations and Learning Algorithms",
 				"creators": [
 					{
 						"firstName": "Jonas",
@@ -148,11 +164,13 @@ var testCases = [
 				],
 				"date": "2017-11-29",
 				"ISBN": "9780262037310",
-				"libraryCatalog": "MIT Press",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
 				"numPages": "288",
 				"place": "Cambridge, MA, USA",
 				"publisher": "MIT Press",
 				"series": "Adaptive Computation and Machine Learning series",
+				"shortTitle": "Elements of Causal Inference",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -191,10 +209,84 @@ var testCases = [
 				],
 				"date": "2019-08-13",
 				"ISBN": "9780262537537",
-				"libraryCatalog": "MIT Press",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
 				"numPages": "256",
 				"place": "Cambridge, MA, USA",
 				"publisher": "MIT Press",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mitpress.mit.edu/books/construction-site-possible-worlds",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Construction Site for Possible Worlds",
+				"creators": [
+					{
+						"firstName": "Amanda",
+						"lastName": "Beech",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Robin",
+						"lastName": "Mackay",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Wiltgen",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2020-05-12",
+				"ISBN": "9781913029579",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
+				"numPages": "136",
+				"place": "Cambridge, MA, USA",
+				"publisher": "MIT Press",
+				"series": "Urbanomic",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mitpress.mit.edu/books/ribbon-olympias-throat",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Ribbon at Olympia's Throat",
+				"creators": [
+					{
+						"firstName": "Michel",
+						"lastName": "Leiris",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christine",
+						"lastName": "Pichini",
+						"creatorType": "translator"
+					}
+				],
+				"date": "2019-07-02",
+				"ISBN": "9781635900842",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
+				"numPages": "288",
+				"place": "Cambridge, MA, USA",
+				"publisher": "MIT Press",
+				"series": "Semiotext(e) / Native Agents",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
