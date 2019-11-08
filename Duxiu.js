@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-05 14:51:51"
+	"lastUpdated": "2019-11-08 18:37:44"
 }
 
 /*
@@ -120,7 +120,7 @@ function scrapeAndParse(doc, url) {
 			// Zotero.debug(authorNames);
 			
 			// list of role titles. used to remove the role title from the name of the creator.
-			var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$/;
+			var titleMask = /本书主编$|本书副主编$|总主编$|总编辑$|总编$|编译$|编著$|主编$|副主编$|改编$|编$|著$|译$|选编$|摄影$|整理$|执笔$|合著$|撰$|编纂$|纂$|辑$|集注$|编辑$|原著$|主译$|绘$/;
 
 			for (let i = 0; i < authorNames.length; i++) {
 				var assignedRole = "";
@@ -160,7 +160,9 @@ function scrapeAndParse(doc, url) {
 					case '著':
 					case '执笔':
 					case '撰':
+					case '绘':
 					case '纂':
+					case '摄影':
 					case '集解':
 					case '集注':
 						newItem.creators.push({ lastName: assignedName,
@@ -335,7 +337,7 @@ function scrapeAndParse(doc, url) {
 }
 
 // the list from which to pick the best role for a given creator. Do not add variants of strings that end with 著,译，编
-var rolelist = ["总主编", "总编辑", "总编", "编著", "编译", "编", "整理", "执笔", "译", "著", "撰", "纂", "集解", "辑", "编辑", "集注"];
+var rolelist = ["总主编", "总编辑", "总编", "编著", "编译", "编", "整理", "执笔", "译", "著", "撰", "纂", "集解", "辑", "编辑", "集注","绘"];
 
 function trimTags(text) {
 	return text.replace(/(<.*?>)|\t|\r|(隐藏更多)|&nbsp;|/g, "");
@@ -362,6 +364,7 @@ function pickClosestRole(namelist, index) {
 	}
 	return role;
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
