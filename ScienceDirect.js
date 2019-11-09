@@ -2,14 +2,14 @@
 	"translatorID": "b6d0a7a-d076-48ae-b2f0-b6de28b194e",
 	"label": "ScienceDirect",
 	"creator": "Michael Berkowitz and Aurimas Vinckevicius",
-	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\\d)|search\\?|journal/[^/]+/vol)",
+	"target": "^https?://[^/]*science-?direct\\.com[^/]*/((science/)?(article/|(journal|bookseries|book|handbook)/\\d)|search[?/]|journal/[^/]+/vol)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-03 09:59:32"
+	"lastUpdated": "2019-11-09 03:35:55"
 }
 
 // attr()/text() v2
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	if (url.includes('/search?') && getArticleList(doc).length > 0) {
+	if (url.search(/\/search[?/]/) != -1 && getArticleList(doc).length > 0) {
 		return "multiple";
 	}
 	if (!url.includes("pdf")) {
@@ -470,6 +470,7 @@ function scrape(doc, url) {
 
 	throw new Error("Could not scrape metadata via known methods");
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -1152,6 +1153,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.sciencedirect.com/search/advanced?qs=testing",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
