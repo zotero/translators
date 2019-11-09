@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-03 13:03:06"
+	"lastUpdated": "2019-11-09 11:21:06"
 }
 
 /*
@@ -35,11 +35,12 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	Z.monitorDOMChanges(doc.getElementById("ref-liees-p"));
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -61,10 +62,10 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+function doWeb(doc, _url) {
 	Zotero.selectItems(getSearchResults(doc, false), function (selectedItems) {
 		if (!selectedItems) {
-			return true;
+			return;
 		}
 		var articles = [];
 		for (var i in selectedItems) {
