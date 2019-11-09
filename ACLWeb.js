@@ -193,7 +193,7 @@ function getSearchResults(doc, url) {
 	let items = {};
 	if (url.includes('/search/')) {
 		// e.g. https://www.aclweb.org/anthology/search/?q=foo+bar
-		papers = ZU.xpath(doc, '//div[contains(@class, "gsc-webResult")]//div[@class = "gs-title"]/a');
+		papers = ZU.xpath(doc, '//div[contains(@class, "gsc-webResult")]//div[contains(@class, "gs-title")]/a');
 		for (let i = 0; i < papers.length; i++) {
 			let paperId = papers[i].href.split('/').pop();
 			items[constructPaperURL(paperId)] = papers[i].text;
