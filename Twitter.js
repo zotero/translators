@@ -1,7 +1,7 @@
 {
 	"translatorID": "31659710-d04e-45d0-84ba-8e3f5afc4a54",
 	"label": "Twitter",
-	"creator": "Avram Lyon, Philipp Zumstein",
+	"creator": "Avram Lyon, Philipp Zumstein, Tomas Fiers",
 	"target": "^https?://([^/]+\\.)?twitter\\.com/",
 	"minVersion": "4.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-11 23:28:19"
+	"lastUpdated": "2019-11-10 14:10:48"
 }
 
 /*
@@ -89,18 +89,18 @@ function scrape(doc, url) {
 	}
 	var date = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//span[@class="metadata"]/span[1]');
 	if (date) {
-		// e.g. 10:22 AM - 1 Feb 2018
+		// e.g. 10:22 am - 1 Feb 2018
 		var m = date.split('-');
 		if (m.length == 2) {
-			// times with AM
-			if (m[0].includes("AM")) {
-				m[0] = m[0].replace("AM", "").trim();
+			// times with am
+			if (m[0].includes("am")) {
+				m[0] = m[0].replace("am", "").trim();
 				if (m[0].indexOf(":")==1) m[0] = "0" + m[0];
 				m[0] = m[0].replace("12:", "00:");
 			}
-			// times with PM
-			if (m[0].includes("PM")) {
-				m[0] = m[0].replace("PM", "").replace(/\d+:/, function(matched) {
+			// times with pm
+			if (m[0].includes("pm")) {
+				m[0] = m[0].replace("pm", "").replace(/\d+:/, function(matched) {
 					return (parseInt(matched)+12) + ":";
 				}).trim();
 				m[0] = m[0].replace("24:", "12:");
