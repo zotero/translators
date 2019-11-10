@@ -84,17 +84,18 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
+	// div class="bHexK" is for regular google book searches
+	// div class="Q9MA7b" is for google play searches
 	var rows = doc.querySelectorAll('div.bHexk>a, div.Q9MA7b>a');
 	for (let row of rows) {
 		let href = row.href;
-		// TODO: check and maybe adjust
-		let title = ZU.trimInternal(text(row, 'h3, div'));
+		// h3 for google books, div for google play
+		let title = text(row, 'h3, div');
 
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
-		items[href] = title;
+		items[href] = ZU.trimInternal(title);
 	}
 	return found ? items : false;
 }
