@@ -97,18 +97,20 @@ function scrape(doc, url) {
 	}
 	var date = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//span[@class="metadata"]/span[1]');
 	if (date) {
-		// e.g. 10:22 am - 1 Feb 2018
+		// e.g. 10:22 AM - 1 Feb 2018
 		var m = date.split('-');
+		// Support localization where am/pm are lowercase
+		m[0] = m[0].toUpperCase();
 		if (m.length == 2) {
-			// times with am
-			if (m[0].includes("am")) {
-				m[0] = m[0].replace("am", "").trim();
+			// times with AM
+			if (m[0].includes("AM")) {
+				m[0] = m[0].replace("AM", "").trim();
 				if (m[0].indexOf(":") == 1) m[0] = "0" + m[0];
 				m[0] = m[0].replace("12:", "00:");
 			}
-			// times with pm
-			if (m[0].includes("pm")) {
-				m[0] = m[0].replace("pm", "").replace(/\d+:/, function (matched) {
+			// times with PM
+			if (m[0].includes("PM")) {
+				m[0] = m[0].replace("PM", "").replace(/\d+:/, function (matched) {
 					return (parseInt(matched) + 12) + ":";
 				}).trim();
 				m[0] = m[0].replace("24:", "12:");
