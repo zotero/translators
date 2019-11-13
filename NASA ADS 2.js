@@ -2,7 +2,7 @@
 	"translatorID": "7044e7f7-2c35-4b25-9755-ee87cdb7f599",
 	"label": "NASA ADS 2",
 	"creator": "Tim Hostetler",
-	"target": "^https://ui.adsabs.harvard.edu/(search|abs)/",
+	"target": "^https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
