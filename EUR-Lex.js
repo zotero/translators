@@ -39,6 +39,15 @@
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
+function getQueryParam(url, param){
+	const queryString = url.split("?")[1]
+	const vars = queryString.split("&")
+	for (var i=0;i<vars.length;i++) {
+           const pair = vars[i].split("=");
+           if(pair[0] == param){return pair[1];}
+   }
+   return(false);
+}
 
 // the eli resource types are described at:
 // http://publications.europa.eu/mdr/resource/authority/resource-type/html/resourcetypes-eng.html
@@ -46,13 +55,27 @@ var typeMapping = {
 	'DIR': 'bill', // directive
 	'REG': 'statute', // regulation
 	'DEC': 'statute', // decision
-	'RECO': 'report', // recommodation
-	'OPI': 'report' // opinion
+	'RECO': 'report', // recommendation
+	'OPI': 'report', // opinion
+	'CASE': 'case', // case
+	'CASE_LAW': 'case', // case law
+	'OPIN_AG': 'case', // advocate general's opinion
+	'OPIN_CASE': 'case', // advocate general's opinion
+	'VIEW_AG': 'case', // advocate general's opinion
 };
 
 
 function detectWeb(doc, url) {
-	var eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
+	const celex = getQueryParam(url, 'uri')
+	if(celex){
+		const sector = celex.slice(6, 7)
+		if(sector === '6'){ // caselaw
+			return 'case'
+		}
+	}
+	
+	
+	const eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
 		var eliType = eliTypeURI.split('/').pop();
 		var eliCategory = eliType.split('_')[0];
@@ -64,7 +87,7 @@ function detectWeb(doc, url) {
 		}
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
-	}
+	}	
 }
 
 
@@ -105,6 +128,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
+	} else if (detectWeb(doc, url) === "case"){
+		scrapeCase(doc, url);
 	} else {
 		scrape(doc, url);
 	}
@@ -193,6 +218,31 @@ function scrape(doc, url) {
 	item.complete();
 }
 
+function scrapeCase(doc, url) {
+	const type = detectWeb(doc, url);
+	const item = new Zotero.Item(type);
+	
+	// determine the language we are currently looking the document at
+	const languageUrl = url.split('/')[4];
+	if (languageUrl=="AUTO") {
+		languageUrl = autoLanguage || "EN";
+	}
+	const language = languageMapping[languageUrl] || "eng";
+	
+	item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('. ')[1];
+	item.language = languageUrl.toLowerCase();
+	
+	
+	const parsedDate = ZU.xpathText(doc, "//div[@id='PPDates_Contents']/div[1]/dl[1]/dd[1]").split('/')
+	item.date = parsedDate[2] + '-' + parsedDate[1] + '-' + parsedDate[0];
+
+	
+	item.url = url;
+	
+	item.complete();
+}
+
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -275,6 +325,24 @@ var testCases = [
 				"language": "fr",
 				"publicLawNumber": "31994R2257",
 				"url": "http://data.europa.eu/eli/reg/1994/2257/oj/fra",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:61962CJ0026",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "NV Algemene Transport- en Expeditie Onderneming van Gend & Loos v Netherlands Inland Revenue Administration",
+				"creators": [],
+				"dateDecided": "1963-02-05",
+				"language": "en",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:61962CJ0026",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
