@@ -37,44 +37,48 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+function attr(docOrElem, selector, attr, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null;
+}
 
-function getQueryParam(url, param){
-	const queryString = url.split("?")[1]
-	const vars = queryString.split("&")
-	for (var i=0;i<vars.length;i++) {
-		   const pair = vars[i].split("=");
-		   if(pair[0] == param){return pair[1];}
-   }
-   return(false);
+function getQueryParam(url, param) {
+	const queryString = url.split("?")[1];
+	const vars = queryString.split("&");
+	for (var i = 0; i < vars.length; i++) {
+		const pair = vars[i].split("=");
+		if (pair[0] == param) {
+			return pair[1];
+		}
+	}
+	return (false);
 }
 
 // the eli resource types are described at:
 // http://publications.europa.eu/mdr/resource/authority/resource-type/html/resourcetypes-eng.html
 var typeMapping = {
-	'DIR': 'bill', // directive
-	'REG': 'statute', // regulation
-	'DEC': 'statute', // decision
-	'RECO': 'report', // recommendation
-	'OPI': 'report', // opinion
-	'CASE': 'case', // case
-	'CASE_LAW': 'case', // case law
-	'OPIN_AG': 'case', // advocate general's opinion
-	'OPIN_CASE': 'case', // advocate general's opinion
-	'VIEW_AG': 'case', // advocate general's opinion
+	DIR: 'bill', // directive
+	REG: 'statute', // regulation
+	DEC: 'statute', // decision
+	RECO: 'report', // recommendation
+	OPI: 'report', // opinion
+	CASE: 'case', // case
+	CASE_LAW: 'case', // case law
+	OPIN_AG: 'case', // advocate general's opinion
+	OPIN_CASE: 'case', // advocate general's opinion
+	VIEW_AG: 'case', // advocate general's opinion
 };
 
 
 function detectWeb(doc, url) {
-	const celex = getQueryParam(url, 'uri')
-	if(celex){
-		const sector = celex.slice(6, 7)
-		if(sector === '6'){ // caselaw
-			return 'case'
+	const celex = getQueryParam(url, 'uri');
+	if (celex) {
+		const sector = celex.slice(6, 7);
+		if (sector === '6') { // caselaw
+			return 'case';
 		}
 	}
-	
-	
+
+
 	const eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
 		var eliType = eliTypeURI.split('/').pop();
@@ -82,12 +86,17 @@ function detectWeb(doc, url) {
 		var type = typeMapping[eliCategory];
 		if (type) {
 			return type;
-		} else {
-			Z.debug("Unknown eliType: " + eliType);
 		}
-	} else if (getSearchResults(doc, true)) {
+		else {
+			Z.debug("Unknown eliType: " + eliType);
+			return null;
+		}
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
-	}	
+	}
+
+	return null;
 }
 
 
@@ -95,7 +104,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.title');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -126,119 +135,121 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, scrape);
+			return ZU.processDocuments(articles, scrape);
 		});
-	} else if (detectWeb(doc, url) === "case"){
-		scrapeCase(doc, url);
-	} else {
-		scrape(doc, url);
 	}
+	else if (detectWeb(doc, url) === "case") {
+		return scrapeCase(doc, url);
+	}
+	return scrape(doc, url);
 }
 
 
 // this maps language codes from ISO 639-1 to 639-3
 var languageMapping = {
-	'BG': 'bul',
-	'CS': 'ces',
-	'DA': 'dan',
-	'DE': 'deu',
-	'EL': 'ell',
-	'EN': 'eng',
-	'ES': 'spa',
-	'ET': 'est',
-	'FI': 'fin',
-	'FR': 'fra',
-	'GA': 'gle',
-	'HR': 'hrv',
-	'HU': 'hun',
-	'IT': 'ita',
-	'LV': 'lav',
-	'LT': 'lit',
-	'MT': 'mlt',
-	'NL': 'nld',
-	'PL': 'pol',
-	'PT': 'por',
-	'RO': 'ron',
-	'SK': 'slk',
-	'SL': 'slv',
-	'SV': 'swe'
+	BG: 'bul',
+	CS: 'ces',
+	DA: 'dan',
+	DE: 'deu',
+	EL: 'ell',
+	EN: 'eng',
+	ES: 'spa',
+	ET: 'est',
+	FI: 'fin',
+	FR: 'fra',
+	GA: 'gle',
+	HR: 'hrv',
+	HU: 'hun',
+	IT: 'ita',
+	LV: 'lav',
+	LT: 'lit',
+	MT: 'mlt',
+	NL: 'nld',
+	PL: 'pol',
+	PT: 'por',
+	RO: 'ron',
+	SK: 'slk',
+	SL: 'slv',
+	SV: 'swe'
 };
 
 
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
-	
+
 	// determine the language we are currently looking the document at
-	var languageUrl = url.split('/')[4];
-	if (languageUrl=="AUTO") {
+	let languageUrl = url.split('/')[4];
+	if (languageUrl === "AUTO") {
 		languageUrl = autoLanguage || "EN";
 	}
-	var language = languageMapping[languageUrl] || "eng";
-	
+	const language = languageMapping[languageUrl] || "eng";
+
 	item.title = attr(doc, 'meta[property="eli:title"][lang=' + languageUrl.toLowerCase() + ']', 'content');
 	item.language = languageUrl.toLowerCase();
-	
+
 	var uri = attr(doc, '#format_language_table_digital_sign_act_' + languageUrl.toUpperCase(), 'href');
 	if (uri) {
-		var uriParts = uri.split('/').pop().replace('?uri=', '').split(':');
+		var uriParts = uri.split('/').pop().replace('?uri=', '')
+			.split(':');
 		// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
 		// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
-		if (uriParts.length>=4) {
+		if (uriParts.length >= 4) {
 			if (/\d+/.test(uriParts[1])) {
 				item.code = uriParts[0];
 				item.codeNumber = uriParts[1] + ', ' + uriParts[2];
-			} else {
+			}
+			else {
 				item.code = uriParts[0] + ' ' + uriParts[1];
 				item.codeNumber = uriParts[3];
 			}
-			if (type=="bill") {
+			if (type == "bill") {
 				item.codeVolume = item.code;
 				item.code = item.codeNumber;
 			}
 		}
 	}
-	
+
 	item.number = attr(doc, 'meta[property="eli:id_local"]', 'content');
-	
+
 	item.date = attr(doc, 'meta[property="eli:date_publication"]', 'content');
 	// attr(doc, 'meta[property="eli:date_document"]', 'content');
 
 	var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
 	var passedByArray = [];
-	for (let i=0; i<passedBy.length; i++) {
+	for (let i = 0; i < passedBy.length; i++) {
 		passedByArray.push(passedBy[i].getAttribute('resource').split('/').pop());
 	}
 	item.legislativeBody = passedByArray.join(', ');
-	
+
 	item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', 'about') + '/' + language;
-	
+
 	// eli:is_about -> eurovoc -> tags
-	
+
 	item.complete();
 }
 
 function scrapeCase(doc, url) {
 	const type = detectWeb(doc, url);
 	const item = new Zotero.Item(type);
-	
+
 	// determine the language we are currently looking the document at
-	const languageUrl = url.split('/')[4];
-	if (languageUrl=="AUTO") {
+	let languageUrl = url.split('/')[4];
+	if (languageUrl == "AUTO") {
 		languageUrl = autoLanguage || "EN";
 	}
-	const language = languageMapping[languageUrl] || "eng";
-	
+	// const language = languageMapping[languageUrl] || "eng";
+
 	item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('.')[1].trim();
 	item.language = languageUrl.toLowerCase();
-	
-	
-	const parsedDate = ZU.xpathText(doc, "//div[@id='PPDates_Contents']/div[1]/dl[1]/dd[1]").split('/')
+
+
+	const parsedDate = ZU.xpathText(doc, "//div[@id='PPDates_Contents']/div[1]/dl[1]/dd[1]").split('/');
 	item.date = parsedDate[2] + '-' + parsedDate[1] + '-' + parsedDate[0];
 
-	
+
 	item.url = url;
-	
+
 	item.complete();
 }
 
