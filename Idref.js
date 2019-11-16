@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-09 11:21:06"
+	"lastUpdated": "2019-11-16 21:34:33"
 }
 
 /*
@@ -53,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 		// We need to replace the http://www.sudoc.fr/XXXXXX links are they are redirects and aren't handled correctly from subtranslator
 		href = href.replace(/http:\/\/www\.sudoc\.fr\/(.*)$/, "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=$1");
 
-		if ((href.includes("www.sudoc.abes.fr")) || (href.includes("archives-ouvertes")) || (href.includes("catalogue.bnf.fr")) || (href.includes("www.theses.fr")) || (href.includes("pub.orcid.org"))) {
+		if ((href.includes("www.sudoc.abes.fr")) || (href.includes("archives-ouvertes")) || (href.includes("catalogue.bnf.fr")) || (href.includes("www.theses.fr")) || (href.includes("pub.orcid.org")) || (href.includes("www.persee.fr")) || (href.includes("oatao.univ-toulouse.fr"))) {
 			if (checkOnly) return true;
 			found = true;
 			items[href] = resultsTitle[i].textContent;
@@ -89,6 +89,9 @@ function scrape(doc, url) {
 	}
 	else if (url.includes("www.theses.fr")) {
 		translator.setTranslator('3f73f0aa-f91c-4192-b0d5-907312876cb9');
+	}
+	else if (url.includes("www.persee.fr") || url.includes("oatao.univ-toulouse.fr")) {
+		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded metadata
 	}
 	else {
 		// Orcid is the only case where we need to use an import translator, different behvior from previous ones
