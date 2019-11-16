@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-21 20:27:07"
+	"lastUpdated": "2019-11-16 09:11:06"
 }
 
 /*
@@ -43,8 +43,8 @@ function getQueryParam(url, param){
 	const queryString = url.split("?")[1]
 	const vars = queryString.split("&")
 	for (var i=0;i<vars.length;i++) {
-           const pair = vars[i].split("=");
-           if(pair[0] == param){return pair[1];}
+		   const pair = vars[i].split("=");
+		   if(pair[0] == param){return pair[1];}
    }
    return(false);
 }
@@ -229,7 +229,7 @@ function scrapeCase(doc, url) {
 	}
 	const language = languageMapping[languageUrl] || "eng";
 	
-	item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('. ')[1];
+	item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('.')[1].trim();
 	item.language = languageUrl.toLowerCase();
 	
 	
@@ -273,7 +273,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "bill",
-				"title": "Směrnice Evropského parlamentu a Rady 95/46/ES ze dne 24. října 1995 o ochraně fyzických osob v souvislosti se zpracováním osobních údajů a o volném pohybu těchto údajů",
+				"title": "Směrnice Evropského parlamentu a Rady 95/46/ES ze dne 24. října 1995 o ochraně fyzických osob v souvislosti se zpracováním osobních údajů a o volném pohybu těchto údajů",
 				"creators": [],
 				"date": "1995-11-23",
 				"billNumber": "31995L0046",
@@ -354,6 +354,24 @@ var testCases = [
 		"type": "web",
 		"url": "http://eur-lex.europa.eu/search.html?lang=en&text=%22open+access%22&qid=1513887127793&type=quick&scope=EURLEX&locale=nl",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:62018CJ0621",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Andy Wightman and Others v Secretary of State for Exiting the European Union",
+				"creators": [],
+				"dateDecided": "2018-12-10",
+				"language": "en",
+				"url": "https://eur-lex.europa.eu/legal-content/EN/ALL/?uri=CELEX:62018CJ0621",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
