@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-11-06 08:22:27"
+	"lastUpdated": "2019-11-16 15:40:16"
 }
 
 /*
@@ -40,31 +40,31 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefworksByID(ids, next) {
 	var postData = "";
-	for (var i = 0, n = ids.length; i < n; i++) {
-		postData += ids[i].dbname + "!" + ids[i].filename + "!0!0,";
+	for (var i=0, n=ids.length; i<n; i++) {
+		postData += ids[i].dbname + "!" + ids[i].filename + "!1!0,";
 	}
 	postData = "formfilenames=" + encodeURIComponent(postData);
-	ZU.doPost('https://epub.cnki.net/kns/ViewPage/viewsave.aspx?TablePre=SCDB', postData, function() {
-		ZU.doPost(
-			'https://epub.cnki.net/KNS/ViewPage/SaveSelectedNoteFormat.aspx?type=txt',
-			'CurSaveModeType=REFWORKS',
-			function(text) {
-				// fix item types
-				text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
-					// Zotero doesn't do well with mixed line endings. Make everything \n
-					.replace(/\r\n?/g, '\n')
-					// split authors
-					.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, function(m, tag, authors) {
-						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
-						if (!authors[authors.length - 1].trim()) authors.pop();
-						
+	postData += '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F';
+	postData += '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F';
+	postData += '&CookieName=FileNameS';
+	
+	ZU.doGet('https://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks' + '&' +  postData, 
+		function(text) {
+			var parser = new DOMParser();
+			var html = parser.parseFromString(text, "text/html")
+			var text = ZU.xpath(html, "//table[@class='mainTable']//td")[0].innerHTML;
+			var text = text.replace(/<br>/g, '\n');
+			text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation');
+			text = text.replace(/^(A[1-4]|U2)\s*([^\r\n]+)/gm, 
+					function(m, tag, authors) {
+						var authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
+						if (!authors[authors.length-1].trim()) authors.pop();
 						return tag + ' ' + authors.join('\n' + tag + ' ');
-					});
-
-				next(text, ids);
-			}
-		);
-	});
+					}
+				);
+			next(text);
+		}
+	);
 }
 
 function getIDFromURL(url) {
@@ -164,6 +164,8 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 
 function detectWeb(doc, url) {
 	// Z.debug(doc);
+	var ab = ZU.xpath(doc, "//span[@id='ChDivSummary']")[0]
+	Z.debug(doc.attributes);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
 	Z.debug(id);
