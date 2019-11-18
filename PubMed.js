@@ -2,14 +2,14 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
+	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)|^https?://pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d|\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-03 18:23:15"
+	"lastUpdated": "2019-11-18 17:40:30"
 }
 
  /*
@@ -283,6 +283,7 @@ function doSearch(item) {
 	
 	lookupPMIDs(pmid);
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -995,7 +996,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/30572268-gamification-predicting-the-effectiveness-of-variety-game-design-elements-to-intrinsically-motivate-users-energy-conservation-behaviour/",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/30572268-gamification-predicting-the-effectiveness-of-variety-game-design-elements-to-intrinsically-motivate-users-energy-conservation-behaviour/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1012,7 +1013,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Dec 17, 2018",
+				"date": "Mar 01, 2019",
 				"DOI": "10.1016/j.jenvman.2018.11.127",
 				"ISSN": "1095-8630",
 				"abstractNote": "This research predicted the effectiveness of variety game design elements in enhancing the intrinsic motivation of users on energy conservation behaviour prior to its actual implementation to ensure cost-effective. Face-to-face questionnaire surveys were conducted at the five recognized Malaysian research universities and obtained a total of 1500 valid survey data. The collected data was run with Structural Equation Modeling (SEM) analysis using SmartPLS 3 software. The results predicted the positive effect of gamification on intrinsically motivate the users based on Self-Determination Theory (SDT). The identified nine core game design elements were found to be useful in satisfying users' autonomy, competence and relatedness need satisfactions specified by SDT. This research is useful to guide the campaign organizer in designing a gamified design energy-saving campaign and provide understanding on the causal relationships between game design elements and users' intrinsic motivation to engage on energy conservation. A game-like campaign environment is believed to be created to users by implementing the game design elements in energy-saving campaign, and subsequently users' intrinsic motivation to engage on energy conservation behaviour can be enhanced.",
@@ -1033,6 +1034,9 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Conservation of Energy Resources"
+					},
+					{
 						"tag": "Energy conservation behaviour"
 					},
 					{
@@ -1045,10 +1049,25 @@ var testCases = [
 						"tag": "Gamification"
 					},
 					{
+						"tag": "Humans"
+					},
+					{
 						"tag": "Intrinsic motivation"
 					},
 					{
+						"tag": "Motivation"
+					},
+					{
+						"tag": "Personal Autonomy"
+					},
+					{
+						"tag": "Personal Satisfaction"
+					},
+					{
 						"tag": "Self-determination theory"
+					},
+					{
+						"tag": "Surveys and Questionnaires"
 					}
 				],
 				"notes": [],
@@ -1794,6 +1813,75 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/30226337-a-review-of-the-non-equivalent-control-group-post-test-only-design/?from_term=test&from_pos=2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A review of the non-equivalent control group post-test-only design",
+				"creators": [
+					{
+						"firstName": "Preetha",
+						"lastName": "Krishnan",
+						"creatorType": "author"
+					}
+				],
+				"date": "09 21, 2019",
+				"DOI": "10.7748/nr.2018.e1582",
+				"ISSN": "1351-5578",
+				"abstractNote": "BACKGROUND: Quantitative research designs are broadly classified as either experimental or quasi-experimental. The main distinguishing feature of the quasi-experiment is the manipulation of the independent variable without randomisation. When randomisation or use of a control group is unfeasible, a researcher can choose from a range of quasi-experimental designs.\nAIM: To present the features of the quasi-experimental 'non-equivalent control group post-test-only' design, which aims to demonstrate causality between an intervention and an outcome.\nDISCUSSION: This paper provides an overview of the non-equivalent control group post-test-only design in terms of its design features, applications and statistical analysis, as well as its advantages and disadvantages.\nCONCLUSION: The non-equivalent control group post-test-only design can be used in natural settings, where randomisation cannot be conducted for ethical or practical reasons. Although the design is less complex than some other designs, with low error propagation, it is vulnerable to threats to internal validity.",
+				"extra": "PMID: 30226337",
+				"issue": "2",
+				"journalAbbreviation": "Nurse Res",
+				"language": "eng",
+				"libraryCatalog": "PubMed",
+				"pages": "37-40",
+				"publicationTitle": "Nurse Researcher",
+				"volume": "26",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Control Groups"
+					},
+					{
+						"tag": "Data Collection"
+					},
+					{
+						"tag": "Nursing Research"
+					},
+					{
+						"tag": "Research Design"
+					},
+					{
+						"tag": "nursing research"
+					},
+					{
+						"tag": "quantitative research"
+					},
+					{
+						"tag": "quasi-experimental design"
+					},
+					{
+						"tag": "statistical analysis"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/?term=testing",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
