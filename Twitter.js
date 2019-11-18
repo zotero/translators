@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-10 14:10:48"
+	"lastUpdated": "2019-11-18 18:29:30"
 }
 
 /*
@@ -35,11 +35,11 @@
  */
 
 
-function detectWeb(doc, _url) {
+function detectWeb(doc, url) {
 	if (doc.getElementById('page-container')) {
 		Z.monitorDOMChanges(doc.getElementById('page-container'), { childList: true });
 	}
-	if (ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]')) {
+	if (url.includes('/status/')) {
 		return "blogPost";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -79,8 +79,19 @@ function doWeb(doc, url) {
 			}
 		});
 	}
-	else {
+	else if (ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]')) {
 		scrape(doc, url);
+	}
+	else {
+		// the new twitter interface is a mess w.r.t to extracting data
+		// thus we reopen the url but providing a different user agent
+		// which should then open the old twitter interface
+		// cf. https://www.theverge.com/2019/7/26/8930770/how-to-old-twitter-web-interface-design-desktop-ui
+		ZU.doGet(url, function (text) {
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(text, "text/html");
+			scrape(doc, url);
+		}, null,  { "User-Agent": "Mozilla/5.0 (Windows NT 6.3; Trident/7.0; rv:11.0) like Gecko" });
 	}
 }
 
