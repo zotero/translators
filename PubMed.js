@@ -12,7 +12,7 @@
 	"lastUpdated": "2019-11-18 17:40:30"
 }
 
- /*
+/*
  	***** BEGIN LICENSE BLOCK *****
  	
  	Copyright © 2015 Philipp Zumstein
@@ -36,33 +36,32 @@
  */
  
   
-  /*****************************
+/** ***************************
   * General utility functions *
   *****************************/
 
-function lookupPMIDs(ids, next) {
-	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
-		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
+function lookupPMIDs(ids) {
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
+		+ "db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id=" + ids.join(",");
 	Zotero.debug(newUri);
-	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
-		if (text.indexOf('PubmedArticle') == -1 && text.indexOf('PubmedBookArticle') == -1) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
-			throw("No Pubmed Data found - Most likely eutils is temporarily down");
+	Zotero.Utilities.HTTP.doGet(newUri, function (text) {
+		if (!text.includes('PubmedArticle') && !text.includes('PubmedBookArticle')) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
+			throw new Error("No Pubmed Data found - Most likely eutils is temporarily down");
 		}
 		
-		//call the import translator
+		// call the import translator
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");
 		translator.setString(text);
 		translator.translate();
-		
 	});
 }
 
 
-/****************************
+/** **************************
  * Web translator functions *
  ****************************/
- //retrieves the UID from an item page. Returns false if there is more than one.
+// retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
 	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist" or @name="ncbi_article_id"]/@content');
 	if (!uid.length) {
@@ -74,13 +73,13 @@ function getUID(doc) {
 	}
 	
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
-	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
+	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); // mobile site
 	if (uid.length == 1) {
 		uid = uid[0].textContent.match(/\/(\d+)(?:\/|$)/);
 		if (uid) return uid[1];
 	}
 	
-	//PMID from a bookshelf entry
+	// PMID from a bookshelf entry
 	var maincontent = doc.getElementById('maincontent');
 	if (maincontent) {
 		uid = ZU.xpath(maincontent,
@@ -94,7 +93,7 @@ function getUID(doc) {
 // retrieve itemprop elements for scraping books directly from page where UID is not available
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
-	if (!main) return;
+	if (!main) return false;
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
 }
@@ -112,7 +111,7 @@ var bookRDFaMap = {
 
 function scrapeItemProps(itemprops) {
 	var item = new Zotero.Item('book');
-	for (var i=0; i<itemprops.length; i++) {
+	for (var i = 0; i < itemprops.length; i++) {
 		var value = ZU.trimInternal(itemprops[i].textContent);
 		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
 		if (!field) continue;
@@ -120,12 +119,14 @@ function scrapeItemProps(itemprops) {
 		if (field.indexOf('creator/') == 0) {
 			field = field.substr(8);
 			item.creators.push(ZU.cleanAuthor(value, field, false));
-		} else if (field == 'ISBN') {
+		}
+		else if (field == 'ISBN') {
 			if (!item.ISBN) item.ISBN = '';
 			else item.ISBN += '; ';
 			
 			item.ISBN += value;
-		} else {
+		}
+		else {
 			item[field] = value;
 		}
 	}
@@ -144,15 +145,14 @@ function getSearchResults(doc, checkOnly) {
 
 	if (!results.length) return false;
 	for (var i = 0; i < results.length; i++) {
-		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]') ||
-			ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]') ||
-			ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+			|| ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]')
+			|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); // My Bibliography
 
-		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value') ||
-			ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]') ||
-			ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-			||
-			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+			|| ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]')
+			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') // My Bibliography
+			||			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 
 		if (!uid) {
 			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
@@ -178,7 +178,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc, true) && url.indexOf("/books/") == -1) {
+	if (getSearchResults(doc, true) && !url.includes("/books/")) {
 		return "multiple";
 	}
 	
@@ -188,25 +188,24 @@ function detectWeb(doc, url) {
 		else return false;
 	}
 	
-	//try to determine if this is a book
-	//"Sections" heading only seems to show up for books
+	// try to determine if this is a book
+	// "Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
-	{
+	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length) {
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
 	}
 
-	//determine if book or bookSection for PubMed Labs
+	// determine if book or bookSection for PubMed Labs
 	var bookCitation = doc.getElementsByClassName('book-citation');
 	if (bookCitation.length > 0 && ZU.xpath(bookCitation, './/div[@class="affiliations"]')) {
 		// For a bookSection there are the affiliations of the authors of this
 		// section as well as the affiliations of the book authors.
-		var book_affiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
-		return book_affiliations ? "bookSection" : "book";
+		var bookAffiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
+		return bookAffiliations ? "bookSection" : "book";
 	}
 	
-	//from bookshelf page
+	// from bookshelf page
 	var pdid = ZU.xpathText(doc, 'html/head/meta[@name="ncbi_pdid"]/@content');
 	if (pdid == "book-part") return 'bookSection';
 	if (pdid == "book-toc") return 'book';
@@ -216,8 +215,8 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
-			if (!selectedItems) return true;
+		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
+			if (!selectedItems) return;
 
 			var uids = [];
 			for (var i in selectedItems) {
@@ -225,11 +224,13 @@ function doWeb(doc, url) {
 			}
 			lookupPMIDs(uids);
 		});
-	} else {
+	}
+	else {
 		var uid = getUID(doc);
 		if (uid) {
 			lookupPMIDs([uid]);
-		} else {
+		}
+		else {
 			var itemprops = getBookProps(doc);
 			if (itemprops) {
 				scrapeItemProps(itemprops);
@@ -239,13 +240,13 @@ function doWeb(doc, url) {
 }
 
 
-/*******************************
+/** *****************************
  * Search translator functions *
  *******************************/
-//extract PMID from a context object
+// extract PMID from a context object
 function getPMID(co) {
 	var coParts = co.split("&");
-	for (var i=0; i<coParts.length; i++) {
+	for (var i = 0; i < coParts.length; i++) {
 		var part = coParts[i];
 		if (part.substr(0, 7) == "rft_id=") {
 			var value = decodeURIComponent(part.substr(7));
@@ -254,6 +255,7 @@ function getPMID(co) {
 			}
 		}
 	}
+	return false;
 }
 
 function detectSearch(item) {
@@ -263,9 +265,9 @@ function detectSearch(item) {
 		}
 	}
 	
-	//supply PMID as a string or array
+	// supply PMID as a string or array
 	if (item.PMID
-		&& (typeof item.PMID == 'string' || item.PMID.length > 0) )  {
+		&& (typeof item.PMID == 'string' || item.PMID.length > 0)) {
 		return true;
 	}
 	
