@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-11-19 08:32:36"
+	"lastUpdated": "2019-11-19 09:14:01"
 }
 
 /*
@@ -39,7 +39,7 @@ function getRefworksByID(ids, next) {
 	var searchType = {
 		journalArticle: 'periodical',
 		patent: 'patent',
-		conference: 'conference',
+		conferencePaper: 'conference',
 		thesis: 'thesis'
 	}
 	var r = Math.random();
@@ -331,6 +331,73 @@ var testCases = [
 						"tag": "生物多样性评价"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=conference&id=9534067",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "生物发酵提高芦笋汁生物利用率研究",
+				"creators": [],
+				"date": "2018",
+				"abstractNote": "本研究在单因素试验的基础上通过响应面法优化安琪酵母发酵芦笋汁生产工艺,以芦笋汁中总皂苷元含量作为响应值,各影响因素为自变量,设计响应面实验方案.结果表明一次项X1(接种量)、X2(发酵温度)、X3(发酵时间)和所有因素的二次项都达到了极显著水平(P<0.01).并得到安琪酵母发酵芦笋汁的最优生产工艺条件:利用R2A琼脂作为基础培养基接种量0.2％、发酵温度30℃、发酵时间7天.在此条件下重复实验3次,整理结果可知芦笋总皂苷元含量可达到(361.68±8.62)μg.",
+				"language": "chi",
+				"libraryCatalog": "WanFang",
+				"pages": "69-74",
+				"publicationTitle": "2018年广东省食品学会年会论文集",
+				"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=conference&id=9534067",
+				"attachments": [
+					{
+						"title": "生物发酵提高芦笋汁生物利用率研究",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					{
+						"tag": "总皂苷元含量"
+					},
+					{
+						"tag": "生物利用率"
+					},
+					{
+						"tag": "生物发酵"
+					},
+					{
+						"tag": "芦笋汁"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=patent&id=CN201880013080.0",
+		"items": [
+			{
+				"itemType": "patent",
+				"title": "生物体签名系统及生物体签名方法",
+				"creators": [],
+				"issueDate": "2019-10-11",
+				"abstractNote": "生物体签名系统保持将从用户的部位得到的第一生物体信息转换而得到的第一模板和通过单向性转换将从该用户的该部位得到的第二生物体信息进行转换而得到的第二模板，根据认证对象的第一生物体信息生成第一模板，对使用参数修正后的认证对象的第一模板与生物体签名系统保持的第一模板之间的相似度高的该参数进行特定，分别根据分别使用包括该特定出的参数在内的规定范围所包括的参数修正后的认证对象的第二生物体信息，生成第二模板，并将该生成的第二模板分别与生物体签名系统保持的第二模板进行比较来判定认证对象的认证成功与否。",
+				"applicationNumber": "发明专利",
+				"issuingAuthority": "株式会社日立制作所",
+				"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=patent&id=CN201880013080.0",
+				"attachments": [
+					{
+						"title": "生物体签名系统及生物体签名方法",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
