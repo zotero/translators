@@ -84,9 +84,12 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// div class="bHexK" is for regular google book searches
-	// div class="Q9MA7b" is for google play searches
-	var rows = doc.querySelectorAll('div.bHexk>a, div.Q9MA7b>a');
+	// regular books
+	var rows = ZU.xpath(doc, '//div[@class="srg"]//a[h3]');
+	if (!rows.length) {
+		// play store
+		rows = doc.querySelectorAll('div.Q9MA7b>a');
+	}
 	for (let row of rows) {
 		let href = row.href;
 		// h3 for google books, div for google play
@@ -115,7 +118,7 @@ function scrape(doc, url) {
 	var id;
 	// New books format:
 	if (url.includes("/books/edition/")) {
-		id = url.match(/\/books\/edition.*\/([^/]+)(?:\?.+)?$/)[1];
+		id = url.split('/').pop().split('?')[0];
 	}
 	// All old formats with explicit id, including play store
 	else if (url.search(/[&?]id=/) != -1) {
