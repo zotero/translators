@@ -1,263 +1,299 @@
 {
-	"translatorID": "eb876bd2-644c-458e-8d05-bf54b10176f3",
-	"label": "Wanfang Data",
-	"creator": "Ace Strong <acestrong@gmail.com>",
-	"target": "^https?://[ds]\\.(g\\.)?wanfangdata\\.com\\.cn",
-	"minVersion": "2.0rc1",
+	"translatorID": "dbee13de-2baf-4034-bbac-afa05bc29b48",
+	"label": "WanFang",
+	"creator": "Xingzhong Lin",
+	"target": "^https?://www\\.wanfangdata\\.com\\.cn",
+	"minVersion": "",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-06-10 22:46:01"
+	"lastUpdated": "2019-11-19 08:32:36"
 }
 
 /*
-   Wanfang Data Translator
-   Copyright (C) 2010 TAO Cheng, acestrong@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Copyright © 2019 Xingzhong Lin, linxzh1989@gmail.com
+	
+	This file is part of Zotero.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
-// #######################
-// ##### Sample URLs #####
-// #######################
-
-/*
- * The starting point for an search is the URL below.
- * In testing, I tried the following:
- *
- *   - A search listing of journals
- *   - A search listing of thesis
- *   - A search listing of conference papers
- *   - A search listing of foreign literatures(for chinese)
- *   - A journal paper page
- *   - A thesis page
- *   - A conference paper page
- *   - A foreign literature page
- */
-// http://g.wanfangdata.com.cn/Default.aspx
-
-
-// #################################
-// #### Local utility functions ####
-// #################################
-
-// sets the rs cookie value to the provided ID and returns the old value
-function setCookie(doc, rsId) {
-	if (!rsId) return null;
-
-	var matches = doc.cookie.match(/(?:$|; )rs=([^;]*)/);
-	var oldCookie = matches ? unescape(matches[1]) : null;
-
-	var domain = escape('wanfangdata.com.cn');
-	var id = escape(rsId);
-
-	doc.cookie = 'rs=' + id + ';domain=' + domain;
-
-	return oldCookie;
+function getRefworksByID(ids, next) {
+	var searchType = {
+		journalArticle: 'periodical',
+		patent: 'patent',
+		conference: 'conference',
+		thesis: 'thesis'
+	}
+	var r = Math.random();
+	var isHtml5Value = '';
+	for (var i=0, n=ids.length; i<n; i++) {
+		// only these four types have refworks
+		if (searchType[ids[i].dbname]){
+			isHtml5Value += searchType[ids[i].dbname] + "_" + ids[i].filename + ";";
+		}
+	}
+	//var isHtml5Value = "thesis_Y3578315;conference_9534067;periodical_jsjyjyfz201910006;patent_CN201880013080.0";
+	
+	var postData = "r=" + r + "&exportType=refWorks&isHtml5=true&isHtml5Value=" + isHtml5Value;
+	// Z.debug(postData);
+	ZU.doPost('http://www.wanfangdata.com.cn/export/getExportJson.do', postData, 
+		function(text) {
+			var text = JSON.parse(text)['exportHtml'];
+			var text = text.replace(/<br>/g, '\n');
+			text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation');
+			next(text);
+		}
+	);
 }
 
-function detectCode(url) {
-	var pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn\/([A-Za-z]*?)_/;
-	if (pattern.test(url)) {
-		var code = pattern.exec(url)[1];
-		return code;
-	}
-	return null;
-}
 
-function detectType(code) {
-	if (code == "Periodical"
-		|| code == "OAPaper") {
-		return "journalArticle";
-	}
-	else if (code == "Thesis") {
-		return "thesis";
-	}
-	else if (code == "Conference") {
-		return "conferencePaper";
-	}
-	else if (code == "NSTLHY") {
-		return "conferencePaper";
-	}
-	else if (code == "NSTLQK") {
-		return "journalArticle";
-	}
-	else {
+// Get file name and database name.
+function getIDFromURL(url) {
+	if (!url) return false;
+	
+	var filename = url.match(/[?&]id=([^&#]*)/i);
+	var dbname = url.match(/[?&]_type=([^&#]*)/i);
+	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
+	return { 
+				dbname: getTypeFromDBName(dbname[1]), 
+				filename: filename[1], url: url };
+			}
+
+// database and item type match
+function getTypeFromDBName(db) {
+	var dbType = {
+		perio: "journalArticle",
+		degree: "thesis",
+		legislations: "statute",
+		conference: "conferencePaper",
+		patent: "patent",
+		tech: "report",
+	};
+	if (db) {
+		return dbType[db];
+	} else {
 		return false;
 	}
 }
 
-function getSearchResults(doc, checkOnly) {
-	var items = [], found = false,
-		lis = ZU.xpath(doc, '//li[contains(@class,"title_li")]');
-	for (var i = 0, n = lis.length; i < n; i++) {
-		var a = lis[i].getElementsByTagName("a")[1];
-		var title = ZU.trimInternal(ZU.cleanTags(a.textContent));
-		var link = a.getAttribute("href").match(/\/([^/]+)\.aspx/)[1];
-		if (!link) continue;
-		
-		if (checkOnly) return true;
-		
-		items[link] = title;
-		found = true;
-	}
-	
-	return found ? items : false;
-}
-
-function getItemId(doc) {
-	var action = ZU.xpathText(doc, '//form[@id="aspnetForm"]/@action');
-	if (!action) return null;
-	
-	var id = action.match(/(?:\?|&)ID=([^&]+)/);
-	if (!id) return null;
-	
-	return id[1];
-}
-
-// #############################
-// ##### Scraper functions #####
-// #############################
-
-function scrape(doc, id) {
-	id = '|' + id + '|';
-	var oldCookie = setCookie(doc, id);
-
-	var exportUrl = 'http://s.wanfangdata.com.cn/Export/Export.aspx?scheme=EndNote';
-
-	ZU.doGet(exportUrl, function (text) {
-		var matches = text.match(/<div\s+id=["']export_container["']>((?:.|[\r\n])+?)<\/div>/i);
-		if (!matches) return;
-
-		text = ZU.cleanTags(matches[1].replace(/[\r\n]/g, ''));
-
-		var translator = Zotero.loadTranslator('import');
-		translator.setTranslator('881f60f2-0802-411a-9228-ce5f47b64c7d');
-		translator.setString(text);
-		translator.setHandler('itemDone', function (obj, item) {
-			// author first and last names are mixed up
-			for (var i = 0, n = item.creators.length; i < n; i++) {
-				if (!item.creators[i].firstName) continue;
-				var first = item.creators[i].lastName;
-				item.creators[i].lastName = item.creators[i].firstName;
-				item.creators[i].firstName = first;
-			}
-
-			// type is actually DOI
-			if (item.type) {
-				item.DOI = item.type;
-				delete item.type;
-			}
-
-			// tags are messed up
-			item.tags = [];
-
-			item.complete();
-		});
-
-		translator.setHandler('done', function () {
-			setCookie(doc, oldCookie);
-		});
-
-		translator.translate();
-	});
-}
-
-// #########################
-// ##### API functions #####
-// #########################
 
 function detectWeb(doc, url) {
-	if (url.toLowerCase().includes('paper.aspx')
-		&& getSearchResults(doc, true)
-	) {
+	var id = getIDFromURL(url);
+	var items = url.match(/\/(search)\//i);
+	Z.debug(id);
+	if (id) {
+		return id.dbname;
+	} else if (items) {
 		return "multiple";
+	} else {
+		return false;
 	}
-	
-	let pattern = /[ds]\.(?:g\.)?wanfangdata\.com\.cn/;
-	if (pattern.test(url) && getItemId(doc)) {
-		var code = detectCode(url);
-		return detectType(code);
-	}
+}
 
-	return false;
+function getSearchResults(doc, itemInfo) {
+  var items = {};
+  var found = false;
+  // TODO: adjust the CSS selector
+  var rows = ZU.xpath(doc, "//div[@class='ResultList ']");
+  for (let row of rows) {
+	var title = ZU.xpath(row, ".//a")[0];
+	var href = title.href;
+	// Z.debug(title.innerText);
+	// Z.debug(href);
+	items[href] = title.innerText;
+	var clickCmd = ZU.xpath(row, ".//a/i")[0].getAttribute('onclick');
+	var clickCmdArr = clickCmd.split(/[,)']/);
+	var filename = clickCmdArr[2];
+	var dbname = clickCmdArr[5]; 
+	itemInfo[href] = {filename:filename, dbname:getTypeFromDBName(dbname), url:href};
+  }
+  return items
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		// search page
-		var items = getSearchResults(doc);
-
-		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
-		
-			var urls = [];
-			for (var i in selectedItems) {
-				urls.push(i);
+  if (detectWeb(doc, url) == "multiple") {
+		var itemInfo = {};
+		var items = getSearchResults(doc, itemInfo);
+		Z.selectItems(items, function(selectedItems) {
+			if (!selectedItems) return true;
+			
+			var itemInfoByTitle = {};
+			var ids = [];
+			for (var url in selectedItems) {
+				// Z.debug('url ' + url);
+				// Z.debug(itemInfo[url]);
+				ids.push(itemInfo[url]);
+				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
+				itemInfoByTitle[selectedItems[url]].url = url;
 			}
-
-			var ids = '|' + urls.join('|') + '|';
-			scrape(doc, ids);
+			scrape(ids, doc, url, itemInfoByTitle);
 		});
-	}
-	else {
-		var id = getItemId(doc);
-		scrape(doc, id);
+	} else {
+		scrape([getIDFromURL(url)], doc, url);
 	}
 }
 
-/** BEGIN TEST CASES **/
+function scrape(ids, doc, url, itemInfo) {
+	getRefworksByID(ids, function(text, ids) {
+		var translator = Z.loadTranslator('import');
+		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); //Refworks
+		translator.setString(text);
+		translator.setHandler('itemDone', function(obj, newItem) {
+			// split names
+			var authors = newItem.creators[0]['lastName'].split(';');
+			var authors = authors.slice(0, authors.length/2);
+			newItem.creators = [];
+			for (var i = 0, n = authors.length; i < n; i++) {
+				var author = ZU.trimInternal(authors[i]);
+				var creator = {creatorType: "author"};
+				if (author.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
+					// western name. split on last space
+					creator['firstName'] = author.substr(0,lastSpace);
+					creator['lastName'] = author.substr(lastSpace + 1);
+				} else {
+					// Chinese name. first character is last name, the rest are first name
+					creator['firstName'] = author.substr(1);
+					creator['lastName'] = author.charAt(0);
+				}
+				newItem.creators.push(creator);
+			}
+			// split tags 
+			var tags = newItem.tags;
+			newItem.tags = [];
+			for (var tag of tags){
+				var tagSplit = tag.split(/\s+/);
+				newItem.tags = newItem.tags.concat(tagSplit);
+			}
+			// remove unnecessary notes
+			if (newItem.notes){
+				newItem.notes = [];
+			}
+				
+			if (newItem.abstractNote) {
+				newItem.abstractNote = newItem.abstractNote.replace(/\s*[\r\n]\s*/g, '\n');
+			}
+			
+			// clean up tags. Remove numbers from end
+			for (var j = 0, l = newItem.tags.length; j < l; j++) {
+				newItem.tags[j] = newItem.tags[j].replace(/:\d+$/, '');
+			}
+			
+			newItem.title = ZU.trimInternal(newItem.title);
+			if (itemInfo) {
+				var info = itemInfo[newItem.title];
+				if (!info) {
+					Z.debug('No item info for "' + newItem.title + '"');
+				} else {
+					newItem.url = info.url;
+				}
+			} else {
+				newItem.url = url;
+			}
+			newItem.attachments = [{
+				url: newItem.url,
+				title: newItem.title,
+				mimeType: "text/html",
+				snapshot: true
+			}];
+			newItem.complete();
+		});
+		
+		translator.translate();
+	});
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
+		"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=perio&id=hgxb2019z1002",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "参考文献管理工具研究",
+				"title": "微波法制备生物柴油研究进展",
 				"creators": [
 					{
-						"firstName": "",
-						"lastName": "余敏",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "辉",
+						"lastName": "商"
 					},
 					{
-						"firstName": "",
-						"lastName": "朱江",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "禹",
+						"lastName": "丁"
 					},
 					{
-						"firstName": "",
-						"lastName": "丁照蕾",
-						"creatorType": "author"
+						"creatorType": "author",
+						"firstName": "文慧",
+						"lastName": "张"
 					}
 				],
-				"date": "2009",
-				"DOI": "10.3969/j.issn.1008-0821.2009.02.027",
-				"abstractNote": "介绍了参考文献管理的基本方法,对参考文献管理工具的主要功能进行了对比,最后分析了参考文献管理的趋势.",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"extra": "Yu Min\nZhu Jiang\nDing Zhaolei",
-				"issue": "2",
-				"libraryCatalog": "Wanfang Data",
-				"pages": "94-98,93",
-				"publicationTitle": "JOURNAL OF MODERN INFORMATION",
-				"url": "http://d.wanfangdata.com.cn/Periodical_xdqb200902027.aspx",
-				"volume": "29",
-				"attachments": [],
-				"tags": [],
+				"date": "2019",
+				"DOI": "10.11949/j.issn.0438?1157.20181400[doi]",
+				"ISSN": "0438-1157",
+				"abstractNote": "基于微波的选择性、瞬时性及体积性加热的特点,可以有效提高反应分子的平均能量、分子的碰撞频率,加快反应速率,采用微波辅助催化酯交换反应制备生物柴油近几年得到了国内外学者的广泛关注.将微波能应用于生物柴油制备过程具有显著的优势,与传统加热方式相比,采用微波辐射加热,反应时间明显缩短,产物组成也有所变化.因此主要从酸碱催化剂催化酯交换反应和酯化反应的角度,综述了国内外对微波辅助生物柴油制备的研究进展,并对微波优势及未来发展趋势进行了展望.",
+				"issue": "z1",
+				"language": "chi",
+				"libraryCatalog": "WanFang",
+				"pages": "15-22",
+				"publicationTitle": "Research progress of microwave assisted biodiesel production",
+				"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=perio&id=hgxb2019z1002",
+				"volume": "70",
+				"attachments": [
+					{
+						"title": "微波法制备生物柴油研究进展",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [
+					{
+						"tag": "biodiesel"
+					},
+					{
+						"tag": "catalyst"
+					},
+					{
+						"tag": "esterification"
+					},
+					{
+						"tag": "microwave"
+					},
+					{
+						"tag": "transesterification"
+					},
+					{
+						"tag": "催化剂"
+					},
+					{
+						"tag": "微波"
+					},
+					{
+						"tag": "生物柴油"
+					},
+					{
+						"tag": "酯交换"
+					},
+					{
+						"tag": "酯化"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -265,46 +301,40 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
+		"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=degree&id=D01698671",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "Zotero: harnessing the power of a personal bibliographic manager.",
-				"creators": [
+				"itemType": "thesis",
+				"title": "济南市生物多样性评价及与生物入侵关系研究",
+				"creators": [],
+				"date": "2019",
+				"language": "chi",
+				"libraryCatalog": "WanFang",
+				"place": "中国",
+				"university": "山东农业大学",
+				"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=degree&id=D01698671",
+				"attachments": [
 					{
-						"firstName": "JT",
-						"lastName": "Coar",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "JP",
-						"lastName": "Sewell",
-						"creatorType": "author"
+						"title": "济南市生物多样性评价及与生物入侵关系研究",
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
-				"date": "2010",
-				"ISBN": "0363-3624",
-				"abstractNote": "Zotero is a powerful free personal bibliographic manager (PBM) for writers. Use of a PBM allows the writer to focus on content, rather than the tedious details of formatting citations and references. Zotero 2.0 (http://www.zotero.org) has new features including the ability to synchronize citations with the off-site Zotero server and the ability to collaborate and share with others. An overview on how to use the software and discussion about the strengths and limitations are included.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"archiveLocation": "北京万方数据股份有限公司",
-				"issue": "5",
-				"libraryCatalog": "Wanfang Data",
-				"pages": "205-207",
-				"publicationTitle": "Nurse educator",
-				"shortTitle": "Zotero",
-				"url": "http://d.wanfangdata.com.cn/NSTLQK_NSTL_QKJJ0216348353.aspx",
-				"volume": "35",
-				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "济南市"
+					},
+					{
+						"tag": "生物入侵"
+					},
+					{
+						"tag": "生物多样性评价"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://s.wanfangdata.com.cn/Paper.aspx?q=zotero+DBID%3A%28NSTL_QK+OR+NSTL_HY%29&f=d.top",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
