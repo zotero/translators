@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-11-19 09:14:01"
+	"lastUpdated": "2019-11-19 14:27:05"
 }
 
 /*
@@ -59,6 +59,8 @@ function getRefworksByID(ids, next) {
 			var text = JSON.parse(text)['exportHtml'];
 			var text = text.replace(/<br>/g, '\n');
 			text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation');
+			text = text.replace(/^RT\s+Conference Proceeding/gmi, "RT Conference Proceedings");
+			Z.debug(text);
 			next(text);
 		}
 	);
@@ -158,8 +160,14 @@ function scrape(ids, doc, url, itemInfo) {
 		translator.setString(text);
 		translator.setHandler('itemDone', function(obj, newItem) {
 			// split names
-			var authors = newItem.creators[0]['lastName'].split(';');
-			var authors = authors.slice(0, authors.length/2);
+			var authors = newItem.creators[0]['lastName'];
+			// remove [names in PINYIN]
+			var authors = authors.replace(/[\s;]\[.*\]/g, '');
+			if (newItem.itemType == "conferencePaper"){
+				var authors = authors.split(/[\s;]/);
+			} else {
+				var authors = authors.split(';');
+			}
 			newItem.creators = [];
 			for (var i = 0, n = authors.length; i < n; i++) {
 				var author = ZU.trimInternal(authors[i]);
@@ -306,7 +314,13 @@ var testCases = [
 			{
 				"itemType": "thesis",
 				"title": "济南市生物多样性评价及与生物入侵关系研究",
-				"creators": [],
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "令玉",
+						"lastName": "孟"
+					}
+				],
 				"date": "2019",
 				"language": "chi",
 				"libraryCatalog": "WanFang",
@@ -341,15 +355,27 @@ var testCases = [
 		"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=conference&id=9534067",
 		"items": [
 			{
-				"itemType": "journalArticle",
+				"itemType": "conferencePaper",
 				"title": "生物发酵提高芦笋汁生物利用率研究",
-				"creators": [],
+				"creators": [
+					{
+						"creatorType": "author",
+						"firstName": "晓春",
+						"lastName": "吴"
+					},
+					{
+						"creatorType": "author",
+						"firstName": "惠华",
+						"lastName": "黄"
+					}
+				],
 				"date": "2018",
 				"abstractNote": "本研究在单因素试验的基础上通过响应面法优化安琪酵母发酵芦笋汁生产工艺,以芦笋汁中总皂苷元含量作为响应值,各影响因素为自变量,设计响应面实验方案.结果表明一次项X1(接种量)、X2(发酵温度)、X3(发酵时间)和所有因素的二次项都达到了极显著水平(P<0.01).并得到安琪酵母发酵芦笋汁的最优生产工艺条件:利用R2A琼脂作为基础培养基接种量0.2％、发酵温度30℃、发酵时间7天.在此条件下重复实验3次,整理结果可知芦笋总皂苷元含量可达到(361.68±8.62)μg.",
 				"language": "chi",
 				"libraryCatalog": "WanFang",
 				"pages": "69-74",
-				"publicationTitle": "2018年广东省食品学会年会论文集",
+				"proceedingsTitle": "2018年广东省食品学会年会论文集",
+				"publisher": "广东省食品学会",
 				"url": "http://www.wanfangdata.com.cn/details/detail.do?_type=conference&id=9534067",
 				"attachments": [
 					{
