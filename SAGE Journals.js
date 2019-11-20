@@ -99,6 +99,7 @@ function scrape(doc, url) {
 	var filename = ZU.xpathText(doc, '//input[@name="downloadFileName"]/@value');
 	var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + filename + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
@@ -153,6 +154,11 @@ function scrape(doc, url) {
 					if (tags)
 						item.tags = tags.map(n => n.textContent);
 				}
+			}
+
+			if (articleType && articleType.length > 0) {
+				if (articleType[0].textContent.trim().match(/Book Review/))
+					item.tags.push("Book Review");
 			}
 
 			item.notes = [];
