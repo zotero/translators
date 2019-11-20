@@ -98,7 +98,10 @@ function postProcess(doc, item) {
 			item.abstractNote = abstractParagraphs[0].textContent;
 	}
 
-	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:")]/..');
+	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
+	if (!keywords || keywords.length == 0)
+		keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..')
+
 	if (keywords && keywords.length > 0) {
 		item.tags = keywords[0].textContent
 						.trim()
