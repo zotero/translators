@@ -14,7 +14,7 @@
 
 // attr()/text() v2
 // eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;} 
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -69,7 +69,7 @@ function getPDFLink(doc, onDone) {
 		onDone();
 		return;
 	}
-	
+
 	// Some pages still have the PDF link available
 	var pdfURL = attr(doc, '#pdfLink', 'href');
 	if (!pdfURL) pdfURL = attr(doc, '[name="citation_pdf_url"]', 'content');
@@ -77,7 +77,7 @@ function getPDFLink(doc, onDone) {
 		parseIntermediatePDFPage(pdfURL, onDone);
 		return;
 	}
-	
+
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
@@ -85,7 +85,7 @@ function getPDFLink(doc, onDone) {
 		parseIntermediatePDFPage(intermediateURL, onDone);
 		return;
 	}
-	
+
 	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
 	// for the intermediate page, which doesn't seem to be available in the DOM after the page load.
 	// This is an awful hack, and we should look out for a better way to get the URL, but it beats
@@ -109,7 +109,7 @@ function getPDFLink(doc, onDone) {
 			return;
 		}
 	}
-	
+
 	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
 	// by fetching the page source again. Hopefully this is never actually used.
 	var url = doc.location.href;
@@ -323,12 +323,21 @@ function processRIS(doc, text) {
 		}
 		if (item.ISBN && !ZU.cleanISBN(item.ISBN)) delete item.ISBN;
 		if (item.ISSN && !ZU.cleanISSN(item.ISSN)) delete item.ISSN;
-		
+
 		item.language = item.language || attr(doc, 'article[role="main"]', 'lang');
 
 		if (item.url && item.url.substr(0, 2) == "//") {
 			item.url = "https:" + item.url;
 		}
+
+		var articleType = ZU.xpath(doc, '//div[@class="article-dochead"]//span');
+		if (articleType && articleType.length > 0) {
+			if (articleType[0].textContent.trim().match(/Book (R|r)eview/))
+				item.tags.push("Book Review");
+		}
+
+		if (!item.title)
+			item.title = ZU.xpathText(doc, '//meta[@name="citation_title"]/@content');
 
 		getPDFLink(doc, function (pdfURL) {
 			if (pdfURL) {
