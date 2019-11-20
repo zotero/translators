@@ -172,13 +172,28 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
-	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
-	if (!abs) {
-		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
+	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
+	if (abstractSections && abstractSections.length > 0) {
+		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
+		let abstract = "";
+		for (let i = 0; i < sectionTitles.length; ++i) {
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(abstractSections[i], './/p').trim();
+
+			abstract += titleText + ": " + sectionBody + "\n\n";
+		}
+
+		item.abstractNote = abstract.trim();
+	} else {
+		let abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
+		if (!abs) {
+			abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
+		}
+		if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
 	}
-	if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+
 	// add tags
-	var tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
