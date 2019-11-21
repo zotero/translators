@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-21 19:14:26"
+	"lastUpdated": "2019-11-21 19:29:09"
 }
 
 /*
@@ -51,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	// We have a different querySelector according to the page (respectively, all supplements page, journal issue page, and supplement issue page)
 	var rows = doc.querySelectorAll('div[class^=pubs] p.SuppVolume em,div[class^=pubs] p.title, div[class^=pubs] p.chap');
 	for (let row of rows) {
-		let title = ZU.trimInternal(row.textContent);
+		let title = row.textContent;
 		if (!title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -63,9 +63,10 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) return true;
-			for (var id in items) {
-				scrape(id, doc, url);
+			if (items) {
+				for (var id in items) {
+					scrape(id, doc, url);
+				}
 			}
 		});
 	}
