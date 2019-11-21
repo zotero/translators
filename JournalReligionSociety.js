@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-21 18:06:21"
+	"lastUpdated": "2019-11-21 18:58:46"
 }
 
 /*
@@ -145,6 +145,11 @@ function scrape(id, doc, url) {
 			mimeType: "application/pdf",
 			url: pdfurl
 		});
+		
+		if (infoBlock.nextElementSibling.querySelectorAll("a")[0].textContent.search("Abstract") > -1) {
+			let abstract = infoBlock.nextElementSibling.querySelectorAll("a")[0].getAttribute("href").split("'")[1];
+			item.abstractNote = doc.getElementById(abstract).textContent;
+		}
 	}
 	
 	item.libraryCatalog = "Journal of Religion and Society";
