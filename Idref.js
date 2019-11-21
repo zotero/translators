@@ -130,7 +130,7 @@ function scrape(doc, url) {
 }
 
 function urlToDomain(url) {
-	return url.replace(/https?:\/\/([^/]*).*/, "$1");
+	return url.replace(/^https?:\/\/([^/]*).*/, "$1");
 }
 
 /** BEGIN TEST CASES **/
