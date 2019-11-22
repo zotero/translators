@@ -12,6 +12,11 @@
 	"lastUpdated": "2019-11-22 10:44:27"
 }
 
+function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -74,7 +79,7 @@ function doWeb(doc, url) {
 
 function scrape(doc) {
 	if (doc.querySelector(".doiInPaperShow_doiContext_1p7QW") !== null) {
-		let DOI = doc.querySelector(".doiInPaperShow_doiContext_1p7QW").textContent;
+		let DOI = text(doc, ".doiInPaperShow_doiContext_1p7QW");
 	
 		const translate = Zotero.loadTranslator("search");
 		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
