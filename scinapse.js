@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-22 02:26:51"
+	"lastUpdated": "2019-11-22 02:49:15"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -39,7 +38,7 @@
 function detectWeb(doc, url) {
 	if ((url.includes('/journals/') || url.includes('/authors/') || url.includes('/search?')) && getSearchResults(doc, true)) {
 		return "multiple";
-	} 
+	}
 	else if (url.includes("/papers/")) {
 		return "journalArticle";
 	}
@@ -50,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	var rows = doc.querySelectorAll(".title_title_2TG0L")
+	var rows = doc.querySelectorAll(".title_title_2TG0L");
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -67,15 +66,15 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} 
+	}
 	else {
 		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) {
-	if(doc.querySelector(".doiInPaperShow_doiContext_1p7QW") != null){
-		DOI = doc.querySelector(".doiInPaperShow_doiContext_1p7QW").textContent;
+function scrape(doc) {
+	if (doc.querySelector(".doiInPaperShow_doiContext_1p7QW") !== null) {
+		let DOI = doc.querySelector(".doiInPaperShow_doiContext_1p7QW").textContent;
 	
 		const translate = Zotero.loadTranslator("search");
 		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
@@ -87,7 +86,7 @@ function scrape(doc, url) {
 				item.title = "[No Title]";
 			}
 			try {
-				item.abstractNote = doc.querySelector(".paperShow_abstractContent_3Zqzc, .mobilePaperShow_abstractContent_3ViME").textContent.replace("Abstract","");
+				item.abstractNote = doc.querySelector(".paperShow_abstractContent_3Zqzc, .mobilePaperShow_abstractContent_3ViME").textContent.replace("Abstract", "");
 			}
 			catch (err) {}
 			item.complete();
@@ -97,6 +96,7 @@ function scrape(doc, url) {
 		translate.translate();
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
