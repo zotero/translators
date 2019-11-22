@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-22 10:28:40"
+	"lastUpdated": "2019-11-22 18:19:16"
 }
 
 /*
@@ -35,6 +35,15 @@
 	***** END LICENSE BLOCK *****
 */
 
+function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
+
+function attr(docOrElem, selector, attr, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.getAttribute(attr) : null;
+}
 
 function detectWeb(doc, url) {
 	// Three possible cases : the list of articles of an issue, the list of content of a supplement, or the list of the supplements
@@ -84,8 +93,8 @@ function scrape(id, doc, url) {
 		item = new Zotero.Item("journalArticle");
 		item.title = id;
 		item.publicationTitle = "Journal of Religion & Society";
-		item.date = ZU.strToISO(doc.querySelector(".heading").textContent.split('(')[1].match(/\d+/)[0]);
-		item.volume = doc.querySelector(".heading").textContent.split('(')[0].match(/\d+/)[0];
+		item.date = ZU.strToISO(text(doc, ".heading").split('(')[1].match(/\d+/)[0]);
+		item.volume = text(doc, ".heading").split('(')[0].match(/\d+/)[0];
 		item.url = url;
 		
 		infoBlock = ZU.xpath(doc, "//p[contains(., '" + id + "')]/following-sibling::p")[0];
@@ -94,8 +103,8 @@ function scrape(id, doc, url) {
 			item.creators.push(ZU.cleanAuthor(auth.split(", ")[0], "author", false));
 		}
 	
-		if (infoBlock.querySelectorAll("a:last-child")[0].textContent.includes("PDF")) {
-			pdfurl = infoBlock.querySelectorAll("a:last-child")[0].getAttribute('href');
+		if (text(infoBlock, "a:last-child", 0).includes("PDF")) {
+			pdfurl = attr(infoBlock, "a:last-child", "href", 0);
 			item.attachments.push({
 				title: item.title,
 				mimeType: "application/pdf",
@@ -103,9 +112,9 @@ function scrape(id, doc, url) {
 			});
 		}
 		
-		if (infoBlock.querySelectorAll("a")[0].textContent.includes("Abstract")) {
-			let abstract = infoBlock.querySelectorAll("a")[0].getAttribute("href").split("'")[1];
-			item.abstractNote = doc.getElementById(abstract).textContent;
+		if (text(infoBlock, "a", 0).includes("Abstract")) {
+			let abstract = attr(infoBlock, "a", "href", 0).split("'")[1];
+			item.abstractNote = text(doc, abstract);
 		}
 	}
 	else if (url.includes('/toc/Supplement')) {
@@ -118,8 +127,8 @@ function scrape(id, doc, url) {
 		
 		infoBlock = ZU.xpath(doc, "//p[contains(., '" + id + "')]")[0];
 		item.date = ZU.strToISO(infoBlock.querySelector("em").nextSibling.textContent.match(/\d+/)[0]);
-		item.seriesNumber = infoBlock.querySelector("a").textContent.match(/\d+/)[0];
-		item.url = root + infoBlock.querySelector("a").getAttribute("href");
+		item.seriesNumber = text(infoBlock, "a").match(/\d+/)[0];
+		item.url = root + attr(infoBlock, "a", "href");
 		author = infoBlock.nextElementSibling.textContent.split(",")[0].replace("Edited by ", "").split(" and ");
 		for (let auth of author) item.creators.push(ZU.cleanAuthor(auth, "editor", false));
 	}
@@ -127,11 +136,11 @@ function scrape(id, doc, url) {
 		item = new Zotero.Item("bookSection");
 		item.title = id.split(" (")[0];
 		item.series = "Supplement of the Journal of Religion & Society";
-		item.seriesNumber = doc.querySelector(".heading").textContent.split('(')[0].match(/\d+/)[0];
+		item.seriesNumber = text(doc, ".heading").split('(')[0].match(/\d+/)[0];
 		item.publisher = "Journal of Religion & Society Supplement";
-		item.date = ZU.strToISO(doc.querySelector(".heading").textContent.split('(')[1].match(/\d+/)[0]);
-		item.bookTitle = doc.querySelector(".suppTitle").textContent;
-		author = doc.querySelector("p.SuppAuthor, p.editor").textContent.split(",")[0].replace("Edited by ", "").split(" and ");
+		item.date = ZU.strToISO(text(doc, ".heading").split('(')[1].match(/\d+/)[0]);
+		item.bookTitle = text(doc, ".suppTitle");
+		author = text(doc, "p.SuppAuthor, p.editor").split(",")[0].replace("Edited by ", "").split(" and ");
 		for (let auth of author) item.creators.push(ZU.cleanAuthor(auth, "editor", false));
 		item.url = url;
 		
@@ -140,16 +149,16 @@ function scrape(id, doc, url) {
 		author = infoBlock.nextElementSibling.textContent.split(",")[0].split(" and ");
 		for (let auth of author) item.creators.push(ZU.cleanAuthor(auth, "author", false));
 		
-		pdfurl = infoBlock.nextElementSibling.querySelectorAll("a:last-child")[0].getAttribute('href');
+		pdfurl = attr(infoBlock.nextElementSibling, "a:last-child", "href", 0);
 		item.attachments.push({
 			title: item.title,
 			mimeType: "application/pdf",
 			url: pdfurl
 		});
 		
-		if (infoBlock.nextElementSibling.querySelectorAll("a")[0].textContent.includes("Abstract")) {
-			let abstract = infoBlock.nextElementSibling.querySelectorAll("a")[0].getAttribute("href").split("'")[1];
-			item.abstractNote = doc.getElementById(abstract).textContent;
+		if (text(infoBlock.nextElementSibling, "a", 0).includes("Abstract")) {
+			let abstract = attr(infoBlock.nextElementSibling, "a", "href", 0).split("'")[1];
+			item.abstractNote = text(doc, abstract);
 		}
 	}
 	
