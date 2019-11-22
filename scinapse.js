@@ -2,14 +2,14 @@
 	"translatorID": "42680c5e-1ae8-4171-ab53-afe1d8e840d4",
 	"label": "scinapse",
 	"creator": "Vincent Carret",
-	"target": "^https?://(www\\.)?scinapse.io/",
+	"target": "^https?://(www\\.)?scinapse\\.io/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-22 02:49:15"
+	"lastUpdated": "2019-11-22 10:44:27"
 }
 
 /*
