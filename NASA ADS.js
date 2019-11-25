@@ -1,7 +1,7 @@
 {
 	"translatorID": "7987b420-e8cb-4bea-8ef7-61c2377cd686",
 	"label": "NASA ADS",
-	"creator": "Philipp Zumstein, Asa Kusuma, Ramesh Srigiriraju and Tim Hostetler",
+	"creator": "Tim Hostetler",
 	"target": "^https://ui\\.adsabs\\.harvard\\.edu/(search|abs)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-20 22:29:34"
+	"lastUpdated": "2019-11-25 18:11:28"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Philipp Zumstein
+	Copyright © 2019 Tim Hostetler
 
 	This file is part of Zotero.
 
@@ -56,21 +56,21 @@ function extractId(url) {
 	return /\/abs\/(.*)\/abstract/.exec(url)[1];
 }
 
+function getTypeFromId(id) {
+	// bibcodes always start with 4 digit year, then bibstem
+	const bibstem = id.slice(4);
+	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
+		return "thesis";
+	}
+	return "journalArticle";
+}
+
 function detectWeb(doc, url) {
 	if (url.includes("/search/")) {
 		return "multiple";
 	}
 	else if (url.includes("/abs/")) {
-		// bibcodes always start with 4 digit year, then bibstem
-		const bibstem = extractId(url).slice(4);
-
-		if (bibstem.startsWith("MsT")) {
-			return "Masters thesis";
-		}
-		else if (bibstem.startsWith("PhDT")) {
-			return "Ph.D. thesis";
-		}
-		return "journalArticle";
+		return getTypeFromId(extractId(url));
 	}
 	return false;
 }
@@ -100,8 +100,10 @@ function scrape(ids, doc) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			const id = ids.pop();
+			item.itemType = getTypeFromId(id);
 			item.attachments.push({
-				url: makePdfUrl(ids.pop()),
+				url: makePdfUrl(id),
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
@@ -200,7 +202,7 @@ var testCases = [
 		"url": "https://ui.adsabs.harvard.edu/abs/2019MsT.........15M/abstract",
 		"items": [
 			{
-				"itemType": "Masters thesis",
+				"itemType": "thesis",
 				"title": "Autonomous quantum Maxwell's demon using superconducting devices",
 				"creators": [
 					{
@@ -235,7 +237,7 @@ var testCases = [
 		"url": "https://ui.adsabs.harvard.edu/abs/2019PhDT........69B/abstract",
 		"items": [
 			{
-				"itemType": "Ph.D. thesis",
+				"itemType": "thesis",
 				"title": "Cosmology on the Edge of Lambda-Cold Dark Matter",
 				"creators": [
 					{
