@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-07-05 10:50:25"
+	"lastUpdated": "2019-11-29 01:18:44"
 }
 
 function detectWeb(doc, url){
@@ -45,21 +45,34 @@ function doWeb(doc, url){
 				});
 	}
 }
+function scrape(doc, url) {
+	var dateRe = new RegExp("^https?://web.archive.org/web/([0-9]+)");
+	// create new webpage Item from page
+	var newItem = new Zotero.Item("webpage");
+	newItem.title = doc.title;
+	newItem.url = url;
+	// parse date and add
+	var m = dateRe.exec(doc.location.href);
+	var date = m[1];
+	date = date.substr(0, 4) + "-" + date.substr(4, 2) + "-" + date.substr(6, 2);
+	newItem.date = date;
+	// if snapshot is pdf, attach it
+	if (url.endsWith(".pdf")){
+		var pdfxpath = '//body/iframe[@id="playback"]/@src';
+		var pdfurls = doc.evaluate(pdfxpath, doc, null, XPathResult.ANY_TYPE, null);
+		var link;
+		while (link = pdfurls.iterateNext()) { 
+			Zotero.debug(link.value);
+			newItem.attachments = [{mimeType:"application/pdf",
+ 				title:link.value. substring(link.value. lastIndexOf('/')+1),
+				url:link.value}];
+		}
+	} else { 
+	// create snapshot
+	newItem.attachments = [{url:doc.location.href, title:doc.title, mimeType:"text/html"}];
+	} 
 
-function scrape(doc, url){
-		var dateRe = new RegExp("^https?://web.archive.org/web/([0-9]+)");
-		//create new webpage Item from page
-		var newItem = new Zotero.Item("webpage");
-		newItem.title = doc.title;
-		newItem.url = url;
-		//parse date and add
-		var m = dateRe.exec(doc.location.href);
-		var date = m[1];
-		date = date.substr(0, 4) + "-" + date.substr(4,2) + "-" + date.substr(6,2);
-		newItem.date = date;
-		//create snapshot
-		newItem.attachments = [{url:doc.location.href, title:doc.title, mimeType:"text/html"}];
-		newItem.complete();
+	newItem.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
