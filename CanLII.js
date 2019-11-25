@@ -12,16 +12,42 @@
 	"lastUpdated": "2019-11-25 22:05:12"
 }
 
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2012 Sebastian Karcher
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
 // attr()/text() v2
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^\/]*\/(?:en|fr)\/[^\/]+\/[^\/]+\/doc\/.+/;
+var canLiiRegexp = /https?:\/\/(?:www\.)?canlii\.org[^/]*\/(?:en|fr)\/[^/]+\/[^/]+\/doc\/.+/;
 
 function detectWeb(doc, url) {
 	if (canLiiRegexp.test(url)) {
 		return "case";
-	} else {
+	}
+	else {
 		var aTags = doc.getElementsByTagName("a");
 		for (var i = 0; i < aTags.length; i++) {
 			if (canLiiRegexp.test(aTags[i].href)) {
@@ -29,11 +55,11 @@ function detectWeb(doc, url) {
 			}
 		}
 	}
+	return false;
 }
 
 
 function scrape(doc, url) {
-
 	var newItem = new Zotero.Item("case");
 	var voliss = doc.getElementsByClassName('documentMeta-citation')[0].nextElementSibling;
 	voliss = ZU.trimInternal(
@@ -55,7 +81,7 @@ function scrape(doc, url) {
 	newItem.docketNumber = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
 	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations")]/following-sibling::div');
 	if (otherCitations) {
-		newItem.notes.push({"note" : "Other Citations: " + ZU.trimInternal(otherCitations)});
+		newItem.notes.push({ note: "Other Citations: " + ZU.trimInternal(otherCitations) });
 	}
 	
 	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
@@ -64,7 +90,7 @@ function scrape(doc, url) {
 	}
 
 	// attach link to pdf version
-	//Z.debug(url)
+	// Z.debug(url)
 	var pdfurl = url.replace(/\.html(?:[?#].*)?/, ".pdf");
 	newItem.attachments.push({
 		url: pdfurl,
@@ -81,11 +107,12 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	if (canLiiRegexp.test(url)) {
 		scrape(doc, url);
-	} else {
+	}
+	else {
 		var items = ZU.getItemArray(doc, doc, canLiiRegexp);
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -95,6 +122,7 @@ function doWeb(doc, url) {
 		});
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
