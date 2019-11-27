@@ -1,164 +1,176 @@
-{
-	"translatorID": "e3748cf3-36dc-4816-bf86-95a0b63feb03",
-	"label": "Gale Databases",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://go\\.galegroup\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 15:50:14"
-}
+// {
+// 	'translatorID': 'e3748cf3-36dc-4816-bf86-95a0b63feb03',
+// 	'label': 'Gale Databases',
+// 	'creator': 'Jim Miazek',
+// 	'target': '^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\\.com(?:\\:\\d+)?/ps/',
+// 	'minVersion': '3.0',
+// 	'maxVersion': '',
+// 	'priority': 100,
+// 	'inRepository': true,
+// 	'translatorType': 4,
+// 	'browserSupport': 'gcsibv',
+// 	'lastUpdated': '2019-10-11 12:00:00'
+// }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
-	Galegroup Translator - Copyright © 2018 Sebastian Karcher 
+
+	Gale Databases Translator - Copyright © 2019
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
+var GaleZotero = (function () {
 
-function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
+	var DATA_TRANSLATOR = '32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7';
+	var POST_URL = '/ps/citationtools/rest/cite/download';
 
-	var rows = doc.querySelectorAll('ul.SearchResultsList span.title a.documentLink');
-	if (!rows.length) {
-		rows = doc.querySelectorAll('ul.SearchResultsList p.subTitle a.title');
+	function detect(doc) {
+		var entries = getCitableDocuments(doc);
+		switch (entries.length) {
+			case 0 : return false;
+			case 1 : return entries[0].getAttribute('data-zoterolabel');
+			default: return 'multiple';
+		}
 	}
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
+
+	function process(doc) {
+		var entries = getCitableDocuments(doc);
+		switch (entries.length) {
+			case 0 : break;
+			case 1 : processSingleEntry(doc); break;
+			default: processMulipleEntries(entries);
+		}
 	}
-	return found ? items : false;
-}
-function detectWeb(doc, url) {
-	if ((url.includes('/retrieve.do') || url.includes('/i.do?')) && text(doc, 'li#docTools-citation, li.docTools-citation')) {
-		return "journalArticle";
+
+	function processMulipleEntries(entries) {
+		Zotero.selectItems(createKeyValuePairs(entries), function (selectedItems) {
+			if (selectedItems) {
+				Zotero.Utilities.processDocuments(getURLs(selectedItems), processSingleEntry);
+			}
+		});
 	}
-	
-	else if (getSearchResults(doc, true)) return "multiple";
-}
 
+	function createKeyValuePairs(entries) {
+		var map = {};
+		for (var item in entries) {
+			/* istanbul ignore next */
+			if (entries.hasOwnProperty(item)) {
+				var entry = entries[item];
+				map[entry.href] = entry.text;
+			}
+		}
+		return map;
+	}
 
-function scrape(doc, url) {
-	var postURL = "/ps/citationtools/rest/cite/download";
-	
-	var docId = attr(doc, 'input.citationToolsData', 'data-docid');
-	var documentUrl = attr(doc, 'input.citationToolsData', 'data-url');
-	var productName = attr(doc, 'input.citationToolsData', 'data-productname');
- 
-	var documentData = '{"docId":"' + docId +'","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
-	var post = "citationFormat=RIS&documentData=" + encodeURIComponent(documentData).replace(/%20/g, "+");
-	var pdfurl = attr(doc, '#docTools-pdf a', 'href');
+	function getURLs(selectedItems) {
+		var urls = [];
+		for (var url in selectedItems) {
+			if (selectedItems.hasOwnProperty(url)) {
+				urls.push(url);
+			}
+		}
+		return urls;
+	}
 
-	// Z.debug(post)
-	ZU.doPost(postURL, post, function(text){
+	function processSingleEntry(doc) {
+		var entry = doc.querySelector('.zotero');
+		var docId = entry.getAttribute('data-documentnumber');
+		var documentUrl = entry.getAttribute('href');
+		var productName = entry.getAttribute('data-productname');
+		var documentData = '{"docId":"' + docId +'","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
+		var urlParams = "citationFormat=RIS&documentData=" + encodeString(documentData);
+		Zotero.Utilities.doPost(POST_URL, urlParams, translate);
+	}
 
-		text = text.trim();
-		// gale puts issue numbers in M1
-		text = text.replace(/M1\s*\-/g, "IS  -");
-		// L2 is probably meant to be UR, but we can ignore it altogether
-		text = text.replace(/^L2\s+-.+\n/gm, '');
-		// we can map copyright notes via CR
-		text = text.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-		// Z.debug(text);
-		
+	function translate(data) {
 		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
+		translator.setTranslator(DATA_TRANSLATOR);
+		translator.setString(transform(data));
 		translator.setHandler("itemDone", function (obj, item) {
 			if (item.ISSN) {
-				item.ISSN = ZU.cleanISSN(item.ISSN);
+				item.ISSN = Zotero.Utilities.cleanISSN(item.ISSN);
 			}
 			if (item.pages && item.pages.endsWith("+")) {
 				item.pages = item.pages.replace(/\+/, "-");
 			}
-			if (pdfurl) {
-				item.attachments.push({
-					url: pdfurl,
-					title: "Full Text PDF",
-					mimeType:'application/pdf'
-				});
-			} else {
-				item.attachments.push({document: doc, title: "Snapshot"});
-			}
+			item.attachments.push({document: data, title: "Snapshot"});
 			item.complete();
 		});
 		translator.translate();
-	});
+	}
+
+	function transform(ris) {
+		return ris.trim()
+			.replace(/M1\s*-/g, "IS  -") // gale puts issue numbers in M1
+			.replace(/^L2\s+-.+\n/gm, '') // Ignore
+			.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
+	}
+
+	function encodeString(value) {
+		return encodeURIComponent(value).replace(/%20/g, "+");
+	}
+
+	function getCitableDocuments(doc) {
+		return doc.getElementsByClassName('zotero');
+	}
+
+	return {
+		detect: detect,
+		process: process
+	};
+
+}());
+
+function detectWeb(doc, url) { // eslint-disable-line no-unused-vars
+	return GaleZotero.detect(doc);
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		});
-	} else {
-		scrape(doc, url);
-	}
+function doWeb(doc, url) { // eslint-disable-line no-unused-vars
+	return GaleZotero.process(doc);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://go.galegroup.com/ps/i.do?p=PROF&u=nysl_ce_syr&id=GALE|A213083272&v=2.1&it=r&sid=PROF&asid=a8973dd8",
+		"url": "https://go.qa.galetesting.com/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=1&docId=GALE%7CA598621601&docType=Critical+essay&sort=Relevance&contentSegment=ZONE-Exclude-FT&prodId=AONE&contentSet=GALE%7CA598621601&searchId=R1&userGroupName=zotero&inPS=true",
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Improving a counselor education Web site through usability testing: the bibliotherapy education project",
+				"title": "\"Real\" Mind Style and Authenticity Effects in Fiction: Represented Experiences of War in Atonement",
 				"creators": [
 					{
-						"lastName": "McMillen",
-						"firstName": "Paula S.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Pehrsson",
-						"firstName": "Dale-Elizabeth",
+						"lastName": "Nuttall",
+						"firstName": "Louise",
 						"creatorType": "author"
 					}
 				],
-				"date": "December 2009",
-				"ISSN": "0011-0035",
-				"archive": "Educators Reference Complete",
+				"date": "2019",
+				"ISSN": "0039-4238",
+				"archive": "Gale Academic OneFile",
 				"issue": "2",
 				"language": "English",
 				"libraryCatalog": "Gale",
-				"pages": "122-",
-				"publicationTitle": "Counselor Education and Supervision",
-				"shortTitle": "Improving a counselor education Web site through usability testing",
-				"url": "http://link.galegroup.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=PROF&xid=a8973dd8",
-				"volume": "49",
+				"pages": "215-",
+				"publicationTitle": "Style",
+				"shortTitle": "\"Real\" Mind Style and Authenticity Effects in Fiction",
+				"url": "https://link.qa.galetesting.com/apps/doc/A598621601/AONE?u=zotero&sid=zotero&xid=c1dc0ef6",
+				"volume": "53",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -166,22 +178,29 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Bibliotherapy"
+						"tag": "Atonement (McEwan, Ian) (Novel)"
 					},
 					{
-						"tag": "Counseling"
+						"tag": "Authenticity"
 					},
 					{
-						"tag": "Counselling"
+						"tag": "English writers"
 					},
 					{
-						"tag": "Usability testing"
+						"tag": "Literary styles"
 					},
 					{
-						"tag": "Web sites (World Wide Web)"
+						"tag": "McEwan, Ian"
+					},
+					{
+						"tag": "War stories"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "<p>Northern Illinois University</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
