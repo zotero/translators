@@ -997,8 +997,10 @@ function importItem(newItem, node) {
 		n.so + "issueNumber"], true);
 	
 
-	// these mean the same thing
-	newItem.patentNumber = newItem.reportNumber = newItem.number = newItem.issue;
+	// number means the same thing as issue
+	// and will automatically then also map
+	// to patentNumber or reportNumber
+	newItem.number = newItem.issue;
 
 	// edition
 	newItem.edition = getFirstResults(node, [n.prism + "edition", n.prism2_0 + "edition", n.prism2_1 + "edition", n.bibo + "edition", n.so + "bookEdition", n.so + "version"], true);
