@@ -48,25 +48,25 @@ function getRefWorksByID(ids, onDataAvailable) {
 	ZU.doPost('https://kns.cnki.net/kns/ViewPage/viewsave.aspx?displayMode=Refworks', postData,
 		function (text) {
 			var parser = new DOMParser();
-			var html = parser.parseFromString(text, "text/html")
-			var text = ZU.xpath(html, "//table[@class='mainTable']//td")[0].innerHTML;
-			var text = text.replace(/<br>/g, '\n');
-			text = text.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation');
-			text = text.replace(
-				/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
-				function (m, tag, authors) {
-					var authors = authors.split(/\s*[;，,]\s*/); //that's a special comma
-					if (!authors[authors.length-1].trim()) authors.pop();
-					return tag + ' ' + authors.join('\n' + tag + ' ');
-				}
-			);
-			onDataAvailable(text);
+			var html = parser.parseFromString(text, "text/html");
+			var data = ZU.xpath(html, "//table[@class='mainTable']//td")[0].innerHTML
+				.replace(/<br>/g, '\n')
+				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
+				.replace(
+					/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
+					function (m, tag, authors) {
+						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
+						if (!authors[authors.length - 1].trim()) authors.pop();
+						return tag + ' ' + authors.join('\n' + tag + ' ');
+					}
+				);
+			onDataAvailable(data);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
 			}
 		}
-	)
+	);
 }
 
 function getIDFromURL(url) {
@@ -113,7 +113,8 @@ function getTypeFromDBName(dbname) {
 	var db = dbname.substr(0, 4).toUpperCase();
 	if (dbType[db]) {
 		return dbType[db];
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -136,7 +137,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 
 	if (!links.length) {
 		return false;
-	} 
+	}
 	var items = {};
 	for (var i = 0, n = links.length; i < n; i++) {
 		// Z.debug(links[i].innerHTML)
@@ -161,14 +162,15 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 
 function detectWeb(doc, url) {
 	// Z.debug(doc);
-	var ab = ZU.xpath(doc, "//span[@id='ChDivSummary']")[0]
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
 	if (id) {
 		return getTypeFromDBName(id.dbname);
-	} else if (items) {
+	}
+	else if (items) {
 		return "multiple";
-	} else {
+	}
+	else {
 		return false;
 	}
 }
@@ -177,7 +179,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
-		Z.selectItems(items, function(selectedItems) {
+		Z.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return true;
 			
 			var itemInfoByTitle = {};
@@ -189,7 +191,8 @@ function doWeb(doc, url) {
 			}
 			scrape(ids, doc, url, itemInfoByTitle);
 		});
-	} else {
+	}
+	else {
 		scrape([getIDFromPage(doc, url)], doc, url);
 	}
 }
@@ -201,7 +204,7 @@ function scrape(ids, doc, url, itemInfo) {
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
 		translator.setString(text);
 		
-		translator.setHandler('itemDone', function(obj, newItem) {
+		translator.setHandler('itemDone', function (obj, newItem) {
 			// split names
 			for (var i = 0, n = newItem.creators.length; i < n; i++) {
 				var creator = newItem.creators[i];
@@ -210,9 +213,10 @@ function scrape(ids, doc, url, itemInfo) {
 				var lastSpace = creator.lastName.lastIndexOf(' ');
 				if (creator.lastName.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 					// western name. split on last space
-					creator.firstName = creator.lastName.substr(0,lastSpace);
+					creator.firstName = creator.lastName.substr(0, lastSpace);
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
-				} else {
+				}
+				else {
 					// Chinese name. first character is last name, the rest are first name
 					creator.firstName = creator.lastName.substr(1);
 					creator.lastName = creator.lastName.charAt(0);
@@ -233,16 +237,18 @@ function scrape(ids, doc, url, itemInfo) {
 				var info = itemInfo[newItem.title];
 				if (!info) {
 					Z.debug('No item info for "' + newItem.title + '"');
-				} else {
+				}
+				else {
 					newItem.url = info.url;
 				}
-			} else {
+			}
+			else {
 				newItem.url = url;
 			}
 
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
-			if (newItem.callNumber){
+			if (newItem.callNumber) {
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
 			}
@@ -250,7 +256,7 @@ function scrape(ids, doc, url, itemInfo) {
 			var webType = detectWeb(doc, url);
 			if (webType && webType != 'multiple') {
 				newItem.attachments = getAttachments(doc, newItem);
-			} 
+			}
 			newItem.complete();
 		});
 		
@@ -261,22 +267,18 @@ function scrape(ids, doc, url, itemInfo) {
 // get pdf download link
 function getPDF(doc, itemType) {
 	// retrieve PDF links from CNKI oversea
-	if (itemType == 'thesis') {
-		var pdf = ZU.xpath(doc, "//div[@id='DownLoadParts']/a[contains(text(), 'PDF')]");
-	} else {
-		var pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
-	}
+	var pdf = itemType == 'thesis'
+		? ZU.xpath(doc, "//div[@id='DownLoadParts']/a[contains(text(), 'PDF')]")
+		: ZU.xpath(doc, "//a[@name='pdfDown']");
 	return pdf.length ? pdf[0].href : false;
 }
 
 // caj download link, default is the whole article for thesis.
 function getCAJ(doc, itemType) {
 	// //div[@id='DownLoadParts']
-	if (itemType == 'thesis') {
-		var caj = ZU.xpath(doc, "//div[@id='DownLoadParts']/a");
-	} else {
-		var caj = ZU.xpath(doc, "//a[@name='cajDown']");
-	}
+	var caj = itemType == 'thesis'
+		? ZU.xpath(doc, "//div[@id='DownLoadParts']/a")
+		: ZU.xpath(doc, "//a[@name='cajDown']");
 	return caj.length ? caj[0].href : false;
 }
 
@@ -291,14 +293,15 @@ function getAttachments(doc, item) {
 	// Z.debug(doc.body.innerHTML);
 	// Z.debug(loginUser[0].value);
 	// Z.debug(loginUser.length);
-	if (loginUser.length && loginUser[0].value) { 
+	if (loginUser.length && loginUser[0].value) {
 		if (pdfurl) {
 			attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
 				url: pdfurl
 			});
-		} else if (cajurl) {
+		}
+		else if (cajurl) {
 			attachments.push({
 				title: "Full Text CAJ",
 				mimeType: "application/caj",
