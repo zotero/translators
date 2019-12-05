@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-22 18:19:16"
+	"lastUpdated": "2019-12-05 22:56:10"
 }
 
 /*
@@ -35,15 +35,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
-function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	// Three possible cases : the list of articles of an issue, the list of content of a supplement, or the list of the supplements
@@ -118,17 +112,15 @@ function scrape(id, doc, url) {
 		}
 	}
 	else if (url.includes('/toc/Supplement')) {
-		let root = "http://moses.creighton.edu/JRS/toc/";
 		item = new Zotero.Item("book");
 		item.title = id;
 		item.series = "Supplement of the Journal of Religion & Society";
 		item.publisher = "Journal of Religion & Society Supplement";
 		
-		
 		infoBlock = ZU.xpath(doc, "//p[contains(., '" + id + "')]")[0];
 		item.date = ZU.strToISO(infoBlock.querySelector("em").nextSibling.textContent.match(/\d+/)[0]);
 		item.seriesNumber = text(infoBlock, "a").match(/\d+/)[0];
-		item.url = root + attr(infoBlock, "a", "href");
+		item.url = "http://moses.creighton.edu/JRS/toc/" + attr(infoBlock, "a", "href");
 		author = infoBlock.nextElementSibling.textContent.split(",")[0].replace("Edited by ", "").split(" and ");
 		for (let auth of author) item.creators.push(ZU.cleanAuthor(auth, "editor", false));
 	}
