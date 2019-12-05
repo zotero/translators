@@ -35,9 +35,26 @@
 
 
 function detectWeb(doc, url) {
+	if (getSearchResults(doc))
+		return "multiple"
+
 	var title = ZU.xpath(doc, '//span[@class="item-title"]');
 	if (title && title.length == 1)
 		return "journalArticle";
+}
+
+function getSearchResults(doc) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//td[@class="issue-entry"]//a[not(contains(@href, ".pdf?"))]')
+	for (let i = 0; i < rows.length; i++) {
+		let href = rows[i].href;
+		let title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 
