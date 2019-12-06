@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-06 12:51:37"
+	"lastUpdated": "2019-12-06 20:50:24"
 }
 
 /*
@@ -125,9 +125,9 @@ function scrape(doc, url) {
 				item.abstractNote = abstract;
 			}
 			
-			var tags = ZU.xpathText(doc, '//meta[@name="dc.Subject"]/@content');
+			var tags = ZU.xpathText(doc, '//kwd-group[1]');
 			if (tags) {
-				item.tags = tags.split(";");
+				item.tags = tags.split(",");
 			}
 			
 			//Workaround while Sage hopefully fixes RIS for authors
