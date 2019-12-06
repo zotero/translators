@@ -60,18 +60,20 @@ function getSearchResults(doc) {
 function invokeBestTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
     translator.setDocument(doc);
-    translator.setHandler("translators", function (o, t) {
-        translator.setTranslator(t);
-        translator.translate();
+    translator.setHandler("translators", function (o, valid_translators) {
+        if (valid_translators && valid_translators.length > 0) {
+            translator.setTranslator(valid_translators);
+            translator.translate();
+        }
     });
-    translator.setHandler("itemDone", function (t, i) {
-        if (i.issue === "0")
-            i.issue = "";
+    translator.setHandler("itemDone", function (t, item) {
+        if (item.issue === "0")
+            item.issue = "";
 
-        if (i.volume === "0")
-            i.volume = "";
+        if (item.volume === "0")
+            item.volume = "";
 
-        i.complete();
+        item.complete();
     });
     translator.getTranslators();
 }
