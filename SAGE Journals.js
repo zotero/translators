@@ -2,14 +2,14 @@
 	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
 	"label": "SAGE Journals",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-14 20:53:20"
+	"lastUpdated": "2019-12-06 12:51:37"
 }
 
 /*
@@ -37,8 +37,12 @@
 
 //SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 function detectWeb(doc, url) {
-	if (url.indexOf('/abs/10.') != -1 || url.indexOf('/full/10.') != -1) {
+	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
 		return "journalArticle";
 	} else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -48,7 +52,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.")][1]');
+	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -65,7 +69,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function(items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -95,7 +99,7 @@ function scrape(doc, url) {
 		//and will therefore simply delete the later in cases both
 		//dates are present.
 		//Z.debug(text);
-		if (text.indexOf("DA  - ")>-1) {
+		if (text.includes("DA  - ")) {
 			text = text.replace(/Y1  - .*\r?\n/, '');
 		}
 		
@@ -119,6 +123,11 @@ function scrape(doc, url) {
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
 				item.abstractNote = abstract;
+			}
+			
+			var tags = ZU.xpathText(doc, '//meta[@name="dc.Subject"]/@content');
+			if (tags) {
+				item.tags = tags.split(";");
 			}
 			
 			//Workaround while Sage hopefully fixes RIS for authors
