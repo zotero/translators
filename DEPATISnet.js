@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-03-12 04:43:57"
+	"lastUpdated": "2019-12-07 18:38:46"
 }
 
 /*
@@ -115,7 +115,7 @@ function scrape(doc, url) {
 
 	var ipcs = [];
 
-	var rows = ZU.xpath(doc, '//table[@class="ergebnis"]/tbody/tr');
+	var rows = ZU.xpath(doc, '//table[@class="tab_detail"]/tbody/tr');
 	
 	for (var i=0, n=rows.length; i<n; i++) {
 		var columns = ZU.xpath(rows[i], './td');
@@ -207,7 +207,9 @@ function scrape(doc, url) {
 	});
 	
 	var pages = ZU.xpathText(doc, '//table[@class="ergebnis"]/caption[1]');
-	pages = pages.match(/(Seiten|Pages):\s*([0-9]+)/)[2];
+	if (pages) {
+		pages = pages.match(/(Seiten|Pages):\s*([0-9]+)/)[2];
+	}
 
 	if (pages > 0) {
 		var pdfurl = "https://register.dpma.de/pdfschrift/"+pn+".pdf?dpi=300";
