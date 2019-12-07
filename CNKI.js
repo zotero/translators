@@ -180,7 +180,7 @@ function doWeb(doc, url) {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
 		Z.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return true;
+			if (!selectedItems) return;
 			
 			var itemInfoByTitle = {};
 			var ids = [];
