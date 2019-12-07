@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-09-17 15:09:07"
+	"lastUpdated": "2019-10-12 20:32:44"
 }
 
 /*
@@ -229,6 +229,8 @@ var bibtex2zoteroTypeMap = {
 	"misc":"book",
 	"proceedings":"book",
 	"online":"webpage",
+	// alias for online from BibLaTeX:
+	"electronic":"webpage",
 	// from BibLaTeX translator:
 	"thesis":"thesis",
 	"letter":"letter",
@@ -848,7 +850,7 @@ function processComment() {
 
 function beginRecord(type, closeChar) {
 	type = Zotero.Utilities.trimInternal(type.toLowerCase());
-	if (type != "string") {
+	if (type !== "string" && type !== "preamble") {
 		var zoteroType = bibtex2zoteroTypeMap[type];
 		if (!zoteroType) {
 			Zotero.debug("discarded item from BibTeX; type was "+type);
@@ -872,48 +874,82 @@ function beginRecord(type, closeChar) {
 	while (dontRead || (read = Zotero.read(1))) {
 		dontRead = false;
 		
-		if (read == "=") {								// equals begin a field
-		// read whitespace
-			var read = Zotero.read(1);
-			while (" \n\r\t".includes(read)) {
-				read = Zotero.read(1);
-			}
-			
-			if (keyRe.test(read)) {
-				// read numeric data here, since we might get an end bracket
-				// that we should care about
-				value = "";
-				value += read;
-				
-				// character is a number
-				while ((read = Zotero.read(1)) && keyRe.test(read)) {
-					value += read;
+		// the equal sign indicate the start of the value
+		// which will be handled in the following part
+		// possible formats are:
+		//    = 42,
+		//    = "42",
+		//    = {42},
+		//    = name,  (where this is defined as a string)
+		if (read == "=") {
+			var valueArray = [];
+			var rawValueArray = [];
+			// concatenation is possible with # and for that we
+			// do this do-while-loop here, e.g.
+			//     = name # " and " # "Adam Smith",
+			do {
+				var read = Zotero.read(1);
+				// skip whitespaces
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
 				}
 				
-				// don't read the next char; instead, process the character
-				// we already read past the end of the string
-				dontRead = true;
+				if (keyRe.test(read)) {
+					// read numeric data here, since we might get an end bracket
+					// that we should care about
+					value = "";
+					value += read;
+					
+					// character is a number or part of a string name
+					while ((read = Zotero.read(1)) && /[a-zA-Z0-9\-:_]/.test(read)) {
+						value += read;
+					}
+					
+					// don't read the next char; instead, process the character
+					// we already read past the end of the string
+					dontRead = true;
+					
+					// see if there's a defined string
+					if (strings[value.toLowerCase()]) value = strings[value.toLowerCase()];
+					
+					// rawValue has to be set for some fields to process
+					// thus, in this case, we set it equal to value
+					rawValue = value;
+				} else {
+					rawValue = getFieldValue(read);
+					value = unescapeBibTeX(rawValue);
+				}
 				
-				// see if there's a defined string
-				if (strings[value]) value = strings[value];
-			} else {
-				rawValue = getFieldValue(read);
-				value = unescapeBibTeX(rawValue);
-			}
+				valueArray.push(value);
+				rawValueArray.push(rawValue);
+				
+				while (" \n\r\t".includes(read)) {
+					read = Zotero.read(1);
+				}
+			
+			} while (read === "#");
+			
+			value = valueArray.join('');
+			rawValue = rawValueArray.join('');
 			
 			if (item) {
 				processField(item, field.toLowerCase(), value, rawValue);
 			} else if (type == "string") {
-				strings[field] = value;
+				strings[field.toLowerCase()] = value;
 			}
 			field = "";
-		} else if (read == ",") {						// commas reset
+		}
+		// commas reset, i.e. we are not reading a field
+		// but rather we are reading the bibkey
+		else if (read == ",") {
 			if (item.itemID == null) {
 				item.itemID = field; // itemID = citekey
 			}
 			field = "";
 
-		} else if (read == closeChar) {
+		}
+		// closing character
+		else if (read == closeChar) {
 			if (item) {
 				if (item.backupLocation) {
 					if (item.itemType=="conferencePaper") {
@@ -934,7 +970,10 @@ function beginRecord(type, closeChar) {
 				return item.complete();
 			}
 			return;
-		} else if (!" \n\r\t".includes(read)) {		// skip whitespace
+		}
+		// skip whitespaces; the rest will become
+		// the field name (or bibkey)
+		else if (!" \n\r\t".includes(read)) {
 			field += read;
 		}
 	}
@@ -3814,6 +3853,59 @@ var testCases = [
 				"pages": "36–44",
 				"place": "Reykjavik",
 				"publisher": "Félagsvísindastofnun Háskóla Íslands",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {zotero-url = {https://www.zotero.org/}}\n@string(zotero-creator = \"Corporation for Digital Scholarship\"))\n\n@Electronic{example-electronic-string,\n  author = zotero-creator,\n  title= {Zotero's Homepage},\n  year = 2019,\n  url       =zotero-url,\n  urldate=\"2019-10-12\"\n}\n",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Zotero's Homepage",
+				"creators": [
+					{
+						"firstName": "Corporation for Digital",
+						"lastName": "Scholarship",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"itemID": "example-electronic-string",
+				"url": "https://www.zotero.org/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@String {meta:maintainer = \"Xavier D\\\\'ecoret\"}\n\n@\n  %a\npreamble\n  %a\n{ \"Maintained by \" # meta:maintainer }\n@String(Stefan = \"Stefan Swe{\\\\i}g\")\n@String(and = \" and \")\n\n@Book{sweig42,\n  Author =\t stefan # And # meta:maintainer,\n  title =\t { The {impossible} TEL---book },\n  publisher =\t { D\\\\\"ead Po$_{eee}$t Society},\n  yEAr =\t 1942,\n  month =        mar\n}",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The impossible ℡—book",
+				"creators": [
+					{
+						"firstName": "Stefan",
+						"lastName": "Swe\\ıg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xavier",
+						"lastName": "D\\écoret",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 1942",
+				"itemID": "sweig42",
+				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
