@@ -42,24 +42,25 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
+	// multiples are not working (easily) because the website
+	// has to fully load before Zotero can extract its
+	// metadata
 	if (doc.getElementById("pagebody")) {
-		Z.monitorDOMChanges(doc.getElementById("pagebody"), {childList: true});
+		Z.monitorDOMChanges(doc.getElementById("pagebody"), { childList: true });
 	}
 	if (doc.getElementById("application-content")) {
 		Z.monitorDOMChanges(doc.getElementById("application-content"));
 	}
 	
-	if ((url.indexOf("/biblio?") !== -1 || url.includes("/publication/"))
+	if ((url.includes("/biblio?") || url.includes("/publication/"))
 		&& getTitle(doc)) {
 		return "patent";
 	}
-	// multiples are not working (easily) because the website
-	// has to fully load before Zotero can extract its
-	// metadata
+	return false;
 }
 
 
-function getTitle(doc) {
+function getTitle(_doc) {
 	var title = text('#pagebody>h3, #biblio-title-content');
 	if (title) {
 		if (title.toUpperCase() == title) {
@@ -67,17 +68,18 @@ function getTitle(doc) {
 		}
 		return title.trim();
 	}
+	return false;
 }
 
 
-//clean up names list and call callback with a clean name
+// clean up names list and call callback with a clean name
 function cleanNames(names, callback) {
 	if (names) {
-		//Z.debug(names)
+		// Z.debug(names)
 		names = names.replace(/\[[a-zA-Z]*\]/g, "").trim(); // to eliminate country code in square brackets after inventors' and applicants' names
 		names = ZU.capitalizeTitle(names.toLowerCase(), true);
 		names = names.split(/\s*;\s*/);
-		for (var j=0, m=names.length; j<m; j++) {
+		for (var j = 0, m = names.length; j < m; j++) {
 			callback(names[j].replace(/\s*,$/, ''));
 		}
 	}
@@ -87,18 +89,18 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("patent");
 	newItem.title = getTitle(doc);
 
-	cleanNames(text('#inventors, #biblio-inventors-content'), 
-		function(name) {
+	cleanNames(text('#inventors, #biblio-inventors-content'),
+		function (name) {
 			newItem.creators.push(
-				ZU.cleanAuthor(name.replace(/,?\s/, ', '),	//format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
+				ZU.cleanAuthor(name.replace(/,?\s/, ', '),	// format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
 					"inventor", true));
 		});
 	
 	var assignees = [];
 	cleanNames(text('#applicants, #biblio-applicants-content'),
-			function(name) {
-				assignees.push(name);
-			});
+		function (name) {
+			assignees.push(name);
+		});
 	newItem.assignee = assignees.join('; ');
 	
 	var classifications = {
@@ -111,16 +113,16 @@ function scrape(doc, url) {
 	}
 	var cpcClasses = doc.querySelectorAll('a.classTT:not(.ipc), #biblio-cooperative-content a');
 	for (let cpc of cpcClasses) {
-		classifications.cpc.push(cpc.textContent.replace(';', ''))
+		classifications.cpc.push(cpc.textContent.replace(';', ''));
 	}
-	var note = "<h1>Classifications</h1>\n<h2>IPC</h2>\n" + classifications.ipc.join('; ') + "<h2>CPC</h2>\n" + classifications.cpc.join('; ') 
+	var note = "<h1>Classifications</h1>\n<h2>IPC</h2>\n" + classifications.ipc.join('; ') + "<h2>CPC</h2>\n" + classifications.cpc.join('; ');
 	newItem.notes.push({ note: note });
 
 	var rows = ZU.xpath(doc, '//tr[@class="noPrint" or ./th[@class="printTableText"]]');
 
 	var pn = text('#biblio-publication-number-content');
 	if (pn) { // new design
-		datePnumber = pn.split('·');
+		var datePnumber = pn.split('·');
 		if (datePnumber.length == 2) {
 			newItem.patentNumber = datePnumber[0];
 		}
@@ -133,7 +135,7 @@ function scrape(doc, url) {
 		newItem.priorityNumbers = text('#biblio-priority-numbers-label ~ div');
 	}
 	else { // old design
-		for (var i=0, n=rows.length; i<n; i++) {
+		for (var i = 0, n = rows.length; i < n; i++) {
 			var label = rows[i].firstElementChild.textContent.trim();
 			var value = rows[i].firstElementChild.nextElementSibling;
 			if (!value) continue;
@@ -167,7 +169,7 @@ function scrape(doc, url) {
 		text('p.printAbstract, #biblio-abstract-content') || '');
 
 	newItem.attachments.push({
-		title:"Espacenet patent record",
+		title: "Espacenet patent record",
 		url: url,
 		snapshot: false
 	});
@@ -178,8 +180,9 @@ function scrape(doc, url) {
 function doWeb(doc, url) {
 	// only single items need to be handled
 	scrape(doc, url);
-}   
-  /** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
