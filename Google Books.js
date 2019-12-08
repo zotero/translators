@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-12-07 19:06:54"
+	"lastUpdated": "2019-12-08 18:50:54"
 }
 
 /*
@@ -94,8 +94,9 @@ function getSearchResults(doc, checkOnly) {
 		let href = row.href;
 		// h3 for google books, div for google play
 		let title = text(row, 'h3, div');
-
-		if (!href || !title) continue;
+		// exclude audiobooks on google play
+		// audiobooks aren't in Google's book metadata
+		if (!href || !title || href.includes("/store/audiobooks/")) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = ZU.trimInternal(title);
