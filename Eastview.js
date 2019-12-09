@@ -40,9 +40,11 @@ function detectWeb(doc, url) {
 			childList: true
 		});
 		if (getSearchResults(doc, true)) return "multiple";
-	} else {
+	}
+	else {
 		return "newspaperArticle";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -65,8 +67,8 @@ var typeMap = {
 	"Argumenty i fakty": "magazineArticle",
 	"Argumenty nedeli": "magazineArticle",
 	"Ekonomika i zhizn'": "magazineArticle",
-	"Ekspert": "magazineArticle",
-	"Izvestiia": "newspaperArticle",
+	Ekspert: "magazineArticle",
+	Izvestiia: "newspaperArticle",
 	"Kommersant. Daily": "newspaperArticle",
 	"Komsomol'skaia pravda": "newspaperArticle",
 	"Kul'tura": "magazineArticle",
@@ -78,21 +80,21 @@ var typeMap = {
 	"Nezavisimaia gazeta": "newspaperArticle",
 	"Novaia gazeta": "newspaperArticle",
 	"Novye izvestiia": "newspaperArticle",
-	"Ogonek": "magazineArticle",
-	"Pravda": "newspaperArticle",
-	"President": "magazineArticle",
+	Ogonek: "magazineArticle",
+	Pravda: "newspaperArticle",
+	President: "magazineArticle",
 	"Profil'": "magazineArticle",
 	"RBK Daily": "newspaperArticle",
 	"Rossiiskaia gazeta": "newspaperArticle",
 	"Rossiiskie vesti": "newspaperArticle",
 	"Russkii reporter": "magazineArticle",
 	"Sankt-Peterburgskie vedomosti": "newspaperArticle",
-	"Slovo": "magazineArticle",
+	Slovo: "magazineArticle",
 	"Sovetskaia Rossiia": "newspaperArticle",
-	"Trud": "newspaperArticle",
+	Trud: "newspaperArticle",
 	"Vecherniaia Moskva": "newspaperArticle",
-	"Vedomosti": "newspaperArticle",
-	"Zavtra": "newspaperArticle"
+	Vedomosti: "newspaperArticle",
+	Zavtra: "newspaperArticle"
 };
 
 function permaLink(URL) {
@@ -103,13 +105,13 @@ function permaLink(URL) {
 
 function pdfLink(URL) {
 	// from regular link
-	 var id = URL.match(/id=(\d+)/);
-	 if (!id & URL.includes("/browse/doc/")) {
-	 	// from permalink
-	 	id = URL.match(/\/browse\/doc\/(\d+)/);
-	 }
-	 if (id) return "/browse/pdf-download?articleid=" + id[1];
-	 else return URL;
+	var id = URL.match(/id=(\d+)/);
+	if (!id & URL.includes("/browse/doc/")) {
+		// from permalink
+		id = URL.match(/\/browse\/doc\/(\d+)/);
+	}
+	if (id) return "/browse/pdf-download?articleid=" + id[1];
+	else return URL;
 }
 
 function scrape(doc, url) {
@@ -128,7 +130,7 @@ function scrape(doc, url) {
 	var database = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/udb")]');
 	if (database) item.libraryCatalog = database.replace(/\(.+\)/, "") + "(Eastview)";
 	if (ZU.xpathText(doc, '//table[@class="table table-condensed Table Table-noTopBorder"]//td[contains(text(), "Article")]')) {
-		//we have the metadata in a table
+		// we have the metadata in a table
 		var metatable = ZU.xpath(doc, '//table[tbody/tr/td[contains(text(), "Article")]]');
 		title = ZU.xpathText(metatable, './/td[contains(text(), "Article")]/following-sibling::td');
 		var source = ZU.xpathText(metatable, './/td[contains(text(), "Source")]/following-sibling::td');
@@ -144,7 +146,6 @@ function scrape(doc, url) {
 		}
 		if (!item.publicationTitle) {
 			item.publicationTitle = ZU.xpathText(metatable, './/td[text()="Title"]/following-sibling::td');
-
 		}
 		if (!item.pages) {
 			var pagesOnly = ZU.xpathText(metatable, './/td[contains(text(), "Page(s)")]/following-sibling::td');
@@ -152,38 +153,41 @@ function scrape(doc, url) {
 		}
 		var author = ZU.xpathText(metatable, './/td[contains(text(), "Author(s)")]/following-sibling::td');
 		if (author) {
-			//Z.debug(author)
-			authors = author.trim().split(/\s*,\s*/);
+			// Z.debug(author)
+			var authors = author.trim().split(/\s*,\s*/);
 			for (var i = 0; i < authors.length; i++) {
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
 		}
 		var place = ZU.xpathText(metatable, './/td[contains(text(), "Place of Publication")]/following-sibling::td');
 		if (place) item.place = ZU.trimInternal(place);
-	} else {
+	}
+	else {
 		title = ZU.xpathText(doc, '//div[@class="ArticleTitle"]');
 		if (!title) {
 			title = ZU.xpathText(doc, '//div[contains(@class, "table-responsive")]/div[@class="change_font"]');
-		}	
-		//the "old" page format. We have very little structure here, doing the best we can.
+		}
+		// the "old" page format. We have very little structure here, doing the best we can.
 		var header = ZU.xpathText(doc, '//div[contains(@class, "table-responsive")]/ul[1]');
-		//Z.debug(header);
-		date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
-		if (date) item.date = date[1];
-		if (!item.publicationTitle) {
-			//most of the time the publication title is in quotation marks
-			publication = header.match(/\"(.+?)\"/);
-			if (publication) item.publicationTitle = publication[1];
-			//if all else fails we just take the top of the file
-			else {
-				item.publicationTitle = header.trim().match(/^.+/)[0];
+		// Z.debug(header);
+		if (header) {
+			date = header.match(/Date:\s*(\d{2}-\d{2}-\d{2,4})/);
+			if (date) item.date = date[1];
+			if (!item.publicationTitle) {
+				// most of the time the publication title is in quotation marks
+				publication = header.match(/"(.+?)"/);
+				if (publication) item.publicationTitle = publication[1];
+				// if all else fails we just take the top of the file
+				else {
+					item.publicationTitle = header.trim().match(/^.+/)[0];
+				}
 			}
 		}
 	}
-	//see if we have a match for item type; default to newspaper otherwise.
+	// see if we have a match for item type; default to newspaper otherwise.
 	var itemType = typeMap[item.publicationTitle];
 	if (itemType) item.itemType = itemType;
-	//Attach real PDF for PDFs:
+	// Attach real PDF for PDFs:
 	if (doc.querySelectorAll('#pdfjsContainer').length) {
 		item.attachments.push({
 			url: pdfLink(url),
@@ -203,17 +207,15 @@ function scrape(doc, url) {
 		title = ZU.capitalizeTitle(title, true);
 	}
 	item.title = title;
-	//Z.debug(item)
-	//sometimes items actually don't have a title: use the publication title instead.
+	// Z.debug(item)
+	// sometimes items actually don't have a title: use the publication title instead.
 	if (!item.title) item.title = item.publicationTitle;
 	item.complete();
 }
 
 function doWeb(doc, url) {
-	var articles = [];
-	var items = {};
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function(items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
 			}
@@ -223,7 +225,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
