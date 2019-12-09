@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-12-09 13:33:14"
+	"lastUpdated": "2019-12-09 13:35:39"
 }
 
 /*
@@ -469,6 +469,47 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Juvenile Fiction / Action & Adventure / General"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://books.google.com.au/books?id=xylqIkDQ-gEC&pg=PA111&dq=clinical+psychology&hl=en&sa=X&ved=0ahUKEwidzdfqiKjmAhXNF3IKHhttps://books.google.com.au/books?id=xylqIkDQ-gEC&pg=PA111&dq=clinical+psychology&hl=en&sa=X&ved=0ahUKEwidzdfqiKjmAhXNF3IKHejiBPoQ6AEIQTAD#v=onepage&q=clinical%20psychology&f=true",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Contemporary Clinical Psychology",
+				"creators": [
+					{
+						"firstName": "Thomas G.",
+						"lastName": "Plante",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010-08-20",
+				"ISBN": "9780470872116",
+				"abstractNote": "Contemporary Clinical Psychology, Third Edition introduces students to this fascinating profession from an integrative, biopsychosocial perspective. Thoroughly updated to include the latest information on topics central to the field, this innovative approach to studying clinical psychology delivers an engaging overview of the roles and responsibilities of today's clinical psychologists that is designed to inform and spark interest in a future career in this dynamic field. Highlighting evidence-based therapies, multiple case studies round out the portrayal of clinical practice. Designed for graduate and undergraduate students in introductory clinical psychology courses.",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "625",
+				"publisher": "John Wiley & Sons",
+				"attachments": [
+					{
+						"title": "Google Books Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Psychology / Clinical Psychology"
+					},
+					{
+						"tag": "Psychology / General"
 					}
 				],
 				"notes": [],
