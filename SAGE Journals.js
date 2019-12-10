@@ -59,6 +59,7 @@ function getSearchResults(doc, checkOnly) {
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
+		href = href.replace("/doi/pdf/", "/doi/abs/");
 		items[href] = title;
 	}
 	return found ? items : false;
@@ -88,8 +89,7 @@ function scrape(doc, url) {
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
-	var filename = ZU.xpathText(doc, '//input[@name="downloadFileName"]/@value');
-	var post = "doi=" + encodeURIComponent(doi) + "&downloadFileName=" + filename + "&include=abs&format=ris&direct=false&submit=Download+Citation";
+	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	//Z.debug(pdfurl);
 	//Z.debug(post);
