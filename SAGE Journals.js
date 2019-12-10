@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-06 20:50:24"
+	"lastUpdated": "2019-12-10 18:09:17"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-//SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
+// SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
 
 // attr()/text() v2
 // eslint-disable-next-line
@@ -44,9 +44,11 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -68,7 +70,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function(items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
 			}
@@ -78,7 +80,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -91,25 +94,25 @@ function scrape(doc, url) {
 	}
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	//Z.debug(pdfurl);
-	//Z.debug(post);
-	ZU.doPost(risURL, post, function(text) {
-		//The publication date is saved in DA and the date first
-		//appeared online is in Y1. Thus, we want to prefer DA over T1
-		//and will therefore simply delete the later in cases both
-		//dates are present.
-		//Z.debug(text);
+	// Z.debug(pdfurl);
+	// Z.debug(post);
+	ZU.doPost(risURL, post, function (text) {
+		// The publication date is saved in DA and the date first
+		// appeared online is in Y1. Thus, we want to prefer DA over T1
+		// and will therefore simply delete the later in cases both
+		// dates are present.
+		// Z.debug(text);
 		if (text.includes("DA  - ")) {
-			text = text.replace(/Y1  - .*\r?\n/, '');
+			text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
 		}
 		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-			//The subtitle will be neglected in RIS and is only present in
-			//the website itself. Moreover, there can be problems with
-			//encodings of apostrophs.
+		translator.setHandler("itemDone", function (obj, item) {
+			// The subtitle will be neglected in RIS and is only present in
+			// the website itself. Moreover, there can be problems with
+			// encodings of apostrophs.
 			var subtitle = ZU.xpathText(doc, '//div[contains(@class, "publicationContentSubTitle")]/h1');
 			var title = ZU.xpathText(doc, '//div[contains(@class, "publicationContentTitle")]/h1');
 			if (title) {
@@ -118,8 +121,8 @@ function scrape(doc, url) {
 					item.title += ': ' + subtitle.trim();
 				}
 			}
-			//The encoding of apostrophs in the RIS are incorrect and
-			//therefore we extract the abstract again from the website.
+			// The encoding of apostrophs in the RIS are incorrect and
+			// therefore we extract the abstract again from the website.
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
 				item.abstractNote = abstract;
@@ -130,8 +133,8 @@ function scrape(doc, url) {
 				item.tags = tags.split(",");
 			}
 			
-			//Workaround while Sage hopefully fixes RIS for authors
-			for (let i = 0; i<item.creators.length; i++) {
+			// Workaround while Sage hopefully fixes RIS for authors
+			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
 					let type = item.creators[i].creatorType;
 					let comma = item.creators[i].lastName.includes(",");
@@ -186,7 +189,17 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "emotion regulation"
+					},
+					{
+						"tag": "facial expression"
+					},
+					{
+						"tag": "facial feedback"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -238,7 +251,32 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Shear cell"
+					},
+					{
+						"tag": "BCR limestone powder (CRM-116)"
+					},
+					{
+						"tag": "flow function"
+					},
+					{
+						"tag": "characterizing powder flowability"
+					},
+					{
+						"tag": "reproducibility"
+					},
+					{
+						"tag": "Brookfield powder flow tester"
+					},
+					{
+						"tag": "Jenike shear cell"
+					},
+					{
+						"tag": "Schulze ring shear tester"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -296,7 +334,20 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Moffitt’s developmental taxonomy"
+					},
+					{
+						"tag": "gang membership"
+					},
+					{
+						"tag": "snares"
+					},
+					{
+						"tag": "delinquency"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
