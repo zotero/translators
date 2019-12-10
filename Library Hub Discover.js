@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 21:10:46"
+	"lastUpdated": "2019-12-10 21:27:56"
 }
 
 /*
@@ -39,7 +39,7 @@
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -65,17 +65,18 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-		  if (items) ZU.processDocuments(Object.keys(items), scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('05d07af9-105a-4572-99f6-a8e231c0daef');
 	translator.setDocument(doc);
 	translator.translate();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
