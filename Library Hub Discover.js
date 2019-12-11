@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-11 11:42:31"
+	"lastUpdated": "2019-12-11 11:47:15"
 }
 
 /*
@@ -40,11 +40,11 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 var typeMapping = {
-	"book": "book",
-	"visual" : "artwork",
-	"map": "map",
-	"audio": "audioRecording",
-	"periodical": "document",
+	book: "book",
+	visual: "artwork",
+	map: "map",
+	audio: "audioRecording",
+	periodical: "document",
 	"mixed-material": "document",
 	"music-score": "document"
 };
@@ -54,10 +54,9 @@ function detectWeb(doc, _url) {
 		return "multiple";
 	}
 	else {
-		item_type = text(doc, 'div.record-details__type');
+		var item_type = text(doc, 'div.record-details__type');
 		return typeMapping[item_type];
 	}
-	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -98,7 +97,7 @@ function scrape(url) {
 		translator.setTranslator('0e2235e7-babf-413c-9acf-f27cce5f059c');
 		translator.setString(text);
 		translator.translate();
-	})
+	});
 }
 
 /** BEGIN TEST CASES **/
