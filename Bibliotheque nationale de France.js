@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "g",
-	"lastUpdated": "2017-07-07 11:47:44"
+	"browserSupport": "gc",
+	"lastUpdated": "2021-05-28 18:02:24"
 }
 
 /*
@@ -30,6 +30,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 /* Bnf namespace. */
 var BnfClass = function() {
@@ -41,7 +44,8 @@ var BnfClass = function() {
 		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
 	*/
 	function getCreatorType(aut) {
-
+		// To avoid an error on certain pages where the item is not well catalogued
+		if (aut['4'] === undefined) return undefined;
 		var typeAut = aut['4'].trim();
 		switch (typeAut) {
 			case "005":
@@ -607,17 +611,35 @@ var BnfClass = function() {
 /* Global BnfClass object. */
 var Bnf = new BnfClass();
 
-
 /* Translator API implementation. */
-
+var typeMapping = {
+	"moving image": "film",
+	text: "book",
+	"printed text": "book",
+	"electronic resource": "book",
+	score: "book",
+	sound: "audioRecording",
+	"sound recording": "audioRecording",
+	"cartographic resource": "map",
+	"still image": "artwork",
+	kit: "single",
+	"modern manuscript or archive": "manuscript",
+	"coin or medal": "single",
+	"physical object": "single",
+	"three dimensional object": "single"
+};
 
 function detectWeb(doc, url) {
 	var resultRegexp = /ark:\/12148\/cb[0-9]+/i;
 	//Single result ?
 	if (resultRegexp.test(url)) {
-
-		return "single";
-
+		itemType = attr(doc, 'meta[name="DC.type"][lang="eng"]', "content");
+		if(typeMapping[itemType]) {
+			return typeMapping[itemType];
+		}
+		else {
+			return "single";
+		}
 	}
 	//Muliple result ?
 	else if (Bnf.getResultsTable(doc)) {
@@ -657,17 +679,250 @@ function doWeb(doc, url) {
 				}
 			});
 			break;
-		case "single":
+		default:
 			urls = [Bnf.reformURL(url)];
 			Zotero.Utilities.processDocuments(urls, function(doc) {
 				Bnf.processMarcUrl.call(Bnf, doc, url);
 			});
 			break;
-		default:
-			// nothing to do 
-			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb40636779s",
+		"items": [
+			{
+				"itemType": "map",
+				"title": "Scotia Regnum divisum in Partem Septentrionalem et Meridionalem Subdivisas in Comitatus, Vicecomitatus, Provincias, Praefecturas, Dominia et Insulas",
+				"creators": [
+					{
+						"firstName": "Frederick",
+						"lastName": "De Wit ",
+						"creatorType": "author"
+					}
+				],
+				"date": "1680",
+				"extra": "510 x 570. Le titre est en bas et à gauche dans un cartouche monumental décoré d'un Amour. En haut de la carte, deux Amours portent un écu aux armes de l'Ecosse. Vers 1680.",
+				"language": "lat",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"place": "S.l.",
+				"publisher": "s.n.",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": " Écosse, Royaume d' (843-1707) "
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb43664161m",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "La déesse des petites victoires",
+				"creators": [
+					{
+						"firstName": "Yannick",
+						"lastName": "Grannec ",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISBN": "9782286093051",
+				"callNumber": "Tolbiac - Rez de Jardin - Littérature et art - Magasin - 2013-334011",
+				"extra": "couv. ill. 21 cm. Bibliogr., 3 p.",
+				"language": "fre",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"numPages": "468",
+				"numberOfVolumes": "1",
+				"place": "Paris",
+				"publisher": "le Grand livre du mois",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb39209609w",
+		"items": [
+			{
+				"itemType": "film",
+				"title": "Problèmes et pratiques :  sciences de la vie et de la terre",
+				"creators": [],
+				"date": "199",
+				"distributor": "Centre national de documentation pédagogique",
+				"extra": "coul. (SECAM), son. Titre de dos : \"Sciences de la vie et de la terre, problèmes et pratiques. Notice réd. d'après un document produit en 1996.",
+				"language": "fre",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"shortTitle": "Problèmes et pratiques",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb40494299f",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "[Recueil. Vues stéréoscopiques de Louis] :  [photographie",
+				"creators": [
+					{
+						"lastName": "Louis",
+						"creatorType": "artist"
+					}
+				],
+				"extra": "formats divers. Comprend deux séries : \"Le Petit Chaperon rouge\" et \"La Belle au Bois Dormant.",
+				"language": "fre",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"shortTitle": "[Recueil. Vues stéréoscopiques de Louis]",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": " Figurines "
+					},
+					{
+						"tag": " Perrault ,  Charles  ( 1628-1703 ),  La Belle au bois dormant "
+					},
+					{
+						"tag": " Perrault ,  Charles  ( 1628-1703 ),  Le Petit Chaperon rouge "
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb39755519v",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "[3 lettres et 1 carte de visite d'Adolphe Aderer à Adolphe Jullien]",
+				"creators": [
+					{
+						"firstName": "Adolphe",
+						"lastName": "Aderer ",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adolphe",
+						"lastName": "Jullien ",
+						"creatorType": "recipient"
+					}
+				],
+				"language": "fre",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"place": "1895-1922",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb40025449j",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "The complete D singles collection :  the sounds of Houston, Texas",
+				"creators": [],
+				"extra": "6 brochures.",
+				"label": "Bear family records",
+				"language": "eng",
+				"libraryCatalog": "BnF Catalogue général (http://catalogue.bnf.fr)",
+				"place": "Hambergen (Allemagne)",
+				"shortTitle": "The complete D singles collection",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/rechercher.do?motRecherche=test&critereRecherche=0&depart=0&facetteModifiee=ok",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://catalogue.bnf.fr/ark:/12148/cb410374690.public",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Les sorcières envahissent la forêt Lespinasse :  [affiche",
+				"creators": [],
+				"date": "2007",
+				"extra": "60 x 40 cm.",
+				"language": "fre",
+				"libraryCatalog": "BnF Catalogue général (http:// catalogue.bnf.fr)",
+				"shortTitle": "Les sorcières envahissent la forêt Lespinasse",
+				"attachments": [
+					{
+						"title": "Lien vers la notice du catalogue",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 /** END TEST CASES **/
