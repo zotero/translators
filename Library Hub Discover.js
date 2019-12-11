@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 21:27:56"
+	"lastUpdated": "2019-12-11 11:42:31"
 }
 
 /*
@@ -39,9 +39,23 @@
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
+var typeMapping = {
+	"book": "book",
+	"visual" : "artwork",
+	"map": "map",
+	"audio": "audioRecording",
+	"periodical": "document",
+	"mixed-material": "document",
+	"music-score": "document"
+};
+
 function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	else {
+		item_type = text(doc, 'div.record-details__type');
+		return typeMapping[item_type];
 	}
 	return false;
 }
@@ -49,13 +63,14 @@ function detectWeb(doc, _url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll(".record-details__title a");
+	var rows = doc.querySelectorAll("div[prefix='schema: http://schema.org/ dct:http://purl.org/dc/terms/']");
+	if (checkOnly && rows.length > 1) return true;
+	else if (checkOnly && rows.length <= 1) return false;
 	for (let row of rows) {
-		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let href = "/search?id=" + row.getAttribute('resource').split('/')[4] + "&format=mods";
+		let title = ZU.trimInternal(text(row, 'div.record-details__title a'));
 		if (title.endsWith(" /")) title = title.slice(0, -2);
 		if (!href || !title) continue;
-		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
@@ -65,23 +80,154 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
+			if (items) {
+				for (let href of Object.keys(items)) scrape(href);
+			}
 		});
+	}
+	else {
+		var row = doc.querySelector("div[prefix='schema: http://schema.org/ dct:http://purl.org/dc/terms/']");
+		let href = "/search?id=" + row.getAttribute('resource').split('/')[4] + "&format=mods";
+		scrape(href);
 	}
 }
 
-function scrape(doc, _url) {
-	var translator = Zotero.loadTranslator('web');
-	translator.setTranslator('05d07af9-105a-4572-99f6-a8e231c0daef');
-	translator.setDocument(doc);
-	translator.translate();
+function scrape(url) {
+	ZU.doGet(url, function (text) {
+		var translator = Zotero.loadTranslator('import');
+		translator.setTranslator('0e2235e7-babf-413c-9acf-f27cce5f059c');
+		translator.setString(text);
+		translator.translate();
+	})
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
 		"url": "https://discover.libraryhub.jisc.ac.uk/search?q=test",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://discover.libraryhub.jisc.ac.uk/search?q=test%20sound&rn=1",
+		"items": [
+			{
+				"itemType": "audioRecording",
+				"title": "Second sound test.",
+				"creators": [],
+				"date": "2016",
+				"abstractNote": "A sound test record.",
+				"archiveLocation": "Wellcome Library; wel",
+				"label": "Wellcome test records",
+				"language": "English",
+				"libraryCatalog": "Library Hub Discover",
+				"numberOfVolumes": "1",
+				"place": "London",
+				"runningTime": "00:00",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://discover.libraryhub.jisc.ac.uk/id/73805859",
+		"items": [
+			{
+				"itemType": "map",
+				"title": "The Americas [and] Bird migration in the Americas: produced by the Cartographic Division, National Geographic Society.",
+				"creators": [
+					{
+						"lastName": "National Geographic Society (U.S.)",
+						"fieldMode": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "1979",
+				"archiveLocation": "British Library; bli",
+				"callNumber": "912.7, 912.8",
+				"language": "English",
+				"libraryCatalog": "Library Hub Discover",
+				"place": "Washington, D.C.",
+				"publisher": "National Geographic Society",
+				"scale": "1:20,000",
+				"shortTitle": "The Americas [and] Bird migration in the Americas",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Birds migration"
+					},
+					{
+						"tag": "Birds migration"
+					},
+					{
+						"tag": "Birds migration"
+					}
+				],
+				"notes": [
+					{
+						"note": "general: Relief shown by shading. Elevations, depth curves and soundings in meters."
+					},
+					{
+						"note": "general: Political map of the Western Hemisphere backed with pictorial map entitled \"Bird migration in the Americas\"."
+					},
+					{
+						"note": "general: Includes inset map: Physical map of the Americas."
+					},
+					{
+						"note": "general: Issued as Supplement to the National Geographic, August 1979, page 154A, vol. 156, no. 2 – Bird migration."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://discover.libraryhub.jisc.ac.uk/id/64412752",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Which hi-fi.",
+				"creators": [],
+				"date": "1983",
+				"archiveLocation": "British Library; bli",
+				"callNumber": "TK7881.7, 621.389/3, 621.389/3, RW 51",
+				"language": "English",
+				"libraryCatalog": "Library Hub Discover",
+				"publisher": "Haymarket Pub.",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "High-fidelity sound recording & reproduction equipment"
+					},
+					{
+						"tag": "High-fidelity sound systems"
+					},
+					{
+						"tag": "Periodicals."
+					},
+					{
+						"tag": "Serials"
+					}
+				],
+				"notes": [
+					{
+						"note": "date/sequential designation: 84."
+					},
+					{
+						"note": "numbering: Only one issue published."
+					},
+					{
+						"note": "linking entry complexity: Continues: Hi-fi annual and test."
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
