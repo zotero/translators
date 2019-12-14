@@ -5,11 +5,11 @@
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 110,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-14 11:15:15"
+	"lastUpdated": "2019-12-14 12:40:29"
 }
 
 /*
@@ -316,6 +316,26 @@ function getAttachments(doc, item) {
 	
 	return attachments;
 }
+
+
+function detectSearch(item) {
+	if (item.DOI) {
+		return true;
+	}
+	return false;
+}
+
+
+// e.g. 10.16524/j.45-1002.20190905.002
+function doSearch(item) {
+	if (item.DOI && !Array.isArray(item.DOI)) {
+		let url = 'https://kns.cnki.net/kcms/detail/detail.aspx?doi=' + ZU.cleanDOI(item.DOI);
+		ZU.processDocuments(url, function (doc) {
+			scrape([getIDFromPage(doc, url)], doc, url);
+		});
+	}
+}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
