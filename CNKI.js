@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"lastUpdated": "2019-12-14 09:56:45"
 }
 
 /*
@@ -256,6 +256,9 @@ function scrape(ids, doc, url, itemInfo) {
 			var webType = detectWeb(doc, url);
 			if (webType && webType != 'multiple') {
 				newItem.attachments = getAttachments(doc, newItem);
+				if (!newItem.DOI) {
+					newItem.DOI = ZU.xpathText(doc, '//label[@id="catalog_ZCDOI"]/following-sibling::text()');
+				}
 			}
 			newItem.complete();
 		});
