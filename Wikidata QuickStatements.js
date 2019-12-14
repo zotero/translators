@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2017-08-04 20:31:00"
+	"lastUpdated": "2019-12-14 19:45:00"
 }
 
 
@@ -95,12 +95,45 @@ var propertyMapping = {
 	"P304" : "pages"
 };
 
+// it is important to use here the language codes in the form
+// as they are also used in Wikidata for monolingual text
 var languageMapping = {
 	"en" : "Q1860",
-	"it" : "Q652",
+	"zh" : "Q7850",
+	"ru" : "Q7737",
+	"fr" : "Q150",
+	"ja" : "Q5287",
 	"de" : "Q188",
-	"ger" : "Q188",
-	"fr" : "Q150"
+	"es" : "Q1321",
+	"sr" : "Q9299",
+	"pl" : "Q809",
+	"cs" : "Q9056",
+	"it" : "Q652",
+	"cy" : "Q9309",
+	"pt" : "Q5146",
+	"nl" : "Q7411",
+	"sv" : "Q9027",
+	"ar" : "Q13955",
+	"ko" : "Q9176",
+	"hu" : "Q9067",
+	"da" : "Q9035",
+	"fi" : "Q1412",
+	"eu" : "Q8752",
+	"he" : "Q9288",
+	"la" : "Q397",
+	"nb" : "Q25167",
+	"no" : "Q9043",
+	"el" : "Q9129",
+	"tr" : "Q256",
+	"ca" : "Q7026",
+	"sl" : "Q9063",
+	"ro" : "Q7913",
+	"is" : "Q294",
+	"grc" : "Q35497",
+	"uk" : "Q8798",
+	"fa" : "Q9168", 
+	"hy" : "Q8785",
+	"ta" : "Q5885"
 };
 
 var identifierMapping = {
@@ -197,14 +230,10 @@ function zoteroItemToQuickStatements(item) {
 		}
 	}
 
-	if (item.language) {
-		item.language = item.language.toLowerCase();
-		addStatement('P1476', item.language + ':"' + item.title + '"');
-		for (var lang in languageMapping) {
-			if (item.language.startsWith(lang)) {
-				addStatement('P407', languageMapping[lang]);
-			}
-		}
+	if (item.language && (item.language.toLowerCase() in languageMapping)) {
+		let lang = item.language.toLowerCase();
+		addStatement('P1476', lang + ':"' + item.title + '"');
+		addStatement('P407', languageMapping[lang]);
 	} else {
 		//otherwise use "und" for undetermined language
 		addStatement('P1476', 'und:"' + item.title + '"');
