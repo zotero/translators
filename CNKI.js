@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-14 09:56:45"
+	"lastUpdated": "2019-12-14 11:15:15"
 }
 
 /*
@@ -81,7 +81,8 @@ function getIDFromURL(url) {
 
 
 // 网络首发期刊信息并不能从URL获取dbname和filename信息
-// Get dbname and filename from pre-released article web page.
+// Get dbname and filename from web page, e.g. for pre-released article
+// but also works in general pretty good now
 function getIDFromRef(doc, url) {
 	var func = ZU.xpath(doc, '//div[@class="link"]/a');
 	if (!func.length) {
@@ -94,9 +95,9 @@ function getIDFromRef(doc, url) {
 }
 
 function getIDFromPage(doc, url) {
-	return getIDFromURL(url)
-		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'))
-		|| getIDFromRef(doc, url);
+	return getIDFromRef(doc, url)
+		|| getIDFromURL(url)
+		|| getIDFromURL(ZU.xpathText(doc, '//div[@class="zwjdown"]/a/@href'));
 }
 
 function getTypeFromDBName(dbname) {
@@ -507,6 +508,77 @@ var testCases = [
 					},
 					{
 						"tag": "资产池定价"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?filename=dqwj201002019&dbname=CJFD&dbcode=CJFQ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "利用卫星重力数据研究中国及邻域地壳厚度",
+				"creators": [
+					{
+						"lastName": "段",
+						"firstName": "虎荣",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "张",
+						"firstName": "永志",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "刘",
+						"firstName": "锋",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "康",
+						"firstName": "荣华",
+						"creatorType": "author"
+					}
+				],
+				"date": "2010",
+				"ISSN": "1004-2903",
+				"abstractNote": "本文以中国大陆及邻域地壳厚度为研究对象,采用GRACE提供的GX OG-2-GCM模型数据计算自由空气重力异常,通过确定地核与地幔的质量,分离出由地壳部分产生的重力异常并经过布格改正得到布格重力异常,利用Park公式求出了中国大陆地壳厚度的分布,结果与以前地壳厚度资料相符合.",
+				"issue": "02",
+				"language": "中文;",
+				"libraryCatalog": "CNKI",
+				"pages": "494-499",
+				"publicationTitle": "地球物理学进展",
+				"url": "http://kns.cnki.net/KCMS/detail/detail.aspx?filename=dqwj201002019&dbname=CJFD&dbcode=CJFQ",
+				"volume": "25",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Bouguer gravity anomalies"
+					},
+					{
+						"tag": "crustal thickness"
+					},
+					{
+						"tag": "inversion"
+					},
+					{
+						"tag": "satellite gravity"
+					},
+					{
+						"tag": "卫星重力"
+					},
+					{
+						"tag": "反演"
+					},
+					{
+						"tag": "地壳厚度"
+					},
+					{
+						"tag": "布格重力异常"
 					}
 				],
 				"notes": [],
