@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-29 01:43:27"
+	"lastUpdated": "2019-12-16 17:07:19"
 }
 
 /*
@@ -150,7 +150,7 @@ function scrape(doc, url) {
 			// trying to correct for this
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName && item.creators[i].lastName.includes(" ")) {
-					item.creators[i].firstName = item.creators[i].lastName.match(/^\w+\s+(.+)/)[1];
+					item.creators[i].firstName = item.creators[i].lastName.match(/^\w+([-‐]\w+)?\s+(.+)/)[2];
 					item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
 					delete item.creators[i].fieldMode;
 				}
@@ -295,6 +295,142 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.emerald.com/insight/publication/issn/0140-9174/vol/32/iss/12",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.emerald.com/insight/content/doi/10.1108/00070700410528754/full/html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The influence of context upon consumer sensory evaluation of chicken‐meat quality",
+				"creators": [
+					{
+						"lastName": "Kennedy",
+						"creatorType": "author",
+						"firstName": "Orla"
+					},
+					{
+						"lastName": "Stewart‐Knox",
+						"creatorType": "author",
+						"firstName": "Barbara"
+					},
+					{
+						"lastName": "Mitchell",
+						"creatorType": "author",
+						"firstName": "Peter"
+					},
+					{
+						"lastName": "Thurnham",
+						"creatorType": "author",
+						"firstName": "David"
+					}
+				],
+				"date": "2004-01-01",
+				"DOI": "10.1108/00070700410528754",
+				"ISSN": "0007-070X",
+				"abstractNote": "There is an apparent lack of research investigating how different test conditions influence or bias consumer sensory evaluation of food. The aim of the present pilot study was to determine if testing conditions had any effect on responses of an untrained panel to a novel chicken product. Assessments of flavour, texture and overall liking of corn‐fed chicken were made across three different testing conditions (laboratory‐based under normal lighting; laboratory‐based under controlled lighting; and, home testing). Least favourable evaluations occurred under laboratory‐based conditions irrespective of what lighting was used. Consumers perceived the product more favourably in terms of flavour (p < 0.001), texture (p < 0.001) and overall preference (p < 0.001) when evaluated in the familiar setting of the home. Home testing produced more consistent assessments than under either of the two laboratory‐based test conditions. The results imply that home evaluation should be undertaken routinely in new food product development.",
+				"issue": "3",
+				"libraryCatalog": "Emerald Insight",
+				"pages": "158-165",
+				"publicationTitle": "British Food Journal",
+				"url": "https://doi.org/10.1108/00070700410528754",
+				"volume": "106",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Food products"
+					},
+					{
+						"tag": "Poultry"
+					},
+					{
+						"tag": "Sensory perception"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.emerald.com/insight/content/doi/10.1108/S0163-786X(2012)0000033008/full/html",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Media Framing of the Pittsburgh G-20 Protests",
+				"creators": [
+					{
+						"lastName": "Kutz-Flamenbaum",
+						"creatorType": "author",
+						"firstName": "Rachel V."
+					},
+					{
+						"lastName": "Staggenborg",
+						"creatorType": "author",
+						"firstName": "Suzanne"
+					},
+					{
+						"lastName": "Duncan",
+						"creatorType": "author",
+						"firstName": "Brittany J."
+					},
+					{
+						"lastName": "Jennifer",
+						"creatorType": "editor",
+						"firstName": "Earl"
+					},
+					{
+						"lastName": "Deana",
+						"creatorType": "editor",
+						"firstName": "A. Rohlinger"
+					}
+				],
+				"date": "2012-01-01",
+				"ISBN": "9781780528816 9781780528809",
+				"abstractNote": "Research implications – We argue that events such as the G-20 meetings provide protesters with opportunities to gain temporary “standing” with the media. During such times, activists can use tactics and frames to alter the balance of power in relations with the media and the state and to attract positive media coverage, particularly when activists develop strategies that are not exclusively focused on the media. We argue that a combination of political opportunities and activist media strategies enabled protest organizers to position themselves as central figures in the G-20 news story and leverage that position to build media interest, develop relationships with reporters, and influence newspaper coverage.",
+				"bookTitle": "Media, Movements, and Political Change",
+				"extra": "DOI: 10.1108/S0163-786X(2012)0000033008",
+				"libraryCatalog": "Emerald Insight",
+				"pages": "109-135",
+				"publisher": "Emerald Group Publishing Limited",
+				"series": "Research in Social Movements, Conflicts and Change",
+				"url": "https://doi.org/10.1108/S0163-786X(2012)0000033008",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Anarchist(s)"
+					},
+					{
+						"tag": "Framing"
+					},
+					{
+						"tag": "G-20"
+					},
+					{
+						"tag": "Media strategy"
+					},
+					{
+						"tag": "Strategy"
+					},
+					{
+						"tag": "Summit protests"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
