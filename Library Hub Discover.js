@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-11 11:47:15"
+	"lastUpdated": "2019-12-16 17:25:26"
 }
 
 /*
@@ -54,8 +54,8 @@ function detectWeb(doc, _url) {
 		return "multiple";
 	}
 	else {
-		var item_type = text(doc, 'div.record-details__type');
-		return typeMapping[item_type];
+		var itemType = text(doc, 'div.record-details__type');
+		return typeMapping[itemType];
 	}
 }
 
