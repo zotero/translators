@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-16 17:07:19"
+	"lastUpdated": "2019-12-16 19:25:40"
 }
 
 /*
@@ -119,15 +119,15 @@ function scrape(doc, url) {
 	}
 
 	// Z.debug("pdfURL: " + pdfURL);
-	ZU.doGet(risURL, function (text) {
+	ZU.doGet(risURL, function (response) {
 		// they number authors in their RIS...
-		text = text.replace(/A\d+\s+-/g, "AU  -");
+		response = response.replace(/A\d+\s+-/g, "AU  -");
 
 		var abstract = doc.getElementById('abstract');
 		var translator = Zotero.loadTranslator("import");
 		var tags = doc.querySelectorAll('li .intent_text');
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
+		translator.setString(response);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (pdfURL) {
 				item.attachments.push({
@@ -150,8 +150,16 @@ function scrape(doc, url) {
 			// trying to correct for this
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName && item.creators[i].lastName.includes(" ")) {
-					item.creators[i].firstName = item.creators[i].lastName.match(/^\w+([-‐]\w+)?\s+(.+)/)[2];
-					item.creators[i].lastName = item.creators[i].lastName.replace(/\s.+/, "");
+					var author = doc.querySelector("a[href*='" + item.creators[i].lastName.split(" ")[0] + "'][class='contrib-search']");
+					if(author) {
+						item.creators[i].firstName = text(author, "span[class=given-names]");
+						item.creators[i].lastName = text(author, "span[class=surname]");
+					}
+					else {
+						Z.debug("No span tag for " + item.creators[i].lastName);
+						item.creators[i].firstName = item.creators[i].lastName.split(" ")[0];
+						item.creators[i].lastName = item.creators[i].lastName.split(" ").slice(1).join(" ");
+					}
 					delete item.creators[i].fieldMode;
 				}
 			}
@@ -381,14 +389,14 @@ var testCases = [
 						"firstName": "Brittany J."
 					},
 					{
-						"lastName": "Jennifer",
+						"lastName": "Earl",
 						"creatorType": "editor",
-						"firstName": "Earl"
+						"firstName": "Jennifer"
 					},
 					{
-						"lastName": "Deana",
+						"lastName": "A. Rohlinger",
 						"creatorType": "editor",
-						"firstName": "A. Rohlinger"
+						"firstName": "Deana"
 					}
 				],
 				"date": "2012-01-01",
@@ -425,6 +433,88 @@ var testCases = [
 					},
 					{
 						"tag": "Summit protests"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.emerald.com/insight/content/doi/10.1108/eb058217/full/html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Tourism research in Spain: The contribution of geography (1960–1995)",
+				"creators": [
+					{
+						"lastName": "Antón i Clavé",
+						"creatorType": "author",
+						"firstName": "Salvador"
+					},
+					{
+						"lastName": "López Palomeque",
+						"creatorType": "author",
+						"firstName": "Francisco"
+					},
+					{
+						"lastName": "Marchena Gómez",
+						"creatorType": "author",
+						"firstName": "Manuel J."
+					},
+					{
+						"lastName": "Vera Rebollo",
+						"creatorType": "author",
+						"firstName": "Sevilla"
+					},
+					{
+						"lastName": "Fernando Vera Rebollo",
+						"creatorType": "author",
+						"firstName": "J."
+					}
+				],
+				"date": "1996-01-01",
+				"DOI": "10.1108/eb058217",
+				"ISSN": "0251-3102",
+				"abstractNote": "The Geography of Tourism in Spain is now at a par in terms of its scientific production with other European countries. Since the middle of the '80s the quality and volume of contributions is analogous to the rest of the European Union, although as a part of University Geography in Spain it has not achieved the level of dedication reached by other subjects considering the importance of tourist activities to the economy, the society and the territory of Spain. It could be said that the Geography of Tourism in Spain is in the international vanguard in dealing with Mediterranean coastal tourism, with the relationships between the residential real estate and tourism sectors and with aspects related to tourism and leisure in rural and protected areas.",
+				"issue": "1",
+				"libraryCatalog": "Emerald Insight",
+				"pages": "46-64",
+				"publicationTitle": "The Tourist Review",
+				"shortTitle": "Tourism research in Spain",
+				"url": "https://doi.org/10.1108/eb058217",
+				"volume": "51",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Environment"
+					},
+					{
+						"tag": "Geography of Leisure"
+					},
+					{
+						"tag": "Regional Paradigms"
+					},
+					{
+						"tag": "Rural"
+					},
+					{
+						"tag": "Territory"
+					},
+					{
+						"tag": "Tourism"
+					},
+					{
+						"tag": "Tourism Real‐Estate"
+					},
+					{
+						"tag": "Urban and Coastal Geography"
 					}
 				],
 				"notes": [],
