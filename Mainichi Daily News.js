@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-12-27 12:01:25"
+	"lastUpdated": "2019-12-17 20:24:31"
 }
 
 /*
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 
-	item.title = ZU.xpathText(doc, '//header/h1');
+	item.title = text(doc, 'header>h1, .header-box h1');
 	
 	item.publicationTitle = "Mainichi Daily News";
 	
@@ -114,7 +114,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/articles/20160409/ddn/041/040/012000c",
+		"url": "https://mainichi.jp/articles/20160409/ddn/041/040/012000c",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -125,7 +125,7 @@ var testCases = [
 				"libraryCatalog": "Mainichi Daily News",
 				"publicationTitle": "Mainichi Daily News",
 				"section": "地域, めっちゃ関西",
-				"url": "http://mainichi.jp/articles/20160409/ddn/041/040/012000c",
+				"url": "https://mainichi.jp/articles/20160409/ddn/041/040/012000c",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -139,7 +139,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
+		"url": "https://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -150,7 +150,7 @@ var testCases = [
 				"libraryCatalog": "Mainichi Daily News",
 				"publicationTitle": "Mainichi Daily News",
 				"section": "Japan",
-				"url": "http://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
+				"url": "https://mainichi.jp/english/articles/20160608/p2a/00m/0na/005000c",
 				"attachments": [
 					{
 						"title": "Snapshot"
