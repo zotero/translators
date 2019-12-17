@@ -35,19 +35,28 @@
 	***** END LICENSE BLOCK *****
 */
 
+
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 function detectWeb(doc, url) {
-	if (url.indexOf('/articles/')>-1) {
+	if (url.includes('/articles/')) {
 		return "newspaperArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
+
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//li/a[contains(@href, "/articles/")]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -63,7 +72,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -71,7 +80,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -88,18 +98,20 @@ function scrape(doc, url) {
 	var stop = url.indexOf("/", start);
 	var datestring = url.substring(start, stop);
 	if (datestring.length == 8) {
-		item.date = datestring.substring(0,4)+"-"+datestring.substring(4,6)+"-"+datestring.substring(6,8);
-	} else {
+		item.date = datestring.substring(0, 4) + "-" + datestring.substring(4, 6) + "-" + datestring.substring(6, 8);
+	}
+	else {
 		item.date = ZU.xpathText(doc, '//div[contains(@class, "article-info")]//time');
 	}
 	
-	if (url.indexOf("/english/")>-1) {
+	if (url.includes("/english/")) {
 		item.language = "en";
-	} else {
+	}
+	else {
 		item.language = "jp";
 	}
 	
-	item.section = ZU.xpathText(doc, '//div[contains(@class, "container")]/ul/li[@class="active"]')
+	item.section = ZU.xpathText(doc, '//div[contains(@class, "container")]/ul/li[@class="active"]');
 	
 	item.url = url;
 	item.attachments.push({
@@ -109,6 +121,7 @@ function scrape(doc, url) {
 	
 	item.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
