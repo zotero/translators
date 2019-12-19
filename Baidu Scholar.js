@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-22 09:40:59"
+	"lastUpdated": "2019-12-19 03:41:34"
 }
 
 /*
@@ -38,7 +38,8 @@
 
 // attr()/text() v2
 // eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}
+function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 
 function detectWeb(doc, url) {
@@ -95,7 +96,6 @@ function scrape(doc, _url) {
 
 	var tags = [];
 	doc.querySelectorAll('p.kw_main span a').forEach(e => tags.push(ZU.trimInternal(e.textContent)));
-
 	ZU.doGet(risUrl, function (ris) {
 		// Z.debug({ ris });
 		// delete parenthesis in pages information, e.g. SP  - 5-7(3)
@@ -103,6 +103,7 @@ function scrape(doc, _url) {
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		// Z.debug('***'+ris);
 		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.url = dataUrl;
@@ -124,8 +125,16 @@ function scrape(doc, _url) {
 			if (!item.creators || item.creators.length == 0) {
 				item.creators = [];
 				doc.querySelectorAll('p.author_text a').forEach((e) => {
-					item.creators.push(ZU.cleanAuthor(e.textContent, 'author', true));
+					var creator = ZU.cleanAuthor(e.textContent, 'author', true);
+					item.creators.push(creator);
+					var lastSpace = creator.lastName.lastIndexOf(' ');
+					if (creator.lastName.search(/[A-Za-z]/) == -1 && lastSpace == -1) {
+						// Chinese name. first character is last name, the rest are first name
+						creator.firstName = creator.lastName.substr(1);
+						creator.lastName = creator.lastName.charAt(0);
+					}
 				});
+				
 			}
 			if (!item.publicationTitle) {
 				item.publicationTitle = attr(doc, 'a.journal_title', 'title');
@@ -133,7 +142,7 @@ function scrape(doc, _url) {
 			if (!item.date) {
 				item.date = ZU.trimInternal(text(doc, 'div.year_wr p.kw_main'));
 			}
-			if (!item.DOI) {
+			if (!item.DOI && text(doc, 'div.doi_wr p.kw_main')) {
 				item.DOI = ZU.trimInternal(text(doc, 'div.doi_wr p.kw_main'));
 			}
 
