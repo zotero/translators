@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2019-12-21 18:51:09"
 }
 
 /*
@@ -103,6 +103,8 @@ var _prefixes = {
 	book:"http://ogp.me/ns/book#",
 	music:"http://ogp.me/ns/music#",
 	video:"http://ogp.me/ns/video#",
+	so: "http://schema.org/",
+	codemeta: "https://codemeta.github.io/terms/",
 	rdf:"http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 };
 
@@ -264,13 +266,21 @@ function init(doc, url, callback, forceLoadRDF) {
 		tags = tags.split(/\s+/);
 		for(var j=0, m=tags.length; j<m; j++) {
 			var tag = tags[j];
-			// We allow three delimiters between the namespace and the property
-			var delimIndex = tag.search(/[.:_]/);
-			//if(delimIndex === -1) continue;
-
-			var prefix = tag.substr(0, delimIndex).toLowerCase();
+			let parts = tag.split(/[.:_]/);
+			let prefix;
+			let prefixLength;
+			if (parts.length > 2) {
+				// e.g. og:video:release_date
+				prefix = parts[1].toLowerCase();
+				prefixLength = parts[0].length + parts[1].length + 1;
+			}
+			if (!prefix || !_prefixes[prefix]) {
+				prefix = parts[0].toLowerCase();
+				prefixLength = parts[0].length;
+			}
 			if(_prefixes[prefix]) {
-				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
+				var prop = tag.substr(prefixLength + 1);
+				prop = prop.charAt(0).toLowerCase() + prop.slice(1);
 				//bib and bibo types are special, they use rdf:type to define type
 				var specialNS = [_prefixes['bib'], _prefixes['bibo']];
 				if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
@@ -1289,6 +1299,7 @@ var testCases = [
 				],
 				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
+				"language": "en",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
@@ -1304,7 +1315,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=510",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=3874",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1372,7 +1383,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 47 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",

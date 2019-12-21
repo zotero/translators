@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-11-30 20:49:31"
+	"lastUpdated": "2019-12-21 18:56:43"
 }
 
 /*
@@ -72,6 +72,8 @@ var n = {
 	og: "http://ogp.me/ns#",				// Used for Facebook's OpenGraph Protocol
 	article: "http://ogp.me/ns/article#",
 	book: "http://ogp.me/ns/book#",
+	music: "http://ogp.me/ns/music#",
+	video: "http://ogp.me/ns/video#",
 	so: "http://schema.org/",
 	codemeta: "https://codemeta.github.io/terms/"
 };
@@ -919,7 +921,7 @@ function importItem(newItem, node) {
 			creators = getFirstResults(node, [n.so + "producer"]);
 		}
 		else if (creatorType == "programmer") {
-			creators = getFirstResults(node, [n.z+"programmers", n.so + "author", n.codemeta + "maintainer"]);
+			creators = getFirstResults(node, [n.z + "programmers", n.so + "author", n.codemeta + "maintainer"]);
 		}
 		else {
 			creators = getFirstResults(node, [n.z + creatorType + "s"]);
