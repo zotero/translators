@@ -30,8 +30,17 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(_doc, _url) {
-	return 'newspaperArticle';
+
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
+function detectWeb(doc, _url) {
+	if (attr(doc, 'meta[property="og:type"]', 'content') == "article") {
+		return 'newspaperArticle';
+	}
+	return false;
 }
 function doWeb(doc, url) {
 	var i;
