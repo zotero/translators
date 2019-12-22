@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-16 19:25:40"
+	"lastUpdated": "2019-12-22 20:10:13"
 }
 
 /*
@@ -34,10 +34,10 @@
 
 	***** END LICENSE BLOCK *****
 */
+
 // attr()/text() v2
 // eslint-disable-next-line
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
 	// ensure that we only detect where scrape will (most likely) work
@@ -147,18 +147,23 @@ function scrape(doc, url) {
 				item.tags.push(tag.textContent);
 			}
 			// authors are in RIS as lastname firstname(s), though not necessarily correctly so
-			// trying to correct for this
+			// trying to correct for this. Editors are firstname lastname
 			for (let i = 0; i < item.creators.length; i++) {
-				if (!item.creators[i].firstName && item.creators[i].lastName.includes(" ")) {
-					var author = doc.querySelector("a[href*='" + item.creators[i].lastName.split(" ")[0] + "'][class='contrib-search']");
-					if(author) {
+				lastName = item.creators[i].lastName.split(" ");
+				if (!item.creators[i].firstName && lastName) {
+					var author = doc.querySelector("a[href*='" + lastName[0] + "'][class='contrib-search']");
+					if (author) {
 						item.creators[i].firstName = text(author, "span[class=given-names]");
 						item.creators[i].lastName = text(author, "span[class=surname]");
 					}
+					else if (item.creators[i].creatorType === "author") {
+						item.creators[i].firstName = lastName.slice(1).join(" ");
+						item.creators[i].lastName = lastName[0];
+					}
 					else {
 						Z.debug("No span tag for " + item.creators[i].lastName);
-						item.creators[i].firstName = item.creators[i].lastName.split(" ")[0];
-						item.creators[i].lastName = item.creators[i].lastName.split(" ").slice(1).join(" ");
+						item.creators[i].firstName = lastName[0];
+						item.creators[i].lastName = lastName.slice(1).join(" ");
 					}
 					delete item.creators[i].fieldMode;
 				}
@@ -345,8 +350,7 @@ var testCases = [
 				"volume": "106",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
@@ -487,8 +491,7 @@ var testCases = [
 				"volume": "51",
 				"attachments": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "Snapshot"
 					}
 				],
 				"tags": [
