@@ -194,6 +194,7 @@ function processRIS(text, jid) {
 		
 		item.url = item.url.replace('http:','https:'); // RIS still lists http addresses while JSTOR's stable URLs use https
 		
+		if (item.url && !item.url.startsWith("http")) item.url = "https://" + item.url;
 		item.complete();
 	});
 		
