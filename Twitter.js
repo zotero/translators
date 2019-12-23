@@ -1,15 +1,15 @@
 {
 	"translatorID": "31659710-d04e-45d0-84ba-8e3f5afc4a54",
+	"translatorType": 4,
 	"label": "Twitter",
 	"creator": "Avram Lyon, Philipp Zumstein, Tomas Fiers",
 	"target": "^https?://([^/]+\\.)?twitter\\.com/",
 	"minVersion": "4.0",
-	"maxVersion": "",
+	"maxVersion": null,
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-10 14:10:48"
+	"lastUpdated": "2019-11-17 21:50:00"
 }
 
 /*
@@ -35,11 +35,16 @@
  */
 
 
-function detectWeb(doc, _url) {
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
+function detectWeb(doc, url) {
 	if (doc.getElementById('page-container')) {
 		Z.monitorDOMChanges(doc.getElementById('page-container'), { childList: true });
 	}
-	if (ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]')) {
+	if (url.includes('/status/')) {
 		return "blogPost";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -87,40 +92,72 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("blogPost");
-	item.title = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]');
-	// Don't set short title when tweet contains colon
-	item.shortTitle = false;
-	item.language = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]/@lang');
-	var author = ZU.xpathText(doc, '//div[contains(@class,"permalink-header")]//strong[contains(@class,"fullname")]');
-	if (author) {
-		item.creators.push(ZU.cleanAuthor(author, "author"));
-	}
-	var date = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//span[@class="metadata"]/span[1]');
-	if (date) {
-		// e.g. 10:22 AM - 1 Feb 2018
-		var m = date.split('-');
-		// Support localization where am/pm are lowercase
-		m[0] = m[0].toUpperCase();
-		if (m.length == 2) {
-			// times with AM
-			if (m[0].includes("AM")) {
-				m[0] = m[0].replace("AM", "").trim();
-				if (m[0].indexOf(":") == 1) m[0] = "0" + m[0];
-				m[0] = m[0].replace("12:", "00:");
-			}
-			// times with PM
-			if (m[0].includes("PM")) {
-				m[0] = m[0].replace("PM", "").replace(/\d+:/, function (matched) {
-					return (parseInt(matched) + 12) + ":";
-				}).trim();
-				m[0] = m[0].replace("24:", "12:");
-			}
-			item.date = ZU.strToISO(m[1]) + "T" + m[0];
+	
+	if (ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]')) {
+		item.title = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]');
+		item.language = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//p[contains(@class, "js-tweet-text")]/@lang');
+		var author = ZU.xpathText(doc, '//div[contains(@class,"permalink-header")]//strong[contains(@class,"fullname")]');
+		if (author) {
+			item.creators.push(ZU.cleanAuthor(author, "author"));
 		}
-		else {
+		var date = ZU.xpathText(doc, '//div[contains(@class,"permalink-tweet-container")]//span[@class="metadata"]/span[1]');
+		if (date) {
+			// e.g. 10:22 AM - 1 Feb 2018
+			var m = date.split('-');
+			// Support localization where am/pm are lowercase
+			m[0] = m[0].toUpperCase();
+			if (m.length == 2) {
+				// times with AM
+				if (m[0].includes("AM")) {
+					m[0] = m[0].replace("AM", "").trim();
+					if (m[0].indexOf(":") == 1) m[0] = "0" + m[0];
+					m[0] = m[0].replace("12:", "00:");
+				}
+				// times with PM
+				if (m[0].includes("PM")) {
+					m[0] = m[0].replace("PM", "").replace(/\d+:/, function (matched) {
+						return (parseInt(matched) + 12) + ":";
+					}).trim();
+					m[0] = m[0].replace("24:", "12:");
+				}
+				item.date = ZU.strToISO(m[1]) + "T" + m[0];
+			}
+			else {
+				item.date = date;
+			}
+		}
+	}
+	else {
+		var article = doc.querySelector('article');
+		
+		item.title = text(article, 'div[lang]');
+		item.language = attr(article, 'div[lang]', 'lang');
+		
+		var date = attr(article, 'time', 'datetime');
+		if (date) {
 			item.date = date;
 		}
+		else {
+			// search for the part between the dots containing a year
+			var searchDate = article.textContent.match(/·(.*\d\d\d\d.*)·/);
+			if (searchDate) {
+				item.extra = searchDate[1];
+				item.date = ZU.strToISO(searchDate[1]);
+			}
+		}
+
+		var creator = ZU.xpathText(article, './div/div[2]');
+		if (creator && creator.includes('@')) {
+			item.creators.push({
+				lastName: creator.split('@')[0],
+				fieldMode: 1,
+				creatorType: "author"
+			});
+		}
 	}
+	
+	// Don't set short title when tweet contains colon
+	item.shortTitle = false;
 	var urlParts = url.split('/');
 	item.blogTitle = '@' + urlParts[3];
 	item.websiteType = "Tweet";
