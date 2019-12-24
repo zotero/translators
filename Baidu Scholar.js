@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-19 03:41:34"
+	"lastUpdated": "2019-12-24 12:46:21"
 }
 
 /*
@@ -38,8 +38,7 @@
 
 // attr()/text() v2
 // eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}
-function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 
 function detectWeb(doc, url) {
@@ -103,7 +102,6 @@ function scrape(doc, _url) {
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		// Z.debug('***'+ris);
 		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
 			item.url = dataUrl;
@@ -127,14 +125,16 @@ function scrape(doc, _url) {
 				doc.querySelectorAll('p.author_text a').forEach((e) => {
 					var creator = ZU.cleanAuthor(e.textContent, 'author', true);
 					item.creators.push(creator);
-					var lastSpace = creator.lastName.lastIndexOf(' ');
-					if (creator.lastName.search(/[A-Za-z]/) == -1 && lastSpace == -1) {
-						// Chinese name. first character is last name, the rest are first name
-						creator.firstName = creator.lastName.substr(1);
-						creator.lastName = creator.lastName.charAt(0);
-					}
 				});
-				
+			}
+			for (var i=0, n=item.creators.length; i<n; i++) {
+				var creator = item.creators[i];
+				if (creator.lastName.search(/[A-Za-z]/) == -1 && !creator.lastName.includes(' ')) {
+					// Chinese name. first character is last name, the rest are first name
+					creator.firstName = creator.lastName.substr(1);
+					creator.lastName = creator.lastName.charAt(0);
+				}
+				item.creators[i] = creator;
 			}
 			if (!item.publicationTitle) {
 				item.publicationTitle = attr(doc, 'a.journal_title', 'title');
@@ -156,11 +156,11 @@ function scrape(doc, _url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://xueshu.baidu.com/s?wd=paperuri%3A%28b3ab239032d44d951d8eee26d7bc44bf%29&filter=sc_long_sign&sc_ks_para=q%3DZotero%3A%20information%20management%20software%202.0&sc_us=11047153676455408520&tn=SE_baiduxueshu_c1gjeupa&ie=utf-8",
+		"url": "http://xueshu.baidu.com/usercenter/paper/show?paperid=b3ab239032d44d951d8eee26d7bc44bf&site=xueshu_se",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Zotero: information management software 2.0",
+				"title": "Zotero: Information management software 2.0",
 				"creators": [
 					{
 						"lastName": "Fernandez",
@@ -169,6 +169,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
+				"DOI": "10.1108/07419051111154758",
 				"abstractNote": "Purpose – The purpose of this paper is to highlight how the open-source bibliographic management program Zotero harnesses Web 2.0 features to make library resources more accessible to casual users without sacrificing advanced features. This reduces the barriers understanding library resources and provides additional functionality when organizing information resources. Design/methodology/approach – The paper reviews select aspects of the program to illustrate how it can be used by patrons and information professionals, and why information professionals should be aware of it. Findings – Zotero has some limitations, but succeeds in meeting the information management needs of a wide variety of users, particularly users who use online resources. Originality/value – This paper is of interest to information professionals seeking free software that can make managing bibliographic information easier for themselves and their patrons.",
 				"issue": "4",
 				"libraryCatalog": "Baidu Scholar",
@@ -203,8 +204,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": [],
-				"DOI": "10.1108/07419051111154758"
+				"seeAlso": []
 			}
 		]
 	},
