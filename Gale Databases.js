@@ -36,27 +36,15 @@
 
 
 function processMultipleEntries(entries) {
-	Zotero.selectItems(createKeyValuePairs(entries), function (selectedItems) {
+	var keyValuePairs = {};
+	for (var entry of entries) {
+		keyValuePairs[entry.href] = keyValuePairs.text;
+	}
+	Zotero.selectItems(keyValuePairs, function (selectedItems) {
 		if (selectedItems) {
-			Zotero.Utilities.processDocuments(getURLs(selectedItems), processSingleEntry);
+			Zotero.Utilities.processDocuments(Object.keys(selectedItems), processSingleEntry);
 		}
 	});
-}
-
-function createKeyValuePairs(entries) {
-	var map = {};
-	for (var entry of entries) {
-		map[entry.href] = entry.text;
-	}
-	return map;
-}
-
-function getURLs(selectedItems) {
-	var urls = [];
-	for (var url in selectedItems) {
-		urls.push(url);
-	}
-	return urls;
 }
 
 function processSingleEntry(doc) {
@@ -65,7 +53,7 @@ function processSingleEntry(doc) {
 	var documentUrl = entry.getAttribute('href');
 	var productName = entry.getAttribute('data-productname');
 	var documentData = '{"docId":"' + docId + '","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
-	var urlParams = "citationFormat=RIS&documentData=" + encodeString(documentData);
+	var urlParams = "citationFormat=RIS&documentData=" + encodeURIComponent(documentData).replace(/%20/g, "+");
 	Zotero.Utilities.doPost("/ps/citationtools/rest/cite/download", urlParams, translate);
 }
 
@@ -93,10 +81,6 @@ function transform(ris) {
 		.replace(/^(?:L2|M2)\s+-.+\n/gm, '') // Ignore
 		.replace(/^SP\s+-\s+NA\n/gm, '') // Remove missing page numbers
 		.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-}
-
-function encodeString(value) {
-	return encodeURIComponent(value).replace(/%20/g, "+");
 }
 
 function getCitableDocuments(doc) {
