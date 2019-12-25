@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-25 15:35:07"
+	"lastUpdated": "2019-12-25 16:42:52"
 }
 
 /*
@@ -185,15 +185,17 @@ function separateNames(creators) {
 		var lastName = creators[i].lastName.split(" ");
 		// Only authors are in the format lastname firstname in RIS
 		// Other creators are firstname lastname
-		if (creators[i].creatorType === "author") {
-			creators[i].firstName = lastName.slice(1).join(" ");
-			creators[i].lastName = lastName[0];
+		if (!creators[i].firstName && lastName.length > 1) {
+			if (creators[i].creatorType === "author") {
+				creators[i].firstName = lastName.slice(1).join(" ");
+				creators[i].lastName = lastName[0];
+			}
+			else {
+				creators[i].firstName = lastName[0];
+				creators[i].lastName = lastName.slice(1).join(" ");
+			}
+			delete creators[i].fieldMode;
 		}
-		else {
-			creators[i].firstName = lastName[0];
-			creators[i].lastName = lastName.slice(1).join(" ");
-		}
-		delete creators[i].fieldMode;
 	}
 	return creators;
 }
