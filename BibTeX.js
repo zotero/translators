@@ -12,8 +12,13 @@
 	},
 	"displayOptions": {
 		"exportCharset": "UTF-8",
-		"exportNotes": true,
+		"exportNotes": false,
 		"exportFileData": false,
+		"exportAbstract": false,
+		"exportUrl": false,
+		"exportDOI": false,
+		"exportExtraInfo": false,
+		"exportKeywords": false,
 		"useJournalAbbreviation": false
 	},
 	"inRepository": true,
@@ -104,6 +109,32 @@ var fieldMap = {
   	nationality: "country",
   	language:"language",
   	assignee:"assignee"
+};
+
+var blockFieldsExtra = {
+	location: "place",
+	isbn: "ISBN",
+	issn: "ISSN",
+	series: "series",
+	shorttitle: "shortTitle",
+	copyright:"rights",
+	holder: "assignee",
+	version: "version",
+	pagetotal: "numPages", 
+	nationality: "country",
+	language:"language"
+};
+
+var blockFieldsUrl = {
+	url: "url"
+};
+
+var blockFieldsDOI = {
+	doi: "DOI"
+};
+
+var blockFieldsAbstract = {
+	abstract: "abstractNote"
 };
 
 // Fields for which upper case letters will be protected on export
@@ -1359,7 +1390,9 @@ function doExport() {
 		first = false;
 		
 		for (var field in fieldMap) {
-			if (item[fieldMap[field]]) {
+			if (blockFieldsUrl[field] && Zotero.getOption("exportUrl") || blockFieldsDOI[field] && Zotero.getOption("exportDOI") || blockFieldsExtra[field] && Zotero.getOption("exportExtraInfo") || blockFieldsAbstract[field] && Zotero.getOption("exportAbstract")) {
+				continue;
+			} else if (item[fieldMap[field]]) {
 				writeField(field, item[fieldMap[field]]);
 			}
 		}
@@ -1367,10 +1400,12 @@ function doExport() {
 		if (item.reportNumber || item.issue || item.seriesNumber || item.patentNumber) {
 			writeField("number", item.reportNumber || item.issue || item.seriesNumber|| item.patentNumber);
 		}
-		
-		if (item.accessDate){
-			var accessYMD = item.accessDate.replace(/\s*\d+:\d+:\d+/, "");
-			writeField("urldate", accessYMD);
+			
+		if (Zotero.getOption("exportUrl")) {
+			if (item.accessDate){
+				var accessYMD = item.accessDate.replace(/\s*\d+:\d+:\d+/, "");
+				writeField("urldate", accessYMD);
+			}
 		}
 		
 		if (item.publicationTitle) {
@@ -1445,7 +1480,7 @@ function doExport() {
 			}
 		}
 		
-		if (item.date) {
+		if (item.date && Zotero.getOption("exportExtraInfo")) {
 			var date = Zotero.Utilities.strToDate(item.date);
 			// need to use non-localized abbreviation
 			if (typeof date.month == "number") {
@@ -1456,7 +1491,7 @@ function doExport() {
 			}
 		}
 		
-		if (extraFields) {
+		if (extraFields && Zotero.getOption("exportExtraInfo")) {
 			// Export identifiers
 			for (var i=0; i<extraFields.length; i++) {
 				var rec = extraFields[i];
@@ -1472,7 +1507,7 @@ function doExport() {
 			if (extra) writeField("note", extra);
 		}
 		
-		if (item.tags && item.tags.length) {
+		if (item.tags && item.tags.length && Zotero.getOption("exportKeywords")) {
 			var tagString = "";
 			for (var i in item.tags) {
 				var tag = item.tags[i];
@@ -1503,7 +1538,7 @@ function doExport() {
 			}
 		}
 		
-		if (item.attachments) {
+		if (item.attachments && Zotero.getOption("exportFileData")) {
 			var attachmentString = "";
 			
 			for (var i in item.attachments) {
@@ -1514,7 +1549,7 @@ function doExport() {
 				var title = cleanFilePath(attachment.title),
 					path = null;
 				
-				if (Zotero.getOption("exportFileData") && attachment.saveFile) {
+				if (attachment.saveFile) {
 					path = cleanFilePath(attachment.defaultPath);
 					attachment.saveFile(path, true);
 				} else if (attachment.localPath) {
@@ -1526,11 +1561,12 @@ function doExport() {
 						+ ":" + encodeFilePathComponent(path)
 						+ ":" + encodeFilePathComponent(attachment.mimeType);
 				}
+
+				if (attachmentString) {
+					writeField("file", attachmentString.substr(1));
+				}
 			}
 			
-			if (attachmentString) {
-				writeField("file", attachmentString.substr(1));
-			}
 		}
 		
 		Zotero.write("\n}");
