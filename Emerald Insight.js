@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-25 15:21:24"
+	"lastUpdated": "2019-12-25 15:26:20"
 }
 
 /*
@@ -149,23 +149,23 @@ function scrape(doc, url) {
 			
 			var authorsNodes = doc.querySelectorAll("div > a.contrib-search");
 			if (authorsNodes.length > 0) {
-			   // prefer the authors information from the website as it contains the last and first name separately
-			   // where the RIS data does not separate them correctly (it uses a space instead of comma)
-			   // but the editors are only part of the RIS data
-			   var authors = [];
-			   for (let author of authorsNodes) {
-				  authors.push({
-					 firstName: text(author, "span.given-names"),
-					 lastName: text(author, "span.surname"),
-					 creatorType: "author"
-				  });
-			   }
-			   var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
-			   item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
+				// prefer the authors information from the website as it contains the last and first name separately
+				// where the RIS data does not separate them correctly (it uses a space instead of comma)
+				// but the editors are only part of the RIS data
+				var authors = [];
+				for (let author of authorsNodes) {
+					authors.push({
+						firstName: text(author, "span.given-names"),
+						lastName: text(author, "span.surname"),
+						creatorType: "author"
+				});
+			}
+				var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
+				item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
 			}
 			else {
-			   Z.debug("No tags available for authors");
-			   item.creators = separateNames(item.creators);
+				Z.debug("No tags available for authors");
+				item.creators = separateNames(item.creators);
 			}
 
 			if (item.date) {
@@ -195,6 +195,7 @@ function separateNames(creators) {
 		}
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
