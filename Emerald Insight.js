@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-25 15:26:20"
+	"lastUpdated": "2019-12-25 15:35:07"
 }
 
 /*
@@ -158,8 +158,8 @@ function scrape(doc, url) {
 						firstName: text(author, "span.given-names"),
 						lastName: text(author, "span.surname"),
 						creatorType: "author"
-				});
-			}
+					});
+				}
 				var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
 				item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
 			}
@@ -193,7 +193,9 @@ function separateNames(creators) {
 			creators[i].firstName = lastName[0];
 			creators[i].lastName = lastName.slice(1).join(" ");
 		}
+		delete creators[i].fieldMode;
 	}
+	return creators;
 }
 
 /** BEGIN TEST CASES **/
