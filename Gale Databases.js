@@ -38,7 +38,7 @@
 function processMultipleEntries(entries) {
 	var keyValuePairs = {};
 	for (var entry of entries) {
-		keyValuePairs[entry.href] = keyValuePairs.text;
+		keyValuePairs[entry.href] = entry.textContent;
 	}
 	Zotero.selectItems(keyValuePairs, function (selectedItems) {
 		if (selectedItems) {
@@ -89,6 +89,9 @@ function getCitableDocuments(doc) {
 
 
 function detectWeb(doc, _url) {
+	if (doc.getElementById('searchResults')) {
+		Zotero.monitorDOMChanges(doc.querySelector('#searchResults'));
+	}
 	var entries = getCitableDocuments(doc);
 	switch (entries.length) {
 		case 0: return false;
