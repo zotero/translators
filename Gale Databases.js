@@ -1,15 +1,15 @@
 {
-	'translatorID': 'e3748cf3-36dc-4816-bf86-95a0b63feb03',
-	'label': 'Gale Databases',
-	'creator': 'Jim Miazek',
-	'target': '^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\.com(?:\:\d+)?/ps/',
-	'minVersion': '3.0',
-	'maxVersion': '',
-	'priority': 100,
-	'inRepository': true,
-	'translatorType': 4,
-	'browserSupport': 'gcsibv',
-	'lastUpdated': '2019-10-11 12:00:00'
+	"translatorID": "e3748cf3-36dc-4816-bf86-95a0b63feb03",
+	"label": "Gale Databases",
+	"creator": "Jim Miazek",
+	"target": "^https?://[^?&]*(?:gale|galegroup|galetesting|ggtest)\\.com(?:\\:\\d+)?/ps/",
+	"minVersion": "3.0",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2019-12-25 09:35:52"
 }
 
 /*
@@ -34,29 +34,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-var GaleZotero = (function () {
-var DATA_TRANSLATOR = '32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7';
-var POST_URL = '/ps/citationtools/rest/cite/download';
 
-function detect(doc) {
-	var entries = getCitableDocuments(doc);
-	switch (entries.length) {
-		case 0: return false;
-		case 1: return entries[0].getAttribute('data-zoterolabel');
-		default: return 'multiple';
-	}
-}
-
-function process(doc) {
-	var entries = getCitableDocuments(doc);
-	switch (entries.length) {
-		case 0: break;
-		case 1: processSingleEntry(doc); break;
-		default: processMulipleEntries(entries);
-	}
-}
-
-function processMulipleEntries(entries) {
+function processMultipleEntries(entries) {
 	Zotero.selectItems(createKeyValuePairs(entries), function (selectedItems) {
 		if (selectedItems) {
 			Zotero.Utilities.processDocuments(getURLs(selectedItems), processSingleEntry);
@@ -66,12 +45,8 @@ function processMulipleEntries(entries) {
 
 function createKeyValuePairs(entries) {
 	var map = {};
-	for (var item in entries) {
-		/* istanbul ignore next */
-		if (entries.hasOwnProperty(item)) {
-			var entry = entries[item];
-			map[entry.href] = entry.text;
-		}
+	for (var entry of entries) {
+		map[entry.href] = entry.text;
 	}
 	return map;
 }
@@ -79,9 +54,7 @@ function createKeyValuePairs(entries) {
 function getURLs(selectedItems) {
 	var urls = [];
 	for (var url in selectedItems) {
-		if (selectedItems.hasOwnProperty(url)) {
-			urls.push(url);
-		}
+		urls.push(url);
 	}
 	return urls;
 }
@@ -93,12 +66,13 @@ function processSingleEntry(doc) {
 	var productName = entry.getAttribute('data-productname');
 	var documentData = '{"docId":"' + docId + '","documentUrl":"' + documentUrl + '","productName":"' + productName + '"}';
 	var urlParams = "citationFormat=RIS&documentData=" + encodeString(documentData);
-	Zotero.Utilities.doPost(POST_URL, urlParams, translate);
+	Zotero.Utilities.doPost("/ps/citationtools/rest/cite/download", urlParams, translate);
 }
 
 function translate(data) {
 	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator(DATA_TRANSLATOR);
+	// use RIS translator
+	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(transform(data));
 	translator.setHandler("itemDone", function (obj, item) {
 		if (item.ISSN) {
@@ -119,7 +93,6 @@ function transform(ris) {
 		.replace(/^(?:L2|M2)\s+-.+\n/gm, '') // Ignore
 		.replace(/^SP\s+-\s+NA\n/gm, '') // Remove missing page numbers
 		.replace(/^N1(?=\s+-\s+copyright)/igm, 'CR');
-
 }
 
 function encodeString(value) {
@@ -130,82 +103,84 @@ function getCitableDocuments(doc) {
 	return doc.getElementsByClassName('zotero');
 }
 
-return {
-	detect: detect,
-	process: process
-};
-}());
 
-function detectWeb(doc, url) { // eslint-disable-line no-unused-vars
-	return GaleZotero.detect(doc);
+function detectWeb(doc, _url) {
+	var entries = getCitableDocuments(doc);
+	switch (entries.length) {
+		case 0: return false;
+		case 1: return entries[0].getAttribute('data-zoterolabel');
+		default: return 'multiple';
+	}
 }
 
-function doWeb(doc, url) { // eslint-disable-line no-unused-vars
-	return GaleZotero.process(doc);
+function doWeb(doc, _url) {
+	var entries = getCitableDocuments(doc);
+	switch (entries.length) {
+		case 0: break;
+		case 1: processSingleEntry(doc); break;
+		default: processMultipleEntries(entries);
+	}
 }
+
 
 /** BEGIN TEST CASES **/
-// eslint-disable-next-line no-unused-vars
 var testCases = [
 	{
-		type: "web",
-		url: "https://go.qa.galetesting.com/ps/retrieve.do?tabID=T002&resultListType=RESULT_LIST&searchResultsType=SingleTab&searchType=BasicSearchForm&currentPosition=1&docId=GALE%7CA598621601&docType=Critical+essay&sort=Relevance&contentSegment=ZONE-Exclude-FT&prodId=AONE&contentSet=GALE%7CA598621601&searchId=R1&userGroupName=zotero&inPS=true",
-		items: [
+		"type": "web",
+		"url": "https://go.gale.com/ps/i.do?p=PROF&u=nysl_ce_syr&id=GALE|A213083272&v=2.1&it=r&sid=PROF&asid=a8973dd8",
+		"items": [
 			{
-				itemType: "magazineArticle",
-				title: "\"Real\" Mind Style and Authenticity Effects in Fiction: Represented Experiences of War in Atonement",
-				creators: [
+				"itemType": "magazineArticle",
+				"title": "Improving a counselor education Web site through usability testing: the bibliotherapy education project",
+				"creators": [
 					{
-						lastName: "Nuttall",
-						firstName: "Louise",
-						creatorType: "author"
+						"lastName": "McMillen",
+						"firstName": "Paula S.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Pehrsson",
+						"firstName": "Dale-Elizabeth",
+						"creatorType": "author"
 					}
 				],
-				date: "2019",
-				ISSN: "0039-4238",
-				archive: "Gale Academic OneFile",
-				issue: "2",
-				language: "English",
-				libraryCatalog: "Gale",
-				pages: "215-",
-				publicationTitle: "Style",
-				shortTitle: "\"Real\" Mind Style and Authenticity Effects in Fiction",
-				url: "https://link.qa.galetesting.com/apps/doc/A598621601/AONE?u=zotero&sid=zotero&xid=c1dc0ef6",
-				volume: "53",
-				attachments: [
+				"date": "Dezember 2009",
+				"ISSN": "0011-0035",
+				"archive": "Gale OneFile: Educator's Reference Complete",
+				"issue": "2",
+				"language": "English",
+				"libraryCatalog": "Gale",
+				"pages": "122-",
+				"publicationTitle": "Counselor Education and Supervision",
+				"shortTitle": "Improving a counselor education Web site through usability testing",
+				"url": "https://link.gale.com/apps/doc/A213083272/PROF?u=nysl_ce_syr&sid=zotero&xid=a8973dd8",
+				"volume": "49",
+				"attachments": [
 					{
-						title: "Snapshot"
+						"title": "Snapshot"
 					}
 				],
-				tags: [
+				"tags": [
 					{
-						tag: "Atonement (McEwan, Ian) (Novel)"
+						"tag": "Bibliotherapy"
 					},
 					{
-						tag: "Authenticity"
+						"tag": "Counseling"
 					},
 					{
-						tag: "English writers"
+						"tag": "Counselling"
 					},
 					{
-						tag: "Literary styles"
+						"tag": "Usability testing"
 					},
 					{
-						tag: "McEwan, Ian"
-					},
-					{
-						tag: "War stories"
+						"tag": "Web sites (World Wide Web)"
 					}
 				],
-				notes: [
-					{
-						note: "<p>Northern Illinois University</p>"
-					}
-				],
-				seeAlso: []
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
-]; // eslint-disable-line
-
+]
 /** END TEST CASES **/
