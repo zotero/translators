@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-22 20:10:13"
+	"lastUpdated": "2019-12-25 15:21:24"
 }
 
 /*
@@ -146,28 +146,28 @@ function scrape(doc, url) {
 			for (let tag of tags) {
 				item.tags.push(tag.textContent);
 			}
-			// authors are in RIS as lastname firstname(s), though not necessarily correctly so
-			// trying to correct for this. Editors are firstname lastname
-			for (let i = 0; i < item.creators.length; i++) {
-				lastName = item.creators[i].lastName.split(" ");
-				if (!item.creators[i].firstName && lastName) {
-					var author = doc.querySelector("a[href*='" + lastName[0] + "'][class='contrib-search']");
-					if (author) {
-						item.creators[i].firstName = text(author, "span[class=given-names]");
-						item.creators[i].lastName = text(author, "span[class=surname]");
-					}
-					else if (item.creators[i].creatorType === "author") {
-						item.creators[i].firstName = lastName.slice(1).join(" ");
-						item.creators[i].lastName = lastName[0];
-					}
-					else {
-						Z.debug("No span tag for " + item.creators[i].lastName);
-						item.creators[i].firstName = lastName[0];
-						item.creators[i].lastName = lastName.slice(1).join(" ");
-					}
-					delete item.creators[i].fieldMode;
-				}
+			
+			var authorsNodes = doc.querySelectorAll("div > a.contrib-search");
+			if (authorsNodes.length > 0) {
+			   // prefer the authors information from the website as it contains the last and first name separately
+			   // where the RIS data does not separate them correctly (it uses a space instead of comma)
+			   // but the editors are only part of the RIS data
+			   var authors = [];
+			   for (let author of authorsNodes) {
+				  authors.push({
+					 firstName: text(author, "span.given-names"),
+					 lastName: text(author, "span.surname"),
+					 creatorType: "author"
+				  });
+			   }
+			   var otherContributors = item.creators.filter(creator => creator.creatorType !== "author");
+			   item.creators = otherContributors.length !== 0 ? authors.concat(separateNames(otherContributors)) : authors;
 			}
+			else {
+			   Z.debug("No tags available for authors");
+			   item.creators = separateNames(item.creators);
+			}
+
 			if (item.date) {
 				item.date = ZU.strToISO(item.date);
 			}
@@ -180,6 +180,21 @@ function scrape(doc, url) {
 	});
 }
 
+function separateNames(creators) {
+	for (let i = 0; i < creators.length; i++) {
+		var lastName = creators[i].lastName.split(" ");
+		// Only authors are in the format lastname firstname in RIS
+		// Other creators are firstname lastname
+		if (creators[i].creatorType === "author") {
+			creators[i].firstName = lastName.slice(1).join(" ");
+			creators[i].lastName = lastName[0];
+		}
+		else {
+			creators[i].firstName = lastName[0];
+			creators[i].lastName = lastName.slice(1).join(" ");
+		}
+	}
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -350,7 +365,8 @@ var testCases = [
 				"volume": "106",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -491,7 +507,8 @@ var testCases = [
 				"volume": "51",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
