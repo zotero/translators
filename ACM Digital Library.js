@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-03 09:45:46"
+	"lastUpdated": "2019-12-26 14:14:53"
 }
 
 /*
@@ -43,47 +43,86 @@ function detectWeb(doc, url) {
 	}
 }
 
+function processItems(items) {
+	if (!items) {
+		return true;
+	}
+	
+	var urls = [];
+	for (var i in items) {
+		urls.push(i);
+	}
+	ZU.processDocuments(urls, scrape);
+}
+
+function isConferencePage(doc)
+{
+	var conferenceTitle = ZU.xpathText(doc, '//meta[@name="citation_conference_title"][1]/@content');
+	
+	if (conferenceTitle && conferenceTitle.trim()) {
+		return true;
+	}
+	return false;
+}
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return true;
-			}
-			
-			var urls = [];
-			for (var i in items) {
-				urls.push(i);
-			}
-			ZU.processDocuments(urls, scrape);
-		});
+		if (isConferencePage(doc)) {
+			Zotero.selectItems(getTableOfContents(doc), processItems);
+		} else {
+			Zotero.selectItems(getSearchResults(doc), processItems);
+		}
 	} else {
 		scrape(doc);
 	}
 }
 
-
-function getSearchResults(doc, checkOnly) {
+function getMultiple(doc, checkOnly, itemSelector, urlPostProcess, urlFilter) {
 	var items = {};
 	var found = false;	
-	var results = doc.querySelectorAll('div#results div.title>a[target="_self"], #toShowTop10 li>a');
+	var results = doc.querySelectorAll(itemSelector);
 	
 	for (var i=0; i<results.length; i++) {
 		var url = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
 		if (!title || !url) continue;
+		if (!urlFilter(url)) continue;
 		
 		if (checkOnly) return true;
 		found = true;
 		
-		url = url.replace(/#.*/, '')
-			.replace(/([?&])preflayout=[^&]*/, '$1')
-			+ '&preflayout=flat';
+		url = urlPostProcess(url);
 		items[url] = title;
 	}
 	
 	return found ? items : false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	return getMultiple(doc, checkOnly, 
+		'div#results div.title>a[target="_self"], #toShowTop10 li>a',
+		function(url){
+			return url.replace(/#.*/, '')
+				.replace(/([?&])preflayout=[^&]*/, '$1')
+				+ '&preflayout=flat';
+		},
+		function(url){ return true; });
+}
+
+function getTableOfContents(doc, checkOnly) {
+	return getMultiple(doc, checkOnly, 
+		'.text12 > tbody > tr > td > span:nth-child(1) > a',
+		function(url) {
+			return url + '&preflayout=flat';
+		},
+		function(url){ 
+			if (url.includes('/citation.cfm')) {
+				return true; 
+			} else {
+				return false;
+			}
+		});
+}
 
 function scrape(doc) {
 	var abs = text(doc, '#abstract');
@@ -191,6 +230,8 @@ function getArticleType(doc) {
 	
 	var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"][1]/@content');
 	if (journal && journal.trim()) return "journalArticle";
+	
+	if (isConferencePage(doc)) return 'multiple';
 	
 	return "book";
 }/** BEGIN TEST CASES **/
@@ -482,6 +523,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://dl.acm.org/ccs/ccs.cfm?id=10010343&lid=0.10010147.10010341.10010342.10010343",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/citation.cfm?id=3037697&picked=prox&preflayout=flat",
 		"items": "multiple"
 	}
 ]
