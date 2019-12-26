@@ -123,14 +123,13 @@ function scrape(doc, _url) {
 			if (!item.creators || item.creators.length == 0) {
 				item.creators = [];
 				doc.querySelectorAll('p.author_text a').forEach((e) => {
-					var creator = ZU.cleanAuthor(e.textContent, 'author', true);
-					item.creators.push(creator);
+					item.creators.push(ZU.cleanAuthor(e.textContent, 'author', true));
 				});
 			}
-			for (var i=0, n=item.creators.length; i<n; i++) {
-				var creator = item.creators[i];
-				if (creator.lastName.search(/[A-Za-z]/) == -1 && !creator.lastName.includes(' ')) {
-					// Chinese name. first character is last name, the rest are first name
+			for (let i = 0, n = item.creators.length; i < n; i++) {
+				let creator = item.creators[i];
+				if (!creator.firstName && creator.lastName.search(/[A-Za-z]/) == -1 && !creator.lastName.includes(' ')) {
+					// Chinese name: first character is last name, the rest are first name (ignoring compound last names which are rare)
 					creator.firstName = creator.lastName.substr(1);
 					creator.lastName = creator.lastName.charAt(0);
 				}
@@ -139,7 +138,7 @@ function scrape(doc, _url) {
 			if (!item.publicationTitle) {
 				item.publicationTitle = attr(doc, 'a.journal_title', 'title');
 			}
-			if (!item.date) {
+			if (!item.date && text(doc, 'div.year_wr p.kw_main')) {
 				item.date = ZU.trimInternal(text(doc, 'div.year_wr p.kw_main'));
 			}
 			if (!item.DOI && text(doc, 'div.doi_wr p.kw_main')) {
