@@ -32,20 +32,28 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+/*
+function attr(docOrElem, selector, attr, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null;
+}*/
+function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null;
+}
 
 
 function detectWeb(doc, url) {
 	if (url.includes("/results.cfm") || url.includes("/author_page.cfm") || url.includes("/ccs/ccs.cfm")) {
 		return getSearchResults(doc, true) ? 'multiple' : false;
-	} else if (url.includes("/citation.cfm")) {
+	}
+	else if (url.includes("/citation.cfm")) {
 		return getArticleType(doc);
 	}
+	return false;
 }
 
 function processItems(items) {
 	if (!items) {
-		return true;
+		return;
 	}
 	
 	var urls = [];
@@ -55,8 +63,7 @@ function processItems(items) {
 	ZU.processDocuments(urls, scrape);
 }
 
-function isConferencePage(doc)
-{
+function isConferencePage(doc) {
 	var conferenceTitle = ZU.xpathText(doc, '//meta[@name="citation_conference_title"][1]/@content');
 	
 	if (conferenceTitle && conferenceTitle.trim()) {
@@ -69,20 +76,22 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		if (isConferencePage(doc)) {
 			Zotero.selectItems(getTableOfContents(doc), processItems);
-		} else {
+		}
+		else {
 			Zotero.selectItems(getSearchResults(doc), processItems);
 		}
-	} else {
+	}
+	else {
 		scrape(doc);
 	}
 }
 
 function getMultiple(doc, checkOnly, itemSelector, urlPostProcess, urlFilter) {
 	var items = {};
-	var found = false;	
+	var found = false;
 	var results = doc.querySelectorAll(itemSelector);
 	
-	for (var i=0; i<results.length; i++) {
+	for (var i = 0; i < results.length; i++) {
 		var url = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
 		if (!title || !url) continue;
@@ -99,26 +108,29 @@ function getMultiple(doc, checkOnly, itemSelector, urlPostProcess, urlFilter) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	return getMultiple(doc, checkOnly, 
+	return getMultiple(doc, checkOnly,
 		'div#results div.title>a[target="_self"], #toShowTop10 li>a',
-		function(url){
+		function (url) {
 			return url.replace(/#.*/, '')
 				.replace(/([?&])preflayout=[^&]*/, '$1')
 				+ '&preflayout=flat';
 		},
-		function(url){ return true; });
+		function (_) {
+			return true;
+		});
 }
 
 function getTableOfContents(doc, checkOnly) {
-	return getMultiple(doc, checkOnly, 
+	return getMultiple(doc, checkOnly,
 		'.text12 > tbody > tr > td > span:nth-child(1) > a',
-		function(url) {
+		function (url) {
 			return url + '&preflayout=flat';
 		},
-		function(url){ 
+		function (url) {
 			if (url.includes('/citation.cfm')) {
-				return true; 
-			} else {
+				return true;
+			}
+			else {
 				return false;
 			}
 		});
@@ -128,8 +140,7 @@ function scrape(doc) {
 	var abs = text(doc, '#abstract');
 
 	// Get genric URL, preferring the conference version.
-	var url = ZU.xpath(doc, '//meta[@name="citation_conference"]\
-			/following-sibling::meta[@name="citation_abstract_html_url"]/@content')[0]
+	var url = ZU.xpath(doc, '//meta[@name="citation_conference"]/following-sibling::meta[@name="citation_abstract_html_url"]/@content')[0]
 		|| ZU.xpath(doc, '//meta[@name="citation_abstract_html_url"]/@content')[0];
 	url = url.textContent;
 
@@ -140,14 +151,14 @@ function scrape(doc) {
 	var itemID = m[2];
 	var parentID = m[1] || '';
 
-	//compose bibtex URL
+	// compose bibtex URL
 	var bibtexstring = 'id=' + itemID + '&parent_id=' + parentID + '&expformat=bibtex';
-	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
+	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org") // deproxify the URL above.
 		.replace(/citation\.cfm/, 'downformats.cfm')
 		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
 	// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
 	if (bibtexURL.startsWith('http:') && doc.location.href.startsWith('https')) {
-		Z.debug("Forcing BibTeX URL to HTTPS")
+		Z.debug("Forcing BibTeX URL to HTTPS");
 		bibtexURL = bibtexURL.replace(/^http:/, 'https:');
 	}
 	Zotero.debug('BibTeX URL: ' + bibtexURL);
@@ -157,13 +168,13 @@ function scrape(doc) {
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			//get the URL for the pdf fulltext from the metadata
+			// get the URL for the pdf fulltext from the metadata
 			var pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content')[0];
 			if (pdfURL) {
-				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); //deproxify URL
+				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); // deproxify URL
 				// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
 				if (pdfURL.startsWith('http:') && doc.location.href.startsWith('https')) {
-					Z.debug("Forcing PDF URL to HTTPS")
+					Z.debug("Forcing PDF URL to HTTPS");
 					pdfURL = pdfURL.replace(/^http:/, 'https:');
 				}
 				Z.debug("PDF URL: " + pdfURL);
@@ -174,18 +185,18 @@ function scrape(doc) {
 				}];
 			}
 			
-			//fix DOIs if they're in URL form
+			// fix DOIs if they're in URL form
 			if (item.DOI) item.DOI = item.DOI.replace(/^.*\/(10\.\d+\/)/, '$1');
 			
-			//Conference Locations shouldn't go int Loc in Archive (nor should anything else)
+			// Conference Locations shouldn't go int Loc in Archive (nor should anything else)
 			delete item.archiveLocation;
 			
 			// some bibtext contains odd </kwd> tags - remove them
-			for (var i=0; i<item.tags.length; i++) {
+			for (var i = 0; i < item.tags.length; i++) {
 				item.tags[i] = item.tags[i].replace("</kwd>", "");
 			}
 			
-			//full issues of journals/magazines don't have a title
+			// full issues of journals/magazines don't have a title
 			if (!item.title && text.includes("issue_date")) {
 				var m = text.match(/issue_date\s*=\s*{(.*)},?/);
 				item.itemType = "book";
@@ -195,29 +206,30 @@ function scrape(doc) {
 				}
 			}
 			
-			//The abstract from above or we try to make an individual request
-			//e.g. for multiples
+			// The abstract from above or we try to make an individual request
+			// e.g. for multiples
 			if (!item.abstractNote) {
 				if (abs && abs.trim()) {
 					item.abstractNote = abs;
 					item.complete();
-				} else {
-					ZU.doGet("https://dl.acm.org/tab_abstract.cfm?id="+itemID, function(abstract) {
+				}
+				else {
+					ZU.doGet("https://dl.acm.org/tab_abstract.cfm?id=" + itemID, function (abstract) {
 						item.abstractNote = ZU.unescapeHTML(abstract);
 						if (item.abstractNote.trim() == "An abstract is not available.") delete item.abstractNote;
 						item.complete();
 					});
 				}
-			} else {
+			}
+			else {
 				item.complete();
 			}
-			
 		});
 		translator.translate();
 	});
 }
 
-//Simon's helper funcitons.
+// Simon's helper funcitons.
 /**
  * Find out what kind of document this is by checking google metadata
  * @param doc The XML document describing the page
