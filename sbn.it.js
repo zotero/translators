@@ -2,14 +2,14 @@
 	"translatorID": "4c272290-7ac4-433e-862d-244884ed285a",
 	"label": "sbn.it",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www|opac)\\.sbn\\.it/opacsbn/opaclib\\?",
+	"target": "^https?://(www|opac)\\.sbn\\.it/opacsbn/opaclib",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-24 10:05:03"
+	"lastUpdated": "2019-12-27 16:17:20"
 }
 
 /*
@@ -53,7 +53,7 @@ var typeMapping = {
 
 function detectWeb(doc, url) {
 	if (url.indexOf("full.jsp")>-1) {
-		var type = ZU.xpathText(doc, '//tr[ td[contains(@class,"detail_key") and contains(text(), "Tipo documento")] ]/td[contains(@class,"detail_value")]');
+		var type = ZU.xpathText(doc, '//tr[ td[contains(text(), "Tipo documento")] ]/td[contains(@class,"detail_value")]');
 		//Z.debug(type.trim());
 		return typeMapping[type.trim().toLowerCase()] || "book";
 	} else if (getSearchResults(doc, true)) {
@@ -64,7 +64,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//table[@id="records"]//td/div[contains(@class, "rectitolo")]/a');
+	var rows = ZU.xpath(doc, '//li[contains(@class, "element")]//div[contains(@class, "content")]/strong/a');
 	for (var i=0; i<rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -95,7 +95,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var urlMarc = ZU.xpathText(doc, '//a[contains(@title, "Scarico Marc21 del record") or contains(@title, "Download Marc21 record")]/@href');
+	var urlMarc = ZU.xpathText(doc, '(//a[contains(@title, "Scarico Marc21 del record") or contains(@title, "Download Marc21 record")]/@href)[1]');
 	//Z.debug(urlMarc);
 	ZU.doGet(urlMarc, function(text) {
 		//call MARC translator
