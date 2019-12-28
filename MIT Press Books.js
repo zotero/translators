@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-28 18:17:37"
+	"lastUpdated": "2019-12-28 18:25:46"
 }
 
 /*
@@ -489,6 +489,37 @@ var testCases = [
 				"place": "Cambridge, MA, USA",
 				"publisher": "SA+P Press",
 				"series": "Agendas in Architecture",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mitpress.mit.edu/books/america-over-water-revised-and-expanded-edition",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "America Over the Water: A Historic Journey into the Cultural Roots of Traditional American Music",
+				"creators": [
+					{
+						"firstName": "Shirley",
+						"lastName": "Collins",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-08-11",
+				"ISBN": "9781907222924",
+				"abstractNote": "The chronicle of a year spent discovering the traditional musicians of the American South, including Mississippi Fred McDowell, Muddy Waters, and many others.",
+				"edition": "Revised And Expanded",
+				"language": "en",
+				"libraryCatalog": "MIT Press Books",
+				"numPages": "248",
+				"place": "Cambridge, MA, USA",
+				"publisher": "Strange Attractor Press",
+				"shortTitle": "America Over the Water",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
