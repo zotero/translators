@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-27 18:42:40"
+	"lastUpdated": "2019-12-28 15:34:11"
 }
 
 /*
@@ -199,16 +199,10 @@ function detectWeb(doc, url) {
 	// determine if book or bookSection for PubMed Labs
 	var bookCitation = doc.getElementsByClassName('book-citation');
 	if (bookCitation.length > 0 && ZU.xpath(doc, './/div[@class="affiliations"]')) {
-		// For a bookSection there are the affiliations of the authors of this
-		// section as well as the affiliations of the book authors.
-		var bookAffiliations;
-		if (doc.getElementById('full-authors')) {
-			bookAffiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
-		}
-		else {
-			bookAffiliations = ZU.xpath(doc, '//div[@id="full-view-heading"]//div[@class="affiliations"]//li').length > 1;
-		}
-		return bookAffiliations ? "bookSection" : "book";
+		// For a bookSection there is the affiliations section of the authors of this
+		// section as well as another affiliation sections for the book authors.
+		var isChapter = doc.querySelectorAll('#full-view-heading div.affiliations').length > 1;
+		return isChapter ? "bookSection" : "book";
 	}
 	
 	// from bookshelf page
