@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-29 15:00:00"
+	"lastUpdated": "2019-12-29 21:00:00"
 }
 
 
@@ -268,6 +268,10 @@ function zoteroItemToQuickStatements(item) {
 function doExport() {
 	var item;
 	while ((item = Zotero.nextItem())) {
+		// skipping items with a QID saved in extra
+		if (item.extra && item.extra.match(/^QID: /m)) continue;
+
+		// write the statements
 		Zotero.write(zoteroItemToQuickStatements(item));
 	}
 }
