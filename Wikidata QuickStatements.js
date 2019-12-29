@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-14 19:45:00"
+	"lastUpdated": "2019-12-29 15:00:00"
 }
 
 
@@ -248,6 +248,14 @@ function zoteroItemToQuickStatements(item) {
 				var value = extraLines[j].substr(colon+1);
 				if (identifierMapping[label]) {
 					addStatement(identifierMapping[label], '"' + value.trim() + '"');
+				}
+				if (label.match(/^P\d+$/)) {
+					if (value.trim().match(/^Q\d+$/)) { 
+						addStatement(label, value.trim());
+					}
+					else {
+						addStatement(label, '"' + value.trim() + '"');
+					}
 				}
 			}
 		}
