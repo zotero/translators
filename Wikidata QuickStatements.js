@@ -38,125 +38,125 @@
 
 
 var typeMapping = {
-	//Zotero types
-	"artwork" : "Q838948",
-	//"attachment" : "Q17709279",
-	"audioRecording" : "Q30070318",
-	"bill" : "Q686822",
-	"blogPost" : "Q17928402",
-	"book" : "Q571",
-	"bookSection" : "Q1980247",
-	"case" : "Q2334719",
-	"computerProgram" : "Q40056",
-	"conferencePaper" : "Q23927052",
-	"dictionaryEntry" : "Q30070414",
-	"document" : "Q49848",
-	"email" : "Q30070439",
-	"encyclopediaArticle" : "Q17329259",
-	"film" : "Q11424",
-	"forumPost" : "Q7216866",
-	"hearing" : "Q30070550",
-	"instantMessage" : "Q30070565",
-	"interview" : "Q178651",
-	"journalArticle" : "Q13442814",
-	"letter" : "Q133492",
-	"magazineArticle" : "Q30070590",
-	"manuscript" : "Q87167",
-	"map" : "Q4006",
-	"newspaperArticle" : "Q5707594",
-	//note
-	"patent" : "Q253623",
-	"podcast" : "Q24634210",
-	"presentation" : "Q604733",
-	"radioBroadcast" : "Q1555508",
-	"report" : "Q10870555",
-	"statute" : "Q820655",
-	"thesis" : "Q1266946",
-	"tvBroadcast" : "Q15416",
-	"videoRecording" : "Q30070675",
-	"webpage" : "Q36774",
-	//additional CSL types (can be used in Zotero with a hack)
-	"dataset" : "Q1172284",
-	//entry
-	"figure" : "Q30070753",
-	"musical_score" : "Q187947",
-	"pamphlet" : "Q190399",
-	"review" : "Q265158",
-	"review-book" : "Q637866",
-	"treaty" : "Q131569"
+	// Zotero types
+	artwork: "Q838948",
+	// "attachment" : "Q17709279",
+	audioRecording: "Q30070318",
+	bill: "Q686822",
+	blogPost: "Q17928402",
+	book: "Q571",
+	bookSection: "Q1980247",
+	case: "Q2334719",
+	computerProgram: "Q40056",
+	conferencePaper: "Q23927052",
+	dictionaryEntry: "Q30070414",
+	document: "Q49848",
+	email: "Q30070439",
+	encyclopediaArticle: "Q17329259",
+	film: "Q11424",
+	forumPost: "Q7216866",
+	hearing: "Q30070550",
+	instantMessage: "Q30070565",
+	interview: "Q178651",
+	journalArticle: "Q13442814",
+	letter: "Q133492",
+	magazineArticle: "Q30070590",
+	manuscript: "Q87167",
+	map: "Q4006",
+	newspaperArticle: "Q5707594",
+	// note
+	patent: "Q253623",
+	podcast: "Q24634210",
+	presentation: "Q604733",
+	radioBroadcast: "Q1555508",
+	report: "Q10870555",
+	statute: "Q820655",
+	thesis: "Q1266946",
+	tvBroadcast: "Q15416",
+	videoRecording: "Q30070675",
+	webpage: "Q36774",
+	// additional CSL types (can be used in Zotero with a hack)
+	dataset: "Q1172284",
+	// entry
+	figure: "Q30070753",
+	musical_score: "Q187947", // eslint-disable-line camelcase
+	pamphlet: "Q190399",
+	review: "Q265158",
+	"review-book": "Q637866",
+	treaty: "Q131569"
 };
 
-//simple properties with string values can be simply mapped here
+// simple properties with string values can be simply mapped here
 var propertyMapping = {
-	"P356" : "DOI",
-	"P953" : "url",
-	"P478" : "volume",
-	"P433" : "issue",
-	"P304" : "pages"
+	P356: "DOI",
+	P953: "url",
+	P478: "volume",
+	P433: "issue",
+	P304: "pages"
 };
 
 // it is important to use here the language codes in the form
 // as they are also used in Wikidata for monolingual text
 var languageMapping = {
-	"en" : "Q1860",
-	"zh" : "Q7850",
-	"ru" : "Q7737",
-	"fr" : "Q150",
-	"ja" : "Q5287",
-	"de" : "Q188",
-	"es" : "Q1321",
-	"sr" : "Q9299",
-	"pl" : "Q809",
-	"cs" : "Q9056",
-	"it" : "Q652",
-	"cy" : "Q9309",
-	"pt" : "Q5146",
-	"nl" : "Q7411",
-	"sv" : "Q9027",
-	"ar" : "Q13955",
-	"ko" : "Q9176",
-	"hu" : "Q9067",
-	"da" : "Q9035",
-	"fi" : "Q1412",
-	"eu" : "Q8752",
-	"he" : "Q9288",
-	"la" : "Q397",
-	"nb" : "Q25167",
-	"no" : "Q9043",
-	"el" : "Q9129",
-	"tr" : "Q256",
-	"ca" : "Q7026",
-	"sl" : "Q9063",
-	"ro" : "Q7913",
-	"is" : "Q294",
-	"grc" : "Q35497",
-	"uk" : "Q8798",
-	"fa" : "Q9168", 
-	"hy" : "Q8785",
-	"ta" : "Q5885"
+	en: "Q1860",
+	zh: "Q7850",
+	ru: "Q7737",
+	fr: "Q150",
+	ja: "Q5287",
+	de: "Q188",
+	es: "Q1321",
+	sr: "Q9299",
+	pl: "Q809",
+	cs: "Q9056",
+	it: "Q652",
+	cy: "Q9309",
+	pt: "Q5146",
+	nl: "Q7411",
+	sv: "Q9027",
+	ar: "Q13955",
+	ko: "Q9176",
+	hu: "Q9067",
+	da: "Q9035",
+	fi: "Q1412",
+	eu: "Q8752",
+	he: "Q9288",
+	la: "Q397",
+	nb: "Q25167",
+	no: "Q9043",
+	el: "Q9129",
+	tr: "Q256",
+	ca: "Q7026",
+	sl: "Q9063",
+	ro: "Q7913",
+	is: "Q294",
+	grc: "Q35497",
+	uk: "Q8798",
+	fa: "Q9168",
+	hy: "Q8785",
+	ta: "Q5885"
 };
 
 var identifierMapping = {
-	"PMID" : "P698",
-	"PMCID" : "P932",
-	"JSTOR ID" : "P888",
-	"arXiv" : "P818",
-	"Open Library ID" : "P648",
-	"OCLC" : "P243"
+	PMID: "P698",
+	PMCID: "P932",
+	"JSTOR ID": "P888",
+	arXiv: "P818",
+	"Open Library ID": "P648",
+	OCLC: "P243"
 };
 
 
 function zoteroItemToQuickStatements(item) {
 	var statements = ['CREATE'];
-	var addStatement = function() {
+	var addStatement = function () {
 		var args = Array.prototype.slice.call(arguments);
 		statements.push('LAST\t' + args.join('\t'));
 	};
 
 	var itemType = item.itemType;
-	//check whether a special itemType is defined in the extra fields
+	// check whether a special itemType is defined in the extra fields
 	if (item.extra) {
-		var matchItemType = item.extra.match(/itemType: ([\w\-]+)($|\n)/);
+		var matchItemType = item.extra.match(/itemType: ([\w-]+)($|\n)/);
 		if (matchItemType) {
 			itemType = matchItemType[1];
 		}
@@ -166,10 +166,10 @@ function zoteroItemToQuickStatements(item) {
 	}
 	addStatement('Len', '"' + item.title + '"');
 
-	var description = itemType.replace(/([A-Z])/, function(match, firstLetter) {
+	var description = itemType.replace(/([A-Z])/, function (match, firstLetter) {
 		return ' ' + firstLetter.toLowerCase();
 	});
-	if (item.publicationTitle && (itemType=="journalArticle" || itemType=="magazineArticle" || itemType=="newspaperArticle")) {
+	if (item.publicationTitle && (itemType == "journalArticle" || itemType == "magazineArticle" || itemType == "newspaperArticle")) {
 		description = description + ' from \'' + item.publicationTitle + '\'';
 	}
 	if (item.date) {
@@ -188,44 +188,44 @@ function zoteroItemToQuickStatements(item) {
 	}
 
 	var index = 1;
-	for (var i=0; i<item.creators.length; i++) {
+	for (var i = 0; i < item.creators.length; i++) {
 		var creatorValue = item.creators[i].lastName;
 		var creatorType = item.creators[i].creatorType;
 		if (item.creators[i].firstName) {
 			creatorValue = item.creators[i].firstName + ' ' + creatorValue;
 		}
-		if (creatorType=="author") {
-			addStatement('P2093', '"' + creatorValue + '"', 'P1545', '"' + index+ '"');
+		if (creatorType == "author") {
+			addStatement('P2093', '"' + creatorValue + '"', 'P1545', '"' + index + '"');
 			index++;
 		}
-		//other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
+		// other creatorTypes are ignored, because they would need to point an item, rather than just writing the string value
 	}
 
 	if (item.date) {
-		//e.g. +1967-01-17T00:00:00Z/11
+		// e.g. +1967-01-17T00:00:00Z/11
 		var formatedDate = ZU.strToISO(item.date);
-		switch(formatedDate.length) {
+		switch (formatedDate.length) {
 			case 4:
-				formatedDate = formatedDate + "-00-00T00:00:00Z/9";
+				formatedDate += "-00-00T00:00:00Z/9";
 				break;
 			case 7:
-				formatedDate = formatedDate + "-00T00:00:00Z/10";
+				formatedDate += "-00T00:00:00Z/10";
 				break;
 			case 10:
-				formatedDate = formatedDate + "T00:00:00Z/11";
+				formatedDate += "T00:00:00Z/11";
 				break;
 			default:
-				formatedDate = formatedDate + "/11";
+				formatedDate += "/11";
 		}
-		addStatement('P577', '+'+formatedDate);
+		addStatement('P577', '+' + formatedDate);
 	}
 
 	if (item.ISBN) {
-		var isbnDigits = item.ISBN.replace(/\-/g, '');
-		if (isbnDigits.length==13) {
+		var isbnDigits = item.ISBN.replace(/-/g, '');
+		if (isbnDigits.length == 13) {
 			addStatement('P212', '"' + item.ISBN + '"');
 		}
-		if (isbnDigits.length==10) {
+		if (isbnDigits.length == 10) {
 			addStatement('P957', '"' + item.ISBN + '"');
 		}
 	}
@@ -234,23 +234,24 @@ function zoteroItemToQuickStatements(item) {
 		let lang = item.language.toLowerCase();
 		addStatement('P1476', lang + ':"' + item.title + '"');
 		addStatement('P407', languageMapping[lang]);
-	} else {
-		//otherwise use "und" for undetermined language
+	}
+	else {
+		// otherwise use "und" for undetermined language
 		addStatement('P1476', 'und:"' + item.title + '"');
 	}
 
 	if (item.extra) {
 		var extraLines = item.extra.split('\n');
-		for (var j=0; j<extraLines.length; j++) {
+		for (var j = 0; j < extraLines.length; j++) {
 			var colon = extraLines[j].indexOf(':');
-			if (colon>-1) {
-				var label = extraLines[j].substr(0,colon);
-				var value = extraLines[j].substr(colon+1);
+			if (colon > -1) {
+				var label = extraLines[j].substr(0, colon);
+				var value = extraLines[j].substr(colon + 1);
 				if (identifierMapping[label]) {
 					addStatement(identifierMapping[label], '"' + value.trim() + '"');
 				}
 				if (label.match(/^P\d+$/)) {
-					if (value.trim().match(/^Q\d+$/)) { 
+					if (value.trim().match(/^Q\d+$/)) {
 						addStatement(label, value.trim());
 					}
 					else {
