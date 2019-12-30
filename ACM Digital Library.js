@@ -1,203 +1,200 @@
 {
 	"translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
 	"label": "ACM Digital Library",
-	"creator": "Simon Kornblith, Michael Berkowitz, John McCaffery, and Sebastian Karcher",
-	"target": "^https?://([^/]+\\.)?dl\\.acm\\.org/(results|citation|author_page|ccs/ccs)\\.cfm",
+	"creator": "Guy Aglionby",
+	"target": "^https://dl\\.acm\\.org/(doi|do|profile|toc|topic|keyword|action/doSearch|acmbooks)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-03 09:45:46"
+	"lastUpdated": "2019-12-31 14:12:38"
 }
 
 /*
-ACM Digital Library Translator
-Copyright (C) 2011 Sebastian Karcher and CHNM
+	***** BEGIN LICENSE BLOCK *****
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+	Copyright © 2019 Guy Aglionby
+	This file is part of Zotero.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	if (url.includes("/results.cfm") || url.includes("/author_page.cfm") || url.includes("/ccs/ccs.cfm")) {
-		return getSearchResults(doc, true) ? 'multiple' : false;
-	} else if (url.includes("/citation.cfm")) {
-		return getArticleType(doc);
+	if ((url.includes('/doi/') || url.includes('/do/')) && !url.includes('/doi/proceedings')) {
+		let extractedContext = doc.querySelector('meta[name=pbContext]').content;
+		let subtypeRegex = /csubtype:string:(\w+)/;
+		let subtype = extractedContext.match(subtypeRegex)[1].toLowerCase();
+
+		if (subtype == 'conference') {
+			return 'conferencePaper';
+		}
+		else if (subtype == 'journal' || subtype == 'magazine' || subtype == 'newsletter') {
+			return 'journalArticle';
+		}
+		else if (subtype == 'report' || subtype == 'rfc') {
+			return 'report';
+		}
+		else if (subtype == 'thesis') {
+			return 'thesis';
+		}
+		else if (subtype == 'software') {
+			return 'computerProgram';
+		}
+		else if (subtype == 'dataset') {
+			return 'document';
+		}
+		else if (subtype == 'book') {
+			let bookTypeRegex = /page:string:([\w ]+)/;
+			let bookType = extractedContext.match(bookTypeRegex)[1].toLowerCase();
+			if (bookType == 'book page') {
+				return 'book';
+			}
+			else {
+				return 'bookSection';
+			}
+		}
 	}
+	else if (getSearchResults(doc, false)) {
+		return 'multiple';
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return true;
+		Zotero.selectItems(getSearchResults(doc), function (selected) {
+			if (selected) {
+				ZU.processDocuments(Object.keys(selected), scrape);
 			}
-			
-			var urls = [];
-			for (var i in items) {
-				urls.push(i);
-			}
-			ZU.processDocuments(urls, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc);
 	}
 }
 
-
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;	
-	var results = doc.querySelectorAll('div#results div.title>a[target="_self"], #toShowTop10 li>a');
+	let items = {};
+	let found = false;
+	let results = doc.querySelectorAll('h5.issue-item__title a');
 	
-	for (var i=0; i<results.length; i++) {
-		var url = results[i].href;
-		var title = ZU.trimInternal(results[i].textContent);
-		if (!title || !url) continue;
+	for (let i = 0; i < results.length; i++) {
+		let url = results[i].href;
+		let title = ZU.trimInternal(results[i].textContent);
+		if (!title || !url) {
+			continue;
+		}
 		
-		if (checkOnly) return true;
+		if (!(url.includes('/doi/') || url.includes('/do/')) || url.includes('/doi/proceedings')) {
+			continue;
+		}
+		
+		if (checkOnly) {
+			return true;
+		}
 		found = true;
-		
-		url = url.replace(/#.*/, '')
-			.replace(/([?&])preflayout=[^&]*/, '$1')
-			+ '&preflayout=flat';
 		items[url] = title;
 	}
 	
 	return found ? items : false;
 }
 
-
 function scrape(doc) {
-	var abs = text(doc, '#abstract');
-
-	// Get genric URL, preferring the conference version.
-	var url = ZU.xpath(doc, '//meta[@name="citation_conference"]\
-			/following-sibling::meta[@name="citation_abstract_html_url"]/@content')[0]
-		|| ZU.xpath(doc, '//meta[@name="citation_abstract_html_url"]/@content')[0];
-	url = url.textContent;
-
-	// Get item ID and parent ID
-	// ID format in the url is id=<parentID>.<itemID> or id=<itemID>
-	// Some items have no parent ID - set the parent ID for them to empty
-	var m = url.match(/\bid=(?:(\d+)\.)?(\d+)/);
-	var itemID = m[2];
-	var parentID = m[1] || '';
-
-	//compose bibtex URL
-	var bibtexstring = 'id=' + itemID + '&parent_id=' + parentID + '&expformat=bibtex';
-	var bibtexURL = url.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org")  //deproxify the URL above.
-		.replace(/citation\.cfm/, 'downformats.cfm')
-		.replace(/([?&])id=[^&#]+/, '$1' + bibtexstring);
-	// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
-	if (bibtexURL.startsWith('http:') && doc.location.href.startsWith('https')) {
-		Z.debug("Forcing BibTeX URL to HTTPS")
-		bibtexURL = bibtexURL.replace(/^http:/, 'https:');
-	}
-	Zotero.debug('BibTeX URL: ' + bibtexURL);
-	
-	ZU.doGet(bibtexURL, function (text) {
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			//get the URL for the pdf fulltext from the metadata
-			var pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content')[0];
-			if (pdfURL) {
-				pdfURL = pdfURL.textContent.replace(/dl[.-]acm[.-]org[^\/]*/, "dl.acm.org"); //deproxify URL
-				// As of 10/2019, embedded URL can be HTTP even when page is served via HTTPS proxy
-				if (pdfURL.startsWith('http:') && doc.location.href.startsWith('https')) {
-					Z.debug("Forcing PDF URL to HTTPS")
-					pdfURL = pdfURL.replace(/^http:/, 'https:');
-				}
-				Z.debug("PDF URL: " + pdfURL);
-				item.attachments = [{
-					url: pdfURL,
-					title: "ACM Full Text PDF",
-					mimeType: "application/pdf"
-				}];
+	let extractedContext = doc.querySelector('meta[name=pbContext]').content;
+	let doiRegex = /article:article:doi\\:([^;]+)/;
+	let doi = extractedContext.match(doiRegex)[1].toLowerCase();
+	let lookupEndpoint = 'https://dl.acm.org/action/exportCiteProcCitation?targetFile=custom-bibtex&format=bibTex&dois=';
+	ZU.doGet(lookupEndpoint + doi, function (text) {
+		let json = JSON.parse(text);
+		let cslItem = json.items[0][doi];
+		cslItem.type = cslItem.type.toLowerCase().replace('_', '-');
+		
+		// For theses, the advisor is indicated as an editor in CSL which
+		// ZU.itemFromCSLJSON incorrectly extracts as an author.
+		if (cslItem.type == 'thesis') {
+			delete cslItem.editor;
+		}
+		
+		let item = new Zotero.Item();
+		ZU.itemFromCSLJSON(item, cslItem);
+		
+		let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
+		let abstract = Array.from(abstractElements).map(function (element) {
+			return element.textContent;
+		}).join(' ');
+		if (abstract.length && abstract.toLowerCase() != 'no abstract available.') {
+			item.abstractNote = ZU.trimInternal(abstract);
+		}
+		
+		let pdfElement = doc.querySelector('a[title=PDF]');
+		if (pdfElement) {
+			item.attachments.push({
+				url: pdfElement.href,
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf'
+			});
+		}
+		
+		if (item.itemType == 'journalArticle') {
+			// Publication name in the CSL is shortened; scrape from page to get full title.
+			let expandedTitle = doc.querySelector('span.epub-section__title');
+			if (expandedTitle) {
+				item.publicationTitle = expandedTitle.textContent;
 			}
-			
-			//fix DOIs if they're in URL form
-			if (item.DOI) item.DOI = item.DOI.replace(/^.*\/(10\.\d+\/)/, '$1');
-			
-			//Conference Locations shouldn't go int Loc in Archive (nor should anything else)
-			delete item.archiveLocation;
-			
-			// some bibtext contains odd </kwd> tags - remove them
-			for (var i=0; i<item.tags.length; i++) {
-				item.tags[i] = item.tags[i].replace("</kwd>", "");
+		}
+		
+		if (item.itemType == 'bookSection' && item.creators.length == 0) {
+			// A chapter of a book is extracted as a bookSection, but the
+			// authors are not included in the CSL so we must scrape them.
+			// e.g. https://dl.acm.org/doi/abs/10.5555/3336323.C5474411
+			let authorElements = doc.querySelectorAll('div.citation span.loa__author-name');
+			authorElements.forEach(function (element) {
+				item.creators.push(ZU.cleanAuthor(element.textContent));
+			});
+		}
+		
+		if (!item.ISBN && cslItem.ISBN) {
+			if (!item.extra) {
+				item.extra = '';
 			}
-			
-			//full issues of journals/magazines don't have a title
-			if (!item.title && text.includes("issue_date")) {
-				var m = text.match(/issue_date\s*=\s*{(.*)},?/);
-				item.itemType = "book";
-				item.title = item.publicationTitle;
-				if (m) {
-					item.title = item.title + ", " + m[1];
-				}
-			}
-			
-			//The abstract from above or we try to make an individual request
-			//e.g. for multiples
-			if (!item.abstractNote) {
-				if (abs && abs.trim()) {
-					item.abstractNote = abs;
-					item.complete();
-				} else {
-					ZU.doGet("https://dl.acm.org/tab_abstract.cfm?id="+itemID, function(abstract) {
-						item.abstractNote = ZU.unescapeHTML(abstract);
-						if (item.abstractNote.trim() == "An abstract is not available.") delete item.abstractNote;
-						item.complete();
-					});
-				}
-			} else {
-				item.complete();
-			}
-			
+			let isbnLength = cslItem.ISBN.replace('-', '').length;
+			item.extra += '\nISBN-' + isbnLength + ': ' + cslItem.ISBN;
+		}
+		
+		let pagesElement = doc.querySelector('div.pages-info span');
+		if (pagesElement) {
+			item.numPages = pagesElement.textContent;
+		}
+		
+		let tagElements = doc.querySelectorAll('div.tags-widget a');
+		tagElements.forEach(function (tag) {
+			item.tags.push(tag.textContent);
 		});
-		translator.translate();
+		
+		item.complete();
 	});
 }
 
-//Simon's helper funcitons.
-/**
- * Find out what kind of document this is by checking google metadata
- * @param doc The XML document describing the page
- * @return a string with either "journalArticle",  "conferencePaper", or "book" in it, depending on the type of document
- */
-
-function getArticleType(doc) {
-	var conference = ZU.xpathText(doc, '//meta[@name="citation_conference"][1]/@content');
-	if (conference && conference.trim()) return "conferencePaper";
-	
-	var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"][1]/@content');
-	if (journal && journal.trim()) return "journalArticle";
-	
-	return "book";
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://dl.acm.org/citation.cfm?id=1596682&preflayout=tabs",
+		"url": "https://dl.acm.org/doi/abs/10.1145/1596655.1596682",
 		"defer": true,
 		"items": [
 			{
@@ -252,7 +249,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=1717186&coll=DL&dl=GUIDE",
+		"url": "https://dl.acm.org/doi/10.5555/1717186",
 		"defer": true,
 		"items": [
 			{
@@ -282,7 +279,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dl.acm.org/citation.cfm?id=254650.257486&coll=DL&dl=GUIDE",
+		"url": "https://dl.acm.org/doi/abs/10.1023/A:1008286901817",
 		"defer": true,
 		"items": [
 			{
@@ -345,7 +342,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dl.acm.org/citation.cfm?id=258948.258973&coll=DL&dl=ACM",
+		"url": "https://dl.acm.org/doi/abs/10.1145/258948.258973",
 		"defer": true,
 		"items": [
 			{
@@ -390,7 +387,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=2566617",
+		"url": "https://dl.acm.org/doi/abs/10.1145/2566617",
 		"defer": true,
 		"items": [
 			{
@@ -444,16 +441,16 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/author_page.cfm?id=81100246710",
+		"url": "https://dl.acm.org/profile/81460641152/publications?Role=author",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://dl.acm.org/citation.cfm?id=3029062",
+		"url": "https://dl.acm.org/toc/interactions/2016/24/1",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "interactions, January - February 2017",
+				"title": "Interactions, January - February 2017",
 				"creators": [
 					{
 						"firstName": "Ron",
@@ -481,7 +478,32 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dl.acm.org/ccs/ccs.cfm?id=10010343&lid=0.10010147.10010341.10010342.10010343",
+		"url": "https://dl.acm.org/topic/ccs2012/10010147.10010341.10010342.10010343",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/doi/proceedings/10.1145/2342541",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/keyword/pesq",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/action/doSearch?AllField=Zotero",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/browse/book",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/subject/mobile",
 		"items": "multiple"
 	}
 ]
