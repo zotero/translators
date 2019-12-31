@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-28 12:10:45"
+	"lastUpdated": "2019-12-31 16:12:50"
 }
 
 /*
@@ -36,36 +36,36 @@
 
 // See BibTeX.js
 var bibtex2zoteroTypeMap = {
-	"book":"book", // or booklet, proceedings
-	"inbook":"bookSection",
-	"incollection":"bookSection",
-	"article":"journalArticle", // or magazineArticle or newspaperArticle
-	"patent" :"patent",
-	"phdthesis":"thesis",
-	"unpublished":"manuscript",
-	"inproceedings":"conferencePaper", // check for conference also
-	"conference":"conferencePaper",
-	"techreport":"report",
-	"booklet":"book",
-	"manual":"book",
-	"mastersthesis":"thesis",
-	"misc":"book",
-	"proceedings":"book",
-	"online":"webpage",
+	book: "book", // or booklet, proceedings
+	inbook: "bookSection",
+	incollection: "bookSection",
+	article: "journalArticle", // or magazineArticle or newspaperArticle
+	patent: "patent",
+	phdthesis: "thesis",
+	unpublished: "manuscript",
+	inproceedings: "conferencePaper", // check for conference also
+	conference: "conferencePaper",
+	techreport: "report",
+	booklet: "book",
+	manual: "book",
+	mastersthesis: "thesis",
+	misc: "book",
+	proceedings: "book",
+	online: "webpage",
 	// from BibLaTeX translator:
-	"thesis":"thesis",
-	"letter":"letter",
-	"movie":"film",
-	"artwork":"artwork",
-	"report":"report",
-	"legislation":"bill",
-	"jurisdiction":"case",
-	"audio":"audioRecording",
-	"video":"videoRecording",
-	"software":"computerProgram",
-	"inreference":"encyclopediaArticle",
-	"collection":"book",
-	"mvbook":"book"
+	thesis: "thesis",
+	letter: "letter",
+	movie: "film",
+	artwork: "artwork",
+	report: "report",
+	legislation: "bill",
+	jurisdiction: "case",
+	audio: "audioRecording",
+	video: "videoRecording",
+	software: "computerProgram",
+	inreference: "encyclopediaArticle",
+	collection: "book",
+	mvbook: "book"
 };
 
 function detectWeb(doc, url) {
@@ -73,9 +73,11 @@ function detectWeb(doc, url) {
 		let bibtex = extractBibtex(doc);
 		let doctype = bibtex.split('{')[0].replace('@', '');
 		return bibtex2zoteroTypeMap[doctype] || 'journalArticle';
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -85,16 +87,17 @@ function doWeb(doc, url) {
 		// https://ai.google/research/pubs/
 		Zotero.selectItems(getSearchResults(doc), function (selected) {
 			if (!selected) {
-				return true;
+				return;
 			}
 			ZU.processDocuments(Object.keys(selected), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url) { 
+function scrape(doc) {
 	let bibtex = extractBibtex(doc);
 	let translator = Zotero.loadTranslator("import");
 	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
@@ -111,13 +114,13 @@ function scrape(doc, url) {
 		delete item.itemID;
 		item.complete();
 	});
-	translator.translate();	
+	translator.translate();
 }
 
-function extractBibtex(doc) { 
+function extractBibtex(doc) {
 	let escapedBibtex = ZU.xpathText(doc, '//a[span[contains(@class, "icon--copy")]]/@ng-click')
-							.replace("CopyCtrl.onClick($event, '", '')
-							.replace("', true)", '');
+		.replace("CopyCtrl.onClick($event, '", '')
+		.replace("', true)", '');
 	return decodeURIComponent(escapedBibtex);
 }
 
@@ -125,7 +128,7 @@ function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
 	let rows = ZU.xpath(doc, '//a[contains(@class, "card__title")]');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -135,6 +138,7 @@ function getSearchResults(doc, checkOnly) {
 	}
 	return found ? items : false;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
