@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-31 16:22:04"
+	"lastUpdated": "2019-12-31 16:28:48"
 }
 
 /*
@@ -116,7 +116,7 @@ function scrape(doc) {
 	translator.translate();
 }
 
-function extractBibtex(doc) { 
+function extractBibtex(doc) {
 	let bibtex = ZU.xpathText(doc, '//a[contains(text(), "Bibtex")]/@copy-to-clipboard');
 	return decodeURIComponent(bibtex);
 }
