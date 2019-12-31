@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-07 21:59:05"
+	"lastUpdated": "2019-12-31 17:36:50"
 }
 
 /*
@@ -103,11 +103,18 @@ function parseDocument(doc, url) {
 		var scripts = ZU.xpath(doc, '//script');
 		var rawData = {};
 		const DATA_INDICATOR = 'var DATA = \'';
+		const DETAIL_VALUE = 'PAPER_DETAIL';
 		for (let i = 0; i < scripts.length; i++) {
 			if (scripts[i].innerHTML.startsWith(DATA_INDICATOR)) {
 				let dataText = scripts[i].innerHTML.replace(DATA_INDICATOR, '').slice(0, -2);
 				dataText = decodeURIComponent(atob(dataText));
-				rawData = JSON.parse(dataText)[1].resultData.paper;
+				let jsonData = JSON.parse(dataText);
+				for (let responseKey in jsonData) {
+					if (jsonData[responseKey].requestType == DETAIL_VALUE) {
+						rawData = jsonData[responseKey].resultData.paper;
+						break;
+					}
+				}
 				break;
 			}
 		}
@@ -122,21 +129,37 @@ function parseDocument(doc, url) {
 			item.issue = volumeAndIssue[1];
 		}
 		
-		if (rawData.hasPdf && (rawData.primaryPaperLink.linkType === 's2'
-			|| rawData.primaryPaperLink.linkType == 'arxiv')) {
-			item.attachments.push({
-				url: rawData.primaryPaperLink.url,
-				title: "Full Text PDF",
-				mimeType: 'application/pdf'
-			});
-			if (rawData.primaryPaperLink.linkType == 'arxiv') {
-				let arxivId = rawData.primaryPaperLink.url.match(/\d{4}\.\d{5}/);
-				if (arxivId.length >= 1) {
-					if (item.extra) {
-						item.extra += '\narXiv: ' + arxivId[0];
+		if (rawData.primaryPaperLink) {
+			let pdfLinkElement;
+			if (rawData.primaryPaperLink.url.endsWith('.pdf')) {
+				pdfLinkElement = rawData.primaryPaperLink;
+			}
+			else if (rawData.alternatePaperLinks) {
+				for (let i = 0; i < rawData.alternatePaperLinks.length; i++) {
+					let alternateElement = rawData.alternatePaperLinks[i];
+					if (alternateElement.url.endsWith('.pdf')) {
+						pdfLinkElement = alternateElement;
+						break;
 					}
-					else {
-						item.extra = 'arXiv: ' + arxivId[0];
+				}
+			}
+			
+			if (pdfLinkElement) {
+				item.attachments.push({
+					url: pdfLinkElement.url,
+					title: "Full Text PDF",
+					mimeType: 'application/pdf'
+				});
+				
+				if (pdfLinkElement.linkType == 'arxiv') {
+					let arxivId = pdfLinkElement.url.match(/\d{4}\.\d{5}/);
+					if (arxivId.length >= 1) {
+						if (item.extra) {
+							item.extra += '\narXiv: ' + arxivId[0];
+						}
+						else {
+							item.extra = 'arXiv: ' + arxivId[0];
+						}
 					}
 				}
 			}
@@ -222,7 +245,7 @@ var testCases = [
 				],
 				"date": "2010",
 				"DOI": "10.1007/978-3-642-14770-8_33",
-				"abstractNote": "In the present paper we describe TectoMT, a multi-purpose open-source NLP framework. It allows for fast and efficient development of NLP applications by exploiting a wide range of software modules already integrated in TectoMT, such as tools for sentence segmentation, tokenization, morphological analysis, POS tagging, shallow and deep syntax parsing, named entity recognition, anaphora resolution, tree-to-tree translation, natural language generation, word-level alignment of parallel corpora, and other tasks. One of the most complex applications of TectoMT is the English-Czech machine translation system with transfer on deep syntactic (tectogrammatical) layer. Several modules are available also for other languages (German, Russian, Arabic). Where possible, modules are implemented in a language-independent way, so they can be reused in many applications.",
+				"abstractNote": "In the present paper we describe TectoMT, a multi-purpose open-source NLP framework. It allows for fast and efficient development of NLP applications by exploiting a wide range of software modules already integrated in TectoMT, such as tools for sentence segmentation, tokenization, morphological analysis, POS tagging, shallow and deep syntax parsing, named entity recognition, anaphora resolution, tree-to-tree translation, natural language generation, word-level alignment of parallel corpora, and other tasks. One of the most complex applications of TectoMT is the English-Czech machine translation system with transfer on deep syntactic (tectogrammatical) layer. Several modules are available also for other languages (German, Russian, Arabic).Where possible, modules are implemented in a language-independent way, so they can be reused in many applications.",
 				"itemID": "Popel2010TectoMTMN",
 				"libraryCatalog": "Semantic Scholar",
 				"proceedingsTitle": "IceTAL",
@@ -232,6 +255,10 @@ var testCases = [
 						"title": "Semantic Scholar Link",
 						"mimeType": "text/html",
 						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -308,7 +335,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Ralph Charles",
+						"firstName": "Ralph C.",
 						"lastName": "Kester",
 						"creatorType": "author"
 					},
@@ -345,79 +372,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Foundations-of-Statistical-Natural-Language-Manning-Sch%C3%BCtze/06fd7d924d499fbc62ccbcc2e458fb6c187bcf6f",
-		"items": [
-			{
-				"itemType": "conferencePaper",
-				"title": "Foundations of statistical natural language processing",
-				"creators": [
-					{
-						"firstName": "Christopher D.",
-						"lastName": "Manning",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Hinrich",
-						"lastName": "Schütze",
-						"creatorType": "author"
-					}
-				],
-				"date": "1999",
-				"DOI": "10.1023/A:1011424425034",
-				"abstractNote": "Statistical approaches to processing natural language text have become dominant in recent years. This foundational text is the first comprehensive introduction to statistical natural language processing (NLP) to appear. The book contains all the theory and algorithms needed for building NLP tools. It provides broad but rigorous coverage of mathematical and linguistic foundations, as well as detailed discussion of statistical methods, allowing students and researchers to construct their own implementations. The book covers collocation finding, word sense disambiguation, probabilistic parsing, information retrieval, and other applications.",
-				"itemID": "Manning1999FoundationsOS",
-				"libraryCatalog": "Semantic Scholar",
-				"attachments": [
-					{
-						"title": "Semantic Scholar Link",
-						"mimeType": "text/html",
-						"snapshot": false
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Algorithm"
-					},
-					{
-						"tag": "Data compression"
-					},
-					{
-						"tag": "Grams"
-					},
-					{
-						"tag": "Language model"
-					},
-					{
-						"tag": "Linear interpolation"
-					},
-					{
-						"tag": "N-gram"
-					},
-					{
-						"tag": "Natural language processing"
-					},
-					{
-						"tag": "Protologism"
-					},
-					{
-						"tag": "Smoothing"
-					},
-					{
-						"tag": "Stochastic grammar"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Interleukin-7-mediates-the-homeostasis-of-na%C3%AFve-and-Schluns-Kieper/aee7b854bed51120fe356a5792dfb22fec7cf2ae",
+		"url": "https://www.semanticscholar.org/paper/Interleukin-7-mediates-the-homeostasis-of-na%C3%AFve-and-Schluns-Kieper/9cee117453fe7c9d68117325636548c704c80e03",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -457,6 +412,10 @@ var testCases = [
 						"title": "Semantic Scholar Link",
 						"mimeType": "text/html",
 						"snapshot": false
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -508,7 +467,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Claudia E.",
+						"firstName": "Claudia Elisabeth",
 						"lastName": "Kuehni",
 						"creatorType": "author"
 					},
@@ -523,7 +482,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "ERS Taskforce on Primary Ciliary Dyskinesia in",
+						"firstName": "Ers Taskforce on Primary Ciliary Dyskinesia in",
 						"lastName": "children",
 						"creatorType": "author"
 					}
@@ -606,19 +565,19 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/author/Jane-Holmes/3023517",
+		"url": "https://www.semanticscholar.org/author/Donald-E.-Knuth/1717349",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Superpower-Your-Browser-with-LibX-and-Zotero-Puckett/ac7caef334a4296503cc062529290d4c3ef6be32",
+		"url": "https://www.semanticscholar.org/paper/Superpower-Your-Browser-with-LibX-and-Zotero-Puckett/c5149756d171241cdeb044eb0d774679db0dc194",
 		"items": [
 			{
 				"itemType": "conferencePaper",
 				"title": "Superpower Your Browser with LibX and Zotero",
 				"creators": [
 					{
-						"firstName": "J.",
+						"firstName": "Jason",
 						"lastName": "Puckett",
 						"creatorType": "author"
 					}
@@ -653,11 +612,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.semanticscholar.org/paper/Tracking-State-Changes-in-Procedural-Text%3A-A-and-Dalvi-Huang/5e9c9d0164ae041786f8fdc5726da12403e91a6c",
+		"url": "https://www.semanticscholar.org/paper/Tracking-State-Changes-in-Procedural-Text%3A-a-and-Dalvi-Huang/5e9c9d0164ae041786f8fdc5726da12403e91a6c",
 		"items": [
 			{
-				"itemType": "journalArticle",
-				"title": "Tracking State Changes in Procedural Text: A Challenge Dataset and Models for Process Paragraph Comprehension",
+				"itemType": "conferencePaper",
+				"title": "Tracking State Changes in Procedural Text: a Challenge Dataset and Models for Process Paragraph Comprehension",
 				"creators": [
 					{
 						"firstName": "Bhavana",
@@ -680,16 +639,19 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Peter",
+						"firstName": "Peter E.",
 						"lastName": "Clark",
 						"creatorType": "author"
 					}
 				],
 				"date": "2018",
-				"abstractNote": "We present a new dataset and models for comprehending paragraphs about processes (e.g., photosynthesis), an important genre of text describing a dynamic world. The new dataset, ProPara, is the first to contain natural (rather than machine-generated) text about a changing world along with a full annotation of entity states (location and existence) during those changes (81k datapoints). The end-task, tracking the location and existence of entities through the text, is challenging because the causal effects of actions are often implicit and need to be inferred. We find that previous models that have worked well on synthetic data achieve only mediocre performance on ProPara, and introduce two new neural models that exploit alternative mechanisms for state prediction, in particular using LSTM input encoding and span prediction. The new models improve accuracy by up to 19%. The dataset and models are available to the community at http://data.allenai.org/propara.",
+				"DOI": "10.18653/v1/N18-1144",
+				"abstractNote": "We present a new dataset and models for comprehending paragraphs about processes (e.g., photosynthesis), an important genre of text describing a dynamic world. The new dataset, ProPara, is the first to contain natural (rather than machine-generated) text about a changing world along with a full annotation of entity states (location and existence) during those changes (81k datapoints). The end-task, tracking the location and existence of entities through the text, is challenging because the causal effects of actions are often implicit and need to be inferred. We find that previous models that have worked well on synthetic data achieve only mediocre performance on ProPara, and introduce two new neural models that exploit alternative mechanisms for state prediction, in particular using LSTM input encoding and span prediction. The new models improve accuracy by up to 19%. The dataset and models are available to the community at this http URL",
+				"extra": "arXiv: 1805.06975",
 				"itemID": "Dalvi2018TrackingSC",
 				"libraryCatalog": "Semantic Scholar",
 				"proceedingsTitle": "NAACL-HLT",
+				"publicationTitle": "NAACL-HLT",
 				"shortTitle": "Tracking State Changes in Procedural Text",
 				"attachments": [
 					{
@@ -720,9 +682,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": [],
-				"publicationTitle": "ArXiv",
-				"volume": "abs/1805.06975"
+				"seeAlso": []
 			}
 		]
 	}
