@@ -2,14 +2,14 @@
 	"translatorID": "5f1c4a3b-b7cf-4170-a896-e4d82c0621c9",
 	"label": "Google AI",
 	"creator": "Guy Aglionby",
-	"target": "^https://research\\.google/(pubs|people|research-areas)",
+	"target": "^https://research\\.google/(pubs|people|research-areas|teams)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-31 16:28:48"
+	"lastUpdated": "2019-12-31 16:36:03"
 }
 
 /*
@@ -209,6 +209,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://research.google/research-areas/algorithms-and-theory/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://research.google/teams/applied-science/gas/",
 		"items": "multiple"
 	}
 ]
