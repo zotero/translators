@@ -2,14 +2,14 @@
 	"translatorID": "5f1c4a3b-b7cf-4170-a896-e4d82c0621c9",
 	"label": "Google AI",
 	"creator": "Guy Aglionby",
-	"target": "^https://ai\\.google/research/(pubs|people)",
+	"target": "^https://research\\.google/(pubs|people|research-areas)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-31 16:12:50"
+	"lastUpdated": "2019-12-31 16:22:04"
 }
 
 /*
@@ -86,10 +86,9 @@ function doWeb(doc, url) {
 		// https://ai.google/research/people/105197
 		// https://ai.google/research/pubs/
 		Zotero.selectItems(getSearchResults(doc), function (selected) {
-			if (!selected) {
-				return;
+			if (selected) {
+				ZU.processDocuments(Object.keys(selected), scrape);
 			}
-			ZU.processDocuments(Object.keys(selected), scrape);
 		});
 	}
 	else {
@@ -104,7 +103,7 @@ function scrape(doc) {
 	translator.setString(bibtex);
 	translator.setHandler("itemDone", function (obj, item) {
 		let downloadUrl = ZU.xpathText(doc, '//a[span[contains(@class, "icon--download")]]/@href');
-		if (downloadUrl.endsWith('.pdf')) {
+		if (downloadUrl && downloadUrl.endsWith('.pdf')) {
 			item.attachments.push({
 				url: downloadUrl,
 				title: 'Full Text PDF',
@@ -117,11 +116,9 @@ function scrape(doc) {
 	translator.translate();
 }
 
-function extractBibtex(doc) {
-	let escapedBibtex = ZU.xpathText(doc, '//a[span[contains(@class, "icon--copy")]]/@ng-click')
-		.replace("CopyCtrl.onClick($event, '", '')
-		.replace("', true)", '');
-	return decodeURIComponent(escapedBibtex);
+function extractBibtex(doc) { 
+	let bibtex = ZU.xpathText(doc, '//a[contains(text(), "Bibtex")]/@copy-to-clipboard');
+	return decodeURIComponent(bibtex);
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -143,7 +140,7 @@ function getSearchResults(doc, checkOnly) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://ai.google/research/pubs/pub47251",
+		"url": "https://research.google/pubs/pub47251/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -187,7 +184,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://ai.google/research/pubs/pub46616",
+		"url": "https://research.google/pubs/pub46616/",
 		"items": [
 			{
 				"itemType": "report",
@@ -208,6 +205,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://research.google/research-areas/algorithms-and-theory/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
