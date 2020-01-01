@@ -1,6 +1,6 @@
 {
 	"translatorID": "5f1c4a3b-b7cf-4170-a896-e4d82c0621c9",
-	"label": "Google AI",
+	"label": "Google Research",
 	"creator": "Guy Aglionby",
 	"target": "^https://research\\.google/(pubs|people|research-areas|teams)",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-31 16:36:03"
+	"lastUpdated": "2020-01-01 19:36:16"
 }
 
 /*
@@ -82,7 +82,8 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) === 'multiple') {
-		// Test cases: (defer: true is broken so cannot currently use automated tests)
+		// The below two pages with multiples are populated after page load has finished,
+		// so can't be used as automatic test cases. For others this is not the case.
 		// https://ai.google/research/people/105197
 		// https://ai.google/research/pubs/
 		Zotero.selectItems(getSearchResults(doc), function (selected) {
@@ -168,7 +169,7 @@ var testCases = [
 					}
 				],
 				"date": "2018",
-				"libraryCatalog": "Google AI",
+				"libraryCatalog": "Google Research",
 				"proceedingsTitle": "Proceedings of the Symposium on Usable Privacy and Security 2018",
 				"attachments": [
 					{
@@ -197,7 +198,7 @@ var testCases = [
 					}
 				],
 				"date": "2018",
-				"libraryCatalog": "Google AI",
+				"libraryCatalog": "Google Research",
 				"url": "http://www.unofficialgoogledatascience.com/2018/01/designing-ab-tests-in-collaboration.html",
 				"attachments": [],
 				"tags": [],
