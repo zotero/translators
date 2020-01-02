@@ -17,7 +17,8 @@ function detectWeb(doc, url) {
 	// Z.debug(items);
 	if (items && !url.includes("Patent")) {
 		return "multiple";
-	} else if (url.includes("Patent")) {
+	} 
+	else if (url.includes("Patent")) { 
 		return "patent";
 	}
 }
@@ -30,7 +31,6 @@ function scrape(doc, url, loginStatus) {
 	var appDate = appNo[3];
 	appNo = appNo[1];
 	var ab = ZU.xpath(doc, "//b[contains(text(), '摘要：')]/parent::td")[0].innerText;
-	var inventor = ZU.xpath(doc, "//b[contains(text(), '发明(设计)人：')]/parent::td")[0].innerText;
 	Z.debug(title + appDate + appNo);
 	newItem.title = title;
 	newItem.abstractNote = ab;
@@ -43,7 +43,9 @@ function scrape(doc, url, loginStatus) {
 	for (var n of legalStatusNodes) {
 		legalStatus += "," + n.innerText;
 	}
-	legalStatus ? newItem['legalStatus'] = legalStatus.substr(1) : false;
+	if (legalStatus) {
+		newItem.legalStatus = legalStatus.substr(1);
+	}
 	var note = ZU.xpath(doc, "//tr[td='主权项']/td[2]")[0].innerText;
 	if (note) {
 		newItem.notes = [{ note: note }];
@@ -56,9 +58,9 @@ function scrape(doc, url, loginStatus) {
 		var lastSpace = inventor.lastIndexOf(' ');
 		if (inventor.search(/[A-Za-z]/) !== -1 && lastSpace !== -1) {
 			// western name. split on last space
-			creator.firstName = inventor.substr(0,lastSpace);
+			creator.firstName = inventor.substr(0, lastSpace);
 			creator.lastName = inventor.substr(lastSpace + 1);
-		} 
+		}
 		else {
 			// Chinese name. first character is last name, the rest are first name
 			creator.firstName = inventor.substr(1);
@@ -69,10 +71,9 @@ function scrape(doc, url, loginStatus) {
 	newItem.place = ZU.xpath(doc, "//b[contains(text(), '申请人：')]/parent::td/a")[0].innerText;
 	var downlink = ZU.xpath(doc, "//div[@class='mix']/a[2]")[0].getAttribute('onclick').split("'")[1];
 	// Z.debug(downlink);
-	
 	if (loginStatus) {
 		getPDF(downlink, newItem);
-	} 
+	}
 	else {
 		newItem.complete();
 	}
@@ -89,7 +90,7 @@ function doWeb(doc, url) {
 			var urls = Object.keys(selectedItems);
 			getItemsFromSearch(urls, itemInfos, loginStatus);
 		});
-	} 
+	}
 	else {
 		scrape(doc, url, loginStatus);
 	}
@@ -122,9 +123,10 @@ function detectLogin(doc) {
 	var loginHeader = ZU.xpath(doc, "//div[@class='login']")[0];
 	var counts = (loginHeader.innerText.match(/登录/g) || []).length;
 	if (counts == 2) {
-		return false
-	} else {
-		return true
+		return false;
+	}
+	else {
+		return true;
 	}
 }
 
