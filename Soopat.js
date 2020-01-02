@@ -42,12 +42,12 @@ function detectWeb (doc, url) {
 	// Z.debug(items);
 	if (items && !url.includes("Patent")) {
 		return "multiple";
-	} else if (url.includes("Patent")) { 
+	} else if (url.includes("Patent")) {
 		return "patent";
 	}
 }
 
-function scrape (doc, url, loginStatus) {
+function scrape(doc, url, loginStatus) {
 	var newItem = new Zotero.Item("patent");
 	var detailtitle = ZU.xpath(doc, "//span[@class='detailtitle']")[0];
 	var title = ZU.xpath(detailtitle, "./h1")[0];
@@ -103,7 +103,7 @@ function scrape (doc, url, loginStatus) {
 	}
 }
 
-function doWeb (doc, url) {
+function doWeb(doc, url) {
 	var loginStatus = detectLogin(doc);
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfos = {};
@@ -122,7 +122,7 @@ function doWeb (doc, url) {
 
 
 // get item fields from search page
-function getSearchItems (doc, itemInfos) {
+function getSearchItems(doc, itemInfos) {
 	var patentNodes = ZU.xpath(doc, "//div[@class='PatentBlock']");
 	var items = {};
 	for (var i = 0, n = patentNodes.length; i < n; i++) {
@@ -142,8 +142,8 @@ function getSearchItems (doc, itemInfos) {
 	return items;
 }
 
-
-function detectLogin (doc) {
+// detect user login state
+function detectLogin(doc) {
 	var loginHeader = ZU.xpath(doc, "//div[@class='login']")[0];
 	var counts = (loginHeader.innerText.match(/登录/g) || []).length;
 	if (counts == 2) {
@@ -154,8 +154,8 @@ function detectLogin (doc) {
 }
 
 
-function getPDF (downlink, newItem) {
-	ZU.doGet(downlink, function(text) {
+function getPDF(downlink, newItem) {
+	ZU.doGet(downlink, function (text) {
 		// Z.debug(text);
 		var parser = new DOMParser();
 		var downHtml = parser.parseFromString(text, 'text/html');
@@ -166,11 +166,11 @@ function getPDF (downlink, newItem) {
 			url: link.href
 		}];
 		newItem.complete();
-	})
+	});
 }
 
 
-function getItemsFromSearch (urls, itemInfos, loginStatus) {
+function getItemsFromSearch(urls, itemInfos, loginStatus) {
 	if (!urls.length) return;
 	for (var url of urls) {
 		var patent = itemInfos[url];
