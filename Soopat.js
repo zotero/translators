@@ -12,17 +12,42 @@
 	"lastUpdated": "2020-01-02 07:04:38"
 }
 
-function detectWeb(doc, url) {
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2019 Xingzhong Lin, https://github.com/Zotero-CN/translators_CN
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
+
+function detectWeb (doc, url) {
 	var items = getSearchItems(doc);
 	// Z.debug(items);
 	if (items && !url.includes("Patent")) {
 		return "multiple";
-	} 
-	else if (url.includes("Patent")) { 
+	} else if (url.includes("Patent")) { 
 		return "patent";
 	}
 }
-function scrape(doc, url, loginStatus) {
+
+function scrape (doc, url, loginStatus) {
 	var newItem = new Zotero.Item("patent");
 	var detailtitle = ZU.xpath(doc, "//span[@class='detailtitle']")[0];
 	var title = ZU.xpath(detailtitle, "./h1")[0];
@@ -60,8 +85,7 @@ function scrape(doc, url, loginStatus) {
 			// western name. split on last space
 			creator.firstName = inventor.substr(0, lastSpace);
 			creator.lastName = inventor.substr(lastSpace + 1);
-		}
-		else {
+		} else {
 			// Chinese name. first character is last name, the rest are first name
 			creator.firstName = inventor.substr(1);
 			creator.lastName = inventor.charAt(0);
@@ -79,7 +103,7 @@ function scrape(doc, url, loginStatus) {
 	}
 }
 
-function doWeb(doc, url) {
+function doWeb (doc, url) {
 	var loginStatus = detectLogin(doc);
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfos = {};
@@ -98,7 +122,7 @@ function doWeb(doc, url) {
 
 
 // get item fields from search page
-function getSearchItems(doc, itemInfos) {
+function getSearchItems (doc, itemInfos) {
 	var patentNodes = ZU.xpath(doc, "//div[@class='PatentBlock']");
 	var items = {};
 	for (var i = 0, n = patentNodes.length; i < n; i++) {
@@ -119,19 +143,18 @@ function getSearchItems(doc, itemInfos) {
 }
 
 
-function detectLogin(doc) {
+function detectLogin (doc) {
 	var loginHeader = ZU.xpath(doc, "//div[@class='login']")[0];
 	var counts = (loginHeader.innerText.match(/登录/g) || []).length;
 	if (counts == 2) {
 		return false;
-	}
-	else {
+	} else {
 		return true;
 	}
 }
 
 
-function getPDF(downlink, newItem) {
+function getPDF (downlink, newItem) {
 	ZU.doGet(downlink, function(text) {
 		// Z.debug(text);
 		var parser = new DOMParser();
@@ -147,7 +170,7 @@ function getPDF(downlink, newItem) {
 }
 
 
-function getItemsFromSearch(urls, itemInfos, loginStatus) {
+function getItemsFromSearch (urls, itemInfos, loginStatus) {
 	if (!urls.length) return;
 	for (var url of urls) {
 		var patent = itemInfos[url];
@@ -163,10 +186,9 @@ function getItemsFromSearch(urls, itemInfos, loginStatus) {
 		newItem.place = ZU.xpath(patent, ".//span[@class='PatentAuthorBlock']/a")[0].innerText;
 		newItem.legalStatus = ZU.xpath(patent, ".//h2[@class='PatentTypeBlock']")[0].innerText.split(/\s/).slice(4, -1).join(',');
 		var downlink = ZU.xpath(patent, ".//span[@class='PatentBottomBlock']/a[3]")[0].getAttribute('onclick').split("'")[1];
-		if (loginStatus) {
+		if (loginStatus){
 			getPDF(downlink, newItem);
-		} 
-		else {
+		} else {
 			newItem.complete();
 		}
 	}
