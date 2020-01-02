@@ -37,12 +37,13 @@
 */
 
 
-function detectWeb (doc, url) {
+function detectWeb(doc, url) {
 	var items = getSearchItems(doc);
 	// Z.debug(items);
 	if (items && !url.includes("Patent")) {
 		return "multiple";
-	} else if (url.includes("Patent")) {
+	}
+	else if (url.includes("Patent")) {
 		return "patent";
 	}
 }
@@ -85,7 +86,8 @@ function scrape(doc, url, loginStatus) {
 			// western name. split on last space
 			creator.firstName = inventor.substr(0, lastSpace);
 			creator.lastName = inventor.substr(lastSpace + 1);
-		} else {
+		}
+		else {
 			// Chinese name. first character is last name, the rest are first name
 			creator.firstName = inventor.substr(1);
 			creator.lastName = inventor.charAt(0);
@@ -148,7 +150,8 @@ function detectLogin(doc) {
 	var counts = (loginHeader.innerText.match(/登录/g) || []).length;
 	if (counts == 2) {
 		return false;
-	} else {
+	}
+	else {
 		return true;
 	}
 }
@@ -188,7 +191,8 @@ function getItemsFromSearch(urls, itemInfos, loginStatus) {
 		var downlink = ZU.xpath(patent, ".//span[@class='PatentBottomBlock']/a[3]")[0].getAttribute('onclick').split("'")[1];
 		if (loginStatus){
 			getPDF(downlink, newItem);
-		} else {
+		}
+		else {
 			newItem.complete();
 		}
 	}
