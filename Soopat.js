@@ -58,6 +58,7 @@ function scrape(doc, url, loginStatus) {
 	appNo = appNo[1];
 	var ab = ZU.xpath(doc, "//b[contains(text(), '摘要：')]/parent::td")[0].innerText;
 	Z.debug(title + appDate + appNo);
+	newItem.url = url;
 	newItem.title = title;
 	newItem.abstractNote = ab;
 	newItem.applicationNumber = appNo;
