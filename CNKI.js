@@ -166,7 +166,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 			itemInfo[a.href] = { id: id };
 			if (filelink.length) {
 				filelink = filelink[0].href;
-				itemInfo[a.href]['filelink'] = filelink;
+				itemInfo[a.href].filelink = filelink;
 			}
 		}
 		items[a.href] = links[i].innerText;
@@ -223,13 +223,13 @@ function scrape(ids, doc, url, itemInfo) {
 			// 如果你想将PDF文件替换为CAJ文件，将下面一行 keepPDF 设为 false
 			var keepPDF = true;
 			// Z.debug('loginStatus: '+loginStatus);
-			if (itemInfo && loginStatus && itemInfo[url]['filelink']) { // search result
-				if (itemInfo[url]['filelink'].includes('&dflag=') && keepPDF) {
+			if (itemInfo && loginStatus && itemInfo[url].filelink) { // search result
+				if (itemInfo[url].filelink.includes('&dflag=') && keepPDF) {
 					// replace CAJ with PDF
-					var fileUrl = itemInfo[url]['filelink'].replace('&dflag=nhdown', '&dflag=pdfdown');
+					var fileUrl = itemInfo[url].filelink.replace('&dflag=nhdown', '&dflag=pdfdown');
 				}
 				else {
-					var fileUrl = itemInfo[url]['filelink'] + "&dflag=pdfdown";
+					var fileUrl = itemInfo[url].filelink + "&dflag=pdfdown";
 				}
 				newItem.attachments = [{
 					title: "Full Text PDF",
