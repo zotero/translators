@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2020-01-02 08:05:38"
+	"lastUpdated": "2020-01-04 13:49:03"
 }
 
 /*
@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefWorksByID(ids, onDataAvailable) {
 	if (!ids.length) return;
-	var { dbname, filename } = ids.shift();
+	var { dbname, filename, url } = ids.shift();
 	var postData = "formfilenames=" + encodeURIComponent(dbname + "!" + filename + "!1!0,")
 		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
 		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
@@ -61,7 +61,7 @@ function getRefWorksByID(ids, onDataAvailable) {
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					}
 				);
-			onDataAvailable(data);
+			onDataAvailable(data, url);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
@@ -73,8 +73,8 @@ function getRefWorksByID(ids, onDataAvailable) {
 
 function getIDFromURL(url) {
 	if (!url) return false;
-	
-	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
+	// add regex for navi.cnki.net
+	var dbname = url.match(/[?&](?:db|table)[nN]ame=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
 	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
 	
@@ -122,21 +122,27 @@ function getTypeFromDBName(dbname) {
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
-	var iframe = doc.getElementById('iframeResult');
-	if (iframe) {
-		var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
-		if (innerDoc) {
-			doc = innerDoc;
+	if (url.includes('JournalDetail')) {// for journal detail page
+		var links =  ZU.xpath(doc, "//dl[@id='CataLogContent']/dd");
+		var aXpath = "./span/a";
+		var fileXpath = "./ul/li/a";
+	}
+	else {// for search result page
+		var iframe = doc.getElementById('iframeResult');
+		if (iframe) {
+			var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
+			if (innerDoc) {
+				doc = innerDoc;
+			}
 		}
+		var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
+		var aXpath = './/a[@class="fz14"]';
+		if (!links.length) {
+			links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
+			aXpath = './td[2]/a';
+		}
+		var fileXpath = "./td[8]/a";
 	}
-	
-	var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
-	var aXpath = './/a[@class="fz14"]';
-	if (!links.length) {
-		links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
-		aXpath = './td[2]/a';
-	}
-
 	if (!links.length) {
 		return false;
 	}
@@ -144,7 +150,7 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	for (var i = 0, n = links.length; i < n; i++) {
 		// Z.debug(links[i].innerHTML)
 		var a = ZU.xpath(links[i], aXpath)[0];
-		var title = ZU.xpathText(a, './node()[not(name()="SCRIPT")]', null, '');
+		var title = a.innerText;
 		if (title) title = ZU.trimInternal(title);
 		var id = getIDFromURL(a.href);
 		// pre-released item can not get ID from URL, try to get ID from element.value
@@ -154,20 +160,16 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 			id = { dbname: tmp[0], filename: tmp[1], url: a.href };
 		}
 		// download link in search result
-		var filelink = ZU.xpath(links[i], "./td[8]/a");
-		var author = ZU.xpath(links[i], "./td[3]")[0].innerText.split(';')[0];
+		var filelink = ZU.xpath(links[i], fileXpath);
 		if (!title || !id) continue;
 		if (itemInfo) {
-			var fatTitle = (title + "-" + author).replace(/\s/g, '');
 			itemInfo[a.href] = { id: id };
 			if (filelink.length) {
 				filelink = filelink[0].href;
-				itemInfo[fatTitle] = filelink;
+				itemInfo[a.href]['filelink'] = filelink;
 			}
 		}
-		var authors = ZU.xpath(links[i], "./td[3]")[0].innerText;
-		var pub = ZU.xpath(links[i], "./td[4]")[0].innerText;
-		items[a.href] = title + "， " + authors + "《" + pub + "》";
+		items[a.href] = links[i].innerText;
 	}
 	return items;
 }
@@ -179,7 +181,7 @@ function detectWeb(doc, url) {
 	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
-	else if (url.match(/kns\/brief\/(default_)?result\.aspx/i)) {
+	else if (url.match(/kns\/brief\/(default_)?result\.aspx/i) || url.includes('JournalDetail')) {
 		return "multiple";
 	}
 	else {
@@ -191,6 +193,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
 		var items = getItemsFromSearchResults(doc, url, itemInfo);
+		Z.debug(itemInfo);
 		if (!items) return false;// no items
 		Z.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return true;
@@ -207,7 +210,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(ids, doc, url, itemInfo) {
-	getRefWorksByID(ids, function (text) {
+	getRefWorksByID(ids, function (text, url) {
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
@@ -219,16 +222,14 @@ function scrape(ids, doc, url, itemInfo) {
 			// If you want CAJ instead of PDF, set keepPDF = false
 			// 如果你想将PDF文件替换为CAJ文件，将下面一行 keepPDF 设为 false
 			var keepPDF = true;
-			var fatTitle = (newItem.title + "-" + newItem.creators[0].lastName).replace(/\s/g, '');
-			Z.debug(fatTitle);
 			// Z.debug('loginStatus: '+loginStatus);
-			if (itemInfo && loginStatus) { // search result
-				if (itemInfo[fatTitle].includes('&dflag=') && keepPDF) {
+			if (itemInfo && loginStatus && itemInfo[url]['filelink']) { // search result
+				if (itemInfo[url]['filelink'].includes('&dflag=') && keepPDF) {
 					// replace CAJ with PDF
-					var fileUrl = itemInfo[fatTitle].replace('&dflag=nhdown', '&dflag=pdfdown');
+					var fileUrl = itemInfo[url]['filelink'].replace('&dflag=nhdown', '&dflag=pdfdown');
 				}
 				else {
-					var fileUrl = itemInfo[fatTitle] + "&dflag=pdfdown";
+					var fileUrl = itemInfo[url]['filelink'] + "&dflag=pdfdown";
 				}
 				newItem.attachments = [{
 					title: "Full Text PDF",
