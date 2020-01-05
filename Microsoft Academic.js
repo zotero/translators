@@ -36,6 +36,11 @@
 */
 
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 function detectWeb(doc, url) {
 	// The website first loads only a skeleton including the
 	// main node, where the data and elements will be attached
@@ -55,15 +60,12 @@ function detectWeb(doc, url) {
 			return 'journalArticle';
 		}
 	}
-	else {
-		if (getSearchResults(doc, url, true)) {
-			return 'multiple';
-		}
+	else if (getSearchResults(doc, url, true)) {
+		return 'multiple';
 	}
 
-
-	//The automatic testing does not work because of the monitoring.
-	//Setting the correct type therefore here manually for three test cases:
+	// The automatic testing does not work because of the monitoring.
+	// Setting the correct type therefore here manually for three test cases:
 	if (url.startsWith("https://academic.microsoft.com/paper/2084324324")) {
 		return 'journalArticle';
 	}
@@ -73,12 +75,14 @@ function detectWeb(doc, url) {
 	if (url.startsWith("https://academic.microsoft.com/paper/2093027094")) {
 		return 'conferencePaper';
 	}
-	//Tests for multiple:
+	// Tests for multiple:
 	//  https://academic.microsoft.com/search?q=zotero&qe=%40%40%40%2540zotero%2540&f=&orderBy=0
 	// https://academic.microsoft.com/search?q=PS%20Political%20Science%20%26%20Politics&qe=And(Composite(J.JId%3D975761300)%2CTy%3D%270%27)&f=&orderBy=0&skip=0&take=10
 	//  https://academic.microsoft.com/author/1337865506/publication/search?q=Paul%20Erd%C3%B6s&qe=Composite(AA.AuId%253D1337865506)&f=&orderBy=0
-	//But test also to navigate in the website by clicking on the links to
-	//journal, author, affilation, subjects, or search something.
+	// But test also to navigate in the website by clicking on the links to
+	// journal, author, affilation, subjects, or search something.
+	
+	return false;
 }
 
 
@@ -87,7 +91,7 @@ function getSearchResults(doc, url, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.ma-paper-results .ma-card a.title');
 
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -103,7 +107,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, url, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -111,104 +115,110 @@ function doWeb(doc, url) {
 			}
 			scrape(articles);
 		});
-	} else {
+	}
+	else {
 		scrape([url]);
 	}
 }
 
 
-//Scrape a list of urls by extracting the pubID in each url, call the
-//API to receive the data and create an item in Zotero out of this.
+// Scrape a list of urls by extracting the pubID in each url, call the
+// API to receive the data and create an item in Zotero out of this.
 function scrape(urlList) {
 	for (let url of urlList) {
 		var pubID = url.match(/\/(?:detail|paper)\/(\d+)/)[1];
 		var apiUrl = "https://academic.microsoft.com/api/entity/" + pubID + "?entityType=2";
 		
-		ZU.doGet(apiUrl, function(text) {
-			var data = JSON.parse(text);
-			var type;
-			switch (data.entity.v.entityType) {
-				case 0:
-					type = "book";
-					break;
-				// TODO what is case 2? find an example for it
-				case 4:
-					type = "conferencePaper";
-					break;
-				case 3:
-				default:
-					type = "journalArticle";
-			}
-			var item = new Zotero.Item(type);
-			item.itemID = pubID;
-			item.title = data.entity.dn.replace(/\.$/, '');
-			item.date = data.entity.v.publishedDate;
-			if (item.date) {
-				item.date = ZU.strToISO(item.date);
-			}
-			if (data.entity.d && data.entity.d.replace(/\W/g, '').length>0) {
-				//we don't want an abstract which contains only non-word characters
-				item.abstractNote = data.entity.d;
-			}
-			
-			if (data.entity.a) {
-				for (let author of data.entity.a) {
-					item.creators.push(ZU.cleanAuthor(author.dn, "author"));
-				}
-			}
-
-			item.publicationTitle = data.entity.v.displayName;
-			item.volume = data.entity.v.volume;
-			item.issue = data.entity.v.issue;
-			item.pages = data.entity.v.firstPage;
-			if (data.entity.v.lastPage) {
-				item.pages += "–" + data.entity.v.lastPage;
-			}
-			item.DOI = data.entity.v.doi;
-			
-			if (data.entity.fos) {
-				for (let tag of data.entity.fos) {
-					item.tags.push(tag.dn);
-				}
-			}
-			
-			//Save all links to the source in one HTML note.
-			var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
-			if (data.entity.s) {
-				for (let i=0; i<data.entity.s.length; i++) {
-					sourcesNote += '<a href="' +data.entity.s[i].link+ '">'+data.entity.s[i].link+'</a><br/>';
-				}
-			}
-			item.notes.push({note: sourcesNote});
-			
-			item.attachments.push({
-				title: "Link to Microsoft Academic",
-				url: url,
-				snapshot: false
-			});
-			
-			//add DOIs for books, but make this robust to addition of other item types
-			if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
-				if (item.extra) {
-					if (item.extra.search(/^DOI:/) == -1) {
-						item.extra += '\nDOI: ' + item.DOI;
-					}
-				} else {
-					item.extra = 'DOI: ' + item.DOI;
-				}
-			}
-			/*
-			delete data.references;
-			delete data.sources;
-			delete data.related;
-			delete data.citations;
-			Z.debug(data);
-			*/
-			
-			item.complete();
-		});
+		ZU.doGet(apiUrl, scrapeJson);
 	}
 }
+
+function scrapeJson(text) {
+	var data = JSON.parse(text);
+	var type;
+	switch (data.entity.v.entityType) {
+		case 0:
+			type = "book";
+			break;
+		// TODO what is case 2? find an example for it
+		case 4:
+			type = "conferencePaper";
+			break;
+		case 3:
+		default:
+			type = "journalArticle";
+	}
+	var item = new Zotero.Item(type);
+	item.itemID = data.entity.id.toString();
+	item.title = data.entity.dn.replace(/\.$/, '');
+	item.date = data.entity.v.publishedDate;
+	if (item.date) {
+		item.date = ZU.strToISO(item.date);
+	}
+	if (data.entity.d && data.entity.d.replace(/\W/g, '').length > 0) {
+		// we don't want an abstract which contains only non-word characters
+		item.abstractNote = data.entity.d;
+	}
+	
+	if (data.entity.a) {
+		for (let author of data.entity.a) {
+			item.creators.push(ZU.cleanAuthor(author.dn, "author"));
+		}
+	}
+
+	item.publicationTitle = data.entity.v.displayName;
+	item.volume = data.entity.v.volume;
+	item.issue = data.entity.v.issue;
+	item.pages = data.entity.v.firstPage;
+	if (data.entity.v.lastPage) {
+		item.pages += "–" + data.entity.v.lastPage;
+	}
+	item.DOI = data.entity.v.doi;
+	
+	if (data.entity.fos) {
+		for (let tag of data.entity.fos) {
+			item.tags.push(tag.dn);
+		}
+	}
+	
+	// Save all links to the source in one HTML note.
+	var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
+	if (data.entity.s) {
+		for (let i = 0; i < data.entity.s.length; i++) {
+			sourcesNote += '<a href="' + data.entity.s[i].link + '">' + data.entity.s[i].link + '</a><br/>';
+		}
+	}
+	item.notes.push({ note: sourcesNote });
+	
+	item.attachments.push({
+		title: "Link to Microsoft Academic",
+		url: "https://academic.microsoft.com/paper/" + item.itemID,
+		snapshot: false
+	});
+	
+	// add DOIs for books, but make this robust to addition of other item types
+	if (item.DOI && !ZU.fieldIsValidForType("DOI", item.itemType)) {
+		if (item.extra) {
+			if (item.extra.search(/^DOI:/) == -1) {
+				item.extra += '\nDOI: ' + item.DOI;
+			}
+		}
+		else {
+			item.extra = 'DOI: ' + item.DOI;
+		}
+	}
+
+	/*
+	delete data.references;
+	delete data.sources;
+	delete data.related;
+	delete data.citations;
+	Z.debug(data);
+	*/
+	
+	item.complete();
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
