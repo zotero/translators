@@ -142,7 +142,8 @@ var identifierMapping = {
 	"JSTOR ID": "P888",
 	arXiv: "P818",
 	"Open Library ID": "P648",
-	OCLC: "P243"
+	OCLC: "P243",
+	"IMDb ID": "P345"
 };
 
 
