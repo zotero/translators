@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-16 20:02:57"
+	"lastUpdated": "2020-01-07 00:38:50"
 }
 
 /*
@@ -78,59 +78,46 @@ function doWeb(doc, url) {
 	}
 }
 
-
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) {
-		var titleWrapper = ZU.xpath(doc, '//div[contains(@class, "title_wrapper")]');
-		var title = ZU.xpathText(titleWrapper, './h1/text()[1]');
-		if (title) {
-			item.title = title;
+function scrape(doc, _url) {
+	var item = new Zotero.Item("film");
+	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+	item.title = json.name;// note that json only has the original title
+	var transTitle = ZU.trimInternal(ZU.xpathText(doc, "//div[@class='title_wrapper']/h1/text()")).slice(0, -2);
+	if (transTitle && transTitle !== item.title) addExtra(item, "Translated title: " + transTitle);
+	item.date = json.datePublished;
+	item.runningTime = "duration" in json ? json.duration.replace("PT", "").toLowerCase() : "";
+	item.genre = Array.isArray(json.genre) ? json.genre.join(", ") : json.genre;
+	item.abstractNote = json.description;
+	var creatorsMapping = {
+		director: "director",
+		creator: "scriptwriter",
+		actor: "contributor"
+	};
+	for (var role in creatorsMapping) {
+		if (!json[role]) continue;
+		var creators = json[role];
+		if (!Array.isArray(creators)) {
+			item.creators.push(ZU.cleanAuthor(creators.name, creatorsMapping[role]));
 		}
-		item.date = ZU.xpathText(titleWrapper, './/meta[@itemprop="datePublished"]/@content');
-		item.runningTime = ZU.xpathText(titleWrapper, './/time[@itemprop="duration"]');
-		item.genre = ZU.xpathText(titleWrapper, './/span[@itemprop="genre"]');
-		var origTitle = ZU.xpathText(titleWrapper, './/div[contains(@class, "originalTitle")]/text()[1]');
-		if (origTitle) {
-			addExtra(item, "original-title: "+origTitle);
-		}
-		var pageId = ZU.xpathText(doc, '//meta[@property="pageId"]/@content');
-		if (pageId) {
-			addExtra(item, "IMDb ID: "+pageId);
-		}
-		
-		var summary = ZU.xpath(doc, '//div[contains(@class, "plot_summary_wrapper")]');
-		var creatorsMapping = {
-			"director": "director",
-			"creator": "scriptwriter",
-			"actors": "contributor"
-		};
-		for (var role in creatorsMapping) {
-			var creators = ZU.xpath(summary, './/span[@itemprop="'+role+'"]//span[@itemprop="name"]');
-			for (var i=0; i<creators.length; i++) {
-				item.creators.push(ZU.cleanAuthor(creators[i].textContent, creatorsMapping[role]));
+		else {
+			for (var i = 0; i < creators.length; i++) {
+				if (creators[i]["@type"] == "Person") item.creators.push(ZU.cleanAuthor(creators[i].name, creatorsMapping[role]));
 			}
 		}
-		
-		//the keywords in the meta tags are very generic
-		item.tags = [];
-		var tags = ZU.xpath(doc, '//div[@itemprop="keywords"]/a');
-		for (var i=0; i<tags.length; i++) {
-			item.tags.push(tags[i].textContent);
-		}
-		
-		item.complete();
-		
-	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "film";
-		trans.doWeb(doc, url);
-	});
+	}
+	let companyNodes = doc.querySelectorAll('a[href*="/company/"]');
+	let companies = [];
+	for (let company of companyNodes) {
+		companies.push(company.textContent);
+	}
+	item.distributor = companies.join(', ');
+	var pageId = ZU.xpathText(doc, '//meta[@property="pageId"]/@content');
+	if (pageId) {
+		addExtra(item, "IMDb ID: " + pageId);
+	}
+	addExtra(item, "event-location: " + text(doc, 'a[href*="title?country_of_origin"]'));
+	item.tags = "keywords" in json ? json.keywords.split(",") : [];
+	item.complete();
 }
 
 
