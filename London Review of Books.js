@@ -83,15 +83,10 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 
 	translator.setHandler('itemDone', function (obj, item) {
-		let titleParts = item.title.split(/(?:·|\|)/);
-		// e.g. Attempts to Escape the Logic of Capitalism · LRB 28 October 1999
-		if (titleParts.length == 2) {
-			item.title = titleParts[0];
-		}
-		// e.g. Jonathan Rée | The Young Man One Hopes For · LRB 19 November 2019
-		if (titleParts.length == 3) {
-			item.title = titleParts[1];
-		}
+		// clean the title as this otherwise also contains
+		// the author and publication information
+		item.title = text('h1 .title') || item.title;
+		
 		let volumeIssue = url.match(/\/the-paper\/v(\d+)\/n(\d+)\//);
 		if (volumeIssue) {
 			item.volume = volumeIssue[1];
