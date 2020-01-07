@@ -280,7 +280,7 @@ function scrape(ids, doc, url, itemInfo) {
 			newItem.title = ZU.trimInternal(newItem.title);
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
-			if (newItem.callNumber){
+			if (newItem.callNumber) {
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
 			}
