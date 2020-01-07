@@ -122,12 +122,13 @@ function getTypeFromDBName(dbname) {
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
-	if (url.includes('JournalDetail')) {// for journal detail page
-		var links =  ZU.xpath(doc, "//dl[@id='CataLogContent']/dd");
-		var aXpath = "./span/a";
-		var fileXpath = "./ul/li/a";
+	var links, aXpath, fileXpath = '';
+	if (url.includes('JournalDetail')) { // for journal detail page
+		links = ZU.xpath(doc, "//dl[@id='CataLogContent']/dd");
+		aXpath = "./span/a";
+		fileXpath = "./ul/li/a";
 	}
-	else {// for search result page
+	else { // for search result page
 		var iframe = doc.getElementById('iframeResult');
 		if (iframe) {
 			var innerDoc = iframe.contentDocument || iframe.contentWindow.document;
@@ -135,13 +136,13 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 				doc = innerDoc;
 			}
 		}
-		var links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
-		var aXpath = './/a[@class="fz14"]';
+		links = ZU.xpath(doc, '//tr[not(.//tr) and .//a[@class="fz14"]]');
+		aXpath = './/a[@class="fz14"]';
 		if (!links.length) {
 			links = ZU.xpath(doc, '//table[@class="GridTableContent"]/tbody/tr[./td[2]/a]');
 			aXpath = './td[2]/a';
 		}
-		var fileXpath = "./td[8]/a";
+		fileXpath = "./td[8]/a";
 	}
 	if (!links.length) {
 		return false;
@@ -224,12 +225,13 @@ function scrape(ids, doc, url, itemInfo) {
 			var keepPDF = true;
 			// Z.debug('loginStatus: '+loginStatus);
 			if (itemInfo && loginStatus && itemInfo[url].filelink) { // search result
+				var fileUrl = '';
 				if (itemInfo[url].filelink.includes('&dflag=') && keepPDF) {
 					// replace CAJ with PDF
-					var fileUrl = itemInfo[url].filelink.replace('&dflag=nhdown', '&dflag=pdfdown');
+					fileUrl = itemInfo[url].filelink.replace('&dflag=nhdown', '&dflag=pdfdown');
 				}
 				else {
-					var fileUrl = itemInfo[url].filelink + "&dflag=pdfdown";
+					fileUrl = itemInfo[url].filelink + "&dflag=pdfdown";
 				}
 				newItem.attachments = [{
 					title: "Full Text PDF",
@@ -292,11 +294,12 @@ function scrape(ids, doc, url, itemInfo) {
 // get pdf download link
 function getPDF(doc, itemType) {
 	// retrieve PDF links from CNKI oversea
+	var pdf = '';
 	if (itemType == 'thesis') {
-		var pdf = ZU.xpath(doc, "//div[@id='DownLoadParts']/a[contains(text(), 'PDF')]");
+		pdf = ZU.xpath(doc, "//div[@id='DownLoadParts']/a[contains(text(), 'PDF')]");
 	}
 	else {
-		var pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
+		pdf = ZU.xpath(doc, "//a[@name='pdfDown']");
 	}
 	return pdf.length ? pdf[0].href : false;
 }
@@ -304,11 +307,12 @@ function getPDF(doc, itemType) {
 // caj download link, default is the whole article for thesis.
 function getCAJ(doc, itemType) {
 	// //div[@id='DownLoadParts']
+	var caj = '';
 	if (itemType == 'thesis') {
-		var caj = ZU.xpath(doc, "//div[@id='DownLoadParts']/a");
+		caj = ZU.xpath(doc, "//div[@id='DownLoadParts']/a");
 	}
 	else {
-		var caj = ZU.xpath(doc, "//a[@name='cajDown']");
+		caj = ZU.xpath(doc, "//a[@name='cajDown']");
 	}
 	return caj.length ? caj[0].href : false;
 }
