@@ -42,7 +42,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/the-paper\/v\d+\/n\d+\//)) {
+	if (/\/the-paper\/v\d+\/n\d+\//.test(url)) {
 		return "magazineArticle";
 	}
 	else if (getSearchResults(doc, true)) {
