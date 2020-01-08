@@ -203,10 +203,13 @@ function doWeb(doc, url) {
 				ids.push(itemInfo[url].id);
 			}
 			scrape(ids, doc, url, itemInfo);
+			return true;
 		});
+		return true;
 	}
 	else {
 		scrape([getIDFromPage(doc, url)], doc, url);
+		return true;
 	}
 }
 
