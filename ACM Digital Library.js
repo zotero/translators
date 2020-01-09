@@ -2,14 +2,14 @@
 	"translatorID": "f3f092bf-ae09-4be6-8855-a22ddd817925",
 	"label": "ACM Digital Library",
 	"creator": "Guy Aglionby",
-	"target": "^https://dl\\.acm\\.org/(doi|do|profile|toc|topic|keyword|action/doSearch|acmbooks)",
+	"target": "^https://dl\\.acm\\.org/(doi|do|profile|toc|topic|keyword|action/doSearch|acmbooks|browse)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-09 16:46:31"
+	"lastUpdated": "2020-01-09 22:02:54"
 }
 
 /*
@@ -34,11 +34,17 @@
 	***** END LICENSE BLOCK *****
 */
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 function detectWeb(doc, url) {
-	if ((url.includes('/doi/') || url.includes('/do/')) && !url.includes('/doi/proceedings')) {
-		let extractedContext = doc.querySelector('meta[name=pbContext]').content;
-		let subtypeRegex = /csubtype:string:(\w+)/;
-		let subtype = extractedContext.match(subtypeRegex)[1].toLowerCase();
+	if (isContentUrl(url)) {
+		let subtypeMatch = getItemSubtype(doc);
+		if (!subtypeMatch) {
+			return 'journalArticle';
+		}
+		let subtype = subtypeMatch[1].toLowerCase();
 
 		if (subtype == 'conference') {
 			return 'conferencePaper';
@@ -60,14 +66,16 @@ function detectWeb(doc, url) {
 		}
 		else if (subtype == 'book') {
 			let bookTypeRegex = /page:string:([\w ]+)/;
-			let bookType = extractedContext.match(bookTypeRegex)[1].toLowerCase();
-			if (bookType == 'book page') {
+			let extractedContext = attr(doc, 'meta[name=pbContext]', 'content');
+			let bookType = extractedContext.match(bookTypeRegex);
+			if (bookType && bookType[1].toLowerCase() == 'book page') {
 				return 'book';
 			}
 			else {
 				return 'bookSection';
 			}
 		}
+		return 'journalArticle';
 	}
 	else if (getSearchResults(doc, false)) {
 		return 'multiple';
@@ -76,7 +84,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function (selected) {
 			if (selected) {
 				ZU.processDocuments(Object.keys(selected), scrape);
@@ -86,6 +94,16 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc);
 	}
+}
+
+function getItemSubtype(doc) {
+	let extractedContext = attr(doc, 'meta[name=pbContext]', 'content');
+	let subtypeRegex = /csubtype:string:(\w+)/;
+	return extractedContext.match(subtypeRegex);
+}
+
+function isContentUrl(url) {
+	return (url.includes('/doi/') || url.includes('/do/')) && !url.includes('/doi/proceedings');
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -100,7 +118,7 @@ function getSearchResults(doc, checkOnly) {
 			continue;
 		}
 		
-		if (!(url.includes('/doi/') || url.includes('/do/')) || url.includes('/doi/proceedings')) {
+		if (!isContentUrl(url)) {
 			continue;
 		}
 		
@@ -115,29 +133,28 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function scrape(doc) {
-	let extractedContext = doc.querySelector('meta[name=pbContext]').content;
-	let doiRegex = /article:article:doi\\:([^;]+)/;
-	let doi = extractedContext.match(doiRegex)[1].toLowerCase();
-	doi = decodeURIComponent(doi);
-	let lookupEndpoint = 'https://dl.acm.org/action/exportCiteProcCitation?targetFile=custom-bibtex&format=bibTex&dois=';
-	ZU.doGet(lookupEndpoint + doi, function (text) {
-		let json = JSON.parse(text);
+	let doi = attr(doc, 'input[name=doiVal]', 'value');
+	let lookupEndpoint = 'https://dl.acm.org/action/exportCiteProcCitation';
+	let postBody = 'targetFile=custom-bibtex&format=bibTex&dois=' + encodeURIComponent(doi);
+	
+	ZU.doPost(lookupEndpoint, postBody, function (returnedText) {
+		let json = JSON.parse(returnedText);
 		let cslItem = json.items[0][doi];
 		cslItem.type = cslItem.type.toLowerCase().replace('_', '-');
 		
-		// For theses, the advisor is indicated as an editor in CSL which
-		// ZU.itemFromCSLJSON incorrectly extracts as an author.
 		if (cslItem.type == 'thesis') {
+			// The advisor is indicated as an editor in CSL which
+			// ZU.itemFromCSLJSON incorrectly extracts as an author.
 			delete cslItem.editor;
+			// The (co-)chair(s) or supervisor(s) are included in CSL as additional authors.
+			cslItem.author.splice(1);
 		}
 		
 		let item = new Zotero.Item();
 		ZU.itemFromCSLJSON(item, cslItem);
 		
 		let abstractElements = doc.querySelectorAll('div.article__abstract p, div.abstractSection p');
-		let abstract = Array.from(abstractElements).map(function (element) {
-			return element.textContent;
-		}).join(' ');
+		let abstract = Array.from(abstractElements).map(x => x.textContent).join('\n\n');
 		if (abstract.length && abstract.toLowerCase() != 'no abstract available.') {
 			item.abstractNote = ZU.trimInternal(abstract);
 		}
@@ -153,39 +170,41 @@ function scrape(doc) {
 		
 		if (item.itemType == 'journalArticle') {
 			// Publication name in the CSL is shortened; scrape from page to get full title.
-			let expandedTitle = doc.querySelector('span.epub-section__title');
+			let expandedTitle = text(doc, 'span.epub-section__title');
 			if (expandedTitle) {
-				item.publicationTitle = expandedTitle.textContent;
+				item.publicationTitle = expandedTitle;
 			}
 		}
 		
-		if (item.itemType == 'bookSection' && item.creators.length == 0) {
-			// A chapter of a book is extracted as a bookSection, but the
-			// authors are not included in the CSL so we must scrape them.
+		if (!item.creators.length) {
+			// There are cases where authors are not included in the CSL
+			// (for example, a chapter of a book) so we must scrape them.
 			// e.g. https://dl.acm.org/doi/abs/10.5555/3336323.C5474411
 			let authorElements = doc.querySelectorAll('div.citation span.loa__author-name');
 			authorElements.forEach(function (element) {
-				item.creators.push(ZU.cleanAuthor(element.textContent));
+				item.creators.push(ZU.cleanAuthor(element.textContent, 'author'));
 			});
 		}
 		
 		if (!item.ISBN && cslItem.ISBN) {
-			if (!item.extra) {
-				item.extra = '';
-			}
 			let isbnLength = cslItem.ISBN.replace('-', '').length;
-			item.extra += '\nISBN-' + isbnLength + ': ' + cslItem.ISBN;
+			let isbnText = 'ISBN-' + isbnLength + ': ' + cslItem.ISBN;
+			item.extra = item.extra ? item.extra + '\n' + isbnText : isbnText;
 		}
 		
-		let pagesElement = doc.querySelector('div.pages-info span');
-		if (pagesElement) {
-			item.numPages = pagesElement.textContent;
+		let numPages = text(doc, 'div.pages-info span');
+		if (numPages && !item.numPages) {
+			item.numPages = numPages;
 		}
 		
 		let tagElements = doc.querySelectorAll('div.tags-widget a');
 		tagElements.forEach(function (tag) {
 			item.tags.push(tag.textContent);
 		});
+		
+		if (getItemSubtype(doc) == 'dataset') {
+			item.extra = item.extra ? item.extra + '\nitemType: data' : 'itemType: data';
+		}
 		
 		item.complete();
 	});
@@ -451,6 +470,162 @@ var testCases = [
 						"tag": "urban analytics"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/doi/abs/10.5555/3336323.C5474411",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "2007--2016",
+				"creators": [
+					{
+						"firstName": "Peter A.",
+						"lastName": "Freeman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "W. Richards",
+						"lastName": "Adrion",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "William",
+						"lastName": "Aspray",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9781450372763",
+				"abstractNote": "This organizational history relates the role of the National Science Foundation (NSF) in the development of modern computing. Drawing upon new and existing oral histories, extensive use of NSF documents, and the experience of two of the authors as senior managers, this book describes how NSF's programmatic activities originated and evolved to become the primary source of funding for fundamental research in computing and information technologies. The book traces how NSF's support has provided facilities and education for computing usage by all scientific disciplines, aided in institution and professional community building, supported fundamental research in computer science and allied disciplines, and led the efforts to broaden participation in computing by all segments of society. Today, the research and infrastructure facilitated by NSF computing programs are significant economic drivers of American society and industry. For example, NSF supported work that led to the first widelyused web browser, Netscape; sponsored the creation of algorithms at the core of the Google search engine; facilitated the growth of the public Internet; and funded research on the scientific basis for countless other applications and technologies. NSF has advanced the development of human capital and ideas for future advances in computing and its applications. This account is the first comprehensive coverage of NSF's role in the extraordinary growth and expansion of modern computing and its use. It will appeal to historians of computing, policy makers and leaders in government and academia, and individuals interested in the history and development of computing and the NSF.",
+				"bookTitle": "Computing and the National Science Foundation, 1950--2016: Building a Foundation for Modern Computing",
+				"callNumber": "10.5555/3336323.C5474411",
+				"itemID": "10.5555/3336323.C5474411",
+				"libraryCatalog": "ACM Digital Library",
+				"place": "New York, NY, USA",
+				"publisher": "Association for Computing Machinery",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/doi/10.1145/3264631.3264634",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Beyond screen and voice: augmenting aural navigation with screenless access",
+				"creators": [
+					{
+						"lastName": "Gross",
+						"firstName": "Mikaylah",
+						"creatorTypeID": 1,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bolchini",
+						"firstName": "Davide",
+						"creatorTypeID": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "August 2, 2018",
+				"DOI": "10.1145/3264631.3264634",
+				"ISSN": "1558-2337",
+				"abstractNote": "The current interaction paradigm to access the mobile web forces people who are blind to hold out their phone at all times, thus increasing the risk for the device to fall or be robbed. Moreover, such continuous, two-handed interaction on a small screen hampers the ability of people who are blind to keep their hands free to control aiding devices (e.g., cane) or touch objects nearby, especially on-the-go. To investigate alternative paradigms, we are exploring and reifying strategies for \"screenless access\": a browsing approach that enables users to interact touch-free with aural navigation architectures using one-handed, in-air gestures recognized by an off-the-shelf armband. In this article, we summarize key highlights from an exploratory study with ten participants who are blind or visually impaired who experienced our screenless access prototype. We observed proficient navigation performance after basic training, users conceptual fit with a screen-free paradigm, and low levels of cognitive load, notwithstanding the errors and limits of the design and system proposed. The full paper appeared in W4A2018 [1].",
+				"callNumber": "10.1145/3264631.3264634",
+				"issue": "121",
+				"itemID": "10.1145/3264631.3264634",
+				"libraryCatalog": "ACM Digital Library",
+				"pages": "1",
+				"publicationTitle": "ACM SIGACCESS Accessibility and Computing",
+				"shortTitle": "Beyond screen and voice",
+				"url": "https://doi.org/10.1145/3264631.3264634",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/doi/10.1145/2854146",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Why Google stores billions of lines of code in a single repository",
+				"creators": [
+					{
+						"lastName": "Potvin",
+						"firstName": "Rachel",
+						"creatorTypeID": 1,
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Levenberg",
+						"firstName": "Josh",
+						"creatorTypeID": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "June 24, 2016",
+				"DOI": "10.1145/2854146",
+				"ISSN": "0001-0782",
+				"abstractNote": "Google's monolithic repository provides a common source of truth for tens of thousands of developers around the world.",
+				"callNumber": "10.1145/2854146",
+				"issue": "7",
+				"itemID": "10.1145/2854146",
+				"libraryCatalog": "ACM Digital Library",
+				"pages": "78–87",
+				"publicationTitle": "Communications of the ACM",
+				"url": "https://doi.org/10.1145/2854146",
+				"volume": "59",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dl.acm.org/doi/book/10.5555/1087674",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "A \"void-trimming\" methodology of generating shrink-wrapped mesh for component-based complex \"dirty\" geometry",
+				"creators": [
+					{
+						"lastName": "Yuan",
+						"firstName": "Wei",
+						"creatorTypeID": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "2005",
+				"abstractNote": "The geometric surface model generated by common CAD tools is often “dirty” (cracks, small gaps, small holes, surface penetration, inconsistent surface orientation, bad edge-face connectivity, etc.). Also, problems of component overlapping, island components, and patch duplication exist in a component-based system. The process of traditional geometric healing and repairing methods is time-consuming (weeks or months), and often time fails when dealing with a complex “dirty” geometric model. In this dissertation, a new methodology based on “void volume trimming” is presented to resolve problems stated above. The meshing process starts from generating a Cartesian volume mesh using the 2 N tree (instead of the traditional Octree) data structure. With this structure, several mesh adaptation methods based on geometric features coupled with a smoothing algorithm between neighbor cells are developed to generate the preferred mesh sizes at desired regions while ensuring the gradual transition between dense and coarse meshes. In the process of constructing surface mesh for “dirty” geometric components, an effective “surface orientation free” algorithm is proposed. For resolving of “mesh leak” at cracks and small gap regions, the continuous “intersecting cell” set is used instead of geometric surfaces as the domain bound. The major contribution of this dissertation is the development of “void volume trimming” algorithm. With this methodology, the watertight feature can be promised, and the axis-aligned surface mesh is gradually adjusted to be geometric aligned while maintaining high mesh quality. Meanwhile, the surface mesh is pushed towards the geometry for satisfaction of mapping criteria. The constrained smoothing algorithm presented in this dissertation further improves the mesh quality while shrinking the surface mesh closer to geometry components. At the same time, the use of the SPP (Shortest Path Projection) algorithm coupled with the ADT (Alternating Digital Tree) data structure has been shown that it is efficient when generating body-fitted surface meshes for complex “dirty” geometries while maintaining high performance. The present critical feature preservation method has shown its capability of capturing the detailed features, while the introduced patch mapping method can topologically maintain the geometric model property. Case studies and application results have demonstrated that the current methodology is efficient for handling the component-based complex “dirty” geometric model.",
+				"callNumber": "10.5555/1087674",
+				"extra": "AAI3164056\nISBN-10: 0496987127",
+				"itemID": "10.5555/1087674",
+				"libraryCatalog": "ACM Digital Library",
+				"numPages": "118",
+				"place": "USA",
+				"thesisType": "phd",
+				"university": "University of Alabama in Huntsville",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
