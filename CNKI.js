@@ -197,19 +197,16 @@ function doWeb(doc, url) {
 		Z.debug(itemInfo);
 		if (!items) return false;// no items
 		Z.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return true;
+			if (!selectedItems) return;
 			var ids = [];
 			for (var url in selectedItems) {
 				ids.push(itemInfo[url].id);
 			}
 			scrape(ids, doc, url, itemInfo);
-			return true;
 		});
-		return true;
 	}
 	else {
 		scrape([getIDFromPage(doc, url)], doc, url);
-		return true;
 	}
 }
 
