@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-31 17:36:50"
+	"lastUpdated": "2020-01-10 01:34:44"
 }
 
 /*
@@ -130,29 +130,19 @@ function parseDocument(doc, url) {
 		}
 		
 		if (rawData.primaryPaperLink) {
-			let pdfLinkElement;
-			if (rawData.primaryPaperLink.url.endsWith('.pdf')) {
-				pdfLinkElement = rawData.primaryPaperLink;
-			}
-			else if (rawData.alternatePaperLinks) {
-				for (let i = 0; i < rawData.alternatePaperLinks.length; i++) {
-					let alternateElement = rawData.alternatePaperLinks[i];
-					if (alternateElement.url.endsWith('.pdf')) {
-						pdfLinkElement = alternateElement;
-						break;
-					}
-				}
+			let pdfLink;
+			let paperLinks = [rawData.primaryPaperLink];
+			
+			if (rawData.alternatePaperLinks) {
+				paperLinks.push(...rawData.alternatePaperLinks);
 			}
 			
-			if (pdfLinkElement) {
-				item.attachments.push({
-					url: pdfLinkElement.url,
-					title: "Full Text PDF",
-					mimeType: 'application/pdf'
-				});
-				
-				if (pdfLinkElement.linkType == 'arxiv') {
-					let arxivId = pdfLinkElement.url.match(/\d{4}\.\d{5}/);
+			for (let paperElement of paperLinks) {
+				if (!pdfLink && paperElement.url.endsWith('.pdf')) {
+					pdfLink = paperElement.url;
+				}
+				if (paperElement.linkType == 'arxiv') {
+					let arxivId = paperElement.url.match(/\d{4}\.\d{5}/);
 					if (arxivId.length >= 1) {
 						if (item.extra) {
 							item.extra += '\narXiv: ' + arxivId[0];
@@ -160,8 +150,19 @@ function parseDocument(doc, url) {
 						else {
 							item.extra = 'arXiv: ' + arxivId[0];
 						}
+						if (!pdfLink) {
+							pdfLink = 'https://arxiv.org/pdf/' + arxivId[0] + '.pdf';
+						}
 					}
 				}
+			}
+			
+			if (pdfLink) {
+				item.attachments.push({
+					url: pdfLink,
+					title: "Full Text PDF",
+					mimeType: 'application/pdf'
+				});
 			}
 		}
 
@@ -651,7 +652,6 @@ var testCases = [
 				"itemID": "Dalvi2018TrackingSC",
 				"libraryCatalog": "Semantic Scholar",
 				"proceedingsTitle": "NAACL-HLT",
-				"publicationTitle": "NAACL-HLT",
 				"shortTitle": "Tracking State Changes in Procedural Text",
 				"attachments": [
 					{
