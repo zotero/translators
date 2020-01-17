@@ -2,7 +2,7 @@
 	"translatorID": "276cb34c-6861-4de7-a11d-c2e46fb8af28",
 	"label": "Semantic Scholar",
 	"creator": "Guy Aglionby",
-	"target": "^https?://(www\\.semanticscholar\\.org/(search|paper|author)|pdfs\\.semanticscholar\\.org/)",
+	"target": "^https?://(www\\.semanticscholar\\.org/paper/.+|pdfs\\.semanticscholar\\.org/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -35,36 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 
-// See also https://github.com/zotero/translators/blob/master/BibTeX.js
-var bibtex2zoteroTypeMap = {
-	inproceedings: "conferencePaper",
-	conference: "conferencePaper",
-	article: "journalArticle"
-};
-
 function detectWeb(doc, url) {
-	if (url.includes('/search') || url.includes('/author/')) {
-		return 'multiple';
-	}
-	else if (url.includes('pdfs.semanticscholar.org')) {
-		return 'journalArticle';
-	}
-	else {
-		let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
-		let type = citation.split('{')[0].replace('@', '');
-		return bibtex2zoteroTypeMap[type];
-	}
+	// the regex in target will ensure we're on a paper
+	return 'journalArticle';
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) === 'multiple') {
-		Zotero.selectItems(getSearchResults(doc), function (selected) {
-			if (selected) {
-				ZU.processDocuments(Object.keys(selected), parseDocument);
-			}
-		});
-	}
-	else if (url.includes('pdfs.semanticscholar.org')) {
+	if (url.includes('pdfs.semanticscholar.org')) {
 		let urlComponents = url.split('/');
 		let paperId = urlComponents[3] + urlComponents[4].replace('.pdf', '');
 		const API_URL = 'https://api.semanticscholar.org/';
@@ -75,128 +52,49 @@ function doWeb(doc, url) {
 	}
 }
 
-function getSearchResults(doc) {
-	var titles = ZU.xpath(doc, '//a[@data-selenium-selector="title-link"]');
-	var results = {};
-	titles.forEach(function (linkElement) {
-		results[linkElement.href] = linkElement.textContent;
-	});
-	return results;
-}
-
 function parseDocument(doc, url) {
-	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
-	
-	let translator = Zotero.loadTranslator("import");
-	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
-	translator.setString(citation);
-	translator.setHandler("itemDone", function (obj, item) {
-		// Add the link to Semantic Scholar
+	// load structured schema data 
+	const schemaTag = doc.querySelector("script.schema-data");
+	const schemaObject = JSON.parse(schemaTag.innerHTML);
+	const article = schemaObject["@graph"][1][0];
+
+	var item = new Zotero.Item("journalArticle");
+	item.title = article["name"];
+	item.abstractNote = article["description"];
+
+	if (article["author"]) {
+		article["author"].forEach(author => {
+			item.creators.push(ZU.cleanAuthor(author["name"]));
+		});
+	}
+	item.publicationTitle = article["publication"];
+	item.date = article["datePublished"];
+
+	// attachments
+	item.attachments.push({
+		url: url,
+		title: "Semantic Scholar Link",
+		mimeType: "text/html",
+		snapshot: false
+	});
+
+	const paperLink = article["about"]["url"];
+	if (paperLink.includes("pdfs.semanticscholar.org") || paperLink.includes("arxiv.org")) {
 		item.attachments.push({
-			url: url,
-			title: "Semantic Scholar Link",
+			url: paperLink,
+			title: "Full Text PDF",
+			mimeType: 'application/pdf'
+		});
+	} else {
+		item.attachments.push({
+			url: paperLink,
+			title: "Publisher Link",
 			mimeType: "text/html",
 			snapshot: false
 		});
-
-		// Attach the PDF
-		var scripts = ZU.xpath(doc, '//script');
-		var rawData = {};
-		const DATA_INDICATOR = 'var DATA = \'';
-		for (let i = 0; i < scripts.length; i++) {
-			if (scripts[i].innerHTML.startsWith(DATA_INDICATOR)) {
-				let dataText = scripts[i].innerHTML.replace(DATA_INDICATOR, '').slice(0, -2);
-				dataText = decodeURIComponent(atob(dataText));
-				rawData = JSON.parse(dataText)[1].resultData.paper;
-				break;
-			}
-		}
-		
-		if (item.pages) {
-			item.pages = fixPageRange(item.pages);
-		}
-		
-		if (item.volume && item.volume.includes(' ')) {
-			let volumeAndIssue = item.volume.split(' ');
-			item.volume = volumeAndIssue[0];
-			item.issue = volumeAndIssue[1];
-		}
-		
-		if (rawData.hasPdf && (rawData.primaryPaperLink.linkType === 's2'
-			|| rawData.primaryPaperLink.linkType == 'arxiv')) {
-			item.attachments.push({
-				url: rawData.primaryPaperLink.url,
-				title: "Full Text PDF",
-				mimeType: 'application/pdf'
-			});
-			if (rawData.primaryPaperLink.linkType == 'arxiv') {
-				let arxivId = rawData.primaryPaperLink.url.match(/\d{4}\.\d{5}/);
-				if (arxivId.length >= 1) {
-					if (item.extra) {
-						item.extra += '\narXiv: ' + arxivId[0];
-					}
-					else {
-						item.extra = 'arXiv: ' + arxivId[0];
-					}
-				}
-			}
-		}
-
-		if (rawData.paperAbstract && rawData.paperAbstract.text) {
-			item.abstractNote = ZU.unescapeHTML(rawData.paperAbstract.text);
-		}
-
-		if (rawData.doiInfo && rawData.doiInfo.doi) {
-			item.DOI = rawData.doiInfo.doi;
-		}
-		
-		if (rawData.entities) {
-			for (let entity of rawData.entities) {
-				item.tags.push(entity.name);
-			}
-		}
-
-		item.complete();
-	});
-	translator.translate();
-}
-
-// Some page ranges are given as e.g. 575-84. Expand these to e.g. 575-584
-function fixPageRange(pageRange) {
-	let numbers = pageRange.split('-');
-	if (numbers.length !== 2) {
-		return pageRange;
 	}
-	
-	numbers = numbers.map(function (x) {
-		return parseInt(x);
-	});
-	
-	// No change is needed if they're already correctly formatted
-	if (numbers[0] < numbers[1]) {
-		return pageRange;
-	}
-	else {
-		let digitsInSecond = Math.floor(Math.log10(numbers[1])) + 1;
-		let baseNumber = numbers[0];
-		let difference = 0;
-		
-		for (let i = 1; i <= digitsInSecond; i++) {
-			let mod = baseNumber % (10 ** i);
-			baseNumber -= mod;
-			difference += mod;
-		}
-		
-		// If the given pageRange doesn't make sense, just leave it as it has been given
-		// e.g. '95-10'
-		if (difference > numbers[1]) {
-			return pageRange;
-		}
-		
-		numbers[1] = baseNumber + numbers[1];
-		
-		return numbers[0] + '-' + numbers[1];
-	}
+
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
