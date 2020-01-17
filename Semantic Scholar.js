@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-07 21:59:05"
+	"lastUpdated": "2020-01-17 15:47:05"
 }
 
 /*
@@ -42,7 +42,7 @@ var bibtex2zoteroTypeMap = {
 	article: "journalArticle"
 };
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	let citation = ZU.xpathText(doc, '//pre[@class="bibtex-citation"]');
 	let type = citation.split('{')[0].replace('@', '');
 	return bibtex2zoteroTypeMap[type];
@@ -67,21 +67,21 @@ function parseDocument(doc, url) {
 
 	var item = new Zotero.Item(itemType);
 
-	// load structured schema data 
+	// load structured schema data
 	const schemaTag = doc.querySelector("script.schema-data");
 	const schemaObject = JSON.parse(schemaTag.innerHTML);
 	const article = schemaObject["@graph"][1][0];
 
-	item.title = article["name"];
-	item.abstractNote = article["description"];
+	item.title = article.name;
+	item.abstractNote = article.description;
 
-	if (article["author"]) {
-		article["author"].forEach(author => {
-			item.creators.push(ZU.cleanAuthor(author["name"], 'author'));
+	if (article.author) {
+		article.author.forEach((author) => {
+			item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 		});
 	}
-	item.publicationTitle = article["publication"];
-	item.date = article["datePublished"];
+	item.publicationTitle = article.publication;
+	item.date = article.datePublished;
 
 	// attachments
 	item.attachments.push({
@@ -91,14 +91,15 @@ function parseDocument(doc, url) {
 		snapshot: false
 	});
 
-	const paperLink = article["about"]["url"];
+	const paperLink = article.about.url;
 	if (paperLink.includes("pdfs.semanticscholar.org") || paperLink.includes("arxiv.org")) {
 		item.attachments.push({
 			url: paperLink,
 			title: "Full Text PDF",
 			mimeType: 'application/pdf'
 		});
-	} else {
+	} 
+	else {
 		item.attachments.push({
 			url: paperLink,
 			title: "Publisher Link",
