@@ -98,7 +98,7 @@ function parseDocument(doc, url) {
 			title: "Full Text PDF",
 			mimeType: 'application/pdf'
 		});
-	} 
+	}
 	else {
 		item.attachments.push({
 			url: paperLink,
