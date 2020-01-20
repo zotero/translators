@@ -91,6 +91,7 @@ function parseDocument(doc, url) {
 		snapshot: false
 	});
 
+	// if semantic scholar has a pdf as it's primary paper link it will appear in the about field
 	const paperLink = article.about.url;
 	if (paperLink.includes("pdfs.semanticscholar.org") || paperLink.includes("arxiv.org")) {
 		item.attachments.push({
@@ -99,16 +100,16 @@ function parseDocument(doc, url) {
 			mimeType: 'application/pdf'
 		});
 	}
-	else {
-		item.attachments.push({
-			url: paperLink,
-			title: "Publisher Link",
-			mimeType: "text/html",
-			snapshot: false
-		});
-	}
 
-	item.complete();
+	// use the public api to retrieve more structured data
+	const paperIdRegex = /\/(.{40})(\?|$)/;
+	const paperId = paperIdRegex.exec(url)[1];
+	const apiUrl = `http://api.semanticscholar.org/v1/paper/${paperId}?client=zotero_connect`;
+	ZU.doGet(apiUrl, (data) => {
+		let json = JSON.parse(data);
+		item.DOI = json.doi;
+		item.complete();
+	});
 }
 
 /** BEGIN TEST CASES **/
@@ -142,16 +143,12 @@ var testCases = [
 						"title": "Semantic Scholar Link",
 						"mimeType": "text/html",
 						"snapshot": false
-					},
-					{
-						"title": "Publisher Link",
-						"mimeType": "text/html",
-						"snapshot": false
 					}
 				],
 				"notes": [],
 				"seeAlso": [],
-				"tags": []
+				"tags": [],
+				"DOI": "10.1007/978-3-642-14770-8_33"
 			}
 		]
 	}
