@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-05 12:28:58"
+	"lastUpdated": "2020-01-20 08:47:16"
 }
 
 /*
@@ -181,15 +181,6 @@ function scrapeJson(text) {
 		}
 	}
 	
-	// Save all links to the source in one HTML note.
-	var sourcesNote = "<p>Data sources found by Microsoft Academic search engine:</p>";
-	if (data.entity.s) {
-		for (let i = 0; i < data.entity.s.length; i++) {
-			sourcesNote += '<a href="' + data.entity.s[i].link + '">' + data.entity.s[i].link + '</a><br/>';
-		}
-	}
-	item.notes.push({ note: sourcesNote });
-	
 	item.attachments.push({
 		title: "Link to Microsoft Academic",
 		url: "https://academic.microsoft.com/paper/" + item.itemID,
@@ -272,11 +263,7 @@ var testCases = [
 						"tag": "Public relations"
 					}
 				],
-				"notes": [
-					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"https://eric.ed.gov/?id=EJ867276\">https://eric.ed.gov/?id=EJ867276</a><br/><a href=\"http://www.journals.cambridge.org/abstract_S1049096509090337\">http://www.journals.cambridge.org/abstract_S1049096509090337</a><br/>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -340,11 +327,7 @@ var testCases = [
 						"tag": "Pathwidth"
 					}
 				],
-				"notes": [
-					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://ci.nii.ac.jp/ncid/BA27008641\">http://ci.nii.ac.jp/ncid/BA27008641</a><br/><a href=\"https://www.amazon.com/Introduction-Graph-Theory-Douglas-West/dp/0130144002\">https://www.amazon.com/Introduction-Graph-Theory-Douglas-West/dp/0130144002</a><br/>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -412,11 +395,7 @@ var testCases = [
 						"tag": "Sectional curvature"
 					}
 				],
-				"notes": [
-					{
-						"note": "<p>Data sources found by Microsoft Academic search engine:</p><a href=\"http://math.univ-lyon1.fr/~morvan/SCANPUBLICATIONS/cohensteinermorvansocg2003.pdf\">http://math.univ-lyon1.fr/~morvan/SCANPUBLICATIONS/cohensteinermorvansocg2003.pdf</a><br/><a href=\"http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf\">http://www.cs.jhu.edu/~misha/Fall09/Steiner03.pdf</a><br/><a href=\"https://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf\">https://graphics.stanford.edu/courses/cs468-03-fall/Papers/cohen_normalcycle.pdf</a><br/><a href=\"http://portal.acm.org/citation.cfm?doid=777792.777839\">http://portal.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"https://core.ac.uk/display/22880751\">https://core.ac.uk/display/22880751</a><br/><a href=\"https://dl.acm.org/citation.cfm?doid=777792.777839\">https://dl.acm.org/citation.cfm?doid=777792.777839</a><br/><a href=\"https://doi.acm.org/10.1145/777792.777839\">https://doi.acm.org/10.1145/777792.777839</a><br/>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
