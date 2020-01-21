@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-21 17:53:41"
+	"lastUpdated": "2020-01-21 18:06:44"
 }
 
 
@@ -100,3 +100,98 @@ function doWeb(doc, url) {
     scrape(doc, url);
   }
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://leg.colorado.gov/bills/hb20-1084",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Requirements For Dog And Cat Breeders And Sellers",
+				"creators": [
+					{
+						"firstName": "Mike",
+						"lastName": "Foote",
+						"creatorType": "sponsor"
+					},
+					{
+						"firstName": "Monica",
+						"lastName": "Duran",
+						"creatorType": "sponsor"
+					}
+				],
+				"billNumber": "HB20-1084",
+				"legislativeBody": "Colorado General Assembly",
+				"session": "2020 Regular Session",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Agriculture"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://leg.colorado.gov/bill-search?search_api_views_fulltext=education%20sirota&field_chamber=All&field_bill_type=All&field_sessions=64656&sort_bef_combine=search_api_relevance%20DESC",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://leg.colorado.gov/bills/hjr19-1015",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Adjourn Sine Die",
+				"creators": [
+					{
+						"firstName": "Stephen",
+						"lastName": "Fenberg",
+						"creatorType": "sponsor"
+					},
+					{
+						"firstName": "Alec",
+						"lastName": "Garnett",
+						"creatorType": "sponsor"
+					}
+				],
+				"billNumber": "HJR19-1015",
+				"legislativeBody": "Colorado General Assembly",
+				"session": "2019 Regular Session",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://leg.colorado.gov/bills/sb17b-001",
+		"items": [
+			{
+				"itemType": "bill",
+				"title": "Taxation Of Retail Marijuana Sales",
+				"creators": [
+					{
+						"firstName": "Lucia",
+						"lastName": "Guzman",
+						"creatorType": "sponsor"
+					}
+				],
+				"billNumber": "SB17B-001",
+				"legislativeBody": "Colorado General Assembly",
+				"session": "2017 Extraordinary Session",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
