@@ -62,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function scrape(doc, url) {
+function scrape(doc) {
 	var item = new Zotero.Item("bill");
 
 	item.title = doc.querySelector(`h1[class='node__title node-title']`).textContent;
