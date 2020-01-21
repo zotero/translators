@@ -71,6 +71,14 @@ function scrape(doc, url) {
   ).textContent;
   item.billNumber = ZU.trimInternal(billNumber);
 
+
+  let sponsors = doc.querySelectorAll(`div[class='sponsor-item']>div[class='member']>div[class='member-details']>h4`);
+
+  for (var i = sponsors.length - 1; i >= 0; i--) {
+    let sponsorName = ZU.trimInternal(sponsors[i].textContent);
+    item.creators.push(ZU.cleanAuthor(sponsorName, "sponsor", false));
+  }
+
   item.complete();
 }
 
