@@ -82,6 +82,11 @@ function scrape(doc, url) {
 
   item.session = doc.querySelector(`div[class='bill-session']>div>div[class='field-items']>div`).textContent;
 
+  let tags = doc.querySelectorAll(`div[class='bill-subjects']>div>div[class=field-items]>div[class*='field-item']`);
+  for (let tag of tags) {
+    item.tags.push(tag.textContent);
+  }
+
   item.complete();
 }
 
