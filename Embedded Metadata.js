@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2020-01-28 04:04:30"
 }
 
 /*
@@ -671,7 +671,7 @@ function tryOgAuthors(doc) {
 }
 
 function getAuthorFromByline(doc, newItem) {
-	var bylineClasses = ['byline', 'vcard'];
+	var bylineClasses = ['byline', 'bylines', 'vcard'];
 	Z.debug("Looking for authors in " + bylineClasses.join(', '));
 	var bylines = [], byline;
 	for(var i=0; i<bylineClasses.length; i++) {
@@ -1464,6 +1464,35 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "U.S. has world’s highest rate of children living in single-parent households",
+				"creators": [
+					{
+						"firstName": "Stephanie",
+						"lastName": "Kramer",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "Almost a quarter of U.S. children under 18 live with one parent and no other adults, more than three times the share of children around the world who do so.",
+				"blogTitle": "Pew Research Center",
+				"language": "en-US",
+				"url": "https://www.pewresearch.org/fact-tank/2019/12/12/u-s-children-more-likely-than-children-in-other-countries-to-live-with-just-one-parent/",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
