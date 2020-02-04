@@ -50,78 +50,78 @@ function doImport() {
 		p: 'http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib',
 		sear: 'http://www.exlibrisgroup.com/xsd/jaguar/search'
 	};
-	
+
 	var item = new Zotero.Item();
 	var itemType = ZU.xpathText(doc, '//p:display/p:type', ns) || ZU.xpathText(doc, '//p:facets/p:rsrctype', ns) || ZU.xpathText(doc, '//p:search/p:rsrctype', ns);
 	if (!itemType) {
 		throw new Error('Could not locate item type');
 	}
-	
+
 	switch (itemType.toLowerCase()) {
-	case 'book':
-	case 'ebook':
-	case 'pbook':
-	case 'books':
-	case 'score':
-	case 'journal':		// as long as we don't have a periodical item type;
-		item.itemType = "book";
-		break;
-	case 'audio':
-	case 'sound_recording':
-		item.itemType = "audioRecording";
-		break;
-	case 'video':
-	case 'dvd':
-		item.itemType = "videoRecording";
-		break;
-	case 'computer_file':
-		item.itemType = "computerProgram";
-		break;
-	case 'report':
-		item.itemType = "report";
-		break;
-	case 'webpage':
-		item.itemType = "webpage";
-		break;
-	case 'article':
-	case 'review':
-		item.itemType = "journalArticle";
-		break;
-	case 'thesis':
-	case 'dissertation':
-		item.itemType = "thesis";
-		break;
-	case 'archive_manuscript':
-	case 'object':
-		item.itemType = "manuscript";
-		break;
-	case 'map':
-		item.itemType = "map";
-		break;
-	case 'reference_entry':
-		item.itemType = "encyclopediaArticle";
-		break;
-	case 'image':
-		item.itemType = "artwork";
-		break;
-	case 'newspaper_article':
-		item.itemType = "newspaperArticle";
-		break;
-	case 'conference_proceeding':
-		item.itemType = "conferencePaper";
-		break;
-	default:
-		item.itemType = "document";
-		var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
-		if (risType) {
-			switch (risType.toUpperCase()) {
-			case 'THES':
-				item.itemType = "thesis";
-				break;
+		case 'book':
+		case 'ebook':
+		case 'pbook':
+		case 'books':
+		case 'score':
+		case 'journal':		// as long as we don't have a periodical item type;
+			item.itemType = "book";
+			break;
+		case 'audio':
+		case 'sound_recording':
+			item.itemType = "audioRecording";
+			break;
+		case 'video':
+		case 'dvd':
+			item.itemType = "videoRecording";
+			break;
+		case 'computer_file':
+			item.itemType = "computerProgram";
+			break;
+		case 'report':
+			item.itemType = "report";
+			break;
+		case 'webpage':
+			item.itemType = "webpage";
+			break;
+		case 'article':
+		case 'review':
+			item.itemType = "journalArticle";
+			break;
+		case 'thesis':
+		case 'dissertation':
+			item.itemType = "thesis";
+			break;
+		case 'archive_manuscript':
+		case 'object':
+			item.itemType = "manuscript";
+			break;
+		case 'map':
+			item.itemType = "map";
+			break;
+		case 'reference_entry':
+			item.itemType = "encyclopediaArticle";
+			break;
+		case 'image':
+			item.itemType = "artwork";
+			break;
+		case 'newspaper_article':
+			item.itemType = "newspaperArticle";
+			break;
+		case 'conference_proceeding':
+			item.itemType = "conferencePaper";
+			break;
+		default:
+			item.itemType = "document";
+			var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
+			if (risType) {
+				switch (risType.toUpperCase()) {
+					case 'THES':
+						item.itemType = "thesis";
+						break;
+				}
 			}
-		}
 	}
-	
+
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
@@ -134,7 +134,7 @@ function doImport() {
 		creators = contributors;
 		contributors = [];
 	}
-	
+
 	// //addata/au is great because it lists authors in last, first format,
 	// but it can also have a bunch of junk. We'll use it to help split authors
 	var splitGuidance = {};
@@ -192,15 +192,15 @@ function doImport() {
 			item.date = m[0];
 		}
 	}
-	
+
 	// the three letter ISO codes that should be in the language field work well:
 	item.language = ZU.xpathText(doc, '(//p:display/p:language|//p:facets/p:language)[1]', ns);
-	
+
 	var pages = ZU.xpathText(doc, '//p:display/p:format', ns);
 	if (item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
 		item.numPages = extractNumPages(pages);
 	}
-	
+
 	item.series = ZU.xpathText(doc, '(//p:addata/p:seriestitle)[1]', ns);
 	if (item.series) {
 		let m = item.series.match(/^(.*);\s*(\d+)/);
@@ -215,11 +215,11 @@ function doImport() {
 	if (isbn) {
 		item.ISBN = ZU.cleanISBN(isbn);
 	}
-	
+
 	if (issn) {
 		item.ISSN = ZU.cleanISSN(issn);
 	}
-	
+
 	// Try this if we can't find an isbn/issn in addata
 	// The identifier field is supposed to have standardized format, but
 	// the super-tolerant idCheck should be better than a regex.
@@ -231,7 +231,7 @@ function doImport() {
 	}
 
 	item.edition = ZU.xpathText(doc, '//p:display/p:edition', ns);
-	
+
 	var subjects = ZU.xpath(doc, '//p:display/p:subject', ns);
 	if (!subjects.length) {
 		subjects = ZU.xpath(doc, '//p:search/p:subject', ns);
@@ -244,16 +244,16 @@ function doImport() {
 			item.tags.push(tag);
 		}
 	}
-	
+
 	item.abstractNote = ZU.xpathText(doc, '//p:display/p:description', ns)
 		|| ZU.xpathText(doc, '//p:addata/p:abstract', ns);
 	if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-	
+
 	item.DOI = ZU.xpathText(doc, '//p:addata/p:doi', ns);
 	item.issue = ZU.xpathText(doc, '//p:addata/p:issue', ns);
 	item.volume = ZU.xpathText(doc, '//p:addata/p:volume', ns);
 	item.publicationTitle = ZU.xpathText(doc, '//p:addata/p:jtitle', ns);
-	
+
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
 	var overallPages = ZU.xpathText(doc, '//p:addata/p:pages', ns);
@@ -269,7 +269,7 @@ function doImport() {
 	else if (endPage) {
 		item.pages = endPage;
 	}
-	
+
 	// these are actual local full text links (e.g. to google-scanned books)
 	// e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
 	var URL = ZU.xpathText(doc, '//p:links/p:linktorsrc', ns);
@@ -280,7 +280,7 @@ function doImport() {
 	// add finding aids as links
 	var findingAid = ZU.xpathText(doc, '//p:links/p:linktofa', ns);
 	if (findingAid && findingAid.search(/\$\$U.+\$\$/) != -1) {
-		item.attachments.push({ url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false });
+		item.attachments.push({url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false});
 	}
 	// get the best call Number; sequence recommended by Harvard University Library
 	var callNumber = ZU.xpath(doc, '//p:browse/p:callnumber', ns);
@@ -342,7 +342,7 @@ function stripAuthor(str) {
 	// e.g. Wheaton, Barbara Ketcham [former owner]$$QWheaton, Barbara Ketcham
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
-		// Remove year
+	// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|.{3})?\)?/g, '')
 		// Remove creator type like (illustrator)
 		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
@@ -363,12 +363,12 @@ function fetchCreators(item, creators, type, splitGuidance) {
 				type,
 				true
 			);
-			
+
 			if (!c.firstName) {
 				delete c.firstName;
 				c.fieldMode = 1;
 			}
-			
+
 			item.creators.push(c);
 		}
 	}
