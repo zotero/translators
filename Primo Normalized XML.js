@@ -240,7 +240,7 @@ function doImport() {
 	for (let i = 0, n = subjects.length; i < n; i++) {
 		let tagChain = ZU.trimInternal(subjects[i].textContent);
 		// Split chain of tags, e.g. "Deutschland / Gerichtsverhandlung / Schallaufzeichnung / Bildaufzeichnung"
-		for (let tag of tagChain.split(/ (?:\/|--) /)) {
+		for (let tag of tagChain.split(/ (?:\/|--|;) /)) {
 			item.tags.push(tag);
 		}
 	}
@@ -343,8 +343,10 @@ function stripAuthor(str) {
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
 		// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
-		// Remove things like (illustrator). TODO: use this to assign creator type?
+		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|.{3})?\)?/g, '')
+		// Remove creator type like (illustrator)
+		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
+		// Sometimes creator type is displayed twice
 		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
@@ -437,10 +439,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Chemistry"
+						"tag": "Water"
 					},
 					{
-						"tag": "Water"
+						"tag": "Chemistry"
 					}
 				],
 				"notes": [],
@@ -543,46 +545,37 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Bildaufzeichnung"
-					},
-					{
 						"tag": "Conduct of court proceedings"
 					},
 					{
-						"tag": "Deutschland"
+						"tag": "Germany"
+					},
+					{
+						"tag": "Constitutional law"
+					},
+					{
+						"tag": "Freedom of information"
 					},
 					{
 						"tag": "Deutschland"
 					},
 					{
-						"tag": "Deutschland"
-					},
-					{
-						"tag": "Elektronische Medien"
-					},
-					{
-						"tag": "Gerichtsberichterstattung"
-					},
-					{
-						"tag": "Gerichtsverhandlung"
-					},
-					{
-						"tag": "Germany; Constitutional law"
-					},
-					{
-						"tag": "Germany; Freedom of information"
-					},
-					{
-						"tag": "Germany; Hochschulschrift"
-					},
-					{
-						"tag": "Informationsfreiheit"
+						"tag": "Hochschulschrift"
 					},
 					{
 						"tag": "Rechtsprechende Gewalt"
 					},
 					{
-						"tag": "Schallaufzeichnung"
+						"tag": "Öffentlichkeitsgrundsatz"
+					},
+					{
+						"tag": "Informationsfreiheit"
+					},
+					{
+						"tag": "Gerichtsberichterstattung"
+					},
+					{
+						"tag": "Elektronische Medien"
 					},
 					{
 						"tag": "Verbot"
@@ -591,7 +584,13 @@ var testCases = [
 						"tag": "Verfassungsmäßigkeit"
 					},
 					{
-						"tag": "Öffentlichkeitsgrundsatz"
+						"tag": "Gerichtsverhandlung"
+					},
+					{
+						"tag": "Schallaufzeichnung"
+					},
+					{
+						"tag": "Bildaufzeichnung"
 					}
 				],
 				"notes": [],

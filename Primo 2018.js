@@ -114,34 +114,170 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://primo-demo.exlibrisgroup.com:1701/primo-explore/fulldisplay?docid=TN_gvrl_refCX4183000563&context=PC&vid=NORTH&search_scope=PC&tab=articles&lang=en_US",
+		"url": "http://virtuose.uqam.ca/primo-explore/fulldisplay?vid=UQAM&docid=UQAM_BIB000969205&context=L",
 		"items": [
 			{
-				"itemType": "encyclopediaArticle",
-				"title": "Water",
-				"creators": [],
-				"date": "2012",
-				"ISBN": "9781452218557",
+				"itemType": "book",
+				"title": "War",
+				"creators": [
+					{
+						"firstName": "Ken",
+						"lastName": "Baynes",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Ken. Baynes",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Welsh Arts Council",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Glynn Vivian Art Gallery",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "1970",
+				"callNumber": "NX650G8B38",
 				"language": "eng",
-				"libraryCatalog": "primo-demo.exlibrisgroup.com:1701",
-				"pages": "1775–1778",
+				"libraryCatalog": "virtuose.uqam.ca",
+				"place": "Boston",
+				"publisher": "Boston Book and Art Chop",
+				"series": "Art and society 1",
+				"attachments": [],
+				"tags": [
+					"ART",
+					"GUERRE",
+					"WAR"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://primo-prod.u-paris10.fr/primo-explore/fulldisplay?vid=UPON&docid=SCD_ALEPH000546633&context=L&search_scope=default_scope",
+		"items": [
+			{
+				"itemType": "thesis",
+				"title": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud) : quand la ville fait œuvre d'art et l'art œuvre de ville",
+				"creators": [
+					{
+						"firstName": "Pauline",
+						"lastName": "Guinard",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Gervais-Lambony",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Marie-Hélène",
+						"lastName": "Bacqué",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Maria",
+						"lastName": "Gravari-Barbas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Myriam",
+						"lastName": "Houssay-Holzschuch",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Guy",
+						"lastName": "Di Méo",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Cynthia",
+						"lastName": "Kros",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "Université Paris Nanterre",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "cultures et sociétés du passé et du présent Nanterre",
+						"lastName": "Ecole doctorale Milieux",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2012",
+				"abstractNote": "Thèse de doctorat, Cette thèse porte sur les espaces publics à Johannesburg, capitale économique de l’Afrique du Sud. Dans le contexte contemporain, l’utilisation de la notion occidentale d’espaces publics pose problème : d’une part, du fait des ségrégations passées qui ont eu tendance à faire de ces espaces des lieux de séparation et de mise à distance des différents publics ; et d’autre part, du fait des forts taux de violence et du fort sentiment d’insécurité, qui tendent à encourager la sécurisation et la privatisation de ces mêmes espaces. L’enjeu est alors de comprendre les éventuels processus de construction de la publicité (au sens de caractère public) de ces espaces, à la fois sur le plan juridique, social et politique. Pour ce faire, l’art qui se déploie dans les espaces juridiquement publics de la métropole depuis la fin de l’apartheid, est utilisé comme une clef de lecture privilégiée de ces phénomènes, en tant qu’il permettrait, ainsi que nous entendons le montrer, de créer des espaces de rencontre et de débats ou, à l’inverse, de mieux réguler et contrôler ces espaces. Selon une approche qualitative, notre étude se base à la fois sur des observations de terrain et sur des entretiens conduits auprès des producteurs mais aussi des récepteurs de cet art qui a lieu dans les espaces publics. A la croisée de la géographie urbaine et de la géographie culturelle, nous envisageons donc de réexaminer la notion d’espaces publics au prisme de l’art à Johannesburg en vue de saisir – entre tentative de normalisation et résistance à cette normalisation – quelle ville est aujourd’hui à l’œuvre non seulement à Johannesburg, mais aussi, à travers elle, dans d’autres villes du monde., This Ph.D. thesis deals with public spaces in Johannesburg, the economic capital of South Africa. In the current context, the issues raised by the use of the western notion of public spaces are explored. On one hand, the previous segregations tended to mark off spaces into different publics completely separated from each other. On the other hand, the high rates of violence and sense of insecurity enhance securitization and privatization of these same spaces. What is at stake is to understand how the publicness of these spaces can be legally, socially, and politically built. In that framework, art spread in legally public spaces of Johannesburg since the end of apartheid is used as a tool to understand and reveal these phenomena since it is presented, as we aim at demonstrating, as a mean to create spaces of encounter and debate or, conversely, to regulate and control better these spaces. In a qualitative approach, our study is based on field observations and interviews with both producers and receivers of this art which takes place in public spaces. At the crossroads of urban geography and cultural geography, we are therefore re-examining the concept of public spaces through the prism of art in Johannesburg to figure out – between normalization and resistance to this normalization – which city is today at work not only in Johannesburg, but also, through her, in other cities of the world.",
+				"language": "fre",
+				"libraryCatalog": "primo-prod.u-paris10.fr",
+				"shortTitle": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud)",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"attachments": [],
+				"tags": [
+					"Espaces publics",
+					"Afrique du Sud",
+					"Johannesburg (Afrique du Sud)",
+					"Thèses et écrits académiques",
+					"Art urbain",
+					"Géographie culturelle",
+					"Géographie urbaine",
+					"Art",
+					"Johannesburg",
+					"Prisme",
+					"Publicisation",
+					"Normalisation"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bcujas-catalogue.univ-paris1.fr/primo-explore/fulldisplay?vid=CUJAS_V1&docid=33CUJAS_ALEPH000070200&context=L&search_scope=LSCOP_ALL",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test pattern for living",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					}
+				],
+				"date": "1972",
+				"callNumber": "203.206",
+				"language": "eng",
+				"libraryCatalog": "bcujas-catalogue.univ-paris1.fr",
+				"numPages": "xx+154",
+				"place": "Toronto New York",
+				"publisher": "Bantam Books",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Drinking Water"
+						"tag": "Mass media"
 					},
 					{
-						"tag": "Fresh Water"
+						"tag": "Social aspects"
 					},
 					{
-						"tag": "Residential Water Supply"
+						"tag": "United States"
 					},
 					{
-						"tag": "Water Distribution"
+						"tag": "Social conditions"
 					},
 					{
-						"tag": "Water Treatment"
+						"tag": "1960-"
 					}
+
 				],
 				"notes": [],
 				"seeAlso": []
