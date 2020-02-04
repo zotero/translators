@@ -210,9 +210,6 @@ function fetchPNX(itemData) {
 				}
 
 				importPNX(text, url);
-			} else {
-				gotPNX = false;
-				return;
 			}
 		},
 		function () {

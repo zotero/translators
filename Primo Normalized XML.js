@@ -280,7 +280,7 @@ function doImport() {
 	// add finding aids as links
 	var findingAid = ZU.xpathText(doc, '//p:links/p:linktofa', ns);
 	if (findingAid && findingAid.search(/\$\$U.+\$\$/) != -1) {
-		item.attachments.push({url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false});
+		item.attachments.push({ url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false });
 	}
 	// get the best call Number; sequence recommended by Harvard University Library
 	var callNumber = ZU.xpath(doc, '//p:browse/p:callnumber', ns);
