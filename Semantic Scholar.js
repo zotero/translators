@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-17 15:47:05"
+	"lastUpdated": "2020-02-05 15:02:05"
 }
 
 /*
@@ -104,7 +104,7 @@ function parseDocument(doc, url) {
 	// use the public api to retrieve more structured data
 	const paperIdRegex = /\/(.{40})(\?|$)/;
 	const paperId = paperIdRegex.exec(url)[1];
-	const apiUrl = `http://api.semanticscholar.org/v1/paper/${paperId}?client=zotero_connect`;
+	const apiUrl = `https://api.semanticscholar.org/v1/paper/${paperId}?client=zotero_connect`;
 	ZU.doGet(apiUrl, (data) => {
 		let json = JSON.parse(data);
 		item.DOI = json.doi;
