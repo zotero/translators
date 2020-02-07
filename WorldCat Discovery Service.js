@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-10-20 22:00:01"
+	"lastUpdated": "2019-11-26 22:21:07"
 }
 
 /*
@@ -43,7 +43,7 @@ function detectWeb(doc, _url) {
 	// single result
 	// generate item and return type
 	var co = getFirstContextObj(doc);
-	if (co) {
+	if (ZU.xpathText(doc, '//input[@id="dbList"]/@value') && co) {
 		return generateItem(doc, co).itemType;
 	}
 	return false;

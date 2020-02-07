@@ -2,17 +2,17 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)",
+	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)|^https?://pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d|\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-03 18:23:15"
+	"lastUpdated": "2019-12-28 15:34:11"
 }
 
- /*
+/*
  	***** BEGIN LICENSE BLOCK *****
  	
  	Copyright © 2015 Philipp Zumstein
@@ -36,33 +36,32 @@
  */
  
   
-  /*****************************
+/** ***************************
   * General utility functions *
   *****************************/
 
-function lookupPMIDs(ids, next) {
-	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?" +
-		"db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id="+ids.join(",");
+function lookupPMIDs(ids) {
+	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
+		+ "db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id=" + ids.join(",");
 	Zotero.debug(newUri);
-	Zotero.Utilities.HTTP.doGet(newUri, function(text) {
-		if (text.indexOf('PubmedArticle') == -1 && text.indexOf('PubmedBookArticle') == -1) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
-			throw("No Pubmed Data found - Most likely eutils is temporarily down");
+	Zotero.Utilities.HTTP.doGet(newUri, function (text) {
+		if (!text.includes('PubmedArticle') && !text.includes('PubmedBookArticle')) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
+			throw new Error("No Pubmed Data found - Most likely eutils is temporarily down");
 		}
 		
-		//call the import translator
+		// call the import translator
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("fcf41bed-0cbc-3704-85c7-8062a0068a7a");
 		translator.setString(text);
 		translator.translate();
-		
 	});
 }
 
 
-/****************************
+/** **************************
  * Web translator functions *
  ****************************/
- //retrieves the UID from an item page. Returns false if there is more than one.
+// retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
 	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist" or @name="ncbi_article_id"]/@content');
 	if (!uid.length) {
@@ -74,18 +73,18 @@ function getUID(doc) {
 	}
 	
 	uid = ZU.xpath(doc, 'html/head/link[@media="handheld"]/@href');
-	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); //mobile site
+	if (!uid.length) uid = ZU.xpath(doc, 'html/head/link[@rel="canonical"]/@href'); // mobile site
 	if (uid.length == 1) {
 		uid = uid[0].textContent.match(/\/(\d+)(?:\/|$)/);
 		if (uid) return uid[1];
 	}
 	
-	//PMID from a bookshelf entry
+	// PMID from a bookshelf entry
 	var maincontent = doc.getElementById('maincontent');
 	if (maincontent) {
 		uid = ZU.xpath(maincontent,
 			'.//a[@title="PubMed record of this title" or @title="PubMed record of this page"]');
-		if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid;
+		if (uid.length == 1 && uid[0].textContent.search(/^\d+$/) != -1) return uid[0].textContent;
 	}
 
 	return false;
@@ -94,7 +93,7 @@ function getUID(doc) {
 // retrieve itemprop elements for scraping books directly from page where UID is not available
 function getBookProps(doc) {
 	var main = doc.getElementById('maincontent');
-	if (!main) return;
+	if (!main) return false;
 	var itemprops = ZU.xpath(main, './/div[@itemtype="http://schema.org/Book"]//*[@itemprop]');
 	return itemprops.length ? itemprops : null;
 }
@@ -112,7 +111,7 @@ var bookRDFaMap = {
 
 function scrapeItemProps(itemprops) {
 	var item = new Zotero.Item('book');
-	for (var i=0; i<itemprops.length; i++) {
+	for (var i = 0; i < itemprops.length; i++) {
 		var value = ZU.trimInternal(itemprops[i].textContent);
 		var field = bookRDFaMap[itemprops[i].getAttribute('itemprop')];
 		if (!field) continue;
@@ -120,12 +119,14 @@ function scrapeItemProps(itemprops) {
 		if (field.indexOf('creator/') == 0) {
 			field = field.substr(8);
 			item.creators.push(ZU.cleanAuthor(value, field, false));
-		} else if (field == 'ISBN') {
+		}
+		else if (field == 'ISBN') {
 			if (!item.ISBN) item.ISBN = '';
 			else item.ISBN += '; ';
 			
 			item.ISBN += value;
-		} else {
+		}
+		else {
 			item[field] = value;
 		}
 	}
@@ -144,15 +145,14 @@ function getSearchResults(doc, checkOnly) {
 
 	if (!results.length) return false;
 	for (var i = 0; i < results.length; i++) {
-		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]') ||
-			ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]') ||
-			ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); //My Bibliography
+		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
+			|| ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]')
+			|| ZU.xpathText(results[i], './div[@class="docsumRightcol"]/a'); // My Bibliography
 
-		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value') ||
-			ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]') ||
-			ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') //My Bibliography
-			||
-			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
+		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
+			|| ZU.xpathText(results[i], './/div[@class="labs-docsum-citation"]/span[@class="docsum-pmid"]')
+			|| ZU.xpathText(results[i], './div[@class="chkBoxLeftCol"]/input/@refuid') // My Bibliography
+			||			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 
 		if (!uid) {
 			uid = ZU.xpathText(results[i], './/p[@class="title"]/a/@href');
@@ -178,7 +178,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function detectWeb(doc, url) {
-	if (getSearchResults(doc, true) && url.indexOf("/books/") == -1) {
+	if (getSearchResults(doc, true) && !url.includes("/books/")) {
 		return "multiple";
 	}
 	
@@ -188,25 +188,24 @@ function detectWeb(doc, url) {
 		else return false;
 	}
 	
-	//try to determine if this is a book
-	//"Sections" heading only seems to show up for books
+	// try to determine if this is a book
+	// "Sections" heading only seems to show up for books
 	var maincontent = doc.getElementById('maincontent');
-	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length)
-	{
+	if (maincontent && ZU.xpath(maincontent, './/div[@class="sections"]').length) {
 		var inBook = ZU.xpath(maincontent, './/div[contains(@class, "aff_inline_book")]').length;
 		return inBook ? "bookSection" : "book";
 	}
 
-	//determine if book or bookSection for PubMed Labs
+	// determine if book or bookSection for PubMed Labs
 	var bookCitation = doc.getElementsByClassName('book-citation');
-	if (bookCitation.length > 0 && ZU.xpath(bookCitation, './/div[@class="affiliations"]')) {
-		// For a bookSection there are the affiliations of the authors of this
-		// section as well as the affiliations of the book authors.
-		var book_affiliations = ZU.xpath(doc.getElementById('full-authors'), './/div[@class="affiliations"]/h3[@class="title"]').length > 1;
-		return book_affiliations ? "bookSection" : "book";
+	if (bookCitation.length > 0 && ZU.xpath(doc, './/div[@class="affiliations"]')) {
+		// For a bookSection there is the affiliations section of the authors of this
+		// section as well as another affiliation sections for the book authors.
+		var isChapter = doc.querySelectorAll('#full-view-heading div.affiliations').length > 1;
+		return isChapter ? "bookSection" : "book";
 	}
 	
-	//from bookshelf page
+	// from bookshelf page
 	var pdid = ZU.xpathText(doc, 'html/head/meta[@name="ncbi_pdid"]/@content');
 	if (pdid == "book-part") return 'bookSection';
 	if (pdid == "book-toc") return 'book';
@@ -216,8 +215,8 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function(selectedItems) {
-			if (!selectedItems) return true;
+		Zotero.selectItems(getSearchResults(doc), function (selectedItems) {
+			if (!selectedItems) return;
 
 			var uids = [];
 			for (var i in selectedItems) {
@@ -225,11 +224,13 @@ function doWeb(doc, url) {
 			}
 			lookupPMIDs(uids);
 		});
-	} else {
+	}
+	else {
 		var uid = getUID(doc);
 		if (uid) {
 			lookupPMIDs([uid]);
-		} else {
+		}
+		else {
 			var itemprops = getBookProps(doc);
 			if (itemprops) {
 				scrapeItemProps(itemprops);
@@ -239,13 +240,13 @@ function doWeb(doc, url) {
 }
 
 
-/*******************************
+/** *****************************
  * Search translator functions *
  *******************************/
-//extract PMID from a context object
+// extract PMID from a context object
 function getPMID(co) {
 	var coParts = co.split("&");
-	for (var i=0; i<coParts.length; i++) {
+	for (var i = 0; i < coParts.length; i++) {
 		var part = coParts[i];
 		if (part.substr(0, 7) == "rft_id=") {
 			var value = decodeURIComponent(part.substr(7));
@@ -254,6 +255,7 @@ function getPMID(co) {
 			}
 		}
 	}
+	return false;
 }
 
 function detectSearch(item) {
@@ -263,9 +265,9 @@ function detectSearch(item) {
 		}
 	}
 	
-	//supply PMID as a string or array
+	// supply PMID as a string or array
 	if (item.PMID
-		&& (typeof item.PMID == 'string' || item.PMID.length > 0) )  {
+		&& (typeof item.PMID == 'string' || item.PMID.length > 0)) {
 		return true;
 	}
 	
@@ -283,6 +285,7 @@ function doSearch(item) {
 	
 	lookupPMIDs(pmid);
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -326,9 +329,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Bibliography as Topic",
-					"Database Management Systems",
-					"Humans"
+					{
+						"tag": "Bibliographies as Topic"
+					},
+					{
+						"tag": "Database Management Systems"
+					},
+					{
+						"tag": "Humans"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -995,7 +1004,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/30572268-gamification-predicting-the-effectiveness-of-variety-game-design-elements-to-intrinsically-motivate-users-energy-conservation-behaviour/",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/30572268-gamification-predicting-the-effectiveness-of-variety-game-design-elements-to-intrinsically-motivate-users-energy-conservation-behaviour/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1012,7 +1021,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Dec 17, 2018",
+				"date": "Mar 01, 2019",
 				"DOI": "10.1016/j.jenvman.2018.11.127",
 				"ISSN": "1095-8630",
 				"abstractNote": "This research predicted the effectiveness of variety game design elements in enhancing the intrinsic motivation of users on energy conservation behaviour prior to its actual implementation to ensure cost-effective. Face-to-face questionnaire surveys were conducted at the five recognized Malaysian research universities and obtained a total of 1500 valid survey data. The collected data was run with Structural Equation Modeling (SEM) analysis using SmartPLS 3 software. The results predicted the positive effect of gamification on intrinsically motivate the users based on Self-Determination Theory (SDT). The identified nine core game design elements were found to be useful in satisfying users' autonomy, competence and relatedness need satisfactions specified by SDT. This research is useful to guide the campaign organizer in designing a gamified design energy-saving campaign and provide understanding on the causal relationships between game design elements and users' intrinsic motivation to engage on energy conservation. A game-like campaign environment is believed to be created to users by implementing the game design elements in energy-saving campaign, and subsequently users' intrinsic motivation to engage on energy conservation behaviour can be enhanced.",
@@ -1033,6 +1042,9 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Conservation of Energy Resources"
+					},
+					{
 						"tag": "Energy conservation behaviour"
 					},
 					{
@@ -1045,10 +1057,25 @@ var testCases = [
 						"tag": "Gamification"
 					},
 					{
+						"tag": "Humans"
+					},
+					{
 						"tag": "Intrinsic motivation"
 					},
 					{
+						"tag": "Motivation"
+					},
+					{
+						"tag": "Personal Autonomy"
+					},
+					{
+						"tag": "Personal Satisfaction"
+					},
+					{
 						"tag": "Self-determination theory"
+					},
+					{
+						"tag": "Surveys and Questionnaires"
 					}
 				],
 				"notes": [],
@@ -1058,7 +1085,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/labs/pubmed/20729678-zotero-harnessing-the-power-of-a-personal-bibliographic-manager/",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/20729678-zotero-harnessing-the-power-of-a-personal-bibliographic-manager/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1097,7 +1124,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Bibliography as Topic"
+						"tag": "Bibliographies as Topic"
 					},
 					{
 						"tag": "Database Management Systems"
@@ -1794,6 +1821,75 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/30226337-a-review-of-the-non-equivalent-control-group-post-test-only-design/?from_term=test&from_pos=2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A review of the non-equivalent control group post-test-only design",
+				"creators": [
+					{
+						"firstName": "Preetha",
+						"lastName": "Krishnan",
+						"creatorType": "author"
+					}
+				],
+				"date": "09 21, 2019",
+				"DOI": "10.7748/nr.2018.e1582",
+				"ISSN": "1351-5578",
+				"abstractNote": "BACKGROUND: Quantitative research designs are broadly classified as either experimental or quasi-experimental. The main distinguishing feature of the quasi-experiment is the manipulation of the independent variable without randomisation. When randomisation or use of a control group is unfeasible, a researcher can choose from a range of quasi-experimental designs.\nAIM: To present the features of the quasi-experimental 'non-equivalent control group post-test-only' design, which aims to demonstrate causality between an intervention and an outcome.\nDISCUSSION: This paper provides an overview of the non-equivalent control group post-test-only design in terms of its design features, applications and statistical analysis, as well as its advantages and disadvantages.\nCONCLUSION: The non-equivalent control group post-test-only design can be used in natural settings, where randomisation cannot be conducted for ethical or practical reasons. Although the design is less complex than some other designs, with low error propagation, it is vulnerable to threats to internal validity.",
+				"extra": "PMID: 30226337",
+				"issue": "2",
+				"journalAbbreviation": "Nurse Res",
+				"language": "eng",
+				"libraryCatalog": "PubMed",
+				"pages": "37-40",
+				"publicationTitle": "Nurse Researcher",
+				"volume": "26",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Control Groups"
+					},
+					{
+						"tag": "Data Collection"
+					},
+					{
+						"tag": "Nursing Research"
+					},
+					{
+						"tag": "Research Design"
+					},
+					{
+						"tag": "nursing research"
+					},
+					{
+						"tag": "quantitative research"
+					},
+					{
+						"tag": "quasi-experimental design"
+					},
+					{
+						"tag": "statistical analysis"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/?term=testing",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

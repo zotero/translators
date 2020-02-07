@@ -35,7 +35,7 @@
 
 
 function detectWeb(doc, url) {
-    if (url.match(/\/issue\/view/))
+    if (url.match(/\/issue\/view/) && getSearchResults(doc))
         return "multiple";
 }
 

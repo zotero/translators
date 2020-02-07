@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-31 18:53:37"
+	"lastUpdated": "2019-11-07 17:17:11"
 }
 
 /*
@@ -193,14 +193,14 @@ function getSearchResults(doc, url) {
 	let items = {};
 	if (url.includes('/search/')) {
 		// e.g. https://www.aclweb.org/anthology/search/?q=foo+bar
-		papers = ZU.xpath(doc, '//div[@class = "gsc-wrapper"]//td//a[contains(@class, "gs-title")]');
+		papers = ZU.xpath(doc, '//div[contains(@class, "gsc-webResult")]//div[contains(@class, "gs-title")]/a');
 		for (let i = 0; i < papers.length; i++) {
 			let paperId = papers[i].href.split('/').pop();
 			items[constructPaperURL(paperId)] = papers[i].text;
 		}
 	}
 	else {
-		papers = ZU.xpath(doc, '//strong/a[contains(@href, "/papers/")]');
+		papers = ZU.xpath(doc, '//strong/a[contains(@href, "/anthology/")]');
 		for (let i = 0; i < papers.length; i++) {
 			items[papers[i].href] = papers[i].text;
 		}
