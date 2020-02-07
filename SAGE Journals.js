@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 18:09:17"
+	"lastUpdated": "2020-02-07 15:10:35"
 }
 
 /*
@@ -139,6 +139,12 @@ function scrape(doc, url) {
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
 				item.abstractNote = abstract;
+			}
+
+			// ubtue: also add translated abstracts
+			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			if (abstract) {
+				item.abstractNote += "\n\n" + abstract;
 			}
 
 			var tags = ZU.xpathText(doc, '//kwd-group[1]');
