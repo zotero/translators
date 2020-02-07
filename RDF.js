@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-09-08 11:33:52"
+	"lastUpdated": "2019-11-30 20:49:31"
 }
 
 /*
@@ -983,20 +983,25 @@ function importItem(newItem, node) {
 		n.so + "volumeNumber"], true);
 	
 	// issue
+	var issueNodes = [node];
 	if (container) {
-		newItem.issue = getFirstResults([container, node], [n.prism + "number",
-			n.prism2_0 + "number",
-			n.prism2_1 + "number",
-			n.eprints + "number",
-			n.bibo + "issue",
-			n.dc + "source.Issue",
-			n.dcterms + "citation.issue",
-			n.so + "issueNumber"], true);
+		issueNodes.unshift(container);
 	}
-
-	// these mean the same thing
-	newItem.patentNumber = newItem.number = newItem.issue;
+	newItem.issue = getFirstResults(issueNodes, [n.prism + "number",
+		n.prism2_0 + "number",
+		n.prism2_1 + "number",
+		n.eprints + "number",
+		n.bibo + "issue",
+		n.dc + "source.Issue",
+		n.dcterms + "citation.issue",
+		n.so + "issueNumber"], true);
 	
+
+	// number means the same thing as issue
+	// and will automatically then also map
+	// to patentNumber or reportNumber
+	newItem.number = newItem.issue;
+
 	// edition
 	newItem.edition = getFirstResults(node, [n.prism + "edition", n.prism2_0 + "edition", n.prism2_1 + "edition", n.bibo + "edition", n.so + "bookEdition", n.so + "version"], true);
 	// these fields mean the same thing
@@ -1731,6 +1736,23 @@ var testCases = [
 						"tag": "software"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<rdf:RDF\n xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n xmlns:z=\"http://www.zotero.org/namespaces/export#\"\n xmlns:link=\"http://purl.org/rss/1.0/modules/link/\"\n xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n xmlns:dcterms=\"http://purl.org/dc/terms/\"\n xmlns:prism=\"http://prismstandard.org/namespaces/1.2/basic/\"\n xmlns:bib=\"http://purl.org/net/biblio#\">\n    <bib:Report rdf:about=\"#test-report\">\n        <z:itemType>report</z:itemType>\n        <prism:number>NLR-TP-96-464</prism:number>\n        <dc:title>Test</dc:title>\n    </bib:Report>\n</rdf:RDF>\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Test",
+				"creators": [],
+				"itemID": "#test-report",
+				"reportNumber": "NLR-TP-96-464",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
