@@ -2,7 +2,7 @@
 	"translatorID": "1a615592-77b0-4715-a509-702b66196ff1",
 	"label": "Colorado Leg",
 	"creator": "Andrew Schwartz",
-	"target": "leg.colorado.gov",
+	"target": "^https?://leg\\.colorado\\.gov/(bills|bill-search)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
