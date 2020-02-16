@@ -133,7 +133,11 @@ var testCases = [
 				"billNumber": "HB20-1084",
 				"legislativeBody": "Colorado General Assembly",
 				"session": "2020 Regular Session",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Agriculture"
@@ -171,7 +175,11 @@ var testCases = [
 				"billNumber": "HJR19-1015",
 				"legislativeBody": "Colorado General Assembly",
 				"session": "2019 Regular Session",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -195,7 +203,11 @@ var testCases = [
 				"billNumber": "SB17B-001",
 				"legislativeBody": "Colorado General Assembly",
 				"session": "2017 Extraordinary Session",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
