@@ -70,7 +70,7 @@ function scrape(doc) {
 		`div.field.field-name-field-bill-number.field-type-text.field-label-hidden`
 	).textContent;
 
-	if (item.billNumber) {
+	if (billNumber) {
 		item.billNumber = ZU.trimInternal(billNumber);
 	}
 
