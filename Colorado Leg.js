@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-21 18:06:44"
+	"lastUpdated": "2020-02-16 21:38:12"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -50,7 +49,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll(`header[class='search-result-single-item']>h4>a[href*="/bills/"]`);
+	var rows = doc.querySelectorAll(`header.search-result-single-item>h4>a[href*="/bills/"]`);
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -65,14 +64,16 @@ function getSearchResults(doc, checkOnly) {
 function scrape(doc) {
 	var item = new Zotero.Item("bill");
 
-	item.title = doc.querySelector(`h1[class='node__title node-title']`).textContent;
+	item.title = doc.querySelector(`h1.node-title`).textContent;
 
 	let billNumber = doc.querySelector(
-		`div[class='field field-name-field-bill-number field-type-text field-label-hidden']`
+		`div.field.field-name-field-bill-number.field-type-text.field-label-hidden`
 	).textContent;
 	item.billNumber = ZU.trimInternal(billNumber);
 
-	let sponsors = doc.querySelectorAll(`div[class='sponsor-item']>div[class='member']>div[class='member-details']>h4`);
+	let sponsors = doc.querySelectorAll(
+		`div.sponsor-item>div.member>div.member-details>h4`
+	);
 
 	for (var i = sponsors.length - 1; i >= 0; i--) {
 		let sponsorName = ZU.trimInternal(sponsors[i].textContent);
@@ -80,9 +81,11 @@ function scrape(doc) {
 	}
 	item.legislativeBody = 'Colorado General Assembly';
 
-	item.session = doc.querySelector(`div[class='bill-session']>div>div[class='field-items']>div`).textContent;
+	item.session = doc.querySelector(
+		`div.bill-session>div>div.field-items>div`
+	).textContent;
 
-	let tags = doc.querySelectorAll(`div[class='bill-subjects']>div>div[class=field-items]>div[class*='field-item']`);
+	let tags = doc.querySelectorAll(`div.bill-subjects>div>div.field-items>div.field-item`);
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
