@@ -88,7 +88,7 @@ function scrape(doc) {
 		`div.bill-session>div>div.field-items>div`
 	).textContent;
 
-	item.attachments.push({title: "Snapshot", document: doc});
+	item.attachments.push({ title: "Snapshot", document: doc });
 
 	let tags = doc.querySelectorAll(`div.bill-subjects>div>div.field-items>div.field-item`);
 	for (let tag of tags) {
