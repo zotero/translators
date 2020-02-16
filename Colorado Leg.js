@@ -69,7 +69,10 @@ function scrape(doc) {
 	let billNumber = doc.querySelector(
 		`div.field.field-name-field-bill-number.field-type-text.field-label-hidden`
 	).textContent;
-	item.billNumber = ZU.trimInternal(billNumber);
+
+	if (item.billNumber) {
+		item.billNumber = ZU.trimInternal(billNumber);
+	}
 
 	let sponsors = doc.querySelectorAll(
 		`div.sponsor-item>div.member>div.member-details>h4`
