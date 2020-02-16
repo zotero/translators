@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2020-02-16 19:08:54"
 }
 
 /*
@@ -678,7 +678,7 @@ function getAuthorFromByline(doc, newItem) {
 		byline = doc.getElementsByClassName(bylineClasses[i]);
 		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
 		for(var j=0; j<byline.length; j++) {
-			if (!byline[j].textContent.trim()) continue;
+			if (!byline[j].innerText.trim()) continue;
 
 			bylines.push(byline[j]);
 		}
@@ -692,7 +692,7 @@ function getAuthorFromByline(doc, newItem) {
 		actualByline = bylines[0];
 	} else if(newItem.title) {
 		Z.debug(bylines.length + " bylines found:");
-		Z.debug(bylines.map(function(n) { return ZU.trimInternal(n.textContent)}).join('\n'));
+		Z.debug(bylines.map(function(n) { return ZU.trimInternal(n.innerText)}).join('\n'));
 		Z.debug("Locating the one closest to title.");
 
 		//find the closest one to the title (in DOM)
@@ -761,12 +761,12 @@ function getAuthorFromByline(doc, newItem) {
 	}
 
 	if(actualByline) {
-		var byline = ZU.trimInternal(actualByline.textContent);
+		var byline = ZU.trimInternal(actualByline.innerText);
 		Z.debug("Extracting author(s) from byline: " + byline);
 		var li = actualByline.getElementsByTagName('li');
 		if (li.length) {
 			for (var i=0; i<li.length; i++) {
-				var author = ZU.trimInternal(li[i].textContent);
+				var author = ZU.trimInternal(li[i].innerText);
 				newItem.creators.push(ZU.cleanAuthor(fixCase(author), 'author', author.indexOf(',') != -1));
 			}
 		} else {
