@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 18:09:17"
+	"lastUpdated": "2020-02-17 01:41:54"
 }
 
 /*
@@ -42,7 +42,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
+	if (url.includes('/doi/')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -54,7 +54,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+	var rows = ZU.xpath(doc, '(//span | //div)[contains(@class, "art_title")]/a[contains(@href, "/doi/")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
