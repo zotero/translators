@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-09-17 04:55:38"
+	"lastUpdated": "2020-02-20 20:55:54"
 }
 
 function detectWeb(doc, url) {
@@ -21,14 +21,14 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 	
-	else if ((url.indexOf("search?") !=-1 || url.indexOf("search;") != -1) && getSearchResults(doc)) {
+	else if ((url.indexOf("search") !=-1) && getSearchResults(doc)) {
 		return "multiple";
 	}
 }
 
 
 function getRisUrl(doc) {
-	return ZU.xpathText(doc, '//div[contains(@class,"export-formats")]/ul/li/a[@title="EndNote Export"]/@href');
+	return ZU.xpathText(doc, '//div[contains(@class,"export-formats")]/ul/li/a[contains(text(), "EndNote")]/@href');
 }
 
 
