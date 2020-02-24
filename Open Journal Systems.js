@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-08 11:33:52"
+	"lastUpdated": "2020-02-24 12:08:59"
 }
 
 /*
@@ -56,6 +56,25 @@ function doWeb(doc, url) {
 	}
 }
 
+/**
+ * This function is used instead of ZU.xpathText,
+ * because there are lots of <br> tags which the original function
+ * does remove instead of replacing it by whitespace.
+ **/
+function xpathTextCustom(node, xpath) {
+	var elements = ZU.xpath(node, xpath);
+	if (!elements.length) return null;
+
+	var strings = new Array(elements.length);
+	var text = '';
+	for(var i=0, n=elements.length; i<n; i++) {
+		var el = elements[i];
+		if (text != '') text += '\n\n';
+		text += el.innerText.trim().replace(/\\\\n/, ' ');
+	}
+	return text;
+}
+
 function scrape(doc, _url) {
 	// use Embeded Metadata
 	var trans = Zotero.loadTranslator('web');
@@ -97,8 +116,8 @@ function scrape(doc, _url) {
 
 		// if we still don't have abstract, we can try scraping from page
 		if (!item.abstractNote) {
-			item.abstractNote = ZU.xpathText(doc, '//div[@id="articleAbstract"]/div[1]')
-				|| ZU.xpathText(doc, '//div[contains(@class, "main_entry")]/div[contains(@class, "abstract")]');
+			item.abstractNote = xpathTextCustom(doc, '//div[@id="articleAbstract"]/div[1]')
+				|| xpathTextCustom(doc, '//div[contains(@class, "main_entry")]/div[contains(@class, "abstract")]');
 		}
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.trim().replace(/^Abstract:?\s*/, '');
