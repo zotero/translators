@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-02 00:36:24"
+	"lastUpdated": "2020-03-02 08:21:08"
 }
 
 /*
@@ -93,7 +93,7 @@ function addBookReviewTag(doc, item) {
 
 function validatePageCount(item) {
 	// clear page count if invalid
-	if (item.pages && item.pages.match(/e[0-9]+/))
+	if (item.pages && (item.pages.match(/e[0-9]+/) || item.pages.match(/inside_front_cover/)))
 		item.pages = "";
 }
 
