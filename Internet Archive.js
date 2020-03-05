@@ -13,7 +13,7 @@
 }
 
 function detectWeb(doc, url) {
-	var icon = ZU.xpathText(doc, '//h1/div[@class="left-icon"]/span[contains(@class, "iconochive")]/@class');
+	var icon = ZU.xpathText(doc, '//div[@class="left-icon"]/span[contains(@class, "iconochive")]/@class');
 	if (icon) {
 		if (icon.indexOf("texts") != -1) {
 			return "book";
@@ -161,7 +161,7 @@ function scrape(doc, url) {
 			};
 			Z.debug(pdfSizeMB);
 			if (pdfSizeMB < pref_maxPdfSizeMB){
-				newItem.attachments.push({"url": pdfurl, "title": "Internet Archive Fulltext PDF", "mimeType": "application/pdf" })	
+				newItem.attachments.push({"url": pdfurl, "title": "Internet Archive Fulltext PDF", "mimeType": "application/pdf" })
 			}
 		}
 		newItem.date = test(date);
@@ -173,6 +173,7 @@ function scrape(doc, url) {
 		newItem.runningTime = test(obj.runtime);
 		newItem.rights = test(obj.licenseurl);
 		if (!newItem.rights) newItem.rights = test(obj.rights);
+		if (Array.isArray(obj.isbn) && obj.isbn.length > 0) newItem.ISBN = (obj.isbn).join(' ');
 		newItem.url = "http://archive.org/details/" + test(obj.identifier);
 
 		newItem.complete();
@@ -231,15 +232,49 @@ var testCases = [
 				"publisher": "Bristol, Reprinted for J.M. Gutch and Sold in London by R. Baldwin, and R. Triphook",
 				"shortTitle": "The gull's hornbook",
 				"url": "http://archive.org/details/gullshornbookstu00dekk",
-				"attachments": [
-					{
-						"title": "Internet Archive Fulltext PDF",
-						"mimeType": "application/pdf"
-					}
-				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"attachments": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://archive.org/details/darktowersdeutsc0000enri/mode/2up",
+		"items": [
+			{
+				"itemType":"book",
+				"creators":[
+					{
+						"firstName":"David",
+						"lastName":"Enrich",
+						"creatorType":"author"
+					},
+					{
+						"lastName":"Internet Archive",
+						"creatorType":"contributor",
+						"fieldMode": 1
+					}
+				],
+				"tags":[
+					{
+						"tag":"Trump, Donald, 1946-"
+					}
+				],
+				"title":"Dark towers : Deutsche Bank, Donald Trump, and an epic trail of destruction",
+				"abstractNote":"x, 402 pages ; 24 cm; \"A searing exposé by an award-winning journalist of the most scandalous bank in the world, including its shadowy ties to Donald Trump's business empire\"--; Includes bibliographical references (pages 367-390) and index; \"A searing expose by an award-winning journalist of the most scandalous bank in the world, including its shadowy ties to Donald Trump's business empire\"--",
+				"date":"2020",
+				"publisher":"New York, NY : Custom House",
+				"language":"eng",
+				"numPages":"426",
+				"ISBN":"9780062878816 9780062878830",
+				"url":"http://archive.org/details/darktowersdeutsc0000enri",
+				"libraryCatalog":"Internet Archive",
+				"shortTitle":"Dark towers",
+				"notes": [],
+				"seeAlso": [],
+				"attachments": []
 			}
 		]
 	},
@@ -338,7 +373,7 @@ var testCases = [
 					}
 				],
 				"date": "1990",
-				"abstractNote": "Published by\n   MECC\nDeveloped by\n   MECC\nReleased\n   1990\nAlso For\n   Apple II, Atari 8-bit, Macintosh, Windows, Windows 3.x \nGenre\n   Adventure, Educational, Simulation\nPerspective\n   3rd-Person Perspective, Side-Scrolling\nSport\n   Hunting\nTheme\n   Managerial, Real-Time\nEducational\n   Geography, HistoryDescription\n  As a covered wagon party of pioneers, you head out west from Independence, Missouri to the Willamette River and valley in Oregon. You first must stock up on provisions, and then, while traveling, make decisions such as when to rest, how much food to eat, etc. The Oregon Trail incorporates simulation elements and planning ahead, along with discovery and adventure, as well as mini-game-like activities (hunting and floating down the Dalles River). From Mobygames.com. Original Entry",
+				"abstractNote": "Also For\nApple II, Macintosh, Windows, Windows 3.x\nDeveloped by\nMECC\nPublished by\nMECC\nReleased\n1990\n\n\nPacing\nReal-Time\nPerspective\nBird's-eye view, Side view, Text-based / Spreadsheet, Top-down\nEducational\nGeography, History\nGenre\nEducational, Simulation\nSetting\nWestern\nInterface\nText Parser\nGameplay\nManagerial / Business Simulation\nVisual\nFixed / Flip-screen\n\n\nDescription\n\nAs a covered wagon party of pioneers, you head out west from Independence, Missouri to the Willamette River and valley in Oregon.  You first must stock up on provisions, and then, while traveling, make decisions such as when to rest, how much food to eat, etc. The Oregon Trail incorporates simulation elements and planning ahead, along with discovery and adventure, as well as mini-game-like activities (hunting and floating down the Dalles River).\n\nFrom Mobygames.com. Original Entry",
 				"libraryCatalog": "Internet Archive",
 				"url": "http://archive.org/details/msdos_Oregon_Trail_The_1990",
 				"attachments": [],
@@ -401,7 +436,8 @@ var testCases = [
 					"Nuclear warfare"
 				],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"ISBN": "9780393017984"
 			}
 		]
 	},
@@ -460,6 +496,7 @@ var testCases = [
 					"rachel maddow",
 					"richard nixon",
 					"russia",
+					"south carolina",
 					"south carolina",
 					"titan atlas",
 					"washington",
