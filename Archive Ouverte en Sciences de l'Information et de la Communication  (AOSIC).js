@@ -12,71 +12,103 @@
 	"lastUpdated": "2020-03-09 12:23:02"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2018 Sylvain Machefert
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
-	if (doc.title.toLowerCase().match(/::\ search|::\ recherche/)) {
-	return "multiple";
-	//return false;
-	} else if (url.match(/sic_\d+|tel-\d+/)) {
+	if (doc.title.toLowerCase().match(/:: search|:: recherche/)) {
+		return "multiple";
+	}
+	else if (url.match(/sic_\d+|tel-\d+/)) {
 		return "journalArticle";
 	}
+	return false;
 }
 
 var metaTags = {
-	"DC.relation":"url",
-	"DC.date":"date",
-	"DC.description":"abstractNote",
-	"DC.creator":"creators",
-	"DC.title":"title"
-}
+	"DC.relation": "url",
+	"DC.date": "date",
+	"DC.description": "abstractNote",
+	"DC.creator": "creators",
+	"DC.title": "title",
+};
 
 function doWeb(doc, url) {
-	var articles = new Array();
+	var articles = [];
 	if (detectWeb(doc, url) == "multiple") {
 		var items = Zotero.Utilities.getItemArray(doc, doc, /sic_\d+|tel-\d+/);
-		items = Zotero.selectItems(items) 
+		items = Zotero.selectItems(items);
 		for (var i in items) {
 			articles.push(i);
 		}
-	} else {
+	}
+	else {
 		articles = [url];
 	}
-	Zotero.Utilities.processDocuments(articles, function(doc) {
+	Zotero.Utilities.processDocuments(articles, function (doc) {
 		var xpath = '//meta[@name]';
-		var data = new Object();
+		var data = {};
 		var metas = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
 		var meta;
-		while (meta = metas.iterateNext()) {
+
+		meta = metas.iterateNext();
+		while (meta) {
 			if (data[meta.name]) {
 				data[meta.name] = data[meta.name] + ";" + meta.content;
-			} else {
+			}
+			else {
 				data[meta.name] = meta.content;
 			}
+			meta = metas.iterateNext();
 		}
 
 		var item = new Zotero.Item("journalArticle");
 		for (var tag in metaTags) {
 			if (tag == "DC.creator") {
 				var authors = data['DC.creator'].split(";");
-				for (var i=0; i<authors.length; i++) {
+				for (var i = 0; i < authors.length; i++) {
 					var aut = authors[i];
 					aut = aut.replace(/^([^,]+),\s+(.*)$/, "$2 $1");
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 				}
-			} else {
+			}
+			else {
 				item[metaTags[tag]] = data[tag];
 			}
 		}
 		
-		var pdfurl = data["citation_pdf_url"];
+		var pdfurl = data.citation_pdf_url;
 		
 		if (pdfurl) {
 			item.attachments = [
-				{url:item.url, title:"AOSIC Snapshot", mimeType:"text/html"},
-				{url:pdfurl, title:"AOSIC Full Text PDF", mimeType:"application/pdf"}
+				{ url: item.url, title: "AOSIC Snapshot", mimeType: "text/html" },
+				{ url: pdfurl, title: "AOSIC Full Text PDF", mimeType: "application/pdf" }
 			];
 		}
 		item.complete();
-	}, function() {Zotero.done();});
+	}, function () {
+		Zotero.done();
+	});
 	Zotero.wait();
 }/** BEGIN TEST CASES **/
 var testCases = [
