@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-21 11:52:29"
+	"lastUpdated": "2020-03-09 14:34:22"
 }
 
 /*
@@ -38,6 +38,9 @@
 var domain2translator = {
 	'www.sudoc.abes.fr': '1b9ed730-69c7-40b0-8a06-517a89a3a278',
 	'hal.archives-ouvertes.fr': '58ab2618-4a25-4b9b-83a7-80cd0259f896',
+	'edutice.archives-ouvertes.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'halshs.archives-ouvertes.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'archivesic.ccsd.cnrs.fr' : 'dedcae51-073c-48fb-85ce-2425e97f128d',
 	'memsic.ccsd.cnrs.fr': '58ab2618-4a25-4b9b-83a7-80cd0259f896',
 	'catalogue.bnf.fr': '47533cd7-ccaa-47a7-81bb-71c45e68a74d',
 	'www.theses.fr': '3f73f0aa-f91c-4192-b0d5-907312876cb9',
