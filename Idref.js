@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-09 14:34:22"
+	"lastUpdated": "2020-03-09 14:42:40"
 }
 
 /*
@@ -47,6 +47,9 @@ var domain2translator = {
 	'www.persee.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
 	'oatao.univ-toulouse.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
 	'pub.orcid.org': 'bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7',
+	'tel.archives-ouvertes.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'medihal.archives-ouvertes.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'dumas.ccsd.cnrs.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
 };
 
 function detectWeb(doc, _url) {
