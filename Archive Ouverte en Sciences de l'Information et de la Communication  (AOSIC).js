@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 05:58:49"
+	"lastUpdated": "2020-03-09 12:23:02"
 }
 
 function detectWeb(doc, url) {
@@ -52,7 +52,7 @@ function doWeb(doc, url) {
 				data[meta.name] = meta.content;
 			}
 		}
-		Zotero.debug(data);
+
 		var item = new Zotero.Item("journalArticle");
 		for (var tag in metaTags) {
 			if (tag == "DC.creator") {
@@ -66,12 +66,15 @@ function doWeb(doc, url) {
 				item[metaTags[tag]] = data[tag];
 			}
 		}
-		var pdfurl = doc.evaluate('//a[contains(@href, ".pdf")]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().href //.href.match(/url=([^&]+)&/)[1];
-		Zotero.debug(pdfurl);
-		item.attachments = [
-			{url:item.url, title:"AOSIC Snapshot", mimeType:"text/html"},
-			{url:pdfurl, title:"AOSIC Full Text PDF", mimeType:"application/pdf"}
-		];
+		
+		var pdfurl = data["citation_pdf_url"];
+		
+		if (pdfurl) {
+			item.attachments = [
+				{url:item.url, title:"AOSIC Snapshot", mimeType:"text/html"},
+				{url:pdfurl, title:"AOSIC Full Text PDF", mimeType:"application/pdf"}
+			];
+		}
 		item.complete();
 	}, function() {Zotero.done();});
 	Zotero.wait();
@@ -79,10 +82,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224/fr/",
+		"url": "https://archivesic.ccsd.cnrs.fr/sic_00665224/fr/",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "comprendre une organisation par l'analyse de ses documents",
 				"creators": [
 					{
 						"firstName": "Brigitte",
@@ -90,36 +94,32 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2011",
+				"abstractNote": "s'appuyer sur des observables que sont les documents d'entreprise donne à voir à la fois une dynamique de formalisation des écrits professionnels, une activité particulière, celle d'éditorialisation, ainsi que des traces d'intervention institutionnelle ; tout cela fait du document un miroir et un porteur d'ordre.",
+				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
 				"attachments": [
 					{
-						"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224",
 						"title": "AOSIC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://archivesic.ccsd.cnrs.fr/docs/00/66/52/24/PDF/PAROSIC_BG.pdf",
 						"title": "AOSIC Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://archivesic.ccsd.cnrs.fr/sic_00665224",
-				"date": "2011",
-				"abstractNote": "s'appuyer sur des observables que sont les documents d'entreprise donne à voir à la fois une dynamique de formalisation des écrits professionnels, une activité particulière, celle d'éditorialisation, ainsi que des traces d'intervention institutionnelle ; tout cela fait du document un miroir et un porteur d'ordre.",
-				"title": "comprendre une organisation par l'analyse de ses documents",
-				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://tel.archives-ouvertes.fr/tel-00483442/fr/",
+		"url": "https://tel.archives-ouvertes.fr/tel-00483442/fr/",
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Valorisation d'un patrimoine documentaire industriel et évolution vers un système de gestion des connaissances orienté métiers",
 				"creators": [
 					{
 						"firstName": "Caroline",
@@ -127,27 +127,22 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2010/04/14",
+				"abstractNote": "Le patrimoine documentaire des entreprises s'est souvent accumulé sans que ces dernières puissent s'adapter au rythme des évolutions des technologies de l'information. La mémoire collective qui ne cesse d'être produite voit sa masse croître et est devenue éparse et hétérogène. Comme nombre d'entreprises, des problématiques transverses imposent aujourd'hui à la Division Ingénierie Nucléaire (DIN) d'EDF d'être capable de mobiliser ses connaissances de façon opérationnelle. Mais la valorisation de son patrimoine informationnel dépasse largement les aspects techniques pour prendre en compte l'organisation dans sa globalité. Ce sont en effet les métiers cœurs de l'entreprise qui sont le point de départ de notre réflexion. Dans ce contexte d'ingénierie c'est par la documentation que les connaissances techniques transitent et sont exprimées par des concepts propres aux métiers. La terminologie métiers est la clé permettant de valoriser les connaissances et de mieux gérer le patrimoine de la DIN. Elle nous permet d'aller vers une représentation explicite, au sein d'une base de connaissances centrée sur le \" sens métier \" de l'organisation. Notre approche résolument empirique et qualitative aboutit à une méthode de construction d'une base de connaissances métiers appliquée à un domaine délimité de la Division Ingénierie Nucléaire d'EDF.",
+				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
 				"attachments": [
 					{
-						"url": "http://tel.archives-ouvertes.fr/tel-00483442",
 						"title": "AOSIC Snapshot",
 						"mimeType": "text/html"
 					},
 					{
-						"url": "http://tel.archives-ouvertes.fr/docs/00/67/11/78/PDF/ThA_se_C_Djambian.pdf",
 						"title": "AOSIC Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
-				"url": "http://tel.archives-ouvertes.fr/tel-00483442",
-				"date": "2010-04-14",
-				"abstractNote": "Le patrimoine documentaire des entreprises s'est souvent accumulé sans que ces dernières puissent s'adapter au rythme des évolutions des technologies de l'information. La mémoire collective qui ne cesse d'être produite voit sa masse croître et est devenue éparse et hétérogène. Comme nombre d'entreprises, des problématiques transverses imposent aujourd'hui à la Division Ingénierie Nucléaire (DIN) d'EDF d'être capable de mobiliser ses connaissances de façon opérationnelle. Mais la valorisation de son patrimoine informationnel dépasse largement les aspects techniques pour prendre en compte l'organisation dans sa globalité. Ce sont en effet les métiers cœurs de l'entreprise qui sont le point de départ de notre réflexion. Dans ce contexte d'ingénierie c'est par la documentation que les connaissances techniques transitent et sont exprimées par des concepts propres aux métiers. La terminologie métiers est la clé permettant de valoriser les connaissances et de mieux gérer le patrimoine de la DIN. Elle nous permet d'aller vers une représentation explicite, au sein d'une base de connaissances centrée sur le ' sens métier ' de l'organisation. Notre approche résolument empirique et qualitative aboutit à une méthode de construction d'une base de connaissances métiers appliquée à un domaine délimité de la Division Ingénierie Nucléaire d'EDF.",
-				"title": "Valorisation d'un patrimoine documentaire industriel et évolution vers un système de gestion des connaissances orienté métiers",
-				"libraryCatalog": "Archive Ouverte en Sciences de l'Information et de la Communication  (AOSIC)",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
