@@ -136,7 +136,7 @@ function scrape(doc, url) {
 		const fullDate = ZU.xpathText(xmlDoc, '//dcterms:dateAccepted', ns);
 		const year = ZU.xpathText(xmlDoc, '//dc:date', ns);
 
-		// Some old reccords doesn't have a full date instead we can use the defense year
+		// Some old records doesn't have a full date instead we can use the defense year
 		newItem.date = fullDate ? fullDate : year;
 
 		const permalink = ZU.xpath(xmlDoc, '//bibo:Document', ns);
