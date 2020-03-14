@@ -121,7 +121,7 @@ function genXMLId(item) {
 		}
 		// Replace space, tabulations, colon, punctuation, parenthesis and apostrophes by "_"
 		xmlid = xmlid.replace(/([ \t\[\]:\u00AD\u0021-\u002C\u2010-\u2021])+/g, "_");
-		
+
 
 		// Remove any non xml NCName characters
 
@@ -344,6 +344,13 @@ function generateItem(item, teiDoc) {
 		monogr.appendChild(idno);
 	}
 
+    // multivolume works
+    if (item.numberOfVolumes) {
+        var volumes = teiDoc.createElementNS(ns.tei, "extent");
+        volumes.appendChild(teiDoc.createTextNode(item.numberOfVolumes));
+        monogr.appendChild(volumes);
+    }
+
 	// creators are all people only remotely involved into the creation of
 	// a resource
 	for (let creator of item.creators) {
@@ -471,7 +478,7 @@ function generateItem(item, teiDoc) {
 		var date = teiDoc.createElementNS(ns.tei, "date");
 		imprint.appendChild(date);
 		}
-		
+
 	if (item.accessDate) {
 		var note = teiDoc.createElementNS(ns.tei, "note");
 		note.setAttribute("type", "accessed");
