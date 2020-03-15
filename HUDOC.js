@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-15 19:24:20"
+	"lastUpdated": "2020-03-15 19:41:43"
 }
 
 /*
@@ -43,6 +43,7 @@ TODO:
 - Handle different types of documents via the API.
 - Use keywords for tags
 - Use references to create "related" entries if they exist
+- Put in short titles
 
 => All relate to one thing: This translator is currently unable to access the API
 to query it for the taxonomies/thesauruses used for decision type ("typedescription"),
@@ -182,6 +183,8 @@ function doWeb(doc, url) {
 function scrapeDecision(doc, url) { //Works for both Court judgments and decisions
 	var item = new Zotero.Item("case");
 	
+	//Title
+	//FIXME: Use full title of advisory opinion, not the short title
 	var cap_title = ZU.capitalizeTitle(text(doc, "title").toLowerCase(), true);
 	
 	//Zotero capitalizes the "v.", so we need to correct that for English and French cases
@@ -197,7 +200,7 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 	var court = scrapeMetaData(doc, "originatingbody");
 	
 	if (court != null) { //Advisory opinions have no "originatingbody" listed
-		item.author = court.replace("Court", "ECtHR");
+		item.creators.push({lastName:court.replace("Court", "ECtHR"), creatorType:"author"});
 	
 		if (court.includes("Grand Chamber")) {
 			item.court = "ECtHR [GC]";
@@ -211,7 +214,7 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 			item.court = "ECtHR";
 		}
 	} else { //All Advisory Opinions (so far) are decided by the GC
-		item.author = "ECtHR (Grand Chamber)";
+		item.creators.push({lastName:"ECtHR (Grand Chamber)", creatorType:"author"});
 		item.court = "ECtHR [GC]";
 	}
 	
@@ -286,10 +289,10 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 								+ appno_string + " AND "
 								+ doctype_string + " AND "
 								+ "(kpdate=\"" + kpdate + "\")"
-								+ "&select=itemid" //Adapt based on what is needed
+								+ "&select=itemid"
 								+ "&sort=&start=0&length=500";
 			
-			Zotero.debug("Getting legal summary at: " + summary_url);
+			Zotero.debug("Getting id of legal summary at: " + summary_url);
 			
 			ZU.doGet(summary_url, function(json) {
 				json = JSON.parse(json);
@@ -298,6 +301,8 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 				if (json["resultcount"] == 1) {
 					text_url = "https://hudoc.echr.coe.int/app/conversion/docx/html/body?library=ECHR&id="
 								+ json["results"][0]["columns"]["itemid"];
+					
+					Zotero.debug("Getting text of legal summary at: " + text_url);
 					
 					ZU.doGet(text_url, function(text) {
 						text = text.replace(/<style>[\s\S]*<\/style>/, "");
@@ -317,7 +322,6 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 		} else {
 			item.complete();
 		}
-
 	});
 	
 }
