@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-15 19:41:43"
+	"lastUpdated": "2020-03-15 20:08:22"
 }
 
 /*
@@ -39,7 +39,8 @@
 
 TODO:
 - Handle more than judgments or decisions (summaries, translations, search results)
-- Handle resolutions and reports properly
+- Handle reports
+- Handle resolutions and advisory opinions properly (esp. title)
 - Handle different types of documents via the API.
 - Use keywords for tags
 - Use references to create "related" entries if they exist
@@ -56,6 +57,7 @@ Search for "// ###..//sites/echr/echr.js ###"" in compiled.js to find most API f
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}
 function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
+//Scrapes some metadata from the document
 //TODO: integrate function into scrape
 function scrapeMetaData(doc, detail) { //Only scrapes the header of the main page
 	switch (detail) {
@@ -67,6 +69,7 @@ function scrapeMetaData(doc, detail) { //Only scrapes the header of the main pag
 	}
 }
 
+//Gets the itemid of the document
 function getItemID(url) {
 	var url_regex = /%22itemid%22:\[%22([\d-]*)%22]|\?i=([\d-]*)/i;
 	var id = url.match(url_regex);
@@ -74,6 +77,7 @@ function getItemID(url) {
 	return id[1];
 }
 
+//Adds the type of judgment at the end of the name
 function getTypeBit(doc, url) { //TODO: Switch to 'url' once we use the API instead
 	var description = scrapeMetaData(doc, "typedescription");
 	
@@ -107,9 +111,9 @@ function getTypeBit(doc, url) { //TODO: Switch to 'url' once we use the API inst
 	if (description.includes("Communicated")) {
 		return " (communicated)"; //TODO: Check if correct
 	} else
-	if (description.includes("Report")) {
-		return ""; //Currently only in here because it is one of the document types. But reports are a different Zotero type
-	} else
+	//if (description.includes("Report")) {
+	//	return ""; //Currently only in here because it is one of the document types. But reports are a different Zotero type
+	//} else
 	if (description.includes("Revision")) {
 		return " (dec. on revision)"; //TODO: Check if correct
 	} else
@@ -118,6 +122,57 @@ function getTypeBit(doc, url) { //TODO: Switch to 'url' once we use the API inst
 	}
 	
 	return "";
+}
+
+//Downloads the legal summary in HUDOC
+function getLegalSummary(item, appno) {
+	//A bit hacky. Should probably query kpdate and then convert it
+	var kpdate = item.dateDecided.replace(/(..).(..).(....)/, "$3-$2-$1");
+	
+	var appno_string = appno.join(" AND appno:");
+	
+	//Save the French version if user visited the French version of the judgment
+	if (item["language"] == "fra") {
+		var doctype_string = "doctype:CLINF";
+	} else {
+		var doctype_string = "doctype:CLIN";
+	}
+	
+	var summary_url = "https://hudoc.echr.coe.int/app/query/results?query=contentsitename=ECHR "
+						+ appno_string + " AND "
+						+ doctype_string + " AND "
+						+ "(kpdate=\"" + kpdate + "\")"
+						+ "&select=itemid"
+						+ "&sort=&start=0&length=500";
+	
+	Zotero.debug("Getting id of legal summary at: " + summary_url);
+	
+	//Request id of legal summary
+	ZU.doGet(summary_url, function(json) {
+		json = JSON.parse(json);
+		
+		if (json["resultcount"] == 1) {
+			text_url = "https://hudoc.echr.coe.int/app/conversion/docx/html/body?library=ECHR&id="
+						+ json["results"][0]["columns"]["itemid"];
+			
+			Zotero.debug("Getting text of legal summary at: " + text_url);
+			
+			//Request text of legal summary
+			ZU.doGet(text_url, function(text) {
+				text = text.replace(/<style>[\s\S]*<\/style>/, "");
+
+				item.notes.push({
+					title: "HUDOC Legal Summary",
+					note: "<h1> HUDOC Legal Summary </h1> </br>" + text
+				});
+				
+				item.complete();
+			}); 
+			
+		} else {
+			item.complete();	
+		}
+	});
 }
 
 function detectWeb(doc, url) {
@@ -130,11 +185,12 @@ function detectWeb(doc, url) {
 
 	var doc_type = scrapeMetaData(doc, "typedescription");
 
-	if (doc_type.includes("Judgment") || doc_type.includes("Decision") || doc_type.includes("Advisory Opinion")) {
+	if (doc_type.includes("Judgment") 
+	|| doc_type.includes("Decision") 
+	|| doc_type.includes("Advisory Opinion")
+	|| doc_type.includes("Res-")) {
 		return "case";
 	}
-	
-	
 	
 	return false;
 	
@@ -184,7 +240,6 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 	var item = new Zotero.Item("case");
 	
 	//Title
-	//FIXME: Use full title of advisory opinion, not the short title
 	var cap_title = ZU.capitalizeTitle(text(doc, "title").toLowerCase(), true);
 	
 	//Zotero capitalizes the "v.", so we need to correct that for English and French cases
@@ -197,6 +252,7 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 	item.caseName = cap_title + getTypeBit(doc, url);
 	
 	//Court and Author
+	//FIXME: Unsure if author should be listed like this or rather get removed 
 	var court = scrapeMetaData(doc, "originatingbody");
 	
 	if (court != null) { //Advisory opinions have no "originatingbody" listed
@@ -230,14 +286,15 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 	ZU.doGet(query_url, function(json) {
 		json = JSON.parse(json)["results"][0]["columns"];
 		
-		Zotero.debug("Queried HUDOC API at: " + query_url + "\n\n Result:\n" + json);
+		Zotero.debug("Queried HUDOC API at: " + query_url + "\n\n Result:\n");
+		Zotero.debug(json);
 		
 		//Application numbers
 		//FIXME: Decide whether to prepend "app. no.". Some styles automatically add "no." (Chicago)
 		//while most others do not (OSCOLA, APA).
 		var appno = json["appno"].split(";");
 		if (appno.toString().length !== 0) { //Only if not empty
-			if (Array.isArray(appno)) {
+			if (appno.length > 1) {
 				var length = appno.length;
 				var comma_part = appno.slice(0, length-1);
 				var appnos = comma_part.join(", ") + " and " + appno[length-1].toString();
@@ -271,54 +328,8 @@ function scrapeDecision(doc, url) { //Works for both Court judgments and decisio
 		});
 		
 		//Download Legal Summary
-		//Request id of legal summary
 		if (appno.length !== 0) { //without app. nos. we can't find a legal summary
-			//A bit hacky. Should probably query kpdate and then convert it
-			var kpdate = item.dateDecided.replace(/(..).(..).(....)/, "$3-$2-$1");
-			
-			var appno_string = appno.join(" AND appno:");
-			
-			//Save the French version if user visited the French version of the judgment
-			if (item["language"] == "fra") {
-				var doctype_string = "doctype:CLINF";
-			} else {
-				var doctype_string = "doctype:CLIN";
-			}
-			
-			var summary_url = "https://hudoc.echr.coe.int/app/query/results?query=contentsitename=ECHR "
-								+ appno_string + " AND "
-								+ doctype_string + " AND "
-								+ "(kpdate=\"" + kpdate + "\")"
-								+ "&select=itemid"
-								+ "&sort=&start=0&length=500";
-			
-			Zotero.debug("Getting id of legal summary at: " + summary_url);
-			
-			ZU.doGet(summary_url, function(json) {
-				json = JSON.parse(json);
-				
-				//Request text of legal summary
-				if (json["resultcount"] == 1) {
-					text_url = "https://hudoc.echr.coe.int/app/conversion/docx/html/body?library=ECHR&id="
-								+ json["results"][0]["columns"]["itemid"];
-					
-					Zotero.debug("Getting text of legal summary at: " + text_url);
-					
-					ZU.doGet(text_url, function(text) {
-						text = text.replace(/<style>[\s\S]*<\/style>/, "");
-
-						item.notes.push({
-							title: "HUDOC Legal Summary",
-							note: "<h1> HUDOC Legal Summary </h1> </br>" + text
-						});
-						
-						item.complete();
-					}); 
-					
-				} else {
-					item.complete();	
-				}
-			});
+			getLegalSummary(item, appno);
 		} else {
 			item.complete();
 		}
