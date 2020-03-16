@@ -266,7 +266,7 @@ var testCases = [
 				"url": "http://www.theses.fr/s128743",
 				"libraryCatalog": "theses.fr",
 				"rights": "Les données de Theses.fr sont sous licence Etalab"
-		   }
+		   	}
 		]
 	}
 ]
