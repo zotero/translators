@@ -70,6 +70,7 @@ function doWeb(doc, url) {
 			if (!items) return;
 
 			const records = [];
+			let item = null;
 
 			for (item in items) {
 				records.push(item);
