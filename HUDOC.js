@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-16 11:58:01"
+	"lastUpdated": "2020-03-16 12:03:51"
 }
 
 /*
@@ -188,11 +188,13 @@ function detectWeb(doc, url) {
 	var doc_type = scrapeMetaData(doc, "typedescription");
 
 	if ((doc_type.includes("Judgment") 
-	|| doc_type.includes("Decision") 
-	|| doc_type.includes("Advisory Opinion")
-	|| doc_type.includes("Res-")
-	|| doc_type.includes("Communicated")) 
-	&& !text(doc, "title").toLowerCase().includes("translation]")) { //Exclude translations. toLowerCase() is added because "translation" is sometimes capitalized
+		|| doc_type.includes("Decision") 
+		|| doc_type.includes("Advisory Opinion")
+		|| doc_type.includes("Res-")
+		|| doc_type.includes("Communicated")) 
+	&& //Exclude translations and press releases.
+	!(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
+		|| doc_type.includes("Press Release"))) { 
 		return "case";
 	}
 	
