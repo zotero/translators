@@ -3,13 +3,13 @@
 	"label": "HUDOC",
 	"creator": "Jonas Skorzak",
 	"target": "https?:\\/\\/hudoc\\.echr\\.coe\\.int.*",
-	"minVersion": "3.0",
+	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-15 23:21:24"
+	"lastUpdated": "2020-03-16 11:34:04"
 }
 
 /*
