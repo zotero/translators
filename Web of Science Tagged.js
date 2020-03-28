@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-03-28 19:31:21"
+	"lastUpdated": "2020-03-28 22:56:16"
 }
 
 /*
@@ -223,12 +223,10 @@ function doImport(text) {
 	
 	var rawLine;
 	while ((rawLine = Zotero.read()) !== false) {    // until EOF
-		// trim leading space if this line is not part of a note
-		line = rawLine.replace(/^\s+/, "");
-		//Z.debug("line: " + line);
-		var split = line.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
+		//Z.debug("line: " + rawLine);
+		let split = rawLine.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
-		if (line == "ER") split = ["","ER",""];
+		if (rawLine == "ER") split = ["","ER",""];
 		if (split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
@@ -889,6 +887,11 @@ var testCases = [
 					{
 						"firstName": "YANG",
 						"lastName": "Y",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "LI",
+						"lastName": "W",
 						"creatorType": "inventor"
 					}
 				],
