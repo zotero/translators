@@ -1,15 +1,15 @@
 {
 	"translatorID": "874d70a0-6b95-4391-a681-c56dabaa1411",
-	"label": "Clinical Trials",
+	"label": "clinicaltrials.gov",
 	"creator": "Ryan Velazquez",
 	"target": "^https://(www\\.)?clinicaltrials\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
-	"translatorType": 4, // TODO
-	"browserSupport": "gcsibv", // TODO
-	"lastUpdated": "2020-04-01 11:00:00"
+	"translatorType": 4,
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2020-04-01 14:00:00"
 }
 
 /*
@@ -36,101 +36,95 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('https://clinicaltrials.gov/ct2/results')){
-		return "multiple"
-	} else {
-		return "report"
+	if (url.includes('https://clinicaltrials.gov/ct2/results')) {
+		throw new Error('clinicaltrials.gov search pages not supported by Zotero, only individual trials');
 	}
-}
-
-// TODO: implement the search functionality
-function getSearchResults(doc, checkOnly) {
-	return false
+	else {
+		return "report";
+	}
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		return null // TODO: implement the search functionality, just returning null for now
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
-		});
-	}
-	else {
-		scrape(doc, url);
-	}
+	scrape(doc, url);
 }
 
 function isJsonAPIRequest(url) {
 	if (url.includes("https://clinicaltrials.gov/api/query") && url.includes("fmt=JSON")) {
-		return true
-	} else {
-		return false
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
 function isXmlAPIRequest(url) {
 	if (url.includes("https://clinicaltrials.gov/api/query") && url.includes("fmt=XML")) {
-		return true
-	} else {
-		return false
+		return true;
+	}
+	else {
+		return false;
 	}
 }
 
 function getClinicalTrialID(url) {
 	// TODO: make sure this handles all the potential URLs
-	if (isXmlAPIRequest(url) || isJsonAPIRequest(url)){
-		return url.split("expr=")[1].split("&")[0]
-	} else {
-		return url.split('/show/')[1].split("?")[0]
+	if (isXmlAPIRequest(url) || isJsonAPIRequest(url)) {
+		return url.split("expr=")[1].split("&")[0];
+	}
+	else {
+		return url.split('/show/')[1].split("?")[0];
 	}
 }
 
 function dateTimeToDateString(dateTime) {
-	return dateTime.split(" ")[0].split(":").join("-")
+	return dateTime.split(" ")[0].split(":").join("-");
 }
 
 function scrape(doc, url) {
-	const clinicalTrialID = getClinicalTrialID(url)
-	let jsonRequestURL
-	if (!isJsonAPIRequest(url)){
-		jsonRequestURL = `https://clinicaltrials.gov/api/query/full_studies?expr=${clinicalTrialID}&fmt=JSON`
-	} else {
-		jsonRequestURL = url
+	const clinicalTrialID = getClinicalTrialID(url);
+	let jsonRequestURL;
+	if (!isJsonAPIRequest(url)) {
+		jsonRequestURL = `https://clinicaltrials.gov/api/query/full_studies?expr=${clinicalTrialID}&fmt=JSON`;
+	}
+	else {
+		jsonRequestURL = url;
 	}
 
-	ZU.doGet(jsonRequestURL, function(resp) {
-		data = JSON.parse(resp)
-		var item = new Zotero.Item(type)
-		const study = data.FullStudiesResponse.FullStudies[0].Study
-		item.itemType = "report"
-		item.title = study.ProtocolSection.IdentificationModule.OfficialTitle
+	ZU.doGet(jsonRequestURL, function (resp) {
+		const data = JSON.parse(resp);
+		var item = new Zotero.Item("report");
+		const study = data.FullStudiesResponse.FullStudies[0].Study;
+		item.itemType = "report";
+		item.title = study.ProtocolSection.IdentificationModule.OfficialTitle;
 
 		// Get the creator info
-		const responsibleParty = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty
+		const responsibleParty = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
 		if (typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string") {
-			let authorName = responsibleParty.ResponsiblePartyInvestigatorFullName
+			let authorName = responsibleParty.ResponsiblePartyInvestigatorFullName;
 			item.creator = {
 				author: authorName
-			}
-		} else if (study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty.ResponsiblePartyType == "Sponsor") {
-			let sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName
+			};
+		}
+		else if (study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty.ResponsiblePartyType == "Sponsor") {
+			let sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName;
 			item.creator = {
 				author: sponsor
-			}
+			};
 		}
 
-		item.date = study.ProtocolSection.StatusModule.LastUpdateSubmitDate // TODO: is this the date that we want? Would "StudyFirstSubmitDate" be better? 
-		item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs)
-		item.libraryCatalog = "clinicaltrials.gov"
-		item.shortTitle = study.ProtocolSection.IdentificationModule.BriefTitle
-		item.url = "https://clinicaltrials.gov/ct2/show/" + clinicalTrialID
-		item.complete()
-	})
+		item.date = study.ProtocolSection.StatusModule.LastUpdateSubmitDate; // TODO: is this the date that we want? Would "StudyFirstSubmitDate" be better?
+		item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs);
+		item.libraryCatalog = "clinicaltrials.gov";
+		item.shortTitle = study.ProtocolSection.IdentificationModule.BriefTitle;
+		item.url = "https://clinicaltrials.gov/ct2/show/" + clinicalTrialID;
+		item.complete();
+	});
 }
 
 
 /** BEGIN TEST CASES **/
-var testCases = [ // TODO: set up more test cases
+// TODO: set up more test cases
+var testCases = [ 
 	{
 		"type": "web",
 		"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
@@ -139,8 +133,8 @@ var testCases = [ // TODO: set up more test cases
 				"itemType": "report",
 				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
 				"creator": {
-						"author": "Gilead Sciences"
-					},
+					"author": "Gilead Sciences"
+				},
 				"date": "February 28, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
