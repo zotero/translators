@@ -36,11 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	// TODO: confirm that there all searches will have ct2/results in the url
 	if (url.includes('https://clinicaltrials.gov/ct2/results')){
 		return "multiple"
 	} else {
-		return "journalArticle"
+		return "report"
 	}
 }
 
@@ -79,10 +78,10 @@ function isXmlAPIRequest(url) {
 
 function getClinicalTrialID(url) {
 	// TODO: make sure this handles all the potential URLs
-	if (isXmlAPIRequest(url)){
+	if (isXmlAPIRequest(url) || isJsonAPIRequest(url)){
 		return url.split("expr=")[1].split("&")[0]
 	} else {
-		return url.split('/show/')[1]
+		return url.split('/show/')[1].split("?")[0]
 	}
 }
 
@@ -91,49 +90,64 @@ function dateTimeToDateString(dateTime) {
 }
 
 function scrape(doc, url) {
+	const clinicalTrialID = getClinicalTrialID(url)
 	let jsonRequestURL
 	if (!isJsonAPIRequest(url)){
-		const clinicalTrialID = getClinicalTrialID(url)
-		jsonRequestURL = "https://clinicaltrials.gov/api/query/full_studies?expr=" + clinicalTrialID + "&fmt=JSON"
+		jsonRequestURL = `https://clinicaltrials.gov/api/query/full_studies?expr=${clinicalTrialID}&fmt=JSON`
 	} else {
 		jsonRequestURL = url
 	}
 
-	https.get(jsonRequestURL, (resp) => {  // TODO: replace the `https.get` with `ZU.doGet` and modify accordingly
-		let data = ''
-		resp.on('data', (chunk) => { data += chunk; });
-		resp.on('end', () => {
-			var item = {} /// TODO: replace `var item = {}` with `var item = new Zotero.Item(type)`
-			data = JSON.parse(data)
-			item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs)
-			item.title = data.FullStudiesResponse.FullStudies[0].Study.ProtocolSection.IdentificationModule.OfficialTitle
-			item.shortTitle = data.FullStudiesResponse.FullStudies[0].Study.ProtocolSection.IdentificationModule.BriefTitle
-			// TODO: parse all the data from the json into the `item`
-			console.log('item: ', item);
-		})
+	ZU.doGet(jsonRequestURL, function(resp) {
+		data = JSON.parse(resp)
+		var item = new Zotero.Item(type)
+		const study = data.FullStudiesResponse.FullStudies[0].Study
+		item.itemType = "report"
+		item.title = study.ProtocolSection.IdentificationModule.OfficialTitle
+
+		// Get the creator info
+		const responsibleParty = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty
+		if (typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string") {
+			let authorName = responsibleParty.ResponsiblePartyInvestigatorFullName
+			item.creator = {
+				author: authorName
+			}
+		} else if (study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty.ResponsiblePartyType == "Sponsor") {
+			let sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName
+			item.creator = {
+				author: sponsor
+			}
+		}
+
+		item.date = study.ProtocolSection.StatusModule.LastUpdateSubmitDate // TODO: is this the date that we want? Would "StudyFirstSubmitDate" be better? 
+		item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs)
+		item.libraryCatalog = "clinicaltrials.gov"
+		item.shortTitle = study.ProtocolSection.IdentificationModule.BriefTitle
+		item.url = "https://clinicaltrials.gov/ct2/show/" + clinicalTrialID
+		item.complete()
 	})
 }
 
 
 /** BEGIN TEST CASES **/
-var testCases = [ // TODO: set up test cases
-	
+var testCases = [ // TODO: set up more test cases
+	{
+		"type": "web",
+		"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
+				"creator": {
+						"author": "Gilead Sciences"
+					},
+				"date": "February 28, 2020",
+				"accessDate": "2020-04-01",
+				"libraryCatalog": "clinicaltrials.gov",
+				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
+				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899"
+			}
+		]
+	}
 ]
 /** END TEST CASES **/
-
-
-// TEMPORARY: Test Function for local testing with node while developing
-// comment out the json metadata at the top and then run `node clinicaltrials.gov.js`
-
-const https = require('https')
-
-function testURL(url, testName){
-	console.log('\n  ----  testing ', testName)
-	doWebResult = doWeb(null, url)
-}
-
-console.log('running temporary tests')
-testURL("https://clinicaltrials.gov/ct2/show/NCT04292899", "clinical trials main web page")
-testURL("https://clinicaltrials.gov/api/query/full_studies?expr=NCT04292899&fmt=JSON", "clinical trials json api request")
-testURL("https://clinicaltrials.gov/api/query/full_studies?expr=NCT04292899&fmt=XML", "clinical trials xml api request")
-testURL("https://clinicaltrials.gov/ct2/results?recrs=ab&cond=COVID-19&term=&cntry=&state=&city=&dist=", "clinical trials search result")
