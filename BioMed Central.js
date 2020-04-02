@@ -97,10 +97,13 @@ function scrape(doc, url) {
 			}
 
 			var keywordsNodes = doc.getElementsByClassName("Keyword");
+			if (!keywordsNodes || keywordsNodes.length == 0)
+				keywordsNodes = ZU.xpath(doc, '//h3[contains(@class, "c-article__sub-heading") and contains(text(), "Keywords")]/..//span[@itemprop="about"]');
+
 			for (var i=0; i<keywordsNodes.length; i++) {
-				item.tags.push( keywordsNodes[i].textContent );
+				item.tags.push( keywordsNodes[i].textContent.trim() );
 			}
-			
+
 			if (pdfURL) {
 				item.attachments.push({
 					url: pdfURL.href,

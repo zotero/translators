@@ -40,7 +40,7 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
 		return "journalArticle";
-	} else if((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
+	} else if ((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 }
@@ -108,12 +108,12 @@ function scrape(doc, url) {
 			// We'll just try to unescape the most likely fields to contain these entities
 			// Note that RIS data is not always correct, so we avoid using it
 			var unescapeFields = ['title', 'publicationTitle', 'abstractNote'];
-			for(var i=0; i<unescapeFields.length; i++) {
-				if(item[unescapeFields[i]]) {
+			for (var i=0; i<unescapeFields.length; i++) {
+				if (item[unescapeFields[i]]) {
 					item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
 				}
 			}
-			
+
 			item.bookTitle = item.publicationTitle;
 
 			//unfortunately, bibtex is missing some data
@@ -123,19 +123,19 @@ function scrape(doc, url) {
 				if (/^DA\s+-\s+/m.test(text)) {
 					text = text.replace(/^Y1(\s+-.*)/gm, '');
 				}
-				
+
 				risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
 				risTrans.setHandler("itemDone", function(obj, risItem) {
-					if(!item.title) item.title = "<no title>";	//RIS title can be even worse, it actually says "null"
-					if(risItem.date) item.date = risItem.date; // More complete
+					if (!item.title) item.title = "<no title>";	//RIS title can be even worse, it actually says "null"
+					if (risItem.date) item.date = risItem.date; // More complete
 					item.publisher = risItem.publisher;
 					item.ISSN = risItem.ISSN;
 					item.ISBN = risItem.ISBN;
 					//clean up abstract removing Abstract:, Summary: or Abstract Summary:
 					if (item.abstractNote) item.abstractNote = item.abstractNote.replace(/^(Abstract)?\s*(Summary)?:?\s*/i, "");
-					if(item.title.toUpperCase() == item.title) {
+					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title, true);
 					}
 					finalizeItem(item, doc, doi, baseUrl);
@@ -151,20 +151,28 @@ function scrape(doc, url) {
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
-	
+
 	//add keywords
 	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
 	for (var i=0; i<keywords.length; i++) {
 		item.tags.push(keywords[i].textContent);
 	}
-	
+
+	//add "Book Reviews" tag, if found
+	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
+	if (sectionheading) {
+		sectionheading = sectionheading.trim();
+		if (sectionheading.match(/^(Book )?Reviews?$/i))
+			item.tags.push("Book Reviews");
+	}
+
 	//add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
 		url: pdfurl + doi,
 		mimeType: 'application/pdf'
 	}];
-	if(doc) {
+	if (doc) {
 		item.attachments.push({
 			title: 'Snapshot',
 			document: doc

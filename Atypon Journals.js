@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-16 17:58:22"
+	"lastUpdated": "2019-11-02 15:43:51"
 }
 
 /*
@@ -41,10 +41,10 @@ function detectWeb(doc, url) {
 	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
-	
+
 	var citLinks = ZU.xpath(doc, '//a[contains(@href, "/action/showCitFormats")]');
 	if (citLinks.length > 0) {
-		if (url.indexOf('/doi/book/') != -1) {
+		if (url.includes('/doi/book/')) {
 			return 'book';
 		}
 		else if (url.search(/\.ch\d+$/)!=-1){
@@ -70,29 +70,29 @@ function getSearchResults(doc, checkOnly, extras) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
 		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
-		
+
 		var urlRow = rows[i];
 		var url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
-		
+
 		if (!url) {
 			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
 			urlRow = rows[i].nextElementSibling;
 			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
-			
+
 			url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
 		}
 		if (!url) continue;
-		
+
 		if (checkOnly) return true;
 		found = true;
-		
+
 		if (extras) {
 			extras[url] = { pdf: buildPdfUrl(url, urlRow) };
 		}
-		
+
 		articles[url] = title;
 	}
-	
+
 	if (!found){
 		Z.debug("Trying an alternate multiple format");
 		var rows = container.getElementsByClassName("item-details");
@@ -100,22 +100,22 @@ function getSearchResults(doc, checkOnly, extras) {
 			var title = ZU.xpathText(rows[i], './h3');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
-			
+
 			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
 				+ doiLink + ')[1]/@href');
 			if (!url) continue;
-			
+
 			if (checkOnly) return true;
 			found = true;
-			
+
 			if (extras) {
 				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
 			}
-			
+
 			articles[url] = title;
 		}
 	}
-	
+
 	return found ? articles : false;
 }
 
@@ -124,15 +124,15 @@ var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
-	
+
 	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
 	for (var i=0; i<pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
 			return url.replace(replURLRegExp, pdfPaths[i]);
 		}
 	}
-	
-	Z.debug('PDF link not found.')
+
+	Z.debug('PDF link not found.');
 	if (root.nodeType != 9 /*DOCUMENT_NODE*/) {
 		Z.debug('Available links:');
 		var links = root.getElementsByTagName('a');
@@ -141,7 +141,7 @@ function buildPdfUrl(url, root) {
 			Z.debug(links[i].href);
 		}
 	}
-	
+
 	return false;
 }
 
@@ -159,7 +159,7 @@ function doWeb(doc, url) {
 					extras: extras[itemurl]
 				});
 			}
-			
+
 			fetchArticles(articles);
 		});
 
@@ -170,17 +170,17 @@ function doWeb(doc, url) {
 
 function fixCase(str, titleCase) {
 	if (str.toUpperCase() != str) return str;
-	
+
 	if (titleCase) {
 		return ZU.capitalizeTitle(str, true);
 	}
-	
+
 	return str.charAt(0) + str.substr(1).toLowerCase();
 }
 
 function fetchArticles(articles) {
 	if (!articles.length) return;
-	
+
 	var article = articles.shift();
 	ZU.processDocuments(article.url, function(doc, url) {
 		scrape(doc, url, article.extras);
@@ -194,7 +194,6 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = doc.getElementsByClassName('abstractSection')[0];
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
@@ -209,37 +208,53 @@ function scrape(doc, url, extras) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 			translator.setString(text);
 			translator.setHandler("itemDone", function (obj, item) {
+				// The RIS translator mixes up the title's language
+				// Ensure that the title is always in the correct language by grabbing it from the meta tag
+				var metaTitle = doc.querySelector("meta[name='dc.Title']");
+				if (metaTitle && metaTitle.getAttribute("content"))
+					item.title = metaTitle.getAttribute("content")
+
 				// Sometimes we get titles and authors in all caps
 				item.title = fixCase(item.title);
-				
+
 				for (var i=0; i<item.creators.length; i++) {
 					item.creators[i].lastName = fixCase(item.creators[i].lastName, true);
 					if (item.creators[i].firstName) {
 						item.creators[i].firstName = fixCase(item.creators[i].firstName, true);
-					} else if (url.indexOf('www.emeraldinsight.com')>-1) {
-						//for Emerald, improve author's lastname and firstname
-						item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, item.creators[i].creatorType);
 					}
 				}
-				
+
 				item.url = url;
-				//for Emerald, get rid of the "null" that they add at the end of every title:
-				if (url.indexOf("www.emeraldinsight.com")!=-1){
-					item.title = item.title.replace(/null$/, "")
-				}
 				item.notes = [];
 				for (var i in tags){
-					item.tags.push(tags[i].textContent)
+					item.tags.push(tags[i].textContent);
 				}
-				
-				if (abstract) {
-					// Drop "Abstract" prefix
-					// This is not excellent, since some abstracts could
-					// conceivably begin with the word "abstract"
-					item.abstractNote = abstract.textContent
-						.replace(/^[^\w\d]*abstract\s*/i, '');
+
+				// save the first abstract to the expected field and the others in the notes field for later processing
+				var abstracts = ZU.xpath(doc, '//div[contains(@class, "abstractSection")]/p/span[not(./i)]');
+				if (!abstracts || abstracts.length == 0)
+					abstracts = ZU.xpath(doc, '//div[contains(@class, "abstractSection")]/p');
+
+				if (abstracts) {
+					abstracts = abstracts.map(function(x) { return x.textContent.replace(/\s+/g, " ").trim(); })
+					item.abstractNote = abstracts[0];
+					for (var i = 1; i < abstracts.length; ++i) {
+						item.notes.push({
+							note: "abs:" + abstracts[i],
+						});
+					}
 				}
-				
+
+				let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+				if (docType === "book-review")
+					item.tags.push("Book Reviews");
+
+				if (!item.language) {
+					var metaLang = doc.querySelector("meta[name='dc.Language']");
+					if (metaLang && metaLang.getAttribute("content"))
+						item.language = metaLang.getAttribute("content")
+				}
+
 				item.attachments = [];
 				if (extras.pdf) {
 					item.attachments.push({
@@ -248,7 +263,7 @@ function scrape(doc, url, extras) {
 						mimeType: "application/pdf"
 					});
 				}
-				
+
 				item.attachments.push({
 					document: doc,
 					title: "Snapshot",
@@ -260,7 +275,7 @@ function scrape(doc, url, extras) {
 			});
 			translator.translate();
 		});
-	})
+	});
 }
 
 /** BEGIN TEST CASES **/
@@ -428,7 +443,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+		"url": "https://www.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -455,11 +470,11 @@ var testCases = [
 				"abstractNote": "An accurate genome sequence of a desired species is now a pre-requisite for genome research. An important step in obtaining a high-quality genome sequence is to correctly assemble short reads into longer sequences accurately representing contiguous genomic regions. Current sequencing technologies continue to offer increases in throughput, and corresponding reductions in cost and time. Unfortunately, the benefit of obtaining a large number of reads is complicated by sequencing errors, with different biases being observed with each platform. Although software are available to assemble reads for each individual system, no procedure has been proposed for high-quality simultaneous assembly based on reads from a mix of different technologies. In this paper, we describe a parallel short-read assembler, called Ray, which has been developed to assemble reads obtained from a combination of sequencing platforms. We compared its performance to other assemblers on simulated and real datasets. We used a combination of Roche/454 and Illumina reads to assemble three different genomes. We showed that mixing sequencing technologies systematically reduces the number of contigs and the number of errors. Because of its open nature, this new tool will hopefully serve as a basis to develop an assembler that can be of universal utilization (availability: http://deNovoAssembler.sf.Net/). For online Supplementary Material, see www.liebertonline.com.",
 				"issue": "11",
 				"journalAbbreviation": "Journal of Computational Biology",
-				"libraryCatalog": "online.liebertpub.com (Atypon)",
+				"libraryCatalog": "liebertpub.com (Atypon)",
 				"pages": "1519-1533",
 				"publicationTitle": "Journal of Computational Biology",
 				"shortTitle": "Ray",
-				"url": "http://online.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+				"url": "https://www.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
 				"volume": "17",
 				"attachments": [
 					{
@@ -554,52 +569,6 @@ var testCases = [
 				"shortTitle": "Block Copolymer Thin Films",
 				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 				"volume": "31",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.emeraldinsight.com/toc/sajgbr/2/2",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.emeraldinsight.com/doi/full/10.1108/SAJGBR-10-2012-0120",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Irish coffee? Well, something better …",
-				"creators": [
-					{
-						"firstName": "Pramila",
-						"lastName": "Rao",
-						"creatorType": "author"
-					}
-				],
-				"date": "August 16, 2013",
-				"DOI": "10.1108/SAJGBR-10-2012-0120",
-				"ISSN": "2045-4457",
-				"issue": "2",
-				"journalAbbreviation": "S Asian Jnl of Global Bus Res",
-				"libraryCatalog": "emeraldinsight.com (Atypon)",
-				"pages": "165-171",
-				"publicationTitle": "South Asian Journal of Global Business Research",
-				"shortTitle": "Irish coffee?",
-				"url": "http://www.emeraldinsight.com/doi/full/10.1108/SAJGBR-10-2012-0120",
-				"volume": "2",
 				"attachments": [
 					{
 						"title": "Full Text PDF",

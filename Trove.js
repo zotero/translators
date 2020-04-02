@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-02-04 19:41:04"
+	"lastUpdated": "2020-01-05 17:34:52"
 }
 
 /*
@@ -32,13 +32,16 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('/result?') != -1 || url.indexOf('/newspaper/page') != -1) {
+	if (url.includes('/result?') || url.includes('/newspaper/page')) {
 		return getSearchResults(doc, url, true) ? 'multiple' : false;
-	} else if (url.indexOf('/newspaper/article') != -1) {
+	}
+	else if (url.includes('/newspaper/article')) {
 		return "newspaperArticle";
-	} else if (url.indexOf('/work/') != -1) {
+	}
+	else if (url.includes('/work/')) {
 		return "book";
 	}
+	return false;
 }
 
 
@@ -46,12 +49,13 @@ function getSearchResults(doc, url, checkOnly) {
 	var items = {};
 	var results;
 	var found = false;
-	if (url.indexOf('/result?') != -1) {
+	if (url.includes('/result?')) {
 		results = ZU.xpath(doc, "//div[@id='mainresults']//li/dl/dt/a");
-	} else {
+	}
+	else {
 		results = ZU.xpath(doc, "//ol[@class='list-unstyled articles']/li/h4/a");
 	}
-	for (var i=0; i<results.length; i++) {
+	for (var i = 0; i < results.length; i++) {
 		var link = results[i].href;
 		var title = ZU.trimInternal(results[i].textContent);
 		if (!title || !link) continue;
@@ -66,35 +70,34 @@ function getSearchResults(doc, url, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, url), function (items) {
-			if (!items) {
-				return true;
-			}
+			if (!items) return;
+
 			for (var i in items) {
 				scrape(null, i);
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
-
 }
 
 
 function scrape(doc, url) {
-	if (url.indexOf('/newspaper/article/') != -1) {
+	if (url.includes('/newspaper/article/')) {
 		scrapeNewspaper(doc, url);
-	} else {
+	}
+	else {
 		scrapeWork(doc, url);
 	}
 }
 
 
 function scrapeNewspaper(doc, url) {
-
 	var articleID = url.match(/newspaper\/article\/(\d+)/)[1];
 	var bibtexURL = "http://trove.nla.gov.au/newspaper/citations/bibtex-article-" + articleID + ".bibtex";
 
-	ZU.HTTP.doGet(bibtexURL, function(bibtex) {
+	ZU.HTTP.doGet(bibtexURL, function (bibtex) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
@@ -112,64 +115,72 @@ function scrapeNewspaper(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
-				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a");
+				for (let tag of tags) {
+					tag = ZU.xpathText(tag, "a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
 			var proxyURL = "http://trove-proxy.herokuapp.com/pdf/" + articleID;
-			ZU.HTTP.doGet(proxyURL, function(pdfURL) {
-				item.attachments.push({
-					url: pdfURL, 
-					title: 'Trove newspaper PDF', 
-					mimeType:'application/pdf'
-				});
+			ZU.doGet(proxyURL, function (pdfURL) {
+				// With the last argument 'false' passed to doGet
+				// we allow all status codes to continue and reach
+				// the item.complete() command.
+				if (pdfURL.startsWith('http')) {
+					item.attachments.push({
+						url: pdfURL,
+						title: 'Trove newspaper PDF',
+						mimeType: 'application/pdf'
+					});
+				}
+				else {
+					Zotero.debug("No PDF because unexpected return from trove-proxy " + proxyURL);
+					Zotero.debug(pdfURL);
+				}
 
 				// Get the OCRd text and save in a note.
 				var textURL = "http://trove.nla.gov.au/newspaper/rendition/nla.news-article" + articleID + ".txt";
-				ZU.HTTP.doGet(textURL, function(text) {
+				ZU.HTTP.doGet(textURL, function (text) {
 					item.notes.push({
 						note: text.trim()
 					});
 					item.complete();
 				});
-
-			});
+			}, null, null, null, false);
 		});
-	translator.translate();	
+		translator.translate();
 	});
 }
 
 
 var troveTypes = {
-	"Book": "book",
+	Book: "book",
 	"Article Article/Book chapter": "bookSection",
-	"Thesis": "thesis",
+	Thesis: "thesis",
 	"Archived website": "webpage",
 	"Conference Proceedings": "book",
 	"Audio book": "book",
-	"Article": "journalArticle",
+	Article: "journalArticle",
 	"Article Article/Journal or magazine article": "journalArticle",
 	"Article Article/Conference paper": "conferencePaper",
 	"Article Article/Report": "report",
-	"Photograph": "artwork",
+	Photograph: "artwork",
 	"Poster, chart, other": "artwork",
 	"Art work": "artwork",
-	"Object": "artwork",
+	Object: "artwork",
 	"Microform Photograph": "artwork",
 	"Microform Object": "artwork",
-	"Sound": "audioRecording",
-	"Video": "videoRecording",
+	Sound: "audioRecording",
+	Video: "videoRecording",
 	"Printed music": "book",
-	"Map": "map",
-	"Unpublished": "manuscript",
-	"Published": "document"
+	Map: "map",
+	Unpublished: "manuscript",
+	Published: "document"
 };
 
 
-//The function ...
+// The function ...
 function checkType(string) {
 	var types = string.split("; ");
 	var newString;
@@ -179,15 +190,14 @@ function checkType(string) {
 			return troveTypes[newString];
 		}
 		types.pop();
-
 	}
 	return "book";
 }
 
 
-//Sometimes authors are a little messy and we need to clean them
-//e.g. author = { Bayley, William A. (William Alan), 1910-1981 },
-//results in
+// Sometimes authors are a little messy and we need to clean them
+// e.g. author = { Bayley, William A. (William Alan), 1910-1981 },
+// results in
 //   "firstName": "1910-1981, William A. (William Alan)",
 //   "lastName": "Bayley"
 function cleanCreators(creators) {
@@ -195,12 +205,13 @@ function cleanCreators(creators) {
 		var name = creators[i].firstName;
 		name = name.replace(/\(?\d{4}-\d{0,4}\)?,?/, "").trim();
 		var posParenthesis = name.indexOf("(");
-		if (posParenthesis>-1) {
+		if (posParenthesis > -1) {
 			var first = name.substr(0, posParenthesis);
-			var second = name.substr(posParenthesis+1, name.length-posParenthesis-2);
-			if (second.indexOf( first.replace('.', '').trim() )>-1) {
+			var second = name.substr(posParenthesis + 1, name.length - posParenthesis - 2);
+			if (second.includes(first.replace('.', '').trim())) {
 				name = second;
-			} else {
+			}
+			else {
 				name = first;
 			}
 		}
@@ -219,18 +230,19 @@ function scrapeWork(doc, url) {
 	
 	if (doc) {
 		// Need to get version identifier for the BibText url
-		var versionID = doc.body.innerHTML.match(/displayCiteDialog\(\'(.+?)\'/);
+		var versionID = doc.body.innerHTML.match(/displayCiteDialog\('(.+?)'/);
 		if (versionID !== null) {
 			bibtexURL += '&selectedversion=' + versionID[1];
 			thumbnailURL = ZU.xpathText(doc, "//a/img[@class='mosaic ui-shdw']/@src");
-		} else {
+		}
+		else {
 			// It's a work -- so thumbnails are different
 			thumbnailURL = ZU.xpathText(doc, "//li[@class='imgfirst']//img/@src");
 		}
 	}
 
 	// Get the BibTex and feed it to the translator.
-	ZU.HTTP.doGet(bibtexURL, function(bibtex) {
+	ZU.HTTP.doGet(bibtexURL, function (bibtex) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(bibtex);
@@ -254,18 +266,18 @@ function scrapeWork(doc, url) {
 				item.abstractNote = ZU.xpathText(doc, "//meta[@property='og:description']/@content");
 				
 				// Add tags
-				tags = ZU.xpath(doc, "//div[@id='tagswork']/ul/li");
+				let tags = ZU.xpath(doc, "//div[@id='tagswork' or @id='content-tags']/ul/li");
 				for (var i = 0; i < tags.length; i++) {
-					tag = ZU.xpathText(tags[i], "a");
+					let tag = ZU.xpathText(tags[i], "a");
 					item.tags.push(tag);
 				}
 			}
 
 			if (thumbnailURL !== null) {
 				item.attachments.push({
-					url: thumbnailURL, 
-					title: 'Trove thumbnail image', 
-					mimeType:'image/jpeg'
+					url: thumbnailURL,
+					title: 'Trove thumbnail image',
+					mimeType: 'image/jpeg'
 				});
 			}
 			item.complete();
@@ -278,7 +290,7 @@ function scrapeWork(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://trove.nla.gov.au/work/9958833?q&versionId=11567057",
+		"url": "https://trove.nla.gov.au/work/9958833?q&versionId=11567057",
 		"items": [
 			{
 				"itemType": "book",
@@ -292,12 +304,12 @@ var testCases = [
 				],
 				"date": "1980",
 				"ISBN": "9780908065073",
-				"abstractNote": "In 14 libraries. 24 p. : ill. ; 22 cm. Wragge, Clement L. (Clement Lindley), 1852-1922. South Australia. Climate, 1883-1884. Meteorologists -- South Australia -- Biography. South Australia -- Climate -- History.",
+				"abstractNote": "In 14 libraries. 24 p. : ill. ; 22 cm. Wragge, Clement L. (Clement Lindley), 1852-1922. South Australia. Climate, 1883-1884. Meteorologists -- South Australia -- Biography. South Australia -- Description and travel. South Australia -- Climate -- History.",
 				"itemID": "trove.nla.gov.au/work/9958833",
 				"language": "English",
 				"libraryCatalog": "Trove",
 				"publisher": "Warradale, S.Aust. : Pioneer Books",
-				"url": "http://trove.nla.gov.au/version/11567057",
+				"url": "https://trove.nla.gov.au/version/11567057",
 				"attachments": [],
 				"tags": [],
 				"notes": [
@@ -311,7 +323,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://trove.nla.gov.au/newspaper/article/70068753",
+		"url": "https://trove.nla.gov.au/newspaper/article/70068753",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -322,20 +334,17 @@ var testCases = [
 				"libraryCatalog": "Trove",
 				"pages": "4",
 				"place": "Vic.",
-				"publicationTitle": "Sunbury News (Vic. : 1900 - 1910)",
+				"publicationTitle": "Sunbury News (Vic. : 1900 - 1927)",
 				"url": "http://nla.gov.au/nla.news-article70068753",
-				"attachments": [
-					{
-						"title": "Trove newspaper PDF",
-						"mimeType": "application/pdf"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"Meteorology Journal - Clement Wragge"
+					{
+						"tag": "Meteorology Journal - Clement Wragge"
+					}
 				],
 				"notes": [
 					{
-						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1910), Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
+						"note": "<html>\n  <head>\n    <title>07 Feb 1903 - 'WRAGGE.'</title>\n  </head>\n  <body>\n      <p>Sunbury News (Vic. : 1900 - 1927), Saturday 7 February 1903, page 4</p>\n      <hr/>\n    <div class='zone'><p>'WRAGGE' - we have received a copy of the above, which is a journal devoted chiefly to the science of meteorology. It is owned and conducted by Mr. Clement Wragge. </p></div>\n  </body>\n</html>"
 					}
 				],
 				"seeAlso": []
@@ -354,12 +363,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://trove.nla.gov.au/newspaper/page/7013947",
+		"url": "https://trove.nla.gov.au/newspaper/page/7013947",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://trove.nla.gov.au/work/9531118?q&sort=holdings+desc&_=1483112824975&versionId=14744047",
+		"url": "https://trove.nla.gov.au/work/9531118?q&sort=holdings+desc&_=1483112824975&versionId=14744047",
 		"items": [
 			{
 				"itemType": "book",
@@ -372,12 +381,12 @@ var testCases = [
 					}
 				],
 				"date": "1969",
-				"abstractNote": "In 19 libraries. 40 p. : ill., map ; 22 cm. Great Zig Zag Railway (Lithgow, N.S.W.) Railroads -- Blue Mountains (N.S.W. : Mountains) Zig Zag Railway -- Lithgow, Australia. Railroads -- New South Wales -- Blue Mountains. Blue Mountains (N.S.W.)",
+				"abstractNote": "In 19 libraries. 40 p. : ill., map ; 22 cm. Great Zig Zag Railway (Lithgow, N.S.W.) Railroads -- Blue Mountains (N.S.W. : Mountains) Zig Zag Railway -- Lithgow, Australia. Railroads -- New South Wales. Railroads -- New South Wales -- Blue Mountains. Blue Mountains (N.S.W.)",
 				"itemID": "trove.nla.gov.au/work/9531118",
 				"language": "English",
 				"libraryCatalog": "Trove",
 				"publisher": "[Bulli, N.S.W. : Zig Zag Press",
-				"url": "http://trove.nla.gov.au/version/14744047",
+				"url": "https://trove.nla.gov.au/version/14744047",
 				"attachments": [],
 				"tags": [],
 				"notes": [

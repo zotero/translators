@@ -5,12 +5,33 @@
 	"target": "/primo_library/|/nebis/|^https?://www\\.recherche-portal\\.ch/zbz/",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 101,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-08-28 15:36:29"
+	"lastUpdated": "2019-03-26 01:29:32"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
+	
+	***** END LICENSE BLOCK *****
+*/
+
 
 /*
 Supports Primo 2:
@@ -28,91 +49,95 @@ Primos with showPNX.jsp installed:
 */
 
 function getSearchResults(doc) {
-	var linkXPaths = [ //order dictates preference
-		'.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', //details link
-		'.//h2[@class="EXLResultTitle"]/a[@href]' //title link
-	];
+	// order dictates preference
+	var linkXPaths = ['.//li[starts-with(@id,"exlidResult") and substring(@id,string-length(@id)-10)="-DetailsTab"]/a[@href]', // details link
+		'.//h2[@class="EXLResultTitle"]/a[@href]']; // title link
 	var resultsXPath = '//*[self::tr or self::div][starts-with(@id, "exlidResult") and '
 		+ 'number(substring(@id,12))=substring(@id,12)][' + linkXPaths.join(' or ') + ']';
-	//Z.debug(resultsXPath);
+	// Z.debug(resultsXPath);
 	var results = ZU.xpath(doc, resultsXPath);
 	results.titleXPath = './/h2[@class="EXLResultTitle"]';
 	results.linkXPaths = linkXPaths;
 	return results;
 }
 
-function detectWeb(doc, url) {
-	if(getSearchResults(doc).length) {
+function detectWeb(doc) {
+	if (getSearchResults(doc).length) {
 		return 'multiple';
 	}
 	
 	var contentDiv = doc.getElementsByClassName('EXLFullResultsHeader');
-	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
-	if(!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
-	if(contentDiv.length) return 'book';
+	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullDisplay');
+	if (!contentDiv.length) contentDiv = doc.getElementsByClassName('EXLFullView');
+	if (contentDiv.length) return 'book';
+	return false;
 }
 
 function doWeb(doc, url) {
 	var searchResults = getSearchResults(doc);
-	if(searchResults.length) {
+	if (searchResults.length) {
 		var items = {}, itemIDs = {}, title, link,
 			linkXPaths = searchResults.linkXPaths;
-		for(var i=0, n=searchResults.length; i<n; i++) {
+		for (var i = 0, n = searchResults.length; i < n; i++) {
 			title = ZU.xpathText(searchResults[i], searchResults.titleXPath);
-			for(var j=0, m=linkXPaths.length; j<m; j++) {
+			for (var j = 0, m = linkXPaths.length; j < m; j++) {
 				link = ZU.xpath(searchResults[i], linkXPaths[j])[0];
-				if(link) {
+				if (link) {
 					break;
 				}
 			}
 			
-			if(!link || !title || !(title = ZU.trimInternal(title))) continue;
+			if (!link || !title || !(title = ZU.trimInternal(title))) continue;
 			
 			items[link.href] = title;
-			itemIDs[link.href] = {id: i, docID: getDocID(link.href)};
+			itemIDs[link.href] = { id: i, docID: getDocID(link.href) };
 		}
 		
-		Z.selectItems(items, function(selectedItems) {
-			if(!selectedItems) return true;
+		Z.selectItems(items, function (selectedItems) {
+			if (!selectedItems) return true;
 			
 			var urls = [];
-			for(var i in selectedItems) {
-				urls.push({url: i, id: itemIDs[i].id, docID: itemIDs[i].docID});
+			for (var i in selectedItems) {
+				urls.push({ url: i, id: itemIDs[i].id, docID: itemIDs[i].docID });
 			}
 			fetchPNX(urls);
+			return true;
 		});
-	} else {
-		fetchPNX([{url: url, id: 0, docID: getDocID(url)}]);
+	}
+	else {
+		fetchPNX([{ url: url, id: 0, docID: getDocID(url) }]);
 	}
 }
 
 function getDocID(url) {
 	var id = url.match(/\bdoc(?:Id)?=([^&]+)/i);
-	if(id) return id[1];
+	if (id) return id[1];
+	else return false;
 }
 
-//keeps track of which URL format works for retrieving PNX record
-//and applies the correct transformation function
-var PNXUrlGenerator = new function() {
+// keeps track of which URL format works for retrieving PNX record
+// and applies the correct transformation function
+var PNXUrlGenerator = new function () {
 	var functions = [
-		//showPNX.js
-		//using docIDs instead of IDs tied to a session
-		//e.g. http://searchit.princeton.edu/primo_library/libweb/showPNX.jsp?id=PRN_VOYAGER7343340
-		function(urlObj) {
+		// showPNX.js
+		// using docIDs instead of IDs tied to a session
+		// e.g. http://searchit.princeton.edu/primo_library/libweb/showPNX.jsp?id=PRN_VOYAGER7343340
+		function (urlObj) {
 			return getUrlWithId(urlObj.url, urlObj.docID);
 		},
-		//fall back to IDs
-		//from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
-		//to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
-		function(urlObj) {
+		// fall back to IDs
+		// from: http://primo.bib.uni-mannheim.de/primo_library/libweb/action/search.do?...
+		// to:   http://primo.bib.uni-mannheim.de/primo_library/libweb/showPNX.jsp?id=
+		function (urlObj) {
 			return getUrlWithId(urlObj.url, urlObj.id);
 		},
-		//simply add &showPnx=true
-		function(urlObj) {
+		// simply add &showPnx=true
+		function (urlObj) {
 			var url = urlObj.url.split('#');
-			if(url[0].indexOf('?') == -1) {
+			if (!url[0].includes("?")) {
 				url[0] += '?';
-			} else {
+			}
+			else {
 				url[0] += '&';
 			}
 			return url[0] + 'showPnx=true';
@@ -120,42 +145,46 @@ var PNXUrlGenerator = new function() {
 	];
 	
 	function getUrlWithId(url, id) {
-		var url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^\/]*(?:[?#]|$)/);
-		if(!url) return;
+		url = url.match(/(https?:\/\/[^?#]+\/)[^?#]+\/[^/]*(?:[?#]|$)/);
+		if (!url) return false;
 		return url[1] + 'showPNX.jsp?id=' + id;
 	}
 	
 	this.currentFunction = 0;
 	this.confirmed = false;
 	
-	this.getUrl = function(data) {
+	this.getUrl = function (data) {
 		var fun = functions[this.currentFunction];
-		if(!fun) return;
+		if (!fun) return false;
 		
 		return fun(data);
 	};
 	
-	this.nextFunction = function() {
-		if(!this.confirmed && this.currentFunction < functions.length) {
+	this.nextFunction = function () {
+		if (!this.confirmed && this.currentFunction < functions.length) {
 			Z.debug("Function " + this.currentFunction + " did not work.");
 			this.currentFunction++;
 			return true;
 		}
+		else {
+			return false;
+		}
 	};
 };
 
-//retrieve PNX records for given items sequentially
+// retrieve PNX records for given items sequentially
 function fetchPNX(itemData) {
-	if(!itemData.length) return; //do this until we run out of URLs
+	if (!itemData.length) return; // do this until we run out of URLs
 	
 	var data = itemData.shift();
-	var url = PNXUrlGenerator.getUrl(data); //format URL if still possible
-	if(!url) {
-		if(PNXUrlGenerator.nextFunction()) {
+	var url = PNXUrlGenerator.getUrl(data); // format URL if still possible
+	if (!url) {
+		if (PNXUrlGenerator.nextFunction()) {
 			itemData.unshift(data);
-		} else if(!PNXUrlGenerator.confirmed){
-			//in case we can't find PNX for a particular item,
-			//go to the next and start looking from begining
+		}
+		else if (!PNXUrlGenerator.confirmed) {
+			// in case we can't find PNX for a particular item,
+			// go to the next and start looking from begining
 			Z.debug("Could not determine PNX url from " + data.url);
 			PNXUrlGenerator.currentFunction = 0;
 		}
@@ -167,361 +196,50 @@ function fetchPNX(itemData) {
 	var gotPNX = false;
 	Z.debug("Trying " + url);
 	ZU.doGet(url,
-		function(text) {
+		function (text) {
 			text = text.trim();
-			if(text.substr(0,5) != '<?xml' || text.search(/<error\b/i) !== -1) {
-				//try a different PNX url
+			if (text.substr(0, 5) != '<?xml' || text.search(/<error\b/i) !== -1) {
+				// try a different PNX url
 				gotPNX = false;
 				return;
-			} else {
+			}
+			else {
 				gotPNX = true;
 				PNXUrlGenerator.confirmed = true;
 			}
 			
 			importPNX(text, url);
 		},
-		function() {
-			if(!gotPNX && PNXUrlGenerator.nextFunction()) {
-				//if url function not confirmed, try another one on the same URL
-				//otherwise, we move on
+		function () {
+			if (!gotPNX && PNXUrlGenerator.nextFunction()) {
+				// if url function not confirmed, try another one on the same URL
+				// otherwise, we move on
 				itemData.unshift(data);
 			}
 			
 			fetchPNX(itemData);
-		}
+		},
+		null,
+		null,
+		[200, 404, 500]
 	);
 }
 
-//import PNX record
 function importPNX(text, url) {
-	//Note that if the session times out, PNX record will just contain a "null" entry
-	//Z.debug(url)
-	Z.debug(text);
-	//a lot of these apply only to prim records, mainly (but no exclusively) served by the jsp file
-	text = text.replace(/\<\/?xml-fragment[^\>]*\>/g, "")
-			.replace(/(<\/?)\w+:([^\>]*)/g, "$1$2") //remove namespaces
-			//remove ns declarations - we don't need them and they break this
-			.replace(/<[^>]+/g, function(m) {
-				return m.replace(/\s+xmlns(?::\w+)?\s*=\s*(['"]).*?\1/ig, '');
-			});
-	//Z.debug(text);
-	
-	var parser = new DOMParser();
-	var doc = parser.parseFromString(text, "text/xml");
-	
-	var item = new Zotero.Item();
-	
-	var itemType = ZU.xpathText(doc, '//display/type')  || ZU.xpathText(doc, '//facets/rsrctype') || ZU.xpathText(doc, '//search/rsrctype');
-	if(!itemType) {
-		throw new Error('Could not locate item type');
-	}
-	
-	switch(itemType.toLowerCase()) {
-		case 'book':
-		case 'ebook':
-		case 'pbook' :
-		case 'books':
-		case 'score':
-		case 'journal':		//as long as we don't have a periodical item type;
- 			item.itemType = "book";
-			break;
-		case 'audio':
-		case 'sound_recording':
-			item.itemType = "audioRecording";
-			break;
-		case 'video':
-		case 'dvd':
-			item.itemType = "videoRecording";
-			break;
-		case 'computer_file':
-			item.itemType = "computerProgram";
-			break;
-		case 'report':
-			item.itemType = "report";
-			break;
-		case 'webpage':
-			item.itemType = "webpage";
-			break;
-		case 'article':
-		case 'review':
-			item.itemType = "journalArticle";
-			break;
-		case 'thesis':
-		case 'dissertation':
-			item.itemType = "thesis";
-			break;
-		case 'archive_manuscript':
-		case 'object':
-			item.itemType = "manuscript";
-			break;
-		case 'map':
-			item.itemType = "map";
-			break;
-		case 'reference_entry':
-			item.itemType = "encyclopediaArticle";
-			break;
-		case 'image':
-			item.itemType = "artwork";
-			break;
-		case 'newspaper_article':
-			item.itemType = "newspaperArticle";
-			break;
-		case 'conference_proceeding':
-			item.itemType = "conferencePaper";
-			break;
-		default:
-			item.itemType = "document";
-			var risType = ZU.xpathText(doc, '//addata/ristype');
-			if (risType) {
-				switch(risType.toUpperCase()) {
-					case 'THES':
-						item.itemType = "thesis";
-						break;
-				}
-			}
-	}
-	
-	item.title = ZU.xpathText(doc, '//display/title');
-	if(item.title) {
-		item.title = ZU.unescapeHTML(item.title);
-		item.title = item.title.replace(/\s*:/, ":");
-	}
-	var creators = ZU.xpath(doc, '//display/creator');
-	var contributors = ZU.xpath(doc, '//display/contributor');
-	if(!creators.length && contributors.length) {
-		// <creator> not available using <contributor> as author instead
-		creators = contributors;
-		contributors = [];
-	}
-	
-	// //addata/au is great because it lists authors in last, first format,
-	// but it can also have a bunch of junk. We'll use it to help split authors
-	var splitGuidance = {};
-	var addau = ZU.xpath(doc, '//addata/addau|//addata/au');
-	for (var i=0; i<addau.length; i++) {
-		var author = stripAuthor(addau[i].textContent);
-		if (author.indexOf(',') != -1) {
-			var splitAu = author.split(',');
-			if (splitAu.length > 2) continue;
-			var name = splitAu[1].trim().toLowerCase() + ' '
-				+ splitAu[0].trim().toLowerCase();
-			splitGuidance[name] = author;
+	// Z.debug(text);
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("efd737c9-a227-4113-866e-d57fbc0684ca");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		if (url) {
+			item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
 		}
-	}
-	
-	fetchCreators(item, creators, 'author', splitGuidance);
-	fetchCreators(item, contributors, 'contributor', splitGuidance);
-	
-	item.place = ZU.xpathText(doc, '//addata/cop');
-	var publisher = ZU.xpathText(doc, '//addata/pub');
-	if(!publisher) publisher = ZU.xpathText(doc, '//display/publisher');
-	if(publisher) {
-		publisher = publisher.replace(/,\s*c?\d+|[\(\)\[\]]|(\.\s*)?/g, "");
-		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
-		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
-
-		if(pubplace && pubplace[1]) {
-			var possibleplace = pubplace[0];
-			if(!item.place ) {
-				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
-				item.place = possibleplace;
-			}
-			if(item.place && item.place == possibleplace) {
-				item.publisher = pubplace[1].replace(/^\s*"|,?"\s*$/g, '');
-			}
-		}
-	}
-	
-	var date = ZU.xpathText(doc, '//display/creationdate|//search/creationdate');
-	var m;
-	if(date && (m = date.match(/\d+/))) {
-		item.date = m[0];
-	}
-	
-	// the three letter ISO codes that should be in the language field work well:
-	item.language = ZU.xpathText(doc, '(//display/language|//facets/language)[1]');
-	
-	var pages = ZU.xpathText(doc, '//display/format');
-	if(item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
-		item.numPages = extractNumPages(pages);
-	}
-	
-	item.series = ZU.xpathText(doc, '(//addata/seriestitle)[1]');
-
-	var isbn;
-	var issn;
-	if (isbn = ZU.xpathText(doc, '//addata/isbn')){
-		item.ISBN = ZU.cleanISBN(isbn);
-	}
-	
-	if (issn = ZU.xpathText(doc, '//addata/issn')){
-		item.ISSN = ZU.cleanISSN(issn);
-	}
-	
-	// Try this if we can't find an isbn/issn in addata
-	// The identifier field is supposed to have standardized format, but
-	// the super-tolerant idCheck should be better than a regex.
-	// (although note that it will reject invalid ISBNs)
-	var locators = ZU.xpathText(doc, '//display/identifier');
-	if(!(item.ISBN || item.ISSN) && locators) {
-		item.ISBN = ZU.cleanISBN(locators);
-		item.ISSN = ZU.cleanISSN(locators);
-	}
-
-	item.edition = ZU.xpathText(doc, '//display/edition');
-	
-	var subjects = ZU.xpath(doc, '//search/subject');
-	if(!subjects.length) {
-		subjects = ZU.xpath(doc, '//display/subject');
-	}
-
-	for(var i=0, n=subjects.length; i<n; i++) {
-		item.tags.push(ZU.trimInternal(subjects[i].textContent));
-	}
-	
-	item.abstractNote = ZU.xpathText(doc, '//display/description')
-		|| ZU.xpathText(doc, '//addata/abstract');
-	if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-	
-	item.DOI = ZU.xpathText(doc, '//addata/doi');
-	item.issue = ZU.xpathText(doc, '//addata/issue');
-	item.volume = ZU.xpathText(doc, '//addata/volume');
-	item.publicationTitle = ZU.xpathText(doc, '//addata/jtitle');
-	
-	var startPage = ZU.xpathText(doc, '//addata/spage');
-	var endPage = ZU.xpathText(doc, '//addata/epage');
-	var overallPages = ZU.xpathText(doc, '//addata/pages');
-	if (startPage && endPage){
-		item.pages = startPage + '–' + endPage;
-	} else if (overallPages) {
-		item.pages = overallPages;
-	} else if (startPage) {
-		item.pages = startPage;
-	} else if (endPage) {
-		item.pages = endPage;
-	}
-	
-	//these are actual local full text links (e.g. to google-scanned books)
-	//e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
-	var URL = ZU.xpathText(doc, '//links/linktorsrc');
-	if (URL && URL.search(/\$\$U.+\$\$/) != -1) {
-		item.url = URL.match(/\$\$U(.+?)\$\$/)[1];
-	}
-
-	//add finding aids as links
-	var findingAid = ZU.xpathText(doc, '//links/linktofa');
-	if (findingAid && findingAid.search(/\$\$U.+\$\$/) != -1) {
-		item.attachments.push({url: findingAid.match(/\$\$U(.+?)\$\$/)[1], title: "Finding Aid", snapshot: false});
-	}
-	// get the best call Number; sequence recommended by Harvard University Library
-	var callNumber = ZU.xpath(doc, '//browse/callnumber');
-	var callArray = [];
-	for (var i = 0; i<callNumber.length; i++) {
-		if (callNumber[i].textContent.search(/\$\$D.+\$/) != -1) {
-			callArray.push(callNumber[i].textContent.match(/\$\$D(.+?)\$/)[1]);
-		}
-	}
-	if (!callArray.length) {
-		callNumber = ZU.xpath(doc, '//display/availlibrary');
-		for (var i = 0; i<callNumber.length; i++) {
-			if (callNumber[i].textContent.search(/\$\$2.+\$/) != -1) {
-				callArray.push(callNumber[i].textContent.match(/\$\$2\(?(.+?)(?:\s*\))?\$/)[1]);
-			}
-		}
-	}
-	if (callArray.length) {
-		//remove duplicate call numbers
-		callArray = dedupeArray(callArray);
-		item.callNumber = callArray.join(", ");
-	}
-	else {
-		ZU.xpathText(doc, '//enrichment/classificationlcc');
-	}
-
-	if (url) {
-		item.libraryCatalog = url.match(/^https?:\/\/(.+?)\//)[1].replace(/\.hosted\.exlibrisgroup/, "");
-	}
-
-	//Harvard specific code, requested by Harvard Library:
-	//Getting the library abbreviation properly,
-	//so it's easy to implement custom code for other libraries, either locally or globally should we want to.
-	var library;
-	var source = ZU.xpathText(doc, '//control/sourceid');
-	if (source) {
-		library = source.match(/^(.+?)_/);
-		if (library) library = library[1];
-	}
-	//Z.debug(library)
-	if (library && library == "HVD") {
-		if (ZU.xpathText(doc, '//display/lds01')) {
-			item.extra = "HOLLIS number: " + ZU.xpathText(doc, '//display/lds01');
-		}
-		if (ZU.xpathText(doc, '//display/lds03')) {
-			item.attachments.push({url: ZU.xpathText(doc, '//display/lds03'), title: "HOLLIS Permalink", snapshot: false});		
-		}
-	}
-	//End Harvard-specific code
-	item.complete();
+		item.complete();
+	});
+	translator.translate();
 }
 
-function stripAuthor(str) {
-	return str
-		// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
-		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*[\[\(][^()]*[\]\)]$/, '')
-		// The full "continuous" name uses no separators, which need be removed
-		// cf. "Luc, Jean André : de (1727-1817)"
-		.replace(/\s*:\s+/, " ");
-}
-
-function fetchCreators(item, creators, type, splitGuidance) {
-	for(var i=0; i<creators.length; i++) {
-		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
-		for(var j=0; j<creator.length; j++) {
-			var c = stripAuthor(creator[j]);
-			c = ZU.cleanAuthor(
-				splitGuidance[c.toLowerCase()] || c,
-				type,
-				true
-			);
-			
-			if (!c.firstName) {
-				delete c.firstName;
-				c.fieldMode = 1;
-			}
-			
-			item.creators.push(c);
-		}
-	}
-}
-
-function extractNumPages(str) {
-	// Borrowed from Library Catalog (PICA). See #756
-	//make sure things like 2 partition don't match, but 2 p at the end of the field do
-	// f., p., and S. are "pages" in various languages
-	// For multi-volume works, we expect formats like:
-	//   x-109 p., 510 p. and X, 106 S.; 123 S.
-	var numPagesRE = /\[?\b((?:[ivxlcdm\d]+[ ,\-]*)+)\]?\s+[fps]\b/ig,
-		numPages = [], m;
-	while(m = numPagesRE.exec(str)) {
-		numPages.push(m[1].trim()
-			.replace(/[ ,\-]+/g,'+')
-			.toLowerCase() // for Roman numerals
-		);
-	}
-	return numPages.join('; ');
-}
-
-function dedupeArray(names) {
-	//via http://stackoverflow.com/a/15868720/1483360
-	return names.reduce(function(a,b){
-		if(a.indexOf(b)<0) {
-			a.push(b);
-		}
-		return a;
-	},[]);
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -550,72 +268,6 @@ var testCases = [
 					"Great Britain Foreign relations China.",
 					"Missions China."
 				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://purdue-primo-prod.hosted.exlibrisgroup.com/default:default_scope:PURDUE_ALMA21505315560001081",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "War",
-				"creators": [
-					{
-						"firstName": "Lawrence",
-						"lastName": "Freedman",
-						"creatorType": "author"
-					}
-				],
-				"date": "1994",
-				"ISBN": "9780192892546",
-				"abstractNote": "Experience of war -- Causes of war -- War and the military establishment -- Ethics of war -- Strategy -- Total war and the great powers -- Limited war and developing countries., \"War makes headlines and history books. It has shaped the international system, prompted social change, and inspired literature, art, and music. It engenders some of the most intense as well as the most brutal human experiences, and it raises fundamental questions of human ethics.\" \"The ubiquitous, contradictory, and many-sided character of war is fully reflected in this reader. It addresses a wide range of questions: What are the causes of war? Which strategic as well as moral principles guide its conduct, and how have these changed? Has total war become unthinkable? What is the nature of contemporary conflict? How is war experienced by those on the front line?\" \"These and other key issues are examined through a variety of writings. Drawing on sources from numerous countries and disciplines, this reader includes accounts by generals, soldiers, historians, strategists, and poets, who consider conflicts from the Napoleonic Wars to Vietnam and Bosnia. The writing not only of great strategic thinkers but also of ordinary soldiers illustrates both the theory and the experience of war in its many guises.\"--BOOK JACKET.",
-				"callNumber": "355.02 W1945 1994",
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"numPages": "xi+385",
-				"place": "Oxford ; New York",
-				"publisher": "Oxford University Press",
-				"series": "Oxford readers",
-				"attachments": [],
-				"tags": [
-					"War."
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://limo.libis.be/LIBISnet:default_scope:32LIBIS_ALMA_DS71166851730001471",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "War",
-				"creators": [
-					{
-						"firstName": "Albert R.",
-						"lastName": "Leventhal",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Del",
-						"lastName": "Byrne",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1973",
-				"ISBN": "9780600393047",
-				"callNumber": "9B6655",
-				"language": "eng",
-				"libraryCatalog": "Primo",
-				"numPages": "252",
-				"publisher": "Hamlyn",
-				"attachments": [],
-				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -720,66 +372,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://hollis.harvard.edu/primo_library/libweb/action/dlDisplay.do?vid=HVD&search_scope=default_scope&docId=HVD_ALEPH002208563&fn=permalink",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Mastering the art of French cooking",
-				"creators": [
-					{
-						"firstName": "Simone",
-						"lastName": "Beck",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Louisette",
-						"lastName": "Bertholle",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Julia",
-						"lastName": "Child",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Barbara Ketcham",
-						"lastName": "Wheaton",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Avis",
-						"lastName": "DeVoto",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1961",
-				"abstractNote": "Illustrates the ways in which classic French dishes may be created with American foodstuffs and appliances.",
-				"callNumber": "641.64 C53m, c.1, 641.64 C53m, c. 3, 641.64 C53m, c.4, 641.64 C53m, c.5, 641.64 C53m, c.6, 641.64 C53m, c. 7, 641.64 C53m, c. 8, 641.64 C53m, c.2",
-				"edition": "[1st ed.]",
-				"extra": "HOLLIS number: 002208563",
-				"language": "eng",
-				"libraryCatalog": "hollis.harvard.edu",
-				"place": "New York",
-				"publisher": "Knopf",
-				"attachments": [
-					{
-						"title": "HOLLIS Permalink",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"Authors' inscriptions (Provenance)",
-					"Cookery, French",
-					"Cooking, French.",
-					"French cooking"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://digitale.beic.it/primo_library/libweb/action/display.do?doc=39bei_digitool2018516",
 		"items": [
 			{
@@ -800,6 +392,53 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					"LEGGI;ITALIA - STORIA MEDIOEVALE"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bcujas-catalogue.univ-paris1.fr/CUJAS_V1:LSCOP_ALL:33CUJAS_ALEPH000070200",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test pattern for living",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					}
+				],
+				"date": "1972",
+				"callNumber": "203.206",
+				"language": "eng",
+				"libraryCatalog": "bcujas-catalogue.univ-paris1.fr",
+				"numPages": "xx+154",
+				"place": "Toronto New York",
+				"publisher": "Bantam Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "301.16/1/0973"
+					},
+					{
+						"tag": "Mass media"
+					},
+					{
+						"tag": "Mass media -- Social aspects -- United States"
+					},
+					{
+						"tag": "Social aspects"
+					},
+					{
+						"tag": "United States"
+					},
+					{
+						"tag": "United States -- Social conditions -- 1960-"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

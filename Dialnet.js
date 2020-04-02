@@ -9,29 +9,33 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2018-03-24 00:33:54"
+=======
+	"lastUpdated": "2018-03-28 21:36:40"
+>>>>>>> d79df820c0063a2a404c2eacfcf950d4c7f9886c
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	
+
 	Copyright © 2016 Philipp Zumstein
-	
+
 	This file is part of Zotero.
-	
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-	
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-	
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-	
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -91,30 +95,88 @@ function scrape(doc, url) {
 		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
 			delete item.abstractNote;
 		}
-		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3" 
+
+		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3"
 		// clean issue number in case of multiple download
-		var issue = ZU.xpathText(doc, '//*[@id="informacion"]/li[2]/span/a[2]');//.replace(/^Vol.\s\d*,\sNº.\s/, '').replace(/^Vol.\s/, '').replace(/^Nº.\s/, '');
+		var issue = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(text(), "Nº.")]');
 		if (issue) {
-			if (issue.match(/^Vol.\s\d*,\sNº.\s/)) {
-				issue = issue.replace(/^Vol.\s\d*,\sNº.\s/, '');
-				}
-			else if (issue.match(/^Vol.\s/)) {
-				issue = issue.replace(/^Vol.\s/, '');
-				}
-			else if (issue.match(/^Nº.\s/)) { 
-				issue = issue.replace(/^Nº.\s/, '');
-				}
-			else if (issue.match(/^Año\s\d*,\sNº.\s/)) { 
-				issue = issue.replace(/^Año\s\d*,\sNº.\s/, '');
-				}
-			}
- 		item.issue = issue.replace(/,\s\d*/, '');
+			// e.g. Vol. 89, Nº. 3-4, 2012
+			item.issue = issue.split('Nº.')[1].split(',')[0];
+		}
+
+		// restrict issues to just numbers
+		if (item.issue) {
+			var matchedIssue = item.issue.trim().match(/^([0-9]+).*/);
+			if (matchedIssue)
+				item.issue = matchedIssue[1];
+		}
+
+		// if the issue on the webpage has a Nº prefix, it denotes the volume
+		if (issue) {
+			var volume = item.volume;
+			item.volume = item.issue;
+			item.issue = volume;
+		}
+
+		// clear language if multiple
+		if (item.language && item.language === "mul")
+			item.language = "";
+
  		// Delete generic keywords
  		if (item.tags);
- 			delete item.tags;
+			 delete item.tags;
+
+		// sometimes, the embedded metadata inverts the volume and issue information
+		// we need to check the DOM to see if there's information to the contrary and revert if necessary
+		var domVolume = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(@href, "ejemplar")]');
+		if (domVolume) {
+			var match = domVolume.match(/^Vol\.? (\d+)/i)
+			if (match) {
+				domVolume = match[1];
+				if (domVolume != item.volume && domVolume == item.issue) {
+					var temp = item.volume;
+					item.volume = item.issue;
+					item.issue = temp;
+				}
+			}
+		}
+
+		// get alternate titles and abstracts
+		var alternateTitle = ZU.xpathText(doc, '//strong[@class="concepto" and text()="Títulos paralelos:"]/../ul/li');
+		if (alternateTitle)
+			item.shortTitle = alternateTitle;
+
+		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li//p');
+		if (abstracts && abstracts.length > 0) {
+			var combinedAbstract = "";
+			for (var i in abstracts)
+				combinedAbstract += abstracts[i].textContent + "\n\n";
+			item.abstractNote = combinedAbstract.trim();
+		}
+
+>>>>>>> d79df820c0063a2a404c2eacfcf950d4c7f9886c
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
+		// Remove Facebook's OpenGraph meta tags from the document before sending it to the Embedded Metadata handler
+		// Those break the aforementioned translator for some reason
+		var metaTags = doc.head.getElementsByTagName("meta");
+		var ogTags = [];
+		for (var i=0; i < metaTags.length; i++) {
+			var metaTag = metaTags[i];
+			var tags = metaTag.getAttribute("name");
+			if (!tags) tags = metaTag.getAttribute("property");
+			if(!tags) continue;
+
+			if (tags.startsWith("og:"))
+				ogTags.push(metaTag);
+		}
+
+		for (var i=0; i < ogTags.length; i++) {
+			var ogTag = ogTags[i];
+			ogTag.parentNode.removeChild(ogTag);
+		}
+
 		trans.doWeb(doc, url);
 	});
 }
@@ -146,6 +208,7 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
+<<<<<<< HEAD
 				"tags": [
 					{
 						"tag": "Libres"
@@ -157,6 +220,8 @@ var testCases = [
 						"tag": "buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
 					}
 				],
+=======
+>>>>>>> d79df820c0063a2a404c2eacfcf950d4c7f9886c
 				"notes": [],
 				"seeAlso": []
 			}
@@ -200,11 +265,6 @@ var testCases = [
 						"title": "Snapshot"
 					}
 				],
-				"tags": [
-					"Ciencias sociales",
-					"Grupo D",
-					"Sociología. Población. Trabajo social"
-				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -219,6 +279,39 @@ var testCases = [
 		"type": "web",
 		"url": "https://dialnet.unirioja.es/ejemplar/381860",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dialnet.unirioja.es/servlet/articulo?codigo=4251373",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Secularisation as a challenge for a contemporary order theology International Theological Symposium as part of the research project \"Transmission of Faith in social and Religious Transformation Processes\".",
+				"creators": [
+					{
+						"firstName": "Ulrich",
+						"lastName": "Engel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2012",
+				"ISSN": "1123-5772",
+				"issue": "3-4",
+				"language": "mul",
+				"libraryCatalog": "dialnet.unirioja.es",
+				"pages": "659-666",
+				"publicationTitle": "Angelicum",
+				"url": "https://dialnet.unirioja.es/servlet/articulo?codigo=4251373",
+				"volume": "89",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

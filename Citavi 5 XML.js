@@ -12,7 +12,7 @@
 	"inRepository": true,
 	"translatorType": 1,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2016-12-29 13:57:06"
+	"lastUpdated": "2018-08-26 10:46:17"
 }
 
 /*
@@ -43,6 +43,8 @@
 TEST DATA can be found here:
  - Single reference (162 KB) text: https://gist.github.com/zuphilip/02d6478ace4636e4e090e348443c551e
  - Larger project (1221 KB): https://gist.github.com/zuphilip/76ce89ebbdac0386507b36cff3fd499a
+ - Other project (1,11 MB): https://gist.github.com/anonymous/10fc363b6d79dae897e296a4327aa707
+ - Citavi 6 project (935 KB): https://gist.github.com/zuphilip/00a4ec6df58ac24b68366e32531bae4b
 */
 
 
@@ -94,6 +96,7 @@ var typeMapping = {
 
 function doImport() {
 	var doc = Zotero.getXML();
+	var citaviVersion = ZU.xpathText(doc, '//CitaviExchangeData/@Version');
 	
 	//Groups will also be mapped to tags which can be assigned to
 	//items or notes.
@@ -239,17 +242,31 @@ function doImport() {
 		var onlyCallNumber = [];
 		for (var j=0; j<locations.length; j++) {
 			var address = ZU.xpathText(locations[j], 'Address');
+			if (address && citaviVersion[0] !== "5") {
+				var jsonAddress = JSON.parse(address);
+				// Z.debug(jsonAddress);
+				address = jsonAddress["UriString"];
+			}
 			var addressType = ZU.xpathText(locations[j], 'MirrorsReferencePropertyId');
 			if (address) {
 				if (addressType == "Doi" && !item.DOI) {
 					item.DOI = address;
-				} else if (addressType == "PubMedId" && item.extra.indexOf("PMID") == -1) {
+				} else if (addressType == "PubMedId" && ((item.extra && !item.extra.includes("PMID"))|| !item.extra)) {
 					addExtraLine(item, "PMID", address);
 				} else {
-					item.attachments.push({
-						url: address,
-						title:"Location"
-					});
+					// distinguish between local paths and internet addresses
+					// (maybe also encoded in AddressInfo subfield?)
+					if (address.indexOf('http://')==0 || address.indexOf('https://')==0) {
+						item.attachments.push({
+							url: address,
+							title: "Online"
+						});
+					} else {
+						item.attachments.push({
+							path: address,
+							title: "Full Text"
+						});
+					}
 				}
 			}
 			var callNumber = ZU.xpathText(locations[j], 'CallNumber');
@@ -328,7 +345,8 @@ function doImport() {
 	//also the hierarchy number which we first calculate from the
 	//CategoryCategories list.
 	var categories = ZU.xpath(doc, '//Categories/Category');
-	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN');
+	//typo CategoryCatgories was fixed in Citavi 6
+	var hierarchy = ZU.xpath(doc, '//CategoryCatgories/OnetoN|//CategoryCategories/OnetoN');
 	var numbering = { "00000000-0000-0000-0000-000000000000" : "$" };
 	//we will have fixed prefix "$." for all collections (see below),
 	//such that only the substring starting form index 2 is relevant.
@@ -336,6 +354,7 @@ function doImport() {
 		var categoryLists = hierarchy[i].textContent.split(";");
 		var referencePoint = categoryLists[0];
 		if (!numbering[referencePoint]) {
+			//in some cases the ordering of these relations is different
 			Z.debug("Warning: Reference point for categorization hierarchy not yet found");
 			Z.debug(categoryLists);
 			continue;
@@ -348,7 +367,11 @@ function doImport() {
 	for (var i=0, n=categories.length; i<n; i++) {
 		var collection = new Zotero.Collection();
 		collection.id = ZU.xpathText(categories[i], './@id');
-		collection.name = numbering[collection.id].substr(2) + ' ' + ZU.xpathText(categories[i], './Name');
+		collection.name = ZU.xpathText(categories[i], './Name');
+		if (numbering[collection.id]) {
+			//add the hierarchy number whenever possible
+			collection.name = numbering[collection.id].substr(2) + ' ' + collection.name;
+		}
 		collection.type = 'collection';
 		collection.children = [];
 		var referenceCategories = ZU.xpath(doc, '//ReferenceCategories/OnetoN[contains(text(), "'+collection.id+'")]');
@@ -414,13 +437,13 @@ function attachPersons(doc, item, ids, type) {
 		var lastName = ZU.xpathText(author, 'LastName');
 		var firstName = ZU.xpathText(author, 'FirstName');
 		var middleName = ZU.xpathText(author, 'MiddleName');
-		if(firstName && lastName) {
+		if (firstName && lastName) {
 			if (middleName) {
 				firstName += ' ' + middleName;
 			}
 			item.creators.push({ lastName : lastName, firstName : firstName, creatorType : type });
 		}
-		if(!firstName && lastName) {
+		if (!firstName && lastName) {
 			item.creators.push({ lastName : lastName, creatorType : type , fieldMode : true});
 		}
 	}

@@ -9,13 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-28 20:52:23"
+	"lastUpdated": "2018-03-27 05:23:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2018 Timotheus Chang-Whae Kim, Johannes Ruscheinski, Philipp Zumstein
-	
 	This file is part of Zotero.
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -32,7 +31,7 @@
 
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+function attr(docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; } function text(docOrElem, selector, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null; }
 
 
 function detectWeb(doc, url) {
@@ -48,7 +47,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('tr');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = attr(rows[i], 'td a', 'href');
 		let title = text(rows[i], 'td', 1);
 		if (!href || !title) continue;
@@ -87,44 +86,79 @@ function ALLCaps(name) {
 function getValue(nodes) {
 	var value = "";
 	for (let part of nodes) {
-		if (part.tagName=="BR" || part.tagName=="B") break;
+		if (part.tagName == "BR" || part.tagName == "B") break;
 		value += ' ';
-		if (part.tagName=="I") {
+		if (part.tagName) {
 			value += part.outerHTML;
 		} else {
 			value += part.textContent.trim();
 		}
 	}
-	return value.trim();
+	return value;
 }
 
+function parseAbstract(doc, item) {
+	// the abstract text can be interspersed by inline <i> tags that break
+	// the flow of text. So, we need to iterate through the text nodes and
+	// <i> nodes in sequence
+	let textParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
+	let italicsParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::i');
+
+	if (textParts && textParts.length > 0) {
+		item.abstractNote = "";
+
+		let fullAbstract = "";
+		let i = 0, j = 0;
+		do {
+			let text = textParts[i].textContent;
+			if (text && text.length > 0)
+				fullAbstract += text;
+
+			if (j < italicsParts.length) {
+				let text = italicsParts[j].textContent;
+				if (text && text.length > 0)
+					fullAbstract += text;
+				++j;
+			}
+
+			++i;
+		} while (i < textParts.length);
+
+		item.abstractNote = fullAbstract.trim();
+	}
+}
 
 function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
-	
+
 	var titleNodes = ZU.xpath(doc, '//b[contains(text(), "Title:")]/following-sibling::node()');
-	item.title = getValue(titleNodes);
+	item.title = getValue(titleNodes).replace(/<[^>]*>/g, "");
 	var subtitleNodes = ZU.xpath(doc, '//b[contains(text(), "Subtitle:")]/following-sibling::node()');
 	var subtitle = getValue(subtitleNodes);
 	if (subtitle) {
-		item.title = ZU.unescapeHTML(item.title += ': ' + subtitle);
+		item.title += ': ' + subtitle;
 	}
-	
+
+	item.title = ZU.unescapeHTML(item.title.replace(/<(.|\n)*?>/g, ''));
+
 	// e.g. Author(s): HANDAL, Boris , WATSON, Kevin , ..., VAN DER MERWE, W.L.
 	// but sometimes the space before the comma is also missing
-	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]').split(',');
+	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]');
+	if (authors) {
+		authors = authors.split(',');
+	}
 	var creator;
-	for (let i=0; i<authors.length; i++) {
+	for (let i = 0; i < authors.length; i++) {
 		let name = authors[i];
 		if (ALLCaps(name)) name = ZU.capitalizeTitle(name, true);
-		if (i%2===0) {// last name
+		if (i % 2 === 0) {// last name
 			creator = {
 				creatorType: 'author',
 				lastName: ZU.capitalizeTitle(name, true)
 			};
 		} else {// first name
 			creator.firstName = name;
-			item.creators.push(creator); 
+			item.creators.push(creator);
 		}
 	}
 
@@ -134,8 +168,17 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
-	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()|//b[contains(text(), "Abstract :")]/following::i', '', '');
-	
+	item.url = url;
+
+	parseAbstract(doc, item);
+
+	// fixup date
+	if (item.date) {
+		var match = item.date.match(/^numéro [0-9]+, ([0-9]{4})/);
+		if (match)
+			item.date = match[1];
+	}
+
 	item.attachments.push({
 		url: url,
 		title: "Snapshot",
@@ -310,7 +353,7 @@ var testCases = [
 				],
 				"date": "March 1994",
 				"DOI": "10.2143/EP.1.1.630100",
-				"abstractNote": "Today, applied ethics confronts many problems: technological and biomedical innovations, crisis of the welfare state, rising unemployment, migration and xenophobia. These and the changes accompanying them are, in themselves, important objects of study. \n\nAn investigation on the level of the differentiated disciplines of practical ethics is insufficient. In as far as practical ethics also serves to disclose reality, it shows that modern problems can only be understood in the light of the general cultural crisis of which they are, at the very least, symptoms. In the first part of this article, we will try to clarify this byanalyzing the crisis in the ethos of modern secularized society. The second part will try to show that Christian ethics can offer a meaningful answer to this cultural crisis, and how it can do so.",
+				"abstractNote": "Today, applied ethics confronts many problems: technological and biomedical innovations, crisis of the welfare state, rising unemployment, migration and xenophobia. These and the changes accompanying them are, in themselves, important objects of study.",
 				"issue": "1",
 				"libraryCatalog": "Peeters",
 				"pages": "3-12",
@@ -524,7 +567,6 @@ var testCases = [
 				],
 				"date": "July 1996",
 				"DOI": "10.2143/EP.3.2.563038",
-				"abstractNote": "Umuntu ngumuntu ngabantu is the Zulu version of a traditional African aphorism. Although with considerable loss of culture-specific meaning, it can be translated as: 'A human being is a human being through (the otherness of) other human beings.' Still, its meaning can be interpreted in various ways of which I would like to highlight only two, in accordance with the grammar of the central concept 'Ubuntu' which denotes both a state of being and one of becoming.",
 				"issue": "2",
 				"libraryCatalog": "Peeters",
 				"pages": "76-90",
@@ -548,7 +590,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "The Unedited Life of St John Chrysostom by Nicetas David the Paphlagonian: Editio princeps , Part I",
+				"title": "The Unedited <i>Life</i> of St John Chrysostom by Nicetas David the Paphlagonian:  <i>Editio princeps</i> , Part I",
 				"creators": [
 					{
 						"creatorType": "author",
@@ -558,11 +600,11 @@ var testCases = [
 				],
 				"date": "2017",
 				"DOI": "10.2143/BYZ.87.0.3256900",
-				"abstractNote": "The paper presents the first ever edition of the first half (chapters 1-28) of the long Life of St John Chrysostom by Nicetas David the Paphlagonian, composed in all probability in the second quarter of the tenth century. This is an important text for a number of reasons, as explained in detail in my introduction to the Life published in Byz, 86 (2016), pp. 1-51. The critical edition is preceded by a study of the unique manuscript and an exposition of the peculiarities of the author’s language as well as of the editorial principles.",
+				"abstractNote": "The paper presents the first ever edition of the first half (chapters 1-28) of the long",
 				"libraryCatalog": "Peeters",
 				"pages": "1-67",
 				"publicationTitle": "Byzantion",
-				"shortTitle": "The Unedited Life of St John Chrysostom by Nicetas David the Paphlagonian",
+				"shortTitle": "The Unedited <i>Life</i> of St John Chrysostom by Nicetas David the Paphlagonian",
 				"volume": "87",
 				"attachments": [
 					{
@@ -575,11 +617,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://poj.peeters-leuven.be/content.php?url=issue&journal_code=BYZ&issue=0&vol=87",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

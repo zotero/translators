@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-26 11:30:00"
+	"lastUpdated": "2018-11-01 19:46:46"
 }
 
 /*
@@ -37,6 +37,11 @@
 	***** END LICENSE BLOCK *****
 */
 
+
+// attr()/text() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 var HIGHWIRE_MAPPINGS = {
 	"citation_title":"title",
 	"citation_publication_date":"date",	//perhaps this is still used in some old implementations
@@ -44,7 +49,7 @@ var HIGHWIRE_MAPPINGS = {
 	"citation_date":"date",
 	"citation_journal_title":"publicationTitle",
 	"citation_journal_abbrev":"journalAbbreviation",
-	"citation_inbook_title": "bookTitle", //used on RSC, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
+	"citation_inbook_title": "publicationTitle", //used as bookTitle or proceedingTitle, e.g. http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8
 	"citation_book_title":"bookTitle",
 	"citation_volume":"volume",
 	"citation_issue":"issue",
@@ -157,12 +162,18 @@ function getPrefixes(doc) {
 	}
 }
 
-function getContentText(doc, name, strict) {
-	var xpath = '/x:html/x:head/x:meta[' +
-		(strict?'@name':
-			'substring(@name, string-length(@name)-' + (name.length - 1) + ')') +
-		'="'+ name +'"]/';
-	return ZU.xpathText(doc, xpath + '@content | ' + xpath + '@contents', namespaces);
+// Boolean Parameters (default values false)
+//   * strict = false: compare only ending substring, e.g. bepress
+//   * strict = true: compare exactly
+//   * all = false: return only first match
+//   * all = true: concatenate all values
+function getContentText(doc, name, strict, all) {
+	let csspath = 'html>head>meta[name' + (strict ? '="' : '$="') + name + '"]';
+	if (all) {
+		return Array.from(doc.querySelectorAll(csspath)).map(obj => obj.content || obj.contents).join(', ');
+	} else {
+		return attr(doc, csspath, 'content') || attr(doc, csspath, 'contents');
+	}
 }
 
 function getContent(doc, name, strict) {
@@ -186,7 +197,9 @@ function fixCase(authorName) {
 function processFields(doc, item, fieldMap, strict) {
 	for(var metaName in fieldMap) {
 		var zoteroName = fieldMap[metaName];
-		var value = getContentText(doc, metaName, strict);
+		// only concatenate values for ISSN and ISBN; otherwise take the first
+		var allValues = (zoteroName == "ISSN" || zoteroName == "ISBN");
+		var value = getContentText(doc, metaName, strict, allValues);
 		if(value && value.trim()) {
 			item[zoteroName] = ZU.trimInternal(value);
 		}
@@ -256,7 +269,6 @@ function init(doc, url, callback, forceLoadRDF) {
 			//if(delimIndex === -1) continue;
 
 			var prefix = tag.substr(0, delimIndex).toLowerCase();
-
 			if(_prefixes[prefix]) {
 				var prop = tag.substr(delimIndex+1, 1).toLowerCase()+tag.substr(delimIndex+2);
 				//bib and bibo types are special, they use rdf:type to define type
@@ -314,6 +326,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
+			// Z.debug(newItem)
 			completeItem(doc, newItem);
 		});
 
@@ -370,17 +383,19 @@ function importRDF(doc, url) {
 function addHighwireMetadata(doc, newItem) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
-
-	var authorNodes = getContent(doc, 'citation_author')
-						.concat(getContent(doc, 'citation_authors'));
+	var authorNodes = getContent(doc, 'citation_author');
+	if (authorNodes.length == 0) {
+		authorNodes = getContent(doc, 'citation_authors');
+	}
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = [];
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
-		if (authors.length == 1) {
-			/* If we get nothing when splitting by semicolon, and at least two words on
-			* either side of the comma when splitting by comma, we split by comma. */
+		if (authors.length == 1 && authorNodes.length == 1) {
+			/* If there is only one author node and 
+			 we get nothing when splitting by semicolon, and at least two words on
+			 either side of the comma when splitting by comma, we split by comma. */
 			var authorsByComma = authors[0].split(/\s*,\s*/);
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].indexOf(" ") !== -1
@@ -452,10 +467,14 @@ function addHighwireMetadata(doc, newItem) {
 
 	//sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages)? newItem.pages.split(/\s*-\s*/) : new Array();
-	var firstpage = getContentText(doc, 'citation_firstpage') ||
-					rdfPages[0];
-	var lastpage = getContentText(doc, 'citation_lastpage') ||
-					rdfPages[1];
+	var firstpage = getContentText(doc, 'citation_firstpage');
+	var lastpage = getContentText(doc, 'citation_lastpage');
+	if (firstpage && firstpage.includes("-")) {
+		firstpage = firstpage.split(/\s*-\s*/)[0];
+		lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+	}
+	firstpage = firstpage || rdfPages[0];
+	var lastpage = lastpage || rdfPages[1];
 	if(firstpage && ( firstpage = firstpage.trim() )) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
@@ -463,14 +482,26 @@ function addHighwireMetadata(doc, newItem) {
 
 	//fall back to some other date options
 	if(!newItem.date) {
-		newItem.date = getContentText(doc, 'citation_online_date')
-			|| getContentText(doc, 'citation_year');
+		var onlineDate = getContentText(doc, 'citation_online_date');
+		var citationYear = getContentText(doc, 'citation_year');
+		
+		if (onlineDate && citationYear) {
+			onlineDate = ZU.strToISO(onlineDate);
+			if (citationYear < onlineDate.substr(0,4)) {
+				// online date can be years after the citation year
+				newItem.date = citationYear;
+			} else {
+				newItem.date = onlineDate;
+			}
+		} else {
+			newItem.date = onlineDate || citationYear;
+		}
 	}
 
 	//prefer ISSN over eISSN
-	var issn = getContentText(doc, 'citation_issn') ||
-			getContentText(doc, 'citation_ISSN') ||
-			getContentText(doc, 'citation_eIssn');
+	var issn = getContentText(doc, 'citation_issn', null, true) ||
+			getContentText(doc, 'citation_ISSN', null, true) ||
+			getContentText(doc, 'citation_eIssn', null, true);
 
 	if(issn) newItem.ISSN = issn;
 
@@ -566,11 +597,13 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if(newItem.title) {
 		newItem.title = newItem.title.replace(/\s+/g, ' '); //make sure all spaces are \u0020
+
 		if(newItem.publicationTitle) {
 			//remove publication title from the end of title (see #604)
 			//this can occur if we have to doc.title, og:title etc.
+			//Make sure we escape all regex special chars in publication title
 			var removePubTitleRegex = new RegExp('\\s*[-–—=_:|~#]\\s*'
-				+ newItem.publicationTitle + '\\s*$','i');
+				+ newItem.publicationTitle.replace(/([()\[\]\$\^\*\+\.?\|])/g, '\\$1') + '\\s*$','i');
 			newItem.title = newItem.title.replace(removePubTitleRegex, '');
 		}
 	}
@@ -604,10 +637,15 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 
 	if(!newItem.url) {
-		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href');
+		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
 	}
-	if(!newItem.url) {
-		newItem.url = doc.location.href;
+	
+	if (!newItem.language) {
+		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces) ||
+			ZU.xpathText(doc, '//html/@lang') ||
+			doc.documentElement.getAttribute('xml:lang');
 	}
 
 
@@ -624,7 +662,8 @@ function tryOgAuthors(doc) {
 	var authors = [];
 	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
 	for (var i = 0; i<ogAuthors.length; i++) {
-		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0) {
+		
+		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0 && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"))
 		}
 	}
@@ -904,7 +943,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
+		"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34/",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -919,9 +958,10 @@ var testCases = [
 				"date": "2011",
 				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"shortTitle": "Session F",
-				"url": "http://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
+				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -935,7 +975,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2/",
+		"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -957,11 +997,12 @@ var testCases = [
 				"ISSN": "1947-508X",
 				"abstractNote": "The purpose of this paper is to examine the contemporary role of an eighteenth century bounty proclamation issued on the Penobscot Indians of Maine. We focus specifically on how the changing cultural context of the 1755 Spencer Phips Bounty Proclamation has transformed the document from serving as a tool for sanctioned violence to a tool of decolonization for the Indigenous peoples of Maine. We explore examples of the ways indigenous and non-indigenous people use the Phips Proclamation to illustrate past violence directed against Indigenous peoples. This exploration is enhanced with an analysis of the re-introduction of the Phips Proclamation using concepts of decolonization theory.",
 				"issue": "1",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"pages": "2",
 				"publicationTitle": "Landscapes of Violence",
 				"shortTitle": "Wabanaki Resistance and Healing",
-				"url": "http://scholarworks.umass.edu/lov/vol2/iss1/2",
+				"url": "https://scholarworks.umass.edu/lov/vol2/iss1/2",
 				"volume": "2",
 				"attachments": [
 					{
@@ -980,7 +1021,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://scholarworks.umass.edu/open_access_dissertations/508/",
+		"url": "https://scholarworks.umass.edu/open_access_dissertations/508/",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -994,9 +1035,11 @@ var testCases = [
 				],
 				"date": "2012",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
+				"extra": "DOI: https://doi.org/10.7275/n8e9-xy93",
+				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
-				"url": "http://scholarworks.umass.edu/open_access_dissertations/508",
+				"url": "https://scholarworks.umass.edu/open_access_dissertations/508",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1014,7 +1057,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+		"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1041,13 +1084,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/2007",
+				"date": "2007-12",
 				"DOI": "10.1590/S0034-89102007000900015",
-				"ISSN": "0034-8910",
-				"libraryCatalog": "www.scielosp.org",
+				"ISSN": "0034-8910, 0034-8910, 1518-8787",
+				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
+				"journalAbbreviation": "Rev. Saúde Pública",
+				"language": "pt",
+				"libraryCatalog": "scielosp.org",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
-				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
 				"volume": "41",
 				"attachments": [
 					{
@@ -1114,35 +1160,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Junot Díaz: My stories come from trauma",
-				"creators": [
-					{
-						"firstName": "Gregg",
-						"lastName": "Barrios",
-						"creatorType": "author"
-					}
-				],
-				"abstractNote": "The effervescent author of \"This is How You Lose Her\" explains the darkness coursing through his fiction",
-				"shortTitle": "Junot Díaz",
-				"url": "http://www.salon.com/2012/10/10/junot_diaz_my_stories_come_from_trauma/",
-				"websiteTitle": "Salon",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 		"items": [
 			{
@@ -1158,44 +1175,9 @@ var testCases = [
 				"date": "2013-12-22T11:58:34+00:00",
 				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
 				"blogTitle": "The Volokh Conspiracy",
+				"language": "en-US",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/97603",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "WHO recommendations on postnatal care of the mother and newborn",
-				"creators": [
-					{
-						"firstName": "World Health",
-						"lastName": "Organization",
-						"creatorType": "author"
-					}
-				],
-				"date": "2014",
-				"ISBN": "9789241506649",
-				"abstractNote": "62 p.",
-				"language": "en",
-				"libraryCatalog": "apps.who.int",
-				"publisher": "World Health Organization",
-				"url": "http://www.who.int/iris/handle/10665/97603",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
 					{
 						"title": "Snapshot"
 					}
@@ -1271,6 +1253,7 @@ var testCases = [
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
+				"pages": "e1",
 				"publicationTitle": "Open Library of Humanities",
 				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
 				"url": "http://olh.openlibhums.org/article/10.16995/olh.46/",
@@ -1321,7 +1304,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=2797",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=510",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1389,12 +1372,12 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "Signaling data from the cellular networks can provide a means of analyzing the efficiency of a deployed transportation system and assisting in the formulation of transport models to predict its fut ...",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 47 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
 				"shortTitle": "Mobility modeling for transport efficiency",
-				"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2:766397",
+				"url": "http://urn.kb.se/resolve?urn=urn:nbn:se:liu:diva-112443",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1427,7 +1410,7 @@ var testCases = [
 				"date": "1999/04/01",
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "0894-9875, 1572-9524",
-				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today.It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's...",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
@@ -1436,6 +1419,46 @@ var testCases = [
 				"publicationTitle": "Foundations of Physics Letters",
 				"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 				"volume": "12",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/article/234097",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Serfs on the Move: Peasant Seasonal Migration in Pre-Reform Russia, 1800–61",
+				"creators": [
+					{
+						"firstName": "Boris B.",
+						"lastName": "Gorshkov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2000",
+				"DOI": "10.1353/kri.2008.0061",
+				"ISSN": "1538-5000",
+				"issue": "4",
+				"language": "en",
+				"libraryCatalog": "muse.jhu.edu",
+				"pages": "627-656",
+				"publicationTitle": "Kritika: Explorations in Russian and Eurasian History",
+				"shortTitle": "Serfs on the Move",
+				"url": "https://muse.jhu.edu/article/234097",
+				"volume": "1",
 				"attachments": [
 					{
 						"title": "Full Text PDF",

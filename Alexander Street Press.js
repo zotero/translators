@@ -1,18 +1,18 @@
 {
-	"translatorID":"0a84a653-79ea-4c6a-8a68-da933e3b504a",
-	"translatorType":4,
-	"label":"Alexander Street Press",
-	"creator":"John West and Michael Berkowitz",
-	"target":"http://(www\\.)alexanderstreet",
-	"minVersion":"1.0.0b4.r5",
-	"maxVersion":"",
-	"priority":100,
-	"inRepository":true,
-	"lastUpdated":"2009-01-08 08:19:07"
+	"translatorID": "0a84a653-79ea-4c6a-8a68-da933e3b504a",
+	"translatorType": 4,
+	"label": "Alexander Street Press",
+	"creator": "John West and Michael Berkowitz",
+	"target": "^https?://(www\\.)alexanderstreet",
+	"minVersion": "1.0.0b4.r5",
+	"maxVersion": "",
+	"priority": 100,
+	"inRepository": true,
+	"lastUpdated": "2009-01-08 08:19:07"
 }
 
 function detectWeb(doc, url) {
-	if( url.indexOf("object.details.aspx") != -1 ) {
+	if ( url.indexOf("object.details.aspx") != -1 ) {
 		var zitemtype = doc.getElementById("ctl00_ctl00_MasterContentBody_ContentPlaceHolder1_txtZType").value;
 		switch (zitemtype.toLowerCase()) {
 		        case "book":
