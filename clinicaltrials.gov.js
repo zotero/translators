@@ -124,11 +124,11 @@ function scrape(doc, url) {
 		if (study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty("LeadSponsor")) {
 			sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName;
 			let sponsorCreatorType;
-			if (creators.length == 0){
+			if (creators.length == 0) {
 				sponsorCreatorType = "author";
 			}
 			else {
-				sponsorCreatorType = "contributor"
+				sponsorCreatorType = "contributor";
 			}
 			creators.push({
 				firstName: sponsor,
