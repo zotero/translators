@@ -163,14 +163,20 @@ function scrape(doc, url) {
 
 		item.date = study.ProtocolSection.StatusModule.LastUpdateSubmitDate;
 		item.accessDate = dateTimeToDateString(data.FullStudiesResponse.DataVrs);
-		item.libraryCatalog = "clinicaltrials.gov";
+		item.institution = "clinicaltrials.gov";
+		item.reportNumber = clinicalTrialID;
 		item.shortTitle = study.ProtocolSection.IdentificationModule.BriefTitle;
+		item.abstractNote = study.ProtocolSection.DescriptionModule.BriefSummary;
 		item.url = "https://clinicaltrials.gov/ct2/show/" + clinicalTrialID;
+		item.reportType = "Clinical trial registration";
+
 		let extras = {
-			submittedDate: study.ProtocolSection.StatusModule.StudyFirstSubmitDate,
-			responsiblePartyInvestigator: responsiblePartyInvestigator,
+			submitted: study.ProtocolSection.StatusModule.StudyFirstSubmitDate,
 			sponsor: sponsor
 		};
+		if (responsiblePartyInvestigator) {
+			extras["Principle investigator"] = responsiblePartyInvestigator;
+		}
 		if (collaborators.length > 0) {
 			extras.collaborators = [];
 			collaborators.forEach((collaborator) => {
@@ -193,18 +199,22 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
+				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to the normalization of temperature and oxygen saturation through Day 14 in participants with severe coronavirus disease (COVID-19).",
 				"creators": [
 					{
 						"firstName": "Gilead Sciences",
 						"creatorType": "author"
 					}
 				],
-				"date": "March 27, 2020",
+				"date": "April 1, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
 				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
-				"extra": "submittedDate: February 28, 2020\nresponsiblePartyInvestigator: undefined\nsponsor: Gilead Sciences",
+				"institution": "clinicaltrials.gov",
+         		"reportNumber": "NCT04292899",
+         		"reportType": "Clinical trial registration",
+				"extra": "submitted: February 28, 2020\nsponsor: Gilead Sciences",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
@@ -219,6 +229,7 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "The Impact of Gastroesophageal Reflux Disease in Sleep Disorders: A Pilot Investigation of Rabeprazole, 20 mg Twice Daily for the Relief of GERD-Related Insomnia.",
+				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance. Patients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching. Even very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.\n\nThis study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia. Rabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
 				"creators": [
 					{
 						"firstName": "University of North Carolina",
@@ -234,7 +245,10 @@ var testCases = [
 				"libraryCatalog": "clinicaltrials.gov",
 				"shortTitle": "Sleep Disorders and Gastroesophageal Reflux Disease (GERD)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT00287391",
-				"extra": "submittedDate: February 3, 2006\nresponsiblePartyInvestigator: undefined\nsponsor: University of North Carolina\ncollaborators: 'Janssen Pharmaceutica N.V., Belgium'",
+				"institution": "clinicaltrials.gov",
+         		"reportNumber": "NCT00287391",
+         		"reportType": "Clinical trial registration",
+				"extra": "submitted: February 3, 2006\nsponsor: University of North Carolina\ncollaborators: 'Janssen Pharmaceutica N.V., Belgium'",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
@@ -249,6 +263,7 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "Efficacy and Safety of Hydroxychloroquine for Treatment of Pneumonia Caused by 2019-nCoV ( HC-nCoV )",
+				"abstractNote": "The study aims to evaluate the efficacy and safety of hydroxychloroquine in the treatment of pneumonia caused by the 2019 novel coronavirus",
 				"creators": [
 					{
 						"firstName": "Hongzhou",
@@ -264,7 +279,10 @@ var testCases = [
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04261517",
-				"extra": "submittedDate: February 6, 2020\nresponsiblePartyInvestigator: Hongzhou Lu\nsponsor: Shanghai Public Health Clinical Center",
+				"institution": "clinicaltrials.gov",
+         		"reportNumber": "NCT04261517",
+         		"reportType": "Clinical trial registration",
+				"extra": "submitted: February 6, 2020\nsponsor: Shanghai Public Health Clinical Center\nPrinciple investigator: Hongzhou Lu",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
