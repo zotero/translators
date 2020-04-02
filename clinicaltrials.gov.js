@@ -86,6 +86,20 @@ function nameToFirstAndLast(rawName) {
 	return [firstName, lastName];
 }
 
+function extrasObjToExtrasString(extrasObj) {
+	let extrasString = "";
+	for (let key in extrasObj) {
+		if (key == "collaborators") {
+			const stringifiedArray = "'" + extrasObj[key].join("','") + "'";
+			extrasString = extrasString + "\n" + key + ": " + stringifiedArray;
+		}
+		else {
+			extrasString = extrasString + "\n" + key + ": " + extrasObj[key];
+		}
+	}
+	return extrasString;
+}
+
 function scrape(doc, url) {
 	const clinicalTrialID = getClinicalTrialID(url);
 	let jsonRequestURL;
@@ -163,8 +177,8 @@ function scrape(doc, url) {
 				extras.collaborators.push(collaborator.firstName);
 			});
 		}
-
-		item.extra = extras;
+		const extrasString = extrasObjToExtrasString(extras);
+		item.extra = extrasString;
 		item.complete();
 	});
 }
@@ -185,16 +199,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "February 28, 2020",
+				"date": "March 27, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
 				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
-				"extra": {
-					"submittedDate": "February 6, 2020",
-					"responsiblePartyInvestigator": "undefined",
-					"sponsor": "Gilead Sciences"
-				}
+				"extra": "submittedDate: February 28, 2020\nresponsiblePartyInvestigator: undefined\nsponsor: Gilead Sciences",
+				"notes": [],
+          		"tags": [],
+        		"seeAlso": [],
+         		"attachments": []
 			}
 		]
 	},
@@ -220,12 +234,11 @@ var testCases = [
 				"libraryCatalog": "clinicaltrials.gov",
 				"shortTitle": "Sleep Disorders and Gastroesophageal Reflux Disease (GERD)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT00287391",
-				"extra": {
-					"submittedDate": "February 3, 2006",
-					"responsiblePartyInvestigator": "undefined",
-					"sponsor": "University of North Carolina",
-					"collaborators": ["Janssen Pharmaceutica N.V., Belgium"]
-				}
+				"extra": "submittedDate: February 3, 2006\nresponsiblePartyInvestigator: undefined\nsponsor: University of North Carolina\ncollaborators: 'Janssen Pharmaceutica N.V., Belgium'",
+				"notes": [],
+          		"tags": [],
+        		"seeAlso": [],
+         		"attachments": []
 			}
 		]
 	},
@@ -250,13 +263,12 @@ var testCases = [
 				"date": "March 22, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
-				"shortTitle": "Efficacy and Safety of Hydroxychloroquine for Treatment of Pneumonia Caused by 2019-nCoV ( HC-nCoV )",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04261517",
-				"extra": {
-					"submittedDate": "February 6, 2020",
-					"responsiblePartyInvestigator": "Hongzhou Lu",
-					"sponsor": "Shanghai Public Health Clinical Center"
-				}
+				"extra": "submittedDate: February 6, 2020\nresponsiblePartyInvestigator: Hongzhou Lu\nsponsor: Shanghai Public Health Clinical Center",
+				"notes": [],
+          		"tags": [],
+        		"seeAlso": [],
+         		"attachments": []
 			}
 		]
 	}
