@@ -86,20 +86,6 @@ function nameToFirstAndLast(rawName) {
 	return [firstName, lastName];
 }
 
-function extrasObjToExtrasString(extrasObj) {
-	let extrasString = "";
-	for (let key in extrasObj) {
-		if (key == "collaborators") {
-			const stringifiedArray = "'" + extrasObj[key].join("','") + "'";
-			extrasString = extrasString + "\n" + key + ": " + stringifiedArray;
-		}
-		else {
-			extrasString = extrasString + "\n" + key + ": " + extrasObj[key];
-		}
-	}
-	return extrasString;
-}
-
 function scrape(doc, url) {
 	const clinicalTrialID = getClinicalTrialID(url);
 	let jsonRequestURL;
@@ -137,9 +123,16 @@ function scrape(doc, url) {
 
 		if (study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty("LeadSponsor")) {
 			sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName;
+			let sponsorCreatorType;
+			if (creators.length == 0){
+				sponsorCreatorType = "author";
+			}
+			else {
+				sponsorCreatorType = "contributor"
+			}
 			creators.push({
 				firstName: sponsor,
-				creatorType: "author"
+				creatorType: sponsorCreatorType
 			});
 		}
 		
@@ -149,7 +142,7 @@ function scrape(doc, url) {
 				collaborators.push(
 					{
 						firstName: collaborator.CollaboratorName,
-						creatorType: "author"
+						creatorType: "contributor"
 					}
 				);
 			});
@@ -169,22 +162,7 @@ function scrape(doc, url) {
 		item.abstractNote = study.ProtocolSection.DescriptionModule.BriefSummary;
 		item.url = "https://clinicaltrials.gov/ct2/show/" + clinicalTrialID;
 		item.reportType = "Clinical trial registration";
-
-		let extras = {
-			submitted: study.ProtocolSection.StatusModule.StudyFirstSubmitDate,
-			sponsor: sponsor
-		};
-		if (responsiblePartyInvestigator) {
-			extras["Principle investigator"] = responsiblePartyInvestigator;
-		}
-		if (collaborators.length > 0) {
-			extras.collaborators = [];
-			collaborators.forEach((collaborator) => {
-				extras.collaborators.push(collaborator.firstName);
-			});
-		}
-		const extrasString = extrasObjToExtrasString(extras);
-		item.extra = extrasString;
+		item.extra = `submitted: ${study.ProtocolSection.StatusModule.StudyFirstSubmitDate}`;
 		item.complete();
 	});
 }
@@ -214,7 +192,7 @@ var testCases = [
 				"institution": "clinicaltrials.gov",
          		"reportNumber": "NCT04292899",
          		"reportType": "Clinical trial registration",
-				"extra": "submitted: February 28, 2020\nsponsor: Gilead Sciences",
+				"extra": "submitted: February 28, 2020",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
@@ -237,7 +215,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Janssen Pharmaceutica N.V., Belgium",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "April 25, 2007",
@@ -248,7 +226,7 @@ var testCases = [
 				"institution": "clinicaltrials.gov",
          		"reportNumber": "NCT00287391",
          		"reportType": "Clinical trial registration",
-				"extra": "submitted: February 3, 2006\nsponsor: University of North Carolina\ncollaborators: 'Janssen Pharmaceutica N.V., Belgium'",
+				"extra": "submitted: February 3, 2006",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
@@ -272,7 +250,7 @@ var testCases = [
 					},
 					{
 						"firstName": "Shanghai Public Health Clinical Center",
-						"creatorType": "author"
+						"creatorType": "contributor"
 					}
 				],
 				"date": "March 22, 2020",
@@ -282,7 +260,7 @@ var testCases = [
 				"institution": "clinicaltrials.gov",
          		"reportNumber": "NCT04261517",
          		"reportType": "Clinical trial registration",
-				"extra": "submitted: February 6, 2020\nsponsor: Shanghai Public Health Clinical Center\nPrinciple investigator: Hongzhou Lu",
+				"extra": "submitted: February 6, 2020",
 				"notes": [],
           		"tags": [],
         		"seeAlso": [],
