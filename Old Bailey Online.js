@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-08 14:06:13"
+	"lastUpdated": "2018-10-12 23:37:03"
 }
 
 /*
@@ -32,7 +32,7 @@
 	along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
 	
 	***** END LICENSE BLOCK *****
-*/ 	
+*/
 // URLs
 // trial: div=t18000115-12
 // session: name=16900430
@@ -46,7 +46,7 @@ function detectWeb(doc, url) {
 		return "case";
 	} else if ( url.includes("search.jsp") &&  getSearchResults(doc, true)) {
 		return "multiple";
-	} 
+	}
 }
 
 // to do:  not trials...
@@ -86,16 +86,26 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	var trialTitle = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-main-title"]');   // updated @class name
 	
 	
+	
 	newItem.url = url;
 	
 	var sessDate = ZU.xpathText(doc, '//div[@class="sessionsPaper"]/div[@class="sessions-paper-date"]'); // add session date, as the date is now in a gettable node
 	
-	newItem.date = ZU.strToISO(sessDate); 
+	newItem.date = ZU.strToISO(sessDate);
 	
-	if (newItem.itemType == "case" && newItem.title && newItem.title == newItem.title.toUpperCase()) {
-		newItem.title = ZU.capitalizeTitle(trialTitle, true);  // todo tidying this up - sometimes no name, messy punctuation
+	if (newItem.itemType == "case" && trialTitle) {
+ 		if (trialTitle == trialTitle.toUpperCase()) {
+  			newItem.title = ZU.capitalizeTitle(trialTitle, true);
+   		} else {
+      			newItem.title = trialTitle;
+   		}
 	} else if (newItem.itemType == "book") {
 		newItem.title = trialTitle + " " + sessDate;
+	}
+
+	newItem.title = newItem.title.trim().replace(/[,.]+$/, "");
+	if (!newItem.title) {
+		newItem.title = "[no title]";
 	}
 	
 	var referenceNo = ZU.xpathText(doc, '//div[@class="ob-panel"][1]/table[@class="ob-info-table"][1]/tbody/tr[th[contains(text(),"Reference")]]/td').trim(); // changed fetching Reference number
@@ -103,7 +113,7 @@ if (url.includes('browse.jsp')  && ( url.includes('div=OA') || url.includes('nam
 	newItem.extra = "Reference Number: " + referenceNo; // putting the ref number in the Extra field had a particular function, was it for Voyant? or the defunct DMCI plugin? retain it at least for now (non trials will want it anyway)
 	
 	if (newItem.itemType == "case") {
-		newItem.docketNumber = referenceNo; 
+		newItem.docketNumber = referenceNo;
 	}
 	
 	if (newItem.itemType == "book") {
@@ -143,7 +153,7 @@ if (newItem.itemType == "case") {
 
 // use print-friendly URLs for snapshots
 
-	var attachmentUrl = "https://www.oldbaileyonline.org/print.jsp?div=" + referenceNo;  
+	var attachmentUrl = "https://www.oldbaileyonline.org/print.jsp?div=" + referenceNo;
 	newItem.attachments.push({ url  : attachmentUrl,    title : "OBO Snapshot",    mimeType : "text/html" });
 
 	newItem.complete();
@@ -165,7 +175,7 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else if (url.includes('browse.jsp') && ( url.includes('div=') || url.includes('name=') ) )  {  
+	} else if (url.includes('browse.jsp') && ( url.includes('div=') || url.includes('name=') ) )  {
 		scrape(doc, url);
 	}
 }
@@ -185,7 +195,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "Peter Asterbawd, Andrew Forsman.",
+				"caseName": "Peter Asterbawd, Andrew Forsman",
 				"creators": [],
 				"dateDecided": "1800-01-15",
 				"docketNumber": "t18000115-12",
@@ -232,7 +242,7 @@ var testCases = [
 				"creators": [],
 				"date": "1711-04-21",
 				"extra": "Reference Number: OA17110421",
-				"libraryCatalog": "Old Bailey Online 201809",
+				"libraryCatalog": "Old Bailey Online",
 				"place": "London",
 				"url": "https://www.oldbaileyonline.org/browse.jsp?div=OA17110421",
 				"attachments": [
@@ -257,7 +267,7 @@ var testCases = [
 				"creators": [],
 				"date": "1711-04-21",
 				"extra": "Reference Number: OA17110421",
-				"libraryCatalog": "Old Bailey Online 201809",
+				"libraryCatalog": "Old Bailey Online",
 				"place": "London",
 				"url": "https://www.oldbaileyonline.org/browse.jsp?name=OA17110421",
 				"attachments": [
@@ -282,7 +292,7 @@ var testCases = [
 				"creators": [],
 				"date": "1710-04-18",
 				"extra": "Reference Number: 17100418",
-				"libraryCatalog": "Old Bailey Online 201809",
+				"libraryCatalog": "Old Bailey Online",
 				"place": "London",
 				"url": "https://www.oldbaileyonline.org/browse.jsp?name=17100418",
 				"attachments": [
@@ -292,6 +302,40 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "[no title]",
+				"creators": [],
+				"dateDecided": "1678-08-28",
+				"docketNumber": "t16780828-12",
+				"extra": "Reference Number: t16780828-12",
+				"url": "https://www.oldbaileyonline.org/browse.jsp?id=t16780828-12&div=t16780828-12&terms=hog#highlight",
+				"attachments": [
+					{
+						"title": "OBO Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Guilty"
+					},
+					{
+						"tag": "Theft"
+					},
+					{
+						"tag": "animal theft"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

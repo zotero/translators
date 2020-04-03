@@ -1,0 +1,21 @@
+{
+	"name": "translators-check",
+	"version": "1.0.2",
+	"description": "Continuous integration of Zotero translators",
+	"main": "index.js",
+	"scripts": {
+		"test": "teslint .",
+		"lint": "teslint",
+		"lint:linter": "eslint --no-ignore .ci"
+	},
+	"author": "kba+pz",
+	"license": "CC0-1.0",
+	"repository": {
+		"url": "https://github.com/zotero/translators/blob/master/.ci/"
+	},
+	"devDependencies": {
+		"@zotero/eslint-config": "^1.0.4",
+		"eslint": "^5.16.0",
+		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator"
+	}
+}
