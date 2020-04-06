@@ -165,7 +165,7 @@ function scrapecase(doc) { //Jurisprudence
 	
 	// Note : présence d'autres cas pour les TA
 	
-	var h; // Cour de cassation 
+	var h; // Cour de cassation
 	h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/);
 	if (h) {
 		nature = h[1];
@@ -205,15 +205,13 @@ function scrapecase(doc) { //Jurisprudence
 		newItem.date = date;
 		newItem.docketNumber = numero;
 		newItem.reporter = publication;
-	
 	}
 	newItem.complete();
 }
 
 
-function scrapelegislation(doc, url) { //Législation
-	
-	var code, date;
+function scrapelegislation(doc, url) { //Législation	
+	var code, date, UnParam;
 	var newItem = new Zotero.Item("statute");
 	
 	var title = ZU.xpathText(doc, '//h2[@class="title"]');
@@ -221,13 +219,13 @@ function scrapelegislation(doc, url) { //Législation
 	var MonUrl = doc.location.href;
 	var UrlParam = MonUrl.substring(MonUrl.indexOf("?")+1).split("&");
 	
-	if (MonUrl.indexOf("jsessionid")!=-1) {
+	if (MonUrl.indexOf("jsessionid") != -1) {
 		MonUrl = MonUrl.substring(0,MonUrl.indexOf("jsessionid")-1)+"?";
 	} else {
 		MonUrl = MonUrl.substring(0,MonUrl.indexOf("?")+1);
 	}
 	for (UnParam in UrlParam) {
-		if ((UrlParam[UnParam].indexOf("dateTexte")==-1)&&(UrlParam[UnParam].indexOf("categorieLien")==-1)) {
+		if ((UrlParam[UnParam].indexOf("dateTexte") == -1)&&(UrlParam[UnParam].indexOf("categorieLien") == -1)) {
 			MonUrl = MonUrl + UrlParam[UnParam]+"&";
 		}
 	}
@@ -235,7 +233,7 @@ function scrapelegislation(doc, url) { //Législation
 	newItem.url = MonUrl;
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 	
-	// 
+	//
 	var a; // Codes
 	a = title.match(/(Code.*) - Article (.*)/);
 	if (a) {
@@ -247,20 +245,19 @@ function scrapelegislation(doc, url) { //Législation
 	
 	var b; // Lois 1er modèle
 	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
-	if (b) {
-		
+	if (b) {	
 		code = b[2];
 		date = b[3];
-		newItem.code = code; // publicLawNumber non défini 
+		newItem.code = code; // publicLawNumber non défini
 		newItem.date = date;
 	}
 	
 	var c; // Lois 2ème modèle
 	c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
-	if (c) {	
+	if (c) {
 		code = c[2];
 		date = c[3];
-		newItem.code = code; // publicLawNumber non défini 
+		newItem.code = code; // publicLawNumber non défini
 		newItem.date = date;
 	}
 	
@@ -295,7 +292,6 @@ function doWeb(doc, url) {
 			}
 			Zotero.Utilities.processDocuments(articles, scrapecase);
 		});
-	
 	}
 } /** BEGIN TEST CASES **/
 
