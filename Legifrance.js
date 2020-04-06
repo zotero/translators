@@ -210,7 +210,7 @@ function scrapecase(doc) { //Jurisprudence
 }
 
 
-function scrapelegislation(doc, url) { //Législation	
+function scrapelegislation(doc) { //Législation
 	var code, date, UnParam;
 	var newItem = new Zotero.Item("statute");
 	
@@ -245,7 +245,7 @@ function scrapelegislation(doc, url) { //Législation
 	
 	var b; // Lois 1er modèle
 	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
-	if (b) {	
+	if (b) {
 		code = b[2];
 		date = b[3];
 		newItem.code = code; // publicLawNumber non défini
@@ -293,6 +293,7 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(articles, scrapecase);
 		});
 	}
+	return true;
 } /** BEGIN TEST CASES **/
 
 var testCases = [
