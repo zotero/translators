@@ -291,7 +291,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "2020-05-12",
+				"date": "2020-10-11",
 				"ISBN": "9781913029579",
 				"abstractNote": "Perspectives from philosophy, aesthetics, and art on how to envisage the construction site of possible worlds.",
 				"language": "en",
@@ -510,7 +510,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2020-08-11",
+				"date": "2020-10-20",
 				"ISBN": "9781907222924",
 				"abstractNote": "The chronicle of a year spent discovering the traditional musicians of the American South, including Mississippi Fred McDowell, Muddy Waters, and many others.",
 				"edition": "Revised And Expanded",
