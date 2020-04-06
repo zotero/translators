@@ -217,6 +217,21 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 
 		var title = ZU.xpathText(doc, '//h2[@class="title"]');
 		newItem.title = title;
+		var MonUrl = doc.location.href;
+		var UrlParam = MonUrl.substring(MonUrl.indexOf("?")+1).split("&");
+
+  		if (MonUrl.indexOf("jsessionid")!=-1) {
+				MonUrl = MonUrl.substring(0,MonUrl.indexOf("jsessionid")-1)+"?";
+  		} else {
+  			MonUrl = MonUrl.substring(0,MonUrl.indexOf("?")+1);
+  		} 
+  		for (UnParam in UrlParam) {
+				if ((UrlParam[UnParam].indexOf("dateTexte")==-1)&&(UrlParam[UnParam].indexOf("categorieLien")==-1)) {
+	  				MonUrl = MonUrl + UrlParam[UnParam]+"&";
+				}
+  		}
+  		MonUrl = MonUrl.substring(0,MonUrl.length-1);
+  		newItem.url = MonUrl
 		newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 		// 
