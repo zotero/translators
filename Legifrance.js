@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 	} else return false;
 }
 
-function scrapecase(doc) { //Jurisprudence	
+function scrapecase(doc) { //Jurisprudence
 	var newItem = new Zotero.Item("case");
 	
 	// Paramètres communs
@@ -72,9 +72,9 @@ function scrapecase(doc) { //Jurisprudence
 	
 	// Situation selon les juridictions
 	
-	// Conseil constitutionnel 
+	// Conseil constitutionnel
 	
-	a = title.match(/(.*) - (.*) - (.*) - (.*)/)
+	a = title.match(/(.*) - (.*) - (.*) - (.*)/);
 	
 	if (a) {
 		var numero = a[1];
@@ -88,7 +88,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Conseil d'État avec indication de publication
-	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/)
+	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/);
 	if (b) {
 		var cour = b[1];
 		var formation = b[2];
@@ -103,7 +103,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 
 	// Conseil d'État sans indication de publication
-	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/)
+	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/);
 	if (c) {
 		var formation = c[2];
 		var date = c[3];
@@ -115,7 +115,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Tribunal des conflits (jp administrative)
-	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/)
+	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/);
 	if (d) {
 		var date = d[2];
 		var numero = d[3];
@@ -125,7 +125,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Cours administratives d'appel avec publication // très rares cas sans publication
-	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/)
+	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/);
 	if (e) {
 		var cour = e[1];
 		var formation = e[2];
@@ -140,7 +140,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	var f; // tribunaux administratifs avec chambre
-	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/)
+	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/);
 	if (f) {
 		var cour = f[1];
 		var formation = f[2];
