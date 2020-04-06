@@ -57,6 +57,7 @@ function scrapecase(doc) { //Jurisprudence
 	var newItem = new Zotero.Item("case");
 	
 	// Paramètres communs
+	var numero, date, formation, cour, publication, nature;
 	
 	var title = ZU.xpathText(doc, '//h2[@class="title"]');
 	newItem.title = title;
@@ -75,10 +76,10 @@ function scrapecase(doc) { //Jurisprudence
 	var a;// Conseil constitutionnel
 	a = title.match(/(.*) - (.*) - (.*) - (.*)/);
 	if (a) {
-		var numero = a[1];
-		var date = a[2];
-		var texteparties = a[3]
-		var formation = a[4];
+		numero = a[1];
+		date = a[2];
+		var texteparties = a[3];
+		formation = a[4];
 		newItem.court = 'Conseil constitutionnel';
 		newItem.docketNumber = numero;
 		newItem.date = date;
@@ -88,11 +89,11 @@ function scrapecase(doc) { //Jurisprudence
 	var b;// Conseil d'État avec indication de publication
 	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/);
 	if (b) {
-		var cour = b[1];
-		var formation = b[2];
-		var date = b[3];
-		var numero = b[4];
-		var publication = b[5];
+		cour = b[1];
+		formation = b[2];
+		date = b[3];
+		numero = b[4];
+		publication = b[5];
 		newItem.court = 'Conseil d\'État';
 		newItem.extra = formation;
 		newItem.date = date;
@@ -103,9 +104,9 @@ function scrapecase(doc) { //Jurisprudence
 	var c;// Conseil d'État sans indication de publication
 	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/);
 	if (c) {
-		var formation = c[2];
-		var date = c[3];
-		var numero = c[4];
+		formation = c[2];
+		date = c[3];
+		numero = c[4];
 		newItem.court = 'Conseil d\'État';
 		newItem.extra = formation;
 		newItem.date = date;
@@ -115,8 +116,8 @@ function scrapecase(doc) { //Jurisprudence
 	var d;// Tribunal des conflits (jp administrative)
 	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/);
 	if (d) {
-		var date = d[2];
-		var numero = d[3];
+		date = d[2];
+		numero = d[3];
 		newItem.court = 'Tribunal des Conflits';
 		newItem.date = date;
 		newItem.docketNumber = numero;
@@ -125,11 +126,11 @@ function scrapecase(doc) { //Jurisprudence
 	var e;// Cours administratives d'appel avec publication // très rares cas sans publication
 	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/);
 	if (e) {
-		var cour = e[1];
-		var formation = e[2];
-		var date = e[3];
-		var numero = e[4];
-		var publication = e[5];
+		cour = e[1];
+		formation = e[2];
+		date = e[3];
+		numero = e[4];
+		publication = e[5];
 		newItem.court = cour;
 		newItem.extra = formation;
 		newItem.date = date;
@@ -140,10 +141,10 @@ function scrapecase(doc) { //Jurisprudence
 	var f; // tribunaux administratifs avec chambre
 	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/);
 	if (f) {
-		var cour = f[1];
-		var formation = f[2];
-		var date = f[3];
-		var numero = f[4];
+		cour = f[1];
+		formation = f[2];
+		date = f[3];
+		numero = f[4];
 		newItem.court = 'Tribunal ' + cour;
 		newItem.date = date;
 		newItem.docketNumber = numero;
@@ -152,10 +153,10 @@ function scrapecase(doc) { //Jurisprudence
 	var g; // tribunaux administratifs sans chambre avec publication
 	g = title.match(/(Tribunal Administratif|administratif.*), du (.*), (s*[0-9-]+), (.*Lebon)/);
 	if (g) {
-		var cour = g[1];
-		var date = g[2];
-		var numero = g[3];
-		var publication = g[4];
+		cour = g[1];
+		date = g[2];
+		numero = g[3];
+		publication = g[4];
 		newItem.court = 'Tribunal ' + cour;
 		newItem.date = date;
 		newItem.docketNumber = numero;
@@ -167,11 +168,11 @@ function scrapecase(doc) { //Jurisprudence
 	var h; // Cour de cassation 
 	h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/);
 	if (h) {
-		var nature = h[1];
-		var formation = h[2];
-		var date = h[3];
-		var numero = h[4];
-		var publication = h[5];
+		nature = h[1];
+		formation = h[2];
+		date = h[3];
+		numero = h[4];
+		publication = h[5];
 		newItem.court = 'Cour de cassation';
 		if (nature) newItem.tags.push(nature);
 		newItem.extra = formation;
@@ -183,10 +184,10 @@ function scrapecase(doc) { //Jurisprudence
 	var i; // cours d'appel et tribunaux
 	i = title.match(/(Cour d'appel.*|Tribunal.*|Conseil.*|Chambre.*|Juridiction.*|Commission.*|Cour d'assises.*) de (.*), (.*), (s*[0-9/]+)/);
 	if (i) {
-		var cour = i[1];
+		cour = i[1];
 		var lieu = i[2];
-		var date = i[3];
-		var numero = i[4];
+		date = i[3];
+		numero = i[4];
 		newItem.court = cour + ' de ' + lieu;
 		newItem.date = date;
 		newItem.docketNumber = numero;
@@ -195,10 +196,10 @@ function scrapecase(doc) { //Jurisprudence
 	var j;// Tribunal des conflits - Base CASS
 	j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/);
 	if (j) {
-		var nature = j[2];
-		var date = j[3];
-		var numero = j[4];
-		var publication = j[5];
+		nature = j[2];
+		date = j[3];
+		numero = j[4];
+		publication = j[5];
 		newItem.court = 'Tribunal des conflits';
 		if (nature) newItem.tags.push(nature);
 		newItem.date = date;
@@ -212,6 +213,7 @@ function scrapecase(doc) { //Jurisprudence
 
 function scrapelegislation(doc, url) { //Législation
 	
+	var code, date;
 	var newItem = new Zotero.Item("statute");
 	
 	var title = ZU.xpathText(doc, '//h2[@class="title"]');
@@ -237,7 +239,7 @@ function scrapelegislation(doc, url) { //Législation
 	var a; // Codes
 	a = title.match(/(Code.*) - Article (.*)/);
 	if (a) {
-		var code = a[1];
+		code = a[1];
 		var codeNumber = a[2];
 		newItem.code = code;
 		newItem.codeNumber = codeNumber;
@@ -247,8 +249,8 @@ function scrapelegislation(doc, url) { //Législation
 	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
 	if (b) {
 		
-		var code = b[2];
-		var date = b[3];
+		code = b[2];
+		date = b[3];
 		newItem.code = code; // publicLawNumber non défini 
 		newItem.date = date;
 	}
@@ -256,8 +258,8 @@ function scrapelegislation(doc, url) { //Législation
 	var c; // Lois 2ème modèle
 	c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
 	if (c) {	
-		var code = c[2];
-		var date = c[3];
+		code = c[2];
+		date = c[3];
 		newItem.code = code; // publicLawNumber non défini 
 		newItem.date = date;
 	}
@@ -266,8 +268,8 @@ function scrapelegislation(doc, url) { //Législation
 	e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/);
 	if (e) {
 		var nameOfAct = e[1];
-		var code = e[2];
-		var date = e[3];
+		code = e[2];
+		date = e[3];
 		newItem.nameOfAct = nameOfAct + ' de la Commission Nationale de l\'Informatique et des Libertés';
 		newItem.code = code;
 		newItem.date = date;
