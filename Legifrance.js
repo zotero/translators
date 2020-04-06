@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2013-04-17 03:09:28"
+	"lastUpdated": "2020-04-06 23:03:28"
 }
 
 /*
@@ -44,17 +44,16 @@ var legifrancecaseRegexp = /https?:\/\/(www.)?legifrance\\.gouv\\.fr\/.+JURITEXT
 // Détection occurences multiples uniquement pour la jurisprudence ... pour l'instant
 
 function detectWeb(doc, url) {
-	if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence 
+	if (url.match(/.CETATEXT|CONSTEXT|JURITEXT./)) { // Détection jurisprudence
 		return "case";
-	} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs 
+	} else if (url.match(/LEGIARTI|affichCodeArticle|affichTexteArticle|KALICONT|JORFTEXT|CNILTEXT/)) { // Détection textes législatifs
 		return "statute"; // Détection lois et codes
 	} else if (url.match(/rechJuriConst|rechExpJuriConst|rechJuriAdmin|rechExpJuriAdmin|rechJuriJudi|rechExpJuriJudi/)) { // Détection occurences multiples uniquement pour la jurisprudence
 		return "multiple"; // occurences multiples
 	} else return false;
 }
 
-function scrapecase(doc) { //Jurisprudence
-	
+function scrapecase(doc) { //Jurisprudence	
 	var newItem = new Zotero.Item("case");
 	
 	// Paramètres communs
@@ -75,7 +74,7 @@ function scrapecase(doc) { //Jurisprudence
 	
 	// Conseil constitutionnel 
 	
-	a = title.match(/(.*) - (.*) - (.*) - (.*)/);
+	a = title.match(/(.*) - (.*) - (.*) - (.*)/)
 	
 	if (a) {
 		var numero = a[1];
@@ -89,7 +88,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Conseil d'État avec indication de publication
-	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/);
+	b = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+), (.*Lebon)/)
 	if (b) {
 		var cour = b[1];
 		var formation = b[2];
@@ -104,7 +103,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 
 	// Conseil d'État sans indication de publication
-	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/);
+	c = title.match(/(Conseil d'État), (.*), (s*[0-9/]+), (s*[0-9]+)/)
 	if (c) {
 		var formation = c[2];
 		var date = c[3];
@@ -116,7 +115,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Tribunal des conflits (jp administrative)
-	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/);
+	d = title.match(/(Tribunal des Conflits), , (s*[0-9/]+), (.*)/)
 	if (d) {
 		var date = d[2];
 		var numero = d[3];
@@ -126,7 +125,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Cours administratives d'appel avec publication // très rares cas sans publication
-	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/);
+	e = title.match(/(Cour administrative .*), (.*), (s*[0-9/]+), (.*), (.*Lebon)/)
 	if (e) {
 		var cour = e[1];
 		var formation = e[2];
@@ -141,7 +140,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	var f; // tribunaux administratifs avec chambre
-	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/);
+	f = title.match(/(|Tribunal Administratif|administratif.*), (.*chambre), (s*[0-9/]+), (s*[0-9]+)/)
 	if (f) {
 		var cour = f[1];
 		var formation = f[2];
@@ -153,7 +152,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	var g; // tribunaux administratifs sans chambre avec publication
-	g = title.match(/(Tribunal Administratif|administratif.*), du (.*), (s*[0-9-]+), (.*Lebon)/);
+	g = title.match(/(Tribunal Administratif|administratif.*), du (.*), (s*[0-9-]+), (.*Lebon)/)
 	if (g) {
 		var cour = g[1];
 		var date = g[2];
@@ -168,7 +167,7 @@ function scrapecase(doc) { //Jurisprudence
 	// Note : présence d'autres cas pour les TA
 	
 	var h; // Cour de cassation 
-	h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/);
+	h = title.match(/(Cour de cassation), (.*), (.*), (s*[0-9-. ]+), (.*)/)
 	if (h) {
 		var nature = h[1];
 		var formation = h[2];
@@ -184,7 +183,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	var i; // cours d'appel et tribunaux
-	i = title.match(/(Cour d'appel.*|Tribunal.*|Conseil.*|Chambre.*|Juridiction.*|Commission.*|Cour d'assises.*) de (.*), (.*), (s*[0-9/]+)/);
+	i = title.match(/(Cour d'appel.*|Tribunal.*|Conseil.*|Chambre.*|Juridiction.*|Commission.*|Cour d'assises.*) de (.*), (.*), (s*[0-9/]+)/)
 	if (i) {
 		var cour = i[1];
 		var lieu = i[2];
@@ -196,7 +195,7 @@ function scrapecase(doc) { //Jurisprudence
 	}
 	
 	// Tribunal des conflits - Base CASS
-	j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/);
+	j = title.match(/(Tribunal des conflits), (.*), (.*), (s*[0-9-. ]+), (.*)/)
 	if (j) {
 		var nature = j[2];
 		var date = j[3];
@@ -238,7 +237,7 @@ function scrapelegislation(doc, url) { //Législation
 	
 	// 
 	var a; // Codes
-	a = title.match(/(Code.*) - Article (.*)/);
+	a = title.match(/(Code.*) - Article (.*)/)
 	if (a) {
 		var code = a[1];
 		var codeNumber = a[2];
@@ -247,7 +246,7 @@ function scrapelegislation(doc, url) { //Législation
 	}
 	
 	var b; // Lois 1er modèle
-	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
+	b = title.match(/(LOI|Décret) n[o°] (s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
 	if (b) {
 		
 		var code = b[2];
@@ -257,7 +256,7 @@ function scrapelegislation(doc, url) { //Législation
 	}
 	
 	var c; // Lois 2ème modèle
-	c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/);
+	c = title.match(/(Loi|Décret) n[o°](s*[0-9-]+) du ((s*[0-9]+) (janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre) (s*[0-9z]+))/)
 	if (c) {	
 		var code = c[2];
 		var date = c[3];
@@ -266,7 +265,7 @@ function scrapelegislation(doc, url) { //Législation
 	}
 	
 	var e; // CNIL
-	e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/);
+	e = title.match(/(Délibération) (s*[0-9-]+) du ((s*[0-9]+) (.*) (s*[0-9]+))/)
 	if (e) {
 		var nameOfAct = e[1];
 		var code = e[2];
