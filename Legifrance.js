@@ -285,7 +285,7 @@ function doWeb(doc, url) {
 		var articles = [];
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			for (var i in items) {
 				articles.push(i);
@@ -293,7 +293,6 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(articles, scrapecase);
 		});
 	}
-	return true;
 } /** BEGIN TEST CASES **/
 
 var testCases = [
