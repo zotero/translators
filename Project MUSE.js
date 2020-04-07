@@ -89,6 +89,7 @@ function scrape(doc, url) {
 	let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
+	let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -96,6 +97,9 @@ function scrape(doc, url) {
 		if (abstract) {
 			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "")
 				.trim();
+		}
+		if (tags) {
+			item.tags = tags.split(",");
 		}
 		if (url.includes("/article/")) {
 			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
