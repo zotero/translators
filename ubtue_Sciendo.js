@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-07 13:22:06"
+	"lastUpdated": "2019-01-10 15:40:06"
 }
 
 /*
@@ -35,9 +35,10 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/view/)) {
+	var toc = ZU.xpath(doc, '//div[contains(@class, "component-table-of-contents")]');
+	if (toc && toc.length == 1)
 		return "multiple";
-	} else if (url.match(/article/)) {
+	else {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
@@ -60,6 +61,7 @@ function getSearchResults(doc, checkOnly) {
   }
   return found ? items : false;
 }
+
 function invokeEmbeddedMetadataTranslator(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
