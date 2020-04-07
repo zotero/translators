@@ -2,14 +2,14 @@
 	"translatorID": "c54d1932-73ce-dfd4-a943-109380e06574",
 	"label": "Project MUSE",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|results\\?)",
+	"target": "^https?://[^/]*muse\\.jhu\\.edu/(book/|article/|issue/|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-19 19:38:19"
+	"lastUpdated": "2020-01-26 19:38:19"
 }
 
 /*
@@ -53,14 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[@class="single_result"]//h1/a[contains(@href, "/article/") or contains(@href, "/book/")]');
-	if (!rows.length) {
-		rows = ZU.xpath(doc, '//div[@class="article"]//h4/a[contains(@href, "/article/") or contains(@href, "/book/")]');
-	}
-	if (!rows.length) {
-		rows = ZU.xpath(doc, '//div[@class="card_text"]//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
-	}
-
+	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -95,37 +88,24 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
-	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="abstract"]/p');
 	if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
-			item.abstractNote = abstract.replace(/^,*\s*Abstract:*,*\s*/, "")
-										.replace(/show (less|more)$/, "")
-										.replace(/,\s*$/, "")
-										.replace(/\[End Page [0-9]+\]/g, "")
-										.trim();
+			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "")
+				.trim();
 		}
-
-		if (url.indexOf("/article/") != -1) {
+		if (url.includes("/article/")) {
 			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
 			item.attachments = [{
-				"url": pdfurl,
-				"title": "Full Text PDF",
-				"mimeType": "application/pdf"
-			}]
+				url: pdfurl,
+				title: "Full Text PDF",
+				mimeType: "application/pdf"
+			}];
 		}
 		item.libraryCatalog = "Project MUSE";
-		var keywords = ZU.xpath(doc, '//div[@class="kwd-group"]//p');
-		if (keywords) {
-			item.tags = keywords.map(function(x) { return x.textContent.trim(); })
-								.join("")
-								.split(",")
-								.map(function(x) { return x.trim(); })
-		}
-
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {
