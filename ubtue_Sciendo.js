@@ -1,7 +1,7 @@
 {
 	"translatorID": "bf64f8a7-89b4-4a79-ae80-70630e428f35",
 	"label": "Sciendo",
-	"creator": "Madeesh Kannan",
+	"creator": "Madeesh Kannan", "Timotheus Kim",
 	"target": "https?://content.sciendo.com/view/journals",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 15:40:06"
+	"lastUpdated": "2020-04-07 13:22:06"
 }
 
 /*
@@ -35,29 +35,31 @@
 
 
 function detectWeb(doc, url) {
-	var toc = ZU.xpath(doc, '//div[contains(@class, "component-table-of-contents")]');
-	if (toc && toc.length == 1)
+	if (url.match(/view/)) {
 		return "multiple";
-	else {
+	} else if (url.match(/article/)) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
 }
 
-function getSearchResults(doc) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//li[contains(@class, "type-article")]//a[contains(@class, "text-title")]')
-	for (let i = 0; i < rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
+function getSearchResults(doc, checkOnly) {
+  var items = {};
+  var found = false;
+  // TODO: adjust the CSS selector
+  var rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
+  for (let row of rows) {
+    // TODO: check and maybe adjust
+    let href = row.href;
+    // TODO: check and maybe adjust
+    let title = ZU.trimInternal(row.textContent);
+    if (!href || !title) continue;
+    if (checkOnly) return true;
+    found = true;
+    items[href] = title;
+  }
+  return found ? items : false;
 }
-
 function invokeEmbeddedMetadataTranslator(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
