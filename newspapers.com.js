@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-02 01:44:09"
+	"lastUpdated": "2020-04-08 23:07:42"
 }
 
 /*
@@ -87,8 +87,7 @@ function doWeb(doc, _url) {
 	
 	// downloads pdfs instead of images - not pretty but functional
 	// works for ids of length 7 or 8
-	var clipID = newItem.url.replace("https://www.newspapers.com/clip/","")
-	var uniqueID = clipID.substring(0,8)
+	var uniqueID = newItem.url.match(/\d+/)
 	var pdfurl = "https://www.newspapers.com/clippings/download/?id=" + uniqueID
 	newItem.attachments.push({
 		title:"Full Text PDF",
@@ -113,6 +112,7 @@ function doWeb(doc, _url) {
 	}
 	newItem.complete();
 Zotero.debug(pdfurl)
+
 }
 
 
