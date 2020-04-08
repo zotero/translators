@@ -1,7 +1,7 @@
 {
 	"translatorID": "bf64f8a7-89b4-4a79-ae80-70630e428f35",
 	"label": "Sciendo",
-	"creator": "Madeesh Kannan", "Timotheus Kim",
+	"creator": "Madeesh Kannan and Timotheus Kim",
 	"target": "https?://content.sciendo.com/view/journals",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -50,9 +50,7 @@ function getSearchResults(doc, checkOnly) {
   // TODO: adjust the CSS selector
   var rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
   for (let row of rows) {
-    // TODO: check and maybe adjust
     let href = row.href;
-    // TODO: check and maybe adjust
     let title = ZU.trimInternal(row.textContent);
     if (!href || !title) continue;
     if (checkOnly) return true;
