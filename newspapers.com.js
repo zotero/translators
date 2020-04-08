@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-08 23:07:42"
+	"lastUpdated": "2020-04-08 23:40:05"
 }
 
 /*
@@ -85,8 +85,6 @@ function doWeb(doc, _url) {
 
 	newItem.abstractNote = details.media.note;
 	
-	// downloads pdfs instead of images - not pretty but functional
-	// works for ids of length 7 or 8
 	var uniqueID = newItem.url.match(/\d+/)
 	var pdfurl = "https://www.newspapers.com/clippings/download/?id=" + uniqueID
 	newItem.attachments.push({
@@ -111,8 +109,6 @@ function doWeb(doc, _url) {
 		newItem.title = "Clipped From " + newItem.publicationTitle;
 	}
 	newItem.complete();
-Zotero.debug(pdfurl)
-
 }
 
 
