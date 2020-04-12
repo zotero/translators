@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-01-01 16:53:13"
+	"lastUpdated": "2020-04-12 17:46:33"
 }
 
 function detectWeb(doc, url) {
@@ -54,7 +54,11 @@ function doWeb(doc, url) {
 	if (item.date) item.date = ZU.trimInternal(item.date);
 
 	//clear the automatic Print popup
+	var bodyChildren = Array.from(doc.body.children);
+	var script = bodyChildren.find(child => child.tagName.toLowerCase() === 'script');
+	if (script) script.remove();
 	doc.body.removeAttribute('onload');
+
 	item.attachments.push({
 		title:"Email Snapshot",
 		document: doc
