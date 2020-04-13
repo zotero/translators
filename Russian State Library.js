@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-13 01:01:05"
+	"lastUpdated": "2020-04-13 21:18:02"
 }
 
 /*
@@ -52,24 +52,24 @@
 		https://search.rsl.ru (sRSL)
 		http://aleph.rsl.ru (aRSL)
 	search.rsl.ru records can be accessed via search.rsl.ru/(ru|en)/record/<RID>
-	aleph.rsl.ru is a total mess, a very basic partial support for single record 
+	aleph.rsl.ru is a total mess, a very basic partial support for single record
 	saving is implemented.
-	
-	search.rsl.ru/(ru|en)/download/marc21?id=<RID> interface provides access to 
+
+	search.rsl.ru/(ru|en)/download/marc21?id=<RID> interface provides access to
 	binary MARC21 records, but requires prior authentication, so they are not used.
-	
+
 	Translator's logic for both catalogs involves parsing the web page into MARCXML,
 	loading MARCXML translator for initial processing, followed by postprocessing as
 	necessary.
-	
+
 	Postprocessing for search.rsl.ru aslo involves parsing of the human readable
-	description to harvest additional metadata.
-	
+	descriptioto harvest additional metadata.
+
 	TODO:
 	search.rsl.ru - some records contain expandable "Consists of" or "Periodicals"
-	reference with an arrow, when displayed as part of a search result, and "Contents" 
+	reference with an arrow, when displayed as part of a search result, and "Contents"
 	tab on the record page, referring to related/constituent records. Such references
-	may potentially be processed via the "multiple" routine, but such processing 
+	may potentially be processed via the "multiple" routine, but such processing
 	is not implemented.
 */
 
@@ -78,14 +78,14 @@
 	Item type is adjusted based on the catalog information. Present implementation
 	assumes that each record belongs to a single catalog (it is not clear whether
 	this is correct or not.)
-	
+
 	Russian style thesis abstracts are more like manuscripts, but they are assigned
 	the "thesis" type, with additional type note added to the "Extra" field.
-	
+
 	At present, technical standards are commonly mapped to Zotero "report" due to
 	lack of a dedicated type. Such a type is expected to be implemented in the near
 	future, but	for the time being a type note is added to the "Extra" field.
-	
+
 	The following catalogs are supported. For items beloning to other catalogs no
 	type adjustment is made.
 */
@@ -94,8 +94,8 @@ const catalog2type = {
 	"Старопечатные книги (изданные с 1450 по 1830 г.)": "book",
 	"Сериальные издания (кроме газет)": "journal",
 	"Авторефераты диссертаций": "thesisAutoreferat",
-	"Диссертации": "thesis",
-	"Стандарты": "standard"
+	Диссертации: "thesis",
+	Стандарты: "standard"
 };
 
 /*
@@ -103,56 +103,57 @@ const catalog2type = {
 	https://search.rsl.ru/(ru|en)/record/<RSLID>
 	https://search.rsl.ru/(ru|en)/search#
 */
-const sRSL_filters = {
+const sRSLFilters = {
 	libraryCatalog: "Российская Государственная Библиотека",
-	marc_table_css: "div#marc-rec > table",
-	desc_table_css: "table.card-descr-table",
-	search_list_css: "span.js-item-maininfo",
-	search_record_rslid_attr: "data-id",
-	search_record_title: /^[^:/[]*/,
-	search_pattern: "https://search.rsl.ru/ru/search#q=id:${id} AND title:(${title})",
-	rslid_prefix: "https://search.rsl.ru/ru/record/",
-	thesis_rel_attr: "href",
-	thesis_rel_prefix: "/ru/transition/",
-	thesis_rel_css: 'a[href^="/ru/transition/"]',
-	fav_rslid_css: "a.rsl-link",
-	fav_desc_css: "div.rsl-fav-item-descr",
+	marcTableCSS: "div#marc-rec > table",
+	descTableCSS: "table.card-descr-table",
+	searchListCSS: "span.js-item-maininfo",
+	searchRecordRslidAttr: "data-id",
+	searchRecordTitle: /^[^:/[]*/,
+	searchPattern: "https://search.rsl.ru/ru/search#q=id:{@id@} AND title:({@title@})",
+	rslidPrefix: "https://search.rsl.ru/ru/record/",
+	thesisRelAttr: "href",
+	thesisRelPrefix: "/ru/transition/",
+	thesisRelCSS: 'a[href^="/ru/transition/"]',
+	favRslidCSS: "a.rsl-link",
+	favDescCSS: "div.rsl-fav-item-descr",
 	title: "Заглавие",
 	catalog: "Каталоги",
 	bbk: "BBK-код",
-	call_number: "Места хранения",
-	eresource: "Электронный адрес"
+	callNumber: "Места хранения",
+	eResource: "Электронный адрес"
 };
 
 /*
 	Filter strings for extraction of metadata from
 	aleph.rsl.ru
 */
-const aRSL_filters = {
-	marc_table_tag_css: "td.td1[nowrap]",
-	marc_table_val_css: "td.td1:not([nowrap])",
-	marc_table_set_css: 'a[title="Добавить в подборку"]',
-	record_marc_signature: "&format=001",
-	record_standard_signature: "&format=999",
-	record_format_regex: /&format=[0-9]{3}/,
-	url_prefix: "http://aleph.rsl.ru/F/",
+const aRSLFilters = {
+	marcTableTagCSS: "td.td1[nowrap]",
+	marcTableValCSS: "td.td1:not([nowrap])",
+	marcTableSetCSS: 'a[title="Добавить в подборку"]',
+	recordMarcSignature: "&format=001",
+	recordStandardSignature: "&format=999",
+	recordFormatRegex: /&format=[0-9]{3}/,
+	urlPrefix: "http://aleph.rsl.ru/F/",
 };
 
 
-const base_eurl = 'https://dlib.rsl.ru/';
+const baseEurl = 'https://dlib.rsl.ru/';
 
 
 function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
 	return elem ? elem.getAttribute(attr) : null;
 }
 
 
+/*
 function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
 	return elem ? elem.textContent : null;
 }
-
+*/
 
 /**
  *	Adds link attachment to a Zotero item.
@@ -163,17 +164,17 @@ function text(docOrElem, selector, index) {
  *  the middle) line in the object definition, the "title" property is ignored,
  *  e.g., for 'research.rsl.ru/ru/record/01004956040' the "title" is set to
  *  "01004956040" regardless of the specified title. If 'linkMode: "linked_url"'
- *  is the first member as below, the "title" field is set as expected. 
- * 
- *  There appear to be a bug in Zotero routine that creates attachments from JSON 
- *  definitions. "linkMode" property affects (determines?) the type of the new 
- *  attachment and interpretation of the remaining properties. The routine 
+ *  is the first member as below, the "title" field is set as expected.
+ *
+ *  There appear to be a bug in Zotero routine that creates attachments from JSON
+ *  definitions. "linkMode" property affects (determines?) the type of the new
+ *  attachment and interpretation of the remaining properties. The routine
  *  apparently enumerates keys of the supplied JSON object, instead of accessing
- *  "linkMode" directly. It processes properties in the order supplied, and if 
- *  "linkMode" does not come first, may not process earlier properties correctly. 
- *  This is particularly problematic, since there is no guaranteed order of members 
- *  in a dictionary, though, apparently, in simple cases at least the members are 
- *  returned in the "added first" order. However, this behavior is not relaibly 
+ *  "linkMode" directly. It processes properties in the order supplied, and if
+ *  "linkMode" does not come first, may not process earlier properties correctly.
+ *  This is particularly problematic, since there is no guaranteed order of members
+ *  in a dictionary, though, apparently, in simple cases at least the members are
+ *  returned in the "added first" order. However, this behavior is not relaibly
  *  reproducible.
  *  Windows 7 x64, April 2020.
  *
@@ -187,7 +188,7 @@ function addLink(item, title, url) {
 	item.attachments.push({
 		linkMode: "linked_url", // Apparently, should be the first
 		title: title,
-		snapshot: false, 
+		snapshot: false,
 		contentType: "text/html",
 		url: url });
 }
@@ -199,15 +200,15 @@ function addLink(item, title, url) {
 		- "Ctrl/Cmd-T", "doc" receives "object HTMLDocument";
 		- "Run test", "doc" receives JS object (not sure about details).
 	Both objects have doc.location.host defined.
-	
+
 	When tester runs a web translator on a search results page, it fails to
 	present the search result selection dialog and throws an error:
 	"Error: Translator called select items with no items"
-	
+
 	When tester is called on "https://search.rsl.ru/ru/search#q=math", the part
 	starting with the hashtag is lost and not passed to the processing function
 	(not available from either "url" or "doc").
-	
+
 	Working environment: Windows 7 x64
 */
 function detectWeb(doc, url) {
@@ -277,12 +278,12 @@ function doWeb(doc, url) {
 				scrape(doc, url);
 				break;
 			case 'aleph':
-				if (url.indexOf(aRSL_filters.record_marc_signature) != -1) {
+				if (url.indexOf(aRSLFilters.recordMarcSignature) != -1) {
 					scrape(doc, url);
 				} else {
-					let href = aRSL_filters.url_prefix + '?' + 
-					           url.split('?')[1].replace(aRSL_filters.record_format_regex, 
-														 aRSL_filters.record_marc_signature);
+					let href = aRSLFilters.urlPrefix + '?'
+							 + url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
+														 aRSLFilters.recordMarcSignature);
 					ZU.processDocuments([href], scrape);
 				}
 				break;
@@ -303,47 +304,47 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	// Convert HTML table of MARC record to MARCXML
-	let record_marcxml;
-	let scrape_callback;
+	let recordMarcxml;
+	let scrapeCallback;
 	let domain = url.match(/^https?:\/\/([^/]*)/)[1];
 	let subdomain = domain.slice(0, -'.rsl.ru'.length);
 	switch(subdomain) {
 		case 'search':
-			record_marcxml = getMARCXML_sRSL(doc, url);
-			scrape_callback = scrape_callback_sRSL;
+			recordMarcxml = getMARCXML_sRSL(doc, url);
+			scrapeCallback = scrapeCallback_sRSL;
 			break;
 		case 'aleph':
-			record_marcxml = getMARCXML_aRSL(doc, url);
-			scrape_callback = scrape_callback_aRSL;
+			recordMarcxml = getMARCXML_aRSL(doc, url);
+			scrapeCallback = scrapeCallback_aRSL;
 			break;
 		default:
 			Z.debug('Subdomain not supported');
 			return false;
 	}
-	//Z.debug('\n' + record_marcxml);
-	
+	//Z.debug('\n' + recordMarcxml);
+
 	// call MARCXML translator
-	const MARCXML_tid = 'edd87d07-9194-42f8-b2ad-997c4c7deefd';
-	var trans = Zotero.loadTranslator('import');
-	trans.setTranslator(MARCXML_tid);
-	trans.setString(record_marcxml);
-	trans.setHandler('itemDone', scrape_callback(doc, url));
+	const MarcxmlTid = 'edd87d07-9194-42f8-b2ad-997c4c7deefd';
+	let trans = Zotero.loadTranslator('import');
+	trans.setTranslator(MarcxmlTid);
+	trans.setString(recordMarcxml);
+	trans.setHandler('itemDone', scrapeCallback(doc, url));
 	trans.translate();
 }
 
 
 /*
 	Additional processing after the MARCXML translator for search.rsl.ru
-	Adjust item type based on catalog information for supported catalogs. For 
-	types not available in Zotero, "type" annotation is added to the "extra" 
-	field. Add the following information: 
+	Adjust item type based on catalog information for supported catalogs. For
+	types not available in Zotero, "type" annotation is added to the "extra"
+	field. Add the following information:
 		RSL record ID,
 		call numbers (semicolon separated),
 		catalog/item type,
 		BBK codes (semicolon separated),
 		electronic url, if available.
 */
-function scrape_callback_sRSL(doc, url) {
+function scrapeCallback_sRSL(doc, url) {
 	function callback(obj, item) {
 		//Zotero.debug(item);
 		let metadata = getRecordDescription_sRSL(doc, url);
@@ -352,25 +353,25 @@ function scrape_callback_sRSL(doc, url) {
 			item.itemType = metadata.itemType;
 		}
 		item.url = metadata.url;
-		item.libraryCatalog = sRSL_filters.libraryCatalog;
-		item.callNumber = metadata[sRSL_filters.call_number];
-		item.archive = metadata[sRSL_filters.catalog];
+		item.libraryCatalog = sRSLFilters.libraryCatalog;
+		item.callNumber = metadata[sRSLFilters.callNumber];
+		item.archive = metadata[sRSLFilters.catalog];
 		let extra = [];
 		extra.push('RSLID: ' + metadata.rslid)
 		if (metadata.extraType) {
 			extra.push('Type: ' + metadata.extraType);
 		}
-		if (metadata[sRSL_filters.bbk]) {
-			extra.push('BBK: ' + metadata[sRSL_filters.bbk]);
+		if (metadata[sRSLFilters.bbk]) {
+			extra.push('BBK: ' + metadata[sRSLFilters.bbk]);
 		}
 		if (item.extra) {
 			extra.push(item.extra);
 		}
 		item.extra = extra.join('\n');
-		
+
 		//Z.debug(item.attachments[0]);
-		metadata.related_url.forEach(link => addLink(item, link.title, link.url));
-		
+		metadata.relatedURL.forEach(link => addLink(item, link.title, link.url));
+
 		//Z.debug(item);
 		item.complete();
 	}
@@ -381,27 +382,27 @@ function scrape_callback_sRSL(doc, url) {
 /*
 	Additional processing after the MARCXML translator for aleph.rsl.ru
 */
-function scrape_callback_aRSL(doc, url) {
+function scrapeCallback_aRSL(doc, url) {
 	function callback(obj, item) {
 
 		// RSLID
-		let add2set = attr(doc, aRSL_filters.marc_table_set_css, 'href');
-		let RSLID = add2set.match(/&doc_library=RSL([0-9]{2})/)[1] + 
-					add2set.match(/&doc_number=([0-9]{9})/)[1]
+		let add2set = attr(doc, aRSLFilters.marcTableSetCSS, 'href');
+		let RSLID = add2set.match(/&doc_library=RSL([0-9]{2})/)[1]
+				  + add2set.match(/&doc_number=([0-9]{9})/)[1]
 		let extra = ['RSLID: ' + RSLID];
 		if (item.extra) { extra.push(item.extra); }
 		item.extra = extra.join('\n');
-		
-		item.url = aRSL_filters.url_prefix + '?' + 
-				   url.split('?')[1].replace(aRSL_filters.record_format_regex, 
-											 aRSL_filters.record_standard_signature);
+
+		item.url = aRSLFilters.urlPrefix + '?'
+				 + url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
+											 aRSLFilters.recordStandardSignature);
 
 		let metadata = {};
-		metadata.related_url = [];
-		href = sRSL_filters.rslid_prefix + RSLID;
-		metadata.related_url.push({title: "search.rsl.ru", url: href});
+		metadata.relatedURL = [];
+		let href = sRSLFilters.rslidPrefix + RSLID;
+		metadata.relatedURL.push({title: "search.rsl.ru", url: href});
 
-		metadata.related_url.forEach(link => addLink(item, link.title, link.url));
+		metadata.relatedURL.forEach(link => addLink(item, link.title, link.url));
 
 		//Z.debug(item);
 		item.complete();
@@ -413,26 +414,24 @@ function scrape_callback_aRSL(doc, url) {
 function getSearchResults(doc, url) {
 	let domain = url.match(/^https?:\/\/([^/]*)/)[1];
 	let subdomain = domain.slice(0, -'.rsl.ru'.length);
-	var records = {};
+	let records = {};
 
 	if (subdomain == 'search') {
-		let rows = doc.querySelectorAll(sRSL_filters.search_list_css);
-	
+		let rows = doc.querySelectorAll(sRSLFilters.searchListCSS);
+
 		// ZU.processDocuments(url, function (doc, url) { Z.debug(doc); });
 		// ZU.doGet(url, function (responseText, response, url) { Z.debug(response); });
-		
+
 		for (let row of rows) {
-			let href = sRSL_filters.rslid_prefix + 
-					   row.getAttribute(sRSL_filters.search_record_rslid_attr);
-			let title = row.innerText.match(sRSL_filters.search_record_title)[0];
-			records[href] = title;
+			let href = sRSLFilters.rslidPrefix
+					 + row.getAttribute(sRSLFilters.searchRecordRslidAttr);
+			records[href] = row.innerText.match(sRSLFilters.searchRecordTitle)[0];
 		}
 	} else if (subdomain == 'favorites') {
-		let rows = doc.querySelectorAll(sRSL_filters.fav_rslid_css);
+		let rows = doc.querySelectorAll(sRSLFilters.favRslidCSS);
 		for (let row of rows) {
 			let href = row.href;
-			let title = row.parentNode.parentNode.querySelector(sRSL_filters.fav_desc_css).innerText.match(sRSL_filters.search_record_title)[0];
-			records[href] = title;
+			records[href] = row.parentNode.parentNode.querySelector(sRSLFilters.favDescCSS).innerText.match(sRSLFilters.searchRecordTitle)[0];
 		}
 	}
 
@@ -441,75 +440,75 @@ function getSearchResults(doc, url) {
 
 
 /**
- *	Parses record table with MARC data https://search.rsl.ru/(ru|en)/record/<RSLID>. 
+ *	Parses record table with MARC data https://search.rsl.ru/(ru|en)/record/<RSLID>.
  *  Returned MARCXML string can be processed using the MARCXML import translator.
  *
- *	@return {String} - MARCXML record 
+ *	@return {String} - MARCXML record
  */
 function getMARCXML_sRSL(doc, url) {
 	let irow = 0;
 
-	let marc21_table_rows = doc.querySelector(sRSL_filters.marc_table_css).rows;
-	let marcxml_lines = [];
+	let marc21TableRows = doc.querySelector(sRSLFilters.marcTableCSS).rows;
+	let marcxmlLines = [];
 
-	marcxml_lines.push(
+	marcxmlLines.push(
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">',
-		'    <leader>' + marc21_table_rows[0].cells[1].innerText.replace(/#/g, ' ') + '</leader>'
+		'    <leader>' + marc21TableRows[0].cells[1].innerText.replace(/#/g, ' ') + '</leader>'
 	);
 	irow++;
-	
+
 	// Control fields
-	for (irow; irow < marc21_table_rows.length; irow++) {
-		let cur_cells = marc21_table_rows[irow].cells;
-		let field_tag = cur_cells[0].innerText;
-		let field_val = cur_cells[1].innerText;
-		if (Number(field_tag) > 8) { break; }
-		marcxml_lines.push(
-			'    <controlfield tag="' + field_tag + '">' + field_val.replace(/#/g, ' ') + '</controlfield>'
+	for (irow; irow < marc21TableRows.length; irow++) {
+		let curCells = marc21TableRows[irow].cells;
+		let fieldTag = curCells[0].innerText;
+		let fieldVal = curCells[1].innerText;
+		if (Number(fieldTag) > 8) { break; }
+		marcxmlLines.push(
+			'    <controlfield tag="' + fieldTag + '">' + fieldVal.replace(/#/g, ' ') + '</controlfield>'
 		);
 	}
-	
+
 	// Data fields
-	for (irow; irow < marc21_table_rows.length; irow++) {
-		let cur_cells = marc21_table_rows[irow].cells;
-		let field_tag = cur_cells[0].innerText;
+	for (irow; irow < marc21TableRows.length; irow++) {
+		let curCells = marc21TableRows[irow].cells;
+		let fieldTag = curCells[0].innerText;
 
 		/*
 		  Subfield separator is '$'. Subfield separator always comes right after a tag,
 		  so triple all '$' that follow immediately after '>' before stripping HTML tags
-		  to prevent collisions with potential occurences of '$' as part of subfield contets. 
+		  to prevent collisions with potential occurences of '$' as part of subfield contets.
 		*/
-		cur_cells[1].innerHTML = cur_cells[1].innerHTML.replace(/\>\$/g, '>$$$$$$');
-		field_val = cur_cells[1].innerText;
-		let subfields = field_val.split('$$$');
-		cur_cells[1].innerHTML = cur_cells[1].innerHTML.replace(/\$\$\$/g, '$$');
+		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\>\$/g, '>$$$$$$');
+		let fieldVal = curCells[1].innerText;
+		let subfields = fieldVal.split('$$$');
+		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\$\$\$/g, '$$');
 		let inds = subfields[0].replace(/#/g, ' ');
 
 		// Data field tag and indicators
-		marcxml_lines.push(
-			'    <datafield tag="' + field_tag + '" ind1="' + inds[0] + '" ind2="' + inds[1] + '">'
+		marcxmlLines.push(
+			'    <datafield tag="' + fieldTag + '" ind1="' + inds[0] + '" ind2="' + inds[1] + '">'
 		);
-		
+
 		// Subfields
 		for (let isubfield = 1; isubfield < subfields.length; isubfield++) {
 			// Split on first <space> character to extract the subfield code and its contents
-			subfield = subfields[isubfield].replace(/\s/, '\x01').split('\x01');
-			marcxml_lines.push(
+			let subfield = subfields[isubfield].replace(/\s/, '\x01').split('\x01');
+			marcxmlLines.push(
 				'        <subfield code="' + subfield[0] + '">' + subfield[1] + '</subfield>'
 			);
 		}
-		
-		marcxml_lines.push(
+
+		marcxmlLines.push(
 			'    </datafield>'
 		);
 	}
 
-	marcxml_lines.push(
+	marcxmlLines.push(
 		'</record>'
 	);
-	
-	return marcxml_lines.join('\n');
+
+	return marcxmlLines.join('\n');
 }
 
 
@@ -522,66 +521,66 @@ function getMARCXML_sRSL(doc, url) {
  *	@return {Object} - extracted metadata.
  */
 function getRecordDescription_sRSL(doc, url) {
-		let irow = 0;
+		let irow;
 		let metadata = {};
-		let property_name = '';
-		let property_value = '';
-		let desc_table_rows = doc.querySelector(sRSL_filters.desc_table_css).rows;
+		let propertyName = '';
+		let propertyValue = '';
+		let descTableRows = doc.querySelector(sRSLFilters.descTableCSS).rows;
 
 		// Parse description table
-		for (irow = 0; irow < desc_table_rows.length; irow++) {
-			let cur_cells = desc_table_rows[irow].cells;
-			let buffer = cur_cells[0].innerText;
+		for (irow = 0; irow < descTableRows.length; irow++) {
+			let curCells = descTableRows[irow].cells;
+			let buffer = curCells[0].innerText;
 			if (buffer) {
-				metadata[property_name] = property_value;
-				property_name = buffer;
-				property_value = cur_cells[1].innerText;
+				metadata[propertyName] = propertyValue;
+				propertyName = buffer;
+				propertyValue = curCells[1].innerText;
 			} else {
-				property_value = property_value + '; ' + cur_cells[1].innerText;
+				propertyValue = propertyValue + '; ' + curCells[1].innerText;
 			}
 		}
-		metadata[property_name] = property_value;
+		metadata[propertyName] = propertyValue;
 		delete metadata[''];
-		
+
 		// Record type
-		let type = catalog2type[metadata[sRSL_filters.catalog]];
+		let type = catalog2type[metadata[sRSLFilters.catalog]];
 		if (type) {
 			metadata.type = type;
 			metadata.itemType = type;
 		}
-		
+
 		// Record ID
-		metadata.rslid = url.slice(sRSL_filters.rslid_prefix.length);
+		metadata.rslid = url.slice(sRSLFilters.rslidPrefix.length);
 
 		// URL
-		metadata.url = url; 
-		
+		metadata.url = url;
+
 		// Array of link attachments: {title: title, url: url}
-		metadata.related_url = [];
-		
+		metadata.relatedURL = [];
+
 		/*
-			Some metadata is only included with the record when displayed as part 
-			of search result. Here a search query is constructed combining (AND) 
-			record title and system record id, which is RSL ID without the two 
+			Some metadata is only included with the record when displayed as part
+			of search result. Here a search query is constructed combining (AND)
+			record title and system record id, which is RSL ID without the two
 			most significant digits.
 		*/
-		let href = sRSL_filters.search_pattern
-					.replace(/\$\{title\}/, metadata[sRSL_filters.title])
-					.replace(/\$\{id\}/, metadata.rslid.slice(2));
-		metadata.related_url.push({title: "via search", url: href});
+		let href = sRSLFilters.searchPattern
+					.replace(/\{@title@\}/, metadata[sRSLFilters.title])
+					.replace(/\{@id@\}/, metadata.rslid.slice(2));
+		metadata.relatedURL.push({title: "via search", url: href});
 
 		// E-resource
-		if (metadata[sRSL_filters.eresource]) {
-			let eurl = base_eurl + metadata.rslid;
-			metadata.related_url.push({title: "E-resource", url: eurl});
-		} 
-		
+		if (metadata[sRSLFilters.eResource]) {
+			let eurl = baseEurl + metadata.rslid;
+			metadata.relatedURL.push({title: "E-resource", url: eurl});
+		}
+
 		// Workaround until implementation of a "technical standard" type
 		if (type == 'standard') {
 			metadata.itemType = 'report';
 			metadata.extraType = type;
 		}
-		
+
 		if (type == 'journal') {
 			metadata.itemType = 'book';
 			metadata.extraType = type;
@@ -589,111 +588,112 @@ function getRecordDescription_sRSL(doc, url) {
 
 		// Complementary thesis/autoreferat record if availabless
 		if (type == 'thesis') {
-			let aurl = attr(doc, sRSL_filters.thesis_rel_css, sRSL_filters.thesis_rel_attr);
+			let aurl = attr(doc, sRSLFilters.thesisRelCSS, sRSLFilters.thesisRelAttr);
 			if (aurl) {
-				aurl = sRSL_filters.rslid_prefix + 
-					   aurl.slice(sRSL_filters.thesis_rel_prefix.length + 
-								  metadata.rslid.length + '/'.length);
-				metadata.related_url.push({title: "Autoreferat RSL record", url: aurl});
+				aurl = sRSLFilters.rslidPrefix
+					 + aurl.slice(sRSLFilters.thesisRelPrefix.length
+					 + metadata.rslid.length + '/'.length);
+				metadata.relatedURL.push({title: "Autoreferat RSL record", url: aurl});
 			}
 		}
 		if (type == 'thesisAutoreferat') {
 			// From citation point of view, the "manuscript" type might be more suitable
 			// On the other hand, the thesis should be cited rather then this paper anyway.
 			metadata.itemType = 'thesis';
-			let turl = attr(doc, sRSL_filters.thesis_rel_css, sRSL_filters.thesis_rel_attr);
+			let turl = attr(doc, sRSLFilters.thesisRelCSS, sRSLFilters.thesisRelAttr);
 			if (turl) {
-				turl = sRSL_filters.rslid_prefix + 
-					   turl.slice(sRSL_filters.thesis_rel_prefix.length + 
-								  metadata.rslid.length + '/'.length);
-				metadata.related_url.push({title: "Thesis RSL record", url: turl});
+				turl = sRSLFilters.rslidPrefix
+					 + turl.slice(sRSLFilters.thesisRelPrefix.length
+					 + metadata.rslid.length + '/'.length);
+				metadata.relatedURL.push({title: "Thesis RSL record", url: turl});
 			}
 			metadata.extraType = type;
 		}
-		
+
 		return metadata;
 }
 
 
+// noinspection JSUnusedLocalSymbols
 /**
- *	Parses record table with MARC data from aleph.rsl.ru. 
+ *	Parses record table with MARC data from aleph.rsl.ru.
  *  Returned MARCXML string can be processed using the MARCXML import translator.
  *
- *	@return {String} - MARCXML record 
+ *	@return {String} - MARCXML record
  */
 function getMARCXML_aRSL(doc, url) {
 	// -------------- Parse MARC table into a MARC array object -------------- //
-	let marc_tags = doc.querySelectorAll(aRSL_filters.marc_table_tag_css);
-	let marc_vals = doc.querySelectorAll(aRSL_filters.marc_table_val_css);
+	let marcTags = doc.querySelectorAll(aRSLFilters.marcTableTagCSS);
+	let marcVals = doc.querySelectorAll(aRSLFilters.marcTableValCSS);
 	let marc = [];
-	
-	if (marc_tags.length < 1) { return false; }
-	
-	// Leader
-	marc.push([ marc_tags[1].innerText.padEnd(5, ' '), marc_vals[1].innerText]);
 
-	for (let field_count = 2; field_count < marc_tags.length; field_count++) {
-		let tag = marc_tags[field_count].innerText; 
+	if (marcTags.length < 1) { return ''; }
+
+	// Leader
+	marc.push([ marcTags[1].innerText.padEnd(5, ' '), marcVals[1].innerText]);
+
+	for (let field_count = 2; field_count < marcTags.length; field_count++) {
+		let tag = marcTags[field_count].innerText;
 		if (Number(tag)) {
 			tag = tag.padEnd(5, ' ');
-			marc.push([tag, marc_vals[field_count].innerText]);
+			marc.push([tag, marcVals[field_count].innerText]);
 		}
 	}
 
-	if (marc.length < 5) { return false; }
+	if (marc.length < 5) { return ''; }
 
-	// ---------- Format MARCXML from the prepared MARC array object --------- //  
+	// ---------- Format MARCXML from the prepared MARC array object --------- //
 	let irow = 0;
-	let marcxml_lines = [];
+	let marcxmlLines = [];
 
-	marcxml_lines.push(
+	marcxmlLines.push(
 		'<?xml version="1.0" encoding="UTF-8"?>',
 		'<record xmlns="http://www.loc.gov/MARC21/slim" type="Bibliographic">',
 		'    <leader>' + marc[1][1] + '</leader>'
 	);
 	irow++;
-	
+
 	// Control fields
 	for (irow; irow < marc.length; irow++) {
-		let field_tag = marc[irow][0].slice(0, 3);
-		let field_val = marc[irow][1];
-		if (Number(field_tag) > 8) { break; }
-		marcxml_lines.push(
-			'    <controlfield tag="' + field_tag + '">' + field_val + '</controlfield>'
+		let fieldTag = marc[irow][0].slice(0, 3);
+		let fieldVal = marc[irow][1];
+		if (Number(fieldTag) > 8) { break; }
+		marcxmlLines.push(
+			'    <controlfield tag="' + fieldTag + '">' + fieldVal + '</controlfield>'
 		);
 	}
-	
+
 	// Data fields
 	for (irow; irow < marc.length; irow++) {
-		let field_tag = marc[irow][0].slice(0, 3);
-		let field_ind = marc[irow][0].slice(3);
-		let field_val = marc[irow][1];
+		let fieldTag = marc[irow][0].slice(0, 3);
+		let fieldInd = marc[irow][0].slice(3);
+		let fieldVal = marc[irow][1];
 
 		// Data field tag and indicators
-		marcxml_lines.push('    <datafield tag="' + field_tag + 
-									   '" ind1="' + field_ind[0] + 
-									   '" ind2="' + field_ind[1] + '">');
-		
+		marcxmlLines.push('    <datafield tag="' + fieldTag
+									+ '" ind1="' + fieldInd[0]
+									+ '" ind2="' + fieldInd[1] + '">');
+
 		// Subfields
-		let subfields = field_val.split('|');
+		let subfields = fieldVal.split('|');
 		for (let isubfield = 1; isubfield < subfields.length; isubfield++) {
 			// Split on first <space> character to extract the subfield code and its contents
-			subfield = subfields[isubfield].replace(/\s/, '\x01').split('\x01');
-			marcxml_lines.push(
+			let subfield = subfields[isubfield].replace(/\s/, '\x01').split('\x01');
+			marcxmlLines.push(
 				'        <subfield code="' + subfield[0] + '">' + subfield[1] + '</subfield>'
 			);
 		}
-		
-		marcxml_lines.push(
+
+		marcxmlLines.push(
 			'    </datafield>'
 		);
 	}
 
-	marcxml_lines.push(
+	marcxmlLines.push(
 		'</record>'
 	);
-	
-	return marcxml_lines.join('\n');
+
+	return marcxmlLines.join('\n');
 }
 
 
@@ -1750,25 +1750,27 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://aleph.rsl.ru/F/RHHCIAN6HNXCK6MBTHQTH8JPT2T8LG3T6VPTVBKAUXEA8HITMK-01986?func=full-set-set&set_number=001478&set_entry=000001&format=001",
+		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=001",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Однообразно и уныло: часть VIII из романа в стихах «Роман девушки»: стихотворение: [список]",
+				"title": "Беседы с православным священником",
 				"creators": [
 					{
-						"firstName": "Евдокия Петровна",
-						"lastName": "Ростопчина",
+						"firstName": "Константин",
+						"lastName": "Пархоменко",
 						"creatorType": "author"
 					}
 				],
-				"extra": "RSLID: 01010089849",
+				"date": "2007",
+				"ISBN": "9785289024565",
+				"callNumber": "271.22",
+				"extra": "RSLID: 01003120332",
 				"language": "rus",
-				"libraryCatalog": "a a Russian State Library RSL.ru",
-				"numPages": "1",
-				"place": "Б. м.",
-				"series": "Коллекция Я. П. Гарелина",
-				"shortTitle": "Однообразно и уныло",
+				"libraryCatalog": "Russian State Library",
+				"numPages": "316",
+				"place": "Санкт-Петербург",
+				"publisher": "Лениздат : Ленинград",
 				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
 				"attachments": [
 					{
@@ -1781,7 +1783,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Сохранность: края листа надорваны; реставрирован в 1950 г Надписи, записи, пометы: поправки и надпись-автограф (французский яз.)"
+						"note": "На обл. авт. не указан"
 					}
 				],
 				"seeAlso": []
@@ -1794,21 +1796,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Однообразно и уныло: часть VIII из романа в стихах «Роман девушки»: стихотворение: [список]",
+				"title": "Беседы с православным священником",
 				"creators": [
 					{
-						"firstName": "Евдокия Петровна",
-						"lastName": "Ростопчина",
+						"firstName": "Константин",
+						"lastName": "Пархоменко",
 						"creatorType": "author"
 					}
 				],
-				"extra": "RSLID: 01010089849",
+				"date": "2007",
+				"ISBN": "9785289024565",
+				"callNumber": "271.22",
+				"extra": "RSLID: 01003120332",
 				"language": "rus",
-				"libraryCatalog": "a a Russian State Library RSL.ru",
-				"numPages": "1",
-				"place": "Б. м.",
-				"series": "Коллекция Я. П. Гарелина",
-				"shortTitle": "Однообразно и уныло",
+				"libraryCatalog": "Russian State Library",
+				"numPages": "316",
+				"place": "Санкт-Петербург",
+				"publisher": "Лениздат : Ленинград",
 				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
 				"attachments": [
 					{
@@ -1821,7 +1825,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Сохранность: края листа надорваны; реставрирован в 1950 г Надписи, записи, пометы: поправки и надпись-автограф (французский яз.)"
+						"note": "На обл. авт. не указан"
 					}
 				],
 				"seeAlso": []
@@ -1830,25 +1834,27 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://aleph.rsl.ru/F/9F63N9XQHXHST5RUEVM27SY4THNCJSYLXPI53E2V7GDDRMNUUJ-02384?func=full-set-set&set_number=001478&set_entry=000001&format=002",
+		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=002",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Однообразно и уныло: часть VIII из романа в стихах «Роман девушки»: стихотворение: [список]",
+				"title": "Беседы с православным священником",
 				"creators": [
 					{
-						"firstName": "Евдокия Петровна",
-						"lastName": "Ростопчина",
+						"firstName": "Константин",
+						"lastName": "Пархоменко",
 						"creatorType": "author"
 					}
 				],
-				"extra": "RSLID: 01010089849",
+				"date": "2007",
+				"ISBN": "9785289024565",
+				"callNumber": "271.22",
+				"extra": "RSLID: 01003120332",
 				"language": "rus",
-				"libraryCatalog": "a a Russian State Library RSL.ru",
-				"numPages": "1",
-				"place": "Б. м.",
-				"series": "Коллекция Я. П. Гарелина",
-				"shortTitle": "Однообразно и уныло",
+				"libraryCatalog": "Russian State Library",
+				"numPages": "316",
+				"place": "Санкт-Петербург",
+				"publisher": "Лениздат : Ленинград",
 				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
 				"attachments": [
 					{
@@ -1861,7 +1867,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Сохранность: края листа надорваны; реставрирован в 1950 г Надписи, записи, пометы: поправки и надпись-автограф (французский яз.)"
+						"note": "На обл. авт. не указан"
 					}
 				],
 				"seeAlso": []
@@ -1874,41 +1880,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Журнал физической химии",
+				"title": "Беседы с православным священником",
 				"creators": [
 					{
-						"lastName": "АН СССР",
-						"creatorType": "editor",
-						"fieldMode": true
-					},
-					{
-						"lastName": "СССР",
-						"creatorType": "editor",
-						"fieldMode": true
-					},
-					{
-						"lastName": "РСФСР",
-						"creatorType": "editor",
-						"fieldMode": true
-					},
-					{
-						"lastName": "СССР",
-						"creatorType": "editor",
-						"fieldMode": true
-					},
-					{
-						"lastName": "Российская академия наук",
-						"creatorType": "editor",
-						"fieldMode": true
+						"firstName": "Константин",
+						"lastName": "Пархоменко",
+						"creatorType": "author"
 					}
 				],
-				"date": "1930",
-				"callNumber": "Г5я5",
-				"extra": "RSLID: 01002386114",
+				"date": "2007",
+				"ISBN": "9785289024565",
+				"callNumber": "271.22",
+				"extra": "RSLID: 01003120332",
 				"language": "rus",
-				"libraryCatalog": "a a Russian State Library RSL.ru",
-				"place": "Москва",
-				"publisher": "Российская академия наук",
+				"libraryCatalog": "Russian State Library",
+				"numPages": "316",
+				"place": "Санкт-Петербург",
+				"publisher": "Лениздат : Ленинград",
 				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000010&format=999",
 				"attachments": [
 					{
@@ -1921,7 +1909,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Основан Бюро физ.-хим. конф. при НТУ ВСНХ СССР в 1930 г Журнал издается под руководством Отделения химии и наук о материалах РАН 1931-1934 (Т. 5 Вып. 1-3) является \"Серией В Химического журнала\" Изд-во: Т. 1 Гос. изд-во; Т. 2 Гос. науч.-техн. изд-во ; Т. 3-5 (Вып. 1-7) Гос. техн.-теорет. изд-во ; Т. 5 (Вып. 8-12) - 11 (Вып. 1-3) ОНТИ НКТП СССР; Т. 11 (Вып. 4-6) - 38 не указано; Т. 39-66 Наука ; Т. 67-72 МАИК \"Наука\"; Т. 73- Наука: МАИК \"Наука\"/Интерпериодика ; Т. 82- Наука Место изд.: 1930, т. 1, 29- М.; 1931. т. 2-28 М.; Л Изд-во: 2017- Федеральное государственное унитарное предприятие Академический научно-издательский, производственно-полиграфический и книгораспространительский центр \"Наука\" ; 2018- Российская академия наук"
+						"note": "На обл. авт. не указан"
 					}
 				],
 				"seeAlso": []
@@ -1934,11 +1922,23 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Журнал физической химии. 2019",
-				"creators": [],
-				"extra": "RSLID: 01009918533",
+				"title": "Беседы с православным священником",
+				"creators": [
+					{
+						"firstName": "Константин",
+						"lastName": "Пархоменко",
+						"creatorType": "author"
+					}
+				],
+				"date": "2007",
+				"ISBN": "9785289024565",
+				"callNumber": "271.22",
+				"extra": "RSLID: 01003120332",
 				"language": "rus",
-				"libraryCatalog": "a a Russian State Library RSL.ru",
+				"libraryCatalog": "Russian State Library",
+				"numPages": "316",
+				"place": "Санкт-Петербург",
+				"publisher": "Лениздат : Ленинград",
 				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000002&format=999",
 				"attachments": [
 					{
@@ -1949,7 +1949,11 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"note": "На обл. авт. не указан"
+					}
+				],
 				"seeAlso": []
 			}
 		]
