@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-14 16:18:29"
+	"lastUpdated": "2020-04-14 16:26:08"
 }
 
 /*
@@ -292,7 +292,6 @@ function doWeb(doc, url) {
 				break;
 			default:
 				Z.debug('Subdomain not supported');
-				return;
 		}
 	}
 	else {
