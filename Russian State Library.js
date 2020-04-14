@@ -73,7 +73,6 @@
 	is not implemented.
 */
 
-
 /*
 	Item type is adjusted based on the catalog information. Present implementation
 	assumes that each record belongs to a single catalog (it is not clear whether
@@ -102,6 +101,7 @@ const catalog2type = {
 	Filter strings used for extraction of metadata from
 	https://search.rsl.ru/(ru|en)/record/<RSLID>
 	https://search.rsl.ru/(ru|en)/search#
+	https://favorites.rsl.ru/(ru|en)/
 */
 const sRSLFilters = {
 	libraryCatalog: "Российская Государственная Библиотека",
@@ -207,6 +207,7 @@ function detectWeb(doc, url) {
 	let domain = url.match(/^https?:\/\/([^/]*)/)[1];
 	let subdomain = domain.slice(0, -'.rsl.ru'.length);
 	let pathname = doc.location.pathname;
+
 	// Z.debug(subdomain);
 	switch (subdomain) {
 		case 'search':
@@ -216,13 +217,20 @@ function detectWeb(doc, url) {
 			else if (pathname.includes('/record/')) {
 				let metadata = getRecordDescriptionsRSL(doc, url);
 				let itemType = metadata.itemType;
-				// Z.debug(metadata);
+				if (itemType == 'thesis') {
+					if (metadata.relatedURL['Autoreferat RSL record']
+						|| metadata.relatedURL['Thesis RSL record']) {
+						return 'multiple';
+					}
+				}
+				//Z.debug(metadata);
 				return itemType ? itemType : 'book';
 			}
 			else {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
+			break;
 		case 'favorites':
 			return 'multiple';
 		case 'aleph':
@@ -233,12 +241,12 @@ function detectWeb(doc, url) {
 			*/
 			if (url.includes('func=full-set-set')) {
 				return 'book';
-			}
 
 			/*
 				There are other single record patterns, but the full repertoire
 				is unclear. Due to awful implementation, "multiple" is not supported.
 			*/
+			}
 			else if (url.match(/func=(find-[abcm]|basket-short|(history|short)-action)/)) {
 				Z.debug('Due to awful implementation, "multiple" is not supported.');
 				// return 'multiple';
@@ -248,6 +256,7 @@ function detectWeb(doc, url) {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
+			break;
 		default:
 			Z.debug('Subdomain not supported: ' + subdomain);
 			return false;
@@ -273,23 +282,45 @@ function doWeb(doc, url) {
 				scrape(doc, url);
 				break;
 			case 'aleph':
-				if (url.incudes(aRSLFilters.recordMarcSignature)) {
+				if (url.includes(aRSLFilters.recordMarcSignature)) {
 					scrape(doc, url);
 				}
 				else {
 					let href = aRSLFilters.urlPrefix + '?'
-							+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
-								aRSLFilters.recordMarcSignature);
+						+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
+							aRSLFilters.recordMarcSignature);
 					ZU.processDocuments([href], scrape);
 				}
 				break;
 			default:
 				Z.debug('Subdomain not supported');
+				return false;
 		}
 	}
 	else {
-		getSearchResults(doc, url);
-		Zotero.selectItems(getSearchResults(doc, url),
+		let pathname = doc.location.pathname;
+		var records;
+		if (pathname.includes('/record/')) {
+			let metadata = getRecordDescriptionsRSL(doc, url);
+			let itemType = metadata.itemType;
+			records = {};
+			if (itemType == 'thesis' && metadata.relatedURL['Autoreferat RSL record']) {
+				records[url] = 'Thesis'; 
+				records[metadata.relatedURL['Autoreferat RSL record']] = 'Autoreferat';
+			}
+			else if  (itemType == 'thesis' && metadata.relatedURL['Thesis RSL record']) {
+				records[metadata.relatedURL['Thesis RSL record']] = 'Thesis';
+				records[url] = 'Autoreferat';
+			}
+			else {
+				Z.debug('Unsupported case of related records');
+			}
+		}
+		else {
+			records = getSearchResults(doc, url);
+		}
+
+		Zotero.selectItems(records,
 			function (records) {
 				if (records) ZU.processDocuments(Object.keys(records), scrape);
 			}
@@ -366,7 +397,8 @@ function scrapeCallbacksRSL(doc, url) {
 		item.extra = extra.join('\n');
 
 		// Z.debug(item.attachments[0]);
-		metadata.relatedURL.forEach(link => addLink(item, link.title, link.url));
+		let rURLs = metadata.relatedURL;
+		Object.keys(rURLs).forEach(key => addLink(item, key, rURLs[key]));
 
 		// Z.debug(item);
 		item.complete();
@@ -391,15 +423,16 @@ function scrapeCallbackaRSL(doc, url) {
 		item.extra = extra.join('\n');
 
 		item.url = aRSLFilters.urlPrefix + '?'
-				+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
-					aRSLFilters.recordStandardSignature);
+			+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
+				aRSLFilters.recordStandardSignature);
 
 		let metadata = {};
-		metadata.relatedURL = [];
+		metadata.relatedURL = {};
 		let href = sRSLFilters.rslidPrefix + RSLID;
-		metadata.relatedURL.push({ title: "search.rsl.ru", url: href });
+		metadata.relatedURL['search.rsl.ru'] = href;
 
-		metadata.relatedURL.forEach(link => addLink(item, link.title, link.url));
+		let rURLs = metadata.relatedURL;
+		Object.keys(rURLs).forEach(key => addLink(item, key, rURLs[key]));
 
 		// Z.debug(item);
 		item.complete();
@@ -421,11 +454,10 @@ function getSearchResults(doc, url) {
 
 		for (let row of rows) {
 			let href = sRSLFilters.rslidPrefix
-					+ row.getAttribute(sRSLFilters.searchRecordRslidAttr);
+				+ row.getAttribute(sRSLFilters.searchRecordRslidAttr);
 			records[href] = row.innerText.match(sRSLFilters.searchRecordTitle)[0];
 		}
-	}
-	else if (subdomain == 'favorites') {
+	} else if (subdomain == 'favorites') {
 		let rows = doc.querySelectorAll(sRSLFilters.favRslidCSS);
 		for (let row of rows) {
 			let href = row.href;
@@ -475,11 +507,11 @@ function getMarcxmlsRSL(doc) {
 		let fieldTag = curCells[0].innerText;
 
 		/*
-			Subfield separator is '$'. Subfield separator always comes right after a tag,
-			so triple all '$' that follow immediately after '>' before stripping HTML tags
-			to prevent collisions with potential occurences of '$' as part of subfield contets.
+		  Subfield separator is '$'. Subfield separator always comes right after a tag,
+		  so triple all '$' that follow immediately after '>' before stripping HTML tags
+		  to prevent collisions with potential occurences of '$' as part of subfield contets.
 		*/
-		curCells[1].innerHTML = curCells[1].innerHTML.replace(/>\$/g, '>$$$$$$');
+		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\>\$/g, '>$$$$$$');
 		let fieldVal = curCells[1].innerText;
 		let subfields = fieldVal.split('$$$');
 		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\$\$\$/g, '$$');
@@ -557,7 +589,7 @@ function getRecordDescriptionsRSL(doc, url) {
 	metadata.url = url;
 
 	// Array of link attachments: {title: title, url: url}
-	metadata.relatedURL = [];
+	metadata.relatedURL = {};
 
 	/*
 		Some metadata is only included with the record when displayed as part
@@ -568,12 +600,12 @@ function getRecordDescriptionsRSL(doc, url) {
 	let href = sRSLFilters.searchPattern
 		.replace(/\{@title@\}/, metadata[sRSLFilters.title])
 		.replace(/\{@id@\}/, metadata.rslid.slice(2));
-	metadata.relatedURL.push({ title: "via search", url: href });
+	metadata.relatedURL['via search'] = href;
 
 	// E-resource
 	if (metadata[sRSLFilters.eResource]) {
 		let eurl = baseEurl + metadata.rslid;
-		metadata.relatedURL.push({ title: "E-resource", url: eurl });
+		metadata.relatedURL['E-resource'] = eurl;
 	}
 
 	// Workaround until implementation of a "technical standard" type
@@ -594,7 +626,7 @@ function getRecordDescriptionsRSL(doc, url) {
 			aurl = sRSLFilters.rslidPrefix
 				+ aurl.slice(sRSLFilters.thesisRelPrefix.length
 					+ metadata.rslid.length + '/'.length);
-			metadata.relatedURL.push({ title: "Autoreferat RSL record", url: aurl });
+			metadata.relatedURL['Autoreferat RSL record'] = aurl;
 		}
 	}
 	if (type == 'thesisAutoreferat') {
@@ -606,7 +638,7 @@ function getRecordDescriptionsRSL(doc, url) {
 			turl = sRSLFilters.rslidPrefix
 				+ turl.slice(sRSLFilters.thesisRelPrefix.length
 					+ metadata.rslid.length + '/'.length);
-			metadata.relatedURL.push({ title: "Thesis RSL record", url: turl });
+			metadata.relatedURL['Thesis RSL record'] = turl;
 		}
 		metadata.extraType = type;
 	}
@@ -752,95 +784,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://search.rsl.ru/ru/record/01007721928",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Химия неорганических молекулярных комплексов в газовой фазе: Автореф. дис. на соиск. учен. степени д-ра хим. наук: (02.00.07)",
-				"creators": [
-					{
-						"firstName": "Андрей Владимирович",
-						"lastName": "Суворов",
-						"creatorType": "author"
-					}
-				],
-				"date": "1977",
-				"archive": "Авторефераты диссертаций",
-				"callNumber": "FB Др 352/1727; FB Др 352/1728",
-				"extra": "RSLID: 01007721928\nType: thesisAutoreferat\nBBK: Г116.625с16",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"numPages": "32",
-				"place": "Ленинград",
-				"shortTitle": "Химия неорганических молекулярных комплексов в газовой фазе",
-				"university": "б. и.",
-				"url": "https://search.rsl.ru/ru/record/01007721928",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "Thesis RSL record",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://search.rsl.ru/ru/record/01009512194",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Химия неорганических молекулярных комплексов в газовой фазе: диссертация ... доктора химических наук: 02.00.01",
-				"creators": [
-					{
-						"firstName": "Андрей Владимирович",
-						"lastName": "Суворов",
-						"creatorType": "author"
-					}
-				],
-				"date": "1977",
-				"archive": "Диссертации",
-				"callNumber": "OD Дд 78-2/85",
-				"extra": "RSLID: 01009512194\nBBK: Г116.625с16,0; Г123.505-25,0",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"numPages": "308",
-				"place": "Ленинград",
-				"shortTitle": "Химия неорганических молекулярных комплексов в газовой фазе",
-				"url": "https://search.rsl.ru/ru/record/01009512194",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "Autoreferat RSL record",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Неорганическая химия"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -936,110 +885,12 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://search.rsl.ru/ru/record/01008704042",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Комплексообразование серебра (I) с 1,2,4-триазолом и 1,2,4-триазолтиолом: автореферат дис. ... кандидата химических наук: [специальность] 02.00.01 Неорганическая химия",
-				"creators": [
-					{
-						"firstName": "Хайриддин Гуломович",
-						"lastName": "Мудинов",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019",
-				"archive": "Авторефераты диссертаций",
-				"callNumber": "FB 2Р 43/502",
-				"extra": "RSLID: 01008704042\nType: thesisAutoreferat",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"numPages": "24",
-				"place": "Душанбе",
-				"shortTitle": "Комплексообразование серебра (I) с 1,2,4-триазолом и 1,2,4-триазолтиолом",
-				"url": "https://search.rsl.ru/ru/record/01008704042",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "E-resource",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "Thesis RSL record",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Неорганическая химия"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://search.rsl.ru/ru/record/01010006646",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Комплексообразование серебра (I) с 1,2,4-триазолом и 1,2,4-триазолтиолом: диссертация ... кандидата химических наук: 02.00.01",
-				"creators": [
-					{
-						"firstName": "Хайриддин Гуломович",
-						"lastName": "Мудинов",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019",
-				"archive": "Диссертации",
-				"callNumber": "OD 61 19-2/172",
-				"extra": "RSLID: 01010006646",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"numPages": "135",
-				"place": "Душанбе",
-				"shortTitle": "Комплексообразование серебра (I) с 1,2,4-триазолом и 1,2,4-триазолтиолом",
-				"url": "https://search.rsl.ru/ru/record/01010006646",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "E-resource",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "Autoreferat RSL record",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Неорганическая химия"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -1568,56 +1419,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://search.rsl.ru/ru/record/01000287561",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "Влияние природы кислотного катализатора на селективность и кинетические характеристики гидратации камфена и α-пинена: автореферат дис. ... кандидата химических наук: 02.00.04",
-				"creators": [
-					{
-						"firstName": "Максим Васильевич",
-						"lastName": "Куликов",
-						"creatorType": "author"
-					}
-				],
-				"date": "2000",
-				"archive": "Авторефераты диссертаций",
-				"callNumber": "FB 9 00-6/2084-8; FB 9 00-6/2085-6",
-				"extra": "RSLID: 01000287561\nType: thesisAutoreferat\nBBK: Г221.76,0; Г292.3-271.6,0",
-				"language": "rus",
-				"libraryCatalog": "Российская Государственная Библиотека",
-				"numPages": "21",
-				"place": "Нижний Новгород",
-				"shortTitle": "Влияние природы кислотного катализатора на селективность и кинетические характеристики гидратации камфена и α-пинена",
-				"url": "https://search.rsl.ru/ru/record/01000287561",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "via search",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "E-resource",
-						"snapshot": false,
-						"contentType": "text/html"
-					},
-					{
-						"linkMode": "linked_url",
-						"title": "Thesis RSL record",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Физическая химия"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
