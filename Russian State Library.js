@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-14 11:03:21"
+	"lastUpdated": "2020-04-14 16:18:29"
 }
 
 /*
@@ -223,14 +223,13 @@ function detectWeb(doc, url) {
 						return 'multiple';
 					}
 				}
-				//Z.debug(metadata);
+				// Z.debug(metadata);
 				return itemType ? itemType : 'book';
 			}
 			else {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
-			break;
 		case 'favorites':
 			return 'multiple';
 		case 'aleph':
@@ -256,7 +255,6 @@ function detectWeb(doc, url) {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
-			break;
 		default:
 			Z.debug('Subdomain not supported: ' + subdomain);
 			return false;
@@ -294,7 +292,7 @@ function doWeb(doc, url) {
 				break;
 			default:
 				Z.debug('Subdomain not supported');
-				return false;
+				return;
 		}
 	}
 	else {
@@ -305,10 +303,10 @@ function doWeb(doc, url) {
 			let itemType = metadata.itemType;
 			records = {};
 			if (itemType == 'thesis' && metadata.relatedURL['Autoreferat RSL record']) {
-				records[url] = 'Thesis'; 
+				records[url] = 'Thesis';
 				records[metadata.relatedURL['Autoreferat RSL record']] = 'Autoreferat';
 			}
-			else if  (itemType == 'thesis' && metadata.relatedURL['Thesis RSL record']) {
+			else if (itemType == 'thesis' && metadata.relatedURL['Thesis RSL record']) {
 				records[metadata.relatedURL['Thesis RSL record']] = 'Thesis';
 				records[url] = 'Autoreferat';
 			}
@@ -457,7 +455,8 @@ function getSearchResults(doc, url) {
 				+ row.getAttribute(sRSLFilters.searchRecordRslidAttr);
 			records[href] = row.innerText.match(sRSLFilters.searchRecordTitle)[0];
 		}
-	} else if (subdomain == 'favorites') {
+	}
+	else if (subdomain == 'favorites') {
 		let rows = doc.querySelectorAll(sRSLFilters.favRslidCSS);
 		for (let row of rows) {
 			let href = row.href;
@@ -511,7 +510,7 @@ function getMarcxmlsRSL(doc) {
 		  so triple all '$' that follow immediately after '>' before stripping HTML tags
 		  to prevent collisions with potential occurences of '$' as part of subfield contets.
 		*/
-		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\>\$/g, '>$$$$$$');
+		curCells[1].innerHTML = curCells[1].innerHTML.replace(/>\$/g, '>$$$$$$');
 		let fieldVal = curCells[1].innerText;
 		let subfields = fieldVal.split('$$$');
 		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\$\$\$/g, '$$');
