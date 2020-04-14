@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-13 23:36:37"
+	"lastUpdated": "2020-04-14 11:03:21"
 }
 
 /*
@@ -147,13 +147,6 @@ function attr(docOrElem, selector, attr, index) {
 	return elem ? elem.getAttribute(attr) : null;
 }
 
-
-/*
-function text(docOrElem, selector, index) {
-	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-*/
 
 /**
  *	Adds link attachment to a Zotero item.
@@ -684,8 +677,8 @@ function getMarcxmlaRSL(doc) {
 
 		// Data field tag and indicators
 		marcxmlLines.push('    <datafield tag="' + fieldTag
-									+ '" ind1="' + fieldInd[0]
-									+ '" ind2="' + fieldInd[1] + '">');
+			+ '" ind1="' + fieldInd[0]
+			+ '" ind2="' + fieldInd[1] + '">');
 
 		// Subfields
 		let subfields = fieldVal.split('|');
@@ -1757,216 +1750,6 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=001",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Беседы с православным священником",
-				"creators": [
-					{
-						"firstName": "Константин",
-						"lastName": "Пархоменко",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007",
-				"ISBN": "9785289024565",
-				"callNumber": "271.22",
-				"extra": "RSLID: 01003120332",
-				"language": "rus",
-				"libraryCatalog": "Russian State Library",
-				"numPages": "316",
-				"place": "Санкт-Петербург",
-				"publisher": "Лениздат : Ленинград",
-				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "search.rsl.ru",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "На обл. авт. не указан"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=037",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Беседы с православным священником",
-				"creators": [
-					{
-						"firstName": "Константин",
-						"lastName": "Пархоменко",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007",
-				"ISBN": "9785289024565",
-				"callNumber": "271.22",
-				"extra": "RSLID: 01003120332",
-				"language": "rus",
-				"libraryCatalog": "Russian State Library",
-				"numPages": "316",
-				"place": "Санкт-Петербург",
-				"publisher": "Лениздат : Ленинград",
-				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "search.rsl.ru",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "На обл. авт. не указан"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=002",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Беседы с православным священником",
-				"creators": [
-					{
-						"firstName": "Константин",
-						"lastName": "Пархоменко",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007",
-				"ISBN": "9785289024565",
-				"callNumber": "271.22",
-				"extra": "RSLID: 01003120332",
-				"language": "rus",
-				"libraryCatalog": "Russian State Library",
-				"numPages": "316",
-				"place": "Санкт-Петербург",
-				"publisher": "Лениздат : Ленинград",
-				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=001478&set_entry=000001&format=999",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "search.rsl.ru",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "На обл. авт. не указан"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000010&format=001",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Беседы с православным священником",
-				"creators": [
-					{
-						"firstName": "Константин",
-						"lastName": "Пархоменко",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007",
-				"ISBN": "9785289024565",
-				"callNumber": "271.22",
-				"extra": "RSLID: 01003120332",
-				"language": "rus",
-				"libraryCatalog": "Russian State Library",
-				"numPages": "316",
-				"place": "Санкт-Петербург",
-				"publisher": "Лениздат : Ленинград",
-				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000010&format=999",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "search.rsl.ru",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "На обл. авт. не указан"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000002&format=001",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Беседы с православным священником",
-				"creators": [
-					{
-						"firstName": "Константин",
-						"lastName": "Пархоменко",
-						"creatorType": "author"
-					}
-				],
-				"date": "2007",
-				"ISBN": "9785289024565",
-				"callNumber": "271.22",
-				"extra": "RSLID: 01003120332",
-				"language": "rus",
-				"libraryCatalog": "Russian State Library",
-				"numPages": "316",
-				"place": "Санкт-Петербург",
-				"publisher": "Лениздат : Ленинград",
-				"url": "http://aleph.rsl.ru/F/?func=full-set-set&set_number=005075&set_entry=000002&format=999",
-				"attachments": [
-					{
-						"linkMode": "linked_url",
-						"title": "search.rsl.ru",
-						"snapshot": false,
-						"contentType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [
-					{
-						"note": "На обл. авт. не указан"
-					}
-				],
 				"seeAlso": []
 			}
 		]
