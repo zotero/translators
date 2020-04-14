@@ -186,10 +186,10 @@ function text(docOrElem, selector, index) {
  */
 function addLink(item, title, url) {
 	item.attachments.push({ linkMode: "linked_url", // Apparently, should be the first
-							title: title,
-							snapshot: false,
-							contentType: "text/html",
-							url: url });
+		title: title,
+		snapshot: false,
+		contentType: "text/html",
+		url: url });
 }
 
 
@@ -217,43 +217,44 @@ function detectWeb(doc, url) {
 	// Z.debug(subdomain);
 	switch (subdomain) {
 		case 'search':
-			if (pathname.indexOf('/search') != -1) {
+			if (pathname.includes('/search')) {
 				return 'multiple';
-			} else if (pathname.indexOf('/record/') != -1) {
+			}
+			else if (pathname.includes('/record/')) {
 				let metadata = getRecordDescriptionsRSL(doc, url);
 				let itemType = metadata.itemType;
-				//Z.debug(metadata);
+				// Z.debug(metadata);
 				return itemType ? itemType : 'book';
-			} else {
+			}
+			else {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
-			break;
 		case 'favorites':
 			return 'multiple';
-			break;
 		case 'aleph':
 
 			/*
 				There are other single record patterns, but the full repertoire
 				is unclear. Only this pattern is supported
 			*/
-			if (url.indexOf('func=full-set-set') != -1) {
+			if (url.includes('func=full-set-set')) {
 				return 'book';
+			}
 
 			/*
 				There are other single record patterns, but the full repertoire
 				is unclear. Due to awful implementation, "multiple" is not supported.
 			*/
-			} else if (url.match(/func=(find-[abcm]|basket-short|(history|short)-action)/)) {
+			else if (url.match(/func=(find-[abcm]|basket-short|(history|short)-action)/)) {
 				Z.debug('Due to awful implementation, "multiple" is not supported.');
 				// return 'multiple';
 				return false;
-			} else {
+			}
+			else {
 				Z.debug('Catalog section not supported');
 				return false;
 			}
-			break;
 		default:
 			Z.debug('Subdomain not supported: ' + subdomain);
 			return false;
@@ -279,20 +280,21 @@ function doWeb(doc, url) {
 				scrape(doc, url);
 				break;
 			case 'aleph':
-				if (url.indexOf(aRSLFilters.recordMarcSignature) != -1) {
+				if (url.incudes(aRSLFilters.recordMarcSignature)) {
 					scrape(doc, url);
-				} else {
+				}
+				else {
 					let href = aRSLFilters.urlPrefix + '?'
 							+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
-														aRSLFilters.recordMarcSignature);
+								aRSLFilters.recordMarcSignature);
 					ZU.processDocuments([href], scrape);
 				}
 				break;
 			default:
 				Z.debug('Subdomain not supported');
-				return false;
 		}
-	} else {
+	}
+	else {
 		getSearchResults(doc, url);
 		Zotero.selectItems(getSearchResults(doc, url),
 			function (records) {
@@ -311,11 +313,11 @@ function scrape(doc, url) {
 	let subdomain = domain.slice(0, -'.rsl.ru'.length);
 	switch (subdomain) {
 		case 'search':
-			recordMarcxml = getMarcxmlsRSL(doc, url);
+			recordMarcxml = getMarcxmlsRSL(doc);
 			scrapeCallback = scrapeCallbacksRSL;
 			break;
 		case 'aleph':
-			recordMarcxml = getMarcxmlaRSL(doc, url);
+			recordMarcxml = getMarcxmlaRSL(doc);
 			scrapeCallback = scrapeCallbackaRSL;
 			break;
 		default:
@@ -397,7 +399,7 @@ function scrapeCallbackaRSL(doc, url) {
 
 		item.url = aRSLFilters.urlPrefix + '?'
 				+ url.split('?')[1].replace(aRSLFilters.recordFormatRegex,
-											aRSLFilters.recordStandardSignature);
+					aRSLFilters.recordStandardSignature);
 
 		let metadata = {};
 		metadata.relatedURL = [];
@@ -429,7 +431,8 @@ function getSearchResults(doc, url) {
 					+ row.getAttribute(sRSLFilters.searchRecordRslidAttr);
 			records[href] = row.innerText.match(sRSLFilters.searchRecordTitle)[0];
 		}
-	} else if (subdomain == 'favorites') {
+	}
+	else if (subdomain == 'favorites') {
 		let rows = doc.querySelectorAll(sRSLFilters.favRslidCSS);
 		for (let row of rows) {
 			let href = row.href;
@@ -447,7 +450,7 @@ function getSearchResults(doc, url) {
  *
  *	@return {String} - MARCXML record
  */
-function getMarcxmlsRSL(doc, url) {
+function getMarcxmlsRSL(doc) {
 	let irow = 0;
 
 	let marc21TableRows = doc.querySelector(sRSLFilters.marcTableCSS).rows;
@@ -479,11 +482,11 @@ function getMarcxmlsRSL(doc, url) {
 		let fieldTag = curCells[0].innerText;
 
 		/*
-		  Subfield separator is '$'. Subfield separator always comes right after a tag,
-		  so triple all '$' that follow immediately after '>' before stripping HTML tags
-		  to prevent collisions with potential occurences of '$' as part of subfield contets.
+			Subfield separator is '$'. Subfield separator always comes right after a tag,
+			so triple all '$' that follow immediately after '>' before stripping HTML tags
+			to prevent collisions with potential occurences of '$' as part of subfield contets.
 		*/
-		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\>\$/g, '>$$$$$$');
+		curCells[1].innerHTML = curCells[1].innerHTML.replace(/>\$/g, '>$$$$$$');
 		let fieldVal = curCells[1].innerText;
 		let subfields = fieldVal.split('$$$');
 		curCells[1].innerHTML = curCells[1].innerHTML.replace(/\$\$\$/g, '$$');
@@ -539,7 +542,8 @@ function getRecordDescriptionsRSL(doc, url) {
 			metadata[propertyName] = propertyValue;
 			propertyName = buffer;
 			propertyValue = curCells[1].innerText;
-		} else {
+		}
+		else {
 			propertyValue = propertyValue + '; ' + curCells[1].innerText;
 		}
 	}
@@ -569,8 +573,8 @@ function getRecordDescriptionsRSL(doc, url) {
 		most significant digits.
 	*/
 	let href = sRSLFilters.searchPattern
-				.replace(/\{@title@\}/, metadata[sRSLFilters.title])
-				.replace(/\{@id@\}/, metadata.rslid.slice(2));
+		.replace(/\{@title@\}/, metadata[sRSLFilters.title])
+		.replace(/\{@id@\}/, metadata.rslid.slice(2));
 	metadata.relatedURL.push({ title: "via search", url: href });
 
 	// E-resource
@@ -595,8 +599,8 @@ function getRecordDescriptionsRSL(doc, url) {
 		let aurl = attr(doc, sRSLFilters.thesisRelCSS, sRSLFilters.thesisRelAttr);
 		if (aurl) {
 			aurl = sRSLFilters.rslidPrefix
-				 + aurl.slice(sRSLFilters.thesisRelPrefix.length
-				 + metadata.rslid.length + '/'.length);
+				+ aurl.slice(sRSLFilters.thesisRelPrefix.length
+					+ metadata.rslid.length + '/'.length);
 			metadata.relatedURL.push({ title: "Autoreferat RSL record", url: aurl });
 		}
 	}
@@ -607,8 +611,8 @@ function getRecordDescriptionsRSL(doc, url) {
 		let turl = attr(doc, sRSLFilters.thesisRelCSS, sRSLFilters.thesisRelAttr);
 		if (turl) {
 			turl = sRSLFilters.rslidPrefix
-				 + turl.slice(sRSLFilters.thesisRelPrefix.length
-				 + metadata.rslid.length + '/'.length);
+				+ turl.slice(sRSLFilters.thesisRelPrefix.length
+					+ metadata.rslid.length + '/'.length);
 			metadata.relatedURL.push({ title: "Thesis RSL record", url: turl });
 		}
 		metadata.extraType = type;
@@ -624,7 +628,7 @@ function getRecordDescriptionsRSL(doc, url) {
  *
  *	@return {String} - MARCXML record
  */
-function getMarcxmlaRSL(doc, url) {
+function getMarcxmlaRSL(doc) {
 	// -------------- Parse MARC table into a MARC array object -------------- //
 	let marcTags = doc.querySelectorAll(aRSLFilters.marcTableTagCSS);
 	let marcVals = doc.querySelectorAll(aRSLFilters.marcTableValCSS);
@@ -635,7 +639,7 @@ function getMarcxmlaRSL(doc, url) {
 	}
 
 	// Leader
-	marc.push([ marcTags[1].innerText.padEnd(5, ' '), marcVals[1].innerText]);
+	marc.push([marcTags[1].innerText.padEnd(5, ' '), marcVals[1].innerText]);
 
 	for (let fieldCount = 2; fieldCount < marcTags.length; fieldCount++) {
 		let tag = marcTags[fieldCount].innerText;
