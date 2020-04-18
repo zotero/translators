@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Edinburg Universitz Press Journals Translator
+	Edinburg University Press Journals Translator
 	(Closely based on the ESA journals translator)
 	Copyright © 2013 Sebastian Karcher
 
@@ -87,29 +87,31 @@ function scrape(doc, url) {
 		translator.setHandler("itemDone", function (obj, item) {
 			item.url = url;
 			item.notes = [];
-
+			
 			var tagentry = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+
 			if (tagentry){
-				var tags = tagentry.split(/\s*,\s*/)
+				var tags = tagentry.split(/\s*,\s*/);
 				for (var i in tags){
-					item.tags.push(tags[i])
+					item.tags.push(tags[i].replace(/^\w/gi,function(m){return m.toUpperCase();}));
+					
 				}
 			}
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
 			let abstractFromDOM = ZU.xpathText(doc, '//div[contains(@class, "abstractInFull")]//p[not(@class="summary-title")]');
 			if (abstractFromDOM && item.abstractNote.length < abstractFromDOM.length)
-				item.abstractNote = abstractFromDOM;
+				item.abstractNote = abstractFromDOM.replace(/^Abstract/,'');
 
 			item.attachments = [{
 				document: doc,
 				title: "EUP Snapshot",
 				mimeType: "text/html"
 			}];
-
+			
 			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
 			if (docType === "book-review" || docType === "review-article")
 				item.tags.push("Book Reviews");
-
+			
 			var pdfurl = ZU.xpath(doc, '//div[@class="article_link"]/a')[0];
 			if (pdfurl) {
 				pdfurl = pdfurl.href;
@@ -125,6 +127,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -180,6 +183,137 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.euppublishing.com/action/doSearch?AllField=labour",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective: Dora Burgess (1887–1962)",
+				"creators": [
+					{
+						"lastName": "Lee",
+						"firstName": "Sun Yong",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 20, 2020",
+				"DOI": "10.3366/swc.2020.0280",
+				"ISSN": "1354-9901",
+				"abstractNote": "Dora Belle McLaughlin Burgess was an American Presbyterian missionary, devoted to the mission to the Quiché tribe in Guatemala from 1913 to 1962. During her service, she translated the New Testament from Greek into the Quiché language. She also published a hymnal in Quiché and an ethnographic writing on Quiché culture. This paper attempts to shed light on the life of Dora Burgess, whose work was unknown, and to trace the formation of her identity as a missionary and her mission approach to the native inhabitants. In doing so, the paper argues that her interaction with the native tribes in the mission field shaped her identity as a missionary and her understanding of mission in ways in which the indigenous people's agency and subjectivity were recognised and respected. In the earlier period of her service in Guatemala, Dora Burgess conceived of mission work as a rescue project to transform the native tribes into Christians who would denounce their ‘superstitious’ traditions; however, her later focus in mission work, especially in her bible translation project, lay in acknowledging the native traditions and cultures and giving the indigenous tribe opportunities to be Christians in their own ways.",
+				"issue": "1",
+				"journalAbbreviation": "Studies in World Christianity",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "21-41",
+				"publicationTitle": "Studies in World Christianity",
+				"shortTitle": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
+				"volume": "26",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bible translation"
+					},
+					{
+						"tag": "Christianity"
+					},
+					{
+						"tag": "Conversion of missionaries"
+					},
+					{
+						"tag": "Dora Burgess"
+					},
+					{
+						"tag": "Guatemala"
+					},
+					{
+						"tag": "Protestant Indian missions"
+					},
+					{
+						"tag": "Quiché (K'iche)"
+					},
+					{
+						"tag": "US woman missionary"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/toc/swc/26/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective: Dora Burgess (1887–1962)",
+				"creators": [
+					{
+						"lastName": "Lee",
+						"firstName": "Sun Yong",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 20, 2020",
+				"DOI": "10.3366/swc.2020.0280",
+				"ISSN": "1354-9901",
+				"abstractNote": "Dora Belle McLaughlin Burgess was an American Presbyterian missionary, devoted to the mission to the Quiché tribe in Guatemala from 1913 to 1962. During her service, she translated the New Testament from Greek into the Quiché language. She also published a hymnal in Quiché and an ethnographic writing on Quiché culture. This paper attempts to shed light on the life of Dora Burgess, whose work was unknown, and to trace the formation of her identity as a missionary and her mission approach to the native inhabitants. In doing so, the paper argues that her interaction with the native tribes in the mission field shaped her identity as a missionary and her understanding of mission in ways in which the indigenous people's agency and subjectivity were recognised and respected. In the earlier period of her service in Guatemala, Dora Burgess conceived of mission work as a rescue project to transform the native tribes into Christians who would denounce their ‘superstitious’ traditions; however, her later focus in mission work, especially in her bible translation project, lay in acknowledging the native traditions and cultures and giving the indigenous tribe opportunities to be Christians in their own ways.",
+				"issue": "1",
+				"journalAbbreviation": "Studies in World Christianity",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "21-41",
+				"publicationTitle": "Studies in World Christianity",
+				"shortTitle": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
+				"volume": "26",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bible translation"
+					},
+					{
+						"tag": "Christianity"
+					},
+					{
+						"tag": "Conversion of missionaries"
+					},
+					{
+						"tag": "Dora Burgess"
+					},
+					{
+						"tag": "Guatemala"
+					},
+					{
+						"tag": "Protestant Indian missions"
+					},
+					{
+						"tag": "Quiché (K'iche)"
+					},
+					{
+						"tag": "US woman missionary"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
