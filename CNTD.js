@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-04-19 19:54:32"
+	"lastUpdated": "2020-04-19 19:57:24"
 }
 
 /**
@@ -140,7 +140,7 @@ const matchTypePattern = [
 ];
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	let pathname = doc.location.pathname;
 	let searchPattern = '/search/';
 	let recordPattern = /^\/document\/([0-9]+)/;
@@ -176,13 +176,13 @@ function doWeb(doc, url) {
 		}
 	}
 	else {
-		adjustMetadata(doc);
+		adjustMetadata();
 		scrape(doc, url);
 	}
 }
 
 
-function getSearchResult(doc, url) {
+function getSearchResult(doc, _url) {
 	let records = {};
 	let searchResult = doc.querySelectorAll(filters.searchResultCSS);
 	searchResult.forEach(record => records[record.href] = record.innerText.trim());
@@ -320,7 +320,7 @@ function parseMetadata(doc) {
  *
  *	@return {null}
  */
-function adjustMetadata(doc) {
+function adjustMetadata() {
 	let subType = metadata.subType;
 	let subT = docTypes[subType];
 
@@ -384,7 +384,7 @@ function adjustMetadata(doc) {
 				if (title) metadata.title = title[1];
 				break;
 			case 'ПОТ РМ':
-				prefix = metadata.title.match(/^ПОТ Р ?М\-([0-9.\-/]+) /);
+				prefix = metadata.title.match(/^ПОТ Р ?М-([0-9./-]+) /);
 				if (prefix) {
 					metadata.title = metadata.title.slice(prefix[0].length);
 					docNumber = prefix[1];
@@ -400,7 +400,7 @@ function adjustMetadata(doc) {
 					title = title.replace('Об утверждении Правил ', 'Правила ');
 				}
 				else {
-					prefix = metadata.title.match(/^ПБ ([0-9.\-]+) /);
+					prefix = metadata.title.match(/^ПБ ([0-9.-]+) /);
 					if (prefix) {
 						let docNumber = prefix[1];
 						if (metadata.publicDocNumber.includes(docNumber)) {
@@ -447,7 +447,7 @@ function adjustMetadata(doc) {
 				metadata.dateApproved = dateApproved;
 				title = metadata.title;
 				title = title.replace('*', '');
-				prefix = title.match(/^СНиП ([0-9.\-/]+) /);
+				prefix = title.match(/^СНиП ([0-9./-]+) /);
 				if (prefix) {
 					title = title.slice(prefix[0].length);
 					docNumber = prefix[1];
@@ -456,6 +456,8 @@ function adjustMetadata(doc) {
 					if (docSubNumber) metadata.publicDocNumber = docNumber + ' ## ' + docSubNumber;
 				}
 				metadata.title = title;
+				metadata.code = 'СП (Свод правил)';
+				break;
 			case 'СП (Свод правил)':
 				metadata.code = 'СП (Свод правил)';
 				break;
@@ -472,7 +474,7 @@ function adjustMetadata(doc) {
 					title = title.replace(prefix[0], '');
 				}
 				else {
-					docNumber = /^НП-[0-9\-]+/;
+					docNumber = /^НП-[0-9-]+/;
 					docNumber = title.match(docNumber);
 					if (docNumber) {
 						docNumber = docNumber[0];
@@ -489,6 +491,9 @@ function adjustMetadata(doc) {
 				title = title.replace(/^Об утверждении технического регламента /i, '');
 				title = title.replace(/^о/, 'О');
 				metadata.title = title;
+				metadata.title = metadata.title.replace(/"/g, '');
+				metadata.code = 'ТР (Технический регламент)';
+				break;
 			case 'Технический регламент Евразийского экономического союза':
 			case 'Технический регламент Таможенного союза':
 				// Remove document type and number prefix from title
