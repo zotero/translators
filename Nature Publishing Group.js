@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-12 15:27:55"
+	"lastUpdated": "2020-04-19 20:52:54"
 }
 
 /**
@@ -537,13 +537,16 @@ function scrape(doc, url) {
 		if (!item) {	//EM failed (unlikely)
 			item = items[1];
 		} else if (items[1]) {
-			var preferredRisFields = ['journalAbbreviation', 'date'];
+			var preferredRisFields = ['journalAbbreviation', 'date', 'abstractNote'];
 			//palgrave-macmillan journals
 			if (!isNature(url)) {
 				preferredRisFields.push('publisher'); //all others are going to be dropped since we only handle journalArticle
 				if (item.rights.includes('Nature Publishing Group')) {
 					delete item.rights;
 				}
+			}
+			if (item.publicationTitle == 'Nature Communications') {
+				preferredRisFields.push('pages'); // Nature Communications has PDF page numbers in metadata
 			}
 			
 			item = supplementItem(item, items[1], preferredRisFields);
