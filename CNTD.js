@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-04-19 18:37:06"
+	"lastUpdated": "2020-04-19 19:54:32"
 }
 
 /**
@@ -52,14 +52,6 @@ const keywords = {
 	activeLaw: "Действующий",
 	codeAmendments: "(с изменениями на",
 	codeVersion: "(редакция"
-};
-
-let waitStep;
-let waitCount;
-const pdfStatus = {
-	started: -1,
-	inprocess: -1,
-	ready: 1,
 };
 
 // Holds extracted metadata
@@ -146,24 +138,6 @@ const matchTypePattern = [
 	[/ПБ/, "ПБ"],
 	[/ПОТ РМ/, "ПОТ РМ"]
 ];
-
-
-/**
- *	Adds link attachment to a Zotero item.
- *
- *	@param {Object} item - Zotero item
- *	@param {String} title - Link name
- *	@param {String} url - Link url
- *
- *	@return {None}
- */
-function addLink(item, title, url) {
-	item.attachments.push({ linkMode: "linked_url", // Apparently, should be the first
-		title: title,
-		snapshot: false,
-		contentType: "text/html",
-		url: url });
-}
 
 
 function detectWeb(doc, url) {
