@@ -37,7 +37,7 @@
 
 /**
 	A provider of legislative, technical, and regulatory documents in Russian.
-	With primery focus on documents produced by Russian authorities, CNTD also
+	With primary focus on documents produced by Russian authorities, CNTD also
 	serves translated into Russian foreign and international documents applicable
 	to activities in Russia.
 */
@@ -76,7 +76,7 @@ let fieldMap = {
 	Each custom type consists of:
 		key:		user facing original type name
 		"type": 	specific subtype that could be used for coding purposes
-		"itemType": zotero item type
+		"itemType": Zotero item type
 		"short":	user facing shortened type name
 		"abbr":		user facing type name abbreviation
 		"tags":		tags to be added
@@ -117,7 +117,7 @@ const legalTypes = ["Указ", "Приказ", "Постановление", "�
 	There are records with no document type defined. When such a type can be
 	defined based on document title, an array element is added here, which is an
 	arrayed pair of "pattern" to be matched against the title and "custom type".
-	Additionaly, a corresponding descriptor is added to "docTypes".
+	Additionally, a corresponding descriptor is added to "docTypes".
 */
 const docTypePatterns = [
 	[/^Государственная поверочная схема для/, "Государственная поверочная схема"],
@@ -209,7 +209,7 @@ function scrape(doc, url) {
 	zItem.url = url;
 	zItem.language = 'Russian';
 
-	// For statute, the date/dateEncated field is set to the last amendment
+	// For statute, the date/dateEnacted field is set to the last amendment
 	// date. Original enactment date is stored in the extra field.
 	zItem.date = metadata.dateAmended ? metadata.dateAmended : metadata.dateEnacted;
 
