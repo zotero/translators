@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-04-19 19:57:24"
+	"lastUpdated": "2020-04-23 15:35:49"
 }
 
 /**
@@ -174,8 +174,7 @@ function doWeb(doc, url) {
 				}
 			);
 		}
-	}
-	else {
+	} else {
 		adjustMetadata();
 		scrape(doc, url);
 	}
@@ -398,8 +397,7 @@ function adjustMetadata() {
 				prefix = 'Об утверждении Правил ';
 				if (title.startsWith(prefix)) {
 					title = title.replace('Об утверждении Правил ', 'Правила ');
-				}
-				else {
+				} else {
 					prefix = metadata.title.match(/^ПБ ([0-9.-]+) /);
 					if (prefix) {
 						let docNumber = prefix[1];
@@ -472,8 +470,7 @@ function adjustMetadata() {
 				prefix = title.match(prefix);
 				if (prefix) {
 					title = title.replace(prefix[0], '');
-				}
-				else {
+				} else {
 					docNumber = /^НП-[0-9-]+/;
 					docNumber = title.match(docNumber);
 					if (docNumber) {
@@ -504,8 +501,7 @@ function adjustMetadata() {
 
 		// Tags
 		if (subT.tags) metadata.tags = subT.tags;
-	}
-	else {
+	} else {
 		// Remove authority from document type
 		for (let legalType of legalTypes) {
 			if (subType.indexOf(legalType) == 0) {
