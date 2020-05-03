@@ -137,7 +137,7 @@ function doWeb(doc, url) {
 		for (let i = 0; i < rows.length; i++) {
 			// Careful: If you get more than one node,
 			// ZU.xpathText will join the textContent of each with commas.
-			var title = ZU.xpathText(rows[i], './b|./article/span[@class="title"]');
+			var title = ZU.xpathText(rows[i], './/span[@class="title"]');
 			var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href|./nav//div/a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
 			items[link] = title;
 		}
