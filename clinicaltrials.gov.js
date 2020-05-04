@@ -2,7 +2,7 @@
 	"translatorID": "874d70a0-6b95-4391-a681-c56dabaa1411",
 	"label": "clinicaltrials.gov",
 	"creator": "Ryan Velazquez",
-	"target": "^https://(www\\.)?clinicaltrials\\.gov/",
+	"target": "^https://(www\\.)?clinicaltrials\\.gov/ct2/show",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -35,13 +35,8 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
-	if (url.includes("https://clinicaltrials.gov/ct2/results")) {
-		throw new Error("clinicaltrials.gov search pages not supported by Zotero, only individual trials");
-	}
-	else {
-		return "report";
-	}
+function detectWeb() {
+	return "report";
 }
 
 function doWeb(doc, url) {
@@ -79,13 +74,6 @@ function dateTimeToDateString(dateTime) {
 	return dateTime.split(" ")[0].split(":").join("-");
 }
 
-function nameToFirstAndLast(rawName) {
-	const name = rawName.split(",")[0];
-	const firstName = name.split(" ")[0];
-	const lastName = name.split(",")[0].split(" ")[name.split(" ").length - 1];
-	return [firstName, lastName];
-}
-
 function scrape(doc, url) {
 	const clinicalTrialID = getClinicalTrialID(url);
 	let jsonRequestURL;
@@ -112,12 +100,7 @@ function scrape(doc, url) {
 			const responsibleParty = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
 			if (typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string") {
 				responsiblePartyInvestigator = responsibleParty.ResponsiblePartyInvestigatorFullName;
-				const splitResponsiblePartyInvestigator = nameToFirstAndLast(responsiblePartyInvestigator);
-				creators.push({
-					firstName: splitResponsiblePartyInvestigator[0],
-					lastName: splitResponsiblePartyInvestigator[1],
-					creatorType: "author"
-				});
+				creators.push(ZU.cleanAuthor(responsiblePartyInvestigator, "author", false));
 			}
 		}
 
@@ -177,26 +160,26 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
-				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to the normalization of temperature and oxygen saturation through Day 14 in participants with severe coronavirus disease (COVID-19).",
+				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to clinical status assessed by a 7-point ordinal scale on Day 14.",
 				"creators": [
 					{
 						"firstName": "Gilead Sciences",
 						"creatorType": "author"
 					}
 				],
-				"date": "April 1, 2020",
+				"date": "April 28, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
 				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
 				"institution": "clinicaltrials.gov",
-         		"reportNumber": "NCT04292899",
-         		"reportType": "Clinical trial registration",
+				"reportNumber": "NCT04292899",
+				"reportType": "Clinical trial registration",
 				"extra": "submitted: February 28, 2020",
 				"notes": [],
-          		"tags": [],
-        		"seeAlso": [],
-         		"attachments": []
+				"tags": [],
+				"seeAlso": [],
+				"attachments": []
 			}
 		]
 	},
@@ -224,13 +207,13 @@ var testCases = [
 				"shortTitle": "Sleep Disorders and Gastroesophageal Reflux Disease (GERD)",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT00287391",
 				"institution": "clinicaltrials.gov",
-         		"reportNumber": "NCT00287391",
-         		"reportType": "Clinical trial registration",
+				"reportNumber": "NCT00287391",
+				"reportType": "Clinical trial registration",
 				"extra": "submitted: February 3, 2006",
 				"notes": [],
-          		"tags": [],
-        		"seeAlso": [],
-         		"attachments": []
+				"tags": [],
+				"seeAlso": [],
+				"attachments": []
 			}
 		]
 	},
@@ -240,8 +223,8 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "report",
-				"title": "Efficacy and Safety of Hydroxychloroquine for Treatment of Pneumonia Caused by 2019-nCoV ( HC-nCoV )",
-				"abstractNote": "The study aims to evaluate the efficacy and safety of hydroxychloroquine in the treatment of pneumonia caused by the 2019 novel coronavirus",
+				"title": "Efficacy and Safety of Hydroxychloroquine for Treatment of COVID-19",
+				"abstractNote": "The study aims to evaluate the efficacy and safety of hydroxychloroquine in the treatment of COVID-19 pneumonia.",
 				"creators": [
 					{
 						"firstName": "Hongzhou",
@@ -253,21 +236,20 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"date": "March 22, 2020",
+				"date": "April 9, 2020",
 				"accessDate": "2020-04-01",
 				"libraryCatalog": "clinicaltrials.gov",
 				"url": "https://clinicaltrials.gov/ct2/show/NCT04261517",
 				"institution": "clinicaltrials.gov",
-         		"reportNumber": "NCT04261517",
-         		"reportType": "Clinical trial registration",
+				"reportNumber": "NCT04261517",
+				"reportType": "Clinical trial registration",
 				"extra": "submitted: February 6, 2020",
 				"notes": [],
-          		"tags": [],
-        		"seeAlso": [],
-         		"attachments": []
+				"tags": [],
+				"seeAlso": [],
+				"attachments": []
 			}
 		]
 	}
-
 ]
 /** END TEST CASES **/
