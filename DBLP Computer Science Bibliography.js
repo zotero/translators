@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-16 21:02:38"
+	"lastUpdated": "2020-05-03 20:02:38"
 }
 
 /*
@@ -247,7 +247,6 @@ var testCases = [
 				],
 				"date": "2010",
 				"DOI": "10.1109/ATS.2010.10",
-				"ISBN": "9780769542485",
 				"itemID": "DBLP:conf/ats/KochteZBIWHCP10",
 				"libraryCatalog": "DBLP Computer Science Bibliography",
 				"pages": "3–8",
@@ -316,7 +315,6 @@ var testCases = [
 				],
 				"date": "2013",
 				"DOI": "10.1007/978-3-642-40328-6_47",
-				"ISBN": "9783642403279",
 				"itemID": "DBLP:conf/approx/SchederT13",
 				"libraryCatalog": "DBLP Computer Science Bibliography",
 				"pages": "683–698",
