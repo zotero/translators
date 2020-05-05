@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-05 03:10:07"
+	"lastUpdated": "2020-05-05 03:20:08"
 }
 
 /*
@@ -37,9 +37,11 @@
 
 
 function detectWeb(doc, url) {
-  Zotero.monitorDOMChanges(doc.querySelector('#theDataTable'));	
-  if (url.includes("/ct2/results?") && getSearchResults(doc, true)) {
-	return "multiple";
+  if (url.includes("/ct2/results?")) {
+  	Zotero.monitorDOMChanges(doc.querySelector('#theDataTable'));
+  	if (getSearchResults(doc, true)) {
+		return "multiple";
+  	}
   }
   
   if (url.includes('/ct2/show')) {
