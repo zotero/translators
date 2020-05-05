@@ -37,50 +37,51 @@
 
 
 function detectWeb(doc, url) {
-  if (url.includes("/ct2/results?")) {
-  	Zotero.monitorDOMChanges(doc.querySelector('#theDataTable'));
-  	if (getSearchResults(doc, true)) {
-		return "multiple";
-  	}
-  }
-  
-  if (url.includes('/ct2/show')) {
-	return "report";
-  }
-  
-  return false;
+	if (url.includes("/ct2/results?")) {
+		Zotero.monitorDOMChanges(doc.querySelector("#theDataTable"));
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+	}
+
+	if (url.includes("/ct2/show")) {
+		return "report";
+	}
+
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-  var items = {};
-  var found = false;
-  var rows = doc.querySelectorAll('table#theDataTable a[href*="/ct2/show"]');
-  for (let row of rows) {
-	let href = row.href;
-	let title = ZU.trimInternal(row.textContent);
-	if (!href || !title) continue;
-	if (checkOnly) return true;
-	found = true;
-	items[href] = title;
-  }
-  return found ? items : false;
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('table#theDataTable a[href*="/ct2/show"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
-  if (detectWeb(doc, url) == "multiple") {
-	Zotero.selectItems(getSearchResults(doc, false), function (items) {
-	  if (items) ZU.processDocuments(Object.keys(items), scrape);
-	});
-  } else
-  {
-	scrape(doc, url);
-  }
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
 }
 
-
-
 function isJsonAPIRequest(url) {
-	if (url.includes("https://clinicaltrials.gov/api/query") && url.includes("fmt=JSON")) {
+	if (
+		url.includes("https://clinicaltrials.gov/api/query")
+    && url.includes("fmt=JSON")
+	) {
 		return true;
 	}
 	else {
@@ -89,7 +90,10 @@ function isJsonAPIRequest(url) {
 }
 
 function isXmlAPIRequest(url) {
-	if (url.includes("https://clinicaltrials.gov/api/query") && url.includes("fmt=XML")) {
+	if (
+		url.includes("https://clinicaltrials.gov/api/query")
+    && url.includes("fmt=XML")
+	) {
 		return true;
 	}
 	else {
@@ -132,16 +136,32 @@ function scrape(doc, url) {
 		let responsiblePartyInvestigator;
 		let sponsor;
 		let collaborators = [];
-		if (study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty("ResponsibleParty")) {
-			const responsibleParty = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
-			if (typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string") {
-				responsiblePartyInvestigator = responsibleParty.ResponsiblePartyInvestigatorFullName;
-				creators.push(ZU.cleanAuthor(responsiblePartyInvestigator, "author", false));
+		if (
+			study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty(
+				"ResponsibleParty"
+			)
+		) {
+			const responsibleParty
+        = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
+			if (
+				typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string"
+			) {
+				responsiblePartyInvestigator
+          = responsibleParty.ResponsiblePartyInvestigatorFullName;
+				creators.push(
+					ZU.cleanAuthor(responsiblePartyInvestigator, "author", false)
+				);
 			}
 		}
 
-		if (study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty("LeadSponsor")) {
-			sponsor = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor.LeadSponsorName;
+		if (
+			study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty(
+				"LeadSponsor"
+			)
+		) {
+			sponsor
+        = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor
+          .LeadSponsorName;
 			let sponsorCreatorType;
 			if (creators.length == 0) {
 				sponsorCreatorType = "author";
@@ -151,19 +171,23 @@ function scrape(doc, url) {
 			}
 			creators.push({
 				firstName: sponsor,
-				creatorType: sponsorCreatorType
+				creatorType: sponsorCreatorType,
 			});
 		}
-		
-		if (study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty("CollaboratorList")) {
-			const collaboratorList = study.ProtocolSection.SponsorCollaboratorsModule.CollaboratorList.Collaborator;
+
+		if (
+			study.ProtocolSection.SponsorCollaboratorsModule.hasOwnProperty(
+				"CollaboratorList"
+			)
+		) {
+			const collaboratorList
+        = study.ProtocolSection.SponsorCollaboratorsModule.CollaboratorList
+          .Collaborator;
 			collaboratorList.forEach((collaborator) => {
-				collaborators.push(
-					{
-						firstName: collaborator.CollaboratorName,
-						creatorType: "contributor"
-					}
-				);
+				collaborators.push({
+					firstName: collaborator.CollaboratorName,
+					creatorType: "contributor",
+				});
 			});
 			collaborators.forEach((collaborator) => {
 				creators.push(collaborator);
