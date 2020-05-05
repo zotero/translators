@@ -2,14 +2,14 @@
 	"translatorID": "874d70a0-6b95-4391-a681-c56dabaa1411",
 	"label": "clinicaltrials.gov",
 	"creator": "Ryan Velazquez",
-	"target": "^https://(www\\.)?clinicaltrials\\.gov/ct2/show",
+	"target": "^https://(www\\.)?clinicaltrials\\.gov/ct2/(show|results\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-01 14:00:00"
+	"lastUpdated": "2020-05-05 03:10:07"
 }
 
 /*
@@ -35,13 +35,47 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb() {
+
+function detectWeb(doc, url) {
+  Zotero.monitorDOMChanges(doc.querySelector('#theDataTable'));	
+  if (url.includes("/ct2/results?") && getSearchResults(doc, true)) {
+	return "multiple";
+  }
+  
+  if (url.includes('/ct2/show')) {
 	return "report";
+  }
+  
+  return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+  var items = {};
+  var found = false;
+  var rows = doc.querySelectorAll('table#theDataTable a[href*="/ct2/show"]');
+  for (let row of rows) {
+	let href = row.href;
+	let title = ZU.trimInternal(row.textContent);
+	if (!href || !title) continue;
+	if (checkOnly) return true;
+	found = true;
+	items[href] = title;
+  }
+  return found ? items : false;
 }
 
 function doWeb(doc, url) {
+  if (detectWeb(doc, url) == "multiple") {
+	Zotero.selectItems(getSearchResults(doc, false), function (items) {
+	  if (items) ZU.processDocuments(Object.keys(items), scrape);
+	});
+  } else
+  {
 	scrape(doc, url);
+  }
 }
+
+
 
 function isJsonAPIRequest(url) {
 	if (url.includes("https://clinicaltrials.gov/api/query") && url.includes("fmt=JSON")) {
@@ -152,7 +186,7 @@ function scrape(doc, url) {
 
 
 /** BEGIN TEST CASES **/
-var testCases = [ 
+var testCases = [
 	{
 		"type": "web",
 		"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
@@ -160,7 +194,6 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
-				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to clinical status assessed by a 7-point ordinal scale on Day 14.",
 				"creators": [
 					{
 						"firstName": "Gilead Sciences",
@@ -168,18 +201,19 @@ var testCases = [
 					}
 				],
 				"date": "April 28, 2020",
+				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to clinical status assessed by a 7-point ordinal scale on Day 14.",
 				"accessDate": "2020-04-01",
-				"libraryCatalog": "clinicaltrials.gov",
-				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
-				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
+				"extra": "submitted: February 28, 2020",
 				"institution": "clinicaltrials.gov",
+				"libraryCatalog": "clinicaltrials.gov",
 				"reportNumber": "NCT04292899",
 				"reportType": "Clinical trial registration",
-				"extra": "submitted: February 28, 2020",
-				"notes": [],
+				"shortTitle": "Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe Coronavirus Disease (COVID-19)",
+				"url": "https://clinicaltrials.gov/ct2/show/NCT04292899",
+				"attachments": [],
 				"tags": [],
-				"seeAlso": [],
-				"attachments": []
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -190,7 +224,6 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "The Impact of Gastroesophageal Reflux Disease in Sleep Disorders: A Pilot Investigation of Rabeprazole, 20 mg Twice Daily for the Relief of GERD-Related Insomnia.",
-				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance. Patients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching. Even very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.\n\nThis study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia. Rabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
 				"creators": [
 					{
 						"firstName": "University of North Carolina",
@@ -202,18 +235,19 @@ var testCases = [
 					}
 				],
 				"date": "April 25, 2007",
+				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance. Patients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching. Even very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.\n\nThis study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia. Rabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
 				"accessDate": "2020-04-01",
-				"libraryCatalog": "clinicaltrials.gov",
-				"shortTitle": "Sleep Disorders and Gastroesophageal Reflux Disease (GERD)",
-				"url": "https://clinicaltrials.gov/ct2/show/NCT00287391",
+				"extra": "submitted: February 3, 2006",
 				"institution": "clinicaltrials.gov",
+				"libraryCatalog": "clinicaltrials.gov",
 				"reportNumber": "NCT00287391",
 				"reportType": "Clinical trial registration",
-				"extra": "submitted: February 3, 2006",
-				"notes": [],
+				"shortTitle": "Sleep Disorders and Gastroesophageal Reflux Disease (GERD)",
+				"url": "https://clinicaltrials.gov/ct2/show/NCT00287391",
+				"attachments": [],
 				"tags": [],
-				"seeAlso": [],
-				"attachments": []
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -224,7 +258,6 @@ var testCases = [
 			{
 				"itemType": "report",
 				"title": "Efficacy and Safety of Hydroxychloroquine for Treatment of COVID-19",
-				"abstractNote": "The study aims to evaluate the efficacy and safety of hydroxychloroquine in the treatment of COVID-19 pneumonia.",
 				"creators": [
 					{
 						"firstName": "Hongzhou",
@@ -237,17 +270,18 @@ var testCases = [
 					}
 				],
 				"date": "April 9, 2020",
+				"abstractNote": "The study aims to evaluate the efficacy and safety of hydroxychloroquine in the treatment of COVID-19 pneumonia.",
 				"accessDate": "2020-04-01",
-				"libraryCatalog": "clinicaltrials.gov",
-				"url": "https://clinicaltrials.gov/ct2/show/NCT04261517",
+				"extra": "submitted: February 6, 2020",
 				"institution": "clinicaltrials.gov",
+				"libraryCatalog": "clinicaltrials.gov",
 				"reportNumber": "NCT04261517",
 				"reportType": "Clinical trial registration",
-				"extra": "submitted: February 6, 2020",
-				"notes": [],
+				"url": "https://clinicaltrials.gov/ct2/show/NCT04261517",
+				"attachments": [],
 				"tags": [],
-				"seeAlso": [],
-				"attachments": []
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
