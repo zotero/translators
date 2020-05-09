@@ -2,7 +2,7 @@
 	"translatorID": "8a00461c-5b42-4632-8048-339b221ac3a2",
 	"label": "London Review of Books",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://www\\.lrb\\.co\\.uk",
+	"target": "^https?://(www\\.)?lrb\\.co\\.uk",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
