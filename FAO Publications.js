@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-11 16:33:05"
+	"lastUpdated": "2020-05-11 22:30:09"
 }
 
 /*
@@ -164,8 +164,6 @@ function scrape(doc, url) {
 			pages: ['الصفحات', '页次', 'Pages', 'Страницы', 'Páginas'],
 			ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
 			author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
-			corpAuthor: ['الشعبة', '司', 'Corporate author', 'Division', 'Отдел', 'División'],
-			office: ['مكتب', '办公室', 'Office', 'Bureau', 'Oфис', 'Oficina'],
 			seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
 			seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
 			conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'],
@@ -205,7 +203,7 @@ function scrape(doc, url) {
 			if (key.includes('ISBN')) {
 				newItem.ISBN = ZU.cleanISBN(metaResult, false);
 			}
-			// individual author(s)
+			// author(s)
 			if (key.includes('author')) {
 				if (typeof metaResult == 'object') { // If there are more than 1 authors, metaResult returns an array.
 					for (let i = 0; i < metaResult.length; i++) {
@@ -216,13 +214,6 @@ function scrape(doc, url) {
 				else { // If there is only 1 author, metaResult returns a string.
 					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));
 				}
-			}
-			// corporate author: save for later conditions
-			if (key.includes('corpAuthor')) {
-				var corpAuthorWeb = metaResult;
-			}
-			if (key.includes('office')) {
-				var officeWeb = metaResult;
 			}
 			// tag (Agrovoc)
 			if (key.includes('tags')) {
@@ -253,36 +244,13 @@ function scrape(doc, url) {
 		if (!newItem.place) {
 			newItem.place = 'Rome, Italy';
 		}
-		// Write corporate author; if no individual or corporate author, use 'FAO' as author.
-		if (newItem.creators.length === 0) {
-			if (corpAuthorWeb && officeWeb) {
-				newItem.creators.push({
-					lastName: corpAuthorWeb + ', ' + officeWeb,
-					creatorType: author,
-					fieldMode: true
-				});
-			}
-			else if (corpAuthorWeb && !officeWeb) {
-				newItem.creators.push({
-					lastName: corpAuthorWeb,
-					creatorType: author,
-					fieldMode: true
-				});
-			}
-			else if (!corpAuthorWeb && officeWeb) {
-				newItem.creators.push({
-					lastName: officeWeb,
-					creatorType: author,
-					fieldMode: true
-				});
-			}
-			else {
-				newItem.creators.push({
-					lastName: 'FAO',
-					creatorType: author,
-					fieldMode: true
-				});
-			}
+		// If there's no author, use 'FAO' as author.
+		if (!newItem.creators) {
+			newItem.creators.push({
+				lastName: 'FAO',
+				creatorType: author,
+				fieldMode: true
+			});
 		}
 		// If conference exists in document page, the itemType is 'conferencePaper'; otherwise it's 'book'.
 		if (conferenceWeb) {
