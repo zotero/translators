@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-11 15:57:23"
+	"lastUpdated": "2020-05-12 21:30:21"
 }
 
 /*
@@ -28,13 +28,12 @@
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 	***** END LICENSE BLOCK *****
 */
-
 function detectWeb(doc, url) {
 	// Just differentiate single and multiple. Correct itemType (either book or conferencePaper) will be determined in scrape().
 	if (url.includes('card')) {
 		return 'book';
 	}
-	
+
 	/* Multiples currently don't load properly
 	else if (getSearchResults(doc, true)) {
 		return 'multiple';
@@ -69,7 +68,7 @@ function scrape(doc, url) {
 		//* ********* Begin fixed-location variables **********
 
 		// Some variables always appear and appear at the same location in all document pages.
-		
+
 		// abstract
 		var abs = doc.getElementById("mainContentN0");
 		// The childrens of `abs` are the label "Abstract:" in a strong-tag,
@@ -81,11 +80,11 @@ function scrape(doc, url) {
 			for (let child of children) {
 				if (child.tagName == "STRONG" || (child.nodeType == 1 && ZU.xpathText(child, './/strong'))) {
 					if (abstractFound) {
-						break;// stop when another strong tag is found
+						break; // stop when another strong tag is found
 					}
 					else {
 						abstractFound = true;
-						continue;// exclude the label "Abstract"
+						continue; // exclude the label "Abstract"
 					}
 				}
 				if (newItem.abstractNote) {
@@ -99,9 +98,9 @@ function scrape(doc, url) {
 				}
 			}
 			// DOI: Some docs contain DOI as the last paragraph in abs field
-			var DOILead='https://doi.org/';
+			var DOILead = 'https://doi.org/';
 			if (abs.textContent.includes(DOILead) === true) {
-					newItem.DOI = abs.textContent.slice(abs.textContent.indexOf(DOILead)+DOILead.length);
+				newItem.DOI = abs.textContent.slice(abs.textContent.indexOf(DOILead) + DOILead.length);
 			}
 		}
 		// attach PDF
@@ -111,8 +110,8 @@ function scrape(doc, url) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-		// url: remove 'http://' from pdfUrl
-		newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
+		// url
+		newItem.url = url;
 		// language: according to the last one (old format) or two (new format) letters of PDF file name
 		var langOld = pdfUrl.charAt(pdfUrl.indexOf('pdf') - 2);
 		var langNew = pdfUrl.slice(pdfUrl.indexOf('pdf') - 3, pdfUrl.indexOf('pdf') - 1);
@@ -149,7 +148,7 @@ function scrape(doc, url) {
 		else {
 			newItem.title = mainTitle + ': ' + subTitle;
 		}
-		
+
 		//* ********* End fixed-location variables **********
 
 
@@ -160,13 +159,11 @@ function scrape(doc, url) {
 		// get what variables are listed in the page, save to object existingMeta
 		var textVariable = { // declarations for metadata names as appeared in document pages in different languages
 			date: ['سنة النشر', '出版年代', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
-			publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur','Издатель', 'Editor'],
+			publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur', 'Издатель', 'Editor'],
 			place: ['مكان النشر', '出版地點', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
 			pages: ['الصفحات', '页次', 'Pages', 'Страницы', 'Páginas'],
 			ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
 			author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
-			corpAuthor: ['الشعبة', '司', 'Corporate author', 'Division', 'Отдел', 'División'],
-			office: ['مكتب', '办公室', 'Office', 'Bureau', 'Oфис', 'Oficina'],
 			seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
 			seriesNumber: ['رقم المسلسل', '系列号码', 'Series number', 'Numéro de série', 'Серийный номер', 'Número de serie'],
 			conference: ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'],
@@ -185,7 +182,7 @@ function scrape(doc, url) {
 
 		for (let key in existingMeta) {
 			var metaResult = cleanMeta(existingMeta[key]);
-			
+
 			// date
 			if (key.includes('date')) {
 				newItem.date = metaResult;
@@ -206,24 +203,32 @@ function scrape(doc, url) {
 			if (key.includes('ISBN')) {
 				newItem.ISBN = ZU.cleanISBN(metaResult, false);
 			}
-			// individual author(s)
+			// author(s): whether there is one or more authors; whether last and first name are separated by ',' (if not, use single-field mode).
 			if (key.includes('author')) {
-				if (typeof metaResult == 'object') { // If there are more than 1 authors, metaResult returns an array.
+				if (Array.isArray(metaResult)) { // If there are more than 1 authors, metaResult returns an array.
 					for (let i = 0; i < metaResult.length; i++) {
-						var author = metaResult[i];
-						newItem.creators.push(ZU.cleanAuthor(author, 'author', true));
+						if (metaResult[i].includes(',')) {
+							newItem.creators.push(ZU.cleanAuthor(metaResult[i], 'author', true));
+						}
+						else {
+							newItem.creators.push({
+								lastName: metaResult[i],
+								creatorType: 'author',
+								fieldMode: 1
+							});
+						}
 					}
 				}
-				else { // If there is only 1 author, metaResult returns a string.
-					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));
+				else if (metaResult.includes(',')) {
+					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));					
 				}
-			}
-			// corporate author: save for later conditions
-			if (key.includes('corpAuthor')) {
-				var corpAuthorWeb = metaResult;
-			}
-			if (key.includes('office')) {
-				var officeWeb = metaResult;
+				else {
+					newItem.creators.push({
+						lastName: metaResult,
+						creatorType: 'author',
+						fieldMode: 1
+					});
+				}
 			}
 			// tag (Agrovoc)
 			if (key.includes('tags')) {
@@ -239,7 +244,7 @@ function scrape(doc, url) {
 			if (key.includes('seriesNumber')) {
 				newItem.seriesNumber = metaResult[0].toUpperCase() + metaResult.slice(1);
 			}
-			//conferenceName: save for later conditions.
+			// conferenceName: save for later conditions.
 			if (key.includes('conference')) {
 				var conferenceWeb = metaResult[0];
 				newItem.conferenceName = conferenceWeb;
@@ -254,20 +259,13 @@ function scrape(doc, url) {
 		if (!newItem.place) {
 			newItem.place = 'Rome, Italy';
 		}
-		// Write corporate author; if no individual or corporate author, use 'FAO' as author.
-		if (newItem.creators.length === 0) {
-			if (corpAuthorWeb && officeWeb) {
-				newItem.creators.push({ lastName: corpAuthorWeb + ', ' + officeWeb, creatorType: author, fieldMode: true });
-			}
-			else if (corpAuthorWeb && !officeWeb) {
-				newItem.creators.push({ lastName: corpAuthorWeb, creatorType: author, fieldMode: true });
-			}
-			else if (!corpAuthorWeb && officeWeb) {
-				newItem.creators.push({ lastName: officeWeb, creatorType: author, fieldMode: true });
-			}
-			else {
-				newItem.creators.push({ lastName: 'FAO', creatorType: author, fieldMode: true });
-			}
+		// If there's no author, use 'FAO' as author.
+		if (!newItem.creators.length) {
+			newItem.creators.push({
+				lastName: 'FAO',
+				creatorType: 'author',
+				fieldMode: 1
+			});
 		}
 		// If conference exists in document page, the itemType is 'conferencePaper'; otherwise it's 'book'.
 		if (conferenceWeb) {
@@ -317,6 +315,7 @@ function doWeb(doc, url) {
 }
 
 // Note on test cases: Because the pages use dynamic elements (which is also why the translator doesn't work for multiple item pages), automatic test in Scaffold doesn't work. Every time a test is needed, use "New Web" to manually add it.
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -348,7 +347,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
 				"seriesNumber": "No. 1207",
-				"url": "www.fao.org/3/ca8751en/CA8751EN.pdf",
+				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -412,7 +411,7 @@ var testCases = [
 				"numPages": "65",
 				"place": "Budapest, Hungary",
 				"publisher": "FAO",
-				"url": "www.fao.org/3/i9069en/i9069en.pdf",
+				"url": "http://www.fao.org/documents/card/en/c/I9069EN",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -465,7 +464,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "FAO",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2020",
@@ -477,7 +477,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"shortTitle": "FAO publications catalogue 2020",
-				"url": "www.fao.org/3/ca7988en/CA7988EN.pdf",
+				"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -518,11 +518,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Ousseynou Ndoye",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": "Paul Vantomme",
-						"creatorType": "author"
+						"lastName": " Paul Vantomme",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2016",
@@ -535,7 +537,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "Non-wood forest products working paper",
 				"seriesNumber": "21",
-				"url": "www.fao.org/3/a-i6399f.pdf",
+				"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -641,7 +643,7 @@ var testCases = [
 				"libraryCatalog": "FAO Publications",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
-				"url": "www.fao.org/3/mw246ZH/mw246zh.pdf",
+				"url": "http://www.fao.org/publications/card/zh/c/mw246ZH/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -704,6 +706,73 @@ var testCases = [
 					},
 					{
 						"tag": "食物链"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Climate-Smart Agriculture: A Call for Action: Synthesis of the Asia-Pacific Regional Workshop Bangkok, Thailand, 18 to 20 June 2015",
+				"creators": [
+					{
+						"lastName": "FAO",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015",
+				"ISBN": "9789251088630",
+				"abstractNote": "This publication is a summary of the workshop held in Bangkok, Thailand from 18 to 20 June 2015 to promote the mainstreaming and up-scaling of Climate-Smart Agriculture in the region. Included in the report are successful case studies that agriculturists have been practicing as a means to address food security under adverse circumstances.",
+				"language": "other",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "106",
+				"place": "Rome, Italy",
+				"publisher": "FAO Regional Office for Asia and the Pacific",
+				"series": "RAP Publication",
+				"shortTitle": "Climate-Smart Agriculture",
+				"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "climate-smart agriculture"
+					},
+					{
+						"tag": "forestry"
+					},
+					{
+						"tag": "market gardens"
+					},
+					{
+						"tag": "meetings"
+					},
+					{
+						"tag": "sustainable agriculture"
+					},
+					{
+						"tag": "sustainable development"
+					},
+					{
+						"tag": "urban farmers"
+					},
+					{
+						"tag": "water harvesting"
 					}
 				],
 				"notes": [],
