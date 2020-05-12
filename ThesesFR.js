@@ -142,12 +142,23 @@ function scrape(doc, url) {
 		newItem.libraryCatalog = 'theses.fr';
 		newItem.rights = 'Les données de Theses.fr sont sous licence Etalab';
 
-		// Keep extra information such as laboratory, graduate schools, etc. in a note
+		// Keep extra information such as laboratory, graduate schools, etc. in a note for thesis not yet defended
+		let notePrepa = Array.from(doc.getElementsByClassName('donnees-ombreprepa2')).map((description) => {
+			return Array.from(description.getElementsByTagName('p')).map(description => description.textContent.replace(/\n/g, ' ').trim());
+		}).join(' ');
+
+		if (notePrepa) {
+			newItem.notes.push({description: notePrepa});
+		}
+
+		// Keep extra information such as laboratory, graduate schools, etc. in a note for defended thesis
 		let note = Array.from(doc.getElementsByClassName('donnees-ombre')).map((description) => {
 			return Array.from(description.getElementsByTagName('p')).map(description => description.textContent.replace(/\n/g, ' ').trim());
 		}).join(' ');
 
-		newItem.notes.push({description: note});
+		if (note) {
+			newItem.notes.push({description: note});
+		}
 
 		ZU.xpath(xmlDoc, '//dc:subject', ns).forEach((t) => {
 			let tag = t.textContent;
@@ -254,7 +265,11 @@ var testCases = [
 				 		"creatorType": "contributor"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"description": "Thèses en préparation à Paris 2 , dans le cadre de   Ecole doctorale Georges Vedel Droit public interne, science administrative et science politique (Paris)  depuis le 01-10-2014 ."
+					}
+				],
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
