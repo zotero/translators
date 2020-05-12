@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-12 00:11:58"
+	"lastUpdated": "2020-05-12 21:30:21"
 }
 
 /*
@@ -111,12 +111,7 @@ function scrape(doc, url) {
 			mimeType: 'application/pdf'
 		});
 		// url
-		if (newItem.DOI) { // use DOI URL if DOI exists
-			newItem.url = DOILead + newItem.DOI;
-		}
-		else { // remove 'http://' from pdfUrl
-			newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
-		}
+		newItem.url = url;
 		// language: according to the last one (old format) or two (new format) letters of PDF file name
 		var langOld = pdfUrl.charAt(pdfUrl.indexOf('pdf') - 2);
 		var langNew = pdfUrl.slice(pdfUrl.indexOf('pdf') - 3, pdfUrl.indexOf('pdf') - 1);
@@ -208,15 +203,31 @@ function scrape(doc, url) {
 			if (key.includes('ISBN')) {
 				newItem.ISBN = ZU.cleanISBN(metaResult, false);
 			}
-			// author(s)
+			// author(s): whether there is one or more authors; whether last and first name are separated by ',' (if not, use single-field mode).
 			if (key.includes('author')) {
 				if (Array.isArray(metaResult)) { // If there are more than 1 authors, metaResult returns an array.
 					for (let i = 0; i < metaResult.length; i++) {
-						newItem.creators.push(ZU.cleanAuthor(metaResult[i], 'author', true));
+						if (metaResult[i].includes(',')) {
+							newItem.creators.push(ZU.cleanAuthor(metaResult[i], 'author', true));
+						}
+						else {
+							newItem.creators.push({
+								lastName: metaResult[i],
+								creatorType: 'author',
+								fieldMode: 1
+							});
+						}
 					}
 				}
-				else { // If there is only 1 author, metaResult returns a string.
-					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));
+				else if (metaResult.includes(',')) {
+					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));					
+				}
+				else {
+					newItem.creators.push({
+						lastName: metaResult,
+						creatorType: 'author',
+						fieldMode: 1
+					});
 				}
 			}
 			// tag (Agrovoc)
@@ -233,7 +244,7 @@ function scrape(doc, url) {
 			if (key.includes('seriesNumber')) {
 				newItem.seriesNumber = metaResult[0].toUpperCase() + metaResult.slice(1);
 			}
-			//conferenceName: save for later conditions.
+			// conferenceName: save for later conditions.
 			if (key.includes('conference')) {
 				var conferenceWeb = metaResult[0];
 				newItem.conferenceName = conferenceWeb;
@@ -249,7 +260,7 @@ function scrape(doc, url) {
 			newItem.place = 'Rome, Italy';
 		}
 		// If there's no author, use 'FAO' as author.
-		if (newItem.creators.length === 0) {
+		if (!newItem.creators.length) {
 			newItem.creators.push({
 				lastName: 'FAO',
 				creatorType: 'author',
@@ -287,7 +298,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Z.selectItems(getSearchResults(doc, false), function(items) {
+		Z.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return;
 			}
@@ -336,7 +347,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
 				"seriesNumber": "No. 1207",
-				"url": "https://doi.org/10.4060/ca8751en",
+				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -400,7 +411,7 @@ var testCases = [
 				"numPages": "65",
 				"place": "Budapest, Hungary",
 				"publisher": "FAO",
-				"url": "www.fao.org/3/i9069en/i9069en.pdf",
+				"url": "http://www.fao.org/documents/card/en/c/I9069EN",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -453,7 +464,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "FAO",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2020",
@@ -465,7 +477,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"shortTitle": "FAO publications catalogue 2020",
-				"url": "https://doi.org/10.4060/ca7988en",
+				"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -506,11 +518,13 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Ousseynou Ndoye",
-						"creatorType": "author"
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"lastName": "Paul Vantomme",
-						"creatorType": "author"
+						"lastName": " Paul Vantomme",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
 				"date": "2016",
@@ -523,7 +537,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "Non-wood forest products working paper",
 				"seriesNumber": "21",
-				"url": "www.fao.org/3/a-i6399f.pdf",
+				"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -629,7 +643,7 @@ var testCases = [
 				"libraryCatalog": "FAO Publications",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
-				"url": "www.fao.org/3/mw246ZH/mw246zh.pdf",
+				"url": "http://www.fao.org/publications/card/zh/c/mw246ZH/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -723,7 +737,7 @@ var testCases = [
 				"publisher": "FAO Regional Office for Asia and the Pacific",
 				"series": "RAP Publication",
 				"shortTitle": "Climate-Smart Agriculture",
-				"url": "www.fao.org/3/i4904e/I4904E.pdf",
+				"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
