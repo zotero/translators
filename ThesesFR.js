@@ -94,8 +94,7 @@ function scrape(doc, url) {
 
 		// Skiping invalid or empty RDF files : prevents crashes while importing multiple records
 		if (xmlDoc.getElementsByTagName('parsererror')[0] || xmlDoc.children[0].childElementCount === 0) {
-			Z.debug('Skiping: Invalid or empty RDF file.');
-			return;
+			throw "Invalid or empty RDF file"
 		}
 		
 		// Importing XML namespaces for parsing purposes
@@ -110,8 +109,7 @@ function scrape(doc, url) {
 	
 		let title = ZU.xpathText(xmlDoc, '//dc:title', ns);
 		
-		// The case should't exists : preve;nts crashes while importing multiple records
-		if (!title) return;
+		if (!title) throw "Reccord must contains a title to be imported"
 
 		let newItem = new Zotero.Item();
 		newItem.itemType = 'thesis';
