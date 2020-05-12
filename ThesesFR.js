@@ -140,7 +140,7 @@ function scrape(doc, url) {
 		newItem.date = fullDate ? fullDate : year;
 		newItem.url = url;
 		newItem.libraryCatalog = 'theses.fr';
-		newItem.rights = 'Les données de Theses.fr sont sous licence Etalab';
+		newItem.rights = 'Licence Etalab';
 
 		// Keep extra information such as laboratory, graduate schools, etc. in a note for thesis not yet defended
 		let notePrepa = Array.from(doc.getElementsByClassName('donnees-ombreprepa2')).map((description) => {
