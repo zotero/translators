@@ -94,7 +94,7 @@ function scrape(doc, url) {
 
 		// Skiping invalid or empty RDF files : prevents crashes while importing multiple records
 		if (xmlDoc.getElementsByTagName('parsererror')[0] || xmlDoc.children[0].childElementCount === 0) {
-			throw "Invalid or empty RDF file"
+			throw new Error("Invalid or empty RDF file");
 		}
 		
 		// Importing XML namespaces for parsing purposes
@@ -109,7 +109,7 @@ function scrape(doc, url) {
 	
 		let title = ZU.xpathText(xmlDoc, '//dc:title', ns);
 		
-		if (!title) throw "Reccord must contains a title to be imported"
+		if (!title) throw new Error("Reccord must contains a title to be imported");
 
 		let newItem = new Zotero.Item();
 		newItem.itemType = 'thesis';
@@ -148,7 +148,7 @@ function scrape(doc, url) {
 		}).join(' ');
 
 		if (notePrepa) {
-			newItem.notes.push({description: notePrepa});
+			newItem.notes.push({ description: notePrepa });
 		}
 
 		// Keep extra information such as laboratory, graduate schools, etc. in a note for defended thesis
@@ -157,7 +157,7 @@ function scrape(doc, url) {
 		}).join(' ');
 
 		if (note) {
-			newItem.notes.push({description: note});
+			newItem.notes.push({ description: note });
 		}
 
 		ZU.xpath(xmlDoc, '//dc:subject', ns).forEach((t) => {
