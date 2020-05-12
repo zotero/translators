@@ -178,7 +178,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://theses.fr/2016SACLS590",
+		"url": "http://www.theses.fr/fr/154750417",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.theses.fr/fr/188120777",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://www.theses.fr/2016SACLS590",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -249,7 +259,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://theses.fr/s128743",
+		"url": "http://www.theses.fr/s128743",
 		"items": [
 			{
 				"itemType": "thesis",
