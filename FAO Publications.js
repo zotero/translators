@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-11 22:30:09"
+	"lastUpdated": "2020-05-12 00:11:58"
 }
 
 /*
@@ -110,8 +110,13 @@ function scrape(doc, url) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-		// url: remove 'http://' from pdfUrl
-		newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
+		// url
+		if (newItem.DOI) { // use DOI URL if DOI exists
+			newItem.url = DOILead + newItem.DOI;
+		}
+		else { // remove 'http://' from pdfUrl
+			newItem.url = pdfUrl.slice(pdfUrl.indexOf('www'));
+		}
 		// language: according to the last one (old format) or two (new format) letters of PDF file name
 		var langOld = pdfUrl.charAt(pdfUrl.indexOf('pdf') - 2);
 		var langNew = pdfUrl.slice(pdfUrl.indexOf('pdf') - 3, pdfUrl.indexOf('pdf') - 1);
@@ -205,10 +210,9 @@ function scrape(doc, url) {
 			}
 			// author(s)
 			if (key.includes('author')) {
-				if (typeof metaResult == 'object') { // If there are more than 1 authors, metaResult returns an array.
+				if (Array.isArray(metaResult)) { // If there are more than 1 authors, metaResult returns an array.
 					for (let i = 0; i < metaResult.length; i++) {
-						var author = metaResult[i];
-						newItem.creators.push(ZU.cleanAuthor(author, 'author', true));
+						newItem.creators.push(ZU.cleanAuthor(metaResult[i], 'author', true));
 					}
 				}
 				else { // If there is only 1 author, metaResult returns a string.
@@ -245,11 +249,11 @@ function scrape(doc, url) {
 			newItem.place = 'Rome, Italy';
 		}
 		// If there's no author, use 'FAO' as author.
-		if (!newItem.creators) {
+		if (newItem.creators.length === 0) {
 			newItem.creators.push({
 				lastName: 'FAO',
-				creatorType: author,
-				fieldMode: true
+				creatorType: 'author',
+				fieldMode: 1
 			});
 		}
 		// If conference exists in document page, the itemType is 'conferencePaper'; otherwise it's 'book'.
@@ -332,7 +336,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
 				"seriesNumber": "No. 1207",
-				"url": "www.fao.org/3/ca8751en/CA8751EN.pdf",
+				"url": "https://doi.org/10.4060/ca8751en",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -461,7 +465,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"shortTitle": "FAO publications catalogue 2020",
-				"url": "www.fao.org/3/ca7988en/CA7988EN.pdf",
+				"url": "https://doi.org/10.4060/ca7988en",
 				"attachments": [
 					{
 						"title": "FAO Document Record Snapshot",
@@ -688,6 +692,73 @@ var testCases = [
 					},
 					{
 						"tag": "食物链"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Climate-Smart Agriculture: A Call for Action: Synthesis of the Asia-Pacific Regional Workshop Bangkok, Thailand, 18 to 20 June 2015",
+				"creators": [
+					{
+						"lastName": "FAO",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015",
+				"ISBN": "9789251088630",
+				"abstractNote": "This publication is a summary of the workshop held in Bangkok, Thailand from 18 to 20 June 2015 to promote the mainstreaming and up-scaling of Climate-Smart Agriculture in the region. Included in the report are successful case studies that agriculturists have been practicing as a means to address food security under adverse circumstances.",
+				"language": "other",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "106",
+				"place": "Rome, Italy",
+				"publisher": "FAO Regional Office for Asia and the Pacific",
+				"series": "RAP Publication",
+				"shortTitle": "Climate-Smart Agriculture",
+				"url": "www.fao.org/3/i4904e/I4904E.pdf",
+				"attachments": [
+					{
+						"title": "FAO Document Record Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "climate-smart agriculture"
+					},
+					{
+						"tag": "forestry"
+					},
+					{
+						"tag": "market gardens"
+					},
+					{
+						"tag": "meetings"
+					},
+					{
+						"tag": "sustainable agriculture"
+					},
+					{
+						"tag": "sustainable development"
+					},
+					{
+						"tag": "urban farmers"
+					},
+					{
+						"tag": "water harvesting"
 					}
 				],
 				"notes": [],
