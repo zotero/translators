@@ -48,13 +48,13 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	const items = {};
+	let items = {};
 	let found = false;
-	const rows = ZU.xpath(doc, '//div[contains(@class, "encart arrondi-10")]//h2/a');
+	let rows = ZU.xpath(doc, '//div[contains(@class, "encart arrondi-10")]//h2/a');
 
 	rows.forEach((row) => {
-		const href = row.href;
-		const title = ZU.trimInternal(row.textContent);
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -69,7 +69,7 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), (items) => {
 			if (!items) return;
 
-			const records = [];
+			let records = [];
 			let item = null;
 
 			for (item in items) {
@@ -85,12 +85,12 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	const xmlDocumentUrl = `${url}.rdf`;
+	let xmlDocumentUrl = `${url}.rdf`;
 	
 	// Each thesis record has an underlying .rdf file
 	Zotero.Utilities.HTTP.doGet(xmlDocumentUrl, function (text) {
-		const parser = new DOMParser();
-		const xmlDoc = parser.parseFromString(text, 'application/xml');
+		let parser = new DOMParser();
+		let xmlDoc = parser.parseFromString(text, 'application/xml');
 
 		// Skiping invalid or empty RDF files : prevents crashes while importing multiple records
 		if (xmlDoc.getElementsByTagName('parsererror')[0] || xmlDoc.children[0].childElementCount === 0) {
@@ -99,7 +99,7 @@ function scrape(doc, url) {
 		}
 		
 		// Importing XML namespaces for parsing purposes
-		const ns = {
+		let ns = {
 			bibo: 'http://purorg/ontology/bibo/',
 			dc: 'http://purl.org/dc/elements/1.1/',
 			dcterms: 'http://purl.org/dc/terms/',
@@ -108,42 +108,42 @@ function scrape(doc, url) {
 			rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
 		};
 	
-		const title = ZU.xpathText(xmlDoc, '//dc:title', ns);
+		let title = ZU.xpathText(xmlDoc, '//dc:title', ns);
 		
 		// The case should't exists : preve;nts crashes while importing multiple records
 		if (!title) return;
 
-		const newItem = new Zotero.Item();
+		let newItem = new Zotero.Item();
 		newItem.itemType = 'thesis';
 		newItem.title = title;
 
 		ZU.xpath(xmlDoc, '//marcrel:aut//foaf:Person/foaf:name | //marcrel:dis//foaf:Person/foaf:name', ns).forEach((auth) => {
-			const author = ZU.cleanAuthor(auth.textContent, 'author', true);
+			let author = ZU.cleanAuthor(auth.textContent, 'author', true);
 			newItem.creators.push(author);
 		});
 
 		// Supervisor(s) must be considered as contributor(s) for french thesis
 		ZU.xpath(xmlDoc, '//marcrel:ths//foaf:Person/foaf:name', ns).forEach((sup) => {
-			const supervisor = ZU.cleanAuthor(sup.textContent, 'contributor', true);
+			let supervisor = ZU.cleanAuthor(sup.textContent, 'contributor', true);
 			newItem.creators.push(supervisor);
 		});
 
-		const abstractNotes = ZU.xpath(xmlDoc, '//dcterms:abstract', ns);
+		let abstractNotes = ZU.xpath(xmlDoc, '//dcterms:abstract', ns);
 		newItem.abstractNote = abstractNotes.length > 0 ? abstractNotes[0].textContent : undefined;
 
 		// '/s + digit' in url means thesis in preparation
 		newItem.thesisType = url.match(/\/s\d+/) ? 'These en préparation' : 'These de doctorat';
 
-		const organizations = ZU.xpath(xmlDoc, '//marcrel:dgg/foaf:Organization/foaf:name', ns);
+		let organizations = ZU.xpath(xmlDoc, '//marcrel:dgg/foaf:Organization/foaf:name', ns);
 		newItem.university = organizations.length > 0 ? organizations[0].textContent : undefined;
 
-		const fullDate = ZU.xpathText(xmlDoc, '//dcterms:dateAccepted', ns);
-		const year = ZU.xpathText(xmlDoc, '//dc:date', ns);
+		let fullDate = ZU.xpathText(xmlDoc, '//dcterms:dateAccepted', ns);
+		let year = ZU.xpathText(xmlDoc, '//dc:date', ns);
 
 		// Some old records doesn't have a full date instead we can use the defense year
 		newItem.date = fullDate ? fullDate : year;
 
-		const permalink = ZU.xpath(xmlDoc, '//bibo:Document', ns);
+		let permalink = ZU.xpath(xmlDoc, '//bibo:Document', ns);
 		newItem.url = permalink.length > 0 ? permalink[0].getAttribute('rdf:about') : url;
 		newItem.libraryCatalog = 'theses.fr';
 		newItem.rights = 'Les données de Theses.fr sont sous licence Etalab';
@@ -154,7 +154,7 @@ function scrape(doc, url) {
 		}).join(' ');
 
 		ZU.xpath(xmlDoc, '//dc:subject', ns).forEach((t) => {
-			const tag = t.textContent;
+			let tag = t.textContent;
 			newItem.tags.push(tag);
 		});
 
