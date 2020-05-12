@@ -142,10 +142,12 @@ function scrape(doc, url) {
 		newItem.libraryCatalog = 'theses.fr';
 		newItem.rights = 'Les données de Theses.fr sont sous licence Etalab';
 
-		// Keep extra information such as laboratory, graduate schools, etc.
-		newItem.extra = Array.from(doc.getElementsByClassName('donnees-ombre')).map((description) => {
-			return Array.from(description.getElementsByTagName('p')).map(description => description.textContent.replace(/\n/g, ' '));
+		// Keep extra information such as laboratory, graduate schools, etc. in a note
+		let note = Array.from(doc.getElementsByClassName('donnees-ombre')).map((description) => {
+			return Array.from(description.getElementsByTagName('p')).map(description => description.textContent.replace(/\n/g, ' ').trim());
 		}).join(' ');
+
+		newItem.notes.push({description: note});
 
 		ZU.xpath(xmlDoc, '//dc:subject', ns).forEach((t) => {
 			let tag = t.textContent;
@@ -224,9 +226,12 @@ var testCases = [
 						"tag": "W boson mass"
 			   		}
 				],
-				"extra": "Sous la direction de  Maarten Boonekamp.  Soutenue le 19-09-2016,à l'Université Paris-Saclay (ComUE) , dans le cadre de   École doctorale Particules, Hadrons, Énergie et Noyau : Instrumentation, Imagerie, Cosmos et Simulation (Orsay, Essonne ; 2015-....) , en partenariat avec  Département de physique des particules (Gif-sur-Yvette, Essonne)   (laboratoire)  ,  Centre européen pour la recherche nucléaire   (laboratoire)   et de  Université Paris-Sud (1970-2019)   (établissement opérateur d'inscription)  .",
 				"rights": "Les données de Theses.fr sont sous licence Etalab",
-				"notes": [],
+				"notes": [
+					{
+						"description": "Sous la direction de  Maarten Boonekamp. Soutenue le 19-09-2016,à l'Université Paris-Saclay (ComUE) , dans le cadre de   École doctorale Particules, Hadrons, Énergie et Noyau : Instrumentation, Imagerie, Cosmos et Simulation (Orsay, Essonne ; 2015-....) , en partenariat avec  Département de physique des particules (Gif-sur-Yvette, Essonne)   (laboratoire)  ,  Centre européen pour la recherche nucléaire   (laboratoire)   et de  Université Paris-Sud (1970-2019)   (établissement opérateur d'inscription)  ."
+					}
+				],
 				"seeAlso": []
 			}
 		]
