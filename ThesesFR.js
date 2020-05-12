@@ -128,23 +128,19 @@ function scrape(doc, url) {
 			newItem.creators.push(supervisor);
 		});
 
-		let abstractNotes = ZU.xpath(xmlDoc, '//dcterms:abstract', ns);
-		newItem.abstractNote = abstractNotes.length > 0 ? abstractNotes[0].textContent : undefined;
+		newItem.abstractNote = ZU.xpathText(xmlDoc, '(//dcterms:abstract)[1]', ns);
 
 		// '/s + digit' in url means thesis in preparation
 		newItem.thesisType = url.match(/\/s\d+/) ? 'These en préparation' : 'These de doctorat';
 
-		let organizations = ZU.xpath(xmlDoc, '//marcrel:dgg/foaf:Organization/foaf:name', ns);
-		newItem.university = organizations.length > 0 ? organizations[0].textContent : undefined;
+		newItem.university = ZU.xpathText(xmlDoc, '(//marcrel:dgg/foaf:Organization/foaf:name)[1]', ns);
 
 		let fullDate = ZU.xpathText(xmlDoc, '//dcterms:dateAccepted', ns);
 		let year = ZU.xpathText(xmlDoc, '//dc:date', ns);
 
 		// Some old records doesn't have a full date instead we can use the defense year
 		newItem.date = fullDate ? fullDate : year;
-
-		let permalink = ZU.xpath(xmlDoc, '//bibo:Document', ns);
-		newItem.url = permalink.length > 0 ? permalink[0].getAttribute('rdf:about') : url;
+		newItem.url = url;
 		newItem.libraryCatalog = 'theses.fr';
 		newItem.rights = 'Les données de Theses.fr sont sous licence Etalab';
 
