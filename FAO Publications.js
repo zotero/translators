@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-12 21:30:21"
+	"lastUpdated": "2020-05-12 21:41:07"
 }
 
 /*
@@ -220,7 +220,7 @@ function scrape(doc, url) {
 					}
 				}
 				else if (metaResult.includes(',')) {
-					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));					
+					newItem.creators.push(ZU.cleanAuthor(metaResult, 'author', true));
 				}
 				else {
 					newItem.creators.push({
