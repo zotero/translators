@@ -227,8 +227,8 @@ function scrape(doc, url, extras) {
 				item.url = url;
 				item.notes = [];
 				if (tagentry){
-				var tags = tagentry.split(/\s*,\s*/)
-				for (var i in tags){
+				let tags = tagentry.split(/\s*,\s*/);
+					for (let i in tags){
 					item.tags.push(tags[i].replace('Keywords:', '').replace(/.$/, '').replace(/^\w/gi,function(m){return m.toUpperCase();}));
 					}
 				}
