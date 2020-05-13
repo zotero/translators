@@ -6,16 +6,16 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-07-31 11:29:00"
+	"lastUpdated": "2020-05-13 17:17:11"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright � 2019 Universit�tsbibliothek T�bingen.  All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -73,7 +73,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 			}
 		}
 
-		item.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
+		item.tags = ZU.xpath(doc, '//div[@id="entries"]//div[@class="index ltr"]//a | //div[@id="entries"]//div[@class="index"]//a').map(x => x.textContent.trim());
 		if (item.issue) {
 			let issueAndVol = item.issue.match(/(\d+)\/(\d+)/);
 			if (issueAndVol) {
