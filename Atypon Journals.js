@@ -194,7 +194,7 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var tagentry = ZU.xpathText(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")] | //kwd-group');
+	var tagentry = ZU.xpathText(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") | contains(@href, "Keyword=")] | //kwd-group');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
 		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
@@ -280,10 +280,6 @@ function scrape(doc, url, extras) {
 		});
 	});
 }
-
-
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
