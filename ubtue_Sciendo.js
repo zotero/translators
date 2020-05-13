@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-  var items = {};
+  let items = {};
   var found = false;
   // TODO: adjust the CSS selector
   var rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
