@@ -148,7 +148,7 @@ function scrape(doc, url) {
 		}).join(' ');
 
 		if (notePrepa) {
-			newItem.notes.push({ description: notePrepa });
+			newItem.notes.push({ note: notePrepa });
 		}
 
 		// Keep extra information such as laboratory, graduate schools, etc. in a note for defended thesis
@@ -157,7 +157,7 @@ function scrape(doc, url) {
 		}).join(' ');
 
 		if (note) {
-			newItem.notes.push({ description: note });
+			newItem.notes.push({ note: note });
 		}
 
 		ZU.xpath(xmlDoc, '//dc:subject', ns).forEach((t) => {
@@ -250,7 +250,7 @@ var testCases = [
 				"rights": "Les données de Theses.fr sont sous licence Etalab",
 				"notes": [
 					{
-						"description": "Sous la direction de  Maarten Boonekamp. Soutenue le 19-09-2016,à l'Université Paris-Saclay (ComUE) , dans le cadre de   École doctorale Particules, Hadrons, Énergie et Noyau : Instrumentation, Imagerie, Cosmos et Simulation (Orsay, Essonne ; 2015-....) , en partenariat avec  Département de physique des particules (Gif-sur-Yvette, Essonne)   (laboratoire)  ,  Centre européen pour la recherche nucléaire   (laboratoire)   et de  Université Paris-Sud (1970-2019)   (établissement opérateur d'inscription)  ."
+						"note": "Sous la direction de  Maarten Boonekamp. Soutenue le 19-09-2016,à l'Université Paris-Saclay (ComUE) , dans le cadre de   École doctorale Particules, Hadrons, Énergie et Noyau : Instrumentation, Imagerie, Cosmos et Simulation (Orsay, Essonne ; 2015-....) , en partenariat avec  Département de physique des particules (Gif-sur-Yvette, Essonne)   (laboratoire)  ,  Centre européen pour la recherche nucléaire   (laboratoire)   et de  Université Paris-Sud (1970-2019)   (établissement opérateur d'inscription)  ."
 					}
 				],
 				"seeAlso": []
@@ -277,7 +277,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"description": "Thèses en préparation à Paris 2 , dans le cadre de   Ecole doctorale Georges Vedel Droit public interne, science administrative et science politique (Paris)  depuis le 01-10-2014 ."
+						"note": "Thèses en préparation à Paris 2 , dans le cadre de   Ecole doctorale Georges Vedel Droit public interne, science administrative et science politique (Paris)  depuis le 01-10-2014 ."
 					}
 				],
 				"tags": [],
