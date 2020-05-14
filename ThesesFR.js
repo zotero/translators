@@ -247,7 +247,7 @@ var testCases = [
 						"tag": "W boson mass"
 			   		}
 				],
-				"rights": "Les données de Theses.fr sont sous licence Etalab",
+				"rights": "Licence Etalab",
 				"notes": [
 					{
 						"note": "Sous la direction de  Maarten Boonekamp. Soutenue le 19-09-2016,à l'Université Paris-Saclay (ComUE) , dans le cadre de   École doctorale Particules, Hadrons, Énergie et Noyau : Instrumentation, Imagerie, Cosmos et Simulation (Orsay, Essonne ; 2015-....) , en partenariat avec  Département de physique des particules (Gif-sur-Yvette, Essonne)   (laboratoire)  ,  Centre européen pour la recherche nucléaire   (laboratoire)   et de  Université Paris-Sud (1970-2019)   (établissement opérateur d'inscription)  ."
@@ -290,7 +290,7 @@ var testCases = [
 				"date": "2014",
 				"url": "http://www.theses.fr/s128743",
 				"libraryCatalog": "theses.fr",
-				"rights": "Les données de Theses.fr sont sous licence Etalab"
+				"rights": "Licence Etalab"
 		   	}
 		]
 	}
