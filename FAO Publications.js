@@ -382,7 +382,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -452,7 +453,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -506,7 +508,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -620,7 +623,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -711,7 +715,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	},
 	{
 		"type": "web",
@@ -778,7 +783,8 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		]
+		],
+		"defer": true
 	}
 ]
 /** END TEST CASES **/
