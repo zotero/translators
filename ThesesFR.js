@@ -2,7 +2,7 @@
 	"translatorID": "3f73f0aa-f91c-4192-b0d5-907312876cb9",
 	"label": "ThesesFR",
 	"creator": "TFU, Mathis EON",
-	"target": "^https?://(www\\.)?theses\\.fr/.",
+	"target": "^https?://(www\\.)?theses\\.fr/([a-z]{2}/)?((s\\d+|\\d{4}.{8}|\\d{8}X|\\d{9})(?!\\.(rdf|xml)$)|(sujets/\\?q=|\\?q=))(?!.*&format=(json|xml))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
