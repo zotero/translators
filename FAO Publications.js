@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-16 21:40:58"
+	"lastUpdated": "2020-05-16 22:01:25"
 }
 
 /*
@@ -117,7 +117,7 @@ function scrape(doc, url) {
 		// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
 		var langCode = '';
 		var pdfFilename = pdfUrl.split('/').pop();
-		var pdfFile = pdfFilename.slice(0,pdfFilename.indexOf('.'));
+		var pdfFile = pdfFilename.slice(0, pdfFilename.indexOf('.'));
 		// In PDF file name, the immediate char before langCode is always a number.
 		for (let i = pdfFile.length - 1; i >= 0; i--) {
 			if (isNaN(pdfFile.charAt(i))) {
@@ -127,31 +127,31 @@ function scrape(doc, url) {
 				break;
 			}
 		}
-		if (langCode.length > 1) { // In the new PDF naming scheme, langCode follows ISO 639.
+		// In the new PDF naming scheme, langCode follows ISO 639.
+		if (langCode.length > 1) {
 			newItem.language = langCode.toLowerCase();
 		}
-		else { // In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
-			if ((langCode == 'a') || (langCode == 'A')) {
+		// In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
+		else if ((langCode == 'a') || (langCode == 'A')) {
 				newItem.language = 'ar';
-			}
-			else if ((langCode == 'c') || (langCode == 'C')) {
-				newItem.language = 'zh';
-			}
-			else if ((langCode == 'e') || (langCode == 'E')) {
-				newItem.language = 'en';
-			}
-			else if ((langCode == 'f') || (langCode == 'F')) {
-				newItem.language = 'fr';
-			}
-			else if ((langCode == 'r') || (langCode == 'R')) {
-				newItem.language = 'ru';
-			}
-			else if ((langCode == 's') || (langCode == 'S')) {
-				newItem.language = 'es';
-			}
-			else { // Other languages are usually designated 'o'. Using 'else' just to be safe.
-				newItem.language = 'other';
-			}
+		}
+		else if ((langCode == 'c') || (langCode == 'C')) {
+			newItem.language = 'zh';
+		}
+		else if ((langCode == 'e') || (langCode == 'E')) {
+			newItem.language = 'en';
+		}
+		else if ((langCode == 'f') || (langCode == 'F')) {
+			newItem.language = 'fr';
+		}
+		else if ((langCode == 'r') || (langCode == 'R')) {
+			newItem.language = 'ru';
+		}
+		else if ((langCode == 's') || (langCode == 'S')) {
+			newItem.language = 'es';
+		}
+		else { // Other languages are usually designated 'o'. Using 'else' just to be safe.
+			newItem.language = 'other';
 		}
 		// title: use colon to connect main title and subtitle (if subtitle exists)
 		var mainTitle = ZU.xpathText(doc, '//*[@id="headerN0"]/h1');
