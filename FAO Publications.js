@@ -133,7 +133,7 @@ function scrape(doc, url) {
 		}
 		// In the old PDF naming scheme, langCode is one lower/upper case letter and only differentiates between the 6 UN languages.
 		else if ((langCode == 'a') || (langCode == 'A')) {
-				newItem.language = 'ar';
+			newItem.language = 'ar';
 		}
 		else if ((langCode == 'c') || (langCode == 'C')) {
 			newItem.language = 'zh';
