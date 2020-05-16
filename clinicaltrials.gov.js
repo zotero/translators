@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-05 03:20:08"
+	"lastUpdated": "2020-05-16 20:26:33"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2020 Ryan Velazquez
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -80,7 +80,7 @@ function doWeb(doc, url) {
 function isJsonAPIRequest(url) {
 	if (
 		url.includes("https://clinicaltrials.gov/api/query")
-    && url.includes("fmt=JSON")
+	&& url.includes("fmt=JSON")
 	) {
 		return true;
 	}
@@ -92,7 +92,7 @@ function isJsonAPIRequest(url) {
 function isXmlAPIRequest(url) {
 	if (
 		url.includes("https://clinicaltrials.gov/api/query")
-    && url.includes("fmt=XML")
+	&& url.includes("fmt=XML")
 	) {
 		return true;
 	}
@@ -142,12 +142,12 @@ function scrape(doc, url) {
 			)
 		) {
 			const responsibleParty
-        = study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
+				= study.ProtocolSection.SponsorCollaboratorsModule.ResponsibleParty;
 			if (
 				typeof responsibleParty.ResponsiblePartyInvestigatorFullName == "string"
 			) {
 				responsiblePartyInvestigator
-          = responsibleParty.ResponsiblePartyInvestigatorFullName;
+					= responsibleParty.ResponsiblePartyInvestigatorFullName;
 				creators.push(
 					ZU.cleanAuthor(responsiblePartyInvestigator, "author", false)
 				);
@@ -160,18 +160,19 @@ function scrape(doc, url) {
 			)
 		) {
 			sponsor
-        = study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor
-          .LeadSponsorName;
+				= study.ProtocolSection.SponsorCollaboratorsModule.LeadSponsor
+					.LeadSponsorName;
 			let sponsorCreatorType;
-			if (creators.length == 0) {
+			if (creators.length === 0) {
 				sponsorCreatorType = "author";
 			}
 			else {
 				sponsorCreatorType = "contributor";
 			}
 			creators.push({
-				firstName: sponsor,
+				lastName: sponsor,
 				creatorType: sponsorCreatorType,
+				fieldMode: 1
 			});
 		}
 
@@ -181,12 +182,13 @@ function scrape(doc, url) {
 			)
 		) {
 			const collaboratorList
-        = study.ProtocolSection.SponsorCollaboratorsModule.CollaboratorList
-          .Collaborator;
+				= study.ProtocolSection.SponsorCollaboratorsModule.collaboratorList
+					.Collaborator;
 			collaboratorList.forEach((collaborator) => {
 				collaborators.push({
-					firstName: collaborator.CollaboratorName,
+					lastName: collaborator.CollaboratorName,
 					creatorType: "contributor",
+					fieldMode: 1
 				});
 			});
 			collaborators.forEach((collaborator) => {
@@ -222,13 +224,13 @@ var testCases = [
 				"title": "A Phase 3 Randomized Study to Evaluate the Safety and Antiviral Activity of Remdesivir (GS-5734™) in Participants With Severe COVID-19",
 				"creators": [
 					{
-						"firstName": "Gilead Sciences",
-						"creatorType": "author"
+						"lastName": "Gilead Sciences",
+						"creatorType": "author",
+						"fieldMode": 1
 					}
 				],
-				"date": "April 28, 2020",
+				"date": "May 12, 2020",
 				"abstractNote": "The primary objective of this study is to evaluate the efficacy of 2 remdesivir (RDV) regimens with respect to clinical status assessed by a 7-point ordinal scale on Day 14.",
-				"accessDate": "2020-04-01",
 				"extra": "submitted: February 28, 2020",
 				"institution": "clinicaltrials.gov",
 				"libraryCatalog": "clinicaltrials.gov",
@@ -252,17 +254,18 @@ var testCases = [
 				"title": "The Impact of Gastroesophageal Reflux Disease in Sleep Disorders: A Pilot Investigation of Rabeprazole, 20 mg Twice Daily for the Relief of GERD-Related Insomnia.",
 				"creators": [
 					{
-						"firstName": "University of North Carolina",
-						"creatorType": "author"
+						"lastName": "University of North Carolina",
+						"creatorType": "author",
+						"fieldMode": 1
 					},
 					{
-						"firstName": "Janssen Pharmaceutica N.V., Belgium",
-						"creatorType": "contributor"
+						"lastName": "Janssen Pharmaceutica N.V., Belgium",
+						"creatorType": "contributor",
+						"fieldMode": 1
 					}
 				],
 				"date": "April 25, 2007",
 				"abstractNote": "This study will investigate Gastroesophageal Reflux Disease (GERD)as a cause of sleep disturbance. Patients with GERD may experience all or some of the following symptoms: stomach acid or partially digested food re-entering the esophagus (which is sometimes referred to as heartburn or regurgitation) and belching. Even very small, unnoticeable amounts of rising stomach acid may cause patients to wake up during the night.\n\nThis study will also investigate the effect of Rabeprazole, (brand name Aciphex) on patients with known insomnia. Rabeprazole is an FDA approved medication already marketed for the treatment of GERD.",
-				"accessDate": "2020-04-01",
 				"extra": "submitted: February 3, 2006",
 				"institution": "clinicaltrials.gov",
 				"libraryCatalog": "clinicaltrials.gov",
