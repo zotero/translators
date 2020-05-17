@@ -58,12 +58,13 @@ function scrape(doc, url) {
 
 	if (url.includes('card')) {
 		// attach document card URL and snapshot
-		newItem.attachments.push({
+		// TEMP: Disable at least until we have post-JS snapshots
+		/*newItem.attachments.push({
 			url: url,
 			title: 'FAO Document Record Snapshot',
 			mimeType: 'text/html',
 			snapshot: true
-		});
+		});*/
 
 		//* ********* Begin fixed-location variables **********
 
@@ -331,6 +332,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -360,11 +362,6 @@ var testCases = [
 				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 				"attachments": [
 					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -392,12 +389,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/I9069EN",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -424,11 +421,6 @@ var testCases = [
 				"publisher": "FAO",
 				"url": "http://www.fao.org/documents/card/en/c/I9069EN",
 				"attachments": [
-					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
@@ -463,12 +455,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -492,11 +484,6 @@ var testCases = [
 				"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
 				"attachments": [
 					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -518,12 +505,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -552,11 +539,6 @@ var testCases = [
 				"seriesNumber": "21",
 				"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
 				"attachments": [
-					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
@@ -633,12 +615,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/publications/card/zh/c/mw246ZH/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -659,11 +641,6 @@ var testCases = [
 				"publisher": "FAO",
 				"url": "http://www.fao.org/publications/card/zh/c/mw246ZH/",
 				"attachments": [
-					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
@@ -725,12 +702,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -754,11 +731,6 @@ var testCases = [
 				"shortTitle": "Climate-Smart Agriculture",
 				"url": "http://www.fao.org/publications/card/en/c/5014f143-be17-4b58-b90e-f1c6bef344a0/",
 				"attachments": [
-					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
