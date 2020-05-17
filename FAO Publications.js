@@ -792,11 +792,6 @@ var testCases = [
 				"url": "http://www.fao.org/publications/card/ar/c/c6c2c8d7-3683-53a7-ab58-ce480c65f36c/",
 				"attachments": [
 					{
-						"title": "FAO Document Record Snapshot",
-						"mimeType": "text/html",
-						"snapshot": true
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
