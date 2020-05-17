@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-16 22:01:25"
+	"lastUpdated": "2020-05-17 12:27:13"
 }
 
 /*
@@ -116,16 +116,9 @@ function scrape(doc, url) {
 		// indicated by the last 1-3 letters in PDF file name (langCode)
 		// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
 		var langCode = '';
-		var pdfFilename = pdfUrl.split('/').pop();
-		var pdfFile = pdfFilename.slice(0, pdfFilename.indexOf('.'));
-		// In PDF file name, the immediate char before langCode is always a number.
-		for (let i = pdfFile.length - 1; i >= 0; i--) {
-			if (isNaN(pdfFile.charAt(i))) {
-				langCode = pdfFile.charAt(i) + langCode;
-			}
-			else {
-				break;
-			}
+		var matches = pdfUrl.match(/([a-z]+)\.pdf$/i);
+		if (matches) {
+			langCode = matches[1];
 		}
 		// In the new PDF naming scheme, langCode follows ISO 639.
 		if (langCode.length > 1) {
@@ -159,7 +152,7 @@ function scrape(doc, url) {
 		if (!subTitle) {
 			newItem.title = mainTitle;
 		}
-		else if ((newItem.language == 'zh') || (newItem.language == 'ja')) {
+		else if ((newItem.language == 'zh') || (newItem.language == 'ja') || (newItem.language == 'ko')) {
 			newItem.title = mainTitle + '：' + subTitle;
 		}
 		else {
