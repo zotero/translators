@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-07 03:51:21"
+	"lastUpdated": "2020-05-19 07:13:18"
 }
 
 /*
@@ -43,7 +43,7 @@
 function lookupPMIDs(ids) {
 	var newUri = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?"
 		+ "db=PubMed&tool=Zotero&retmode=xml&rettype=citation&id=" + ids.join(",");
-	Zotero.debug(newUri);
+	//Zotero.debug(newUri);
 	Zotero.Utilities.HTTP.doGet(newUri, function (text) {
 		if (!text.includes('PubmedArticle') && !text.includes('PubmedBookArticle')) { // e.g. http://www.ncbi.nlm.nih.gov/pubmed/1477919937
 			throw new Error("No Pubmed Data found - Most likely eutils is temporarily down");
@@ -63,7 +63,7 @@ function lookupPMIDs(ids) {
  ****************************/
 // retrieves the UID from an item page. Returns false if there is more than one.
 function getUID(doc) {
-	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist" or @name="ncbi_article_id"]/@content');
+	var uid = ZU.xpath(doc, 'html/head/meta[@name="ncbi_uidlist" or @name="ncbi_article_id" or @name="uid"]/@content');
 	if (!uid.length) {
 		uid = ZU.xpath(doc, '//input[@id="absid"]/@value');
 	}
