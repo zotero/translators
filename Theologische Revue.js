@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-19 13:26:44"
+	"lastUpdated": "2020-05-20 15:45:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2012 Aurimas Vinckevicius
+	Copyright © 2020 Timotheus Kim
 
 	This file is part of Zotero.
 
@@ -60,6 +60,11 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	//add tag "Book Reviews" if not Leitartikel 
+	let leitartikel = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "current", " " ))]')
+	if (item.itemTpye = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
+		item.tags.push('Book Review');
+	}
+	
 	/*if (item.title) {
 		item.itemType = "magazineArticle";
 	}*/
@@ -92,3 +97,139 @@ function doWeb(doc, url) {
 	} else
 		invokeEMTranslator(doc, url);
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/issue/view/201",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2731",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mit der Islamischen Theologie im Gespräch. Zu einigen Neuerscheinungen aus dem Bereich der christlich-muslimischen Beziehungen",
+				"creators": [
+					{
+						"firstName": "Anja",
+						"lastName": "Middelbeck-Varwick",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2731",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2731",
+				"volume": "116",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2689",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Hammann, Konrad: Rudolf Bultmann und seine Zeit. Biographische und theologische Konstellationen",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Dreher",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2689",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"shortTitle": "Hammann, Konrad",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2689",
+				"volume": "116",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2690",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Levering, Matthew: The Achievement of Hans Urs von Balthasar. An Introduction to His Trilogy",
+				"creators": [
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Müller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2690",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"shortTitle": "Levering, Matthew",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2690",
+				"volume": "116",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
