@@ -65,10 +65,6 @@ function postProcess(doc, item) {
 		item.tags.push('Book Review');
 	}
 	
-	/*if (item.title) {
-		item.itemType = "magazineArticle";
-	}*/
-
 	item.complete();
 }
 
