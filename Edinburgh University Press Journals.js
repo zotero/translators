@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-13 21:55:09"
+	"lastUpdated": "2020-05-25 13:54:44"
 }
 
 /*
@@ -87,14 +87,13 @@ function scrape(doc, url) {
 		translator.setHandler("itemDone", function (obj, item) {
 			item.url = url;
 			item.notes = [];
-			
+
 			var tagentry = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
 
 			if (tagentry){
 				var tags = tagentry.split(/\s*,\s*/);
-				for (var i in tags){
+				for (var i in tags) {
 					item.tags.push(tags[i].replace(/^\w/gi,function(m){return m.toUpperCase();}));
-					
 				}
 			}
 			item.abstractNote = ZU.xpathText(doc, '//meta[@name="dc.Description"]/@content');
@@ -108,8 +107,8 @@ function scrape(doc, url) {
 				mimeType: "text/html"
 			}];
 			
-			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
-			if (docType === "book-review" || docType === "review-article")
+			let docType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content | //*[contains(concat( " ", @class, " " ), concat( " ", "abs", " " ))]');
+			if (docType === "book-review" || docType === "review-article" || docType === "First Page")
 				item.tags.push("Book Reviews");
 			
 			var pdfurl = ZU.xpath(doc, '//div[@class="article_link"]/a')[0];
@@ -126,90 +125,33 @@ function scrape(doc, url) {
 		});
 		translator.translate();
 	});
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.euppublishing.com/toc/jqs/14/1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0019",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "The Influence of Western Qur'anic Scholarship in Turkey",
+				"title": "A Church for Scotland? The Free Church and Scottish Nationalism after the Disruption",
 				"creators": [
 					{
-						"lastName": "Koç",
-						"firstName": "Mehmet Akif",
+						"lastName": "Mallon",
+						"firstName": "Ryan",
 						"creatorType": "author"
 					}
 				],
-				"date": "April 1, 2012",
-				"DOI": "10.3366/jqs.2012.0036",
-				"ISSN": "1465-3591",
-				"abstractNote": "After first surveying the development of academic studies of Islam within the modern Turkish higher education system, this essay provides an inventory of material that has been translated from Western languages into Turkish. It is inevitable that orientalist studies will have a place of tremendous importance in this analysis. However, approaches to the Qur'an and its exegesis which have been developed under the influence of the Western scientific and cultural world encompass a larger range of literature that includes not only the orientalist studies themselves but also the criticisms directed against these studies. Particular attention is paid to the work of Fazlur Rahman and Arab scholars influenced by Western methods, and an assessment of the various issues related to the critique of orientalist works is provided.",
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0019",
+				"ISSN": "2516-6298",
+				"abstractNote": "The 1843 Disruption of the Church of Scotland, which split the national church in two, was one of the most important events in Victorian Britain. The evangelical ministers who seceded from the Kirk to form the Free Church of Scotland did so in protest against the British state's intrusion in the church's affairs. The anti-English and patriotic rhetoric of the Disruption has led historians such as David Bebbington to argue that it represented something close to a nationalist movement. This paper questions this claim by assessing the nationalist characteristics of the Disruption and their role in shaping the political ‘unionist-nationalism’ of the mid-nineteenth century. It examines the kind of nationalist sentiment, if any, evident at the Disruption, the role of Free Church members in the National Association for the Vindication of Scottish Rights, the short-lived proto-nationalist pressure group, and the nationalism of the Free Church minister James Begg, who called for Home Rule for Scotland in 1850. By assessing the influence of the Disruption's constructionist critique of the union on political nationalism, the paper argues that the religious nationalism evident in 1843 failed to translate to a political context in the mid-nineteenth century. The new religiously pluralist environment of the post-Disruption period saw the Free Church turn inwards and begin to focus upon its own denominational fortunes as a single Scottish national identity was replaced by a variety of competing confessional identities, each with their own claim to nationhood.",
 				"issue": "1",
-				"journalAbbreviation": "J Qur'anic Studies",
 				"libraryCatalog": "Edinburgh University Press Journals",
-				"pages": "9-44",
-				"publicationTitle": "Journal of Qur'anic Studies",
-				"url": "http://www.euppublishing.com/doi/abs/10.3366/jqs.2012.0036",
-				"volume": "14",
-				"attachments": [
-					{
-						"title": "EUP Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					"Divinity Faculties in Turkey",
-					"Exegesis",
-					"Orientalist studies",
-					"Tafsir",
-					"Turkish higher education"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.euppublishing.com/action/doSearch?AllField=labour",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective: Dora Burgess (1887–1962)",
-				"creators": [
-					{
-						"lastName": "Lee",
-						"firstName": "Sun Yong",
-						"creatorType": "author"
-					}
-				],
-				"date": "February 20, 2020",
-				"DOI": "10.3366/swc.2020.0280",
-				"ISSN": "1354-9901",
-				"abstractNote": "Dora Belle McLaughlin Burgess was an American Presbyterian missionary, devoted to the mission to the Quiché tribe in Guatemala from 1913 to 1962. During her service, she translated the New Testament from Greek into the Quiché language. She also published a hymnal in Quiché and an ethnographic writing on Quiché culture. This paper attempts to shed light on the life of Dora Burgess, whose work was unknown, and to trace the formation of her identity as a missionary and her mission approach to the native inhabitants. In doing so, the paper argues that her interaction with the native tribes in the mission field shaped her identity as a missionary and her understanding of mission in ways in which the indigenous people's agency and subjectivity were recognised and respected. In the earlier period of her service in Guatemala, Dora Burgess conceived of mission work as a rescue project to transform the native tribes into Christians who would denounce their ‘superstitious’ traditions; however, her later focus in mission work, especially in her bible translation project, lay in acknowledging the native traditions and cultures and giving the indigenous tribe opportunities to be Christians in their own ways.",
-				"issue": "1",
-				"journalAbbreviation": "Studies in World Christianity",
-				"libraryCatalog": "Edinburgh University Press Journals",
-				"pages": "21-41",
-				"publicationTitle": "Studies in World Christianity",
-				"shortTitle": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective",
-				"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
-				"volume": "26",
+				"pages": "1-24",
+				"publicationTitle": "Scottish Church History",
+				"shortTitle": "A Church for Scotland?",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0019",
+				"volume": "49",
 				"attachments": [
 					{
 						"title": "EUP Snapshot",
@@ -218,28 +160,19 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Bible translation"
+						"tag": "Disruption"
 					},
 					{
-						"tag": "Christianity"
+						"tag": "Free Church of Scotland"
 					},
 					{
-						"tag": "Conversion of missionaries"
+						"tag": "James Begg"
 					},
 					{
-						"tag": "Dora Burgess"
+						"tag": "National Association for the Vindication of Scottish Rights"
 					},
 					{
-						"tag": "Guatemala"
-					},
-					{
-						"tag": "Protestant Indian missions"
-					},
-					{
-						"tag": "Quiché (K'iche)"
-					},
-					{
-						"tag": "US woman missionary"
+						"tag": "Nationalism"
 					}
 				],
 				"notes": [],
@@ -249,35 +182,28 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.euppublishing.com/toc/swc/26/1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0020",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective: Dora Burgess (1887–1962)",
+				"title": "The Rhetoric of Empire in the Scottish Mission in North America, 1732–63",
 				"creators": [
 					{
-						"lastName": "Lee",
-						"firstName": "Sun Yong",
+						"lastName": "Kelly",
+						"firstName": "Jamie J.",
 						"creatorType": "author"
 					}
 				],
-				"date": "February 20, 2020",
-				"DOI": "10.3366/swc.2020.0280",
-				"ISSN": "1354-9901",
-				"abstractNote": "Dora Belle McLaughlin Burgess was an American Presbyterian missionary, devoted to the mission to the Quiché tribe in Guatemala from 1913 to 1962. During her service, she translated the New Testament from Greek into the Quiché language. She also published a hymnal in Quiché and an ethnographic writing on Quiché culture. This paper attempts to shed light on the life of Dora Burgess, whose work was unknown, and to trace the formation of her identity as a missionary and her mission approach to the native inhabitants. In doing so, the paper argues that her interaction with the native tribes in the mission field shaped her identity as a missionary and her understanding of mission in ways in which the indigenous people's agency and subjectivity were recognised and respected. In the earlier period of her service in Guatemala, Dora Burgess conceived of mission work as a rescue project to transform the native tribes into Christians who would denounce their ‘superstitious’ traditions; however, her later focus in mission work, especially in her bible translation project, lay in acknowledging the native traditions and cultures and giving the indigenous tribe opportunities to be Christians in their own ways.",
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0020",
+				"ISSN": "2516-6298",
+				"abstractNote": "In 1755, William Robertson delivered a sermon before the Society in Scotland for Propagating Christian Knowledge, entitled The Situation of the World at the Time of Christ's Appearance…. He addresses British imperial expansion and its prospects for civil and moral improvement, while denouncing the moral decay manifest in the growth of slavery and exploitation of natives. Through advocating a considered balance between submission to revealed religious principles and the exercise of reason, Robertson stresses the necessity of both for promoting virtue and preventing vice. The SSPCK, an organisation dedicated to spreading ‘reformed Christianity’ as a catalyst of cultural progress (and thus the growth of virtue) among rural Scots and Natives in North America, was responding to a perceived lack of government commitment to this very task. Empire provided the framework for mission, yet the government's secular agenda often outweighed religious commitments. This article makes use of SSPCK sermons from the eighteenth century to trace the attitudes of Scottish churchmen and missionaries towards the institutions and motives driving empire, in a period when they too were among its most prominent agents. This will shed light on the Scottish church's developing views on empire, evangelism, race, improvability and the role of government.",
 				"issue": "1",
-				"journalAbbreviation": "Studies in World Christianity",
 				"libraryCatalog": "Edinburgh University Press Journals",
-				"pages": "21-41",
-				"publicationTitle": "Studies in World Christianity",
-				"shortTitle": "Protestant ‘Indian Mission’ Work in Guatemala from a Woman Missionary's Perspective",
-				"url": "https://www.euppublishing.com/doi/abs/10.3366/swc.2020.0280",
-				"volume": "26",
+				"pages": "25-37",
+				"publicationTitle": "Scottish Church History",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0020",
+				"volume": "49",
 				"attachments": [
 					{
 						"title": "EUP Snapshot",
@@ -286,28 +212,198 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Bible translation"
+						"tag": "Church of Scotland"
 					},
+					{
+						"tag": "Education"
+					},
+					{
+						"tag": "Eighteenth Century"
+					},
+					{
+						"tag": "Empire"
+					},
+					{
+						"tag": "Missionaries"
+					},
+					{
+						"tag": "Sermons"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0021",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Industrial Gospel of Robert Laws and the Livingstonia Expedition",
+				"creators": [
+					{
+						"lastName": "Jeffrey",
+						"firstName": "Kenneth S.",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0021",
+				"ISSN": "2516-6298",
+				"abstractNote": "It has been widely assumed that academic education lay at the heart of nineteenth century Scottish missions in Africa. This article will argue that a particular form of education that included artisan skills-based, commercial and industrial training was the basis of the Livingstonia expedition led by Robert Laws in Nyasaland from 1875. Inspired by Dr James Stewart of Lovedale, financed by Free Church businessmen from Glasgow and led by teams of tradesmen, the aim of this mission was to establish small settlements that would create a network of trading centres from which commerce, civilisation and Christianity would spread across Africa. The ambitions and character of these first missionaries, not least Laws, exercised a fundamental influence upon the nature and purpose of this enterprise. Livingstonia was the most industrial mission of the modern era in Africa. A practical skills-based education was central to the gospel according to Robert Laws.",
+				"issue": "1",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "38-50",
+				"publicationTitle": "Scottish Church History",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0021",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
 					{
 						"tag": "Christianity"
 					},
 					{
-						"tag": "Conversion of missionaries"
+						"tag": "Commerce"
 					},
 					{
-						"tag": "Dora Burgess"
+						"tag": "Gospel"
 					},
 					{
-						"tag": "Guatemala"
+						"tag": "Industry"
 					},
 					{
-						"tag": "Protestant Indian missions"
+						"tag": "Livingstonia"
 					},
 					{
-						"tag": "Quiché (K'iche)"
+						"tag": "Mission"
 					},
 					{
-						"tag": "US woman missionary"
+						"tag": "Robert Laws"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0022",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Elizabeth Ewan, Rose Pipes, Jane Rendall and Siân Reynolds (eds), The New Biographical Dictionary of Scottish Women",
+				"creators": [
+					{
+						"lastName": "Thor",
+						"firstName": "Jowita A.",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0022",
+				"ISSN": "2516-6298",
+				"issue": "1",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "51-53",
+				"publicationTitle": "Scottish Church History",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0022",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Reviews"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0023",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Alexander D. Campbell, The Life and Works of Robert Baillie (1602–1662): Politics, Religion and Record-Keeping in the British Civil Wars",
+				"creators": [
+					{
+						"lastName": "Schultz",
+						"firstName": "Karie",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0023",
+				"ISSN": "2516-6298",
+				"issue": "1",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "53-55",
+				"publicationTitle": "Scottish Church History",
+				"shortTitle": "Alexander D. Campbell, The Life and Works of Robert Baillie (1602–1662)",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0023",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Reviews"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0024",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Alasdair Raffe, Scotland in Revolution, 1685–1690",
+				"creators": [
+					{
+						"lastName": "Langley",
+						"firstName": "Christopher R.",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 24, 2020",
+				"DOI": "10.3366/sch.2020.0024",
+				"ISSN": "2516-6298",
+				"issue": "1",
+				"libraryCatalog": "Edinburgh University Press Journals",
+				"pages": "55-57",
+				"publicationTitle": "Scottish Church History",
+				"url": "https://www.euppublishing.com/doi/abs/10.3366/sch.2020.0024",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "EUP Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Reviews"
 					}
 				],
 				"notes": [],
