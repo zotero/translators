@@ -61,7 +61,7 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	//add tag "Book Reviews" if not Leitartikel 
 	let leitartikel = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "current", " " ))]')
-	if (item.itemTpye = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
+	if (item.itemType = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
 		item.tags.push('Book Review');
 	}
 	
