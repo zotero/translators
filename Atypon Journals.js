@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-02 15:43:51"
+	"lastUpdated": "2020-05-26 16:59:28"
 }
 
 /*
@@ -194,7 +194,7 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var tagentry = ZU.xpathText(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") | contains(@href, "Keyword=")] | //kwd-group');
+	var tagentry = ZU.xpathText(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword")| contains(@href, "Keyword=")] | //kwd-group');
 	Z.debug("Citation URL: " + citationurl);
 	ZU.processDocuments(citationurl, function(citationDoc){
 		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
@@ -227,9 +227,9 @@ function scrape(doc, url, extras) {
 				item.url = url;
 				item.notes = [];
 				if (tagentry){
-				let tags = tagentry.split(/\s*,\s*/);
+				let tags = tagentry.split(/\s*,\s*/)
 					for (let i in tags){
-					item.tags.push(tags[i].replace('Keywords:', '').replace(/.$/, '').replace(/^\w/gi,function(m){return m.toUpperCase();}));
+						item.tags.push(tags[i].replace('Keywords:', '').replace(/.$/, '').replace(/^\w/gi,function(m){return m.toUpperCase();}));
 					}
 				}
 
@@ -279,9 +279,7 @@ function scrape(doc, url, extras) {
 			translator.translate();
 		});
 	});
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
