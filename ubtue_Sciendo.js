@@ -2,11 +2,11 @@
 	"translatorID": "bf64f8a7-89b4-4a79-ae80-70630e428f35",
 	"label": "Sciendo",
 	"creator": "Madeesh Kannan, Timotheus Kim",
-	"target": "https?://content.sciendo.com/view/journals",
+	"target": "https?://content\\.sciendo\\.com/view/journals",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-05-26 09:51:25"
