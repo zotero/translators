@@ -2,20 +2,20 @@
 	"translatorID": "bc052944-8588-4f34-a348-9892cf76bdf6",
 	"label": "Theologische Revue",
 	"creator": "Timotheus Kim",
-	"target": "/thrv/",
+	"target": "^https?://www\\.uni-muenster\\.de/Ejournals/index\\.php/thrv/issue/view",
 	"minVersion": "3",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-20 15:45:49"
+	"lastUpdated": "2020-05-26 14:39:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Timotheus Kim
+	Copyright © 2020 Universitätsbibliothek Tübingen All rights reserved.
 
 	This file is part of Zotero.
 
@@ -64,7 +64,6 @@ function postProcess(doc, item) {
 	if (item.itemType = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
 		item.tags.push('Book Review');
 	}
-	
 	item.complete();
 }
 
@@ -93,6 +92,7 @@ function doWeb(doc, url) {
 	} else
 		invokeEMTranslator(doc, url);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
