@@ -9,13 +9,13 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-13 17:17:11"
+	"lastUpdated": "2020-05-26 14:31:26"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright � 2019 Universit�tsbibliothek T�bingen.  All rights reserved.
+	Copyright © 2019 Universitätsbibliothek Tübingen All rights reserved.
 
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -38,7 +38,6 @@ function detectWeb(doc, url) {
 	if (getSearchResults(doc))
 		return "multiple";
 	else if (ZU.xpath(doc, '//h1[@id="docTitle"]').length === 1) {
-		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
 }
