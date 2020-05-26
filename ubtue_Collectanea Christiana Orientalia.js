@@ -2,49 +2,52 @@
 	"translatorID": "f24cd419-5892-450a-b39e-be2ff3191757",
 	"label": "Collectanea Christiana Orientalia",
 	"creator": "Timotheus Kim",
-	"target": "/issue/view/",
+	"target": "^https?://www\\.uco\\.es/revistas/index\\.php/cco/(issue|article)/view/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-26 12:07:00"
+	"lastUpdated": "2020-05-26 14:54:47"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright © 2020 Universitätsbibliothek Tübingen All rights reserved.
 
-	This program is free software: you can redistribute it and/or modify
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
+	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
 
 	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
 	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/issue\/view/))
-		return "multiple";
-	else if (url.match(/article/)) {
+	if (url.match(/article/))
 		return "journalArticle";
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc) {
-	let items = {};
-	let found = false;
-	let rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "tocTitle", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "file", " " ))]')
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "file", " " ))]')
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -56,34 +59,20 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
-	let section = item.title;
-		if (section && section.match(/ISBN|Verlag|Press/g)) {
-			item.tags.push("Book Reviews");
-			
-		}
-		if (item.title.match(/ISBN|Verlag|Press/g)) {
-			item.tags.push("Book Reviews");	
-		}
-		if (item.title.match(/Seminario|Conferences|Congress|Congreso/g)) {
-			item.tags.push("Kongressbericht");
-		}
-		item.complete();
+	//add tag "Book Reviews" if not Leitartikel 
+	let leitartikel = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "current", " " ))]')
+	if (item.itemTpye = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
+		item.tags.push('Book Review');
+	}
+	item.complete();
 }
 
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	translator.setHandler("itemDone", function (t, item) {
-		if (item.issue === "0")
-			item.issue = "";
-
-		if (item.volume === "0")
-			item.volume = "";
-		if (item.number === "0")
-			item.number = "";
-
-	postProcess(doc, item);	
+	translator.setHandler("itemDone", function (t, i) {
+		postProcess(doc, i);
 	});
 	translator.translate();
 }
@@ -102,44 +91,79 @@ function doWeb(doc, url) {
 		});
 	} else
 		invokeEMTranslator(doc, url);
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.uco.es/revistas/index.php/cco/issue/view/67",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/issue/view/201",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.uco.es/revistas/index.php/cco/issue/view/67",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.uco.es/revistas/index.php/cco/article/view/1100",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2731",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Talking heads:‎ Necromancy in Jewish and Christian Accounts ‎ from Mesopotamia and beyond",
+				"title": "Mit der Islamischen Theologie im Gespräch. Zu einigen Neuerscheinungen aus dem Bereich der christlich-muslimischen Beziehungen",
 				"creators": [
 					{
-						"firstName": "Emmanouela",
-						"lastName": "Grypeou",
+						"firstName": "Anja",
+						"lastName": "Middelbeck-Varwick",
 						"creatorType": "author"
 					}
 				],
-				"date": "2019/07/18",
-				"DOI": "10.21071/cco.v16i0.1100",
-				"ISSN": "2386-7442",
-				"abstractNote": "Relations between Jewish and Christian communities in Late Antiquity involved interactions relating to a complex cultural and religious landscape. An intrinsic aspect of the exchange between Jews and Christians refers to attitudes towards pagan communities in their shared environment as a common discourse pertaining to a symbolic construction of the “Other”. More specifically, a persisting  topos  was the implication of “pagan” communities and their respective religious specialists in illicit magical practices including necromancy.  In the following, a discussion of testimonies regarding variants of necromantic practices in ancient, rabbinic and Christian sources will explore the dissemination and special characteristics of the different necromantic accounts in Late Antiquity and contextualise this peculiar practice of a divinatory “talking head” as evidenced in contemporary Jewish and Christian traditions.",
-				"language": "en",
-				"libraryCatalog": "www.uco.es",
-				"pages": "1-30",
-				"publicationTitle": "Collectanea Christiana Orientalia",
-				"rights": "Copyright (c) 2019 Collectanea Christiana Orientalia",
-				"shortTitle": "Talking heads",
-				"url": "https://www.uco.es/revistas/index.php/cco/article/view/1100",
-				"volume": "16",
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2731",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2731",
+				"volume": "116",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2689",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Hammann, Konrad: Rudolf Bultmann und seine Zeit. Biographische und theologische Konstellationen",
+				"creators": [
+					{
+						"firstName": "Matthias",
+						"lastName": "Dreher",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2689",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"shortTitle": "Hammann, Konrad",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2689",
+				"volume": "116",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -151,19 +175,51 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Christian Tradition"
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2690",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Levering, Matthew: The Achievement of Hans Urs von Balthasar. An Introduction to His Trilogy",
+				"creators": [
+					{
+						"firstName": "Wolfgang",
+						"lastName": "Müller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/04/20",
+				"DOI": "10.17879/thrv-2020-2690",
+				"ISSN": "2699-5433",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "www.uni-muenster.de",
+				"publicationTitle": "Theologische Revue",
+				"rights": "Copyright (c) 2020",
+				"shortTitle": "Levering, Matthew",
+				"url": "https://www.uni-muenster.de/Ejournals/index.php/thrv/article/view/2690",
+				"volume": "116",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					},
 					{
-						"tag": "Late Antiquity"
-					},
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
 					{
-						"tag": "Necromancy"
-					},
-					{
-						"tag": "Rabbinic Tradition"
-					},
-					{
-						"tag": "Religion History"
+						"tag": "Book Review"
 					}
 				],
 				"notes": [],
