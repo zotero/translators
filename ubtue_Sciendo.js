@@ -34,24 +34,19 @@
 */
 
 function detectWeb(doc, url) {
-	//var toc = ZU.xpath(doc, '//div[contains(@class, "component-table-of-contents")]');
 	if (url.match(/view/)) {
 		return "multiple";
 	} else if (url.match(/article/)) {
-		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
 }
 
 function getSearchResults(doc, checkOnly) {
-  var items = {};
-  var found = false;
-  // TODO: adjust the CSS selector
-  var rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
+  let items = {};
+  let found = false;
+  let rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
   for (let row of rows) {
-	// TODO: check and maybe adjust
 	let href = row.href;
-	// TODO: check and maybe adjust
 	let title = ZU.trimInternal(row.textContent);
 	if (!href || !title) continue;
 	if (checkOnly) return true;
