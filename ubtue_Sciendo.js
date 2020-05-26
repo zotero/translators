@@ -1,15 +1,15 @@
 {
 	"translatorID": "bf64f8a7-89b4-4a79-ae80-70630e428f35",
 	"label": "Sciendo",
-	"creator": "Madeesh Kannan and Timotheus Kim",
+	"creator": "Madeesh Kannan, Timotheus Kim",
 	"target": "https?://content.sciendo.com/view/journals",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-10 15:40:06"
+	"lastUpdated": "2020-05-26 09:51:25"
 }
 
 /*
@@ -33,29 +33,30 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
-	var toc = ZU.xpath(doc, '//div[contains(@class, "component-table-of-contents")]');
-	if (toc && toc.length == 1)
+	//var toc = ZU.xpath(doc, '//div[contains(@class, "component-table-of-contents")]');
+	if (url.match(/view/)) {
 		return "multiple";
-	else {
+	} else if (url.match(/article/)) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
 }
 
 function getSearchResults(doc, checkOnly) {
-  let items = {};
+  var items = {};
   var found = false;
   // TODO: adjust the CSS selector
   var rows = doc.querySelectorAll('.ln-1 .c-Button--primary');
   for (let row of rows) {
-    let href = row.href;
-    let title = ZU.trimInternal(row.textContent);
-    if (!href || !title) continue;
-    if (checkOnly) return true;
-    found = true;
-    items[href] = title;
+	// TODO: check and maybe adjust
+	let href = row.href;
+	// TODO: check and maybe adjust
+	let title = ZU.trimInternal(row.textContent);
+	if (!href || !title) continue;
+	if (checkOnly) return true;
+	found = true;
+	items[href] = title;
   }
   return found ? items : false;
 }
@@ -66,16 +67,14 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
 		if (!i.abstractNote)
-            i.abstractNote = ZU.xpathText(doc, '//section[@class="abstract"]//p')
+			i.abstractNote = ZU.xpathText(doc, '//section[@class="abstract"]//p')
+		if (!i.ISSN) {
+			i.ISSN = ZU.xpathText(doc, '//dl[@class="onlineissn"]//dd');
+			if (i.ISSN)
+				i.ISSN = i.ISSN.trim();
+		}
 
-        i.tags = ZU.xpath(doc, '//dd[@class="keywords"]//a').map(x => x.textContent.trim());
-        if (!i.ISSN) {
-            i.ISSN = ZU.xpathText(doc, '//dl[@class="onlineissn"]//dd');
-            if (i.ISSN)
-                i.ISSN = i.ISSN.trim();
-        }
-
-		i.complete();
+		  i.complete();
 	});
 	translator.translate();
 }
