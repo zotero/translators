@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-26 10:22:40"
+	"lastUpdated": "2020-05-26 12:07:00"
 }
 
 /*
@@ -62,7 +62,7 @@ function postProcess(doc, item) {
 			
 		}
 		if (item.title.match(/ISBN|Verlag|Press/g)) {
-			item.itemType = "magazineArticle";	
+			item.tags.push("Book Reviews");	
 		}
 		if (item.title.match(/Seminario|Conferences|Congress|Congreso/g)) {
 			item.tags.push("Kongressbericht");
