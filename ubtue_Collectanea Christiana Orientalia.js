@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-14 12:57:39"
+	"lastUpdated": "2020-05-26 10:22:40"
 }
 
 /*
@@ -37,15 +37,14 @@ function detectWeb(doc, url) {
 	if (url.match(/\/issue\/view/))
 		return "multiple";
 	else if (url.match(/article/)) {
-		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
 }
 
 function getSearchResults(doc) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "tocTitle", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "file", " " ))]')
+	let items = {};
+	let found = false;
+	let rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "tocTitle", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "file", " " ))]')
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -64,11 +63,11 @@ function postProcess(doc, item) {
 		}
 		if (item.title.match(/ISBN|Verlag|Press/g)) {
 			item.itemType = "magazineArticle";	
-			//itemType.push("magazinArticle");
 		}
 		if (item.title.match(/Seminario|Conferences|Congress|Congreso/g)) {
 			item.tags.push("Kongressbericht");
 		}
+		item.complete();
 }
 
 function invokeEMTranslator(doc) {
@@ -85,7 +84,6 @@ function invokeEMTranslator(doc) {
 			item.number = "";
 
 	postProcess(doc, item);	
-	//	item.complete();
 	});
 	translator.translate();
 }
