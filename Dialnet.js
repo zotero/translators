@@ -91,6 +91,7 @@ function scrape(doc, url) {
 		if (item.abstractNote && item.abstractNote.includes(item.title) && item.abstractNote.length<item.title.length+30) {
 			delete item.abstractNote;
 		}
+    
 		// in case of double issue e.g. "3-4" wrong issue number in Embedded Metadata e,g. "3"
 		// clean issue number in case of multiple download
 		var issue = ZU.xpathText(doc, '//*[@id="informacion"]//a[contains(text(), "Nº.")]');
@@ -148,7 +149,6 @@ function scrape(doc, url) {
 				combinedAbstract += abstracts[i].textContent + "\n\n";
 			item.abstractNote = combinedAbstract.trim();
 		}
-
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
@@ -200,6 +200,17 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Libres"
+					},
+					{
+						"tag": "Libro"
+					},
+					{
+						"tag": "buenos y justos como miembros de un mismo cuerpo: lecciones de teoría del derecho y de derecho natural"
 					}
 				],
 				"notes": [],
