@@ -2,14 +2,14 @@
 	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
 	"label": "Springer Link",
 	"creator": "Aurimas Vinckevicius",
-	"target": "^https?://(link|rd)\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
+	"target": "^https?://link\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-10-19 17:03:34"
+	"lastUpdated": "2020-05-27 13:33:28"
 }
 
 function detectWeb(doc, url) {
@@ -193,7 +193,7 @@ function complementItem(doc, item) {
 	}
 
 	// add tags
-	let tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
@@ -251,10 +251,7 @@ function scrape(doc, url) {
 		});
 		translator.translate();
 	});
-}
-
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -599,6 +596,63 @@ var testCases = [
 					},
 					{
 						"tag": "Social mediation "
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/11562/14/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11562-019-00443-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Who pioneered Islamic banking in Malaysia? The background of the pioneers of Bank Islam Malaysia Berhad",
+				"creators": [
+					{
+						"lastName": "Kitamura",
+						"firstName": "Hideki",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-04-01",
+				"DOI": "10.1007/s11562-019-00443-w",
+				"ISSN": "1872-0226",
+				"abstractNote": "This study investigates the background of the pioneers of Bank Islam Malaysia Berhad (BIMB) and their perception of Islamic banking to explore the influence that their background had on the practices of BIMB, which have been criticized for being too similar to those of conventional banking. Accordingly, this study opts to explore this topic using interviews with the pioneers, complemented by archival research. Results of the research into the pioneers’ background and their perception of Islamic banking show that most came from a conventional banking background as part of the strong network of the founder of the bank, Abdul Halim Ismail. Furthermore, to fulfill the government’s expectations, they intended to make conventional banking Islamically acceptable rather than simply implementing the profit-and-loss sharing envisaged as ideal by Islamic economists, so they could provide modern banking facilities to economically underrepresented Malay Muslims. The findings reaffirm the significance of the intermediary role of practitioners, their background and philosophy in the development of products and services. In addition, the findings suggest the need for a reevaluation of the research of social scientists exploring whether Islamic banking offers an alternative to conventional global banking, as the pioneers of BIMB did not deny the value of conventional banking, but rather sought to learn from conventional banking to provide competitive banking products in a workable Islamic way.",
+				"issue": "1",
+				"journalAbbreviation": "Cont Islam",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "75-93",
+				"publicationTitle": "Contemporary Islam",
+				"shortTitle": "Who pioneered Islamic banking in Malaysia?",
+				"url": "https://doi.org/10.1007/s11562-019-00443-w",
+				"volume": "14",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Bank Islam Malaysia Berhad"
+					},
+					{
+						"tag": " Islamic banking"
+					},
+					{
+						"tag": " Malaysia"
+					},
+					{
+						"tag": "Economic anthropology/sociology"
 					}
 				],
 				"notes": [],
