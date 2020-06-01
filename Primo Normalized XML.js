@@ -345,9 +345,7 @@ function stripAuthor(str) {
 	// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|.{3})?\)?/g, '')
 		// Remove creator type like (illustrator)
-		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
-		// Sometimes creator type is displayed twice
-		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
+		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
 		.replace(/\s*:\s+/, " ");
