@@ -1,21 +1,18 @@
 {
 	"translatorID": "87766765-919e-4d3b-9071-3dd7efe984c8",
-	"label": "Revues.org",
-	"creator": "Aurimas Vinckevicius, Pierre-Alain Mignot, and Michael Berkowitz",
-	"target": "^https?://.*\\.revues\\.org",
+	"label": "OpenEdition Journals",
+	"creator": "Aurimas Vinckevicius, Pierre-Alain Mignot, Michael Berkowitz, Hélène Prieto, Jean-François Rivière",
+	"target": "^https?://journals\\.openedition\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2014-04-03 18:55:44"
+	"lastUpdated": "2020-06-03 10:41:00"
 }
 
 function detectWeb(doc, url) {
-	// don't do anything on main domain, because there's nothing to fetch there
-	if (url.match(/http:\/\/(www\.)?revues\.org/)) return false;
-
 	var types = ZU.xpath(doc, '//meta[@name="DC.type"]/@content');
 	for (var i=0, n=types.length; i<n; i++) {
 		switch (types[i].textContent.toLowerCase()) {
@@ -39,7 +36,7 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	//is this still necessary??
+	//Example: https://journals.openedition.org/remi/persee-144614
 	if (url.match(/persee\-\d+/)) {
 		// the article is on Persée portal, getting it to be translated by COinS
 		var translator = Zotero.loadTranslator("web");
@@ -73,12 +70,12 @@ function scrape(doc, url) {
 					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true)
 				}
 			}
-			//set abstract and keywords based on preferred locale
-			var locale = doc.cookie.match(/\blanguage=([a-z]{2})/i);
+			//set abstract and keywords based on documents language
+			var locale = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
 			//default to french if not set
-			locale = locale ? locale[1].toLowerCase() : 'fr';
+			locale = locale ? locale.toLowerCase() : 'fr';
 
-			//get abstract  and tags in preferred locale
+			//get abstract and tags in document language
 			//or the first locale available
 			item.abstractNote = ZU.xpathText(doc,
 				'//meta[@name="description" or @name="DC.description"]\
@@ -168,12 +165,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://amerika.revues.org/1283",
+		"url": "https://journals.openedition.org/amerika/1283",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://e-spania.revues.org/12303?lang=fr",
+		"url": "https://journals.openedition.org/e-spania/12303?lang=fr",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -196,10 +193,10 @@ var testCases = [
 				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"issue": "5",
 				"language": "fr",
-				"libraryCatalog": "e-spania.revues.org",
+				"libraryCatalog": "journals.openedition.org",
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "Les contenus de la revue e-Spania sont mis à disposition selon les termes de la Licence Creative Commons Attribution - Pas d'Utilisation Commerciale - Pas de Modification 4.0 International.",
-				"url": "http://e-spania.revues.org/12303?lang=fr",
+				"url": "https://journals.openedition.org/e-spania/12303?lang=fr",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -231,7 +228,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://e-spania.revues.org/12303?lang=es",
+		"url": "https://journals.openedition.org/e-spania/12303?lang=es",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -251,13 +248,13 @@ var testCases = [
 				"date": "2008/02/01",
 				"DOI": "10.4000/e-spania.12303",
 				"ISSN": "1951-6169",
-				"abstractNote": "El testamento de Elvira brinda una preciosísima información sobre la realidad del infantazgo : su extensión, la composición de sus bienes, sus evoluciones, las formas de su adquisición y transmisión, su papel político. También nos informa sobre una infanta de nivel mediano, sobre el marco de su vida, su entorno personal, sus actividades, la red de sus influencias e incluso sobre su fe.",
+				"abstractNote": "Le testament d’Elvire livre de précieuses informations sur la réalité historique de l’infantat : son implantation, la composition de ses biens, ses évolutions, les formes de son acquisition et de sa transmission, sa fonction politique. Mais il nous renseigne aussi sur une infante de niveau moyen, sur son cadre de vie, son entourage, ses activités, les réseaux de son pouvoir et même sur sa foi.",
 				"issue": "5",
 				"language": "fr",
-				"libraryCatalog": "e-spania.revues.org",
+				"libraryCatalog": "journals.openedition.org",
 				"publicationTitle": "e-Spania. Revue interdisciplinaire d’études hispaniques médiévales et modernes",
 				"rights": "Les contenus de la revue e-Spania sont mis à disposition selon les termes de la Licence Creative Commons Attribution - Pas d'Utilisation Commerciale - Pas de Modification 4.0 International.",
-				"url": "http://e-spania.revues.org/12303?lang=es",
+				"url": "https://journals.openedition.org/e-spania/12303?lang=es",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -268,18 +265,19 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Alfonso VI de Castilla y León",
-					"Elvira Fernández",
-					"Fernando I de Castilla y León",
-					"Infanta Elvira",
-					"Infanta Sancha",
-					"Infanta Urraca",
-					"Infantazgo",
-					"San Isidoro de León",
-					"Sancha Raimundez",
-					"Urraca Fernández",
-					"siglo XI",
-					"testamento"
+					"Alphonse VI de Castille et de León",
+					"Elvire Fernandez",
+					"Ferdinand Ier de Castille et de León",
+					"Saint-Isidore de León",
+					"Sancie Raimundez",
+					"Urraque Fernandez",
+					"XIe siècle",
+					"infantat",
+					"infantaticum",
+					"infante Elvire",
+					"infante Sancie",
+					"infante Urraque",
+					"testament"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -288,7 +286,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://chs.revues.org/142",
+		"url": "https://journals.openedition.org/chs/142",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -306,11 +304,11 @@ var testCases = [
 				"abstractNote": "Au sortir de la Seconde Guerre mondiale, pour sauvegarder son empire colonial, la France est contrainte de reconnaître la citoyenneté des Français musulmans d’Algérie (FMA). Dès lors, ceux-ci se retrouvent en métropole dans une situation proche de celle d’autres citoyens diminués (vagabonds, prostituées…) qui, bien que juridiquement peu accessibles à la répression policière sont considérés comme « indésirables » et constituent la clientèle privilégiée de forces de l’ordre agissant aux marges de la loi. Si l’ethnicité, la xénophobie, et la situation coloniale contribuent à définir les Algériens comme « indésirables », le répertoire d’actions policier envers les FMA tient avant tout à la façon dont l’arène policière est médiatisée par le contrôle et la représentation politiques.",
 				"issue": "1",
 				"language": "fr",
-				"libraryCatalog": "chs.revues.org",
+				"libraryCatalog": "journals.openedition.org",
 				"pages": "5-25",
 				"publicationTitle": "Crime, Histoire & Sociétés / Crime, History & Societies",
 				"rights": "© Droz",
-				"url": "http://chs.revues.org/142",
+				"url": "https://journals.openedition.org/chs/142",
 				"volume": "11",
 				"attachments": [
 					{
@@ -329,34 +327,40 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://poldev.revues.org/135",
+		"url": "https://journals.openedition.org/remi/2495",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Développement économique et legs coloniaux en Afrique",
+				"title": "Multiracial Classification on the United States Census",
 				"creators": [
 					{
-						"firstName": "Gareth",
-						"lastName": "Austin",
+						"firstName": "Ann",
+						"lastName": "Morning",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Emmanuelle",
-						"lastName": "Chauvet",
-						"creatorType": "translator"
+						"firstName": "Marco",
+						"lastName": "Martiniello",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Patrick",
+						"lastName": "Simon",
+						"creatorType": "contributor"
 					}
 				],
-				"date": "2010/03/01",
-				"DOI": "10.4000/poldev.135",
-				"ISSN": "1663-9375",
-				"abstractNote": "Cet article étudie les effets du gouvernement colonial et de l’action des Africains pendant la période coloniale sur le contexte institutionnel et la situation en matière de ressources qui ont posé le cadre du futur développement économique au sud du Sahara. Cette question est placée dans la perspective de la dynamique du développement dans une région qui était, en 1900, extrêmement riche en terres et caractérisée par un manque de main-d’œuvre et de capital, par des activités marchandes indigènes dont l’ampleur peut étonner et par des degrés variables mais souvent peu élevés de centralisation politique. L’article explore la différence entre les effets des gouvernements français et britannique, mais il affirme que la différence visible dans l’évolution de la pauvreté, du bien-être et du changement structurel a davantage été déterminée par l’opposition entre économies « de peuplement » et « d’exploitation ».",
-				"issue": "1",
-				"language": "fr",
-				"libraryCatalog": "poldev.revues.org",
-				"pages": "11-36",
-				"publicationTitle": "International Development Policy | Revue internationale de politique de développement",
-				"rights": "International Development Policy is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.",
-				"url": "http://poldev.revues.org/135",
+				"date": "2005/06/01",
+				"DOI": "10.4000/remi.2495",
+				"ISSN": "0765-0752",
+				"abstractNote": "In 1997, the United States’ federal guidelines on racial classification were amended to permit individual respondents to identify themselves as members of more than one race. This measure, taken at the urging of a vocal community of mixed-race individuals and organizations, was seen by many as having important consequences. In this article I examine the predictions about the impact of multiple-race classification, and assess how accurate they have proved to be. I conclude however that neither the hopes nor fears associated with multiracial recognition have been realized. Instead, the most important legacy of the recognition of mixed-race America is likely to be its contribution to the debate about classifying a much larger segment of the population: the Hispanic community.",
+				"issue": "2",
+				"volume": "21",
+				"language": "en",
+				"libraryCatalog": "journals.openedition.org",
+				"pages": "111-134",
+				"publicationTitle": "Revue européenne des migrations internationales",
+				"rights": "© Université de Poitiers",
+				"url": "https://journals.openedition.org/remi/2495",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -367,7 +371,11 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Afrique subsaharienne"
+					"États-Unis",
+					"ethnicisation",
+					"méthodologie",
+					"recensement",
+					"statistiques"
 				],
 				"notes": [],
 				"seeAlso": []
