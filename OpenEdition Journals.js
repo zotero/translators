@@ -9,12 +9,35 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-03 10:41:00"
+	"lastUpdated": "2020-07-07 20:28:00"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2020 Aurimas Vinckevicius, Pierre-Alain Mignot, Michael Berkowitz, Hélène Prieto, Jean-François Rivière
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectWeb(doc, url) {
 	var types = ZU.xpath(doc, '//meta[@name="DC.type"]/@content');
-	for (var i=0, n=types.length; i<n; i++) {
+	for (let i = 0, n = types.length; i < n; i++) {
 		switch (types[i].textContent.toLowerCase()) {
 			case 'journalarticle':
 				return 'journalArticle';
@@ -25,96 +48,91 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	if (ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]\
-			/dl[@class="documents"]/dd[@class="titre"]/a').length ||
-		ZU.xpath(doc, '//ul[@class="summary"]//div[@class="title"]/a').length) {
+	if (ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]/a').length
+		|| ZU.xpath(doc, '//ul[@class="summary"]//div[@class="title"]/a').length) {
 		return "multiple";
-	} else if (ZU.xpath(doc, '//h1[@id="docTitle"]/span[@class="text"]').length ||
-		url.match(/document\d+/)) {
+	}
+	else if (ZU.xpath(doc, '//h1[@id="docTitle"]/span[@class="text"]').length
+		|| /document\d+/.test(url)) {
 		return "journalArticle";
 	}
+	return false;
 }
 
 function scrape(doc, url) {
-	//Example: https://journals.openedition.org/remi/persee-144614
-	if (url.match(/persee\-\d+/)) {
+	// Example: https://journals.openedition.org/remi/persee-144614
+	if (/persee-\d+/.test(url)) {
 		// the article is on Persée portal, getting it to be translated by COinS
-		var translator = Zotero.loadTranslator("web");
+		let translator = Zotero.loadTranslator("web");
 		translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");
 		translator.setDocument(doc);
 		translator.translate();
-	} else {
-		//use Embeded Metadata
-		var translator = Zotero.loadTranslator('web');
+	}
+	else {
+		// use Embeded Metadata
+		let translator = Zotero.loadTranslator('web');
 		translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 		translator.setDocument(doc);
-		translator.setHandler('itemDone', function(obj, item) {
-			//editor and translator declarations not part of DC spec
-			//editors (and compilers)
-			var editors = ZU.xpath(doc, '//meta[@name="DC.contributor.edt" \
-				or @name="DC.contributor.com"]/@content');
-			for (var i=0, n=editors.length; i<n; i++) {
+		translator.setHandler('itemDone', function (obj, item) {
+			// editor and translator declarations not part of DC spec
+			// editors (and compilers)
+			var editors = ZU.xpath(doc, '//meta[@name="DC.contributor.edt" or @name="DC.contributor.com"]/@content');
+			for (let i = 0, n = editors.length; i < n; i++) {
 				item.creators.push(
 					ZU.cleanAuthor(editors[i].textContent, 'editor', true));
 			}
-			//translators
+			// translators
 			var trans = ZU.xpath(doc,
 				'//meta[@name="DC.contributor.trl"]/@content');
-			for (var i=0, n=trans.length; i<n; i++) {
+			for (let i = 0, n = trans.length; i < n; i++) {
 				item.creators.push(
 					ZU.cleanAuthor(trans[i].textContent, 'translator', true));
 			}
-			//fix all caps for author last names
-			for (var i=0; i<item.creators.length; i++){
-				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()){
-					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true)
+			// fix all caps for author last names
+			for (let i = 0; i < item.creators.length; i++) {
+				if (item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
+					item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
 				}
 			}
-			//set abstract and keywords based on documents language
+			// set abstract and keywords based on documents language
 			var locale = ZU.xpathText(doc, '//meta[@name="citation_language"]/@content');
-			//default to french if not set
+			// default to french if not set
 			locale = locale ? locale.toLowerCase() : 'fr';
 
-			//get abstract and tags in document language
-			//or the first locale available
+			// get abstract and tags in document language
+			// or the first locale available
 			item.abstractNote = ZU.xpathText(doc,
-				'//meta[@name="description" or @name="DC.description"]\
-						[lang("' + locale + '") or @lang="' + locale + '"][1]\
-						/@content') ||
-				ZU.xpathText(doc,
-					'//meta[@name="description" or @name="DC.description"][1]\
-						/@content');
+				'//meta[@name="description" or @name="DC.description"][lang("' + locale + '") or @lang="' + locale + '"][1]/@content')
+				|| ZU.xpathText(doc,
+					'//meta[@name="description" or @name="DC.description"][1]/@content');
 
 			var tags = ZU.xpathText(doc,
-				'//meta[@name="keywords" or @name="DC.subject"]\
-						[lang("' + locale + '") or @lang="' + locale + '"][1]\
-						/@content') ||
-				ZU.xpathText(doc,
-					'//meta[@name="keywords" or @name="DC.subject"][1]\
-						/@content');
+				'//meta[@name="keywords" or @name="DC.subject"][lang("' + locale + '") or @lang="' + locale + '"][1]/@content')
+				|| ZU.xpathText(doc,
+					'//meta[@name="keywords" or @name="DC.subject"][1]/@content');
 			if (tags) {
 				item.tags = tags.trim().split(/\s*,\s*/);
 			}
 
 			delete item.extra;
 		
-			//The site lists all editor of journals as editor in the header. Turn them into contributors. 
-			//I don't think there is a use case for editors for journal articles
-			if (item.itemType === "journalArticle"){
-				for (i in item.creators){
-					if (item.creators[i].creatorType === "editor"){
+			// The site lists all editor of journals as editor in the header. Turn them into contributors.
+			// I don't think there is a use case for editors for journal articles
+			if (item.itemType === "journalArticle") {
+				for (let i = 0; i < item.creators.length; i++) {
+					if (item.creators[i].creatorType === "editor") {
 						item.creators[i].creatorType = "contributor";
 					}
 				}
 			}
-				//store the language-specific url
+			// store the language-specific url
 			item.url = url;
 
 			item.complete();
 		});
 
-		translator.getTranslatorObject(function(trans) {
-			//override some of the mappings
+		translator.getTranslatorObject(function (trans) {
+			// override some of the mappings
 			trans.addCustomFields({
 				'prism.number': 'issue',
 				'prism.volume': 'volume',
@@ -128,39 +146,29 @@ function scrape(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var results = ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]\
-			/dl[@class="documents"]/dd[@class="titre"]');
+		var results = ZU.xpath(doc, '//div[@id="inside"]/div[@class="sommaire"]/dl[@class="documents"]/dd[@class="titre"]');
 		if (!results.length) {
 			results = ZU.xpath(doc, '//ul[@class="summary"]//div[@class="title"]');
 		}
 
-/* From old code: When is this needed?
-		if (doc.evaluate('//meta[@name="DC.description.tableOfContents"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-			var titles = doc.evaluate('//meta[@name="DC.description.tableOfContents"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext().content.split(' -- ');
-			var articles = doc.evaluate('//meta[@name="DC.relation.hasPart"]', doc, null, XPathResult.ANY_TYPE, null);
-			var article;
-			var i = 0;
-			while (article = articles.iterateNext()) {
-				items[article.content] = titles[i++];
-			}
-		} */
-
-		Zotero.selectItems(ZU.getItemArray(doc, results), function(selectedItems) {
+		Zotero.selectItems(ZU.getItemArray(doc, results), function (selectedItems) {
 			if (!selectedItems) return true;
 
-			var urls = new Array();
-			for (var i in selectedItems) {
+			var urls = [];
+			for (let i in selectedItems) {
 				urls.push(i);
 			}
 
-			ZU.processDocuments(urls, function(doc) {
-				scrape(doc, doc.location.href)
-			});
+			ZU.processDocuments(urls, scrape);
+
+			return true;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
