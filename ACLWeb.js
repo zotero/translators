@@ -213,6 +213,7 @@ function getSearchResults(doc, url) {
 	}
 	return Object.keys(items).length ? items : false;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
