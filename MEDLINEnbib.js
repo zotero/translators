@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-05-28 02:34:24"
+	"lastUpdated": "2020-06-09 03:13:39"
 }
 
 /*
@@ -42,17 +42,17 @@ function detectImport() {
 	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if (line != "") {
-			//Actual MEDLINE format starts with PMID
+			// Actual MEDLINE format starts with PMID
 			// ERIC .nbib starts with "OWN -  ERIC"
 			if (line.substr(0, 6).match(/^PMID( {1, 2})?- /) || line.includes("OWN - ERIC")) {
 				return true;
-			} else {
-				if (i++ > 3) {
-					return false;
-				}
+			}
+			else if (i++ > 3) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 var fieldMap = {
@@ -60,7 +60,7 @@ var fieldMap = {
 	VI: "volume",
 	IP: "issue",
 	PL: "place",
-	PB: "publisher", //not in the specs, but is used 
+	PB: "publisher", // not in the specs, but is used
 	BTI: "bookTitle",
 	JT: "publicationTitle",
 	TA: "journalAbbreviation",
@@ -74,77 +74,87 @@ var fieldMap = {
 };
 
 
-// Only the most basic types. Most official MEDLINE types make little sense as item types 
+// Only the most basic types. Most official MEDLINE types make little sense as item types
 var inputTypeMap = {
-	"Book": "book",
-	"Book Chapter": "bookSection", //can't find in specs, but is used.
+	Book: "book",
+	"Book Chapter": "bookSection", // can't find in specs, but is used.
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
 	"Technical Report": "report",
 	"Legal Case": "case",
-	"Legislation": "statute"
+	Legislation: "statute"
 };
-
-var isEndNote = false;
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
+	var type;
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
-	} else if (tag == "PT") {
+	}
+	else if (tag == "PT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
-			item.itemType = inputTypeMap[value]
+			item.itemType = inputTypeMap[value];
 		}
-	} else if (tag == "FAU" || tag == "FED") {
+	}
+	else if (tag == "FAU" || tag == "FED") {
 		if (tag == "FAU") {
-			var type = "author";
-		} else if (tag == "FED") {
-			var type = "editor";
+			type = "author";
 		}
-		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "AU" || tag == "ED") { //save normal author tags as fallback
+		else if (tag == "FED") {
+			type = "editor";
+		}
+		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "AU" || tag == "ED") { // save normal author tags as fallback
 		if (tag == "AU") {
-			var type = "author";
-		} else if (tag == "ED") {
-			var type = "editor";
+			type = "author";
 		}
-		value = value.replace(/\s([A-Z]+)$/, ", $1")
-		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "PMID") {
+		else if (tag == "ED") {
+			type = "editor";
+		}
+		value = value.replace(/\s([A-Z]+)$/, ", $1");
+		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "PMID") {
 		item.extra = "PMID: " + value;
-	} else if (tag == "PMC") {
+	}
+	else if (tag == "PMC") {
 		item.extra += " \nPMCID: " + value;
-	} else if (tag == "IS") {
-		var newline = "";
-		if (ZU.cleanISSN(value)){
-			if (!item.ISSN){
-				item.ISSN =ZU.cleanISSN(value);
+	}
+	else if (tag == "IS") {
+		if (ZU.cleanISSN(value)) {
+			if (!item.ISSN) {
+				item.ISSN = ZU.cleanISSN(value);
 			}
 			else {
 				item.ISSN += " " + ZU.cleanISSN(value);
 			}
 		}
-		else if (ZU.cleanISBN(value)){
-			if (!item.ISBN){
-				item.ISBN =ZU.cleanISBN(value);
+		else if (ZU.cleanISBN(value)) {
+			if (!item.ISBN) {
+				item.ISBN = ZU.cleanISBN(value);
 			}
 			else {
 				item.ISBN += " " + ZU.cleanISBN(value);
 			}
 		}
-	} else if (tag == "AID") {
-		if (value.indexOf("[doi]") != -1) item.DOI = value.replace(/\s*\[doi\]/, "")
-	} else if (tag == "DP") {
+	}
+	else if (tag == "AID") {
+		if (value.includes("[doi]")) item.DOI = value.replace(/\s*\[doi\]/, "");
+	}
+	else if (tag == "DP") {
 		item.date = value;
-	} else if (tag == "MH" || tag == "OT") {
+	}
+	else if (tag == "MH" || tag == "OT") {
 		item.tags.push(value);
 	}
 }
 
 function doImport() {
 	var line = true;
-	var tag = data = false;
+	var tag = false;
+	var data = false;
 	do { // first valid line is type
 		Zotero.debug("ignoring " + line);
 		line = Zotero.read();
@@ -153,8 +163,8 @@ function doImport() {
 
 	var item = new Zotero.Item();
 	item.creatorsBackup = [];
-	var tag = line.match(/^[A-Z0-9]+/)[0];
-	var data = line.substr(line.indexOf("-") + 1);
+	tag = line.match(/^[A-Z0-9]+/)[0];
+	data = line.substr(line.indexOf("-") + 1);
 	while ((line = Zotero.read()) !== false) { // until EOF
 		line = line.replace(/^\s+/, "");
 		if (!line) {
@@ -163,11 +173,12 @@ function doImport() {
 				// unset info
 				tag = data = false;
 				// new item
-				finalizeItem(item)
+				finalizeItem(item);
 				item = new Zotero.Item();
 				item.creatorsBackup = [];
 			}
-		} else if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
+		}
+		else if (line.search(/^[A-Z0-9]+\s*-/) != -1) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
 			if (tag) {
@@ -177,54 +188,54 @@ function doImport() {
 			// then fetch the tag and data from this line
 			tag = line.match(/^[A-Z0-9]+/)[0];
 			data = line.substr(line.indexOf("-") + 1);
-		} else {
+		}
+		else if (tag) {
 			// otherwise, assume this is data from the previous line continued
-			if (tag) {
-				data += " " + line;
-			}
+			data += " " + line;
 		}
 	}
 
 	if (tag) { // save any unprocessed tags
 		processTag(item, tag, data);
 		// and finalize with some post-processing
-		finalizeItem(item)
+		finalizeItem(item);
 	}
 }
 
 function finalizeItem(item) {
-	//if we didn't get full authors (included post 2002, sub in the basic authors)
+	// if we didn't get full authors (included post 2002, sub in the basic authors)
 	if (item.creators.length == 0 && item.creatorsBackup.length > 0) {
 		item.creators = item.creatorsBackup;
 	}
 	delete item.creatorsBackup;
 	if (item.pages) {
-		//where page ranges are given in an abbreviated format, convert to full
-		//taken verbatim from NCBI Pubmed translator
+		// where page ranges are given in an abbreviated format, convert to full
+		// taken verbatim from NCBI Pubmed translator
 		var pageRangeRE = /(\d+)-(\d+)/g;
 		pageRangeRE.lastIndex = 0;
 		var range;
-		while (range = pageRangeRE.exec(item.pages)) {
+
+		while (range = pageRangeRE.exec(item.pages)) { // eslint-disable-line no-cond-assign
 			var pageRangeStart = range[1];
 			var pageRangeEnd = range[2];
 			var diff = pageRangeStart.length - pageRangeEnd.length;
 			if (diff > 0) {
-				pageRangeEnd = pageRangeStart.substring(0,diff) + pageRangeEnd;
+				pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
 				var newRange = pageRangeStart + "-" + pageRangeEnd;
-				var fullPageRange = item.pages.substring(0, range.index) //everything before current range
-					+ newRange	//insert the new range
-					+ item.pages.substring(range.index + range[0].length);	//everything after the old range
-				//adjust RE index
+				var fullPageRange = item.pages.substring(0, range.index) // everything before current range
+					+ newRange	// insert the new range
+					+ item.pages.substring(range.index + range[0].length);	// everything after the old range
+				// adjust RE index
 				pageRangeRE.lastIndex += newRange.length - range[0].length;
 			}
 		}
-		if (fullPageRange){
+		if (fullPageRange) {
 			item.pages = fullPageRange;
 		}
 	}
-	//journal article is the fallback item type
+	// journal article is the fallback item type
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
-	//titles for books are mapped to bookTitle
+	// titles for books are mapped to bookTitle
 	if (item.itemType == "book") item.title = item.bookTitle;
 	item.complete();
 }/** BEGIN TEST CASES **/
