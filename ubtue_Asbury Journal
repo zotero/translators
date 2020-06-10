@@ -45,8 +45,8 @@ function scrape(doc, item) {
     item.pages = text(doc, '.citation').match(/\d+-\d+/);
     item.abstractNote = text(doc, '#abstract p');
 	
-	let excludeBookReview = text(doc, '#title a')
-	if (excludeBookReview.match(/Book Reviews/)) {
+	let TagBookReview = text(doc, '#title a')
+	if (TagBookReview.match(/Book Reviews/)) {
 		item.tags.push('Book Review');
 		}
     item.complete();
