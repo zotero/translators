@@ -1,15 +1,15 @@
 {
 	"translatorID": "1bab66b7-fa6d-4004-80bb-a7127beddec3",
-	"label": "Davarlogos",
+	"label": "ubtue_Davarlogos",
 	"creator": "Timotheus Kim",
-	"target": "^http://publicaciones\\.uap\\.edu.ar/index\\.php/davarlogos/issue/view",
+	"target": "^http://publicaciones\\.uap\\.edu.ar/index\\.php/davarlogos/(article|issue)/view",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-26 14:23:14"
+	"lastUpdated": "2020-06-10 10:37:05"
 }
 
 /*
@@ -42,18 +42,19 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc) {
-	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a')
-	for (let i=0; i<rows.length; i++) {
+	let items = {};
+    	let found = false;
+	let rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a')
+	for (let i = 0; i < rows.length; ++i) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
+        	if (!href || !title) continue;
 		found = true;
 		items[href] = title;
 	}
 	return found ? items : false;
 }
+
 
 function postProcess(doc, item) {
 	let authors = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "authors", " " ))]')
@@ -70,33 +71,23 @@ function postProcess(doc, item) {
 				item.tags.push(tags[i].replace(/^\w/gi,function(m){return m.toUpperCase();}));
 		}
 	}
-	
-	if (!item.abstractNote) {
-		item.abstractNote = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "item abstract", " " ))]');
-		if (item.abstractNote && item.abstractNote.length > 0)
-			item.abstractNote = ZU.unescapeHTML(item.abstractNote[0].textContent.trim().replace('Resumen', ''));
-	}
-	
-	
-	//scrape item.pages
-	//ToDo item.pages = attr(doc, '.pages')
-	
+	item.title = item.title.replace(' | DavarLogos', '');
 	item.volume = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]').trim().substr(4, 7).replace('Núm', '');
 	item.issue = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]').trim().substr(-20, 1);
 	item.date = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]').trim().substr(-17, 4);
 	item.url = attr(doc, '.pdf', 'href');
 	item.ISSN = '1666-7832'
-	item.itemType = 'journalArticle'
-	
-	item.complete();
+	//ToDO scrape item.pages before getSearchResults see e.g. fzpth
+
 }
 
-function invokeEMTranslator(doc) {
+function invokeOJSTranslator(doc, url) {
 	var translator = Zotero.loadTranslator("web");
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388"); //OJS Translator for abstractNote and title
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
 		postProcess(doc, i);
+		i.complete();
 	});
 	translator.translate();
 }
@@ -111,10 +102,10 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				articles.push(i);
 			}
-			ZU.processDocuments(articles, invokeEMTranslator);
+			ZU.processDocuments(articles, invokeOJSTranslator);
 		});
 	} else
-		invokeEMTranslator(doc, url);
+        invokeOJSTranslator(doc, url);
 }
 	  
 /** BEGIN TEST CASES **/
