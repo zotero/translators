@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-10 10:16:57"
+	"lastUpdated": "2020-05-12 21:30:21"
 }
 
 /*
@@ -65,7 +65,7 @@ function scrape(doc, url) {
 			mimeType: 'text/html',
 			snapshot: true
 		}); */
-
+    
 		//* ********* Begin fixed-location variables **********
 
 		// Some variables always appear and appear at the same location in all document pages.
@@ -98,13 +98,10 @@ function scrape(doc, url) {
 					newItem.abstractNote = child.textContent;
 				}
 			}
-			// DOI: Some docs contain DOI as a separate paragraph in abs field
-			// use DOI URL as url when DOI exists
+			// DOI: Some docs contain DOI as the last paragraph in abs field
 			var DOILead = 'https://doi.org/';
-			if (abs.innerText.includes(DOILead)) {
-				var DOIMatch = abs.innerText.match(/https:\/\/doi\.org\/(.+)/i);
-				newItem.DOI = DOIMatch[1];
-				newItem.url = DOIMatch[0];
+			if (abs.textContent.includes(DOILead) === true) {
+				newItem.DOI = abs.textContent.slice(abs.textContent.indexOf(DOILead) + DOILead.length);
 			}
 		}
 		// attach PDF
