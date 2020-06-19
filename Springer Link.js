@@ -185,7 +185,7 @@ function complementItem(doc, item) {
 
 		item.abstractNote = abstract.trim();
 	} else {
-		let abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
+		let abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1] | //*[(@id = "Abs1-content")]//p');
 		if (!abs) {
 			abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
 		}
