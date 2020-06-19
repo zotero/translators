@@ -69,8 +69,8 @@ function postProcess(doc, item) {
 		}
 	}
 	
-	var matchFirstAbstract = item.abstractNote.match(/\s.*/);
-	var matchSecondAbstract = item.abstractNote.match(/(DANSK RESUMÉ|DANSK RESUME).*/);
+	let matchFirstAbstract = item.abstractNote.match(/\s.*/);
+	let matchSecondAbstract = item.abstractNote.match(/(DANSK RESUMÉ|DANSK RESUME).*/);
 	if (matchSecondAbstract) {
 		item.notes.push({
 			note: "abs:" + matchSecondAbstract,
@@ -78,7 +78,7 @@ function postProcess(doc, item) {
 	}
 	
 	// swap Band and Ausgabe
-	var issue = item.issue;
+	let issue = item.issue;
 	item.issue = item.volume;
 	item.volume = issue;
 	item.abstractNote = matchFirstAbstract;
