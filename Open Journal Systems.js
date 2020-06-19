@@ -120,7 +120,7 @@ function scrape(doc, _url) {
 				|| xpathTextCustom(doc, '//div[contains(@class, "main_entry")]/div[contains(@class, "abstract")]');
 		}
 		if (item.abstractNote) {
-			item.abstractNote = item.abstractNote.trim().replace(/^Abstract:?\s*/, '');
+			item.abstractNote = item.abstractNote.trim().replace(/^(Abstract|Resumo):?\s*/, '');
 		}
 
 		// clear issue if it's zero
