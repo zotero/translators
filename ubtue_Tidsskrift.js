@@ -84,11 +84,11 @@ function postProcess(doc, item) {
 	item.abstractNote = matchFirstAbstract;
 	
 	let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
-    if (sidebarVals && sidebarVals.length) {
-        for (let val in sidebarVals) {
-            let node = sidebarVals[val];
-            if (node.textContent.trim().match(/Anmeldelser/)) {
-                item.tags.push('Book Review');
+    	if (sidebarVals && sidebarVals.length) {
+        	for (let val in sidebarVals) {
+            	let node = sidebarVals[val];
+            		if (node.textContent.trim().match(/Anmeldelser/)) {
+                	item.tags.push('Book Review');
                 break;
             }
         }
