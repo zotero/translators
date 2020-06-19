@@ -44,8 +44,7 @@ function scrape(doc, item) {
     item.DOI = text(doc, '#identifier p').replace('DOI:', '');
     item.pages = text(doc, '.citation').match(/\d+-\d+/);
     item.abstractNote = text(doc, '#abstract p');
-	
-	let TagBookReview = text(doc, '#title a')
+    let TagBookReview = text(doc, '#title a')
 	if (TagBookReview.match(/Book Reviews/)) {
 		item.tags.push('Book Review');
 		}
