@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-21 20:40:35"
+	"lastUpdated": "2020-06-21 20:46:20"
 }
 
 /*
@@ -93,8 +93,7 @@ function scrape(urls) {
 		// Z.debug(url);
 		ZU.doGet(constructMARCurl(url), handler);
 	}
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
