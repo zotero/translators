@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-21 18:50:14"
+	"lastUpdated": "2020-06-21 20:40:35"
 }
 
 /*
@@ -79,20 +79,22 @@ function constructMARCurl(url) {
 	return url + "/Export?style=MARCXML";
 }
 
+
 function scrape(urls) {
+	var handler = function (text) {
+		var translator = Zotero.loadTranslator("import");
+		// Z.debug(text);
+		// MARC XML
+		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
+		translator.setString(text);
+		translator.translate();
+	};
 	for (let url of urls) {
-	// Z.debug(url);
-	// eslint-disable-next-line loopfunc
-		ZU.doGet(constructMARCurl(url), function (text) {
-			var translator = Zotero.loadTranslator("import");
-			// Z.debug(text);
-			// MARC XML
-			translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
-			translator.setString(text);
-			translator.translate();
-		});
+		// Z.debug(url);
+		ZU.doGet(constructMARCurl(url), handler);
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
