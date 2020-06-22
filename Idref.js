@@ -54,7 +54,7 @@ function getTranslatorFromDomain(domain) {
 	}
 
 	/* Fallback for *.archives-ouvertes.fr */
-	if (domain.includes(".archives-ouvertes.fr")) {
+	if (domain.endsWith(".archives-ouvertes.fr")) {
 		return '951c027d-74ac-47d4-a107-9c3069ab7b48';
 	}
 	
