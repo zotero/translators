@@ -47,7 +47,7 @@ function scrape(doc, item) {
     let TagBookReview = text(doc, '#title a')
 	if (TagBookReview.match(/Book Reviews/)) {
 		item.tags.push('Book Review');
-		}
+	}
     item.complete();
 }
 
