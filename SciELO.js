@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-22 12:17:36"
+	"lastUpdated": "2020-06-22 12:58:42"
 }
 
 /*
@@ -131,8 +131,8 @@ function postProcess(doc, item) {
 }
 
 function scrape(doc, url) {
-	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
-	var tagentry = text(doc, ' p:nth-child(6)'); Z.debug(tagentry)
+	var abstract = text(doc, ' p:nth-child(4)');
+	var tagentry = text(doc, ' p:nth-child(6)'); 
 	var translator = Zotero.loadTranslator('web');
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
