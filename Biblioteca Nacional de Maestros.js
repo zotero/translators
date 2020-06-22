@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-21 20:46:20"
+	"lastUpdated": "2020-06-22 00:23:44"
 }
 
 /*
@@ -74,25 +74,27 @@ function doWeb(doc, url) {
 }
 
 
-function constructMARCurl(url) {
-	url = url.replace(/\/(Details|Holdings)([#?].*)?/, ""); // remove panels
-	return url + "/Export?style=MARCXML";
+function constructMARCurls(urls) {
+	let MARCurls = [];
+	for (let url of urls) {
+		url = url.replace(/\/(Details|Holdings)([#?].*)?/, ""); // remove panels
+		MARCurls.push(url + "/Export?style=MARCXML");
+	}
+	return MARCurls;
 }
 
 
 function scrape(urls) {
-	var handler = function (text) {
+	let MARCurls = constructMARCurls(urls);
+	// Z.debug(MARCurls);
+	ZU.doGet(MARCurls, function(text) {
 		var translator = Zotero.loadTranslator("import");
 		// Z.debug(text);
 		// MARC XML
 		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
 		translator.setString(text);
 		translator.translate();
-	};
-	for (let url of urls) {
-		// Z.debug(url);
-		ZU.doGet(constructMARCurl(url), handler);
-	}
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
