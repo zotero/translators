@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-24 11:53:49"
+	"lastUpdated": "2020-06-22 12:17:36"
 }
 
 /*
@@ -130,13 +130,23 @@ function postProcess(doc, item) {
 	item.libraryCatalog = "SciELO"
 }
 
-
 function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+	var tagentry = text(doc, ' p:nth-child(6)'); Z.debug(tagentry)
 	var translator = Zotero.loadTranslator('web');
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
+		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT|RESUMO|RESUMEN)/, "").replace(/[\n\t]/g, "");
+		item.libraryCatalog = "SciELO"
+		if (tagentry){
+				var tags = tagentry.split(/\s*;\s*/);
+				for (var i in tags){
+					item.tags.push(tags[i].replace(/^\w/gi,function(m){return m.toUpperCase();}).replace(/Palabras clave\s.*:/, '').replace(/\.\s.*$/, ''));
+					
+				}
+			}
 		postProcess(doc, item);
 		item.complete();
 	});
