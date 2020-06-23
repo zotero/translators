@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-23 10:51:43"
+	"lastUpdated": "2020-06-23 12:51:51"
 }
 
 /*
@@ -82,7 +82,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		}
 
 		let section = ZU.xpathText(doc, '//div[contains(@class, "souspartie")]//span[@class="title"]');
-		if (section && section.match(/Recensions/))
+		if (section && section.match(/(Recensions|Notes de lecture)/))
 			item.tags.push("Book Review");
 		item.itemType = "journalArticle";
 		item.complete();
