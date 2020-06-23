@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-23 10:36:19"
+	"lastUpdated": "2020-06-23 11:43:53"
 }
 
 /*
@@ -36,7 +36,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
+	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.') || url.includes('/doi/10.')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -141,7 +141,7 @@ function scrape(doc, url) {
 				item.abstractNote += "\n\n" + abstract;
 			}
 
-			var tags = ZU.xpathText(doc, '//kwd-group[1]');
+			var tags = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tags) {
 				item.tags = tags.split(",");
 			}
