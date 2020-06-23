@@ -1,6 +1,6 @@
 {
 	"translatorID": "a288df9e-ce56-40ca-a205-bc32182ced4c",
-	"label": "tidsskrift.dk",
+	"label": "ubtue_tidsskrift.dk",
 	"creator": "Madeesh Kannan and Timotheus Kim",
 	"target": "^https?://tidsskrift.dk/[^/]+/(article|issue)/view.*/[0-9]+",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-09 11:40:20"
+	"lastUpdated": "2020-06-23 15:24:04"
 }
 
 /*
@@ -84,16 +84,16 @@ function postProcess(doc, item) {
 	item.abstractNote = matchFirstAbstract;
 	
 	let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
-    	if (sidebarVals && sidebarVals.length) {
-        	for (let val in sidebarVals) {
-            	let node = sidebarVals[val];
-            		if (node.textContent.trim().match(/Anmeldelser/)) {
-                	item.tags.push('Book Review');
-                break;
-            }
-        }
-    }
-    
+	if (sidebarVals && sidebarVals.length) {
+		for (let val in sidebarVals) {
+			let node = sidebarVals[val];Z.debug(node.textContent)
+			if (node.textContent.trim().match(/Anmeldelser|Review-artikel/)) {
+				item.tags.push('Book Review');
+				break;
+			}
+		}
+	}
+	
 	item.complete();
 }
 
@@ -285,6 +285,51 @@ var testCases = [
 						"note": "abs:DANSK RESUMÉ: I Det Gamle Testamente er der ingen forventning eller ønske om et liv i himlen efter døden. Gud og guddommelige væsener på den ene side og mennesker på den anden bevarer normalt en rimelig afstand til hinanden. Guddommelige væsener er potentielt dræbende, og døde mennesker er den stærkeste form for urenhed der truer med at invadere hellige steder. Med den ‘ontologiske’ transformation der fandt sted i antik Jødedom og som åbnede for muligheden for et liv i himlen efter døden, fulgte en omvending af synet på døde menneskers kroppe, der på nogle punkter minder om den indiske tantrisme. Døde kroppe skulle ikke længere undgås, men opsøges på vejen til himlen.,DANSK RESUMÉ"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/120416",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Fornuftens fyrtårn. Om Jürgen Habermas: Auch eine Geschichte der Philosophie,",
+				"creators": [
+					{
+						"firstName": "Lars",
+						"lastName": "Albinus",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/05/19",
+				"DOI": "10.7146/rt.v0i70.120416",
+				"ISSN": "1904-8181",
+				"abstractNote": "\n\t\t\t\t\tAnmeldelse og diskussion af Jürgen Habermas, Auch eine Geschichte der Philosophie, Band 1: Die okzidentale Konstellation von Glauben und Wissen, Band 2: Vernünftige Freiheit. Spuren des Diskurses über Glauben und Wissen, Suhrkamp 2019",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "1-15",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Ophavsret (c) 2020 Forfatter og Tidsskrift",
+				"shortTitle": "Fornuftens fyrtårn. Om Jürgen Habermas",
+				"url": "https://tidsskrift.dk/rvt/article/view/120416",
+				"volume": "70",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
