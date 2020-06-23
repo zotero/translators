@@ -9,29 +9,23 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-07 15:10:35"
+	"lastUpdated": "2020-06-23 10:36:19"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-
 	Copyright © 2016 Philipp Zumstein
-
 	This file is part of Zotero.
-
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
 	***** END LICENSE BLOCK *****
 */
 
@@ -107,6 +101,7 @@ function scrape(doc, url) {
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
+	
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
@@ -118,7 +113,6 @@ function scrape(doc, url) {
 		if (text.indexOf("DA  - ") > -1) {
 			text = text.replace(/Y1  - .*\r?\n/, '');
 		}
-
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -151,7 +145,15 @@ function scrape(doc, url) {
 			if (tags) {
 				item.tags = tags.split(",");
 			}
-
+			// ubtue: add tags "Book Review" if "Review Article"
+			if (articleType) {
+				for (let r of articleType) {
+				let reviewDOIlink = r.innerHTML;
+					if (reviewDOIlink.match(/Review Article/)) {
+						item.tags.push('Book Review');
+					}
+				}
+			}
 			// Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
