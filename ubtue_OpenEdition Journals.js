@@ -1,6 +1,6 @@
 {
 	"translatorID": "55275811-58f4-4f5e-b711-a043f1fc50da",
-	"label": "OpenEdition Journals",
+	"label": "ubtue_OpenEdition Journals",
 	"creator": "Madeesh Kannan",
 	"target": "https?://journals.openedition.org",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-26 14:31:26"
+	"lastUpdated": "2020-06-23 10:51:43"
 }
 
 /*
@@ -84,7 +84,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		let section = ZU.xpathText(doc, '//div[contains(@class, "souspartie")]//span[@class="title"]');
 		if (section && section.match(/Recensions/))
 			item.tags.push("Book Review");
-
+		item.itemType = "journalArticle";
 		item.complete();
 	});
 	translator.translate();
@@ -105,3 +105,79 @@ function doWeb(doc, url) {
 	} else
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://journals.openedition.org/rsr/4866",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "« Poésie, Bible et théologie de l’Antiquité tardive au Moyen Âge » (Strasbourg, 25‑27 janv. 2018)",
+				"creators": [
+					{
+						"firstName": "Michele",
+						"lastName": "Cutino",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-01T00:00:00+02:00",
+				"ISSN": "0035-2217",
+				"abstractNote": "Du 25 au 27 janvier 2018 s’est déroulé à Strasbourg un colloque international intitulé « Poésie, Bible et théologie de l’Antiquité tardive au Moyen Âge », qui était organisé par la Faculté de théologie catholique avec le soutien de l’Université de Strasbourg et en collaboration avec plusieurs institutions nationales (Institut d’Études Augustiniennes [IEA] ; Laboratoire d’études sur les monothéismes [LEM – UMR 8584] ; Centre Jean Mabillon (EA 3624), École nationale des chartes ; Association « ...",
+				"issue": "2",
+				"language": "fr",
+				"libraryCatalog": "journals.openedition.org",
+				"pages": "277-278",
+				"publicationTitle": "Revue des sciences religieuses",
+				"rights": "© RSR",
+				"url": "http://journals.openedition.org/rsr/4866",
+				"volume": "92",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.openedition.org/rsr/4866",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "« Poésie, Bible et théologie de l’Antiquité tardive au Moyen Âge » (Strasbourg, 25‑27 janv. 2018)",
+				"creators": [
+					{
+						"firstName": "Michele",
+						"lastName": "Cutino",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-01T00:00:00+02:00",
+				"ISSN": "0035-2217",
+				"abstractNote": "Du 25 au 27 janvier 2018 s’est déroulé à Strasbourg un colloque international intitulé « Poésie, Bible et théologie de l’Antiquité tardive au Moyen Âge », qui était organisé par la Faculté de théologie catholique avec le soutien de l’Université de Strasbourg et en collaboration avec plusieurs institutions nationales (Institut d’Études Augustiniennes [IEA] ; Laboratoire d’études sur les monothéismes [LEM – UMR 8584] ; Centre Jean Mabillon (EA 3624), École nationale des chartes ; Association « ...",
+				"issue": "2",
+				"language": "fr",
+				"libraryCatalog": "journals.openedition.org",
+				"pages": "277-278",
+				"publicationTitle": "Revue des sciences religieuses",
+				"rights": "© RSR",
+				"url": "http://journals.openedition.org/rsr/4866",
+				"volume": "92",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
