@@ -191,7 +191,6 @@ function complementItem(doc, item) {
 		}
 		if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
 	}
-
 	// add tags
 	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
 	if (tags && (!item.tags || item.tags.length === 0)) {
@@ -251,7 +250,9 @@ function scrape(doc, url) {
 		});
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
