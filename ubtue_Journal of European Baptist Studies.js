@@ -34,7 +34,8 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/article/') return "journalArticle";
+	if (url.includes('/article/') 
+		return "journalArticle";
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
