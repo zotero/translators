@@ -86,8 +86,7 @@ function postProcess(doc, item) {
 		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
 		if (doiMatches) {
 			var secondPart = doiMatches[2];
-			if (item.pages === secondPart)
-				item.pages = "";
+			if (item.pages === secondPart) item.pages = "";
 		}
 	}
 }
