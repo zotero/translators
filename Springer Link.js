@@ -190,9 +190,8 @@ function complementItem(doc, item) {
 		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
 		let abs = "";
 		for (let i = 0; i < sectionTitles.length; ++i) {
-			let titleText = sectionTitles[i].textContent.trim();Z.debug(titleText)
-			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim(); 
-			
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
 			abs += titleText + ": " + sectionBody + "\n\n";
 			item.abstractNote = abs.trim();
 		}
@@ -207,14 +206,12 @@ function complementItem(doc, item) {
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
 	if (docType.match(/(Book R|reviews?)|(Review P|paper)/))
 		item.tags.push("Book Reviews");
-
 	return item;
 }
 
 function shouldPostprocessWithEmbeddedMetadata(item) {
 	if (!item.pages)
 		return true;
-
 	return false;
 }
 
@@ -257,7 +254,8 @@ function scrape(doc, url) {
 		});
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
