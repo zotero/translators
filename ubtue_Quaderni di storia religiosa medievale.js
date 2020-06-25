@@ -1,6 +1,6 @@
 {
 	"translatorID": "5db07685-2d24-4b0a-9659-2e6af73e58ba",
-	"label": "Quaderni di storia religiosa medievale",
+	"label": "ubtue_Quaderni di storia religiosa medievale",
 	"creator": "Timotheus Kim",
 	"target": "^https:?//www\\.rivisteweb\\.it/(doi|issn)/",
 	"minVersion": "3.0",
@@ -34,8 +34,7 @@
 */
 
 // attr()/text() v2
-
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+function attr(docOrElem ,selector ,attr ,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.textContent:null; }
 
 function detectWeb(doc, url) {
 	if (url.includes('/doi/')) {
