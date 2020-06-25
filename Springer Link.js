@@ -204,14 +204,12 @@ function complementItem(doc, item) {
 	}
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
-	if (docType.match(/(Book R|reviews?)|(Review P|paper)/))
-		item.tags.push("Book Reviews");
+	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
 	return item;
 }
 
 function shouldPostprocessWithEmbeddedMetadata(item) {
-	if (!item.pages)
-		return true;
+	if (!item.pages) return true;
 	return false;
 }
 
@@ -247,8 +245,7 @@ function scrape(doc, url) {
 				mimeType: "application/pdf"
 			});
 
-			if (shouldPostprocessWithEmbeddedMetadata(item))
-				postprocessWithEmbeddedMetadataTranslator(doc, item);
+			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
 			else
 				item.complete();
 		});
