@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-25 10:03:08"
+	"lastUpdated": "2020-06-25 10:05:30"
 }
 
 /*
@@ -74,9 +74,6 @@ function doWeb(doc, url) {
 	}
 }
 
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 function postProcess(doc, item) {
 	// the author fields are repeated in the website's embedded metadata
