@@ -38,7 +38,6 @@ function detectWeb(doc,url) {
 	if (url.indexOf("search.")!=-1 && getSearchResults(doc, true)){
 		return "multiple";
 	}
-	return null;
 }
 
 
