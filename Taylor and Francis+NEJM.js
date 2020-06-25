@@ -36,7 +36,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
 		return "journalArticle";
@@ -89,7 +88,7 @@ function scrape(doc, url) {
 	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 	var doi = match[1];
 
-	var baseUrl = url.match(/https?:\/\/[^\/]+/)[0];
+	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
 	var postUrl = baseUrl + '/action/downloadCitation';
 	var postBody = 	'downloadFileName=citation&' +
 					'direct=true&' +
