@@ -107,7 +107,6 @@ function postProcess(doc, item) {
 		item.tags = keywords[0].textContent
 						.trim()
 						.replace(/keywords\s*\:\s*/ig, "")
-						.replace(/^\w/, )
 						.split(";")
 						.map(function(x) { return x.trim(); })
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1);})
