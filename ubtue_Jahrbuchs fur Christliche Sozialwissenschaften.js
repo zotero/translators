@@ -34,12 +34,10 @@
 */
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
+function attr(docOrElem ,selector ,attr ,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.textContent:null; }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/issue\/view/))
-		return "multiple";
+	if (url.match(/\/issue\/view/)) return "multiple";
 	else if (url.match(/article/)) {
 		return "journalArticle";
 	}
@@ -50,7 +48,7 @@ function getSearchResults(doc) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "pages", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a');
 	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href; 
+		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		found = true;
@@ -60,7 +58,7 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
-	let authors = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "name", " " ))]')
+	let authors = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "name", " " ))]');
 	if (item.creators.length===0) {
 		for (let author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
@@ -70,13 +68,13 @@ function postProcess(doc, item) {
 	item.volume = item.volume.substr(3, 4);
 	item.DOI = text(doc, '.doi a');
 	item.Date = text(doc, '.published .value');
-	//ToDO scrape englisch abstract ZU.doGet? 
+	//ToDO scrape englisch abstract ZU.doGet?
 	item.abstractNote = text(doc, '#pkp_content_main p');
 	//ToDO replace methode not working e.g. .replace('+%E2%80%93+', '-')
 	let rowpages = doc.querySelectorAll('.Z3988');
 	for (let rowpage of rowpages) {
-		let pages = rowpage.title; Z.debug(pages)
-		item.pages = pages.match(/\d{1,3}\+%E2%80%93\+\d{1,3}/); Z.debug(item.pages)
+		let pages = rowpage.title;
+		item.pages = pages.match(/\d{1,3}\+%E2%80%93\+\d{1,3}/);
 	}
 	
 	item.ISSN = "2196-6265";
@@ -106,7 +104,6 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
-		invokeEMTranslator(doc, url);
+	} else invokeEMTranslator(doc, url);
 }
 
