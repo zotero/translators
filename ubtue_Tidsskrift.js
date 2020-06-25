@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-23 15:24:04"
+	"lastUpdated": "2020-06-25 15:00:12"
 }
 
 /*
@@ -48,9 +48,7 @@ function postProcess(doc, item) {
 		if (abstractParagraphs && abstractParagraphs.length > 0) {
 			for (var paragraph in abstractParagraphs) {
 				var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
-				if (paragraph == 0)
-					item.abstractNote = extractedText;
-
+				if (paragraph == 0) item.abstractNote = extractedText;
 				// check if it's in English
 				var prologue = extractedText.match(/^(\w)*\s\w*:(.*)/i);
 				if (prologue) {
@@ -63,12 +61,11 @@ function postProcess(doc, item) {
 			}
 		}
 
-	if (item.abstractNote) {
-		if (matchFirstAbstract) 
-			item.abstractNote = matchFirstAbstract[2].trim();
+		if (item.abstractNote) {
+			if (matchFirstAbstract) 
+				item.abstractNote = matchFirstAbstract[2].trim();
 		}
 	}
-	
 	let matchFirstAbstract = item.abstractNote.match(/\s.*/);
 	let matchSecondAbstract = item.abstractNote.match(/(DANSK RESUMÉ|DANSK RESUME).*/);
 	if (matchSecondAbstract) {
@@ -86,7 +83,7 @@ function postProcess(doc, item) {
 	let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
 	if (sidebarVals && sidebarVals.length) {
 		for (let val in sidebarVals) {
-			let node = sidebarVals[val];Z.debug(node.textContent)
+			let node = sidebarVals[val];Z.debug(node.textContent);
 			if (node.textContent.trim().match(/Anmeldelser|Review-artikel/)) {
 				item.tags.push('Book Review');
 				break;
@@ -99,13 +96,13 @@ function postProcess(doc, item) {
 
 function doWeb(doc, url) {
 	var translator = Zotero.loadTranslator("web");
-	translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");   // Open Journal Systems
+	translator.setTranslator("99b62ba4-065c-4e83-a5c0-d8cc0c75d388");// Open Journal Systems
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
 		postProcess(doc, i);
 	});
 	translator.translate();
-}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
