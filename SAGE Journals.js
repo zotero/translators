@@ -166,18 +166,15 @@ function scrape(doc, url) {
 			// scrape tags
 			if (!item.tags || item.tags.length === 0) {
 				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-				if (embedded)
-					item.tags = embedded.split(",");
+				if (embedded) item.tags = embedded.split(",");
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
-					if (tags)
-						item.tags = tags.map(n => n.textContent);
+					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
 
 			if (articleType && articleType.length > 0) {
-				if (articleType[0].textContent.trim().match(/Book Review/))
-					item.tags.push("Book Review");
+				if (articleType[0].textContent.trim().match(/Book Review/)) item.tags.push("Book Review");
 			}
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
