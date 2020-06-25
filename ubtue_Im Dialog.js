@@ -34,8 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/issue\/view/))
-		return "multiple";
+	if (url.match(/\/issue\/view/)) return "multiple";
 	else if (url.match(/article/)) {
 		return "journalArticle";
 	}
@@ -58,7 +57,7 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	if (item.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
 		let firstandlastpages = item.pages.split('–'); //Z.debug(firstandlastpages)
-				item.pages = firstandlastpages[0] + '-' + firstandlastpages[2];
+		item.pages = firstandlastpages[0] + '-' + firstandlastpages[2];
 	}
 	item.complete();
 }
@@ -68,7 +67,6 @@ function invokeEMTranslator(doc) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-	
 		postProcess(doc, i);
 	});
 	translator.translate();
