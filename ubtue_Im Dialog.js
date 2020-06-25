@@ -84,6 +84,5 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
-		invokeEMTranslator(doc, url);
+	} else invokeEMTranslator(doc, url);
 }
