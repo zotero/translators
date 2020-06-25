@@ -52,9 +52,9 @@ function getSearchResults(doc, checkOnly) {
 	let found = false;
 	let links = doc.querySelectorAll('.servizi li:nth-child(1) a');
 	let text = doc.querySelectorAll('#threeColumnsBarCenter h4');
-	for (let i = 0; i < links.length; ++i) { 
-		let href = links[i].href; 
-		let title = ZU.trimInternal(text[i].textContent); 
+	for (let i = 0; i < links.length; ++i) {
+		let href = links[i].href;
+		let title = ZU.trimInternal(text[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
