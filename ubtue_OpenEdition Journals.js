@@ -91,7 +91,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
-				return false;
+				return true;
 			}
 			let articles = [];
 			for (let i in items) {
