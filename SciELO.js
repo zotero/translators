@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-25 10:18:23"
+	"lastUpdated": "2017-06-24 11:53:49"
 }
 
 /*
@@ -74,7 +74,6 @@ function doWeb(doc, url) {
 	}
 }
 
-
 function postProcess(doc, item) {
 	// the author fields are repeated in the website's embedded metadata
 	// so, the duplicates need to be removed
@@ -85,8 +84,8 @@ function postProcess(doc, item) {
 		}
 		return unique;
 	},[]);
-	
-	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")] | //div[@class="trans-abstract"]//p[not(@class="sec")]');Z.debug(abstractParagraphs)
+
+	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")] | //div[@class="trans-abstract"]//p[not(@class="sec")]')');
 	if (abstractParagraphs && abstractParagraphs.length > 0) {
 		item.abstractNote = "";
 		for (var paragraph in abstractParagraphs) {
@@ -106,10 +105,11 @@ function postProcess(doc, item) {
 	if (keywords && keywords.length > 0) {
 		item.tags = keywords[0].textContent
 						.trim()
+						.replace(/\n/g, "")
 						.replace(/keywords\s*\:\s*/ig, "")
 						.split(";")
 						.map(function(x) { return x.trim(); })
-						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1);})
+						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1);});
 	}
 
 	if (item.date) {
@@ -127,8 +127,10 @@ function postProcess(doc, item) {
 		item.volume = item.issue;
 		item.issue = volume;
 	}
+
 	item.libraryCatalog = "SciELO"
 }
+
 
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
@@ -136,7 +138,6 @@ function scrape(doc, url) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler('itemDone', function(obj, item) {
-		item.libraryCatalog = "SciELO"
 		postProcess(doc, item);
 		item.complete();
 	});
@@ -145,6 +146,58 @@ function scrape(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "http://www.scielosp.org/scielo.php?script=sci_arttext&pid=S0034-89102007000900015&lang=pt",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
+				"creators": [
+					{
+						"firstName": "P. R.",
+						"lastName": "Telles-Dias",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "S.",
+						"lastName": "Westman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "A. E.",
+						"lastName": "Fernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "M.",
+						"lastName": "Sanchez",
+						"creatorType": "author"
+					}
+				],
+				"date": "12/2007",
+				"DOI": "10.1590/S0034-89102007000900015",
+				"ISSN": "0034-8910",
+				"libraryCatalog": "SciELO",
+				"pages": "94-100",
+				"publicationTitle": "Revista de Saúde Pública",
+				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"volume": "41",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
 	{
 		"type": "web",
 		"url": "http://www.scielo.br/scielo.php?script=sci_arttext&pid=S0104-62762002000200002&lang=pt",
@@ -253,228 +306,6 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Re-pensar el ex opere operato II: Per signa sensibilia significantur (SC 7). Quid enim?",
-				"creators": [
-					{
-						"firstName": "Gonzalo",
-						"lastName": "Guzmán",
-						"creatorType": "author"
-					}
-				],
-				"date": "12/2019",
-				"DOI": "10.4067/S0049-34492019000400457",
-				"ISSN": "0049-3449",
-				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.\n\nPalabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato\n\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\n\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato",
-				"issue": "4",
-				"libraryCatalog": "SciELO",
-				"pages": "457-474",
-				"publicationTitle": "Teología y vida",
-				"shortTitle": "Re-pensar el ex opere operato II",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-				"volume": "60",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "ex opere operato"
-					},
-					{
-						"tag": "liturgy"
-					},
-					{
-						"tag": "performative"
-					},
-					{
-						"tag": "rituality"
-					},
-					{
-						"tag": "sacraments"
-					},
-					{
-						"tag": "semiotics"
-					},
-					{
-						"tag": "symbolic language"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Re-pensar el ex opere operato II: Per signa sensibilia significantur (SC 7). Quid enim?",
-				"creators": [
-					{
-						"firstName": "Gonzalo",
-						"lastName": "Guzmán",
-						"creatorType": "author"
-					}
-				],
-				"date": "12/2019",
-				"DOI": "10.4067/S0049-34492019000400457",
-				"ISSN": "0049-3449",
-				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.\n\nPalabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato\n\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\n\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato",
-				"issue": "4",
-				"libraryCatalog": "SciELO",
-				"pages": "457-474",
-				"publicationTitle": "Teología y vida",
-				"shortTitle": "Re-pensar el ex opere operato II",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-				"volume": "60",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Ex opere operato"
-					},
-					{
-						"tag": "Liturgy"
-					},
-					{
-						"tag": "Rituality"
-					},
-					{
-						"tag": "Sacraments"
-					},
-					{
-						"tag": "Semiotics"
-					},
-					{
-						"tag": "Symbolic language"
-					},
-					{
-						"tag": "Undefinederformative"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "El Papado bajo-medieval, dueño de todas las islas A 70 años de la teoría omni-insular de Luis Weckmann",
-				"creators": [
-					{
-						"firstName": "Luis",
-						"lastName": "Rojas-Donat",
-						"creatorType": "author"
-					}
-				],
-				"date": "03/2020",
-				"DOI": "10.4067/S0049-34492020000100047",
-				"ISSN": "0049-3449",
-				"abstractNote": "El artículo expone la teoría omni-insular fundada en la donación de Constantino. Se concluye que: las menciones a la donación son muy pocas y circunstanciales; si el Papa exigió un censo basado en que tenía potestad sobre todas las islas de Occidente está probado en algunos casos, pero no en todos; el censo parece explicarse por el contexto feudal, el prestigio de ser el sucesor de Pedro y el reconocimiento de la protección apostólica; la intervención de los papas en la expansión ultramarina portuguesa y castellana se funda, primero, en su condición de Vicario de Cristo (potestad apostólica), y segundo, en la doctrina hierocrática del Señorío del Mundo (Dominium Mundi).",
-				"issue": "1",
-				"libraryCatalog": "SciELO",
-				"pages": "47-72",
-				"publicationTitle": "Teología y vida",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
-				"volume": "61",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Potestad apostólica."
-					},
-					{
-						"tag": "Teoría omni-insular"
-					},
-					{
-						"tag": "Undefinedalabras clave\n\t\t:\n\t\tPapado"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "El Papado bajo-medieval, dueño de todas las islas A 70 años de la teoría omni-insular de Luis Weckmann",
-				"creators": [
-					{
-						"firstName": "Luis",
-						"lastName": "Rojas-Donat",
-						"creatorType": "author"
-					}
-				],
-				"date": "03/2020",
-				"DOI": "10.4067/S0049-34492020000100047",
-				"ISSN": "0049-3449",
-				"abstractNote": "El artículo expone la teoría omni-insular fundada en la donación de Constantino. Se concluye que: las menciones a la donación son muy pocas y circunstanciales; si el Papa exigió un censo basado en que tenía potestad sobre todas las islas de Occidente está probado en algunos casos, pero no en todos; el censo parece explicarse por el contexto feudal, el prestigio de ser el sucesor de Pedro y el reconocimiento de la protección apostólica; la intervención de los papas en la expansión ultramarina portuguesa y castellana se funda, primero, en su condición de Vicario de Cristo (potestad apostólica), y segundo, en la doctrina hierocrática del Señorío del Mundo (Dominium Mundi).",
-				"issue": "1",
-				"libraryCatalog": "SciELO",
-				"pages": "47-72",
-				"publicationTitle": "Teología y vida",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
-				"volume": "61",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Potestad apostólica."
-					},
-					{
-						"tag": "Teoría omni-insular"
-					},
-					{
-						"tag": "Undefinedalabras clave\n\t\t:\n\t\tPapado"
-					}
-				],
 				"notes": [],
 				"seeAlso": []
 			}
