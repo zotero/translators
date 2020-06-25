@@ -87,7 +87,7 @@ function postProcess(doc, item) {
 		if (doiMatches) {
 			var secondPart = doiMatches[2];
 			if (item.pages === secondPart)
-			item.pages = "";
+				item.pages = "";
 		}
 	}
 }
@@ -141,9 +141,9 @@ function scrape(doc, url) {
 				item.abstractNote += "\n\n" + ubtueabstract;
 			}
 
-			var tags = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
+			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tags) {
-				item.tags = tags.split(",");
+				item.tags = tagentry.split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
@@ -167,8 +167,7 @@ function scrape(doc, url) {
 			if (!item.tags || item.tags.length === 0) {
 				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
 				if (embedded)
-				item.tags = embedded.split(",");
-
+					item.tags = embedded.split(",");
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
 					if (tags)
@@ -180,7 +179,6 @@ function scrape(doc, url) {
 				if (articleType[0].textContent.trim().match(/Book Review/))
 				item.tags.push("Book Review");
 			}
-
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
