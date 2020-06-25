@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a')
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a');
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -57,9 +57,9 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	if (item.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
-			let firstandlastpages = item.pages.split('–'); //Z.debug(firstandlastpages)
-				item.pages = firstandlastpages[0] + '-' + firstandlastpages[2] ;
-		}
+		let firstandlastpages = item.pages.split('–'); //Z.debug(firstandlastpages)
+				item.pages = firstandlastpages[0] + '-' + firstandlastpages[2];
+	}
 	item.complete();
 }
 
@@ -89,4 +89,3 @@ function doWeb(doc, url) {
 	} else
 		invokeEMTranslator(doc, url);
 }
-
