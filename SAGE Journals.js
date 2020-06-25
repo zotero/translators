@@ -83,11 +83,11 @@ function doWeb(doc, url) {
 function postProcess(doc, item) {
 	// remove partial DOIs stored in the pages field of online-first articles
 	if (item.DOI) {
-		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&\'<>])\S)+))\b/);
+		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
 		if (doiMatches) {
 			var secondPart = doiMatches[2];
 			if (item.pages === secondPart)
-				item.pages = "";
+			item.pages = "";
 		}
 	}
 }
@@ -111,7 +111,7 @@ function scrape(doc, url) {
 		//dates are present.
 		//Z.debug(text);
 		if (text.indexOf("DA  - ") > -1) {
-			text = text.replace(/Y1  - .*\r?\n/, '');
+			text = text.replace(/Y1 - .*\r?\n/, '');
 		}
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -136,9 +136,9 @@ function scrape(doc, url) {
 			}
 
 			// ubtue: also add translated abstracts
-			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
-			if (abstract) {
-				item.abstractNote += "\n\n" + abstract;
+			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			if (ubtueabstract) {
+				item.abstractNote += "\n\n" + ubtueabstract;
 			}
 
 			var tags = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
@@ -148,7 +148,7 @@ function scrape(doc, url) {
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
 				for (let r of articleType) {
-				let reviewDOIlink = r.innerHTML;
+					let reviewDOIlink = r.innerHTML;
 					if (reviewDOIlink.match(/Review Article/)) {
 						item.tags.push('Book Review');
 					}
@@ -167,18 +167,18 @@ function scrape(doc, url) {
 			if (!item.tags || item.tags.length === 0) {
 				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
 				if (embedded)
-					item.tags = embedded.split(",");
+				item.tags = embedded.split(",");
 
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
 					if (tags)
-						item.tags = tags.map(n => n.textContent);
+					item.tags = tags.map(n => n.textContent);
 				}
 			}
 
 			if (articleType && articleType.length > 0) {
 				if (articleType[0].textContent.trim().match(/Book Review/))
-					item.tags.push("Book Review");
+				item.tags.push("Book Review");
 			}
 
 			item.notes = [];
