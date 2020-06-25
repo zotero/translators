@@ -6,7 +6,7 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-06-23 12:51:51"
@@ -34,18 +34,18 @@
 */
 
 
-function detectWeb(doc, url) {
-	if (getSearchResults(doc))
-		return "multiple";
+function detectWeb(doc) {
+	if (getSearchResults(doc)) return "multiple";
 	else if (ZU.xpath(doc, '//h1[@id="docTitle"]').length === 1) {
 		return "journalArticle";
 	}
+	return false;
 }
 
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//li[contains(@class,"textes")]//div[@class="title"]//a')
+	var rows = ZU.xpath(doc, '//li[contains(@class,"textes")]//div[@class="title"]//a');
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -56,7 +56,7 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-function invokeEmbeddedMetadataTranslator(doc, url) {
+function invokeEmbeddedMetadataTranslator(doc) {
 	let translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
@@ -65,10 +65,8 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		if (abstracts) {
 			abstracts = abstracts.map(x => x.textContent.trim());
 			for (let i = 0; i < abstracts.length; ++i) {
-				if (i == 0)
-					item.abstractNote = abstracts[i];
-				else
-					item.notes.push({ note: "abs:" + abstracts[i] });
+				if (i == 0) item.abstractNote = abstracts[i];
+				else item.notes.push({ note: "abs:" + abstracts[i] });
 			}
 		}
 
@@ -82,8 +80,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		}
 
 		let section = ZU.xpathText(doc, '//div[contains(@class, "souspartie")]//span[@class="title"]');
-		if (section && section.match(/(Recensions|Notes de lecture)/))
-			item.tags.push("Book Review");
+		if (section && section.match(/(Recensions|Notes de lecture)/)) item.tags.push("Book Review");
 		item.itemType = "journalArticle";
 		item.complete();
 	});
@@ -94,7 +91,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
-				return true;
+				return false;
 			}
 			let articles = [];
 			for (let i in items) {
@@ -102,8 +99,7 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
 		});
-	} else
-		invokeEmbeddedMetadataTranslator(doc, url);
+	} else invokeEmbeddedMetadataTranslator(doc, url);
 }
 /** BEGIN TEST CASES **/
 var testCases = [
