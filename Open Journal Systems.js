@@ -124,8 +124,7 @@ function scrape(doc, _url) {
 		}
 
 		// clear issue if it's zero
-		if (item.issue === "0")
-			item.issue = "";
+		if (item.issue === "0") item.issue = "";
 
 		var pdfAttachment = false;
 
@@ -151,15 +150,13 @@ function scrape(doc, _url) {
 		if (item.pages) {
 			var matches = item.pages.match(/^([0-9]+)-([0-9]+)-([0-9]+)$/);
 			// only update if the last two captures are the same, otherwise it's ambiguous
-			if (matches && matches[2] === matches[3])
-				item.pages = matches[1] + "-" + matches[2];
+			if (matches && matches[2] === matches[3]) item.pages = matches[1] + "-" + matches[2];
 		}
 
 		let articleType = ZU.xpathText(doc, '//meta[@name="DC.Type.articleType"]/@content');
 		if (articleType) {
 			articleType = articleType.trim();
-			if (articleType.match(/Book Reviews?/))
-				item.tags.push("Book Reviews");
+			if (articleType.match(/Book Reviews?/)) item.tags.push("Book Reviews");
 		}
 
 		item.complete();
