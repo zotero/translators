@@ -171,13 +171,13 @@ function scrape(doc, url) {
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
 					if (tags)
-					item.tags = tags.map(n => n.textContent);
+						item.tags = tags.map(n => n.textContent);
 				}
 			}
 
 			if (articleType && articleType.length > 0) {
 				if (articleType[0].textContent.trim().match(/Book Review/))
-				item.tags.push("Book Review");
+					item.tags.push("Book Review");
 			}
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
