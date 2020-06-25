@@ -383,6 +383,10 @@ var citeKeyConversions = {
 	},
 	t: function (flags, item) {
 		if (item.title) {
+      var first_word = item.title.toLowerCase().split(/\s+/g)[0];
+      if (first_word.includes("-")) {
+        return first_word;
+      }
 			return item.title.toLowerCase().replace(citeKeyTitleBannedRe, "").split(/\s+/g)[0];
 		}
 		return "notitle";
