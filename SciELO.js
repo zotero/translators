@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-25 10:05:30"
+	"lastUpdated": "2020-06-25 10:18:23"
 }
 
 /*
@@ -94,14 +94,14 @@ function postProcess(doc, item) {
 			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
 		}
 	} else {
-		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)]');
+		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)] | /html/body/div/div[2]/div[2]/p[3]');
 		if (abstractParagraphs && abstractParagraphs.length > 0)
 			item.abstractNote = abstractParagraphs[0].textContent;
 	}
 
 	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
 	if (!keywords || keywords.length == 0)
-		keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
+		keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 
 	if (keywords && keywords.length > 0) {
 		item.tags = keywords[0].textContent
@@ -376,6 +376,104 @@ var testCases = [
 					},
 					{
 						"tag": "Undefinederformative"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "El Papado bajo-medieval, dueño de todas las islas A 70 años de la teoría omni-insular de Luis Weckmann",
+				"creators": [
+					{
+						"firstName": "Luis",
+						"lastName": "Rojas-Donat",
+						"creatorType": "author"
+					}
+				],
+				"date": "03/2020",
+				"DOI": "10.4067/S0049-34492020000100047",
+				"ISSN": "0049-3449",
+				"abstractNote": "El artículo expone la teoría omni-insular fundada en la donación de Constantino. Se concluye que: las menciones a la donación son muy pocas y circunstanciales; si el Papa exigió un censo basado en que tenía potestad sobre todas las islas de Occidente está probado en algunos casos, pero no en todos; el censo parece explicarse por el contexto feudal, el prestigio de ser el sucesor de Pedro y el reconocimiento de la protección apostólica; la intervención de los papas en la expansión ultramarina portuguesa y castellana se funda, primero, en su condición de Vicario de Cristo (potestad apostólica), y segundo, en la doctrina hierocrática del Señorío del Mundo (Dominium Mundi).",
+				"issue": "1",
+				"libraryCatalog": "SciELO",
+				"pages": "47-72",
+				"publicationTitle": "Teología y vida",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+				"volume": "61",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Potestad apostólica."
+					},
+					{
+						"tag": "Teoría omni-insular"
+					},
+					{
+						"tag": "Undefinedalabras clave\n\t\t:\n\t\tPapado"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "El Papado bajo-medieval, dueño de todas las islas A 70 años de la teoría omni-insular de Luis Weckmann",
+				"creators": [
+					{
+						"firstName": "Luis",
+						"lastName": "Rojas-Donat",
+						"creatorType": "author"
+					}
+				],
+				"date": "03/2020",
+				"DOI": "10.4067/S0049-34492020000100047",
+				"ISSN": "0049-3449",
+				"abstractNote": "El artículo expone la teoría omni-insular fundada en la donación de Constantino. Se concluye que: las menciones a la donación son muy pocas y circunstanciales; si el Papa exigió un censo basado en que tenía potestad sobre todas las islas de Occidente está probado en algunos casos, pero no en todos; el censo parece explicarse por el contexto feudal, el prestigio de ser el sucesor de Pedro y el reconocimiento de la protección apostólica; la intervención de los papas en la expansión ultramarina portuguesa y castellana se funda, primero, en su condición de Vicario de Cristo (potestad apostólica), y segundo, en la doctrina hierocrática del Señorío del Mundo (Dominium Mundi).",
+				"issue": "1",
+				"libraryCatalog": "SciELO",
+				"pages": "47-72",
+				"publicationTitle": "Teología y vida",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+				"volume": "61",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Potestad apostólica."
+					},
+					{
+						"tag": "Teoría omni-insular"
+					},
+					{
+						"tag": "Undefinedalabras clave\n\t\t:\n\t\tPapado"
 					}
 				],
 				"notes": [],
