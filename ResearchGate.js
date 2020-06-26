@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-03-30 15:18:21"
+	"lastUpdated": "2020-06-26 14:15:03"
 }
 
 /*
@@ -35,18 +35,36 @@
 	***** END LICENSE BLOCK *****
 */
 
+var debug = 1;
 
 // attr()/text() v2
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
+	if (debug) {
+		Zotero.debug('url: ' + url);
+	}
+	
 	if (url.includes('/publication/')) {
-		var type = text(doc, 'div.publication-meta strong');
-		if (!type) {
-			// for logged in users (yes, really...)
-			type = text(doc, 'b[data-reactid]');
+		if (debug) {
+			Zotero.debug('Detected something');
+			Zotero.debug('text: ' + text(doc, "span.research-detail-header-section__badge"));
+			Zotero.debug('attr: ' + attr(doc, 'span.research-detail-header-section__badge', 'content'));
 		}
-		type = type.replace('(PDF Available)', '').trim();
+		var type = text(doc, "span.research-detail-header-section__badge");
+		if (!type) {
+			Zotero.debug('trying different way');
+			type = text(doc, "b[research-meta-type]");
+			if (!type) {
+			// for logged in users (yes, really...)
+			Zotero.debug('trying logged in way');
+			type = text(doc, 'b[data-reactid]');
+			}
+		}
+		if (debug) {
+			Zotero.debug('type: ' + type);
+		}
+		//type = type.replace('(PDF Available)', '').trim();
 		switch (type) {
 		case "Data":// until we have a data itemType
 		case "Article":
