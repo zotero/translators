@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-26 14:15:03"
+	"lastUpdated": "2020-06-27 15:12:17"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017 Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,16 +35,16 @@
 	***** END LICENSE BLOCK *****
 */
 
-var debug = 1;
+var debug = 0;
 
 // attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
+function attr(docOrElem, selector, attr, index) {var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null } function text(docOrElem, selector, index){var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null}
 
 function detectWeb(doc, url) {
 	if (debug) {
 		Zotero.debug('url: ' + url);
 	}
-	
+
 	if (url.includes('/publication/')) {
 		if (debug) {
 			Zotero.debug('Detected something');
@@ -57,8 +57,8 @@ function detectWeb(doc, url) {
 			type = text(doc, "b[research-meta-type]");
 			if (!type) {
 			// for logged in users (yes, really...)
-			Zotero.debug('trying logged in way');
-			type = text(doc, 'b[data-reactid]');
+			  Zotero.debug('trying logged in way');
+			  type = text(doc, 'b[data-reactid]');
 			}
 		}
 		if (debug) {
@@ -66,21 +66,21 @@ function detectWeb(doc, url) {
 		}
 		//type = type.replace('(PDF Available)', '').trim();
 		switch (type) {
-		case "Data":// until we have a data itemType
-		case "Article":
-			return "journalArticle";
-		case "Conference Paper":
-			return "conferencePaper";
-		case "Chapter":
-			return "bookSection";
-		case "Thesis":
-			return "thesis";
-		case "Research":
-			return "report";
-		case "Presentation":
-			return "presentation";
-		default:
-			return "book";
+		  case "Data":// until we have a data itemType
+		  case "Article":
+			  return "journalArticle";
+		  case "Conference Paper":
+			  return "conferencePaper";
+		  case "Chapter":
+			  return "bookSection";
+		  case "Thesis":
+			  return "thesis";
+		  case "Research":
+			  return "report";
+		  case "Presentation":
+			  return "presentation";
+		  default:
+			  return "book";
 		}
 	} else if ((url.match('/search(\\?|/)?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -147,7 +147,7 @@ function scrape(doc, url) {
 		if (type == "presentation") text = text.replace('TY  - BOOK', 'TY  - SLIDE');
 		if (type == "journalArticle") text = text.replace('TY  - BOOK', 'TY  - JOUR');
 		if (type == "thesis") text = text.replace('TY  - BOOK', 'TY  - THES');
-		
+
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
