@@ -45,28 +45,15 @@ function attr(docOrElem, selector, attr, index) {
 }
 
 function detectWeb(doc, url) {
-	if (debug) {
-		Zotero.debug('url: ' + url);
-	}
-
 	if (url.includes('/publication/')) {
-		if (debug) {
-			Zotero.debug('Detected something');
-			Zotero.debug('text: ' + text(doc, "span.research-detail-header-section__badge"));
-			Zotero.debug('attr: ' + attr(doc, 'span.research-detail-header-section__badge', 'content'));
-		}
 		var type = text(doc, "span.research-detail-header-section__badge");
 		if (!type) {
-			Zotero.debug('trying different way');
 			type = text(doc, "b[research-meta-type]");
 			if (!type) {
 			// for logged in users (yes, really...)
 				Zotero.debug('trying logged in way');
 				type = text(doc, 'b[data-reactid]');
 			}
-		}
-		if (debug) {
-			Zotero.debug('type: ' + type);
 		}
 		// type = type.replace('(PDF Available)', '').trim();
 		switch (type) {
