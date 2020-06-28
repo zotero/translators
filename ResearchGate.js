@@ -35,7 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-var debug = 0;
 
 // attr()/text() v2
 function attr(docOrElem, selector, attr, index) {
@@ -48,7 +47,7 @@ function detectWeb(doc, url) {
 	if (url.includes('/publication/')) {
 		var type = text(doc, "span.research-detail-header-section__badge");
 		if (!type) {
-			type = text(doc, "b[research-meta-type]");
+			type = text(doc, '[data-testid="research-meta-type"]');
 			if (!type) {
 			// for logged in users (yes, really...)
 				Zotero.debug('trying logged in way');
