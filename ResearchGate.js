@@ -38,7 +38,11 @@
 var debug = 0;
 
 // attr()/text() v2
-function attr(docOrElem, selector, attr, index) {var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null } function text(docOrElem, selector, index){var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null}
+function attr(docOrElem, selector, attr, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null;
+} function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null;
+}
 
 function detectWeb(doc, url) {
 	if (debug) {
@@ -57,32 +61,33 @@ function detectWeb(doc, url) {
 			type = text(doc, "b[research-meta-type]");
 			if (!type) {
 			// for logged in users (yes, really...)
-			  Zotero.debug('trying logged in way');
-			  type = text(doc, 'b[data-reactid]');
+				Zotero.debug('trying logged in way');
+				type = text(doc, 'b[data-reactid]');
 			}
 		}
 		if (debug) {
 			Zotero.debug('type: ' + type);
 		}
-		//type = type.replace('(PDF Available)', '').trim();
+		// type = type.replace('(PDF Available)', '').trim();
 		switch (type) {
-		  case "Data":// until we have a data itemType
-		  case "Article":
-			  return "journalArticle";
-		  case "Conference Paper":
-			  return "conferencePaper";
-		  case "Chapter":
-			  return "bookSection";
-		  case "Thesis":
-			  return "thesis";
-		  case "Research":
-			  return "report";
-		  case "Presentation":
-			  return "presentation";
-		  default:
-			  return "book";
+			case "Data":// until we have a data itemType
+			case "Article":
+				return "journalArticle";
+			case "Conference Paper":
+				return "conferencePaper";
+			case "Chapter":
+				return "bookSection";
+			case "Thesis":
+				return "thesis";
+			case "Research":
+				return "report";
+			case "Presentation":
+				return "presentation";
+			default:
+				return "book";
 		}
-	} else if ((url.match('/search(\\?|/)?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
+	}
+	else if ((url.match('/search(\\?|/)?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -119,7 +124,8 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, scrape);
 			return true;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -141,8 +147,8 @@ function scrape(doc, url) {
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text);
 		// fix wrong itemType information in RIS
-		if (type == "bookSection") text = text.replace('TY  - BOOK', 'TY  - CHAP');
-		if (type == "conferencePaper") text = text.replace('TY  - BOOK', 'TY  - CONF');
+		if (type == "bookSection") text = text.replace('TY	- BOOK', 'TY	- CHAP');
+		if (type == "conferencePaper") text = text.replace('TY	- BOOK', 'TY	- CONF');
 		if (type == "report") text = text.replace('TY  - BOOK', 'TY  - RPRT');
 		if (type == "presentation") text = text.replace('TY  - BOOK', 'TY  - SLIDE');
 		if (type == "journalArticle") text = text.replace('TY  - BOOK', 'TY  - JOUR');
