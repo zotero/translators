@@ -135,7 +135,7 @@ function scrape(doc, url) {
 			}
 
 			// ubtue: also add translated abstracts
-			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 			if (ubtueabstract) {
 				item.abstractNote += "\n\n" + ubtueabstract;
 			}
