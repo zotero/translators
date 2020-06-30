@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-29 05:39:46"
+	"lastUpdated": "2020-06-22 09:16:55"
 }
 
 /*
@@ -35,7 +35,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
 
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
@@ -89,7 +88,7 @@ function scrape(doc, url) {
 	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 	var doi = match[1];
 
-	var baseUrl = url.match(/https?:\/\/[^\/]+/)[0];
+	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
 	var postUrl = baseUrl + '/action/downloadCitation';
 	var postBody = 	'downloadFileName=citation&' +
 					'direct=true&' +
@@ -162,7 +161,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
 	if (sectionheading) {
 		sectionheading = sectionheading.trim();
-		if (sectionheading.match(/^(Book )?Reviews?$/i))
+		if (sectionheading.match(/^(Book )?(Reviews|Symposium)?$/i))
 			item.tags.push("Book Reviews");
 	}
 
@@ -187,6 +186,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 
 	item.complete();
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [

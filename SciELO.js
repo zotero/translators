@@ -78,14 +78,13 @@ function postProcess(doc, item) {
 	// the author fields are repeated in the website's embedded metadata
 	// so, the duplicates need to be removed
 	item.creators = item.creators.reduce((unique, o) => {
-		if(!unique.some(obj => obj.firstName === o.firstName && obj.lastName === o.lastName &&
-			obj.creatorType === o.creatorType && obj.fieldMode === o.fieldMode)) {
-		  unique.push(o);
+		if(!unique.some(obj => obj.firstName === o.firstName && obj.lastName === o.lastName && obj.creatorType === o.creatorType && obj.fieldMode === o.fieldMode)) {
+			unique.push(o);
 		}
 		return unique;
-	},[]);
+	}, []);
 
-	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")]');
+	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")] | //div[@class="trans-abstract"]//p[not(@class="sec")]');
 	if (abstractParagraphs && abstractParagraphs.length > 0) {
 		item.abstractNote = "";
 		for (var paragraph in abstractParagraphs) {
@@ -93,41 +92,35 @@ function postProcess(doc, item) {
 			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
 		}
 	} else {
-		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)]');
-		if (abstractParagraphs && abstractParagraphs.length > 0)
-			item.abstractNote = abstractParagraphs[0].textContent;
+		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)] | /html/body/div/div[2]/div[2]/p[3]');
+		if (abstractParagraphs && abstractParagraphs.length > 0) item.abstractNote = abstractParagraphs[0].textContent;
 	}
-
 	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
-	if (!keywords || keywords.length == 0)
-		keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..')
-
+	if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 	if (keywords && keywords.length > 0) {
 		item.tags = keywords[0].textContent
 						.trim()
 						.replace(/\n/g, "")
-						.replace(/keywords\s*\:\s*/ig, "")
+						.replace(/keywords\s*:\s*/ig, "")
 						.split(";")
-						.map(function(x) { return x.trim(); });
+						.map(function(x) { return x.trim(); })
+						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
 	}
 
 	if (item.date) {
 		let dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
-		if (dateMatches && dateMatches[1] == "00")
-			item.date = dateMatches[2];
+		if (dateMatches && dateMatches[1] == "00") item.date = dateMatches[2];
 	}
 
 	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()');
-	if (titleSpanMatch)
-		titleSpanMatch = titleSpanMatch.match(/\d{4},\sn\.(\d+),\spp/);
-
+	if (titleSpanMatch) titleSpanMatch = titleSpanMatch.match(/\d{4},\sn\.(\d+),\spp/);
 	if (titleSpanMatch) {
 		let volume = item.volume;
 		item.volume = item.issue;
 		item.issue = volume;
 	}
 
-	item.libraryCatalog = "SciELO"
+	item.libraryCatalog = "SciELO";
 }
 
 

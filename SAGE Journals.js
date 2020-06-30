@@ -9,29 +9,23 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-07 15:10:35"
+	"lastUpdated": "2020-06-23 11:43:53"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-
 	Copyright © 2016 Philipp Zumstein
-
 	This file is part of Zotero.
-
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
-
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
-
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
 	***** END LICENSE BLOCK *****
 */
 
@@ -42,7 +36,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
+	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.') || url.includes('/doi/10.')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -89,11 +83,10 @@ function doWeb(doc, url) {
 function postProcess(doc, item) {
 	// remove partial DOIs stored in the pages field of online-first articles
 	if (item.DOI) {
-		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&\'<>])\S)+))\b/);
+		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
 		if (doiMatches) {
 			var secondPart = doiMatches[2];
-			if (item.pages === secondPart)
-				item.pages = "";
+			if (item.pages === secondPart) item.pages = "";
 		}
 	}
 }
@@ -107,6 +100,7 @@ function scrape(doc, url) {
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
+	
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
@@ -116,9 +110,8 @@ function scrape(doc, url) {
 		//dates are present.
 		//Z.debug(text);
 		if (text.indexOf("DA  - ") > -1) {
-			text = text.replace(/Y1  - .*\r?\n/, '');
+			text = text.replace(/Y1 - .*\r?\n/, '');
 		}
-
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -142,16 +135,24 @@ function scrape(doc, url) {
 			}
 
 			// ubtue: also add translated abstracts
-			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
-			if (abstract) {
-				item.abstractNote += "\n\n" + abstract;
+			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
+			if (ubtueabstract) {
+				item.abstractNote += "\n\n" + ubtueabstract;
 			}
 
-			var tags = ZU.xpathText(doc, '//kwd-group[1]');
+			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tags) {
-				item.tags = tags.split(",");
+				item.tags = tagentry.split(",");
 			}
-
+			// ubtue: add tags "Book Review" if "Review Article"
+			if (articleType) {
+				for (let r of articleType) {
+					let reviewDOIlink = r.innerHTML;
+					if (reviewDOIlink.match(/Review Article/)) {
+						item.tags.push('Book Review');
+					}
+				}
+			}
 			// Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
@@ -164,21 +165,16 @@ function scrape(doc, url) {
 			// scrape tags
 			if (!item.tags || item.tags.length === 0) {
 				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-				if (embedded)
-					item.tags = embedded.split(",");
-
+				if (embedded) item.tags = embedded.split(",");
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
-					if (tags)
-						item.tags = tags.map(n => n.textContent);
+					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
 
 			if (articleType && articleType.length > 0) {
-				if (articleType[0].textContent.trim().match(/Book Review/))
-					item.tags.push("Book Review");
+				if (articleType[0].textContent.trim().match(/Book Review/)) item.tags.push("Book Review");
 			}
-
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({

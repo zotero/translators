@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-05-27 13:33:28"
+	"lastUpdated": "2020-06-24 13:14:31"
 }
 
 function detectWeb(doc, url) {
@@ -185,30 +185,31 @@ function complementItem(doc, item) {
 
 		item.abstractNote = abstract.trim();
 	} else {
-		let abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
-		if (!abs) {
-			abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
+		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
+		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
+		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
+		let abs = "";
+		for (let i = 0; i < sectionTitles.length; ++i) {
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
+			abs += titleText + ": " + sectionBody + "\n\n";
+			item.abstractNote = abs.trim();
 		}
-		if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
 	}
 
-	// add tags
 	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
-	if (docType.match(/(Book R|reviews?)|(Review P|paper)/))
-		item.tags.push("Book Reviews");
-
+	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
 	return item;
 }
 
 function shouldPostprocessWithEmbeddedMetadata(item) {
-	if (!item.pages)
-		return true;
-
+	if (!item.pages) return true;
 	return false;
 }
 
@@ -244,14 +245,14 @@ function scrape(doc, url) {
 				mimeType: "application/pdf"
 			});
 
-			if (shouldPostprocessWithEmbeddedMetadata(item))
-				postprocessWithEmbeddedMetadataTranslator(doc, item);
+			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
 			else
 				item.complete();
 		});
 		translator.translate();
 	});
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -653,6 +654,81 @@ var testCases = [
 					},
 					{
 						"tag": "Economic anthropology/sociology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-019-00556-z",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ist unerfüllter Kinderwunsch ein Leiden? – Der Leidensbegriff im Kontext der Kinderwunschtherapie",
+				"creators": [
+					{
+						"lastName": "Westermann",
+						"firstName": "Anna Maria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alkatout",
+						"firstName": "Ibrahim",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-06-01",
+				"DOI": "10.1007/s00481-019-00556-z",
+				"ISSN": "1437-1618",
+				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden., Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.\n\nDefinition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Arguments: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Conclusion: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account.",
+				"issue": "2",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "125-139",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Ist unerfüllter Kinderwunsch ein Leiden?",
+				"url": "https://doi.org/10.1007/s00481-019-00556-z",
+				"volume": "32",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Infertility"
+					},
+					{
+						"tag": " Kinderwunschbehandlung"
+					},
+					{
+						"tag": " Leidenslinderung"
+					},
+					{
+						"tag": " Relief of suffering"
+					},
+					{
+						"tag": " Reproductive medicine"
+					},
+					{
+						"tag": " Reproduktionsmedizin"
+					},
+					{
+						"tag": " Suffering"
+					},
+					{
+						"tag": " Unerfüllter Kinderwunsch"
+					},
+					{
+						"tag": " Unfulfilled desire to have children"
+					},
+					{
+						"tag": "Leiden"
 					}
 				],
 				"notes": [],
