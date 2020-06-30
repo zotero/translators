@@ -1,15 +1,15 @@
 {
 	"translatorID": "a288df9e-ce56-40ca-a205-bc32182ced4c",
-	"label": "ubtue_tidsskrift.dk",
+	"label": "ubtue_Tidsskrift",
 	"creator": "Madeesh Kannan and Timotheus Kim",
 	"target": "^https?://tidsskrift.dk/[^/]+/(article|issue)/view.*/[0-9]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 90,
+	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-25 15:00:12"
+	"lastUpdated": "2020-06-30 09:41:18"
 }
 
 /*
@@ -66,7 +66,8 @@ function postProcess(doc, item) {
 				item.abstractNote = matchFirstAbstract[2].trim();
 		}
 	}
-	let matchFirstAbstract = item.abstractNote.match(/\s.*/);
+	
+	var matchFirstAbstract = item.abstractNote.match(/\s.*/);
 	let matchSecondAbstract = item.abstractNote.match(/(DANSK RESUMÉ|DANSK RESUME).*/);
 	if (matchSecondAbstract) {
 		item.notes.push({
@@ -83,7 +84,7 @@ function postProcess(doc, item) {
 	let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
 	if (sidebarVals && sidebarVals.length) {
 		for (let val in sidebarVals) {
-			let node = sidebarVals[val];Z.debug(node.textContent);
+			let node = sidebarVals[val]; //Z.debug(node.textContent);
 			if (node.textContent.trim().match(/Anmeldelser|Review-artikel/)) {
 				item.tags.push('Book Review');
 				break;
@@ -102,8 +103,7 @@ function doWeb(doc, url) {
 		postProcess(doc, i);
 	});
 	translator.translate();
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
