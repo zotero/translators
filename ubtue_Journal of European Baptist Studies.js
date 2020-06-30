@@ -5,11 +5,11 @@
 	"target": "^https?://ojs2\\.uni-tuebingen\\.de/ojs/index\\.php/jebs/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 150,
+	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-24 20:21:22"
+	"lastUpdated": "2020-06-30 09:23:48"
 }
 
 /*
@@ -34,12 +34,13 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/article/') 
+	if (url.includes('/article/')) {
 		return "journalArticle";
-	else if (getSearchResults(doc, true)) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
+	} else {
+		return false;
 	}
-	return false;
 }
 
 function getSearchResults(doc) {
