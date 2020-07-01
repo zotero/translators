@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-30 09:41:18"
+	"lastUpdated": "2020-07-01 08:26:27"
 }
 
 /*
@@ -48,13 +48,13 @@ function postProcess(doc, item) {
 		if (abstractParagraphs && abstractParagraphs.length > 0) {
 			for (var paragraph in abstractParagraphs) {
 				var extractedText = ZU.xpathText(abstractParagraphs[paragraph], ".").trim();
-				if (paragraph == 0) item.abstractNote = extractedText;
+				if (paragraph === 0) item.abstractNote = extractedText;
 				// check if it's in English
 				var prologue = extractedText.match(/^(\w)*\s\w*:(.*)/i);
 				if (prologue) {
 					var language = prologue[1];
 					if (language.match(/english/i)) {
-						item.abstractNote = prologue[2].trim();
+						item.abstractNote = prologue[2].trim(); 
 						break;
 					}
 				}
@@ -67,19 +67,21 @@ function postProcess(doc, item) {
 		}
 	}
 	
-	var matchFirstAbstract = item.abstractNote.match(/\s.*/);
+	var matchFirstAbstract = item.abstractNote.match(/\s+.*/);//Z.debug(matchFirstAbstract)
 	let matchSecondAbstract = item.abstractNote.match(/(DANSK RESUMÉ|DANSK RESUME).*/);
 	if (matchSecondAbstract) {
 		item.notes.push({
 			note: "abs:" + matchSecondAbstract,
 		});
 	}
+
+	item.notes = item.notes[0].note.replace(/(DANSK RESUMÉ: |DANSK RESUME: )/, '');
+	item.abstractNote = matchFirstAbstract[0].replace(/ENGLISH ABSTRACT:/, '');
 	
 	// swap Band and Ausgabe
 	let issue = item.issue;
 	item.issue = item.volume;
 	item.volume = issue;
-	item.abstractNote = matchFirstAbstract;
 	
 	let sidebarVals = ZU.xpath(doc, '//div[@class="value"]');
 	if (sidebarVals && sidebarVals.length) {
@@ -91,7 +93,6 @@ function postProcess(doc, item) {
 			}
 		}
 	}
-	
 	item.complete();
 }
 
@@ -327,6 +328,139 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/120397",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Religion og medier i et religionsvidenskabeligt perspektiv",
+				"creators": [
+					{
+						"firstName": "Armin W.",
+						"lastName": "Geertz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Laura",
+						"lastName": "Feldt",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/05/18",
+				"ISSN": "1904-8181",
+				"abstractNote": "The religion and media field has grown strongly as an academic subject in recent years, especially regarding studies of religion in contemporary mass media, TV, film, internet, social media etc., and in relation to popular culture. Scholars of religion have also begun to pay attention to the important role that media, mediation, and mediatization have played in the history of religions. It is this growing awareness that we wish to examine here. Our focus is not intended to signal the abandonment of interest in contemporary religion, media and popular culture; rather we wish to place this development in the deep and broad perspective of the study of religion. Media, mediation, and the more recent phenomenon of mediatization, are processes that are inseparable from the ways in which religion functions and is passed on from generation to generation. Thus, from a general study of religion perspective, we promote the argument that media and mediation processes are central aspects of how all religions function because all communication, including religious communication, can be seen as mediated. In this article, we reflect on and discuss the roles that media have played in the deep history of religions and continue to play in the present by bringing religion and media studies in conversation with cultural evolution and cognitive perspectives.",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "1-32",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Ophavsret (c)",
+				"url": "https://tidsskrift.dk/rvt/article/view/120397",
+				"volume": "70",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "cognition"
+					},
+					{
+						"tag": "evolution."
+					},
+					{
+						"tag": "history"
+					},
+					{
+						"tag": "media"
+					},
+					{
+						"tag": "mediation"
+					},
+					{
+						"tag": "religion"
+					}
+				],
+				"notes": [
+					"abs:Religion og medier er blomstret stærkt op som emnefelt i de seneste år, særligt med fokus på religion i samtidens massemedier, tv, film, internet, sociale medier m.m. og i relation til populærkultur. Samtidigt er religionsforskere blevet opmærksomme på at medier og mediering har spillet vigtige roller for religionshistorien og det er dén udvikling vi her vil gribe fat i. Dermed ønsker vi ikke på nogen måde at signalere en opgiven af interessen for religion, medier og populærkultur i samtiden, men snarere at vi ønsker at indsætte denne udvikling i et langt og bredt religionsvidenskabeligt perspektiv. Medier og mediering er uadskilleligt fra hvordan religion fungerer og videreføres fra generation til generation. Derfor anlægger vi det overordnede perspektiv her, at medier og mediering udgør centrale aspekter af hvordan alle religioner fungerer, da al kommunikation, inklusiv religiøs kommunikation, kan anskues som medieret. I denne artikel reflekterer vi over og diskuterer den rolle medier, mediering og medialisering har spillet i religionshistorien og i samtiden bl.a. med inddragelse af kulturevolutionære og kognitive perspektiver.,DANSK RESUMÉ"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/120512",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Religion, fantasyfilm og fantastiske væsener:",
+				"creators": [
+					{
+						"firstName": "Laura",
+						"lastName": "Feldt",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/05/25",
+				"DOI": "10.7146/rt.v0i70.120512",
+				"ISSN": "1904-8181",
+				"abstractNote": "This article discusses the nexus of religion and media on the basis of an analysis of one example of religion in popular culture: the expansion of J.K. Rowling’s Harry Potter series in the book Fantastic Beasts and Where to Find Them (2001) and the subsequent film by the same title connected to the book (directed by David Yates, screenplay by J.K. Rowling 2016). I present a study of religion-based, media-focused approach to film analysis that distinguishes between verbal and non-verbal aspects of mediation. The analysis treats the mediation of religion – traditional religion, magic and monstrous beings – in the film, as well as the mediality of the film. The analysis shows that the film forms part of a broader trend that portrays traditional religion as ossified and authoritative, while magic, monsters and green religion are represented as fascinating and attractive. Moreover, I argue that the mediality of the film sustains a blurring of boundaries between worlds in terms of the film-internal world structure, in terms of the diegetic vs. the afilmic world, and in terms of the hu-man vs. the nonhuman world. The key argument of the article is that pop-cultural me-dia constitute an important arena for religion, as media such as fantasy films both re-flect and form religious transformations today. This arena needs more attention in the study of religion.",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "1-25",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Ophavsret (c) 2020 Forfatter og Tidsskrift",
+				"shortTitle": "Religion, fantasyfilm og fantastiske væsener",
+				"url": "https://tidsskrift.dk/rvt/article/view/120512",
+				"volume": "70",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Fantastic Beasts"
+					},
+					{
+						"tag": "Harry Potter"
+					},
+					{
+						"tag": "Religion og populærkultur"
+					},
+					{
+						"tag": "fantasyfilm"
+					},
+					{
+						"tag": "grøn religion"
+					},
+					{
+						"tag": "magi"
+					},
+					{
+						"tag": "medier"
+					},
+					{
+						"tag": "samtidsreligion"
+					}
+				],
+				"notes": [
+					"abs:Denne artikel diskuterer religion og medier ud fra en analyse af et eksempel på religion i populærkultur, nemlig en videreudvikling relateret til J.K. Row-lings Harry Potter univers: udgivelsen af bogen Fantastic Beasts and Where to Find Them (2001), en bog der er fiktivt indlejret som undervisningsbog på Hogwarts School of Wizardry and Witchcraft, og den senere filmatisering der knytter sig til bo-gen, Fantastic Beasts and Where to Find Them (instrueret af David Yates, screenplay af J.K. Rowling 2016). Artiklen præsenterer en religionsvidenskabelig, mediefokuseret tilgang til filmanalyse, der inkluderer både verbale og non-verbale medierings-aspekter. Analysen behandler fremstillingen af religion – hhv. traditionel religion, magi og det monstrøse – i det filmiske univers, samt filmens medialitet. Analysen viser, at filmen indlejrer sig i en bredere trend, hvor traditionel religion fremstilles som forstenet og autoritær, mens magi, monstre og grøn religion fremstilles positivt og tiltrækkende, samt endvidere at filmens medialitet understøtter en udviskning af grænserne mellem verdener både i den tekst-interne verdensstruktur, mellem den diegetiske og den afilmi-ske verden, samt mellem den humane og den non-humane verden. Artiklen argumente-rer grundlæggende for at populærkulturelle medier såsom fantasyfilm udgør en vigtig arena for religion, og at denne arena bør behandles religionsvidenskabeligt, da den både afspejler og former religiøse forandringer i samtiden.,DANSK RESUME"
+				],
 				"seeAlso": []
 			}
 		]

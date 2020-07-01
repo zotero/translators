@@ -1,15 +1,15 @@
 {
 	"translatorID": "8011b266-12b6-42db-815c-95ecdc8736f2",
-	"label": "ubtue_Jahrbuchs für Christliche Sozialwissenschaften",
+	"label": "ubtue_Jahrbuch für Christliche Sozialwissenschaften",
 	"creator": "Timotheus Kim",
 	"target": "^https?://(www)?\\.uni-muenster\\.de/Ejournals/index\\.php/jcsw",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 150,
+	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-24 21:41:22"
+	"lastUpdated": "2020-07-01 12:08:46"
 }
 
 /*
@@ -70,11 +70,10 @@ function postProcess(doc, item) {
 	item.Date = text(doc, '.published .value');
 	//ToDO scrape englisch abstract ZU.doGet?
 	item.abstractNote = text(doc, '#pkp_content_main p');
-	//ToDO replace methode not working e.g. .replace('+%E2%80%93+', '-')
 	let rowpages = doc.querySelectorAll('.Z3988');
 	for (let rowpage of rowpages) {
-		let pages = rowpage.title;
-		item.pages = pages.match(/\d{1,3}\+%E2%80%93\+\d{1,3}/);
+		let pagestext = rowpage.title;
+		item.pages = pagestext.match(/\d{1,3}\+%E2%80%93\+\d{1,3}|rft\.pages=\d+-\d+/)[0].replace(/rft\.pages=/, '').replace(/\+%E2%80%93\+/, '-');
 	}
 	
 	item.ISSN = "2196-6265";
