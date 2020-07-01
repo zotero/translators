@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-22 09:16:55"
+	"lastUpdated": "2020-07-01 08:54:55"
 }
 
 /*
@@ -90,7 +90,7 @@ function scrape(doc, url) {
 
 	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
 	var postUrl = baseUrl + '/action/downloadCitation';
-	var postBody = 	'downloadFileName=citation&' +
+	var postBody = 'downloadFileName=citation&' +
 					'direct=true&' +
 					'include=abs&' +
 					'doi=';
@@ -161,7 +161,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
 	if (sectionheading) {
 		sectionheading = sectionheading.trim();
-		if (sectionheading.match(/^(Book )?(Reviews|Symposium)?$/i))
+		if (sectionheading.match(/^(Book )?(Reviews|Symposium)?/i))
 			item.tags.push("Book Reviews");
 	}
 
@@ -571,6 +571,50 @@ var testCases = [
 					"credibility",
 					"performance auditing",
 					"source"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/14755610.2019.1572099",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "(Un)believing in modern society: religion, spirituality, and religious-secular competition",
+				"creators": [
+					{
+						"firstName": "Claire",
+						"lastName": "Wanless",
+						"creatorType": "author"
+					}
+				],
+				"date": "Januar 2, 2019",
+				"DOI": "10.1080/14755610.2019.1572099",
+				"ISSN": "1475-5610",
+				"issue": "1",
+				"itemID": "doi:10.1080/14755610.2019.1572099",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "124-128",
+				"publicationTitle": "Culture and Religion",
+				"shortTitle": "(Un)believing in modern society",
+				"url": "https://doi.org/10.1080/14755610.2019.1572099",
+				"volume": "20",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Reviews"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
