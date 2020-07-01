@@ -5,11 +5,11 @@
 	"target": "^https?://tidsskrift.dk/[^/]+/(article|issue)/view.*/[0-9]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 90,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-01 08:26:27"
+	"lastUpdated": "2020-07-01 14:36:58"
 }
 
 /*
@@ -75,7 +75,7 @@ function postProcess(doc, item) {
 		});
 	}
 
-	item.notes = item.notes[0].note.replace(/(DANSK RESUMÉ: |DANSK RESUME: )/, '');
+	item.notes = item.notes[0].note.replace(/(DANSK RESUMÉ: |DANSK RESUME: |,DANSK RESUMÉ|,DANSK RESUME)/g, '');
 	item.abstractNote = matchFirstAbstract[0].replace(/ENGLISH ABSTRACT:/, '');
 	
 	// swap Band and Ausgabe
@@ -147,76 +147,6 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://tidsskrift.dk/rvt/article/view/120512",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Religion, fantasyfilm og fantastiske væsener:",
-				"creators": [
-					{
-						"firstName": "Laura",
-						"lastName": "Feldt",
-						"creatorType": "author"
-					}
-				],
-				"date": "2020/05/25",
-				"DOI": "10.7146/rt.v0i70.120512",
-				"ISSN": "1904-8181",
-				"abstractNote": "\n\t\t\t\t\tENGLISH ABSTRACT: This article discusses the nexus of religion and media on the basis of an analysis of one example of religion in popular culture: the expansion of J.K. Rowling’s Harry Potter series in the book Fantastic Beasts and Where to Find Them (2001) and the subsequent film by the same title connected to the book (directed by David Yates, screenplay by J.K. Rowling 2016). I present a study of religion-based, media-focused approach to film analysis that distinguishes between verbal and non-verbal aspects of mediation. The analysis treats the mediation of religion – traditional religion, magic and monstrous beings – in the film, as well as the mediality of the film. The analysis shows that the film forms part of a broader trend that portrays traditional religion as ossified and authoritative, while magic, monsters and green religion are represented as fascinating and attractive. Moreover, I argue that the mediality of the film sustains a blurring of boundaries between worlds in terms of the film-internal world structure, in terms of the diegetic vs. the afilmic world, and in terms of the hu-man vs. the nonhuman world. The key argument of the article is that pop-cultural me-dia constitute an important arena for religion, as media such as fantasy films both re-flect and form religious transformations today. This arena needs more attention in the study of religion.",
-				"language": "da",
-				"libraryCatalog": "tidsskrift.dk",
-				"pages": "1-25",
-				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
-				"rights": "Ophavsret (c) 2020 Forfatter og Tidsskrift",
-				"shortTitle": "Religion, fantasyfilm og fantastiske væsener",
-				"url": "https://tidsskrift.dk/rvt/article/view/120512",
-				"volume": "70",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Fantastic Beasts"
-					},
-					{
-						"tag": "Harry Potter"
-					},
-					{
-						"tag": "Religion og populærkultur"
-					},
-					{
-						"tag": "fantasyfilm"
-					},
-					{
-						"tag": "grøn religion"
-					},
-					{
-						"tag": "magi"
-					},
-					{
-						"tag": "medier"
-					},
-					{
-						"tag": "samtidsreligion"
-					}
-				],
-				"notes": [
-					{
-						"note": "abs:DANSK RESUME: Denne artikel diskuterer religion og medier ud fra en analyse af et eksempel på religion i populærkultur, nemlig en videreudvikling relateret til J.K. Row-lings Harry Potter univers: udgivelsen af bogen Fantastic Beasts and Where to Find Them (2001), en bog der er fiktivt indlejret som undervisningsbog på Hogwarts School of Wizardry and Witchcraft, og den senere filmatisering der knytter sig til bo-gen, Fantastic Beasts and Where to Find Them (instrueret af David Yates, screenplay af J.K. Rowling 2016). Artiklen præsenterer en religionsvidenskabelig, mediefokuseret tilgang til filmanalyse, der inkluderer både verbale og non-verbale medierings-aspekter. Analysen behandler fremstillingen af religion – hhv. traditionel religion, magi og det monstrøse – i det filmiske univers, samt filmens medialitet. Analysen viser, at filmen indlejrer sig i en bredere trend, hvor traditionel religion fremstilles som forstenet og autoritær, mens magi, monstre og grøn religion fremstilles positivt og tiltrækkende, samt endvidere at filmens medialitet understøtter en udviskning af grænserne mellem verdener både i den tekst-interne verdensstruktur, mellem den diegetiske og den afilmi-ske verden, samt mellem den humane og den non-humane verden. Artiklen argumente-rer grundlæggende for at populærkulturelle medier såsom fantasyfilm udgør en vigtig arena for religion, og at denne arena bør behandles religionsvidenskabeligt, da den både afspejler og former religiøse forandringer i samtiden.,DANSK RESUME"
-					}
-				],
 				"seeAlso": []
 			}
 		]
@@ -460,6 +390,59 @@ var testCases = [
 				],
 				"notes": [
 					"abs:Denne artikel diskuterer religion og medier ud fra en analyse af et eksempel på religion i populærkultur, nemlig en videreudvikling relateret til J.K. Row-lings Harry Potter univers: udgivelsen af bogen Fantastic Beasts and Where to Find Them (2001), en bog der er fiktivt indlejret som undervisningsbog på Hogwarts School of Wizardry and Witchcraft, og den senere filmatisering der knytter sig til bo-gen, Fantastic Beasts and Where to Find Them (instrueret af David Yates, screenplay af J.K. Rowling 2016). Artiklen præsenterer en religionsvidenskabelig, mediefokuseret tilgang til filmanalyse, der inkluderer både verbale og non-verbale medierings-aspekter. Analysen behandler fremstillingen af religion – hhv. traditionel religion, magi og det monstrøse – i det filmiske univers, samt filmens medialitet. Analysen viser, at filmen indlejrer sig i en bredere trend, hvor traditionel religion fremstilles som forstenet og autoritær, mens magi, monstre og grøn religion fremstilles positivt og tiltrækkende, samt endvidere at filmens medialitet understøtter en udviskning af grænserne mellem verdener både i den tekst-interne verdensstruktur, mellem den diegetiske og den afilmi-ske verden, samt mellem den humane og den non-humane verden. Artiklen argumente-rer grundlæggende for at populærkulturelle medier såsom fantasyfilm udgør en vigtig arena for religion, og at denne arena bør behandles religionsvidenskabeligt, da den både afspejler og former religiøse forandringer i samtiden.,DANSK RESUME"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tidsskrift.dk/rvt/article/view/112747",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Kāmākhya, den menstruerende gudinde: Tantrisme for lægfolk og elite",
+				"creators": [
+					{
+						"firstName": "Marianne Qvortrup",
+						"lastName": "Fibiger",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019/03/05",
+				"DOI": "10.7146/rt.v0i69.112747",
+				"ISSN": "1904-8181",
+				"abstractNote": "Based on an analysis of the cult around the tantric goddess Kāmākhya from Assam, I will discuss her appeal for both laypeople and ascetics. A special feature is that she menstruates and that her blood is held to have thaumaturgical as well as transformative properties. For laypeople the hope is that it will have a positive effect on their lives here and now, and for the ascetics that it will give rise to an internal process with a soteriological goal in mind. Consequently, I shall present a differentiation between a hardcore and a softcore tantrism and, furthermore, their interrelationship.",
+				"language": "da",
+				"libraryCatalog": "tidsskrift.dk",
+				"pages": "135-147",
+				"publicationTitle": "Religionsvidenskabeligt Tidsskrift",
+				"rights": "Ophavsret (c) 2019 Forfatter og Tidsskrift",
+				"shortTitle": "Kāmākhya, den menstruerende gudinde",
+				"url": "https://tidsskrift.dk/rvt/article/view/112747",
+				"volume": "69",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Kāmākhya tantrism"
+					},
+					{
+						"tag": "thamaturgical and tranformative properties"
+					},
+					{
+						"tag": "śaktism"
+					}
+				],
+				"notes": [
+					"abs:Med udgangspunkt i en analyse af kulten omkring den tantriske gudinde Kāmakhya fra Assam diskuteres hendes brede appeal for både lægfolk og asketer. Det specielle ved gudinden er, at hun menstruerer, og at blodet tillægges både thaumaturgiske og transformative egenskaber. For lægfolk er håbet, at det kan have positiv effekt for deres liv nu og her, for asketer at det vil sætte gang i en individuel proces med et soteriologisk mål for øje. I den forbindelse vil en skelnen imellem en hard core- og en soft core-tantrisme og deres interrelation blive præsenteret."
 				],
 				"seeAlso": []
 			}
