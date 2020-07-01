@@ -2,11 +2,11 @@
 	"translatorID": "8011b266-12b6-42db-815c-95ecdc8736f2",
 	"label": "ubtue_Jahrbuch für Christliche Sozialwissenschaften",
 	"creator": "Timotheus Kim",
-	"target": "^https?://(www)?\\.uni-muenster\\.de/Ejournals/index\\.php/jcsw",
+	"target": "^https?://(www\\.)?uni-muenster\\.de/Ejournals/index\\.php/jcsw",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-07-01 12:08:46"
