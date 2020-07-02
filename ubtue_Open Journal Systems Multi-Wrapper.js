@@ -34,46 +34,71 @@
 */
 
 function detectWeb(doc, url) {
-    if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+    if (url.match(/\/issue\/view/) && getSearchResults(doc))
+        return "multiple";
 }
 
 function getSearchResults(doc) {
     var items = {};
     var found = false;
-    var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a');
-    for (let row of rows) {
-        let href = row.href;
-        let title = ZU.trimInternal(row.textContent);
-        if (!href || !title) continue;
+    var rows = ZU.xpath(doc, '//a[contains(@href, "/article/view/") and not(contains(@href, "/pdf"))]')
+    for (let i = 0; i < rows.length; i++) {
+        let href = rows[i].href;
+        let title = ZU.trimInternal(rows[i].textContent);
+
+        if (!href || !title)
+            continue;
+        if (title.match(/PDF|EPUB|XML|HTML|Download Full Text/i))
+            continue;
         found = true;
         items[href] = title;
     }
     return found ? items : false;
 }
 
-function invokeEMTranslator(doc) {
+function invokeBestTranslator(doc, url) {
     var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
     translator.setDocument(doc);
-    translator.setHandler("itemDone", function (t, i) {
-        i.complete();
+    translator.setHandler("translators", function (o, valid_translators) {
+        if (valid_translators && valid_translators.length > 0) {
+            translator.setTranslator(valid_translators);
+            translator.translate();
+        }
     });
-    translator.translate();
+    translator.setHandler("itemDone", function (t, item) {
+        if (item.issue === "0")
+            item.issue = "";
+
+        if (item.volume === "0")
+            item.volume = "";
+
+        item.complete();
+    });
+    translator.getTranslators();
 }
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) === "multiple") {
-        Zotero.selectItems(getSearchResults(doc), function (items) {
+    let items = getSearchResults(doc);
+    if (items) {
+        Zotero.selectItems(items, function (items) {
             if (!items) {
                 return true;
             }
-            var articles = [];
-            for (var i in items) {
+            let articles = [];
+            for (let i in items) {
                 articles.push(i);
             }
-            ZU.processDocuments(articles, invokeEMTranslator);
+            ZU.processDocuments(articles, invokeBestTranslator);
         });
-    } else
-        invokeEMTranslator(doc, url);
+    } else {
+        // attempt to skip landing pages for issues
+        let tocLinks = ZU.xpath(doc, '//a[contains(@href, "/issue/view/") and not(contains(@href, "/pdf"))]')
+        for (let entry in tocLinks) {
+            let link = tocLinks[entry].href;
+            if (link.match(/\/issue\/view\/\d+\/showToc$/i)) {
+                ZU.processDocuments([link], invokeBestTranslator);
+                break;
+            }
+        }
+    }
 }
-
