@@ -1,15 +1,15 @@
 {
 	"translatorID": "f24cd419-5892-450a-b39e-be2ff3191757",
-	"label": "Collectanea Christiana Orientalia",
+	"label": "ubtue_Collectanea Christiana Orientalia",
 	"creator": "Timotheus Kim",
 	"target": "^https?://www\\.uco\\.es/revistas/index\\.php/cco/(issue|article)/view/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 80,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-26 14:54:47"
+	"lastUpdated": "2020-07-03 12:55:52"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "file", " " ))]')
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "tocTitle", " " ))]//a')
 	for (let i=0; i<rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
@@ -59,11 +59,8 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
-	//add tag "Book Reviews" if not Leitartikel 
-	let leitartikel = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "current", " " ))]')
-	if (item.itemTpye = "journalArticle" && !leitartikel.match(/Leitartikel/)) {
-		item.tags.push('Book Review');
-	}
+	if (item.issue === "0") item.issue = "";
+	if (item.number === "0") item.number = "";
 	item.complete();
 }
 
