@@ -1,38 +1,37 @@
 {
     "translatorID": "b60e74db-2e5d-4b2a-94ac-f484737364b1",
-    "label": "Open Journal Systems Multi-Wrapper",
+    "label": "ubtue_Open Journal Systems Multi-Wrapper",
     "creator": "Madeesh Kannan",
-    "target": "/issue/view/",
+    "target": "/article|issue/view/",
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 100,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-07-31 17:00:25"
+    "lastUpdated": "2020-06-26 11:10:51"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+    ***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
+    Copyright © 2019 Universitätsbibliothek Tübingen.  All rights reserved.
 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****
+    ***** END LICENSE BLOCK *****
 */
-
 
 function detectWeb(doc, url) {
     if (url.match(/\/issue\/view/) && getSearchResults(doc))

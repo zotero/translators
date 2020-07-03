@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-09 15:33:29"
+	"lastUpdated": "2020-07-01 14:59:25"
 }
 
 /*
@@ -37,29 +37,28 @@
 
 
 function detectWeb(doc, url) {
-    return "journalArticle";
+	return "journalArticle";
 }
 
 function scrape(doc, item) {
-    item.DOI = text(doc, '#identifier p').replace('DOI:', '');
-    item.pages = text(doc, '.citation').match(/\d+-\d+/);
-    item.abstractNote = text(doc, '#abstract p');
-    let TagBookReview = text(doc, '#title a')
+	item.DOI = text(doc, '#identifier p').replace('DOI:', '');
+	item.pages = text(doc, '.citation').match(/p\.\s+\d+-\d+/)[0].replace('p.', '');
+	item.abstractNote = text(doc, '#abstract p');
+	let TagBookReview = text(doc, '#title a');
 	if (TagBookReview.match(/Book Reviews/)) {
 		item.tags.push('Book Review');
-	}
-    item.complete();
+		}
+	item.complete();
 }
 
-
 function doWeb(doc, url) {
-    var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");   // COinS
-    translator.setDocument(doc);
-    translator.setHandler("itemDone", function (t, i) {
-        scrape(doc, i);
-    });
-    translator.translate();
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("05d07af9-105a-4572-99f6-a8e231c0daef");   // COinS
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, i) {
+		scrape(doc, i);
+	});
+	translator.translate();
 }
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -318,35 +317,66 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss2/13/",
+		"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss2/7/",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Book Reviews",
+				"title": "The Capital of Methodism: The New York Station: 1800-1832",
 				"creators": [
 					{
-						"firstName": "R. Jeffrey Hiatt, Zachariah S. Motts, Scott Donahue-Martens, David Nonnenmacher, Jr., Zachariah S. Motts, Michael Whitcomb-Tavey,",
+						"firstName": "Philip",
 						"creatorType": "author",
-						"lastName": "Scott Donahue-Martens"
+						"lastName": "Hardt"
 					}
 				],
 				"date": "2019-01-01",
-				"DOI": "10.7252/Journal.02.2019F.12",
+				"DOI": "10.7252/Journal.02.2019F.06",
 				"ISSN": "2375-6330",
 				"issue": "2",
-				"libraryCatalog": "Asbury Journal",
-				"pages": "457-470",
+				"libraryCatalog": "ubtue_Asbury Journal",
+				"pages": "347-368",
 				"publicationTitle": "The Asbury Journal",
-				"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss2/13",
+				"shortTitle": "The Capital of Methodism",
+				"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss2/7",
 				"volume": "74",
 				"attachments": [
 					{}
 				],
-				"tags": [
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss1/3/",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Spirit of Methodism: Missionary Zeal and the Gift of an Evangelist",
+				"creators": [
 					{
-						"tag": "Book Review"
+						"firstName": "Philip",
+						"creatorType": "author",
+						"lastName": "Meadows"
 					}
 				],
+				"date": "2019-01-01",
+				"DOI": "10.7252/Journal.01.2019S.02",
+				"ISSN": "2375-6330",
+				"abstractNote": "The church does not need more vital congregations, but rather a few vital Christians, whose vitality is not measured in terms of institutional effectiveness, but by missionary zeal. This zeal is a hungering and thirsting for just one thing: the glory of God and the salvation of souls. It cannot be manufactured, but can only be caught from those who have been gifted by the Spirit to continue the charism of their founder, and fanned into flame. Without this type of Christian, there is no movement, and there is no Methodism. John Welsey's most important legacy was not his doctrine or his discipline but a movement of zealous preachers and people who put flesh on the way of scriptural holiness. This paper explores the nature of that legacy and the spiritual zeal it fostered. This paper concludes that this same \"spirit\" is available to all who would commit to the doctrine and discipline of the Methodist movement. A version of this paper was delivered before the faculty of Asbury Theological Seminary to conclude the formal installation of the author in the Sundo Kim Chair of Evangelism on December 4, 2018.",
+				"issue": "1",
+				"libraryCatalog": "ubtue_Asbury Journal",
+				"pages": "8-38",
+				"publicationTitle": "The Asbury Journal",
+				"shortTitle": "The Spirit of Methodism",
+				"url": "https://place.asburyseminary.edu/asburyjournal/vol74/iss1/3",
+				"volume": "74",
+				"attachments": [
+					{}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
