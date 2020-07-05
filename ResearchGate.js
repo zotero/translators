@@ -130,12 +130,12 @@ function scrape(doc, url) {
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text);
 		// fix wrong itemType information in RIS
-		if (type == "bookSection") text = text.replace('TY	- BOOK', 'TY	- CHAP');
-		if (type == "conferencePaper") text = text.replace('TY	- BOOK', 'TY	- CONF');
-		if (type == "report") text = text.replace('TY  - BOOK', 'TY  - RPRT');
-		if (type == "presentation") text = text.replace('TY  - BOOK', 'TY  - SLIDE');
-		if (type == "journalArticle") text = text.replace('TY  - BOOK', 'TY  - JOUR');
-		if (type == "thesis") text = text.replace('TY  - BOOK', 'TY  - THES');
+		if (type == "bookSection") text = text.replace('TY - BOOK', 'TY	- CHAP');
+		if (type == "conferencePaper") text = text.replace('TY - BOOK', 'TY - CONF');
+		if (type == "report") text = text.replace('TY - BOOK', 'TY - RPRT');
+		if (type == "presentation") text = text.replace('TY - BOOK', 'TY - SLIDE');
+		if (type == "journalArticle") text = text.replace('TY - BOOK', 'TY - JOUR');
+		if (type == "thesis") text = text.replace('TY - BOOK', 'TY - THES');
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
