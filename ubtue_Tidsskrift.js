@@ -5,11 +5,11 @@
 	"target": "^https?://tidsskrift.dk/[^/]+/(article|issue)/view.*/[0-9]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 90,
+	"priority": 80,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-01 14:36:58"
+	"lastUpdated": "2020-07-06 13:22:17"
 }
 
 /*
@@ -74,8 +74,9 @@ function postProcess(doc, item) {
 			note: "abs:" + matchSecondAbstract,
 		});
 	}
-
-	item.notes = item.notes[0].note.replace(/(DANSK RESUMÉ: |DANSK RESUME: |,DANSK RESUMÉ|,DANSK RESUME)/g, '');
+	if (item.notes.length > 0) {
+		item.notes = item.notes[0].note.replace(/(DANSK RESUMÉ: |DANSK RESUME: |,DANSK RESUMÉ|,DANSK RESUME)/g, '');
+	}
 	item.abstractNote = matchFirstAbstract[0].replace(/ENGLISH ABSTRACT:/, '');
 	
 	// swap Band and Ausgabe
