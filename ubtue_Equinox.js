@@ -1,53 +1,51 @@
 {
     "translatorID": "cf2973a7-5804-4e28-a684-04051122fcc0",
-    "label": "EquinoxPub",
+    "label": "ubtue_EquinoxPub",
     "creator": "Madeesh Kannan",
-    "target": "^https:\/\/((www)|(journals)).equinoxpub.com\/",
+    "target": "^https://((www)|(journals))\\.equinoxpub\\.com/",
     "minVersion": "3.0",
     "maxVersion": "",
-    "priority": 90,
+    "priority": 100,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2018-11-09 13:14:00"
+    "lastUpdated": "2020-07-06 14:29:28"
 }
 
 /*
-	***** BEGIN LICENSE BLOCK *****
+    ***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Universitätsbibliothek Tübingen.  All rights reserved.
+    Copyright © 2018 Universitätsbibliothek Tübingen.  All rights reserved.
 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-	***** END LICENSE BLOCK *****
+    ***** END LICENSE BLOCK *****
 */
 
 
 function detectWeb(doc, url) {
     // except for "multiple", the return values of this function are placeholders that
     // will be replaced by the Embedded Metadata translator's results
-    if (/\/article\/view\//.test(url) || /-view-abstract\//.test(url))
-        return "journalArticle";
-    else if (/\/issue\/.+/.test(url) || /-view-issue\//.test(url))
-        return "multiple";
+    if (/\/article\//.test(url) || /-view-abstract\//.test(url)) return "journalArticle";
+    else if (/\/issue\/.+/.test(url) || /-view-issue\//.test(url)) return "multiple";
 }
 
 function getSearchResults(doc) {
     let items = {};
     let found = false;
     let rows = ZU.xpath(doc, '//span[@class="chapter-title"]/a');
-    if (!rows || rows.length == 0)
+    if (!rows || rows.length === 0)
         rows = ZU.xpath(doc, '//td[@class="tocTitle"]/a');
     for (let i = 0; i < rows.length; i++) {
         let href = rows[i].href;
@@ -76,13 +74,11 @@ function postProcess(item) {
     // we need to clear the abstractNote field in the case of editorials.
     // ideally, we'd look at the shortTitle field, but thanks to the above problem, the shortTitle field is undefined at this point.
     // so, we'll just check the abstract itself instead.
-    if (item.abstractNote.startsWith("Editorial"))
-        item.abstractNote = "";
+    if (item.abstractNote.startsWith("Editorial")) item.abstractNote = "";
 
     // HTML escape sequences occasionally sneak into the abstract
-    if (item.abstractNote)
-        item.abstractNote = ZU.unescapeHTML(item.abstractNote)
-
+    if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
+    if (item.abstractNote.match(/\b[0-9]+\s?pp\./)) item.tags.push('Book Review');
     item.complete();
 }
 
@@ -143,3 +139,12 @@ function doWeb(doc, url) {
     } else
         scrape(doc, url);
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+    {
+        "type": "web",
+        "url": "https://journals.equinoxpub.com/ISIT/issue/view/2902",
+        "items": "multiple"
+    }
+]
+/** END TEST CASES **/
