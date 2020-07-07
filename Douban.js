@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-04 03:46:18"
+	"lastUpdated": "2020-06-28 09:37:27"
 }
 
 /*
@@ -29,6 +29,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 // #######################
 // ##### Sample URLs #####
@@ -51,9 +55,8 @@
 // #################################
 // #### Local utility functions ####
 // #################################
-
 function trimTags(text) {
-	return text.replace(/(<.*?>)/g, "");
+	return text.replace(/(<.*?>)|&[A-Za-z]*;/g, "");
 }
 
 // #############################
@@ -89,15 +92,18 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 作者
-
 		page = page.replace(/\n/g, "");
-		// Z.debug(page)
-		pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>/;
+		pattern = /<span>\s*<span[^>]*?>\s*作者<\/span>:(.*?)<\/span>|<span [^>]*?>作者:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
-			var authorNames = trimTags(pattern.exec(page)[1]);
-			pattern = /(\[.*?\]|\(.*?\)|（.*?）)/g;
+			var authorNames = pattern.exec(page);
+			if (authorNames[2]) {
+				authorNames = trimTags(authorNames[2]);
+			} else {
+				authorNames = trimTags(authorNames[1]);
+			}
+			pattern = /(\[.*?\]|\(.*?\)|（.*?）|&[A-Za-z]*;)/g;
 			authorNames = authorNames.replace(pattern, "").split("/");
-			// Zotero.debug(authorNames);
+			// Zotero.debug("作者: " + authorNames);
 			for (let i = 0; i < authorNames.length; i++) {
 				let useComma = true;
 				pattern = /[A-Za-z]/;
@@ -112,6 +118,7 @@ function scrapeAndParse(doc, url) {
 					Zotero.Utilities.trim(authorNames[i]),
 					"author", useComma));
 			}
+			// Zotero.debug("作者: " + newItem.creators);
 		}
 
 		// 译者
@@ -135,7 +142,7 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// ISBN
-		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>ISBN:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var isbn = pattern.exec(page)[1];
 			newItem.ISBN = Zotero.Utilities.trim(isbn);
@@ -143,7 +150,7 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 页数
-		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>页数:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var numPages = pattern.exec(page)[1];
 			newItem.numPages = Zotero.Utilities.trim(numPages);
@@ -151,7 +158,7 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 出版社
-		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>出版社:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var publisher = pattern.exec(page)[1];
 			newItem.publisher = Zotero.Utilities.trim(publisher);
@@ -159,7 +166,7 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 丛书
-		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>丛书:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var series = trimTags(pattern.exec(page)[1]);
 			newItem.series = Zotero.Utilities.trim(series);
@@ -167,7 +174,7 @@ function scrapeAndParse(doc, url) {
 		}
 
 		// 出版年
-		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/>/;
+		pattern = /<span [^>]*?>出版年:<\/span>(.*?)<br\/?>/;
 		if (pattern.test(page)) {
 			var date = pattern.exec(page)[1];
 			newItem.date = Zotero.Utilities.trim(date);
@@ -179,15 +186,25 @@ function scrapeAndParse(doc, url) {
 		for (let i in tags) {
 			newItem.tags.push(tags[i].textContent);
 		}
+
+		// 摘要
 		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
 
+		// 评分 & 评价人数 by felix-20200626-1
+		var ratingNum = ZU.xpathText(doc, '//strong[@property="v:average"]');
+		if (ratingNum && (ratingNum = Zotero.Utilities.trim(ratingNum))) {
+			// var ratingPeople = ZU.xpathText(doc, '//div[@class="rating_sum"]/span/a[@class="rating_people"]/span[@property="v:votes"]');
+			var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
+			newItem.extra = ratingNum + "/" + ratingPeople;
+		}
+		
 		newItem.complete();
 	});
 }
+
 // #########################
 // ##### API functions #####
 // #########################
-
 function detectWeb(doc, url) {
 	var pattern = /subject_search|doulist|people\/[a-zA-Z._]*?\/(?:do|wish|collect)|.*?status=(?:do|wish|collect)|group\/[0-9]*?\/collection|tag/;
 
@@ -266,6 +283,7 @@ var testCases = [
 				"date": "2003",
 				"ISBN": "9780099448822",
 				"abstractNote": "When he hears her favourite Beatles song, Toru Watanabe recalls his first love Naoko, the girlfriend of his best friend Kizuki. Immediately he is transported back almost twenty years to his student days in Tokyo, adrift in a world of uneasy friendships, casual sex, passion, loss and desire - to a time when an impetuous young woman called Midori marches into his life and he has ..., (展开全部)",
+				"extra": "9.0/668",
 				"libraryCatalog": "Douban",
 				"numPages": "389",
 				"publisher": "Vintage",
@@ -311,6 +329,64 @@ var testCases = [
 		"type": "web",
 		"url": "https://book.douban.com/tag/认知心理学?type=S",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://book.douban.com/subject/1487579/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "认知心理学",
+				"creators": [
+					{
+						"lastName": "彭聃龄",
+						"creatorType": "author"
+					}
+				],
+				"date": "2004-12",
+				"ISBN": "9787533823511",
+				"extra": "7.3/147",
+				"libraryCatalog": "Douban",
+				"numPages": "610",
+				"publisher": "浙江教育出版社",
+				"series": "世纪心理学丛书",
+				"url": "https://book.douban.com/subject/1487579/",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "psychology"
+					},
+					{
+						"tag": "交互设计"
+					},
+					{
+						"tag": "心理学"
+					},
+					{
+						"tag": "科学"
+					},
+					{
+						"tag": "認知心理學"
+					},
+					{
+						"tag": "认知"
+					},
+					{
+						"tag": "认知心理学"
+					},
+					{
+						"tag": "认知科学"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://book.douban.com/subject/10734423/",
+		"items": []
 	}
 ]
 /** END TEST CASES **/
