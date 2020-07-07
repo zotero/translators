@@ -1,7 +1,19 @@
 language: node_js
 node_js:
-  - "8"
+    - "node"
+sudo: false
+services:
+    - xvfb
+cache:
+    directories:
+        - ".ci/pull-request-check/connectors"
+matrix:
+    include:
+        - addons:
+            chrome: stable
+          # Work-around for https://github.com/travis-ci/travis-ci/issues/8836
+          sudo: required
 script:
   - git diff -z --name-only $TRAVIS_COMMIT_RANGE *.js | xargs -0 npm run lint --
   - cd .ci && ./checkDeletedTxt.sh
-cache: npm
+  - "[[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]] && cd pull-request-check && ./check-pull-request.sh || true"

@@ -15,7 +15,10 @@
 	},
 	"devDependencies": {
 		"@zotero/eslint-config": "^1.0.5",
+		"chalk": "^4.1.0",
+		"chromedriver": "^83.0.0",
 		"eslint": "^5.16.0",
-		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator"
+		"eslint-plugin-zotero-translator": "file:.ci/eslint-plugin-zotero-translator",
+		"selenium-webdriver": "^4.0.0-alpha.7"
 	}
 }
