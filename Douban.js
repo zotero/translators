@@ -98,7 +98,8 @@ function scrapeAndParse(doc, url) {
 			var authorNames = pattern.exec(page);
 			if (authorNames[2]) {
 				authorNames = trimTags(authorNames[2]);
-			} else {
+			}
+			else {
 				authorNames = trimTags(authorNames[1]);
 			}
 			pattern = /(\[.*?\]|\(.*?\)|（.*?）|&[A-Za-z]*;)/g;
@@ -197,7 +198,7 @@ function scrapeAndParse(doc, url) {
 			var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
 			newItem.extra = ratingNum + "/" + ratingPeople;
 		}
-		
+
 		newItem.complete();
 	});
 }
@@ -217,11 +218,11 @@ function detectWeb(doc, url) {
 }
 
 function detectTitles(doc, url) {
-	
 	var pattern = /\.douban\.com\/tag\//;
 	if (pattern.test(url)) {
 		return ZU.xpath(doc, '//div[@class="info"]/h2/a');
-	} else {
+	}
+	else {
 		return ZU.xpath(doc, '//div[@class="title"]/a');
 	}
 }
