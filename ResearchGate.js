@@ -70,7 +70,7 @@ function detectWeb(doc, url) {
 				return "book";
 		}
 	}
-	else if ((url.match('/search(\\?|/)?') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
+	else if ((url.includes('/search') || url.includes('/profile/') || url.includes('/scientific-contributions/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
