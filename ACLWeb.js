@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-06 17:29:46"
+	"lastUpdated": "2020-07-08 09:55:39"
 }
 
 /*
@@ -116,6 +116,10 @@ function scrape(doc) {
 		
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
+		}
+		
+		if (item.abstractNote) {
+			item.abstractNote = ZU.cleanTags(item.abstractNote);
 		}
 		
 		if (item.itemType == 'conferencePaper') {
