@@ -1,15 +1,15 @@
 {
 	"translatorID": "1b9ed730-69c7-40b0-8a06-517a89a3a278",
 	"label": "Library Catalog (PICA)",
-	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher",
-	"target": "^https?://[^/]+(/[^/]+)?//?DB=\\d",
+	"creator": "Sean Takats, Michael Berkowitz, Sylvain Machefert, Sebastian Karcher, Stéphane Gully",
+	"target": "^https?://[^/]+(/[^/]+)*//?DB=\\d",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 248,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2018-01-26 09:57:02"
+	"lastUpdated": "2020-07-08 20:14:01"
 }
 
 function getSearchResults(doc) {
@@ -584,7 +584,7 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var newUrl = doc.evaluate('//base/@href', doc, null, XPathResult.ANY_TYPE, null).iterateNext().nodeValue;
 		// fix for sudoc, see #1529
-		newUrl = newUrl.replace(/sudoc\.abes\.fr\/\/?DB=/, 'sudoc.abes.fr/xslt/DB=');
+		newUrl = newUrl.replace(/sudoc\.abes\.fr\/cbs\/\/?DB=/, 'sudoc.abes.fr/cbs/xslt/DB=');
 		var elmts = getSearchResults(doc);
 		var elmt = elmts.iterateNext();
 		var links = [];
@@ -612,12 +612,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/CMD?ACT=SRCHA&IKT=1016&SRT=RLV&TRM=labor",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//CMD?ACT=SRCHA&IKT=1016&SRT=RLV&TRM=labor",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=147745608",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=147745608",
 		"items": [
 			{
 				"itemType": "book",
@@ -672,7 +672,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=156726319",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=156726319",
 		"items": [
 			{
 				"itemType": "book",
@@ -719,7 +719,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=093838956",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=093838956",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -779,7 +779,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=127261664",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=127261664",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -830,7 +830,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=128661828",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=128661828",
 		"items": [
 			{
 				"itemType": "film",
@@ -899,7 +899,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=098846663",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=098846663",
 		"items": [
 			{
 				"itemType": "map",
@@ -941,7 +941,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=05625248X",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=05625248X",
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -1175,7 +1175,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/DB=2.1/SRCH?IKT=12&TRM=013979922",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=013979922",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1857,7 +1857,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=024630527",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=024630527",
 		"items": [
 			{
 				"itemType": "book",
@@ -1918,7 +1918,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=001493817",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=001493817",
 		"items": [
 			{
 				"itemType": "book",
@@ -1985,7 +1985,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sudoc.abes.fr/xslt/DB=2.1//SRCH?IKT=12&TRM=200278649",
+		"url": "http://www.sudoc.abes.fr/cbs/xslt/DB=2.1//SRCH?IKT=12&TRM=200278649",
 		"items": [
 			{
 				"itemType": "book",
