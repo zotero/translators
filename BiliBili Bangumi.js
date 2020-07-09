@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-08 16:07:36"
+	"lastUpdated": "2020-07-09 10:01:14"
 }
 
 /*
@@ -98,7 +98,6 @@ function doWeb(doc, url) {
 			if (pattern.test(pageEpisode)) {
 				json = pattern.exec(pageEpisode)[0].replace('"epList":', '');
 				objArray = JSON.parse(json);
-				Z.debug(objArray);
 				for (var obj of objArray) {
 					if (id) {
 						if (obj.id == id) {
@@ -137,8 +136,8 @@ function scrape(aid, title, longTitle) {
 		});
 
 		// 发布时间
-		item.date = ZU.formatDate(new Date(data.pubdate * 1000));
-
+		item.date = ZU.strToISO(new Date(data.pubdate * 1000));
+		
 		// 摘要
 		item.abstractNote = data.desc;
 
