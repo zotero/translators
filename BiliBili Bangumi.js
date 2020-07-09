@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2020 Felix Hui
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -42,13 +42,13 @@ function detectWeb(doc, url) {
 	if (url.includes('/play/')) {
 		return "tvBroadcast";
 	}
-	else if (url.includes('/media/') && getSearchResults(doc, url, true)) {
+	else if (url.includes('/media/') && getSearchResults(doc)) {
 		return "multiple";
 	}
 	return false;
 }
 
-function getSearchResults(doc, url, checkOnly) {
+function getSearchResults(doc) {
 	var rows = doc.querySelectorAll('li.misl-ep-item');
 	if (rows && rows.length >= 1) {
 		return true;
@@ -63,7 +63,7 @@ function doWeb(doc, url) {
 			if (pattern.test(pageMedia)) {
 				var json = pattern.exec(pageMedia);
 				var obj = JSON.parse(json);
-				
+
 				ZU.doGet('https://api.bilibili.com/pgc/web/season/section?season_id=' + obj.season_id, function (pageSection) {
 					obj = JSON.parse(pageSection);
 					let items = {};
@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 			if (pattern.test(url)) {
 				id = pattern.exec(url)[0].replace('/ep', '');
 			}
-			
+
 			pattern = /"epList":\[\{.*?\}\]/;
 			if (pattern.test(pageEpisode)) {
 				json = pattern.exec(pageEpisode)[0].replace('"epList":', '');
@@ -105,7 +105,8 @@ function doWeb(doc, url) {
 							scrape(obj.aid, obj.title, obj.longTitle);
 							return;
 						}
-					} else {
+					}
+					else {
 						if (obj.title == 1) {
 							scrape(obj.aid, obj.title, obj.longTitle);
 							return;
@@ -123,32 +124,32 @@ function scrape(aid, title, longTitle) {
 		if (obj.code !== 0) {
 			return;
 		}
-		
+
 		const { data } = obj;
 		var item = new Zotero.Item("tvBroadcast");
-		
+
 		// 标题
 		item.title = data.title;
-		
+
 		// 作者
 		item.creators.push({
 			lastName: data.owner.name,
 			creatorType: "contributor",
 			fieldMode: 1
 		});
-		
+
 		// 发布时间
 		item.date = ZU.formatDate(new Date(data.pubdate * 1000));
-		
+
 		// 摘要
 		item.abstractNote = data.desc;
-		
+
 		// 时长
 		let hour = Math.floor(data.duration / 3600 % 24);
 		let min = Math.floor(data.duration / 60 % 60);
 		let sec = Math.floor(data.duration % 60);
 		item.runningTime = `${hour}:${min}:${sec}`;
-		
+
 		// 视频选集
 		if (title) {
 			item.episodeNumber = title;
@@ -156,10 +157,10 @@ function scrape(aid, title, longTitle) {
 		if (longTitle) {
 			item.programTitle = longTitle;
 		}
-		
+
 		// URL
 		item.url = data.redirect_url;
-	
+
 		item.complete();
 	});
 }
