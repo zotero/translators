@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-16 16:24:39"
+	"lastUpdated": "2020-07-09 07:31:15"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017 Philipp Zumstein
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -45,6 +45,10 @@ function detectWeb(doc, url) {
 			return "newspaperArticle";
 		}
 	}
+	if (ZU.xpathText(doc, '//h1[@data-qa="headline"]')) {
+		return "newspaperArticle";
+	}
+	// For older articles
 	if (url.includes('/archive/') || url.includes('/wp-dyn/content/')) {
 		return "newspaperArticle";
 	}
@@ -96,10 +100,10 @@ function scrape(doc, url) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = type;
-		
+
 		// in the metadata there are only some facebook urls for the authors
 		item.creators = [];
 		var authors = doc.querySelectorAll('div.author-wrapper');
@@ -121,7 +125,7 @@ function scrape(doc, url) {
 			item.ISSN = "0190-8286";
 		}
 		item.section = ZU.xpathText(doc, '(//div[contains(@class, "headline-kicker")])[1]');
-		
+
 		item.complete();
 	});
 
@@ -246,6 +250,31 @@ var testCases = [
 				"libraryCatalog": "www.washingtonpost.com",
 				"publicationTitle": "Washington Post",
 				"url": "https://www.washingtonpost.com/archive/entertainment/books/1991/04/07/bombs-in-the-cause-of-brotherhood/fe590e29-8052-4086-b9a9-6fcabdbae4ba/",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.washingtonpost.com/world/the_americas/coronavirus-brazil-bolsonaro-tests-positive/2020/07/07/5fa71548-c049-11ea-b4f6-cb39cd8940fb_story.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Brazil’s Bolsonaro tests positive for coronavirus",
+				"creators": [],
+				"ISSN": "0190-8286",
+				"abstractNote": "The U.S. ambassador to Brazil said he would also be tested after hosting Jair Bolsonaro for a Fourth of July barbecue.",
+				"language": "en-US",
+				"libraryCatalog": "www.washingtonpost.com",
+				"publicationTitle": "Washington Post",
+				"url": "https://www.washingtonpost.com/world/the_americas/coronavirus-brazil-bolsonaro-tests-positive/2020/07/07/5fa71548-c049-11ea-b4f6-cb39cd8940fb_story.html",
 				"attachments": [
 					{
 						"title": "Snapshot"
