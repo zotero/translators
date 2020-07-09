@@ -161,7 +161,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
 	if (sectionheading) {
 		sectionheading = sectionheading.trim();
-		if (sectionheading.match(/^(Book )?(Reviews|Symposium)?/i))
+		if (sectionheading.match(/^(Book )?Reviews?$/i))
 			item.tags.push("Book Reviews");
 	}
 
