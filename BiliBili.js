@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- TODO
+	Copyright © 2020 Felix Hui
 
 	This file is part of Zotero.
 
