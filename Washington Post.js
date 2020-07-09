@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-09 07:31:15"
+	"lastUpdated": "2020-07-09 08:24:34"
 }
 
 /*
@@ -104,18 +104,20 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = type;
 
-		// in the metadata there are only some facebook urls for the authors
-		item.creators = [];
-		var authors = doc.querySelectorAll('div.author-wrapper');
-		for (var i = 0; i < authors.length; i++) {
-			item.creators.push(ZU.cleanAuthor(authors[i].getAttribute('data-authorname'), "author"));
-		}
+		// Old articles
 		if (url.includes('/wp-dyn/content/')) {
-			authors = ZU.xpathText(doc, '//div[@id="byline"]');
+			let authors = ZU.xpathText(doc, '//div[@id="byline"]');
 			if (authors) {
 				item.creators.push(ZU.cleanAuthor(authors.replace(/^By /, ''), "author"));
 			}
 		}
+		else {
+			let authors = doc.querySelectorAll('.author-name');
+			authors = Array.from(authors).map(x => x.textContent.trim());
+			item.creators = ZU.arrayUnique(authors)
+				.map(x => ZU.cleanAuthor(x, "author"));
+		}
+		
 		item.date = ZU.xpathText(doc, '//span[@itemprop="datePublished"]/@content') || ZU.xpathText(doc, '//meta[@name="DC.date.issued"]/@content');
 
 		// the automatic added tags here are usually not really helpful
@@ -138,7 +140,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.washingtonpost.com/wp-dyn/content/article/2008/11/07/AR2008110703296.html",
+		"url": "https://www.washingtonpost.com/wp-dyn/content/article/2008/11/07/AR2008110703296.html",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -158,7 +160,8 @@ var testCases = [
 				"url": "http://www.washingtonpost.com/wp-dyn/content/article/2008/11/07/AR2008110703296.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -191,7 +194,8 @@ var testCases = [
 				"url": "https://www.washingtonpost.com/world/national-security/aulaqi-killing-reignites-debate-on-limits-of-executive-power/2011/09/30/gIQAx1bUAL_story.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -221,7 +225,8 @@ var testCases = [
 				"url": "https://www.washingtonpost.com/blogs/ezra-klein/post/jack-abramoffs-guide-to-buying-congressmen/2011/08/25/gIQAoXKLvM_blog.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -252,7 +257,8 @@ var testCases = [
 				"url": "https://www.washingtonpost.com/archive/entertainment/books/1991/04/07/bombs-in-the-cause-of-brotherhood/fe590e29-8052-4086-b9a9-6fcabdbae4ba/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -268,16 +274,23 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Brazil’s Bolsonaro tests positive for coronavirus",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Terrence",
+						"lastName": "McCoy",
+						"creatorType": "author"
+					}
+				],
 				"ISSN": "0190-8286",
-				"abstractNote": "The U.S. ambassador to Brazil said he would also be tested after hosting Jair Bolsonaro for a Fourth of July barbecue.",
+				"abstractNote": "The populist president said he’s taking hydroxychloroquine to treat the infection. The U.S. ambassador to Brazil has tested negative for covid-19.",
 				"language": "en-US",
 				"libraryCatalog": "www.washingtonpost.com",
 				"publicationTitle": "Washington Post",
 				"url": "https://www.washingtonpost.com/world/the_americas/coronavirus-brazil-bolsonaro-tests-positive/2020/07/07/5fa71548-c049-11ea-b4f6-cb39cd8940fb_story.html",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
