@@ -52,7 +52,7 @@ function detectWeb(doc, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-	var items = {}
+	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('li[class*="-item"] a.title');
 	for (let row of rows) {
@@ -123,6 +123,7 @@ function scrape(doc, url) {
 
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

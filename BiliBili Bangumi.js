@@ -59,7 +59,7 @@ function getSearchResults(doc) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		ZU.doGet(url, function (pageMedia) {
-		var pattern = /{"season_id":\d+,"season_type":\d+}/;
+			var pattern = /{"season_id":\d+,"season_type":\d+}/;
 			if (pattern.test(pageMedia)) {
 				var json = pattern.exec(pageMedia);
 				var obj = JSON.parse(json);
@@ -106,11 +106,9 @@ function doWeb(doc, url) {
 							return;
 						}
 					}
-					else {
-						if (obj.title == 1) {
-							scrape(obj.aid, obj.title, obj.longTitle);
-							return;
-						}
+					else if (obj.title == 1) {
+						scrape(obj.aid, obj.title, obj.longTitle);
+						return;
 					}
 				}
 			}
@@ -164,6 +162,7 @@ function scrape(aid, title, longTitle) {
 		item.complete();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
