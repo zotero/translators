@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-10 09:33:32"
+	"lastUpdated": "2020-07-10 12:59:44"
 }
 
 /*
@@ -114,6 +114,7 @@ function scrape(doc, url) {
 
 	item.title = text(doc, 'h1 span[property="v:itemreviewed"]');
 
+	var pattern, episodeCount;
 	const infos = doc.querySelector('div[class*="subject"] div#info');
 	for (var section of Object.values(infos.textContent.split('\n'))) {
 		if (!section || section.trim() === "") continue;
@@ -143,7 +144,27 @@ function scrape(doc, url) {
 				item.language = value;
 				break;
 			case "上映日期":
-				item.date = value;
+			case "首播":
+				pattern = /\d+[-|\/]\d+[-|\/]\d+/;
+				if (value && pattern.test(value)) {
+					item.date = pattern.exec(value)[0];
+				}
+				else {
+					item.date = value;
+				}
+				break;
+			case "季数":
+				break;
+			case "集数":
+				episodeCount = value;
+				break;
+			case "单集片长":
+				// {集数}必须先于{单集片长}
+				pattern = /\d+/;
+				if (value && pattern.test(value)) {
+					runningTime = pattern.exec(value)[0];
+					item.runningTime = (runningTime * episodeCount) + value.replace(runningTime, "");
+				}
 				break;
 			case "片长":
 				item.runningTime = value;
@@ -152,7 +173,12 @@ function scrape(doc, url) {
 				item.shortTitle = value;
 				break;
 			case "IMDb链接":
-				item.ISBN = value;
+				let strUrl = "https://www.imdb.com/title/" + value;
+				item.attachments.push({
+					snapshot: false,
+					url: strUrl,
+					title: "IMDb"
+				});
 				break;
 			default:
 				break;
@@ -164,7 +190,7 @@ function scrape(doc, url) {
 	if (!abstractNote) {
 		abstractNote = text(doc, 'div.related-info span');
 	}
-	item.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
+	item.abstractNote = abstractNote.trim().replace(/([　 ]*\n[　 ]*)+/g, '\n');
 
 	// 评分 & 评价人数
 	var ratingNum = text(doc, 'strong[property*="v:average"]');
@@ -360,6 +386,127 @@ var testCases = [
 		"type": "web",
 		"url": "https://movie.douban.com/chart",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/subject/26939247/",
+		"items": [
+			{
+				"itemType": "film",
+				"title": "夏目友人帐 第六季 夏目友人帳 陸",
+				"creators": [
+					{
+						"lastName": "大森贵弘",
+						"creatorType": "director",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "出合小都美",
+						"creatorType": "director",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "绿川幸",
+						"creatorType": "scriptwriter",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "村井贞之",
+						"creatorType": "scriptwriter",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "神谷浩史",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "井上和彦",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "小林沙苗",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "石田彰",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "堀江一真",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "木村良平",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "菅沼久义",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "泽城美雪",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "佐藤利奈",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "伊藤美纪 Miki Itô",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "伊藤荣次",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "诹访部顺一",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "2017-04-11",
+				"abstractNote": "与温柔友人们度过的，值得珍惜的每一天——\n                                　　美丽而虚幻的，人与妖的物语。\n                                    \n                                　　从小就能看见妖怪的少年·夏目贵志，继承了祖母玲子的遗产“友人帐”，与自称保镖的猫咪老师一起，开始将名字返还给被束缚在友人帐中的妖怪。\n                                    \n                                　　通过与妖怪及与之相关的人们接触，开始摸索自己前进之路的夏目，在与心灵相通的朋友们帮助下，设法守护自己重要的每一天。",
+				"distributor": "日本",
+				"extra": "9.6/31280",
+				"genre": "剧情 / 动画 / 奇幻",
+				"language": "日语",
+				"libraryCatalog": "Douban Movie",
+				"runningTime": "264分钟",
+				"shortTitle": "妖怪联络簿 六(台) / Natsume's Book of Friends 6 / Natsume Yuujinchou Roku",
+				"url": "https://movie.douban.com/subject/26939247/",
+				"attachments": [
+					{
+						"snapshot": false,
+						"title": "IMDb"
+					}
+				],
+				"tags": [
+					{
+						"tag": "剧情"
+					},
+					{
+						"tag": "动画"
+					},
+					{
+						"tag": "奇幻"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
