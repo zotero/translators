@@ -145,7 +145,8 @@ function scrape(doc, url) {
 				break;
 			case "上映日期":
 			case "首播":
-				pattern = /\d+[-|\/]\d+[-|\/]\d+/;
+			// eslint-disable-next-line
+			pattern = /\d+[-|\/]\d+[-|\/]\d+/;
 				if (value && pattern.test(value)) {
 					item.date = pattern.exec(value)[0];
 				}
@@ -162,7 +163,7 @@ function scrape(doc, url) {
 				// {集数}必须先于{单集片长}
 				pattern = /\d+/;
 				if (value && pattern.test(value)) {
-					runningTime = pattern.exec(value)[0];
+					var runningTime = pattern.exec(value)[0];
 					item.runningTime = (runningTime * episodeCount) + value.replace(runningTime, "");
 				}
 				break;
@@ -173,7 +174,7 @@ function scrape(doc, url) {
 				item.shortTitle = value;
 				break;
 			case "IMDb链接":
-				let strUrl = "https://www.imdb.com/title/" + value;
+				var strUrl = "https://www.imdb.com/title/" + value;
 				item.attachments.push({
 					snapshot: false,
 					url: strUrl,
@@ -190,6 +191,7 @@ function scrape(doc, url) {
 	if (!abstractNote) {
 		abstractNote = text(doc, 'div.related-info span');
 	}
+	// eslint-disable-next-line
 	item.abstractNote = abstractNote.trim().replace(/([　 ]*\n[　 ]*)+/g, '\n');
 
 	// 评分 & 评价人数
