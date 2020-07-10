@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-28 09:37:27"
+	"lastUpdated": "2020-07-10 09:40:32"
 }
 
 /*
@@ -193,8 +193,13 @@ function scrapeAndParse(doc, url) {
 			newItem.tags.push(tags[i].textContent);
 		}
 
-		// 摘要
-		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
+		// 摘要 felix-20200710-1 修复部分页面无法抓取的bug
+		// newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
+		let abstractNote = text(doc, 'div.indent span[class*="all"] div.intro');
+		if (!abstractNote) {
+			abstractNote = text(doc, 'div.indent div.intro');
+		}
+		newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 
 		// 评分 & 评价人数 by felix-20200626-1
 		var ratingNum = ZU.xpathText(doc, '//strong[@property="v:average"]');
