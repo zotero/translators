@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-10 09:40:32"
+	"lastUpdated": "2020-07-11 00:15:24"
 }
 
 /*
@@ -202,10 +202,11 @@ function scrapeAndParse(doc, url) {
 		newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 
 		// 评分 & 评价人数 by felix-20200626-1
-		var ratingNum = ZU.xpathText(doc, '//strong[@property="v:average"]');
+		// at 2020-07-11 00:05:43 by 018: 修复安装了「豆瓣资源下载大师」时，获取到亚马逊评分。 
+		var ratingNum = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//strong');
 		if (ratingNum && (ratingNum = Zotero.Utilities.trim(ratingNum))) {
 			// var ratingPeople = ZU.xpathText(doc, '//div[@class="rating_sum"]/span/a[@class="rating_people"]/span[@property="v:votes"]');
-			var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
+			var ratingPeople = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//a/span').trim();;
 			newItem.extra = ratingNum + "/" + ratingPeople;
 		}
 
@@ -227,34 +228,57 @@ function detectWeb(doc, url) {
 	}
 }
 
-function detectTitles(doc, url) {
-	var pattern = /\.douban\.com\/tag\//;
-	if (pattern.test(url)) {
-		return ZU.xpath(doc, '//div[@class="info"]/h2/a');
+// at 2020-07-11 00:05:43 by 018: 抓取豆列时添加显示评分信息。 
+function doWebList(doc, url) {
+	let r = /douban.com\/url\//;
+	var items = {};
+	var subjects = ZU.xpath(doc, '//div[@class="bd doulist-subject"]');
+	var subject;
+	for (let i = 0; i < subjects.length; i++) {
+		subject = subjects[i];
+		var title = ZU.xpath(subject, './/div[@class="title"]/a')[0];
+		if (r.test(title.href)) { // Ignore links
+			continue;
+		}
+		var rating = ZU.xpathText(subject, './/div[@class="rating"]');
+		items[title.href] = title.textContent.replace(/[\n| ]/g, "") + " " + rating.replace(/[\n| ]/g, "");
 	}
-	else {
-		return ZU.xpath(doc, '//div[@class="title"]/a');
+	return items;
+}
+
+// at 2020-07-11 00:05:43 by 018: 抓取标签时添加显示评分信息。 
+function doWebTag(doc, url) {
+	let r = /douban.com\/url\//;
+	var items = {};
+	var subjects = ZU.xpath(doc, '//li[@class="subject-item"]');
+	var subject;
+	for (let i = 0; i < subjects.length; i++) {
+		subject = subjects[i];
+		var title = ZU.xpath(subject, './/div[@class="info"]/h2/a')[0];
+		if (r.test(title.href)) { // Ignore links
+			continue;
+		}
+		var rating = ZU.xpathText(subject, './/div[@class="star clearfix"]');
+		items[title.href] = title.textContent.replace(/[\n| ]/g, "") + " " + rating.replace(/[\n| ]/g, "");
 	}
+	return items;
 }
 
 function doWeb(doc, url) {
 	var articles = [];
-	let r = /douban.com\/url\//;
 	if (detectWeb(doc, url) == "multiple") {
 		// also searches but they don't work as test cases in Scaffold
 		// e.g. https://book.douban.com/subject_search?search_text=Murakami&cat=1001
-		var items = {};
-		// var titles = ZU.xpath(doc, '//div[@class="title"]/a');
-		var titles = detectTitles(doc, url);
-		var title;
-		for (let i = 0; i < titles.length; i++) {
-			title = titles[i];
-			// Zotero.debug({ href: title.href, title: title.textContent });
-			if (r.test(title.href)) { // Ignore links
-				continue;
-			}
-			items[title.href] = title.textContent;
+		var items;
+		var pattern = /\.douban\.com\/tag\//;
+		// at 2020-07-11 00:05:43 by 018: 抓取多个时添加显示评分信息。 
+		if (pattern.test(url)) {
+			items = doWebTag(doc, url);
 		}
+		else {
+			items = doWebList(doc, url);
+		}
+		
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return;
