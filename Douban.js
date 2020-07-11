@@ -202,11 +202,11 @@ function scrapeAndParse(doc, url) {
 		newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 
 		// 评分 & 评价人数 by felix-20200626-1
-		// at 2020-07-11 00:05:43 by 018: 修复安装了「豆瓣资源下载大师」时，获取到亚马逊评分。 
+		// 2020-07-11 11:47:17 018 修复安装了豆瓣资源下载大师时获取到亚马逊评分
 		var ratingNum = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//strong');
 		if (ratingNum && (ratingNum = Zotero.Utilities.trim(ratingNum))) {
 			// var ratingPeople = ZU.xpathText(doc, '//div[@class="rating_sum"]/span/a[@class="rating_people"]/span[@property="v:votes"]');
-			var ratingPeople = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//a/span').trim();;
+			var ratingPeople = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//a/span').trim();
 			newItem.extra = ratingNum + "/" + ratingPeople;
 		}
 
@@ -228,8 +228,8 @@ function detectWeb(doc, url) {
 	}
 }
 
-// at 2020-07-11 00:05:43 by 018: 抓取豆列时添加显示评分信息。 
-function doWebList(doc, url) {
+// at 2020-07-11 00:05:43 by 018: 抓取豆列时添加显示评分信息。
+function doWebList(doc) {
 	let r = /douban.com\/url\//;
 	var items = {};
 	var subjects = ZU.xpath(doc, '//div[@class="bd doulist-subject"]');
@@ -246,8 +246,8 @@ function doWebList(doc, url) {
 	return items;
 }
 
-// at 2020-07-11 00:05:43 by 018: 抓取标签时添加显示评分信息。 
-function doWebTag(doc, url) {
+// at 2020-07-11 00:05:43 by 018，抓取标签时添加显示评分信息。
+function doWebTag(doc) {
 	let r = /douban.com\/url\//;
 	var items = {};
 	var subjects = ZU.xpath(doc, '//li[@class="subject-item"]');
@@ -271,12 +271,12 @@ function doWeb(doc, url) {
 		// e.g. https://book.douban.com/subject_search?search_text=Murakami&cat=1001
 		var items;
 		var pattern = /\.douban\.com\/tag\//;
-		// at 2020-07-11 00:05:43 by 018: 抓取多个时添加显示评分信息。 
+		// at 2020-07-11 00:05:43 by 018: 抓取多个时添加显示评分信息。
 		if (pattern.test(url)) {
-			items = doWebTag(doc, url);
+			items = doWebTag(doc);
 		}
 		else {
-			items = doWebList(doc, url);
+			items = doWebList(doc);
 		}
 		
 		Zotero.selectItems(items, function (items) {
