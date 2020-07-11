@@ -2,14 +2,14 @@
 	"translatorID": "d0a65ab7-b10c-4801-a906-05505fecc749",
 	"label": "Douban Movie",
 	"creator": "Felix Hui",
-	"target": "https?://movie.douban.com",
+	"target": "https?://(movie|www).douban.com(/doulist)?",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-10 12:59:44"
+	"lastUpdated": "2020-07-11 01:17:08"
 }
 
 /*
@@ -79,6 +79,12 @@ function getSearchResults(doc, url, checkOnly) {
 	var rows;
 	if (url.includes('.com/chart')) {
 		rows = doc.querySelectorAll('div.indent a');
+	}
+	else if (url.includes('.com/top')) {
+		rows = doc.querySelectorAll('ol.grid_view div.info a');
+	}
+	else if (url.includes('.com/doulist/')) {
+		rows = doc.querySelectorAll('div.article div.doulist-item div.title a');
 	}
 	else {
 		rows = doc.querySelectorAll('div.list-wp a');
