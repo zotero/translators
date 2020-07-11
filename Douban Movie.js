@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-11 01:17:08"
+	"lastUpdated": "2020-07-11 04:32:16"
 }
 
 /*
@@ -83,6 +83,8 @@ function getSearchResults(doc, url, checkOnly) {
 	else if (url.includes('.com/top')) {
 		rows = doc.querySelectorAll('ol.grid_view div.info a');
 	}
+	// 与 Douban.js 有冲突
+	// 可以先把 Douban.js 从 zotero/translators 移出，抓取后再移回
 	else if (url.includes('.com/doulist/')) {
 		rows = doc.querySelectorAll('div.article div.doulist-item div.title a');
 	}
@@ -121,8 +123,8 @@ function scrape(doc, url) {
 	item.title = text(doc, 'h1 span[property="v:itemreviewed"]');
 
 	var pattern, episodeCount;
-	const infos = doc.querySelector('div[class*="subject"] div#info');
-	for (var section of Object.values(infos.textContent.split('\n'))) {
+	const infos = text(doc, 'div[class*="subject"] div#info');
+	for (var section of Object.values(infos.split('\n'))) {
 		if (!section || section.trim() === "") continue;
 
 		let strArr = section.split(':');
@@ -151,8 +153,8 @@ function scrape(doc, url) {
 				break;
 			case "上映日期":
 			case "首播":
-			// eslint-disable-next-line
-			pattern = /\d+[-|\/]\d+[-|\/]\d+/;
+				// eslint-disable-next-line
+				pattern = /\d+[-|\/]\d+[-|\/]\d+/;
 				if (value && pattern.test(value)) {
 					item.date = pattern.exec(value)[0];
 				}
@@ -163,6 +165,7 @@ function scrape(doc, url) {
 			case "季数":
 				break;
 			case "集数":
+				// 考虑是否将 film 改为 tvBroadcast
 				episodeCount = value;
 				break;
 			case "单集片长":
@@ -180,10 +183,9 @@ function scrape(doc, url) {
 				item.shortTitle = value;
 				break;
 			case "IMDb链接":
-				var strUrl = "https://www.imdb.com/title/" + value;
 				item.attachments.push({
+					url: "https://www.imdb.com/title/" + value,
 					snapshot: false,
-					url: strUrl,
 					title: "IMDb"
 				});
 				break;
