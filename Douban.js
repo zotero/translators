@@ -141,9 +141,11 @@ function scrapeAndParse(doc, url) {
 				// 外文名
 					useComma = false;
 				}
+				// at 2020-07-11 23:45:29 by 018(lyb018@gmail.com): 把译者(translator)改为作者(author)，否则导
+				// 出的Zotero RDF文件再导入时会破坏评分。
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(
 					Zotero.Utilities.trim(translatorNames[i]),
-					"translator", useComma));
+					"author", useComma));
 			}
 		}
 
@@ -198,6 +200,9 @@ function scrapeAndParse(doc, url) {
 		let abstractNote = text(doc, 'div.indent span[class*="all"] div.intro');
 		if (!abstractNote) {
 			abstractNote = text(doc, 'div.indent div.intro');
+		}
+		if(abstractNote) {
+			newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 		}
 		newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 
