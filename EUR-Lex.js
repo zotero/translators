@@ -2,14 +2,14 @@
 	"translatorID": "bf053edc-a8c3-458c-93db-6d04ead2e636",
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/TXT/|search.html\\?)",
+	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/(TXT|ALL)/|search.html\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-16 09:11:06"
+	"lastUpdated": "2020-07-12 15:19:24"
 }
 
 /*
@@ -37,14 +37,13 @@
 
 
 // attr()/text() v2
-function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null;
-}
+// eslint-disable-next-line
+function attr(docOrElem, selector, attr, index) {var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null;}
 
 function getQueryParam(url, param) {
 	const queryString = url.split("?")[1];
 	const vars = queryString.split("&");
-	for (var i = 0; i < vars.length; i++) {
+	for (let i = 0; i < vars.length; i++) {
 		const pair = vars[i].split("=");
 		if (pair[0] == param) {
 			return pair[1];
@@ -55,7 +54,7 @@ function getQueryParam(url, param) {
 
 // the eli resource types are described at:
 // http://publications.europa.eu/mdr/resource/authority/resource-type/html/resourcetypes-eng.html
-var typeMapping = {
+const typeMapping = {
 	DIR: 'bill', // directive
 	REG: 'statute', // regulation
 	DEC: 'statute', // decision
@@ -71,42 +70,40 @@ var typeMapping = {
 
 function detectWeb(doc, url) {
 	const celex = getQueryParam(url, 'uri');
-	if (celex) {
-		const sector = celex.slice(6, 7);
-		if (sector === '6') { // caselaw
-			return 'case';
-		}
+	if (celex && celex.slice(6, 7) === '6') {
+		// if celex type is caselaw
+		return 'case';
 	}
 
 
 	const eliTypeURI = attr(doc, 'meta[property="eli:type_document"]', 'resource');
 	if (eliTypeURI) {
-		var eliType = eliTypeURI.split('/').pop();
-		var eliCategory = eliType.split('_')[0];
-		var type = typeMapping[eliCategory];
+		const eliType = eliTypeURI.split('/').pop();
+		const eliCategory = eliType.split('_')[0];
+		const type = typeMapping[eliCategory];
 		if (type) {
 			return type;
 		}
 		else {
 			Z.debug("Unknown eliType: " + eliType);
-			return null;
+			return false;
 		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
-	return null;
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('a.title');
+	let items = {};
+	let found = false;
+	const rows = doc.querySelectorAll('a.title');
 	for (let i = 0; i < rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+		const href = rows[i].href;
+		const title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -118,35 +115,35 @@ function getSearchResults(doc, checkOnly) {
 
 // we need to remember the language in search page to use the same for
 // individual entry page
-var autoLanguage;
+let autoLanguage;
 
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var m = url.match(/\blocale=([a-z][a-z])/);
+		const m = url.match(/\blocale=([a-z][a-z])/);
 		if (m) {
 			autoLanguage = m[1];
 		}
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = [];
-			for (var i in items) {
+			const articles = [];
+			for (const i in items) {
 				articles.push(i);
 			}
-			return ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(articles, scrape);
 		});
 	}
 	else if (detectWeb(doc, url) === "case") {
-		return scrapeCase(doc, url);
+		scrape(doc, url);
 	}
-	return scrape(doc, url);
+	scrape(doc, url);
 }
 
 
 // this maps language codes from ISO 639-1 to 639-3
-var languageMapping = {
+const languageMapping = {
 	BG: 'bul',
 	CS: 'ces',
 	DA: 'dan',
@@ -175,84 +172,69 @@ var languageMapping = {
 
 
 function scrape(doc, url) {
-	var type = detectWeb(doc, url);
-	var item = new Zotero.Item(type);
-
-	// determine the language we are currently looking the document at
-	let languageUrl = url.split('/')[4];
-	if (languageUrl === "AUTO") {
-		languageUrl = autoLanguage || "EN";
-	}
-	const language = languageMapping[languageUrl] || "eng";
-
-	item.title = attr(doc, 'meta[property="eli:title"][lang=' + languageUrl.toLowerCase() + ']', 'content');
-	item.language = languageUrl.toLowerCase();
-
-	var uri = attr(doc, '#format_language_table_digital_sign_act_' + languageUrl.toUpperCase(), 'href');
-	if (uri) {
-		var uriParts = uri.split('/').pop().replace('?uri=', '')
-			.split(':');
-		// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
-		// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
-		if (uriParts.length >= 4) {
-			if (/\d+/.test(uriParts[1])) {
-				item.code = uriParts[0];
-				item.codeNumber = uriParts[1] + ', ' + uriParts[2];
-			}
-			else {
-				item.code = uriParts[0] + ' ' + uriParts[1];
-				item.codeNumber = uriParts[3];
-			}
-			if (type == "bill") {
-				item.codeVolume = item.code;
-				item.code = item.codeNumber;
-			}
-		}
-	}
-
-	item.number = attr(doc, 'meta[property="eli:id_local"]', 'content');
-
-	item.date = attr(doc, 'meta[property="eli:date_publication"]', 'content');
-	// attr(doc, 'meta[property="eli:date_document"]', 'content');
-
-	var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
-	var passedByArray = [];
-	for (let i = 0; i < passedBy.length; i++) {
-		passedByArray.push(passedBy[i].getAttribute('resource').split('/').pop());
-	}
-	item.legislativeBody = passedByArray.join(', ');
-
-	item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', 'about') + '/' + language;
-
-	// eli:is_about -> eurovoc -> tags
-
-	item.complete();
-}
-
-function scrapeCase(doc, url) {
 	const type = detectWeb(doc, url);
 	const item = new Zotero.Item(type);
 
 	// determine the language we are currently looking the document at
 	let languageUrl = url.split('/')[4];
-	if (languageUrl == "AUTO") {
+	if (languageUrl === "AUTO" || typeof languageUrl === `undefined`) {
 		languageUrl = autoLanguage || "EN";
 	}
-	// const language = languageMapping[languageUrl] || "eng";
+	const language = languageMapping[languageUrl] || "eng";
 
-	item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('.')[1].trim();
 	item.language = languageUrl.toLowerCase();
 
+	if (type === "case") {
+		item.title = ZU.xpathText(doc, "//p[@id='translatedTitle']").split('.')[1].trim();
+		
+		const parsedDate = ZU.xpathText(doc, "//div[@id='PPDates_Contents']/div[1]/dl[1]/dd[1]").split('/');
+		item.date = parsedDate[2] + '-' + parsedDate[1] + '-' + parsedDate[0];
+		
+		item.url = url;
+	} else {
+		item.title = attr(doc, 'meta[property="eli:title"][lang=' + item.language + ']', 'content');
+		
+		const uri = attr(doc, '#format_language_table_digital_sign_act_' + languageUrl.toUpperCase(), 'href');
+		if (uri) {
+			const uriParts = uri.split('/').pop().replace('?uri=', '')
+				.split(':');
+			// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
+			// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
+			if (uriParts.length >= 4) {
+				if (/\d+/.test(uriParts[1])) {
+					item.code = uriParts[0];
+					item.codeNumber = uriParts[1] + ', ' + uriParts[2];
+				}
+				else {
+					item.code = uriParts[0] + ' ' + uriParts[1];
+					item.codeNumber = uriParts[3];
+				}
+				if (type == "bill") {
+					item.codeVolume = item.code;
+					item.code = item.codeNumber;
+				}
+			}
+		}
 
-	const parsedDate = ZU.xpathText(doc, "//div[@id='PPDates_Contents']/div[1]/dl[1]/dd[1]").split('/');
-	item.date = parsedDate[2] + '-' + parsedDate[1] + '-' + parsedDate[0];
-
-
-	item.url = url;
-
+		item.number = attr(doc, 'meta[property="eli:id_local"]', 'content');
+		
+		item.date = attr(doc, 'meta[property="eli:date_publication"]', 'content');
+		// attr(doc, 'meta[property="eli:date_document"]', 'content');
+	
+		const passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
+		let passedByArray = [];
+		for (let i = 0; i < passedBy.length; i++) {
+			passedByArray.push(passedBy[i].getAttribute('resource').split('/').pop());
+		}
+		item.legislativeBody = passedByArray.join(', ');
+	
+		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', 'about') + '/' + language;
+	
+		// eli:is_about -> eurovoc -> tags
+	}
+	
 	item.complete();
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
