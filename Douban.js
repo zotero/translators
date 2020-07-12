@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-11 00:15:24"
+	"lastUpdated": "2020-07-12 11:44:15"
 }
 
 /*
@@ -204,8 +204,6 @@ function scrapeAndParse(doc, url) {
 		if(abstractNote) {
 			newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
 		}
-		newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
-
 		// 评分 & 评价人数 by felix-20200626-1
 		// at 2020-07-11 11:47:17 by 018(lyb018@gmail.com) 修复安装了豆瓣资源下载大师时获取到亚马逊评分
 		var ratingNum = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//strong');
