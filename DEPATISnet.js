@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-10 11:53:20"
+	"lastUpdated": "2020-07-10 12:58:10"
 }
 
 /*
@@ -117,7 +117,7 @@ function scrape(doc, url) {
 
 	var ipcs = [];
 
-	var rows = ZU.xpath(doc, '//table/tbody/tr');			//old line: //var rows = ZU.xpath(doc, '//table[@class="tab_detail"]/tbody/tr');
+	var rows = ZU.xpath(doc, '//table/tbody/tr');			// old line: var rows = ZU.xpath(doc, '//table[@class="tab_detail"]/tbody/tr');
 
 	for (var i = 0, n = rows.length; i < n; i++) {
 		var columns = ZU.xpath(rows[i], './td');
@@ -197,14 +197,14 @@ function scrape(doc, url) {
 		snapshot: false
 	});
 	
-	var pages = ZU.xpathText(doc, '/html/body/div[4]/p/span');			//old line: //var pages = ZU.xpathText(doc, '//div[@id="inhalt"]/h2');
-	alert(pages);
+	var pages = ZU.xpathText(doc, '/html/body/div[4]/p/span');			// old line: var pages = ZU.xpathText(doc, '//div[@id="inhalt"]/h2');
+	
 	// e.g. "Dokument   DE000004446098C2   (Seiten: 8)"
 	// but there is no PDF available when we have "Seiten: 0"
 	if (pages && /(Seiten|Pages):\s*[1-9][0-9]*/.test(pages)) {
 		var pdfurl = "https://depatisnet.dpma.de/DepatisNet/depatisnet/" + pn + "_all_pages.pdf?window=1&space=menu&content=download_doc_verify&action=download_doc&docid=" + pn;
 		newItem.attachments.push({
-			title: pn,		//old line:  title: "Fulltext",
+			title: pn,		// old line:  title: "Fulltext",
 			url: pdfurl,
 			mimeType: "application/pdf"
 		});
