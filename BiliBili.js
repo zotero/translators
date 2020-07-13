@@ -15,8 +15,8 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- TODO
-	
+	Copyright © 2020 Felix Hui
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -39,20 +39,19 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	
 	if (url.includes('/video/')) {
 		if (doc.getElementById('bofqi') || doc.getElementById('multi_page')) {
 			Z.monitorDOMChanges(doc.body, { childList: true });
 		}
 		return "tvBroadcast";
 	}
-	if ((url.includes('/ranking') || url.includes('search.bilibili.com')) && getSearchResults(doc, true, url)) {
+	if ((url.includes('/ranking') || url.includes('search.bilibili.com')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
 }
 
-function getSearchResults(doc, checkOnly, url) {
+function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('li[class*="-item"] a.title');
@@ -68,9 +67,8 @@ function getSearchResults(doc, checkOnly, url) {
 }
 
 function doWeb(doc, url) {
-	
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false, url), function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
@@ -79,24 +77,23 @@ function doWeb(doc, url) {
 	}
 }
 function scrape(doc, url) {
-	
 	var item = new Zotero.Item("tvBroadcast");
 
 	// URL
 	item.url = url;
-	
+
 	// 标题
 	item.title = text(doc, '#viewbox_report h1.video-title');
 	// Z.debug('title: ' + item.title);
-	
+
 	// 时长
 	item.runningTime = text(doc, 'span.bilibili-player-video-time-total');
 	// Z.debug('runningTime: ' + item.runningTime);
-	
+
 	// 发布时间
 	item.date = text(doc, '.video-data span:not([class])');
 	// Z.debug('date: ' + item.date);
-	
+
 	// 导演
 	var author = text(doc, '#v_upinfo a.username');
 	// Z.debug('director: ' + author);
@@ -107,14 +104,14 @@ function scrape(doc, url) {
 			fieldMode: 1
 		});
 	}
-	
+
 	// 摘要
 	var description = text(doc, '#v_desc div.info');
 	// Z.debug('description: ' + description);
 	if (description) {
 		item.abstractNote = ZU.cleanTags(description);
 	}
-	
+
 	// 视频选集
 	var episodeInfo = doc.querySelector('#multi_page li[class*="on"] a');
 	if (episodeInfo) {
@@ -123,9 +120,10 @@ function scrape(doc, url) {
 		item.programTitle = episodeInfo.title;
 		// item.url = episodeInfo.href;
 	}
-	
+
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

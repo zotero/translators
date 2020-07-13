@@ -9,25 +9,30 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-28 09:37:27"
+	"lastUpdated": "2020-07-12 11:44:15"
 }
 
 /*
-   Douban Translator
-   Copyright (C) 2009-2010 TAO Cheng, acestrong@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Copyright © 2020 TAO Cheng, acestrong@gmail.com
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 // attr()/text() v2
@@ -98,7 +103,8 @@ function scrapeAndParse(doc, url) {
 			var authorNames = pattern.exec(page);
 			if (authorNames[2]) {
 				authorNames = trimTags(authorNames[2]);
-			} else {
+			}
+			else {
 				authorNames = trimTags(authorNames[1]);
 			}
 			pattern = /(\[.*?\]|\(.*?\)|（.*?）|&[A-Za-z]*;)/g;
@@ -135,9 +141,11 @@ function scrapeAndParse(doc, url) {
 				// 外文名
 					useComma = false;
 				}
+				// at 2020-07-11 23:45:29 by 018(lyb018@gmail.com): 把译者(translator)改为作者(author)，否则导
+				// 出的Zotero RDF文件再导入时会破坏评分。
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(
 					Zotero.Utilities.trim(translatorNames[i]),
-					"translator", useComma));
+					"author", useComma));
 			}
 		}
 
@@ -187,17 +195,24 @@ function scrapeAndParse(doc, url) {
 			newItem.tags.push(tags[i].textContent);
 		}
 
-		// 摘要
-		newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
-
+		// 摘要 felix-20200710-1 修复部分页面无法抓取的bug
+		// newItem.abstractNote = ZU.xpathText(doc, '//span[@class="short"]/div[@class="intro"]/p');
+		let abstractNote = text(doc, 'div.indent span[class*="all"] div.intro');
+		if (!abstractNote) {
+			abstractNote = text(doc, 'div.indent div.intro');
+		}
+		if(abstractNote) {
+			newItem.abstractNote = abstractNote.trim().replace(/\n *(\n)+/, '\n');
+		}
 		// 评分 & 评价人数 by felix-20200626-1
-		var ratingNum = ZU.xpathText(doc, '//strong[@property="v:average"]');
+		// at 2020-07-11 11:47:17 by 018(lyb018@gmail.com) 修复安装了豆瓣资源下载大师时获取到亚马逊评分
+		var ratingNum = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//strong');
 		if (ratingNum && (ratingNum = Zotero.Utilities.trim(ratingNum))) {
 			// var ratingPeople = ZU.xpathText(doc, '//div[@class="rating_sum"]/span/a[@class="rating_people"]/span[@property="v:votes"]');
-			var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
+			var ratingPeople = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//a/span').trim();
 			newItem.extra = ratingNum + "/" + ratingPeople;
 		}
-		
+
 		newItem.complete();
 	});
 }
@@ -216,34 +231,57 @@ function detectWeb(doc, url) {
 	}
 }
 
-function detectTitles(doc, url) {
-	
-	var pattern = /\.douban\.com\/tag\//;
-	if (pattern.test(url)) {
-		return ZU.xpath(doc, '//div[@class="info"]/h2/a');
-	} else {
-		return ZU.xpath(doc, '//div[@class="title"]/a');
+// at 2020-07-11 00:05:43 by 018(lyb018@gmail.com): 抓取豆列时添加显示评分信息。
+function doWebList(doc) {
+	let r = /douban.com\/url\//;
+	var items = {};
+	var subjects = ZU.xpath(doc, '//div[@class="bd doulist-subject"]');
+	var subject;
+	for (let i = 0; i < subjects.length; i++) {
+		subject = subjects[i];
+		var title = ZU.xpath(subject, './/div[@class="title"]/a')[0];
+		if (r.test(title.href)) { // Ignore links
+			continue;
+		}
+		var rating = ZU.xpathText(subject, './/div[@class="rating"]');
+		items[title.href] = title.textContent.replace(/[\n| ]/g, "") + " " + rating.replace(/[\n| ]/g, "");
 	}
+	return items;
+}
+
+// at 2020-07-11 00:05:43 by 018(lyb018@gmail.com): 抓取标签时添加显示评分信息。
+function doWebTag(doc) {
+	let r = /douban.com\/url\//;
+	var items = {};
+	var subjects = ZU.xpath(doc, '//li[@class="subject-item"]');
+	var subject;
+	for (let i = 0; i < subjects.length; i++) {
+		subject = subjects[i];
+		var title = ZU.xpath(subject, './/div[@class="info"]/h2/a')[0];
+		if (r.test(title.href)) { // Ignore links
+			continue;
+		}
+		var rating = ZU.xpathText(subject, './/div[@class="star clearfix"]');
+		items[title.href] = title.textContent.replace(/[\n| ]/g, "") + " " + rating.replace(/[\n| ]/g, "");
+	}
+	return items;
 }
 
 function doWeb(doc, url) {
 	var articles = [];
-	let r = /douban.com\/url\//;
 	if (detectWeb(doc, url) == "multiple") {
 		// also searches but they don't work as test cases in Scaffold
 		// e.g. https://book.douban.com/subject_search?search_text=Murakami&cat=1001
-		var items = {};
-		// var titles = ZU.xpath(doc, '//div[@class="title"]/a');
-		var titles = detectTitles(doc, url);
-		var title;
-		for (let i = 0; i < titles.length; i++) {
-			title = titles[i];
-			// Zotero.debug({ href: title.href, title: title.textContent });
-			if (r.test(title.href)) { // Ignore links
-				continue;
-			}
-			items[title.href] = title.textContent;
+		var items;
+		var pattern = /\.douban\.com\/tag\//;
+		// at 2020-07-11 00:05:43 by 018(lyb018@gmail.com): 抓取多个时添加显示评分信息。
+		if (pattern.test(url)) {
+			items = doWebTag(doc);
 		}
+		else {
+			items = doWebList(doc);
+		}
+		
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return;
