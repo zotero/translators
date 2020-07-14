@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-11 04:32:16"
+	"lastUpdated": "2020-07-14 01:19:44"
 }
 
 /*
@@ -199,13 +199,18 @@ function scrape(doc, url) {
 	if (!abstractNote) {
 		abstractNote = text(doc, 'div.related-info span');
 	}
-	// eslint-disable-next-line
-	item.abstractNote = abstractNote.trim().replace(/([　 ]*\n[　 ]*)+/g, '\n');
+	if (abstractNote) {
+		// eslint-disable-next-line
+		item.abstractNote = abstractNote.trim().replace(/([　 ]*\n[　 ]*)+/g, '\n');
+	}
 
 	// 评分 & 评价人数
 	var ratingNum = text(doc, 'strong[property*="v:average"]');
 	if (ratingNum) {
 		var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
+		if (!ratingPeople || ratingPeople.toString().trim().length <= 0) {
+			ratingPeople = 0;
+		}
 		item.extra = ratingNum.trim() + "/" + ratingPeople;
 	}
 
