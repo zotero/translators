@@ -141,11 +141,9 @@ function scrapeAndParse(doc, url) {
 				// 外文名
 					useComma = false;
 				}
-				// at 2020-07-11 23:45:29 by 018(lyb018@gmail.com): 把译者(translator)改为作者(author)，否则导
-				// 出的Zotero RDF文件再导入时会破坏评分。
 				newItem.creators.push(Zotero.Utilities.cleanAuthor(
 					Zotero.Utilities.trim(translatorNames[i]),
-					"author", useComma));
+					"translator", useComma));
 			}
 		}
 
