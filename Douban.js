@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-12 11:44:15"
+	"lastUpdated": "2020-07-14 01:27:33"
 }
 
 /*
@@ -210,6 +210,9 @@ function scrapeAndParse(doc, url) {
 		if (ratingNum && (ratingNum = Zotero.Utilities.trim(ratingNum))) {
 			// var ratingPeople = ZU.xpathText(doc, '//div[@class="rating_sum"]/span/a[@class="rating_people"]/span[@property="v:votes"]');
 			var ratingPeople = ZU.xpathText(doc, '//*[@class="rating_wrap clearbox"]//a/span').trim();
+			if (!ratingPeople || ratingPeople.toString().trim().length <= 0) {
+				ratingPeople = 0;
+			}
 			newItem.extra = ratingNum + "/" + ratingPeople;
 		}
 
