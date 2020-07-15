@@ -2,7 +2,7 @@
 
 const path = require('path');
 const process = require('process');
-const { exec } = require('child_process');
+const childProcess = require('child_process');
 const fs = require('fs').promises;
 const selenium = require('selenium-webdriver');
 const until = require('selenium-webdriver/lib/until');
@@ -13,20 +13,53 @@ const translatorServer = require('./translator-server');
 const chromeExtensionDir = path.join(__dirname, 'connectors', 'build', 'chrome');
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 
+function exec(cmd) {
+	return childProcess.execSync(cmd, { encoding: 'utf8' });
+}
+
 async function getTranslatorsToTest() {
-	const translatorFilenames = await new Promise((resolve, reject) => {
-		// A bit of a complicated bash script based on https://stackoverflow.com/a/12185115/3199106
-		// retrieves the diff of translator files between the `master` commit at which the PR branch was started
-		// and PR `HEAD`
-		exec('git diff $(git rev-list "$(git rev-list --first-parent ^HEAD master | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$"',
-				(err, stdout) => {
-			if (err) {
-				console.log(chalk.red("Failed to get the list of translators to test"));
-				reject(err);
+	const branch = exec('git rev-parse --abbrev-ref HEAD').trim();
+	
+	const hasUpstream = exec('git remote -v').split('\n')
+		.map(line => line.trim())
+		.includes('upstream\thttps://github.com/zotero/translators.git');
+	// Assume that if upstream/master exists, we want to compare against that
+	const master = hasUpstream ? 'upstream/master' : 'master';
+	
+	if (branch == master) {
+		return [];
+	}
+	
+	const translatorFilenames =[]
+	
+	try {
+		for (const file of exec(`git diff --name-status ${master}`).split('\n')) {
+			// Find modified JS files in root directory
+			// "M	Washington Post.js"
+			let m = file.match(/^M\t([^/]+\.js)$/);
+			if (m) {
+				translatorFilenames.push(m[1]);
+				continue;
 			}
-			resolve(stdout.split('\n').filter(str => str.length));
-		})
-	});
+			// Find renamed JS files in root directory
+			// "R092	washingtonpost.com.js	Washington Post.js"
+			m = file.match(/^R\d+\t[^/]+\.js\t([^/]+\.js)$/);
+			if (m) {
+				translatorFilenames.push(m[1]);
+				continue;
+			}
+		}
+	}
+	catch (e) {
+		console.log(chalk.red("Failed to get the list of translators to test"));
+		return [];
+	}
+	
+	if (!translatorFilenames.length) {
+		console.log(chalk.red("No modified translators found"));
+		return [];
+	}
+	
 	let changedTranslatorIDs = [];
 	let toTestTranslatorIDs = new Set();
 	let toTestTranslatorNames = new Set();
