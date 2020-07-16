@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-16 23:01:04"
+	"lastUpdated": "2020-07-16 23:16:42"
 }
 
 /*
@@ -33,49 +33,46 @@
 
 function detectWeb(doc, url) {
 	var urlParts = url.split('/');
-	if ( urlParts.length <= 4 ) {
+	if (urlParts.length <= 4) {
 		return "webpage";
-	}	
+	}
 	return "blogPost";
 }
 
 function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
-	// Creating the item
 	var newItem = new Zotero.Item(resourceType);
 
-	var urlParts = url.split('/');
-	
-	var tmp_date, tmp_author;
+	var tmpDate, tmpAuthor;
 	if (resourceType == "blogPost") {
 		newItem.blogTitle = ZU.xpathText(doc, "(//span[@class='display-name__account'])[1]");
 		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
-		tmp_date = ZU.xpathText(doc, '//div[@class="detailed-status__meta"]/data/@value');
-		tmp_author = ZU.xpathText(doc, "(//strong[@class='display-name__html p-name emojify'])[1]");
-	} else {
+		tmpDate = ZU.xpathText(doc, '//div[@class="detailed-status__meta"]/data/@value');
+		tmpAuthor = ZU.xpathText(doc, "(//strong[@class='display-name__html p-name emojify'])[1]");
+	}
+	else {
 		var aux = ZU.xpathText(doc, '//div[@class="public-account-bio__extra"]/text()');
-		tmp_date = aux.substring(aux.length, aux.length-8);
-		tmp_author = ZU.xpathText(doc, "//h1").split("\n")[1];
+		tmpDate = aux.substring(aux.length, aux.length - 8);
+		tmpAuthor = ZU.xpathText(doc, "//h1").split("\n")[1];
 		newItem.title = ZU.xpathText(doc, "//h1/small");
 	}
 
-	newItem.date = ZU.strToISO(tmp_date);
-	if (tmp_author) {
-		newItem.creators.push(ZU.cleanAuthor(tmp_author, "author", false));
+	newItem.date = ZU.strToISO(tmpDate);
+	if (tmpAuthor) {
+		newItem.creators.push(ZU.cleanAuthor(tmpAuthor, "author", false));
 	}
 	newItem.websiteType = "Microblogging (Mastodon)";
 	newItem.url = url;
-	
+
 	// Adding the attachment
 	newItem.attachments.push({
 		title: "Mastodon Snapshot",
 		mimeType: "text/html",
 		url: url
-	});	
-	
+	});
+
 	newItem.complete();
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
