@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-15 15:08:26"
+	"lastUpdated": "2020-07-16 23:01:04"
 }
 
 /*
@@ -46,21 +46,20 @@ function doWeb(doc, url) {
 
 	var urlParts = url.split('/');
 	
-	var tmp_date;
+	var tmp_date, tmp_author;
 	if (resourceType == "blogPost") {
-		//Setting common data:
-		newItem.blogTitle = ZU.xpathText(doc, "//span[@class='display-name__account']/text()");
-		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");	
+		newItem.blogTitle = ZU.xpathText(doc, "(//span[@class='display-name__account'])[1]");
+		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
 		tmp_date = ZU.xpathText(doc, '//div[@class="detailed-status__meta"]/data/@value');
+		tmp_author = ZU.xpathText(doc, "(//strong[@class='display-name__html p-name emojify'])[1]");
 	} else {
 		var aux = ZU.xpathText(doc, '//div[@class="public-account-bio__extra"]/text()');
 		tmp_date = aux.substring(aux.length, aux.length-8);
-		newItem.title = ZU.xpathText(doc, "//meta[@property='profile:username']/@content");		
+		tmp_author = ZU.xpathText(doc, "//h1").split("\n")[1];
+		newItem.title = ZU.xpathText(doc, "//h1/small");
 	}
 
-	newItem.websiteTitle = urlParts[2];
 	newItem.date = ZU.strToISO(tmp_date);
-	var tmp_author = ZU.xpathText(doc, "//strong[@class='display-name__html p-name emojify']");		
 	if (tmp_author) {
 		newItem.creators.push(ZU.cleanAuthor(tmp_author, "author", false));
 	}
@@ -84,7 +83,6 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"blogTitle": "@febrezo@mastodon.social",
 				"title": "He decidit que heu de trobar qui és la persona o cosa que es menja els cables USB-C de casa meva. No sé com ni per què però ara mateix estic sense cables i aixó és desesperant. Tots els que trobo són de tipus USB normals. Havia de dir-ho. #TootSeriós",
 				"creators": [
 					{
@@ -94,6 +92,7 @@ var testCases = [
 					}
 				],
 				"date": "2020-02-24",
+				"blogTitle": "@febrezo@mastodon.social",
 				"url": "https://mastodon.social/@febrezo/103715916688810274",
 				"websiteType": "Microblogging (Mastodon)",
 				"attachments": [
@@ -114,17 +113,16 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "webpage",
-				"title": "febrezo@mastodon.social",
+				"title": "@febrezo@mastodon.social",
 				"creators": [
 					{
-						"firstName": "Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Félix Brezo, Aussie Rockman, Félix Brezo, Félix Brezo, Panz', Tarik ‍, Félix Brezo, Félix Brezo, Félix",
+						"firstName": "Félix",
 						"lastName": "Brezo",
 						"creatorType": "author"
 					}
 				],
 				"date": "2017",
 				"url": "https://mastodon.social/@febrezo",
-				"websiteTitle": "mastodon.social",
 				"websiteType": "Microblogging (Mastodon)",
 				"attachments": [
 					{
