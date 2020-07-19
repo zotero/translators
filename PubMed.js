@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-20 05:41:13"
+	"lastUpdated": "2020-07-19 18:21:10"
 }
 
 /*
@@ -146,11 +146,11 @@ function getSearchResults(doc, checkOnly) {
 	if (!results.length) return false;
 	for (var i = 0; i < results.length; i++) {
 		var title = ZU.xpathText(results[i], '(.//p[@class="title"]|.//h1)[1]')
-			|| ZU.xpathText(results[i], './/a[@class="labs-docsum-title"]')
+			|| ZU.xpathText(results[i], './/a[@class="docsum-title"]')
 			|| ZU.xpathText(results[i], './/div[@class="ncbi-docsum"]/a'); // My Bibliography
 
 		var uid = ZU.xpathText(results[i], './/input[starts-with(@id,"UidCheckBox")]/@value')
-			|| ZU.xpathText(results[i], './/div[contains(@class, "labs-docsum-citation")]//span[@class="docsum-pmid"]')
+			|| ZU.xpathText(results[i], './/div[contains(@class, "docsum-citation")]//span[@class="docsum-pmid"]')
 			|| ZU.xpathText(results[i], './div[@class="citation"]//input/@pmid') // My Bibliography
 			||			ZU.xpathText(results[i], './/dl[@class="rprtid"]/dd[preceding-sibling::*[1][text()="PMID:"]]');
 
