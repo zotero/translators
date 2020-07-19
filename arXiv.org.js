@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2019-10-22 05:31:06"
+	"lastUpdated": "2020-07-20 05:51:06"
 }
 
 /*
@@ -40,8 +40,8 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	var url = 'https://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
-		+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(item.arXiv);
+	var url = 'http://export.arxiv.org/api/query?id_list='
+	 + encodeURIComponent(item.arXiv);
 	ZU.doGet(url, parseXML);
 }
 
@@ -61,6 +61,172 @@ function detectWeb(doc, url) {
 		return "journalArticle";
 	}
 }
+
+var dict = new Map([
+	['astro-ph','Astrophysics'],
+	['cond-mat','Condensed Matter'],
+	['cs','Computer Science'],
+	['econ','Economics'],
+	['eess','Electrical Engineering and Systems Science'],
+	['gr-qc','General Relativity and Quantum Cosmology'],
+	['hep-ex','High Energy Physics - Experiment'],
+	['hep-lat','High Energy Physics - Lattice'],
+	['hep-ph','High Energy Physics - Phenomenology'],
+	['hep-th','High Energy Physics - Theory'],
+	['math','Mathematics'],
+	['math-ph','Mathematical Physics'],
+	['nlin','Nonlinear Sciences'],
+	['nucl-ex','Nuclear Experiment'],
+	['nucl-th','Nuclear Theory'],
+	['physics','Physics'],
+	['q-bio','Quantitative Biology'],
+	['q-fin','Quantitative Finance'],
+	['quant-ph','Quantum Physics'],
+	['stat','Statistics'],
+	['astro-ph.CO','Cosmology and Nongalactic Astrophysics'],
+	['astro-ph.EP','Earth and Planetary Astrophysics'],
+	['astro-ph.GA','Astrophysics of Galaxies'],
+	['astro-ph.HE','High Energy Astrophysical Phenomena'],
+	['astro-ph.IM','Instrumentation and Methods for Astrophysics'],
+	['astro-ph.SR','Solar and Stellar Astrophysics'],
+	['cond-mat.dis-nn','Disordered Systems and Neural Networks'],
+	['cond-mat.mes-hall','Mesoscale and Nanoscale Physics'],
+	['cond-mat.mtrl-sci','Materials Science'],
+	['cond-mat.other','Other Condensed Matter'],
+	['cond-mat.quant-gas','Quantum Gases'],
+	['cond-mat.soft','Soft Condensed Matter'],
+	['cond-mat.stat-mech','Statistical Mechanics'],
+	['cond-mat.str-el','Strongly Correlated Electrons'],
+	['cond-mat.supr-con','Superconductivity'],
+	['cs.AI','Artificial Intelligence'],
+	['cs.AR','Hardware Architecture'],
+	['cs.CC','Computational Complexity'],
+	['cs.CE','Computational Engineering, Finance, and Science'],
+	['cs.CG','Computational Geometry'],
+	['cs.CL','Computation and Language'],
+	['cs.CR','Cryptography and Security'],
+	['cs.CV','Computer Vision and Pattern Recognition'],
+	['cs.CY','Computers and Society'],
+	['cs.DB','Databases'],
+	['cs.DC','Distributed, Parallel, and Cluster Computing'],
+	['cs.DL','Digital Libraries'],
+	['cs.DM','Discrete Mathematics'],
+	['cs.DS','Data Structures and Algorithms'],
+	['cs.ET','Emerging Technologies'],
+	['cs.FL','Formal Languages and Automata Theory'],
+	['cs.GL','General Literature'],
+	['cs.GR','Graphics'],
+	['cs.GT','Computer Science and Game Theory'],
+	['cs.HC','Human-Computer Interaction'],
+	['cs.IR','Information Retrieval'],
+	['cs.IT','Information Theory'],
+	['cs.LG','Learning'],
+	['cs.LO','Logic in Computer Science'],
+	['cs.MA','Multiagent Systems'],
+	['cs.MM','Multimedia'],
+	['cs.MS','Mathematical Software'],
+	['cs.NA','Numerical Analysis'],
+	['cs.NE','Neural and Evolutionary Computing'],
+	['cs.NI','Networking and Internet Architecture'],
+	['cs.OH','Other Computer Science'],
+	['cs.OS','Operating Systems'],
+	['cs.PF','Performance'],
+	['cs.PL','Programming Languages'],
+	['cs.RO','Robotics'],
+	['cs.SC','Symbolic Computation'],
+	['cs.SD','Sound'],
+	['cs.SE','Software Engineering'],
+	['cs.SI','Social and Information Networks'],
+	['cs.SY','Systems and Control'],
+	['econ.EM','Econometrics'],
+	['eess.AS','Audio and Speech Processing'],
+	['eess.IV','Image and Video Processing'],
+	['eess.SP','Signal Processing'],
+	['math.AC','Commutative Algebra'],
+	['math.AG','Algebraic Geometry'],
+	['math.AP','Analysis of PDEs'],
+	['math.AT','Algebraic Topology'],
+	['math.CA','Classical Analysis and ODEs'],
+	['math.CO','Combinatorics'],
+	['math.CT','Category Theory'],
+	['math.CV','Complex Variables'],
+	['math.DG','Differential Geometry'],
+	['math.DS','Dynamical Systems'],
+	['math.FA','Functional Analysis'],
+	['math.GM','General Mathematics'],
+	['math.GN','General Topology'],
+	['math.GR','Group Theory'],
+	['math.GT','Geometric Topology'],
+	['math.HO','History and Overview'],
+	['math.IT','Information Theory'],
+	['math.KT','K-Theory and Homology'],
+	['math.LO','Logic'],
+	['math.MG','Metric Geometry'],
+	['math.MP','Mathematical Physics'],
+	['math.NA','Numerical Analysis'],
+	['math.NT','Number Theory'],
+	['math.OA','Operator Algebras'],
+	['math.OC','Optimization and Control'],
+	['math.PR','Probability'],
+	['math.QA','Quantum Algebra'],
+	['math.RA','Rings and Algebras'],
+	['math.RT','Representation Theory'],
+	['math.SG','Symplectic Geometry'],
+	['math.SP','Spectral Theory'],
+	['math.ST','Statistics Theory'],
+	['nlin.AO','Adaptation and Self-Organizing Systems'],
+	['nlin.CD','Chaotic Dynamics'],
+	['nlin.CG','Cellular Automata and Lattice Gases'],
+	['nlin.PS','Pattern Formation and Solitons'],
+	['nlin.SI','Exactly Solvable and Integrable Systems'],
+	['physics.acc-ph','Accelerator Physics'],
+	['physics.ao-ph','Atmospheric and Oceanic Physics'],
+	['physics.app-ph','Applied Physics'],
+	['physics.atm-clus','Atomic and Molecular Clusters'],
+	['physics.atom-ph','Atomic Physics'],
+	['physics.bio-ph','Biological Physics'],
+	['physics.chem-ph','Chemical Physics'],
+	['physics.class-ph','Classical Physics'],
+	['physics.comp-ph','Computational Physics'],
+	['physics.data-an','Data Analysis, Statistics and Probability'],
+	['physics.ed-ph','Physics Education'],
+	['physics.flu-dyn','Fluid Dynamics'],
+	['physics.gen-ph','General Physics'],
+	['physics.geo-ph','Geophysics'],
+	['physics.hist-ph','History and Philosophy of Physics'],
+	['physics.ins-det','Instrumentation and Detectors'],
+	['physics.med-ph','Medical Physics'],
+	['physics.optics','Optics'],
+	['physics.plasm-ph','Plasma Physics'],
+	['physics.pop-ph','Popular Physics'],
+	['physics.soc-ph','Physics and Society'],
+	['physics.space-ph','Space Physics'],
+	['q-bio.BM','Biomolecules'],
+	['q-bio.CB','Cell Behavior'],
+	['q-bio.GN','Genomics'],
+	['q-bio.MN','Molecular Networks'],
+	['q-bio.NC','Neurons and Cognition'],
+	['q-bio.OT','Other Quantitative Biology'],
+	['q-bio.PE','Populations and Evolution'],
+	['q-bio.QM','Quantitative Methods'],
+	['q-bio.SC','Subcellular Processes'],
+	['q-bio.TO','Tissues and Organs'],
+	['q-fin.CP','Computational Finance'],
+	['q-fin.EC','Economics'],
+	['q-fin.GN','General Finance'],
+	['q-fin.MF','Mathematical Finance'],
+	['q-fin.PM','Portfolio Management'],
+	['q-fin.PR','Pricing of Securities'],
+	['q-fin.RM','Risk Management'],
+	['q-fin.ST','Statistical Finance'],
+	['q-fin.TR','Trading and Market Microstructure'],
+	['stat.AP','Applications'],
+	['stat.CO','Computation'],
+	['stat.ME','Methodology'],
+	['stat.ML','Machine Learning'],
+	['stat.OT','Other Statistics'],
+	['stat.TH','Statistics Theory']
+]);
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
@@ -104,10 +270,7 @@ function doWeb(doc, url) {
 			
 			var urls = [];
 			for (var id in items) {
-				urls.push('http://export.arxiv.org/oai2'
-					+ '?verb=GetRecord&metadataPrefix=oai_dc'
-					+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id)
-				);
+				urls.push('http://export.arxiv.org/api/query?id_list=' + encodeURIComponent(id));
 			}
 			
 			ZU.doGet(urls, parseXML);
@@ -129,8 +292,7 @@ function doWeb(doc, url) {
 		}
 		if (!id) throw new Error('Could not find arXiv ID on page.');
 		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
-		var apiurl = 'http://export.arxiv.org/oai2?verb=GetRecord&metadataPrefix=oai_dc'
-			+ '&identifier=oai%3AarXiv.org%3A' + encodeURIComponent(id);
+		var apiurl = 'http://export.arxiv.org/api/query?id_list=' + encodeURIComponent(id);
 		ZU.doGet(apiurl, parseXML);
 	}
 }
@@ -140,64 +302,64 @@ function parseXML(text) {
 	// Z.debug(text);
 	/* eslint camelcase: ["error", { allow: ["oai_dc"] }] */
 	var ns = {
-		oai_dc: 'http://www.openarchives.org/OAI/2.0/oai_dc/',
-		dc: 'http://purl.org/dc/elements/1.1/',
-		xsi: 'http://www.w3.org/2001/XMLSchema-instance',
-		n: 'http://www.openarchives.org/OAI/2.0/' // Default
+		arxiv: 'http://arxiv.org/schemas/atom',
+		opensearch: 'http://a9.com/-/spec/opensearch/1.1/',
+		a: 'http://www.w3.org/2005/Atom' // Default
 	};
 	var newItem = new Zotero.Item("journalArticle");
 	
 	var xml = (new DOMParser()).parseFromString(text, "text/xml");
-	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
+	var dcMeta = ZU.xpath(xml, '//a:entry', ns)[0];
 
-	newItem.title = getXPathNodeTrimmed(dcMeta, "dc:title", ns);
-	getCreatorNodes(dcMeta, "dc:creator", newItem, "author", ns);
-	var dates = ZU.xpath(dcMeta, './dc:date', ns)
-		.map(element => element.textContent)
-		.sort();
-	if (dates.length > 0) {
-		if (version && version < dates.length) {
-			newItem.date = dates[version - 1];
-		}
-		else {
-			// take the latest date
-			newItem.date = dates[dates.length - 1];
-		}
-	}
-	
-	
-	var descriptions = ZU.xpath(dcMeta, "./dc:description", ns);
-	
-	// Put the first description into abstract, all other into notes.
-	if (descriptions.length > 0) {
-		newItem.abstractNote = ZU.trimInternal(descriptions[0].textContent);
-		for (let j = 1; j < descriptions.length; j++) {
-			var noteStr = ZU.trimInternal(descriptions[j].textContent);
-			newItem.notes.push({ note: noteStr });
-		}
-	}
-	var subjects = ZU.xpath(dcMeta, "./dc:subject", ns);
-	for (let j = 0; j < subjects.length; j++) {
-		var subject = ZU.trimInternal(subjects[j].textContent);
-		newItem.tags.push(subject);
-	}
-					
-	var identifiers = ZU.xpath(dcMeta, "./dc:identifier", ns);
-	for (let j = 0; j < identifiers.length; j++) {
-		var identifier = ZU.trimInternal(identifiers[j].textContent);
-		if (identifier.substr(0, 4) == "doi:") {
-			newItem.DOI = identifier.substr(4);
-		}
-		else if (identifier.substr(0, 7) == "http://") {
-			newItem.url = identifier;
-		}
+	newItem.title = getXPathNodeTrimmed(dcMeta, "a:title", ns);
+	getCreatorNodes(dcMeta, "a:author", newItem, "author", ns);
+	var date = ZU.xpath(dcMeta, "./a:updated", ns)[0];
+	if(date){
+		date = ZU.trimInternal(date.textContent).substr(0,10);
+		newItem.date = date;
 	}
 
-	var articleID = ZU.xpath(xml, "//n:GetRecord/n:record/n:header/n:identifier", ns)[0];
-	if (articleID) articleID = ZU.trimInternal(articleID.textContent).substr(14); // Trim off oai:arXiv.org:
+	var summary = ZU.xpath(dcMeta, "./a:summary", ns)[0];
+	if (summary) {
+		newItem.abstractNote = ZU.trimInternal(summary.textContent);
+	}
+
+	var comment = ZU.xpath(dcMeta,"./arxiv:comment",ns)[0];
+	if (comment) {
+		comment = ZU.trimInternal(comment.textContent);
+		newItem.notes.push({note: 'Comment: '+ comment});
+	}
+
+	var categories = ZU.xpath(dcMeta,".//a:category/@term",ns);
+	for (let j = 0; j < categories.length; j++) {
+		var category = ZU.trimInternal(categories[j].textContent);
+		var temp_category = dict.get(category);
+		category = category.split('.');
+		if (category.length>1){
+			category = dict.get(category[0]) + ' - ' + temp_category;
+		} else {
+			category = temp_category;
+		}
+		newItem.tags.push(category);
+	}
+
+	var doi = ZU.xpath(dcMeta, "./arxiv:doi",ns)[0];
+	if (doi) {
+		newItem.DOI = ZU.trimInternal(doi.textContent);
+	}
+
+	var url = ZU.xpath(dcMeta, "./a:id", ns)[0];
+	if (url) {
+		url = ZU.trimInternal(url.textContent);
+		newItem.url = url.substr(0,url.length-2);
+
+		var articleID = url.substr(21,url.length-23);
+	}
+
+	var articleField = ZU.xpath(dcMeta, "./arxiv:primary_category/@term", ns)[0];
+	articleField = ZU.trimInternal(articleField.textContent);
 	
-	var articleField = ZU.xpathText(xml, '//n:GetRecord/n:record/n:header/n:setSpec', ns);
-	if (articleField) articleField = "[" + articleField.replace(/^.+?:/, "") + "]";
+	if (articleField) articleField = "[" + articleField+ "]";
 	
 	if (articleID && articleID.includes("/")) {
 		newItem.publicationTitle = "arXiv:" + articleID;
@@ -268,7 +430,7 @@ function getCreatorNodes(dcMeta, name, newItem, creatorType, ns) {
 	var nodes = ZU.xpath(dcMeta, './' + name, ns);
 	for (var i = 0; i < nodes.length; i++) {
 		newItem.creators.push(
-			ZU.cleanAuthor(nodes[i].textContent, creatorType, true)
+			ZU.cleanAuthor(nodes[i].textContent, creatorType, false)
 		);
 	}
 }/** BEGIN TEST CASES **/
