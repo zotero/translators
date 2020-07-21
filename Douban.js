@@ -2,14 +2,14 @@
 	"translatorID": "d0a65ab7-b10c-4801-a906-05505fecc749",
 	"label": "Douban",
 	"creator": "Felix Hui",
-	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|people|tag|celebrity|explore)",
+	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|celebrity|explore|chart|tv|top)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-20 08:26:01"
+	"lastUpdated": "2020-07-21 06:36:16"
 }
 
 /*
@@ -39,9 +39,9 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 var TYPE_MAP = {
-	"book": "book",
-	"movie": "film",
-	"tv": "tvBroadcast"
+	book: 'book',
+	movie: 'film',
+	tv: 'tvBroadcast'
 };
 
 function doPerson(item, data, creatorType) {
@@ -60,7 +60,7 @@ function doTag(item, data) {
 	}
 }
 
-function detectType(doc, url) {
+function detectType(doc) {
 	var element = Object.values(doc.scripts).find(element => element.textContent.includes('answerObj'));
 	if (element) {
 		var pattern = /TYPE: '[a-zA-Z]+'/;
@@ -74,9 +74,46 @@ function detectType(doc, url) {
 	return false;
 }
 
+function getResults1(rows, funcTitle, funcRating) {
+	if (!rows || rows.length <= 0) return false;
+
+	var found = false, items = {}, titleTag;
+	for (let row of rows) {
+		titleTag = funcTitle(row);
+		let href = titleTag.href;
+		let title = ZU.trimInternal(titleTag.textContent);
+		if (!href || !title) continue;
+
+		found = true;
+		if (funcRating) {
+			title = '[' + funcRating(row) + '] ' + title;
+		}
+		items[href] = title;
+	}
+
+	return found ? items : false;
+}
+
+function getResults2(rows, titleSelector, ratingSelector) {
+	if (!rows || rows.length <= 0) return false;
+
+	var found = false, items = {}, rating;
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(text(row, titleSelector));
+		if (!href || !title) continue;
+
+		found = true;
+		rating = ZU.trimInternal(text(row, ratingSelector));
+		title = '[' + rating + '] ' + title.replace(rating, '');
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function detectWeb(doc, url) {
 	if (url.includes('/subject/')) {
-		return detectType(doc, url);
+		return detectType(doc);
 	}
 	else if (getSearchResults(doc, url, true)) {
 		return "multiple";
@@ -89,36 +126,49 @@ function getSearchResults(doc, url, checkOnly) {
 	// 检查时，不做列表的验证(只使用URL验证)
 	if (checkOnly) return true;
 
-	var items = {};
-	var found = false;
-
-	var rows;
+	var rows, items;
 	if (url.includes('movie.douban.com/chart')) {
-		rows = doc.querySelectorAll('div.indent a');
+		rows = doc.querySelectorAll('div.indent tr.item');
+		return getResults1(rows, (row) => {
+			return row.querySelector('div.pl2 a');
+		}, (row) => {
+			return text(row, 'span.rating_nums');
+		});
 	}
 	else if (url.includes('movie.douban.com/top')) {
-		rows = doc.querySelectorAll('ol.grid_view div.info a');
+		rows = doc.querySelectorAll('ol.grid_view div.item');
+		items = getResults1(rows, (row) => {
+			return row.querySelector('div.hd a');
+		}, (row) => {
+			return text(row, 'div.bd div.star span.rating_num');
+		});
+	}
+	else if (url.includes('movie.douban.com/tag')) {
+		rows = doc.querySelectorAll('div.list-wp a');
+		items = getResults2(rows, 'span.title', 'span.rate');
+	}
+	else if (url.includes('movie.douban.com/explore')
+		|| url.includes('movie.douban.com/tv')) {
+		rows = doc.querySelectorAll('div.list-wp a.item');
+		items = getResults2(rows, 'a p', 'a strong');
 	}
 	else if (url.includes('.com/doulist/')) {
-		rows = doc.querySelectorAll('div.article div.doulist-item div.title a');
+		rows = doc.querySelectorAll('div.article div.doulist-item');
+		items = getResults1(rows, (row) => {
+			return row.querySelector('div.title a');
+		}, (row) => {
+			return text(row, 'span.rating_nums');
+		});
 	}
 	else if (url.includes('book.douban.com/tag')) {
-		rows = doc.querySelectorAll('li.subject-item h2 a');
+		rows = doc.querySelectorAll('li.subject-item');
+		items = getResults1(rows, (row) => {
+			return row.querySelector('h2 a');
+		}, (row) => {
+			return text(row, 'span.rating_nums');
+		});
 	}
-	else {
-		rows = doc.querySelectorAll('div.list-wp a');
-	}
-	if (!rows || rows.length <= 0) return found;
-
-	for (let row of rows) {
-		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
+	return items;
 }
 
 function doWeb(doc, url) {
@@ -133,7 +183,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	var itemType = detectType(doc, url);
+	var itemType = detectType(doc);
 	var item = new Zotero.Item(itemType);
 
 	item.url = url;
@@ -142,15 +192,18 @@ function scrape(doc, url) {
 
 	var pattern, episodeCount;
 	var infos = text(doc, 'div[class*="subject"] div#info');
-	infos = infos.replace(/(\n\s*)+/g, '\n').replace(/:(\s*)\n(\s*)/g, ': ').replace(/((\n *)*\/(\n *)*)/g, '/');
+	infos = infos.replace(/^[\xA0\s]+/gm, '').replace(/[\xA0\s]+$/gm, '').replace(/\n+/g, '\n')
+		.replace(/:\n+/g, ': ').replace(/\n\/\n/g, '/');
+	// Z.debug(infos);
 	for (var section of Object.values(infos.split('\n'))) {
 		if (!section || section.trim().length <= 0) continue;
 
-		let strArr = section.split(':');
-		if (!strArr[0] || !strArr[1]) continue;
+		let index = section.indexOf(':');
+		if (index <= -1) continue;
 
-		let value = strArr[1].trim();
-		switch (strArr[0].trim()) {
+		let key = section.substr(0, index).trim();
+		let value = section.substr(index + 1).trim();
+		switch (key) {
 			// book
 			case "作者":
 				doPerson(item, value, "author");
@@ -159,7 +212,6 @@ function scrape(doc, url) {
 				doPerson(item, value, "translator");
 				break;
 			case "原作名":
-			case "又名":
 				item.shortTitle = value;
 				break;
 			case "ISBN":
@@ -177,7 +229,7 @@ function scrape(doc, url) {
 			case "出版年":
 				item.date = value;
 				break;
-			// film & tv
+			// film & tvBroadcast
 			case "导演":
 				doPerson(item, value, "director");
 				break;
@@ -192,7 +244,12 @@ function scrape(doc, url) {
 				doTag(item, value);
 				break;
 			case "制片国家/地区":
-				item.distributor = value;
+				if (itemType === 'tvBroadcast') {
+					item.network = value;
+				}
+				else {
+					item.distributor = value;
+				}
 				break;
 			case "语言":
 				item.language = value;
@@ -209,7 +266,7 @@ function scrape(doc, url) {
 				}
 				break;
 			case "季数":
-				//item.season = value;
+				// item.season = value;
 				break;
 			case "集数":
 				episodeCount = value;
