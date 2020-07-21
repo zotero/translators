@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-21 12:39:53"
+	"lastUpdated": "2020-07-21 14:41:33"
 }
 
 /*
@@ -32,7 +32,6 @@
 
 
 function detectWeb(doc, url) {
-	var urlParts = url.split('/');
 	if (url.indexOf("diario_boe") > -1 || url.indexOf("www.boe.es/eli") > -1 || url.indexOf("/doc.php") > -1) {
 		return "statute";
 	}
@@ -41,14 +40,14 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
-	newItem = new Zotero.Item(resourceType);
+	var newItem = new Zotero.Item(resourceType);
 	
 	var metadataUri;
 	if (url.indexOf("/xml") <= -1) {
 		var index = 0;
 		
 		while (true) {
-			index ++;
+			index++;
 			metadataUri = ZU.xpathText(doc, "(//meta[@property='http://data.europa.eu/eli/ontology#is_embodied_by'])[" + index + "]/@resource");
 			if (!metadataUri || metadataUri.indexOf("/xml") > 0) {
 				break;
@@ -80,7 +79,7 @@ function doWeb(doc, url) {
 		newItem.pages = ZU.xpathText(metadataDoc, "//pagina_inicial") + "-" + ZU.xpathText(metadataDoc, "//pagina_final");
 		newItem.session = ZU.xpathText(metadataDoc, "//diario") + " núm. " + ZU.xpathText(metadataDoc, "//diario_numero");
 		newItem.codeNumber = ZU.xpathText(metadataDoc, "//identificador");
-		newItem.publicLawNumber = ZU.xpathText(metadataDoc, "//rango") + " " + ZU.xpathText(metadataDoc, "//numero_oficial") ;
+		newItem.publicLawNumber = ZU.xpathText(metadataDoc, "//rango") + " " + ZU.xpathText(metadataDoc, "//numero_oficial");
 		newItem.url = ZU.xpathText(metadataDoc, "//url_eli");
 
 		// Adding the attachment
