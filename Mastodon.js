@@ -1,7 +1,7 @@
 {
 	"translatorID": "eebd16cb-69ca-4b85-b3e2-7c603dc98562",
 	"label": "Mastodon",
-	"creator": "febrezo",
+	"creator": "Félix Brezo (@febrezo)",
 	"target": "^https?://(mastodon\\.(social|xyz|cloud)|pawoo\\.net|mastdn.(jp|io)|switter.at)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-16 23:16:42"
+	"lastUpdated": "2020-07-21 01:02:52"
 }
 
 /*
@@ -47,12 +47,12 @@ function doWeb(doc, url) {
 	if (resourceType == "blogPost") {
 		newItem.blogTitle = ZU.xpathText(doc, "(//span[@class='display-name__account'])[1]");
 		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
-		tmpDate = ZU.xpathText(doc, '//div[@class="detailed-status__meta"]/data/@value');
+		tmpDate = ZU.xpathText(doc, '//time[@class="formatted"]/@datetime');
 		tmpAuthor = ZU.xpathText(doc, "(//strong[@class='display-name__html p-name emojify'])[1]");
 	}
 	else {
 		var aux = ZU.xpathText(doc, '//div[@class="public-account-bio__extra"]/text()');
-		tmpDate = aux.substring(aux.length, aux.length - 8);
+		tmpDate = aux.substring(aux.length, aux.length - 5);
 		tmpAuthor = ZU.xpathText(doc, "//h1").split("\n")[1];
 		newItem.title = ZU.xpathText(doc, "//h1/small");
 	}
