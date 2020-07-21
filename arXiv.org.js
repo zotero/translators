@@ -243,7 +243,7 @@ var greekReMap = [
 	{ greek: /[\u039D]/g, latex: 'N' },
 	{ greek: /[\u039E]/g, latex: '\\Xi' },
 	{ greek: /[\u039F]/g, latex: 'O' },
-	{ greek: /[\u03A0]/g, latex: '\Pi' },
+	{ greek: /[\u03A0]/g, latex: '\\Pi' },
 	{ greek: /[\u03A1]/g, latex: 'P' },
 	{ greek: /[\u03A3]/g, latex: '\\Sigma' },
 	{ greek: /[\u03A4]/g, latex: 'T' },
