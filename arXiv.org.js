@@ -228,62 +228,62 @@ var dict = new Map([
 ]);
 
 var greekReMap = [
-	{ 'greek': /[\u0391]/g, 'latex': 'A'},
-	{ 'greek': /[\u0392]/g, 'latex': 'B'},
-	{ 'greek': /[\u0393]/g, 'latex': '\\Gamma'},
-	{ 'greek': /[\u0394]/g, 'latex': '\\Delta'},
-	{ 'greek': /[\u0395]/g, 'latex': 'E'},
-	{ 'greek': /[\u0396]/g, 'latex': 'Z'},
-	{ 'greek': /[\u0397]/g, 'latex': 'H'},
-	{ 'greek': /[\u0398]/g, 'latex': '\\Theta'},
-	{ 'greek': /[\u0399]/g, 'latex': 'I'},
-	{ 'greek': /[\u039A]/g, 'latex': 'K'},
-	{ 'greek': /[\u039B]/g, 'latex': '\\Lambda'},
-	{ 'greek': /[\u039C]/g, 'latex': 'M'},
-	{ 'greek': /[\u039D]/g, 'latex': 'N'},
-	{ 'greek': /[\u039E]/g, 'latex': '\\Xi'},
-	{ 'greek': /[\u039F]/g, 'latex': 'O'},
-	{ 'greek': /[\u03A0]/g, 'latex': '\Pi'},
-	{ 'greek': /[\u03A1]/g, 'latex': 'P'},
-	{ 'greek': /[\u03A3]/g, 'latex': '\\Sigma'},
-	{ 'greek': /[\u03A4]/g, 'latex': 'T'},
-	{ 'greek': /[\u03A5]/g, 'latex': '\\Upsilon'},
-	{ 'greek': /[\u03A6]/g, 'latex': '\\Phi'},
-	{ 'greek': /[\u03A7]/g, 'latex': 'X'},
-	{ 'greek': /[\u03A8]/g, 'latex': '\\Psi'},
-	{ 'greek': /[\u03A9]/g, 'latex': '\\Omega'},
-	{ 'greek': /[\u03B1]/g, 'latex': '\\alpha'},
-	{ 'greek': /[\u03B2]/g, 'latex': '\\beta'},
-	{ 'greek': /[\u03B3]/g, 'latex': '\\gamma'},
-	{ 'greek': /[\u03B4]/g, 'latex': '\\delta'},
-	{ 'greek': /[\u03B5]/g, 'latex': '\\varepsilon'},
-	{ 'greek': /[\u03B6]/g, 'latex': '\\zeta'},
-	{ 'greek': /[\u03B7]/g, 'latex': '\\eta'},
-	{ 'greek': /[\u03B8]/g, 'latex': '\\theta'},
-	{ 'greek': /[\u03B9]/g, 'latex': '\\iota'},
-	{ 'greek': /[\u03BA]/g, 'latex': '\\kappa'},
-	{ 'greek': /[\u03BB]/g, 'latex': '\\lambda'},
-	{ 'greek': /[\u03BC]/g, 'latex': '\\mu'},
-	{ 'greek': /[\u03BD]/g, 'latex': '\\nu'},
-	{ 'greek': /[\u03BE]/g, 'latex': '\\xi'},
-	{ 'greek': /[\u03BF]/g, 'latex': 'o'},
-	{ 'greek': /[\u03C0]/g, 'latex': '\\pi'},
-	{ 'greek': /[\u03C1]/g, 'latex': '\\rho'},
-	{ 'greek': /[\u03C3]/g, 'latex': '\\sigma'},
-	{ 'greek': /[\u03C4]/g, 'latex': '\\tau'},
-	{ 'greek': /[\u03C5]/g, 'latex': '\\upsilon'},
-	{ 'greek': /[\u03C6]/g, 'latex': '\\phi'},
-	{ 'greek': /[\u03C7]/g, 'latex': '\\chi'},
-	{ 'greek': /[\u03C8]/g, 'latex': '\\psi'},
-	{ 'greek': /[\u03C9]/g, 'latex': '\\omega'},
-	{ 'greek': /[\u03F5]/g, 'latex': '\\epsilon'},
-	{ 'greek': /[\u03D1]/g, 'latex': '\\vartheta'},
-	{ 'greek': /[\u03F0]/g, 'latex': '\\varkappa'},
-	{ 'greek': /[\u03D6]/g, 'latex': '\\varpi'},
-	{ 'greek': /[\u03F1]/g, 'latex': '\\varrho'},
-	{ 'greek': /[\u03C2]/g, 'latex': '\\varsigma'},
-	{ 'greek': /[\u03D5]/g, 'latex': '\\varphi'}
-]
+	{ greek: /[\u0391]/g, latex: 'A' },
+	{ greek: /[\u0392]/g, latex: 'B' },
+	{ greek: /[\u0393]/g, latex: '\\Gamma' },
+	{ greek: /[\u0394]/g, latex: '\\Delta' },
+	{ greek: /[\u0395]/g, latex: 'E' },
+	{ greek: /[\u0396]/g, latex: 'Z' },
+	{ greek: /[\u0397]/g, latex: 'H' },
+	{ greek: /[\u0398]/g, latex: '\\Theta' },
+	{ greek: /[\u0399]/g, latex: 'I' },
+	{ greek: /[\u039A]/g, latex: 'K' },
+	{ greek: /[\u039B]/g, latex: '\\Lambda' },
+	{ greek: /[\u039C]/g, latex: 'M' },
+	{ greek: /[\u039D]/g, latex: 'N' },
+	{ greek: /[\u039E]/g, latex: '\\Xi' },
+	{ greek: /[\u039F]/g, latex: 'O' },
+	{ greek: /[\u03A0]/g, latex: '\Pi' },
+	{ greek: /[\u03A1]/g, latex: 'P' },
+	{ greek: /[\u03A3]/g, latex: '\\Sigma' },
+	{ greek: /[\u03A4]/g, latex: 'T' },
+	{ greek: /[\u03A5]/g, latex: '\\Upsilon' },
+	{ greek: /[\u03A6]/g, latex: '\\Phi' },
+	{ greek: /[\u03A7]/g, latex: 'X' },
+	{ greek: /[\u03A8]/g, latex: '\\Psi' },
+	{ greek: /[\u03A9]/g, latex: '\\Omega' },
+	{ greek: /[\u03B1]/g, latex: '\\alpha' },
+	{ greek: /[\u03B2]/g, latex: '\\beta' },
+	{ greek: /[\u03B3]/g, latex: '\\gamma' },
+	{ greek: /[\u03B4]/g, latex: '\\delta' },
+	{ greek: /[\u03B5]/g, latex: '\\varepsilon' },
+	{ greek: /[\u03B6]/g, latex: '\\zeta' },
+	{ greek: /[\u03B7]/g, latex: '\\eta' },
+	{ greek: /[\u03B8]/g, latex: '\\theta' },
+	{ greek: /[\u03B9]/g, latex: '\\iota' },
+	{ greek: /[\u03BA]/g, latex: '\\kappa' },
+	{ greek: /[\u03BB]/g, latex: '\\lambda' },
+	{ greek: /[\u03BC]/g, latex: '\\mu' },
+	{ greek: /[\u03BD]/g, latex: '\\nu' },
+	{ greek: /[\u03BE]/g, latex: '\\xi' },
+	{ greek: /[\u03BF]/g, latex: 'o' },
+	{ greek: /[\u03C0]/g, latex: '\\pi' },
+	{ greek: /[\u03C1]/g, latex: '\\rho' },
+	{ greek: /[\u03C3]/g, latex: '\\sigma' },
+	{ greek: /[\u03C4]/g, latex: '\\tau' },
+	{ greek: /[\u03C5]/g, latex: '\\upsilon' },
+	{ greek: /[\u03C6]/g, latex: '\\phi' },
+	{ greek: /[\u03C7]/g, latex: '\\chi' },
+	{ greek: /[\u03C8]/g, latex: '\\psi' },
+	{ greek: /[\u03C9]/g, latex: '\\omega' },
+	{ greek: /[\u03F5]/g, latex: '\\epsilon' },
+	{ greek: /[\u03D1]/g, latex: '\\vartheta' },
+	{ greek: /[\u03F0]/g, latex: '\\varkappa' },
+	{ greek: /[\u03D6]/g, latex: '\\varpi' },
+	{ greek: /[\u03F1]/g, latex: '\\varrho' },
+	{ greek: /[\u03C2]/g, latex: '\\varsigma' },
+	{ greek: /[\u03D5]/g, latex: '\\varphi' }
+];
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
@@ -376,7 +376,7 @@ function parseXML(text) {
 	getCreatorNodes(dcMeta, "a:author", newItem, "author", ns);
 	var date = ZU.xpath(dcMeta, "./a:updated", ns)[0];
 	if (date) {
-		date = ZU.trimInternal(date.textContent).substr(0,10);
+		date = ZU.trimInternal(date.textContent).substr(0, 10);
 		newItem.date = date;
 	}
 
@@ -385,13 +385,13 @@ function parseXML(text) {
 		newItem.abstractNote = ZU.trimInternal(summary.textContent);
 	}
 
-	var comment = ZU.xpath(dcMeta,"./arxiv:comment",ns)[0];
+	var comment = ZU.xpath(dcMeta, "./arxiv:comment", ns)[0];
 	if (comment) {
 		comment = ZU.trimInternal(comment.textContent);
-		newItem.notes.push({ note: 'Comment: '+ comment });
+		newItem.notes.push({ note: 'Comment: ' + comment });
 	}
 
-	var categories = ZU.xpath(dcMeta,".//a:category/@term",ns);
+	var categories = ZU.xpath(dcMeta, ".//a:category/@term", ns);
 	for (let j = 0; j < categories.length; j++) {
 		var category = ZU.trimInternal(categories[j].textContent);
 		if (category !== "math.MP") {
@@ -736,64 +736,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://xxx.lanl.gov/abs/1307.1469",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Precision of a Low-Cost InGaAs Detector for Near Infrared Photometry",
-				"creators": [
-					{
-						"firstName": "Peter W.",
-						"lastName": "Sullivan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Bryce",
-						"lastName": "Croll",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Robert A.",
-						"lastName": "Simcoe",
-						"creatorType": "author"
-					}
-				],
-				"date": "09/2013",
-				"DOI": "10.1086/672573",
-				"ISSN": "00046280, 15383873",
-				"abstractNote": "We have designed, constructed, and tested an InGaAs near-infrared camera to explore whether low-cost detectors can make small (<1 m) telescopes capable of precise (<1 mmag) infrared photometry of relatively bright targets. The camera is constructed around the 640x512 pixel APS640C sensor built by FLIR Electro-Optical Components. We designed custom analog-to-digital electronics for maximum stability and minimum noise. The InGaAs dark current halves with every 7 deg C of cooling, and we reduce it to 840 e-/s/pixel (with a pixel-to-pixel variation of +/-200 e-/s/pixel) by cooling the array to -20 deg C. Beyond this point, glow from the readout dominates. The single-sample read noise of 149 e- is reduced to 54 e- through up-the-ramp sampling. Laboratory testing with a star field generated by a lenslet array shows that 2-star differential photometry is possible to a precision of 631 +/-205 ppm (0.68 mmag) hr^-0.5 at a flux of 2.4E4 e-/s. Employing three comparison stars and de-correlating reference signals further improves the precision to 483 +/-161 ppm (0.52 mmag) hr^-0.5. Photometric observations of HD80606 and HD80607 (J=7.7 and 7.8) in the Y band shows that differential photometry to a precision of 415 ppm (0.45 mmag) hr^-0.5 is achieved with an effective telescope aperture of 0.25 m. Next-generation InGaAs detectors should indeed enable Poisson-limited photometry of brighter dwarfs with particular advantage for late-M and L types. In addition, one might acquire near-infrared photometry simultaneously with optical photometry or radial velocity measurements to maximize the return of exoplanet searches with small telescopes.",
-				"extra": "arXiv: 1307.1469",
-				"issue": "931",
-				"libraryCatalog": "arXiv.org",
-				"pages": "1021-1030",
-				"publicationTitle": "Publications of the Astronomical Society of the Pacific",
-				"url": "http://arxiv.org/abs/1307.1469",
-				"volume": "125",
-				"attachments": [
-					{
-						"title": "arXiv:1307.1469 PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "arXiv.org Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					"Astrophysics - Earth and Planetary Astrophysics",
-					"Astrophysics - Instrumentation and Methods for Astrophysics"
-				],
-				"notes": [
-					{
-						"note": "Comment: Accepted to PASP"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://arxiv.org/find/cs/1/au:+Hoffmann_M/0/1/0/all/0/1",
 		"items": "multiple"
 	},
@@ -820,7 +762,7 @@ var testCases = [
 				"abstractNote": "We construct a dual pair associated to the Hamiltonian geometric formulation of perfect fluids with free boundaries. This dual pair is defined on the cotangent bundle of the space of volume preserving embeddings of a manifold with boundary into a boundaryless manifold of the same dimension. The dual pair properties are rigorously verified in the infinite dimensional Fr\\'echet manifold setting. It provides an example of a dual pair associated to actions that are not completely mutually orthogonal.",
 				"extra": "arXiv: 1402.1516",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1402.1516 [math-ph]",
+				"publicationTitle": "arXiv:1402.1516 [math.SG]",
 				"url": "http://arxiv.org/abs/1402.1516",
 				"attachments": [
 					{
