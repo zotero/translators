@@ -40,8 +40,7 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	var url = 'http://export.arxiv.org/api/query?id_list='
-	 + encodeURIComponent(item.arXiv);
+	var url = 'http://export.arxiv.org/api/query?id_list=' + encodeURIComponent(item.arXiv);
 	ZU.doGet(url, parseXML);
 }
 
@@ -63,170 +62,228 @@ function detectWeb(doc, url) {
 }
 
 var dict = new Map([
-	['astro-ph','Astrophysics'],
-	['cond-mat','Condensed Matter'],
-	['cs','Computer Science'],
-	['econ','Economics'],
-	['eess','Electrical Engineering and Systems Science'],
-	['gr-qc','General Relativity and Quantum Cosmology'],
-	['hep-ex','High Energy Physics - Experiment'],
-	['hep-lat','High Energy Physics - Lattice'],
-	['hep-ph','High Energy Physics - Phenomenology'],
-	['hep-th','High Energy Physics - Theory'],
-	['math','Mathematics'],
-	['math-ph','Mathematical Physics'],
-	['nlin','Nonlinear Sciences'],
-	['nucl-ex','Nuclear Experiment'],
-	['nucl-th','Nuclear Theory'],
-	['physics','Physics'],
-	['q-bio','Quantitative Biology'],
-	['q-fin','Quantitative Finance'],
-	['quant-ph','Quantum Physics'],
-	['stat','Statistics'],
-	['astro-ph.CO','Cosmology and Nongalactic Astrophysics'],
-	['astro-ph.EP','Earth and Planetary Astrophysics'],
-	['astro-ph.GA','Astrophysics of Galaxies'],
-	['astro-ph.HE','High Energy Astrophysical Phenomena'],
-	['astro-ph.IM','Instrumentation and Methods for Astrophysics'],
-	['astro-ph.SR','Solar and Stellar Astrophysics'],
-	['cond-mat.dis-nn','Disordered Systems and Neural Networks'],
-	['cond-mat.mes-hall','Mesoscale and Nanoscale Physics'],
-	['cond-mat.mtrl-sci','Materials Science'],
-	['cond-mat.other','Other Condensed Matter'],
-	['cond-mat.quant-gas','Quantum Gases'],
-	['cond-mat.soft','Soft Condensed Matter'],
-	['cond-mat.stat-mech','Statistical Mechanics'],
-	['cond-mat.str-el','Strongly Correlated Electrons'],
-	['cond-mat.supr-con','Superconductivity'],
-	['cs.AI','Artificial Intelligence'],
-	['cs.AR','Hardware Architecture'],
-	['cs.CC','Computational Complexity'],
-	['cs.CE','Computational Engineering, Finance, and Science'],
-	['cs.CG','Computational Geometry'],
-	['cs.CL','Computation and Language'],
-	['cs.CR','Cryptography and Security'],
-	['cs.CV','Computer Vision and Pattern Recognition'],
-	['cs.CY','Computers and Society'],
-	['cs.DB','Databases'],
-	['cs.DC','Distributed, Parallel, and Cluster Computing'],
-	['cs.DL','Digital Libraries'],
-	['cs.DM','Discrete Mathematics'],
-	['cs.DS','Data Structures and Algorithms'],
-	['cs.ET','Emerging Technologies'],
-	['cs.FL','Formal Languages and Automata Theory'],
-	['cs.GL','General Literature'],
-	['cs.GR','Graphics'],
-	['cs.GT','Computer Science and Game Theory'],
-	['cs.HC','Human-Computer Interaction'],
-	['cs.IR','Information Retrieval'],
-	['cs.IT','Information Theory'],
-	['cs.LG','Learning'],
-	['cs.LO','Logic in Computer Science'],
-	['cs.MA','Multiagent Systems'],
-	['cs.MM','Multimedia'],
-	['cs.MS','Mathematical Software'],
-	['cs.NA','Numerical Analysis'],
-	['cs.NE','Neural and Evolutionary Computing'],
-	['cs.NI','Networking and Internet Architecture'],
-	['cs.OH','Other Computer Science'],
-	['cs.OS','Operating Systems'],
-	['cs.PF','Performance'],
-	['cs.PL','Programming Languages'],
-	['cs.RO','Robotics'],
-	['cs.SC','Symbolic Computation'],
-	['cs.SD','Sound'],
-	['cs.SE','Software Engineering'],
-	['cs.SI','Social and Information Networks'],
-	['cs.SY','Systems and Control'],
-	['econ.EM','Econometrics'],
-	['eess.AS','Audio and Speech Processing'],
-	['eess.IV','Image and Video Processing'],
-	['eess.SP','Signal Processing'],
-	['math.AC','Commutative Algebra'],
-	['math.AG','Algebraic Geometry'],
-	['math.AP','Analysis of PDEs'],
-	['math.AT','Algebraic Topology'],
-	['math.CA','Classical Analysis and ODEs'],
-	['math.CO','Combinatorics'],
-	['math.CT','Category Theory'],
-	['math.CV','Complex Variables'],
-	['math.DG','Differential Geometry'],
-	['math.DS','Dynamical Systems'],
-	['math.FA','Functional Analysis'],
-	['math.GM','General Mathematics'],
-	['math.GN','General Topology'],
-	['math.GR','Group Theory'],
-	['math.GT','Geometric Topology'],
-	['math.HO','History and Overview'],
-	['math.IT','Information Theory'],
-	['math.KT','K-Theory and Homology'],
-	['math.LO','Logic'],
-	['math.MG','Metric Geometry'],
-	['math.MP','Mathematical Physics'],
-	['math.NA','Numerical Analysis'],
-	['math.NT','Number Theory'],
-	['math.OA','Operator Algebras'],
-	['math.OC','Optimization and Control'],
-	['math.PR','Probability'],
-	['math.QA','Quantum Algebra'],
-	['math.RA','Rings and Algebras'],
-	['math.RT','Representation Theory'],
-	['math.SG','Symplectic Geometry'],
-	['math.SP','Spectral Theory'],
-	['math.ST','Statistics Theory'],
-	['nlin.AO','Adaptation and Self-Organizing Systems'],
-	['nlin.CD','Chaotic Dynamics'],
-	['nlin.CG','Cellular Automata and Lattice Gases'],
-	['nlin.PS','Pattern Formation and Solitons'],
-	['nlin.SI','Exactly Solvable and Integrable Systems'],
-	['physics.acc-ph','Accelerator Physics'],
-	['physics.ao-ph','Atmospheric and Oceanic Physics'],
-	['physics.app-ph','Applied Physics'],
-	['physics.atm-clus','Atomic and Molecular Clusters'],
-	['physics.atom-ph','Atomic Physics'],
-	['physics.bio-ph','Biological Physics'],
-	['physics.chem-ph','Chemical Physics'],
-	['physics.class-ph','Classical Physics'],
-	['physics.comp-ph','Computational Physics'],
-	['physics.data-an','Data Analysis, Statistics and Probability'],
-	['physics.ed-ph','Physics Education'],
-	['physics.flu-dyn','Fluid Dynamics'],
-	['physics.gen-ph','General Physics'],
-	['physics.geo-ph','Geophysics'],
-	['physics.hist-ph','History and Philosophy of Physics'],
-	['physics.ins-det','Instrumentation and Detectors'],
-	['physics.med-ph','Medical Physics'],
-	['physics.optics','Optics'],
-	['physics.plasm-ph','Plasma Physics'],
-	['physics.pop-ph','Popular Physics'],
-	['physics.soc-ph','Physics and Society'],
-	['physics.space-ph','Space Physics'],
-	['q-bio.BM','Biomolecules'],
-	['q-bio.CB','Cell Behavior'],
-	['q-bio.GN','Genomics'],
-	['q-bio.MN','Molecular Networks'],
-	['q-bio.NC','Neurons and Cognition'],
-	['q-bio.OT','Other Quantitative Biology'],
-	['q-bio.PE','Populations and Evolution'],
-	['q-bio.QM','Quantitative Methods'],
-	['q-bio.SC','Subcellular Processes'],
-	['q-bio.TO','Tissues and Organs'],
-	['q-fin.CP','Computational Finance'],
-	['q-fin.EC','Economics'],
-	['q-fin.GN','General Finance'],
-	['q-fin.MF','Mathematical Finance'],
-	['q-fin.PM','Portfolio Management'],
-	['q-fin.PR','Pricing of Securities'],
-	['q-fin.RM','Risk Management'],
-	['q-fin.ST','Statistical Finance'],
-	['q-fin.TR','Trading and Market Microstructure'],
-	['stat.AP','Applications'],
-	['stat.CO','Computation'],
-	['stat.ME','Methodology'],
-	['stat.ML','Machine Learning'],
-	['stat.OT','Other Statistics'],
-	['stat.TH','Statistics Theory']
+	['astro-ph', 'Astrophysics'],
+	['cond-mat', 'Condensed Matter'],
+	['cs', 'Computer Science'],
+	['econ', 'Economics'],
+	['eess', 'Electrical Engineering and Systems Science'],
+	['gr-qc', 'General Relativity and Quantum Cosmology'],
+	['hep-ex', 'High Energy Physics - Experiment'],
+	['hep-lat', 'High Energy Physics - Lattice'],
+	['hep-ph', 'High Energy Physics - Phenomenology'],
+	['hep-th', 'High Energy Physics - Theory'],
+	['math', 'Mathematics'],
+	['math-ph', 'Mathematical Physics'],
+	['nlin', 'Nonlinear Sciences'],
+	['nucl-ex', 'Nuclear Experiment'],
+	['nucl-th', 'Nuclear Theory'],
+	['physics', 'Physics'],
+	['q-bio', 'Quantitative Biology'],
+	['q-fin', 'Quantitative Finance'],
+	['quant-ph', 'Quantum Physics'],
+	['stat', 'Statistics'],
+	['astro-ph.CO', 'Cosmology and Nongalactic Astrophysics'],
+	['astro-ph.EP', 'Earth and Planetary Astrophysics'],
+	['astro-ph.GA', 'Astrophysics of Galaxies'],
+	['astro-ph.HE', 'High Energy Astrophysical Phenomena'],
+	['astro-ph.IM', 'Instrumentation and Methods for Astrophysics'],
+	['astro-ph.SR', 'Solar and Stellar Astrophysics'],
+	['cond-mat.dis-nn', 'Disordered Systems and Neural Networks'],
+	['cond-mat.mes-hall', 'Mesoscale and Nanoscale Physics'],
+	['cond-mat.mtrl-sci', 'Materials Science'],
+	['cond-mat.other', 'Other Condensed Matter'],
+	['cond-mat.quant-gas', 'Quantum Gases'],
+	['cond-mat.soft', 'Soft Condensed Matter'],
+	['cond-mat.stat-mech', 'Statistical Mechanics'],
+	['cond-mat.str-el', 'Strongly Correlated Electrons'],
+	['cond-mat.supr-con', 'Superconductivity'],
+	['cs.AI', 'Artificial Intelligence'],
+	['cs.AR', 'Hardware Architecture'],
+	['cs.CC', 'Computational Complexity'],
+	['cs.CE', 'Computational Engineering, Finance, and Science'],
+	['cs.CG', 'Computational Geometry'],
+	['cs.CL', 'Computation and Language'],
+	['cs.CR', 'Cryptography and Security'],
+	['cs.CV', 'Computer Vision and Pattern Recognition'],
+	['cs.CY', 'Computers and Society'],
+	['cs.DB', 'Databases'],
+	['cs.DC', 'Distributed, Parallel, and Cluster Computing'],
+	['cs.DL', 'Digital Libraries'],
+	['cs.DM', 'Discrete Mathematics'],
+	['cs.DS', 'Data Structures and Algorithms'],
+	['cs.ET', 'Emerging Technologies'],
+	['cs.FL', 'Formal Languages and Automata Theory'],
+	['cs.GL', 'General Literature'],
+	['cs.GR', 'Graphics'],
+	['cs.GT', 'Computer Science and Game Theory'],
+	['cs.HC', 'Human-Computer Interaction'],
+	['cs.IR', 'Information Retrieval'],
+	['cs.IT', 'Information Theory'],
+	['cs.LG', 'Learning'],
+	['cs.LO', 'Logic in Computer Science'],
+	['cs.MA', 'Multiagent Systems'],
+	['cs.MM', 'Multimedia'],
+	['cs.MS', 'Mathematical Software'],
+	['cs.NA', 'Numerical Analysis'],
+	['cs.NE', 'Neural and Evolutionary Computing'],
+	['cs.NI', 'Networking and Internet Architecture'],
+	['cs.OH', 'Other Computer Science'],
+	['cs.OS', 'Operating Systems'],
+	['cs.PF', 'Performance'],
+	['cs.PL', 'Programming Languages'],
+	['cs.RO', 'Robotics'],
+	['cs.SC', 'Symbolic Computation'],
+	['cs.SD', 'Sound'],
+	['cs.SE', 'Software Engineering'],
+	['cs.SI', 'Social and Information Networks'],
+	['cs.SY', 'Systems and Control'],
+	['econ.EM', 'Econometrics'],
+	['eess.AS', 'Audio and Speech Processing'],
+	['eess.IV', 'Image and Video Processing'],
+	['eess.SP', 'Signal Processing'],
+	['math.AC', 'Commutative Algebra'],
+	['math.AG', 'Algebraic Geometry'],
+	['math.AP', 'Analysis of PDEs'],
+	['math.AT', 'Algebraic Topology'],
+	['math.CA', 'Classical Analysis and ODEs'],
+	['math.CO', 'Combinatorics'],
+	['math.CT', 'Category Theory'],
+	['math.CV', 'Complex Variables'],
+	['math.DG', 'Differential Geometry'],
+	['math.DS', 'Dynamical Systems'],
+	['math.FA', 'Functional Analysis'],
+	['math.GM', 'General Mathematics'],
+	['math.GN', 'General Topology'],
+	['math.GR', 'Group Theory'],
+	['math.GT', 'Geometric Topology'],
+	['math.HO', 'History and Overview'],
+	['math.IT', 'Information Theory'],
+	['math.KT', 'K-Theory and Homology'],
+	['math.LO', 'Logic'],
+	['math.MG', 'Metric Geometry'],
+	['math.MP', 'Mathematical Physics'],
+	['math.NA', 'Numerical Analysis'],
+	['math.NT', 'Number Theory'],
+	['math.OA', 'Operator Algebras'],
+	['math.OC', 'Optimization and Control'],
+	['math.PR', 'Probability'],
+	['math.QA', 'Quantum Algebra'],
+	['math.RA', 'Rings and Algebras'],
+	['math.RT', 'Representation Theory'],
+	['math.SG', 'Symplectic Geometry'],
+	['math.SP', 'Spectral Theory'],
+	['math.ST', 'Statistics Theory'],
+	['nlin.AO', 'Adaptation and Self-Organizing Systems'],
+	['nlin.CD', 'Chaotic Dynamics'],
+	['nlin.CG', 'Cellular Automata and Lattice Gases'],
+	['nlin.PS', 'Pattern Formation and Solitons'],
+	['nlin.SI', 'Exactly Solvable and Integrable Systems'],
+	['physics.acc-ph', 'Accelerator Physics'],
+	['physics.ao-ph', 'Atmospheric and Oceanic Physics'],
+	['physics.app-ph', 'Applied Physics'],
+	['physics.atm-clus', 'Atomic and Molecular Clusters'],
+	['physics.atom-ph', 'Atomic Physics'],
+	['physics.bio-ph', 'Biological Physics'],
+	['physics.chem-ph', 'Chemical Physics'],
+	['physics.class-ph', 'Classical Physics'],
+	['physics.comp-ph', 'Computational Physics'],
+	['physics.data-an', 'Data Analysis, Statistics and Probability'],
+	['physics.ed-ph', 'Physics Education'],
+	['physics.flu-dyn', 'Fluid Dynamics'],
+	['physics.gen-ph', 'General Physics'],
+	['physics.geo-ph', 'Geophysics'],
+	['physics.hist-ph', 'History and Philosophy of Physics'],
+	['physics.ins-det', 'Instrumentation and Detectors'],
+	['physics.med-ph', 'Medical Physics'],
+	['physics.optics', 'Optics'],
+	['physics.plasm-ph', 'Plasma Physics'],
+	['physics.pop-ph', 'Popular Physics'],
+	['physics.soc-ph', 'Physics and Society'],
+	['physics.space-ph', 'Space Physics'],
+	['q-bio.BM', 'Biomolecules'],
+	['q-bio.CB', 'Cell Behavior'],
+	['q-bio.GN', 'Genomics'],
+	['q-bio.MN', 'Molecular Networks'],
+	['q-bio.NC', 'Neurons and Cognition'],
+	['q-bio.OT', 'Other Quantitative Biology'],
+	['q-bio.PE', 'Populations and Evolution'],
+	['q-bio.QM', 'Quantitative Methods'],
+	['q-bio.SC', 'Subcellular Processes'],
+	['q-bio.TO', 'Tissues and Organs'],
+	['q-fin.CP', 'Computational Finance'],
+	['q-fin.EC', 'Economics'],
+	['q-fin.GN', 'General Finance'],
+	['q-fin.MF', 'Mathematical Finance'],
+	['q-fin.PM', 'Portfolio Management'],
+	['q-fin.PR', 'Pricing of Securities'],
+	['q-fin.RM', 'Risk Management'],
+	['q-fin.ST', 'Statistical Finance'],
+	['q-fin.TR', 'Trading and Market Microstructure'],
+	['stat.AP', 'Applications'],
+	['stat.CO', 'Computation'],
+	['stat.ME', 'Methodology'],
+	['stat.ML', 'Machine Learning'],
+	['stat.OT', 'Other Statistics'],
+	['stat.TH', 'Statistics Theory']
 ]);
+
+var greekReMap = [
+	{ 'greek': /[\u0391]/g, 'latex': 'A'},
+	{ 'greek': /[\u0392]/g, 'latex': 'B'},
+	{ 'greek': /[\u0393]/g, 'latex': '\\Gamma'},
+	{ 'greek': /[\u0394]/g, 'latex': '\\Delta'},
+	{ 'greek': /[\u0395]/g, 'latex': 'E'},
+	{ 'greek': /[\u0396]/g, 'latex': 'Z'},
+	{ 'greek': /[\u0397]/g, 'latex': 'H'},
+	{ 'greek': /[\u0398]/g, 'latex': '\\Theta'},
+	{ 'greek': /[\u0399]/g, 'latex': 'I'},
+	{ 'greek': /[\u039A]/g, 'latex': 'K'},
+	{ 'greek': /[\u039B]/g, 'latex': '\\Lambda'},
+	{ 'greek': /[\u039C]/g, 'latex': 'M'},
+	{ 'greek': /[\u039D]/g, 'latex': 'N'},
+	{ 'greek': /[\u039E]/g, 'latex': '\\Xi'},
+	{ 'greek': /[\u039F]/g, 'latex': 'O'},
+	{ 'greek': /[\u03A0]/g, 'latex': '\Pi'},
+	{ 'greek': /[\u03A1]/g, 'latex': 'P'},
+	{ 'greek': /[\u03A3]/g, 'latex': '\\Sigma'},
+	{ 'greek': /[\u03A4]/g, 'latex': 'T'},
+	{ 'greek': /[\u03A5]/g, 'latex': '\\Upsilon'},
+	{ 'greek': /[\u03A6]/g, 'latex': '\\Phi'},
+	{ 'greek': /[\u03A7]/g, 'latex': 'X'},
+	{ 'greek': /[\u03A8]/g, 'latex': '\\Psi'},
+	{ 'greek': /[\u03A9]/g, 'latex': '\\Omega'},
+	{ 'greek': /[\u03B1]/g, 'latex': '\\alpha'},
+	{ 'greek': /[\u03B2]/g, 'latex': '\\beta'},
+	{ 'greek': /[\u03B3]/g, 'latex': '\\gamma'},
+	{ 'greek': /[\u03B4]/g, 'latex': '\\delta'},
+	{ 'greek': /[\u03B5]/g, 'latex': '\\varepsilon'},
+	{ 'greek': /[\u03B6]/g, 'latex': '\\zeta'},
+	{ 'greek': /[\u03B7]/g, 'latex': '\\eta'},
+	{ 'greek': /[\u03B8]/g, 'latex': '\\theta'},
+	{ 'greek': /[\u03B9]/g, 'latex': '\\iota'},
+	{ 'greek': /[\u03BA]/g, 'latex': '\\kappa'},
+	{ 'greek': /[\u03BB]/g, 'latex': '\\lambda'},
+	{ 'greek': /[\u03BC]/g, 'latex': '\\mu'},
+	{ 'greek': /[\u03BD]/g, 'latex': '\\nu'},
+	{ 'greek': /[\u03BE]/g, 'latex': '\\xi'},
+	{ 'greek': /[\u03BF]/g, 'latex': 'o'},
+	{ 'greek': /[\u03C0]/g, 'latex': '\\pi'},
+	{ 'greek': /[\u03C1]/g, 'latex': '\\rho'},
+	{ 'greek': /[\u03C3]/g, 'latex': '\\sigma'},
+	{ 'greek': /[\u03C4]/g, 'latex': '\\tau'},
+	{ 'greek': /[\u03C5]/g, 'latex': '\\upsilon'},
+	{ 'greek': /[\u03C6]/g, 'latex': '\\phi'},
+	{ 'greek': /[\u03C7]/g, 'latex': '\\chi'},
+	{ 'greek': /[\u03C8]/g, 'latex': '\\psi'},
+	{ 'greek': /[\u03C9]/g, 'latex': '\\omega'},
+	{ 'greek': /[\u03F5]/g, 'latex': '\\epsilon'},
+	{ 'greek': /[\u03D1]/g, 'latex': '\\vartheta'},
+	{ 'greek': /[\u03F0]/g, 'latex': '\\varkappa'},
+	{ 'greek': /[\u03D6]/g, 'latex': '\\varpi'},
+	{ 'greek': /[\u03F1]/g, 'latex': '\\varrho'},
+	{ 'greek': /[\u03C2]/g, 'latex': '\\varsigma'},
+	{ 'greek': /[\u03D5]/g, 'latex': '\\varphi'}
+]
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
@@ -287,11 +344,11 @@ function doWeb(doc, url) {
 			id = url.substring(p + 5, url.length - 4);
 		}
 		else {
-			id = ZU.xpathText(doc, '(//span[@class="arxivid"]/a)[1]')
+			id = ZU.xpathText(doc, '(//span[@class="arxivid"]/a)[2]')
 				|| ZU.xpathText(doc, '//b[starts-with(normalize-space(text()),"arXiv:")]');
 		}
 		if (!id) throw new Error('Could not find arXiv ID on page.');
-		id = id.trim().replace(/^arxiv:\s*|v\d+|\s+.*$/ig, '');
+		id = id.trim().replace(/^arxiv:\s*|\s+.*$/ig, '');
 		var apiurl = 'http://export.arxiv.org/api/query?id_list=' + encodeURIComponent(id);
 		ZU.doGet(apiurl, parseXML);
 	}
@@ -311,10 +368,14 @@ function parseXML(text) {
 	var xml = (new DOMParser()).parseFromString(text, "text/xml");
 	var dcMeta = ZU.xpath(xml, '//a:entry', ns)[0];
 
-	newItem.title = getXPathNodeTrimmed(dcMeta, "a:title", ns);
+	var title = getXPathNodeTrimmed(dcMeta, "a:title", ns);
+	for (let i = 0; i < greekReMap.length; i++) {
+		title = title.replace(greekReMap[i].greek, greekReMap[i].latex);
+	}
+	newItem.title = title;
 	getCreatorNodes(dcMeta, "a:author", newItem, "author", ns);
 	var date = ZU.xpath(dcMeta, "./a:updated", ns)[0];
-	if(date){
+	if (date) {
 		date = ZU.trimInternal(date.textContent).substr(0,10);
 		newItem.date = date;
 	}
@@ -327,23 +388,26 @@ function parseXML(text) {
 	var comment = ZU.xpath(dcMeta,"./arxiv:comment",ns)[0];
 	if (comment) {
 		comment = ZU.trimInternal(comment.textContent);
-		newItem.notes.push({note: 'Comment: '+ comment});
+		newItem.notes.push({ note: 'Comment: '+ comment });
 	}
 
 	var categories = ZU.xpath(dcMeta,".//a:category/@term",ns);
 	for (let j = 0; j < categories.length; j++) {
 		var category = ZU.trimInternal(categories[j].textContent);
-		var temp_category = dict.get(category);
-		category = category.split('.');
-		if (category.length>1){
-			category = dict.get(category[0]) + ' - ' + temp_category;
-		} else {
-			category = temp_category;
+		if (category !== "math.MP") {
+			var tempCategory = dict.get(category);
+			category = category.split('.');
+			if (category.length > 1) {
+				category = dict.get(category[0]) + ' - ' + tempCategory;
+			}
+			else {
+				category = tempCategory;
+			}
+			newItem.tags.push(category);
 		}
-		newItem.tags.push(category);
 	}
 
-	var doi = ZU.xpath(dcMeta, "./arxiv:doi",ns)[0];
+	var doi = ZU.xpath(dcMeta, "./arxiv:doi", ns)[0];
 	if (doi) {
 		newItem.DOI = ZU.trimInternal(doi.textContent);
 	}
@@ -351,15 +415,15 @@ function parseXML(text) {
 	var url = ZU.xpath(dcMeta, "./a:id", ns)[0];
 	if (url) {
 		url = ZU.trimInternal(url.textContent);
-		newItem.url = url.substr(0,url.length-2);
+		newItem.url = url.substr(0, url.length - 2);
 
-		var articleID = url.substr(21,url.length-23);
+		var articleID = url.substr(21, url.length - 23);
 	}
 
 	var articleField = ZU.xpath(dcMeta, "./arxiv:primary_category/@term", ns)[0];
 	articleField = ZU.trimInternal(articleField.textContent);
 	
-	if (articleField) articleField = "[" + articleField+ "]";
+	if (articleField) articleField = "[" + articleField + "]";
 	
 	if (articleID && articleID.includes("/")) {
 		newItem.publicationTitle = "arXiv:" + articleID;
@@ -760,7 +824,7 @@ var testCases = [
 				"url": "http://arxiv.org/abs/1402.1516",
 				"attachments": [
 					{
-						"title": "arXiv:1402.1516 PDF",
+						"title": "arXiv Fulltext PDF",
 						"mimeType": "application/pdf"
 					},
 					{
@@ -810,11 +874,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2018-10-10",
-				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
+				"date": "2018-10-11",
+				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT representations can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE benchmark to 80.4% (7.6% absolute improvement), MultiNLI accuracy to 86.7 (5.6% absolute improvement) and the SQuAD v1.1 question answering Test F1 to 93.2 (1.5% absolute improvement), outperforming human performance by 2.0%.",
 				"extra": "arXiv: 1810.04805\nversion: 1",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"publicationTitle": "arXiv:1810.04805 [cs.CL]",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
@@ -832,7 +896,11 @@ var testCases = [
 						"tag": "Computer Science - Computation and Language"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "Comment: 13 pages"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -870,7 +938,7 @@ var testCases = [
 				"abstractNote": "We introduce a new language representation model called BERT, which stands for Bidirectional Encoder Representations from Transformers. Unlike recent language representation models, BERT is designed to pre-train deep bidirectional representations from unlabeled text by jointly conditioning on both left and right context in all layers. As a result, the pre-trained BERT model can be fine-tuned with just one additional output layer to create state-of-the-art models for a wide range of tasks, such as question answering and language inference, without substantial task-specific architecture modifications. BERT is conceptually simple and empirically powerful. It obtains new state-of-the-art results on eleven natural language processing tasks, including pushing the GLUE score to 80.5% (7.7% point absolute improvement), MultiNLI accuracy to 86.7% (4.6% absolute improvement), SQuAD v1.1 question answering Test F1 to 93.2 (1.5 point absolute improvement) and SQuAD v2.0 Test F1 to 83.1 (5.1 point absolute improvement).",
 				"extra": "arXiv: 1810.04805\nversion: 2",
 				"libraryCatalog": "arXiv.org",
-				"publicationTitle": "arXiv:1810.04805 [cs]",
+				"publicationTitle": "arXiv:1810.04805 [cs.CL]",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
