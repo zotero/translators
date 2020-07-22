@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-21 01:02:52"
+	"lastUpdated": "2020-08-01 15:11:54"
 }
 
 /*
 	Mastodon Translator
-	Copyright (C) 2020 Félix Brezo, felixbrezo@gmail.com
+	Copyright (C) 2020 Félix Brezo (@febrezo), felixbrezo@disroot.org
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -43,21 +43,19 @@ function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
 	var newItem = new Zotero.Item(resourceType);
 
-	var tmpDate, tmpAuthor;
+	var tmpAuthor;
 	if (resourceType == "blogPost") {
 		newItem.blogTitle = ZU.xpathText(doc, "(//span[@class='display-name__account'])[1]");
 		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
-		tmpDate = ZU.xpathText(doc, '//time[@class="formatted"]/@datetime');
-		tmpAuthor = ZU.xpathText(doc, "(//strong[@class='display-name__html p-name emojify'])[1]");
+		var tmpDate = ZU.xpathText(doc, '(//time)[1]/@datetime');
+		newItem.date = ZU.strToISO(tmpDate);
+		tmpAuthor = ZU.xpathText(doc, "//meta[@property='og:title']/@content").split("(")[0];
 	}
 	else {
-		var aux = ZU.xpathText(doc, '//div[@class="public-account-bio__extra"]/text()');
-		tmpDate = aux.substring(aux.length, aux.length - 5);
 		tmpAuthor = ZU.xpathText(doc, "//h1").split("\n")[1];
 		newItem.title = ZU.xpathText(doc, "//h1/small");
 	}
 
-	newItem.date = ZU.strToISO(tmpDate);
 	if (tmpAuthor) {
 		newItem.creators.push(ZU.cleanAuthor(tmpAuthor, "author", false));
 	}
@@ -66,7 +64,7 @@ function doWeb(doc, url) {
 
 	// Adding the attachment
 	newItem.attachments.push({
-		title: "Mastodon Snapshot",
+		title: "Snapshot",
 		mimeType: "text/html",
 		url: url
 	});
@@ -94,7 +92,7 @@ var testCases = [
 				"websiteType": "Microblogging (Mastodon)",
 				"attachments": [
 					{
-						"title": "Mastodon Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -118,12 +116,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017",
 				"url": "https://mastodon.social/@febrezo",
 				"websiteType": "Microblogging (Mastodon)",
 				"attachments": [
 					{
-						"title": "Mastodon Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
