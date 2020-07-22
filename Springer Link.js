@@ -196,6 +196,7 @@ function complementItem(doc, item) {
 			item.abstractNote = abs.trim();
 		}
 		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+		if (item.abstractNote == null) item.abstractNote = '';
 	}
 
 	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
