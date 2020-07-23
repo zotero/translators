@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-30 08:59:40"
+	"lastUpdated": "2020-07-23 11:59:40"
 }
 
 /*
@@ -130,15 +130,11 @@ function scrape(doc, url) {
 			// The encoding of apostrophs in the RIS are incorrect and
 			// therefore we extract the abstract again from the website.
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			if (abstract) {
-				item.abstractNote = abstract;
-			}
-			
 			// ubtue: extract translated and other abstracts from the different xpath
 			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
 			if (ubtueabstract) {
 				item.abstractNote = ubtueabstract.replace(/(\.)(?!\s)/g, '. ');
-			} else if (!ubtueabstract) {
+			} else if (!ubtueabstract && item.abstractNote) {
 				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 				item.abstractNote = ubtueabstract.replace(/(\.)(?!\s)/g, '. ');
 			} else {
