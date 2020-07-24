@@ -198,8 +198,7 @@ function scrape(doc, url) {
 
 	var pattern, episodeCount, runningTime, runningTimeUnit;
 	var infos = text(doc, 'div[class*="subject"] div#info');
-	infos = infos.replace(/^[\xA0\s]+/gm, '').replace(/[\xA0\s]+$/gm, '').replace(/\n+/g, '\n')
-		.replace(/:\n+/g, ': ').replace(/\n\/\n/g, '/');
+	infos = infos.replace(/^[\xA0\s]+/gm, '').replace(/[\xA0\s]+$/gm, '').replace(/\n+/g, '\n').replace(/:\n+/g, ': ').replace(/\n\/\n/g, '/');
 	for (var section of Object.values(infos.split('\n'))) {
 		if (!section || section.trim().length <= 0) continue;
 
@@ -237,7 +236,7 @@ function scrape(doc, url) {
 					if (value.includes(item.publisher)) {
 						item.publisher = value;
 					}
-					else if (!item.publisher.includes(value)){
+					else if (!item.publisher.includes(value)) {
 						item.publisher = value + " | " + item.publisher;
 					}
 				}
@@ -321,7 +320,7 @@ function scrape(doc, url) {
 	if (runningTime && episodeCount) {
 		item.runningTime = (runningTime * episodeCount).toString();
 		if (runningTimeUnit && runningTimeUnit.length >= 1) {
-			item.runningTime += runningTimeUnit
+			item.runningTime += runningTimeUnit;
 		}
 	}
 
