@@ -2,14 +2,14 @@
 	"translatorID": "d0a65ab7-b10c-4801-a906-05505fecc749",
 	"label": "Douban",
 	"creator": "Felix Hui",
-	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|celebrity|explore|chart|tv|top)",
+	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|celebrity|explore|chart|tv|top|series)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-21 06:36:16"
+	"lastUpdated": "2020-07-24 07:32:08"
 }
 
 /*
@@ -48,7 +48,12 @@ function doPerson(item, data, creatorType) {
 	if (!data || data.length <= 0) return;
 	const persons = data.split('/');
 	for (var person of persons) {
-		item.creators.push(ZU.cleanAuthor(person.trim().replace(/(更多\.\.\.|. 著)/, ''), creatorType, true));
+		// item.creators.push(ZU.cleanAuthor(person.trim().replace(/(更多\.\.\.|. 著)/, ''), creatorType, true));
+		item.creators.push({
+			lastName: person.trim().replace(/(更多\.\.\.|. 著)/, ''),
+			creatorType: creatorType,
+			fieldMode: 1
+		});
 	}
 }
 
@@ -160,7 +165,8 @@ function getSearchResults(doc, url, checkOnly) {
 			return text(row, 'span.rating_nums');
 		});
 	}
-	else if (url.includes('book.douban.com/tag')) {
+	else if (url.includes('book.douban.com/tag')
+		|| url.includes('book.douban.com/series')) {
 		rows = doc.querySelectorAll('li.subject-item');
 		items = getResults1(rows, (row) => {
 			return row.querySelector('h2 a');
@@ -190,11 +196,10 @@ function scrape(doc, url) {
 
 	item.title = text(doc, 'h1 span[property="v:itemreviewed"]');
 
-	var pattern, episodeCount;
+	var pattern, episodeCount, runningTime, runningTimeUnit;
 	var infos = text(doc, 'div[class*="subject"] div#info');
 	infos = infos.replace(/^[\xA0\s]+/gm, '').replace(/[\xA0\s]+$/gm, '').replace(/\n+/g, '\n')
 		.replace(/:\n+/g, ': ').replace(/\n\/\n/g, '/');
-	// Z.debug(infos);
 	for (var section of Object.values(infos.split('\n'))) {
 		if (!section || section.trim().length <= 0) continue;
 
@@ -212,7 +217,13 @@ function scrape(doc, url) {
 				doPerson(item, value, "translator");
 				break;
 			case "原作名":
-				item.shortTitle = value;
+			case "副标题":
+				if (item.shortTitle && item.shortTitle.length >= 1) {
+					item.shortTitle += " / " + value;
+				}
+				else {
+					item.shortTitle = value;
+				}
 				break;
 			case "ISBN":
 				item.ISBN = value;
@@ -221,7 +232,18 @@ function scrape(doc, url) {
 				item.numPages = value;
 				break;
 			case "出版社":
-				item.publisher = value;
+			case "出品方":
+				if (item.publisher && item.publisher.length >= 1) {
+					if (value.includes(item.publisher)) {
+						item.publisher = value;
+					}
+					else if (!item.publisher.includes(value)){
+						item.publisher = value + " | " + item.publisher;
+					}
+				}
+				else {
+					item.publisher = value;
+				}
 				break;
 			case "丛书":
 				item.series = value;
@@ -272,11 +294,10 @@ function scrape(doc, url) {
 				episodeCount = value;
 				break;
 			case "单集片长":
-				// {集数}必须先于{单集片长}
 				pattern = /\d+/;
 				if (value && pattern.test(value)) {
-					var runningTime = pattern.exec(value)[0];
-					item.runningTime = (runningTime * episodeCount) + value.replace(runningTime, "");
+					runningTime = pattern.exec(value)[0];
+					runningTimeUnit = value.replace(runningTime, "");
 				}
 				break;
 			case "片长":
@@ -297,6 +318,13 @@ function scrape(doc, url) {
 		}
 	}
 
+	if (runningTime && episodeCount) {
+		item.runningTime = (runningTime * episodeCount).toString();
+		if (runningTimeUnit && runningTimeUnit.length >= 1) {
+			item.runningTime += runningTimeUnit
+		}
+	}
+
 	// 摘要
 	let abstractNote;
 	switch (itemType) {
@@ -314,7 +342,7 @@ function scrape(doc, url) {
 			break;
 	}
 	if (abstractNote) {
-		item.abstractNote = abstractNote.trim().replace(/((\s*)\n(\s*))+/g, '\n');
+		item.abstractNote = abstractNote.trim().replace(/(([\xA0\s]*)\n([\xA0\s]*))+/g, '\n');
 	}
 
 	// 标签
@@ -330,13 +358,13 @@ function scrape(doc, url) {
 	// }
 
 	// 评分 & 评价人数
-	var ratingNum = text(doc, 'strong[property*="v:average"]');
-	if (ratingNum) {
+	var rating = text(doc, 'strong[property*="v:average"]');
+	if (rating && (rating = rating.trim()).length >= 1) {
 		var ratingPeople = text(doc, 'div.rating_sum a.rating_people span[property="v:votes"]');
 		if (!ratingPeople || ratingPeople.toString().trim().length <= 0) {
 			ratingPeople = 0;
 		}
-		item.extra = ratingNum.trim() + "/" + ratingPeople;
+		item.extra = rating + "/" + ratingPeople;
 	}
 
 	item.complete();
