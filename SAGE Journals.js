@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-23 11:59:40"
+	"lastUpdated": "2020-07-29 10:32:40"
 }
 
 /*
@@ -130,19 +130,20 @@ function scrape(doc, url) {
 			// The encoding of apostrophs in the RIS are incorrect and
 			// therefore we extract the abstract again from the website.
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			// ubtue: extract translated and other abstracts from the different xpath
-			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
-			if (ubtueabstract) {
-				item.abstractNote = ubtueabstract.replace(/(\.)(?!\s)/g, '. ');
-			} else if (!ubtueabstract && item.abstractNote) {
-				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-				item.abstractNote = ubtueabstract.replace(/(\.)(?!\s)/g, '. ');
-			} else {
-				item.abstractNote = abstract;
+			if (abstract) {
+				item.abstractNote = abstract.trim();
+			}
+
+			// ubtue: also add translated abstracts in 520
+			var translatedAbstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			if (translatedAbstract) {
+				item.notes.push({
+					note: "abs:" + translatedAbstract,
+				});
 			}
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
-			if (tags) {
+			if (tagentry) {
 				item.tags = tagentry.split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
@@ -176,7 +177,6 @@ function scrape(doc, url) {
 			if (articleType && articleType.length > 0) {
 				if (articleType[0].textContent.trim().match(/Book Review/)) item.tags.push("Book Review");
 			}
-			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
 				url: pdfurl,
