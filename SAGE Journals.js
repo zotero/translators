@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-29 10:32:40"
+	"lastUpdated": "2020-07-29 11:32:40"
 }
 
 /*
@@ -80,16 +80,6 @@ function doWeb(doc, url) {
 	}
 }
 
-function postProcess(doc, item) {
-	// remove partial DOIs stored in the pages field of online-first articles
-	if (item.DOI) {
-		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
-		if (doiMatches) {
-			var secondPart = doiMatches[2];
-			if (item.pages === secondPart) item.pages = "";
-		}
-	}
-}
 
 function scrape(doc, url) {
 	var risURL = "//journals.sagepub.com/action/downloadCitation";
@@ -99,7 +89,6 @@ function scrape(doc, url) {
 	}
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
 	
 	//Z.debug(pdfurl);
 	//Z.debug(post);
@@ -109,8 +98,8 @@ function scrape(doc, url) {
 		//and will therefore simply delete the later in cases both
 		//dates are present.
 		//Z.debug(text);
-		if (text.indexOf("DA  - ") > -1) {
-			text = text.replace(/Y1 - .*\r?\n/, '');
+		if (text.includes("DA  - ")) {
+			text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
 		}
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -183,7 +172,6 @@ function scrape(doc, url) {
 				title: "SAGE PDF Full Text",
 				mimeType: "application/pdf"
 			});
-			postProcess(doc, item);
 			item.complete();
 		});
 		translator.translate();
