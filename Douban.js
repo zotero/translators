@@ -2,14 +2,14 @@
 	"translatorID": "d0a65ab7-b10c-4801-a906-05505fecc749",
 	"label": "Douban",
 	"creator": "Felix Hui",
-	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|celebrity|explore|chart|tv|top|series)",
+	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|explore|chart|tv|top|series)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-24 07:32:08"
+	"lastUpdated": "2020-08-01 10:12:56"
 }
 
 /*
@@ -90,6 +90,7 @@ function getResults1(rows, funcTitle, funcRating) {
 		if (!href || !title) continue;
 
 		found = true;
+		// 0评分选项将显示为“[] xxxx”，鉴于该方式的识别度比较高，所以保留
 		if (funcRating) {
 			title = '[' + funcRating(row) + '] ' + title;
 		}
@@ -109,6 +110,7 @@ function getResults2(rows, titleSelector, ratingSelector) {
 		if (!href || !title) continue;
 
 		found = true;
+		// 0评分选项将显示为“[] xxxx”，鉴于该方式的识别度比较高，所以保留
 		rating = ZU.trimInternal(text(row, ratingSelector));
 		title = '[' + rating + '] ' + title.replace(rating, '');
 		items[href] = title;
@@ -120,6 +122,9 @@ function detectWeb(doc, url) {
 	if (url.includes('/subject/')) {
 		return detectType(doc);
 	}
+	// else if (url.includes('/celebrity/')) {
+	// 	return detectType(doc);
+	// }
 	else if (getSearchResults(doc, url, true)) {
 		return "multiple";
 	}
@@ -377,6 +382,86 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"url": "https://www.douban.com/doulist/111850146/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://book.douban.com/tag/%E8%AE%A4%E7%9F%A5%E5%BF%83%E7%90%86%E5%AD%A6",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://book.douban.com/series/567",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/top250",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/chart",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.douban.com/doulist/41546224/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/tag/#/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/explore#!type=movie&tag=%E8%B1%86%E7%93%A3%E9%AB%98%E5%88%86&sort=recommend&page_limit=20&page_start=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://movie.douban.com/tv/#!type=tv&tag=%E7%83%AD%E9%97%A8&sort=rank&page_limit=20&page_start=0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://book.douban.com/subject/4864832/",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "为什么学生不喜欢上学?",
+				"creators": [
+					{
+						"lastName": "(美) 威廉厄姆 (Willingham.D.T.) ",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "赵萌.",
+						"creatorType": "translator",
+						"fieldMode": 1
+					}
+				],
+				"date": "2010-5",
+				"ISBN": "9787534396533",
+				"abstractNote": "《为什么学生不喜欢上学?》一书，是美国弗吉尼亚大学心理学教授威林厄姆的重要著作，是一本深受学生和教师欢迎的教育心理学著作。他用认知心理学的原理，详细分析了学生学习的过程和教师在课堂教学中必须注意的一些问题。书中每一章都运用了一个认知心理学的基本原理，如“事实性的知识先于技能”“记忆是思考的残留物”“我们在已知的环境中理解新的事物”“儿童在学习方面更多的是相似而不是不同”“教学技能可以通过练习而提高”等等。    《为什么学生不喜欢上学?》是一本关于认知心理学的普及读物，也是一本教育心理学的入门书籍。书中的许多观点新颖而深刻。如开篇伊始关于大脑的作用的分析，作者认为，大脑不是用来思考的，它的真正作用在于使你避免思考。虽然人类生来就具有好奇心，但是我们不是天生的杰出思想者，除非认知环境符合一定的要求，否则我们会尽可能地避免思考。作者指出，学生是否喜欢学校，在很大程度上取决于学校能否持续地让学生体验到解决问题的愉悦感。",
+				"extra": "9.2/2330",
+				"libraryCatalog": "Douban",
+				"numPages": "168",
+				"publisher": "江苏教育出版社",
+				"shortTitle": "Why Don't Students Like School: A Cognitive Scientist Answers Questions About How the Mind Works and What It Means for the Classroom",
+				"url": "https://book.douban.com/subject/4864832/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://movie.douban.com/subject/1292052/",
 		"items": [
 			{
@@ -524,139 +609,16 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "1994-09-10(多伦多电影节) / 1994-10-14(美国)",
-				"abstractNote": "20世纪40年代末，小有成就的青年银行家安迪（蒂姆·罗宾斯 Tim Robbins 饰）因涉嫌杀害妻子及她的情人而锒铛入狱。在这座名为鲨堡的监狱内，希望似乎虚无缥缈，终身监禁的惩罚无疑注定了安迪接下来灰暗绝望的人生。未过多久，安迪尝试接近囚犯中颇有声望的瑞德（摩根·弗 里曼 Morgan Freeman 饰），请求对方帮自己搞来小锤子。以此为契机，二人逐渐熟稔，安迪也仿佛在鱼龙混杂、罪恶横生、黑白混淆的牢狱中找到属于自己的求生之道。他利用自身的专业知识，帮助监狱管理层逃税、洗黑钱，同时凭借与瑞德的交往在犯人中间也渐渐受到礼遇。表面看来，他已如瑞德那样对那堵高墙从憎恨转变为处之泰然，但是对自由的渴望仍促使他朝着心中的希望和目标前进。而关于其罪行的真相，似乎更使这一切朝前推进了一步……\n                                　　本片根据著名作家斯蒂芬·金（Stephen Edwin King）的原著改编。",
+				"date": "1994-09-10",
+				"abstractNote": "20世纪40年代末，小有成就的青年银行家安迪（蒂姆·罗宾斯 Tim Robbins 饰）因涉嫌杀害妻子及她的情人而锒铛入狱。在这座名为鲨堡的监狱内，希望似乎虚无缥缈，终身监禁的惩罚无疑注定了安迪接下来灰暗绝望的人生。未过多久，安迪尝试接近囚犯中颇有声望的瑞德（摩根·弗 里曼 Morgan Freeman 饰），请求对方帮自己搞来小锤子。以此为契机，二人逐渐熟稔，安迪也仿佛在鱼龙混杂、罪恶横生、黑白混淆的牢狱中找到属于自己的求生之道。他利用自身的专业知识，帮助监狱管理层逃税、洗黑钱，同时凭借与瑞德的交往在犯人中间也渐渐受到礼遇。表面看来，他已如瑞德那样对那堵高墙从憎恨转变为处之泰然，但是对自由的渴望仍促使他朝着心中的希望和目标前进。而关于其罪行的真相，似乎更使这一切朝前推进了一步……\n本片根据著名作家斯蒂芬·金（Stephen Edwin King）的原著改编。",
 				"distributor": "美国",
-				"extra": "9.7/2069725",
+				"extra": "9.7/2095443",
 				"genre": "剧情 / 犯罪",
 				"language": "英语",
-				"libraryCatalog": "Douban Movie",
+				"libraryCatalog": "Douban",
 				"runningTime": "142分钟",
 				"shortTitle": "月黑高飞(港) / 刺激1995(台) / 地狱诺言 / 铁窗岁月 / 消香克的救赎",
 				"url": "https://movie.douban.com/subject/1292052/",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "剧情"
-					},
-					{
-						"tag": "犯罪"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://movie.douban.com/tag/#/?sort=U&range=0,10&tags=%E7%94%B5%E5%BD%B1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://movie.douban.com/chart",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://movie.douban.com/subject/26939247/",
-		"items": [
-			{
-				"itemType": "film",
-				"title": "夏目友人帐 第六季 夏目友人帳 陸",
-				"creators": [
-					{
-						"lastName": "大森贵弘",
-						"creatorType": "director",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "出合小都美",
-						"creatorType": "director",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "绿川幸",
-						"creatorType": "scriptwriter",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "村井贞之",
-						"creatorType": "scriptwriter",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "神谷浩史",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "井上和彦",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "小林沙苗",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "石田彰",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "堀江一真",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "木村良平",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "菅沼久义",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "泽城美雪",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "佐藤利奈",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "伊藤美纪 Miki Itô",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "伊藤荣次",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					},
-					{
-						"lastName": "诹访部顺一",
-						"creatorType": "contributor",
-						"fieldMode": 1
-					}
-				],
-				"date": "2017-04-11",
-				"abstractNote": "与温柔友人们度过的，值得珍惜的每一天——\n                                　　美丽而虚幻的，人与妖的物语。\n                                    \n                                　　从小就能看见妖怪的少年·夏目贵志，继承了祖母玲子的遗产“友人帐”，与自称保镖的猫咪老师一起，开始将名字返还给被束缚在友人帐中的妖怪。\n                                    \n                                　　通过与妖怪及与之相关的人们接触，开始摸索自己前进之路的夏目，在与心灵相通的朋友们帮助下，设法守护自己重要的每一天。",
-				"distributor": "日本",
-				"extra": "9.6/31280",
-				"genre": "剧情 / 动画 / 奇幻",
-				"language": "日语",
-				"libraryCatalog": "Douban Movie",
-				"runningTime": "264分钟",
-				"shortTitle": "妖怪联络簿 六(台) / Natsume's Book of Friends 6 / Natsume Yuujinchou Roku",
-				"url": "https://movie.douban.com/subject/26939247/",
 				"attachments": [
 					{
 						"snapshot": false,
@@ -668,10 +630,7 @@ var testCases = [
 						"tag": "剧情"
 					},
 					{
-						"tag": "动画"
-					},
-					{
-						"tag": "奇幻"
+						"tag": "犯罪"
 					}
 				],
 				"notes": [],
