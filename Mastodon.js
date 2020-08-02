@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-02 03:10:52"
+	"lastUpdated": "2020-08-02 12:44:10"
 }
 
 /*
@@ -45,11 +45,11 @@ function doWeb(doc, url) {
 
 	var tmpAuthor;
 	if (resourceType == "blogPost") {
-		newItem.blogTitle = ZU.xpathText(doc, "(//span[@class='display-name__account'])[1]");
-		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
-		var tmpDate = ZU.xpathText(doc, '(//time)[1]/@datetime');
+		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content").replace(/\n/g, " ").replace(/ +/g, " ");
+		newItem.blogTitle = ZU.xpathText(doc, "//a[@class='detailed-status__display-name u-url']/span/span");
+		tmpAuthor = ZU.xpathText(doc, "//a[@class='detailed-status__display-name u-url']/span/bdi/strong");
+		let tmpDate = ZU.xpathText(doc, "//div[@class='detailed-status detailed-status--flex detailed-status-public']/div/data/@value");
 		newItem.date = ZU.strToISO(tmpDate);
-		tmpAuthor = ZU.xpathText(doc, "//meta[@property='og:title']/@content").split(" (")[0];
 	}
 	else {
 		tmpAuthor = ZU.xpathText(doc, "//h1").split("\n")[1];
@@ -117,6 +117,97 @@ var testCases = [
 					}
 				],
 				"url": "https://mastodon.social/@febrezo",
+				"websiteType": "Microblogging (Mastodon)",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mastodon.social/@hhardy01/102739659005327509",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "@Gargron How is mastodon.social a \"viable publishing platform\" when we can only post about 88 words?",
+				"creators": [
+					{
+						"firstName": "Henry Edward",
+						"lastName": "Hardy",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-09-05",
+				"blogTitle": "@hhardy01@mastodon.social",
+				"url": "https://mastodon.social/@hhardy01/102739659005327509",
+				"websiteType": "Microblogging (Mastodon)",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://mastodon.xyz/@TheKinrar/104242749499971289",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "J'ai setup une partie des rDNS pour AS213318, ça fait de jolis traceroute ! :D",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "TheKinrar",
+						"creatorType": "author"
+					}
+				],
+				"blogTitle": "@TheKinrar@mastodon.xyz",
+				"shortTitle": "J'ai setup une partie des rDNS pour AS213318, ça fait de jolis traceroute !",
+				"url": "https://mastodon.xyz/@TheKinrar/104242749499971289",
+				"websiteType": "Microblogging (Mastodon)",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://switter.at/@switter/99815934036860170",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "When making a listing PLEASE MAKE SURE: - you use the hashtag #swlisting - you list your location - you list your contact info **MAKE SURE THESE ARE ON SEPARATE LINES** Here is an example: Taking incalls today! And I’m with the delightful @ellethorn for doubles 😉 Book in now! Location: Canberra, Australia Contact: 0404864006 #swlisting",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "Switter",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-07",
+				"blogTitle": "@switter@switter.at",
+				"shortTitle": "When making a listing PLEASE MAKE SURE",
+				"url": "https://switter.at/@switter/99815934036860170",
 				"websiteType": "Microblogging (Mastodon)",
 				"attachments": [
 					{
