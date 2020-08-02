@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-02 02:31:35"
+	"lastUpdated": "2020-08-02 14:35:03"
 }
 
 /*
@@ -40,10 +40,10 @@ function doWeb(doc, url) {
 	var newItem = new Zotero.Item(resourceType);
 	
 	var targetUri;
-	if (url.indexOf("/rfc/") > -1) {
+	if (url.includes("/rfc/")) {
 		targetUri = url.replace("/rfc/", "/html/").replace(".txt", "");
 	}
-	else if (url.indexOf("/pdf/") > -1) {
+	else if (url.includes("/pdf/")) {
 		targetUri = url.replace("/pdf/", "/html/").replace(".pdf", "");
 	}
 	else {
@@ -55,24 +55,24 @@ function doWeb(doc, url) {
 		resText = resText.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		resText = Zotero.Utilities.trim(resText);
 
-		var parser = new DOMParser();
-		var metadataDoc = parser.parseFromString(resText, "text/html");
+		let parser = new DOMParser();
+		let metadataDoc = parser.parseFromString(resText, "text/html");
 
 		// Start scraping
 		newItem.title = ZU.xpathText(metadataDoc, "//meta[@name='DC.Title']/@content");
 		
 		// Iterating through authors
-		var index = 0;
+		let index = 0;
 		while (true) {
 			index++;
 			var tmpAuthor = ZU.xpathText(metadataDoc, "(//meta[@name='DC.Creator'])[" + index + "]/@content");
 			if (tmpAuthor) {
-				var splittedAuthor = tmpAuthor.split(" <")[0].split(", ");	// Remove references to emails that sometimes appear
-				if (splittedAuthor.length == 1) {			// Process authors given as full name
-			 		newItem.creators.push(ZU.cleanAuthor(splittedAuthor[0], "author", false)); 
+				let splitAuthor = tmpAuthor.split(" <")[0].split(", ");	// Remove references to emails that sometimes appear
+				if (splitAuthor.length == 1) {			// Process authors given as full name
+			 		newItem.creators.push(ZU.cleanAuthor(splitAuthor[0], "author", false)); 
 				}
 				else {										// Process splitted authors
-					newItem.creators.push({ lastName: splittedAuthor[0], firstName: splittedAuthor[1], creatorType: "author" });
+					newItem.creators.push({ lastName: splitAuthor[0], firstName: splitAuthor[1], creatorType: "author" });
 				}
 			}
 			else {
@@ -81,11 +81,15 @@ function doWeb(doc, url) {
 		}
 		newItem.reportNumber = "RFC " + ZU.xpathText(metadataDoc, "//meta[@name='DC.Identifier']/@content").split(":")[3];
 		newItem.institution = "IETF";
-		var abstractContent = ZU.xpathText(metadataDoc, "//meta[@name='DC.Description.Abstract']/@content").split("[");
-		newItem.abstractNote = abstractContent[0].replace(/\n/g, " ");
-		newItem.reportType = abstractContent[1].split("]")[0];
+		let abstractContent = ZU.xpathText(metadataDoc, "//meta[@name='DC.Description.Abstract']/@content");
+		newItem.abstractNote = abstractContent.replace(/\n/g, " ");
+		
+		let regexp_type = /\[([^\]]+)\]$/;
+		let reportType = abstractContent.match(regexp_type)[1];
+		
+		newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
 		newItem.url = targetUri;
-		var tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
+		let tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
 		newItem.date = ZU.strToISO(tmpDate);
 
 		// Adding the attachment
@@ -129,11 +133,11 @@ var testCases = [
 					}
 				],
 				"date": "1998-12",
-				"abstractNote": "This document defines the IP header field, called the DS (for differentiated services) field.",
+				"abstractNote": "This document defines the IP header field, called the DS (for differentiated services) field. [STANDARDS-TRACK]",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 2474",
-				"reportType": "STANDARDS-TRACK",
+				"reportType": "Standards Track",
 				"url": "https://tools.ietf.org/html/rfc2474",
 				"attachments": [
 					{
@@ -162,11 +166,11 @@ var testCases = [
 					}
 				],
 				"date": "2001-04",
-				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\"\nmessages.",
+				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\" messages. [STANDARDS-TRACK]",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 2822",
-				"reportType": "STANDARDS-TRACK",
+				"reportType": "Standards Track",
 				"url": "https://tools.ietf.org/html/rfc2822",
 				"attachments": [
 					{
@@ -195,11 +199,11 @@ var testCases = [
 					}
 				],
 				"date": "2001-04",
-				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\" messages.",
+				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\" messages. [STANDARDS-TRACK]",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 2822",
-				"reportType": "STANDARDS-TRACK",
+				"reportType": "Standards Track",
 				"url": "https://tools.ietf.org/html/rfc2822",
 				"attachments": [
 					{
