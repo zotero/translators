@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-01 15:11:54"
+	"lastUpdated": "2020-08-02 03:10:52"
 }
 
 /*
@@ -49,7 +49,7 @@ function doWeb(doc, url) {
 		newItem.title = ZU.xpathText(doc, "//meta[@name='description']/@content");
 		var tmpDate = ZU.xpathText(doc, '(//time)[1]/@datetime');
 		newItem.date = ZU.strToISO(tmpDate);
-		tmpAuthor = ZU.xpathText(doc, "//meta[@property='og:title']/@content").split("(")[0];
+		tmpAuthor = ZU.xpathText(doc, "//meta[@property='og:title']/@content").split(" (")[0];
 	}
 	else {
 		tmpAuthor = ZU.xpathText(doc, "//h1").split("\n")[1];
