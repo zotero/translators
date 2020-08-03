@@ -1,8 +1,8 @@
 {
 	"translatorID": "d0a65ab7-b10c-4801-a906-05505fecc749",
 	"label": "Douban",
-	"creator": "Felix Hui",
-	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|explore|chart|tv|top|series)",
+	"creator": "Ace Strong<acestrong@gmail.com>, Felix Hui",
+	"target": "https?://(www|book|movie)\\.douban\\.com/(subject|doulist|tag|explore|chart|tv|top|series|typerank)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
