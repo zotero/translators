@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-03 08:00:38"
+	"lastUpdated": "2020-08-03 18:34:25"
 }
 
 /*
@@ -84,7 +84,7 @@ function getResults1(rows, funcTitle, funcRating, funcRatingPeople, filter) {
 
 	var found = false, items = {}, titleTag;
 	for (let row of rows) {
-		if(!filter || !filter(row)) continue;
+		if(filter && !filter(row)) continue;
 
 		titleTag = funcTitle(row);
 		let href = titleTag.href;
