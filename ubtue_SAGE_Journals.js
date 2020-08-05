@@ -88,100 +88,100 @@ function doWeb(doc, url) {
 
 
 function getPublishedPrintYearFromJSON(json) {
-    if ("published-print" in json) {
-        if ("date-parts" in json["published-print"]) {
-            return json["published-print"]["date-parts"][0][0];
-        }
-    }
-    return undefined;
+	if ("published-print" in json) {
+		if ("date-parts" in json["published-print"]) {
+			return json["published-print"]["date-parts"][0][0];
+		}
+	}
+	return undefined;
 }
 
 
 function postProcess(doc, item) {
-    // remove partial DOIs stored in the pages field of online-first articles
-    if (item.DOI) {
-        var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
-        if (doiMatches) {
-            var secondPart = doiMatches[2];
-            if (item.pages === secondPart) item.pages = "";
-        }
-    }
+	// remove partial DOIs stored in the pages field of online-first articles
+	if (item.DOI) {
+		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
+		if (doiMatches) {
+			var secondPart = doiMatches[2];
+			if (item.pages === secondPart) item.pages = "";
+		}
+	}
 }
 
 
 function scrapedAdditions(item, doc, doi) {
-    var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-        if (abstract) {
-            item.abstractNote = abstract;
-    }
+	var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+		if (abstract) {
+			item.abstractNote = abstract;
+	}
 
-    // ubtue: also add translated abstracts
-    var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-    if (ubtueabstract) {
-         item.abstractNote += "\n\n" + ubtueabstract;
-    }
+	// ubtue: also add translated abstracts
+	var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
+	if (ubtueabstract) {
+		 item.abstractNote += "\n\n" + ubtueabstract;
+	}
 
-    var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
-    if (tags) {
-        item.tags = tagentry.split(",");
-    }
-    // ubtue: add tags "Book Review" if "Review Article"
-    var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
-    if (articleType) {
-        for (let r of articleType) {
-            let reviewDOIlink = r.innerHTML;
-            if (reviewDOIlink.match(/Review Article/)) {
-                item.tags.push('Book Review');
-            }
-        }
-    }
+	var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
+	if (tags) {
+		item.tags = tagentry.split(",");
+	}
+	// ubtue: add tags "Book Review" if "Review Article"
+	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
+	if (articleType) {
+		for (let r of articleType) {
+			let reviewDOIlink = r.innerHTML;
+			if (reviewDOIlink.match(/Review Article/)) {
+				item.tags.push('Book Review');
+			}
+		}
+	}
 
-    // scrape tags
-    if (!item.tags || item.tags.length === 0) {
-        var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-        if (embedded) item.tags = embedded.split(",");
-        if (!item.tags) {
-            var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
-            if (tags) item.tags = tags.map(n => n.textContent);
-        }
-    }
+	// scrape tags
+	if (!item.tags || item.tags.length === 0) {
+		var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+		if (embedded) item.tags = embedded.split(",");
+		if (!item.tags) {
+			var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
+			if (tags) item.tags = tags.map(n => n.textContent);
+		}
+	}
 
-    if (articleType && articleType.length > 0) {
-        if (articleType[0].textContent.trim().match(/Book Review/))
-            item.tags.push("Book Review");
-    }
+	if (articleType && articleType.length > 0) {
+		if (articleType[0].textContent.trim().match(/Book Review/)) {
+			item.tags.push("Book Review");
+		}
+	}
 
-    item.notes = [];
-    item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
-    let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-    item.attachments.push({
-        url: pdfurl,
-        title: "SAGE PDF Full Text",
-        mimeType: "application/pdf"
-    });
-    postProcess(doc, item);
+	item.notes = [];
+	item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
+	let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+	item.attachments.push({
+		url: pdfurl,
+		title: "SAGE PDF Full Text",
+		mimeType: "application/pdf"
+	});
+	postProcess(doc, item);
 }
 
 
 function extract(text, doc, doi) {
-    var translator = Zotero.loadTranslator("import");
-    translator.setTranslator("bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7");
-    translator.setString(text);
-    translator.setHandler("itemDone", function (obj, item) {
-        let json = JSON.parse(text);
-        let publishedPrintYear = getPublishedPrintYearFromJSON(json);
-        item.date = publishedPrintYear !== undefined ? publishedPrintYear : "";
-        scrapedAdditions(item, doc, doi);
-        item.complete();
-    });
-    translator.translate();
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		let json = JSON.parse(text);
+		let publishedPrintYear = getPublishedPrintYearFromJSON(json);
+		item.date = publishedPrintYear !== undefined ? publishedPrintYear : "";
+		scrapedAdditions(item, doc, doi);
+		item.complete();
+	});
+	translator.translate();
 }
-     
 
 
 function scrape(doc, url) {
 	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
-    var doiURL = "http://doi.org/" + encodeURIComponent(doi);
+	var doiURL = "http://doi.org/" + encodeURIComponent(doi);
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
