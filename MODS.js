@@ -15,7 +15,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-20 09:05:38"
+	"lastUpdated": "2019-06-15 13∶58∶58"
 }
 
 
@@ -380,6 +380,8 @@ function doExport() {
 		
 		/** CORE FIELDS **/
 		
+		mapProperty(recordInfo, "recordIdentifier", (item.uri ? item.uri : "#item_"+item.itemID));
+
 		// XML tag titleInfo; object field title
 		if (item.title) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
