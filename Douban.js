@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-03 18:34:25"
+	"lastUpdated": "2020-08-05 09:11:31"
 }
 
 /*
@@ -197,7 +197,8 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
 		}, (row) => {
-			return text(row, 'div.source').includes('豆瓣读书');
+			let source = text(row, 'div.source');
+			return source.includes('豆瓣读书') || source.includes('豆瓣电影');
 		});
 	}
 	else if (url.includes('book.douban.com/tag')
