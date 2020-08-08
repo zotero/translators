@@ -1,6 +1,6 @@
 {
 	"translatorID": "5b731187-04a7-4256-83b4-3f042fa3eaa4",
-	"label": "ncpssd",
+	"label": "Ncpssd",
 	"creator": "018<lyb018@gmail.com>",
 	"target": "^https?://([^/]+\\.)?ncpssd\\.org/Literature/",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-01 05:53:40"
+	"lastUpdated": "2020-08-08 23:03:26"
 }
 
 /*
@@ -36,14 +36,20 @@
 */
 
 // eslint-disable-next-line
-function opt(val){if(val && val.length > 0) return val;else '';}
+function opt(val) {
+	if (val && val.length > 0) {
+		return val;
+	}
+	else {
+		return '';
+	}
+}
 
 function detectWeb(doc, url) {
-	var dType = detectType(doc, url)
+	var dType = detectType(doc, url);
 	if (dType) {
 		return dType;
-	}
-	else if (getSearchResults(doc, true)) {
+	} else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -56,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	// Z.debug(rows.length);
 	for (let row of rows) {
 		let a = row.querySelector('.julei-list a');
-		if(!a){
+		if (!a) {
 			continue;
 		}
 
@@ -84,7 +90,7 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			// Z.debug(items);
 			for (var url in items) {
-				Z.debug('url:' + url);
+				// Z.debug('url:' + url);
 				scrape(doc, url);
 			}
 		});
@@ -99,8 +105,8 @@ function scrapeAndParse(method, data, callback) {
 	var baseUrl = 'http://www.ncpssd.org';
 	var risRequest = baseUrl + '/ajax/articleinfoHandler.ashx?method=' + method;
 
-	Zotero.Utilities.HTTP.doPost(risRequest, data, function(json) {
-		if(callback && json){
+	Zotero.Utilities.HTTP.doPost(risRequest, data, function (json) {
+		if (callback && json) {
 			callback(JSON.parse(json));
 		}
 	});
@@ -108,7 +114,7 @@ function scrapeAndParse(method, data, callback) {
 
 function getUrl(id, type, barcodenum) {
 	var typename = "";
-	var barcodenum;
+	var barcodenum1 = barcodenum;
 	if (type == "journalArticle") {
 		typename = "5Lit5paH5pyf5YiK5paH56ug";
 	}
@@ -119,7 +125,7 @@ function getUrl(id, type, barcodenum) {
 		typename = "5Y+k57GN";
 	}
 	if (type == "Book") {
-		barcodenum = id;
+		barcodenum1 = id;
 		typename = "5aSW5paH5Zu+5Lmm";
 	}
 	if (type == "LocalRecords") {
@@ -132,7 +138,8 @@ function getUrl(id, type, barcodenum) {
 		typename = "5a2m5L2N6K665paH";
 	}
 	
-	return 'http://www.ncpssd.org/Literature/articleinfo.aspx?id=' + btoa(id) + "&type=" + btoa(type) + "&typename=" + typename + "&datatype=" + btoa(type) + "&nav=0&barcodenum=" + (barcodenum ? btoa(barcodenum) : '');
+	/* eslint-disable no-undef */
+	return 'http://www.ncpssd.org/Literature/articleinfo.aspx?id=' + btoa(id) + "&type=" + btoa(type) + "&typename=" + typename + "&datatype=" + btoa(type) + "&nav=0&barcodenum=" + (barcodenum1 ? btoa(barcodenum1) : '');
 }
 
 function getPdfUrl(pdfurl, type) {
@@ -157,8 +164,8 @@ function getPdfUrl(pdfurl, type) {
 function scrapeJournalArticle(url) {
 	var info = getFromURL(url);
 	// Z.debug(info);
-	if(info){
-		scrapeAndParse('getjournalarticletable', '{\'lngid\':\'' + info.id + '\'}', function(ret){
+	if (info) {
+		scrapeAndParse('getjournalarticletable', '{\'lngid\':\'' + info.id + '\'}', function (ret) {
 			var json = ret[0];
 			// Z.debug(json);
 			// https://aurimasv.github.io/z2csl/typeMap.xml#map-journalArticle
@@ -169,7 +176,7 @@ function scrapeJournalArticle(url) {
 		
 			item.title = json.title_c;
 			
-			item.date = (json.years ? (json.years + '年') : '' );
+			item.date = (json.years ? (json.years + '年') : '');
 			item.volume = opt(json.vol);
 			item.issue = opt(json.num);
 			item.pages = json.pagecount + (json.beginpage > 0 ? ('(' + json.beginpage + (json.endpage ? ('-' + json.endpage + '页)') : ')')) : '');
@@ -177,35 +184,35 @@ function scrapeJournalArticle(url) {
 			switch (json.language) {
 				case 1:
 					item.language = '中文';
-					item.publicationTitle = '《' + json.media_c + '》' + (json.media_e && json.media_e.length > 0 ? ('(' + json.media_e + ')') : '' );
+					item.publicationTitle = '《' + json.media_c + '》' + (json.media_e && json.media_e.length > 0 ? ('(' + json.media_e + ')') : '');
 					item.abstractNote = json.remark_c;
 		
 					// Z.debug(item);
 					// 标签
-					var keywords = json.keyword_c;
-					if(keywords && keywords.length > 0) {
-						for (var s of keywords.split(';')) {
-							item.tags.push(s);
+					var keywordcs = json.keyword_c;
+					if (keywordcs && keywordcs.length > 0) {
+						for (var kc of keywordcs.split(';')) {
+							item.tags.push(kc);
 						}
 					}
-					keywords = json.keyword_e;
-					if(keywords && keywords.length > 0) {
-						for (var s of keywords.split(';')) {
-							item.tags.push(s);
+					keywordes = json.keyword_e;
+					if (keywordes && keywordes.length > 0) {
+						for (var ke of keywordes.split(';')) {
+							item.tags.push(ke);
 						}
 					}
 				
 					// 作者
-					var creators = json.showwriter;
-					for (var s of creators.split(';')) {
+					var creators1 = json.showwriter;
+					for (var c1 of creators1.split(';')) {
 						item.creators.push({
-							lastName: s.replace(/\[.*]/g, ''),
+							lastName: c1.replace(/\[.*]/g, ''),
 							creatorType: 'author',
 							fieldMode: 1
 						});
 					}
 		
-					if(json.pdfurl) {
+					if (json.pdfurl) {
 						item.attachments.push({
 							title: 'Full Text PDF',
 							mimeType: 'application/pdf',
@@ -220,18 +227,18 @@ function scrapeJournalArticle(url) {
 		
 					// Z.debug(item);
 					// 标签
-					var keywords = json.keyword_e;
-					if(keywords && keywords.length > 0) {
-						for (var s of keywords.split(';')) {
-							item.tags.push(s);
+					var keywordes = json.keyword_e;
+					if (keywordes && keywordes.length > 0) {
+						for (var k of keywordes.split(';')) {
+							item.tags.push(k);
 						}
 					}
 				
 					// 作者
-					var creators = json.showwriter;
-					for (var s of creators.split(',')) {
+					var creators2 = json.showwriter;
+					for (var c2 of creators2.split(',')) {
 						item.creators.push({
-							lastName: s.replace(/\[.*]/g, ''),
+							lastName: c2.replace(/\[.*]/g, ''),
 							creatorType: 'author',
 							fieldMode: 1
 						});
@@ -241,7 +248,7 @@ function scrapeJournalArticle(url) {
 					break;
 			}
 			var showorgan = json.showorgan;
-			if(showorgan && showorgan.length > 0) {
+			if (showorgan && showorgan.length > 0) {
 				for (var s of showorgan.split(';')) {
 					if (!s || s.trim().length <= 0) continue;
 					item.creators.push({
@@ -262,14 +269,13 @@ function scrapeEJournalArticle(url) {
 	scrapeJournalArticle(url);
 }
 
-
 // 古籍
 function scrapeAncientBook(url) {
 	var info = getFromURL(url);
 	// Z.debug(info);
-	Z.debug(info.barcodenum)
-	if(info && info.barcodenum){
-		scrapeAndParse('getancientbooktable', '{\'barcodenum\':' + info.barcodenum + '}', function(ret){
+	// Z.debug(info.barcodenum);
+	if (info && info.barcodenum) {
+		scrapeAndParse('getancientbooktable', '{\'barcodenum\':' + info.barcodenum + '}', function (ret) {
 			var json = ret[0];
 			// Z.debug(json);
 			// https://aurimasv.github.io/z2csl/typeMap.xml#map-book
@@ -281,7 +287,7 @@ function scrapeAncientBook(url) {
 			item.title = json.title_c;
 			item.ISBN = opt(json.isbn);
 			item.publisher = opt(json.press);
-			item.date = opt(json.pubdatenote)
+			item.date = opt(json.pubdatenote);
 			item.volume = opt(json.vol);
 			item.issue = opt(json.num);
 
@@ -291,25 +297,25 @@ function scrapeAncientBook(url) {
 
 			// Z.debug(item);
 			// 标签
-			var keywords = json.keyword_c;
-			if(keywords && keywords.length > 0) {
-				for (var s of keywords.split(';')) {
-					item.tags.push(s);
+			var keywordcs = json.keyword_c;
+			if (keywordcs && keywordcs.length > 0) {
+				for (var kc of keywordcs.split(';')) {
+					item.tags.push(kc);
 				}
 			}
 		
 			// 作者
 			var creators = json.showwriter;
-			for (var s of creators.split(';')) {
+			for (var c of creators.split(';')) {
 				item.creators.push({
-					lastName: s.replace(/\[.*]/g, ''),
+					lastName: c.replace(/\[.*]/g, ''),
 					creatorType: 'author',
 					fieldMode: 1
 				});
 			}
 
 			var showorgan = json.showorgan;
-			if(showorgan && showorgan.length > 0) {
+			if (showorgan && showorgan.length > 0) {
 				for (var s of showorgan.split(';')) {
 					if (!s || s.trim().length <= 0) continue;
 					item.creators.push({
@@ -320,7 +326,7 @@ function scrapeAncientBook(url) {
 				}
 			}
 		
-			if(json.pdfurl) {
+			if (json.pdfurl) {
 				item.attachments.push({
 					title: 'Full Text PDF',
 					mimeType: 'application/pdf',
@@ -335,8 +341,8 @@ function scrapeAncientBook(url) {
 
 function scrape(doc, url) {
 	var info = getFromURL(url);
-	if(info){
-		type = info.type;
+	if (info) {
+		var type = info.type;
 		switch (type) {
 			case 'journalArticle':
 				scrapeJournalArticle(url);
@@ -356,20 +362,21 @@ function scrape(doc, url) {
 
 function detectType(doc, url) {
 	var TYPE = {
-		'journalArticle': "journalArticle",
-		'eJournalArticle': "journalArticle",
-		'Ancient': "book",
-		// 'Book': "book",
-		// 'Conference': "thesis",
-		// 'Degree': "thesis",
-		// 'LocalRecords': "thesis"
+		journalArticle: "journalArticle",
+		eJournalArticle: "journalArticle",
+		Ancient: "book",
+		// Book: "book",
+		// Conference: "thesis",
+		// Degree: "thesis",
+		// LocalRecords: "thesis"
 	};
 	var info = getFromURL(url);
-	Z.debug(info);
 	// Z.debug(info);
-	if(info){
+	if (info) {
 		return TYPE[info.type];
 	}
+
+	return undefined;
 }
 
 function getFromURL(url) {
@@ -379,10 +386,18 @@ function getFromURL(url) {
 	var id = url.match(/[?&]id=([^&#]*)/i);
 	var typename = url.match(/[?&]typename=([^&#]*)/i);
 	var barcodenum = url.match(/[?&]barcodenum=([^&#]*)/i);
-	if (!type || !type[1] || !id || !id[1] || !typename || !typename[1] ) return false;
+	if (!type || !type[1] || !id || !id[1] || !typename || !typename[1]) return false;
 	
-	return {type: atob(type[1]), id: atob(id[1]), typename: atob(typename[1]), barcodenum: (barcodenum && barcodenum[1] ? atob(barcodenum[1]) : '')};
-}/** BEGIN TEST CASES **/
+	/* eslint-disable no-undef */
+	return {
+		type: atob(type[1]),
+		id: atob(id[1]),
+		typename: atob(typename[1]),
+		barcodenum: (barcodenum && barcodenum[1] ? atob(barcodenum[1]) : '')
+	};
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
