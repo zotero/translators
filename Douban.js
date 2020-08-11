@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-05 09:11:31"
+	"lastUpdated": "2020-08-10 06:35:30"
 }
 
 /*
@@ -240,6 +240,8 @@ function scrape(doc, url) {
 		.replace(/[\xA0\s]+$/gm, '')
 		.replace(/\n+/g, '\n')
 		.replace(/:\n+/g, ': ')
+		.replace(/]\n/g, ']')
+		.replace(/】\n/g, '】')
 		.replace(/\n\/\n/g, '/');
 	for (var section of Object.values(infos.split('\n'))) {
 		if (!section || section.trim().length <= 0) continue;
