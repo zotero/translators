@@ -2,14 +2,14 @@
 	"translatorID": "ee016722-5f02-4362-8ffe-c96e06872b3e",
 	"label": "Le Maitron",
 	"creator": "czar",
-	"target": "^https?://maitron-en-ligne\\.univ-paris1\\.fr",
+	"target": "^https?://maitron\\.fr",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-22 20:31:08"
+	"lastUpdated": "2020-08-12 20:31:08"
 }
 
 /*
@@ -132,7 +132,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article155263",
+		"url": "http://maitron.fr/spip.php?article155263",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -151,7 +151,7 @@ var testCases = [
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article155263",
+				"url": "http://maitron.fr/spip.php?article155263",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
@@ -186,7 +186,7 @@ var testCases = [
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
 				"shortTitle": "RECLUS Paul, dit GUYOU Georges",
-				"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article128360",
+				"url": "http://maitron.fr/spip.php?article128360",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
@@ -201,12 +201,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?page=recherche_avanc&typerech=simple&lang=fr&swishe_exp=voline&OK=OK&swishe_type=and&swishe_from%5B%5D=full",
+		"url": "http://maitron.fr/spip.php?page=recherche_avanc&typerech=simple&lang=fr&swishe_exp=voline&OK=OK&swishe_type=and&swishe_from%5B%5D=full",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article154716",
+		"url": "http://maitron.fr/spip.php?article154716",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -225,7 +225,7 @@ var testCases = [
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article154716",
+				"url": "http://maitron.fr/spip.php?article154716",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
@@ -240,12 +240,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?mot9745&lettre=^(r|R)",
+		"url": "http://maitron.fr/spip.php?mot9745&lettre=^(r|R)",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article149723&id_mot=216",
+		"url": "http://maitron.fr/spip.php?article149723&id_mot=216",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -264,7 +264,7 @@ var testCases = [
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article149723",
+				"url": "http://maitron.fr/spip.php?article149723",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
