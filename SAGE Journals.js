@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-29 11:32:40"
+	"lastUpdated": "2020-08-14 09:16:25"
 }
 
 /*
@@ -89,7 +89,7 @@ function scrape(doc, url) {
 	}
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	
+	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
@@ -162,10 +162,8 @@ function scrape(doc, url) {
 					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
-
-			if (articleType && articleType.length > 0) {
-				if (articleType[0].textContent.trim().match(/Book Review/)) item.tags.push("Book Review");
-			}
+			
+			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
 				url: pdfurl,
