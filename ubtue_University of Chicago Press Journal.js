@@ -201,16 +201,10 @@ function scrape(doc, url, extras) {
 				
 				item.url = url;
 				item.notes = [];
-				/*if (tags) {
-					var tags = tags.content
-					for (var i in tags){
-						item.tags.push(tags[i].content);
-					}
-				}*/
-				
+				//ubtue:scrape tags from dc.Subject and split
 				for (var i in tags){
 					//let tags[0].content = tags[0].content.split(';'))
-					let tagentry = tags[i].content.split(/;/);Z.debug(tagentry)
+					let tagentry = tags[i].content.split(/;/);
 					for (var v in tagentry) {
 						item.tags.push(tagentry[v]);	
 					}
