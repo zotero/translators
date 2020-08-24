@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-21 13:44:44"
+	"lastUpdated": "2020-08-21 17:30:16"
 }
 
 /*
@@ -34,210 +34,259 @@ function detectWeb(doc, url) {
 	else return false;
 }
 
-function getSearchResults(doc, checkOnly, extras) {
-	var articles = {};
-	var container = doc.getElementsByName('frmSearchResults')[0]
-		|| doc.getElementsByName('frmAbs')[0];
-	if (!container) {
-		Z.debug('Atypon: multiples container not found.');
-		return false;
-	}
-	var rows = container.getElementsByClassName('articleEntry'),
-		found = false,
-		doiLink = 'a[contains(@href, "/doi/abs/") or contains(@href, "/doi/abstract/") or '
-			+ 'contains(@href, "/doi/full/") or contains(@href, "/doi/book/")]';
-	for (var i = 0; i<rows.length; i++) {
-		var title = rows[i].getElementsByClassName('art_title')[0];
-		if (!title) continue;
-		title = ZU.trimInternal(title.textContent);
-		
-		var urlRow = rows[i];
-		var url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
-		
-		if (!url) {
-			// e.g. http://pubs.rsna.org/toc/radiographics/toc/33/7 shows links in adjacent div
-			urlRow = rows[i].nextElementSibling;
-			if (!urlRow || urlRow.classList.contains('articleEntry')) continue;
-			
-			url = ZU.xpathText(urlRow, '(.//' + doiLink + ')[1]/@href');
-		}
-		if (!url) continue;
-		
-		if (checkOnly) return true;
+function getSearchResults(doc) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "issue-item__title", " " ))]//a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
 		found = true;
-		
-		if (extras) {
-			extras[url] = { pdf: buildPdfUrl(url, urlRow) };
-		}
-		
-		articles[url] = title;
+		items[href] = title;
 	}
-	
-	if (!found){
-		Z.debug("Trying an alternate multiple format");
-		var rows = container.getElementsByClassName("item-details");
-		for (var i = 0; i<rows.length; i++) {
-			var title = ZU.xpathText(rows[i], './h3');
-			if (!title) continue;
-			title = ZU.trimInternal(title);
-			
-			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
-				+ doiLink + ')[1]/@href');
-			if (!url) continue;
-			
-			if (checkOnly) return true;
-			found = true;
-			
-			if (extras) {
-				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
-			}
-			
-			articles[url] = title;
-		}
-	}
-	
-	return found ? articles : false;
+	return found ? items : false;
 }
 
-// Keep this in line with target regexp
-var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
-
-function buildPdfUrl(url, root) {
-	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
-	
-	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
-	for (var i=0; i<pdfPaths.length; i++) {
-		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
-			return url.replace(replURLRegExp, pdfPaths[i]);
-		}
-	}
-	
-	Z.debug('PDF link not found.');
-	if (root.nodeType != 9 /*DOCUMENT_NODE*/) {
-		Z.debug('Available links:');
-		var links = root.getElementsByTagName('a');
-		if (!links.length) Z.debug('No links');
-		for (var i=0; i<links.length; i++) {
-			Z.debug(links[i].href);
-		}
-	}
-	
-	return false;
-}
+/*function invokeEMTranslator(doc) {
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, i) {
+		//scrape abstract from website instead of EM
+		let abstractFull = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
+		if (abstractFull) i.abstractNote = abstractFull;
+		i.complete();
+	});
+	translator.translate();
+}*/
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		var extras = {};
-		Zotero.selectItems(getSearchResults(doc, false, extras), function (items) {
+	if (detectWeb(doc, url) === "multiple") {
+		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
 			}
 			var articles = [];
-			for (var itemurl in items) {
-				articles.push({
-					url: itemurl.replace(/\?prev.+/, ""),
-					extras: extras[itemurl]
-				});
+			for (var i in items) {
+				articles.push(i);
 			}
-			
-			fetchArticles(articles);
+			ZU.processDocuments(articles, scrape);
 		});
+	} else
+		scrape(doc, url);
+}
 
-	} else {
-		scrape(doc, url, {pdf: buildPdfUrl(url, doc)});
+function scrape(doc, url) {
+	var risURL = "https://www.journals.uchicago.edu/action/downloadCitation";
+	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
+	if (!doi) {
+		doi = url.match(/10\.[^?#]+/)[0];
 	}
-}
+	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
+	//Z.debug(risURL)
 
-function fixCase(str, titleCase) {
-	if (str.toUpperCase() != str) return str;
-	
-	if (titleCase) {
-		return ZU.capitalizeTitle(str, true);
-	}
-	
-	return str.charAt(0) + str.substr(1).toLowerCase();
-}
-
-function fetchArticles(articles) {
-	if (!articles.length) return;
-	
-	var article = articles.shift();
-	ZU.processDocuments(article.url, function(doc, url) {
-		scrape(doc, url, article.extras);
-	},
-	function() {
-		if (articles.length) fetchArticles(articles);
-	});
-}
-
-function scrape(doc, url, extras) {
-	url = url.replace(/[?#].*/, "");
-	var doi = url.match(/10\.[^?#]+/)[0];
-	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = doc.getElementsByClassName('abstractSection')[0];
-	var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
-	Z.debug("Citation URL: " + citationurl);
-	ZU.processDocuments(citationurl, function(citationDoc){
-		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
-		Z.debug("Filename: " + filename);
-		var get = '/action/downloadCitation';
-		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
-		ZU.doPost(get, post, function (text) {
-			//Z.debug(text);
-			var translator = Zotero.loadTranslator("import");
-			// Calling the RIS translator
-			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
-			translator.setHandler("itemDone", function (obj, item) {
-				// Sometimes we get titles and authors in all caps
-				item.title = fixCase(item.title);
-				
-				for (var i=0; i<item.creators.length; i++) {
-					item.creators[i].lastName = fixCase(item.creators[i].lastName, true);
-					if (item.creators[i].firstName) {
-						item.creators[i].firstName = fixCase(item.creators[i].firstName, true);
-					}
-				}
-				
-				item.url = url;
-				item.notes = [];
-				//ubtue:scrape tags from dc.Subject and split
-				for (var i in tags){
+	ZU.doPost(risURL, post, function (text) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
+		translator.setHandler("itemDone", function (obj, item) {
+			Z.debug(text)
+			var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
+			for (var i in tags){
 					//let tags[0].content = tags[0].content.split(';'))
-					let tagentry = tags[i].content.split(/;/);
+					let tagentry = tags[i].content.split(/;/);// Z.debug(tagentry)
 					for (var v in tagentry) {
 						item.tags.push(tagentry[v]);	
 					}
 				}
-				
-				if (abstract) {
-					// Drop "Abstract" prefix
-					// This is not excellent, since some abstracts could
-					// conceivably begin with the word "abstract"
-					item.abstractNote = abstract.textContent
-						.replace(/^[^\w\d]*abstract\s*/i, '');
-				}
-				
-				item.attachments = [];
-				if (extras.pdf) {
-					item.attachments.push({
-						url: extras.pdf,
-						title: "Full Text PDF",
-						mimeType: "application/pdf"
-					});
-				}
-				
-				item.attachments.push({
-					document: doc,
-					title: "Snapshot",
-					mimeType: "text/html"
-				});
-				item.libraryCatalog = url.replace(/^https?:\/\/(?:www\.)?/, '')
-					.replace(/[\/:].*/, '') + " (Atypon)";
-				item.complete();
-			});
-			translator.translate();
+			// 
+			var abstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
+			if (item.abstractNote) item.abstractNote = abstract; // Z.debug(abstract)
+			item.complete();
 		});
+		translator.translate();
 	});
 }
 
+
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.journals.uchicago.edu/doi/10.1086/708235",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Between the Highland Polity and Philistia: The United Monarchy and the Resettlement of the Shephelah in the Iron Age IIA, with a Special Focus on Tel ʿEton and Khirbet Qeiyafa",
+				"creators": [
+					{
+						"lastName": "Faust",
+						"firstName": "Avraham",
+						"creatorType": "author"
+					}
+				],
+				"date": "März 20, 2020",
+				"DOI": "10.1086/708235",
+				"ISSN": "0003-097X",
+				"abstractNote": "The Shephelah, one of Judah’s 8th century b.c.e. settlement hubs, was sparsely settled during the Iron Age I, when only a small Canaanite enclave survived in its eastern part. The resettlement of the Shephelah, beginning during the Iron Age I–II transition and lasting over 200 years, was a complex process that had two different facets. The first, better-known facet is the gradual establishment of dozens of new sites, the vast majority of which had clear connections to the highlands polity (e.g., Lachish, Tel Zayit, Tel Burna). The second, less-discussed facet is the transformations experienced by the few settlements that existed in the region in the Iron Age I, most notably Tell Beit Mirsim, Beth-Shemesh, Tel ʿEton, and Tel Halif. After presenting background data, the article will offer a detailed reconstruction of the processes through which the Shephelah became part of the highland polity, with a special focus on Tel ʿEton and on the enigmatic, earlier, and short-lived site of Khirbet Qeiyafa. The paper will conclude with a detailed refutation of the recent suggestion that the small Iron Age I Canaanite enclave that existed in the eastern Shephelah developed into a large Iron Age IIA Canaanite polity.",
+				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"pages": "115-136",
+				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
+				"shortTitle": "Between the Highland Polity and Philistia",
+				"url": "https://doi.org/10.1086/708235",
+				"volume": "383",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": " 10th century"
+					},
+					{
+						"tag": " Israel"
+					},
+					{
+						"tag": " Judah"
+					},
+					{
+						"tag": " Khirbet Qeiyafa"
+					},
+					{
+						"tag": " Philistia"
+					},
+					{
+						"tag": " Tel ʿEton"
+					},
+					{
+						"tag": " United Monarchy"
+					},
+					{
+						"tag": "Shephelah"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1086/708235</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.journals.uchicago.edu/doi/10.1086/707494",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Color-Inlaid “Champlevé” Reliefs of the Synagogue at Sardis",
+				"creators": [
+					{
+						"lastName": "Rautman",
+						"firstName": "Marcus",
+						"creatorType": "author"
+					}
+				],
+				"date": "Januar 29, 2020",
+				"DOI": "10.1086/707494",
+				"ISSN": "0003-097X",
+				"abstractNote": "One of the notable features of the Sardis Synagogue was its extensive decoration with floor mosaics, wall paintings, marble revetment, and opus sectile, with an ornamental relief arcade also appearing in the forecourt. Reliefs carved in the distinctive “champlevé” technique presented a series of arches with spandrels featuring vases, vines, and birds set against a reddish ground. The sculptural approach is not well known in the region, although examples of similar work have been reported across Europe and the east Mediterranean, most notably at Aizanoi, Antioch, and Kourion. Other fragments of incised and color-inlaid relief at Sardis suggest that the Synagogue arcade was carved by sculptors who were both familiar with the site and aware of broader trends in architectural ornament in the 6th century c.e., *Remembering Gene Kleinbauer (1937–2019)—teacher, mentor, and friend",
+				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"pages": "97-113",
+				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
+				"url": "https://doi.org/10.1086/707494",
+				"volume": "383",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": " Sardis"
+					},
+					{
+						"tag": " ornament"
+					},
+					{
+						"tag": " synagogue"
+					},
+					{
+						"tag": "Champlevé relief sculpture"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1086/707494</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.journals.uchicago.edu/doi/10.1086/707583",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Chalkstone Vessels from Sepphoris: Galilean Production in Roman Times",
+				"creators": [
+					{
+						"lastName": "Sherman",
+						"firstName": "Maya",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Weiss",
+						"firstName": "Zeev",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zilberman",
+						"firstName": "Tami",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yasur",
+						"firstName": "Gal",
+						"creatorType": "author"
+					}
+				],
+				"date": "Februar 6, 2020",
+				"DOI": "10.1086/707583",
+				"ISSN": "0003-097X",
+				"abstractNote": "Stone vessels were used in Judaea and the Galilee from the second half of the 1st century b.c.e. until the 2nd century c.e., when it is widely accepted that they were phased out. This study focuses on the major types of chalkstone vessels uncovered in Roman Sepphoris, identifies the unique forms in the assemblage, and discusses the technological issues pertaining to their production. The findings presented in this study suggest that the stone vessels in the Galilee, unlike those in Judaea, did not disappear immediately but were found in layers associated with the Late Roman period (mid-2nd to 4th centuries), thus indicating their continual use. In tracing the sources of the chalkstone vessels, the geochemical analysis employed in this study shows that large numbers of vessels used by Sepphoreans were evidently produced in local quarries of the Lower Galilee.",
+				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"pages": "79-95",
+				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
+				"shortTitle": "Chalkstone Vessels from Sepphoris",
+				"url": "https://doi.org/10.1086/707583",
+				"volume": "383",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": " Galilean chalkstone vessels"
+					},
+					{
+						"tag": " Sepphoris"
+					},
+					{
+						"tag": " daily life"
+					},
+					{
+						"tag": " quarries"
+					},
+					{
+						"tag": "Chalkstone vessels"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1086/707583</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
