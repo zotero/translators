@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-18 08:13:52"
+	"lastUpdated": "2020-08-25 17:27:17"
 }
 
 /*
@@ -35,7 +35,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a');
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a | //a[contains(@href, "/article/view/") and not(contains(@href, "/pdf"))]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -55,6 +55,7 @@ function invokeEMTranslator(doc) {
 			let firstandlastpages = i.pages.split('–');
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2] ; // Z.debug(item.pages)
 		}
+		if (i.issue === "0") delete i.issue;
 		i.complete();
 	});
 	translator.translate();
