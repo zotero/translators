@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-02 14:35:03"
+	"lastUpdated": "2020-08-26 01:22:24"
 }
 
 /*
@@ -54,13 +54,12 @@ function doWeb(doc, url) {
 		// Clean and parse metadata web
 		resText = resText.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
 		resText = Zotero.Utilities.trim(resText);
-
 		let parser = new DOMParser();
 		let metadataDoc = parser.parseFromString(resText, "text/html");
 
 		// Start scraping
 		newItem.title = ZU.xpathText(metadataDoc, "//meta[@name='DC.Title']/@content");
-		
+
 		// Iterating through authors
 		let index = 0;
 		while (true) {
@@ -80,14 +79,26 @@ function doWeb(doc, url) {
 			}
 		}
 		newItem.reportNumber = "RFC " + ZU.xpathText(metadataDoc, "//meta[@name='DC.Identifier']/@content").split(":")[3];
+
 		newItem.institution = "IETF";
 		let abstractContent = ZU.xpathText(metadataDoc, "//meta[@name='DC.Description.Abstract']/@content");
 		newItem.abstractNote = abstractContent.replace(/\n/g, " ");
-		
-		let regexp_type = /\[([^\]]+)\]$/;
-		let reportType = abstractContent.match(regexp_type)[1];
-		
-		newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
+
+		try {
+			let regexp_type = /\[([^\]]+)\]$/;
+			let reportType = abstractContent.match(regexp_type)[1];
+			newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
+		} catch (error) {
+			let allContent = ZU.xpathText(metadataDoc, "//pre");
+
+			try {
+  				let regexp_type = /Category: (.+)  +[^\n]+?/;
+				newItem.reportType = allContent.match(regexp_type)[1];
+			} catch (cat_error) {
+				let regexp_type = /Category: (.+)\n/;
+				newItem.reportType = allContent.match(regexp_type)[1];
+			}
+		}
 		newItem.url = targetUri;
 		let tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
 		newItem.date = ZU.strToISO(tmpDate);
@@ -205,6 +216,72 @@ var testCases = [
 				"reportNumber": "RFC 2822",
 				"reportType": "Standards Track",
 				"url": "https://tools.ietf.org/html/rfc2822",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tools.ietf.org/html/rfc1951",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "DEFLATE Compressed Data Format Specification version 1.3",
+				"creators": [
+					{
+						"firstName": "L. Peter",
+						"lastName": "Deutsch",
+						"creatorType": "author"
+					}
+				],
+				"date": "1996-05",
+				"abstractNote": "This specification defines a lossless compressed data format that compresses data using a combination of the LZ77 algorithm and Huffman coding, with efficiency comparable to the best currently available general-purpose compression methods. This memo provides information for the Internet community. This memo does not specify an Internet standard of any kind.",
+				"institution": "IETF",
+				"libraryCatalog": "IETF",
+				"reportNumber": "RFC 1951",
+				"reportType": "Informational",
+				"url": "https://tools.ietf.org/html/rfc1951",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://tools.ietf.org/html/rfc7617",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "The 'Basic' HTTP Authentication Scheme",
+				"creators": [
+					{
+						"firstName": "Julian",
+						"lastName": "Reschke",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-09",
+				"abstractNote": "This document defines the \"Basic\" Hypertext Transfer Protocol (HTTP) authentication scheme, which transmits credentials as user-id/ password pairs, encoded using Base64.",
+				"institution": "IETF",
+				"libraryCatalog": "IETF",
+				"reportNumber": "RFC 7617",
+				"reportType": "Standards Track",
+				"url": "https://tools.ietf.org/html/rfc7617",
 				"attachments": [
 					{
 						"title": "Snapshot",
