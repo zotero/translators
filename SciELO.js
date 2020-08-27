@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-24 11:53:49"
+	"lastUpdated": "2020-08-27 15:39:38"
 }
 
 /*
@@ -74,31 +74,22 @@ function doWeb(doc, url) {
 	}
 }
 
-function postProcess(doc, item) {
-	// the author fields are repeated in the website's embedded metadata
-	// so, the duplicates need to be removed
-	item.creators = item.creators.reduce((unique, o) => {
-		if(!unique.some(obj => obj.firstName === o.firstName && obj.lastName === o.lastName && obj.creatorType === o.creatorType && obj.fieldMode === o.fieldMode)) {
-			unique.push(o);
-		}
-		return unique;
-	}, []);
 
-	var abstractParagraphs = ZU.xpath(doc, '//div[@class="abstract"]//p[not(@class="sec")] | //div[@class="trans-abstract"]//p[not(@class="sec")]');
-	if (abstractParagraphs && abstractParagraphs.length > 0) {
-		item.abstractNote = "";
-		for (var paragraph in abstractParagraphs) {
-			var node = abstractParagraphs[paragraph];
-			item.abstractNote += ZU.xpathText(node, ".") + "\n\n";
-		}
-	} else {
-		abstractParagraphs = ZU.xpath(doc, '//h4[contains(text(), "Abstract")]/following::p[not(@xmlns)] | /html/body/div/div[2]/div[2]/p[3]');
-		if (abstractParagraphs && abstractParagraphs.length > 0) item.abstractNote = abstractParagraphs[0].textContent;
-	}
-	var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
-	if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
-	if (keywords && keywords.length > 0) {
-		item.tags = keywords[0].textContent
+function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
+	var transAbstract = ZU.xpathText(doc, '//div[@class="trans-abstract"]');
+	var translator = Zotero.loadTranslator('web');
+	//use Embedded Metadata
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function(obj, item) {
+		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, "").replace(/[\n\t]/g, "");
+		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, ""),
+		});
+		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
+		if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
+		if (keywords && keywords.length > 0) {
+			item.tags = keywords[0].textContent
 						.trim()
 						.replace(/\n/g, "")
 						.replace(/keywords\s*:\s*/ig, "")
@@ -107,30 +98,7 @@ function postProcess(doc, item) {
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
 	}
 
-	if (item.date) {
-		let dateMatches = item.date.match(/(\d{2})\/(\d{4})/);
-		if (dateMatches && dateMatches[1] == "00") item.date = dateMatches[2];
-	}
-
-	var titleSpanMatch = ZU.xpathText(doc, '//span[@class="article-title"]//following-sibling::i//following-sibling::text()');
-	if (titleSpanMatch) titleSpanMatch = titleSpanMatch.match(/\d{4},\sn\.(\d+),\spp/);
-	if (titleSpanMatch) {
-		let volume = item.volume;
-		item.volume = item.issue;
-		item.issue = volume;
-	}
-
-	item.libraryCatalog = "SciELO";
-}
-
-
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	//use Embedded Metadata
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-	translator.setDocument(doc);
-	translator.setHandler('itemDone', function(obj, item) {
-		postProcess(doc, item);
+		item.libraryCatalog = "SciELO"
 		item.complete();
 	});
 	translator.translate();
@@ -299,6 +267,128 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Re-pensar el ex opere operato II: Per signa sensibilia significantur (SC 7). Quid enim?",
+				"creators": [
+					{
+						"firstName": "Gonzalo",
+						"lastName": "Guzmán",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gonzalo",
+						"lastName": "Guzmán",
+						"creatorType": "author"
+					}
+				],
+				"date": "12/2019",
+				"DOI": "10.4067/S0049-34492019000400457",
+				"ISSN": "0049-3449",
+				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.Palabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato",
+				"issue": "4",
+				"libraryCatalog": "SciELO",
+				"pages": "457-474",
+				"publicationTitle": "Teología y vida",
+				"shortTitle": "Re-pensar el ex opere operato II",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+				"volume": "60",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "abs:\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato\n"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Re-pensar el ex opere operato II: Per signa sensibilia significantur (SC 7). Quid enim?",
+				"creators": [
+					{
+						"firstName": "Gonzalo",
+						"lastName": "Guzmán",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gonzalo",
+						"lastName": "Guzmán",
+						"creatorType": "author"
+					}
+				],
+				"date": "12/2019",
+				"DOI": "10.4067/S0049-34492019000400457",
+				"ISSN": "0049-3449",
+				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.Palabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato",
+				"issue": "4",
+				"libraryCatalog": "SciELO",
+				"pages": "457-474",
+				"publicationTitle": "Teología y vida",
+				"shortTitle": "Re-pensar el ex opere operato II",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+				"volume": "60",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ex opere operato"
+					},
+					{
+						"tag": "Liturgy"
+					},
+					{
+						"tag": "Performative"
+					},
+					{
+						"tag": "Rituality"
+					},
+					{
+						"tag": "Sacraments"
+					},
+					{
+						"tag": "Semiotics"
+					},
+					{
+						"tag": "Symbolic language"
+					}
+				],
+				"notes": [
+					{
+						"note": "abs:\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato\n"
+					}
+				],
 				"seeAlso": []
 			}
 		]
