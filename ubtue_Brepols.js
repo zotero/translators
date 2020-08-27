@@ -81,9 +81,8 @@ function invokeEMTranslator(doc, url) {
 	translator.setHandler('itemDone', function (t, i) {
 		var rows = doc.querySelectorAll('.hlFld-Abstract');
 		for (let row of rows) {
-			var abstractsEntry = row.innerText//.replace('Abstract', '');
+			var abstractsEntry = row.innerText; //Z.debug(abstractsEntry)
 		}
-		Z.debug(abstractsEntry)
 		let abstractsOneTwo = abstractsEntry.split('\n\n'); //Z.debug(abstractsOneTwo)
 		if (i.abstractNote) i.abstractNote = abstractsOneTwo[1];
 		if (abstractsOneTwo[2]) {
@@ -95,7 +94,8 @@ function invokeEMTranslator(doc, url) {
 		i.complete();
 	});
 	translator.translate();
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
