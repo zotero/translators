@@ -35,12 +35,12 @@
 
 
 function detectWeb(doc, url) {
-    if (url.match(/\/issue\/[0-9]+\/[0-9]+/))
-        return "multiple";
-    else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
-        // placeholder, actual type determined by the embedded metadata translator
-        return "journalArticle";
-    }
+	if (url.match(/\/issue\/[0-9]+\/[0-9]+/))
+		return "multiple";
+	else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
+		// placeholder, actual type determined by the embedded metadata translator
+		return "journalArticle";
+	}
 }
 
 function getSearchResults(doc) {
@@ -72,17 +72,17 @@ function postProcess(doc, item) {
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
-    var translator = Zotero.loadTranslator("web");
-    translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-    translator.setDocument(doc);
-    translator.setHandler("itemDone", function (t, i) {
-        postProcess(doc, i);
-    });
-    translator.translate();
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, i) {
+		postProcess(doc, i);
+	});
+	translator.translate();
 }
 
 function doWeb(doc, url) {
-    if (detectWeb(doc, url) === "multiple") {
+	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) {
 				return true;
@@ -93,6 +93,6 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
 		});
-    } else
-        invokeEmbeddedMetadataTranslator(doc, url);
+	} else
+		invokeEmbeddedMetadataTranslator(doc, url);
 }
