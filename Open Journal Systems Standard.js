@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-25 17:27:17"
+	"lastUpdated": "2020-08-27 11:23:02"
 }
 
 /*
@@ -56,6 +56,7 @@ function invokeEMTranslator(doc) {
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2] ; // Z.debug(item.pages)
 		}
 		if (i.issue === "0") delete i.issue;
+		if (i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		i.complete();
 	});
 	translator.translate();
@@ -75,7 +76,8 @@ function doWeb(doc, url) {
 		});
 	} else
 		invokeEMTranslator(doc, url);
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -115,6 +117,41 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://www.zwingliana.ch/index.php/zwa/article/view/2516",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Geleitwort",
+				"creators": [
+					{
+						"firstName": "Christian",
+						"lastName": "Oesterheld",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018",
+				"ISSN": "0254-4407",
+				"language": "en",
+				"libraryCatalog": "www.zwingliana.ch",
+				"pages": "VII-IX",
+				"publicationTitle": "Zwingliana",
+				"rights": "Authors who are published in this journal agree to the following conditions:  a) The authors retain the copyright and allow the journal to print the first publication in print as well as to make it electronically available at the end of three years.  b) The author may allot distribution of their first version of the article with additional contracts for non-exclusive publications by naming the first publication in this Journal in said publication (i.e. publishing the article in a book or other publications).",
+				"url": "http://www.zwingliana.ch/index.php/zwa/article/view/2516",
+				"volume": "45",
+				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
