@@ -5,7 +5,7 @@
 	"target": "^https?://classiques-garnier\\.com",
 	"minVersion": "2.1",
 	"maxVersion": "",
-	"priority": 80,
+	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
@@ -29,7 +29,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/revue/) && getSearchResults(doc)) return "multiple";
+	if (url.match(/revue/)) return "journalArticle";
 }
 
 function getSearchResults(doc) {
