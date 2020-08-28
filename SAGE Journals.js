@@ -99,8 +99,8 @@ function scrape(doc, url) {
 		//dates are present.
 		//Z.debug(text);
 		if (text.includes("DA  - ")) {
-			text = text.replace(/Y1[ ]{2}- .*\r?\n/, '');
-		}
+			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
+		} // Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
