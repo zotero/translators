@@ -48,19 +48,6 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
-/*function invokeEMTranslator(doc) {
-	var translator = Zotero.loadTranslator("web");
-	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-	translator.setDocument(doc);
-	translator.setHandler("itemDone", function (t, i) {
-		//scrape abstract from website instead of EM
-		let abstractFull = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
-		if (abstractFull) i.abstractNote = abstractFull;
-		i.complete();
-	});
-	translator.translate();
-}*/
-
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
