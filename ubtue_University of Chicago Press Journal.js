@@ -78,7 +78,6 @@ function scrape(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			Z.debug(text)
 			var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
 			for (var i in tags){
 					//let tags[0].content = tags[0].content.split(';'))
