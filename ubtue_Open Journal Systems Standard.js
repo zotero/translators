@@ -29,7 +29,9 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+	if (url.match(/article/)) return "journalArticle";
+		else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+	else return false;
 }
 
 function getSearchResults(doc) {
