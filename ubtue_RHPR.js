@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-08-19 16:17:54"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
@@ -74,9 +74,11 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
 	} else {
-		invokeEMTranslator(doc, url);
-        }
-}/** BEGIN TEST CASES **/
+        invokeEMTranslator(doc, url);
+    }
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
