@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-14 09:16:25"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
@@ -90,14 +90,14 @@ function scrape(doc, url) {
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
-	//Z.debug(pdfurl);
-	//Z.debug(post);
+	// Z.debug(pdfurl);
+	// Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
-		//The publication date is saved in DA and the date first
-		//appeared online is in Y1. Thus, we want to prefer DA over T1
-		//and will therefore simply delete the later in cases both
-		//dates are present.
-		//Z.debug(text);
+		// The publication date is saved in DA and the date first
+		// appeared online is in Y1. Thus, we want to prefer DA over T1
+		// and will therefore simply delete the later in cases both
+		// dates are present.
+		// Z.debug(text);
 		if (text.includes("DA  - ")) {
 			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
 		} // Z.debug(text);
@@ -162,7 +162,7 @@ function scrape(doc, url) {
 					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
-			
+
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
@@ -175,6 +175,7 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

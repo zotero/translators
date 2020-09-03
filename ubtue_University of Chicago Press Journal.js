@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-21 17:30:16"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
@@ -30,7 +30,7 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/doi/')) return "journalArticle";
-		else if (url.includes('/toc/') && getSearchResults(doc)) return "multiple";
+	else if (url.includes('/toc/') && getSearchResults(doc)) return "multiple";
 	else return false;
 }
 
@@ -60,8 +60,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else
+	} else {
 		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {
@@ -71,7 +72,6 @@ function scrape(doc, url) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
-	//Z.debug(risURL)
 
 	ZU.doPost(risURL, post, function (text) {
 		var translator = Zotero.loadTranslator("import");
@@ -79,16 +79,14 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
-			for (var i in tags){
-					//let tags[0].content = tags[0].content.split(';'))
-					let tagentry = tags[i].content.split(/;/);// Z.debug(tagentry)
-					for (var v in tagentry) {
-						item.tags.push(tagentry[v]);	
-					}
+			for (var i in tags) {
+				let tagentry = tags[i].content.split(/;/);
+				for (var v in tagentry) {
+					item.tags.push(tagentry[v]);
 				}
-			// 
+			}
 			var abstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
-			if (item.abstractNote) item.abstractNote = abstract; // Z.debug(abstract)
+			if (item.abstractNote) item.abstractNote = abstract;
 			item.complete();
 		});
 		translator.translate();

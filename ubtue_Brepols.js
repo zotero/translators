@@ -9,14 +9,14 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-27 10:56:44"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2020 Universitätsbibliothek Tübingen.  All rights reserved.
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,11 +35,11 @@
 	***** END LICENSE BLOCK *****
 */
 // attr()/text() v2
-function attr(docOrElem ,selector ,attr ,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.textContent:null; }
+function attr(docOrElem, selector, attr, index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){ var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector); return elem?elem.textContent:null; }
 
 function detectWeb(doc, url) {
 	if (url.match(/doi/)) return "journalArticle";
-		else if (url.match(/toc/) && getSearchResults(doc, true)) return "multiple";
+	else if (url.match(/toc/) && getSearchResults(doc, true)) return "multiple";
 	else return false;
 }
 
@@ -70,8 +70,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
+	} else {
 		invokeEMTranslator(doc, url);
+	}
 }
 
 function invokeEMTranslator(doc, url) {
@@ -81,20 +82,21 @@ function invokeEMTranslator(doc, url) {
 	translator.setHandler('itemDone', function (t, i) {
 		var rows = doc.querySelectorAll('.hlFld-Abstract');
 		for (let row of rows) {
-			var abstractsEntry = row.innerText; //Z.debug(abstractsEntry)
+			var abstractsEntry = row.innerText;
 		}
-		let abstractsOneTwo = abstractsEntry.split('\n\n'); //Z.debug(abstractsOneTwo)
+		let abstractsOneTwo = abstractsEntry.split('\n\n');
 		if (i.abstractNote) i.abstractNote = abstractsOneTwo[1];
 		if (abstractsOneTwo[2]) {
 			i.notes.push({
 				note: "abs:" + abstractsOneTwo[2],
-		});
-	}
+			});
+		}
 		if (i.reportType === "book-review") i.tags.push('Book Review') && delete i.abstractNote;
 		i.complete();
 	});
 	translator.translate();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

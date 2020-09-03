@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-27 11:23:02"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
@@ -30,7 +30,7 @@
 
 function detectWeb(doc, url) {
 	if (url.match(/article/)) return "journalArticle";
-		else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+	else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
 	else return false;
 }
 
@@ -55,7 +55,7 @@ function invokeEMTranslator(doc) {
 	translator.setHandler("itemDone", function (t, i) {
 		if (i.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
 			let firstandlastpages = i.pages.split('–');
-			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2] ; // Z.debug(item.pages)
+			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
@@ -76,9 +76,11 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
+	} else {
 		invokeEMTranslator(doc, url);
+	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

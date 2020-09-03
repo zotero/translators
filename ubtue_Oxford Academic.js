@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-27 13:03:35"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
@@ -35,9 +35,9 @@
 
 
 function detectWeb(doc, url) {
-	if (url.match(/\/issue\/[0-9]+\/[0-9]+/))
+	if (url.match(/\/issue\/[0-9]+\/[0-9]+/)) {
 		return "multiple";
-	else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
+	} else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
@@ -46,8 +46,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, "//div[contains(@class, 'al-article-items')]/h5[contains(@class, 'item-title')]/a")
-	for (let i=0; i<rows.length; i++) {
+	var rows = ZU.xpath(doc, "//div[contains(@class, 'al-article-items')]/h5[contains(@class, 'item-title')]/a");
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -65,7 +65,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		// update abstract from the webpage as the embedded data is often incomplete
 		var abstractText = ZU.xpathText(doc, '//section[@class="abstract"]');
 		if (abstractText) i.abstractNote = abstractText;
-		var tagreview = ZU.xpathText(doc, '//*[(@id = "ContentTab")]//a')
+		var tagreview = ZU.xpathText(doc, '//*[(@id = "ContentTab")]//a');
 		if (tagreview.match(/Reviews|Book Reviews/i)) delete i.abstractNote;
 		if (tagreview.match(/Reviews|Book Reviews/i)) i.tags.push('Book Review');
 		i.complete();
@@ -85,8 +85,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
 		});
-	} else
+	} else {
 		invokeEmbeddedMetadataTranslator(doc, url);
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
