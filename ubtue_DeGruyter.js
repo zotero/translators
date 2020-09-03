@@ -70,7 +70,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		invokeEMTranslator(doc, url);
-    }
+	}
 }
 
 function invokeEMTranslator(doc) {

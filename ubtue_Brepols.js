@@ -72,7 +72,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		invokeEMTranslator(doc, url);
-    }
+	}
 }
 
 function invokeEMTranslator(doc, url) {
@@ -89,8 +89,8 @@ function invokeEMTranslator(doc, url) {
 		if (abstractsOneTwo[2]) {
 			i.notes.push({
 				note: "abs:" + abstractsOneTwo[2],
-            });
-        }
+			});
+		}
 		if (i.reportType === "book-review") i.tags.push('Book Review') && delete i.abstractNote;
 		i.complete();
 	});

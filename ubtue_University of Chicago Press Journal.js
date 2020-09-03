@@ -60,7 +60,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else scrape(doc, url);
+	} else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {

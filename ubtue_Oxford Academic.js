@@ -37,7 +37,7 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/issue\/[0-9]+\/[0-9]+/)) {
 		return "multiple";
-        } else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
+	} else if (url.match(/\/article\/[0-9]+\/[0-9]+/)) {
 		// placeholder, actual type determined by the embedded metadata translator
 		return "journalArticle";
 	}
@@ -87,7 +87,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		invokeEmbeddedMetadataTranslator(doc, url);
-    }
+	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [

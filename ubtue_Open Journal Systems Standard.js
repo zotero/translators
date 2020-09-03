@@ -78,7 +78,7 @@ function doWeb(doc, url) {
 		});
 	} else {
 		invokeEMTranslator(doc, url);
-    }
+	}
 }
 
 /** BEGIN TEST CASES **/
