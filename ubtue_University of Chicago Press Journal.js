@@ -80,15 +80,13 @@ function scrape(doc, url) {
 		translator.setHandler("itemDone", function (obj, item) {
 			var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
 			for (var i in tags){
-					//let tags[0].content = tags[0].content.split(';'))
-					let tagentry = tags[i].content.split(/;/);// Z.debug(tagentry)
-					for (var v in tagentry) {
-						item.tags.push(tagentry[v]);	
-					}
+				let tagentry = tags[i].content.split(/;/);
+				for (var v in tagentry) {
+					item.tags.push(tagentry[v]);
 				}
-			// 
+			}
 			var abstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
-			if (item.abstractNote) item.abstractNote = abstract; // Z.debug(abstract)
+			if (item.abstractNote) item.abstractNote = abstract;
 			item.complete();
 		});
 		translator.translate();
