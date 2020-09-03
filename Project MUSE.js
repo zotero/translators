@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-26 19:38:19"
+	"lastUpdated": "2020-08-19 12:58:10"
 }
 
 /*
@@ -95,8 +95,7 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "")
-				.trim();
+			item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "").replace(/,\sAbstract:?,?,?/, "").trim();
 		}
 		if (tags) {
 			item.tags = tags.split(",");
@@ -253,6 +252,44 @@ var testCases = [
 				"publicationTitle": "Latin American Research Review",
 				"url": "https://muse.jhu.edu/article/551992",
 				"volume": "49",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/article/762340",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "American Judaism and the Second Vatican Council: The Response of the American Jewish Committee to Nostra Aetate",
+				"creators": [
+					{
+						"firstName": "Magdalena",
+						"lastName": "Dziaczkowska",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-08-15",
+				"DOI": "10.1353/cht.2020.0018",
+				"ISSN": "1947-8224",
+				"abstractNote": "During the Second Vatican Council, American Jewish community members impacted the drafting of the declaration on the Catholic Church's attitude toward Jews and Judaism. This article explores the American Jewish Committee's reactions to the drafting and promulgation of the Declaration on the Relation of the Church with Non-Christian Religions (Nostra Aetate) and its contribution to establishing interfaith relations. The varied Jewish reactions to the declaration provide insight into the internal Jewish discussions regarding Nostra Aetate, revealing that even though the declaration is assessed positively today, initial Jewish reactions were not enthusiastic.",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "Project MUSE",
+				"pages": "25-47",
+				"publicationTitle": "U.S. Catholic Historian",
+				"shortTitle": "American Judaism and the Second Vatican Council",
+				"url": "https://muse.jhu.edu/article/762340",
+				"volume": "38",
 				"attachments": [
 					{
 						"title": "Full Text PDF",

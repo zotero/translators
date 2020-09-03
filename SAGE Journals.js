@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-23 11:43:53"
+	"lastUpdated": "2020-08-14 09:16:25"
 }
 
 /*
@@ -80,16 +80,6 @@ function doWeb(doc, url) {
 	}
 }
 
-function postProcess(doc, item) {
-	// remove partial DOIs stored in the pages field of online-first articles
-	if (item.DOI) {
-		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
-		if (doiMatches) {
-			var secondPart = doiMatches[2];
-			if (item.pages === secondPart) item.pages = "";
-		}
-	}
-}
 
 function scrape(doc, url) {
 	var risURL = "//journals.sagepub.com/action/downloadCitation";
@@ -100,7 +90,6 @@ function scrape(doc, url) {
 	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
 	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
-	
 	//Z.debug(pdfurl);
 	//Z.debug(post);
 	ZU.doPost(risURL, post, function (text) {
@@ -109,9 +98,9 @@ function scrape(doc, url) {
 		//and will therefore simply delete the later in cases both
 		//dates are present.
 		//Z.debug(text);
-		if (text.indexOf("DA  - ") > -1) {
-			text = text.replace(/Y1 - .*\r?\n/, '');
-		}
+		if (text.includes("DA  - ")) {
+			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
+		} // Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -131,17 +120,19 @@ function scrape(doc, url) {
 			// therefore we extract the abstract again from the website.
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
-				item.abstractNote = abstract;
+				item.abstractNote = abstract.trim();
 			}
 
-			// ubtue: also add translated abstracts
-			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-			if (ubtueabstract) {
-				item.abstractNote += "\n\n" + ubtueabstract;
+			// ubtue: also add translated abstracts in 520
+			var translatedAbstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			if (translatedAbstract) {
+				item.notes.push({
+					note: "abs:" + translatedAbstract,
+				});
 			}
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
-			if (tags) {
+			if (tagentry) {
 				item.tags = tagentry.split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
@@ -171,10 +162,7 @@ function scrape(doc, url) {
 					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
-
-			if (articleType && articleType.length > 0) {
-				if (articleType[0].textContent.trim().match(/Book Review/)) item.tags.push("Book Review");
-			}
+			
 			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
@@ -182,13 +170,11 @@ function scrape(doc, url) {
 				title: "SAGE PDF Full Text",
 				mimeType: "application/pdf"
 			});
-			postProcess(doc, item);
 			item.complete();
 		});
 		translator.translate();
 	});
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
