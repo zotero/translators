@@ -30,7 +30,7 @@ function detectWeb(doc, _url) {
 			productClass = attr(doc, 'input[name="storeID"]', 'value');
 		}
 		if (!productClass) {
-			Z.debug("No store ID found; looking for special stores")
+			Z.debug("No store ID found; looking for special stores");
 			if (doc.getElementById('dmusic_buybox_container')) {
 				productClass = 'music';
 			}
@@ -347,7 +347,7 @@ function scrape(doc, url) {
 		// New design encountered 08/31/2020
 		els = doc.querySelectorAll('ul.detail-bullet-list li');
 		for (let el of els) {
-			let key = text(el, '.a-list-item span:first-child')
+			let key = text(el, '.a-list-item span:first-child');
 			let value = text(el, '.a-list-item span:nth-child(2)');
 			if (key && value) {
 				key = key.replace(/\s*:\s*$/, "");
