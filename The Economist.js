@@ -13,19 +13,19 @@
 }
 
 function detectWeb(doc, url) {
-	var m = url.match(/^https?:\/\/[^\/]+\/[^\/]*\/[^\/]*\/\d+/);
+	var m = url.match(/^https?:\/\/[^/]+\/[^/]*\/[^/]*\/\d+/);
 	//Z.debug(m)
 	if (url.includes('/node/') || m) {
 		return "magazineArticle";
-	} else if (getSearchResults(doc, url, true)) {
+	}
+	if (getSearchResults(doc, url, true)) {
 		return "multiple";
-	} 
-
+	}
+	return false;
 }
 
 function scrape(doc, url) {
-
-	newItem = new Zotero.Item("magazineArticle");
+	var newItem = new Zotero.Item("magazineArticle");
 	newItem.ISSN = "0013-0613";
 	newItem.url = url;
 	newItem.publicationTitle = "The Economist";
@@ -66,9 +66,9 @@ function getSearchResults(doc, url, checkOnly) {
 	else {
 		rows = doc.querySelectorAll('a.headline-link');
 	}
-	for (var i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
-		let [subhead, head] = rows[i].innerText.split(/\n/)
+		let [subhead, head] = rows[i].innerText.split(/\n/);
 		let title = ZU.trimInternal(subhead);
 		if (head) {
 			title = ZU.trimInternal(head) + ' — ' + title;
@@ -86,7 +86,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, url, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -94,7 +94,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
