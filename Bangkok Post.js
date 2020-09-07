@@ -35,7 +35,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-
+function detectWeb(doc, url) {
+	return 'newspaperArticle';
+}
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
