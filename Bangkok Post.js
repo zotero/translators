@@ -37,7 +37,7 @@
 
 
 function doWeb(doc, url) {
-		scrape(doc, url);
+	scrape(doc, url);
 }
 function getMetaTag(doc,attr, value, contentattr) {
 	const tag = Array.from(doc.getElementsByTagName("meta")).filter(m => m.attributes[attr] && m.attributes[attr].value==value)[0]; 
@@ -46,7 +46,7 @@ function getMetaTag(doc,attr, value, contentattr) {
 	}
 }
 function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
+	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
@@ -58,13 +58,14 @@ function scrape(doc, url) {
 		//date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
 		if (authorName) {
 			item.creators= [ZU.cleanAuthor(authorName, "author",false)];
-			item.publicationTitle = "Bangkok Post"
 		}
 
 		const date = getMetaTag(doc,"name","cXenseParse:recs:publishtime","content")
 		if (date) {
 			item.date = date.substr(0,10)
 		}
+		
+		item.publicationTitle = "Bangkok Post"
 		
 		
 		item.complete();
