@@ -2,8 +2,6 @@
 
 const path = require('path');
 const process = require('process');
-const { exec } = require('child_process');
-const fs = require('fs').promises;
 const selenium = require('selenium-webdriver');
 const until = require('selenium-webdriver/lib/until');
 const chalk = require('chalk');
@@ -14,19 +12,7 @@ const chromeExtensionDir = path.join(__dirname, 'connectors', 'build', 'chrome')
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 
 async function getTranslatorsToTest() {
-	const translatorFilenames = await new Promise((resolve, reject) => {
-		// A bit of a complicated bash script based on https://stackoverflow.com/a/12185115/3199106
-		// retrieves the diff of translator files between the `master` commit at which the PR branch was started
-		// and PR `HEAD`
-		exec('git diff $(git rev-list "$(git rev-list --first-parent ^HEAD master | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$"',
-				(err, stdout) => {
-			if (err) {
-				console.log(chalk.red("Failed to get the list of translators to test"));
-				reject(err);
-			}
-			resolve(stdout.split('\n').filter(str => str.length));
-		})
-	});
+	const translatorFilenames = process.argv[2].split('\n');
 	let changedTranslatorIDs = [];
 	let toTestTranslatorIDs = new Set();
 	let toTestTranslatorNames = new Set();
