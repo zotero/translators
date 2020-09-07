@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-06-24 13:14:31"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -196,6 +196,7 @@ function complementItem(doc, item) {
 			item.abstractNote = abs.trim();
 		}
 		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+		if (item.abstractNote === null) item.abstractNote = '';
 	}
 
 	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
@@ -246,12 +247,12 @@ function scrape(doc, url) {
 			});
 
 			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
-			else
-				item.complete();
+			else item.complete();
 		});
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
