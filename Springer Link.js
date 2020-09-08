@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-10-19 17:03:34"
+	"lastUpdated": "2020-09-08 02:04:42"
 }
 
 function detectWeb(doc, url) {
@@ -57,6 +57,10 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//div[@class="toc"]/ol//li[contains(@class,"toc-item")]/p[@class="title"]/a');
 	}
+	// https://link.springer.com/journal/10344/volumes-and-issues/66-5
+	if (!results.length) {
+		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
+	}
 	return results;
 }
 
@@ -69,7 +73,7 @@ function doWeb(doc, url) {
 			items[list[i].href] = list[i].textContent;
 		}
 		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return true;
+			if (!selectedItems) return;
 			for (let i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
@@ -467,23 +471,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": " Analytical solutions "
-					},
-					{
-						"tag": " Elastic storage "
-					},
-					{
-						"tag": " Submarine outlet-capping "
-					},
-					{
-						"tag": " Tidal loading efficiency "
-					},
-					{
-						"tag": "Coastal aquifers "
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -562,6 +550,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
