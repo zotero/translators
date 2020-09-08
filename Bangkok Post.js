@@ -2,14 +2,14 @@
 	"translatorID": "7f74d823-d2ba-481c-b717-8b12c90ed874",
 	"label": "Bangkok Post",
 	"creator": "Matt Mayer",
-	"target": "https://www.bangkokpost.com/.*",
+	"target": "^https://www.bangkokpost.com/[a-z0-9-]+/([a-z0-9-]+/)?[0-9]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-07 19:12:01"
+	"lastUpdated": "2020-09-08 07:45:28"
 }
 
 /*
@@ -34,20 +34,21 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-function detectWeb(doc, url) {
+function detectWeb(_doc, _url) {
 	return 'newspaperArticle';
 }
+
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
-function getMetaTag(doc,attr, value, contentattr) {
-	const tag = Array.from(doc.getElementsByTagName("meta")).filter(m => m.attributes[attr] && m.attributes[attr].value==value)[0]; 
+function getMetaTag(doc, attr, value, contentattr) {
+	const tag = Array.from(doc.getElementsByTagName("meta")).filter(m => m.attributes[attr] && m.attributes[attr].value == value)[0];
 	if (tag && tag.attributes[contentattr]) {
 		return tag.attributes[contentattr].value;
 	}
+	return null;
 }
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	const translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -55,30 +56,24 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		// Add data for fields that are not covered by Embedded Metadata
-		//author name is stored as firstname lastname
-		const authorName=getMetaTag(doc,"property","cXenseParse:author","content")
-		//date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
+		// Author name is stored as firstname lastname
+		const authorName = getMetaTag(doc, "property", "cXenseParse:author", "content");
 		if (authorName) {
-			item.creators= [ZU.cleanAuthor(authorName, "author",false)];
+			item.creators = [ZU.cleanAuthor(authorName, "author", false)];
 		}
-
-		const date = getMetaTag(doc,"name","cXenseParse:recs:publishtime","content")
+		// Date is stored as a timestamp like 2020-09-07T17:37:00+07:00, just extract the YYYY-MM-DD at start
+		const date = getMetaTag(doc, "name", "cXenseParse:recs:publishtime", "content");
 		if (date) {
-			item.date = date.substr(0,10)
+			item.date = date.substr(0, 10);
 		}
 		
-		item.publicationTitle = "Bangkok Post"
-		
+		item.publicationTitle = "Bangkok Post";
+		item.itemType = "newspaperArticle";
 		
 		item.complete();
 	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = "newspaperArticle";
-		trans.doWeb(doc, url);
-	});
-}
-/** BEGIN TEST CASES **/
+	translator.translate();
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -164,6 +159,50 @@ var testCases = [
 					},
 					{
 						"tag": "satellite"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bangkokpost.com/opinion/opinion/1981587/tech-is-key-to-rebooting-tourism",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Tech is key to rebooting tourism",
+				"creators": [
+					{
+						"firstName": "Jeff",
+						"lastName": "Paine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-09-08",
+				"abstractNote": "Southeast Asia relies heavily on tourism. In 2019, the travel and tourism industry contributed 12.1% of the region's GDP and approximately one in 10 people are employed within and around it, according to the World Travel and Tourism Council (WTTC).",
+				"libraryCatalog": "www.bangkokpost.com",
+				"publicationTitle": "Bangkok Post",
+				"url": "https://www.bangkokpost.com/opinion/opinion/1981587/tech-is-key-to-rebooting-tourism",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "domestic tourism"
+					},
+					{
+						"tag": "industry"
+					},
+					{
+						"tag": "tourism"
+					},
+					{
+						"tag": "tourism industry"
 					}
 				],
 				"notes": [],
