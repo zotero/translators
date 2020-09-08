@@ -5,7 +5,7 @@
 	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 110,
+	"priority": 90,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
@@ -42,7 +42,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
+	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.') || url.includes('/doi/10.')) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -54,7 +54,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+	var rows = ZU.xpath(doc, '(//div|//span)[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -111,14 +111,14 @@ function postProcess(doc, item) {
 
 function scrapedAdditions(item, doc, doi) {
 	var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-		if (abstract) {
-			item.abstractNote = abstract;
+	if (abstract) {
+		item.abstractNote = abstract;
 	}
 
 	// ubtue: also add translated abstracts
 	var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 	if (ubtueabstract) {
-		 item.abstractNote += "\n\n" + ubtueabstract;
+        item.abstractNote += "\n\n" + ubtueabstract;
 	}
 
 	var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
