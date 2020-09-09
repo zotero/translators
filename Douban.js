@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-10 06:35:30"
+	"lastUpdated": "2020-09-09 12:48:15"
 }
 
 /*
@@ -376,6 +376,18 @@ function scrape(doc, url) {
 			if (!abstractNote) {
 				abstractNote = text(doc, 'div.indent div.intro');
 			}
+			
+			var doubanDir = Z.getHiddenPref('douban');
+			if (doubanDir && doubanDir.split(',').includes('dir')) {
+				let id = getIDFromURL(url);
+				let dir = text(doc, '#dir_' + id + '_full');
+				if (dir) {
+					dir = dir.replace(/(([\xA0\s]*)\n([\xA0\s]*))+/g, '<br>').replace('· · · · · ·     (收起)', '');
+					item.notes.push({
+						note: '<p><strong>目录</strong></p>\n<p>' + dir + '</p>'
+					});
+				}
+			}
 			break;
 		default:
 			abstractNote = text(doc, 'div.related-info span[class*="all"]');
@@ -391,14 +403,23 @@ function scrape(doc, url) {
 	// 标签
 	// 豆瓣标签存在太多冗余(较理想方案是以图书在中图法中的分类作为标签)
 	// 保留原作者(Ace Strong<acestrong@gmail.com>)对标签抓取，有需要可以自行去掉注释
-	// var tags = text(doc,'div#db-tags-section div.indent');
-	// if (tags) {
-	// 	tags = tags.replace(/((\s*)\n(\s*))+/g, '\n');
-	// 	for (var tag of tags.split('\n')) {
-	// 		if (!tag || tag.trim().length <= 0) continue;
-	// 		item.tags.push(tag);
-	// 	}
-	// }
+	var doubanTags = Z.getHiddenPref('douban');
+	if (doubanTags && doubanTags.split(',').includes('tags')) {
+		var tags = text(doc,'div#db-tags-section div.indent');
+		if (tags) {
+			tags = tags.replace(/((\s*)\n(\s*))+/g, '\n');
+			for (var tag of tags.split('\n')) {
+				if (!tag || tag.trim().length <= 0) continue;
+				item.tags.push(tag);
+			}
+		}
+	}
+	
+	// 中图clc作为标签，需要安装油猴插件：https://greasyfork.org/zh-CN/scripts/408682
+	var clc = text(doc, '#clc');
+	if (clc) {
+		item.archiveLocation = clc;
+	}
 
 	// 评分 & 评价人数
 	var rating = text(doc, 'strong[property*="v:average"]');
@@ -411,6 +432,15 @@ function scrape(doc, url) {
 	}
 
 	item.complete();
+}
+
+function getIDFromURL(url) {
+	if (!url) return '';
+	
+	var id = url.match(/subject\/.*\//g);
+	if (!id) return '';
+	
+	return id[0].replace(/subject|\//g, '');
 }
 
 /** BEGIN TEST CASES **/
