@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-15 13:42:52"
+	"lastUpdated": "2020-09-09 12:48:15"
 }
 
 /*
@@ -156,7 +156,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')).match(/\d+/);
+			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/top')) {
@@ -166,7 +166,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'div.bd div.star span.rating_num');
 		}, (row) => {
-			return (text(row, 'div.bd div.star span.rating_num+span+span')).match(/\d+/);
+			return (text(row, 'div.bd div.star span.rating_num+span+span')||'').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/typerank')) {
@@ -176,7 +176,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_num');
 		}, (row) => {
-			return (text(row, 'span.rating_num+span')).match(/\d+/);
+			return (text(row, 'span.rating_num+span')||'').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/tag')) {
@@ -195,7 +195,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')).match(/\d+/);
+			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
 		}, (row) => {
 			let source = text(row, 'div.source');
 			return source.includes('豆瓣读书') || source.includes('豆瓣电影');
@@ -209,7 +209,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')).match(/\d+/);
+			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
 		});
 	}
 	return items;
@@ -251,7 +251,6 @@ function scrape(doc, url) {
 
 		let key = section.substr(0, index).trim();
 		let value = section.substr(index + 1).trim();
-		// Z.debug(key + ':' + value);
 		switch (key) {
 			// book
 			case "作者":
@@ -377,6 +376,18 @@ function scrape(doc, url) {
 			if (!abstractNote) {
 				abstractNote = text(doc, 'div.indent div.intro');
 			}
+			
+			var doubanDir = Z.getHiddenPref('douban');
+			if (doubanDir && doubanDir.split(',').includes('dir')) {
+				let id = getIDFromURL(url);
+				let dir = text(doc, '#dir_' + id + '_full');
+				if (dir) {
+					dir = dir.replace(/(([\xA0\s]*)\n([\xA0\s]*))+/g, '<br>').replace('· · · · · ·     (收起)', '');
+					item.notes.push({
+						note: '<p><strong>目录</strong></p>\n<p>' + dir + '</p>'
+					});
+				}
+			}
 			break;
 		default:
 			abstractNote = text(doc, 'div.related-info span[class*="all"]');
@@ -392,19 +403,22 @@ function scrape(doc, url) {
 	// 标签
 	// 豆瓣标签存在太多冗余(较理想方案是以图书在中图法中的分类作为标签)
 	// 保留原作者(Ace Strong<acestrong@gmail.com>)对标签抓取，有需要可以自行去掉注释
-	var tags = text(doc,'div#db-tags-section div.indent');
-	if (tags) {
-		tags = tags.replace(/((\s*)\n(\s*))+/g, '\n');
-		for (var tag of tags.split('\n')) {
-			if (!tag || tag.trim().length <= 0) continue;
-			item.tags.push(tag);
+	var doubanTags = Z.getHiddenPref('douban');
+	if (doubanTags && doubanTags.split(',').includes('tags')) {
+		var tags = text(doc,'div#db-tags-section div.indent');
+		if (tags) {
+			tags = tags.replace(/((\s*)\n(\s*))+/g, '\n');
+			for (var tag of tags.split('\n')) {
+				if (!tag || tag.trim().length <= 0) continue;
+				item.tags.push(tag);
+			}
 		}
 	}
 	
 	// 中图clc作为标签，需要安装油猴插件：https://greasyfork.org/zh-CN/scripts/408682
 	var clc = text(doc, '#clc');
 	if (clc) {
-		doTag(item, clc);
+		item.archiveLocation = clc;
 	}
 
 	// 评分 & 评价人数
@@ -418,6 +432,15 @@ function scrape(doc, url) {
 	}
 
 	item.complete();
+}
+
+function getIDFromURL(url) {
+	if (!url) return '';
+	
+	var id = url.match(/subject\/.*\//g);
+	if (!id) return '';
+	
+	return id[0].replace(/subject|\//g, '');
 }
 
 /** BEGIN TEST CASES **/
