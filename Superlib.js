@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-15 13:23:58"
+	"lastUpdated": "2020-09-09 12:51:59"
 }
 
 /*
@@ -221,6 +221,9 @@ function scrape(doc, url, pdfurl) {
 						break;
 					case "【形态项】":
 						item.numPages = value;
+						break;
+					case "【中图法分类号】":
+						item.archiveLocation = value;
 						break;
 						
 					default:
