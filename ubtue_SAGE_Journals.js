@@ -1,15 +1,15 @@
 {
 	"translatorID": "4ff2bcd8-968c-49bd-94d2-e99c41aeb842",
 	"label": "SAGE Journals UBTue",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher, Johannes Riedl",
 	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 90,
+	"priority": 110,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 18:09:17"
+	"lastUpdated": "2020-09-09 08:28:17"
 }
 
 /*
@@ -112,7 +112,7 @@ function postProcess(doc, item) {
 function scrapedAdditions(item, doc, doi) {
 	var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 	if (abstract) {
-		item.abstractNote = abstract;
+        item.abstractNote = abstract;
 	}
 
 	// ubtue: also add translated abstracts
