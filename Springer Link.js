@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2020-09-09 15:15:00"
 }
 
 function detectWeb(doc, url) {
@@ -199,7 +199,8 @@ function complementItem(doc, item) {
 		if (item.abstractNote === null) item.abstractNote = '';
 	}
 
-	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span | \
+               //li[@class="c-article-subject-list__subject"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
