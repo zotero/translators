@@ -35,38 +35,38 @@
 */
 
 
-/* Clade class. */
-var CladeClass = function() {
-
-	/* Map MARC responsibility roles to Zotero creator types.
-		See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
-	*/
+/* Clade class.
+	Map MARC responsibility roles to Zotero creator types.
+	See http://archive.ifla.org/VI/3/p1996-1/appx-c.htm.
+*/
+var CladeClass = function () {
 	function getCreatorType(aut) {
-		if(aut['4'] == undefined) {
+		if (aut['4'] == undefined) {
 			return "contributor";
 		}
+
 
 		var typeAut = aut['4'].trim();
 		switch (typeAut) {
 			case "005":
 			case "250":
 			case "275":
-			case "590": //performer
-			case "755": //vocalist
+			case "590": // performer
+			case "755": // vocalist
 				return "performer";
 			case "040":
-			case "130": //book designer
-			case "740": //type designer
-			case "750": //typographer
-			case "350": //engraver
-			case "360": //etcher
-			case "430": //illuminator
-			case "440": //illustrator
-			case "510": //lithographer
-			case "530": //metal engraver
-			case "600": //photographer
-			case "705": //sculptor
-			case "760": //wood engraver
+			case "130": // book designer
+			case "740": // type designer
+			case "750": // typographer
+			case "350": // engraver
+			case "360": // etcher
+			case "430": // illuminator
+			case "440": // illustrator
+			case "510": // lithographer
+			case "530": // metal engraver
+			case "600": // photographer
+			case "705": // sculptor
+			case "760": // wood engraver
 				return "artist";
 			case "070":
 			case "305":
@@ -87,20 +87,20 @@ var CladeClass = function() {
 			case "245":
 				return "inventor";
 			case "255":
-			case "695": //scientific advisor
-			case "727": //thesis advisor
+			case "695": // scientific advisor
+			case "727": // thesis advisor
 				return "counsel";
 			case "300":
 				return "director";
-			case "400": //funder
-			case "723": //sponsor
+			case "400": // funder
+			case "723": // sponsor
 				return "sponsor";
 			case "460":
 				return "interviewee";
 			case "470":
 				return "interviewer";
-			case "480": //librettist
-			case "520": //lyricist
+			case "480": // librettist
+			case "520": // lyricist
 				return "wordsBy";
 			case "605":
 				return "presenter";
@@ -110,54 +110,57 @@ var CladeClass = function() {
 				return "programmer";
 			case "660":
 				return "recipient";
-			case "090": //author of dialog
-			case "690": //scenarist
+			case "090": // author of dialog
+			case "690": // scenarist
 				return "scriptwriter";
 			case "730":
 				return "translator";
-				//Ignore (no matching Zotero creatorType):
-			case "320": //donor
-			case "610": //printer
-			case "650": //publisher
+				// Ignore (no matching Zotero creatorType):
+			case "320": // donor
+			case "610": // printer
+			case "650": // publisher
 				return undefined;
-				//Default
+				// Default
 			case "205":
 			default:
 				return "contributor";
 		}
-	};
+	}
 
 	/* Fix creators (MARC translator is not perfect). */
 	function getCreators(record, item) {
-		//Clear creators
-		item.creators = new Array();
+		var type, authorTag, i;
+
+		// Clear creators
+		item.creators = [];
 		// Extract creators (700, 701 & 702)
-		for (var i = 700; i < 703; i++) {
-			var authorTag = record.getFieldSubfields(i);
+		for (i = 700; i < 703; i++) {
+			authorTag = record.getFieldSubfields(i);
 			for (var j in authorTag) {
 				var aut = authorTag[j];
 				var authorText = "";
 				if (aut.b) {
-					authorText = aut['a'] + ", " + aut['b'];
-				} else {
-					authorText = aut['a'];
+					authorText = aut.a + ", " + aut.b;
 				}
-				var type = getCreatorType(aut);
+				else {
+					authorText = aut.a;
+				}
+				type = getCreatorType(aut);
 				if (type) {
-
 					item.creators.push(Zotero.Utilities.cleanAuthor(authorText, type, true));
 				}
 			}
 		}
+
 		// Extract corporate creators (710, 711 & 712)
-		for (var i = 710; i < 713; i++) {
-			var authorTag = record.getFieldSubfields(i);
-			for (var j in authorTag) {
-				if (authorTag[j]['a']) {
-					var type = getCreatorType(authorTag[j]);
+		for (i = 710; i < 713; i++) {
+			authorTag = record.getFieldSubfields(i);
+			for (var k in authorTag) {
+				if (authorTag[k].a) {
+					type = getCreatorType(authorTag[k]);
 					if (type) {
 						item.creators.push({
-							lastName: authorTag[j]['a'],
+							lastName: authorTag[k].a,
 							creatorType: type,
 							fieldMode: true
 						});
@@ -165,9 +168,9 @@ var CladeClass = function() {
 				}
 			}
 		}
-	};
+	}
 
-	//Add tag, if not present yet
+	// Add tag, if not present yet
 	function addTag(item, tag) {
 		for (var t in item.tags) {
 			if (item.tags[t] == tag) {
@@ -175,15 +178,17 @@ var CladeClass = function() {
 			}
 		}
 		item.tags.push(tag);
-	};
+	}
 
-	//Tagging
+	// Tagging
 	function getTags(record, item) {
 		var pTag = record.getFieldSubfields("600");
+		var tagText, person, j;
+
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				if (person.b) {
 					tagText += ", " + person.b;
@@ -197,47 +202,52 @@ var CladeClass = function() {
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("601");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("605");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("606");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("607");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("602");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				if (person.f) {
 					tagText += " (" + person.f + ")";
@@ -245,11 +255,12 @@ var CladeClass = function() {
 				addTag(item, tagText);
 			}
 		}
+
 		pTag = record.getFieldSubfields("604");
 		if (pTag) {
-			for (var j in pTag) {
-				var tagText = false;
-				var person = pTag[j];
+			for (j in pTag) {
+				tagText = false;
+				person = pTag[j];
 				tagText = person.a;
 				if (person.b) {
 					tagText += ", " + person.b;
@@ -263,9 +274,9 @@ var CladeClass = function() {
 				addTag(item, tagText);
 			}
 		}
-	};
+	}
 
-	//Get series (repeatable)
+	// Get series (repeatable)
 	function getSeries(record, item) {
 		var seriesText = false;
 		var seriesTag = record.getFieldSubfields("225");
@@ -274,7 +285,8 @@ var CladeClass = function() {
 				var series = seriesTag[j];
 				if (seriesText) {
 					seriesText += "; ";
-				} else {
+				}
+				else {
 					seriesText = "";
 				}
 				seriesText += series.a;
@@ -287,15 +299,17 @@ var CladeClass = function() {
 				item.series = seriesText;
 			}
 		}
-		//Try 461
+
+		// Try 461
 		if (!item.series) {
 			seriesTag = record.getFieldSubfields("461");
 			if (seriesTag) {
-				for (var j in seriesTag) {
-					var series = seriesTag[j];
+				for (var k in seriesTag) {
+					series = seriesTag[k];
 					if (seriesText) {
 						seriesText += "; ";
-					} else {
+					}
+					else {
 						seriesText = "";
 					}
 					seriesText += series.t;
@@ -306,18 +320,20 @@ var CladeClass = function() {
 				item.series = seriesText;
 			}
 		}
-	};
+	}
 
-	//Add extra text
+	// Add extra text
 	function addExtra(noteText, extra) {
 		if (extra) {
 			if (noteText) {
 				if (!/\.$/.exec(noteText)) {
 					noteText += ". ";
-				} else {
+				}
+				else {
 					noteText += " ";
 				}
-			} else {
+			}
+			else {
 				noteText = "";
 			}
 			noteText += Zotero.Utilities.trim(extra);
@@ -325,17 +341,17 @@ var CladeClass = function() {
 		return noteText;
 	}
 
-	//Assemble extra information
+	// Assemble extra information
 	function getExtra(record, item) {
 		var extraText = false;
-		//Material description
+		// Material description
 		var extraTag = record.getFieldSubfields("215");
 		if (extraTag) {
 			for (var j in extraTag) {
-				var note = extraTag[j];
-				extraText = addExtra(extraText, note.c);
-				extraText = addExtra(extraText, note.d);
-				extraText = addExtra(extraText, note.e);
+				var desc = extraTag[j];
+				extraText = addExtra(extraText, desc.c);
+				extraText = addExtra(extraText, desc.d);
+				extraText = addExtra(extraText, desc.e);
 			}
 
 			if (extraText) {
@@ -346,14 +362,13 @@ var CladeClass = function() {
 			}
 		}
 
-		//Notes
+		// Notes
 		var noteText = false;
 		for (var i = 300; i <= 328; i++) {
-
-			noteTag = record.getFieldSubfields(i);
+			var noteTag = record.getFieldSubfields(i);
 			if (noteTag) {
-				for (var j in noteTag) {
-					var note = noteTag[j];
+				for (var k in noteTag) {
+					var note = noteTag[k];
 					noteText = addExtra(noteText, note.a);
 				}
 			}
@@ -365,16 +380,16 @@ var CladeClass = function() {
 			}
 			item.notes.push(noteText);
 		}
-	};
+	}
 
-	//Get title from 200
+	// Get title from 200
 	function getTitle(record, item) {
 		var titleTag = record.getFieldSubfields("200");
 		if (titleTag) {
 			titleTag = titleTag[0];
 			var titleText = titleTag.a;
 			if (titleTag.e) {
-				if (!/^[,\.:;-]/.exec(titleTag.e)) {
+				if (!/^[,.:;-]/.exec(titleTag.e)) {
 					titleText += ": ";
 				}
 				titleText += titleTag.e;
@@ -384,37 +399,35 @@ var CladeClass = function() {
 				if (titleTag.i) {
 					titleText += ": " + titleTag.i;
 				}
-			} else if (titleTag.i) {
+			}
+			else if (titleTag.i) {
 				titleText += ", " + titleTag.i;
 			}
 			item.title = titleText;
 		}
-	};
+	}
 
 	function getCote(record, item) {
 		item.callNumber = "";
 		var coteTag = record.getFieldSubfields("930");
 
 		if (coteTag.length) {
-
-			item.callNumber += coteTag[0]['c'] + "-" + coteTag[0]['a'];
-
+			item.callNumber += coteTag[0].c + "-" + coteTag[0].a;
 		}
-	};
+	}
 
 	// Specific Unimarc postprocessing
 	function postProcessMarc(doc, record, newItem) {
-
-		//Title
+		// Title
 		getTitle(record, newItem);
 
-		//Fix creators
+		// Fix creators
 		getCreators(record, newItem);
 
-		//Fix callNumber
+		// Fix callNumber
 		getCote(record, newItem);
 
-		//Store perennial url from 003 as attachment and accession number
+		// Store perennial url from 003 as attachment and accession number
 
 		var url = record.getField("003");
 		if (url && url.length > 0 && url[0][1]) {
@@ -426,10 +439,10 @@ var CladeClass = function() {
 			});
 		}
 
-		//Country (102a)
+		// Country (102a)
 		record._associateDBField(newItem, "102", "a", "country");
 
-		//Try to retrieve volumes/pages from 215d
+		// Try to retrieve volumes/pages from 215d
 		if (!newItem.pages) {
 			var dimTag = record.getFieldSubfields("215");
 			for (var j in dimTag) {
@@ -447,26 +460,26 @@ var CladeClass = function() {
 			}
 		}
 
-		//Series
+		// Series
 		getSeries(record, newItem);
 
-		//Extra
+		// Extra
 		getExtra(record, newItem);
 
-		//Tagging
+		// Tagging
 		getTags(record, newItem);
 
 		// Doc type
 		var itemType = getDocumentType(doc);
-		if(itemType) {
+		if (itemType) {
 			newItem.itemType = itemType;
 		}
 
-		//Repository
+		// Repository
 		newItem.libraryCatalog = "Clade (https://bibliotheques-numeriques.defense.gouv.fr)";
-	};
+	}
 
-	//Check for Gallica URL (digital version available), if found, set item.url
+	// Check for Gallica URL (digital version available), if found, set item.url
 	function checkGallica(record, item) {
 		var url = record.getFieldSubfields("856");
 
@@ -475,25 +488,25 @@ var CladeClass = function() {
 		}
 	}
 
-	this.marcURL = function(url){
+	this.marcURL = function (url) {
 		return url + '/marcxml';
-	}
+	};
 
-	this.processMarcUrl = function(doc, marcurl) {
+	this.processMarcUrl = function (doc, marcurl) {
 		Zotero.Utilities.HTTP.doGet(marcurl, function (xmlText) {
 			var translator = Zotero.loadTranslator("import");
 
 			// Use MARC translator
 			translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-			translator.getTranslatorObject(function(marc) {
+			translator.getTranslatorObject(function (marc) {
 				Clade.transformMarcXml(doc, marc, xmlText);
 			});
 			translator.translate();
-		}) //doGet end
-	}
+		}); // doGet end
+	};
 
 	// Transform MarcXML to Marc base on translator MARCXML (translatorID: edd87d07-9194-42f8-b2ad-997c4c7deefd)
-	this.transformMarcXml = function(doc, marc, xmlText){
+	this.transformMarcXml = function (doc, marc, xmlText) {
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(xmlText, 'text/xml');
 		// define the marc namespace
@@ -529,22 +542,22 @@ var CladeClass = function() {
 
 			record.translate(newItem);
 
-			//Do specific Unimarc postprocessing
+			// Do specific Unimarc postprocessing
 			postProcessMarc(doc, record, newItem);
 
-			//Check for Gallica URL
+			// Check for Gallica URL
 			checkGallica(record, newItem);
 
 			newItem.complete();
 		}
-	}
-}
+	};
+};
 
 /* Global CladeClass object. */
 var Clade = new CladeClass();
 
 function detectWeb(doc, url) {
-	if (url.search(/\/document\//)!=-1) {
+	if (url.search(/\/document\//) != -1) {
 		return getDocumentType(doc);
 	}
 
@@ -554,17 +567,17 @@ function detectWeb(doc, url) {
 function getDocumentType(doc) {
 	var items = ZU.xpath(doc, '/html/body/main//span[@class="Z3988"][1][@title]');
 
-	if(items.length > 0) {
+	if (items.length > 0) {
 		var span = items[0];
 
 		// Get type from dataset
-		if(span.dataset && span.dataset.type !== undefined) {
+		if (span.dataset && span.dataset.type !== undefined) {
 			return span.dataset.type;
 		}
 
 		// Get type from item
 		var item = new Zotero.Item;
-		var success = Zotero.Utilities.parseContextObject(span.title, item);
+		Zotero.Utilities.parseContextObject(span.title, item);
 
 		if (item.itemType) {
 			return item.itemType;
