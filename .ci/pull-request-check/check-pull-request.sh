@@ -31,6 +31,8 @@ get_translators_to_check() {
 		fi
 }
 
+npm install chromedriver --detect_chromedriver_version
+
 # Build connector
 mkdir -p connectors
 cd connectors
