@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-09 12:51:59"
+	"lastUpdated": "2020-09-13 12:28:57"
 }
 
 /*
@@ -223,7 +223,7 @@ function scrape(doc, url, pdfurl) {
 						item.numPages = value;
 						break;
 					case "【中图法分类号】":
-						item.archiveLocation = value;
+						item.archiveLocation = value.replace(/\(.*\)/, '');
 						break;
 						
 					default:
