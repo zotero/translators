@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-11 17:09:11"
+	"lastUpdated": "2019-11-25 22:05:12"
 }
 
 
@@ -68,7 +68,7 @@ function scrape(doc, url) {
 	// e.g. Reference re Secession of Quebec, 1998 CanLII 793 (SCC), [1998] 2 SCR 217, <http://canlii.ca/t/1fqr3>, retrieved on 2019-11-25
 	var citationParts = voliss.split(',');
 	newItem.caseName = citationParts[0];
-	var reporterRegex = /(\[\d\d\d\d\]\s+)?(\d+)\s+([A-Z]+)\s+(\d+)/;
+	var reporterRegex = /(\[\d\d\d\d\]\s+)?(\d+)\s+([A-Za-z]+)\s+(\d+)/;
 	var reporterDetails = voliss.match(reporterRegex);
 	if (reporterDetails) {
 		newItem.reporterVolume = reporterDetails[2];
@@ -77,11 +77,54 @@ function scrape(doc, url) {
 	}
 	
 	newItem.court = text('#breadcrumbs span', 2);
+	// get the jurisdiction code, standardizing to legal-resource-registry codes
+	var jurisdiction = document.location.pathname.split("/")[2];
+	var jurisdiction_codes = {
+		"ab": "CA|Alberta",
+		"bc": "CA|British Columbia",
+		"ca": "Canada|CA",
+		"mb": "CA|Manitoba",
+		"nb": "CA|New Brunswick",
+		"nl": "CA|Newfoundland & Labrador",
+		"ns": "CA|Nova Scotia",
+		"nt": "CA|Northwest Territories",
+		"nu": "CA|Nunavut",
+		"on": "CA|Ontario",
+		"pe": "CA|Prince Edward Island",
+		"qc": "CA|Quebec",
+		"sk": "CA|Saskatchewan",
+		"yu": "CA|Yukon"
+	}
+	jurisdiction_code = jurisdiction_codes[jurisdiction];
+	newItem.jurisdiction = jurisdiction_code;
+	newItem.publisher = "CanLII";
 	newItem.dateDecided = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Date")]/following-sibling::div');
 	newItem.docketNumber = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
-	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations") or contains(text(), "Other citation") or contains (text(), "Autre citation"))]/following-sibling::div');
-	if (otherCitations) {
-		newItem.notes.push({ note: "Other Citations: " + ZU.trimInternal(otherCitations) });
+	if (newItem.docketNumber) {
+		newItem.docketNumber = ZU.trimInternal(newItem.docketNumber);
+	}
+	// get a series of other citations
+	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citation") or contains(text(), "Autres citation")]/following-sibling::div');
+	
+	// sometimes an extra citation is hidden in the main citation block, but we can only include one.
+	var mainOtherCitation;
+	var mainOtherCitationMatch = citationParts[2].match(reporterRegex);
+	if (mainOtherCitationMatch){
+			mainOtherCitation = mainOtherCitationMatch[0];
+		}
+	// sometimes the mainOtherCitation doesn't exist, sometimes the otherCitations don't exist, sometimes neither exists, sometimes both exist
+	var extraCitations;
+	if (mainOtherCitation && otherCitations){
+		extraCitations = ZU.trimInternal(mainOtherCitation) + " — " + ZU.trimInternal(otherCitations);
+		}
+	else if (mainOtherCitation) {
+		extraCitations = ZU.trimInternal(mainOtherCitation);
+	}
+	else if (otherCitations) {
+		extraCitations = ZU.trimInternal(otherCitations);
+	}
+	if (extraCitations) {
+		newItem.notes.push({ note: "Other Citations: " + extraCitations});
 	}
 	
 	var shortUrl = doc.getElementsByClassName('documentStaticUrl')[0];
@@ -135,10 +178,12 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2010-01-21",
 				"court": "Supreme Court of Canada",
+				"jurisdiction": "Canada|CA",
 				"docketNumber": "32797",
-				"firstPage": "6",
-				"reporter": "SCR",
-				"reporterVolume": "1",
+				"reporterVolume": "2010",
+				"reporter": "SCC",
+				"firstPage": "2",
+				"publisher": "CanLII",
 				"url": "http://canlii.ca/t/27jmr",
 				"attachments": [
 					{
@@ -152,7 +197,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
+						"note": "Other Citations: [2010] 1 SCR 6 — 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
 					}
 				],
 				"seeAlso": []
@@ -169,7 +214,12 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2011-02-02",
 				"court": "Federal Court",
+				"jurisdiction": "Canada|CA",
 				"docketNumber": "T-1089-10",
+				"reporterVolume": "2011",
+				"reporter": "FC",
+				"firstPage": "119",
+				"publisher": "CanLII",
 				"url": "http://canlii.ca/t/2flrk",
 				"attachments": [
 					{
@@ -196,10 +246,12 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2010-01-21",
 				"court": "Cour suprême du Canada",
+				"jurisdiction": "Canada|CA",
 				"docketNumber": "32797",
-				"firstPage": "6",
-				"reporter": "RCS",
-				"reporterVolume": "1",
+				"reporterVolume": "2010",
+				"reporter": "CSC",
+				"firstPage": "2",
+				"publisher": "CanLII",
 				"url": "http://canlii.ca/t/27jms",
 				"attachments": [
 					{
@@ -222,7 +274,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/fr/ca/cfpi/doc/2011/2011cf119/2011cf119.html?searchUrlHash=AAAAAQAjU3V0dGllIHYuIENhbmFkYSAoQXR0b3JuZXkgR2VuZXJhbCkAAAAAAQ",
+		"url": "https://www.canlii.org/fr/ca/cfpi/doc/2011/2011cf119/2011cf119.html",
 		"items": [
 			{
 				"itemType": "case",
@@ -230,6 +282,12 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2011-02-02",
 				"court": "Cour fédérale",
+				"jurisdiction": "Canada|CA",
+				"docketNumber": "T-1089-10",
+				"reporterVolume": "2011",
+				"reporter": "CF",
+				"firstPage": "119",
+				"publisher": "CanLII",
 				"docketNumber": "T-1089-10",
 				"url": "http://canlii.ca/t/fks9z",
 				"attachments": [
@@ -249,19 +307,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/en/ca/scc/doc/2010/2010scc2/2010scc2.html",
+		"url": "https://www.canlii.org/en/bc/bcca/doc/2017/2017bcca398/2017bcca398.html",
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "MiningWatch Canada v. Canada (Fisheries and Oceans)",
+				"caseName": "N.N v. Canada (Attorney General)",
 				"creators": [],
-				"dateDecided": "2010-01-21",
-				"court": "Supreme Court of Canada",
-				"docketNumber": "32797",
-				"firstPage": "6",
-				"reporter": "SCR",
-				"reporterVolume": "1",
-				"url": "http://canlii.ca/t/27jmr",
+				"dateDecided": "2017-11-02",
+				"court": "Court of Appeal",
+				"jurisdiction": "CA|British Columbia",
+				"docketNumber": "CA44142; CA44143",
+				"reporterVolume": "2017",
+				"reporter": "BCCA",
+				"firstPage": "398",
+				"url": "http://canlii.ca/t/hnspp",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -272,30 +331,27 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "Other Citations: 397 NR 232 — [2010] SCJ No 2 (QL) — [2010] ACS no 2"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.canlii.org/en/ca/scc/doc/2020/2020scc14/2020scc14.html",
+		"url": "https://www.canlii.org/en/ca/scc/doc/1882/1882canlii29/1882canlii29.html",
 		"items": [
 			{
 				"itemType": "case",
-				"caseName": "R. v. Zora",
+				"caseName": "Theal v. The Queen",
 				"creators": [],
-				"dateDecided": "2020-06-18",
+				"dateDecided": "1882-12-04",
 				"court": "Supreme Court of Canada",
-				"docketNumber": "38540",
-				"firstPage": "14",
-				"reporter": "SCC",
-				"reporterVolume": "2020",
-				"url": "http://canlii.ca/t/j89v2",
+				"jurisdiction": "Canada|CA",
+				"reporterVolume": "1882",
+				"reporter": "CanLII",
+				"firstPage": "29",
+				"publisher": "CanLII",
+				"url": "http://canlii.ca/t/ggxdg",
 				"attachments": [
 					{
 						"title": "CanLII Full Text PDF",
@@ -308,12 +364,12 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "Other Citations: [2020] SCJ No 14 (QL)"
+						"note": "Other Citations: 7 SCR 397"
 					}
 				],
 				"seeAlso": []
 			}
 		]
-	},
+	}
 ]
 /** END TEST CASES **/
