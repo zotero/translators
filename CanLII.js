@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-25 22:05:12"
+	"lastUpdated": "2020-09-11 17:09:11"
 }
 
 
@@ -68,18 +68,18 @@ function scrape(doc, url) {
 	// e.g. Reference re Secession of Quebec, 1998 CanLII 793 (SCC), [1998] 2 SCR 217, <http://canlii.ca/t/1fqr3>, retrieved on 2019-11-25
 	var citationParts = voliss.split(',');
 	newItem.caseName = citationParts[0];
-	var reporterRegex = /\[\d\d\d\d\]\s+(\d+)\s+([A-Z]+)\s+(\d+)/;
+	var reporterRegex = /(\[\d\d\d\d\]\s+)?(\d+)\s+([A-Z]+)\s+(\d+)/;
 	var reporterDetails = voliss.match(reporterRegex);
 	if (reporterDetails) {
-		newItem.reporterVolume = reporterDetails[1];
-		newItem.reporter = reporterDetails[2];
-		newItem.firstPage = reporterDetails[3];
+		newItem.reporterVolume = reporterDetails[2];
+		newItem.reporter = reporterDetails[3];
+		newItem.firstPage = reporterDetails[4];
 	}
 	
 	newItem.court = text('#breadcrumbs span', 2);
 	newItem.dateDecided = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Date")]/following-sibling::div');
 	newItem.docketNumber = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "File number") or contains(text(), "Numéro de dossier")]/following-sibling::div');
-	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations")]/following-sibling::div');
+	var otherCitations = ZU.xpathText(doc, '//div[@id="documentMeta"]//div[contains(text(), "Other citations") or contains(text(), "Autres citations") or contains(text(), "Other citation") or contains (text(), "Autre citation"))]/following-sibling::div');
 	if (otherCitations) {
 		newItem.notes.push({ note: "Other Citations: " + ZU.trimInternal(otherCitations) });
 	}
@@ -280,6 +280,40 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	}
+	},
+	{
+		"type": "web",
+		"url": "https://www.canlii.org/en/ca/scc/doc/2020/2020scc14/2020scc14.html",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "R. v. Zora",
+				"creators": [],
+				"dateDecided": "2020-06-18",
+				"court": "Supreme Court of Canada",
+				"docketNumber": "38540",
+				"firstPage": "14",
+				"reporter": "SCC",
+				"reporterVolume": "2020",
+				"url": "http://canlii.ca/t/j89v2",
+				"attachments": [
+					{
+						"title": "CanLII Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "CanLII Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Other Citations: [2020] SCJ No 14 (QL)"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
 ]
 /** END TEST CASES **/
