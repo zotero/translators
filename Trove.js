@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-05 17:34:52"
+	"lastUpdated": "2020-09-15 00:35:51"
 }
 
 /*
@@ -116,10 +116,11 @@ function scrapeNewspaper(doc, url) {
 				// Add tags
 				var tags = ZU.xpath(doc, "//ul[contains(@class,'nlaTagContainer')]/li");
 				for (let tag of tags) {
-					tag = ZU.xpathText(tag, "a[not(contains(@class,'anno-remove'))]");
+					tag = ZU.xpathText(tag, "div/a[not(contains(@class,'anno-remove'))]");
 					item.tags.push(tag);
 				}
 			}
+			Zotero.debug(item.tags);
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
 			var proxyURL = "http://trove-proxy.herokuapp.com/pdf/" + articleID;
@@ -336,7 +337,12 @@ var testCases = [
 				"place": "Vic.",
 				"publicationTitle": "Sunbury News (Vic. : 1900 - 1927)",
 				"url": "http://nla.gov.au/nla.news-article70068753",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Trove newspaper PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Meteorology Journal - Clement Wragge"
