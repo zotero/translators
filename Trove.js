@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-15 01:00:33"
+	"lastUpdated": "2020-09-15 01:07:09"
 }
 
 /*
@@ -126,7 +126,6 @@ function scrapeNewspaper(doc, url) {
 					item.tags.push(tag);
 				}
 			}
-			Zotero.debug(item.tags);
 
 			// I've created a proxy server to generate the PDF and return the URL without locking up the browser.
 			var proxyURL = "http://trove-proxy.herokuapp.com/pdf/" + articleID;
