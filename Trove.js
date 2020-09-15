@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-15 00:35:51"
+	"lastUpdated": "2020-09-15 01:00:33"
 }
 
 /*
@@ -32,15 +32,21 @@
 
 
 function detectWeb(doc, url) {
+	// Note that the url for search results has changed, 
+	// so the first pattern will never match.
+	// However, results scraping needs to be rewritten due to the redesign,
+	// so leave this as is for now.
 	if (url.includes('/result?') || url.includes('/newspaper/page')) {
 		return getSearchResults(doc, url, true) ? 'multiple' : false;
 	}
 	else if (url.includes('/newspaper/article')) {
 		return "newspaperArticle";
 	}
-	else if (url.includes('/work/')) {
-		return "book";
-	}
+//  Scraping from works is very brokened due to site redesign
+//  Prevent detection until a fix is available
+//	else if (url.includes('/work/')) {
+//		return "book";
+//	}
 	return false;
 }
 
