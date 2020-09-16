@@ -595,35 +595,38 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.clade.loc/document/551e404a-6dae-4b1c-9e7c-71cd09b0ac5e",
+		"url": "https://bibliotheques-numeriques.defense.gouv.fr/document/e0dd0679-6201-4a8d-a02c-f59957b2b3e6",
 		"items": [
 			{
-				"itemType": "book",
-				"title": "Le royalisme durant la première guerre de Vendée à travers les interrogatoires de la \"Commission militaire près l'armée de l'Ouest\": mars 1793 - mai 1794",
+				"itemType": "document",
+				"title": "Watteau's soldiers: scenes of military life in eighteenth-century France [exhibition, New York, The Frick Collection, from July 12, 2016 to October 2, 2016]",
 				"creators": [
 					{
-						"firstName": "Benjamin",
-						"lastName": "Normand",
+						"firstName": "Aaron",
+						"lastName": "Wile",
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "Anne Natacha",
-						"lastName": "Rolland Bonnet",
-						"creatorType": "contributor"
+						"lastName": "Frick collection",
+						"creatorType": "contributor",
+						"fieldMode": true
 					}
 				],
-				"extra": "ill. en noir, ill. en coul. 22 cm.",
+				"extra": "ill. en noir et en coul., jaquette ill. en coul. 26 cm.",
 				"libraryCatalog": "Clade (https://bibliotheques-numeriques.defense.gouv.fr)",
-				"numPages": "129",
-				"shortTitle": "Le royalisme durant la première guerre de Vendée à travers les interrogatoires de la \"Commission militaire près l'armée de l'Ouest\"",
+				"shortTitle": "Watteau's soldiers",
+				"url": "https://images-na.ssl-images-amazon.com/images/I/51LQ5lqDrzL.jpg",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "France histoire Royalisme Guerres de Vendée (1793-1796) Royalisme Guerres de Vendée (1793-1796)"
+						"tag": "Militaires Art"
+					},
+					{
+						"tag": "Watteau, Antoine (1684-1721)"
 					}
 				],
 				"notes": [
-					"Mémoire d'histoire moderne : Université catholique de l'Ouest : Angers : 09 2008."
+					"Notes bibliogr. Bibliogr. p. 104-107. Index p. 110-112."
 				],
 				"seeAlso": []
 			}
@@ -631,32 +634,45 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.clade.loc/document/85318d81-66b9-4b34-ac1f-0fa6ee3c196a",
+		"url": "https://bibliotheques-numeriques.defense.gouv.fr/document/867e8c8d-1781-47eb-807a-80df338b5136",
 		"items": [
 			{
 				"itemType": "map",
-				"title": "Combat de Znaim 11 juillet 1809",
+				"title": "Carte réduite du détroit de Davids faite au Depost des cartes plans et journaux de la marine: par le S. Bellin",
 				"creators": [
 					{
-						"firstName": "Jean-Jacques Germain",
-						"lastName": "Pelet-Clozeau",
+						"firstName": "Jacques-Nicolas",
+						"lastName": "Bellin",
 						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Gerard",
+						"lastName": "Keulen",
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "Dépôt des Cartes et Plans de la Marine",
+						"creatorType": "editor",
+						"fieldMode": true
 					}
 				],
-				"date": "18",
-				"abstractNote": "Znaïm marquait la fin de la campagne d'Autriche. Le maréchal Berthier, pour la France, et de Wimpffen, pour l'Autriche, entreprirent des discussions sur les modalités du cessez-le feu. Les Autrichiens furent contraints d'accéder aux demandes de Napoléon, et le contrôle de plus d'un tiers du territoire autrichien des Français fut entériné. L'armistice fut signé le 12 juillet, prélude au futur Traité de paix de Schonbrünn, qui sera signé le 14 octobre 1809",
-				"extra": "87 cm x 60 cm cm.",
+				"date": "1765",
+				"extra": "61,5 x 92 sur ffle 68x 100 cm.",
 				"libraryCatalog": "Clade (https://bibliotheques-numeriques.defense.gouv.fr)",
-				"place": "Paris",
-				"publisher": "Dépôt Général de la Guerre",
+				"publisher": "Dépôt des Cartes et Plans de la Marine",
+				"shortTitle": "Carte réduite du détroit de Davids faite au Depost des cartes plans et journaux de la marine",
+				"url": "http://gallica.bnf.fr/ark:/12148/btv1b67000649",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Napoléon 1er campagnes et batailles cartescampagne d'Autriche (1809)"
+						"tag": "T Voyages"
+					},
+					{
+						"tag": "T1710 Davis, Détroit deQeqertarsuaq (île)Groenland, Île du Ouest CôtesBaffin, de Est Côtes"
 					}
 				],
 				"notes": [
-					"Echelle: 1:250 000e en mètres et en toises.-Avec texte historique gravé à gauche du général Pelet.Titre différent de la table: bataille de Znaïm."
+					"Échelle(s) : [ca 1:800 000], Cent Lieues Marines de France et d'Angleterre de Vingt au Degré [= 70,4 cm]."
 				],
 				"seeAlso": []
 			}
