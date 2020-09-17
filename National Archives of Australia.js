@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-29 10:18:58"
+	"lastUpdated": "2020-09-17 05:30:31"
 }
 
 /*
@@ -125,7 +125,7 @@ function scrape(doc, url) {
 		default:
 			throw new Error("Unknown page type: " + m[1]);
 	}
-	
+	Zotero.debug(item);
 	if (item) {
 		item.archive = item.libraryCatalog = "National Archives of Australia";
 		item.complete();
@@ -186,7 +186,7 @@ function scrapeItem(doc, url) {
 	item.archiveLocation = meta.citation.replace(/^NAA\s*:\s*/i, '');
 	
 	var barcode = encodeURIComponent(meta['item barcode']);
-	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=I&Number=' + barcode;
+	item.url = 'http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=' + barcode;
 	
 	if (meta['item notes']) {
 		item.notes.push(meta['item notes']);
@@ -196,7 +196,7 @@ function scrapeItem(doc, url) {
 	if (ZU.xpath(doc, '//div[contains(@id, "_pnlDigitalCopy")]/a[normalize-space(text())="View digital copy"]').length) {
 		item.attachments.push({
 			title: "Digital copy at National Archives of Australia",
-			url: '/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
+			url: 'http://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
 			mimeType: 'text/html',
 			snapshot: false
 		});
@@ -216,7 +216,7 @@ function scrapeSeries(doc, url) {
 	item.archiveLocation = meta['series number'];
 	
 	var seriesNumber = encodeURIComponent(meta['series number']);
-	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=S&Number=' + seriesNumber;
+	item.url = 'http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=S&Number=' + seriesNumber;
 	
 	// Agencies recording into this series
 	var agencies = ZU.xpath(doc, '//div[@id="provenanceRecording"]//div[@class="linkagesInfo"]');
@@ -357,7 +357,7 @@ function scrapePhoto(doc, url) {
 	item.date = meta.date || meta['date range'];
 	item.place = meta.location || meta['item location'];
 	
-	item.url = 'http://www.naa.gov.au/cgi-bin/Search?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
+	item.url = 'http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=PSI&Number=' // Magic. Not sure where this is pulled from, but it's stable
 		+ encodeURIComponent(meta.barcode);
 	
 	item.archiveLocation = meta['image no.'];
@@ -438,7 +438,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=8606210",
+		"url": "http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=8606210",
 		"defer": true,
 		"items": [
 			{
@@ -467,7 +467,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.naa.gov.au/cgi-bin/Search?O=I&Number=1339624",
+		"url": "http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=1339624",
 		"defer": true,
 		"items": [
 			{
@@ -489,7 +489,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.naa.gov.au/cgi-bin/Search?O=S&Number=A10950",
+		"url": "http://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=S&Number=A10950",
 		"defer": true,
 		"items": [
 			{
