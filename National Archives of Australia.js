@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-18 07:13:48"
+	"lastUpdated": "2020-09-18 08:17:27"
 }
 
 /*
@@ -201,7 +201,7 @@ function parseItemTable(table) {
 		else if (label == 'related searches') {
 			var childrens = td[1].getElementsByTagName('a');
 			data = [];
-			for (let i = 0; i < childrens.length; i++) {
+			for (let j = 0; j < childrens.length; j++) {
 				data.push(childrens[i].textContent.trim());
 			}
 		}
@@ -220,13 +220,15 @@ function parseItemTable(table) {
 
 function scrapeItem(doc) {
 	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
-
+	Zotero.debug('META');
+	Zotero.debug(meta);
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
 	item.date = meta['contents date range'];
 	item.place = meta.location;
-	item.medium = meta['physical format'];
 	item.archiveLocation = meta.citation.replace(/^NAA\s*:\s*/i, '');
+	item['access status'] = meta['access status'];
+	item['access decision'] = meta['date of decision'];
 
 	var barcode = encodeURIComponent(meta['item barcode']);
 	item.url = 'https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=' + barcode;
@@ -234,9 +236,9 @@ function scrapeItem(doc) {
 	if (meta['item notes']) {
 		item.notes.push(meta['item notes']);
 	}
-
 	// Add link to digital copy if available
-	if (ZU.xpath(doc, '//div[contains(@id, "_pnlDigitalCopy")]/a[normalize-space(text())="View digital copy"]').length) {
+	Zotero.debug('https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode)
+	if (ZU.xpath(doc, '//div[contains(@id, "_pnlDigitalCopy")]/a[contains(normalize-space(text()), "View digital copy")]').length) {
 		item.attachments.push({
 			title: "Digital copy at National Archives of Australia",
 			url: 'https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
