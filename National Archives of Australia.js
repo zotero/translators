@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-19 02:41:36"
+	"lastUpdated": "2020-09-19 02:58:21"
 }
 
 /*
@@ -125,7 +125,7 @@ function getSearchResults(doc, url, checkOnly) {
 				else {
 					title = results[i].getAttribute('title');
 					if (!title) continue;
-					link = results[i].getElementsByTagName('b')[0];
+					link = results[i].getElementsByTagName('a')[0];
 					if (!link) continue;
 					link = link.href;
 				}
@@ -282,7 +282,9 @@ function scrapeSeries(doc) {
 	item.type = 'series';
 	item.date = meta['contents dates'];
 	// Split multiple holdings with semi-colon
-	item.place = meta['quantity and location'].replace(/([A-Z]{1})([0-9]{1})/g, '$1; $2');
+	if (meta['quantity and location']) {
+		item.place = meta['quantity and location'].replace(/([A-Z]{1})([0-9]{1})/g, '$1; $2');
+	}
 	item.format = meta['predominant physical format'];
 	item.abstractNote = meta['series note'];
 	item.archiveLocation = meta['series number'];
