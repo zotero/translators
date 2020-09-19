@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-18 13:17:34"
+	"lastUpdated": "2020-09-19 02:41:36"
 }
 
 /*
@@ -54,7 +54,6 @@ function doWeb(doc, url) {
 			for (var i in items) {
 				urls.push(i);
 			}
-			Zotero.debug(urls);
 			ZU.processDocuments(urls, scrape);
 		});
 	}
@@ -64,15 +63,15 @@ function doWeb(doc, url) {
 }
 
 function getSearchResults(doc, url, checkOnly) {
-	var title;
-	var link;
-	var results;
-	var table;
+	var title,
+		link,
+		results,
+		table,
+		items = {},
+		found = false;
 	var m = url.match(multiplesRE);
 	if (!m) return false;
 
-	var items = {},
-	found = false;
 	switch (m[1].toLowerCase()) {
 		case 'serieslisting':
 			table = doc.getElementsByClassName('SearchResults')[0];
@@ -84,7 +83,7 @@ function getSearchResults(doc, url, checkOnly) {
 				if (!title) continue;
 				link = getCleanLinkFromCell(title);
 				if (!link) continue;
-				
+
 				if (checkOnly) return true;
 				found = true;
 				items[link] = ZU.trimInternal(title.textContent);
@@ -100,53 +99,45 @@ function getSearchResults(doc, url, checkOnly) {
 				if (!title) continue;
 				link = getCleanLinkFromCell(title);
 				if (!link) continue;
-				
+
 				if (checkOnly) return true;
 				found = true;
 				items[link] = ZU.trimInternal(title.textContent);
 			}
 			break;
 		case 'photolisting':
+			// Try the list view first
 			results = ZU.xpath(doc, '//table[contains(@id, "PhotoResults")]//table[@class="greyboxdetail"]');
-			for (let i = 0; i < records.length; i++) {
-				title = results[i].getElementsByTagName('td')[1];
-				if (!title) continue;
+			var view = 'list';
+			// If no results try grid view
+			if (!results.length) {
+				results = ZU.xpath(doc, '//table[contains(@id, "PhotoResults")]/tbody/tr/td[@title]');
+				view = 'grid';
+			}
+			for (let i = 0; i < results.length; i++) {
+				if (view == 'list') {
+					title = results[i].getElementsByTagName('td')[1];
+					if (!title) continue;
+					link = getCleanLinkFromCell(title);
+					if (!link) continue;
+					title = title.textContent;
+				}
+				else {
+					title = results[i].getAttribute('title');
+					if (!title) continue;
+					link = results[i].getElementsByTagName('b')[0];
+					if (!link) continue;
+					link = link.href;
+				}
 
 				if (checkOnly) return true;
 				found = true;
-				link = getCleanLinkFromCell(title);
-				items[link] = ZU.trimInternal(title.textContent);
+				items[link] = ZU.trimInternal(title);
 			}
 			break;
 	}
 
 	return found ? items : false;
-}
-
-function getCleanLinkFromCell(cell) {
-	link = cell.getAttribute('onclick');
-	link = link.substring(link.indexOf("'"));
-	return 'https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/' + ZU.superCleanString(link);
-}
-
-function getIdFromLink(link, linkType) {
-	var id;
-	Zotero.debug(link);
-	if (linkType == 'S') {
-		id = link.match(/series_no=[A-Z/0-9]+/)[1];
-	}
-	else {
-		id = link.match(/Barcode=([0-9]+)/)[1];
-	}
-	return id;
-}
-
-function createPersistentLink(id, linkType) {
-	return 'https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=' + linkType + '&Number=' + id;
-}
-
-function stripSeries(series) {
-	return series.substr(0, series.search(/(Click|All)/));
 }
 
 function getHost(url) {
@@ -155,7 +146,6 @@ function getHost(url) {
 
 function scrape(doc, url) {
 	var m = url.match(singleItemRE);
-	Zotero.debug('HELLLLLLOOOOOO' + url);
 	if (!m) return;
 
 	var item;
@@ -167,7 +157,6 @@ function scrape(doc, url) {
 			item = scrapePhoto(doc, url);
 			break;
 		case 'photodetail':
-			Zotero.debug('photo');
 			item = scrapePhoto(doc, url);
 			break;
 		case 'seriesdetail':
@@ -183,6 +172,23 @@ function scrape(doc, url) {
 		item.archive = item.libraryCatalog = "National Archives of Australia";
 		item.complete();
 	}
+}
+
+function createPersistentLink(id, linkType) {
+	// Create persistent (as possible) links into RS
+	return 'https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=' + linkType + '&Number=' + id;
+}
+
+function stripSeries(series) {
+	// Return cleaned contents of series cells, removing the extra notice
+	return series.substr(0, series.search(/(Click|All)/));
+}
+
+function getCleanLinkFromCell(cell) {
+	// Get a url from a cell that has an onclick attribute.
+	var link = cell.getAttribute('onclick');
+	link = link.substring(link.indexOf("'"));
+	return 'https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/' + ZU.superCleanString(link);
 }
 
 /**
@@ -221,10 +227,7 @@ function parseItemTable(table) {
 		else {
 			data = ZU.trimInternal(td[1].textContent);
 		}
-
-
 		if (!label || !data) continue;
-
 		meta[label] = data;
 	}
 
@@ -233,6 +236,8 @@ function parseItemTable(table) {
 
 function scrapeItem(doc) {
 	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
+	if (!meta) return null;
+	
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
 	item.type = 'item';
@@ -249,21 +254,20 @@ function scrapeItem(doc) {
 	if (meta['item notes']) {
 		item.notes.push(meta['item notes']);
 	}
-	
+
 	// Add link to digital copy if available
-	Zotero.debug('https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode)
 	if (ZU.xpath(doc, '//div[contains(@id, "_pnlDigitalCopy")]/a[contains(normalize-space(text()), "View digital copy")]').length) {
-		item.attachments.push({
-			title: "Digital copy at National Archives of Australia",
-			url: 'https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
-			mimeType: 'text/html',
-			snapshot: false
-		});
+		// item.attachments.push({
+		//	title: "Digital copy at National Archives of Australia",
+		//	url: 'https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=' + barcode,
+		//	mimeType: 'text/html',
+		//	snapshot: false
+		// });
 		item.attachments.push({
 			title: 'National Archives of Australia item PDF',
 			url: 'https://recordsearch.naa.gov.au/SearchNRetrieve/NAAMedia/ViewPDF.aspx?B=' + barcode + '&D=D',
 			mimeType: 'application/pdf'
-		})
+		});
 	}
 
 	return item;
@@ -271,7 +275,8 @@ function scrapeItem(doc) {
 
 function scrapeSeries(doc) {
 	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
-	Zotero.debug(meta);
+	if (!meta) return null;
+	
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
 	item.type = 'series';
@@ -282,8 +287,6 @@ function scrapeSeries(doc) {
 	item.abstractNote = meta['series note'];
 	item.archiveLocation = meta['series number'];
 	item['number of items'] = stripSeries(meta['items in this series on recordsearch']);
-	
-
 	var seriesNumber = encodeURIComponent(meta['series number']);
 	item.url = createPersistentLink(seriesNumber, 'S');
 
@@ -366,7 +369,7 @@ function scrapeImage(doc, url) {
 function scrapePhoto(doc) {
 	var table = ZU.xpath(doc, '//table[contains(@id, "PhotoDetailTable")]//table[contains(@id, "GreyBoxTable")]/tbody')[0];
 	if (!table) return null;
-	
+
 	var meta = parseItemTable(table);
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
@@ -379,7 +382,7 @@ function scrapePhoto(doc) {
 	if (meta['related searches']) {
 		item.tags = meta['related searches'];
 	}
-	
+
 	var imageurl = ZU.xpathText(doc, '//table[contains(@id, "PhotoDetailTable")]//img/@src');
 	if (imageurl) {
 		imageurl = imageurl.replace(/([?&])T=[^&]*(?:&|$)/g, '$1') + '&T=P'; // T=P better quality
