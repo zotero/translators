@@ -73,21 +73,24 @@ function detectWeb(doc, url) {
 			|| url.includes('/doiLanding?doi=')) {
 		if (doc.getElementById('bookchapterstoc')) {
 			return "bookSection";
-		} else {
+		}
+		else {
 			return "journalArticle";
 		}
 	}
-	if (url.includes('/search/results?') || url.includes('/journal/')) {// && getSearchResults(doc, true)) {
+	if (url.includes('/search/results?') || url.includes('/journal/')) { // && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.article-title');
-	for (var i=0; i<rows.length; i++) {
-		var href = attr(rows[i].parentNode, '#buy, a.fullTextHTMLLink, a.fullTextLink', 'href') ;
+	for (var i = 0; i < rows.length; i++) {
+		var href = attr(rows[i].parentNode, '#buy, a.fullTextHTMLLink, a.fullTextLink', 'href');
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -102,7 +105,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -110,7 +113,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -118,6 +122,9 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var uid = getIds(doc, url.replace(/[?#].*$/, ''));
+	if (!uid) {
+		throw new Error("ID not found");
+	}
 	
 	var productCode;
 	var db = doc.getElementById('database');
@@ -125,45 +132,51 @@ function scrape(doc, url) {
 		db = db.parentNode.textContent;
 		if (db.includes('PsycARTICLES')) {
 			productCode = 'PA';
-		} else if (db.includes('PsycBOOKS')) {
+		}
+		else if (db.includes('PsycBOOKS')) {
 			productCode = 'PB';
-		} else if (db.includes('PsycINFO')) {
+		}
+		else if (db.includes('PsycINFO')) {
 			productCode = 'PI';
-		} else if (db.includes('PsycEXTRA')) {
+		}
+		else if (db.includes('PsycEXTRA')) {
 			productCode = 'PE';
 		}
-	} else {
+	}
+	else {
 		// default, e.g. if page is not completely loaded
 		productCode = 'PI';
 	}
 	
-	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"'+uid+'","ProductCode":"'+productCode+'"}],"exportType":"zotero"}}';
+	var postData = '{"api":"record.exportRISFile","params":{"UIDList":[{"UID":"' + uid + '","ProductCode":"' + productCode + '"}],"exportType":"zotero"}}';
 	var headers = {
 		'Content-Type': 'application/json',
-		'Referer': url
+		Referer: url
 	};
 
 	// 1. We have to set the uid, product code and format with a post request
-	ZU.doPost('/api/request/record.exportRISFile', postData, function(apiReturnMessage) {
+	ZU.doPost('/api/request/record.exportRISFile', postData, function (apiReturnMessage) {
 		var apiReturnData;
 		try {
 			apiReturnData = JSON.parse(apiReturnMessage);
-		} catch(e) {
+		}
+		catch (e) {
 			Z.debug('POST request did not result in valid JSON');
 			Z.debug(apiReturnMessage);
 		}
 		
 		if (apiReturnData && apiReturnData.isRisExportCreated) {
 			// 2. Download the requested data (after step 1)
-			ZU.doGet('/ris/download', function(data) {
+			ZU.doGet('/ris/download', function (data) {
 				if (data.includes('Content: application/x-research-info-systems')) {
 					processRIS(data, doc);
-				} else {
+				}
+				else {
 					// sometimes (e.g. during testing) the data is not loaded
 					// but a meta redirect to a captcha page mentioning
-					Z.debug("The APA anomaly detection think we are doing " +
-						"something unusual (sigh). Please reload any APA page e.g. " +
-						"http://psycnet.apa.org/ in your browser and try again.");
+					Z.debug("The APA anomaly detection think we are doing "
+						+ "something unusual (sigh). Please reload any APA page e.g. "
+						+ "http://psycnet.apa.org/ in your browser and try again.");
 					Z.debug(data);
 				}
 			});
@@ -176,13 +189,13 @@ function processRIS(text, doc) {
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
+	translator.setHandler("itemDone", function (obj, item) {
 		item.title = cleanTitle(item.title);
 		if (item.publication) item.publication = cleanTitle(item.publication);
 		if (item.bookTitle) item.bookTitle = cleanTitle(item.bookTitle);
 		if (item.series) item.series = cleanTitle(item.series);
 		if (item.place) item.place = item.place.replace(/\s+/g, ' ');
-		for (var i=0; i<item.tags.length; i++) {
+		for (var i = 0; i < item.tags.length; i++) {
 			item.tags[i] = item.tags[i].replace(/^\*/, '');
 		}
 		var pdfURL = attr(doc, 'a[href*="/fulltext"]', 'href');
@@ -203,23 +216,23 @@ function processRIS(text, doc) {
 }
 
 
-//try to figure out ids that we can use for fetching RIS
+// try to figure out ids that we can use for fetching RIS
 function getIds(doc, url) {
-	//try to extract uid from the table
+	// try to extract uid from the table
 	var uid = text(doc, '#uid + dd') || text(doc, '#bookUID');
 	if (uid) {
 		return uid;
 	}
 
-	//try to extract uid from the url
+	// try to extract uid from the url
 	if (url.includes('/record/')) {
-		let m = url.match(/\/record\/([\d\-]*)/);
+		let m = url.match(/\/record\/([\d-]*)/);
 		if (m && m[1]) {
 			return m[1];
 		}
 	}
 	
-	/**on the book pages, we can find the UID in
+	/** on the book pages, we can find the UID in
 	 * the Front matter and Back matter links
 	 */
 	if (url.includes('/PsycBOOKS/')) {
@@ -232,12 +245,12 @@ function getIds(doc, url) {
 		}
 	}
 
-	/**for pages with buy.optionToBuy
+	/** for pages with buy.optionToBuy
 	 * we can fetch the id from the url
 	 * alternatively, the id is in a javascript section (this is messy)
 	 */
 	if (url.includes('/buy/')) {
-		let m = url.match(/\/buy\/([\d\-]*)/);
+		let m = url.match(/\/buy\/([\d-]*)/);
 		if (m) {
 			return m[1];
 		}
@@ -248,14 +261,15 @@ function getIds(doc, url) {
 		}
 	}
 	
-	/**last option: check for a purchase link
+	/** last option: check for a purchase link
 	 */
 	var purchaseLink = attr(doc, 'a.purchase[href*="/buy/"]', 'href');
 	if (purchaseLink) {
-		let m = purchaseLink.match(/\/buy\/([\d\-]*)/);
+		let m = purchaseLink.match(/\/buy\/([\d-]*)/);
 		return m[1];
 	}
-
+	
+	return false;
 }
 
 
@@ -264,7 +278,8 @@ function cleanTitle(title) {
 	// except it looks like an abbreviation
 	if (/\b\w\.$/.test(title)) {
 		return title;
-	} else {
+	}
+	else {
 		return title.replace(/\.$/, '');
 	}
 }
