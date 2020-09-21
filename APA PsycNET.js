@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-08 19:12:21"
+	"lastUpdated": "2020-09-21 07:34:07"
 }
 
 /*
@@ -51,8 +51,6 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 
 function detectWeb(doc, url) {
-	url = (doc.location && doc.location.href) ? doc.location.href : url;
-	
 	// the dection will only work if the page is load completely,
 	// thus we have to hardcode some test cases
 	if (url.includes('://psycnet.apa.org/record/1992-98221-010')) return "bookSection";
@@ -68,7 +66,11 @@ function detectWeb(doc, url) {
 	if (url.includes('/PsycBOOKS/')) {
 		return "book";
 	}
-	if (url.includes('/search/display?') || url.includes('/record/') || url.includes('/doiLanding?doi=')) {
+	if (url.includes('/search/display?')
+			|| url.includes('/record/')
+			|| url.includes('/fulltext/')
+			|| url.includes('/buy/')
+			|| url.includes('/doiLanding?doi=')) {
 		if (doc.getElementById('bookchapterstoc')) {
 			return "bookSection";
 		} else {
