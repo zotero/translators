@@ -162,7 +162,7 @@ var CladeClass = function () {
 						item.creators.push({
 							lastName: authorTag[k].a,
 							creatorType: type,
-							fieldMode: true
+							fieldMode: 1
 						});
 					}
 				}
@@ -561,7 +561,7 @@ function detectWeb(doc, url) {
 		return getDocumentType(doc);
 	}
 
-	return undefined;
+	return false;
 }
 
 function getDocumentType(doc) {
@@ -584,7 +584,7 @@ function getDocumentType(doc) {
 		}
 	}
 
-	return undefined;
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -595,38 +595,39 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://bibliotheques-numeriques.defense.gouv.fr/document/e0dd0679-6201-4a8d-a02c-f59957b2b3e6",
+		"url": "https://bibliotheques-numeriques.defense.gouv.fr/document/1e5f16b5-ae22-4b03-ab6c-1f40dfe94cff",
 		"items": [
 			{
-				"itemType": "document",
-				"title": "Watteau's soldiers: scenes of military life in eighteenth-century France [exhibition, New York, The Frick Collection, from July 12, 2016 to October 2, 2016]",
+				"itemType": "book",
+				"title": "La Wehrmacht: la fin d'un mythe",
 				"creators": [
 					{
-						"firstName": "Aaron",
-						"lastName": "Wile",
+						"firstName": "Jean",
+						"lastName": "Lopez",
 						"creatorType": "contributor"
-					},
-					{
-						"lastName": "Frick collection",
-						"creatorType": "contributor",
-						"fieldMode": true
 					}
 				],
-				"extra": "ill. en noir et en coul., jaquette ill. en coul. 26 cm.",
+				"date": "2019",
+				"ISBN": "9782262080037",
+				"extra": "ill. en coul. 30 cm.",
 				"libraryCatalog": "Clade (https://bibliotheques-numeriques.defense.gouv.fr)",
-				"shortTitle": "Watteau's soldiers",
-				"url": "https://images-na.ssl-images-amazon.com/images/I/51LQ5lqDrzL.jpg",
+				"numPages": "482",
+				"numberOfVolumes": "1",
+				"place": "Paris [Montrouge]",
+				"publisher": "Perrin",
+				"shortTitle": "La Wehrmacht",
+				"url": "https://bibliotheques-numeriques.defense.gouv.fr/koha/vignettes/lopez_la_wehrmacht_la_fin_d_un_mythe.jpg",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Militaires Art"
+						"tag": "Allemagne Allemagne Allemagne"
 					},
 					{
-						"tag": "Watteau, Antoine (1684-1721)"
+						"tag": "Guerre mondiale (1939-1945) Guerre mondiale (1939-1945) Guerre mondiale (1939-1945)"
 					}
 				],
 				"notes": [
-					"Notes bibliogr. Bibliogr. p. 104-107. Index p. 110-112."
+					"Bibliogr., 1 p. Glossaire."
 				],
 				"seeAlso": []
 			}
