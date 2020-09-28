@@ -365,41 +365,41 @@ function doExport() {
 	Zotero.setCharacterSet("utf-8");
 	var parser = new DOMParser();
 	var doc = parser.parseFromString('<modsCollection xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-2.xsd" />', 'application/xml');
-	
+
 	var item;
 	let titleInfo;
 	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
 		// Don't export notes or standalone attachments
 		if (item.itemType === "note" || item.itemType === "attachment") continue;
-		
+
 		var mods = doc.createElementNS(ns, "mods"),
 			isPartialItem = partialItemTypes.includes(item.itemType),
 			recordInfo = doc.createElementNS(ns, "recordInfo"),
 			host = doc.createElementNS(ns, "relatedItem"),
 			series = doc.createElementNS(ns, "relatedItem"),
 			topOrHost = (isPartialItem ? host : mods);
-		
+
 		/** CORE FIELDS **/
-		
+
 		// XML tag titleInfo; object field title
 		if (item.title) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.title);
 			mods.appendChild(titleInfo);
 		}
-		
+
 		if (item.shortTitle) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
 			titleInfo.setAttribute("type", "abbreviated");
 			mapProperty(titleInfo, "title", item.shortTitle);
 			mods.appendChild(titleInfo);
 		}
-		
+
 		// XML tag typeOfResource/genre; object field type
 		mapProperty(mods, "typeOfResource", toTypeOfResource[item.itemType]);
 		mapProperty(mods, "genre", item.itemType, { authority: "local" });
 		mapProperty(topOrHost, "genre", toMarcGenre[item.itemType], { authority: "marcgt" });
-		
+
 		// XML tag genre; object field thesisType, type
 		if (item.thesisType) {
 			mapProperty(mods, "genre", item.thesisType);
@@ -407,7 +407,7 @@ function doExport() {
 		else if (item.type) {
 			mapProperty(mods, "genre", item.type);
 		}
-		
+
 		// XML tag name; object field creators
 		for (let j = 0; j < item.creators.length; j++) {
 			var creator = item.creators[j],
@@ -432,45 +432,45 @@ function doExport() {
 			}
 
 			const name = doc.createElementNS(ns, "name");
-			
+
 			if (creator.fieldMode == 1) {
 				name.setAttribute("type", "corporate");
-				
+
 				mapProperty(name, "namePart", creator.lastName);
 			}
 			else {
 				name.setAttribute("type", "personal");
-				
+
 				mapProperty(name, "namePart", creator.lastName, { type: "family" });
 				mapProperty(name, "namePart", creator.firstName, { type: "given" });
 			}
-			
+
 			var role = doc.createElementNS(ns, "role");
 			mapProperty(role, "roleTerm", roleTerm,
 				{ type: "code", authority: "marcrelator" });
 			name.appendChild(role);
-			
+
 			var creatorParent = (creator.creatorType === "seriesEditor")
 				? series
 				: ((creator.creatorType === "editor") ? topOrHost : mods);
 			creatorParent.appendChild(name);
 		}
-		
+
 		// XML tag recordInfo.recordOrigin; used to store our generator note
 		// mods.recordInfo.recordOrigin = "Zotero for Firefox "+Zotero.Utilities.getVersion();
-		
+
 		/** FIELDS ON NEARLY EVERYTHING BUT NOT A PART OF THE CORE **/
-		
+
 		// XML tag recordInfo.recordContentSource; object field source
 		mapProperty(recordInfo, "recordContentSource", item.libraryCatalog);
-		
+
 		// XML tag accessCondition; object field rights
 		mapProperty(mods, "accessCondition", item.rights);
-		
+
 		/** SUPPLEMENTAL FIELDS **/
-		
+
 		var part = doc.createElementNS(ns, "part");
-		
+
 		// XML tag detail; object field volume
 		const details = ["volume", "issue", "section"];
 		for (let i = 0; i < details.length; i++) {
@@ -483,7 +483,7 @@ function doExport() {
 				part.appendChild(detail);
 			}
 		}
-		
+
 		// XML tag detail; object field pages
 		if (item.pages) {
 			var extent = doc.createElementNS(ns, "extent");
@@ -499,15 +499,15 @@ function doExport() {
 			}
 			part.appendChild(extent);
 		}
-		
+
 		// Assign part if something was assigned
 		if (part.hasChildNodes()) {
 			// For a journal article, bookSection, etc., the part is the host
 			topOrHost.appendChild(part);
 		}
-		
+
 		var originInfo = doc.createElementNS(ns, "originInfo");
-		
+
 		// XML tag originInfo; object fields edition, place, publisher, year, date
 		mapProperty(originInfo, "edition", item.edition);
 		if (item.place) {
@@ -572,26 +572,26 @@ function doExport() {
 			// For a journal article, bookSection, etc., the part is the host
 			topOrHost.appendChild(originInfo);
 		}
-		
+
 		// XML tag identifier; object fields ISBN, ISSN
 		mapProperty(topOrHost, "identifier", item.ISBN, { type: "isbn" });
 		mapProperty(topOrHost, "identifier", item.ISSN, { type: "issn" });
 		mapProperty(mods, "identifier", item.DOI, { type: "doi" });
-		
+
 		// XML tag relatedItem.name; object field conferenceName
 		if (item.conferenceName) {
 			const name = doc.createElementNS(ns, "name");
 			name.setAttribute("type", "conference");
 			mapProperty(name, "namePart", item.conferenceName);
 		}
-		
+
 		// XML tag relatedItem.titleInfo; object field publication
 		if (item.publicationTitle) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
 			mapProperty(titleInfo, "title", item.publicationTitle);
 			host.appendChild(titleInfo);
 		}
-		
+
 		// XML tag relatedItem.titleInfo; object field journalAbbreviation
 		if (item.journalAbbreviation) {
 			titleInfo = doc.createElementNS(ns, "titleInfo");
@@ -599,7 +599,7 @@ function doExport() {
 			mapProperty(titleInfo, "title", item.journalAbbreviation);
 			host.appendChild(titleInfo);
 		}
-		
+
 		// XML tag classification; object field callNumber
 		mapProperty(topOrHost, "classification", item.callNumber);
 
@@ -610,24 +610,24 @@ function doExport() {
 			if (url && item.accessDate) url.setAttribute("dateLastAccessed", item.accessDate);
 			mods.appendChild(location);
 		}
-				
+
 		// XML tag location.physicalLocation; object field archiveLocation
 		if (item.archiveLocation) {
 			const location = doc.createElementNS(ns, "location");
 			mapProperty(location, "physicalLocation", item.archiveLocation);
 			topOrHost.appendChild(location);
 		}
-		
+
 		// XML tag abstract; object field abstractNote
 		mapProperty(mods, "abstract", item.abstractNote);
-		
+
 		// XML tag series/titleInfo; object field series, seriesTitle, seriesText, seriesNumber
 		titleInfo = doc.createElementNS(ns, "titleInfo");
 		mapProperty(titleInfo, "title", item.series);
 		mapProperty(titleInfo, "title", item.seriesTitle);
 		mapProperty(titleInfo, "subTitle", item.seriesText);
 		if (titleInfo.hasChildNodes()) series.appendChild(titleInfo);
-		
+
 		if (item.seriesNumber) {
 			const seriesPart = doc.createElementNS(ns, "part"),
 				detail = doc.createElementNS(ns, "detail"),
@@ -638,17 +638,17 @@ function doExport() {
 			seriesPart.appendChild(detail);
 			series.appendChild(seriesPart);
 		}
-		
+
 		/** NOTES **/
-		
+
 		if (Zotero.getOption("exportNotes")) {
 			for (let j = 0; j < item.notes.length; j++) {
 				mapProperty(mods, "note", item.notes[j].note);
 			}
 		}
-		
+
 		/** TAGS **/
-		
+
 		for (let j = 0; j < item.tags.length; j++) {
 			var subject = doc.createElementNS(ns, "subject"),
 				topic = doc.createElementNS(ns, "topic");
@@ -658,7 +658,7 @@ function doExport() {
 		}
 
 		/** LANGUAGE **/
-		
+
 		if (item.language) {
 			var language = doc.createElementNS(ns, "language");
 			mapProperty(language, "languageTerm", item.language, { type: "text" });
@@ -667,7 +667,7 @@ function doExport() {
 
 		/** EXTRA->NOTE **/
 		mapProperty(mods, "note", item.extra);
-		
+
 		if (recordInfo.hasChildNodes()) mods.appendChild(recordInfo);
 		if (host.hasChildNodes()) {
 			host.setAttribute("type", "host");
@@ -679,7 +679,7 @@ function doExport() {
 		}
 		doc.documentElement.appendChild(mods);
 	}
-	
+
 	Zotero.write('<?xml version="1.0"?>\n');
 	var serializer = new XMLSerializer();
 	Zotero.write(serializer.serializeToString(doc));
@@ -704,11 +704,11 @@ function processTitle(contextElement) {
 	// child
 	var titleElements = ZU.xpath(contextElement, "m:titleInfo[not(@type)][m:title][1]", xns);
 	if (titleElements.length) return processTitleInfo(titleElements[0]);
-	
+
 	// That failed, so look for any titleInfo element without no type secified
 	var title = ZU.xpathText(contextElement, "m:titleInfo[not(@type)][1]", xns);
 	if (title) return title;
-	
+
 	// That failed, so just go for the first title
 	return ZU.xpathText(contextElement, "m:titleInfo[1]", xns);
 }
@@ -720,72 +720,72 @@ function processGenre(contextElement) {
 		const genreStr = genre[i].textContent;
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
 	}
-	
+
 	// Try to get MARC genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="marcgt"] | m:genre[@authority="marc"]', xns);
 	for (let i = 0; i < genre.length; i++) {
 		const genreStr = genre[i].textContent;
 		if (fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
 	}
-	
+
 	// Try to get DCT genre and convert to an item type
 	genre = ZU.xpath(contextElement, 'm:genre[@authority="dct"]', xns);
 	for (let i = 0; i < genre.length; i++) {
 		const genreStr = genre[i].textContent.replace(/\s+/g, "");
 		if (dctGenres[genreStr]) return dctGenres[genreStr];
 	}
-	
+
 	// Try unlabeled genres
 	genre = ZU.xpath(contextElement, 'm:genre', xns);
 	for (let i = 0; i < genre.length; i++) {
 		const genreStr = genre[i].textContent;
-		
+
 		// Zotero
 		if (Zotero.Utilities.itemTypeExists(genreStr)) return genreStr;
-		
+
 		// MARC
 		if (fromMarcGenre[genreStr]) return fromMarcGenre[genreStr];
-		
+
 		// DCT
 		var dctGenreStr = genreStr.replace(/\s+/g, "");
 		if (dctGenres[dctGenreStr]) return dctGenres[dctGenreStr];
-		
+
 		// Try regexps
 		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(genreStr)) return type;
 		}
 	}
-	
+
 	return undefined;
 }
 
 function processItemType(contextElement) {
 	var type = processGenre(contextElement);
 	if (type) return type;
-	
+
 	// Try to get type information from typeOfResource
 	var typeOfResource = ZU.xpath(contextElement, 'm:typeOfResource', xns);
 	for (let i = 0; i < typeOfResource.length; i++) {
 		var typeOfResourceStr = typeOfResource[i].textContent.trim();
-		
+
 		// Try list
 		if (fromTypeOfResource[typeOfResourceStr]) {
 			return fromTypeOfResource[typeOfResourceStr];
 		}
-		
+
 		// Try regexps
 		for (let type in modsTypeRegex) {
 			if (modsTypeRegex[type].exec(typeOfResourceStr)) return type;
 		}
 	}
-	
+
 	// Try to get genre data from host
 	var hosts = ZU.xpath(contextElement, 'm:relatedItem[@type="host"]', xns);
 	for (let i = 0; i < hosts.length; i++) {
 		type = processGenre(hosts[i]);
 		if (type) return type;
 	}
-		
+
 	// Figure out if it's a periodical
 	var periodical = ZU.xpath(contextElement,
 		'm:relatedItem[@type="host"]/m:originInfo/m:issuance[text()="continuing" or text()="serial"]',
@@ -806,7 +806,7 @@ function processItemType(contextElement) {
 		if (periodical) return 'journalArticle';
 		return 'bookSection';
 	}
-	
+
 	return "document";
 }
 
@@ -814,13 +814,13 @@ function processCreator(name, itemType, defaultCreatorType) {
 	var creator = {};
 	creator.firstName = ZU.xpathText(name, 'm:namePart[@type="given"]', xns, " ") || undefined;
 	creator.lastName = ZU.xpathText(name, 'm:namePart[@type="family"]', xns, " ");
-	
+
 	if (!creator.lastName) {
 		var isPersonalName = name.getAttribute("type") === "personal",
 			backupName = ZU.xpathText(name, 'm:namePart[not(@type="date")][not(@type="termsOfAddress")]', xns, (isPersonalName ? " " : ": "));
-		
+
 		if (!backupName) return null;
-		
+
 		if (isPersonalName) {
 			creator = ZU.cleanAuthor(backupName.replace(/[[(][^A-Za-z]*[\])]/g, ''),
 				"author", true);
@@ -831,7 +831,7 @@ function processCreator(name, itemType, defaultCreatorType) {
 			creator.fieldMode = 1;
 		}
 	}
-	
+
 	if (!creator.lastName) return null;
 
 	// Look for roles
@@ -843,7 +843,7 @@ function processCreator(name, itemType, defaultCreatorType) {
 			creator.creatorType = roleStr;
 		}
 	}
-	
+
 	if (!creator.creatorType) {
 		// Look for MARC roles
 		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
@@ -851,7 +851,7 @@ function processCreator(name, itemType, defaultCreatorType) {
 			const roleStr = roles[i].textContent.toLowerCase();
 			if (marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
 		}
-		
+
 		// Default to author
 		if (!creator.creatorType) creator.creatorType = defaultCreatorType;
 	}
@@ -1002,7 +1002,7 @@ function processIdentifiers(contextElement, newItem) {
 		if (m) isbns.push(m[0]);
 	}
 	if (isbns.length) newItem.ISBN = isbns.join(", ");
-	
+
 	var issnNodes = ZU.xpath(contextElement, './/m:identifier[@type="issn"]', xns),
 		issns = [];
 	for (let i = 0; i < issnNodes.length; i++) {
@@ -1010,7 +1010,7 @@ function processIdentifiers(contextElement, newItem) {
 		if (m) issns.push(m[0]);
 	}
 	if (issns.length) newItem.ISSN = issns.join(", ");
-	
+
 	newItem.DOI = ZU.xpathText(contextElement, 'm:identifier[@type="doi"]', xns);
 }
 
@@ -1024,28 +1024,28 @@ function getFirstResult(contextNode, xpaths) {
 
 function doImport() {
 	var xml = Zotero.getXML();
-	
+
 	var modsElements = ZU.xpath(xml, "/m:mods | /m:modsCollection/m:mods", xns);
-	
+
 	for (let iModsElements = 0, nModsElements = modsElements.length;
 		iModsElements < nModsElements; iModsElements++) {
 		var modsElement = modsElements[iModsElements],
 			newItem = new Zotero.Item();
-		
+
 		// title
 		newItem.title = processTitle(modsElement);
-		
+
 		// shortTitle
 		var abbreviatedTitle = ZU.xpath(modsElement, 'm:titleInfo[@type="abbreviated"]', xns);
 		if (abbreviatedTitle.length) {
 			newItem.shortTitle = processTitleInfo(abbreviatedTitle[0]);
 		}
-		
+
 		// itemType
 		newItem.itemType = processItemType(modsElement);
-		
+
 		// TODO: thesisType, type
-		
+
 		// creators
 		processCreators(modsElement, newItem, "author");
 		// source
@@ -1054,19 +1054,19 @@ function doImport() {
 		newItem.accessionNumber = ZU.xpathText(modsElement, 'm:recordInfo/m:recordIdentifier', xns);
 		// rights
 		newItem.rights = ZU.xpathText(modsElement, 'm:accessCondition', xns);
-		
+
 		/** SUPPLEMENTAL FIELDS **/
-		
+
 		var part = [], originInfo = [];
-		
+
 		// host
 		var hostNodes = ZU.xpath(modsElement, 'm:relatedItem[@type="host"]', xns);
 		for (let i = 0; i < hostNodes.length; i++) {
 			var host = hostNodes[i];
-			
+
 			// publicationTitle
 			if (!newItem.publicationTitle) newItem.publicationTitle = processTitle(host);
-			
+
 			// journalAbbreviation
 			if (!newItem.journalAbbreviation) {
 				const titleInfo = ZU.xpath(host, 'm:titleInfo[@type="abbreviated"]', xns);
@@ -1074,56 +1074,56 @@ function doImport() {
 					newItem.journalAbbreviation = processTitleInfo(titleInfo[0]);
 				}
 			}
-			
+
 			// creators of host item will be evaluated by their role info
 			// and only if this is missing then they are connected by a generic
 			// contributor role
 			processCreators(host, newItem, "contributor");
-			
+
 			// identifiers
 			processIdentifiers(host, newItem);
-			
+
 			part = part.concat(ZU.xpath(host, 'm:part', xns));
 			originInfo = originInfo.concat(ZU.xpath(host, 'm:originInfo', xns));
 		}
-		
+
 		if (!newItem.publicationTitle) newItem.publicationTitle = newItem.journalAbbreviation;
-		
+
 		// series
 		var seriesNodes = ZU.xpath(modsElement, './/m:relatedItem[@type="series"]', xns);
 		for (let i = 0; i < seriesNodes.length; i++) {
 			var seriesNode = seriesNodes[i];
 			var series = ZU.xpathText(seriesNode, 'm:titleInfo/m:title', xns);
-			
+
 			if (ZU.fieldIsValidForType('series', newItem.itemType)) {
 				newItem.series = series;
 			}
 			else if (ZU.fieldIsValidForType('seriesTitle', newItem.itemType)) {
 				newItem.seriesTitle = series;
 			}
-			
+
 			if (!newItem.seriesText) {
 				newItem.seriesText = ZU.xpathText(seriesNode, 'm:titleInfo/m:subTitle', xns);
 			}
-			
+
 			if (!newItem.seriesNumber) {
 				newItem.seriesNumber = getFirstResult(seriesNode,
 					['m:part/m:detail[@type="volume"]/m:number', 'm:titleInfo/m:partNumber']);
 			}
-			
+
 			processCreators(seriesNode, newItem, "seriesEditor");
 		}
-		
+
 		// Add part and originInfo from main entry
 		part = part.concat(ZU.xpath(modsElement, 'm:part', xns));
 		originInfo = originInfo.concat(ZU.xpath(modsElement, 'm:originInfo', xns));
-		
+
 		if (part.length) {
 			// volume, issue, section
 			var details = ["volume", "issue", "section"];
 			for (let i = 0; i < details.length; i++) {
 				var detail = details[i];
-				
+
 				newItem[detail] = getFirstResult(part, ['m:detail[@type="' + detail + '"]/m:number',
 					'm:detail[@type="' + detail + '"]']);
 			}
@@ -1133,7 +1133,7 @@ function doImport() {
 			for (let i = 0; i < extents.length; i++) {
 				var extent = extents[i],
 					unit = extent.getAttribute("unit");
-				
+
 				if (unit === "pages" || unit === "page") {
 					if (newItem.pages) continue;
 					var pagesStart = ZU.xpathText(extent, "m:start[1]", xns);
@@ -1154,7 +1154,7 @@ function doImport() {
 					processExtent(extent.textContent, newItem);
 				}
 			}
-			
+
 			newItem.date = getFirstResult(part, ['m:date[not(@point="end")][@encoding]',
 				'm:date[not(@point="end")]',
 				'm:date']);
@@ -1168,16 +1168,16 @@ function doImport() {
 
 		// identifier
 		processIdentifiers(modsElement, newItem);
-		
+
 		if (originInfo.length) {
 			// edition
 			var editionNodes = ZU.xpath(originInfo, 'm:edition', xns);
 			if (editionNodes.length) newItem.edition = editionNodes[0].textContent;
-			
+
 			// place
 			var placeNodes = ZU.xpath(originInfo, 'm:place/m:placeTerm[@type="text"]', xns);
 			if (placeNodes.length) newItem.place = placeNodes[0].textContent;
-			
+
 			// publisher/distributor
 			var publisherNodes = ZU.xpath(originInfo, 'm:publisher', xns);
 			if (publisherNodes.length) {
@@ -1186,7 +1186,7 @@ function doImport() {
 					newItem.publicationTitle = newItem.publisher;
 				}
 			}
-			
+
 			// date
 			newItem.date = getFirstResult(originInfo, ['m:copyrightDate[@encoding]',
 				'm:copyrightDate',
@@ -1195,19 +1195,19 @@ function doImport() {
 				'm:dateIssued',
 				'm:dateCreated[@encoding]',
 				'm:dateCreated']) || newItem.date;
-			
+
 			// lastModified
 			newItem.lastModified = getFirstResult(originInfo, ['m:dateModified[@encoding]',
 				'm:dateModified']);
-			
+
 			// accessDate
 			newItem.accessDate = getFirstResult(originInfo, ['m:dateCaptured[@encoding]',
 				'm:dateCaptured[not(@encoding)]']);
 		}
-		
+
 		// call number
 		newItem.callNumber = ZU.xpathText(modsElement, 'm:classification', xns);
-		
+
 		// archiveLocation
 		newItem.archiveLocation = ZU.xpathText(modsElement, './/m:location/m:physicalLocation', xns, "; ");
 
@@ -1225,12 +1225,12 @@ function doImport() {
 				if (attachment.path.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
 				newItem.attachments.push(attachment);
 			}
-			
+
 			if ((!newItem.url || usage === "primary" || usage === "primary display")
 					&& access !== "preview") {
 				newItem.url = urlNode.textContent;
 			}
-			
+
 			if (!newItem.accessDate) {
 				newItem.accessDate = urlNode.getAttribute("dateLastAccessed");
 			}
@@ -1238,7 +1238,7 @@ function doImport() {
 
 		// abstract
 		newItem.abstractNote = ZU.xpathText(modsElement, 'm:abstract', xns, "\n\n");
-		
+
 		/** NOTES **/
 		var noteNodes = ZU.xpath(modsElement, 'm:note', xns);
 		for (let i = 0; i < noteNodes.length; i++) {
@@ -1268,7 +1268,7 @@ function doImport() {
 				if (m) newItem.scale = m[0];
 			}
 		}
-		
+
 		// Language
 		// create an array of languages
 		var languages = [];
@@ -1277,11 +1277,11 @@ function doImport() {
 			var code = false,
 				languageNode = languageNodes[i],
 				languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
-				
+
 			for (let j = 0; j < languageTerms.length; j++) {
 				var term = languageTerms[j],
 					termType = term.getAttribute("type");
-				
+
 				if (termType === "text") {
 					languages.push(term.textContent);
 					code = false;
@@ -1303,7 +1303,7 @@ function doImport() {
 		}
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
-		
+
 		Zotero.setProgress(iModsElements / nModsElements * 100);
 		newItem.complete();
 	}
