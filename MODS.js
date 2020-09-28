@@ -302,6 +302,7 @@ var marcRelators = {
 	cmp: "composer",
 	ctb: "contributor",
 	pbd: "seriesEditor",
+	prf: "performer",
 	trl: "translator"
 };
 
@@ -420,6 +421,9 @@ function doExport() {
 			}
 			else if (creator.creatorType == "editor") {
 				roleTerm = "edt";
+			}
+			else if (creator.creatorType == "performer") {
+				roleTerm = "prf";
 			}
 			else if (creator.creatorType == "translator") {
 				roleTerm = "trl";
