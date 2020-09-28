@@ -944,15 +944,15 @@ function processExtent(extent, newItem) {
 					if (!rt[i]) continue;
 
 					switch (rt[i].charAt(0).toLowerCase()) {
-					case 'h':
-						hrs = rt[i - 1];
-						break;
-					case 'm':
-						mins = rt[i - 1];
-						break;
-					case 's':
-						secs = rt[i - 1];
-						break;
+						case 'h':
+							hrs = rt[i - 1];
+							break;
+						case 'm':
+							mins = rt[i - 1];
+							break;
+						case 's':
+							secs = rt[i - 1];
+							break;
 					}
 				}
 
