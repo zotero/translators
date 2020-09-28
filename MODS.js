@@ -299,6 +299,7 @@ var modsInternetMediaTypes = {
 var marcRelators = {
 	aut: "author",
 	edt: "editor",
+	cmp: "composer",
 	ctb: "contributor",
 	pbd: "seriesEditor",
 	trl: "translator"
@@ -413,6 +414,9 @@ function doExport() {
 				roleTerm = "";
 			if (creator.creatorType == "author") {
 				roleTerm = "aut";
+			}
+			else if (creator.creatorType == "composer") {
+				roleTerm = "cmp";
 			}
 			else if (creator.creatorType == "editor") {
 				roleTerm = "edt";
