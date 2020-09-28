@@ -14,7 +14,6 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-09-28 22:56:23"
 }
 
