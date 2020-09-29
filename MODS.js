@@ -14,8 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-20 09:05:38"
+	"lastUpdated": "2020-05-29 00:25:03"
 }
 
 
@@ -953,15 +952,15 @@ function processExtent(extent, newItem) {
 					if (!rt[i]) continue;
 
 					switch (rt[i].charAt(0).toLowerCase()) {
-					case 'h':
-						hrs = rt[i - 1];
-						break;
-					case 'm':
-						mins = rt[i - 1];
-						break;
-					case 's':
-						secs = rt[i - 1];
-						break;
+						case 'h':
+							hrs = rt[i - 1];
+							break;
+						case 'm':
+							mins = rt[i - 1];
+							break;
+						case 's':
+							secs = rt[i - 1];
+							break;
 					}
 				}
 
