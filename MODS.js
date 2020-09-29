@@ -301,7 +301,10 @@ var marcRelators = {
 	edt: "editor",
 	ctb: "contributor",
 	pbd: "seriesEditor",
-	trl: "translator"
+	trl: "translator",
+	cmp: "composer",
+	lyr: "wordsBy",
+	prf: "performer"
 };
 
 // Item types that are part of a larger work
@@ -423,6 +426,16 @@ function doExport() {
 			else if (creator.creatorType == "seriesEditor") {
 				roleTerm = "pbd";
 			}
+			else if (creator.creatorType == "composer") {
+				roleTerm = "cmp";
+			}
+			else if (creator.creatorType == "wordsBy") {
+				roleTerm = "lyr";
+			}
+			else if (creator.creatorType == "performer") {
+				roleTerm = "prf";
+			}
+
 			else {
 				roleTerm = "ctb";
 			}
