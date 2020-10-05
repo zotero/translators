@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2020-10-05 15:15:00"
 }
 
 /*
@@ -29,7 +29,11 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/article/)) return "journalArticle";
+    let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
+    if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+          pkpLibraries.length >= 1))
+        return false;
+    else if (url.match(/article/)) return "journalArticle";
 	else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
 	else return false;
 }
