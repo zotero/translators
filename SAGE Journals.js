@@ -131,10 +131,16 @@ function scrape(doc, url) {
 				});
 			}
 
-			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
+            // Only get attributes and skip introductory term Keywords
+			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))] \
+                                                                  /a[@class="attributes"]');
+            // Make sure we keep the original approach
+            if (!tagentry)
+                tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
 				item.tags = tagentry.split(",");
 			}
+
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
 				for (let r of articleType) {
@@ -160,6 +166,7 @@ function scrape(doc, url) {
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
 					if (tags) item.tags = tags.map(n => n.textContent);
+                    Z.debug(item.tags);
 				}
 			}
 
