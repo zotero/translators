@@ -25,9 +25,9 @@ get_translators_to_check() {
 		# Size of $PARENT_COMMITS array
 		NUM_PARENT_COMMITS=${#PARENT_COMMITS[@]}
 		if [ $NUM_PARENT_COMMITS -gt 1 ]; then
-			TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $(git rev-list "$(git rev-list --first-parent ^HEAD^2 master | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
+			TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $(git rev-list "$(git rev-list --first-parent ^master HEAD^2 | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
 		else
-			TRANSLATORS_TO_CHECK=$(git diff $(git rev-list "$(git rev-list --first-parent ^HEAD master | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
+			TRANSLATORS_TO_CHECK=$(git diff $(git rev-list "$(git rev-list --first-parent ^master HEAD | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
 		fi
 }
 
@@ -41,11 +41,13 @@ if [ -d .git ]; then
 	git pull
 	git submodule update
 	git -C src/zotero/ submodule update -- resource/schema/global
+	git -C src/zotero submodule update -- resource/SingleFileZ
 	npm ci
 else
 	git clone https://github.com/zotero/zotero-connectors.git --depth 1 .
 	git submodule update --init --depth 1
 	git -C src/zotero submodule update --init --depth 1 -- resource/schema/global
+	git -C src/zotero submodule update --init --depth 1 -- resource/SingleFileZ
   npm ci
 fi
 
