@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-19 18:57:13"
+	"lastUpdated": "2020-10-09 03:33:11"
 }
 
 /*
@@ -43,7 +43,7 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 function detectWeb(doc, url) {
 	Z.monitorDOMChanges(doc.body, { childList: true });
 	if (text(doc, 'h1#preprintTitle')) {
-		return "document";
+		return "report";
 	}
 	else if (url.includes("discover?") && getSearchResults(doc, true)) {
 		return "multiple";
@@ -101,7 +101,7 @@ function osfAPIImport(text) {
 	let json = JSON.parse(text);
 	let attr = json.data.attributes;
 	let embeds = json.data.embeds;
-	var item = new Zotero.Item("document");
+	var item = new Zotero.Item("report");
 	// currently we're just doing preprints, but putting this here in case we'll want to handle different OSF
 	// item types in the future
 	// let type = json.data.type
@@ -165,7 +165,7 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function (trans) {
-		trans.itemType = "document";
+		trans.itemType = "report";
 		trans.doWeb(doc, url);
 	});
 }
@@ -178,7 +178,7 @@ var testCases = [
 		"url": "https://psyarxiv.com/nx2b4/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "report",
 				"title": "The Dutch Auditory & Image Vocabulary test (DAIVT): A new Dutch receptive vocabulary test for students",
 				"creators": [
 					{
@@ -195,8 +195,8 @@ var testCases = [
 				"date": "2020-05-05T19:14:05.245Z",
 				"abstractNote": "We introduce a new Dutch receptive vocabulary test, the Dutch auditory & image vocabulary test (DAIVT). The test is multiple-choice and assesses vocabulary knowledge for spoken words. The measure has an online format, has free access, and allows easy data collection. The test was developed with the intent to enable testing for research purposes in university students. This paper describes the test construction. We cover three phases: 1) collecting stimulus materials and developing the test’s first version, 2) an exploratory item-analysis on the first draft (n= 93), and 3) validating the test (both the second and the final version) by comparing it to two existing tests (n= 270, n= 157). The results indicate that the test is reliable and correlates well with existing Dutch receptive vocabulary tests (convergent validity). The final version of the DAIVT comprises 90 test items and 1 practice item. It can be used for research.",
 				"extra": "DOI: 10.31234/osf.io/nx2b4\ntype: article",
-				"libraryCatalog": "psyarxiv.com",
-				"publisher": "PsyArXiv",
+				"institution": "PsyArXiv",
+				"libraryCatalog": "OSF Preprints",
 				"shortTitle": "The Dutch Auditory & Image Vocabulary test (DAIVT)",
 				"url": "https://psyarxiv.com/nx2b4/",
 				"attachments": [
@@ -241,10 +241,10 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://osf.io/b2xmp",
+		"url": "https://osf.io/b2xmp/",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "report",
 				"title": "‘All In’: A Pragmatic Framework for COVID-19 Testing and Action on a Global Scale",
 				"creators": [
 					{
@@ -306,8 +306,8 @@ var testCases = [
 				"date": "2020-04-29T12:19:21.907Z",
 				"abstractNote": "Current demand for SARS-CoV-2 testing is straining material resource and labor capacity around the globe.  As a result, the public health and clinical community are hindered in their ability to monitor and contain the spread of COVID-19.  Despite broad consensus that more testing is needed, pragmatic guidance towards realizing this objective has been limited.  This paper addresses this limitation by proposing a novel and geographically agnostic framework (‘the 4Ps Framework) to guide multidisciplinary, scalable, resource-efficient, and achievable efforts towards enhanced testing capacity.  The 4Ps (Prioritize, Propagate, Partition, and Provide) are described in terms of specific opportunities to enhance the volume, diversity, characterization, and implementation of SARS-CoV-2 testing to benefit public health.  Coordinated deployment of the strategic and tactical recommendations described in this framework have the potential to rapidly expand available testing capacity, improve public health decision-making in response to the COVID-19 pandemic, and/or to be applied in future emergent disease outbreaks.",
 				"extra": "DOI: 10.31219/osf.io/b2xmp\ntype: article",
+				"institution": "OSF Preprints",
 				"libraryCatalog": "OSF Preprints",
-				"publisher": "OSF Preprints",
 				"shortTitle": "‘All In’",
 				"url": "https://osf.io/b2xmp/",
 				"attachments": [
