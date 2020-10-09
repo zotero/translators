@@ -137,6 +137,11 @@ var allPassed = false;
 			await driver.quit();
 		}
 		translatorServer.stopServing();
+		if (allPassed) {
+			console.log(chalk.green("All translator tests passed"));
+		} else {
+			console.log(chalk.red("Some translator tests failed"));
+		}
 		process.exit(allPassed ? 0 : 1);
 	}
 })();
