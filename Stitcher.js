@@ -54,6 +54,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
+	// Podcast pages
 	var rows = doc.querySelectorAll('li>div#episodeContainer a.title[href*="/e/"]');
 	if (rows.length) {
 		for (let row of rows) {
@@ -67,6 +68,7 @@ function getSearchResults(doc, checkOnly) {
 		return found ? items : false;
 	}
 	else {
+		// Search results (episodes only)
 		rows = doc.querySelectorAll('ul#episodeResultsList>li');
 		for (let row of rows) {
 			let href = attr(row, 'a', 'data-eid');
