@@ -11,9 +11,31 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-10-17 05:38:38"
+	"lastUpdated": "2020-10-11 02:35:59"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2017-2020 Simon Kornblith, Michael Berkowitz, Avram Lyon, Sebastian Karcher, and Rintze Zelle
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 /*******************************
  * Import translator functions *
@@ -21,33 +43,33 @@
 
 function detectImport() {
 	var text = Zotero.read(1000);
-	return text.indexOf("<PubmedArticleSet>") != -1;
+	return text.includes("<PubmedArticleSet>");
 }
 
 function processAuthors(newItem, authorsLists) {
-	for (var j=0, m=authorsLists.length; j<m; j++) {
-		//default to 'author' unless it's 'editor'
+	for (var j = 0, m = authorsLists.length; j < m; j++) {
+		// default to 'author' unless it's 'editor'
 		var type = "author";
 		if (authorsLists[j].hasAttribute('Type')
 			&& authorsLists[j].getAttribute('Type') === "editors") {
 			type = "editor";
 		}
-	
+
 		var authors = ZU.xpath(authorsLists[j], 'Author');
-	
-		for (var k=0, l=authors.length; k<l; k++) {
+
+		for (var k = 0, l = authors.length; k < l; k++) {
 			var author = authors[k];
 			var lastName = ZU.xpathText(author, 'LastName');
 			var firstName = ZU.xpathText(author, 'FirstName');
 			if (!firstName) {
 				firstName = ZU.xpathText(author, 'ForeName');
 			}
-	
+
 			var suffix = ZU.xpathText(author, 'Suffix');
 			if (suffix && firstName) {
-				firstName += ", " + suffix
+				firstName += ", " + suffix;
 			}
-	
+
 			if (firstName || lastName) {
 				var creator = ZU.cleanAuthor(lastName + ', ' + firstName, type, true);
 				if (creator.lastName.toUpperCase() == creator.lastName) {
@@ -57,8 +79,9 @@ function processAuthors(newItem, authorsLists) {
 					creator.firstName = ZU.capitalizeTitle(creator.firstName, true);
 				}
 				newItem.creators.push(creator);
-			} else if (lastName = ZU.xpathText(author, 'CollectiveName')) {
-				//corporate author
+			}
+			else if ((lastName = ZU.xpathText(author, 'CollectiveName'))) {
+				// corporate author
 				newItem.creators.push({
 					creatorType: type,
 					lastName: lastName,
@@ -74,57 +97,58 @@ function doImport() {
 
 	var pageRangeRE = /(\d+)-(\d+)/g;
 
-	//handle journal articles
+	// handle journal articles
 	var articles = ZU.xpath(doc, '/PubmedArticleSet/PubmedArticle');
-	for (var i=0, n=articles.length; i<n; i++) {
+	for (let i = 0, n = articles.length; i < n; i++) {
 		var newItem = new Zotero.Item("journalArticle");
 
 		var citation = ZU.xpath(articles[i], 'MedlineCitation')[0];
 
 		var article = ZU.xpath(citation, 'Article')[0];
-		
-		var title = ZU.xpathText(article, 'ArticleTitle');
+
+		let title = ZU.xpathText(article, 'ArticleTitle');
 		if (title) {
-			if (title.charAt(title.length-1) == ".") {
-				title = title.substring(0, title.length-1);
+			if (title.charAt(title.length - 1) == ".") {
+				title = title.substring(0, title.length - 1);
 			}
 			newItem.title = title;
 		}
-		
+
 		var fullPageRange = ZU.xpathText(article, 'Pagination/MedlinePgn');
 		if (fullPageRange) {
-			//where page ranges are given in an abbreviated format, convert to full
+			// where page ranges are given in an abbreviated format, convert to full
 			pageRangeRE.lastIndex = 0;
 			var range;
-			while (range = pageRangeRE.exec(fullPageRange)) {
+			while ((range = pageRangeRE.exec(fullPageRange))) {
 				var pageRangeStart = range[1];
 				var pageRangeEnd = range[2];
 				var diff = pageRangeStart.length - pageRangeEnd.length;
 				if (diff > 0) {
-					pageRangeEnd = pageRangeStart.substring(0,diff) + pageRangeEnd;
+					pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
 					var newRange = pageRangeStart + "-" + pageRangeEnd;
-					fullPageRange = fullPageRange.substring(0, range.index) //everything before current range
-						+ newRange	//insert the new range
-						+ fullPageRange.substring(range.index + range[0].length);	//everything after the old range
-					//adjust RE index
+					fullPageRange = fullPageRange.substring(0, range.index) // everything before current range
+						+ newRange	// insert the new range
+						+ fullPageRange.substring(range.index + range[0].length);	// everything after the old range
+					// adjust RE index
 					pageRangeRE.lastIndex += newRange.length - range[0].length;
 				}
 			}
 			newItem.pages = fullPageRange;
 		}
-		
+
 		var journal = ZU.xpath(article, 'Journal')[0];
 		if (journal) {
 			newItem.ISSN = ZU.xpathText(journal, 'ISSN');
-			
+
 			var abbreviation;
 			if ((abbreviation = ZU.xpathText(journal, 'ISOAbbreviation'))) {
-				newItem.journalAbbreviation = abbreviation;	
-			} else if ((abbreviation = ZU.xpathText(journal, 'MedlineTA'))) {
 				newItem.journalAbbreviation = abbreviation;
 			}
-			
-			var title = ZU.xpathText(journal, 'Title');
+			else if ((abbreviation = ZU.xpathText(journal, 'MedlineTA'))) {
+				newItem.journalAbbreviation = abbreviation;
+			}
+
+			let title = ZU.xpathText(journal, 'Title');
 			if (title) {
 				title = ZU.trimInternal(title);
 				// Fix sentence-cased titles, but be careful...
@@ -136,14 +160,15 @@ function doImport() {
 					title = ZU.capitalizeTitle(title, true);
 				}
 				newItem.publicationTitle = title;
-			} else if (newItem.journalAbbreviation) {
+			}
+			else if (newItem.journalAbbreviation) {
 				newItem.publicationTitle = newItem.journalAbbreviation;
 			}
 			// (do we want this?)
 			if (newItem.publicationTitle) {
 				newItem.publicationTitle = ZU.capitalizeTitle(newItem.publicationTitle);
 			}
-			
+
 			var journalIssue = ZU.xpath(journal, 'JournalIssue')[0];
 			if (journalIssue) {
 				newItem.volume = ZU.xpathText(journalIssue, 'Volume');
@@ -153,14 +178,17 @@ function doImport() {
 					var day = ZU.xpathText(pubDate, 'Day');
 					var month = ZU.xpathText(pubDate, 'Month');
 					var year = ZU.xpathText(pubDate, 'Year');
-					
+
 					if (day) {
-						newItem.date = month+" "+day+", "+year;
-					} else if (month) {
-						newItem.date = month+" "+year;
-					} else if (year) {
+						newItem.date = month + " " + day + ", " + year;
+					}
+					else if (month) {
+						newItem.date = month + " " + year;
+					}
+					else if (year) {
 						newItem.date = year;
-					} else {
+					}
+					else {
 						newItem.date = ZU.xpathText(pubDate, 'MedlineDate');
 					}
 				}
@@ -169,25 +197,25 @@ function doImport() {
 
 		var authorLists = ZU.xpath(article, 'AuthorList');
 		processAuthors(newItem, authorLists);
-		
+
 		newItem.language = ZU.xpathText(article, 'Language');
-		
+
 		var keywords = ZU.xpath(citation, 'MeshHeadingList/MeshHeading');
-		for (var j=0, m=keywords.length; j<m; j++) {
+		for (let j = 0, m = keywords.length; j < m; j++) {
 			newItem.tags.push(ZU.xpathText(keywords[j], 'DescriptorName'));
 		}
-		//OT Terms
+		// OT Terms
 		var otherKeywords = ZU.xpath(citation, 'KeywordList/Keyword');
-		for (var j=0, m=otherKeywords.length; j<m; j++) {
+		for (let j = 0, m = otherKeywords.length; j < m; j++) {
 			newItem.tags.push(otherKeywords[j].textContent);
 		}
 		var abstractSections = ZU.xpath(article, 'Abstract/AbstractText');
 		var abstractNote = [];
-		for (var j=0, m=abstractSections.length; j<m; j++) {
+		for (let j = 0, m = abstractSections.length; j < m; j++) {
 			var abstractSection = abstractSections[j];
 			var paragraph = abstractSection.textContent.trim();
 			if (paragraph) paragraph += '\n';
-			
+
 			var label = abstractSection.hasAttribute("Label") && abstractSection.getAttribute("Label");
 			if (label && label != "UNLABELLED") {
 				paragraph = label + ": " + paragraph;
@@ -195,14 +223,14 @@ function doImport() {
 			abstractNote.push(paragraph);
 		}
 		newItem.abstractNote = abstractNote.join('');
-		
+
 		newItem.DOI = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="doi"]');
-		
+
 		var PMID = ZU.xpathText(citation, 'PMID');
 		var PMCID = ZU.xpathText(articles[i], 'PubmedData/ArticleIdList/ArticleId[@IdType="pmc"]');
 		if (PMID) {
-			newItem.extra = "PMID: "+PMID;
-			//this is a catalog, so we should store links as attachments
+			newItem.extra = "PMID: " + PMID;
+			// this is a catalog, so we should store links as attachments
 			newItem.attachments.push({
 				title: "PubMed entry",
 				url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
@@ -210,93 +238,95 @@ function doImport() {
 				snapshot: false
 			});
 		}
-		
+
 		if (PMCID) {
 			newItem.extra = (newItem.extra ? newItem.extra + "\n" : "")
 				+ "PMCID: " + PMCID;
 		}
-		
+
 		newItem.complete();
 	}
 
-	//handle books and chapters
+	// handle books and chapters
 	var books = ZU.xpath(doc, '/PubmedArticleSet/PubmedBookArticle');
-	for (var i=0, n=books.length; i<n; i++) {
-		var citation = ZU.xpath(books[i], 'BookDocument')[0];
-		
-		//check if this is a section
+	for (let i = 0, n = books.length; i < n; i++) {
+		let citation = ZU.xpath(books[i], 'BookDocument')[0];
+
+		// check if this is a section
 		var sectionTitle = ZU.xpathText(citation, 'ArticleTitle');
 		var isBookSection = !!sectionTitle;
+		// eslint-disable-next-line
 		var newItem = new Zotero.Item(isBookSection ? 'bookSection' : 'book');
-		
+
 		if (isBookSection) {
 			newItem.title = sectionTitle;
 		}
 
 		var book = ZU.xpath(citation, 'Book')[0];
 
-		//title
-		var title = ZU.xpathText(book, 'BookTitle');
+		// title
+		let title = ZU.xpathText(book, 'BookTitle');
 		if (title) {
-			if (title.charAt(title.length-1) == ".") {
-				title = title.substring(0, title.length-1);
+			if (title.charAt(title.length - 1) == ".") {
+				title = title.substring(0, title.length - 1);
 			}
 			if (isBookSection) {
 				newItem.publicationTitle = title;
-			} else {
+			}
+			else {
 				newItem.title = title;
 			}
 		}
 
-		//date
-		//should only need year for books
+		// date
+		// should only need year for books
 		newItem.date = ZU.xpathText(book, 'PubDate/Year');
 
-		//edition
+		// edition
 		newItem.edition = ZU.xpathText(book, 'Edition');
-		
-		//series
+
+		// series
 		newItem.series = ZU.xpathText(book, 'CollectionTitle');
-		
-		//volume
+
+		// volume
 		newItem.volume = ZU.xpathText(book, 'Volume');
 
-		//place
+		// place
 		newItem.place = ZU.xpathText(book, 'Publisher/PublisherLocation');
 
-		//publisher
+		// publisher
 		newItem.publisher = ZU.xpathText(book, 'Publisher/PublisherName');
 
-		//chapter authors
+		// chapter authors
 		if (isBookSection) {
-			var authorsLists = ZU.xpath(citation, 'AuthorList');
+			let authorsLists = ZU.xpath(citation, 'AuthorList');
 			processAuthors(newItem, authorsLists);
 		}
-		
-		//book creators
-		var authorsLists = ZU.xpath(book, 'AuthorList');
+
+		// book creators
+		let authorsLists = ZU.xpath(book, 'AuthorList');
 		processAuthors(newItem, authorsLists);
-	
-		//language
+
+		// language
 		newItem.language = ZU.xpathText(citation, 'Language');
 
-		//abstractNote
+		// abstractNote
 		newItem.abstractNote = ZU.xpathText(citation, 'Abstract/AbstractText');
-		
-		//rights
+
+		// rights
 		newItem.rights = ZU.xpathText(citation, 'Abstract/CopyrightInformation');
-		
-		//seriesNumber, numPages, numberOfVolumes
-		//not available
-		
-		//ISBN
+
+		// seriesNumber, numPages, numberOfVolumes
+		// not available
+
+		// ISBN
 		newItem.ISBN = ZU.xpathText(book, 'Isbn');
-		
-		var PMID = ZU.xpathText(citation, 'PMID');
+
+		let PMID = ZU.xpathText(citation, 'PMID');
 		if (PMID) {
-			newItem.extra = "PMID: "+PMID;
-			
-			//this is a catalog, so we should store links as attachments
+			newItem.extra = "PMID: " + PMID;
+
+			// this is a catalog, so we should store links as attachments
 			newItem.attachments.push({
 				title: "PubMed entry",
 				url: "http://www.ncbi.nlm.nih.gov/pubmed/" + PMID,
@@ -304,15 +334,15 @@ function doImport() {
 				snapshot: false
 			});
 		}
-		
+
 		newItem.callNumber = ZU.xpathText(citation,
 			'ArticleIdList/ArticleId[@IdType="bookaccession"]');
-		//attach link to the bookshelf page
+		// attach link to the bookshelf page
 		if (newItem.callNumber) {
 			var url = "http://www.ncbi.nlm.nih.gov/books/" + newItem.callNumber + "/";
-			if (PMID) {	//books with PMIDs appear to be hosted at NCBI
+			if (PMID) {	// books with PMIDs appear to be hosted at NCBI
 				newItem.url = url;
-				//book sections have printable views, which can stand in for full text PDFs
+				// book sections have printable views, which can stand in for full text PDFs
 				if (newItem.itemType == 'bookSection') {
 					newItem.attachments.push({
 						title: "Printable HTML",
@@ -322,7 +352,8 @@ function doImport() {
 						snapshot: true
 					});
 				}
-			} else {	//currently this should not trigger, since we only import books with PMIDs
+			}
+			else {	// currently this should not trigger, since we only import books with PMIDs
 				newItem.attachments.push({
 					title: "NCBI Bookshelf entry",
 					url: "http://www.ncbi.nlm.nih.gov/books/" + newItem.callNumber + "/",
@@ -335,6 +366,7 @@ function doImport() {
 		newItem.complete();
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
