@@ -39,11 +39,13 @@
 function detectWeb(doc, url) {
 	// return "bookSection"; // activate for testing
 	// return "journalArticle"; // activate for testing
-	if (url.includes("/Record")) {//book, journalArticle or bookSection --> will be improved during scraping
+	if (url.includes("/Record")) { // book, journalArticle or bookSection --> will be improved during scraping
 		return "book";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -51,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[contains(@class, "row")]//a[contains(@class, "title")]');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -67,7 +69,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -75,58 +77,57 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 function scrape(doc, url) {
-	
-	//e.g. url = "http://zenon.dainst.org/Record/000300287"
+	// e.g. url = "http://zenon.dainst.org/Record/000300287"
 	// remove anchor so this doesn't break https://zenon.dainst.org/Record/001275808#usercomments
-	var urlParts = url.replace(/#.*/,"").split("/");
-	var id = urlParts[urlParts.length-1];
-	
-	//call MARC translator
-	ZU.doGet('/Record/' + id + '/Details', function(text) {
+	var urlParts = url.replace(/#.*/, "").split("/");
+	var id = urlParts[urlParts.length - 1];
+
+	// call MARC translator
+	ZU.doGet('/Record/' + id + '/Details', function (text) {
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(text, "text/html");
-		
+
 		var translator = Zotero.loadTranslator("import");
-		
+
 		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 		translator.getTranslatorObject(function (marc) {
 			var details = ZU.xpath(xml, '//tr');
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
-			
-			for (let i=0; i<details.length; i++) {
+
+			for (let i = 0; i < details.length; i++) {
 				var fieldTag = ZU.xpathText(details[i], './th');
-				//skip empty lines
+				// skip empty lines
 				if (!fieldTag) continue;
-	
+
 				var values = ZU.xpath(details[i], './td');
 				if (values.length == 1) {
 					if (fieldTag == "LEADER") {
 						record.leader = ZU.xpathText(details[i], './td');
 					}
-					//the control fields are not anyhow used in MARC translator, thus we do not import them
+					// the control fields are not anyhow used in MARC translator, thus we do not import them
 				}
 				if (values.length == 3) {
 					var ind1 = ZU.xpathText(details[i], './td[1]');
 					var ind2 = ZU.xpathText(details[i], './td[2]');
 					var fieldContent = ZU.xpathText(details[i], './td[3]', null, '').replace(/[\r\n\s]*\|/g, marc.subfieldDelimiter);
-					record.addField( fieldTag, ind1 + ind2, fieldContent);
+					record.addField(fieldTag, ind1 + ind2, fieldContent);
 				}
-				
 			}
-			
+
 			record.translate(newItem);
-			
-			//import tags from the 999 fields and filter out dublicate tags
+
+			// import tags from the 999 fields and filter out dublicate tags
 			// leaving this here in case it ever comes back, but doesn't exist as of October 2020
 			record._associateTags(newItem, 999, "a");
-			newItem.tags = newItem.tags.filter( function( item, index, inputArray ) {
+			newItem.tags = newItem.tags.filter(function (item, index, inputArray) {
 				return inputArray.indexOf(item) == index;
 			});
 
@@ -134,11 +135,11 @@ function scrape(doc, url) {
 			record._associateDBField(newItem, 773, "t", "bookTitle");
 			// This used to be in 995 - not seeing this anymore in October 202 but
 			// leaving to make sure it doesn't break.
-			if (!newItem.bookTitle){
+			if (!newItem.bookTitle) {
 				record._associateDBField(newItem, 995, "n", "bookTitle");
 			}
 			if (newItem.bookTitle) {
-				if (record.leader.substr(6,2) == "as") {//This seems to work good, but I don't know if is always working.
+				if (record.leader.substr(6, 2) == "as") { // This seems to work good, but I don't know if is always working.
 					newItem.itemType = "journalArticle";
 					var regularExpression1 = /^(.*),\s?(\d+),\s?(\d+)\s?\(\d\d\d\d\)/; // e.g. Bulletin du Cercle d'Études Numismatiques, 44,2 (2007)
 					var regularExpression2 = /^(.*),\s?(\d+)\s?\(\d\d\d\d\)/; // e.g Mannheimer Geschichtsblätter, Neue Folge, 16 (2008)
@@ -147,26 +148,27 @@ function scrape(doc, url) {
 						newItem.publicationTitle = m[1];
 						newItem.volume = m[2];
 						newItem.issue = m[3];
-					} else if ((m = newItem.bookTitle.match(regularExpression2))) {
+					}
+					else if ((m = newItem.bookTitle.match(regularExpression2))) {
 						newItem.publicationTitle = m[1];
 						newItem.volume = m[2];
 					}
-				} else {
+				}
+				else {
 					newItem.itemType = "bookSection";
 				}
 				record._associateDBField(newItem, 300, "a", "pages");
 				delete newItem.numPages;
 			}
-	
+
 			newItem.attachments.push({
 				url: url,
 				title: "DAI Zenon Entry",
 				mimeType: 'text/html',
 				snapshot: false
 			});
-			
+
 			newItem.complete();
-			
 		});
 	});
 }/** BEGIN TEST CASES **/
