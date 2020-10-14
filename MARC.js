@@ -8,9 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-07-12 05:44:41"
+	"lastUpdated": "2020-10-14 14:41:53"
 }
-
 
 function detectImport() {
 	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/;
@@ -418,19 +417,38 @@ record.prototype.translate = function (item) {
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
 		
-		// Extract place info
-		this._associateDBField(item, "210", "a", "place");
 		
-		// Extract publisher/distributor
-		if (item.itemType == "film") {
-			this._associateDBField(item, "210", "c", "distributor");
+		// Field 214 replaces 210 in newer version of UNIMARC; the two are exclusive
+		// 214 uses numbered subfields to describe different types of bibliographic information
+		// currently not using that
+		// see https://www.transition-bibliographique.fr/wp-content/uploads/2019/08/B214-2019.pdf
+		if (this.getField("214").length){
+			this._associateDBField(item, "214", "a", "place");
+			if (item.itemType == "film") {
+				this._associateDBField(item, "214", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "214", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "214", "d", "date", pullNumber);
 		}
 		else {
-			this._associateDBField(item, "210", "c", "publisher");
+			// Extract place info
+			this._associateDBField(item, "210", "a", "place");
+			
+			// Extract publisher/distributor
+			if (item.itemType == "film") {
+				this._associateDBField(item, "210", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "210", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "210", "d", "date", pullNumber);
 		}
-		
-		// Extract year
-		this._associateDBField(item, "210", "d", "date", pullNumber);
+	
+
 		// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
 		// this._associateDBField(item, "215", "a", "pages", pullNumber);
 		
