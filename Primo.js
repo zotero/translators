@@ -298,8 +298,7 @@ var testCases = [
 				"publisher": "Ambrogio : da Caponago",
 				"attachments": [],
 				"tags": [
-					"LEGGI",
-					"ITALIA - STORIA MEDIOEVALE"
+					"LEGGI;ITALIA - STORIA MEDIOEVALE"
 				],
 				"notes": [],
 				"seeAlso": []
