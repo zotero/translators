@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-15 09:15:35"
+	"lastUpdated": "2020-10-15 10:14:34"
 }
 
 /*
@@ -88,12 +88,11 @@ function extractAuthors(entry) {
 	//Skip the leading numbering (e.g. 10-03) that is in <b> tags
 	let candidateFragments = entry.querySelectorAll('p > span, p > a');
 	let allAuthors = '';
-	// some neede
 	Object.keys(candidateFragments).some(function (key) {
 		// If we reached the link spans we are done - these are titles...
 		if (candidateFragments[key].nodeName.toLowerCase() == 'a' ||
 		    candidateFragments[key].querySelector('a'))
-		        return true; // Array.some semanatics => break whole iteration
+		        return true; // Array.some semantics => break whole iteration
 		allAuthors += candidateFragments[key].textContent;
 		});
 		// Use 'y' as another author separator
@@ -112,6 +111,21 @@ function extractTitle(entry) {
 }
 
 
+function extractPDF(entry) {
+	let anchor = entry.querySelector('a');
+	Z.debug("ANCHOR: " + anchor);
+	let href = anchor ? anchor.href : null;
+	Z.debug("HREF " + href);
+	if (href) {
+	    return {
+            title:"Full Text PDF",
+            mimeType:"application/pdf",
+            url: href
+        };
+	}
+}
+
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		let rows = ZU.xpath(doc, entriesXPath);
@@ -124,12 +138,13 @@ function doWeb(doc, url) {
 					Z.debug("Warning: more than one matching entry element for PDF " + key + " -- Skipping");
 					return;
 				}
-				Z.debug(extractAuthors(entry[0]));
 				for (let author of extractAuthors(entry[0]))
 					 item.creators.push(ZU.cleanAuthor(author));
 				item.title = extractTitle(entry[0]);
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
+				//Z.debug("PDF" + JSON.stringify(extractPDF(entry[0])));
+				item.attachments.push(extractPDF(entry[0]));
 				item.complete();
 			});
 
