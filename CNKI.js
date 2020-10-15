@@ -1,7 +1,7 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
+	"creator": "Aurimas Vinckevicius, Xingzhong Lin, 018",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"lastUpdated": "2020-09-09 12:15:25"
 }
 
 /*
@@ -136,6 +136,11 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	}
 
 	if (!links.length) {
+		// 018<lyb018@gmail.com>: 20200909
+		if (url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
+			return { '': '【提醒：不存在条目。】' };
+		}
+		
 		return false;
 	}
 	var items = {};
@@ -164,10 +169,12 @@ function detectWeb(doc, url) {
 	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
+	
 	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
-	else if (items) {
+	else if (items || url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
+		// 018<lyb018@gmail.com>: 20200909
 		return "multiple";
 	}
 	else {
@@ -185,9 +192,12 @@ function doWeb(doc, url) {
 			var itemInfoByTitle = {};
 			var ids = [];
 			for (var url in selectedItems) {
-				ids.push(itemInfo[url].id);
-				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
-				itemInfoByTitle[selectedItems[url]].url = url;
+				// 018<lyb018@gmail.com>: 20200909
+				if (url && url.length > 0) {
+					ids.push(itemInfo[url].id);
+					itemInfoByTitle[selectedItems[url]] = itemInfo[url];
+					itemInfoByTitle[selectedItems[url]].url = url;
+				}
 			}
 			scrape(ids, doc, url, itemInfoByTitle);
 		});
@@ -217,9 +227,8 @@ function scrape(ids, doc, url, itemInfo) {
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
 				}
 				else {
-					// Chinese name. first character is last name, the rest are first name
-					creator.firstName = creator.lastName.substr(1);
-					creator.lastName = creator.lastName.charAt(0);
+					// 018<lyb018@gmail.com>: 20200909
+					creator.firstName = '';
 				}
 			}
 			
