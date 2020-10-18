@@ -265,12 +265,27 @@ var testCases = [
 				"publisher": "1860-1912",
 				"attachments": [],
 				"tags": [
-					"Great Britain",
-					"Religion",
-					"Great Britain",
-					"Foreign relations",
-					"Missions",
-					"China"
+					{
+						"tag": "China"
+					},
+					{
+						"tag": "China; China"
+					},
+					{
+						"tag": "Foreign relations"
+					},
+					{
+						"tag": "Foreign relations"
+					},
+					{
+						"tag": "Great Britain; Great Britain"
+					},
+					{
+						"tag": "Missions"
+					},
+					{
+						"tag": "Religion; China"
+					}
 				],
 				"notes": [],
 				"seeAlso": []

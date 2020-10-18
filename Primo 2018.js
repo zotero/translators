@@ -102,21 +102,7 @@ function scrape(doc, pnxurl) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,zotero&tab=everything&search_scope=TCCDALMA_EVERYTHING&vid=TCCDALMA&lang=en_US&offset=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/fulldisplay?vid=TCCDALMA&search_scope=TCCDALMA_EVERYTHING&tab=everything&docid=TCCD_ALMA2136169630001641&lang=en_US&context=L&adaptor=Local%20Search%20Engine&isFrbr=true&query=any,contains,adam%20smith&sortby=rank&offset=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,mannheim&tab=everything&search_scope=TCCDALMA_EVERYTHING&vid=TCCDALMA&sortby=rank&lang=en_US",
-		"items": "multiple"
-	},
-	{
+		"defer": true,
 		"type": "web",
 		"url": "http://virtuose.uqam.ca/primo-explore/fulldisplay?vid=UQAM&docid=UQAM_BIB000969205&context=L",
 		"items": [
@@ -164,11 +150,12 @@ var testCases = [
 		]
 	},
 	{
+		"defer": true,
 		"type": "web",
 		"url": "http://primo-prod.u-paris10.fr/primo-explore/fulldisplay?vid=UPON&docid=SCD_ALEPH000546633&context=L&search_scope=default_scope",
 		"items": [
 			{
-				"itemType": "thesis",
+				"itemType": "Thesis",
 				"title": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud) : quand la ville fait œuvre d'art et l'art œuvre de ville",
 				"creators": [
 					{
@@ -244,6 +231,7 @@ var testCases = [
 		]
 	},
 	{
+		"defer": true,
 		"type": "web",
 		"url": "http://bcujas-catalogue.univ-paris1.fr/primo-explore/fulldisplay?vid=CUJAS_V1&docid=33CUJAS_ALEPH000070200&context=L&search_scope=LSCOP_ALL",
 		"items": [
