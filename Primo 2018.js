@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-04 05:49:37"
+	"lastUpdated": "2020-10-18 08:33:02"
 }
 
 /*
@@ -102,23 +102,23 @@ function scrape(doc, pnxurl) {
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"defer": true,
 		"type": "web",
 		"url": "http://virtuose.uqam.ca/primo-explore/fulldisplay?vid=UQAM&docid=UQAM_BIB000969205&context=L",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
 				"title": "War",
 				"creators": [
 					{
-						"firstName": "Ken",
-						"lastName": "Baynes",
-						"creatorType": "author"
-					},
-					{
 						"lastName": "Ken. Baynes",
 						"creatorType": "author",
 						"fieldMode": 1
+					},
+					{
+						"firstName": "Ken",
+						"lastName": "Baynes",
+						"creatorType": "author"
 					},
 					{
 						"lastName": "Welsh Arts Council",
@@ -136,13 +136,13 @@ var testCases = [
 				"language": "eng",
 				"libraryCatalog": "virtuose.uqam.ca",
 				"place": "Boston",
-				"publisher": "Boston Book and Art Chop",
+				"publisher": "Book and Art Chop",
 				"series": "Art and society 1",
 				"attachments": [],
 				"tags": [
-					"ART",
-					"GUERRE",
-					"WAR"
+					{
+						"tag": "ART; GUERRE; WAR"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -150,13 +150,13 @@ var testCases = [
 		]
 	},
 	{
-		"defer": true,
 		"type": "web",
 		"url": "http://primo-prod.u-paris10.fr/primo-explore/fulldisplay?vid=UPON&docid=SCD_ALEPH000546633&context=L&search_scope=default_scope",
+		"defer": true,
 		"items": [
 			{
-				"itemType": "Thesis",
-				"title": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud) : quand la ville fait œuvre d'art et l'art œuvre de ville",
+				"itemType": "thesis",
+				"title": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud): quand la ville fait œuvre d'art et l'art œuvre de ville",
 				"creators": [
 					{
 						"firstName": "Pauline",
@@ -200,7 +200,7 @@ var testCases = [
 					},
 					{
 						"firstName": "cultures et sociétés du passé et du présent Nanterre",
-						"lastName": "Ecole doctorale Milieux",
+						"lastName": "École doctorale Milieux",
 						"creatorType": "contributor"
 					}
 				],
@@ -209,21 +209,78 @@ var testCases = [
 				"language": "fre",
 				"libraryCatalog": "primo-prod.u-paris10.fr",
 				"shortTitle": "Les espaces publics au prisme de l'art à Johannesburg (Afrique du Sud)",
-				"accessDate": "CURRENT_TIMESTAMP",
+				"url": "http://faraway.parisnanterre.fr/login?url=http://bdr.parisnanterre.fr/theses/intranet/2012PA100165_diff.pdf",
 				"attachments": [],
 				"tags": [
-					"Espaces publics",
-					"Afrique du Sud",
-					"Johannesburg (Afrique du Sud)",
-					"Thèses et écrits académiques",
-					"Art urbain",
-					"Géographie culturelle",
-					"Géographie urbaine",
-					"Art",
-					"Johannesburg",
-					"Prisme",
-					"Publicisation",
-					"Normalisation"
+					{
+						"tag": "Afrique du Sud"
+					},
+					{
+						"tag": "Afrique du Sud"
+					},
+					{
+						"tag": "Afrique du Sud"
+					},
+					{
+						"tag": "Art"
+					},
+					{
+						"tag": "Art urbain"
+					},
+					{
+						"tag": "Espaces publics"
+					},
+					{
+						"tag": "Espaces publics"
+					},
+					{
+						"tag": "Géographie culturelle"
+					},
+					{
+						"tag": "Géographie urbaine"
+					},
+					{
+						"tag": "Johannesburg"
+					},
+					{
+						"tag": "Johannesburg (Afrique du Sud)"
+					},
+					{
+						"tag": "Johannesburg (Afrique du Sud)"
+					},
+					{
+						"tag": "Johannesburg (Afrique du Sud)"
+					},
+					{
+						"tag": "Normalisation"
+					},
+					{
+						"tag": "Normalisation"
+					},
+					{
+						"tag": "Prisme"
+					},
+					{
+						"tag": "Publicisation"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					},
+					{
+						"tag": "Thèses et écrits académiques"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -231,9 +288,9 @@ var testCases = [
 		]
 	},
 	{
-		"defer": true,
 		"type": "web",
 		"url": "http://bcujas-catalogue.univ-paris1.fr/primo-explore/fulldisplay?vid=CUJAS_V1&docid=33CUJAS_ALEPH000070200&context=L&search_scope=LSCOP_ALL",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -264,12 +321,14 @@ var testCases = [
 						"tag": "United States"
 					},
 					{
+						"tag": "United States"
+					},
+					{
 						"tag": "Social conditions"
 					},
 					{
 						"tag": "1960-"
 					}
-
 				],
 				"notes": [],
 				"seeAlso": []
