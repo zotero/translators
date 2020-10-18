@@ -249,6 +249,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "China and foreign missionaries.",
 				"creators": [
 					{
 						"lastName": "Great Britain. Foreign Office",
@@ -256,39 +257,23 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "China"
-					},
-					{
-						"tag": "China; China"
-					},
-					{
-						"tag": "Foreign relations"
-					},
-					{
-						"tag": "Foreign relations"
-					},
-					{
-						"tag": "Great Britain; Great Britain"
-					},
-					{
-						"tag": "Missions"
-					},
-					{
-						"tag": "Religion; China"
-					}
-				],
-				"notes": [],
-				"seeAlso": [],
-				"title": "China and foreign missionaries.",
 				"date": "1860",
 				"callNumber": "5552.406",
 				"language": "eng",
 				"libraryCatalog": "princeton-primo.com",
 				"place": "London",
 				"publisher": "1860-1912",
+				"attachments": [],
+				"tags": [
+					"Great Britain",
+					"Religion",
+					"Great Britain",
+					"Foreign relations",
+					"Missions",
+					"China"
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
