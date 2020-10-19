@@ -133,7 +133,7 @@ function scrape(doc, url) {
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
-				item.tags = tagentry.split(",");
+				item.tags = tagentry.replace(/^Keywords/, '').split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
