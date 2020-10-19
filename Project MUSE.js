@@ -91,6 +91,9 @@ function scrape(doc, url) {
 		if (tags) {
 			item.tags = tags.split(",");
 		}
+		if (item.title) {
+			item.title = item.title.replace(/Project\sMUSE\s--?\s/, '')
+		}
 		if (url.includes("/article/")) {
 			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
 			item.attachments = [{
