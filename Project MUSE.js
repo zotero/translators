@@ -53,7 +53,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")]');
+	var rows = ZU.xpath(doc, '//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/book/")] | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -109,12 +109,15 @@ function scrape(doc, url) {
 			}];
 		}
 		item.libraryCatalog = "Project MUSE";
+		item.itemType = "journalArticle";
 		item.complete();
 	});
 	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
