@@ -91,8 +91,13 @@ function extractAuthors(entry) {
 	Object.keys(candidateFragments).some(function (key) {
 		// If we reached the link spans we are done - these are titles...
 		if (candidateFragments[key].nodeName.toLowerCase() == 'a' ||
+<<<<<<< HEAD
 			candidateFragments[key].querySelector('a'))
 				return true; // Array.some semantics => break whole iteration
+=======
+		    candidateFragments[key].querySelector('a'))
+		        return true; // Array.some semantics => break whole iteration
+>>>>>>> 98ce6b4a685c8f50c319f2bd02b4dde20b463c51
 		allAuthors += candidateFragments[key].textContent;
 		});
 		// Use 'y' as another author separator
@@ -126,6 +131,23 @@ function cleanTitle(title) {
 }
 
 
+<<<<<<< HEAD
+=======
+function extractPDF(entry) {
+	let anchor = entry.querySelector('a');
+	Z.debug("ANCHOR: " + anchor);
+	let href = anchor ? anchor.href : null;
+	Z.debug("HREF " + href);
+	if (href) {
+	    return {
+            title:"Full Text PDF",
+            mimeType:"application/pdf",
+            url: href
+        };
+	}
+}
+
+>>>>>>> 98ce6b4a685c8f50c319f2bd02b4dde20b463c51
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -135,14 +157,26 @@ function doWeb(doc, url) {
 				let item = new Zotero.Item("journalArticle");
 				let entryXPath = entriesXPath + '[.//a[@href=\'' + key + '\']]';
 				let entry = ZU.xpath(doc, entryXPath);
+<<<<<<< HEAD
 				if (Object.keys(entry).length != 1)
 					Z.debug("Warning: more than one matching entry element for " + key + " -- continue with first...");
+=======
+				if (Object.keys(entry).length != 1) {
+					Z.debug("Warning: more than one matching entry element for PDF " + key + " -- Skipping");
+					return;
+				}
+>>>>>>> 98ce6b4a685c8f50c319f2bd02b4dde20b463c51
 				for (let author of extractAuthors(entry[0]))
 					 item.creators.push(ZU.cleanAuthor(author));
 				item.title = extractTitle(entry[0]);
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
+<<<<<<< HEAD
 				item.url = extractURL(entry[0]);
+=======
+				//Z.debug("PDF" + JSON.stringify(extractPDF(entry[0])));
+				item.attachments.push(extractPDF(entry[0]));
+>>>>>>> 98ce6b4a685c8f50c319f2bd02b4dde20b463c51
 				item.complete();
 			});
 
