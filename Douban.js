@@ -84,7 +84,7 @@ function getResults1(rows, funcTitle, funcRating, funcRatingPeople, filter) {
 
 	var found = false, items = {}, titleTag;
 	for (let row of rows) {
-		if(filter && !filter(row)) continue;
+		if (filter && !filter(row)) continue;
 
 		titleTag = funcTitle(row);
 		let href = titleTag.href;
@@ -156,7 +156,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
+			return (text(row, 'span.rating_nums+span') || '').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/top')) {
@@ -166,7 +166,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'div.bd div.star span.rating_num');
 		}, (row) => {
-			return (text(row, 'div.bd div.star span.rating_num+span+span')||'').match(/\d+/);
+			return (text(row, 'div.bd div.star span.rating_num+span+span') || '').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/typerank')) {
@@ -176,7 +176,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_num');
 		}, (row) => {
-			return (text(row, 'span.rating_num+span')||'').match(/\d+/);
+			return (text(row, 'span.rating_num+span') || '').match(/\d+/);
 		});
 	}
 	else if (url.includes('movie.douban.com/tag')) {
@@ -195,7 +195,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
+			return (text(row, 'span.rating_nums+span') || '').match(/\d+/);
 		}, (row) => {
 			let source = text(row, 'div.source');
 			return source.includes('豆瓣读书') || source.includes('豆瓣电影');
@@ -209,7 +209,7 @@ function getSearchResults(doc, url, checkOnly) {
 		}, (row) => {
 			return text(row, 'span.rating_nums');
 		}, (row) => {
-			return (text(row, 'span.rating_nums+span')||'').match(/\d+/);
+			return (text(row, 'span.rating_nums+span') || '').match(/\d+/);
 		});
 	}
 	return items;
@@ -376,7 +376,7 @@ function scrape(doc, url) {
 			if (!abstractNote) {
 				abstractNote = text(doc, 'div.indent div.intro');
 			}
-			
+
 			var doubanDir = Z.getHiddenPref('douban');
 			if (doubanDir && doubanDir.split(',').includes('dir')) {
 				let id = getIDFromURL(url);
@@ -405,7 +405,7 @@ function scrape(doc, url) {
 	// 保留原作者(Ace Strong<acestrong@gmail.com>)对标签抓取，有需要可以自行去掉注释
 	var doubanTags = Z.getHiddenPref('douban');
 	if (doubanTags && doubanTags.split(',').includes('tags')) {
-		var tags = text(doc,'div#db-tags-section div.indent');
+		var tags = text(doc, 'div#db-tags-section div.indent');
 		if (tags) {
 			tags = tags.replace(/((\s*)\n(\s*))+/g, '\n');
 			for (var tag of tags.split('\n')) {
@@ -414,7 +414,7 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	
+
 	// 中图clc作为标签，需要安装油猴插件：https://greasyfork.org/zh-CN/scripts/408682
 	var clc = text(doc, '#clc');
 	if (clc) {
@@ -436,10 +436,10 @@ function scrape(doc, url) {
 
 function getIDFromURL(url) {
 	if (!url) return '';
-	
+
 	var id = url.match(/subject\/.*\//g);
 	if (!id) return '';
-	
+
 	return id[0].replace(/subject|\//g, '');
 }
 
