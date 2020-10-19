@@ -133,7 +133,7 @@ function scrape(doc, url) {
 			
 			// ubtue: extract translated and other abstracts from the different xpath
 			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[(@id = "translated-abstract-fr")] ');
+			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (ubtueabstract && otherabstract) {
 				item.abstractNote = ubtueabstract;
