@@ -118,17 +118,33 @@ function scrape(doc, url) {
 			}
 			// The encoding of apostrophs in the RIS are incorrect and
 			// therefore we extract the abstract again from the website.
-			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+			/*var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
 			if (abstract) {
 				item.abstractNote = abstract.trim();
-			}
+			}*/
 
 			// ubtue: also add translated abstracts in 520
-			var translatedAbstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
+			/*var translatedAbstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
 			if (translatedAbstract) {
 				item.notes.push({
 					note: "abs:" + translatedAbstract,
 				});
+			}*/
+			
+			// ubtue: extract translated and other abstracts from the different xpath
+			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[(@id = "translated-abstract-fr")] ');
+			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+			if (ubtueabstract && otherabstract) {
+				item.abstractNote = ubtueabstract;
+				item.notes.push({
+					note: "abs:" + otherabstract.replace(/^Résumé/, ''),
+				});
+			} else if (ubtueabstract && !otherabstract) {
+				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
+				item.abstractNote = ubtueabstract;
+			} else {
+				item.abstractNote = abstract;
 			}
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
