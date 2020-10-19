@@ -39,15 +39,6 @@ function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		return "journalArticle";
 	}
-	else if (url.includes('/book/')) {
-		return "book";
-	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	else {
-		return false;
-	}
 }
 
 function getSearchResults(doc, checkOnly) {
