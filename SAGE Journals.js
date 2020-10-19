@@ -179,7 +179,6 @@ function scrape(doc, url) {
 				}
 			}
 			
-			item.notes = [];
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
 				url: pdfurl,
