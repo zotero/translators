@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-27 15:12:17"
+	"lastUpdated": "2020-10-18 04:03:07"
 }
 
 /*
@@ -51,6 +51,7 @@ function detectWeb(doc, url) {
 				type = text(doc, 'b[data-reactid]');
 			}
 		}
+		// Z.debug(type)
 		// type = type.replace('(PDF Available)', '').trim();
 		switch (type) {
 			case "Data":// until we have a data itemType
@@ -130,12 +131,12 @@ function scrape(doc, url) {
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text);
 		// fix wrong itemType information in RIS
-		if (type == "bookSection") text = text.replace('TY - BOOK', 'TY	- CHAP');
-		if (type == "conferencePaper") text = text.replace('TY - BOOK', 'TY - CONF');
-		if (type == "report") text = text.replace('TY - BOOK', 'TY - RPRT');
-		if (type == "presentation") text = text.replace('TY - BOOK', 'TY - SLIDE');
-		if (type == "journalArticle") text = text.replace('TY - BOOK', 'TY - JOUR');
-		if (type == "thesis") text = text.replace('TY - BOOK', 'TY - THES');
+		if (type == "bookSection") text = text.replace('TY  - BOOK', 'TY  - CHAP');
+		if (type == "conferencePaper") text = text.replace('TY  - BOOK', 'TY  - CONF');
+		if (type == "report") text = text.replace('TY  - BOOK', 'TY  - RPRT');
+		if (type == "presentation") text = text.replace('TY  - BOOK', 'TY  - SLIDE');
+		if (type == "journalArticle") text = text.replace('TY  - BOOK', 'TY  - JOUR');
+		if (type == "thesis") text = text.replace('TY  - BOOK', 'TY  - THES');
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -185,6 +186,10 @@ var testCases = [
 				"shortTitle": "Academic social networking sites",
 				"volume": "118",
 				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "ResearchGate Link",
 						"snapshot": false
@@ -313,7 +318,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"lastName": "Ali Özler",
+						"lastName": "Özler",
 						"firstName": "Mehmet",
 						"creatorType": "author"
 					}
