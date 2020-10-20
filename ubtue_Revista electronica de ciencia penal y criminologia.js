@@ -2,14 +2,14 @@
 	"translatorID": "7e638a55-f469-4324-89c9-e31aa71c4b46",
 	"label": "ubtue_Revista electrónica de ciencia penal y criminología",
 	"creator": "Johannes Riedl",
-	"target": "^https?://criminet.ugr.es/recpc/",
+	"target": "^https?://criminet.ugr.es/recpc/\\d+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-19 12:45:15"
+	"lastUpdated": "2020-10-20 13:28:03"
 }
 
 /*
@@ -86,13 +86,18 @@ function getYear(doc) {
 
 function extractAuthors(entry) {
 	//Skip the leading numbering (e.g. 10-03) that is in <b> tags
-	let candidateFragments = entry.querySelectorAll('p > span, p > a');
+	let candidateFragments = entry.querySelectorAll('p > span, p > a,  p > font > span, p > font > a');
 	let allAuthors = '';
 	Object.keys(candidateFragments).some(function (key) {
 		// If we reached the link spans we are done - these are titles...
-		if (candidateFragments[key].nodeName.toLowerCase() == 'a' ||
-			candidateFragments[key].querySelector('a'))
-				return true; // Array.some semantics => break whole iteration
+		if (candidateFragments[key].nodeName.toLowerCase() == 'a')
+		   return true; // Array.some semantics => break whole iteration
+		// Handle case that author is in the same span as '<a>' and prepended to the link
+		if (candidateFragments[key].querySelector('a')) {
+		    if (candidateFragments[key].nodeName.toLowerCase() == 'span')
+		        allAuthors += candidateFragments[key].childNodes[0].nodeValue;
+			return true; // Array.some semantics => break whole iteration
+		}
 		allAuthors += candidateFragments[key].textContent;
 		});
 		// Use 'y' as another author separator
