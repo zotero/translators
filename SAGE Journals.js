@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 13:16:42"
+	"lastUpdated": "2020-10-21 13:50:38"
 }
 
 /*
@@ -149,7 +149,7 @@ function scrape(doc, url) {
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
-				item.tags = tagentry.replace(/^Keywords/, '').replace(/Mots-clés/, ',').split(",");
+				item.tags = tagentry.replace(/Keywords/, ',').replace(/Mots-clés/, ',').split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
