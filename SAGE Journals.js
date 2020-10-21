@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-19 12:47:25"
+	"lastUpdated": "2020-10-21 13:05:09"
 }
 
 /*
@@ -149,7 +149,7 @@ function scrape(doc, url) {
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
-				item.tags = tagentry.replace(/^Keywords/, '').split(",");
+				item.tags = tagentry.replace(/^Keywords/, '').replace(/Mots-clés/, '').split(",");
 			}
 			// ubtue: add tags "Book Review" if "Review Article"
 			if (articleType) {
@@ -384,6 +384,90 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0037768620922122",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Religious reconfiguration in Mexico: Beliefs and Practices National Survey, 2016",
+				"creators": [
+					{
+						"lastName": "De la Torre",
+						"firstName": "Renée",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Gutiérrez",
+						"firstName": "Cristina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Hernández",
+						"firstName": "Alberto",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 1, 2020",
+				"DOI": "10.1177/0037768620922122",
+				"ISSN": "0037-7686",
+				"abstractNote": "Although Mexico is one of the countries with the most number of Catholics, it is experiencing a rapid and intense religious diversification. The religious field in Mexico now comprises a myriad of denominations that are transforming the supposed socioreligious homogeneity of Mexicans. Among the Catholics, novel practices often associated with new spiritualities, including neopagan and indigenous rituals, are another feature of this diversity, along with a trend toward religious deinstitutionalization. Findings from the ENCREER, a national survey on religious practices and beliefs, allow for a comparative analysis of the main religious identifications (Catholics, Protestants and Evangelicals, Seventh Day Adventists/Jehovah’s Witnesses/Latter Day Saints, and unaffiliated). With an eye to facilitating international comparisons, this article describes the survey design and the principal findings of the analysis of the contemporary religious diversity in Mexico.",
+				"issue": "3",
+				"journalAbbreviation": "Social Compass",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "349-371",
+				"publicationTitle": "Social Compass",
+				"shortTitle": "Religious reconfiguration in Mexico",
+				"url": "https://doi.org/10.1177/0037768620922122",
+				"volume": "67",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Mexico"
+					},
+					{
+						"tag": " Mexique"
+					},
+					{
+						"tag": " enquêtes"
+					},
+					{
+						"tag": " pluralisme religieux"
+					},
+					{
+						"tag": " pratiques religieuses"
+					},
+					{
+						"tag": " religious beliefs"
+					},
+					{
+						"tag": " religious pluralism"
+					},
+					{
+						"tag": " religious practices"
+					},
+					{
+						"tag": " surveyscroyances religieuses"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0037768620922122</p>"
+					},
+					{
+						"note": "abs:Bien que le Mexique soit l’un des pays les plus catholiques du monde, il connaît une diversification religieuse rapide et intense. Le champ religieux au Mexique est désormais constitué d’une myriade de confessions qui transforment la prétendue homogénéité socio-religieuse des Mexicains. Chez les catholiques, les nouvelles pratiques souvent associées à de nouvelles spiritualités, notamment les rituels néopaïens et indigènes, sont une autre caractéristique de cette diversité, ainsi qu’une tendance à la désinstitutionnalisation religieuse. Les résultats de l’ENCREER, une enquête nationale sur les pratiques et les croyances religieuses, permettent une analyse comparative des principales identifications religieuses (Catholiques, Protestants et Évangéliques, Adventistes du septième jour/Témoins de Jéhovah/Saints des derniers jours et non affiliés). En vue de faciliter les comparaisons internationales, cet article décrit la conception de l’enquête et les principales conclusions de l’analyse de la diversité religieuse contemporaine au Mexique."
+					}
+				],
 				"seeAlso": []
 			}
 		]
