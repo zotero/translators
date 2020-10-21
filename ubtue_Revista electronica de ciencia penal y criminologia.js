@@ -2,14 +2,14 @@
 	"translatorID": "7e638a55-f469-4324-89c9-e31aa71c4b46",
 	"label": "ubtue_Revista electrónica de ciencia penal y criminología",
 	"creator": "Johannes Riedl",
-	"target": "^https?://criminet.ugr.es/recpc/\\d+",
+	"target": "^https?://criminet.ugr.es/recpc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 11:35:44"
+	"lastUpdated": "2020-10-21 13:17:58"
 }
 
 /*
@@ -39,6 +39,7 @@ const entriesXPath = '//p[@class="MsoFooter"]';
 const journalInfoXPath = '//p[@class="MsoNormal"]//span/text()';
 
 const articleNumberPrefix = '^\\s*\\d+-[a-z]?\\d+[a-z]?';
+const quotationMarks = '["”]'
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -87,17 +88,20 @@ function getYear(doc) {
 
 
 function extractAuthors(entry) {
-	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+\\".*\\".*$');
-    let authorPart = entry.innerText.replace(authorRegex, "$1");
-    Z.debug("AUTHOR PART: " + authorPart);
-    return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
+	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
+		  + quotationMarks + '.*' + quotationMarks + '.*$');
+	let authorPart = entry.innerText.replace(authorRegex, "$1");
+	Z.debug("REGEX" + authorRegex.toString())
+	Z.debug("AUTHOR PART " + authorPart);
+	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
 }
 
 
 function extractTitle(entry) {
-	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+\\"(.*)\\".*$', 'g');
-    let titlePart = entry.innerText.replace(titleRegex, "$1");
-    return cleanTitle(titlePart);
+	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
+		 +  quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
+	let titlePart = entry.innerText.replace(titleRegex, "$1");
+	return cleanTitle(titlePart);
 }
 
 
@@ -124,7 +128,8 @@ function cleanNote(note) {
 
 
 function extractNote(entry) {
-	noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+\\".*\\"(.*)$', 'g');
+	noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
+		+ quotationMarks + '.*' + quotationMarks + '(.*)$', 'g');
 	let notePart = entry.innerText.replace(noteRegex, "$1");
 	return(cleanNote(notePart));
 }
@@ -147,7 +152,7 @@ function doWeb(doc, url) {
 				item.year = getYear(doc);
 				item.url = extractURL(entry[0]);
 				if ((note = extractNote(entry[0])))
-				    item.notes.push(note);
+					item.notes.push(note);
 				item.complete();
 			});
 		});
