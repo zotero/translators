@@ -31,8 +31,6 @@ get_translators_to_check() {
 		fi
 }
 
-npm install chromedriver --detect_chromedriver_version
-
 # Build connector
 mkdir -p connectors
 cd connectors
@@ -48,8 +46,9 @@ else
 	git submodule update --init --depth 1
 	git -C src/zotero submodule update --init --depth 1 -- resource/schema/global
 	git -C src/zotero submodule update --init --depth 1 -- resource/SingleFileZ
-  npm ci
+	npm ci
 fi
+npm install chromedriver --detect_chromedriver_version
 
 export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
 ./build.sh -p b -d
