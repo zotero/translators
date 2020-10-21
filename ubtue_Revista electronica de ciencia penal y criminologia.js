@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 15:23:27"
+	"lastUpdated": "2020-10-21 16:05:51"
 }
 
 /*
@@ -72,7 +72,14 @@ function getIssue(doc) {
 	   let issue = /Núm\.\s+(\d+).*/.exec(exp.nodeValue);
 	   if (issue)
 		   return issue[1];
-
+	}
+	// With the new layout there is seemingly no direct class
+	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+	for (let exp of issueExpressions) {
+		Z.debug(exp.innerText);
+		let issue = /Número\s+(\d+).*/.exec(exp.innerText);
+		if (issue)
+		    return issue[1];
 	}
 }
 
@@ -83,6 +90,13 @@ function getYear(doc) {
 		let year =  /Núm\.\s+\d+\s*\((\d+)\)/.exec(exp.nodeValue);
 		if (year)
 			return year[1];
+	}
+	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+	for (let exp of issueExpressions) {
+		Z.debug(exp.innerText);
+		let issue = /Año\s+(\d+).*/.exec(exp.innerText);
+		if (issue)
+		    return issue[1];
 	}
 }
 
