@@ -1,5 +1,5 @@
 {
-	"translatorID": "5ac0fd37-5578-4f82-8340-0e135b6336ee",
+	"translatorID": "0a8fec76-6ddf-4574-b2a8-bcef8a7f0a4c",
 	"label": "Scholars Portal Journals",
 	"creator": "Bartek Kawula",
 	"target": "^https?://journals\\.scholarsportal\\.info/",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 22:29:53"
+	"lastUpdated": "2020-10-21 22:53:20"
 }
 
 /*
@@ -152,7 +152,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "The Number of Water-Water Hydrogen Bonds in Water-Tetrahydrofuran and Water-Acetone Binary Mixtures Determined by Means of X-Ray Scattering",
+				"title": "The Number of Water-Water Hydrogen Bonds in Water-Tetrahydrofuran and Water-Acetone Binary Mixtures Determined by Means of X-Ray Scattering",
 				"creators": [
 					{
 						"lastName": "Katayama",
@@ -174,7 +174,7 @@ var testCases = [
 				"libraryCatalog": "Scholars Portal Journals",
 				"pages": "841-856",
 				"publicationTitle": "Journal of Solution Chemistry",
-				"url": "http://journals.scholarsportal.info/detailsr.scholarsportal.info.xml",
+				"url": "http://journals.scholarsportal.info/details/00959782/v37i0006/841_tnowhbdbmoxs.xml",
 				"volume": "37",
 				"attachments": [
 					{
