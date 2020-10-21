@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-20 13:28:03"
+	"lastUpdated": "2020-10-21 11:35:44"
 }
 
 /*
@@ -37,6 +37,8 @@
 
 const entriesXPath = '//p[@class="MsoFooter"]';
 const journalInfoXPath = '//p[@class="MsoNormal"]//span/text()';
+
+const articleNumberPrefix = '^\\s*\\d+-[a-z]?\\d+[a-z]?';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -85,35 +87,17 @@ function getYear(doc) {
 
 
 function extractAuthors(entry) {
-	//Skip the leading numbering (e.g. 10-03) that is in <b> tags
-	let candidateFragments = entry.querySelectorAll('p > span, p > a,  p > font > span, p > font > a');
-	let allAuthors = '';
-	Object.keys(candidateFragments).some(function (key) {
-		// If we reached the link spans we are done - these are titles...
-		if (candidateFragments[key].nodeName.toLowerCase() == 'a')
-		   return true; // Array.some semantics => break whole iteration
-		// Handle case that author is in the same span as '<a>' and prepended to the link
-		if (candidateFragments[key].querySelector('a')) {
-		    if (candidateFragments[key].nodeName.toLowerCase() == 'span')
-		        allAuthors += candidateFragments[key].childNodes[0].nodeValue;
-			return true; // Array.some semantics => break whole iteration
-		}
-		allAuthors += candidateFragments[key].textContent;
-		});
-		// Use 'y' as another author separator
-		return allAuthors.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
+	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+\\".*\\".*$');
+    let authorPart = entry.innerText.replace(authorRegex, "$1");
+    Z.debug("AUTHOR PART: " + authorPart);
+    return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
 }
 
 
 function extractTitle(entry) {
-   //let titleAnchors = Array.prototype.slice.call(entry.querySelectorAll('a'));
-   let titleAnchors = [...entry.querySelectorAll('a')];
-   if (!titleAnchors) {
-	   Z.debug("Could not find appropriate anchor for title -- Skipping");
-	   return;
-   }
-   title = titleAnchors.map(function (titleAnchor) { return titleAnchor.textContent }).join('');
-   return cleanTitle(title);
+	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+\\"(.*)\\".*$', 'g');
+    let titlePart = entry.innerText.replace(titleRegex, "$1");
+    return cleanTitle(titlePart);
 }
 
 
@@ -140,12 +124,9 @@ function cleanNote(note) {
 
 
 function extractNote(entry) {
-	// Interpret everything after the last <a> as note
-	let noteElements = entry.parentNode.querySelectorAll('a ~ span');
-	let note = [...noteElements].map(function (item) {
-										 return item.textContent; }
-									).join('');
-	return cleanNote(note);
+	noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+\\".*\\"(.*)$', 'g');
+	let notePart = entry.innerText.replace(noteRegex, "$1");
+	return(cleanNote(notePart));
 }
 
 
@@ -165,7 +146,8 @@ function doWeb(doc, url) {
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
 				item.url = extractURL(entry[0]);
-				item.notes.push(extractNote(entry[0]));
+				if ((note = extractNote(entry[0])))
+				    item.notes.push(note);
 				item.complete();
 			});
 		});
