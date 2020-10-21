@@ -2,14 +2,14 @@
 	"translatorID": "7e638a55-f469-4324-89c9-e31aa71c4b46",
 	"label": "ubtue_Revista electrónica de ciencia penal y criminología",
 	"creator": "Johannes Riedl",
-	"target": "^https?://criminet.ugr.es/recpc/",
+	"target": "^https?://criminet.ugr.es/recpc/\\d+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 13:17:58"
+	"lastUpdated": "2020-10-21 15:23:27"
 }
 
 /*
@@ -90,8 +90,9 @@ function getYear(doc) {
 function extractAuthors(entry) {
 	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
 		  + quotationMarks + '.*' + quotationMarks + '.*$');
-	let authorPart = entry.innerText.replace(authorRegex, "$1");
+    let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
 	Z.debug("REGEX" + authorRegex.toString())
+	let authorPart = onelineInnerText.replace(authorRegex, "$1");
 	Z.debug("AUTHOR PART " + authorPart);
 	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
 }
@@ -100,7 +101,9 @@ function extractAuthors(entry) {
 function extractTitle(entry) {
 	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		 +  quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
-	let titlePart = entry.innerText.replace(titleRegex, "$1");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
+	   Z.debug("INNER TEXT ONELINE: " + onelineInnerText);
+	let titlePart = onelineInnerText.replace(titleRegex, "$1");
 	return cleanTitle(titlePart);
 }
 
@@ -116,6 +119,7 @@ function extractURL(entry) {
 function cleanTitle(title) {
 	title = title.replace(/[\n\r]+/, '');
 	title = title.replace(/(?:^\\?")(.*)(?:\\?"$)/g, "$1");
+	titel = title.replace(/\s\s+/gm, " ");
 	return title;
 }
 
@@ -130,7 +134,8 @@ function cleanNote(note) {
 function extractNote(entry) {
 	noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		+ quotationMarks + '.*' + quotationMarks + '(.*)$', 'g');
-	let notePart = entry.innerText.replace(noteRegex, "$1");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ");
+	let notePart = onelineInnerText.replace(noteRegex, "$1");
 	return(cleanNote(notePart));
 }
 
