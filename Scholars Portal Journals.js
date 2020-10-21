@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 22:53:20"
+	"lastUpdated": "2020-10-21 22:57:41"
 }
 
 /*
@@ -126,7 +126,6 @@ function scrape(text, doc) {
 	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 	translator.setString(text);
 	translator.setHandler("itemDone", function(obj, item) {
-		console.log(item.attachments[0].path);
 		var uri = getURI(item.attachments[0].path);
 		var pdfURL = "/pdf" + uri;
 		item.url = "http://journals.scholarsportal.info/details" + uri;
