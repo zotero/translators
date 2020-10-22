@@ -39,7 +39,7 @@ const entriesXPath = '//p[@class="MsoFooter"]';
 const journalInfoXPath = '//p[@class="MsoNormal"]//span/text()';
 
 const articleNumberPrefix = '^\\s*\\d+-[a-z]?\\d+[a-z]?';
-const quotationMarks = '["”]'
+const quotationMarks = '["”]';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -81,6 +81,7 @@ function getIssue(doc) {
 		if (issue)
 		    return issue[1];
 	}
+    return false;
 }
 
 
@@ -91,9 +92,8 @@ function getYear(doc) {
 		if (year)
 			return year[1];
 	}
-	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+    yearExpression = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
 	for (let exp of issueExpressions) {
-		Z.debug(exp.innerText);
 		let issue = /Año\s+(\d+).*/.exec(exp.innerText);
 		if (issue)
 		    return issue[1];
@@ -105,10 +105,8 @@ function extractAuthors(entry) {
 	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
 		  + quotationMarks + '.*' + quotationMarks + '.*$');
     let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
-	Z.debug("REGEX" + authorRegex.toString())
 	let authorPart = onelineInnerText.replace(authorRegex, "$1");
-	Z.debug("AUTHOR PART " + authorPart);
-	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g,',').split(',');
+	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g, ',').split(',');
 }
 
 
@@ -116,7 +114,6 @@ function extractTitle(entry) {
 	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		 +  quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
-	   Z.debug("INNER TEXT ONELINE: " + onelineInnerText);
 	let titlePart = onelineInnerText.replace(titleRegex, "$1");
 	return cleanTitle(titlePart);
 }
@@ -133,7 +130,7 @@ function extractURL(entry) {
 function cleanTitle(title) {
 	title = title.replace(/[\n\r]+/, '');
 	title = title.replace(/(?:^\\?")(.*)(?:\\?"$)/g, "$1");
-	titel = title.replace(/\s\s+/gm, " ");
+	title = title.replace(/\s\s+/gm, " ");
 	return title;
 }
 
@@ -146,7 +143,7 @@ function cleanNote(note) {
 
 
 function extractNote(entry) {
-	noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
+	let noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		+ quotationMarks + '.*' + quotationMarks + '(.*)$', 'g');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ");
 	let notePart = onelineInnerText.replace(noteRegex, "$1");
@@ -170,7 +167,7 @@ function doWeb(doc, url) {
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
 				item.url = extractURL(entry[0]);
-				if ((note = extractNote(entry[0])))
+				if ((let note = extractNote(entry[0])))
 					item.notes.push(note);
 				item.complete();
 			});
