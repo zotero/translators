@@ -93,7 +93,7 @@ function getYear(doc) {
 			return year[1];
 	}
     yearExpression = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
-	for (let exp of issueExpressions) {
+	for (let exp of yearExpression) {
 		let issue = /Año\s+(\d+).*/.exec(exp.innerText);
 		if (issue)
 		    return issue[1];
