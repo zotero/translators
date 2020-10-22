@@ -167,7 +167,7 @@ function doWeb(doc, url) {
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
 				item.url = extractURL(entry[0]);
-				if ((let note = extractNote(entry[0])))
+				if ((note = extractNote(entry[0])))
 					item.notes.push(note);
 				item.complete();
 			});
