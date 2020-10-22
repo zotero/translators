@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-22 18:59:55"
+	"lastUpdated": "2020-10-22 19:09:18"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 	} else if (url.includes('/browse/')) {
 		let browse = doc.getElementById('toc');
 		if (browse) {
-	  		Zotero.monitorDOMChanges(browse.parentElement);
+			Zotero.monitorDOMChanges(browse.parentElement);
 		}
 		if (getItems(doc, true)) {
 			return 'multiple';
@@ -78,14 +78,16 @@ function doWeb(doc, url) {
 }
 
 function getURI(url){
+	var a = '';
+	var b = '';
 	if (url.includes('/details/')){
-		let a = url.indexOf('details');
-		let b = url.indexOf('xml');
+		a = url.indexOf('details');
+		b = url.indexOf('xml');
 		return url.substring(a+7,b+3);
-	} else if (url.includes('/resolve/'))  {
+	} else if (url.includes('/resolve/')) {
 		if (url.includes('.xml')){
-			let a = url.indexOf('/resolve/');
-			let b = url.indexOf('xml');
+			a = url.indexOf('/resolve/');
+			b = url.indexOf('xml');
 			return url.substring(a+9,b+3);
 		} else {
 			return '/' + url.split('/resolve/')[1] + '.xml';
