@@ -1,5 +1,5 @@
 {
-	"translatorID": "0a8fec76-6ddf-4574-b2a8-bcef8a7f0a4c",
+	"translatorID": "5ac0fd37-5578-4f82-8340-0e135b6336ee",
 	"label": "Scholars Portal Journals",
 	"creator": "Bartek Kawula",
 	"target": "^https?://journals\\.scholarsportal\\.info/",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 22:57:41"
+	"lastUpdated": "2020-10-22 18:59:55"
 }
 
 /*
@@ -36,83 +36,84 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/my-articles") != -1) {
+	if (url.includes('/my-articles')) {
 		if (getItems(doc, true)) {
 			return 'multiple';
 		}
-	} else if (url.indexOf("/search?q") != -1) {
+	} else if (url.includes('/search?q')) {
 		if (getItems(doc, true)) {
 			return 'multiple';
 		}
-	} else if (url.indexOf("/browse/") != -1) {
-		var browse = doc.getElementById('toc');
+	} else if (url.includes('/browse/')) {
+		let browse = doc.getElementById('toc');
 		if (browse) {
 	  		Zotero.monitorDOMChanges(browse.parentElement);
 		}
 		if (getItems(doc, true)) {
 			return 'multiple';
 		}
-	} else if (url.indexOf("/details/") != -1) {
+	} else if (url.includes('/details/')) {
 		return 'journalArticle';
 	}
 }
 
 function doWeb(doc, url) {
-	var type = detectWeb(doc, url);
-	if (type == "multiple") {
-		var list = getItems(doc, url);
+	let type = detectWeb(doc, url);
+	if (type == 'multiple') {
+		let list = getItems(doc, url);
 		Zotero.selectItems(list, function(selectedItems) {
 			if (!selectedItems) return true;
-			var articles = [];
-			for (var i in selectedItems) {
-				var article = '/ris?uri='+i;
+			let articles = [];
+			for (let i in selectedItems) {
+				let article = '/ris?uri='+i;
 				articles.push(article);
 			}
 			ZU.doGet(articles, scrape);
 		});
 	} else {
-		var uri = getURI(url);
-		var article = '/ris?uri='+uri;
+		let uri = getURI(url);
+		let article = '/ris?uri='+uri;
 		ZU.doGet(article, scrape);
 	}
 }
 
 function getURI(url){
-	if (url.indexOf("/details/") != -1){
-		var a = url.indexOf("details");
-		var b = url.indexOf("xml");
+	if (url.includes('/details/')){
+		let a = url.indexOf('details');
+		let b = url.indexOf('xml');
 		return url.substring(a+7,b+3);
-	} else if (url.indexOf("/resolve/") != -1)  {
-		if (url.indexOf(".xml") != -1){
-			var a = url.indexOf("/resolve/");
-			var b = url.indexOf("xml");
+	} else if (url.includes('/resolve/'))  {
+		if (url.includes('.xml')){
+			let a = url.indexOf('/resolve/');
+			let b = url.indexOf('xml');
 			return url.substring(a+9,b+3);
 		} else {
-			return "/" + url.split("/resolve/")[1] + ".xml";
+			return '/' + url.split('/resolve/')[1] + '.xml';
 		}
 	}
 }
 
 function getItems(doc, url) {
 	var items = {}, found = false;
-	if (doc.URL.indexOf("/my-articles") != -1) {
-		var titles = ZU.xpath(doc.getElementById('my-articles-list'), './/div[@class = "title"]/h3/a');
-		for (var i=0; i<titles.length; i++) { 
-			var title = ZU.trimInternal(titles[i].textContent);
-			var uri = getURI(titles[i].href);
+	var titles = '';
+	if (doc.URL.includes('/my-articles')) {
+		titles = ZU.xpath(doc.getElementById('my-articles-list'), './/div[@class = "title"]/h3/a');
+		for (let i=0; i<titles.length; i++) { 
+			let title = ZU.trimInternal(titles[i].textContent);
+			let uri = getURI(titles[i].href);
 			items[uri] = title;
 			found = true;
 		}
 	} else {
-		if (doc.URL.indexOf("/browse") != -1){
-			var titles = ZU.xpath(doc, './/div/h3/a');
+		if (doc.URL.includes('/browse')){
+			titles = ZU.xpath(doc, './/div/h3/a');
 		}
 		else {
-			var titles = ZU.xpath(doc.getElementById('result-list'), './/div[@class = "details"]/h2/a');
+			titles = ZU.xpath(doc.getElementById('result-list'), './/div[@class = "details"]/h2/a');
 		}
-		for (var i=0; i<titles.length; i++) { 
-			var title = ZU.trimInternal(titles[i].textContent);
-			var uri = getURI(titles[i].href);
+		for (let i=0; i<titles.length; i++) { 
+			let title = ZU.trimInternal(titles[i].textContent);
+			let uri = getURI(titles[i].href);
 			items[uri] = title;
 			found = true;
 		}
@@ -122,17 +123,17 @@ function getItems(doc, url) {
 
 function scrape(text, doc) { 
 	// loading RIS transformer. 
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+	let translator = Zotero.loadTranslator('import');
+	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
 	translator.setString(text);
-	translator.setHandler("itemDone", function(obj, item) {
-		var uri = getURI(item.attachments[0].path);
-		var pdfURL = "/pdf" + uri;
-		item.url = "http://journals.scholarsportal.info/details" + uri;
+	translator.setHandler('itemDone', function(obj, item) {
+		let uri = getURI(item.attachments[0].path);
+		let pdfURL = '/pdf' + uri;
+		item.url = 'https://journals.scholarsportal.info/details' + uri;
 		item.attachments = [{
 			url: pdfURL,
-			title: "Scholars Portal Full Text PDF",
-			mimeType: "application/pdf"
+			title: 'Scholars Portal Full Text PDF',
+			mimeType: 'application/pdf'
 		}];
 		item.complete();
 	});
@@ -147,34 +148,29 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://journals.scholarsportal.info/details/00959782/v37i0006/841_tnowhbdbmoxs.xml",
+		"url": "https://journals.scholarsportal.info/details/10704965/v16i0001/58_ioiaaphwuiub.xml",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "The Number of Water-Water Hydrogen Bonds in Water-Tetrahydrofuran and Water-Acetone Binary Mixtures Determined by Means of X-Ray Scattering",
+				"title": "Impact of Increased Access and Price on Household Water Use in Urban Bolivia",
 				"creators": [
 					{
-						"lastName": "Katayama",
-						"firstName": "Misaki",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Ozutsumi",
-						"firstName": "Kazuhiko",
+						"lastName": "Israel",
+						"firstName": "Debra K.",
 						"creatorType": "author"
 					}
 				],
-				"date": "2008",
-				"DOI": "10.1007/s10953-008-9276-0",
-				"ISSN": "0095-9782",
-				"abstractNote": "Abstract The liquid structures of water-tetrahydrofuran (THF) and water-acetone binary mixtures were investigated by the X-ray scattering method. Comparison of the X-ray scattering data revealed that only one kind of intermolecular water-organic molecule interaction is commonly involved throughout all mole fractions of these liquid mixtures, in addition to the intermolecular water-water and organic molecule-organic molecule interactions, which are present in neat water and organic liquids, respectively. On the basis of this finding, we proposed a new analytical method for studying liquid mixtures. By this method the structural information on the intermolecular water-organic molecule interaction as well as the concentrations of the intermolecular water-water, water-organic molecules, and organic molecule-organic molecule interactions were obtained. Combining the concentrations of the intermolecular water-water interaction with the concentrations of water in the liquid mixtures, the number of water-water hydrogen bonds at various mole fractions was experimentally determined for the first time. From the dependence of the number of water-water hydrogen bonds on the composition of the liquid mixtures, the change of the size of the self-associated water-water clusters was deduced.",
-				"issue": "6",
-				"journalAbbreviation": "Journal of Solution Chemistry",
+				"date": "2007",
+				"DOI": "10.1177/1070496506298190",
+				"ISSN": "1070-4965",
+				"abstractNote": "Using the 1994 Bolivian Integrated Household Survey, this study analyzes the equity implications of urban water sector reform including both increased water prices and increased access to piped water. Household water expenditures are examined by income decile, and low-income households are found to spend a higher percentage of income on water than high-income households. However, households purchasing from private water vendors could benefit from obtaining piped water, because regression analysis shows that on average, these households spend more on water than those with piped water inside their buildings or yards. This differential was the greatest in the city of Cochabamba, which also had the largest percentage of households purchasing from private water vendors. To understand the equity impact of water reform, the effects on both prereform users of piped water and those without access to piped water must be considered.",
+				"issue": "1",
+				"journalAbbreviation": "The Journal of Environment & Development",
 				"libraryCatalog": "Scholars Portal Journals",
-				"pages": "841-856",
-				"publicationTitle": "Journal of Solution Chemistry",
-				"url": "http://journals.scholarsportal.info/details/00959782/v37i0006/841_tnowhbdbmoxs.xml",
-				"volume": "37",
+				"pages": "58-83",
+				"publicationTitle": "The Journal of Environment & Development",
+				"url": "https://journals.scholarsportal.info/details/10704965/v16i0001/58_ioiaaphwuiub.xml",
+				"volume": "16",
 				"attachments": [
 					{
 						"title": "Scholars Portal Full Text PDF",
@@ -183,22 +179,16 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Acetone"
+						"tag": "Bolivia"
 					},
 					{
-						"tag": "Binary liquid mixtures"
+						"tag": "Latin America"
 					},
 					{
-						"tag": "Tetrahydrofuran"
+						"tag": "equity"
 					},
 					{
-						"tag": "Water"
-					},
-					{
-						"tag": "Water-water hydrogen bonds"
-					},
-					{
-						"tag": "X-ray scattering"
+						"tag": "water reform"
 					}
 				],
 				"notes": [],
