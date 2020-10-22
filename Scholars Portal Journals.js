@@ -37,11 +37,11 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/my-articles')) {
-		if (getItems(doc, true)) {
+		if (getItems(doc)) {
 			return 'multiple';
 		}
 	} else if (url.includes('/search?q')) {
-		if (getItems(doc, true)) {
+		if (getItems(doc)) {
 			return 'multiple';
 		}
 	} else if (url.includes('/browse/')) {
@@ -49,58 +49,62 @@ function detectWeb(doc, url) {
 		if (browse) {
 			Zotero.monitorDOMChanges(browse.parentElement);
 		}
-		if (getItems(doc, true)) {
+		if (getItems(doc)) {
 			return 'multiple';
 		}
 	} else if (url.includes('/details/')) {
 		return 'journalArticle';
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
 	let type = detectWeb(doc, url);
 	if (type == 'multiple') {
-		let list = getItems(doc, url);
+		let list = getItems(doc);
 		Zotero.selectItems(list, function(selectedItems) {
 			if (!selectedItems) return true;
 			let articles = [];
 			for (let i in selectedItems) {
-				let article = '/ris?uri='+i;
+				let article = '/ris?uri=' + i;
 				articles.push(article);
 			}
 			ZU.doGet(articles, scrape);
-		});
+		}
+		);
 	} else {
 		let uri = getURI(url);
-		let article = '/ris?uri='+uri;
+		let article = '/ris?uri=' + uri;
 		ZU.doGet(article, scrape);
 	}
+	return false;
 }
 
 function getURI(url){
 	var a = '';
 	var b = '';
-	if (url.includes('/details/')){
+	if (url.includes('/details/')) {
 		a = url.indexOf('details');
 		b = url.indexOf('xml');
-		return url.substring(a+7,b+3);
+		return url.substring(a + 7,b + 3);
 	} else if (url.includes('/resolve/')) {
 		if (url.includes('.xml')){
 			a = url.indexOf('/resolve/');
 			b = url.indexOf('xml');
-			return url.substring(a+9,b+3);
+			return url.substring(a + 9,b + 3);
 		} else {
 			return '/' + url.split('/resolve/')[1] + '.xml';
 		}
 	}
+	return false;
 }
 
-function getItems(doc, url) {
+function getItems(doc) {
 	var items = {}, found = false;
 	var titles = '';
 	if (doc.URL.includes('/my-articles')) {
 		titles = ZU.xpath(doc.getElementById('my-articles-list'), './/div[@class = "title"]/h3/a');
-		for (let i=0; i<titles.length; i++) { 
+		for (let i = 0; i < titles.length; i++) { 
 			let title = ZU.trimInternal(titles[i].textContent);
 			let uri = getURI(titles[i].href);
 			items[uri] = title;
@@ -113,7 +117,7 @@ function getItems(doc, url) {
 		else {
 			titles = ZU.xpath(doc.getElementById('result-list'), './/div[@class = "details"]/h2/a');
 		}
-		for (let i=0; i<titles.length; i++) { 
+		for (let i = 0; i < titles.length; i++) {
 			let title = ZU.trimInternal(titles[i].textContent);
 			let uri = getURI(titles[i].href);
 			items[uri] = title;
@@ -123,8 +127,8 @@ function getItems(doc, url) {
 	return found ? items : false;
 }
 
-function scrape(text, doc) { 
-	// loading RIS transformer. 
+function scrape(text) {
+	// loading RIS transformer.
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
 	translator.setString(text);
@@ -141,6 +145,7 @@ function scrape(text, doc) {
 	});
 	translator.translate();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
