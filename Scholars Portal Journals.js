@@ -35,17 +35,17 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb (doc, url) {
+function detectWeb(doc, url) {
 	if (url.includes('/my-articles')) {
 		if (getItems(doc)) {
 			return 'multiple';
 		}
-	} 
+	}
 	else if (url.includes('/search?q')) {
 		if (getItems(doc)) {
 			return 'multiple';
 		}
-	} 
+	}
 	else if (url.includes('/browse/')) {
 		let browse = doc.getElementById('toc');
 		if (browse) {
@@ -54,18 +54,18 @@ function detectWeb (doc, url) {
 		if (getItems(doc)) {
 			return 'multiple';
 		}
-	} 
+	}
 	else if (url.includes('/details/')) {
 		return 'journalArticle';
 	}
 	return false;
 }
 
-function doWeb (doc, url) {
+function doWeb(doc, url) {
 	let type = detectWeb(doc, url);
 	if (type == 'multiple') {
 		let list = getItems(doc);
-		Zotero.selectItems(list, function(selectedItems) {
+		Zotero.selectItems(list, function (selectedItems) {
 			if (!selectedItems) return true;
 			let articles = [];
 			for (let i in selectedItems) {
@@ -76,7 +76,7 @@ function doWeb (doc, url) {
 			return false;
 		}
 		);
-	} 
+	}
 	else {
 		let uri = getURI(url);
 		let article = '/ris?uri=' + uri;
@@ -85,20 +85,20 @@ function doWeb (doc, url) {
 	return false;
 }
 
-function getURI (url){
+function getURI(url) {
 	var a = '';
 	var b = '';
 	if (url.includes('/details/')) {
 		a = url.indexOf('details');
 		b = url.indexOf('xml');
 		return url.substring(a + 7, b + 3);
-	} 
+	}
 	else if (url.includes('/resolve/')) {
-		if (url.includes('.xml')){
+		if (url.includes('.xml')) {
 			a = url.indexOf('/resolve/');
 			b = url.indexOf('xml');
 			return url.substring(a + 9, b + 3);
-		} 
+		}
 		else {
 			return '/' + url.split('/resolve/')[1] + '.xml';
 		}
@@ -106,7 +106,7 @@ function getURI (url){
 	return false;
 }
 
-function getItems (doc) {
+function getItems(doc) {
 	var items = {}, found = false;
 	var titles = '';
 	if (doc.URL.includes('/my-articles')) {
@@ -117,9 +117,9 @@ function getItems (doc) {
 			items[uri] = title;
 			found = true;
 		}
-	} 
+	}
 	else {
-		if (doc.URL.includes('/browse')){
+		if (doc.URL.includes('/browse')) {
 			titles = ZU.xpath(doc, './/div/h3/a');
 		}
 		else {
@@ -135,12 +135,12 @@ function getItems (doc) {
 	return found ? items : false;
 }
 
-function scrape (text) {
+function scrape(text) {
 	// loading RIS transformer.
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
 	translator.setString(text);
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 		let uri = getURI(item.attachments[0].path);
 		let pdfURL = '/pdf' + uri;
 		item.url = 'https://journals.scholarsportal.info/details' + uri;
