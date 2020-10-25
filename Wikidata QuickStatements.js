@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-29 21:00:00"
+	"lastUpdated": "2020-10-25 10:00:00"
 }
 
 
@@ -44,7 +44,7 @@ var typeMapping = {
 	audioRecording: "Q30070318",
 	bill: "Q686822",
 	blogPost: "Q17928402",
-	book: "Q571",
+	book: "Q3331189", // changed from Q571 (work level) to edition level as we want to export maximal amount of properties
 	bookSection: "Q1980247",
 	case: "Q2334719",
 	computerProgram: "Q40056",
@@ -92,7 +92,9 @@ var propertyMapping = {
 	P953: "url",
 	P478: "volume",
 	P433: "issue",
-	P304: "pages"
+	P304: "pages",
+	P1104: "numPages",
+	P393: "edition"
 };
 
 // it is important to use here the language codes in the form
@@ -143,11 +145,27 @@ var identifierMapping = {
 	arXiv: "P818",
 	"Open Library ID": "P648",
 	OCLC: "P243",
-	"IMDb ID": "P345"
+	"IMDb ID": "P345",
+	"Google-Books-ID": "P675"
 };
 
 
 function zoteroItemToQuickStatements(item) {
+	// add numPages if only page range is given
+	if (item.pages && !item.numPages) {
+		let pagesMatch = item.pages.match(/^(\d+)[–-](\d+)$/);
+		if (pagesMatch) {
+			item.numPages = parseInt(pagesMatch[2]) - parseInt(pagesMatch[1]) + 1;
+		}
+	}
+	// cleanup edition before to export
+	if (item.edition) {
+		item.edition = parseInt(item.edition);
+		if (item.edition == 1) {
+			delete item.edition;
+		}
+	}
+
 	var statements = ['CREATE'];
 	var addStatement = function () {
 		var args = Array.prototype.slice.call(arguments);
@@ -221,7 +239,9 @@ function zoteroItemToQuickStatements(item) {
 		addStatement('P577', '+' + formatedDate);
 	}
 
-	if (item.ISBN) {
+	// determining depending entries where the ISBN is part of the larger work
+	var dependingWork = ["bookSection", "conferencePaper", "dictionaryEntry", "encyclopediaArticle", "journalArticle", "magazineArticle", "newspaperArticle"].includes(itemType);
+	if (item.ISBN && !dependingWork) {
 		var isbnDigits = item.ISBN.replace(/-/g, '');
 		if (isbnDigits.length == 13) {
 			addStatement('P212', '"' + item.ISBN + '"');
