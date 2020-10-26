@@ -7,7 +7,7 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 110,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-09-09 08:28:17"
@@ -17,9 +17,8 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2016 Philipp Zumstein
-
-	This file is part of Zotero.
+    Copyright © 2016 Philipp Zumstein
+    Modified 2020 Johannes Riedl
 
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by

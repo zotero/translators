@@ -99,7 +99,7 @@ function getYear(doc) {
 
 function extractAuthors(entry) {
 	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
-		  + quotationMarks + '.*' + quotationMarks + '.*$');
+		+ quotationMarks + '.*' + quotationMarks + '.*$');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
 	let authorPart = onelineInnerText.replace(authorRegex, "$1");
 	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g, ',').split(',');
@@ -108,7 +108,7 @@ function extractAuthors(entry) {
 
 function extractTitle(entry) {
 	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
-		 + quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
+		+ quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
 	let titlePart = onelineInnerText.replace(titleRegex, "$1");
 	return cleanTitle(titlePart);
