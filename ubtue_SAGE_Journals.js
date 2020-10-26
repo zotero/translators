@@ -2,8 +2,8 @@
 	"translatorID": "4ff2bcd8-968c-49bd-94d2-e99c41aeb842",
 	"label": "SAGE Journals UBTue",
 	"creator": "Sebastian Karcher, Johannes Riedl",
-    //"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
-	"target": "^THISWILLNEVERMATCH$)",
+    "target_real": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"target": "^THISWILLNEVERMATCH$",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 110,
@@ -12,6 +12,7 @@
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-09-09 08:28:17"
 }
+// We currently "hide" this translator. Thus the original target is set to a value that will never match. See target_real above for a working target
 
 /*
 	***** BEGIN LICENSE BLOCK *****

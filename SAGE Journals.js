@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-09 08:27:00"
+	"lastUpdated": "2020-10-26 13:42:01"
 }
 
 /*
@@ -48,7 +48,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+	let rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -131,12 +131,12 @@ function scrape(doc, url) {
 				});
 			}
 
-            // Only get attributes and skip introductory term Keywords
-			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))] \
-                                                                  /a[@class="attributes"]');
-            // Make sure we keep the original approach
-            if (!tagentry)
-                tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
+			// Only get attributes and skip introductory term Keywords
+			let tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))] \
+																  /a[@class="attributes"]');
+			// Make sure we keep the original approach
+			if (!tagentry)
+				tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
 				item.tags = tagentry.split(",");
 			}
@@ -166,7 +166,6 @@ function scrape(doc, url) {
 				if (!item.tags) {
 					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
 					if (tags) item.tags = tags.map(n => n.textContent);
-                    Z.debug(item.tags);
 				}
 			}
 

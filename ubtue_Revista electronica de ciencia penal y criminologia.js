@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 16:05:51"
+	"lastUpdated": "2020-10-26 13:52:43"
 }
 
 /*
@@ -69,14 +69,14 @@ function getSearchResults(doc, checkOnly) {
 function getIssue(doc) {
 	let issueExpressions = ZU.xpath(doc, journalInfoXPath);
 	for (let exp of issueExpressions) {
-	   let issue = /Núm\.\s+(\d+).*/.exec(exp.nodeValue);
+	   let issue = /Núm\.\s+(\d+)/.exec(exp.nodeValue);
 	   if (issue) return issue[1];
 	}
 	// With the new layout there is seemingly no direct class
 	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
 	for (let exp of issueExpressions) {
 		Z.debug(exp.innerText);
-		let issue = /Número\s+(\d+).*/.exec(exp.innerText);
+		let issue = /Número\s+(\d+)/.exec(exp.innerText);
 		if (issue) return issue[1];
 	}
 	return false;
@@ -100,7 +100,7 @@ function getYear(doc) {
 function extractAuthors(entry) {
 	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
 		  + quotationMarks + '.*' + quotationMarks + '.*$');
-	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
 	let authorPart = onelineInnerText.replace(authorRegex, "$1");
 	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g, ',').split(',');
 }
@@ -109,7 +109,7 @@ function extractAuthors(entry) {
 function extractTitle(entry) {
 	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		 + quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
-	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
 	let titlePart = onelineInnerText.replace(titleRegex, "$1");
 	return cleanTitle(titlePart);
 }
@@ -141,7 +141,7 @@ function cleanNote(note) {
 function extractNote(entry) {
 	let noteRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
 		+ quotationMarks + '.*' + quotationMarks + '(.*)$', 'g');
-	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/g, " ");
 	let notePart = onelineInnerText.replace(noteRegex, "$1");
 	return (cleanNote(notePart));
 }
