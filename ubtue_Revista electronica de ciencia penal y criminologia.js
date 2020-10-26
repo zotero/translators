@@ -70,33 +70,29 @@ function getIssue(doc) {
 	let issueExpressions = ZU.xpath(doc, journalInfoXPath);
 	for (let exp of issueExpressions) {
 	   let issue = /Núm\.\s+(\d+).*/.exec(exp.nodeValue);
-	   if (issue)
-		   return issue[1];
+	   if (issue) return issue[1];
 	}
 	// With the new layout there is seemingly no direct class
 	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
 	for (let exp of issueExpressions) {
 		Z.debug(exp.innerText);
 		let issue = /Número\s+(\d+).*/.exec(exp.innerText);
-		if (issue)
-		    return issue[1];
+		if (issue) return issue[1];
 	}
-    return false;
+	return false;
 }
 
 
 function getYear(doc) {
 	let yearExpression = ZU.xpath(doc, journalInfoXPath);
 	for (let exp of yearExpression) {
-		let year =  /Núm\.\s+\d+\s*\((\d+)\)/.exec(exp.nodeValue);
-		if (year)
-			return year[1];
+		let year = /Núm\.\s+\d+\s*\((\d+)\)/.exec(exp.nodeValue);
+		if (year) return year[1];
 	}
-    yearExpression = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
+	yearExpression = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
 	for (let exp of yearExpression) {
 		let issue = /Año\s+(\d+).*/.exec(exp.innerText);
-		if (issue)
-		    return issue[1];
+		if (issue) return issue[1];
 	}
 }
 
@@ -104,7 +100,7 @@ function getYear(doc) {
 function extractAuthors(entry) {
 	let authorRegex = new RegExp(articleNumberPrefix + '\\s+(.*),\\s+'
 		  + quotationMarks + '.*' + quotationMarks + '.*$');
-    let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
+	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
 	let authorPart = onelineInnerText.replace(authorRegex, "$1");
 	return authorPart.replace(/[\s\r\n]+y[\s\r\n]+/g, ',').split(',');
 }
@@ -112,7 +108,7 @@ function extractAuthors(entry) {
 
 function extractTitle(entry) {
 	let titleRegex = new RegExp(articleNumberPrefix + '\\s+.*,\\s+'
-		 +  quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
+		 + quotationMarks + '(.*)' + quotationMarks + '.*$', 'g');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ").replace(/\s\s+/gm, " ");
 	let titlePart = onelineInnerText.replace(titleRegex, "$1");
 	return cleanTitle(titlePart);
@@ -147,7 +143,7 @@ function extractNote(entry) {
 		+ quotationMarks + '.*' + quotationMarks + '(.*)$', 'g');
 	let onelineInnerText = entry.innerText.replace(/[\r\n]+/gm, " ");
 	let notePart = onelineInnerText.replace(noteRegex, "$1");
-	return(cleanNote(notePart));
+	return (cleanNote(notePart));
 }
 
 
@@ -159,16 +155,13 @@ function doWeb(doc, url) {
 				let item = new Zotero.Item("journalArticle");
 				let entryXPath = entriesXPath + '[.//a[@href=\'' + key + '\']]';
 				let entry = ZU.xpath(doc, entryXPath);
-				if (Object.keys(entry).length != 1)
-					Z.debug("Warning: more than one matching entry element for " + key + " -- continue with first...");
-				for (let author of extractAuthors(entry[0]))
-					 item.creators.push(ZU.cleanAuthor(author));
+				if (Object.keys(entry).length != 1) Z.debug("Warning: more than one matching entry element for " + key + " -- continue with first...");
+				for (let author of extractAuthors(entry[0])) item.creators.push(ZU.cleanAuthor(author));
 				item.title = extractTitle(entry[0]);
 				item.issue = getIssue(doc);
 				item.year = getYear(doc);
 				item.url = extractURL(entry[0]);
-				if ((note = extractNote(entry[0])))
-					item.notes.push(note);
+				if ((note = extractNote(entry[0]))) item.notes.push(note);
 				item.complete();
 			});
 		});
