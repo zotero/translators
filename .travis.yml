@@ -16,4 +16,4 @@ matrix:
 script:
   - git diff -z --name-only $TRAVIS_COMMIT_RANGE *.js | xargs -0 npm run lint --
   - cd .ci && ./checkDeletedTxt.sh
-  - "[[ \"$TRAVIS_PULL_REQUEST\" != \"false\" ]] && cd pull-request-check && ./check-pull-request.sh"
+  - "cd pull-request-check && ./check-pull-request.sh"
