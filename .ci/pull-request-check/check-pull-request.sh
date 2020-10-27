@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
+	exit 0;
+fi
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$( dirname "$DIR" )"
 
@@ -39,20 +43,21 @@ if [ -d .git ]; then
 	git pull
 	git submodule update
 	git -C src/zotero/ submodule update -- resource/schema/global
-	git -C src/zotero submodule update -- resource/SingleFileZ
+	git -C src/zotero submodule update -- resource/SingleFile
 	npm ci
 else
 	git clone https://github.com/zotero/zotero-connectors.git --depth 1 .
 	git submodule update --init --depth 1
 	git -C src/zotero submodule update --init --depth 1 -- resource/schema/global
-	git -C src/zotero submodule update --init --depth 1 -- resource/SingleFileZ
+	git -C src/zotero submodule update --init --depth 1 -- resource/SingleFile
 	npm ci
 fi
-npm install chromedriver --detect_chromedriver_version
 
 export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
 ./build.sh -p b -d
 cd ..
+
+npm install chromedriver --detect_chromedriver_version
 
 get_translators_to_check
 ./selenium-test.js "$TRANSLATORS_TO_CHECK"
