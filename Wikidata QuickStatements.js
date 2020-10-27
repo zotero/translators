@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 2,
 	"browserSupport": "gcs",
-	"lastUpdated": "2020-10-25 10:00:00"
+	"lastUpdated": "2020-10-27 09:15:00"
 }
 
 
@@ -96,6 +96,9 @@ var propertyMapping = {
 	P1104: "numPages",
 	P393: "edition"
 };
+
+// properties which needs no quotes around their values (e.g. ones for numbers)
+var nonStringProperties = ["P1104"];
 
 // it is important to use here the language codes in the form
 // as they are also used in Wikidata for monolingual text
@@ -202,7 +205,12 @@ function zoteroItemToQuickStatements(item) {
 	for (var pnumber in propertyMapping) {
 		var zfield = propertyMapping[pnumber];
 		if (item[zfield]) {
-			addStatement(pnumber, '"' + item[zfield] + '"');
+			if (nonStringProperties.includes(pnumber)) {
+				addStatement(pnumber, item[zfield]);
+			}
+			else {
+				addStatement(pnumber, '"' + item[zfield] + '"');
+			}
 		}
 	}
 
