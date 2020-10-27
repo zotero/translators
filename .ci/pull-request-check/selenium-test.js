@@ -12,7 +12,7 @@ const chromeExtensionDir = path.join(__dirname, 'connectors', 'build', 'chrome')
 const KEEP_BROWSER_OPEN = 'KEEP_BROWSER_OPEN' in process.env;
 
 async function getTranslatorsToTest() {
-	const translatorFilenames = process.argv[2].split('\n');
+	const translatorFilenames = process.argv[2].split('\n').filter(filename => filename.trim().length > 0);
 	let changedTranslatorIDs = [];
 	let toTestTranslatorIDs = new Set();
 	let toTestTranslatorNames = new Set();
