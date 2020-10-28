@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2020-10-05 15:15:00"
 }
 
 /*
@@ -29,8 +29,11 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/article/)) return "journalArticle";
-	else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+    let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
+    if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+          pkpLibraries.length >= 1))
+        return false;
+    else if (url.match(/article/)) return "journalArticle";
 	else return false;
 }
 
@@ -53,12 +56,12 @@ function invokeEMTranslator(doc) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
-		if (i.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
+		if (i.pages && i.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
 			let firstandlastpages = i.pages.split('–');
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
 		}
 		if (i.issue === "0") delete i.issue;
-		if (i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		i.complete();
 	});
 	translator.translate();
