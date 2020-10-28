@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-27 08:05:18"
+	"lastUpdated": "2020-10-27 08:08:17"
 }
 
 /*
