@@ -59,7 +59,6 @@ function getSearchResults(doc) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[(contains(@href, "/article/view/") and not(contains(@href, "/pdf")))]');
-	//var rows = ZU.xpath(doc, '//a[(contains(@href, "article/view/"))]');
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
