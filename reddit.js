@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-28 15:35:26"
+	"lastUpdated": "2020-10-28 15:41:29"
 }
 
 /*
@@ -116,6 +116,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "forumPost",
+				"title": "SpaceX Partners with LeoLabs to Track Starlink Satellites",
 				"creators": [
 					{
 						"firstName": "",
@@ -123,13 +124,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"title": "SpaceX Partners with LeoLabs to Track Starlink Satellites",
-				"url": "www.reddit.com/r/spacex/comments/jj7arf/spacex_partners_with_leolabs_to_track_starlink/",
 				"date": "2020-10-27T18:54:37.000Z",
-				"postType": "Reddit Post",
 				"forumTitle": "r/spacex",
-				"websiteTitle": "reddit.com",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"postType": "Reddit Post",
+				"url": "www.reddit.com/r/spacex/comments/jj7arf/spacex_partners_with_leolabs_to_track_starlink/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
