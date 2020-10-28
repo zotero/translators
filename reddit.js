@@ -2,14 +2,14 @@
 	"translatorID": "23bacc11-98e3-4b78-b1ef-cc2c9a04b893",
 	"label": "reddit",
 	"creator": "Lukas Kawerau",
-	"target": "^https?://(www\\.)?reddit.com",
+	"target": "^https?://www\\.reddit\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-28 13:27:20"
+	"lastUpdated": "2020-10-28 15:28:00"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectWeb(doc, url) {
 	}
 	// Adjust the inspection of url as required
 	else {
-		return 'Forum Post';
+		return 'forumPost';
 	}
 	// Add other cases if needed
 }
@@ -101,10 +101,40 @@ function scrape(doc, url) {
 		// Zotero.debug(reddit_data);
 		newItem.postType = "Reddit Post";
 		newItem.forumTitle = 'r/'+reddit_data[0]["data"]["children"][0]["data"]["subreddit"];
-		newItem.websiteTitle = "Reddit.com";
+		newItem.websiteTitle = "reddit.com";
 		newItem.complete();
-		// Zotero.debug(newItem);
+		//Zotero.debug(newItem);
 		Zotero.done();
 	}, function() {});
 
-}
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.reddit.com/r/spacex/comments/jj7arf/spacex_partners_with_leolabs_to_track_starlink/",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"creators": [
+					"0": {
+						"firstName": "",
+						"lastName": "SpikePlayz",
+						"creatorType": "author"
+					}
+				],
+				"notes": [],
+            	"tags": [],
+            	"seeAlso": [],
+        	    "attachments": [],
+				"title": "SpaceX Partners with LeoLabs to Track Starlink Satellites",
+				"url": "www.reddit.com/r/spacex/comments/jj7arf/spacex_partners_with_leolabs_to_track_starlink/",
+				"date": "2020-10-27T18:54:37.000Z",
+				"postType": "Reddit Post",
+				"forumTitle": "r/spacex",
+				"websiteTitle": "reddit.com",
+				"accessDate": "CURRENT_TIMESTAMP"
+			}
+		]
+	}
+]
+/** END TEST CASES **/
