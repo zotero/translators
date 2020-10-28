@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-28 15:57:26"
+	"lastUpdated": "2020-10-28 16:07:21"
 }
 
 /*
@@ -36,10 +36,6 @@
 
 
 const entriesXPath = '(//div[@id="text"]/blockquote/p | //div[@id="text"]/blockquote/ul/li/p)';
-
-
-const articleNumberPrefix = '^\\s*\\d+-[a-z]?\\d+[a-z]?';
-
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
