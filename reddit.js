@@ -12,6 +12,24 @@
 	"lastUpdated": "2020-10-28 13:27:20"
 }
 
+/*
+***** BEGIN LICENSE BLOCK *****
+Reddit Translator
+Copyright (C) 2020 Lukas Kawerau, lukas@kawerau.org
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+   ***** END LICENSE BLOCK *****
+*/
+
+
 function attr(docOrElem, selector, attr, index) {
 	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
 	return elem ? elem.getAttribute(attr) : null;
@@ -37,7 +55,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// Adjust the CSS Selectors 
+	// Adjust the CSS Selectors
 	var rows = doc.querySelectorAll('.mw-search-result-heading a');
 	for (var i=0; i<rows.length; i++) {
 		// Adjust if required, use Zotero.debug(rows) to check
@@ -88,5 +106,5 @@ function scrape(doc, url) {
 		// Zotero.debug(newItem);
 		Zotero.done();
 	}, function() {});
-	
+
 }
