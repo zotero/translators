@@ -75,7 +75,6 @@ function getIssue(doc) {
 	// With the new layout there is seemingly no direct class
 	issueExpressions = ZU.xpath(doc, "//span[@style='font-size: 10pt;']");
 	for (let exp of issueExpressions) {
-		Z.debug(exp.innerText);
 		let issue = /Número\s+(\d+)/.exec(exp.innerText);
 		if (issue) return issue[1];
 	}
