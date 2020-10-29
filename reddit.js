@@ -36,15 +36,13 @@ function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelec
 
 function detectWeb(doc, url) {
 	var regex = new RegExp("\\/r\\/[a-z\\d]+\\/comments\\/");
-	if (url.includes('search') && getSearchResults(doc, true)) {
-		return 'multiple';
-	}
-	else if (regex.test(url)) {
+	if (regex.test(url)) {
 		return 'forumPost';
 	}
-	else {
+	else if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
