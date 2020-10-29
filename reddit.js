@@ -9,24 +9,24 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 14:43:51"
+	"lastUpdated": "2020-10-29 16:05:25"
 }
 
 /*
-***** BEGIN LICENSE BLOCK *****
-Reddit Translator
-Copyright (C) 2020 Lukas Kawerau, lukas@kawerau.org
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-   ***** END LICENSE BLOCK *****
+	***** BEGIN LICENSE BLOCK *****
+	Copyright © 2020 Lukas Kawerau
+	This file is part of Zotero.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	***** END LICENSE BLOCK *****
 */
 
 
@@ -35,7 +35,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
-	var regex = new RegExp("\/r\/[a-z\d]+\/comments\/");
+	var regex = new RegExp("\\/r\\/[a-z\\d]+\\/comments\\/");
 	if (url.includes('search') && getSearchResults(doc, true)) {
 		return 'multiple';
 	} 
@@ -64,10 +64,9 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	var jsonUrl = url.split("?")[0] + '.json';
-	var commentRegex = new RegExp("\/r\/[a-z\d]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\/");
+	var commentRegex = new RegExp("\\/r\\/[a-z\\d]+\\/comments\\/[a-z\\d]+\\/[a-z\\d_]+\\/[a-z\\d]+\\/");
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			Zotero.debug(items);
 			if (!items) {
 				return true;
 			}
