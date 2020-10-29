@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 09:31:10"
+	"lastUpdated": "2020-10-29 09:41:05"
 }
 
 /*
@@ -166,7 +166,7 @@ function doWeb(doc, url) {
 					item.creators.push(ZU.cleanAuthor(author));
 				item.url = extractURL(entry);
 				item.DOI = extractDOI(entry);
-				item.year = extractYear(entry);
+				item.date = extractYear(entry);
 				item.issue = extractIssue(entry);
 				item.volume = extractVolume(entry);
 				item.complete();
