@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 16:24:31"
+	"lastUpdated": "2020-10-29 20:46:27"
 }
 
 /*
@@ -164,7 +164,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Reddit Post Snapshot",
-						"type": "text/html"
+						"mimetype": "text/html"
 					}
 				],
 				"tags": [],
@@ -194,7 +194,7 @@ var testCases = [
 				"attachments": [
 					{
 						"title": "Reddit Comment Snapshot",
-						"type": "text/html"
+						"mimetype": "text/html"
 					}
 				],
 				"tags": [],
