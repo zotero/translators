@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 13:55:04"
+	"lastUpdated": "2020-10-29 16:01:25"
 }
 
 /*
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 			if (articleType) {
 				for (let r of articleType) {
 					let reviewDOIlink = r.innerHTML;
-					if (reviewDOIlink.match(/Review Article/)) {
+					if (reviewDOIlink.match(/Review Article|book review/i)) {
 						item.tags.push('Book Review');
 					}
 				}
@@ -466,6 +466,52 @@ var testCases = [
 					},
 					{
 						"note": "abs:Bien que le Mexique soit l’un des pays les plus catholiques du monde, il connaît une diversification religieuse rapide et intense. Le champ religieux au Mexique est désormais constitué d’une myriade de confessions qui transforment la prétendue homogénéité socio-religieuse des Mexicains. Chez les catholiques, les nouvelles pratiques souvent associées à de nouvelles spiritualités, notamment les rituels néopaïens et indigènes, sont une autre caractéristique de cette diversité, ainsi qu’une tendance à la désinstitutionnalisation religieuse. Les résultats de l’ENCREER, une enquête nationale sur les pratiques et les croyances religieuses, permettent une analyse comparative des principales identifications religieuses (Catholiques, Protestants et Évangéliques, Adventistes du septième jour/Témoins de Jéhovah/Saints des derniers jours et non affiliés). En vue de faciliter les comparaisons internationales, cet article décrit la conception de l’enquête et les principales conclusions de l’analyse de la diversité religieuse contemporaine au Mexique."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/2056997120926099",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Learning for Life: An Imaginative Approach to Worldview Education in the Context of Diversity",
+				"creators": [
+					{
+						"lastName": "Baumann",
+						"firstName": "Eddie K",
+						"creatorType": "author"
+					}
+				],
+				"date": "November 1, 2020",
+				"DOI": "10.1177/2056997120926099",
+				"ISSN": "2056-9971",
+				"issue": "3",
+				"journalAbbreviation": "International Journal of Christianity & Education",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "317-318",
+				"publicationTitle": "International Journal of Christianity & Education",
+				"shortTitle": "Learning for Life",
+				"url": "https://doi.org/10.1177/2056997120926099",
+				"volume": "24",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/2056997120926099</p>"
 					}
 				],
 				"seeAlso": []
