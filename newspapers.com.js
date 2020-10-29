@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-08 17:39:43"
+	"lastUpdated": "2020-10-29 03:32:09"
 }
 
 /*
@@ -85,7 +85,7 @@ function doWeb(doc, _url) {
 
 	newItem.abstractNote = details.media.note;
 	
-	var uniqueID = newItem.url.match(/\d+/);
+	var uniqueID = newItem.url.match(/\/clip\/(\d+)/)[1];
 	var pdfurl = "https://www.newspapers.com/clippings/download/?id=" + uniqueID;
 	newItem.attachments.push({
 		title: "Full Text PDF",
