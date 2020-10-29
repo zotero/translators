@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 13:53:58"
+	"lastUpdated": "2020-10-29 14:43:51"
 }
 
 /*
@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.SQnoC3ObvgnGjWt90zD9Z._2INHSNB8V5eaWp4P0rY_mE');
+	var rows = ZU.xpath(doc, '//a[div/h3]');
 	for (let row of rows) {
 		var href = row.href + '.json';
 		var title = ZU.trimInternal(row.textContent);
