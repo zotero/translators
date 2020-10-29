@@ -38,10 +38,11 @@ function detectWeb(doc, url) {
 	var regex = new RegExp("\\/r\\/[a-z\\d]+\\/comments\\/");
 	if (url.includes('search') && getSearchResults(doc, true)) {
 		return 'multiple';
-	} 
+	}
 	else if (regex.test(url)) {
 		return 'forumPost';
-	}  else {
+	}
+	else {
 		return 'multiple';
 	}
 }
@@ -76,9 +77,11 @@ function doWeb(doc, url) {
 			}
 			ZU.doGet(articles, scrape);
 		});
-	} else if (detectWeb(doc, url) == "forumPost" && commentRegex.test(url)) {
+	}
+	else if (detectWeb(doc, url) == "forumPost" && commentRegex.test(url)) {
 		ZU.doGet(jsonUrl, scrapeComment);
-	} else {
+	}
+	else {
 		ZU.doGet(jsonUrl, scrape);
 	}
 }
@@ -88,18 +91,18 @@ function scrape(text) {
 	var newItem = new Zotero.Item("forumPost");
 	var redditJson = JSON.parse(text);
 	var redditData = redditJson[0].data.children[0].data;
-	newItem.title = redditData["title"];
-	newItem.creators.push(ZU.cleanAuthor(redditData["author"], "author", true));
-	newItem.url = 'www.reddit.com' + redditData["permalink"];
-	var postDate = new Date(redditData["created_utc"]*1000);
+	newItem.title = redditData.title;
+	newItem.creators.push(ZU.cleanAuthor(redditData.author, "author", true));
+	newItem.url = 'www.reddit.com' + redditData.permalink;
+	var postDate = new Date(redditData.created_utc * 1000);
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Post";
-	newItem.forumTitle = 'r/'+redditData["subreddit"];
+	newItem.forumTitle = 'r/' + redditData.subreddit;
 	newItem.websiteTitle = "reddit.com";
 	newItem.attachments.push({
-		url : 'https://www.reddit.com' + redditData["permalink"],
-		title : "Reddit Post Snapshot",
-		mimetype : "text/html"
+		url: 'https://www.reddit.com' + redditData.permalink,
+		title: "Reddit Post Snapshot",
+		mimetype: "text/html"
 	});
 	newItem.complete();
 }
@@ -109,22 +112,23 @@ function scrapeComment(text) {
 	var redditJson = JSON.parse(text);
 	var parentData = redditJson[0].data.children[0].data;
 	var redditData = redditJson[1].data.children[0].data;
-	newItem.title = ZU.ellipsize(redditData["body"], 20);
-	newItem.creators.push(ZU.cleanAuthor(redditData["author"], "author", true));
-	newItem.url = 'www.reddit.com' + redditData["permalink"];
-	var postDate = new Date(redditData["created_utc"]*1000);
+	newItem.title = ZU.ellipsize(redditData.body, 20);
+	newItem.creators.push(ZU.cleanAuthor(redditData.author, "author", true));
+	newItem.url = 'www.reddit.com' + redditData.permalink;
+	var postDate = new Date(redditData.created_utc * 1000);
 	newItem.date = postDate.toISOString();
 	newItem.postType = "Reddit Comment";
-	newItem.forumTitle = 'r/'+redditData["subreddit"];
+	newItem.forumTitle = 'r/' + redditData.subreddit;
 	newItem.websiteTitle = "reddit.com";
-	newItem.extra = 'Post URL: www.reddit.com' + parentData["permalink"]; 
+	newItem.extra = 'Post URL: www.reddit.com' + parentData.permalink;
 	newItem.attachments.push({
-		url : 'https://www.reddit.com' + redditData["permalink"],
-		title : "Reddit Comment Snapshot",
-		mimetype : "text/html"
+		url: 'https://www.reddit.com' + redditData.permalink,
+		title: "Reddit Comment Snapshot",
+		mimetype: "text/html"
 	});
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
