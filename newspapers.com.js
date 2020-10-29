@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-08 23:40:05"
+	"lastUpdated": "2020-10-08 17:39:43"
 }
 
 /*
@@ -85,12 +85,12 @@ function doWeb(doc, _url) {
 
 	newItem.abstractNote = details.media.note;
 	
-	var uniqueID = newItem.url.match(/\d+/)
-	var pdfurl = "https://www.newspapers.com/clippings/download/?id=" + uniqueID
+	var uniqueID = newItem.url.match(/\d+/);
+	var pdfurl = "https://www.newspapers.com/clippings/download/?id=" + uniqueID;
 	newItem.attachments.push({
-		title:"Full Text PDF",
-		mimeType:"application/pdf",
-		url:pdfurl
+		title: "Full Text PDF",
+		mimeType: "application/pdf",
+		url: pdfurl
 	});
 
 	newItem.publicationTitle = details.source.publisherName;
