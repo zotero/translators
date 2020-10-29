@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 08:25:52"
+	"lastUpdated": "2020-10-29 08:53:37"
 }
 
 /*
@@ -62,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function doWeb(doc, url) {
-	var json_url = url + '.json';
+	var json_url = url.split("?")[0] + '.json';
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			Zotero.debug(items);
@@ -96,7 +96,7 @@ function scrape(text) {
 	newItem.forumTitle = 'r/'+reddit_data["subreddit"];
 	newItem.websiteTitle = "reddit.com";
 	newItem.attachments.push({
-    	url : 'https://www.reddit.com' + reddit_data["permalink"],
+		url : 'https://www.reddit.com' + reddit_data["permalink"],
 		title : "Reddit Post Snapshot",
 		type : "text/html"
 	});
@@ -118,7 +118,7 @@ function scrape_comment(text) {
 	newItem.websiteTitle = "reddit.com";
 	newItem.extra = 'Post URL: www.reddit.com' + parent_data["permalink"]; 
 	newItem.attachments.push({
-    	url : 'https://www.reddit.com' + reddit_data["permalink"],
+		url : 'https://www.reddit.com' + reddit_data["permalink"],
 		title : "Reddit Comment Snapshot",
 		type : "text/html"
 	});
