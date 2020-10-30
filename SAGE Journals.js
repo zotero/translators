@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 16:01:25"
+	"lastUpdated": "2020-10-30 10:12:38"
 }
 
 /*
@@ -155,7 +155,7 @@ function scrape(doc, url) {
 			if (articleType) {
 				for (let r of articleType) {
 					let reviewDOIlink = r.innerHTML;
-					if (reviewDOIlink.match(/Review Article|book review/i)) {
+					if (reviewDOIlink.match(/Review Article|(product|book)\s+review/i)) {
 						item.tags.push('Book Review');
 					}
 				}
@@ -512,6 +512,70 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/2056997120926099</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0091647120908017",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "How to Discuss Controversial Sexual Issues with Christians Who Don’t (and Do) Agree with You",
+				"creators": [
+					{
+						"lastName": "Worthington",
+						"firstName": "Everett L.",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 1, 2020",
+				"DOI": "10.1177/0091647120908017",
+				"ISSN": "0091-6471",
+				"abstractNote": "I review the book, Geoffrey W. Sutton, A house divided: Sexuality, morality, and Christian cultures (Pickwick, 2016). After identifying the main premise as helping people understand the variety of positions (and what are behind them) on sexual issues, I summarize each chapter. Then, while I approve of promoting more understanding, I suggest that cognitive psychology shows that understanding alone will probably not promote societal peace or peace among Christians. Rather, unconscious and intuitive factors must also be considered.",
+				"issue": "3",
+				"journalAbbreviation": "Journal of Psychology and Theology",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "229-233",
+				"publicationTitle": "Journal of Psychology and Theology",
+				"url": "https://doi.org/10.1177/0091647120908017",
+				"volume": "48",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " conflict"
+					},
+					{
+						"tag": " conservatives"
+					},
+					{
+						"tag": " gender"
+					},
+					{
+						"tag": " moral foundations"
+					},
+					{
+						"tag": " progressives"
+					},
+					{
+						"tag": " sex"
+					},
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0091647120908017</p>"
 					}
 				],
 				"seeAlso": []
