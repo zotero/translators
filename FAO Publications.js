@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-17 12:27:13"
+	"lastUpdated": "2020-10-31 13:41:42"
 }
 
 /*
@@ -59,12 +59,12 @@ function scrape(doc, url) {
 	if (url.includes('card')) {
 		// attach document card URL and snapshot
 		// TEMP: Disable at least until we have post-JS snapshots
-		/*newItem.attachments.push({
+		/* newItem.attachments.push({
 			url: url,
 			title: 'FAO Document Record Snapshot',
 			mimeType: 'text/html',
 			snapshot: true
-		});*/
+		}); */
 
 		//* ********* Begin fixed-location variables **********
 
@@ -98,10 +98,13 @@ function scrape(doc, url) {
 					newItem.abstractNote = child.textContent;
 				}
 			}
-			// DOI: Some docs contain DOI as the last paragraph in abs field
+			// DOI: Some docs contain DOI as a separate paragraph in abs field
+			// use DOI URL as url when DOI exists
 			var DOILead = 'https://doi.org/';
-			if (abs.textContent.includes(DOILead)) {
-				newItem.DOI = abs.textContent.slice(abs.textContent.indexOf(DOILead) + DOILead.length);
+			if (abs.innerText.includes(DOILead)) {
+				var DOIMatch = abs.innerText.match(/https:\/\/doi\.org\/(.+)/i);
+				newItem.DOI = DOIMatch[1];
+				newItem.url = DOIMatch[0];
 			}
 		}
 		// attach PDF
@@ -111,8 +114,10 @@ function scrape(doc, url) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-		// url
-		newItem.url = url;
+		// url when DOI doesn't exist
+		if (!abs.innerText.includes(DOILead)) {
+			newItem.url = url;
+		}
 		// language: 2 or 3 letters following ISO 639
 		// indicated by the last 1-3 letters in PDF file name (langCode)
 		// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
@@ -153,7 +158,7 @@ function scrape(doc, url) {
 		if (!subTitle) {
 			newItem.title = mainTitle;
 		}
-		else if ((newItem.language == 'zh') || (newItem.language == 'ja') || (newItem.language == 'ko')) {
+		else if ((newItem.language == 'zh') || (newItem.language == 'ja')) {
 			newItem.title = mainTitle + '：' + subTitle;
 		}
 		else {
@@ -331,6 +336,58 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
+		"url": "http://www.fao.org/documents/card/en/c/ca8466en",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Responding to the impact of the COVID-19 outbreak on food value chains through efficient logistics",
+				"creators": [
+					{
+						"lastName": "FAO",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2020",
+				"ISBN": "9789251323717",
+				"abstractNote": "Measures implemented around the world to contain the COVID-19 pandemic have entailed a severe reduction not only in the transportation of goods and services that rely on transport, but also in the migration of labour domestically and internationally. Workers are less available reflecting both disruptions in transportation systems and restrictions to stop the transmission of the disease, within and across borders. \n\nThe Food and Agriculture Organization of the United Nations (FAO) urges countries to maintain functioning food value chains to avoid food shortages, following practices that are being proven to work. This note summarizes some practices that could be useful for governments and the private sector to maintain critical logistical elements in food value chain.\n\nRevised 26 April 2020.\n\nSee the full list of policy briefs related to COVID-19\n\n.",
+				"language": "en",
+				"libraryCatalog": "FAO Publications",
+				"numPages": "4",
+				"place": "Rome, Italy",
+				"publisher": "FAO",
+				"url": "https://doi.org/10.4060/ca8466en",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Coronavirus"
+					},
+					{
+						"tag": "agrifood sector"
+					},
+					{
+						"tag": "infectious diseases"
+					},
+					{
+						"tag": "logistics"
+					},
+					{
+						"tag": "value chains"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 		"defer": true,
 		"items": [
@@ -359,7 +416,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
 				"seriesNumber": "No. 1207",
-				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
+				"url": "https://doi.org/10.4060/ca8751en",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -481,7 +538,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"shortTitle": "FAO publications catalogue 2020",
-				"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
+				"url": "https://doi.org/10.4060/ca7988en",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -765,12 +822,12 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	},
 	{
 		"type": "web",
 		"url": "http://www.fao.org/publications/card/ar/c/c6c2c8d7-3683-53a7-ab58-ce480c65f36c/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -822,8 +879,7 @@ var testCases = [
 				"notes": [],
 				"seeAlso": []
 			}
-		],
-		"defer": true
+		]
 	}
 ]
 /** END TEST CASES **/
