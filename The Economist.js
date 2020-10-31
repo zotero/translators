@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-05 05:23:47"
+	"lastUpdated": "2020-10-31 11:08:32"
 }
 
 function detectWeb(doc, url) {
@@ -30,9 +30,17 @@ function scrape(doc, url) {
 	newItem.url = url;
 	newItem.publicationTitle = "The Economist";
 
-	//get headline
-	var title = ZU.xpathText(doc, '//h3[@class="headline"]');
+	// Headline
+	var title = text('h1 *[itemprop=headline]');
+	// As of 10/2020 these meta tags seem to be removed from the DOM after page load,
+	// so this won't work
 	if (!title) title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	if (!title) {
+		try {
+			title = JSON.parse(text('script#__NEXT_DATA__')).props.pageProps.content.headline;
+		}
+		catch (e) {}
+	}
 	newItem.title = title;
 
 	if (doc.evaluate('//div[@class="clear"][@id="pay-barrier"]/div[@class="col-right"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
