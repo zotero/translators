@@ -1,12 +1,12 @@
 {
 	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
-	"label": "SAGE Journals",
+	"label": "ubtue_SAGE Journals",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2020-10-30 10:12:38"
@@ -15,6 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	Copyright © 2016 Philipp Zumstein
+	Modiefied 2020 Timotheus Kim
 	This file is part of Zotero.
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -116,20 +117,6 @@ function scrape(doc, url) {
 					item.title += ': ' + subtitle.trim();
 				}
 			}
-			// The encoding of apostrophs in the RIS are incorrect and
-			// therefore we extract the abstract again from the website.
-			/*var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			if (abstract) {
-				item.abstractNote = abstract.trim();
-			}*/
-
-			// ubtue: also add translated abstracts in 520
-			/*var translatedAbstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
-			if (translatedAbstract) {
-				item.notes.push({
-					note: "abs:" + translatedAbstract,
-				});
-			}*/
 			
 			// ubtue: extract translated and other abstracts from the different xpath
 			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
