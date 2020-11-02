@@ -2,14 +2,14 @@
 	"translatorID": "b60e74db-2e5d-4b2a-94ac-f484737364b1",
 	"label": "ubtue_Open Journal Systems Multi-Wrapper",
 	"creator": "Madeesh Kannan",
-	"target": "/article|issue/view/|index.php/journal",
+	"target": "/issue/view/|index.php/journal",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-27 08:08:17"
+	"lastUpdated": "2020-11-02 10:48:09"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectOJSByMeta(doc) {
 
 
 function detectWeb(doc, url) {
-    if (!detectOJSByScript(doc) && !detectOJSByMeta(doc))
+	if (!detectOJSByScript(doc) && !detectOJSByMeta(doc))
 		return false;
 	items = getSearchResults(doc);
 	if (items && Object.keys(items).length > 1)
