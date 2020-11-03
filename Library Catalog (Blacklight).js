@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-21 02:44:56"
+	"lastUpdated": "2020-11-03 01:34:52"
 }
 
 /*
@@ -41,7 +41,7 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 function detectWeb(doc, url) {
-	if (/\/(view|catalog)\/[a-z\d]+/.test(url)) {
+	if (/\/(view|catalog)\/[a-z\d]+/.test(url) && (attr(doc, 'link[title="marcxml"]', 'href') || attr(doc, 'link[title="mods"]', 'href'))) {
 		return "book";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -78,22 +78,40 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var marcXML = attr(doc, 'link[title="marcxml"]', 'href');
+	var mods = attr(doc, 'link[title="mods"]', 'href');
 	// Z.debug(marcXML);
-
-	ZU.doGet(marcXML, function (text) {
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			item.attachments.push({
-				title: "Library Catalog Link",
-				url: url,
-				snapshot: false
+	if (marcXML) {
+		ZU.doGet(marcXML, function (text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("edd87d07-9194-42f8-b2ad-997c4c7deefd");
+			translator.setString(text);
+			translator.setHandler("itemDone", function (obj, item) {
+				item.attachments.push({
+					title: "Library Catalog Link",
+					url: url,
+					snapshot: false
+				});
+				item.complete();
 			});
-			item.complete();
+			translator.translate();
 		});
-		translator.translate();
-	});
+	}
+	else if (mods) {
+		ZU.doGet(mods, function (text) {
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("0e2235e7-babf-413c-9acf-f27cce5f059c");
+			translator.setString(text);
+			translator.setHandler("itemDone", function (obj, item) {
+				item.attachments.push({
+					title: "Library Catalog Link",
+					url: url,
+					snapshot: false
+				});
+				item.complete();
+			});
+			translator.translate();
+		});
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -280,6 +298,44 @@ var testCases = [
 		"type": "web",
 		"url": "https://search.library.brown.edu/catalog?utf8=%E2%9C%93&search_field=all_fields&q=qualitative",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://searchworks.stanford.edu/view/wg761wk9746",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Joan Baez, David Harris and son Gabriel leave La Tuna Federal Prison",
+				"creators": [
+					{
+						"firstName": "Bob",
+						"lastName": "Fitch",
+						"creatorType": "author"
+					}
+				],
+				"date": "1971-03-15",
+				"archiveLocation": "Stanford University. Libraries. Department of Special Collections and University Archives; M1994",
+				"libraryCatalog": "Library Catalog (Blacklight)",
+				"rights": "There is no fee for non-commercial image downloading and use. Commercial use requires permission from the Department of Special Collections and University Archives prior to publishing or rebroadcasting any item or work, in whole or in part, held by the Department. More information can be found on our permissions page [http://library.stanford.edu/spc/using-collections/permission-publish].",
+				"attachments": [
+					{
+						"title": "Library Catalog Link",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Vietnam War, 1961-1975--Protest movements--United States"
+					}
+				],
+				"notes": [
+					{
+						"note": "Digitized by Bob Fitch."
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
