@@ -130,7 +130,7 @@ function extractDOI(entry) {
 }
 
 function extractTitleAndAuthors(entry) {
-	// innerText in ZTS does not behave as intended so flatten and use the <br>-Replacemanet of cleanTags
+	// innerText in ZTS does not behave as intended so flatten and use the <br>-replacement of cleanTags
 	let entryCleanedText = ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, ""));
 	//skip empty element and standalone whitespace
 	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/))
