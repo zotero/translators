@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-09 00:07:31"
+	"lastUpdated": "2020-11-09 00:18:41"
 }
 
 /*
@@ -48,20 +48,21 @@ function doWeb(doc, url) {
 		
 		let allContent = ZU.xpathText(doc, "//pre");
 		try {
-  			let re = /Category: (.+)  +[^\n]+?/;
+			let re = /Category: (.+)  +[^\n]+?/;
 			newItem.reportType = allContent.match(re)[1];
-		} catch (cat_error) {
+		} catch (catError) {
 			let re = /Category: (.+)\n/;
 			newItem.reportType = allContent.match(re)[1];
 		}
 		
 		let auxAuthors = ZU.xpathText(doc, "((//table[@class='table table-condensed']/tbody/tr)[2]/td)[2]").split(',');
 		for (var i=0; i < auxAuthors.length; i++) {
-		 	newItem.creators.push(ZU.cleanAuthor(auxAuthors[i], "author", false)); 
+			newItem.creators.push(ZU.cleanAuthor(auxAuthors[i], "author", false));
 		}
 		
 		targetUri = url;
-	} else {
+	}
+	else {
 		if (url.includes("/rfc/")) {
 			targetUri = url.replace("/rfc/", "/html/").replace(".txt", "");
 		}
@@ -89,8 +90,8 @@ function doWeb(doc, url) {
 				var tmpAuthor = ZU.xpathText(metadataDoc, "(//meta[@name='DC.Creator'])[" + index + "]/@content");
 				if (tmpAuthor) {
 					let splitAuthor = tmpAuthor.split(" <")[0].split(", ");	// Remove references to emails that sometimes appear
-					if (splitAuthor.length == 1) {			// Process authors given as full name
-				 		newItem.creators.push(ZU.cleanAuthor(splitAuthor[0], "author", false)); 
+					if (splitAuthor.length == 1) {				// Process authors given as full name
+				 		newItem.creators.push(ZU.cleanAuthor(splitAuthor[0], "author", false));
 					}
 					else {										// Process splitted authors
 						newItem.creators.push({ lastName: splitAuthor[0], firstName: splitAuthor[1], creatorType: "author" });
@@ -114,9 +115,9 @@ function doWeb(doc, url) {
 				let allContent = ZU.xpathText(metadataDoc, "//pre");
 	
 				try {
-	  				let re = /Category: (.+)  +[^\n]+?/;
+					let re = /Category: (.+)  +[^\n]+?/;
 					newItem.reportType = allContent.match(re)[1];
-				} catch (cat_error) {
+				} catch (catError) {
 					let re = /Category: (.+)\n/;
 					newItem.reportType = allContent.match(re)[1];
 				}
