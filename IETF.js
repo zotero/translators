@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-09 00:18:41"
+	"lastUpdated": "2020-11-09 17:47:27"
 }
 
 /*
@@ -30,7 +30,6 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 function detectWeb(doc, url) {
 	return "report";
 }
@@ -39,14 +38,22 @@ function doWeb(doc, url) {
 	var resourceType = detectWeb(doc, url);
 	var newItem = new Zotero.Item(resourceType);
 	
-	var targetUri;
 	if (url.includes("datatracker")) {
 		let auxTitle = ZU.xpathText(doc, "//title");
 		newItem.institution = "IETF";
 		newItem.title = auxTitle.split(" - ")[1];
 		newItem.reportNumber = auxTitle.split(" - ")[0];
-		
+
+		let auxAuthors = ZU.xpathText(doc, '//table//th[text()="Authors"]/following-sibling::td/following-sibling::td').split(',');
+		for (var i=0; i < auxAuthors.length; i++) {
+			newItem.creators.push(ZU.cleanAuthor(auxAuthors[i], "author", false));
+		}
+
+		let auxDate = ZU.xpathText(doc, '//table//th[text()="Last updated"]/following-sibling::td/following-sibling::td');
+		newItem.date = ZU.strToISO(auxDate);
+
 		let allContent = ZU.xpathText(doc, "//pre");
+
 		try {
 			let re = /Category: (.+)  +[^\n]+?/;
 			newItem.reportType = allContent.match(re)[1];
@@ -54,15 +61,22 @@ function doWeb(doc, url) {
 			let re = /Category: (.+)\n/;
 			newItem.reportType = allContent.match(re)[1];
 		}
-		
-		let auxAuthors = ZU.xpathText(doc, "((//table[@class='table table-condensed']/tbody/tr)[2]/td)[2]").split(',');
-		for (var i=0; i < auxAuthors.length; i++) {
-			newItem.creators.push(ZU.cleanAuthor(auxAuthors[i], "author", false));
-		}
-		
-		targetUri = url;
+
+		let re = /Abstract\n\n([\S\s]+)Status of This Memo/;
+		let auxAbstract = allContent.match(re)[1];
+		newItem.abstractNote = auxAbstract.replace("\n", " "). replace(/\s+/g,' ');
+
+		// Adding the attachment
+		newItem.attachments.push({
+			title: "Snapshot",
+			mimeType: "text/html",
+			url: url
+		});
+
+		newItem.complete();
 	}
 	else {
+		let targetUri;
 		if (url.includes("/rfc/")) {
 			targetUri = url.replace("/rfc/", "/html/").replace(".txt", "");
 		}
@@ -82,7 +96,7 @@ function doWeb(doc, url) {
 	
 			// Start scraping
 			newItem.title = ZU.xpathText(metadataDoc, "//meta[@name='DC.Title']/@content");
-	
+
 			// Iterating through authors
 			let index = 0;
 			while (true) {
@@ -108,8 +122,8 @@ function doWeb(doc, url) {
 			newItem.abstractNote = abstractContent.replace(/\n/g, " ");
 	
 			try {
-				let regexp_type = /\[([^\]]+)\]$/;
-				let reportType = abstractContent.match(regexp_type)[1];
+				let re = /\[([^\]]+)\]$/;
+				let reportType = abstractContent.match(re)[1];
 				newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
 			} catch (error) {
 				let allContent = ZU.xpathText(metadataDoc, "//pre");
@@ -125,15 +139,17 @@ function doWeb(doc, url) {
 			newItem.url = targetUri;
 			let tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
 			newItem.date = ZU.strToISO(tmpDate);
+
+			// Adding the attachment
+			newItem.attachments.push({
+				title: "Snapshot",
+				mimeType: "text/html",
+				url: targetUri
+			});
+
+			newItem.complete();
 		});
 	}
-	// Adding the attachment
-	newItem.attachments.push({
-		title: "Snapshot",
-		mimeType: "text/html",
-		url: targetUri
-	});
-	newItem.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -199,7 +215,7 @@ var testCases = [
 					}
 				],
 				"date": "2001-04",
-				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\" messages. [STANDARDS-TRACK]",
+				"abstractNote": "ftp.is.co.za (Africa), nic.nordu.net (Europe), munnari.oz.au (Pacific Rim), ds.internic.net (US East Coast), or ftp.isi.edu (US West Coast).",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 2822",
@@ -232,7 +248,7 @@ var testCases = [
 					}
 				],
 				"date": "2001-04",
-				"abstractNote": "This document specifies a syntax for text messages that are sent between computer users, within the framework of \"electronic mail\" messages. [STANDARDS-TRACK]",
+				"abstractNote": "ftp.is.co.za (Africa), nic.nordu.net (Europe), munnari.oz.au (Pacific Rim), ds.internic.net (US East Coast), or ftp.isi.edu (US West Coast).",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 2822",
@@ -335,6 +351,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2019-05-21",
+				"abstractNote": "This paper documents the needs in various industries to establish multi-hop paths for characterized flows with deterministic properties.",
 				"institution": "IETF",
 				"libraryCatalog": "IETF",
 				"reportNumber": "RFC 8557",
