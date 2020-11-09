@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-26 01:22:24"
+	"lastUpdated": "2020-11-09 00:07:31"
 }
 
 /*
@@ -40,78 +40,99 @@ function doWeb(doc, url) {
 	var newItem = new Zotero.Item(resourceType);
 	
 	var targetUri;
-	if (url.includes("/rfc/")) {
-		targetUri = url.replace("/rfc/", "/html/").replace(".txt", "");
-	}
-	else if (url.includes("/pdf/")) {
-		targetUri = url.replace("/pdf/", "/html/").replace(".pdf", "");
-	}
-	else {
-		targetUri = url;
-	}
-
-	Zotero.Utilities.HTTP.doGet(targetUri, function (resText) {
-		// Clean and parse metadata web
-		resText = resText.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
-		resText = Zotero.Utilities.trim(resText);
-		let parser = new DOMParser();
-		let metadataDoc = parser.parseFromString(resText, "text/html");
-
-		// Start scraping
-		newItem.title = ZU.xpathText(metadataDoc, "//meta[@name='DC.Title']/@content");
-
-		// Iterating through authors
-		let index = 0;
-		while (true) {
-			index++;
-			var tmpAuthor = ZU.xpathText(metadataDoc, "(//meta[@name='DC.Creator'])[" + index + "]/@content");
-			if (tmpAuthor) {
-				let splitAuthor = tmpAuthor.split(" <")[0].split(", ");	// Remove references to emails that sometimes appear
-				if (splitAuthor.length == 1) {			// Process authors given as full name
-			 		newItem.creators.push(ZU.cleanAuthor(splitAuthor[0], "author", false)); 
-				}
-				else {										// Process splitted authors
-					newItem.creators.push({ lastName: splitAuthor[0], firstName: splitAuthor[1], creatorType: "author" });
-				}
-			}
-			else {
-				break;
-			}
-		}
-		newItem.reportNumber = "RFC " + ZU.xpathText(metadataDoc, "//meta[@name='DC.Identifier']/@content").split(":")[3];
-
+	if (url.includes("datatracker")) {
+		let auxTitle = ZU.xpathText(doc, "//title");
 		newItem.institution = "IETF";
-		let abstractContent = ZU.xpathText(metadataDoc, "//meta[@name='DC.Description.Abstract']/@content");
-		newItem.abstractNote = abstractContent.replace(/\n/g, " ");
-
+		newItem.title = auxTitle.split(" - ")[1];
+		newItem.reportNumber = auxTitle.split(" - ")[0];
+		
+		let allContent = ZU.xpathText(doc, "//pre");
 		try {
-			let regexp_type = /\[([^\]]+)\]$/;
-			let reportType = abstractContent.match(regexp_type)[1];
-			newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
-		} catch (error) {
-			let allContent = ZU.xpathText(metadataDoc, "//pre");
-
-			try {
-  				let regexp_type = /Category: (.+)  +[^\n]+?/;
-				newItem.reportType = allContent.match(regexp_type)[1];
-			} catch (cat_error) {
-				let regexp_type = /Category: (.+)\n/;
-				newItem.reportType = allContent.match(regexp_type)[1];
-			}
+  			let re = /Category: (.+)  +[^\n]+?/;
+			newItem.reportType = allContent.match(re)[1];
+		} catch (cat_error) {
+			let re = /Category: (.+)\n/;
+			newItem.reportType = allContent.match(re)[1];
 		}
-		newItem.url = targetUri;
-		let tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
-		newItem.date = ZU.strToISO(tmpDate);
-
-		// Adding the attachment
-		newItem.attachments.push({
-			title: "Snapshot",
-			mimeType: "text/html",
-			url: targetUri
-		});
+		
+		let auxAuthors = ZU.xpathText(doc, "((//table[@class='table table-condensed']/tbody/tr)[2]/td)[2]").split(',');
+		for (var i=0; i < auxAuthors.length; i++) {
+		 	newItem.creators.push(ZU.cleanAuthor(auxAuthors[i], "author", false)); 
+		}
+		
+		targetUri = url;
+	} else {
+		if (url.includes("/rfc/")) {
+			targetUri = url.replace("/rfc/", "/html/").replace(".txt", "");
+		}
+		else if (url.includes("/pdf/")) {
+			targetUri = url.replace("/pdf/", "/html/").replace(".pdf", "");
+		}
+		else {
+			targetUri = url;
+		}
 	
-		newItem.complete();
+		Zotero.Utilities.HTTP.doGet(targetUri, function (resText) {
+			// Clean and parse metadata web
+			resText = resText.replace(/<!DOCTYPE[^>]*>/, "").replace(/<\?xml[^>]*\?>/, "");
+			resText = Zotero.Utilities.trim(resText);
+			let parser = new DOMParser();
+			let metadataDoc = parser.parseFromString(resText, "text/html");
+	
+			// Start scraping
+			newItem.title = ZU.xpathText(metadataDoc, "//meta[@name='DC.Title']/@content");
+	
+			// Iterating through authors
+			let index = 0;
+			while (true) {
+				index++;
+				var tmpAuthor = ZU.xpathText(metadataDoc, "(//meta[@name='DC.Creator'])[" + index + "]/@content");
+				if (tmpAuthor) {
+					let splitAuthor = tmpAuthor.split(" <")[0].split(", ");	// Remove references to emails that sometimes appear
+					if (splitAuthor.length == 1) {			// Process authors given as full name
+				 		newItem.creators.push(ZU.cleanAuthor(splitAuthor[0], "author", false)); 
+					}
+					else {										// Process splitted authors
+						newItem.creators.push({ lastName: splitAuthor[0], firstName: splitAuthor[1], creatorType: "author" });
+					}
+				}
+				else {
+					break;
+				}
+			}
+			newItem.reportNumber = "RFC " + ZU.xpathText(metadataDoc, "//meta[@name='DC.Identifier']/@content").split(":")[3];
+	
+			newItem.institution = "IETF";
+			let abstractContent = ZU.xpathText(metadataDoc, "//meta[@name='DC.Description.Abstract']/@content");
+			newItem.abstractNote = abstractContent.replace(/\n/g, " ");
+	
+			try {
+				let regexp_type = /\[([^\]]+)\]$/;
+				let reportType = abstractContent.match(regexp_type)[1];
+				newItem.reportType = ZU.capitalizeName(reportType.replace("-", " "));
+			} catch (error) {
+				let allContent = ZU.xpathText(metadataDoc, "//pre");
+	
+				try {
+	  				let re = /Category: (.+)  +[^\n]+?/;
+					newItem.reportType = allContent.match(re)[1];
+				} catch (cat_error) {
+					let re = /Category: (.+)\n/;
+					newItem.reportType = allContent.match(re)[1];
+				}
+			}
+			newItem.url = targetUri;
+			let tmpDate = ZU.xpathText(metadataDoc, "//meta[@name='DC.Date.Issued']/@content");
+			newItem.date = ZU.strToISO(tmpDate);
+		});
+	}
+	// Adding the attachment
+	newItem.attachments.push({
+		title: "Snapshot",
+		mimeType: "text/html",
+		url: targetUri
 	});
+	newItem.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -282,6 +303,41 @@ var testCases = [
 				"reportNumber": "RFC 7617",
 				"reportType": "Standards Track",
 				"url": "https://tools.ietf.org/html/rfc7617",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://datatracker.ietf.org/doc/rfc8557/",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Deterministic Networking Problem Statement",
+				"creators": [
+					{
+						"firstName": "Norman",
+						"lastName": "Finn",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pascal",
+						"lastName": "Thubert",
+						"creatorType": "author"
+					}
+				],
+				"institution": "IETF",
+				"libraryCatalog": "IETF",
+				"reportNumber": "RFC 8557",
+				"reportType": "Informational",
 				"attachments": [
 					{
 						"title": "Snapshot",
