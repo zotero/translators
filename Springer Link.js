@@ -2,33 +2,15 @@
 	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
 	"label": "Springer Link",
 	"creator": "Aurimas Vinckevicius",
-	"target": "https://link.springer.com/article/10.1007/s12103-020-09527-3",
+	"target": "^https?://link\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-11-10 15:23:55"
+	"lastUpdated": "2020-10-05 15:15:00"
 }
-
-/*
-   SpringerLink Translator
-   Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
-
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
@@ -75,10 +57,6 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//div[@class="toc"]/ol//li[contains(@class,"toc-item")]/p[@class="title"]/a');
 	}
-	// https://link.springer.com/journal/10344/volumes-and-issues/66-5
-	if (!results.length) {
-		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
-	}
 	return results;
 }
 
@@ -91,7 +69,7 @@ function doWeb(doc, url) {
 			items[list[i].href] = list[i].textContent;
 		}
 		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
+			if (!selectedItems) return true;
 			for (let i in selectedItems) {
 				ZU.processDocuments(i, scrape);
 			}
@@ -100,11 +78,6 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc, url);
 	}
-}
-
-function undesirableAbstractPresent(doc, item) {
-	let textStart = ZU.xpathText(doc, '//div[@class="c-article-section__content"]/p[not(a | b)]');
-	return textStart.indexOf(item.abstractNote) != -1;
 }
 
 function complementItem(doc, item) {
@@ -199,20 +172,63 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
-	// in some cases we get the beginning of the article as abstract
-	if (undesirableAbstractPresent(doc, item)) 
-		item.abstractNote = ''; 
-	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
-	if (!abs) {
-		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
-	}
-	if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
-	// add tags
-	var tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //li[@class="c-article-subject-list__subject"]');
+	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
+	if (abstractSections && abstractSections.length > 0) {
+		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
+		let abstract = "";
+		for (let i = 0; i < sectionTitles.length; ++i) {
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(abstractSections[i], './/p').trim();
+
+			abstract += titleText + ": " + sectionBody + "\n\n";
+		}
+
+		item.abstractNote = abstract.trim();
+	} else {
+		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
+		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
+		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
+        titleTextGerman = titleTextGerman ? titleTextGerman : '';
+		let abs = "";
+		for (let i = 0; i < sectionTitles.length; ++i) {
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
+			abs += titleText + ": " + sectionBody + "\n\n";
+			item.abstractNote = abs.trim();
+		}
+		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+    }
+    if (!item.abstractNote)
+        item.abstractNote = '';
+
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span | \
+               //li[@class="c-article-subject-list__subject"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
-	}
+    }
+    // Trim and deduplicate
+    item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
+
+	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
+	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
 	return item;
+}
+
+function shouldPostprocessWithEmbeddedMetadata(item) {
+	if (!item.pages) return true;
+	return false;
+}
+
+function postprocessWithEmbeddedMetadataTranslator(doc, originalItem) {
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, extractedMetadata) {
+		originalItem.pages = extractedMetadata.pages;
+
+		originalItem.complete();
+	});
+	translator.translate();
 }
 
 function scrape(doc, url) {
@@ -234,12 +250,13 @@ function scrape(doc, url) {
 				title: "Springer Full Text PDF",
 				mimeType: "application/pdf"
 			});
-			item.complete();
+
+			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
+			else item.complete();
 		});
 		translator.translate();
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -497,7 +514,23 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": " Analytical solutions "
+					},
+					{
+						"tag": " Elastic storage "
+					},
+					{
+						"tag": " Submarine outlet-capping "
+					},
+					{
+						"tag": " Tidal loading efficiency "
+					},
+					{
+						"tag": "Coastal aquifers "
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -579,8 +612,135 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"url": "https://link.springer.com/journal/11562/14/1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11562-019-00443-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Who pioneered Islamic banking in Malaysia? The background of the pioneers of Bank Islam Malaysia Berhad",
+				"creators": [
+					{
+						"lastName": "Kitamura",
+						"firstName": "Hideki",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-04-01",
+				"DOI": "10.1007/s11562-019-00443-w",
+				"ISSN": "1872-0226",
+				"abstractNote": "This study investigates the background of the pioneers of Bank Islam Malaysia Berhad (BIMB) and their perception of Islamic banking to explore the influence that their background had on the practices of BIMB, which have been criticized for being too similar to those of conventional banking. Accordingly, this study opts to explore this topic using interviews with the pioneers, complemented by archival research. Results of the research into the pioneers’ background and their perception of Islamic banking show that most came from a conventional banking background as part of the strong network of the founder of the bank, Abdul Halim Ismail. Furthermore, to fulfill the government’s expectations, they intended to make conventional banking Islamically acceptable rather than simply implementing the profit-and-loss sharing envisaged as ideal by Islamic economists, so they could provide modern banking facilities to economically underrepresented Malay Muslims. The findings reaffirm the significance of the intermediary role of practitioners, their background and philosophy in the development of products and services. In addition, the findings suggest the need for a reevaluation of the research of social scientists exploring whether Islamic banking offers an alternative to conventional global banking, as the pioneers of BIMB did not deny the value of conventional banking, but rather sought to learn from conventional banking to provide competitive banking products in a workable Islamic way.",
+				"issue": "1",
+				"journalAbbreviation": "Cont Islam",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "75-93",
+				"publicationTitle": "Contemporary Islam",
+				"shortTitle": "Who pioneered Islamic banking in Malaysia?",
+				"url": "https://doi.org/10.1007/s11562-019-00443-w",
+				"volume": "14",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Bank Islam Malaysia Berhad"
+					},
+					{
+						"tag": " Islamic banking"
+					},
+					{
+						"tag": " Malaysia"
+					},
+					{
+						"tag": "Economic anthropology/sociology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-019-00556-z",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ist unerfüllter Kinderwunsch ein Leiden? – Der Leidensbegriff im Kontext der Kinderwunschtherapie",
+				"creators": [
+					{
+						"lastName": "Westermann",
+						"firstName": "Anna Maria",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alkatout",
+						"firstName": "Ibrahim",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-06-01",
+				"DOI": "10.1007/s00481-019-00556-z",
+				"ISSN": "1437-1618",
+				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden., Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.\n\nDefinition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Arguments: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Conclusion: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account.",
+				"issue": "2",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "125-139",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Ist unerfüllter Kinderwunsch ein Leiden?",
+				"url": "https://doi.org/10.1007/s00481-019-00556-z",
+				"volume": "32",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Infertility"
+					},
+					{
+						"tag": " Kinderwunschbehandlung"
+					},
+					{
+						"tag": " Leidenslinderung"
+					},
+					{
+						"tag": " Relief of suffering"
+					},
+					{
+						"tag": " Reproductive medicine"
+					},
+					{
+						"tag": " Reproduktionsmedizin"
+					},
+					{
+						"tag": " Suffering"
+					},
+					{
+						"tag": " Unerfüllter Kinderwunsch"
+					},
+					{
+						"tag": " Unfulfilled desire to have children"
+					},
+					{
+						"tag": "Leiden"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
