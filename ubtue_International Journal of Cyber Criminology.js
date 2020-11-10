@@ -1,15 +1,15 @@
 {
-	"translatorID": "b933a748-d9e8-4911-970b-20fd93a51f68",
-	"label": "ubtue_International journal of criminal justice sciences",
+	"translatorID": "c690f8b2-8ce4-4970-a103-940948a62a32",
+	"label": "ubtue_International Journal of Cyber Criminology",
 	"creator": "Johannes Riedl",
-	"target": "http://www.sascv.org/ijcjs/",
+	"target": "http://www.cybercrimejournal.com/index.html",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 09:41:05"
+	"lastUpdated": "2020-11-10 07:24:31"
 }
 
 /*
@@ -35,7 +35,9 @@
 */
 
 
-const entriesXPath = '(//div[@id="text"]/blockquote/p | //div[@id="text"]/blockquote/ul/li/p)';
+//const entriesXPath = '//td[@class="Text" and @width="543"]//tr | //td[@class="Text" and @width="543"]//tr//ancestor::p';
+
+const entriesXPath = '//td[@class="Text" and @width="543"]//tr//a//ancestor::p';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -118,14 +120,18 @@ function extractURL(entry) {
 }
 
 
-function extractDOI(entry) {
-	let anchors = entry.querySelectorAll('a');
-	for (let anchor of anchors) {
-		 if (!anchor.href)
-			 continue;
-		 if (anchor.href.match(/doi.org\/\S+/))
-			 return anchor.href;
-	}
+function extractDOI(doc, key) {
+	// Page is garbled so we need two different approaches
+	// Case 1: DOI is in the next paragraph
+	let entryXPath1 = '//a[@href="' + key + '"]/ancestor::p/following::a[1]';
+	let doiCandidates1 = ZU.xpath(doc, entryXPath1);
+	if (doiCandidates1 && doiCandidates1.length !== 0 && doiCandidates1[0].href.match(/doi.org/))
+		return doiCandidates1[0].href;
+	// Case 2: DOI is contained in the same paragraph as the original key URL
+	let entryXPath2 = '//a[@href="' + key + '"]/ancestor::p//img/parent::a';
+	let doiCandidates2 = ZU.xpath(doc, entryXPath2);
+	if (doiCandidates2 && doiCandidates2.length !== 0 && doiCandidates2[0].href.match(/doi.org/))
+		return doiCandidates2[0].href;
 	return null;
 }
 
@@ -133,7 +139,7 @@ function extractTitleAndAuthors(entry) {
 	// innerText in ZTS does not behave as intended so flatten and use the <br>-replacement of cleanTags
 	let entryCleanedText = ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, ""));
 	//skip empty element and standalone whitespace
-	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/))
+	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/));
 	// Clean up result string
 	return titleAndAuthors.map(i => ZU.unescapeHTML(i)).map(i => i.replace(/\s\s+/g, " "));
 
@@ -146,8 +152,8 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			Object.keys(items).forEach(function (key) {
 				let item = new Zotero.Item("journalArticle");
-				let entryXPath = '//div[@id="text"]/blockquote/p[.//a/@href="' + key + '"] | \
-								  //div[@id="text"]/blockquote/ul/li/*[.//a/@href="' + key + '"]';
+				//let entryXPath = '//a[@href="' + key + '"]//ancestor::p'
+				let entryXPath = '//a[@href="' + key + '"]/ancestor::p';
 				let entryCandidates = ZU.xpath(doc, entryXPath);
 				if (!entryCandidates) {
 					Z.debug("No entry candidates found for \"" + key + "\"");
@@ -165,7 +171,7 @@ function doWeb(doc, url) {
 				for (let author of extractAuthors(titleAndAuthors[1]))
 					item.creators.push(ZU.cleanAuthor(author));
 				item.url = extractURL(entry);
-				item.DOI = extractDOI(entry);
+				item.DOI = extractDOI(doc,key);
 				item.date = extractYear(entry);
 				item.issue = extractIssue(entry);
 				item.volume = extractVolume(entry);
