@@ -80,6 +80,11 @@ function doWeb(doc, url) {
 	}
 }
 
+function undesirableAbstractPresent(doc, item) {
+	let textStart = ZU.xpathText(doc, '//div[@class="c-article-section__content"]/p[not(a | b)]');
+	return textStart.indexOf(item.abstractNote) != -1;
+}
+
 function complementItem(doc, item) {
 	var itemType = detectWeb(doc, doc.location.href);
 	// in case we're missing something, we can try supplementing it from page
@@ -172,6 +177,9 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
+        // in some cases we get the beginning of the article as abstract
+	if (undesirableAbstractPresent(doc, item))
+	    item.abstractNote = '';
 	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
 	if (abstractSections && abstractSections.length > 0) {
 		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
