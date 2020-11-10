@@ -1,15 +1,15 @@
 {
-	"translatorID": "b933a748-d9e8-4911-970b-20fd93a51f68",
-	"label": "ubtue_International journal of criminal justice sciences",
-	"creator": "Johannes Riedl",
-	"target": "http://www.sascv.org/ijcjs/",
+	"translatorID": "c690f8b2-8ce4-4970-a103-940948a62a32",
+	"label": "ubtue_International Journal of Cyber Criminology",
+	"creator": "Johannes Riedl, Hjordis Lindeboom",
+	"target": "http://www.cybercrimejournal.com/index.html",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 09:41:05"
+	"lastUpdated": "2020-11-10 13:33:01"
 }
 
 /*
@@ -35,7 +35,10 @@
 */
 
 
-const entriesXPath = '(//div[@id="text"]/blockquote/p | //div[@id="text"]/blockquote/ul/li/p)';
+//const entriesXPath = '//td[@class="Text" and @width="543"]//tr | //td[@class="Text" and @width="543"]//tr//ancestor::p';
+
+const entriesXPath = '//td[@class="Text" and @width="543"]//tr//a//ancestor::p';
+const journalInformationXPath = '//*[@class="Apple-style-span"]//b';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -73,29 +76,23 @@ function getVolumeLine(entryArg) {
 }
 
 
-function extractIssue(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let issueMatch = /IJCJS VOLUME:\s+\d+\s+ISSUE\s+(\d+)\s+[\s\D]+\d+/i.exec(volumeLine);
-	if (issueMatch)
-	   return issueMatch[1];
+function extractIssue(candidateString) {
+	if (candidateString.match(/Issue/i))
+		return candidateString.replace(/.*Issue:\s*(\d+)/,"$1");
 	return null;
 }
 
 
-function extractYear(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let yearMatch = /IJCJS VOLUME:\s+\d+\s+ISSUE\s+\d+\s+[\s\D]+(\d+)/i.exec(volumeLine);
-	if (yearMatch)
-	   return yearMatch[1];
+function extractYear(candidateString) {
+	if (candidateString.match(/\d{4}/))
+		return candidateString.replace(/.*(\d{4}).*/g,"$1");
 	return null;
 }
 
 
-function extractVolume(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let volumeMatch = /IJCJS VOLUME:\s+(\d+)\s+ISSUE\s+\d+\s+[\s\D]+\d+/i.exec(volumeLine);
-	if (volumeMatch)
-	   return volumeMatch[1];
+function extractVolume(candidateString) {
+	if (candidateString.match(/Volume/i))
+		return candidateString.replace(/.*Volume:\s*(\d+).*/,"$1");
 	return null;
 }
 
@@ -118,25 +115,38 @@ function extractURL(entry) {
 }
 
 
-function extractDOI(entry) {
-	let anchors = entry.querySelectorAll('a');
-	for (let anchor of anchors) {
-		 if (!anchor.href)
-			 continue;
-		 if (anchor.href.match(/doi.org\/\S+/))
-			 return anchor.href;
-	}
+function extractDOI(doc, key) {
+	// Page is garbled so we need two different approaches
+	// Case 1: DOI is in the next paragraph
+	let entryXPath1 = '//a[@href="' + key + '"]/ancestor::p/following::a[1]';
+	let doiCandidates1 = ZU.xpath(doc, entryXPath1);
+	if (doiCandidates1 && doiCandidates1.length !== 0 && doiCandidates1[0].href.match(/doi.org/))
+		return doiCandidates1[0].href;
+	// Case 2: DOI is contained in the same paragraph as the original key URL
+	let entryXPath2 = '//a[@href="' + key + '"]/ancestor::p//img/parent::a';
+	let doiCandidates2 = ZU.xpath(doc, entryXPath2);
+	if (doiCandidates2 && doiCandidates2.length !== 0 && doiCandidates2[0].href.match(/doi.org/))
+		return doiCandidates2[0].href;
 	return null;
 }
 
 function extractTitleAndAuthors(entry) {
 	// innerText in ZTS does not behave as intended so flatten and use the <br>-replacement of cleanTags
-	let entryCleanedText = ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, ""));
-	//skip empty element and standalone whitespace
-	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/))
-	// Clean up result string
-	return titleAndAuthors.map(i => ZU.unescapeHTML(i)).map(i => i.replace(/\s\s+/g, " "));
+	let entryCleanedText = ZU.unescapeHTML(ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, "")));
+	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/));
+	if (titleAndAuthors.length == 2)
+	    return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
 
+    // In rare cases the author are not inluded in the selected paragraph of entry
+    // Thus the next paragraph is our candidate, so we walk up the tree an make sure we get a plausible result
+	if (titleAndAuthors.length == 1) {
+	    let newAuthorAndTitleCandidates = entry.parentNode.querySelectorAll('p');
+	    if (newAuthorAndTitleCandidates[0].isEqualNode(entry) && newAuthorAndTitleCandidates.length >= 2) {
+		titleAndAuthors = [titleAndAuthors[0], newAuthorAndTitleCandidates[1].innerText];
+			return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
+	    }
+	}
+    return null;
 }
 
 
@@ -146,8 +156,8 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			Object.keys(items).forEach(function (key) {
 				let item = new Zotero.Item("journalArticle");
-				let entryXPath = '//div[@id="text"]/blockquote/p[.//a/@href="' + key + '"] | \
-								  //div[@id="text"]/blockquote/ul/li/*[.//a/@href="' + key + '"]';
+				//let entryXPath = '//a[@href="' + key + '"]//ancestor::p'
+				let entryXPath = '//a[@href="' + key + '"]/ancestor::p';
 				let entryCandidates = ZU.xpath(doc, entryXPath);
 				if (!entryCandidates) {
 					Z.debug("No entry candidates found for \"" + key + "\"");
@@ -165,10 +175,14 @@ function doWeb(doc, url) {
 				for (let author of extractAuthors(titleAndAuthors[1]))
 					item.creators.push(ZU.cleanAuthor(author));
 				item.url = extractURL(entry);
-				item.DOI = extractDOI(entry);
-				item.date = extractYear(entry);
-				item.issue = extractIssue(entry);
-				item.volume = extractVolume(entry);
+				item.DOI = extractDOI(doc,key);
+				let journalInformationCandidates = ZU.xpath(doc, journalInformationXPath);
+				let journalInformationTextContent = journalInformationCandidates.map(candidate => candidate.textContent);
+				//Join result & remove whitespace
+				let journalInformationComplete = journalInformationTextContent.join(' ').replace(/[\s]+/g, " ");
+				item.date = extractYear(journalInformationComplete);
+				item.issue = extractIssue(journalInformationComplete);
+				item.volume = extractVolume(journalInformationComplete);
 				item.complete();
 			});
 		});
