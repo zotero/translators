@@ -1,15 +1,15 @@
 {
 	"translatorID": "c690f8b2-8ce4-4970-a103-940948a62a32",
 	"label": "ubtue_International Journal of Cyber Criminology",
-	"creator": "Johannes Riedl",
+	"creator": "Johannes Riedl, Hjordis Lindeboom",
 	"target": "http://www.cybercrimejournal.com/index.html",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-10 07:24:31"
+	"lastUpdated": "2020-11-10 10:27:48"
 }
 
 /*
@@ -38,6 +38,7 @@
 //const entriesXPath = '//td[@class="Text" and @width="543"]//tr | //td[@class="Text" and @width="543"]//tr//ancestor::p';
 
 const entriesXPath = '//td[@class="Text" and @width="543"]//tr//a//ancestor::p';
+const journalInformationXPath = '//*[@class="Apple-style-span"]//b';
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -75,29 +76,23 @@ function getVolumeLine(entryArg) {
 }
 
 
-function extractIssue(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let issueMatch = /IJCJS VOLUME:\s+\d+\s+ISSUE\s+(\d+)\s+[\s\D]+\d+/i.exec(volumeLine);
-	if (issueMatch)
-	   return issueMatch[1];
+function extractIssue(candidateString) {
+	if (candidateString.match(/Issue/i))
+		return candidateString.replace(/.*Issue:\s*(\d+)/,"$1");
 	return null;
 }
 
 
-function extractYear(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let yearMatch = /IJCJS VOLUME:\s+\d+\s+ISSUE\s+\d+\s+[\s\D]+(\d+)/i.exec(volumeLine);
-	if (yearMatch)
-	   return yearMatch[1];
+function extractYear(candidateString) {
+	if (candidateString.match(/\d{4}/))
+		return candidateString.replace(/.*(\d{4}).*/g,"$1");
 	return null;
 }
 
 
-function extractVolume(entry) {
-	let volumeLine = getVolumeLine(entry);
-	let volumeMatch = /IJCJS VOLUME:\s+(\d+)\s+ISSUE\s+\d+\s+[\s\D]+\d+/i.exec(volumeLine);
-	if (volumeMatch)
-	   return volumeMatch[1];
+function extractVolume(candidateString) {
+	if (candidateString.match(/Volume/i))
+		return candidateString.replace(/.*Volume:\s*(\d+).*/,"$1");
 	return null;
 }
 
@@ -137,11 +132,11 @@ function extractDOI(doc, key) {
 
 function extractTitleAndAuthors(entry) {
 	// innerText in ZTS does not behave as intended so flatten and use the <br>-replacement of cleanTags
-	let entryCleanedText = ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, ""));
+	let entryCleanedText = ZU.unescapeHTML(ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, "")));
 	//skip empty element and standalone whitespace
 	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/));
 	// Clean up result string
-	return titleAndAuthors.map(i => ZU.unescapeHTML(i)).map(i => i.replace(/\s\s+/g, " "));
+	return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
 
 }
 
@@ -172,9 +167,13 @@ function doWeb(doc, url) {
 					item.creators.push(ZU.cleanAuthor(author));
 				item.url = extractURL(entry);
 				item.DOI = extractDOI(doc,key);
-				item.date = extractYear(entry);
-				item.issue = extractIssue(entry);
-				item.volume = extractVolume(entry);
+				let journalInformationCandidates = ZU.xpath(doc, journalInformationXPath);
+				let journalInformationTextContent = journalInformationCandidates.map(candidate => candidate.textContent);
+				//Join result & remove whitespace
+				let journalInformationComplete = journalInformationTextContent.join(' ').replace(/[\s]+/g, " ");
+				item.date = extractYear(journalInformationComplete);
+				item.issue = extractIssue(journalInformationComplete);
+				item.volume = extractVolume(journalInformationComplete);
 				item.complete();
 			});
 		});
