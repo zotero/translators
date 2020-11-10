@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-10 10:27:48"
+	"lastUpdated": "2020-11-10 13:33:01"
 }
 
 /*
@@ -133,11 +133,20 @@ function extractDOI(doc, key) {
 function extractTitleAndAuthors(entry) {
 	// innerText in ZTS does not behave as intended so flatten and use the <br>-replacement of cleanTags
 	let entryCleanedText = ZU.unescapeHTML(ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, "")));
-	//skip empty element and standalone whitespace
 	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/));
-	// Clean up result string
-	return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
+	if (titleAndAuthors.length == 2)
+	    return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
 
+    // In rare cases the author are not inluded in the selected paragraph of entry
+    // Thus the next paragraph is our candidate, so we walk up the tree an make sure we get a plausible result
+	if (titleAndAuthors.length == 1) {
+	    let newAuthorAndTitleCandidates = entry.parentNode.querySelectorAll('p');
+	    if (newAuthorAndTitleCandidates[0].isEqualNode(entry) && newAuthorAndTitleCandidates.length >= 2) {
+		titleAndAuthors = [titleAndAuthors[0], newAuthorAndTitleCandidates[1].innerText];
+			return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
+	    }
+	}
+    return null;
 }
 
 
