@@ -35,8 +35,6 @@
 */
 
 
-//const entriesXPath = '//td[@class="Text" and @width="543"]//tr | //td[@class="Text" and @width="543"]//tr//ancestor::p';
-
 const entriesXPath = '//td[@class="Text" and @width="543"]//tr//a//ancestor::p';
 const journalInformationXPath = '//*[@class="Apple-style-span"]//b';
 
@@ -156,7 +154,6 @@ function doWeb(doc, url) {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			Object.keys(items).forEach(function (key) {
 				let item = new Zotero.Item("journalArticle");
-				//let entryXPath = '//a[@href="' + key + '"]//ancestor::p'
 				let entryXPath = '//a[@href="' + key + '"]/ancestor::p';
 				let entryCandidates = ZU.xpath(doc, entryXPath);
 				if (!entryCandidates) {
