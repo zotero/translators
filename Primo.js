@@ -197,20 +197,18 @@ function fetchPNX(itemData) {
 	Z.debug("Trying " + url);
 	ZU.doGet(url,
 		function (text) {
-			if (text) {
-				text = text.trim();
-				if (text.substr(0, 5) != '<?xml' || text.search(/<error\b/i) !== -1) {
-					// try a different PNX url
-					gotPNX = false;
-					return;
-				}
-				else {
-					gotPNX = true;
-					PNXUrlGenerator.confirmed = true;
-				}
-
-				importPNX(text, url);
+			text = text.trim();
+			if (text.substr(0, 5) != '<?xml' || text.search(/<error\b/i) !== -1) {
+				// try a different PNX url
+				gotPNX = false;
+				return;
 			}
+			else {
+				gotPNX = true;
+				PNXUrlGenerator.confirmed = true;
+			}
+
+			importPNX(text, url);
 		},
 		function () {
 			if (!gotPNX && PNXUrlGenerator.nextFunction()) {
