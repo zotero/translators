@@ -58,68 +58,68 @@ function doImport() {
 	}
 	
 	switch (itemType.toLowerCase()) {
-	case 'book':
-	case 'ebook':
-	case 'pbook':
-	case 'books':
-	case 'score':
-	case 'journal':		// as long as we don't have a periodical item type;
-		item.itemType = "book";
-		break;
-	case 'audio':
-	case 'sound_recording':
-		item.itemType = "audioRecording";
-		break;
-	case 'video':
-	case 'dvd':
-		item.itemType = "videoRecording";
-		break;
-	case 'computer_file':
-		item.itemType = "computerProgram";
-		break;
-	case 'report':
-		item.itemType = "report";
-		break;
-	case 'webpage':
-		item.itemType = "webpage";
-		break;
-	case 'article':
-	case 'review':
-		item.itemType = "journalArticle";
-		break;
-	case 'thesis':
-	case 'dissertation':
-		item.itemType = "thesis";
-		break;
-	case 'archive_manuscript':
-	case 'object':
-		item.itemType = "manuscript";
-		break;
-	case 'map':
-		item.itemType = "map";
-		break;
-	case 'reference_entry':
-		item.itemType = "encyclopediaArticle";
-		break;
-	case 'image':
-		item.itemType = "artwork";
-		break;
-	case 'newspaper_article':
-		item.itemType = "newspaperArticle";
-		break;
-	case 'conference_proceeding':
-		item.itemType = "conferencePaper";
-		break;
-	default:
-		item.itemType = "document";
-		var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
-		if (risType) {
-			switch (risType.toUpperCase()) {
-			case 'THES':
-				item.itemType = "thesis";
-				break;
+		case 'book':
+		case 'ebook':
+		case 'pbook':
+		case 'books':
+		case 'score':
+		case 'journal':		// as long as we don't have a periodical item type;
+			item.itemType = "book";
+			break;
+		case 'audio':
+		case 'sound_recording':
+			item.itemType = "audioRecording";
+			break;
+		case 'video':
+		case 'dvd':
+			item.itemType = "videoRecording";
+			break;
+		case 'computer_file':
+			item.itemType = "computerProgram";
+			break;
+		case 'report':
+			item.itemType = "report";
+			break;
+		case 'webpage':
+			item.itemType = "webpage";
+			break;
+		case 'article':
+		case 'review':
+			item.itemType = "journalArticle";
+			break;
+		case 'thesis':
+		case 'dissertation':
+			item.itemType = "thesis";
+			break;
+		case 'archive_manuscript':
+		case 'object':
+			item.itemType = "manuscript";
+			break;
+		case 'map':
+			item.itemType = "map";
+			break;
+		case 'reference_entry':
+			item.itemType = "encyclopediaArticle";
+			break;
+		case 'image':
+			item.itemType = "artwork";
+			break;
+		case 'newspaper_article':
+			item.itemType = "newspaperArticle";
+			break;
+		case 'conference_proceeding':
+			item.itemType = "conferencePaper";
+			break;
+		default:
+			item.itemType = "document";
+			var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
+			if (risType) {
+				switch (risType.toUpperCase()) {
+					case 'THES':
+						item.itemType = "thesis";
+						break;
+				}
 			}
-		}
 	}
 	
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
@@ -140,7 +140,6 @@ function doImport() {
 	var splitGuidance = {};
 	var addau = ZU.xpath(doc, '//p:addata/p:addau|//p:addata/p:au', ns);
 	for (let i = 0; i < addau.length; i++) {
-
 		var author = stripAuthor(addau[i].textContent);
 		if (author.includes(',')) {
 			var splitAu = author.split(',');
@@ -268,7 +267,7 @@ function doImport() {
 			item.pages = overallPages;
 		}
 		else {
-			item.numPages = overallPages
+			item.numPages = overallPages;
 		}
 	}
 	else if (startPage) {
