@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-24 12:08:59"
+	"lastUpdated": "2020-11-12 10:56:08"
 }
 
 /*
@@ -121,6 +121,11 @@ function scrape(doc, _url) {
 		}
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.trim().replace(/^(Abstract|Resumo):?\s*/, '');
+		}
+		
+		// resolving issue for a specific journal sperating keywords by '.'
+		if (item.issn = 2340-0080 && item.tags[0].includes(".")) {
+			item.tags = item.tags[0].split(".");
 		}
 
 		// clear issue if it's zero
