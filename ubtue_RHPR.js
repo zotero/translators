@@ -9,7 +9,11 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
+<<<<<<< HEAD
 	"lastUpdated": "2020-08-19 16:17:55"
+=======
+	"lastUpdated": "2020-09-03 15:15:00"
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 }
 
 /*
@@ -37,7 +41,7 @@ function getSearchResults(doc) {
 	var found = false;
 	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "titleInfo", " " ))]');
 	for (let row of rows) {
-		let href = row.innerHTML.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/)[0];
+		let href = row.innerHTML.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/)[0];
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		found = true;
@@ -73,9 +77,12 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
+	} else {
 		invokeEMTranslator(doc, url);
-}/** BEGIN TEST CASES **/
+	}
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",

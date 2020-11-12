@@ -9,14 +9,14 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-25 17:04:05"
+	"lastUpdated": "2020-09-03 15:15:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2020 Universitätsbibliothek Tübingen.  All rights reserved.
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,7 +37,7 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) return "journalArticle";
-		else if (url.match(/issue/) && getSearchResults(doc)) return "multiple";
+	else if (url.match(/issue/) && getSearchResults(doc)) return "multiple";
 	else return false;
 }
 
@@ -46,7 +46,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.c-Button--link, c-Button--primary');
 	for (let row of rows) {
-		var href = row.href.match(/article/); //Z.debug(href)
+		var href = row.href.match(/article/);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -68,8 +68,9 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
+	} else {
 		invokeEMTranslator(doc, url);
+	}
 }
 
 function invokeEMTranslator(doc) {

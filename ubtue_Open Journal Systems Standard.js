@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
+<<<<<<< HEAD
 	"lastUpdated": "2020-11-04 17:35:40"
+=======
+	"lastUpdated": "2020-10-05 15:15:00"
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 }
 
 /*
@@ -29,8 +33,17 @@
 */
 
 function detectWeb(doc, url) {
+<<<<<<< HEAD
 	if (url.match(/\/article\/view/)) return "journalArticle"
 	else if (url.match(/\/issue\/view/) && getSearchResults(doc)) return "multiple";
+=======
+    let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
+    if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+          pkpLibraries.length >= 1))
+        return false;
+    else if (url.match(/article/)) return "journalArticle";
+	else return false;
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 }
 
 function getSearchResults(doc) {
@@ -52,6 +65,7 @@ function invokeEMTranslator(doc) {
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
+<<<<<<< HEAD
 		var firstPage = ZU.xpathText(doc, '//meta[@name="citation_firstpage"]/@content');
 		var lastPage = ZU.xpathText(doc, '//meta[@name="citation_lastpage"]/@content');
 		var firstandlastPages = i.pages.split('-');//Z.debug(firstandlastPages)
@@ -61,6 +75,14 @@ function invokeEMTranslator(doc) {
 			if (i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		}
 		if (i.tags[0] === "book review") i.tags.push('RezensionstagPica') && delete i.tags[0];
+=======
+		if (i.pages && i.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
+			let firstandlastpages = i.pages.split('–');
+			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
+		}
+		if (i.issue === "0") delete i.issue;
+		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 		i.complete();
 	});
 	translator.translate();
@@ -78,9 +100,11 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, invokeEMTranslator);
 		});
-	} else
+	} else {
 		invokeEMTranslator(doc, url);
+	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

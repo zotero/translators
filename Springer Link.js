@@ -9,7 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
+<<<<<<< HEAD
 	"lastUpdated": "2020-09-18 10:39:21"
+=======
+	"lastUpdated": "2020-10-05 15:15:00"
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 }
 
 function detectWeb(doc, url) {
@@ -78,6 +82,11 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc, url);
 	}
+}
+
+function undesirableAbstractPresent(doc, item) {
+	let textStart = ZU.xpathText(doc, '//div[@class="c-article-section__content"]/p[not(a | b)]');
+	return textStart.indexOf(item.abstractNote) != -1;
 }
 
 function complementItem(doc, item) {
@@ -172,6 +181,9 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
+        // in some cases we get the beginning of the article as abstract
+	if (undesirableAbstractPresent(doc, item))
+	    item.abstractNote = '';
 	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
 	if (abstractSections && abstractSections.length > 0) {
 		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
@@ -189,6 +201,7 @@ function complementItem(doc, item) {
 		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
 		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
 		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
+        titleTextGerman = titleTextGerman ? titleTextGerman : '';
 		let abs = "";
 		for (let i = 0; i < sectionTitles.length; ++i) {
 			let titleText = sectionTitles[i].textContent.trim();
@@ -197,13 +210,22 @@ function complementItem(doc, item) {
 			item.abstractNote = abs.trim();
 		}
 		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
+<<<<<<< HEAD
 		if (item.abstractNote.match(/^null/)) item.abstractNote = '';
 	}
+=======
+    }
+    if (!item.abstractNote)
+        item.abstractNote = '';
+>>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
 
-	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span');
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span | \
+               //li[@class="c-article-subject-list__subject"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
-	}
+    }
+    // Trim and deduplicate
+    item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
 	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
@@ -248,12 +270,12 @@ function scrape(doc, url) {
 			});
 
 			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
-			else
-				item.complete();
+			else item.complete();
 		});
 		translator.translate();
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
