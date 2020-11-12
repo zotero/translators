@@ -1,36 +1,38 @@
 {
-	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
-	"label": "ubtue_SAGE Journals",
-	"creator": "Sebastian Karcher",
-	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"translatorID": "4ff2bcd8-968c-49bd-94d2-e99c41aeb842",
+	"label": "SAGE Journals UBTue",
+	"creator": "Sebastian Karcher, Johannes Riedl",
+    "target_real": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
+	"target": "^THISWILLNEVERMATCH$",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 110,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-<<<<<<< HEAD
-	"lastUpdated": "2020-11-11 16:50:27"
-=======
-	"lastUpdated": "2020-10-26 13:42:01"
->>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
+	"lastUpdated": "2020-09-09 08:28:17"
 }
+// We currently "hide" this translator. Thus the original target is set to a value that will never match. See target_real above for a working target
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	Copyright © 2016 Philipp Zumstein
-	Modiefied 2020 Timotheus Kim
-	This file is part of Zotero.
+
+    Copyright © 2016 Philipp Zumstein
+    Modified 2020 Johannes Riedl
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
 	***** END LICENSE BLOCK *****
 */
 
@@ -53,14 +55,10 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-<<<<<<< HEAD
-	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1] | //a[contains(concat( " ", @class, " " ), concat( " ", "ref", " " )) and contains(concat( " ", @class, " " ), concat( " ", "nowrap", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-Title", " " ))]');
-=======
-	let rows = ZU.xpath(doc, '//div[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
->>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
+	var rows = ZU.xpath(doc, '(//div|//span)[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent.replace(/Citation|ePub.*|Abstract/, ''));
+		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -90,118 +88,108 @@ function doWeb(doc, url) {
 }
 
 
+function getPublishedPrintYearFromJSON(json) {
+	if ("published-print" in json) {
+		if ("date-parts" in json["published-print"]) {
+			return json["published-print"]["date-parts"][0][0];
+		}
+	}
+	return undefined;
+}
+
+
+function postProcess(doc, item) {
+	// remove partial DOIs stored in the pages field of online-first articles
+	if (item.DOI) {
+		var doiMatches = item.DOI.match(/\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/((?:(?!["&'<>])\S)+))\b/);
+		if (doiMatches) {
+			var secondPart = doiMatches[2];
+			if (item.pages === secondPart) item.pages = "";
+		}
+	}
+}
+
+
+function scrapedAdditions(item, doc, doi) {
+	var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+	if (abstract) {
+        item.abstractNote = abstract;
+	}
+
+	// ubtue: also add translated abstracts
+	var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p | //*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
+	if (ubtueabstract) {
+        item.abstractNote += "\n\n" + ubtueabstract;
+	}
+
+	var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
+	if (tags) {
+		item.tags = tagentry.split(",");
+	}
+	// ubtue: add tags "Book Review" if "Review Article"
+	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
+	if (articleType) {
+		for (let r of articleType) {
+			let reviewDOIlink = r.innerHTML;
+			if (reviewDOIlink.match(/Review Article/)) {
+				item.tags.push('Book Review');
+			}
+		}
+	}
+
+	// scrape tags
+	if (!item.tags || item.tags.length === 0) {
+		var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+		if (embedded) item.tags = embedded.split(",");
+		if (!item.tags) {
+			var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
+			if (tags) item.tags = tags.map(n => n.textContent);
+		}
+	}
+
+	if (articleType && articleType.length > 0) {
+		if (articleType[0].textContent.trim().match(/Book Review/)) {
+			item.tags.push("Book Review");
+		}
+	}
+
+	item.notes = [];
+	item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
+	let pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
+	item.attachments.push({
+		url: pdfurl,
+		title: "SAGE PDF Full Text",
+		mimeType: "application/pdf"
+	});
+	postProcess(doc, item);
+}
+
+
+function extract(text, doc, doi) {
+	var translator = Zotero.loadTranslator("import");
+	translator.setTranslator("bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7");
+	translator.setString(text);
+	translator.setHandler("itemDone", function (obj, item) {
+		let json = JSON.parse(text);
+		let publishedPrintYear = getPublishedPrintYearFromJSON(json);
+		item.date = publishedPrintYear !== undefined ? publishedPrintYear : "";
+		scrapedAdditions(item, doc, doi);
+		item.complete();
+	});
+	translator.translate();
+}
+
+
 function scrape(doc, url) {
-	var risURL = "//journals.sagepub.com/action/downloadCitation";
 	var doi = ZU.xpathText(doc, '//meta[@name="dc.Identifier" and @scheme="doi"]/@content');
+	var doiURL = "http://doi.org/" + encodeURIComponent(doi);
 	if (!doi) {
 		doi = url.match(/10\.[^?#]+/)[0];
 	}
-	var post = "doi=" + encodeURIComponent(doi) + "&include=abs&format=ris&direct=false&submit=Download+Citation";
 	var pdfurl = "//" + doc.location.host + "/doi/pdf/" + doi;
-	var articleType = ZU.xpath(doc, '//span[@class="ArticleType"]/span');
-	// Z.debug(pdfurl);
-	// Z.debug(post);
-	ZU.doPost(risURL, post, function (text) {
-		// The publication date is saved in DA and the date first
-		// appeared online is in Y1. Thus, we want to prefer DA over T1
-		// and will therefore simply delete the later in cases both
-		// dates are present.
-		// Z.debug(text);
-		if (text.includes("DA  - ")) {
-			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
-		} // Z.debug(text);
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-		translator.setString(text);
-		translator.setHandler("itemDone", function (obj, item) {
-			// The subtitle will be neglected in RIS and is only present in
-			// the website itself. Moreover, there can be problems with
-			// encodings of apostrophs.
-			var subtitle = ZU.xpathText(doc, '//div[contains(@class, "publicationContentSubTitle")]/h1');
-			var title = ZU.xpathText(doc, '//div[contains(@class, "publicationContentTitle")]/h1');
-			if (title) {
-				item.title = title.trim();
-				if (subtitle) {
-					item.title += ': ' + subtitle.trim();
-				}
-			}
-			
-			// ubtue: extract translated and other abstracts from the different xpath
-			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
-			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			if (ubtueabstract && otherabstract) {
-				item.abstractNote = ubtueabstract;
-				item.notes.push({
-					note: "abs:" + otherabstract.replace(/^Résumé/, ''),
-				});
-			} else if (ubtueabstract && !otherabstract) {
-				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-				item.abstractNote = ubtueabstract;
-			} else if (!ubtueabstract && !otherabstract) {
-				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-				item.abstractNote = ubtueabstract;
-			} else {
-				item.abstractNote = abstract;
-			}
-
-			// Only get attributes and skip introductory term Keywords
-			let tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))] \
-																  /a[@class="attributes"]');
-			// Make sure we keep the original approach
-			if (!tagentry)
-				tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
-			if (tagentry) {
-				item.tags = tagentry.replace(/.*Keywords/, ',').replace(/Mots-clés/, ',').split(",");
-			}
-
-			// ubtue: add tags "Book Review" if "Review Article"
-			if (articleType) {
-				for (let r of articleType) {
-					let reviewDOIlink = r.innerHTML;
-					if (reviewDOIlink.match(/Review Article|(product|book)\s+review/i)) {
-						item.tags.push('Book Review');
-					}
-				}
-			}
-			// Workaround while Sage hopefully fixes RIS for authors
-			for (let i = 0; i < item.creators.length; i++) {
-				if (!item.creators[i].firstName) {
-					let type = item.creators[i].creatorType;
-					let comma = item.creators[i].lastName.includes(",");
-					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
-				}
-			}
-
-			// scrape tags
-			if (!item.tags || item.tags.length === 0) {
-				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-				if (embedded) item.tags = embedded.split(",");
-				if (!item.tags) {
-					var tags = ZU.xpath(doc, '//div[@class="abstractKeywords"]//a');
-					if (tags) item.tags = tags.map(n => n.textContent);
-				}
-			}
-<<<<<<< HEAD
-			
-=======
-
-			item.notes = [];
->>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
-			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
-			item.attachments.push({
-				url: pdfurl,
-				title: "SAGE PDF Full Text",
-				mimeType: "application/pdf"
-			});
-			item.complete();
-		});
-		translator.translate();
-	});
+	ZU.doGet(doiURL, function(text) { extract(text, doc, doi); }, undefined, undefined, { Accept: "application/vnd.citationstyles.csl+json;q=1.0" });
 }
 
-<<<<<<< HEAD
-=======
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -402,4 +390,3 @@ var testCases = [
 	}
 ]
 /** END TEST CASES **/
->>>>>>> 13b3adeb8d1693389161cdeb9743603f8ac18b34
