@@ -141,11 +141,11 @@ function scrape(doc, url) {
 			if (tagentry) {
 				item.tags = tagentry.replace(/.*Keywords/, ',').replace(/Mots-clés/, ',').split(",");
 			}
-			// ubtue: add tags "Book Review" if "Review Article"
+			// ubtue: add tags "Book Review" if "Product article" or "Book review"
 			if (articleType) {
 				for (let r of articleType) {
 					let reviewDOIlink = r.innerHTML;
-					if (reviewDOIlink.match(/Review Article|(product|book)\s+review/i)) {
+					if (reviewDOIlink.match(/(product|book)\s+reviews?/i)) {
 						item.tags.push('Book Review');
 					}
 				}
