@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-12 12:37:35"
+	"lastUpdated": "2020-11-12 13:06:11"
 }
 
 /*
@@ -131,11 +131,6 @@ function scrape(doc, _url) {
 				}
 			}
 		}
-		
-		//if (item.issn = 2340-0080 && item.tags.includes(".")) {
-		//	Z.debug(item.tags);
-		//	item.tags = item.tags.split(".");
-		//}
 
 		// clear issue if it's zero
 		if (item.issue === "0") item.issue = "";
