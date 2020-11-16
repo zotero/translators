@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-11 16:50:27"
+	"lastUpdated": "2020-11-16 11:00:54"
 }
 
 /*
@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1] | //a[contains(concat( " ", @class, " " ), concat( " ", "ref", " " )) and contains(concat( " ", @class, " " ), concat( " ", "nowrap", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-Title", " " ))]');
+	let rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1] | //a[contains(concat( " ", @class, " " ), concat( " ", "ref", " " )) and contains(concat( " ", @class, " " ), concat( " ", "nowrap", " " ))] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-Title", " " ))]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent.replace(/Citation|ePub.*|Abstract/, ''));
@@ -141,12 +141,14 @@ function scrape(doc, url) {
 			if (tagentry) {
 				item.tags = tagentry.replace(/.*Keywords/, ',').replace(/Mots-clés/, ',').split(",");
 			}
-			// ubtue: add tags "Book Review" if "Product article" or "Book review"
+			// ubtue: add tags "Book Review" if ""Book Review"
 			if (articleType) {
 				for (let r of articleType) {
-					let reviewDOIlink = r.innerHTML;
+					var reviewDOIlink = r.innerHTML;
 					if (reviewDOIlink.match(/(product|book)\s+reviews?/i)) {
 						item.tags.push('Book Review');
+					} else if (reviewDOIlink.match(/article\s+commentary|review\s+article/i)) { //"Review article", "Article commentary" as Keywords
+						item.tags.push(reviewDOIlink)
 					}
 				}
 			}
@@ -180,3 +182,143 @@ function scrape(doc, url) {
 		translator.translate();
 	});
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0040573620918177",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Who Is Saved?",
+				"creators": [
+					{
+						"lastName": "Duff",
+						"firstName": "Nancy J.",
+						"creatorType": "author"
+					}
+				],
+				"date": "July 1, 2020",
+				"DOI": "10.1177/0040573620918177",
+				"ISSN": "0040-5736",
+				"issue": "2",
+				"journalAbbreviation": "Theology Today",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "210-217",
+				"publicationTitle": "Theology Today",
+				"url": "https://doi.org/10.1177/0040573620918177",
+				"volume": "77",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Article Commentary"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0040573620918177</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0040573619865711",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Reformed Sacramentality",
+				"creators": [
+					{
+						"lastName": "Galbreath",
+						"firstName": "Paul",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 1, 2019",
+				"DOI": "10.1177/0040573619865711",
+				"ISSN": "0040-5736",
+				"issue": "3",
+				"journalAbbreviation": "Theology Today",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "261-265",
+				"publicationTitle": "Theology Today",
+				"url": "https://doi.org/10.1177/0040573619865711",
+				"volume": "76",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Review Article"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0040573619865711</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0040573619826522",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Myth of Rebellious Angels: Studies in Second Temple Judaism and the New Testament Texts by Loren T. Stuckenbruck",
+				"creators": [
+					{
+						"lastName": "Wold",
+						"firstName": "Benjamin",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 1, 2019",
+				"DOI": "10.1177/0040573619826522",
+				"ISSN": "0040-5736",
+				"issue": "1",
+				"journalAbbreviation": "Theology Today",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "83-84",
+				"publicationTitle": "Theology Today",
+				"shortTitle": "The Myth of Rebellious Angels",
+				"url": "https://doi.org/10.1177/0040573619826522",
+				"volume": "76",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0040573619826522</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
