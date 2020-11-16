@@ -2,14 +2,14 @@
     "translatorID": "4ccf849b-f9e9-4cec-9bae-7c10aa4dea53",
     "label": "University of Toronto Press",
     "creator": "Madeesh Kannan",
-    "target": "^https?:\/\/www.utpjournals.press\/((doi)|(toc))\/",
+    "target": "^https?://(www\\.)?utpjournals\\.press/(doi)|(toc)/",,
     "minVersion": "3.0",
     "maxVersion": "",
     "priority": 90,
     "inRepository": false,
     "translatorType": 4,
     "browserSupport": "gcsibv",
-    "lastUpdated": "2019-03-22 13:14:00"
+    "lastUpdated": "2020-11-12 15:23:00"
 }
 
 /*
