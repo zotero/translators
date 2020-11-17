@@ -1,6 +1,6 @@
 {
 	"translatorID": "908c1ca2-59b6-4ad8-b026-709b7b927bda",
-	"label": "ubtue_SAGE Journals",
+	"label": "SAGE Journals",
 	"creator": "Sebastian Karcher",
 	"target": "^https?://journals\\.sagepub\\.com(/doi/((abs|full|pdf)/)?10\\.|/action/doSearch\\?|/toc/)",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-16 11:00:54"
+	"lastUpdated": "2020-11-17 09:57:21"
 }
 
 /*
@@ -119,22 +119,18 @@ function scrape(doc, url) {
 			}
 			
 			// ubtue: extract translated and other abstracts from the different xpath
-			var ubtueabstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
+			var ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			if (ubtueabstract && otherabstract) {
-				item.abstractNote = ubtueabstract;
+			if (abstract && otherabstract) { // e.g. https://journals.sagepub.com/doi/full/10.1177/0037768620920172 (english/french)
+				item.abstractNote = abstract;
 				item.notes.push({
 					note: "abs:" + otherabstract.replace(/^Résumé/, ''),
-				});
-			} else if (ubtueabstract && !otherabstract) {
-				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-				item.abstractNote = ubtueabstract;
-			} else if (!ubtueabstract && !otherabstract) {
-				ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
-				item.abstractNote = ubtueabstract;
+				}); 
+			} else if (!otherabstract) { // e.g. https://journals.sagepub.com/doi/full/10.1177/0969733020929062
+				item.abstractNote = ubtueabstract; 
 			} else {
-				item.abstractNote = abstract;
+				item.abstractNote = abstract; // e.g. https://journals.sagepub.com/doi/full/10.1177/0146107920958985
 			}
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
@@ -314,6 +310,218 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/0040573619826522</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0969733020929062",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Nurses’ refusals of patient involvement in their own palliative care",
+				"creators": [
+					{
+						"lastName": "Glasdam",
+						"firstName": "Stinne",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jacobsen",
+						"firstName": "Charlotte Bredahl",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Boelsbjerg",
+						"firstName": "Hanne Bess",
+						"creatorType": "author"
+					}
+				],
+				"date": "December 1, 2020",
+				"DOI": "10.1177/0969733020929062",
+				"ISSN": "0969-7330",
+				"abstractNote": "Background:Ideas of patient involvement are related to notions of self-determination and autonomy, which are not always in alignment with complex interactions and communication in clinical practice.Aim:To illuminate and discuss patient involvement in routine clinical care situations in nursing practice from an ethical perspective.Method:A case study based on an anthropological field study among patients with advanced cancer in Denmark.Ethical considerations:Followed the principles of the Helsinki Declaration.Findings:Two cases illustrated situations where nurses refused patient involvement in their own case.Discussion:Focus on two ethical issues, namely ‘including patients’ experiences in palliative nursing care’ and ‘relational distribution of power and knowledge’, inspired primarily by Hannah Arendt’s concept of thoughtlessness and a Foucauldian perspective on the medical clinic and power. The article discusses how patients’ palliative care needs and preferences, knowledge and statements become part of the less significant background of nursing practice, when nurses have a predefined agenda for acting with and involvement of patients. Both structurally conditioned ‘thoughtlessness’ of the nurses and distribution of power and knowledge between patients and nurses condition nurses to set the agenda and assess when and at what level it is relevant to take up patients’ invitations to involve them in their own case.Conclusion:The medical and institutional logic of the healthcare service sets the framework for the exchange between professional and patient, which has an embedded risk that ‘thoughtlessness’ appears among nurses. The consequences of neglecting the spontaneous nature of human action and refusing the invitations of the patients to be involved in their life situation call for ethical and practical reflection among nurses. The conditions for interaction with humans as unpredictable and variable challenge nurses’ ways of being ethically attentive to ensure that patients receive good palliative care, despite the structurally conditioned logic of healthcare.",
+				"issue": "8",
+				"journalAbbreviation": "Nurs Ethics",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "1618-1630",
+				"publicationTitle": "Nursing Ethics",
+				"url": "https://doi.org/10.1177/0969733020929062",
+				"volume": "27",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Patient involvement"
+					},
+					{
+						"tag": " nurse refusals"
+					},
+					{
+						"tag": " palliative care"
+					},
+					{
+						"tag": " power"
+					},
+					{
+						"tag": " thoughtlessness"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0969733020929062</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0037768620920172",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Bridging sociology of religion to transition to adulthood: The emerging role of religion in young adults’ lives",
+				"creators": [
+					{
+						"lastName": "Jung",
+						"firstName": "Gowoon",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Park",
+						"firstName": "Hyunjoon",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 1, 2020",
+				"DOI": "10.1177/0037768620920172",
+				"ISSN": "0037-7686",
+				"abstractNote": "The sociology of religion has not systematically explored the emerging roles of religion in the whole process of the transition to adulthood, especially in the changing contexts of delayed and complicated transitions to adulthood. Seeking to bridge the two different fields of sociology, we identify four directions of research: (1) a multidimensional approach that identifies the different dimensions of religion with varying degrees of relationship to young adults’ lives; (2) a close attention to racial/ethnic variation in the roles of religion for the transition to adulthood; (3) an open inquiry into the changing importance of religion for young adults in a rapidly shifting neoliberal global economy; and (4) the detrimental effects of religion in the transition to adulthood. We call for more research on the increasingly complex relationship between religion and the transition to adulthood.",
+				"issue": "3",
+				"journalAbbreviation": "Social Compass",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "428-443",
+				"publicationTitle": "Social Compass",
+				"shortTitle": "Bridging sociology of religion to transition to adulthood",
+				"url": "https://doi.org/10.1177/0037768620920172",
+				"volume": "67",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " minority"
+					},
+					{
+						"tag": " minorité"
+					},
+					{
+						"tag": " neoliberalism"
+					},
+					{
+						"tag": " néolibéralisme"
+					},
+					{
+						"tag": " race and ethnicity"
+					},
+					{
+						"tag": " race et ethnicité"
+					},
+					{
+						"tag": " religion"
+					},
+					{
+						"tag": " religion"
+					},
+					{
+						"tag": " transition to adulthood"
+					},
+					{
+						"tag": " transition vers l’âge adulte"
+					},
+					{
+						"tag": " young adults"
+					},
+					{
+						"tag": "jeunes adultes"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0037768620920172</p>"
+					},
+					{
+						"note": "abs:La littérature n’a accordé que peu d’attention à la religion en tant que force sociale affectant les transitions des rôles sociaux des jeunes et leurs perceptions subjectives de l’âge adulte. La sociologie de la religion n’a pas systématiquement exploré les rôles émergents de la religion dans des contextes changeants de transitions retardées et compliquées vers l’âge adulte. En cherchant à rapprocher les deux domaines différents de la sociologie, nous identifions quatre directions de recherches : (1) une approche multidimensionnelle de la religion qui identifie différentes dimensions de la religion avec des degrés variables de relation avec la vie des jeunes adultes ; (2) une attention particulière aux variations raciales/ethniques dans les rôles de la religion dans la transition vers l’âge adulte ; (3) une enquête ouverte sur l’évolution de l’importance de la religion pour les jeunes adultes dans une économie mondiale néolibérale en mutation rapide ; et (4) les effets néfastes de la religion dans la transition vers l’âge adulte. Nous appelons à davantage de recherches sur la relation de plus en plus complexe entre la religion et la transition vers l’âge adulte."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0146107920958985",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "“The Land Is Mine” (Leviticus 25:23): Reimagining the Jubilee in the Context of the Palestinian-Israeli Conflict",
+				"creators": [
+					{
+						"lastName": "Joseph",
+						"firstName": "Simon J.",
+						"creatorType": "author"
+					}
+				],
+				"date": "November 1, 2020",
+				"DOI": "10.1177/0146107920958985",
+				"ISSN": "0146-1079",
+				"abstractNote": "The Jubilee tradition commemorates the release of slaves, the remission of debt, and the repatriation of property, a “day” of physical and spiritual restoration. The Jubilee tradition—originating in a constitutional vision of ancient Israel periodically restoring its ancestral sovereignty as custodians of the land—became a master symbol of biblical theology, a powerful ideological resource as well as a promise of a divinely realized future during the Second Temple period, when the Qumran community envisioned an eschatological Jubilee and the early Jesus tradition remembered Jesus’ nonviolence in Jubilee-terms. Jubilee themes can also be identified in ideals inscribed in the founding of America, the Abolition movement, the Women’s Liberation Movement, the Civil Rights movement, and Liberation Theology. This study seeks to extend the exploration of Jubilee themes by adopting a comparative methodological approach, re-examining Jubilee themes in the context of the contemporary Palestinian-Israeli conflict, where the dream of Peace in the Middle East continues to play out in predominantly politicized contexts.",
+				"issue": "4",
+				"journalAbbreviation": "Biblical Theology Bulletin",
+				"language": "en",
+				"libraryCatalog": "ubtue_SAGE Journals",
+				"pages": "180-190",
+				"publicationTitle": "Biblical Theology Bulletin",
+				"shortTitle": "“The Land Is Mine” (Leviticus 25",
+				"url": "https://doi.org/10.1177/0146107920958985",
+				"volume": "50",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Jubilee Year"
+					},
+					{
+						"tag": " Liberation"
+					},
+					{
+						"tag": " Palestinian/Israeli Conflict"
+					},
+					{
+						"tag": " Peace & Nonviolence"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0146107920958985</p>"
 					}
 				],
 				"seeAlso": []
