@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-17 09:57:21"
+	"lastUpdated": "2020-11-18 10:51:00"
 }
 
 /*
@@ -101,7 +101,8 @@ function scrape(doc, url) {
 		//Z.debug(text);
 		if (text.includes("DA  - ")) {
 			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
-		} // Z.debug(text);
+		} //Z.debug(text);
+
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
@@ -117,21 +118,39 @@ function scrape(doc, url) {
 					item.title += ': ' + subtitle.trim();
 				}
 			}
-			
+			//if author name include "(Translator)" change creatorType and delete "(Translator" from lastName e.g. https://journals.sagepub.com/doi/full/10.1177/0040573620947051
+			for (let i in item.creators) {
+				let translator = item.creators[i].lastName;
+				if (item.creators[i].lastName.match(/\(?Translator\)?/)) {
+					item.creators[i].creatorType = "translator";
+					item.creators[i].lastName = item.creators[i].lastName.replace('(Translator)', '');
+				}
+			}
+			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
+			let orcidEntry = doc.querySelectorAll('.author-section-div')
+			for (let n in orcidEntry) {
+				let orcid = orcidEntry[n].innerHTML;//Z.debug(orcid)
+				let name = orcidEntry[n].innerHTML;//Z.debug(name)
+				if (orcid) {
+					let regexOrcid = /\d+-\d+-\d+-\d+/;
+					let regexName = /author=\w+,?\s+?\w+,?\s+?\w+/;
+					if(orcid.match(regexOrcid)) {
+						item.notes.push({note: "orcid:" + orcid.match(regexOrcid) + ' | ' + name.match(regexName)});
+					}
+				}
+			}
 			// ubtue: extract translated and other abstracts from the different xpath
 			var ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');
 			var abstract = ZU.xpathText(doc, '//article//div[contains(@class, "abstractSection")]/p');
-			if (abstract && otherabstract) { // e.g. https://journals.sagepub.com/doi/full/10.1177/0037768620920172 (english/french)
+			if (abstract) {
 				item.abstractNote = abstract;
-				item.notes.push({
-					note: "abs:" + otherabstract.replace(/^Résumé/, ''),
-				}); 
-			} else if (!otherabstract) { // e.g. https://journals.sagepub.com/doi/full/10.1177/0969733020929062
-				item.abstractNote = ubtueabstract; 
-			} else {
-				item.abstractNote = abstract; // e.g. https://journals.sagepub.com/doi/full/10.1177/0146107920958985
 			}
+			if (otherabstract) {
+				item.notes.push({note: "abs:" + otherabstract.replace(/^Résumé/, '')});
+			} else {
+				item.abstractNote = ubtueabstract;
+			}			
 
 			var tagentry = ZU.xpathText(doc, '//kwd-group[1] | //*[contains(concat( " ", @class, " " ), concat( " ", "hlFld-KeywordText", " " ))]');
 			if (tagentry) {
@@ -522,6 +541,69 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/0146107920958985</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0040573620947051",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "My Friend Johann Baptist Metz",
+				"creators": [
+					{
+						"lastName": "Moltmann",
+						"firstName": "Jürgen",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Lösel ",
+						"firstName": "Steffen",
+						"creatorType": "translator"
+					}
+				],
+				"date": "October 1, 2020",
+				"DOI": "10.1177/0040573620947051",
+				"ISSN": "0040-5736",
+				"abstractNote": "Johann Baptist Metz died on December 2, 2019. He and Jürgen Moltmann shared a theological and personal friendship marked by affection and respect. It was an honest friendship and it lasted for over fifty years. It started when two texts met: Metz’s essay “God before Us” and Moltmann’s essay “The Category of Novum in Christian Theology.” Both were published in the volume To Honor Ernst Bloch (1965). This article is a personal reminiscence.",
+				"issue": "3",
+				"journalAbbreviation": "Theology Today",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "310-312",
+				"publicationTitle": "Theology Today",
+				"url": "https://doi.org/10.1177/0040573620947051",
+				"volume": "77",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Catholic"
+					},
+					{
+						"tag": " Johann Baptist Metz"
+					},
+					{
+						"tag": " eulogy"
+					},
+					{
+						"tag": " memory"
+					},
+					{
+						"tag": " political theology"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0040573620947051</p>"
 					}
 				],
 				"seeAlso": []
