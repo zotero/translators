@@ -381,7 +381,10 @@ function scrape(doc, url) {
 				if (!newItem.title) {
 					newItem.title = title[0];
 				}
-				newItem.title = newItem.title.replace(/\s+:/, ":").replace(/\s*\[[^\]]+\]/g, "");
+				// replace(/\s+:/, " :") => cleanup extra spaces before a colon
+				//                          and respects the english (no space) or french typo (with a space)
+				// replace(/\s*\[[^\]]+\]/g, "") => cleanup "[ xxx ]" patterns in the title
+				newItem.title = newItem.title.replace(/\s+:/, " :").replace(/\s*\[[^\]]+\]/g, "");
 				break;
 
 			case 'periodical':
