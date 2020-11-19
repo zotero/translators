@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-18 10:51:00"
+	"lastUpdated": "2020-11-19 09:11:18"
 }
 
 /*
@@ -129,13 +129,13 @@ function scrape(doc, url) {
 			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
 			let orcidEntry = doc.querySelectorAll('.author-section-div')
 			for (let n in orcidEntry) {
-				let orcid = orcidEntry[n].innerHTML;//Z.debug(orcid)
+				let orcid = orcidEntry[n].innerHTML;Z.debug(orcid)
 				let name = orcidEntry[n].innerHTML;//Z.debug(name)
 				if (orcid) {
 					let regexOrcid = /\d+-\d+-\d+-\d+/;
-					let regexName = /author=\w+,?\s+?\w+,?\s+?\w+/;
+					let regexName = /author=.*"/;
 					if(orcid.match(regexOrcid)) {
-						item.notes.push({note: "orcid:" + orcid.match(regexOrcid) + ' | ' + name.match(regexName)});
+						item.notes.push({note: "orcid:" + orcid.match(regexOrcid) + ' | ' + name.match(regexName)[0].replace('\"', '')});
 					}
 				}
 			}
@@ -604,6 +604,89 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/0040573620947051</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/full/10.1177/0084672420926259",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Which psychology(ies) serves us best? Research perspectives on the psycho-cultural interface in the psychology of religion(s)",
+				"creators": [
+					{
+						"lastName": "Anczyk",
+						"firstName": "Adam",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Grzymała-Moszczyńska",
+						"firstName": "Halina",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Krzysztof-Świderska",
+						"firstName": "Agnieszka",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Prusak",
+						"firstName": "Jacek",
+						"creatorType": "author"
+					}
+				],
+				"date": "November 1, 2020",
+				"DOI": "10.1177/0084672420926259",
+				"ISSN": "0084-6724",
+				"abstractNote": "The article concentrates on answering the main question to be addressed, as stated in its title: which psychology(ies) serves us best? In order to achieve this goal, we pursue possible answers in history of psychology of religion and its interdisciplinary relationships with its sister disciplines, anthropology of religion and religious studies, resulting with sketching a typology of the main attitudes towards conceptualising psycho-cultural interface, prevalent among psychologists: the Universalist, the Absolutist and the Relativist stances. Next chosen examples from the field of applied psychology are presented, as the role of the cultural factor within the history of Diagnostic and Statistical Manual of Mental Disorders’ (DSM) development is discussed alongside presenting research on the phenomenon of ‘hearing voices’, in order to show the marked way for the future – the importance of including the cultural factor in psychological research on religion.",
+				"issue": "3",
+				"journalAbbreviation": "Archive for the Psychology of Religion",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "295-316",
+				"publicationTitle": "Archive for the Psychology of Religion",
+				"shortTitle": "Which psychology(ies) serves us best?",
+				"url": "https://doi.org/10.1177/0084672420926259",
+				"volume": "42",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": " Cross-cultural research"
+					},
+					{
+						"tag": " cultural psychology"
+					},
+					{
+						"tag": " history"
+					},
+					{
+						"tag": " methodology"
+					},
+					{
+						"tag": " multicultural issues"
+					},
+					{
+						"tag": " religion"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/0084672420926259</p>"
+					},
+					{
+						"note": "orcid:0000-0001-6906-3104 | author=Anczyk, Adam"
+					},
+					{
+						"note": "orcid:0000-0003-2751-3204 | author=Grzymała-Moszczyńska, Halina"
 					}
 				],
 				"seeAlso": []
