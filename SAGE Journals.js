@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-19 09:11:18"
+	"lastUpdated": "2020-11-19 10:55:30"
 }
 
 /*
@@ -129,11 +129,12 @@ function scrape(doc, url) {
 			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
 			let orcidEntry = doc.querySelectorAll('.author-section-div')
 			for (let n in orcidEntry) {
-				let orcid = orcidEntry[n].innerHTML;Z.debug(orcid)
+				let orcid = orcidEntry[n].innerHTML;//Z.debug(orcid)
 				let name = orcidEntry[n].innerHTML;//Z.debug(name)
 				if (orcid) {
 					let regexOrcid = /\d+-\d+-\d+-\d+/;
 					let regexName = /author=.*"/;
+					
 					if(orcid.match(regexOrcid)) {
 						item.notes.push({note: "orcid:" + orcid.match(regexOrcid) + ' | ' + name.match(regexName)[0].replace('\"', '')});
 					}
