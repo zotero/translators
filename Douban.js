@@ -633,7 +633,7 @@ var testCases = [
 		"url": "https://movie.douban.com/subject/26939247/",
 		"items": [
 			{
-				"itemType": "film",
+				"itemType": "tvBroadcast",
 				"title": "夏目友人帐 第六季 夏目友人帳 陸",
 				"creators": [
 					{
