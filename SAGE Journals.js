@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-19 10:55:30"
+	"lastUpdated": "2020-11-19 10:57:23"
 }
 
 /*
@@ -101,7 +101,7 @@ function scrape(doc, url) {
 		//Z.debug(text);
 		if (text.includes("DA  - ")) {
 			text = text.replace(/Y1\s{2}- .*\r?\n/, '');
-		} //Z.debug(text);
+		}
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -129,8 +129,8 @@ function scrape(doc, url) {
 			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
 			let orcidEntry = doc.querySelectorAll('.author-section-div')
 			for (let n in orcidEntry) {
-				let orcid = orcidEntry[n].innerHTML;//Z.debug(orcid)
-				let name = orcidEntry[n].innerHTML;//Z.debug(name)
+				let orcid = orcidEntry[n].innerHTML;
+				let name = orcidEntry[n].innerHTML;
 				if (orcid) {
 					let regexOrcid = /\d+-\d+-\d+-\d+/;
 					let regexName = /author=.*"/;
