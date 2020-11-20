@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-09 12:48:15"
+	"lastUpdated": "2020-11-20 13:18:10"
 }
 
 /*
@@ -137,8 +137,14 @@ function detectWeb(doc, url) {
 	if (url.includes('/subject/')) {
 		return detectType(doc);
 	}
-	else if (getSearchResults(doc, url, true)) {
-		return "multiple";
+	else {
+		var element = doc.querySelector('div[class*="list-wp"]');
+		if (element) {
+			Z.monitorDOMChanges(doc, { childList: true });
+		}
+		if (getSearchResults(doc, url, true)) {
+			return "multiple";
+		}
 	}
 	return false;
 }
