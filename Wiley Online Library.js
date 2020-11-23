@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-23 10:40:02"
+	"lastUpdated": "2020-11-23 10:55:52"
 }
 
 /*
@@ -465,7 +465,7 @@ function scrapeCochraneTrial(doc, url){
 // returns author(s) of short reviews
 function getAuthorNameShortReview(doc) {
 	let authorsShortReview = doc.querySelectorAll("section.article-section__content > p");
-	return [authorsShortReview ? authorsShortReview[1].innerText : ''];
+	return authorsShortReview ? [authorsShortReview[1].innerText] : [];
 }
 
 function scrape(doc, url) {
