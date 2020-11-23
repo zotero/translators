@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-22 19:29:29"
+	"lastUpdated": "2020-11-23 12:39:37"
 }
 
 /*
@@ -36,34 +36,14 @@ function detectWeb(doc, url) {
 	const artifact = "/collections/catalog/"
 	const isCollection = url.includes(collection)
 	const isArtifact = url.includes(artifact)
-
-
 	if (isCollection) {
 		return 'multiple';
 	}
 	else if (isArtifact) {
+	//todo it'd be better to use different items types according to item types in the collection, i.e. interview, video, audio etc, but for now 'book' has most fields needed.
 		return 'book';
 	}
 	return false;
-}
-
-
-function getSearchResults(doc, checkOnly) {
-	let items = {};
-	let found = false;
-	const entries = doc.querySelectorAll('p.objtext');
-
-	for (let i = 0; i < entries.length; i++) {
-		const titleDiv = entries[i].querySelector('span.objtitle a');
-		if (!titleDiv) continue;
-		const href = titleDiv.href;
-		const title = titleDiv.textContent;
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
 }
 
 function doWeb(doc, url) {
@@ -85,6 +65,24 @@ function doWeb(doc, url) {
 	}
 }
 
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	const entries = doc.querySelectorAll('p.objtext');
+
+	for (let i = 0; i < entries.length; i++) {
+		const titleDiv = entries[i].querySelector('span.objtitle a');
+		if (!titleDiv) continue;
+		const href = titleDiv.href;
+		const title = titleDiv.textContent;
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function scrape(doc, url) {
 	const fields = [...doc.querySelectorAll("div.field")];
 
@@ -96,13 +94,9 @@ function scrape(doc, url) {
 		const node = nodeOriginal.cloneNode(true)
 		const fieldTitleNode = node.querySelector("h4")
 		const fieldTitle = fieldTitleNode.textContent.trim()
-		// the categories vary therefore many are collapsed under 'extra' and 'abstract'.
 		switch(fieldTitle) {
 			case 'Title':
 				newItem.title = getContent(node, fieldTitle)
-				break;
-			case 'Catalog Number':
-				newItem.libraryCatalog = getContent(node, fieldTitle)
 				break;
 			case 'Date':
 				newItem.date = getContent(node, fieldTitle)
@@ -124,25 +118,58 @@ function scrape(doc, url) {
 				newItem.archiveLocation = getContent(node, fieldTitle)
 				break;
 			case 'Description':
+				newItem.abstractNote = insertToTheStartOfAbstract(getContent(node, fieldTitle), newItem.abstractNote)
+				break;
+			case 'Biographical Notes':
+				newItem.abstractNote = insertToTheEndOfAbstract(getContent(node, fieldTitle), newItem.abstractNote, fieldTitle)
+				break
+			case 'Copyright Holder':
+				newItem.rights = getContent(node, fieldTitle)
+				break;
+			// the categories vary therefore many are collapsed under 'extra'.
 			case 'Type':
 			case 'Subject':
 			case 'Category':
 			case 'Collection Title':
-				newItem.abstractNote = insertToTheStartOfAbstract(getContent(node, fieldTitle), newItem.abstractNote, fieldTitle)
-				break;
-			case 'Identifying Numbers':
 			case 'Copyright Holder':
 			case 'Dimensions':
 			case 'Credit':
 			case 'Place Manufactured':
 			case 'Manufacturer':
+			case 'System Requirements':
+			case 'Format':
+			case 'Series Title':
+			case 'Duration':
+			case 'Platform':
+			case 'Catalog Number':
 				newItem.extra = addToExtra(newItem.extra, getContent(node, fieldTitle), fieldTitle);
 				break
+			// parsing identifying numbers with existing Zotero fields e.g. callNumber & ISBN
+			case 'Identifying Numbers':
+				const numberDivs = node.querySelectorAll('tr')
+				numberDivs.forEach(div => {
+					const numberKey = div.querySelector('td.col1').textContent
+					const numberVal = div.querySelector('td.col2').textContent
+					switch(numberKey) {
+						case 'ISBN10':
+							newItem.ISBN = numberVal
+							break;
+						case 'LOC call num':
+							newItem.callNumber = numberVal
+							break;
+						default:
+							newItem.extra = addToExtra(newItem.extra, numberVal, numberKey)
+							break
+					}
+
+				})
+				
+
 		}
 
 	});
 
-
+	// add pdf documents
 	let pdfPath = undefined;
 	const pdfDiv = doc.querySelectorAll('div.mediaDocument li a');
 	if (pdfDiv) {
@@ -158,8 +185,25 @@ function scrape(doc, url) {
 		})
 
 	}
+	
+	// add audio recordings
+	let audioPath = undefined;
+	const audioDiv = doc.querySelectorAll('div.mediaAudio li a');
+	if (audioDiv) {
+		audioDiv.forEach((div, audioIndex) => {
+			audioPath = div.href
+			if (audioPath) {
+				newItem.attachments.push({
+					url: audioPath.replace('https', 'http'),
+					mimeType: "audio/mpeg",
+					title: `${newItem.title}${audioIndex === 0 ? '' : ' ' + (audioIndex + 1)}`
+				});
+			}
+		})
 
+	}
 
+	// add object images
 	let imagePath = undefined;
 	const imageDiv = doc.querySelectorAll('div.mediarow a.media-large img');
 	if (imageDiv) {
@@ -177,6 +221,7 @@ function scrape(doc, url) {
 
 	}
 
+	// add video links
 	let videoPath = undefined;
 	const videoDivs = doc.querySelectorAll('div.mediaVideo iframe')
 	if (videoDivs) {
@@ -199,10 +244,16 @@ function scrape(doc, url) {
 
 
 // helper functions
-function insertToTheStartOfAbstract(insert, abstract, title) {
-	const abstractContent = title + ': ' + insert + '\n' + (abstract ? abstract : '')
+function insertToTheStartOfAbstract(insert, abstract, fieldTitle) {
+	const abstractContent = ( fieldTitle !== undefined ? fieldTitle + ': ' : '' ) + insert + '\n' + (abstract ? abstract : '')
 	return abstractContent  ? abstractContent : ''
 }
+
+function insertToTheEndOfAbstract(insert, abstract, fieldTitle) {
+	const abstractContent = (abstract ? abstract + '\n' : '') + ( fieldTitle !== undefined ? fieldTitle + ': ' : '' ) + insert
+	return abstractContent  ? abstractContent : ''
+}
+
 function getContent(node, fieldTitle) {
 	const content = node.textContent.replace(fieldTitle, '').trim()
 	return content ? content : ''
@@ -218,17 +269,15 @@ function getContributors(node) {
 		const spans = personDiv.querySelectorAll('span')
 		const name = spans[0].textContent
 		const [lastName, firstName] = name.split(', ')
-		Zotero.debug(lastName)
-		Zotero.debug(firstName)
 		contributors.push({
 			firstName,
 			lastName,
-			creatorType: "contributor",
-			fieldMode: true
+			creatorType: "contributor"
 		})
 	})
 	return contributors;
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -243,27 +292,25 @@ var testCases = [
 					{
 						"firstName": "Edward",
 						"lastName": "Feigenbaum",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Donald E.",
 						"lastName": "Knuth",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Yan",
 						"lastName": "Rosenshteyn",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2007-03-14; 2007-03-21",
-				"abstractNote": "Collection Title: Oral history collection\nSubject: Fellow Award Honoree; Knuth, Donald; IBM 650 (Computer); Combinatorial analysis--Data processing; Combinatorics; Analysis of algorithms; The Art of Computer Programming; Stanford University; TeX; METAFONT; Religion; Literate programming\nCategory: Transcription\nDescription: In this wide-ranging interview conducted by Edward Feigenbaum, Donald Knuth talks about the progression of his life and career.  Topics include his family background and early interest in music, physics and mathematics, his first exposure to programming,  finding a mentor, and writing a doctoral thesis.   He describes how \"The Art of Computer Programming\" became \"the story of my life\", and why it was put on hold for the TeX and METAFONT projects.  He also talks about personal work habits, programming style, analysis of algorithms, the influence of religion in his life, and his advice to the next generation of scientists.\nType: Document",
+				"abstractNote": "In this wide-ranging interview conducted by Edward Feigenbaum, Donald Knuth talks about the progression of his life and career.  Topics include his family background and early interest in music, physics and mathematics, his first exposure to programming,  finding a mentor, and writing a doctoral thesis.   He describes how \"The Art of Computer Programming\" became \"the story of my life\", and why it was put on hold for the TeX and METAFONT projects.  He also talks about personal work habits, programming style, analysis of algorithms, the influence of religion in his life, and his advice to the next generation of scientists.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3926.2007",
-				"libraryCatalog": "102658053",
+				"extra": "Catalog Number: 102658053\nType: Document\nCategory: Transcription\nSubject: Fellow Award Honoree; Knuth, Donald; IBM 650 (Computer); Combinatorial analysis--Data processing; Combinatorics; Analysis of algorithms; The Art of Computer Programming; Stanford University; TeX; METAFONT; Religion; Literate programming\nCollection Title: Oral history collection",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "73",
 				"publisher": "Computer History Museum; Mountain View, California",
 				"attachments": [
@@ -287,13 +334,14 @@ var testCases = [
 				"title": "IBM 1401 Programming Systems",
 				"creators": [],
 				"date": "1959",
-				"abstractNote": "Subject: 1401 data processing system (Computer); promotional materials; Digital computer: mainframe; 1401 programming systems (Software); COBOL (Software); Business applications; Scientific applications; Software; Digital communications--Social aspects; International Business Machines Corporation (IBM). Data Processing Division\nCategory: Promotional Material\nDescription: The brochure explains the IBM 1401 programming languages and their application to the 1401 data processing system. The brochure is printed in black, white, and blue. The front cover shows the words Programming and Systems in a repetitive design with the name Donald G. McBrien stamped in the upper right corner. The back cover shows the company logo on a blue background. Throughout the inside pages are black and white photographs of the computer and images of reports generated by the system. Text contents include: What is a 1401 program?; What is a stored program machine?; What are 1401 programming systems?; What 1401 programming systems mean to management?; IBM programming systems; Here's how one of the 1401 programming systems -- Report Program Generator -- works to increase programming efficiency; New IBM services include:; Other services available to every IBM customer.\nType: Document",
+				"abstractNote": "The brochure explains the IBM 1401 programming languages and their application to the 1401 data processing system. The brochure is printed in black, white, and blue. The front cover shows the words Programming and Systems in a repetitive design with the name Donald G. McBrien stamped in the upper right corner. The back cover shows the company logo on a blue background. Throughout the inside pages are black and white photographs of the computer and images of reports generated by the system. Text contents include: What is a 1401 program?; What is a stored program machine?; What are 1401 programming systems?; What 1401 programming systems mean to management?; IBM programming systems; Here's how one of the 1401 programming systems -- Report Program Generator -- works to increase programming efficiency; New IBM services include:; Other services available to every IBM customer.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3067.2005",
-				"extra": "Identifying Numbers: Other number: 520-1368\nDimensions: 9 5/8 x 7 6/8 in.\nCopyright Holder: International Business Machines Corporation (IBM). Data Processing Division",
-				"libraryCatalog": "102646282",
+				"extra": "Catalog Number: 102646282\nType: Document\nOther number: 520-1368\nDimensions: 9 5/8 x 7 6/8 in.\nCategory: Promotional Material\nSubject: 1401 data processing system (Computer); promotional materials; Digital computer: mainframe; 1401 programming systems (Software); COBOL (Software); Business applications; Scientific applications; Software; Digital communications--Social aspects; International Business Machines Corporation (IBM). Data Processing Division",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "6",
 				"publisher": "International Business Machines Corporation. Data Processing Division. (IBM); U.S.",
+				"rights": "International Business Machines Corporation (IBM). Data Processing Division",
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
@@ -319,11 +367,13 @@ var testCases = [
 				"title": "A guide to Fortran IV programming",
 				"creators": [],
 				"date": "1972",
-				"abstractNote": "Category: Book\nDescription: Second edition.  Signed by McCracken on title page.\nType: Document",
+				"ISBN": "9780471582816",
+				"abstractNote": "Second edition.  Signed by McCracken on title page.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3682.2007",
-				"extra": "Identifying Numbers: ISBN10: 0471582816\nLCCN\n72-4745\nLOC call num\nQA76.73.F25 M3 1972\nDimensions: 28 cm.",
-				"libraryCatalog": "102623002",
+				"callNumber": "QA76.73.F25 M3 1972",
+				"extra": "Catalog Number: 102623002\nType: Document\nLCCN: 72-4745\nDimensions: 28 cm.\nCategory: Book",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "288",
 				"publisher": "John Wiley & Sons; New York",
 				"attachments": [],
@@ -342,10 +392,11 @@ var testCases = [
 				"title": "Logic Programming Workshop '83 poster",
 				"creators": [],
 				"date": "1983",
-				"abstractNote": "Category: Promotional Material\nDescription: PDF scan of the poster for the Logic Programming Workshop '83 in Algarve Portugal, June 26 - July 1, 1983.\nType: Document",
+				"abstractNote": "PDF scan of the poster for the Logic Programming Workshop '83 in Algarve Portugal, June 26 - July 1, 1983.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X9292.2020",
-				"libraryCatalog": "102790985",
+				"extra": "Catalog Number: 102790985\nType: Document\nCategory: Promotional Material",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "1; 0.0004 GB",
 				"attachments": [
 					{
@@ -367,11 +418,10 @@ var testCases = [
 				"itemType": "book",
 				"title": "LP20 Linear Programming System",
 				"creators": [],
-				"abstractNote": "Collection Title: 1620 Restoration Project Collection\nCategory: Manual\nType: Document",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X4248.2008",
-				"extra": "Identifying Numbers: Program ID number: 10.1.009\nCredit: Gift of John Maniotes",
-				"libraryCatalog": "102620354",
+				"extra": "Catalog Number: 102620354\nType: Document\nProgram ID number: 10.1.009\nCategory: Manual\nCollection Title: 1620 Restoration Project Collection\nCredit: Gift of John Maniotes",
+				"libraryCatalog": "Computer History Museum Archive",
 				"publisher": "International Business Machines Corporation (IBM)",
 				"attachments": [],
 				"tags": [],
@@ -388,11 +438,11 @@ var testCases = [
 				"itemType": "book",
 				"title": "Jacquard programming cards",
 				"creators": [],
-				"abstractNote": "Category: I/O/punched card device\nDescription: The object is a series of cardboard punch cards connected by string. The cards are hand numbered sequentially from 6 to 44.\nType: Physical Object",
+				"abstractNote": "The object is a series of cardboard punch cards connected by string. The cards are hand numbered sequentially from 6 to 44.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X8070.2017",
-				"extra": "Dimensions: folded for storage: 2 1/2 in x 9 1/4 in x 5 in; unfolded: 1/8 in x 9 1/4 in x 97 1/2 in\nCredit: Gift of the Museum of American Heritage",
-				"libraryCatalog": "102765924",
+				"extra": "Catalog Number: 102765924\nType: Physical Object\nDimensions: folded for storage: 2 1/2 in x 9 1/4 in x 5 in; unfolded: 1/8 in x 9 1/4 in x 97 1/2 in\nCategory: I/O/punched card device\nCredit: Gift of the Museum of American Heritage",
+				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
 						"title": "Jacquard programming cards Image 1",
@@ -414,11 +464,10 @@ var testCases = [
 				"title": "Bizmac programming manual binder",
 				"creators": [],
 				"date": "1956",
-				"abstractNote": "Category: Ephemera/other\nType: Physical object",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X5121.2009",
-				"extra": "Manufacturer: RCA Corporation\nDimensions: overall: 2 in x 10 in x 11 1/2 in",
-				"libraryCatalog": "102701957",
+				"extra": "Catalog Number: 102701957\nType: Physical object\nManufacturer: RCA Corporation\nDimensions: overall: 2 in x 10 in x 11 1/2 in\nCategory: Ephemera/other",
+				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
 						"title": "Bizmac programming manual binder Image 1",
@@ -446,22 +495,20 @@ var testCases = [
 					{
 						"firstName": "Takao",
 						"lastName": "Abe",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Doug",
 						"lastName": "Fairbairn",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2016-06-20",
-				"abstractNote": "Collection Title: CHM oral history collection\nSubject: silicon wafers; Silicon on Insulator; SOI; Dash-necking; Voronkov; SIMOX; Hokkaido University\nCategory: Transcription\nDescription: Mr. Abe was born in 1936 in Otaru, on Hokkaido, the northern island of Japan. He attended Hokkaido University, majoring in physics. He was recruited by a previous graduate of the same university to come to Tokyo and work for Shin-Etsu Handotai. The year was 1964. Abe requested a job in basic research, but the company needed help in growing crystalline silicon for use in semiconductors. \n\nAbe was given the job to improve the quality of the silicon ingots. He traveled to Bell Labs and to Siemens, as Siemens was the source of their crystal growing equipment. During the interview, Abe describes the ups and downs of the industry and his substantial contributions to the quality of silicon wafers.\nType: Document",
+				"abstractNote": "Mr. Abe was born in 1936 in Otaru, on Hokkaido, the northern island of Japan. He attended Hokkaido University, majoring in physics. He was recruited by a previous graduate of the same university to come to Tokyo and work for Shin-Etsu Handotai. The year was 1964. Abe requested a job in basic research, but the company needed help in growing crystalline silicon for use in semiconductors. \n\nAbe was given the job to improve the quality of the silicon ingots. He traveled to Bell Labs and to Siemens, as Siemens was the source of their crystal growing equipment. During the interview, Abe describes the ups and downs of the industry and his substantial contributions to the quality of silicon wafers.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7645.2016",
-				"extra": "Credit: Computer History Museum",
-				"libraryCatalog": "102738167",
+				"extra": "Catalog Number: 102738167\nType: Document\nFormat: PDF\nCategory: Transcription\nSubject: silicon wafers; Silicon on Insulator; SOI; Dash-necking; Voronkov; SIMOX; Hokkaido University\nCollection Title: CHM oral history collection\nCredit: Computer History Museum",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "24",
 				"publisher": "Computer History Museum; Tokyo, Japan",
 				"attachments": [
@@ -487,42 +534,38 @@ var testCases = [
 					{
 						"firstName": "Nicholas",
 						"lastName": "Baker",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Eric",
 						"lastName": "Dennis",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Todd",
 						"lastName": "Holmdahl",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Albert J.",
 						"lastName": "Penello",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Dag",
 						"lastName": "Spicer",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2014-03-25",
-				"abstractNote": "Collection Title: Oral history collection\nSubject: Xbox; Xbox 360; Xbox One; Sony Corporation; Microsoft Corporation; Playstation; Windows; International Business Machines Corporation (IBM); ATI Technologies Inc.; Central Processing Unit (CPU); Graphics Processing Unit (GPU); Nvidia Corporation; Media Center PC (personal computer); Halo; Kinect; Performance Optimization With Enhanced RISC--Performance Computing (PowerPC); Flextronics; Wistron; Allard, J; Bach, Robbie\nCategory: Transcription\nDescription: Three key members of the original Microsoft Xbox team come together in this oral history to discuss the early development of Xbox and Xbox 360, two of the most significant game consoles in computer history. Architect Nick Baker, head of hardware Todd Holmdahl, and marketing lead Albert Penello cover the early development years of the original Xbox and their attempt to gain a foothold in the highly competitive game console market. They then continue with the history of the Xbox 360 console, the successor to the original, and the changing nature of the video game business during that period that allowed for innovations such as live, interconnected play over a network and the Kinect input capture device. Strategic, technical, and marketing aspects of this history are discussed, as are visions for the future of gaming.\nType: Document",
+				"abstractNote": "Three key members of the original Microsoft Xbox team come together in this oral history to discuss the early development of Xbox and Xbox 360, two of the most significant game consoles in computer history. Architect Nick Baker, head of hardware Todd Holmdahl, and marketing lead Albert Penello cover the early development years of the original Xbox and their attempt to gain a foothold in the highly competitive game console market. They then continue with the history of the Xbox 360 console, the successor to the original, and the changing nature of the video game business during that period that allowed for innovations such as live, interconnected play over a network and the Kinect input capture device. Strategic, technical, and marketing aspects of this history are discussed, as are visions for the future of gaming.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7120.2014",
-				"extra": "Copyright Holder: Computer History Museum\nCredit: Computer History Museum",
-				"libraryCatalog": "102746874",
+				"extra": "Catalog Number: 102746874\nType: Document\nCategory: Transcription\nSubject: Xbox; Xbox 360; Xbox One; Sony Corporation; Microsoft Corporation; Playstation; Windows; International Business Machines Corporation (IBM); ATI Technologies Inc.; Central Processing Unit (CPU); Graphics Processing Unit (GPU); Nvidia Corporation; Media Center PC (personal computer); Halo; Kinect; Performance Optimization With Enhanced RISC--Performance Computing (PowerPC); Flextronics; Wistron; Allard, J; Bach, Robbie\nCollection Title: Oral history collection\nCredit: Computer History Museum",
+				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "27",
 				"publisher": "Computer History Museum; Mountain View, California",
+				"rights": "Computer History Museum",
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
@@ -551,22 +594,20 @@ var testCases = [
 					{
 						"firstName": "Douglas",
 						"lastName": "Fairbairn",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					},
 					{
 						"firstName": "Stephen",
 						"lastName": "Su",
-						"creatorType": "contributor",
-						"fieldMode": true
+						"creatorType": "contributor"
 					}
 				],
 				"date": "2017-04-19",
-				"abstractNote": "Subject: ITRI; Apple; iPhone; Camera\nCategory: Oral history\nDescription: Stephen Su grew up on Taiwan, but in 1980 he came to the US to attend high school and college, including studying semiconductors at Caltech. He worked for Motorola for a period of time before returning to school in 1992 to get an MBA from Kellog. Upon graduation, he joined Boston Consulting Group and went to Hong Kong on a consulting assignment. \nIn 1998, Stephen returned to Taiwan, working for Primax.  While there he spent several years managing the Mobile Accessories group, responsible for developing accessories for mobile phone makers like Nokia and Apple.  In particular, he was responsible for developing the camera module for several generations of Apple’s iPhone. He tells many interesting stories about working with Apple on this very important program. \nIn 2009, he was recruited to join ITRI, where he is involved with helping steer Taiwan into lucrative new markets through careful investments in promising new technologies.\nType: Moving image",
+				"abstractNote": "Stephen Su grew up on Taiwan, but in 1980 he came to the US to attend high school and college, including studying semiconductors at Caltech. He worked for Motorola for a period of time before returning to school in 1992 to get an MBA from Kellog. Upon graduation, he joined Boston Consulting Group and went to Hong Kong on a consulting assignment. \nIn 1998, Stephen returned to Taiwan, working for Primax.  While there he spent several years managing the Mobile Accessories group, responsible for developing accessories for mobile phone makers like Nokia and Apple.  In particular, he was responsible for developing the camera module for several generations of Apple’s iPhone. He tells many interesting stories about working with Apple on this very important program. \nIn 2009, he was recruited to join ITRI, where he is involved with helping steer Taiwan into lucrative new markets through careful investments in promising new technologies.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X8201.2017",
-				"extra": "Credit: Computer History Museum",
-				"libraryCatalog": "102738261",
+				"extra": "Catalog Number: 102738261\nType: Moving image\nFormat: MOV\nCategory: Oral history\nSubject: ITRI; Apple; iPhone; Camera\nCredit: Computer History Museum",
+				"libraryCatalog": "Computer History Museum Archive",
 				"publisher": "Computer History Museum; Mountain View, CA",
 				"attachments": [
 					{
@@ -584,6 +625,130 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.computerhistory.org/collections/search/?s=oral+history&page=5",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102796519",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "TRS-80 word processing applications",
+				"creators": [],
+				"date": "1984",
+				"abstractNote": "One 5 1/4 floppy disk. Label: Single-sided, double-density disk for TRS-80 Word Processing Applications for Profile III Plus for the TRS-80 Model III or Model 4 with 48K memory. ISBN: 0-8359-7881-8.",
+				"archive": "Computer History Museum",
+				"archiveLocation": "X4114.2007",
+				"extra": "Catalog Number: 102796519\nType: Software\nSystem Requirements: TRS-80 Model III or Model 4 with 48K memory\nFormat: 5 1/4 inch floppy disk\nCollection Title: Radio Shack collection\nSeries Title: Software",
+				"libraryCatalog": "Computer History Museum Archive",
+				"publisher": "Reston Publishing Company",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102740039",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4",
+				"creators": [
+					{
+						"firstName": "David C.",
+						"lastName": "Brock",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Fortier",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "C. Richard",
+						"lastName": "Kramlich",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2015-03-31",
+				"abstractNote": "C. Richard Kramlich co-founded the venture capital firm New Enterprise Associates (NEA) in 1978, serving as its managing general partner for two decades. In this oral history, Kramlich discusses his education at the Harvard Business School, his early career in finance, and his entry into venture capital in a partnership with Arthur Rock starting in 1969. He details the establishment of NEA with his co-founders, his personal investment in Apple Computer, and one of NEA’s earliest investments, 3Com. After noting the rise of the graphical in computing, Kramlich discusses at length his investment and involvement with the Apple Computer spinoff, Forethought Inc., its history, and its development of PowerPoint. The interview concludes with some of his thoughts about his investment in Silicon Graphics, the software industry, NEA’s approach, and collecting video art.",
+				"archive": "Computer History Museum",
+				"archiveLocation": "X7447.2015",
+				"extra": "Catalog Number: 102740039\nType: Moving image\nDuration: 01:31:00\nFormat: MOV\nCategory: Oral history\nSubject: Kramlich, C. Richard; Venture Capital; Rock, Arthur; New Enterprise Associates (NEA); Software; software industry; Graphics; Networking; personal computers (PCs); 3Com; Apple; Forethought, Inc.; PowerPoint; Silicon Graphics; Video Art\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
+				"libraryCatalog": "Computer History Museum Archive",
+				"publisher": "Computer History Museum; Mountain View, California",
+				"rights": "Computer History Museum",
+				"attachments": [
+					{
+						"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4 video",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102645840",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Challenges and Directions in Fault-Tolerant Computing, lecture by Jack Goldberg",
+				"creators": [
+					{
+						"firstName": "Jack",
+						"lastName": "Goldberg",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1985-10-02",
+				"abstractNote": "Label taped to the video case reads: \"Two decaes of theoritical and experimental work and numerous recent successful applications have established fault tolerance as a standard objective of high speed, satisfaction of fault tolerance requirements cannot be demonstrated by testing alone, but requires formal analysis.  Most of the work in fault tolerance has been concerned with developing effective design techniques.  Recent work on reliabilitymodeling and formal proof of fault tolerant design and implementation is laying a foundation for a more rigorous design discipline.  The scope of concern has also expanded to include any source of computer reliability, such as design mistakes, in software, hardware, or at any system level.  Current art is barely able to keep up with the rapid pace of computer technology, the stresses of new applications and the new expansion in scope of concerns.  Particular challenges lie in coping with the imperfections of the ultrasamll, i.e., high density VLSI, and the ultra-large, i.e., large software systems.  It is clear that fault tolerance cannot be \"added\" to a design and must be integrated with other design objectives.  Simultaneous demands in future systems for high performance, high security, high evolvability and high fault tolerance will require new theoretical models of computer systems and a much closer integration of practical design techniques.  The talk will discuss the widening scope of research into computer dependability.  New issues include tolerance of design errors (including software), operator errors, and the safety of computer-controlled systems.\"",
+				"archive": "Computer History Museum",
+				"extra": "Catalog Number: 102645840\nType: Moving Image\nOther number: COMPAQ 0248880\nOther number: VIDEO SCF 01\nPlatform: NTSC VHS VCR\nFormat: VHS\nCategory: Lecture\nSeries Title: Stanford Computer Forum Distinguished Lecture Series",
+				"libraryCatalog": "Computer History Museum Archive",
+				"publisher": "Stanford University. Stanford Computer Forum; Palo Alto, CA, US",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102706809",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Tutorials on software systems design",
+				"creators": [],
+				"date": "1977-04",
+				"abstractNote": "The West Coast Computer Faire was an annual computer industry conference and exposition. The first fair was held in 1977 and was organized by Jim Warren and Bob Relling. At the time, it was the biggest computer show in the world, intended to popularize the peronal computer in the home.\n\nThis first fair took place on April 16-17, 1977, in San Francisco Civic Auditorium and Brooks Hall, and saw the debut of the Commodre PET, presented by Chuck Peddle, and the Apple II, presented by then 21-year-old Steve Jobs and Steve Wozniak. There were about 180 exhibitors, among them Intel, MITS, and Digitial Research. More than 12,000 people visited the fair.\n\nPapers presented during this session:\n\nR. W. Ulrickson, \"Learning to program microcomputers? Here's how\"\nLarry Tesler, \"Home text editing\"\n\nBiographical Notes: Robert Wayne Ulrickson received a B.S.E.E. from MIT (1959) and M.S.E.E. from SJSC (1966).  He was commissioned and served as a Coast Guard officer before working for Lockheed Missiles and Space in Sunnyvale, California, where he designed PCM telemetry systems for satellites.  He joined John Hulme’s Applications Department at Fairchild as supervisor of Systems Engineering where his team defined the 9300 series TTL MSI devices.  Systems Engineering became a part of Robert Schreiner’s Custom Micromatrix Arrays Department at Fairchild R&D in 1968, where Bob was Section Manager in charge of array architecture, test engineering, and computer aided design.  After CMA’s reorganization, Bob served Fairchild as Manager of Systems and Applications Engineering and as Product Marketing manager for Bipolar ICs.  In 1973 Bob joined John Nichols as co-founder and President of Logical Services Incorporated in Santa Clara.  Logical developed hundreds of new products incorporating microprocessors until and after it was acquired by Smartflex Systems in 1998.  Bob retired to Maui in 2000.",
+				"archive": "Computer History Museum",
+				"archiveLocation": "X2595.2004",
+				"extra": "Catalog Number: 102706809\nType: Audio\nOther number: camvchm_000022\nOther number: Tape #8\nFormat: Standard audio cassette\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
+				"libraryCatalog": "Computer History Museum Archive",
+				"publisher": "Butterfly Media Dimensions; San Francisco, CA",
+				"attachments": [
+					{
+						"mimeType": "audio/mpeg",
+						"title": "Tutorials on software systems design"
+					},
+					{
+						"mimeType": "audio/mpeg",
+						"title": "Tutorials on software systems design 11"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
