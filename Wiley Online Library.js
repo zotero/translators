@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-20 10:53:10"
+	"lastUpdated": "2020-11-23 10:40:02"
 }
 
 /*
@@ -400,7 +400,7 @@ function scrapeBibTeX(doc, url) {
 			}
 			addBookReviewTag(doc, item);
 			// adding author(s) for Short Reviews
-			if (!item.creators[0] && getAuthorNameShortReview(doc)) {
+			if (!item.creators[0]) {
 				for (let author of getAuthorNameShortReview(doc))
 					item.creators.push(ZU.cleanAuthor(author));
 			}
@@ -465,7 +465,7 @@ function scrapeCochraneTrial(doc, url){
 // returns author(s) of short reviews
 function getAuthorNameShortReview(doc) {
 	let authorsShortReview = doc.querySelectorAll("section.article-section__content > p");
-	return authorsShortReview ? authorsShortReview[1].innerText.split(',') : '';
+	return [authorsShortReview ? authorsShortReview[1].innerText : ''];
 }
 
 function scrape(doc, url) {
