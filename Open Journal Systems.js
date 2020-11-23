@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-24 12:08:59"
+	"lastUpdated": "2020-11-23 09:48:46"
 }
 
 /*
@@ -89,6 +89,11 @@ function scrape(doc, _url) {
 		if (!item.title) {
 			item.title = doc.getElementById('articleTitle');
 		}
+		
+		// in some cases (issn = 1799-3121) the article's title is split in 2 parts
+		if (doc.querySelector(".subtitle")) {
+			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
+		}
 
 		if (item.creators.length == 0) {
 			var authorString = doc.getElementById("authorString");
@@ -121,6 +126,15 @@ function scrape(doc, _url) {
 		}
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.trim().replace(/^(Abstract|Resumo):?\s*/, '');
+		}
+		
+		// resolving issue for a specific journal sperating keywords by '.'
+		if (item.issn = 2340-0080){
+			for (var i = 0; i < item.tags.length; i++){
+				if (item.tags[i].includes('.')){
+					item.tags = item.tags[i].split(".");
+				}
+			}
 		}
 
 		// clear issue if it's zero
