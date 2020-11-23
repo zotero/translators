@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-19 11:11:19"
+	"lastUpdated": "2020-11-23 09:48:46"
 }
 
 /*
@@ -91,7 +91,7 @@ function scrape(doc, _url) {
 		}
 		
 		// in some cases (issn = 1799-3121) the article's title is split in 2 parts
-		if (item.title == doc.querySelector(".page_title").textContent.trim() + ":") {
+		if (doc.querySelector(".subtitle")) {
 			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
 		}
 
