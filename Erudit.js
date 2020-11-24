@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 22:48:58"
+	"lastUpdated": "2020-11-24 09:05:15"
 }
 
 /*
@@ -113,9 +113,9 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
-		}
+
+		item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
+
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
 		}
