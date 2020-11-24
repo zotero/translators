@@ -2,14 +2,14 @@
 	"translatorID": "fce388a6-a847-4777-87fb-6595e710b7e7",
 	"label": "ProQuest",
 	"creator": "Avram Lyon",
-	"target": "^https?://search\\.proquest\\.com/(.*/)?(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch/(figtables|documents))",
+	"target": "^https?://(www|search)\\.proquest\\.com/(.*/)?(docview|pagepdf|results|publicationissue|browseterms|browsetitles|browseresults|myresearch/(figtables|documents))",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-10-18 10:39:01"
+	"lastUpdated": "2020-11-25 09:30:01"
 }
 
 /*
@@ -111,9 +111,9 @@ function getSearchResults(doc, checkOnly, extras) {
 	// if the first result is Ebrary, they all are - we're looking at the Ebrary results tab
 	
 	for (var i=0, n=results.length; i<n; i++) {
-		var title = results[i].querySelectorAll('h3')[0];
+		var title = results[i].querySelectorAll('h3 a')[0];
 		//Z.debug(title)
-		if (!title || !attr(title, 'a', 'href')) continue;
+		if (!title || !title.href) continue;
 		
 		if (checkOnly) return true;
 		found = true;
@@ -127,7 +127,7 @@ function getSearchResults(doc, checkOnly, extras) {
 			};
 		}
 		
-		items[attr(title, 'a', 'href')] = item;
+		items[title.href] = item;
 		
 		if (isEbrary && Zotero.isBookmarklet) {
 			extras[title.href] = {
