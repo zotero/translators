@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-24 08:47:57"
+	"lastUpdated": "2020-11-24 08:51:13"
 }
 
 /*
@@ -102,8 +102,8 @@ function scrape(doc, url) {
 				item.creators.push(ZU.cleanAuthor(author));
 		}
 		// check for & remove duplicate authors
-		let unique = item.creators;
-		item.creators = Array.from(new Set(unique.map(JSON.stringify))).map(JSON.parse);
+		let itemCreators = item.creators;
+		item.creators = Array.from(new Set(itemCreators.map(JSON.stringify))).map(JSON.parse);
 		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
 		if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 		if (keywords && keywords.length > 0) {
