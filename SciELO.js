@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-24 08:51:13"
+	"lastUpdated": "2020-11-24 08:52:42"
 }
 
 /*
@@ -101,7 +101,7 @@ function scrape(doc, url) {
 			for (let author of extractAuthors(doc))
 				item.creators.push(ZU.cleanAuthor(author));
 		}
-		// check for & remove duplicate authors
+		// remove duplicate authors
 		let itemCreators = item.creators;
 		item.creators = Array.from(new Set(itemCreators.map(JSON.stringify))).map(JSON.parse);
 		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
