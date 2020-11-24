@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-23 12:46:46"
+	"lastUpdated": "2020-11-24 08:47:57"
 }
 
 /*
@@ -86,15 +86,6 @@ function extractAuthors(doc) {
 }
 
 
-// called translator would sometimes add duplicate authors
-function checkAuthorDiff (author1, author2) {
-	if (author1.lastName == author2.lastName && author1.firstName == author2.firstName) {
-		return true;
-	}
-	return false;
-}
-
-
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
 	var transAbstract = ZU.xpathText(doc, '//div[@class="trans-abstract"]');
@@ -110,13 +101,9 @@ function scrape(doc, url) {
 			for (let author of extractAuthors(doc))
 				item.creators.push(ZU.cleanAuthor(author));
 		}
-		if (item.creators.length >= 2) {
-			for (let i = 0; i < item.creators.length - 1; i++) {
-				if (checkAuthorDiff(item.creators[i], item.creators[i+1])) {
-					item.creators.splice(i, 1);
-				}
-			}
-		}
+		// check for & remove duplicate authors
+		let unique = item.creators;
+		item.creators = Array.from(new Set(unique.map(JSON.stringify))).map(JSON.parse);
 		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
 		if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 		if (keywords && keywords.length > 0) {
