@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-10-05 15:15:00"
+	"lastUpdated": "2020-11-24 11:01:57"
 }
 
 function detectWeb(doc, url) {
@@ -177,9 +177,9 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
-        // in some cases we get the beginning of the article as abstract
+		// in some cases we get the beginning of the article as abstract
 	if (undesirableAbstractPresent(doc, item))
-	    item.abstractNote = '';
+		item.abstractNote = '';
 	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
 	if (abstractSections && abstractSections.length > 0) {
 		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
@@ -196,26 +196,29 @@ function complementItem(doc, item) {
 		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
 		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
 		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
-        titleTextGerman = titleTextGerman ? titleTextGerman : '';
-		let abs = "";
+		item.abstractNote = titleTextGerman ? titleTextGerman : '';
+		let secondAbstract = "";
 		for (let i = 0; i < sectionTitles.length; ++i) {
 			let titleText = sectionTitles[i].textContent.trim();
 			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
-			abs += titleText + ": " + sectionBody + "\n\n";
-			item.abstractNote = abs.trim();
+			secondAbstract += titleText + ": " + sectionBody + "\n\n";
 		}
-		item.abstractNote = titleTextGerman + "\n\n" + ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
-    }
-    if (!item.abstractNote)
-        item.abstractNote = '';
+		if (secondAbstract) {
+			item.notes.push({
+				note: "abs:" + ZU.trimInternal(secondAbstract).replace(/^Abstract[:\s]*/, "").trim()
+			});
+		}
+	}
+	if (!item.abstractNote)
+		item.abstractNote = '';
 
 	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span | \
-               //li[@class="c-article-subject-list__subject"]');
+			   //li[@class="c-article-subject-list__subject"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
-    }
-    // Trim and deduplicate
-    item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
+	}
+	// Trim and deduplicate
+	item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
 	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
