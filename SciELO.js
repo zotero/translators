@@ -9,27 +9,26 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-27 15:39:38"
+	"lastUpdated": "2020-11-25 16:34:36"
 }
 
 /*
 	Translator
-   Copyright (C) 2013 Sebastian Karcher
-
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU Affero General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU Affero General Public License for more details.
-
-   You should have received a copy of the GNU Affero General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Copyright (C) 2013 Sebastian Karcher
+	Modiefied 2020 Timotheus Kim
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 function detectWeb(doc,url) {
 	if (ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content')) {
@@ -86,8 +85,11 @@ function scrape(doc, url) {
 		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, "").replace(/[\n\t]/g, "");
 		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, ""),
 		});
+		if (!abstract && item.ISSN === '0049-3449') {
+			item.abstractNote = text(doc, ' p:nth-child(4)');
+		}
 		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
-		if (!keywords || keywords.length == 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
+		if (!keywords || keywords.length === 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 		if (keywords && keywords.length > 0) {
 			item.tags = keywords[0].textContent
 						.trim()
@@ -96,10 +98,19 @@ function scrape(doc, url) {
 						.split(";")
 						.map(function(x) { return x.trim(); })
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
-	}
-
-		item.libraryCatalog = "SciELO"
+		}
+				item.libraryCatalog = "SciELO"
+		var domAbstract = ZU.xpath(doc, '/html/body/div[1]/div[2]/div[2]/div/a[1]');
+		for (let d in domAbstract) {
+			var lookupAbstract = domAbstract[d].href;//Z.debug(lookupAbstract)	
+		}
+		ZU.processDocuments(lookupAbstract, function (scrapeAbstract){
+				var secondAbstract = text(scrapeAbstract, ' p:nth-child(4)');
+				if (secondAbstract && item.ISSN === '0049-3449')  {
+					item.notes.push({note: "abs:" + secondAbstract});
+				}
 		item.complete();
+		});
 	});
 	translator.translate();
 }
@@ -108,11 +119,11 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.scielosp.org/scielo.php?script=sci_arttext&pid=S0034-89102007000900015&lang=pt",
+		"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
+				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
 				"creators": [
 					{
 						"firstName": "P. R.",
@@ -135,13 +146,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/2007",
+				"date": "2007-12",
 				"DOI": "10.1590/S0034-89102007000900015",
-				"ISSN": "0034-8910",
+				"ISSN": "0034-8910, 0034-8910, 1518-8787",
+				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
+				"journalAbbreviation": "Rev. Saúde Pública",
+				"language": "pt",
 				"libraryCatalog": "SciELO",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
-				"url": "http://www.scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=pt",
+				"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/",
 				"volume": "41",
 				"attachments": [
 					{
@@ -149,10 +163,36 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Abuso de substâncias por via intravenosa"
+					},
+					{
+						"tag": "Brasil"
+					},
+					{
+						"tag": "Pesquisa qualitativa"
+					},
+					{
+						"tag": "Serviços de diagnóstico"
+					},
+					{
+						"tag": "Sorodiagnóstico da Aids"
+					},
+					{
+						"tag": "Síndrome de imunodeficiência adquirida"
+					},
+					{
+						"tag": "Técnicas de diagnóstico e procedimentos"
+					},
+					{
+						"tag": "Vulnerabilidade em saúde"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -164,7 +204,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "How candidates for the Presidency are nominated?: Rules and procedures in the Latin American political parties",
+				"title": "Como se escolhe um candidato a Presidente?: Regras e práticas nos partidos políticos da América Latina",
 				"creators": [
 					{
 						"firstName": "Flavia",
@@ -181,126 +221,13 @@ var testCases = [
 				"DOI": "10.1590/S0104-62762002000200002",
 				"ISSN": "0104-6276",
 				"issue": "2",
+				"language": "pt",
 				"libraryCatalog": "SciELO",
 				"pages": "158-188",
 				"publicationTitle": "Opinião Pública",
-				"shortTitle": "How candidates for the Presidency are nominated?",
+				"shortTitle": "Como se escolhe um candidato a Presidente?",
 				"url": "http://www.scielo.br/scielo.php?script=sci_abstract&pid=S0104-62762002000200002&lng=en&nrm=iso&tlng=pt",
 				"volume": "8",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://search.scielo.org/?q=&lang=pt&count=15&from=0&output=site&sort=&format=summary&fb=&page=1&q=zotero&lang=pt&page=1",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.scielo.br/scielo.php?script=sci_arttext&pid=S1413-35552013000400328&lang=pt",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Analysis of the user satisfaction level in a public physical therapy service",
-				"creators": [
-					{
-						"firstName": "Renato S.",
-						"lastName": "Almeida",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Leandro A. C.",
-						"lastName": "Nogueira",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stéphane",
-						"lastName": "Bourliataux-Lajoine",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Renato S.",
-						"lastName": "Almeida",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Leandro A. C.",
-						"lastName": "Nogueira",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stéphane",
-						"lastName": "Bourliataux-Lajoine",
-						"creatorType": "author"
-					}
-				],
-				"date": "08/2013",
-				"DOI": "10.1590/S1413-35552013005000097",
-				"ISSN": "1413-3555",
-				"abstractNote": "BACKGROUND: The concepts of quality management have increasingly been introduced into the health sector. Methods to measure satisfaction and quality are examples of this trend.  OBJECTIVE: This study aimed to identify the level of customer satisfaction in a physical therapy department involved in the public area and to analyze the key variables that impact the usersâ€(tm) perceived quality. METHOD: A cross-sectional observational study was conducted, and 95 patients from the physical therapy department of the Hospital Universitário Gaffrée e Guinle - Universidade Federal do Estado do Rio de Janeiro (HUGG/UNIRIO) - Rio de Janeiro, Brazil, were evaluated by the SERVQUAL questionnaire. A brief questionnaire to identify the sociocultural profile of the patients was also performed.  RESULTS: Patients from this health service presented a satisfied status with the treatment, and the population final average value in the questionnaire was 0.057 (a positive value indicates satisfaction). There was an influence of the educational level on the satisfaction status (χ‡Â²=17,149; p=0.002). A correlation was found between satisfaction and the dimensions of tangibility (rho=0.56, p=0.05) and empathy (rho=0.46, p=0.01) for the Unsatisfied group. Among the Satisfied group, the dimension that was correlated with the final value of the SERVQUAL was responsiveness (rho=0.44, p=0.01).  CONCLUSIONS: The final values of the GGUH physical therapy department showed that patients can be satisfied even in a public health service. Satisfaction measures must have a multidimensional approach, and we found that people with more years of study showed lower values of satisfaction.Key words: health management; physical therapy; user satisfaction",
-				"issue": "4",
-				"libraryCatalog": "SciELO",
-				"pages": "328-335",
-				"publicationTitle": "Brazilian Journal of Physical Therapy",
-				"url": "http://www.scielo.br/scielo.php?script=sci_abstract&pid=S1413-35552013000400328&lng=en&nrm=iso&tlng=en",
-				"volume": "17",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Re-pensar el ex opere operato II: Per signa sensibilia significantur (SC 7). Quid enim?",
-				"creators": [
-					{
-						"firstName": "Gonzalo",
-						"lastName": "Guzmán",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gonzalo",
-						"lastName": "Guzmán",
-						"creatorType": "author"
-					}
-				],
-				"date": "12/2019",
-				"DOI": "10.4067/S0049-34492019000400457",
-				"ISSN": "0049-3449",
-				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.Palabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato",
-				"issue": "4",
-				"libraryCatalog": "SciELO",
-				"pages": "457-474",
-				"publicationTitle": "Teología y vida",
-				"shortTitle": "Re-pensar el ex opere operato II",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
-				"volume": "60",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -312,9 +239,64 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://search.scielo.org/?q=&lang=pt&count=15&from=0&output=site&sort=&format=summary&fb=&page=1&q=zotero&lang=pt&page=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "El Papado bajo-medieval, dueño de todas las islas A 70 años de la teoría omni-insular de Luis Weckmann",
+				"creators": [
+					{
+						"firstName": "Luis",
+						"lastName": "Rojas-Donat",
+						"creatorType": "author"
+					}
+				],
+				"date": "03/2020",
+				"DOI": "10.4067/S0049-34492020000100047",
+				"ISSN": "0049-3449",
+				"abstractNote": "El artículo expone la teoría omni-insular fundada en la donación de Constantino. Se concluye que: las menciones a la donación son muy pocas y circunstanciales; si el Papa exigió un censo basado en que tenía potestad sobre todas las islas de Occidente está probado en algunos casos, pero no en todos; el censo parece explicarse por el contexto feudal, el prestigio de ser el sucesor de Pedro y el reconocimiento de la protección apostólica; la intervención de los papas en la expansión ultramarina portuguesa y castellana se funda, primero, en su condición de Vicario de Cristo (potestad apostólica), y segundo, en la doctrina hierocrática del Señorío del Mundo (Dominium Mundi).",
+				"issue": "1",
+				"libraryCatalog": "SciELO",
+				"pages": "47-72",
+				"publicationTitle": "Teología y vida",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492020000100047&lng=es&nrm=iso&tlng=es",
+				"volume": "61",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Palabras clave\t\t:\t\tPapado"
+					},
+					{
+						"tag": "Potestad apostólica."
+					},
+					{
+						"tag": "Teoría omni-insular"
+					}
+				],
 				"notes": [
 					{
-						"note": "abs:\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato\n"
+						"note": "abs:The article explains the so-called ‘omni-insular’ theory based on the donation of Constantine. We conclude that the references to this Donation are few and circumstantial. Just in some cases can be testified that the Pope demanded an economical and periodical amount based on his rights over the whole Occident islands. This amount seems derived from the feudal context, the prestige of being the successor of Peter, and the recognition of apostolic protection. The intervention of the popes in the Portuguese and Castilian overseas expansion was based firstly on their condition of Vicar of Christ (apostolic authority) and secondly on the hierocratic doctrine of the Lordship of the World (Dominium Mundi)."
 					}
 				],
 				"seeAlso": []
@@ -323,7 +305,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_arttext&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+		"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=es",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -333,23 +315,18 @@ var testCases = [
 						"firstName": "Gonzalo",
 						"lastName": "Guzmán",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Gonzalo",
-						"lastName": "Guzmán",
-						"creatorType": "author"
 					}
 				],
 				"date": "12/2019",
 				"DOI": "10.4067/S0049-34492019000400457",
 				"ISSN": "0049-3449",
-				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.Palabras claves: performativo; sacramentos; liturgia; semiótica; lenguaje simbólico; ritualidad; ex opere operato",
+				"abstractNote": "La aproximación antropológica de Sacrosanctum concilium a la sagrada liturgia exige adentrarse en el universo del lenguaje simbólico y su proceso semiótico. Este arroja una luz importante para re-pensar el ex opere operato desprendiéndose de una visión ontológica-estática para adentrarse en la dinámica de una acción re-presentada gracias a la acción del Espíritu Santo. La reflexión semiótica del siglo pasado, especialmente en los autores estadounidenses Charles Peirce y Charles Morris, ayuda seriamente para comprender cómo los ritus et preces de la celebración litúrgica son un lugar teológico de la acción del Espíritu que posibilita el encuentro de lo humano y lo divino.",
 				"issue": "4",
 				"libraryCatalog": "SciELO",
 				"pages": "457-474",
 				"publicationTitle": "Teología y vida",
 				"shortTitle": "Re-pensar el ex opere operato II",
-				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=en",
+				"url": "https://scielo.conicyt.cl/scielo.php?script=sci_abstract&pid=S0049-34492019000400457&lng=en&nrm=iso&tlng=es",
 				"volume": "60",
 				"attachments": [
 					{
@@ -363,30 +340,30 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Ex opere operato"
+						"tag": "Ex opere operato."
 					},
 					{
-						"tag": "Liturgy"
+						"tag": "Lenguaje simbólico"
 					},
 					{
-						"tag": "Performative"
+						"tag": "Liturgia"
 					},
 					{
-						"tag": "Rituality"
+						"tag": "Performativo"
 					},
 					{
-						"tag": "Sacraments"
+						"tag": "Ritualidad"
 					},
 					{
-						"tag": "Semiotics"
+						"tag": "Sacramentos"
 					},
 					{
-						"tag": "Symbolic language"
+						"tag": "Semiótica"
 					}
 				],
 				"notes": [
 					{
-						"note": "abs:\nThe anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine.\nKeywords: performative; sacraments; liturgy; semiotics; symbolic language; rituality; ex opere operato\n"
+						"note": "abs:The anthropological approach of Sacrosanctum concilium to the sacred liturgy requires entering into the universe of symbolic language and its semiotic process. It casts an important light to re-think the ex opere operato, detaching itself from an ontological-static vision to enter into the dynamics of an action re-presented thanks to the action of the Holy Spirit. The semiotic reflection of the last century, especially in American authors Charles Peirce and Charles Morris, helps seriously to understand how the ritus et preces of the liturgical celebration are a theological place of the action of the Spirit that makes possible the encounter of the human and the divine."
 					}
 				],
 				"seeAlso": []
