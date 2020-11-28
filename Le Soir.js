@@ -86,7 +86,7 @@ function scrape(doc, url) {
 			item.creators = [];
 			var authors = authorString.split("et");
 			for (var i = 0; i < authors.length; i++) {
-				if (i == authors.length -1) {
+				if (i == authors.length - 1) {
 					authors[i] = authors[i].split(",")[0];
 				}
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
