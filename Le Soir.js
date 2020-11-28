@@ -80,11 +80,11 @@ function scrape(doc, url) {
 		item.date = ZU.strToISO(ZU.xpathText(doc, '//time[@class=" pubdate updated"]'));
 		item.publicationTitle = "Le Soir";
 		item.ISSN = "1375-5668";
-		var authorString = ZU.xpathText(doc, '//p[@class="gr-meta gr-meta-author"]');
+		var authorString = ZU.xpathText(doc, '//div[@class="gr-article-infos"]/p[@class="gr-meta gr-meta-author"]|//div[@class="required-fields gr-infos-author"]/p[@class="gr-meta gr-meta-author"]');
 		if (authorString) {
 			authorString = authorString.replace('Par ', '');
 			item.creators = [];
-			var authors = authorString.split("et");
+			var authors = authorString.split(/,|et/);
 			for (var i = 0; i < authors.length; i++) {
 				if (i == authors.length - 1) {
 					authors[i] = authors[i].split(",")[0];
