@@ -36,10 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/article/") != -1) {
+	if (url.includes("/article/")) {
 		return "newspaperArticle";
 	}
-	else if (url.indexOf("/recherche?") != -1) {
+	else if (url.includes("/recherche?")) {
 		return "multiple";
 	}
 	return false;
@@ -49,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//li[@class="article-inline small gr-article-payant"]/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -82,11 +82,11 @@ function scrape(doc, url) {
 		item.ISSN = "1375-5668";
 		var authorString = ZU.xpathText(doc, '//p[@class="gr-meta gr-meta-author"]');
 		if (authorString) {
-			authorString = authorString.replace('Par ','');
+			authorString = authorString.replace('Par ', '');
 			item.creators = [];
 			var authors = authorString.split("et");
-			for (var i=0; i<authors.length; i++) {
-				if (i == authors.length-1) {
+			for (var i = 0; i < authors.length; i++) {
+				if (i == authors.length -1) {
 					authors[i] = authors[i].split(",")[0];
 				}
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
@@ -94,7 +94,7 @@ function scrape(doc, url) {
 		}
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
