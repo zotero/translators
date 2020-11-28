@@ -36,10 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/article/')) {
+	if (url.indexOf("/article/") != -1) {
 		return "newspaperArticle";
 	}
-	else if (url.indexOf("/recherche?")>-1) {
+	else if (url.indexOf("/recherche?") != -1) {
 		return "multiple";
 	}
 }
@@ -88,11 +88,11 @@ function scrape(doc, url) {
 				if (i == authors.length-1) {
 					authors[i] = authors[i].split(",")[0];
 				}
-				item.creators.push( ZU.cleanAuthor(authors[i] , "author") );
+				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
-		}		
+		}	
 		item.complete();
-	})
+	});
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
