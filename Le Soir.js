@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- 
+	Copyright © 2020 Alexandre Bossard <- 
 	
 	This file is part of Zotero.
 
