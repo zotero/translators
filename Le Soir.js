@@ -42,6 +42,7 @@ function detectWeb(doc, url) {
 	else if (url.indexOf("/recherche?") != -1) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -90,7 +91,7 @@ function scrape(doc, url) {
 				}
 				item.creators.push(ZU.cleanAuthor(authors[i], "author"));
 			}
-		}	
+		}
 		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
