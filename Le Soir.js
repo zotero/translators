@@ -35,7 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
 	if (url.includes('/article/')) {
 		return "newspaperArticle";
@@ -44,8 +43,6 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 }
-
-
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
@@ -77,16 +74,11 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
-
+	// translator.setDocument(doc);
 	translator.setHandler('itemDone', function (obj, item) {
-
 		item.date = ZU.strToISO(ZU.xpathText(doc, '//time[@class=" pubdate updated"]'));
-		
 		item.publicationTitle = "Le Soir";
-		
 		item.ISSN = "1375-5668";
-		
 		var authorString = ZU.xpathText(doc, '//p[@class="gr-meta gr-meta-author"]');
 		if (authorString) {
 			authorString = authorString.replace('Par ','');
@@ -98,17 +90,15 @@ function scrape(doc, url) {
 				}
 				item.creators.push( ZU.cleanAuthor(authors[i] , "author") );
 			}
-		}
-
-		
+		}		
 		item.complete();
-	});
-
+	})
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = "newspaperArticle";
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
