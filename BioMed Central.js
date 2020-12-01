@@ -36,21 +36,23 @@
 */
 
 
-//This translator covers BioMedCentral but also SpringerOpen.
+// This translator covers BioMedCentral but also SpringerOpen.
 
 function detectWeb(doc, url) {
-	if (url.indexOf('.com/articles/10.1186/')>-1) {
+	if (url.includes('.com/articles/10.1186/')) {
 		return "journalArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//div[@id="search-container"]//article//h3[contains(@class,"ResultsList_title")]/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -66,15 +68,16 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = new Array();
+			var articles = [];
 			for (var i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -83,22 +86,21 @@ function scrape(doc, url) {
 	var DOI = url.match(/\/(10\.[^#?]+)/)[1];
 	var risURL = "http://citation-needed.services.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
 	var pdfURL = doc.getElementById("articlePdf");
-	ZU.doGet(risURL, function(text) {
+	ZU.doGet(risURL, function (text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
-
-			//We have to fix issue and pages because these informations are
-			//wrong in the RIS data.
+		translator.setHandler("itemDone", function (obj, item) {
+			// We have to fix issue and pages because these informations are
+			// wrong in the RIS data.
 			var citation = ZU.xpath(doc, '//span[@class="ArticleCitation_Volume"]');
-			if (citation.length>0) {
+			if (citation.length > 0) {
 				fixCitation(item, citation[0].innerHTML);
 			}
 
 			var keywordsNodes = doc.getElementsByClassName("Keyword");
-			for (var i=0; i<keywordsNodes.length; i++) {
-				item.tags.push( keywordsNodes[i].textContent );
+			for (var i = 0; i < keywordsNodes.length; i++) {
+				item.tags.push(keywordsNodes[i].textContent);
 			}
 			
 			if (pdfURL) {
@@ -113,37 +115,37 @@ function scrape(doc, url) {
 				document: doc
 			});
 			item.complete();
-		})
+		});
 		translator.translate();
-	})
+	});
 }
 
 function fixCitation(item, citation) {
-	//This function fixes the information for issue and pages
-	//depending on the information in the citation string.
-	//e.g. citation = <strong>8</strong>:212
+	// This function fixes the information for issue and pages
+	// depending on the information in the citation string.
+	// e.g. citation = <strong>8</strong>:212
 	//  or citation = <strong>2</strong>(1):S1
 	var re = /<strong>(\d+)<\/strong>([\w()]*):(\w+)/;
 	var m = citation.match(re);
 	if (m) {
 		if (item.pages) {
-			//save the pages (PDF) first
+			// save the pages (PDF) first
 			item.notes.push({ note: "Pages " + item.pages + " in PDF" });
 		}
-		if (item.volume != m[1]) {//This should actually be the same as in RIS.
+		if (item.volume != m[1]) { // This should actually be the same as in RIS.
 			Z.debug("Volume number differs in RIS and citation text: " + item.volume + "!=" + m[1]);
 			item.volume = m[1];
 		}
-		//Most of the journal articles at BMC do not have issue numbers;
-		//however this value seem to be filled by default with 1 in the RIS.
-		//Therefore, we have to delete it here or replace it by the correct
-		//value.
+		// Most of the journal articles at BMC do not have issue numbers;
+		// however this value seem to be filled by default with 1 in the RIS.
+		// Therefore, we have to delete it here or replace it by the correct
+		// value.
 		item.issue = m[2].replace(/[()]/g, "");
-		//The article ids should be treated similar to pages.
+		// The article ids should be treated similar to pages.
 		item.pages = m[3];
 	}
-
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
