@@ -23,7 +23,7 @@ function detectWeb(doc, _url) {
 	}
 	if ((attr(doc, 'link[rel=canonical]', 'href') || '').match(/dp\/[A-Z0-9]+$/)) {
 		if (Zotero.isBookmarklet) return "server";
-		
+
 		var productClass = attr(doc, 'div[id="dp"]', 'class');
 		if (!productClass) {
 			Z.debug("No product class found; trying store ID");
@@ -37,7 +37,7 @@ function detectWeb(doc, _url) {
 		}
 		// delete language code
 		productClass = productClass.replace(/[a-z][a-z]_[A-Z][A-Z]/, "").trim();
-		
+
 		if (productClass) {
 			if (productClass.includes("book")) { // also ebooks
 				return "book";
@@ -75,7 +75,7 @@ function detectWeb(doc, _url) {
 function getSearchResults(doc, checkOnly) {
 	// search results
 	var links = doc.querySelectorAll('div.s-result-list h2>a');
-	
+
 	if (!links.length) {
 		// wish lists
 		var container = doc.getElementById('item-page-wrapper');
@@ -83,12 +83,12 @@ function getSearchResults(doc, checkOnly) {
 			links = ZU.xpath(container, './/a[starts-with(@id, "itemName_")]');
 		}
 	}
-	
+
 	if (!links.length) {
 		// author pages
 		links = ZU.xpath(doc, '//div[@id="searchWidget"]//a[span[contains(@class, "a-size-medium")]]');
 	}
-	
+
 	if (!links.length) return false;
 	var availableItems = {}, found = false,
 		asinRe = /\/(?:dp|product)\/(?:[^?#]+)\//;
@@ -100,7 +100,7 @@ function getSearchResults(doc, checkOnly) {
 			found = true;
 		}
 	}
-	
+
 	return found ? availableItems : false;
 }
 
@@ -108,7 +108,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc), function (items) {
 			if (!items) return;
-			
+
 			var links = [];
 			for (var i in items) links.push(i);
 			Zotero.Utilities.processDocuments(links, scrape);
@@ -169,9 +169,9 @@ var i15dFields = {
 function getField(info, field) {
 	// returns the value for the key 'field' or any of its
 	// corresponding (language specific) keys of the array 'info'
-	
+
 	if (!i15dFields[field]) return false;
-	
+
 	for (var i = 0; i < i15dFields[field].length; i++) {
 		let possibleField = i15dFields[field][i].toLowerCase();
 		if (info[possibleField] !== undefined) {
@@ -210,7 +210,7 @@ function scrape(doc, url) {
 	)
 		// though sometimes [Paperback] or [DVD] is mushed with the title...
 		.replace(/(?: [([].+[)\]])+$/, "");
-	
+
 	var baseNode = title.parentElement, bncl;
 	//	Z.debug(baseNode)
 	while (baseNode && (bncl = baseNode.classList)
@@ -248,10 +248,10 @@ function scrape(doc, url) {
 				)];
 			}
 			if (!role) role = 'author';
-			
+
 			name = ZU.trimInternal(authors[i].textContent)
 				.replace(/\s*\([^)]+\)/, '');
-			
+
 			if (item.itemType == 'audioRecording') {
 				item.creators.push({
 					lastName: name,
@@ -304,8 +304,8 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	
-	
+
+
 	// Abstract
 	var abstractNode = doc.getElementById('postBodyPS');
 	if (abstractNode) {
@@ -318,7 +318,7 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	
+
 	// Extract info into an array
 	var info = {},
 		els = ZU.xpath(doc, '//div[@class="content"]/ul/li[b]');
@@ -337,7 +337,7 @@ function scrape(doc, url) {
 		for (let i = 0; i < els.length; i++) {
 			let el = els[i],
 				key = ZU.xpathText(el, 'td[@class="a-span3"]'),
-				value = ZU.xpathText(el, 'td[@class="a-span9"]');
+				value = ZU.xpathText(el, 'td[@class="a-span9"]');;
 			if (key && value) {
 				info[key.trim().toLowerCase()] = value.trim();
 			}
@@ -362,7 +362,7 @@ function scrape(doc, url) {
 	if (item.ISBN) {
 		item.ISBN = ZU.cleanISBN(item.ISBN);
 	}
-	
+
 	// Date
 	for (let i = 0; i < DATE.length; i++) {
 		item.date = info[DATE[i]];
@@ -374,7 +374,7 @@ function scrape(doc, url) {
 			if (m) item.date = m[1];
 		}
 	}
-	
+
 	// Books
 	var publisher = getField(info, 'Publisher') || getField(info, 'Editor');
 	if (publisher) {
@@ -392,7 +392,7 @@ function scrape(doc, url) {
 	if (pages) item.numPages = parseInt(pages);
 	item.language = getField(info, 'Language');
 	// add publication place from ISBN translator, see at the end
-	
+
 	// Video
 	if (item.itemType == 'videoRecording') {
 		// This seems to only be worth it for videos
@@ -423,9 +423,9 @@ function scrape(doc, url) {
 	else if (department && department.trim() == "Amazon MP3 Store") {
 		item.audioRecordingFormat = "MP3";
 	}
-	
+
 	addLink(doc, item);
-	
+
 	// we search for translators for a given ISBN
 	// and try to figure out the missing publication place
 	if (item.ISBN && !item.place) {
@@ -439,7 +439,7 @@ function scrape(doc, url) {
 					// e.g. [Paris]
 					item.place = lookupItem.place.replace("[", "").replace("]", "");
 				}
-				
+
 				if (!item.date && lookupItem.date) {
 					item.date = lookupItem.date;
 				}
