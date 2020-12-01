@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-24 17:55:46"
+	"lastUpdated": "2020-12-01 03:20:34"
 }
 
 /*
@@ -38,6 +38,10 @@
 
 // This translator covers BioMedCentral but also SpringerOpen.
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 function detectWeb(doc, url) {
 	if (url.includes('.com/articles/10.1186/')) {
 		return "journalArticle";
@@ -51,7 +55,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//div[@id="search-container"]//article//h3[contains(@class,"ResultsList_title")]/a');
+	var rows = doc.querySelectorAll('div[data-test="search-content"] article h3.c-listing__title>a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -85,7 +89,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var DOI = url.match(/\/(10\.[^#?]+)/)[1];
 	var risURL = "http://citation-needed.services.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
-	var pdfURL = doc.getElementById("articlePdf");
+	var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
 	ZU.doGet(risURL, function (text) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -98,7 +102,7 @@ function scrape(doc, url) {
 				fixCitation(item, citation[0].innerHTML);
 			}
 
-			var keywordsNodes = doc.getElementsByClassName("Keyword");
+			var keywordsNodes = doc.getElementsByClassName("c-article-subject-list__subject");
 			for (var i = 0; i < keywordsNodes.length; i++) {
 				item.tags.push(keywordsNodes[i].textContent);
 			}
@@ -182,15 +186,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015",
+				"date": "December 25, 2015",
 				"DOI": "10.1186/s13068-015-0395-8",
 				"ISSN": "1754-6834",
 				"abstractNote": "Substrate accessibility to catalysts has been a dominant theme in theories of biomass deconstruction. However, current methods of quantifying accessibility do not elucidate mechanisms for increased accessibility due to changes in microstructure following pretreatment.",
+				"issue": "1",
 				"journalAbbreviation": "Biotechnology for Biofuels",
 				"libraryCatalog": "BioMed Central",
 				"pages": "212",
 				"publicationTitle": "Biotechnology for Biofuels",
-				"url": "http://dx.doi.org/10.1186/s13068-015-0395-8",
+				"url": "https://doi.org/10.1186/s13068-015-0395-8",
 				"volume": "8",
 				"attachments": [
 					{
@@ -198,22 +203,31 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Accessibility",
-					"Biomass",
-					"Cellulose",
-					"Porosimetry",
-					"Pretreatment",
-					"Tomography"
-				],
-				"notes": [
 					{
-						"note": "Pages 212 in PDF"
+						"tag": "Accessibility"
+					},
+					{
+						"tag": "Biomass"
+					},
+					{
+						"tag": "Cellulose"
+					},
+					{
+						"tag": "Porosimetry"
+					},
+					{
+						"tag": "Pretreatment"
+					},
+					{
+						"tag": "Tomography"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -232,7 +246,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2009",
+				"date": "March 26, 2009",
 				"DOI": "10.1186/1756-3305-2-S1-S1",
 				"ISSN": "1756-3305",
 				"abstractNote": "Canine leishmaniosis is widespread in South America, where a number of Leishmania species have been isolated or molecularly characterised from dogs. Most cases of canine leishmaniosis are caused by Leishmania infantum (syn. Leishmania chagasi) and Leishmania braziliensis. The only well-established vector of Leishmania parasites to dogs in South America is Lutzomyia longipalpis, the main vector of L. infantum, but many other phlebotomine sandfly species might be involved. For quite some time, canine leishmaniosis has been regarded as a rural disease, but nowadays it is well-established in large urbanised areas. Serological investigations reveal that the prevalence of anti-Leishmania antibodies in dogs might reach more than 50%, being as high as 75% in highly endemic foci. Many aspects related to the epidemiology of canine leishmaniosis (e.g., factors increasing the risk disease development) in some South American countries other than Brazil are poorly understood and should be further studied. A better understanding of the epidemiology of canine leishmaniosis in South America would be helpful to design sustainable control and prevention strategies against Leishmania infection in both dogs and humans.",
@@ -241,7 +255,7 @@ var testCases = [
 				"libraryCatalog": "BioMed Central",
 				"pages": "S1",
 				"publicationTitle": "Parasites & Vectors",
-				"url": "http://dx.doi.org/10.1186/1756-3305-2-S1-S1",
+				"url": "https://doi.org/10.1186/1756-3305-2-S1-S1",
 				"volume": "2",
 				"attachments": [
 					{
@@ -249,10 +263,27 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Atlantic Rainforest"
+					},
+					{
+						"tag": "Imidacloprid"
+					},
+					{
+						"tag": "Leishmania Infection"
+					},
+					{
+						"tag": "Leishmania Parasite"
+					},
+					{
+						"tag": "Leishmania Species"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -292,7 +323,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2008",
+				"date": "September 26, 2008",
 				"DOI": "10.1186/1757-1146-1-S1-O4",
 				"ISSN": "1757-1146",
 				"issue": "1",
@@ -300,7 +331,7 @@ var testCases = [
 				"libraryCatalog": "BioMed Central",
 				"pages": "O4",
 				"publicationTitle": "Journal of Foot and Ankle Research",
-				"url": "http://dx.doi.org/10.1186/1757-1146-1-S1-O4",
+				"url": "https://doi.org/10.1186/1757-1146-1-S1-O4",
 				"volume": "1",
 				"attachments": [
 					{
@@ -308,10 +339,27 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Iowa Hospital"
+					},
+					{
+						"tag": "Kinematic Data"
+					},
+					{
+						"tag": "Order Butterworth Filter"
+					},
+					{
+						"tag": "Stance Phase"
+					},
+					{
+						"tag": "Ulcer Development"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -341,15 +389,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "September 13, 2011",
 				"DOI": "10.1186/1029-242X-2011-53",
 				"ISSN": "1029-242X",
 				"abstractNote": "In this paper, we prove the Hyers-Ulam stability and the superstability for cubic functional equation by using the fixed point alternative theorem. As a consequence, we show that the cubic multipliers are superstable under some conditions.",
+				"issue": "1",
 				"journalAbbreviation": "Journal of Inequalities and Applications",
 				"libraryCatalog": "BioMed Central",
 				"pages": "53",
 				"publicationTitle": "Journal of Inequalities and Applications",
-				"url": "http://dx.doi.org/10.1186/1029-242X-2011-53",
+				"url": "https://doi.org/10.1186/1029-242X-2011-53",
 				"volume": "2011",
 				"attachments": [
 					{
@@ -357,20 +406,25 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Hyers-Ulam stability",
-					"Superstability",
-					"cubic functional equation",
-					"multiplier"
-				],
-				"notes": [
 					{
-						"note": "Pages 53 in PDF"
+						"tag": "Hyers-Ulam stability"
+					},
+					{
+						"tag": "Superstability"
+					},
+					{
+						"tag": "cubic functional equation"
+					},
+					{
+						"tag": "multiplier"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -399,15 +453,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "September 23, 2011",
 				"DOI": "10.1186/1556-276X-6-530",
 				"ISSN": "1556-276X",
 				"abstractNote": "Nanoscale potassium niobate (KNbO3) powders of orthorhombic structure were synthesized using the sol-gel method. The heat-treatment temperature of the gels had a pronounced effect on KNbO3 particle size and morphology. Field emission scanning electron microscopy and transmission electron microscopy were used to determine particle size and morphology. The average KNbO3 grain size was estimated to be less than 100 nm, and transmission electron microscopy images indicated that KNbO3 particles had a brick-like morphology. Synchrotron X-ray diffraction was used to identify the room-temperature structures using Rietveld refinement. The ferroelectric orthorhombic phase was retained even for particles smaller than 50 nm. The orthorhombic to tetragonal and tetragonal to cubic phase transitions of nanocrystalline KNbO3 were investigated using temperature-dependent powder X-ray diffraction. Differential scanning calorimetry was used to examine the temperature dependence of KNbO3 phase transition. The Curie temperature and phase transition were independent of particle size, and Rietveld analyses showed increasing distortions with decreasing particle size.",
+				"issue": "1",
 				"journalAbbreviation": "Nanoscale Research Letters",
 				"libraryCatalog": "BioMed Central",
 				"pages": "530",
 				"publicationTitle": "Nanoscale Research Letters",
-				"url": "http://dx.doi.org/10.1186/1556-276X-6-530",
+				"url": "https://doi.org/10.1186/1556-276X-6-530",
 				"volume": "6",
 				"attachments": [
 					{
@@ -415,27 +470,32 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"crystal structure",
-					"nanoscale powder.",
-					"phase transition",
-					"potassium niobate"
-				],
-				"notes": [
 					{
-						"note": "Pages 530 in PDF"
+						"tag": "crystal structure"
+					},
+					{
+						"tag": "nanoscale powder."
+					},
+					{
+						"tag": "phase transition"
+					},
+					{
+						"tag": "potassium niobate"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://ccj.springeropen.com/articles/10.1186/1752-153X-5-5",
+		"url": "https://bmcchem.biomedcentral.com/articles/10.1186/1752-153X-5-5",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -477,16 +537,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011",
+				"date": "February 7, 2011",
 				"DOI": "10.1186/1752-153X-5-5",
 				"ISSN": "1752-153X",
 				"abstractNote": "Numerous popular media sources have developed lists of \"Super Foods\" and, more recently, \"Super Fruits\". Such distinctions often are based on the antioxidant capacity and content of naturally occurring compounds such as polyphenols within those whole fruits or juices of the fruit which may be linked to potential health benefits. Cocoa powder and chocolate are made from an extract of the seeds of the fruit of the Theobroma cacao tree. In this study, we compared cocoa powder and cocoa products to powders and juices derived from fruits commonly considered \"Super Fruits\".",
+				"issue": "1",
 				"journalAbbreviation": "Chemistry Central Journal",
 				"libraryCatalog": "BioMed Central",
 				"pages": "5",
 				"publicationTitle": "Chemistry Central Journal",
 				"shortTitle": "Cacao seeds are a \"Super Fruit\"",
-				"url": "http://dx.doi.org/10.1186/1752-153X-5-5",
+				"url": "https://doi.org/10.1186/1752-153X-5-5",
 				"volume": "5",
 				"attachments": [
 					{
@@ -494,15 +555,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [
+				"tags": [
 					{
-						"note": "Pages 5 in PDF"
+						"tag": "Cocoa Butter"
+					},
+					{
+						"tag": "Fruit Juice"
+					},
+					{
+						"tag": "Oxygen Radical Absorbance Capacity"
+					},
+					{
+						"tag": "Total Polyphenol"
+					},
+					{
+						"tag": "Total Polyphenol Content"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
