@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-01 03:20:34"
+	"lastUpdated": "2020-12-01 16:45:33"
 }
 
 /*
@@ -109,7 +109,7 @@ function scrape(doc, url) {
 			
 			if (pdfURL) {
 				item.attachments.push({
-					url: pdfURL.href,
+					url: pdfURL,
 					title: "Full Text PDF",
 					mimeType: "application/pdf"
 				});
