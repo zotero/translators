@@ -57,7 +57,7 @@ export ZOTERO_REPOSITORY_URL="http://localhost:8085/"
 ./build.sh -p b -d
 cd ..
 
-npm install chromedriver --detect_chromedriver_version
+npm explore chromedriver -- npm run install --detect_chromedriver_version
 
 get_translators_to_check
 ./selenium-test.js "$TRANSLATORS_TO_CHECK"
