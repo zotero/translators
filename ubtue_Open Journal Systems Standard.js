@@ -51,6 +51,18 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
+
+function splitDotSeparatedKeywords(item) {
+    if (item.ISSN === "2340-0080" && item.tags.length) {
+        let split_tags = [];
+        for (const tags of item.tags)
+            split_tags.push(...tags.split('.'));
+        item.tags = split_tags;
+    }
+    return item.tags;
+}
+
+
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
@@ -62,6 +74,7 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+        i.tags = splitDotSeparatedKeywords(i);
 		i.complete();
 	});
 	translator.translate();
