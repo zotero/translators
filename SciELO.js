@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-25 16:34:36"
+	"lastUpdated": "2020-12-02 15:12:49"
 }
 
 /*
 	Translator
 	Copyright (C) 2013 Sebastian Karcher
-	Modiefied 2020 Timotheus Kim
+	Modified 2020 Timotheus Kim
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -96,6 +96,10 @@ function scrape(doc, url) {
 		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, "").replace(/[\n\t]/g, "");
 		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, ""),
 		});
+		//abstract in orginal language
+		if (!abstract && item.ISSN === '0049-3449') {
+ 			item.abstractNote = text(doc, ' p:nth-child(4)');
+ 		}
 		if (!item.creators[0] && extractAuthors(doc)) {
 			for (let author of extractAuthors(doc))
 				item.creators.push(ZU.cleanAuthor(author));
@@ -114,12 +118,11 @@ function scrape(doc, url) {
 						.map(function(x) { return x.trim(); })
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
 		}
-				item.libraryCatalog = "SciELO"
+		item.libraryCatalog = "SciELO"
 		var domAbstract = ZU.xpath(doc, '/html/body/div[1]/div[2]/div[2]/div/a[1]');
-		for (let d in domAbstract) {
-			var lookupAbstract = domAbstract[d].href;//Z.debug(lookupAbstract)	
-		}
-		ZU.processDocuments(lookupAbstract, function (scrapeAbstract){
+		var secondUrlAbstract = domAbstract[0].href;//Z.debug(lookupAbstract)	
+
+		ZU.processDocuments(secondUrlAbstract, function (scrapeAbstract){
 				var secondAbstract = text(scrapeAbstract, ' p:nth-child(4)');
 				if (secondAbstract && item.ISSN === '0049-3449')  {
 					item.notes.push({note: "abs:" + secondAbstract});
