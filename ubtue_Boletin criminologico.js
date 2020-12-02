@@ -69,17 +69,17 @@ function extractYear(entry) {
 }
 
 
-function extractVolume(entry) {
-	let volumeCandidate = entry.querySelector('.margen12-izdo');
-	return volumeCandidate ?
-		ZU.cleanTags(volumeCandidate.innerHTML).replace(/^Artículo\s*(\d+)\/\d{4}.*$/g, "$1") : '';
-}
-
-
 function extractIssue(entry) {
 	let issueCandidate = entry.querySelector('.margen12-izdo');
 	return issueCandidate ?
-		ZU.cleanTags(issueCandidate.innerHTML).replace(/^Artículo\s*\d+\/\d{4}.*nº\s*(\d+)\)/g, "$1") : '';
+		ZU.cleanTags(issueCandidate.innerHTML).replace(/^Artículo\s*(\d+)\/\d{4}.*$/g, "$1") : '';
+}
+
+
+function extractVolume(entry) {
+	let volumeCandidate = entry.querySelector('.margen12-izdo');
+	return volumeCandidate ?
+		ZU.cleanTags(volumeCandidate.innerHTML).replace(/^Artículo\s*\d+\/\d{4}.*nº\s*(\d+)\)/g, "$1") : '';
 }
 
 
