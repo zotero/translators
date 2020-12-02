@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 07:13:19"
+	"lastUpdated": "2020-12-02 08:08:31"
 }
 
 /*
@@ -145,11 +145,11 @@ function scrape(doc, url) {
 		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li//p');
 		if (abstracts && abstracts.length > 0) {
 			item.abstractNote = abstracts[0].textContent.trim();
-			let secondAbstract = abstracts[1].textContent.trim();
-			if (secondAbstract) {
+			if (abstracts.length > 1) {
+				let secondAbstract = abstracts[1].textContent.trim();
 				item.notes.push({
 				note: "abs:" + ZU.trimInternal(secondAbstract)
-			});
+				});
 			}
 		}
 		item.complete();
