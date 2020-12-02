@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 09:59:31"
+	"lastUpdated": "2020-12-02 10:28:25"
 }
 
 /*
@@ -63,23 +63,23 @@ function getSearchResults(doc, checkOnly) {
 
 
 function extractYear(entry) {
-	let yearAndIssueElement = entry.querySelector('.margen12-izdo');
-	return yearAndIssueElement ?
-		 ZU.cleanTags(yearAndIssueElement.innerHTML).replace(/^Artículo\s*\d+\/(\d{4}).*$/g, "$1") : '';
-}
-
-
-function extractIssue(entry) {
-	let yearAndIssueElement = entry.querySelector('.margen12-izdo');
-	return yearAndIssueElement ?
-		ZU.cleanTags(yearAndIssueElement.innerHTML).replace(/^Artículo\s*(\d+)\/\d{4}.*$/g, "$1") : '';
+	let yearCandidate = entry.querySelector('.margen12-izdo');
+	return yearCandidate ?
+		 ZU.cleanTags(yearCandidate.innerHTML).replace(/^Artículo\s*\d+\/(\d{4}).*$/g, "$1") : '';
 }
 
 
 function extractVolume(entry) {
-	let volumeElement = entry.querySelector('.margen12-izdo');
-	return volumeElement ?
-		ZU.cleanTags(volumeElement.innerHTML).replace(/^Artículo\s*\d+\/\d{4}.*nº\s*(\d+)\)/g, "$1") : '';
+	let volumeCandidate = entry.querySelector('.margen12-izdo');
+	return volumeCandidate ?
+		ZU.cleanTags(volumeCandidate.innerHTML).replace(/^Artículo\s*(\d+)\/\d{4}.*$/g, "$1") : '';
+}
+
+
+function extractIssue(entry) {
+	let issueCandidate = entry.querySelector('.margen12-izdo');
+	return issueCandidate ?
+		ZU.cleanTags(issueCandidate.innerHTML).replace(/^Artículo\s*\d+\/\d{4}.*nº\s*(\d+)\)/g, "$1") : '';
 }
 
 
