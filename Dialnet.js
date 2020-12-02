@@ -144,11 +144,11 @@ function scrape(doc, url) {
 
 		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li');
 		if (abstracts && abstracts.length > 0) {
-			item.abstractNote = abstracts[0].textContent.trim().replace(/English|español/, "");
+			item.abstractNote = abstracts[0].textContent.trim().replace(/^english|español/i, "");
 			if (abstracts.length > 1) {
 				let secondAbstract = abstracts[1].textContent.trim();
 				item.notes.push({
-                                    note: "abs:" + ZU.trimInternal(secondAbstract.replace(/English|español/, ""))
+                                    note: "abs:" + ZU.trimInternal(secondAbstract.replace(/^english|español/i, ""))
 				});
 			}
 		}
