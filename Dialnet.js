@@ -142,13 +142,13 @@ function scrape(doc, url) {
 		if (alternateTitle)
 			item.shortTitle = alternateTitle;
 
-		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li//p');
+		var abstracts = ZU.xpath(doc, '//ul[@id="resumen"]//li');
 		if (abstracts && abstracts.length > 0) {
-			item.abstractNote = abstracts[0].textContent.trim();
+			item.abstractNote = abstracts[0].textContent.trim().replace(/English|español/, "");
 			if (abstracts.length > 1) {
 				let secondAbstract = abstracts[1].textContent.trim();
 				item.notes.push({
-				note: "abs:" + ZU.trimInternal(secondAbstract)
+                                    note: "abs:" + ZU.trimInternal(secondAbstract.replace(/English|español/, ""))
 				});
 			}
 		}
