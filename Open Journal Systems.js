@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-12 13:06:11"
+	"lastUpdated": "2020-11-23 09:48:46"
 }
 
 /*
@@ -88,6 +88,11 @@ function scrape(doc, _url) {
 
 		if (!item.title) {
 			item.title = doc.getElementById('articleTitle');
+		}
+		
+		// in some cases (issn = 1799-3121) the article's title is split in 2 parts
+		if (doc.querySelector(".subtitle")) {
+			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
 		}
 
 		if (item.creators.length == 0) {
