@@ -69,7 +69,7 @@ function postProcess(doc, item) {
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags)
 		item.tags = item.tags.map(i => i.textContent.trim());
-		let reviewEntry = text(doc, '.articlecategory');
+	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 }
 
