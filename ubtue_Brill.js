@@ -70,7 +70,7 @@ function postProcess(doc, item) {
 	if (item.tags)
 		item.tags = item.tags.map(i => i.textContent.trim());
 	let reviewEntry = text(doc, '.articlecategory');
-	if (reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
+	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
