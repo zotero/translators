@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-19 10:57:23"
+	"lastUpdated": "2020-12-03 10:32:23"
 }
 
 /*
@@ -132,7 +132,7 @@ function scrape(doc, url) {
 				let orcid = orcidEntry[n].innerHTML;
 				let name = orcidEntry[n].innerHTML;
 				if (orcid) {
-					let regexOrcid = /\d+-\d+-\d+-\d+/;
+					let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
 					let regexName = /author=.*"/;
 					
 					if(orcid.match(regexOrcid)) {
