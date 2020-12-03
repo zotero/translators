@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-17 14:20:25"
+	"lastUpdated": "2020-12-02 12:18:25"
 }
 
 /*
@@ -66,10 +66,11 @@ function postProcess(doc, item) {
         if (item.abstractNote && item.abstractNote.length > 0)
             item.abstractNote = item.abstractNote[0].textContent.trim();
     }
-
-    item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
-    if (item.tags)
-        item.tags = item.tags.map(i => i.textContent.trim());
+	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
+	if (item.tags)
+		item.tags = item.tags.map(i => i.textContent.trim());
+	let reviewEntry = text(doc, '.articlecategory');
+	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
