@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-23 12:39:37"
+	"lastUpdated": "2020-12-03 17:02:51"
 }
 
 /*
@@ -174,12 +174,13 @@ function scrape(doc, url) {
 	const pdfDiv = doc.querySelectorAll('div.mediaDocument li a');
 	if (pdfDiv) {
 		pdfDiv.forEach((div, pdfIndex) => {
+			const fileName = div.textContent;
 			pdfPath = div.href
 			if (pdfPath) {
 				newItem.attachments.push({
 					url: pdfPath.replace('https', 'http'),
 					mimeType: "application/pdf",
-					title: `${newItem.title}${pdfIndex === 0 ? '' : ' ' + pdfIndex + 1}`,
+					title: `${ fileName ? fileName : newItem.title}`,
 				});
 			}
 		})
@@ -192,11 +193,12 @@ function scrape(doc, url) {
 	if (audioDiv) {
 		audioDiv.forEach((div, audioIndex) => {
 			audioPath = div.href
+			const fileName = div.textContent;
 			if (audioPath) {
 				newItem.attachments.push({
 					url: audioPath.replace('https', 'http'),
 					mimeType: "audio/mpeg",
-					title: `${newItem.title}${audioIndex === 0 ? '' : ' ' + (audioIndex + 1)}`
+					title: `${ fileName ? fileName : newItem.title }`
 				});
 			}
 		})
@@ -210,10 +212,11 @@ function scrape(doc, url) {
 
 		imageDiv.forEach((div, imageIndex) => {
 			imagePath = div.src
+			const fileName = div.textContent;
 			if (imagePath) {
 				newItem.attachments.push({
 					url: imagePath,
-					title: `${newItem.title} Image ${imageIndex + 1}`,
+					title: `${ fileName ? fileName : newItem.title }`,
 					mimeType: 'image/png'
 				});
 			}
@@ -227,11 +230,11 @@ function scrape(doc, url) {
 	if (videoDivs) {
 		videoDivs.forEach((div, videoIndex) => {
 			videoPath = div.src
-			videoTitle = div.textContent
+			const fileName = div.textContent;
 			if (videoPath) {
 				newItem.attachments.push({
 					url: videoPath,
-					title: `${newItem.title} video${ videoIndex === 0 ? '' : ' ' + videoIndex + 1}`,
+					title: `${ fileName ? fileName : newItem.title }`,
 					snapshot: false
 				});
 			}
@@ -316,7 +319,7 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
-						"title": "Knuth, Donald oral history"
+						"title": "102658053-05-01-acc.pdf"
 					}
 				],
 				"tags": [],
@@ -345,10 +348,10 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
-						"title": "IBM 1401 Programming Systems"
+						"title": "IBM.1401.1959.102646282.pdf"
 					},
 					{
-						"title": "IBM 1401 Programming Systems Image 1",
+						"title": "IBM 1401 Programming Systems",
 						"mimeType": "image/png"
 					}
 				],
@@ -401,7 +404,7 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
-						"title": "Logic Programming Workshop '83 poster"
+						"title": "LPW_Albufeira_1983_poster.pdf"
 					}
 				],
 				"tags": [],
@@ -445,7 +448,7 @@ var testCases = [
 				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
-						"title": "Jacquard programming cards Image 1",
+						"title": "Jacquard programming cards",
 						"mimeType": "image/png"
 					}
 				],
@@ -470,11 +473,11 @@ var testCases = [
 				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
-						"title": "Bizmac programming manual binder Image 1",
+						"title": "Bizmac programming manual binder",
 						"mimeType": "image/png"
 					},
 					{
-						"title": "Bizmac programming manual binder Image 2",
+						"title": "Bizmac programming manual binder",
 						"mimeType": "image/png"
 					}
 				],
@@ -514,7 +517,7 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
-						"title": "Abe, Takao oral history"
+						"title": "Transcript of Takeo Abe's oral history"
 					}
 				],
 				"tags": [],
@@ -569,7 +572,7 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
-						"title": "Xbox oral history panel"
+						"title": "102746874-05-01-acc.pdf"
 					}
 				],
 				"tags": [],
@@ -611,7 +614,7 @@ var testCases = [
 				"publisher": "Computer History Museum; Mountain View, CA",
 				"attachments": [
 					{
-						"title": "Su, Stephen oral history video",
+						"title": "Su, Stephen oral history",
 						"snapshot": false
 					}
 				],
@@ -682,7 +685,7 @@ var testCases = [
 				"rights": "Computer History Museum",
 				"attachments": [
 					{
-						"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4 video",
+						"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4",
 						"snapshot": false
 					}
 				],
@@ -737,11 +740,254 @@ var testCases = [
 				"attachments": [
 					{
 						"mimeType": "audio/mpeg",
-						"title": "Tutorials on software systems design"
+						"title": "Tutorials on software systems design - Side B"
 					},
 					{
 						"mimeType": "audio/mpeg",
-						"title": "Tutorials on software systems design 11"
+						"title": "Tutorials on software systems design - Side A"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102661095",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "People's Computer Company; People's Computers; Recreational Computing",
+				"creators": [],
+				"date": "1972-1981",
+				"abstractNote": "Founded in Oct 1972 as a large-format bimonthly newsprint publication called \"People's Computer Company.\" Name changed to \"People's Computers\" beginning with the May-June 1977 issue and the format changed to a more conventional magazine style, albeit with uncoated paper. Name changed again to \"Recreational Computing\" with Jan-Feb 1979 issue with slicker covers and paper. \n\nNote: The print collection has been augmented with scans provided by Bob Zeidman under lot number X6691.2013. Some issues in the collection exist in digital form only.",
+				"archive": "Computer History Museum",
+				"archiveLocation": "X2595.2004",
+				"extra": "Catalog Number: 102661095\nType: Document\nCategory: Periodical\nCredit: Gift of Jim Warren",
+				"libraryCatalog": "Computer History Museum Archive",
+				"publisher": "People's Computer Company",
+				"attachments": [
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 1, no. 1 (Oct 1972)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 1, no. 2 (Dec 1972)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 1, no. 3 (Feb 1973)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 1, no. 4 (Apr 1973)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 1, no. 5 (May 1973)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 1 (Sep 1973)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 2 (Nov 1973)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 3 (Jan 1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "PCC (People's Computer Company) Games (1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 4 (Mar 1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 5 (May 1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 2, no. 6 (Jul 1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 3, no. 1 (Sep 1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 3, no. 2 (1974)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 3, no. 3 (Jan 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 3, no. 4 (Mar 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 3, no. 5 (May 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 1 (Jul 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 2 (Sep 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 3 (Nov 1975)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 4 (Jan 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 5 (Mar-Apr 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 4, no. 6 (May 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 5, no. 1 (Jul 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 5, no. 2 (Aug-Sep 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 5, no. 3 (Nov-Dec 1976)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 5, no. 4 (Jan-Feb 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computer Company, v. 5, no. 5 (Mar-Apr 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 5, no. 6 (May-Jun 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 1 (Jul-Aug 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 2 (Sep-Oct 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 3 (Nov-Dec 1977)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 4 (Jan-Feb 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 5 (Mar-Apr 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 6, no. 6 (May-Jun 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 7, no. 1 (Jul-Aug 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 7, no. 2 (Sep-Oct 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "People's Computers, v. 7, no. 3 (Nov-Dec 1978)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 7, no. 4 (Jan-Feb 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 7, no. 5 (Mar-Apr 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 7, no. 6 (May-Jun 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 1 (Jul-Aug 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 2 (Sep-Oct 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 3 (Nov-Dec 1979)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 4 (Jan-Feb 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 5 (Mar-Apr 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 8, no. 6 (May-Jun 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 1 (Jul-Aug 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 2 (Sep-Oct 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 3 (Nov-Dec 1980)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 4 (Jan-Feb 1981)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 5 (Mar-Apr 1981)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 9, no. 6 (May-June 1981)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 10, no. 1 (Jul-Aug 1981)"
+					},
+					{
+						"mimeType": "application/pdf",
+						"title": "Recreational Computing, v. 10, no. 2 (Sep-Oct 1981)"
 					}
 				],
 				"tags": [],
