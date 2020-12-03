@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 15:12:49"
+	"lastUpdated": "2020-12-03 09:24:58"
 }
 
 /*
@@ -119,8 +119,8 @@ function scrape(doc, url) {
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
 		}
 		item.libraryCatalog = "SciELO"
-		var domAbstract = ZU.xpath(doc, '/html/body/div[1]/div[2]/div[2]/div/a[1]');
-		var secondUrlAbstract = domAbstract[0].href;//Z.debug(lookupAbstract)	
+		var domAbstract = ZU.xpath(doc, "//a[text()='abstract in  English']/@href");
+		var secondUrlAbstract = domAbstract[0].value;//Z.debug(lookupAbstract)	
 
 		ZU.processDocuments(secondUrlAbstract, function (scrapeAbstract){
 				var secondAbstract = text(scrapeAbstract, ' p:nth-child(4)');
