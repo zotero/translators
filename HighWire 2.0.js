@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2016-12-19 05:02:00"
+	"lastUpdated": "2020-12-05 19:48:04"
 }
 
 /*
@@ -30,21 +30,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-/*
- Translator for several Highwire journals. Example URLs:
-
-1. Ajay Agrawal, Iain Cockburn, and John McHale, “Gone but not forgotten: knowledge flows, labor mobility, and enduring social relationships,” Journal of Economic Geography 6, no. 5 (November 2006): 571-591.
-	http://joeg.oxfordjournals.org/content/6/5/571 :
-2. Gordon L. Clark, Roberto Durán-Fernández, and Kendra Strauss, “‘Being in the market’: the UK house-price bubble and the intended structure of individual pension investment portfolios,” Journal of Economic Geography 10, no. 3 (May 2010): 331-359.
-	http://joeg.oxfordjournals.org/content/10/3/331.abstract
-3. Hans Maes, “Intention, Interpretation, and Contemporary Visual Art,” Brit J Aesthetics 50, no. 2 (April 1, 2010): 121-138.
-	http://bjaesthetics.oxfordjournals.org/cgi/content/abstract/50/2/121
-4. M L Giger et al., “Pulmonary nodules: computer-aided detection in digital chest images.,” Radiographics 10, no. 1 (January 1990): 41-51.
-	http://radiographics.rsna.org/content/10/1/41.abstract
-5. Mitch Leslie, "CLIP catches enzymes in the act," The Journal of Cell Biology 191, no. 1 (October 4, 2010): 2.
-	   http://jcb.rupress.org/content/191/1/2.2.short
-*/
 
 function getSearchResults(doc, url, checkOnly) {
 	var xpaths = [
@@ -319,7 +304,15 @@ function addEmbMeta(doc, url) {
 		if (item.title == item.title.toUpperCase()) {
 			item.title = ZU.capitalizeTitle(item.title, true);
 		}
-
+		
+		// BMJ doesn't include pages in metadata; grab article number from recommended citation
+		if (!item.pages) {
+			let pages = ZU.xpathText(doc, '//span[@class="highwire-cite-article-as"]');
+			if (pages && pages.includes(":")) {
+				item.pages = pages.trim().match(/:([^:]+)$/)[1];
+			}
+		}
+		
 		var abs = getAbstract(doc);
 		if (abs) item.abstractNote = abs;
 
@@ -393,13 +386,13 @@ function detectWeb(doc, url) {
 	}
 	
 	if (highwiretest) {
-		if (getSearchResults(doc, url, true)) {
-			return "multiple";
-		}
-		else if (/content\/(early\/)?[0-9]+/.test(url)
-			&& url.includes('/suppl/')
+		if (/content\/(early\/)?[0-9]+/.test(url)
+			&& !url.includes('/suppl/')
 		) {
 			return "journalArticle";
+		}
+		else if (getSearchResults(doc, url, true)) {
+			return "multiple";
 		}
 	}
 	return false;
@@ -408,18 +401,11 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (!url) url = doc.documentElement.location;
 	
-	var items = getSearchResults(doc, url);
-	// Z.debug(items)
-	if (items) {
-		Zotero.selectItems(items, function (selectedItems) {
-			if (!selectedItems) return;
 
-			var urls = [];
-			for (var item in selectedItems) {
-				urls.push(item);
-			}
-			// Z.debug(urls)
-			Zotero.Utilities.processDocuments(urls, addEmbMeta);
+	// Z.debug(items)
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), addEmbMeta);
 		});
 	}
 	else if (url.includes('.full.pdf+html')) {
@@ -435,32 +421,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://bjaesthetics.oxfordjournals.org/search?fulltext=art&submit=yes&x=0&y=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://bjaesthetics.oxfordjournals.org/content/current",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://jcb.rupress.org/content/early/by/section",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://rsbl.royalsocietypublishing.org/content/early/recent",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.bloodjournal.org/content/early/recent?sso-checked=true",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.pnas.org/content/108/52/20881.full",
+		"url": "https://www.pnas.org/content/108/52/20881.full",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -672,7 +633,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "12/27/2011",
+				"date": "2011/12/27",
 				"DOI": "10.1073/pnas.1109434108",
 				"ISSN": "0027-8424, 1091-6490",
 				"abstractNote": "Amyotrophic lateral sclerosis (ALS) is a devastating and universally fatal neurodegenerative disease. Mutations in two related RNA-binding proteins, TDP-43 and FUS, that harbor prion-like domains, cause some forms of ALS. There are at least 213 human proteins harboring RNA recognition motifs, including FUS and TDP-43, raising the possibility that additional RNA-binding proteins might contribute to ALS pathogenesis. We performed a systematic survey of these proteins to find additional candidates similar to TDP-43 and FUS, followed by bioinformatics to predict prion-like domains in a subset of them. We sequenced one of these genes, TAF15, in patients with ALS and identified missense variants, which were absent in a large number of healthy controls. These disease-associated variants of TAF15 caused formation of cytoplasmic foci when expressed in primary cultures of spinal cord neurons. Very similar to TDP-43 and FUS, TAF15 aggregated in vitro and conferred neurodegeneration in Drosophila, with the ALS-linked variants having a more severe effect than wild type. Immunohistochemistry of postmortem spinal cord tissue revealed mislocalization of TAF15 in motor neurons of patients with ALS. We propose that aggregation-prone RNA-binding proteins might contribute very broadly to ALS pathogenesis and the genes identified in our yeast functional screen, coupled with prion-like domain prediction analysis, now provide a powerful resource to facilitate ALS disease gene discovery.",
@@ -683,7 +644,8 @@ var testCases = [
 				"libraryCatalog": "www.pnas.org",
 				"pages": "20881-20890",
 				"publicationTitle": "Proceedings of the National Academy of Sciences",
-				"url": "http://www.pnas.org/content/108/52/20881",
+				"rights": "©  . Freely available online through the PNAS open access option.",
+				"url": "https://www.pnas.org/content/108/52/20881",
 				"volume": "108",
 				"attachments": [
 					{
@@ -691,7 +653,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -788,7 +751,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -797,12 +761,24 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Euchromatin",
-					"G9a HMTase",
-					"heterochromatin",
-					"histone H3-K9 methylation",
-					"mammalian development",
-					"transcriptional regulation"
+					{
+						"tag": "Euchromatin"
+					},
+					{
+						"tag": "G9a HMTase"
+					},
+					{
+						"tag": "heterochromatin"
+					},
+					{
+						"tag": "histone H3-K9 methylation"
+					},
+					{
+						"tag": "mammalian development"
+					},
+					{
+						"tag": "transcriptional regulation"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -811,145 +787,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Current concepts in osteolysis",
-				"creators": [
-					{
-						"firstName": "B.",
-						"lastName": "Ollivere",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "J. A.",
-						"lastName": "Wimhurst",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "I. M.",
-						"lastName": "Clark",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S. T.",
-						"lastName": "Donell",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012/01/01",
-				"DOI": "10.1302/0301-620X.94B1.28047",
-				"ISSN": "0301-620X, 2044-5377",
-				"abstractNote": "Skip to Next Section\nThe most frequent cause of failure after total hip replacement in all reported arthroplasty registries is peri-prosthetic osteolysis. Osteolysis is an active biological process initiated in response to wear debris. The eventual response to this process is the activation of macrophages and loss of bone.\nActivation of macrophages initiates a complex biological cascade resulting in the final common pathway of an increase in osteolytic activity. The biological initiators, mechanisms for and regulation of this process are beginning to be understood. This article explores current concepts in the causes of, and underlying biological mechanism resulting in peri-prosthetic osteolysis, reviewing the current basic science and clinical literature surrounding the topic.",
-				"extra": "PMID: 22219240",
-				"issue": "1",
-				"journalAbbreviation": "J Bone Joint Surg Br",
-				"language": "en",
-				"libraryCatalog": "www.bjj.boneandjoint.org.uk",
-				"pages": "10-15",
-				"publicationTitle": "J Bone Joint Surg Br",
-				"rights": "©2012 British Editorial Society of\nBone and Joint Surgery",
-				"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1/10",
-				"volume": "94-B",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [
-					"Arthroplasty",
-					"Hip",
-					"Knee",
-					"Loosening",
-					"Osteolysis",
-					"Revision"
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bjj.boneandjoint.org.uk/content/94-B/1.toc",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369.full",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "MEME: discovering and analyzing DNA and protein sequence motifs",
-				"creators": [
-					{
-						"firstName": "Timothy L.",
-						"lastName": "Bailey",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nadya",
-						"lastName": "Williams",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Chris",
-						"lastName": "Misleh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Wilfred W.",
-						"lastName": "Li",
-						"creatorType": "author"
-					}
-				],
-				"date": "07/01/2006",
-				"DOI": "10.1093/nar/gkl198",
-				"ISSN": "0305-1048, 1362-4962",
-				"abstractNote": "MEME (Multiple EM for Motif Elicitation) is one of the most widely used tools for searching for novel ‘signals’ in sets of biological sequences. Applications include the discovery of new transcription factor binding sites and protein domains. MEME works by searching for repeated, ungapped sequence patterns that occur in the DNA or protein sequences provided by the user. Users can perform MEME searches via the web server hosted by the National Biomedical Computation Resource (http://meme.nbcr.net) and several mirror sites. Through the same web server, users can also access the Motif Alignment and Search Tool to search sequence databases for matches to motifs encoded in several popular formats. By clicking on buttons in the MEME output, users can compare the motifs discovered in their input sequences with databases of known motifs, search sequence databases for matches to the motifs and display the motifs in various formats. This article describes the freely accessible web server and its architecture, and discusses ways to use MEME effectively to find new sequence patterns in biological sequences and analyze their significance.",
-				"extra": "PMID: 16845028",
-				"issue": "suppl 2",
-				"journalAbbreviation": "Nucl. Acids Res.",
-				"language": "en",
-				"libraryCatalog": "nar.oxfordjournals.org",
-				"pages": "W369-W373",
-				"publicationTitle": "Nucleic Acids Research",
-				"shortTitle": "MEME",
-				"url": "http://nar.oxfordjournals.org/content/34/suppl_2/W369",
-				"volume": "34",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://science.sciencemag.org/content/340/6131/483",
+		"url": "https://science.sciencemag.org/content/340/6131/483",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -982,7 +820,7 @@ var testCases = [
 				"pages": "483-485",
 				"publicationTitle": "Science",
 				"rights": "Copyright © 2013, American Association for the Advancement of Science",
-				"url": "http://science.sciencemag.org/content/340/6131/483",
+				"url": "https://science.sciencemag.org/content/340/6131/483",
 				"volume": "340",
 				"attachments": [
 					{
@@ -990,7 +828,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -1003,185 +842,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "http://amj.aom.org/search?tmonth=Dec&pubdate_year=&submit=yes&submit=yes&submit=Submit&andorexacttitle=and&format=standard&firstpage=&fmonth=Jan&title=&hits=50&tyear=2013&titleabstract=&journalcode=amj&journalcode=amr&volume=&sortspec=relevance&andorexacttitleabs=and&author2=&andorexactfulltext=and&fyear=2008&author1=&doi=&fulltext=culture%20cultural&FIRSTINDEX=100",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://ajpheart.physiology.org/content/235/5/H553",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Temporal stability and precision of ventricular defibrillation threshold data",
-				"creators": [
-					{
-						"firstName": "C. F.",
-						"lastName": "Babbs",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "S. J.",
-						"lastName": "Whistler",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "G. K.",
-						"lastName": "Yim",
-						"creatorType": "author"
-					}
-				],
-				"date": "1978/11/01",
-				"ISSN": "0363-6135, 1522-1539",
-				"abstractNote": "Over 200 measurements of the minimum damped sinusoidal current and energy for transchest electrical ventricular defibrillation (ventricular defibrillation threshold) were made to determine the stability and precision of threshold data in 15 pentobarbital-anesthetized dogs. Threshold was determined by repeated trials of fibrillation and defibrillation with successive shocks of diminishing current, each 10% less than that of the preceding shock. The lowest shock intensity that defibrillated was defined as threshold. In three groups of five dogs each, threshold was measured at intervals of 60, 15, and 5 min over periods of 8, 5, and 1 h, respectively. Similar results were obtained for all groups. There was no significant change in mean threshold current with time. Owing to a decrease in transchest impedance, threshold delivered energy decreased by 10% during the first hour of testing. The standard deviations for threshold peak current and delivered energy in a given animal were 11% and 22% of their respective mean values. Arterial blood pH, Pco2, and Po2 averaged change of pH, PCO2 and PO2 were not significantly different from zero. The data demonstrate that ventricular defibrillation threshold is a stable physiological parameter that may be measured with reasonable precision.",
-				"extra": "PMID: 31797",
-				"issue": "5",
-				"language": "en",
-				"libraryCatalog": "ajpheart.physiology.org",
-				"pages": "H553-H558",
-				"publicationTitle": "American Journal of Physiology - Heart and Circulatory Physiology",
-				"rights": "Copyright © 1978 the American Physiological Society",
-				"url": "http://ajpheart.physiology.org/content/235/5/H553",
-				"volume": "235",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://ajpheart.physiology.org/content/235/5",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://nar.oxfordjournals.org/content/41/D1/D94.long",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Non-B DB v2.0: a database of predicted non-B DNA-forming motifs and its associated tools",
-				"creators": [
-					{
-						"firstName": "Regina Z.",
-						"lastName": "Cer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Duncan E.",
-						"lastName": "Donohue",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Uma S.",
-						"lastName": "Mudunuri",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nuri A.",
-						"lastName": "Temiz",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael A.",
-						"lastName": "Loss",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nathan J.",
-						"lastName": "Starner",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Goran N.",
-						"lastName": "Halusa",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Natalia",
-						"lastName": "Volfovsky",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ming",
-						"lastName": "Yi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Brian T.",
-						"lastName": "Luke",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Albino",
-						"lastName": "Bacolla",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jack R.",
-						"lastName": "Collins",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Robert M.",
-						"lastName": "Stephens",
-						"creatorType": "author"
-					}
-				],
-				"date": "01/01/2013",
-				"DOI": "10.1093/nar/gks955",
-				"ISSN": "0305-1048, 1362-4962",
-				"abstractNote": "The non-B DB, available at http://nonb.abcc.ncifcrf.gov, catalogs predicted non-B DNA-forming sequence motifs, including Z-DNA, G-quadruplex, A-phased repeats, inverted repeats, mirror repeats, direct repeats and their corresponding subsets: cruciforms, triplexes and slipped structures, in several genomes. Version 2.0 of the database revises and re-implements the motif discovery algorithms to better align with accepted definitions and thresholds for motifs, expands the non-B DNA-forming motifs coverage by including short tandem repeats and adds key visualization tools to compare motif locations relative to other genomic annotations. Non-B DB v2.0 extends the ability for comparative genomics by including re-annotation of the five organisms reported in non-B DB v1.0, human, chimpanzee, dog, macaque and mouse, and adds seven additional organisms: orangutan, rat, cow, pig, horse, platypus and Arabidopsis thaliana. Additionally, the non-B DB v2.0 provides an overall improved graphical user interface and faster query performance.",
-				"extra": "PMID: 23125372",
-				"issue": "D1",
-				"journalAbbreviation": "Nucl. Acids Res.",
-				"language": "en",
-				"libraryCatalog": "nar.oxfordjournals.org",
-				"pages": "D94-D100",
-				"publicationTitle": "Nucleic Acids Research",
-				"shortTitle": "Non-B DB v2.0",
-				"url": "http://nar.oxfordjournals.org/content/41/D1/D94",
-				"volume": "41",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					},
-					{
-						"title": "PubMed entry",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.bloodjournal.org/content/123/22",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -1190,7 +850,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bmj.com/content/322/7277/29.1",
+		"url": "https://www.bmj.com/content/322/7277/29.1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1224,7 +884,7 @@ var testCases = [
 				"pages": "29-32",
 				"publicationTitle": "BMJ",
 				"rights": "© 2001 BMJ Publishing Group Ltd.",
-				"url": "http://www.bmj.com/content/322/7277/29.1",
+				"url": "https://www.bmj.com/content/322/7277/29.1",
 				"volume": "322",
 				"attachments": [
 					{
@@ -1232,7 +892,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -1253,7 +914,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.bmj.com/content/350/bmj.h696",
+		"url": "https://www.bmj.com/content/350/bmj.h696",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1292,7 +953,7 @@ var testCases = [
 				"publicationTitle": "BMJ",
 				"rights": "© Nordström et al 2015. This is an Open Access article distributed in accordance with the Creative Commons Attribution Non Commercial (CC BY-NC 4.0) license, which permits others to distribute, remix, adapt, build upon this work non-commercially, and license their derivative works on different terms, provided the original work is properly cited and the use is non-commercial. See:  http://creativecommons.org/licenses/by-nc/4.0/.",
 				"shortTitle": "Length of hospital stay after hip fracture and short term risk of death after discharge",
-				"url": "http://www.bmj.com/content/350/bmj.h696",
+				"url": "https://www.bmj.com/content/350/bmj.h696",
 				"volume": "350",
 				"attachments": [
 					{
@@ -1300,7 +961,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -1309,6 +971,113 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pnas.org/content/early/recent",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.pnas.org/content/early/2020/11/24/2020346117.long",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Functional characterization of 67 endocytic accessory proteins using multiparametric quantitative analysis of CCP dynamics",
+				"creators": [
+					{
+						"firstName": "Madhura",
+						"lastName": "Bhave",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rosa E.",
+						"lastName": "Mino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xinxin",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeon",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heather M.",
+						"lastName": "Grossman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashley M.",
+						"lastName": "Lakoduk",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gaudenz",
+						"lastName": "Danuser",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sandra L.",
+						"lastName": "Schmid",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marcel",
+						"lastName": "Mettlen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/11/25",
+				"DOI": "10.1073/pnas.2020346117",
+				"ISSN": "0027-8424, 1091-6490",
+				"abstractNote": "Clathrin-mediated endocytosis (CME) begins with the nucleation of clathrin assembly on the plasma membrane, followed by stabilization and growth/maturation of clathrin-coated pits (CCPs) that eventually pinch off and internalize as clathrin-coated vesicles. This highly regulated process involves a myriad of endocytic accessory proteins (EAPs), many of which are multidomain proteins that encode a wide range of biochemical activities. Although domain-specific activities of EAPs have been extensively studied, their precise stage-specific functions have been identified in only a few cases. Using single-guide RNA (sgRNA)/dCas9 and small interfering RNA (siRNA)-mediated protein knockdown, combined with an image-based analysis pipeline, we have determined the phenotypic signature of 67 EAPs throughout the maturation process of CCPs. Based on these data, we show that EAPs can be partitioned into phenotypic clusters, which differentially affect CCP maturation and dynamics. Importantly, these clusters do not correlate with functional modules based on biochemical activities. Furthermore, we discover a critical role for SNARE proteins and their adaptors during early stages of CCP nucleation and stabilization and highlight the importance of GAK throughout CCP maturation that is consistent with GAK’s multifunctional domain architecture. Together, these findings provide systematic, mechanistic insights into the plasticity and robustness of CME.",
+				"extra": "PMID: 33257546",
+				"journalAbbreviation": "PNAS",
+				"language": "en",
+				"libraryCatalog": "www.pnas.org",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
+				"rights": "Copyright © 2020 the Author(s). Published by PNAS.. https://creativecommons.org/licenses/by-nc-nd/4.0/This open access article is distributed under Creative Commons Attribution-NonCommercial-NoDerivatives License 4.0 (CC BY-NC-ND).",
+				"url": "https://www.pnas.org/content/early/2020/11/24/2020346117",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "CRISPRi screen"
+					},
+					{
+						"tag": "GAK"
+					},
+					{
+						"tag": "SNAREs"
+					},
+					{
+						"tag": "clathrin-mediated endocytosis"
+					},
+					{
+						"tag": "total internal reflection fluorescence microscopy"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
