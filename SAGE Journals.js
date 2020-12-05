@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-10 18:09:17"
+	"lastUpdated": "2020-12-05 03:26:37"
 }
 
 /*
@@ -42,7 +42,8 @@
 function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
-	if (url.includes('/abs/10.') || url.includes('/full/10.') || url.includes('/pdf/10.')) {
+	let articleMatch = /(abs|full|pdf|doi)\/10\./;
+	if (articleMatch.test(url)) {
 		return "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -54,7 +55,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//span[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
+	var rows = ZU.xpath(doc, '//*[contains(@class, "art_title")]/a[contains(@href, "/doi/full/10.") or contains(@href, "/doi/abs/10.") or contains(@href, "/doi/pdf/10.")][1]');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -348,6 +349,44 @@ var testCases = [
 						"tag": "delinquency"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/10.1177/0263276404046059",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The ‘System’ of Automobility",
+				"creators": [
+					{
+						"lastName": "Urry",
+						"firstName": "John",
+						"creatorType": "author"
+					}
+				],
+				"date": "October 1, 2004",
+				"DOI": "10.1177/0263276404046059",
+				"ISSN": "0263-2764",
+				"abstractNote": "This article is concerned with how to conceptualize and theorize the nature of the ‘car system’ that is a particularly key, if surprisingly neglected, element in ‘globalization’. The article deploys the notion of systems as self-reproducing or autopoietic. This notion is used to understand the origins of the 20th-century car system and especially how its awesome pattern of path dependency was established and exerted a particularly powerful and self-expanding pattern of domination across the globe. The article further considers whether and how the 20th-century car system may be transcended. It elaborates a number of small changes that are now occurring in various test sites, factories, ITC sites, cities and societies. The article briefly considers whether these small changes may in their contingent ordering end this current car system. The article assesses whether such a new system could emerge well before the end of this century, whether in other words some small changes now may produce the very large effect of a new post-car system that would have great implications for urban life, for mobility and for limiting projected climate change.",
+				"issue": "4-5",
+				"journalAbbreviation": "Theory, Culture & Society",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "25-39",
+				"publicationTitle": "Theory, Culture & Society",
+				"url": "https://doi.org/10.1177/0263276404046059",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
