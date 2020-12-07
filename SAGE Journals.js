@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-04 14:05:29"
+	"lastUpdated": "2020-12-07 08:53:30"
 }
 
 /*
@@ -170,7 +170,12 @@ function scrape(doc, url) {
 			}
 			//ubtue: add tag "Book Review" in every issue 5 of specific journals if the dc.Type is "others"
 			let reviewType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
-			if (reviewType && reviewType.match(/other/i) && item.issue === '5' && item.ISSN === '0142-064X' || item.ISSN === '0309-0892') item.tags.push('Book Review') && item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
+			if (item.ISSN === '0142-064X' || item.ISSN === '0309-0892') {
+				if (reviewType && reviewType.match(/other/i) && item.issue === '5') {
+					item.tags.push('Book Review');
+					item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
+				}
+			}	
 			
 			// Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i < item.creators.length; i++) {
@@ -180,7 +185,6 @@ function scrape(doc, url) {
 					item.creators[i] = ZU.cleanAuthor(item.creators[i].lastName, type, comma);
 				}
 			}
-
 			// scrape tags
 			if (!item.tags || item.tags.length === 0) {
 				var embedded = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
