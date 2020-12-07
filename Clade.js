@@ -2,7 +2,7 @@
 	"translatorID": "c7b97808-e812-476d-8893-a0331e3010a0",
 	"label": "Clade",
 	"creator": "Guillaume Faucheur",
-	"target": "^https?://[^/]*(clade\\.loc|clade\\.net|bibliotheques\\-numeriques\\.defense\\.gouv\\.fr)/?",
+	"target": "^https?://[^/]*(clade\\.loc|clade\\.net|bibliotheques\\-numeriques\\.defense\\.gouv\\.fr)/document?",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
@@ -557,11 +557,7 @@ var CladeClass = function () {
 var Clade = new CladeClass();
 
 function detectWeb(doc, url) {
-	if (url.search(/\/document\//) != -1) {
-		return getDocumentType(doc);
-	}
-
-	return false;
+	return getDocumentType(doc);
 }
 
 function getDocumentType(doc) {
@@ -654,7 +650,7 @@ var testCases = [
 					{
 						"lastName": "Dépôt des Cartes et Plans de la Marine",
 						"creatorType": "editor",
-						"fieldMode": true
+						"fieldMode": 1
 					}
 				],
 				"date": "1765",
