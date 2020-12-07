@@ -556,7 +556,7 @@ var CladeClass = function () {
 /* Global CladeClass object. */
 var Clade = new CladeClass();
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	return getDocumentType(doc);
 }
 
