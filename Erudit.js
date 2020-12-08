@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 22:48:58"
+	"lastUpdated": "2020-12-08 08:50:55"
 }
 
 /*
@@ -93,19 +93,7 @@ function addBookReviewTag(doc, item) {
 }
 
 function scrape(doc, url) {
-	var abstractFR = text(doc, '#resume-fr>p');
-	var abstractEN = text(doc, '#resume-en>p');
-	var abstract;
-	if (url.includes('/en/')) {
-		abstract = abstractEN || abstractFR;
-	} else {
-		abstract = abstractFR || abstractEN;
-	}
-	var secondAbstract;
-	if (abstract == abstractEN)
-		secondAbstract = abstractFR;
-	else
-		secondAbstract = abstractEN;
+	let abstracts = doc.querySelectorAll(".resume>p");
 
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -113,17 +101,20 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
+		if (abstracts[0]) {
+			item.abstractNote = abstracts[0].innerText.replace(/^\s*/mg, '').replace(/\n/g, ' ');
 		}
+
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
 		}
 
-		if (secondAbstract) {
-			item.notes.push({
-				note: "abs:" + secondAbstract.replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
-			});
+		if (abstracts.length > 1) {
+			for (let i = 1; i < abstracts.length; i++) {
+				item.notes.push({
+				note: "abs:" + abstracts[i].innerText.replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+				});
+			}
 		}
 
 		addBookReviewTag(doc, item);
