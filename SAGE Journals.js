@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-07 10:29:32"
+	"lastUpdated": "2020-12-08 11:29:32"
 }
 
 /*
@@ -175,7 +175,7 @@ function scrape(doc, url) {
 					item.tags.push('Book Review');
 					item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
 					if (item.abstractNote && item.abstractNote.match(/,(?!\s\w)/g)) {
-						delete item.abstractNote;	
+						item.abstractNote = '';	
 					}
 				}
 			}	
