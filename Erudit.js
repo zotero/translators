@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-08 13:34:47"
+	"lastUpdated": "2020-12-08 15:05:54"
 }
 
 /*
@@ -93,10 +93,8 @@ function addBookReviewTag(doc, item) {
 }
 
 function normaliseAbstract(entry) {
-	let abstractRegex = new RegExp('\\s+(.*),\\s+' + '.*' + '.*$');
-	let onelineInnerText = entry.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
-	let abstractPart = onelineInnerText.replace(abstractRegex, "$1");
-	return abstractPart.replace(/[\s\r\n]+y[\s\r\n]+/g, ',');
+	let normalisedAbstract = entry.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
+	return normalisedAbstract.replace(/[\s\r\n]+y[\s\r\n]+/g);
 }
 
 function scrape(doc, url) {
@@ -120,32 +118,31 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		if (abstract) {
-			item.abstractNote = abstract.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ');
-		}
 		let abstracts = [normaliseAbstract(abstract), normaliseAbstract(secondAbstract)];
 		let abstractNodes = doc.querySelectorAll('.resume');
 		let abstractList = [];
 		for (let abstract of abstractNodes) { abstractList.push(normaliseAbstract(abstract.innerText)) }
-		abstractList = abstractList.filter(function(item) {
-			return !abstracts.includes(item);
+		let abstractArray = abstracts.concat(abstractList);
+		abstractArray = abstractArray.filter(function(item, pos) {
+    		return abstractArray.indexOf(item) == pos;
 		})
-		if (abstractList) {
-			for (let abs of abstractList) {
+		item.abstractNote = abstractArray[0].replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim();
+		abstractArray.splice(0,1);
+		for (let abs of abstractArray) {
+			absIndex = abstractArray.indexOf(abs);
+			if (absIndex === 0) {
 				item.notes.push({
-				note: "abs:" + abs.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+					note: "abs:" + abs.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
 				});
-			}
+			} else {
+				item.notes.push({
+					note: "abs"+ absIndex + ":" + abs.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+				});
+			}	
 		}
 		
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
-		}
-
-		if (secondAbstract) {
-			item.notes.push({
-				note: "abs:" + secondAbstract.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
-			});
 		}
 
 		addBookReviewTag(doc, item);
