@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 90,
-	"inRepository": true,
+	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-08 16:17:24"
+	"lastUpdated": "2020-12-09 08:46:58"
 }
 
 /*
@@ -34,44 +34,12 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/article-.+\.xml$/)) {
-		return "journalArticle";
-	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
-		return "multiple";
- 	}
+	//for zotaut rss procedure we do not need multiple downloads
+	return "journalArticle";
 }
 
-function getSearchResults(doc) {
-	let items = {};
-	let found = false;
-	var results = ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]');
-	if (results.length<1) {
-		results = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "flex-row", " " )) and contains(concat( " ", @class, " " ), concat( " ", "flex-nowrap", " " ))]//*[contains(concat( " ", @class, " " ), concat( " ", "c-Button--link", " " ))]');
-	}
-	for (var i in results) {
-		let href = results[i].href;
-		let title = ZU.trimInternal(results[i].textContent);
-		if (!href || !title) continue;
-		if (!href.match(/article-.+\.xml$/))
-			continue;
-
-		found = true;
-		items[href] = title;
-	}
-	return found ? items : false;
-}
-
-function postProcess(doc, item) {
-	if (!item.abstractNote) {
-		var abstractEntry = ZU.xpath(doc, '//section[@class="abstract"]//p');
-		if (abstractEntry && abstractEntry.length > 0)
-			item.abstractNote = abstractEntry[0].textContent.trim();
-	}
-	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
-	if (item.tags)
-		item.tags = item.tags.map(i => i.textContent.trim().replace(/^\w/gi,function(m){return m.toUpperCase();}));
-	let reviewEntry = text(doc, '.articlecategory');
-	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
+function doWeb(doc, url) {
+	invokeEmbeddedMetadataTranslator(doc, url);
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
@@ -86,22 +54,21 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.translate();
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) === "multiple") {
-		Zotero.selectItems(getSearchResults(doc), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
-		});
-	} else
-		invokeEmbeddedMetadataTranslator(doc, url);
-}
-/** BEGIN TEST CASES **/
+function postProcess(doc, item) {
+	if (!item.abstractNote) {
+		var abstractEntry = ZU.xpath(doc, '//section[@class="abstract"]//p');
+		if (abstractEntry && abstractEntry.length > 0)
+			item.abstractNote = abstractEntry[0].textContent.trim();
+	}
+	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
+	if (item.tags)
+		item.tags = item.tags.map(i => i.textContent.trim().replace(/^\w/gi,function(m){return m.toUpperCase();}));
+	let reviewEntry = text(doc, '.articlecategory');
+	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	let openAccessTag = text(doc, '.has-license span');
+	if (openAccessTag) item.notes.push('LF');
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -159,6 +126,124 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/bi/28/5/article-p557_557.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Reading with Minor Feelings: Racialized Emotions and Children’s (Non)agency in Judges 10–12",
+				"creators": [
+					{
+						"firstName": "Dong Sung",
+						"lastName": "Kim",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/11/30",
+				"DOI": "10.1163/15685152-2805A003",
+				"ISSN": "1568-5152, 0927-2569",
+				"abstractNote": "In this article, I read the story of Jephthah and his daughter in Judges 10–12 within the contemporary context of racism and discrimination in the U.S. Particularly focusing on the affective and emotional dimensions of the lived experiences in racially/ethnically minoritized communities, I engage the biblical story with what poet and writer Cathy Park Hong calls, “minor feelings.” Reading the biblical narrative alongside Hong’s crudely personal—and yet pervasively common—accounts of Asian American racial trauma, I critically reflect on the notion of childhood agency, and suggest that the Western conception of agency neither reflects nor promotes the lives of the children in minority groups. In turn, I ask: What if we moved away from the traditional notions of agency and voice in our critical works, and, instead, turned towards emotions, sensations, and other embodied experiences as a site of interpretation, critique, and movement for social change?",
+				"issue": "5",
+				"language": "en",
+				"libraryCatalog": "brill.com",
+				"pages": "557-583",
+				"publicationTitle": "Biblical Interpretation",
+				"shortTitle": "Reading with Minor Feelings",
+				"url": "https://brill.com/view/journals/bi/28/5/article-p557_557.xml",
+				"volume": "28",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Affect theory"
+					},
+					{
+						"tag": "Cathy Park Hong"
+					},
+					{
+						"tag": "Childist biblical interpretation"
+					},
+					{
+						"tag": "Jephthah’s daughter"
+					},
+					{
+						"tag": "Judges 10–12"
+					},
+					{
+						"tag": "Minor feelings"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/dsd/27/3/article-p372_4.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Double Object Constructions in DSS Hebrew: The Case of ntn",
+				"creators": [
+					{
+						"firstName": "Femke",
+						"lastName": "Siebesma-Mannens",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/10/12",
+				"DOI": "10.1163/15685179-bja10017",
+				"ISSN": "0929-0761, 1568-5179",
+				"abstractNote": "In this article an overview is given of the verbal valence patterns of the verb ‮נתן‬‎ in the Dead Sea Scrolls. Four patterns are distinguished for this verb: 1. ‮נתן‬‎ + OBJECT to produce; 2. + ‮נתן‬‎ OBJECT + RECIPIENT to give to; 3. ‮נתן‬‎ + OBJECT + LOCATION to place; 4. ‮נתן‬‎ + OBJECT + 2ND OBJECT to make into. All occurrences of the verb in the DSS corpus used, consisting of 1QHa, 1QS, 1QM, and 1QpHab, are discussed and divided into one of these patterns. This study shows that pattern 3 occurs most, followed by pattern 2, and that it can be argued that pattern 1 and 4 also occur in our DSS corpus, though the evidence is scarce. In some cases, translations, differing from the translations in the editions of the texts, are proposed that better reflect the verbal valence patterns used in the clause.",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "brill.com",
+				"pages": "372-391",
+				"publicationTitle": "Dead Sea Discoveries",
+				"shortTitle": "Double Object Constructions in DSS Hebrew",
+				"url": "https://brill.com/view/journals/dsd/27/3/article-p372_4.xml",
+				"volume": "27",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Dead Sea Scrolls"
+					},
+					{
+						"tag": "Ntn"
+					},
+					{
+						"tag": "Qumran Hebrew"
+					},
+					{
+						"tag": "Verbal valence patterns"
+					}
+				],
+				"notes": [
+					"LF"
+				],
 				"seeAlso": []
 			}
 		]
