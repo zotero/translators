@@ -47,6 +47,10 @@ function getSearchResults(doc) {
     let found = false;
     let links = ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]');
 	let text = ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]/span')
+	if (!links[0]) {
+		links = ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+		text = ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+	}
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
