@@ -40,6 +40,7 @@ function detectWeb(doc, url) {
 	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
 		return "multiple";
  	}
+    return false;
 }
 
 function getSearchResults(doc) {
