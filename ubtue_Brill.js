@@ -77,6 +77,10 @@ function postProcess(doc, item) {
 		item.tags = item.tags.map(i => i.textContent.trim());
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	let openAccessTag = text(doc, '.has-license span');
+	if (openAccessTag) item.notes.push('LF');
+	item.itemType = "journalArticle";
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
