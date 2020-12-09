@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-02 22:48:58"
+	"lastUpdated": "2020-12-09 08:59:40"
 }
 
 /*
@@ -92,9 +92,13 @@ function addBookReviewTag(doc, item) {
 	}
 }
 
+function normaliseAbstract(entry) {
+	return entry.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ").replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ');
+}
+
 function scrape(doc, url) {
-	var abstractFR = text(doc, '#resume-fr>p');
-	var abstractEN = text(doc, '#resume-en>p');
+	var abstractFR = text(doc, '#resume-fr');
+	var abstractEN = text(doc, '#resume-en');
 	var abstract;
 	if (url.includes('/en/')) {
 		abstract = abstractEN || abstractFR;
@@ -113,17 +117,25 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		if (abstract) {
-			item.abstractNote = abstract.replace(/^\s*/mg, '').replace(/\n/g, ' ');
+		let abstracts = [normaliseAbstract(abstract), normaliseAbstract(secondAbstract)];
+		let abstractNodes = doc.querySelectorAll('.resume');
+		let abstractList = [];
+		for (let abstract of abstractNodes) { abstractList.push(normaliseAbstract(abstract.innerText)) }
+		abstracts = abstracts.concat(abstractList);
+		abstracts = abstracts.filter(function(item, pos) {
+				return abstracts.indexOf(item) == pos;
+		})
+		item.abstractNote = abstracts[0];
+		let absIndex = 0;
+		for (let abs of abstracts.splice(1)) {
+				item.notes.push({
+					note: "abs"+ (absIndex !== 0 ? absIndex : '') + ":" + abs,
+				});
+				++absIndex;
 		}
+		
 		if (item.publicationTitle) {
 			item.publicationTitle = ZU.unescapeHTML(item.publicationTitle);
-		}
-
-		if (secondAbstract) {
-			item.notes.push({
-				note: "abs:" + secondAbstract.replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
-			});
 		}
 
 		addBookReviewTag(doc, item);
