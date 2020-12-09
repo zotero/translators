@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-07 08:53:30"
+	"lastUpdated": "2020-12-08 11:29:32"
 }
 
 /*
@@ -174,6 +174,9 @@ function scrape(doc, url) {
 				if (reviewType && reviewType.match(/other/i) && item.issue === '5') {
 					item.tags.push('Book Review');
 					item.notes.push({note: "Booklist:" + item.date.match(/\d{4}$/)});
+					if (item.abstractNote && item.abstractNote.match(/,(?!\s\w)/g)) {
+						item.abstractNote = '';	
+					}
 				}
 			}	
 			
@@ -696,89 +699,6 @@ var testCases = [
 					},
 					{
 						"note": "orcid:0000-0003-2751-3204 | author=Grzymała-Moszczyńska, Halina"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://journals.sagepub.com/doi/full/10.1177/0142064X20928711",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "1. New Testament General",
-				"creators": [],
-				"date": "August 1, 2020",
-				"DOI": "10.1177/0142064X20928711",
-				"ISSN": "0142-064X",
-				"abstractNote": ", , ,",
-				"issue": "5",
-				"journalAbbreviation": "Journal for the Study of the New Testament",
-				"language": "en",
-				"libraryCatalog": "SAGE Journals",
-				"pages": "1-3",
-				"publicationTitle": "Journal for the Study of the New Testament",
-				"url": "https://doi.org/10.1177/0142064X20928711",
-				"volume": "42",
-				"attachments": [
-					{
-						"title": "SAGE PDF Full Text",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Book Review"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>doi: 10.1177/0142064X20928711</p>"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://journals.sagepub.com/doi/full/10.1177/0142064X20928711",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "1. New Testament General",
-				"creators": [],
-				"date": "August 1, 2020",
-				"DOI": "10.1177/0142064X20928711",
-				"ISSN": "0142-064X",
-				"abstractNote": ", , ,",
-				"issue": "5",
-				"journalAbbreviation": "Journal for the Study of the New Testament",
-				"language": "en",
-				"libraryCatalog": "SAGE Journals",
-				"pages": "1-3",
-				"publicationTitle": "Journal for the Study of the New Testament",
-				"url": "https://doi.org/10.1177/0142064X20928711",
-				"volume": "42",
-				"attachments": [
-					{
-						"title": "SAGE PDF Full Text",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Book Review"
-					}
-				],
-				"notes": [
-					{
-						"note": "<p>doi: 10.1177/0142064X20928711</p>"
-					},
-					{
-						"note": "Booklist:2020"
 					}
 				],
 				"seeAlso": []
