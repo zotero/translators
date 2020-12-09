@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-08 15:05:54"
+	"lastUpdated": "2020-12-09 08:47:27"
 }
 
 /*
@@ -93,8 +93,7 @@ function addBookReviewTag(doc, item) {
 }
 
 function normaliseAbstract(entry) {
-	let normalisedAbstract = entry.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ");
-	return normalisedAbstract.replace(/[\s\r\n]+y[\s\r\n]+/g);
+	return entry.replace(/[\r\n]+/g, " ").replace(/\s\s+/g, " ").replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ');
 }
 
 function scrape(doc, url) {
@@ -122,23 +121,18 @@ function scrape(doc, url) {
 		let abstractNodes = doc.querySelectorAll('.resume');
 		let abstractList = [];
 		for (let abstract of abstractNodes) { abstractList.push(normaliseAbstract(abstract.innerText)) }
-		let abstractArray = abstracts.concat(abstractList);
-		abstractArray = abstractArray.filter(function(item, pos) {
-    		return abstractArray.indexOf(item) == pos;
+		abstracts = abstracts.concat(abstractList);
+		abstracts = abstracts.filter(function(item, pos) {
+				return abstracts.indexOf(item) == pos;
 		})
-		item.abstractNote = abstractArray[0].replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim();
-		abstractArray.splice(0,1);
-		for (let abs of abstractArray) {
-			absIndex = abstractArray.indexOf(abs);
-			if (absIndex === 0) {
+		item.abstractNote = abstracts[0];
+		abstracts.splice(0,1);
+		let absIndex = 0;
+		for (let abs of abstracts) {
 				item.notes.push({
-					note: "abs:" + abs.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
+					note: "abs"+ (absIndex !== 0 ? absIndex : '') + ":" + abs,
 				});
-			} else {
-				item.notes.push({
-					note: "abs"+ absIndex + ":" + abs.replace(/^(abstract|resumen|résumé)/i, "").replace(/^\s*/mg, '').replace(/\n/g, ' ').trim(),
-				});
-			}	
+				absIndex ++;
 		}
 		
 		if (item.publicationTitle) {
