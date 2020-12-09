@@ -80,6 +80,7 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag) item.notes.push('LF');
+	item.itemType = "journalArticle";
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
