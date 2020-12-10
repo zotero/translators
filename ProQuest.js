@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-25 09:30:01"
+	"lastUpdated": "2020-12-11 03:55:14"
 }
 
 /*
@@ -34,6 +34,11 @@
 
  	***** END LICENSE BLOCK ******/
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+
 var language = "English";
 var L = {};
 var isEbrary = false;
@@ -55,7 +60,7 @@ function getTextValue(doc, fields) {
 		});
 
 	var allValues = [], values;
-	for (var i = 0, n = fields.length; i < n; i++) {
+	for (let i = 0, n = fields.length; i < n; i++) {
 		values = ZU.xpath(doc,
 			'//div[@class="display_record_indexing_fieldname" and	normalize-space(text())="' + fields[i]
 			+ '"]/following-sibling::div[@class="display_record_indexing_data"][1]');
@@ -166,10 +171,10 @@ function detectWeb(doc, url) {
 	}
 
 	// there is not much information about the item type in the pdf/fulltext page
-	var citationTextWrapper = ZU.xpathText(doc, '//div[@class="citationTextWrapper"]');
-	if (citationTextWrapper) {
-		if (citationTextWrapper.includes('ProQuest Dissertations Publishing')) {
-			return "thesis";
+	let titleRow = text(doc, '.open-access');
+	if (titleRow && !text(doc, '.ol-login-link')) {
+		if (getItemType([titleRow])) {
+			return getItemType([titleRow]);
 		}
 		// Fall back on journalArticle - even if we couldn't guess the type
 		return "journalArticle";
@@ -285,7 +290,7 @@ function scrape(doc, url, type) {
 				}
 				break;
 			case 'Publication title':
-				item.publicationTitle = value;
+				item.publicationTitle = value.replace(/;.+/, "");
 				break;
 			case 'Volume':
 				item.volume = value;
@@ -308,8 +313,7 @@ function scrape(doc, url, type) {
 			case 'Copyright':
 				item.rights = value;
 				break;
-				// case 'Language of publication':
-				// if (item.language) break;
+			case 'Language of publication':
 			case 'Language':
 				item.language = value;
 				break;
@@ -388,7 +392,7 @@ function scrape(doc, url, type) {
 	else if (place.publicationPlace) {
 		item.place = place.publicationPlace;
 		if (place.publicationCountry) {
-			item.place = item.place + ', ' + place.publicationCountry;
+			item.place = item.place + ', ' + place.publicationCountry.replace(/,.+/, "");
 		}
 	}
 
@@ -1227,7 +1231,7 @@ var fieldNames = {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
+		"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1245,28 +1249,40 @@ var testCases = [
 				"libraryCatalog": "ProQuest",
 				"numPages": "233",
 				"place": "United States -- Ohio",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"rights": "Database copyright ProQuest LLC; ProQuest does not claim copyright in the individual underlying works.",
 				"shortTitle": "Beyond Stanislavsky",
 				"thesisType": "Ph.D.",
 				"university": "The Ohio State University",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
+				"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/132B8A749B71E82DBA1/1",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
+					{
+						"tag": "Communication and the arts"
+					},
+					{
+						"tag": "Konstantin"
+					},
+					{
+						"tag": "Konstantin Stanislavsky"
+					},
+					{
+						"tag": "Modernism"
+					},
+					{
+						"tag": "Russian"
+					},
+					{
+						"tag": "Stanislavsky"
+					},
+					{
+						"tag": "Theater"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1275,7 +1291,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/docview/213445241",
+		"url": "https://search.proquest.com/docview/213445241",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1300,30 +1316,37 @@ var testCases = [
 				"date": "May 1995",
 				"ISSN": "00084697",
 				"abstractNote": "In his \"Introduction\" to the book entitled Peacemaking: Moral and Policy Challenges for a New World, Rev. Drew Christiansen points out that the Roman Catholic bishops of the United States have made a clear distinction between the social teachings of the Church--comprising universally binding moral and ethical principles--and the particular positions they have taken on public policy issues--such as those relating to war, peace, justice, human rights and other socio-political matters. While the former are not to be mitigated under any circumstances, the latter, being particular applications, observations and recommendations, can allow for plurality of opinion and diversity of focus in the case of specific social, political and opinion and diversity of focus in the case of specific social, political and moral issues.(f.1) Peacemaking aligns itself with this second category. The objectives of this review essay are the following: to summarize the main topics and themes, of some of the recently-published documents on Catholic political thought, relating to peacemaking and peacekeeping; and to provide a brief critique of their main contents, recommendations and suggestions.\nThe Directions of Peacemaking: As in the earlier documents, so too are the virtues of faith, hope, courage, compassion, humility, kindness, patience, perseverance, civility and charity emphasized, in The Harvest of Justice, as definite aids in peacemaking and peacekeeping. The visions of global common good, social and economic development consistent with securing and nurturing conditions for justice and peace, solidarity among people, as well as cooperation among the industrial rich and the poor developing nations are also emphasized as positive enforcements in the peacemaking and peacekeeping processes. All of these are laudable commitments, so long as they are pursued through completely pacifist perspectives. The Harvest of Justice also emphasizes that, \"as far as possible, justice should be sought through nonviolent means;\" however, \"when sustained attempt at nonviolent action fails, then legitimate political authorities are permitted as a last resort to employ limited force to rescue the innocent and establish justice.\"(f.13) The document also frankly admits that \"the vision of Christian nonviolence is not passive.\"(f.14) Such a position may disturb many pacifists. Even though some restrictive conditions--such as a \"just cause,\" \"comparative justice,\" legitimate authority\" to pursue justice issues, \"right intentions,\" probability of success, proportionality of gains and losses in pursuing justice, and the use of force as last resort--are indicated and specified in the document, the use of violence and devastation are sanctioned, nevertheless, by its reaffirmation of the use of force in setting issues and by its support of the validity of the \"just war\" tradition.\nThe first section, entitled \"Theology, Morality, and Foreign Policy in A New World,\" contains four essays. These deal with the new challenges of peace, the illusion of control, creating peace conditions through a theological framework, as well as moral reasoning and foreign policy after the containment. The second, comprising six essays, is entitled \"Human Rights, Self-Determination, and Sustainable Development.\" These essays deal with effective human rights agenda, religious nationalism and human rights, identity, sovereignty, and self-determination, peace and the moral imperatives of democracy, and political economy of peace. The two essays which comprise the third section, entitled \"Global Institutions,\" relate the strengthening of the global institutions and action for the future. The fourth, entitled \"The Use of Force After the Cold War,\" is both interesting and controversial. Its six essays discuss ethical dilemmas in the use of force, development of the just-war tradition, in a multicultural world, casuistry, pacifism, and the just-war tradition, possibilities and limits of humanitarian intervention, and the challenge of peace and stability in a new international order. The last section, devoted to \"Education and Action for Peace,\" contains three essays, which examine the education for peacemaking, the challenge of conscience and the pastoral response to ongoing challenge of peace.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "2",
 				"language": "English",
 				"libraryCatalog": "ProQuest",
-				"numPages": "0",
 				"pages": "90-100",
-				"place": "Winnipeg, Canada",
 				"publicationTitle": "Peace Research",
-				"publisher": "Menno Simons College",
 				"rights": "Copyright Peace Research May 1995",
 				"shortTitle": "Peacemaking",
-				"url": "http://search.proquest.com/docview/213445241",
+				"url": "https://search.proquest.com/docview/213445241/abstract/6A8F72AFAA5E4C45PQ/1",
 				"volume": "27",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Full Text Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Book reviews",
-					"Peace",
-					"Political Science--International Relations",
-					"Sciences: Comprehensive Works",
-					"Sociology"
+					{
+						"tag": "Book reviews"
+					},
+					{
+						"tag": "Peace"
+					},
+					{
+						"tag": "Political Science--International Relations"
+					},
+					{
+						"tag": "Sciences: Comprehensive Works"
+					},
+					{
+						"tag": "Sociology"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1332,7 +1355,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
+		"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1349,27 +1372,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Aug 22, 1984",
+				"date": "1984",
 				"ISSN": "03624331",
 				"abstractNote": "For some months now, a gradual thaw has been in the making between East Germany and West Germany. So far, the United States has paid scant attention -- an attitude very much in keeping with our neglect of East Germany throughout the postwar period. We should reconsider this policy before things much further -- and should in particular begin to look more closely at what is going on in East Germany.",
-				"language": "English",
 				"libraryCatalog": "ProQuest",
 				"pages": "A23",
 				"place": "New York, N.Y., United States",
-				"publicationTitle": "New York Times (1923-Current file)",
+				"publicationTitle": "New York Times",
 				"rights": "Copyright New York Times Company Aug 22, 1984",
-				"url": "http://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11?accountid=12861",
+				"url": "https://search.proquest.com/hnpnewyorktimes/docview/122485317/abstract/1357D8A4FC136DF28E3/11",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"General Interest Periodicals--United States"
+					{
+						"tag": "General Interest Periodicals--United States"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1378,7 +1400,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/docview/129023293/abstract?accountid=12861",
+		"url": "https://search.proquest.com/docview/129023293/abstract",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
@@ -1393,18 +1415,18 @@ var testCases = [
 				"publicationTitle": "Wall Street Journal (1889-1922)",
 				"rights": "Copyright Dow Jones & Company Inc Dec 5, 1905",
 				"shortTitle": "THE PRESIDENT AND ALDRICH.",
-				"url": "http://search.proquest.com/docview/129023293/abstract?",
+				"url": "https://search.proquest.com/docview/129023293/abstract",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"Business And Economics--Banking And Finance"
+					{
+						"tag": "Business And Economics--Banking And Finance"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1413,7 +1435,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/dissertations/pagepdf/251755786/fulltextPDF",
+		"url": "https://search.proquest.com/dissertations/pagepdf/251755786/fulltextPDF",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1431,28 +1453,40 @@ var testCases = [
 				"libraryCatalog": "ProQuest",
 				"numPages": "233",
 				"place": "United States -- Ohio",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"rights": "Database copyright ProQuest LLC; ProQuest does not claim copyright in the individual underlying works.",
 				"shortTitle": "Beyond Stanislavsky",
 				"thesisType": "Ph.D.",
 				"university": "The Ohio State University",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?",
+				"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/90033A720D9A4A68PQ/1",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
+					{
+						"tag": "Communication and the arts"
+					},
+					{
+						"tag": "Konstantin"
+					},
+					{
+						"tag": "Konstantin Stanislavsky"
+					},
+					{
+						"tag": "Modernism"
+					},
+					{
+						"tag": "Russian"
+					},
+					{
+						"tag": "Stanislavsky"
+					},
+					{
+						"tag": "Theater"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1461,7 +1495,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/dissertations/docview/251755786/previewPDF",
+		"url": "https://search.proquest.com/dissertations/docview/251755786/previewPDF",
 		"items": [
 			{
 				"itemType": "thesis",
@@ -1479,28 +1513,40 @@ var testCases = [
 				"libraryCatalog": "ProQuest",
 				"numPages": "233",
 				"place": "United States -- Ohio",
-				"rights": "Copyright UMI - Dissertations Publishing 2001",
+				"rights": "Database copyright ProQuest LLC; ProQuest does not claim copyright in the individual underlying works.",
 				"shortTitle": "Beyond Stanislavsky",
 				"thesisType": "Ph.D.",
 				"university": "The Ohio State University",
-				"url": "http://search.proquest.com/dissertations/docview/251755786/abstract?",
+				"url": "https://search.proquest.com/dissertations/docview/251755786/abstract/F77D491D84F4909PQ/1",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"Communication and the arts",
-					"Konstantin",
-					"Konstantin Stanislavsky",
-					"Modernism",
-					"Russian",
-					"Stanislavsky",
-					"Theater"
+					{
+						"tag": "Communication and the arts"
+					},
+					{
+						"tag": "Konstantin"
+					},
+					{
+						"tag": "Konstantin Stanislavsky"
+					},
+					{
+						"tag": "Modernism"
+					},
+					{
+						"tag": "Russian"
+					},
+					{
+						"tag": "Stanislavsky"
+					},
+					{
+						"tag": "Theater"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1509,7 +1555,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
+		"url": "https://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1545,40 +1591,66 @@ var testCases = [
 				"DOI": "http://dx.doi.org/10.1007/s00227-010-1420-x",
 				"ISSN": "0025-3162",
 				"abstractNote": "The finless porpoise (Neophocaena phocaenoides) inhabits a wide range of tropical and temperate waters of the Indo-Pacific region. Genetic structure of finless porpoises in Chinese waters in three regions (Yangtze River, Yellow Sea, and South China Sea) was analyzed, including the Yangtze finless porpoise which is widely known because of its highly endangered status and unusual adaptation to freshwater. To assist in conservation and management of this species, ten microsatellite loci were used to genotype 125 individuals from the three regions. Contrary to the low genetic diversity revealed in previous mtDNA control region sequence analyses, relatively high levels of genetic variation in microsatellite profiles (HE= 0.732-0.795) were found. Bayesian clustering analysis suggested that finless porpoises in Chinese waters could be described as three distinct genetic groups, which corresponded well to population \"units\" (populations, subspecies, or species) delimited in earlier studies, based on morphological variation, distribution, and genetic analyses. Genetic differentiation between regions was significant, with FST values ranging from 0.07 to 0.137. Immigration rates estimated using a Bayesian method and population ancestry analyses suggested no or very limited gene flow among regional types, even in the area of overlap between types. These results strongly support the classification of porpoises in these regions into distinct evolutionarily significant units, including at least two separate species, and therefore they should be treated as different management units in the design and implementation of conservation programmes. © 2010 Springer-Verlag.",
-				"accessDate": "CURRENT_TIMESTAMP",
 				"issue": "7",
 				"language": "English",
 				"libraryCatalog": "ProQuest",
-				"numPages": "10",
 				"pages": "1453-1462",
 				"publicationTitle": "Marine Biology",
-				"url": "http://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1?accountid=14541",
+				"url": "https://search.proquest.com/docview/925553601/137CCF69B9E7916BDCF/1",
 				"volume": "157",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"84.5.22",
-					"84.5.34",
-					"92.7.2",
-					"CABSCLASS",
-					"CABSCLASS",
-					"CABSCLASS",
-					"DEVELOPMENT",
-					"EUKARYOTIC GENETICS",
-					"EUKARYOTIC GENETICS",
-					"Ecological and Population Genetics",
-					"GENETICS AND MOLECULAR BIOLOGY",
-					"GENETICS AND MOLECULAR BIOLOGY",
-					"Growth Regulators",
-					"Mammalian Genetics",
-					"PLANT SCIENCE"
+					{
+						"tag": "84.5.22"
+					},
+					{
+						"tag": "84.5.34"
+					},
+					{
+						"tag": "92.7.2"
+					},
+					{
+						"tag": "CABSCLASS"
+					},
+					{
+						"tag": "CABSCLASS"
+					},
+					{
+						"tag": "CABSCLASS"
+					},
+					{
+						"tag": "DEVELOPMENT"
+					},
+					{
+						"tag": "EUKARYOTIC GENETICS"
+					},
+					{
+						"tag": "EUKARYOTIC GENETICS"
+					},
+					{
+						"tag": "Ecological and Population Genetics"
+					},
+					{
+						"tag": "GENETICS AND MOLECULAR BIOLOGY"
+					},
+					{
+						"tag": "GENETICS AND MOLECULAR BIOLOGY"
+					},
+					{
+						"tag": "Growth Regulators"
+					},
+					{
+						"tag": "Mammalian Genetics"
+					},
+					{
+						"tag": "PLANT SCIENCE"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1587,7 +1659,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://search.proquest.com/docview/1297954386/citation?accountid=12861",
+		"url": "https://search.proquest.com/docview/1297954386/citation",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1607,22 +1679,37 @@ var testCases = [
 				"pages": "486–498",
 				"publicationTitle": "Human Rights Quarterly",
 				"shortTitle": "Women's Rights as Human Rights",
-				"url": "http://search.proquest.com/docview/1297954386/citation",
+				"url": "https://search.proquest.com/docview/1297954386/citation",
 				"volume": "12",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"mimeType": "application/pdf",
+						"proxy": false
 					}
 				],
 				"tags": [
-					"Law",
-					"Law--Civil Law",
-					"Political Science",
-					"Political Science--Civil Rights",
-					"Social Sciences (General)",
-					"Social Sciences: Comprehensive Works",
-					"Sociology"
+					{
+						"tag": "Law"
+					},
+					{
+						"tag": "Law--Civil Law"
+					},
+					{
+						"tag": "Political Science"
+					},
+					{
+						"tag": "Political Science--Civil Rights"
+					},
+					{
+						"tag": "Social Sciences (General)"
+					},
+					{
+						"tag": "Social Sciences: Comprehensive Works"
+					},
+					{
+						"tag": "Sociology"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
