@@ -51,8 +51,8 @@ function getSearchResults(doc) {
 		links = doc.querySelectorAll(".c-Button--link, [target=_self]");
 	}
 	let text = usesTypography ?
-		   doc.querySelectorAll("span.c-Typography--title") :
-		   doc.querySelectorAll(".c-Button--link, [target=_self]");
+                   doc.querySelectorAll("span.c-Typography--title") :
+                   doc.querySelectorAll(".c-Button--link, [target=_self]");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
@@ -68,11 +68,11 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	if (!item.abstractNote) {
-	 item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
-	 if (item.abstractNote && item.abstractNote.length > 0)
-	    item.abstractNote = item.abstractNote[0].textContent.trim();
-	 else
-	    item.abstractNote = '';
+	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	  if (item.abstractNote && item.abstractNote.length > 0)
+	     item.abstractNote = item.abstractNote[0].textContent.trim();
+	  else
+	     item.abstractNote = '';
     }
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags)
