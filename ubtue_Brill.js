@@ -51,7 +51,7 @@ function getSearchResults(doc) {
 		links = doc.querySelectorAll(".c-Button--link[target=_self]");
 	}
 	let text = usesTypography ?
-		    doc.querySelectorAll(".c-Typography--title > p") :
+		    doc.querySelectorAll(".c-Typography--title > span) :
 		    doc.querySelectorAll(".c-Button--link[target=_self]");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
