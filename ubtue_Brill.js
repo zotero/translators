@@ -48,11 +48,11 @@ function getSearchResults(doc) {
 	let links = doc.querySelectorAll(".c-Typography--title");
 	let usesTypography = !!links.length;
 	if (!usesTypography) {
-		links = doc.querySelectorAll(".c-Button--link[target=_self]");
+		links = doc.querySelectorAll(".c-Button--link, [target='_self']");
 	}
 	let text = usesTypography ?
 		    doc.querySelectorAll(".c-Typography--title > span") :
-		    doc.querySelectorAll(".c-Button--link[target=_self]");
+		    doc.querySelectorAll(".c-Button--link, [target='_self']");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
