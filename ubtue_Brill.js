@@ -46,14 +46,14 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	let items = {};
 	let found = false;
-	let links = ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]');
+	let links = doc.querySelectorAll(".c-Typography--title");
 	let usesTypography = !!links.length;
 	if (!usesTypography) {
-		links = ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+		links = doc.querySelectorAll(".c-Button--link[target=_self]");
 	}
 	let text = usesTypography ?
-	           ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]/span') :
-	           ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+		    doc.querySelectorAll(".c-Typography--title > p") :
+		    doc.querySelectorAll(".c-Button--link[target=_self]");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
@@ -69,9 +69,11 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	if (!item.abstractNote) {
-        item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
-        if (item.abstractNote && item.abstractNote.length > 0)
-            item.abstractNote = item.abstractNote[0].textContent.trim();
+	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	  if (item.abstractNote && item.abstractNote.length > 0)
+	     item.abstractNote = item.abstractNote[0].textContent.trim();
+	  else
+	     item.abstractNote = '';
     }
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags)
