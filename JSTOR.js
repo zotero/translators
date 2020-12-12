@@ -221,7 +221,6 @@ function processRIS(text, jid) {
 			for (i = 0; i < reviewedAuthors.length; i++) {
 				reviewedTitle = reviewedTitle.replace(", "+reviewedAuthors[i], "");
 			}
-			//reviewedTitle = reviewedTitle.replace(/[\s.,]+$/, "");
 			item.title = "Review of " + reviewedTitle;
 		}
 		
