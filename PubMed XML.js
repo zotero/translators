@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-10-11 03:18:11"
+	"lastUpdated": "2020-12-13 03:11:11"
 }
 
 /*
@@ -180,7 +180,15 @@ function doImport() {
 					var year = ZU.xpathText(pubDate, 'Year');
 
 					if (day) {
-						newItem.date = month + " " + day + ", " + year;
+						// month appears in two different formats:
+						// 1. numeric, e.g. "07", see 4th test
+						if (month && /\d+/.test(month)) {
+							newItem.date = ZU.strToISO(year + "-" + month + "-" + day);
+						}
+						// 2. English acronym, e.g. "Aug", see 3rd test
+						else {
+							newItem.date = ZU.strToISO(month + " " + day + ", " + year);
+						}
 					}
 					else if (month) {
 						newItem.date = month + " " + year;
@@ -601,11 +609,21 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Johne’s disease",
-					"control",
-					"evaluation",
-					"infected herd",
-					"testing strategies"
+					{
+						"tag": "Johne’s disease"
+					},
+					{
+						"tag": "control"
+					},
+					{
+						"tag": "evaluation"
+					},
+					{
+						"tag": "infected herd"
+					},
+					{
+						"tag": "testing strategies"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -630,7 +648,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Aug 1, 2015",
+				"date": "2015-08-01",
 				"DOI": "10.1111/rssc.12097",
 				"ISSN": "0035-9254",
 				"abstractNote": "Hierarchical group testing is widely used to test individuals for diseases. This testing procedure works by first amalgamating individual specimens into groups for testing. Groups testing negatively have their members declared negative. Groups testing positively are subsequently divided into smaller subgroups and are then retested to search for positive individuals. In our paper, we propose a new class of informative retesting procedures for hierarchical group testing that acknowledges heterogeneity among individuals. These procedures identify the optimal number of groups and their sizes at each testing stage in order to minimize the expected number of tests. We apply our proposals in two settings: 1) HIV testing programs that currently use three-stage hierarchical testing and 2) chlamydia and gonorrhea screening practices that currently use individual testing. For both applications, we show that substantial savings can be realized by our new procedures.",
@@ -649,12 +667,24 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Classification",
-					"HIV",
-					"Infertility Prevention Project",
-					"Informative retesting",
-					"Pooled testing",
-					"Retesting"
+					{
+						"tag": "Classification"
+					},
+					{
+						"tag": "HIV"
+					},
+					{
+						"tag": "Infertility Prevention Project"
+					},
+					{
+						"tag": "Informative retesting"
+					},
+					{
+						"tag": "Pooled testing"
+					},
+					{
+						"tag": "Retesting"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
