@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-14 22:38:19"
+	"lastUpdated": "2020-12-14 22:24:58"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2016 Sebastian Karcher
-
+	Modified 2020 Timotheus Kim
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -85,9 +85,10 @@ function doWeb(doc, url) {
 	}
 }
 
+
 function scrape(doc, url) {
-	let citationURL = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "view_citation", " " ))]//a');
-	let post = 'https://muse.jhu.edu' + citationURL[0].pathname + citationURL[0].search;
+	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]/a/@href');
+	let post = 'https://muse.jhu.edu' + citationURL;
 	if (citationURL && citationURL[0]) {
 	ZU.processDocuments(post, function (text) {
 		let risEntry = ZU.xpathText(text, '//*[(@id = "tabs-4")]//p');
@@ -110,20 +111,13 @@ function scrape(doc, url) {
 			if (tags) {
 				item.tags = tags.split(",");
 			}
-			if (url.includes("/article/")) {
-			var pdfurl = url.replace(/(\/article\/\d+).*/, "$1") + "/pdf";
-			item.attachments = [{
-				url: pdfurl,
-				title: "Full Text PDF",
-				mimeType: "application/pdf"
-				}];
-			}
-			item.libraryCatalog = "Project MUSE";
+			item.notes = [];
 			item.complete();
 			});
 			translator.translate();
 		});
-	}/** BEGIN TEST CASES **/
+	}
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -149,11 +143,7 @@ var testCases = [
 				"volume": "191",
 				"attachments": [],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>Number 191, May 2006</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -219,11 +209,7 @@ var testCases = [
 				"volume": "54",
 				"attachments": [],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>Volume 54, Number 4, October 2013</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -254,11 +240,7 @@ var testCases = [
 				"volume": "49",
 				"attachments": [],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>Volume 49, Number 2, 2014</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -327,11 +309,7 @@ var testCases = [
 						"tag": "Nostra Aetate"
 					}
 				],
-				"notes": [
-					{
-						"note": "<p>Volume 38, Number 3, Summer 2020</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
