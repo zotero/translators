@@ -9,14 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-14 22:24:58"
+	"lastUpdated": "2020-12-14 22:29:59"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2016 Sebastian Karcher
-	Modified 2020 Timotheus Kim
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
