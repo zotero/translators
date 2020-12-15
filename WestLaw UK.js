@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 16:39:11"
+	"lastUpdated": "2020-12-15 16:43:47"
 }
 
 /*
@@ -59,6 +59,9 @@ function doWeb(doc, url) {
 	else if (detectWeb(doc, url) == "statuteSection") {
 		scrapeStatuteSection(doc, url);
 	}
+	else {
+		return false
+	}
 }
 
 
@@ -72,10 +75,11 @@ function scrapeCase(doc, url) {
 		// TODO adjust if needed:
 		var citation = /Reported\n(.+)\n/.exec(doc.getElementsByClassName("co_docContentMetaField")[3].innerText)[1];
 		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1];
-		item.reporter= /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[3];
+		item.reporter = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[3];
 		item.reporterVolume = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[2];
 		item.firstPage = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[4];
 		item.dateDecided = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[1];
+		item.abstractNote = ""
 		item.complete();
 	});
 
