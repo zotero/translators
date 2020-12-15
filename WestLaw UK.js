@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 16:17:13"
+	"lastUpdated": "2020-12-15 16:39:11"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	// TODO: adjust the logic here
 	if (doc.getElementsByClassName("kh_toc-list ukResearch_toc-list")[0].innerText.includes("Case")) {
 		return "case";
@@ -45,16 +45,16 @@ function detectWeb(doc, url) {
 		return "statute";
 	}
 	else if (doc.title.includes("s.")) {
-		return "statuteSection"
+		return "statuteSection";
 	}
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "case") {
-		scrapeCase(doc,url);
+		scrapeCase(doc, url);
 	}
 	else if (detectWeb(doc, url) == "statute") {
-		scrapeStatute(doc,url);
+		scrapeStatute(doc, url);
 	}
 	else if (detectWeb(doc, url) == "statuteSection") {
 		scrapeStatuteSection(doc, url);
@@ -71,10 +71,10 @@ function scrapeCase(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		var citation = /Reported\n(.+)\n/.exec(doc.getElementsByClassName("co_docContentMetaField")[3].innerText)[1];
-		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1]
-		item.reporter= /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[3]
-		item.reporterVolume = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[2]
-		item.firstPage = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[4]
+		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1];
+		item.reporter= /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[3];
+		item.reporterVolume = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[2];
+		item.firstPage = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[4];
 		item.dateDecided = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[1];
 		item.complete();
 	});
@@ -96,8 +96,8 @@ function scrapeStatute(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		var fullTitle = doc.getElementById("co_documentTitle").innerText;
-		item.date= /(\D+) (\d+)/.exec(fullTitle)[2];
-		item.title= /(\D+) (\d+)/.exec(fullTitle)[1];
+		item.date = /(\D+) (\d+)/.exec(fullTitle)[2];
+		item.title = /(\D+) (\d+)/.exec(fullTitle)[1];
 		item.abstractNote = "";
 		item.complete();
 	});
@@ -119,8 +119,8 @@ function scrapeStatuteSection(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		var fullTitle = /([^\n]+)/.exec(doc.getElementsByClassName("co_title noTOC")[0].innerText)[0];
-		item.date= /(\D+) (\d+)/.exec(fullTitle)[2];
-		item.title= /(\D+) (\d+)/.exec(fullTitle)[1];
+		item.date = /(\D+) (\d+)/.exec(fullTitle)[2];
+		item.title = /(\D+) (\d+)/.exec(fullTitle)[1];
 		item.abstractNote = "";
 		item.complete();
 	});
