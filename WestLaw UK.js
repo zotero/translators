@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 16:47:42"
+	"lastUpdated": "2020-12-15 16:54:40"
 }
 
 /*
@@ -65,6 +65,7 @@ function doWeb(doc, url) {
 	else {
 		return false;
 	}
+	return;
 }
 
 
