@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-14 22:29:59"
+	"lastUpdated": "2020-12-15 03:03:06"
 }
 
 /*
@@ -80,21 +80,20 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		scrape(doc);
 	}
 }
 
 
-function scrape(doc, url) {
-	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]/a/@href');
-	let post = 'https://muse.jhu.edu' + citationURL;
-	if (citationURL && citationURL[0]) {
-	ZU.processDocuments(post, function (text) {
+function scrape(doc) {
+	let citationURL = ZU.xpathText(doc, '//li[@class="view_citation"]//a/@href');
+	ZU.processDocuments(citationURL, function (text) {
 		let risEntry = ZU.xpathText(text, '//*[(@id = "tabs-4")]//p');
 		let doiEntry = ZU.xpathText(text, '//*[(@id = "tabs-1")]//p');
 		if (doiEntry.includes('doi:')) {
 			var doi = doiEntry.split('doi:')[1].replace(/.$/, '');
 		}
+		// RIS translator
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(risEntry);
@@ -105,17 +104,16 @@ function scrape(doc, url) {
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
 			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
 			if (abstract) {
-				item.abstractNote = abstract.replace(/^\s*Abstract/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
+				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
 			}
 			if (tags) {
 				item.tags = tags.split(",");
 			}
 			item.notes = [];
 			item.complete();
-			});
-			translator.translate();
 		});
-	}
+		translator.translate();
+	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
