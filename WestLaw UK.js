@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 16:58:26"
+	"lastUpdated": "2020-12-15 17:01:33"
 }
 
 /*
@@ -54,19 +54,16 @@ function detectWeb(doc) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "case") {
-		scrapeCase(doc, url);
-		return;
+		return scrapeCase(doc, url);
 	}
 	else if (detectWeb(doc, url) == "statute") {
-		scrapeStatute(doc, url);
-		return;
+		return scrapeStatute(doc, url);
 	}
 	else if (detectWeb(doc, url) == "statuteSection") {
-		scrapeStatuteSection(doc, url);
-		return;
+		return scrapeStatuteSection(doc, url);
 	}
 	else {
-		return;
+		return false;
 	}
 }
 
