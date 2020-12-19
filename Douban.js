@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-20 13:18:10"
+	"lastUpdated": "2020-12-19 13:18:10"
 }
 
 /*
@@ -378,9 +378,20 @@ function scrape(doc, url) {
 	let abstractNote;
 	switch (itemType) {
 		case "book":
-			abstractNote = text(doc, 'div.indent span[class*="all"] div.intro');
-			if (!abstractNote) {
-				abstractNote = text(doc, 'div.indent div.intro');
+			var h2s = doc.querySelectorAll('div.related_info h2');
+			for (var i = 0; i < h2s.length; i++) {
+				let h2 = h2s[i];
+				let span = h2.querySelector('span');
+				if (span && span.textContent === '内容简介') {
+					var intro = h2.nextElementSibling.querySelector('.all div.intro');
+					if (!intro) {
+						intro = h2.nextElementSibling.querySelector('div.intro');
+					}
+					if (intro) {
+						abstractNote = intro.textContent;
+					}
+					break;
+				}
 			}
 
 			var doubanDir = Z.getHiddenPref('douban');
