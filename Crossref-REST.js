@@ -194,8 +194,8 @@ function processCrossref(json) {
 		}
 		
 		// edited-book, standard-series - ignore, because Crossref has zero results for this type
-		// component, journal, journal-issue, journal-volume, other, proceedings - ignore,
-		// because Zotero doesn't have equivalent item types.
+		// component, journal, journal-issue, journal-volume, other, proceedings,
+		// proceedings-series, peer-review - ignore, because Zotero doesn't have equivalent item types.
 		
 		item.abstractNote = result.abstract;
 		
