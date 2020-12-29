@@ -50,9 +50,9 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function doWeb(doc, url){
-	if (detectWeb(doc,url) === "multiple") {
-		 getMultipleItems(doc, url);
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) === "multiple") {
+		getMultipleItems(doc, url);
 	} else {
 		scrape(doc, url, detectWeb(doc, url));
 	}
@@ -69,7 +69,7 @@ function scrape(doc, url, type) {
 	newItem.place = 'Singapore';
 	newItem.language = 'en';
 	var authors = ZU.xpath(doc, '//meta[@property="article:author"]');
-	for (var i=0; i<authors.length; i++) {
+	for (var i = 0; i < authors.length; i++) {
 		insertCreator(authors[i].getAttribute('content'), newItem);
 	}
 	newItem.attachments = [{
@@ -79,7 +79,6 @@ function scrape(doc, url, type) {
 	if (doc.evaluate('//div[@class="paid-premium st-flag-1"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
 		newItem.extra = "(Subscription only)";
 	}
-	//Z.debug(newItem);
 	newItem.complete();
 }
 
@@ -89,7 +88,7 @@ function getMultipleItems(doc, url) {
 	if (url.includes('/search?') && url.includes('searchKey')) {
 		rows = ZU.xpath(doc, '//div[@class="queryly_item_row"]');
 		if (rows.length) {
-			for(var i = 0; i < rows.length; i++) {
+			for (var i = 0; i < rows.length; i++) {
 				var searchItem = rows[i];
 				var searchItemUrl = searchItem.querySelector('a') ? searchItem.querySelector('a').href : '';
 				items.push(searchItemUrl);
@@ -98,15 +97,16 @@ function getMultipleItems(doc, url) {
 	} else {
 		rows = ZU.xpath(doc, '//a[@class="block-link"]|//span[@class="story-headline"]/a');
 		if (rows.length) {
-			for(var k = 0; k < rows.length; k++) {
+			for var k = 0; k < rows.length; k++) {
 				var headlineItem = rows[k];
 				var headlineItemUrl = headlineItem.href ? headlineItem.href : '';
 				items.push(headlineItemUrl);
 			}
 		}
 	}
+	
 	if (!!items && items.length) {
-		items = items.filter(function(item) {
+		items = items.filter( function(item) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
@@ -173,7 +173,7 @@ function insertCreator(authorName, newItem) {
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
 		'Zhao Jiayi': { first: 'Jiayi', last: 'Zhao' }
 	}
-	if (!!authorList[authorName]) {
+	if (authorList[authorName]) {
 		newItem.creators.push({
 			lastName: authorList[authorName].last,
 			firstName: authorList[authorName].first,
