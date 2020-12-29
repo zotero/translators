@@ -97,14 +97,13 @@ function getMultipleItems(doc, url) {
 	} else {
 		rows = ZU.xpath(doc, '//a[@class="block-link"]|//span[@class="story-headline"]/a');
 		if (rows.length) {
-			for var k = 0; k < rows.length; k++) {
+			for (var k = 0; k < rows.length; k++) {
 				var headlineItem = rows[k];
 				var headlineItemUrl = headlineItem.href ? headlineItem.href : '';
 				items.push(headlineItemUrl);
 			}
 		}
 	}
-	
 	if (!!items && items.length) {
 		items = items.filter( function(item) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
