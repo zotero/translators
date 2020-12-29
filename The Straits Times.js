@@ -12,6 +12,29 @@
 	"lastUpdated": "2020-12-29 09:10:26"
 }
 
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2020 Robert Sim
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectWeb(doc, url) {
 	if (url.match(/(advertise-with-the-straits-times|newsletter-signup)/)) {
 		return 'webpage';
@@ -84,7 +107,7 @@ function getMultipleItems(doc, url) {
 	}
 	if (!!items && items.length) {
 		items = items.filter(function(item) {
-			return (!!item.match(/^https\:\/\/www\.straitstimes.com/));
+			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
 			ZU.processDocuments(items, scrape);
@@ -96,59 +119,59 @@ function insertCreator(authorName, newItem) {
 	// to account for mostly Chinese names in formats of: <last> <first>, <first (typically English)> <last> <first (typically Chinese)>
 	// list derived from searching in Google with the follow search pattern: authors site:straitstimes.com/authors
 	var authorList = {
-		'Alison de Souza': {'first': 'Alison', 'last': 'de Souza'},
-		'Aw Cheng Wei': {'first': 'Cheng Wei', 'last': 'Aw'},
-		'Benjamin Kang Lim': {'first': 'Kang', 'last': 'Benjamin, Lim'},
-		'Chang May Choon': {'first': 'May Choon', 'last': 'Chang'},
-		'Chong Jun Liang': {'first': 'Jun Liang', 'last': 'Chong'},
-		'Choo Yun Ting': {'first': 'Yun Ting', 'last': 'Choo'},
-		'Feng Zengkun': {'first': 'Zengkun', 'last': 'Feng'},
-		'Goh Yan Han': {'first': 'Yan Han', 'last': 'Goh'},
-		'Ho Ai Li': {'first': 'Ai Li', 'last': 'Ho'},
-		'Joy Pang Minle': {'first': 'Pang', 'last': 'Joy, Minle'},
-		'Khoe Wei Jun': {'first': 'Wei Jun', 'last': 'Khoe'},
-		'Kua Chee Siong': {'first': 'Chee Siong', 'last': 'Kua'},
-		'Lai Shueh Yuan': {'first': 'Shueh Yuan', 'last': 'Lai'},
-		'Lee Chee Chew': {'first': 'Chee Chew', 'last': 'Lee'},
-		'Lee Choo Kiong': {'first': 'Choo Kiong', 'last': 'Lee'},
-		'Lee Jian Xuan': {'first': 'Jian Xuan', 'last': 'Lee'},
-		'Lee Min Kok': {'first': 'Min Kok', 'last': 'Lee'},
-		'Lee Qing Ping': {'first': 'Qing Ping', 'last': 'Lee'},
-		'Lee Seok Hwai': {'first': 'Seok Hwai', 'last': 'Lee'},
-		'Lee Siew Hua': {'first': 'Siew Hua', 'last': 'Lee'},
-		'Li Xueying': {'first': 'Xueying', 'last': 'Li'},
-		'Lian Szu Jin': {'first': 'Szu Jin', 'last': 'Lian'},
-		'Liew Ai Xin': {'first': 'Ai Xin', 'last': 'Liew'},
-		'Lim Min Zhang': {'first': 'Min Zhang', 'last': 'Lim'},
-		'Lim Rei Enn': {'first': 'Rei Enn', 'last': 'Lim'},
-		'Lim Ruey Yan': {'first': 'Ruey Yan', 'last': 'Lim'},
-		'Lim Yaohui': {'first': 'Yaohui', 'last': 'Lim'},
-		'Lin Yangchen': {'first': 'Yanchen', 'last': 'Lin'},
-		'Loh Guo Pei': {'first': 'Guo Pei', 'last': 'Loh'},
-		'Low Lin Fhoong': {'first': 'Lin Fhoong', 'last': 'Low'},
-		'Mok Qiu Lin': {'first': 'Qiu Lin', 'last': 'Mok'},
-		'Ng Huiwen': {'first': 'Huiwen', 'last': 'Ng'},
-		'Ong Sor Fern': {'first': 'Sor Fern', 'last': 'Ong'},
-		'Quah Ting Wen': {'first': 'Ting Wen', 'last': 'Quah'},
-		'Raynold Toh YK': {'first': 'Toh', 'last': 'Raynold, YK'},
-		'Rebecca Tan Hui Qing': {'first': 'Tan', 'last': 'Rebecca, Hui Qing'},
-		'Seow Bei Yi': {'first': 'Bei Yi', 'last': 'Seow'},
-		'Tan Dawn Wei': {'first': 'Dawn Wei', 'last': 'Tan'},
-		'Tan Fong Han': {'first': 'Fong Han', 'last': 'Tan'},
-		'Tan Hsueh Yun': {'first': 'Hsueh Yun', 'last': 'Tan'},
-		'Tan Hui Yee': {'first': 'Hui Yee', 'last': 'Tan'},
-		'Tan Jia Ning': {'first': 'Jia Ning', 'last': 'Tan'},
-		'Tan Tam Mei': {'first': 'Tam Mei', 'last': 'Tan'},
-		'Tan Weizhen': {'first': 'Weizhen', 'last': 'Tan'},
-		'Tang Fan Xi': {'first': 'Fan Xi', 'last': 'Tang'},
-		'Tay Hong Yi': {'first': 'Hong Yi', 'last': 'Tay'},
-		'Tee Zhuo': {'first': 'Zhuo', 'last': 'Tee'},
-		'Teo Cheng Wee': {'first': 'Cheng Wee', 'last': 'Teo'},
-		'Tham Yuen-C': {'first': 'Yuen-C', 'last': 'Tham'},
-		'Thong Yong Jun': {'first': 'Yong Jun', 'last': 'Thong'},
-		'Toh Wen Li': {'first': 'Wen Li', 'last': 'Toh'},
-		'Wong Kim Hoh': {'first': 'Kim Hoh', 'last': 'Wong'},
-		'Zhao Jiayi': {'first': 'Jiayi', 'last': 'Zhao'}
+		'Alison de Souza': { first: 'Alison', last: 'de Souza' },
+		'Aw Cheng Wei': { first: 'Cheng Wei', last: 'Aw' },
+		'Benjamin Kang Lim': { first: 'Kang', last: 'Benjamin, Lim' },
+		'Chang May Choon': { first: 'May Choon', last: 'Chang' },
+		'Chong Jun Liang': { first: 'Jun Liang', last: 'Chong' },
+		'Choo Yun Ting': { first: 'Yun Ting', last: 'Choo' },
+		'Feng Zengkun': { first: 'Zengkun', last: 'Feng' },
+		'Goh Yan Han': { first: 'Yan Han', last: 'Goh' },
+		'Ho Ai Li': { first: 'Ai Li', last: 'Ho' },
+		'Joy Pang Minle': { first: 'Pang', last: 'Joy, Minle' },
+		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
+		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
+		'Lai Shueh Yuan': { first: 'Shueh Yuan', last: 'Lai' },
+		'Lee Chee Chew': { first: 'Chee Chew', last: 'Lee' },
+		'Lee Choo Kiong': { first: 'Choo Kiong', last: 'Lee' },
+		'Lee Jian Xuan': { first: 'Jian Xuan', last: 'Lee' },
+		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
+		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
+		'Lee Seok Hwai': { first: 'Seok Hwai', last: 'Lee' },
+		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
+		'Li Xueying': { first: 'Xueying', last: 'Li' },
+		'Lian Szu Jin': { first: 'Szu Jin', last: 'Lian' },
+		'Liew Ai Xin': { first: 'Ai Xin', last: 'Liew' },
+		'Lim Min Zhang': { first: 'Min Zhang', last: 'Lim' },
+		'Lim Rei Enn': { first: 'Rei Enn', last: 'Lim' },
+		'Lim Ruey Yan': { first: 'Ruey Yan', last: 'Lim' },
+		'Lim Yaohui': { first: 'Yaohui', last: 'Lim' },
+		'Lin Yangchen': { first: 'Yanchen', last: 'Lin' },
+		'Loh Guo Pei': { first: 'Guo Pei', last: 'Loh' },
+		'Low Lin Fhoong': { first: 'Lin Fhoong', last: 'Low' },
+		'Mok Qiu Lin': { first: 'Qiu Lin', last: 'Mok' },
+		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
+		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
+		'Quah Ting Wen': { first: 'Ting Wen', last: 'Quah' },
+		'Raynold Toh YK': { first: 'Toh', last: 'Raynold, YK' },
+		'Rebecca Tan Hui Qing': { first: 'Tan', last: 'Rebecca, Hui Qing' },
+		'Seow Bei Yi': { first: 'Bei Yi', last: 'Seow' },
+		'Tan Dawn Wei': { first: 'Dawn Wei', last: 'Tan' },
+		'Tan Fong Han': { first: 'Fong Han', last: 'Tan' },
+		'Tan Hsueh Yun': { first: 'Hsueh Yun', last: 'Tan' },
+		'Tan Hui Yee': { first: 'Hui Yee', last: 'Tan' },
+		'Tan Jia Ning': { first: 'Jia Ning', last: 'Tan' },
+		'Tan Tam Mei': { first: 'Tam Mei', last: 'Tan' },
+		'Tan Weizhen': { first: 'Weizhen', last: 'Tan' },
+		'Tang Fan Xi': { first: 'Fan Xi', last: 'Tang' },
+		'Tay Hong Yi': { first: 'Hong Yi', last: 'Tay' },
+		'Tee Zhuo': { first: 'Zhuo', last: 'Tee' },
+		'Teo Cheng Wee': { first: 'Cheng Wee', last: 'Teo' },
+		'Tham Yuen-C': { first: 'Yuen-C', last: 'Tham' },
+		'Thong Yong Jun': { first: 'Yong Jun', last: 'Thong' },
+		'Toh Wen Li': { first: 'Wen Li', last: 'Toh' },
+		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
+		'Zhao Jiayi': { first: 'Jiayi', last: 'Zhao' }
 	}
 	if (!!authorList[authorName]) {
 		newItem.creators.push({
@@ -159,7 +182,9 @@ function insertCreator(authorName, newItem) {
 	} else {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
