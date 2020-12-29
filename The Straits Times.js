@@ -105,7 +105,7 @@ function getMultipleItems(doc, url) {
 		}
 	}
 	if (!!items && items.length) {
-		items = items.filter( function(item) {
+		items = items.filter(function(item) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
@@ -171,7 +171,7 @@ function insertCreator(authorName, newItem) {
 		'Toh Wen Li': { first: 'Wen Li', last: 'Toh' },
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
 		'Zhao Jiayi': { first: 'Jiayi', last: 'Zhao' }
-	}
+	};
 	if (authorList[authorName]) {
 		newItem.creators.push({
 			lastName: authorList[authorName].last,
