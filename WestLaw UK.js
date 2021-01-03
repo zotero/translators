@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 17:01:33"
+	"lastUpdated": "2021-01-03 13:31:10"
 }
 
 /*
@@ -76,14 +76,18 @@ function scrapeCase(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
-		var citation = /Reported\n(.+)\n/.exec(doc.getElementsByClassName("co_docContentMetaField")[3].innerText)[1];
+		
+		var citationArray = parseCitationList(doc.getElementsByClassName("co_docContentMetaField")[3].innerText);
+		
+		item.reporter = citationArray[3];
+		item.reporterVolume = citationArray[2];
+		item.firstPage = citationArray[4];
+		item.dateDecided = citationArray[1];
 		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1];
-		item.reporter = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[3];
-		item.reporterVolume = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[2];
-		item.firstPage = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[4];
-		item.dateDecided = /\[?\(?(\d+)\]?\)? (\d+ )?(.+) (\d+)/.exec(citation)[1];
 		item.abstractNote = "";
 		item.complete();
+		
+		
 	});
 
 	translator.getTranslatorObject(function (trans) {
@@ -138,4 +142,22 @@ function scrapeStatuteSection(doc, url) {
 
 		trans.doWeb(doc, url);
 	});
+}
+
+
+function parseCitationList(citList){
+	var allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d?) ?([\w\. ]+) (\w\d+)$/gm); //annoyingly matchAll is not supported
+	if (allCitations.length === 1){ //if there is only one citation we'll have to use it
+		var onlyCitationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) (\w\d*)$/gm.exec(allCitations[0]);
+		return onlyCitationAsArray;
+	} else { //if there's more than one we will find the first one that isn't WLUK
+		for (var citation of allCitations) {
+			var citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) (\w\d*)$/gm.exec(citation);
+			if (citationAsArray[3] === "WLUK"){
+				continue;
+			} else {
+				return citationAsArray;
+			}
+		}
+	}
 }
