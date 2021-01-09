@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-02 11:04:02"
+	"lastUpdated": "2021-01-09 18:02:12"
 }
 
 /*
@@ -148,7 +148,7 @@ function scrape(doc, url) {
 			let minute = matches[2];
 			let ampm = matches[3];
 			// If "PM", add 12 hours
-			if (ampm && ampm.toLowerCase() == 'pm') {
+			if (ampm && ampm.toLowerCase() == 'pm' && hour != "12") {
 				hour = parseInt(hour) + 12;
 			}
 			// Convert to UTC and add 'T' and 'Z'
