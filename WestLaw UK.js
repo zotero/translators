@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-03 13:31:10"
+	"lastUpdated": "2021-01-06 11:36:52"
 }
 
 /*
@@ -146,13 +146,13 @@ function scrapeStatuteSection(doc, url) {
 
 
 function parseCitationList(citList){
-	var allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d?) ?([\w\. ]+) (\w\d+)$/gm); //annoyingly matchAll is not supported
+	var allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm); //annoyingly matchAll is not supported
 	if (allCitations.length === 1){ //if there is only one citation we'll have to use it
-		var onlyCitationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) (\w\d*)$/gm.exec(allCitations[0]);
+		var onlyCitationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(allCitations[0]);
 		return onlyCitationAsArray;
 	} else { //if there's more than one we will find the first one that isn't WLUK
 		for (var citation of allCitations) {
-			var citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) (\w\d*)$/gm.exec(citation);
+			var citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(citation);
 			if (citationAsArray[3] === "WLUK"){
 				continue;
 			} else {
