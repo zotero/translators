@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-23 09:48:46"
+	"lastUpdated": "2021-01-07 07:57:56"
 }
 
 /*
@@ -139,6 +139,15 @@ function scrape(doc, _url) {
 
 		// clear issue if it's zero
 		if (item.issue === "0") item.issue = "";
+		
+		// some journal assigns the volume to the date
+		if (item.date == item.volume) {
+			let datePath = doc.querySelector('.item.published');
+			if (datePath) {
+				let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
+				item.date = itemDate[1];
+			} else item.date = '';
+		}
 
 		var pdfAttachment = false;
 
