@@ -75,6 +75,10 @@ function invokeEMTranslator(doc) {
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
         i.tags = splitDotSeparatedKeywords(i);
+		// in some cases (issn = 1799-3121) the article's title is split in 2 parts
+		if (doc.querySelector(".subtitle")) {
+			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
+		}
 		i.complete();
 	});
 	translator.translate();
