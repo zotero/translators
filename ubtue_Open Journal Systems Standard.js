@@ -86,6 +86,19 @@ function invokeEMTranslator(doc) {
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
+
+		// some journal assigns the volume to the date
+		if (i.ISSN == '1983-2850') {
+			if (i.date == i.volume) {
+				let datePath = doc.querySelector('.item.published');
+				if (datePath) {
+					let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
+					if (itemDate.length >= 2) {
+						i.date = itemDate[1];
+					}					
+				}
+			} else i.date = '';
+		}
 		
 		i.complete();
 	});
