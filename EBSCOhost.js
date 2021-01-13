@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-01-13 14:11:06"
+	"lastUpdated": "2021-01-13 15:32:38"
 }
 
 function detectWeb(doc, url) {
@@ -134,7 +134,7 @@ function downloadFunction(text, url, prefs) {
 		item.archive = "";
 		
 		// Add potential Book Review as Keyword
-        if (m3Data.match(/Book Review/i)) {
+        if (m3Data && m3Data.match(/Book Review/i)) {
             item.tags.push("Book Review");
         }
 		
