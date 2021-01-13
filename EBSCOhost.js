@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
+	"target": "^(https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer))|.*ebscohost.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-12-26 11:18:52"
+	"lastUpdated": "2021-01-13 14:11:06"
 }
 
 function detectWeb(doc, url) {
@@ -132,6 +132,11 @@ function downloadFunction(text, url, prefs) {
 		
 		//the archive field is pretty useless:
 		item.archive = "";
+		
+		// Add potential Book Review as Keyword
+        if (m3Data.match(/Book Review/i)) {
+            item.tags.push("Book Review");
+        }
 		
 		if(item.url) {	
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
