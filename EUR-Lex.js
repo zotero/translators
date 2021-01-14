@@ -206,7 +206,7 @@ function scrape(doc, url) {
 		}
 		item.legislativeBody = passedByArray.join(", ");
 		
-		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language;
+		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language.toLowerCase();
 		// eli:is_about -> eurovoc -> tags
 	}
 	else if (docSector == "6") {
@@ -271,7 +271,7 @@ var testCases = [
 				"codeVolume": "281",
 				"language": "en",
 				"legislativeBody": "EP, CONSIL",
-				"url": "http://data.europa.eu/eli/dir/1995/46/oj/ENG",
+				"url": "http://data.europa.eu/eli/dir/1995/46/oj/eng",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (EN)",
@@ -300,7 +300,7 @@ var testCases = [
 				"code": "OJ L",
 				"codeNumber": "245",
 				"language": "fr",
-				"url": "http://data.europa.eu/eli/reg/1994/2257/oj/FRA",
+				"url": "http://data.europa.eu/eli/reg/1994/2257/oj/fra",
 				"attachments": [
 					{
 						"title": "EUR-Lex PDF (FR)",
