@@ -13,6 +13,7 @@
 }
 
 /*
+Test
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2017 Philipp Zumstein
