@@ -36,8 +36,8 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+// attr() v2
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
 
 
 // the eli resource types are described at:
@@ -115,7 +115,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	} 
+	else {
 		scrape(doc, url);
 	}
 }
@@ -131,7 +132,7 @@ var languageMapping = {
 	"EL": ["ELL", "Δικαστήριο", "Γενικό Δικαστήριο", "Δικαστήριο Δημόσιας Διοίκησης"],
 	"EN": ["ENG", "ECJ", "GC", "CST"],
 	"ES": ["SPA", "TJUE", "Tribunal General", "Tribunal de la Función Pública"],
-	"ET": ["EST", "Euroopa Kohus", "Üldkohus" ,"Avaliku Teenistuse Kohus"],
+	"ET": ["EST", "Euroopa Kohus", "Üldkohus", "Avaliku Teenistuse Kohus"],
 	"FI": ["FIN", "Unionin tuomioistuin", "Unionin yleinen tuomioistuin", "Virkamiestuomioistuin"],
 	"FR": ["FRA", "Cour de justice", "Tribunal", "Tribunal de la fonction publique"],
 	"GA": ["GLE", "An Chúirt Bhreithiúnais", "Cúirt Ghinearálta", "An Binse um Sheirbhís Shibhialta"],
@@ -163,7 +164,7 @@ function scrape(doc, url) {
 	var item = new Zotero.Item(type);
 	// determine the language we are currently looking the document at
 	var languageUrl = url.split("/")[4].toUpperCase();
-	if (languageUrl=="AUTO") {
+	if (languageUrl == "AUTO") {
 		languageUrl = autoLanguage || "EN";
 	}
 	var language = languageMapping[languageUrl][0] || "eng";
@@ -179,29 +180,30 @@ function scrape(doc, url) {
 			var uriParts = uri.split("/").pop().replace("?uri=", "").split(":");
 			// e.g. uriParts =  ["OJ", "L", "1995", "281", "TOC"]
 			// e.g. uriParts = ["DD", "03", "061", "TOC", "FI"]
-			if (uriParts.length>=4) {
+			if (uriParts.length >= 4) {
 				if (/\d+/.test(uriParts[1])) {
 					item.code = uriParts[0];
 					item.codeNumber = uriParts[1] + ", " + uriParts[2];
-				} else {
+				} 
+				else {
 					item.code = uriParts[0] + " " + uriParts[1];
 					item.codeNumber = uriParts[3];
 				}
-				if (type=="bill") {
+				if (type == "bill") {
 					item.codeVolume = item.codeNumber;
 					item.codeNumber = null;
 				}
 			}
 		}
-		
+
 		// item.number = attr(doc, 'meta[property="eli:id_local"]', 'content');
-	  
+
 		item.date = attr(doc, 'meta[property="eli:date_document"]', "content");
 		if (!item.date) {item.date = attr(doc, 'meta[property="eli:date_publication"]', "content")}
 		
 		var passedBy = doc.querySelectorAll('meta[property="eli:passed_by"]');
 		var passedByArray = [];
-		for (let i=0; i<passedBy.length; i++) {
+		for (let i = 0; i < passedBy.length; i++) {
 			passedByArray.push(passedBy[i].getAttribute("resource").split("/").pop());
 		}
 		item.legislativeBody = passedByArray.join(", ");
@@ -212,15 +214,15 @@ function scrape(doc, url) {
 	else if (docSector == "6") {
 		// type: case
 		// pretty hacky stuff, as there's little metadata available
-		var docCourt = docType.substr(0,1);
+		var docCourt = docType.substr(0, 1);
 		if (docCourt == "C") {
-			item.court = languageMapping[languageUrl][1] || "ECJ";	
+			item.court = languageMapping[languageUrl][1] || languageMapping["EN"][1];
 		}
 		else if (docCourt == "T") {
-			item.court = languageMapping[languageUrl][2] || "GC";
+			item.court = languageMapping[languageUrl][2] || languageMapping["EN"][2];
 		}
 		else if (docCourt == "F") {
-			item.court = languageMapping[languageUrl][3] || "CST";
+			item.court = languageMapping[languageUrl][3] || languageMapping["EN"][3];
 		}
 		item.url = url;
 
@@ -233,16 +235,16 @@ function scrape(doc, url) {
 		}
 		else { // Orders, summaries, etc.
 			item.caseName = attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g," ");
-			item.dateDecided = celex.substr(1,4);
+			item.dateDecided = celex.substr(1, 4);
 		}
 	}
 	else {
 		// type: bill
 		item.title = attr(doc, 'meta[name="WT.z_docTitle"]', "content");
-		item.date = celex.substr(1,4);
+		item.date = celex.substr(1, 4);
 		item.url = url;
 		if (docType == "C") {
-			celexCParts = celex.substr(1).split("/");
+			var celexCParts = celex.substr(1).split("/");
 			item.code = "OJ C";
 			item.codeVolume = celexCParts[1];
 			item.codePages = celexCParts[2];
@@ -252,8 +254,8 @@ function scrape(doc, url) {
 	// type: all
 	var pdfurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/PDF/?uri=CELEX:" + celex;
 	var htmlurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/HTML/?uri=CELEX:" + celex;
-	item.attachments = [{url: pdfurl, title: "EUR-Lex PDF (" + languageUrl + ")", mimeType: "application/pdf"}];
-	item.attachments.push({url: htmlurl, title: "EUR-Lex HTML (" + languageUrl + ")", mimeType: "text/html"});
+	item.attachments = [{ url: pdfurl, title: "EUR-Lex PDF (" + languageUrl + ")", mimeType: "application/pdf" }];
+	item.attachments.push({ url: htmlurl, title: "EUR-Lex HTML (" + languageUrl + ")", mimeType: "text/html" });
 	
 	item.complete();
 }/** BEGIN TEST CASES **/
