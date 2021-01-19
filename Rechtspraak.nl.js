@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-19 12:14:04"
+	"lastUpdated": "2021-01-19 12:19:42"
 }
 
 /*
@@ -180,7 +180,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2018-10-09",
 				"abstractNote": "Klimaatzaak Urgenda. Onrechtmatige daad. Schending zorgplicht ex artikelen 2 en 8 EVRM. Staat moet broeikasgassen nu verder terugdringen. Vonnis bekrachtigd\n\nVindplaatsen:\nRechtspraak.nl \nJM 2018/128 met annotatie van W.Th. Douma \nAB 2018/417 met annotatie van G.A. van der Veen, Ch.W. Backes \nO&A 2018/66 \nO&A 2018/51 met annotatie van G.A. van der Veen, T.G. Oztürk \nSEW 2019, afl. 1, p. 35 \nJB 2019/10 met annotatie van Sanderink, D.G.J. \nOGR-Updates.nl 2018-0234 \nPS-Updates.nl 2018-0814 \nJOM 2018/1182 \nJOM 2018/1154 \nJA 2019/37 \nJIN 2019/78 met annotatie van Sanderink, D.G.J.",
-				"court": "Gerechtshof Den Haag",
+				"court": "Hof Den Haag",
 				"docketNumber": "ECLI:NL:GHDHA:2018:2591",
 				"extra": "Soort: Uitspraak",
 				"language": "nl",
@@ -215,7 +215,7 @@ var testCases = [
 				"creators": [],
 				"dateDecided": "2019-10-08",
 				"abstractNote": "Conclusie P-G: Bedreiging. Voldoende bepaald vreesobject. Conclusie strekt tot verwerping.\n\nVindplaatsen:\nRechtspraak.nl",
-				"court": "Parket bij de Hoge Raad",
+				"court": "Parket bij de HR",
 				"docketNumber": "ECLI:NL:PHR:2019:1016",
 				"extra": "Soort: Conclusie",
 				"language": "nl",
@@ -233,6 +233,44 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Strafrecht"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://uitspraken.rechtspraak.nl/inziendocument?id=ECLI:NL:ORBAACM:2020:30&showbutton=true",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "ECLI:NL:ORBAACM:2020:30, Raad van Beroep in Ambtenarenzaken van Aruba, Curaçao, Sint Maarten en van Bonaire, Sint Eustatius en Saba, CUR2019H00160",
+				"creators": [],
+				"dateDecided": "2020-12-16",
+				"abstractNote": "Ontslag wegens strafrechtelijke veroordeling. Geen procesbelang bij het opschuiven van de datum van ontslag. Bevestiging aangevallen uitspraak.\n\nVindplaatsen:\nRechtspraak.nl",
+				"court": "RvB in Ambtenarenzaken Aruba, Curaçao, Sint Maarten en Bonaire, Sint Eustatius en Saba",
+				"docketNumber": "ECLI:NL:ORBAACM:2020:30",
+				"extra": "Soort: Uitspraak",
+				"language": "nl",
+				"url": "https://deeplink.rechtspraak.nl/uitspraak?id=ECLI:NL:ORBAACM:2020:30",
+				"attachments": [
+					{
+						"title": "Rechtspraak.nl PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ambtenarenrecht"
+					},
+					{
+						"tag": "Bestuursrecht"
 					}
 				],
 				"notes": [],
