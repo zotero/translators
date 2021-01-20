@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-02-04 08:28:21"
+	"lastUpdated": "2020-11-11 21:49:51"
 }
 
 /*
@@ -146,7 +146,7 @@ function doImport() {
 			if (splitAu.length > 2) continue;
 			var name = splitAu[1].trim().toLowerCase() + ' '
 				+ splitAu[0].trim().toLowerCase();
-			splitGuidance[name] = author;
+			splitGuidance[name.replace(/\./g, "")] = author;
 		}
 	}
 
@@ -257,11 +257,18 @@ function doImport() {
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
 	var overallPages = ZU.xpathText(doc, '//p:addata/p:pages', ns);
+	
+	var pageRangeTypes = ["journalArticle", "magazineArticle", "newspaperArticle", "dictionaryEntry", "encyclopediaArticle", "conferencePaper"];
 	if (startPage && endPage) {
 		item.pages = startPage + '–' + endPage;
 	}
 	else if (overallPages) {
-		item.pages = overallPages;
+		if (pageRangeTypes.includes(item.itemType)) {
+			item.pages = overallPages;
+		}
+		else {
+			item.numPages = overallPages;
+		}
 	}
 	else if (startPage) {
 		item.pages = startPage;
@@ -355,7 +362,7 @@ function fetchCreators(item, creators, type, splitGuidance) {
 	for (let i = 0; i < creators.length; i++) {
 		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 		for (var j = 0; j < creator.length; j++) {
-			var c = stripAuthor(creator[j]);
+			var c = stripAuthor(creator[j]).replace(/\./g, "");
 			c = ZU.cleanAuthor(
 				splitGuidance[c.toLowerCase()] || c,
 				type,
