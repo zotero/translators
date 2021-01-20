@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-19 12:19:42"
+	"lastUpdated": "2021-01-20 09:37:49"
 }
 
 /*
@@ -39,25 +39,25 @@
 function attr (docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; }
 
 var courtAbbrevs = {
-	"Hoge Raad": "HR",
-	"Raad van State": "ABRvS",
-	"Centrale Raad van Beroep": "CRvB",
-	"College van Beroep voor het bedrijfsleven": "CBb",
-	"Gerechtshof": "Hof",
-	"Rechtbank": "Rb.",
-	"Raad van Beroep": "RvB",
-	"Gerecht in eerste aanleg van": "GiEA",
-	"Gerecht in Eerste Aanleg van": "GiEA",
-	"Gemeenschappelijk Hof van Justitie": "Gem. Hof",
+	"hoge raad": "HR",
+	"raad van state": "ABRvS",
+	"centrale raad van beroep": "CRvB",
+	"college van beroep voor het bedrijfsleven": "CBb",
+	"gerechtshof": "Hof",
+	"rechtbank": "Rb.",
+	"raad van beroep": "RvB",
+	"gerecht in eerste aanleg van": "GiEA",
+	"gemeenschappelijk hof van justitie": "Gem. Hof",
 	"van ": ""
 };
 
 // ReplaceAll solution from https://stackoverflow.com/questions/15604140/replace-multiple-strings-with-multiple-other-strings
+// All keys should be lowercase.
 function replaceAll (str, mapObj) {
 	var re = new RegExp(Object.keys(mapObj).join("|"), "gi");
 
 	return str.replace(re, function (matched) {
-		return mapObj[matched];
+		return mapObj[matched.toLowerCase()];
 	});
 }
 
