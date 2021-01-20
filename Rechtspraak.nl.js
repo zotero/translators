@@ -36,7 +36,7 @@
 */
 
 // attr() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
+function attr (docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; }
 
 var courtAbbrevs = {
 	"Hoge Raad": "HR",
@@ -50,13 +50,13 @@ var courtAbbrevs = {
 	"Gerecht in Eerste Aanleg van": "GiEA",
 	"Gemeenschappelijk Hof van Justitie": "Gem. Hof",
 	"van ": ""
-	};
+};
 
 // ReplaceAll solution from https://stackoverflow.com/questions/15604140/replace-multiple-strings-with-multiple-other-strings
-function replaceAll(str,mapObj){
-	var re = new RegExp(Object.keys(mapObj).join("|"),"gi");
+function replaceAll (str, mapObj) {
+	var re = new RegExp(Object.keys(mapObj).join("|"), "gi");
 
-	return str.replace(re, function(matched){
+	return str.replace(re, function (matched) {
 		return mapObj[matched];
 	});
 }
@@ -65,19 +65,19 @@ var esc = ZU.unescapeHTML;
 
 
 // Custom cleaning function for scraping, adapted from utilities.js
-function cleanTags(x) {
+function cleanTags (x) {
 	if(x === null) { // account for cases without abstractNote
-		return;
+		return undefined;
 	}
-	else if(typeof(x) != "string") {
-		throw "cleanTags: argument must be a string";
+	else if(typeof (x) != "string") {
+		throw new Error("cleanTags: argument must be a string");
 	}
 	x = x.replace(/<(\/para|br)[^>]*>/gi, "\n"); // account for dcterms:abstract newlines
 	x = x.replace(/<[^>]+>/g, "");
 	return esc(x);
 }
 
-function detectWeb(doc, url) {
+function detectWeb (doc, url) {
 	if (url.includes('inziendocument')) {
 		return "case";
 	}
@@ -90,7 +90,7 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function getSearchResults(doc, checkOnly) {
+function getSearchResults (doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('h3>a.titel[href*="inziendocument"]');
@@ -105,7 +105,7 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb(doc, url) {
+function doWeb (doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
@@ -116,7 +116,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape (doc, url) {
 	var newItem = new Zotero.Item("case");
 
 	// First, scrape easy properties
@@ -131,7 +131,7 @@ function scrape(doc, url) {
 
 	// Pursuant to most citation styles (including Leidraad voor juridische auteurs), we abbreviate the court names
 	var fullCourtName = cleanTags(attr(doc, 'meta[property="dcterms:creator"]', 'content'));
-	newItem.court = replaceAll(fullCourtName,courtAbbrevs);
+	newItem.court = replaceAll(fullCourtName, courtAbbrevs);
 
 	// Because we do not know which reporter the user wants to cite, add them all to abstractNote
 	newItem.abstractNote = newItem.abstractNote.concat("\nVindplaatsen:", cleanTags(ZU.xpathText(doc, "//dt[text()='Vindplaatsen']//following::dd[1]")));
@@ -142,34 +142,29 @@ function scrape(doc, url) {
 	for (let i = 0; i < relation.length; i++) {
 		relationArray.push(relation[i].getAttribute('title'));
 	}
-	newItem.references = relationArray.join('; '); 
+	newItem.references = relationArray.join('; ');
 
 	// Add fields of law as tags
 	var tags = attr(doc, 'link[rel="dcterms:subject"]', 'title');
-	if (tags.length) { 
+	if (tags.length) {
 		newItem.tags = tags.split('; ');
 	}
-	
+
 	// Attachments: PDF and Snapshot
 	var pdfurl = "https://uitspraken.rechtspraak.nl" + attr(doc, 'a.pdfUitspraak', 'href');
 	newItem.attachments = [{
-		url: pdfurl,
-		title: "Rechtspraak.nl PDF",
-		mimeType: "application/pdf",
+		"url": pdfurl,
+		"title": "Rechtspraak.nl PDF",
+		"mimeType": "application/pdf",
 	}];
 	newItem.attachments.push({
-		title:"Snapshot",
-		document:doc
+		"title": "Snapshot",
+		"document": doc
 	});
-	
+
 	newItem.complete();
 }/** BEGIN TEST CASES **/
 var testCases = [
-	{
-		"type": "web",
-		"url": "https://uitspraken.rechtspraak.nl/#zoekverfijn/zt[0][zt]=urgenda&zt[0][fi]=AlleVelden&zt[0][ft]=Alle+velden&so=Relevance&ps[]=ps1",
-		"items": "multiple"
-	},
 	{
 		"type": "web",
 		"url": "https://uitspraken.rechtspraak.nl/inziendocument?id=ECLI:NL:GHDHA:2018:2591",
