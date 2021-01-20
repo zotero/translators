@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-01-18 16:07:33"
+	"lastUpdated": "2021-01-20 09:50:50"
 }
 
 function detectWeb(doc, url) {
@@ -217,10 +217,12 @@ function downloadFunction(text, url, prefs, doc) {
 		if (!item.tags.includes('Book Review')) {
 			let data_amplitude = ZU.xpathText(doc, '//*[@data-amplitude]/@data-amplitude');
         	if (data_amplitude) {
-        		let data_amplitude_parsed = JSON.parse(data_amplitude);
-        		if (data_amplitude_parsed.document_type && data_amplitude_parsed.document_type.match(/Book Review/i)) {
-        			item.tags.push("Book Review");
-           		}
+				try {
+					let data_amplitude_parsed = JSON.parse(data_amplitude);
+					if (data_amplitude_parsed.document_type && data_amplitude_parsed.document_type.match(/Book Review/i)) {
+						item.tags.push("Book Review");
+					}
+				} catch(e) { /*Ignore weird erroneous double data-amplitudes*/}
         	}
         }
     	item.complete();
