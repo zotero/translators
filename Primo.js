@@ -250,7 +250,7 @@ var testCases = [
 				"title": "China and foreign missionaries.",
 				"creators": [
 					{
-						"lastName": "Great Britain. Foreign Office",
+						"lastName": "Great Britain Foreign Office",
 						"creatorType": "author",
 						"fieldMode": 1
 					}

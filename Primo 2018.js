@@ -111,9 +111,9 @@ var testCases = [
 				"title": "War",
 				"creators": [
 					{
-						"lastName": "Ken. Baynes",
-						"creatorType": "author",
-						"fieldMode": 1
+						"lastName": "Baynes",
+						"firstName": "Ken",
+						"creatorType": "author"
 					},
 					{
 						"firstName": "Ken",
