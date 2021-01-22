@@ -113,6 +113,11 @@ function scrape(doc, url) {
 		if (item.title == item.title.toUpperCase()) {
 			item.title = ZU.capitalizeTitle(item.title, true);
 		}
+		// Trim off the (Published xxxx) from the end of titles
+		publishedRegexMatch = item.title.match(/(.*) \(Published \d{4}\)/)
+		if (publishedRegexMatch) {
+			item.title = publishedRegexMatch[1]
+		}
 		// Only force all caps to title case when all tags are all caps
 		var allcaps = true;
 		for (let i = 0; i < item.tags.length; i++) {
