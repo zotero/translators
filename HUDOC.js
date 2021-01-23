@@ -2,14 +2,14 @@
 	"translatorID": "d541622d-09c3-4e20-b010-c506b2d01151",
 	"label": "HUDOC",
 	"creator": "Jonas Skorzak",
-	"target": "https?:\\/\\/hudoc\\.echr\\.coe\\.int.*",
+	"target": "^https?://hudoc\\.echr\\.coe\\.int",
 	"minVersion": "4.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-16 12:22:20"
+	"lastUpdated": "2021-01-23 00:49:49"
 }
 
 /*
@@ -52,11 +52,10 @@ to query it for the taxonomies/thesauruses used for decision type ("typedescript
 decision-making body ("originatingbody"), keywords ("kpthesaurus"), ...
 Check compiled.js on the HUDOC website in order to learn how to query these aspects.
 Search for "// ###..//sites/echr/echr.js ###"" in compiled.js to find most API fields.
-
+Zotero.Date.strToISO
 */
 
-// function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}
-function text(docOrElem ,selector ,index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent:null; }
+function text(docOrElem ,selector ,index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent: null; }
 
 // Scrapes some metadata from the document
 // TODO: integrate function into scrape
@@ -128,8 +127,6 @@ function getTypeBit(doc) { // TODO: Switch to 'url' once we use the API instead
 
 // Downloads the legal summary in HUDOC
 function getLegalSummary(item, appno) {
-	// A bit hacky. Should probably query kpdate and then convert it
-	var kpdate = item.dateDecided.replace(/(..).(..).(....)/, "$3-$2-$1");
 
 	var appnoString = appno.join(" AND appno:");
 
@@ -144,11 +141,11 @@ function getLegalSummary(item, appno) {
 	var summaryUrl = "https://hudoc.echr.coe.int/app/query/results?query=contentsitename=ECHR "
 						+ appnoString + " AND "
 						+ doctypeString + " AND "
-						+ "(kpdate=\"" + kpdate + "\")"
+						+ "(kpdate=\"" + item.dateDecided + "\")"
 						+ "&select=itemid"
 						+ "&sort=&start=0&length=500";
 
-	Zotero.debug("Getting id of legal summary at: " + summaryUrl);
+	//Zotero.debug("Getting id of legal summary at: " + summaryUrl);
 
 	// Request id of legal summary
 	ZU.doGet(summaryUrl, function (json) {
@@ -177,17 +174,13 @@ function getLegalSummary(item, appno) {
 	});
 }
 
+// eslint-disable-next-line no-unused-vars: "url"
 function detectWeb(doc, url) {
-	// TODO: adjust the logic here
-	// if (!(url.includes('?=i') || url.includes('itemid'))) {
-	// return "multiple";
-	// }
-
 	// We're waiting until the loading symbol is gone
 	Zotero.monitorDOMChanges(doc.querySelector("#notification div"), { attributes: true, attributeFiler: ["style"] });
 
 	var docType = scrapeMetaData(doc, "typedescription");
-
+	//Zotero.debug(docType);
 	if ((docType.includes("Judgment")
 		|| docType.includes("Decision")
 		|| docType.includes("Advisory Opinion")
@@ -200,45 +193,9 @@ function detectWeb(doc, url) {
 	}
 
 	return false;
-
-	/*
-	if (url.includes('/article/')) {
-	return "newspaperArticle";
-	} else
-	if (getSearchResults(doc, true)) {
-	return "multiple";
-	}
-	return false; */
 }
 
-// function getSearchResults(doc, checkOnly) {
-//   var items = {};
-//   var found = false;
-//   // TODO: adjust the CSS selector
-//   var rows = doc.querySelectorAll('h2>a.title[href*="/article/"]');
-//   for (let row of rows) {
-// 	// TODO: check and maybe adjust
-// 	let href = row.href;
-// 	// TODO: check and maybe adjust
-// 	let title = ZU.trimInternal(row.textContent);
-// 	if (!href || !title) continue;
-// 	if (checkOnly) return true;
-// 	found = true;
-// 	items[href] = title;
-//   }
-//   return found ? items : false;
-// }
-
 function doWeb(doc, url) {
-	// if (detectWeb(doc, url) == "multiple") {
-	// Zotero.selectItems(getSearchResults(doc, false), function (items) {
-	//   if (items) ZU.processDocuments(Object.keys(items), scrape);
-	// });
-	// } else
-	// {
-	// scrape(doc, url);
-	// }
-
 	if (detectWeb(doc, url) == "case") {
 		scrapeDecision(doc, url);
 	}
@@ -250,9 +207,36 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	// Title
 	var capTitle = ZU.capitalizeTitle(text(doc, "title").toLowerCase(), true);
 
-	// If title already contains the type, remove it. Adv. opinions contain number in brackets though
-	if (!scrapeMetaData(doc, "typedescription").includes("Advisory Opinion")) {
-		capTitle = capTitle.split("(")[0];
+	// If title already contains the type, remove it.
+	// if (!scrapeMetaData(doc, "typedescription").includes("Advisory Opinion")) {
+	// 	splitTitle = capTitle.split(/\(/);
+	// 	var i = 0;
+	// 	//Loop to include all parts until we at least got both parties (might still exclude an important bracket at end of second party name)
+	// 	do {
+	// 		if (/\((no.|II|IV|V\)|VI|IX|X\))/i.test(splitTitle[i])) {
+	// 			i++;
+	// 		}
+	// 		capTitle = splitTitle.slice(0, i+1).join("(");
+	// 		i++;
+	// 	} while !(splitTitle[i].includes("V.") || splitTitle[i].includes("C."));
+
+		// for (var i = 0; !(splitTitle[i].includes("V.") || splitTitle[i].includes("C.")); i++) {
+		// 	if (/\((no.|II|IV|V\)|VI|IX|X\))/i.test(splitTitle[i])) {
+		//
+		// 	}
+		// 	capTitle = splitTitle.slice(0, i+1).join("(");
+		// }
+		//
+		//
+		// if (splitTitle[0].includes("V.") || splitTitle[0].includes("C.")) {
+		// 	if (splitTitle[1].match(/\((no.|II|IV|V\)|VI|IX|X\))/)) { //For "No. 2" cases
+		// 		capTitle = splitTitle.slice(0, 2).join("(");
+		// 	} else {
+		// 		capTitle = splitTitle[0];
+		// 	}
+		// } else {
+		// 	capTitle = splitTitle.slice(0, 2).join("(");
+		// }
 	}
 
 	// Zotero capitalizes the "v."/"c.", so we need to correct that for English and French cases
@@ -265,31 +249,25 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	item.caseName = capTitle + getTypeBit(doc);
 
 	// Court and Author
-	// FIXME: Unsure if author should be listed like this or rather get removed
 	var court = scrapeMetaData(doc, "originatingbody");
 
 	if (court !== null) { // Advisory opinions have no "originatingbody" listed
-		item.creators.push({ lastName: court.replace("Court", "ECtHR"), creatorType: "author" });
-
 		if (court.includes("Grand Chamber")) {
 			item.court = "ECtHR [GC]";
-		}
-		if (court.includes("Commission")) {
+		} else if (court.includes("Commission")) {
 			item.court = "Commission";
-		}
-		if (court == "Committee of Ministers") {
+		} else if (court == "Committee of Ministers") {
 			item.court = "Committee of Ministers";
 		} else {
 			item.court = "ECtHR";
 		}
 	} else { // All Advisory Opinions (so far) are decided by the GC
-		item.creators.push({ lastName: "ECtHR (Grand Chamber)", creatorType: "author" });
 		item.court = "ECtHR [GC]";
 	}
 
 	// Date of decision
-	// Ensure dd.mm.yyyy. Unsure if Zotero interprets a date with slashes differently in US locals.
-	item.dateDecided = scrapeMetaData(doc, "judgementdate").replace(/\//g, ".");
+	// convert to simple ISO: yyyy-mm-dd dd.mm.yyyy.
+	item.dateDecided = scrapeMetaData(doc, "judgementdate").split("/").reverse().join('-');
 
 	item.url = "http://hudoc.echr.coe.int/eng?i=" + getItemID(url);
 
@@ -302,7 +280,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	ZU.doGet(queryUrl, function (json) {
 		json = JSON.parse(json).results[0].columns;
 
-		Zotero.debug("Queried HUDOC API at: " + queryUrl + "\n\n Result:\n");
+		Zotero.debug("Queried HUDOC API at: " + queryUrl);
 		Zotero.debug(json);
 
 		// Application numbers
@@ -338,7 +316,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		Zotero.debug("Getting PDF at: " + pdfurl);
 
 		item.attachments.push({
-			title: item.caseName + " PDF",
+			title: "HUDOC Full Text PDF",
 			mimeType: "application/pdf",
 			url: pdfurl
 		});
