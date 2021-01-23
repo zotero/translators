@@ -54,7 +54,7 @@ Check compiled.js on the HUDOC website in order to learn how to query these aspe
 Search for "// ###..//sites/echr/echr.js ###"" in compiled.js to find most API fields.
 */
 
-function text(docOrElem ,selector ,index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent: null; }
+function text(docOrElem, selector, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent: null; }
 
 // Scrapes some metadata from the document
 // TODO: integrate function into scrape
@@ -124,7 +124,8 @@ function getLegalSummary(item, appno) {
 	var doctypeString = "";
 	if (item.language == "fre") {
 		doctypeString = "doctype:CLINF";
-	} else {
+	}
+	else {
 		doctypeString = "doctype:CLIN";
 	}
 
@@ -160,7 +161,8 @@ function getLegalSummary(item, appno) {
 
 				item.complete();
 			});
-		} else {
+		}
+		else {
 			item.complete();
 		}
 	});
@@ -185,7 +187,8 @@ function detectWeb(doc, url) {
 			|| docType.includes("Communiqué de presse"))) {
 			return "case";
 		}
-	} else if (url.includes("hudoc.echr.coe.int/eng#")) {
+	}
+	else if (url.includes("hudoc.echr.coe.int/eng#")) {
 		//English website (so won't work for Spanish or German)
 		if ((docType.includes("Judgment")
 			|| docType.includes("Decision")
@@ -245,8 +248,8 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	// Zotero capitalizes the "v."/"c.", so we need to correct that for English and French cases
 	if (capTitle.includes(" V. ")) {
 		capTitle = capTitle.replace(" V. ", " v. ");
-	} else
-	if (capTitle.includes(" C. ")) {
+	}
+	else if (capTitle.includes(" C. ")) {
 		capTitle = capTitle.replace(" C. ", " c. ");
 	}
 	item.caseName = capTitle + getTypeBit(doc, url);
@@ -256,16 +259,21 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 
 	if (url.includes("hudoc.echr.coe.int/fre#")) {
 		item.court = "ECtHR";
-	} else {
+	}
+	else {
 		if (text(doc, "title").includes("Advisory Opinion")) {
 			item.court = "ECtHR [GC]";
-		} else if (court.includes("Grand Chamber")) {
+		}
+		else if (court.includes("Grand Chamber")) {
 			item.court = "ECtHR [GC]";
-		} else if (court.includes("Commission")) {
+		}
+		else if (court.includes("Commission")) {
 			item.court = "Commission";
-		} else if (court == "Committee of Ministers") {
+		}
+		else if (court == "Committee of Ministers") {
 			item.court = "Committee of Ministers";
-		} else {
+		}
+		else {
 			item.court = "ECtHR";
 		}
 	}
@@ -328,7 +336,8 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		// Download Legal Summary
 		if (appno.length !== 0) { // without app. nos. we can't find a legal summary
 			getLegalSummary(item, appno);
-		} else {
+		}
+		else {
 			item.complete();
 		}
 	});
