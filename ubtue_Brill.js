@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 12:18:25"
+	"lastUpdated": "2020-12-02 13:38:25"
 }
 
 /*
@@ -80,6 +80,8 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag) item.notes.push('LF');
+	// numburing issues with slash due to cataloguing rule
+	item.issue = item.issue.replace('-', '/');
 	item.itemType = "journalArticle";
 }
 
