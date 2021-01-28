@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-26 13:52:43"
+	"lastUpdated": "2021-01-21 08:50:04"
 }
 
 /*
@@ -158,7 +158,7 @@ function doWeb(doc, url) {
 				for (let author of extractAuthors(entry[0])) item.creators.push(ZU.cleanAuthor(author));
 				item.title = extractTitle(entry[0]);
 				item.issue = getIssue(doc);
-				item.year = getYear(doc);
+				item.date = getYear(doc);
 				item.url = extractURL(entry[0]);
 				if ((note = extractNote(entry[0]))) item.notes.push(note);
 				item.complete();

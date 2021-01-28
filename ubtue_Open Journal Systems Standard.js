@@ -62,6 +62,16 @@ function splitDotSeparatedKeywords(item) {
     return item.tags;
 }
 
+// in some cases (issn == 1799-3121) the article's title is split in 2 parts
+function joinTitleAndSubtitle (doc, item) {
+	if (item.ISSN == '1799-3121') {
+		if (doc.querySelector(".subtitle")) {
+			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
+		}	
+	}
+	return item.title;
+}
+
 
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
@@ -74,7 +84,22 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
-        i.tags = splitDotSeparatedKeywords(i);
+		i.tags = splitDotSeparatedKeywords(i);
+		i.title = joinTitleAndSubtitle(doc, i);
+
+		// some journal assigns the volume to the date
+		if (i.ISSN == '1983-2850') {
+			if (i.date == i.volume) {
+				let datePath = doc.querySelector('.item.published');
+				if (datePath) {
+					let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
+					if (itemDate.length >= 2) {
+						i.date = itemDate[1];
+					}					
+				}
+			} else i.date = '';
+		}
+		
 		i.complete();
 	});
 	translator.translate();

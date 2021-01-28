@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-08 11:29:32"
+	"lastUpdated": "2021-01-27 15:33:30"
 }
 
 /*
@@ -127,19 +127,18 @@ function scrape(doc, url) {
 				}
 			}
 			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
-			let orcidEntry = doc.querySelectorAll('.author-section-div')
-			for (let n in orcidEntry) {
-				let orcid = orcidEntry[n].innerHTML;
-				let name = orcidEntry[n].innerHTML;
-				if (orcid) {
+			let authorSectionEntries = doc.querySelectorAll('.author-section-div');
+			for (let authorSectionEntry of authorSectionEntries) {
+				    let entryHTML = authorSectionEntry.innerHTML;
 					let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
 					let regexName = /author=.*"/;
-					
-					if(orcid.match(regexOrcid)) {
-						item.notes.push({note: "orcid:" + orcid.match(regexOrcid) + ' | ' + name.match(regexName)[0].replace('\"', '')});
+					if(entryHTML.match(regexOrcid)) {
+						item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '')});
 					}
-				}
 			}
+			// Workaround to address address weird incorrect multiple extraction by both querySelectorAll and xpath
+			// So, let's deduplicate...
+			item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 			// ubtue: extract translated and other abstracts from the different xpath
 			var ubtueabstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 			var otherabstract = ZU.xpathText(doc, '//article//div[contains(@class, "tabs-translated-abstract")]/p');

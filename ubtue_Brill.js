@@ -40,19 +40,20 @@ function detectWeb(doc, url) {
 	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
 		return "multiple";
  	}
+    return false;
 }
 
 function getSearchResults(doc) {
 	let items = {};
 	let found = false;
-	let links = ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]');
+	let links = doc.querySelectorAll(".c-Typography--title");
 	let usesTypography = !!links.length;
 	if (!usesTypography) {
-		links = ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+		links = doc.querySelectorAll(".c-Button--link, [target='_self']");
 	}
 	let text = usesTypography ?
-	           ZU.xpath(doc, '//a[contains(@class, "c-Typography--title")]/span') :
-	           ZU.xpath(doc, '//a[@class="c-Button--link" and @target="_self"]');
+		    doc.querySelectorAll(".c-Typography--title > span") :
+		    doc.querySelectorAll(".c-Button--link, [target='_self']");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
@@ -68,9 +69,11 @@ function getSearchResults(doc) {
 
 function postProcess(doc, item) {
 	if (!item.abstractNote) {
-        item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
-        if (item.abstractNote && item.abstractNote.length > 0)
-            item.abstractNote = item.abstractNote[0].textContent.trim();
+	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	  if (item.abstractNote && item.abstractNote.length > 0)
+	     item.abstractNote = item.abstractNote[0].textContent.trim();
+	  else
+	     item.abstractNote = '';
     }
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags)
@@ -82,7 +85,8 @@ function postProcess(doc, item) {
 	if (openAccessTag) item.notes.push('LF');
 	// numburing issues with slash due to cataloguing rule
 	item.issue = item.issue.replace('-', '/');
-	item.itemType = "journalArticle";
+  if (!item.itemType)
+            item.itemType = "journalArticle";
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {

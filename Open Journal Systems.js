@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-23 09:48:46"
+	"lastUpdated": "2021-01-11 08:27:03"
 }
 
 /*
@@ -129,7 +129,7 @@ function scrape(doc, _url) {
 		}
 		
 		// resolving issue for a specific journal sperating keywords by '.'
-		if (item.issn = 2340-0080){
+		if (item.ISSN == 2340-0080){
 			for (var i = 0; i < item.tags.length; i++){
 				if (item.tags[i].includes('.')){
 					item.tags = item.tags[i].split(".");
@@ -139,6 +139,19 @@ function scrape(doc, _url) {
 
 		// clear issue if it's zero
 		if (item.issue === "0") item.issue = "";
+		
+		// some journal assigns the volume to the date
+		if (item.ISSN == '1983-2850') {
+			if (item.date == item.volume) {
+				let datePath = doc.querySelector('.item.published');
+				if (datePath) {
+					let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
+					if (itemDate.length >= 2) {
+						item.date = itemDate[1];
+					}					
+				}
+			} else item.date = '';
+		}
 
 		var pdfAttachment = false;
 

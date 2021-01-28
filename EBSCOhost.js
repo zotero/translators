@@ -2,14 +2,14 @@
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
-	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
+	"target": "^(https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer))|.*ebscohost.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-12-26 11:18:52"
+	"lastUpdated": "2021-01-20 09:50:50"
 }
 
 function detectWeb(doc, url) {
@@ -31,7 +31,7 @@ function detectWeb(doc, url) {
 /*
  * given the text of the delivery page, downloads an item
  */
-function downloadFunction(text, url, prefs) {
+function downloadFunction(text, url, prefs, doc) {
 	if (text.search(/^TY\s\s?-/m) == -1) {
 		text = "\nTY  - JOUR\n" + text;	//this is probably not going to work if there is garbage text in the begining
 	}
@@ -133,6 +133,11 @@ function downloadFunction(text, url, prefs) {
 		//the archive field is pretty useless:
 		item.archive = "";
 		
+		// Add potential Book Review as Keyword
+		if (m3Data && m3Data.match(/Book Review/i)) {
+			item.tags.push("Book Review");
+		}
+		
 		if(item.url) {	
 			// Trim the ⟨=cs suffix -- EBSCO can't find the record with it!
 			item.url = item.url.replace(/(AN=[0-9]+)⟨=[a-z]{2}/,"$1")
@@ -156,7 +161,6 @@ function downloadFunction(text, url, prefs) {
 					title: "EBSCO Full Text",
 					mimeType:"application/pdf"
 			});
-			item.complete();
 		} else if(prefs.fetchPDF) {
 			var arguments = urlToArgs(url);
 			if (prefs.mobile){
@@ -171,7 +175,6 @@ function downloadFunction(text, url, prefs) {
 						title: "EBSCO Full Text",
 						mimeType:"application/pdf"
 					});
-					item.complete();
 			}
 			else {
 			
@@ -205,13 +208,24 @@ function downloadFunction(text, url, prefs) {
 					},
 					function () {
 						Z.debug("PDF retrieval done.");
-						item.complete();
 					}
 				);}
 		} else {
 			Z.debug("Not attempting to retrieve PDF.");
-			item.complete();
 		}
+		// Add potential review information if not successfully extracted beforehand
+		if (!item.tags.includes('Book Review')) {
+			let data_amplitude = ZU.xpathText(doc, '//*[@data-amplitude]/@data-amplitude');
+        	if (data_amplitude) {
+				try {
+					let data_amplitude_parsed = JSON.parse(data_amplitude);
+					if (data_amplitude_parsed.document_type && data_amplitude_parsed.document_type.match(/Book Review/i)) {
+						item.tags.push("Book Review");
+					}
+				} catch(e) { /*Ignore weird erroneous double data-amplitudes*/}
+        	}
+        }
+    	item.complete();
 	});
 
 	translator.getTranslatorObject(function(trans) {
@@ -507,7 +521,7 @@ function doDelivery(doc, itemInfo) {
 		+ "&bdata="+arguments["bdata"]
 		+ "&theExportFormat=1";	//RIS file
 	ZU.doGet(postURL, function (text) {
-		downloadFunction(text, postURL, prefs);
+		downloadFunction(text, postURL, prefs, doc);
 	});
 }
 
