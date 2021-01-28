@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-01-28 14:40:53"
+	"lastUpdated": "2021-01-28 15:20:33"
 }
 
 /*
@@ -84,8 +84,7 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	url = url.split('?')[0] // Remove URL parameters like ?utm_source
-	var risURL = url.replace(/#.+/, "") + ".ris";
+	var risURL = url.replace(/[#?].+/, "") + ".ris";
 	var pdfURL = attr(doc, 'a[data-download-type=pdf-article', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function(text) {
