@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 13:38:25"
+	"lastUpdated": "2020-01-29 12:33:25"
 }
 
 /*
@@ -83,8 +83,19 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag) item.notes.push('LF');
-	// numburing issues with slash due to cataloguing rule
-	item.issue = item.issue.replace('-', '/');
+	// numbering issues with slash due to cataloguing rule
+	if (item.issue) item.issue = item.issue.replace('-', '/');
+	let date = item.date;
+	//entry for scraping Berichtsjahr
+	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');//Z.debug(dateEntry)
+	let berichtsjahr = extractBerichtsjahr(dateEntry);//Z.debug(berichtsjahr)
+	let erscheinungsjahr = extractErscheingunssjahr(date);//Z.debug(erscheinungsjahr)
+	//
+	if (erscheinungsjahr !== berichtsjahr) {
+		item.date = extractBerichtsjahr(dateEntry);
+	} else {
+		item.date;
+	}
   if (!item.itemType)
             item.itemType = "journalArticle";
 }
