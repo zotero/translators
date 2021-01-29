@@ -100,6 +100,16 @@ function postProcess(doc, item) {
             item.itemType = "journalArticle";
 }
 
+function extractErscheingunssjahr(date) {
+	let publicationYear = date.trim().match(/\d{4}/)[0];
+	return publicationYear;
+}
+
+function extractBerichtsjahr(dateEntry) {
+	let extractDate = dateEntry.split('(')[1].split(')')[0];
+		return extractDate;
+}
+
 function invokeEmbeddedMetadataTranslator(doc, url) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
