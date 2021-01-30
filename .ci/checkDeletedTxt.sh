@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . "$SCRIPT_DIR/helper.sh"
 cd "$SCRIPT_DIR"
 
-MASTER="master"
+MASTER="origin/master"
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 if [[ "$BRANCH" = "$MASTER" ]];then
@@ -12,7 +12,7 @@ if [[ "$BRANCH" = "$MASTER" ]];then
     exit 0
 fi
 
-if ! git branch |grep -q "$MASTER"; then
+if ! git branch -a | grep -q "$MASTER"; then
     echo "${color_warn}skip${color_reset} - Can only check deleted.txt when '$MASTER' branch is also available for comparison"
     exit 0
 fi

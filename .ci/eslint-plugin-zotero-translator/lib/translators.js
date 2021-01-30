@@ -174,7 +174,7 @@ class Cache {
 			.map(line => line.trim())
 			.includes('upstream\thttps://github.com/zotero/translators.git');
 		// branch to compare lastUpdated against -- assume that if have upstream/master, you want to compare against that
-		const master = hasUpstream ? 'upstream/master' : 'master';
+		const master = hasUpstream ? 'upstream/master' : 'origin/master';
 
 		this.lastUpdated = {};
 		if (branch !== master) {

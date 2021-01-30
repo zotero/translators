@@ -41,8 +41,8 @@ get_translators_to_check() {
 	# Size of $parent_commits array
 	local num_parent_commits=${#parent_commits[@]}
 	if [ $num_parent_commits -gt 1 ]; then
-		TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $(git rev-list "$(git rev-list --first-parent ^master HEAD^2 | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
+		TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $(git rev-list "$(git rev-list --first-parent ^origin/master HEAD^2 | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
 	else
-		TRANSLATORS_TO_CHECK=$(git diff $(git rev-list "$(git rev-list --first-parent ^master HEAD | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
+		TRANSLATORS_TO_CHECK=$(git diff $(git rev-list "$(git rev-list --first-parent ^origin/master HEAD | tail -n1)^^!") --name-only | grep -e "^[^/]*.js$")
 	fi
 }

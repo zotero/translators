@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-if [[ "$TRAVIS_PULL_REQUEST" == "false" ]]; then
-	exit 0;
-fi
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$( dirname "$DIR" )"
 
