@@ -13,6 +13,8 @@ jobs:
       # We're in a shallow single-branch clone, so get the origin/master HEAD and more history
       - run: git fetch origin master --depth=1
       - run: git fetch --depth=25
+      # Sometimes the first time doesn't work?
+      - run: git fetch --depth=25
       
       - name: Install Node
         uses: actions/setup-node@v1
