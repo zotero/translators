@@ -101,7 +101,7 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
-		i.notes.push(getOrcids(doc))
+		i.notes.push(getOrcids(doc));
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
