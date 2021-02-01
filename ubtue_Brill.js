@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-01 11:18:25"
+	"lastUpdated": "2020-02-01 12:44:25"
 }
 
 /*
@@ -87,10 +87,9 @@ function postProcess(doc, item) {
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	let date = item.date;
 	//entry for scraping Berichtsjahr
-	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');//Z.debug(dateEntry)
-	let berichtsjahr = extractBerichtsjahr(dateEntry);//Z.debug(berichtsjahr)
-	let erscheinungsjahr = extractErscheingunssjahr(date);//Z.debug(erscheinungsjahr)
-	//
+	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');
+	let berichtsjahr = extractBerichtsjahr(dateEntry);
+	let erscheinungsjahr = extractErscheingunssjahr(date);
 	if (erscheinungsjahr !== berichtsjahr) {
 		item.date = extractBerichtsjahr(dateEntry);
 	} else {
@@ -106,8 +105,8 @@ function extractErscheingunssjahr(date) {
 }
 
 function extractBerichtsjahr(dateEntry) {
-	let extractDate = dateEntry.match(/([^\)]\d{4})\):/)[1].replace('(', '');
-	return extractDate;
+	let dateCandidate = dateEntry.match(/\(\s*(\d{4})\s*\):/);
+	return dateCandidate.length > 1 ? dateCandidate[1] : null;
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
