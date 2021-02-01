@@ -6,15 +6,15 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-05 15:15:00"
+	"lastUpdated": "2021-02-01 16:29:58"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	Copyright © 2020 Universitätsbibliothek Tübingen.  All rights reserved.
+	Copyright © 2021 Universitätsbibliothek Tübingen.  All rights reserved.
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
@@ -29,11 +29,11 @@
 */
 
 function detectWeb(doc, url) {
-    let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
-    if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
-          pkpLibraries.length >= 1))
-        return false;
-    else if (url.match(/article/)) return "journalArticle";
+	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
+	if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+		  pkpLibraries.length >= 1))
+		return false;
+	else if (url.match(/article/)) return "journalArticle";
 	else return false;
 }
 
@@ -53,23 +53,40 @@ function getSearchResults(doc) {
 
 
 function splitDotSeparatedKeywords(item) {
-    if (item.ISSN === "2340-0080" && item.tags.length) {
-        let split_tags = [];
-        for (const tags of item.tags)
-            split_tags.push(...tags.split('.'));
-        item.tags = split_tags;
-    }
-    return item.tags;
+	if (item.ISSN === "2340-0080" && item.tags.length) {
+		let split_tags = [];
+		for (const tags of item.tags)
+			split_tags.push(...tags.split('.'));
+		item.tags = split_tags;
+	}
+	return item.tags;
 }
+
+
+function getOrcids(doc) {
+	let authorSections = ZU.xpath(doc, '//ul[@class="authors-string"]/li');
+	for (let authorSection of authorSections) {
+		//Z.debug(authorSection);
+		let authorLink = ZU.xpath(authorSection, '//a[@class="author-string-href"]/span');
+		let orcidLink = ZU.xpath(authorSection, '//a[starts-with(@href, "https://orcid.org")]/@href');
+		if (authorLink && orcidLink) {
+		    let author = authorLink[0].innerText;
+		    let orcid = orcidLink[0].value.match(/\d+-\d+-\d+-\d+x?/i);
+		    return {note: "orcid:" + orcid + '|' + author};
+		}
+	}
+	return null;
+}
+
 
 // in some cases (issn == 1799-3121) the article's title is split in 2 parts
 function joinTitleAndSubtitle (doc, item) {
 	if (item.ISSN == '1799-3121') {
 		if (doc.querySelector(".subtitle")) {
 			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
-		}	
+		}
 	}
-	return item.title;
+    return item.title;
 }
 
 
@@ -84,22 +101,20 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
+		i.notes.push(getOrcids(doc))
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
-
 		// some journal assigns the volume to the date
 		if (i.ISSN == '1983-2850') {
 			if (i.date == i.volume) {
-				let datePath = doc.querySelector('.item.published');
-				if (datePath) {
-					let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
-					if (itemDate.length >= 2) {
-						i.date = itemDate[1];
-					}					
+			let datePath = doc.querySelector('.item.published');
+			if (datePath) {
+				let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
+				if (itemDate.length >= 2) {
+					i.date = itemDate[1];
 				}
-			} else i.date = '';
-		}
-		
+        	} else i.date = '';
+    	}
 		i.complete();
 	});
 	translator.translate();
