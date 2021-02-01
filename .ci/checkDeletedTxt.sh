@@ -4,7 +4,7 @@ SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . "$SCRIPT_DIR/helper.sh"
 cd "$SCRIPT_DIR"
 
-MASTER="origin/master"
+MASTER="master"
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 if [[ "$BRANCH" = "$MASTER" ]];then
