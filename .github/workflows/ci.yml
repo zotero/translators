@@ -10,9 +10,10 @@ jobs:
         with:
           submodules: true
       
-      # We're in a shallow single-branch clone, so get the origin/master HEAD and more history on
-      # the current branch so we can find the branch point
+      # We're in a shallow single-branch clone, so get the origin/master HEAD if not already on master
+      # and get more history on the current branch so we can find the branch point
       - run: git fetch origin master:master --depth=1
+        if: github.ref != 'refs/heads/master'
       - run: git fetch --update-shallow --depth=25 origin $(git rev-parse --abbrev-ref HEAD)
       
       - name: Install Node
