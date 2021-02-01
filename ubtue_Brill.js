@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-01-29 12:33:25"
+	"lastUpdated": "2020-02-01 11:18:25"
 }
 
 /*
@@ -106,8 +106,8 @@ function extractErscheingunssjahr(date) {
 }
 
 function extractBerichtsjahr(dateEntry) {
-	let extractDate = dateEntry.split('(')[1].split(')')[0];
-		return extractDate;
+	let extractDate = dateEntry.match(/([^\)]\d{4})\):/)[1].replace('(', '');
+	return extractDate;
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
