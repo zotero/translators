@@ -2,14 +2,14 @@
 	"translatorID": "b60e74db-2e5d-4b2a-94ac-f484737364b1",
 	"label": "ubtue_Open Journal Systems Multi-Wrapper",
 	"creator": "Madeesh Kannan",
-	"target": "/issue/view/|index.php/journal|index.php/eguzkilore/",
+	"target": "/issue/view/|index.php/journal/(?!article/view/)|index.php/eguzkilore/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 99,
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-30 08:51:16"
+	"lastUpdated": "2021-02-01 12:44:56"
 }
 
 /*
