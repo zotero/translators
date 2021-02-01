@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-02 12:18:25"
+	"lastUpdated": "2020-02-01 12:44:25"
 }
 
 /*
@@ -83,8 +83,30 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag) item.notes.push('LF');
-	if (!item.itemType)
+	// numbering issues with slash due to cataloguing rule
+	if (item.issue) item.issue = item.issue.replace('-', '/');
+	let date = item.date;
+	//entry for scraping Berichtsjahr
+	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');
+	let berichtsjahr = extractBerichtsjahr(dateEntry);
+	let erscheinungsjahr = extractErscheingunssjahr(date);
+	if (erscheinungsjahr !== berichtsjahr) {
+		item.date = extractBerichtsjahr(dateEntry);
+	} else {
+		item.date;
+	}
+  if (!item.itemType)
             item.itemType = "journalArticle";
+}
+
+function extractErscheingunssjahr(date) {
+	let publicationYear = date.trim().match(/\d{4}/)[0];
+	return publicationYear;
+}
+
+function extractBerichtsjahr(dateEntry) {
+	let dateCandidate = dateEntry.match(/\(\s*(\d{4})\s*\):/);
+	return dateCandidate.length > 1 ? dateCandidate[1] : null;
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
