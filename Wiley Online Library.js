@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 08:15:09"
+	"lastUpdated": "2021-02-02 09:08:13"
 }
 
 /*
@@ -101,9 +101,9 @@ function addPages (doc, item) {
 	// add pages manually if removed or not previously filled by BibTex translator
 	let pagePath = doc.querySelector('p.page-range');
 	if(pagePath && !item.pages) {
-		pagePath = pagePath.innerText.match(/\d+\-\d+/);
-		if (pagePath)
-			item.pages = pagePath;
+		let pagesMatch = pagePath.innerText.match(/\d+\-\d+/);
+		if (pagesMatch)
+			item.pages = pagesMatch;
 	}
 }
  
