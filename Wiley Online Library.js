@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-11 08:35:41"
+	"lastUpdated": "2021-01-28 09:16:03"
 }
 
 /*
@@ -97,6 +97,13 @@ function validatePageCount(item) {
 		item.pages = "";
 }
 
+function addPages (doc, item) {
+	// add pages manually if removed or not previously filled by BibTex translator
+	pagePath = doc.querySelector('p.page-range').innerText.match(/\d+\-\d+/);
+	if (pagePath && !item.pages)
+		item.pages = pagePath;
+}
+ 
 function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
@@ -380,6 +387,7 @@ function scrapeBibTeX(doc, url) {
 
 			processSubtitles(doc, item);
 			validatePageCount(item);
+			addPages(doc, item);
 
 			//attachments
 			item.attachments = [{
