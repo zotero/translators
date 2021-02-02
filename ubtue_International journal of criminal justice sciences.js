@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 09:41:05"
+	"lastUpdated": "2021-02-02 08:44:58"
 }
 
 /*
@@ -162,8 +162,15 @@ function doWeb(doc, url) {
 					return;
 				}
 				item.title = titleAndAuthors[0];
-				for (let author of extractAuthors(titleAndAuthors[1]))
-					item.creators.push(ZU.cleanAuthor(author));
+				for (let author of extractAuthors(titleAndAuthors[1])) {
+					// Address special cas  "author A & author B"
+					if (!author.includes('&')) {
+						item.creators.push(ZU.cleanAuthor(author));
+					} else {
+					   for (let splitAuthor of author.split('&'))
+					       item.creators.push(ZU.cleanAuthor(splitAuthor));
+					}
+				}
 				item.url = extractURL(entry);
 				item.DOI = extractDOI(entry);
 				item.date = extractYear(entry);
