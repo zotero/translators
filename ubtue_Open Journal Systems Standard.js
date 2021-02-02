@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-01 16:29:58"
+	"lastUpdated": "2021-02-02 14:26:04"
 }
 
 /*
@@ -70,9 +70,9 @@ function getOrcids(doc) {
 		let authorLink = ZU.xpath(authorSection, '//a[@class="author-string-href"]/span');
 		let orcidLink = ZU.xpath(authorSection, '//a[starts-with(@href, "https://orcid.org")]/@href');
 		if (authorLink && orcidLink) {
-		    let author = authorLink[0].innerText;
-		    let orcid = orcidLink[0].value.match(/\d+-\d+-\d+-\d+x?/i);
-		    return {note: "orcid:" + orcid + '|' + author};
+			let author = authorLink[0].innerText;
+			let orcid = orcidLink[0].value.match(/\d+-\d+-\d+-\d+x?/i);
+			return {note: "orcid:" + orcid + '|' + author};
 		}
 	}
 	return null;
@@ -86,7 +86,7 @@ function joinTitleAndSubtitle (doc, item) {
 			item.title = item.title + ' ' + doc.querySelector(".subtitle").textContent.trim();
 		}
 	}
-    return item.title;
+	return item.title;
 }
 
 
@@ -107,14 +107,15 @@ function invokeEMTranslator(doc) {
 		// some journal assigns the volume to the date
 		if (i.ISSN == '1983-2850') {
 			if (i.date == i.volume) {
-			let datePath = doc.querySelector('.item.published');
+				let datePath = doc.querySelector('.item.published');
+			}
 			if (datePath) {
 				let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
 				if (itemDate.length >= 2) {
 					i.date = itemDate[1];
 				}
-        	} else i.date = '';
-    	}
+			} else i.date = '';
+		}
 		i.complete();
 	});
 	translator.translate();
