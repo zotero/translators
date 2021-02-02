@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 08:44:58"
+	"lastUpdated": "2021-02-02 08:56:01"
 }
 
 /*
@@ -123,8 +123,9 @@ function extractDOI(entry) {
 	for (let anchor of anchors) {
 		 if (!anchor.href)
 			 continue;
-		 if (anchor.href.match(/doi.org\/\S+/))
-			 return anchor.href;
+		 let doiCandidate = anchor.href.match(/doi.org\/(\S+)/);
+		 if (doiCandidate && doiCandidate.length == 2)
+			 return doiCandidate[1];
 	}
 	return null;
 }
