@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-28 09:16:03"
+	"lastUpdated": "2021-02-02 08:15:09"
 }
 
 /*
@@ -99,9 +99,12 @@ function validatePageCount(item) {
 
 function addPages (doc, item) {
 	// add pages manually if removed or not previously filled by BibTex translator
-	pagePath = doc.querySelector('p.page-range').innerText.match(/\d+\-\d+/);
-	if (pagePath && !item.pages)
-		item.pages = pagePath;
+	let pagePath = doc.querySelector('p.page-range');
+	if(pagePath && !item.pages) {
+		pagePath = pagePath.innerText.match(/\d+\-\d+/);
+		if (pagePath)
+			item.pages = pagePath;
+	}
 }
  
 function scrapeBook(doc, url) {
