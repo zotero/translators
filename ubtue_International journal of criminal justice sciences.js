@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 09:30:18"
+	"lastUpdated": "2021-02-02 13:51:21"
 }
 
 /*
@@ -101,7 +101,22 @@ function extractVolume(entry) {
 
 
 function extractAuthors(authorLine) {
-	return authorLine.split(/,|\s+and\s+/);
+	let authorTokens = authorLine.split(/\s+and\s+/);
+	let authors = [];
+	// Extract authors on the left of and
+	for (let authorToken of authorTokens.slice(0,-1)) {
+	    authors = authorToken.split(/,/);
+	}
+	// We have to address weird inversions like "aut1_first aut1_last and aut2_last, aut2_first"
+	// So transpose if we have ', on the right side of the \"and\"'
+	if (authorTokens.length > 1) {
+	    if (authorTokens[authorTokens.length-1].includes(',')) {
+			authors.push(authorTokens[authorTokens.length-1].split(/,/).reverse().join(' '));
+		} else {
+			authors.push(authorTokens[authorTokens.length-1]);
+		}
+	}
+	return authors;
 }
 
 
@@ -169,7 +184,7 @@ function doWeb(doc, url) {
 						item.creators.push(ZU.cleanAuthor(author));
 					} else {
 					   for (let splitAuthor of author.split('&'))
-					       item.creators.push(ZU.cleanAuthor(splitAuthor));
+						   item.creators.push(ZU.cleanAuthor(splitAuthor));
 					}
 				}
 				item.url = extractURL(entry);
