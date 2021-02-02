@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-29 09:41:05"
+	"lastUpdated": "2021-02-02 09:30:18"
 }
 
 /*
@@ -123,8 +123,9 @@ function extractDOI(entry) {
 	for (let anchor of anchors) {
 		 if (!anchor.href)
 			 continue;
-		 if (anchor.href.match(/doi.org\/\S+/))
-			 return anchor.href;
+		 let doiCandidate = anchor.href.match(/doi.org\/(\S+)/);
+		 if (doiCandidate && doiCandidate.length == 2)
+			 return doiCandidate[1];
 	}
 	return null;
 }
@@ -162,8 +163,15 @@ function doWeb(doc, url) {
 					return;
 				}
 				item.title = titleAndAuthors[0];
-				for (let author of extractAuthors(titleAndAuthors[1]))
-					item.creators.push(ZU.cleanAuthor(author));
+				for (let author of extractAuthors(titleAndAuthors[1])) {
+					// Address special case  "author A & author B"
+					if (!author.includes('&')) {
+						item.creators.push(ZU.cleanAuthor(author));
+					} else {
+					   for (let splitAuthor of author.split('&'))
+					       item.creators.push(ZU.cleanAuthor(splitAuthor));
+					}
+				}
 				item.url = extractURL(entry);
 				item.DOI = extractDOI(entry);
 				item.date = extractYear(entry);
