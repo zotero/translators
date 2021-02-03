@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-09 03:35:55"
+	"lastUpdated": "2021-02-03 16:03:59"
 }
 
 // attr()/text() v2
@@ -338,6 +338,9 @@ function processRIS(doc, text) {
 
 		if (!item.title)
 			item.title = ZU.xpathText(doc, '//meta[@name="citation_title"]/@content');
+
+		if (item.pages && item.pages.match(/\d{5,}/))
+		    item.pages = "article " + item.pages;
 
 		getPDFLink(doc, function (pdfURL) {
 			if (pdfURL) {
