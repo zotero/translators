@@ -43,7 +43,7 @@ get_translators_to_check() {
 	# Pull request
 	else
 		# Gets parent commits. Either one or two hashes
-		parent_commits=($(git show --no-patch --format="%P" HEAD))
+		parent_commits=$(git show --no-patch --format="%P" HEAD)
 		echo "$parent_commits"
 		# Size of $parent_commits array
 		num_parent_commits=${#parent_commits[@]}
