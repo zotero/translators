@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 14:26:04"
+	"lastUpdated": "2021-02-02 15:41:35"
 }
 
 /*
@@ -101,7 +101,9 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
-		i.notes.push(getOrcids(doc));
+		let orcids = getOrcids(doc);
+		if (orcids)
+			i.notes.push(orcids);
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
