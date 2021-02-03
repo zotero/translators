@@ -44,7 +44,6 @@ get_translators_to_check() {
 	else
 		# Gets parent commits. Either one or two hashes
 		parent_commits=($(git show --no-patch --format="%P" HEAD))
-		echo "$parent_commits"
 		# Size of $parent_commits array
 		num_parent_commits=${#parent_commits[@]}
 		if [ $num_parent_commits -gt 1 ]; then
@@ -53,9 +52,7 @@ get_translators_to_check() {
 			TRANSLATORS_TO_CHECK=$(git diff HEAD^2 $branch_point --name-only | { grep -e "^[^/]*.js$" || true; })
 		else
 			first_parent=$(git rev-list --first-parent ^master HEAD | tail -n1)
-			echo "First parent is $first_parent"
 			branch_point=$(git rev-list "$first_parent^^!")
-			echo "Branch point is $branch_point"
 			TRANSLATORS_TO_CHECK=$(git diff $branch_point --name-only | { grep -e "^[^/]*.js$" || true; })
 		fi
 	fi
