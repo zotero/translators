@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-27 15:33:30"
+	"lastUpdated": "2021-02-04 09:33:30"
 }
 
 /*
@@ -178,7 +178,9 @@ function scrape(doc, url) {
 					}
 				}
 			}	
-			
+			// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
+			if (item.issue) item.issue = item.issue.replace('-', '/');
+
 			// Workaround while Sage hopefully fixes RIS for authors
 			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
