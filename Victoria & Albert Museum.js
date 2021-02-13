@@ -37,11 +37,12 @@
 
 function detectWeb(doc, url) {
 	if (url.includes("/item") != -1) {
-		return "artwork"
+		return "artwork";
 	}
 	else if (url.includes("/search") != -1) {
 		return "multiple";
 	}
+	return false;
 }
 
 function scrape(doc, url) {
@@ -127,6 +128,7 @@ function scrape(doc, url) {
 
 		item.complete();
 	});
+
 }
 
 function doWeb(doc, url) {
@@ -160,5 +162,6 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc, url);
 	}
+	return false;
 }
 
