@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-12 07:19:00"
+	"lastUpdated": "2021-02-13 10:09:29"
 }
 
 /*
@@ -379,7 +379,7 @@ function scrapePhoto(doc) {
 	item.date = meta.date || meta['date range'];
 	item.place = meta.location || meta['item location'];
 	item.archiveLocation = meta['series/control symbol'];
-	item.url = createPersistentLink(encodeURIComponent(meta.barcode), 'PSI');
+	item.url = createPersistentLink(encodeURIComponent(meta['item id']), 'PSI');
 
 	if (meta['related searches']) {
 		item.tags = meta['related searches'];
