@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-13 10:49:55"
+	"lastUpdated": "2021-02-13 11:39:57"
 }
 
 /*
@@ -403,6 +403,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://recordsearch.naa.gov.au/SearchNRetrieve/Interface/ViewImage.aspx?B=12048&S=4",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -419,6 +420,98 @@ var testCases = [
 						"mimeType": "image/jpeg"
 					}
 				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=PSI&Number=11404473",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Antarctica - A Gentoo penguin on Heard Island guards its nesting mate [photographic image]. 1 photographic negative: b&w, acetate",
+				"creators": [],
+				"date": "1949 - 1949",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "A1200, L11912",
+				"libraryCatalog": "National Archives of Australia",
+				"manuscriptType": "photograph",
+				"place": "Canberra",
+				"shortTitle": "Antarctica - A Gentoo penguin on Heard Island guards its nesting mate [photographic image]. 1 photographic negative",
+				"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=PSI&Number=11404473",
+				"attachments": [
+					{
+						"title": "Digital image of NAA: A1200, L11912",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"defer": true,
+		"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=149309",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "The Wragge Estate. Property for sale.",
+				"creators": [],
+				"date": "1917 - 1917",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "A2479, 17/1306",
+				"libraryCatalog": "National Archives of Australia",
+				"manuscriptType": "item",
+				"place": "Canberra",
+				"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=I&Number=149309",
+				"attachments": [
+					{
+						"title": "National Archives of Australia item PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=S&Number=A2",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Correspondence files, annual single number series",
+				"creators": [
+					{
+						"lastName": "CA 588, Prime Minister's Office",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "CA 12, Prime Minister's Department",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "01 Jan 1895 - 31 Dec 1926",
+				"abstractNote": "Name Index Volumes, 1917-1951 (ex CP 602/1, AS12/8)",
+				"archive": "National Archives of Australia",
+				"archiveLocation": "A2",
+				"libraryCatalog": "National Archives of Australia",
+				"manuscriptType": "series",
+				"place": "35.74 metres held in ACT",
+				"url": "https://recordsearch.naa.gov.au/scripts/AutoSearch.asp?O=S&Number=A2",
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
