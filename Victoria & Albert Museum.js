@@ -36,8 +36,12 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/item") != -1) return "artwork";
-	else if (url.includes("/search") != -1) return "multiple";
+	if (url.includes("/item") != -1) {
+      return "artwork"
+    }
+	else if (url.includes("/search") != -1) {
+      return "multiple";
+    }
 }
 
 function scrape(doc, url) {
@@ -51,7 +55,8 @@ function scrape(doc, url) {
 		if (data.titles.length > 0) {
 		 item.title = data.titles[0].title;
 		 item.shortTitle = data.objectType;
-		} else if (data.objectType !== "") {
+		}
+		else if (data.objectType !== "") {
 			item.title = data.objectType;
 			item.shortTitle = data.objectType;
 		}
@@ -61,7 +66,7 @@ function scrape(doc, url) {
 		item.artworkSize = data.dimensionsNote;
 		if(data.productionDates.length > 1) {
 		  item.date = data.productionDates[0].date.text + " and further dates";
-		} else if(data.productionDates.length > 0) {
+        } else if(data.productionDates.length > 0) {
 		  item.date = data.productionDates[0].date.text;
 		}
 
@@ -73,14 +78,14 @@ function scrape(doc, url) {
 
 
 		var artistMakerPerson = data.artistMakerPerson;
-		for(var i = 0; i < artistMakerPerson.length; i++) {
+		for (var i = 0; i < artistMakerPerson.length; i++) {
 			// This is not ideal and assume surname, firstnames convention is correct
 			var fullName = artistMakerPerson[i].name.text;
 			var lastComma = fullName.lastIndexOf(",");
 			var firstName = "";
 			var lastName = "";
 
-			if(lastComma > 0) {
+			if (lastComma > 0) {
 				lastName = fullName.substring(0, lastComma);
 				firstName = fullName.substring(lastComma + 1);
 			}
@@ -130,7 +135,7 @@ function doWeb(doc, url) {
 
 		var items = ZU.xpath(doc, '//figure[contains(@class, "b-object-card--etc")]//a');
 
-		if (items.length<1){
+		if (items.length < 1) {
 			// TODO - other multiples
 			return false;
 		}
@@ -149,7 +154,8 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			Zotero.Utilities.processDocuments(articles, scrape);
-		});
+		}
+		);
 	} else {
 		scrape(doc, url);
 	}
