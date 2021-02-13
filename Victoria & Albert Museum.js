@@ -128,7 +128,6 @@ function scrape(doc, url) {
 
 		item.complete();
 	});
-
 }
 
 function doWeb(doc, url) {
@@ -156,6 +155,7 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			Zotero.Utilities.processDocuments(articles, scrape);
+			return false;
 		}
 		);
 	}
