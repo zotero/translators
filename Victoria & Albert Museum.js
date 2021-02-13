@@ -37,11 +37,11 @@
 
 function detectWeb(doc, url) {
 	if (url.includes("/item") != -1) {
-      return "artwork"
-    }
+		return "artwork"
+	}
 	else if (url.includes("/search") != -1) {
-      return "multiple";
-    }
+		return "multiple";
+	}
 }
 
 function scrape(doc, url) {
@@ -53,8 +53,8 @@ function scrape(doc, url) {
 		var data = museumobject.record;
 		var item = new Zotero.Item("artwork");
 		if (data.titles.length > 0) {
-		 item.title = data.titles[0].title;
-		 item.shortTitle = data.objectType;
+			item.title = data.titles[0].title;
+			item.shortTitle = data.objectType;
 		}
 		else if (data.objectType !== "") {
 			item.title = data.objectType;
@@ -64,10 +64,11 @@ function scrape(doc, url) {
 		item.abstractNote = data.briefDescription;
 		item.medium = data.materialsAndTechniques;
 		item.artworkSize = data.dimensionsNote;
-		if(data.productionDates.length > 1) {
-		  item.date = data.productionDates[0].date.text + " and further dates";
-        } else if(data.productionDates.length > 0) {
-		  item.date = data.productionDates[0].date.text;
+		if (data.productionDates.length > 1) {
+			item.date = data.productionDates[0].date.text + " and further dates";
+		}
+		else if (data.productionDates.length > 0) {
+			item.date = data.productionDates[0].date.text;
 		}
 
 		item.archive = data.collectionCode.text;
@@ -93,7 +94,7 @@ function scrape(doc, url) {
 				firstName = fullName;
 			}
 
-	   		item.creators.push({
+			item.creators.push({
 				lastName: lastName,
 				firstName: firstName,
 				creatorType: "author"
@@ -101,8 +102,8 @@ function scrape(doc, url) {
 		}
 
 		var artistMakerPeople = data.artistMakerPeople;
-		for(var j = 0; j < artistMakerPeople.length; j++) {
-	   		item.creators.push({
+		for (var j = 0; j < artistMakerPeople.length; j++) {
+			item.creators.push({
 				lastName: artistMakerPeople[j].name.text,
 				fieldMode: "1",
 				creatorType: "author"
@@ -110,8 +111,8 @@ function scrape(doc, url) {
 		}
 
 		var artistMakerOrganisations = data.artistMakerOrganisations;
-		for(var k = 0; k < artistMakerOrganisations.length; k++) {
-	   		item.creators.push({
+		for (var k = 0; k < artistMakerOrganisations.length; k++) {
+			item.creators.push({
 				lastName: artistMakerOrganisations[k].name.text,
 				fieldMode: "1",
 				creatorType: "author"
@@ -127,7 +128,6 @@ function scrape(doc, url) {
 		item.complete();
 	});
 }
-
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
@@ -156,7 +156,8 @@ function doWeb(doc, url) {
 			Zotero.Utilities.processDocuments(articles, scrape);
 		}
 		);
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
