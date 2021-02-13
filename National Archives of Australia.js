@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-19 02:58:21"
+	"lastUpdated": "2021-01-12 07:19:00"
 }
 
 /*
@@ -237,7 +237,7 @@ function parseItemTable(table) {
 function scrapeItem(doc) {
 	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
 	if (!meta) return null;
-	
+
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
 	item.type = 'item';
@@ -248,7 +248,7 @@ function scrapeItem(doc) {
 	item.archiveLocation = series + ', ' + control;
 	item['access status'] = meta['access status'];
 	item['access decision'] = meta['date of decision'];
-	var barcode = encodeURIComponent(meta['item barcode']);
+	var barcode = encodeURIComponent(meta['item id']);
 	item.url = createPersistentLink(barcode, 'I');
 
 	if (meta['item notes']) {
@@ -276,7 +276,7 @@ function scrapeItem(doc) {
 function scrapeSeries(doc) {
 	var meta = parseItemTable(ZU.xpath(doc, '//div[@class="detailsTable"]//tbody')[0]);
 	if (!meta) return null;
-	
+
 	var item = new Zotero.Item('manuscript');
 	item.title = meta.title;
 	item.type = 'series';
