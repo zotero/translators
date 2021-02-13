@@ -167,32 +167,32 @@ function doWeb(doc, url) {
 
 /** BEGIN TEST CASES **/
 var testCases = [
-        {
-                "type": "web",
-                "url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co/",
-                "items": [
-                        {
-                                "itemType": "artwork",
-                                "title": "'Ripple' pattern",
-                                "creators": [],
-                                "date": "ca. 1914 and further dates",
-							    "abstract": "Vase of glass, made by Imperial Glass Company, Ohio, c. 1914-25",
-                                "artworkMedium": "Clay",
-                                "artworkSize": "",
-                                "callNumber": "C.32-1992",
-                                "libraryCatalog": "Victoria & Albert Museum",
-                                "shortTitle": "Vase",
-                                "url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co",
-                                "attachments": [
-                                        {
-                                                "title": "Explore the Collections (snapshot)"
-                                        }
-                                ],
-                                "tags": [],
-                                "notes": [],
-                                "seeAlso": []
-                        }
-                ]
-        }
-];
+	{
+		"type": "web",
+		"url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co/",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "'Ripple' pattern",
+				"creators": [],
+				"date": "ca. 1914 and further dates",
+				"abstract": "Vase of glass, made by Imperial Glass Company, Ohio, c. 1914-25",
+				"artworkMedium": "Clay",
+				"artworkSize": "",
+				"callNumber": "C.32-1992",
+				"libraryCatalog": "Victoria & Albert Museum",
+				"shortTitle": "Vase",
+				"url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co",
+				"attachments": [
+					{
+						"title": "Explore the Collections (snapshot)"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
 
