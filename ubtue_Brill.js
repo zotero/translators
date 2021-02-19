@@ -82,7 +82,7 @@ function postProcess(doc, item) {
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag) item.notes.push('LF');
+	if (openAccessTag) item.notes.push('LF:');
 	// numbering issues with slash due to cataloguing rule
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	let date = item.date;
