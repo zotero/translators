@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-06-03 15:12:35"
+	"lastUpdated": "2021-02-21 16:18:09"
 }
 
 /*
@@ -587,8 +587,19 @@ function finalize(doc, url, item) {
 		title: "Snapshot",
 		document: doc
 	}];
+	
+	var perma = ZU.xpathText(doc, '//div[@class="doc-link"]/a/@href');
+	if (perma) {
+		item.attachments.push({
+			title: "beck-online Link",
+			url: perma,
+			snapshot: false
+		});
+	}
+	
 	item.complete();
 }
+
 
 
 /** BEGIN TEST CASES **/
