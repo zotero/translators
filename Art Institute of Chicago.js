@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-22 19:12:15"
+	"lastUpdated": "2021-02-22 19:17:08"
 }
 
 /*
@@ -56,6 +56,7 @@ function doWeb(doc) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
+			return true;
 		});
 	} else {
 		scrape(doc);
