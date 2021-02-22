@@ -2,14 +2,14 @@
 	"translatorID": "8e98b11a-5648-42b2-8542-5f366cb953f6",
 	"label": "Art Institute of Chicago",
 	"creator": "nikhil trivedi, Illya Moskvin",
-	"target": "^https?://(www.)?artic.edu/artworks/.*",
+	"target": "^https?://(www\\.)?artic\\.edu/(artworks/|collection)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-18 21:51:25"
+	"lastUpdated": "2021-02-22 19:12:15"
 }
 
 /*
@@ -39,11 +39,27 @@ function detectWeb(doc) {
 	if (ZU.xpathText(doc, '//html[contains(@class, "p-artwork-show")]')) {
 		return 'artwork';
 	}
+	else if (ZU.xpathText(doc, '//html[contains(@class, "p-collection-index")]')) {
+		return 'multiple';
+	}
 	return false;
 }
 
 function doWeb(doc) {
-	scrape(doc);
+	if (detectWeb(doc) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (!items) {
+				return true;
+			}
+			var articles = [];
+			for (var i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+		});
+	} else {
+		scrape(doc);
+	}
 }
 
 function scrape(doc) {
@@ -75,6 +91,21 @@ function scrape(doc) {
 	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href');
 
 	item.complete();
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = ZU.xpath(doc, '//ul[@id="artworksList"]/li/a');
+	for (var i=0; i<rows.length; i++) {
+		var href = rows[i].href;
+		var title = ZU.trimInternal(rows[i].textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 /** BEGIN TEST CASES **/
