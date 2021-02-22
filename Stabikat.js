@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-02-20 21:30:35"
+	"lastUpdated": "2021-02-22 15:49:26"
 }
 
 /*
@@ -40,16 +40,11 @@ function attr(docOrElem, selector, attr, index) {
 	return elem ? elem.getAttribute(attr) : null;
 }
 
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
-
 function detectWeb(doc, url) {
-	if (url.indexOf('ACT=SRCH') != -1 && getSearchResults(doc, true)) {
+	if (url.includes('ACT=SRCH') && getSearchResults(doc, true)) {
 		return 'multiple';
-	} else{
+	} 
+  else {
 		var type = attr(doc, "#maticon", "alt");
 		switch (type) {
 			case 'Bücher':
@@ -82,11 +77,11 @@ function detectWeb(doc, url) {
 				return 'Datenträger';
 			case 'E-Books/Online Ressourcen':
 			case 'Online resources (without periodicals)':
-				// periodicals -- in contrast to their articals -- will use book-entries, as there is no specific type
+				// periodicals -- in contrast to their articles -- will use book-entries, as there is no specific type
 				return 'book';
 			case 'Kartenmaterial':
 			case 'Cartography':
-			return 'map';
+				return 'map';
 			case 'Mikroformen':
 			case 'Microfilm':
 				return 'microfilm';
@@ -160,8 +155,6 @@ function scrape(doc, url) {
 	fetchJson(ppn, type, false);
 }
 
-
-
 function jsonParse(json, type) {
 	// parsing is directed according to  the documentation of fields in: https://swbtools.bsz-bw.de/cgi-bin/k10plushelp.pl?cmd=pplist&katalog=Standard&val=-1&adm=0
 	switch(type){
@@ -230,7 +223,7 @@ function jsonParse(json, type) {
 					newItem.complete();
 					break;
 				case "prm" || "snd" || "spw":
-					newItem = generalParser(json, "audioRecording")
+					newItem = generalParser(json, "audioRecording");
 					newItem.complete();
 					break;
 				case "crf" || "crm" || "crd" || "crn" || "cri" || "crt":
@@ -297,7 +290,7 @@ function articleParse(json, newItem) {
 				}
 			}
 			//principal authors
-			else if (json[i][0] === "028A") { //multiple authors are to be seperated by a newline
+			else if (json[i][0] === "028A") { //multiple authors have to be seperated by a newline
 				
 				for (j = 0; j < json[i].length; j++) {
 					if (json[i][j] == 'A' || json[i][j] == 'a'){
@@ -350,7 +343,6 @@ function articleParse(json, newItem) {
 				var contributorFirstName = '';
 				var contributorLastName = '';
 				var contributorType = 'a';
-				console.log("found field");
 				for (j = 0; j < json[i].length; j++){
 					if (json[i][j] === 'B'){
 						contributorType = json[i][j+1];
@@ -390,11 +382,12 @@ function articleParse(json, newItem) {
 									lastName: contributorLastName,
 									creatorType: "author"
 								})
-							} else { 
+							} else {
+								let extraTmp = `${contributorFirstName} ${contributorLastName}${contributorType?`(${contributorType})`:''}`
 								if (newItem.extra == null){
-									newItem.extra = contributorFirstName + ' ' + contributorLastName + ' (' + contributorType + ')';
+									newItem.extra = extraTmp
 								} else {
-									newItem.extra += '\n' + contributorFirstName + ' ' + contributorLastName + ' (' + contributorType + ')';
+									newItem.extra += '\n' + extraTmp;
 								}
 							}
 						}
@@ -775,7 +768,7 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 		}
 		// Classification-Data (in an note)
 
-		/*Getting classification data of different library classification systems in a csv format*/
+		/*Getting classification data of different library classification systems*/
 		//LCC-classification - not necessarily present in the data
 		else if (json[i][0] === "045A"){ 
 			for (j = 0; j < json[i].length; j++){
@@ -859,11 +852,9 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 		note:classificationNote,
 		title:"Classification Data"
 	});
-	console.log(zoterotype)
 	switch(zoterotype){
 		case 'bookSection':
 		case 'article':
-			console.log("before articleparse", referencingWorkJson);
 			if (referencingWorkJson) {
 				newItem = articleParse(referencingWorkJson, newItem);
 			}
@@ -871,20 +862,8 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 		case 'film':
 			newItem = filmParse(json, newItem);
 			return newItem
-		case 'audioRecording':
-			newItem = audioParse(json, newItem);
-			return newItem
-		case 'map':
-			newItem = mapParse(json, newItem);
-			return newItem
-		case 'music':
-			newItem = musicParse(json, newItem);
-			return newItem
 		case "artwork":
 			newItem = artParse(json, newItem)
-			return newItem
-		case "manuscript":
-			newItem = manuscriptParse(json, newItem)
 			return newItem
 		default:
 			return newItem
@@ -934,21 +913,120 @@ function filmParse(json, newItem){
 		}
   }
   return newItem
-}
-
-function audioParse(json, newItem){
-  return newItem
-}
-
-function mapParse(json, newItem){
-  return newItem
-}
-
-function musicParse(json, newItem){
-  return newItem
-}
-
-function manuscriptParse(json, newItem){
-  return newItem
-}
-
+}/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=1737430592",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Die Spur der Gesellschaft: Reflexionen zur Gesellschaftstheorie nach Luhmann",
+				"creators": [
+					{
+						"firstName": "Tobias",
+						"lastName": "Arenz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"ISBN": "9783748911661",
+				"edition": "Erste Auflage",
+				"extra": "Hochschulschrift\nDissertation (Deutsche Sporthochschule Köln, 2019)\nAngesichts gegenwärtiger Krisenerfahrungen erlebt die Soziologie ein comeback des Gesellschaftsbegriffs. Hatte man diesen zunächst verabschiedet, weil seine häufig normativ überfrachteten Ganzheitsvorstellungen dem pluralistischen Anspruch der westlichen Welt nicht gerecht wurden, so stellt sich heute erneut die Frage nach der Einheit des Sozialen. Das Problem mit radikalem Fokus gerade auf die Differenz des Sozialen zu bearbeiten, war Niklas Luhmanns Strategie. Seine Systemtheorie sollte Gesellschaft möglichst abstrakt und komplexitätsbewusst beschreiben. Ihr formal-funktionalistischer Blick kann den neuen Herausforderungen jedoch nicht mehr adäquat begegnen. Tobias Arenz’ These lautet deshalb, dass Luhmann zu überwinden ist – jedoch von innen heraus, um nicht hinter ihn zurückzufallen. Entscheidend dafür ist die Reflexion der impliziten Normativität der Systemtheorie, die im Anschluss an das Theorieprogramm Mediale Moderne und das formkritische Rechtsverständnis Christoph Menkes erfolgt. Die Studie entwickelt dergestalt ein neues, mit Pluralität zu vereinbarendes Normativitätskonzept. Ihre hochaktuelle Pointe lautet, dass jede wissenschaftliche Analyse sozialer Verhältnisse notwendig innerhalb eines normativen gesellschaftstheoretischen Rahmens durchgeführt wird, der in der Moderne inhaltlich durch die interne Verknüpfung von Freiheit und Herrschaft bestimmt ist.",
+				"libraryCatalog": "Stabikat",
+				"numPages": "1 Online-Ressource (266 Seiten)",
+				"place": "Weilerswist",
+				"publisher": "Velbrück Wissenschaft",
+				"shortTitle": "Die Spur der Gesellschaft",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "BK: '71.02', '71.11'\n ",
+						"title": "Classification Data"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=649879910",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Systemtheoretische Literaturwissenschaft: Begriffe - Methoden - Anwendungen",
+				"creators": [],
+				"date": "2011",
+				"ISBN": "9783110219012",
+				"extra": "Niels Werber\nIncludes bibliographical references\nThis handbook gives an overview of systems theory in the field of literature, culture and media studies. The individual entries provide an introduction to the key concepts and problems in such a way that their added heuristic value becomes clear, without requiring a detailed understanding of the whole architecture of Luhmann's theory for this purpose. The book tests these concepts and problems in exemplary applications and thus demonstrates how works of art, texts and media can be observed in concrete individual analyses from a systems-theoretical perspective",
+				"libraryCatalog": "Stabikat",
+				"numPages": "Online-Ressource (IX, 514 S.))",
+				"place": "Berlin [u.a.]",
+				"publisher": "de Gruyter",
+				"shortTitle": "Systemtheoretische Literaturwissenschaft",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "LCC: 'PN6231.S93'\nDDC: '809.001/1'\n RVK: 'EC 1850', 'EC 1820', 'EC 1680'\n",
+						"title": "Classification Data"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=1693565242",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The Dark Energy Survey: the story of a cosmological experiment",
+				"creators": [
+					{
+						"firstName": "Ofer",
+						"lastName": "Lahav",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Lucy",
+						"lastName": "Calder",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Julian",
+						"lastName": "Mayers",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Joshua A.",
+						"lastName": "Frieman",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2021",
+				"ISBN": "9781786348357",
+				"callNumber": "10 A 109104",
+				"extra": "Aufsatzsammlung\nOfer Lahav(HerausgeberIn)\nLucy Calder(HerausgeberIn)\nJulian Mayers(HerausgeberIn)\nJoshua A. Frieman(HerausgeberIn)\nIncludes bibliographical references and index\n\"This book is about the Dark Energy Survey, a cosmological experiment designed to investigate the physical nature of dark energy by measuring its effect on the expansion history of the universe and on the growth of large-scale structure. The survey saw first light in 2012, after a decade of planning, and completed observations in 2019. The collaboration designed and built a 570-megapixel camera and installed it on the four-metre Blanco telescope at the Cerro Tololo Inter-American Observatory in the Chilean Andes. The survey data yielded a three-dimensional map of over 300 million galaxies and a catalogue of thousands of supernovae. Analysis of the early data has confirmed remarkably accurately the model of cold dark matter and a cosmological constant. The survey has also offered new insights into galaxies, supernovae, stellar evolution, solar system objects and the nature of gravitational wave events. A project of this scale required the long-term commitment of hundreds of scientists from institutions all over the world. The chapters in the first three sections of the book were either written by these scientists or based on interviews with them. These chapters explain, for a non-specialist reader, the science analysis involved. They also describe how the project was conceived, and chronicle some of the many and diverse challenges involved in advancing our understanding of the universe. The final section is trans-disciplinary, including inputs from a philosopher, an anthropologist, visual artists and a poet. Scientific collaborations are human endeavours and the book aims to convey a sense of the wider context within which science comes about. This book is addressed to scientists, decision makers, social scientists and engineers, as well as to anyone with an interest in contemporary cosmology and astrophysics\"--",
+				"libraryCatalog": "Stabikat",
+				"numPages": "xxii, 421 Seiten",
+				"place": "Tokyo",
+				"publisher": "World Scientific Publishing",
+				"shortTitle": "The Dark Energy Survey",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "LCC: 'QB791.3'\nDDC: '523.01'\nBK: '39.30'\n RVK: 'US 3460'\n",
+						"title": "Classification Data"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
