@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-01 08:54:55"
+	"lastUpdated": "2021-02-24 16:03:16"
 }
 
 /*
@@ -37,7 +37,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
+	if (url.match(/\/doi\/(abs|full|figure|)\/10\./)) {
 		return "journalArticle";
 	} else if ((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -147,6 +147,7 @@ function scrape(doc, url) {
 }
 
 
+
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
@@ -164,7 +165,23 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		if (sectionheading.match(/^(Book )?Reviews?$/i))
 			item.tags.push("Book Reviews");
 	}
-
+	
+	// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
+	if (item.issue) item.issue = item.issue.replace('-', '/');
+	
+	//scraping orcid number 
+	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');
+	for (let authorSectionEntry of authorSectionEntries) {
+		let authorInfo = authorSectionEntry.textContent; //Z.debug(authorInfo)
+		if (authorInfo.match(/\d+-\d+-\d+-\d+x?/i)) {
+			let authorAffilation = authorInfo.split('Correspondence')[0];
+			let orcid = authorInfo.match(/\d+-\d+-\d+-\d+x?/i);
+			 item.notes.push({note: "orcid:" + orcid + '|' + authorAffilation});
+		}
+	}
+	//deduplicate
+	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+	
 	//add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
