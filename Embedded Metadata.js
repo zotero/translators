@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2021-02-22 17:03:16"
 }
 
 /*
@@ -393,7 +393,7 @@ function addHighwireMetadata(doc, newItem) {
 	for(var i=0, n=authorNodes.length; i<n; i++) {
 		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
 		if (authors.length == 1 && authorNodes.length == 1) {
-			/* If there is only one author node and 
+			/* If there is only one author node and
 			 we get nothing when splitting by semicolon, and at least two words on
 			 either side of the comma when splitting by comma, we split by comma. */
 			var authorsByComma = authors[0].split(/\s*,\s*/);
@@ -450,17 +450,14 @@ function addHighwireMetadata(doc, newItem) {
 
 	//Deal with tags in a string
 	//we might want to look at the citation_keyword metatag later
-	if(!newItem.tags || !newItem.tags.length) {
-		var tags = getContent(doc, 'citation_keywords');
-		newItem.tags = [];
-		for(var i=0; i<tags.length; i++) {
-			var tag = tags[i].textContent.trim();
-			if(tag) {
-				var splitTags = tag.split(';');
-				for(var j=0; j<splitTags.length; j++) {
-					if(!splitTags[j].trim()) continue;
-					newItem.tags.push(splitTags[j].trim());
-				}
+	var tags = getContent(doc, 'citation_keywords');
+	for(var i=0; i<tags.length; i++) {
+		var tag = tags[i].textContent ? tags[i].textContent.trim() : null;
+		if(tag) {
+			var splitTags = tag.split(';');
+			for(var j=0; j<splitTags.length; j++) {
+				if(!splitTags[j].trim()) continue;
+				newItem.tags.push(splitTags[j].trim());
 			}
 		}
 	}
@@ -484,7 +481,7 @@ function addHighwireMetadata(doc, newItem) {
 	if(!newItem.date) {
 		var onlineDate = getContentText(doc, 'citation_online_date');
 		var citationYear = getContentText(doc, 'citation_year');
-		
+
 		if (onlineDate && citationYear) {
 			onlineDate = ZU.strToISO(onlineDate);
 			if (citationYear < onlineDate.substr(0,4)) {
@@ -626,9 +623,9 @@ function addLowQualityMetadata(doc, newItem) {
 		}
 	}
 	//fall back to "keywords"
-	if(!newItem.tags.length) {
-		 newItem.tags = ZU.xpathText(doc, '//x:meta[@name="keywords"]/@content', namespaces);
-	}
+    let keywords = ZU.xpathText(doc, '//x:meta[@name="keywords"]/@content', namespaces);
+    if (keywords)
+        newItem.tags.push(keywords);
 
 	//We can try getting abstract from 'description'
 	if(!newItem.abstractNote) {
@@ -639,7 +636,7 @@ function addLowQualityMetadata(doc, newItem) {
 	if(!newItem.url) {
 		newItem.url = ZU.xpathText(doc, '//head/link[@rel="canonical"]/@href') || doc.location.href;
 	}
-	
+
 	if (!newItem.language) {
 		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces) ||
 			ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces) ||
@@ -662,7 +659,7 @@ function tryOgAuthors(doc) {
 	var authors = [];
 	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
 	for (var i = 0; i<ogAuthors.length; i++) {
-		
+
 		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z\.-]+\.[a-z\.]{2,6}/) < 0 && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"))
 		}
@@ -826,7 +823,7 @@ function finalDataCleanup(doc, newItem) {
 			for (var i=0; i<tags.length; i++) {
 				if (tags[i] === "") tags.splice(i, 1);
 			}
-			newItem.tags = tags;
+			newItem.tags = tags.length ? [...(new Set(tags.map(keyword => keyword.trim())))] : [];
 		}
 	} else {
 		// Unless called from another translator, don't include automatic tags,
