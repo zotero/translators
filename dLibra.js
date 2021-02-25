@@ -15,7 +15,7 @@
 /*
    dLibra Translator
    Copyright (C) 2010 Pawel Kolodziej, p.kolodziej@gmail.com
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -34,73 +34,72 @@
 
 
 function detectWeb(doc, url) {
-	
+
 	var singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	var multipleRe = /.*dlibra\/(collectiondescription|results).*|.*\/dlibra\/?/;
-	if (singleRe.test(url)) 
-		return "book"; 
-	if (multipleRe.test(url)) 
+	if (singleRe.test(url))
+		return "book";
+	if (multipleRe.test(url))
 		return "multiple";
 }
 
 
- 
-
 function doWeb(doc, url) {
-	if (detectWeb(doc,url)=="multiple"){
+	if (detectWeb(doc, url) == "multiple") {
 
-var articles = new Array();
+		var articles = new Array();
 		var itemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
-		var titles = doc.evaluate(itemsXPath, doc, null, XPathResult.ANY_TYPE, null); 
+		var titles = doc.evaluate(itemsXPath, doc, null, XPathResult.ANY_TYPE, null);
 		var title;
-		var items= {};
-		while (title = titles.iterateNext()){
-			items[title.href] = title.textContent;}
-		
-	Zotero.selectItems(items, function (items) {
+		var items = {};
+		while (title = titles.iterateNext()) {
+			items[title.href] = title.textContent;
+		}
+
+		Zotero.selectItems(items, function (items) {
 			if (!items) {
 				return true;
 			}
 			for (var i in items) {
-			
+
 				articles.push(i);
 			}
-			Zotero.Utilities.processDocuments(articles, scrape);	
+			Zotero.Utilities.processDocuments(articles, scrape);
 		});
 	} else
 		scrape(doc, url);
-	
+
 }
 
-function scrape(doc, url)
-{
-	var reSingle= new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");	
+function scrape(doc, url) {
+	var reSingle = new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");
 	var m = reSingle.exec(url);
 	if (!m)
 		return "";
 	var baseUrl = m[1];
 	var id = m[2];
 	var isPIA = baseUrl.match("lib.pia.org.pl|cyfrowaetnografia.pl");
-	Zotero.Utilities.HTTP.doGet( baseUrl + "/rdf.xml?type=e&id="+id, function(rdf){
-		
+	Zotero.Utilities.HTTP.doGet(baseUrl + "/rdf.xml?type=e&id=" + id, function (rdf) {
+
 		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
 		//Z.debug(rdf)
 		var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
-			translator.setString(rdf);
-			translator.setHandler("itemDone", function (obj, item) {
-				if (item.extra) item.notes.push(item.extra);
-				item.extra = "";
-				item.itemID = "";
-				item.complete();
-			});
-			translator.getTranslatorObject(function(trans) {
-				trans.defaultUnknownType = 'book';
-				trans.doImport();
+		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
+		translator.setString(rdf);
+		translator.setHandler("itemDone", function (obj, item) {
+			if (item.extra) item.notes.push(item.extra);
+			item.extra = "";
+			item.itemID = "";
+			item.complete();
 		});
-		
+		translator.getTranslatorObject(function (trans) {
+			trans.defaultUnknownType = 'book';
+			trans.doImport();
+		});
+
 	})
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
