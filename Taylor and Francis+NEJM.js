@@ -37,7 +37,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/doi\/(abs|full|figure|)\/10\./)) {
+	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
 		return "journalArticle";
 	} else if ((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
 		return "multiple";
