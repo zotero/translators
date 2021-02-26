@@ -13,30 +13,38 @@
 }
 
 /*
-   dLibra Translator
-   Copyright (C) 2010 Pawel Kolodziej, p.kolodziej@gmail.com
+	***** BEGIN LICENSE BLOCK *****
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation, either version 3 of the License, or
-   (at your option) any later version.
+	Copyright © 2021 Pawel Kolodziej, Kamil Gronowski
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+	This file is part of Zotero.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
 */
 
 function detectWeb(doc, url) {
 	let singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	let multipleRe = /.*dlibra\/(collectiondescription|results|planned).*|.*\/dlibra\/?/;
-	if (singleRe.test(url))
+	if (singleRe.test(url)) {
 		return "document";
-	if (multipleRe.test(url))
+	}
+	if (multipleRe.test(url)) {
 		return "multiple";
+	}
+	return false;
 }
 
 function doWeb(doc, url) {
@@ -50,12 +58,14 @@ function doWeb(doc, url) {
 				let item = titles.snapshotItem(i);
 				items[item.href] = item.textContent;
 			}
-		} else {
+		}
+		else {
 			let dlibra6ItemsXPath = '//h2[@class="objectbox__text--title"]';
 			titles = doc.evaluate(dlibra6ItemsXPath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
 			for (let i = 0, length = titles.snapshotLength; i < length; ++i) {
 				let item = titles.snapshotItem(i);
-				if (item.getAttribute('title')) { //skip Similar in FBC
+				// skip 'Similar in FBC'
+				if (item.getAttribute('title')) {
 					items[item.firstElementChild.getAttribute('href')] = item.getAttribute('title');
 				}
 			}
@@ -70,10 +80,13 @@ function doWeb(doc, url) {
 				objects.push(i);
 			}
 			ZU.processDocuments(objects, scrape);
+			return false;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
+	return false;
 }
 
 function scrape(doc, url) {
@@ -81,7 +94,8 @@ function scrape(doc, url) {
 	let m = reDlibra5Single.exec(url);
 	if (m) {
 		dlibra5Scrape(m[1], m[2]);
-	} else {
+	}
+	else {
 		dlibra6Scrape(doc, url);
 	}
 }
@@ -90,7 +104,8 @@ function dlibra5Scrape(baseUrl, id) {
 	ZU.HTTP.doGet(baseUrl + "/rdf.xml?type=e&id=" + id, function (rdf) {
 		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
 		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f"); // RDF importer
+		// RDF importer
+		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setString(rdf);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (item.extra) item.notes.push(item.extra);
@@ -107,7 +122,8 @@ function dlibra5Scrape(baseUrl, id) {
 
 function dlibra6Scrape(doc, url) {
 	let translator = Zotero.loadTranslator('web');
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // Embedded Metadata
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
 	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
