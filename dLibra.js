@@ -167,11 +167,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://cyfrowa.bibliotekakolbuszowa.pl/dlibra/results?action=SearchAction&skipSearch=true&mdirids=1&server%3Atype=both&tempQueryType=-3&encode=false&isExpandable=on&isRemote=off&roleId=-3&queryType=-3&dirids=1&rootid=&query=gazeta&localQueryType=-3&remoteQueryType=-2",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://demo.dl.psnc.pl/dlibra/planned?action=SimpleSearchAction&type=-6&p=0",
 		"items": "multiple"
 	},
