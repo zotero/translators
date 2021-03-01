@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-01 16:08:14"
+	"lastUpdated": "2021-03-01 16:10:12"
 }
 
 /*
@@ -92,10 +92,8 @@ function scrape(doc) {
 	item.abstractNote = (doc.querySelector('.description .blurb .value').textContent) ? doc.querySelector('.description .blurb .value').textContent : "";
 	// Get Creators
 	var creators = doc.querySelectorAll('.authorMain .biblioAuthor');
-	
-	Z.debug(creators.length)
 	for (let creator of creators) {
-		let creatorName = creator.querySelector('.value').textContent
+		let creatorName = creator.querySelector('.value').textContent;
 		let creatorRole;
 		
 		// currently, we only check for editors; everything else will be treated as authors
@@ -114,6 +112,7 @@ function scrape(doc) {
 	}
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
