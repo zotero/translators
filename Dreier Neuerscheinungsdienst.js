@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-01 15:50:15"
+	"lastUpdated": "2021-03-01 16:08:14"
 }
 
 /*
@@ -73,41 +73,31 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc) {
 	var item = new Zotero.Item("book");
 	// Set the title
 	item.title = ZU.xpathText(doc, '//h1[@class="biblioTitle"]');
-	if (ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]')) item.title += ": " + ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]')
+	if (ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]')) item.title += ": " + ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]');
 	// ISBN
 	item.ISBN = (doc.querySelector('.biblioId .value').textContent) ? doc.querySelector('.biblioId .value').textContent : "";
-	Z.debug (doc.querySelector('.biblioId .value').textContent)
 	// Publisher
 	item.publisher = (doc.querySelector('.biblioPublisher .value').textContent) ? doc.querySelector('.biblioPublisher .value').textContent : "";
-	Z.debug (doc.querySelector('.biblioPublisher .value').textContent)
 	// Publisher Location
-	Z.debug (doc.querySelector('.biblioPublicationTown .value').textContent)
 	item.place = (doc.querySelector('.biblioPublicationTown .value').textContent) ? doc.querySelector('.biblioPublicationTown .value').textContent : "";
 	// Publication Date
-	Z.debug (doc.querySelector('.biblioPublishingYear .value').textContent)
 	item.date = (doc.querySelector('.biblioPublishingYear .value').textContent) ? doc.querySelector('.biblioPublishingYear .value').textContent : "";
 	// Number of pages
-	Z.debug (doc.querySelector('.biblioPages .value').textContent)
 	item.numPages = (doc.querySelector('.biblioPages .value').textContent) ? doc.querySelector('.biblioPages .value').textContent : "";
 	// Abstract
-	// .description .blurb .value
-	Z.debug (doc.querySelector('.description .blurb .value').textContent)
 	item.abstractNote = (doc.querySelector('.description .blurb .value').textContent) ? doc.querySelector('.description .blurb .value').textContent : "";
 	// Get Creators
-	//var creators = doc.querySelectorAll('.titles .biblioAuthor');
 	var creators = doc.querySelectorAll('.authorMain .biblioAuthor');
 	
 	Z.debug(creators.length)
 	for (let creator of creators) {
 		let creatorName = creator.querySelector('.value').textContent
 		let creatorRole;
-	
-		Z.debug(creatorName)
-		Z.debug(creator.textContent)
+		
 		// currently, we only check for editors; everything else will be treated as authors
 		if (creator.textContent.includes("Hrsg.")) {
 			Z.debug(creatorName + " ist Herausgeber");
@@ -120,7 +110,7 @@ function scrape(doc, url) {
 		else {
 			creatorRole = "author";
 		}
-		item.creators.push(Zotero.Utilities.cleanAuthor(creatorName, creatorRole, creatorName.includes(', ')))
+		item.creators.push(Zotero.Utilities.cleanAuthor(creatorName, creatorRole, creatorName.includes(', ')));
 	}
 	item.complete();
 }
