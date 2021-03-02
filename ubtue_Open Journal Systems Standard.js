@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 15:41:35"
+	"lastUpdated": "2021-03-02 16:19:54"
 }
 
 /*
@@ -69,7 +69,7 @@ function getOrcids(doc) {
 		//Z.debug(authorSection);
 		let authorLink = ZU.xpath(authorSection, '//a[@class="author-string-href"]/span');
 		let orcidLink = ZU.xpath(authorSection, '//a[starts-with(@href, "https://orcid.org")]/@href');
-		if (authorLink && orcidLink) {
+		if (authorLink && authorLink[0] && orcidLink && orcidLink[0]) {
 			let author = authorLink[0].innerText;
 			let orcid = orcidLink[0].value.match(/\d+-\d+-\d+-\d+x?/i);
 			return {note: "orcid:" + orcid + '|' + author};
