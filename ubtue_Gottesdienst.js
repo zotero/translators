@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-01 10:44:23"
+	"lastUpdated": "2021-03-02 14:24:39"
 }
 
 /*
@@ -57,9 +57,9 @@ function getSearchResults(doc) {
 }
 
 function extractAuthors(doc) {
-	let authorsElement = doc.querySelector('span.byline');
+	let authorsElement = doc.querySelector('span.byline > a');
 	if (authorsElement)
-		return authorsElement ? authorsElement.innerText.replace(/^Von[\s]/gi, "").split(',') : '';
+		return authorsElement ? authorsElement.innerText.split(',') : '';
 	return false;
 }
 
@@ -81,19 +81,16 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, item) {
 		item.itemType = 'journalArticle';
-		if (item.creators[0]==undefined && extractAuthors(doc)) {
+		if (extractAuthors(doc)) {
+			item.creators = [];
 			for (let author of extractAuthors(doc))
 				item.creators.push(ZU.cleanAuthor(author));
 		}
-		for (let i = 0; i < item.creators.length; i++) {
-			if (item.creators[i].firstName.toUpperCase().includes("VON")) 
-				item.creators[i].firstName = item.creators[i].firstName.replace(/^Von[\s]/gi, "");
-		}
 		let extractionPath = doc.querySelectorAll('span.headline');
-		for (let y = 0; y < extractionPath.length; y++) {
-			let testString = extractionPath[y].textContent;
+		for (let extract of extractionPath) {
+			let testString = extract.textContent;
 			if (testString.match(/\d{4}/g)) {
-				let issueAndYear = extractionPath[y].textContent;
+				let issueAndYear = extract.textContent;
 				extractIssue(doc, item, issueAndYear);
 				extractYear(doc, item, issueAndYear);
 				break;
