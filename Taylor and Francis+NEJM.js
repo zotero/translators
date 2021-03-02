@@ -172,11 +172,11 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');//Z.debug(authorSectionEntries)
 	for (let authorSectionEntry of authorSectionEntries) {
 		let authorInfo = authorSectionEntry.querySelector('.entryAuthor');
-    	let orcidHref = authorSectionEntry.querySelector('.orcid-author');
+    let orcidHref = authorSectionEntry.querySelector('.orcid-author');
 		if (authorInfo && orcidHref) {
-		let author = authorInfo.childNodes[0].textContent;
-        let orcid = orcidHref.textContent.replace(/.*(\d+-\d+-\d+-\d+x?)$/i, '$1');
-			 item.notes.push({note: "orcid:" + orcid + '|' + author});
+			let author = authorInfo.childNodes[0].textContent;
+      let orcid = orcidHref.textContent.replace(/.*(\d+-\d+-\d+-\d+x?)$/i, '$1');
+			item.notes.push({note: "orcid:" + orcid + '|' + author});
 		}
 	}
 	//deduplicate
