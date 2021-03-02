@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-24 16:03:16"
+	"lastUpdated": "2021-03-01 14:39:16"
 }
 
 /*
@@ -17,7 +17,6 @@
 
 	Taylor and Francis Translator
 	Copyright © 2011 Sebastian Karcher
-
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -170,17 +169,24 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	
 	//scraping orcid number 
-	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');
+	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');//Z.debug(authorSectionEntries)
 	for (let authorSectionEntry of authorSectionEntries) {
-		let authorInfo = authorSectionEntry.textContent; //Z.debug(authorInfo)
-		if (authorInfo.match(/\d+-\d+-\d+-\d+x?/i)) {
-			let authorAffilation = authorInfo.split('Correspondence')[0];
-			let orcid = authorInfo.match(/\d+-\d+-\d+-\d+x?/i);
-			 item.notes.push({note: "orcid:" + orcid + '|' + authorAffilation});
+		let authorInfo = authorSectionEntry.querySelector('.entryAuthor');
+    	let orcidHref = authorSectionEntry.querySelector('.orcid-author');
+		if (authorInfo && orcidHref) {
+		let author = authorInfo.childNodes[0].textContent;
+        let orcid = orcidHref.textContent.replace(/.*(\d+-\d+-\d+-\d+x?)$/i, '$1');
+			 item.notes.push({note: "orcid:" + orcid + '|' + author});
 		}
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+	
+	//capitalize first letter
+	let tags = item.tags;
+	for (let tag in tags) {
+		item.tags.push(tags[tag].capitalizeFirstLetter());
+	}
 	
 	//add attachments
 	item.attachments = [{
