@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-01 14:39:16"
+	"lastUpdated": "2021-03-03 12:09:16"
 }
 
 /*
@@ -181,12 +181,6 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	
-	//capitalize first letter
-	let tags = item.tags;
-	for (let tag in tags) {
-		item.tags.push(tags[tag].capitalizeFirstLetter());
-	}
 	
 	//add attachments
 	item.attachments = [{
