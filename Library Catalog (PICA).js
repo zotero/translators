@@ -578,13 +578,13 @@ function scrape(doc, url) {
 				}
 				break;
 
-			case 'links zum titel': // gso.gbv.de
-			case 'volltext': // stabikat.de
-			case 'link zum volltext': // swb.bsz-bw.de
-			case 'link': // opac.tib.eu opac.sub.uni-goettingen.de lhclz.gbv.de
-			case 'zugang': // cbsopac.rz.uni-frankfurt.de
-			case 'accès en ligne': // sudoc.abes.fr
-				///Some time link are inside the third cell : https://kxp.k10plus.de/DB=2.1/DB=2.1/PPNSET?PPN=600530787
+			case 'links zum titel':
+			case 'volltext':
+			case 'link zum volltext':
+			case 'link':
+			case 'zugang':
+			case 'accès en ligne':
+				// Some time links are inside the third cell : https://kxp.k10plus.de/DB=2.1/DB=2.1/PPNSET?PPN=600530787
 				url = doc.evaluate('./td[3]//a | ./td[2]//a', tableRow, null, XPathResult.ANY_TYPE, null).iterateNext();
 				newItem.url = url;
 				break;
