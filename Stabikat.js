@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-02-22 15:49:26"
+	"lastUpdated": "2021-03-03 14:35:26"
 }
 
 /*
@@ -43,8 +43,8 @@ function attr(docOrElem, selector, attr, index) {
 function detectWeb(doc, url) {
 	if (url.includes('ACT=SRCH') && getSearchResults(doc, true)) {
 		return 'multiple';
-	} 
-  else {
+	}
+	else {
 		var type = attr(doc, "#maticon", "alt");
 		switch (type) {
 			case 'Bücher':
@@ -102,7 +102,7 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems (getSearchResults(doc, false), function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
@@ -111,8 +111,10 @@ function doWeb(doc, url) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
+			return false;
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -121,7 +123,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.hit');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].childNodes[1] && rows[i].childNodes[1].href ? rows[i].childNodes[1].href : "";
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -136,11 +138,11 @@ function fetchJson(ppn, type, isReferenceWork, referencingWorkJson) {
 	var JsonUrl = "http://unapi.gbv.de/?id=stabikat:ppn:" + ppn + "&format=picajson";
 	Zotero.Utilities.doGet(JsonUrl, function (json) {
 		json = JSON.parse(json);
-		{return !isReferenceWork ? jsonParse(json, type) : doReferencingWork(json, type, referencingWorkJson) }
+		return !isReferenceWork ? jsonParse(json, type) : doReferencingWork(json, type, referencingWorkJson);
 	});
 }
 
-function doReferencingWork(json, type, referencingWorkJson){
+function doReferencingWork(json, type, referencingWorkJson) {
 	var newItem = generalParser(json, type, referencingWorkJson);
 	newItem.complete();
 }
@@ -148,16 +150,16 @@ function doReferencingWork(json, type, referencingWorkJson){
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 
-	//get the identifaction number necessary for the api query
+	// get the identifaction number necessary for the api query
 	var permalink = attr(doc, ".cnt > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)", "href");
 	var ppn = permalink.slice(permalink.indexOf("PPN=") + 4);
-	//load the json with the ID
+	// load the json with the ID
 	fetchJson(ppn, type, false);
 }
 
 function jsonParse(json, type) {
-	// parsing is directed according to  the documentation of fields in: https://swbtools.bsz-bw.de/cgi-bin/k10plushelp.pl?cmd=pplist&katalog=Standard&val=-1&adm=0
-	switch(type){
+	// parsing is directed according to the documentation of fields in: https://swbtools.bsz-bw.de/cgi-bin/k10plushelp.pl?cmd=pplist&katalog=Standard&val=-1&adm=0
+	switch (type) {
 		case "book":
 		case 'periodicals_online':
 		case 'periodicals_non-online':
@@ -168,12 +170,12 @@ function jsonParse(json, type) {
 			break;
 		case "article":
 			var bookPPN = '';
-			//fetching data to acquire reference work data
-			for (var i = 0; i < json.length; i++){
-				if (json[i][0] === '039B'){
-					for (var j = 0; j < json[i].length; j++){
-						if (json[i][j] === '9'){
-							bookPPN = json[i][j+1];
+			// fetching data to acquire reference work data
+			for (var i = 0; i < json.length; i++) {
+				if (json[i][0] === '039B') {
+					for (var j = 0; j < json[i].length; j++) {
+						if (json[i][j] === '9') {
+							bookPPN = json[i][j + 1];
 							break;
 						}
 					}
@@ -181,21 +183,23 @@ function jsonParse(json, type) {
 				}
 			}
 			
-			if (bookPPN){
+			if (bookPPN) {
 				fetchJson(bookPPN, "bookSection", true, json);
-			} else {
+			}
+			else {
 				newItem = generalParser(json, type, false);
 				newItem.complete();
 			}
 			break;
 		case "microfilm":
 		case "Datenträger":
-			for (i = 0; i < json.length; i++){
-				if (json[i][0] === '002@'){
+			for (i = 0; i < json.length; i++) {
+				if (json[i][0] === '002@') {
 					var contentmediumtype = json[i][3][1];
-					if (contentmediumtype === 's'){
+					if (contentmediumtype === 's') {
 						jsonParse(json, "article");
-					} else {
+					}
+					else {
 						newItem = generalParser(json, 'book');
 						newItem.complete();
 					}
@@ -206,18 +210,18 @@ function jsonParse(json, type) {
 		case "film":
 		case "map":
 		case "music":
-			//content type is stored in 002C. Data is used to specify zotero type in cases of video and audio, image material
+			// content type is stored in 002C. Data is used to specify zotero type in cases of video and audio, image material
 			var contentType = "";
-			for (i = 0; i < json.length; i++){
-				if (json[i][0] === '002C'){
-					for ( j = 0; j < json[i].length; j++){
-						if (json[i][j] === "b"){
-							contentType = json[i][j+1];
+			for (i = 0; i < json.length; i++) {
+				if (json[i][0] === '002C') {
+					for (j = 0; j < json[i].length; j++) {
+						if (json[i][j] === "b") {
+							contentType = json[i][j + 1];
 						}
 					}
 				}
 			}
-			switch(contentType){
+			switch (contentType) {
 				case "tdi" || "tdm" || "tdi":
 					newItem = generalParser(json, "film");
 					newItem.complete();
@@ -253,165 +257,171 @@ function jsonParse(json, type) {
 			newItem.complete();
 			break;
 		default:
-			type = "book"
+			type = "book";
 			newItem = generalParser(json, type, false);
 			newItem.complete();
 			break;
-		}
+	}
 }
 
-
 function articleParse(json, newItem) {
-
-		for (var i = 0; i < json.length; i++){
-			// Title of the article/book section
-			if (json[i][0] === "021A"){ 
-				for (var j = 0; j < json[i].length; j++){
-					if (json[i][j] === 'a') {
-						
-						newItem.title = json[i][j+1].replace('@', '');// an '@' was put into the database to 
-						//mark the first significant word in a title and needs to be erased in translation.
-					} else if (json[i][j] === 'd') {
-						newItem.shortTitle = newItem.title;
-						newItem.title += ': ' + json[i][j+1].replace('@', ''); 
-					}
+	for (var i = 0; i < json.length; i++) {
+		// Title of the article/book section
+		if (json[i][0] === "021A") {
+			for (var j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'a') {
+					newItem.title = json[i][j + 1].replace('@', '');// an '@' was put into the database to
+					// mark the first significant word in a title and needs to be erased in translation.
+				}
+				else if (json[i][j] === 'd') {
+					newItem.shortTitle = newItem.title;
+					newItem.title += ': ' + json[i][j + 1].replace('@', '');
 				}
 			}
-			//date 
-			else if (json[i][0] === "011@"){ 
-				for (j = 0; j < json[i].length; j++){
-					if (json[i][j] === 'a') {
-						newItem.date = json[i][j+1];				
-					} else if (json[i][j] === 'r') {
-						newItem.date === ' [' + json[i][j+1] + ']';
-					} else if (json[i][j] === 'p') {
-						conference_data += ', ' + json[i][j+1];
-					}
+		}
+		// date
+		else if (json[i][0] === "011@") {
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'a') {
+					newItem.date = json[i][j + 1];
+				}
+				else if (json[i][j] === 'r') {
+					newItem.date = ' [' + json[i][j + 1] + ']';
+				}
+				// else if (json[i][j] === 'p') {
+				// conferenceData += ', ' + json[i][j + 1];
+				// }
+			}
+		}
+		// principal authors
+		else if (json[i][0] === "028A") { // multiple authors have to be seperated by a newline
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					var princAuthorLastName = json[i][j + 1];
+				}
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					var princAuthorFirstName = json[i][j + 1];
+				}
+				if (json[i][j] == 'B' || json[i][j] == 'b') {
+					var authType = json[i][j + 1];
+				}
+				if (json[i][j] == '4') {
+					var authTypeShort = json[i][j + 1];
 				}
 			}
-			//principal authors
-			else if (json[i][0] === "028A") { //multiple authors have to be seperated by a newline
-				
-				for (j = 0; j < json[i].length; j++) {
-					if (json[i][j] == 'A' || json[i][j] == 'a'){
-						var princAuthorLastName = json[i][j+1];
-					}
-					if (json[i][j] == 'D' || json[i][j] == 'd'){
-						var princAuthorFirstName = json[i][j+1];
-					}
-					if (json[i][j] == 'B' || json[i][j] == 'b'){
-						var authType = json[i][j+1];
-					}
-					if (json[i][j] == '4'){
-						var authTypeShort = json[i][j+1];
-					}
+			newItem.creators.push({
+				firstName: princAuthorFirstName,
+				lastName: princAuthorLastName,
+				creatorType: "author"
+			});
+			if (authTypeShort && authTypeShort !== 'aut') {
+				let extraTmp = `${princAuthorFirstName} ${princAuthorLastName}${authType ? `(${authType})` : ''}`;
+				if (!newItem.extra) {
+					newItem.extra = extraTmp;
 				}
-				newItem.creators.push({
-					firstName: princAuthorFirstName,
-					lastName: princAuthorLastName,
-					creatorType: "author"
-				})
-				if (authTypeShort && authTypeShort !== 'aut'){
-					let extraTmp = `${princAuthorFirstName} ${princAuthorLastName}${authType?`(${authType})`:''}`
-					if (newItem.extra == null){
-						newItem.extra = extraTmp
-					} else {
-						newItem.extra += '\n' + extraTmp;
-					}
+				else {
+					newItem.extra += '\n' + extraTmp;
 				}
 			}
-			//co-authors
-			else if (json[i][0] == "028B"){ 
-				for (j = 0; j < json[i].length; j++) {
-					if (json[i][j] == 'A' || json[i][j] == 'a'){
-						var secAuthorLastName = json[i][j+1];
-					}
-					if (json[i][j] == 'D' || json[i][j] == 'd'){
-							var secAuthorFirstName = json[i][j+1];
-					}
+		}
+		// co-authors
+		else if (json[i][0] == "028B") {
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					var secAuthorLastName = json[i][j + 1];
 				}
-				newItem.creators.push({
-					firstName: secAuthorFirstName,
-					lastName: secAuthorLastName,
-					creatorType: "author"
-				})
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					var secAuthorFirstName = json[i][j + 1];
+				}
 			}
-			// other people involved (relation specified in one field)
-			else if (json[i][0] === "028C" 
-				|| json[i][0] === "028G" 
-				|| json[i][0].includes("029")){ 
-				var contributorFirstName = '';
-				var contributorLastName = '';
-				var contributorType = 'a';
-				for (j = 0; j < json[i].length; j++){
-					if (json[i][j] === 'B'){
-						contributorType = json[i][j+1];
-					}
-					if (json[i][j] == 'A' || json[i][j] == 'a'){
-						contributorLastName = json[i][j+1];
-					}
-					if (json[i][j] == 'D' || json[i][j] == 'd'){
-						contributorFirstName = json[i][j+1];
+			newItem.creators.push({
+				firstName: secAuthorFirstName,
+				lastName: secAuthorLastName,
+				creatorType: "author"
+			});
+		}
+		// other people involved (relation specified in one field)
+		else if (json[i][0] === "028C"
+			|| json[i][0] === "028G"
+			|| json[i][0].includes("029")) {
+			var contributorFirstName = '';
+			var contributorLastName = '';
+			var contributorType = 'a';
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'B') {
+					contributorType = json[i][j + 1];
+				}
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					contributorLastName = json[i][j + 1];
+				}
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					contributorFirstName = json[i][j + 1];
+				}
+				if (json[i][j] == 'F' || json[i][j] == 'f') {
+					contributorLastName += json[i][j + 1];
+				}
+				if (contributorLastName !== '') {
+					if (json[i][j] === '4') {
+						if (json[i][j + 1] === "trl") {
+							newItem.creators.push({
+								firstName: contributorFirstName,
+								lastName: contributorLastName,
+								creatorType: "translator"
+							});
 						}
-					if (json[i][j] == 'F' || json[i][j] == 'f'){
-						contributorLastName += json[i][j+1];
+						else if (json[i][j + 1] === "edt" || json[i][j + 1] === "isb") {
+							newItem.creators.push({
+								firstName: contributorFirstName,
+								lastName: contributorLastName,
+								creatorType: "editor"
+							});
 						}
-					if (contributorLastName !== ''){
-						if (json[i][j] === '4'){
-							if (json[i][j+1] === "trl"){
-								newItem.creators.push({
-									firstName: contributorFirstName,
-									lastName: contributorLastName,
-									creatorType: "translator"
-								})
-							} else if (json[i][j+1] === "edt" || json[i][j+1] === "isb" ) {
-								newItem.creators.push({
-									firstName: contributorFirstName,
-									lastName: contributorLastName,
-									creatorType: "editor"
-								})
-							} else if (json[i][j+1] === "ctb") {
-								newItem.creators.push({
-									firstName: contributorFirstName,
-									lastName: contributorLastName,
-									creatorType: "contributor"
-								})
-							} else if (json[i][j+1] === "aut") {
-								newItem.creators.push({
-									firstName: contributorFirstName,
-									lastName: contributorLastName,
-									creatorType: "author"
-								})
-							} else {
-								let extraTmp = `${contributorFirstName} ${contributorLastName}${contributorType?`(${contributorType})`:''}`
-								if (newItem.extra == null){
-									newItem.extra = extraTmp
-								} else {
-									newItem.extra += '\n' + extraTmp;
-								}
+						else if (json[i][j + 1] === "ctb") {
+							newItem.creators.push({
+								firstName: contributorFirstName,
+								lastName: contributorLastName,
+								creatorType: "contributor"
+							});
+						}
+						else if (json[i][j + 1] === "aut") {
+							newItem.creators.push({
+								firstName: contributorFirstName,
+								lastName: contributorLastName,
+								creatorType: "author"
+							});
+						}
+						else {
+							let extraTmp = `${contributorFirstName} ${contributorLastName}${contributorType ? `(${contributorType})` : ''}`;
+							if (!newItem.extra) {
+								newItem.extra = extraTmp;
+							}
+							else {
+								newItem.extra += '\n' + extraTmp;
 							}
 						}
 					}
 				}
 			}
-			else if (json[i][0] === "034D"){ 
-				for (j = 0; j < json[i].length; j++){
-					if (json[i][j] === 'a') {
-						newItem.pages = json[i][j+1];					
-					}
+		}
+		else if (json[i][0] === "034D") {
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'a') {
+					newItem.pages = json[i][j + 1];
 				}
 			}
 		}
-	return newItem
+	}
+	return newItem;
 }
 
-function generalParser(json, zoterotype, referencingWorkJson) { 
-	var notes_lcc = '';
-	var notes_ddc = '';
-	var notes_bk = '';
-	var notes_rvk = '';
+function generalParser(json, zoterotype, referencingWorkJson) {
+	var notesLcc = '';
+	var notesDdc = '';
+	var notesBk = '';
+	var notesRvk = '';
 	var extraClassDataDict = {};
 	var extraClassDataDictKeyList = [];
+	var presKey = '';
 	var callnumberFound = false;
 	var isbnFound = false;
 	var isThesis = false;
@@ -421,178 +431,183 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 
 	var newItem = new Zotero.Item(zoterotype);
 
-  newItem.author = '';
-  for (var i = 0; i < json.length;  i++){
+	newItem.author = '';
+	for (var i = 0; i < json.length; i++) {
 		// title and short title
-		if (json[i][0] === "021A"){ 
-			for (var j = 0; j < json[i].length; j++){
+		if (json[i][0] === "021A") {
+			for (var j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (zoterotype === 'bookSection'){
-						newItem.bookTitle = json[i][j+1].replace('@', '');
-					} else {
-						newItem.title = json[i][j+1].replace('@', '');// an '@' was put into the database to 
-						//mark the first significant word in a title and needs to be erased in translation.
-					} 
-
-				} else if (json[i][j] === 'd') {
-					if (zoterotype === 'bookSection'){
-						newItem.bookTitle += ': ' + json[i][j+1].replace('@', ''); 						
-					} else {					
-					newItem.shortTitle = newItem.title;
-					newItem.title += ': ' + json[i][j+1].replace('@', ''); 
+					if (zoterotype === 'bookSection') {
+						newItem.bookTitle = json[i][j + 1].replace('@', '');
+					}
+					else {
+						newItem.title = json[i][j + 1].replace('@', '');// an '@' was put into the database to
+						// mark the first significant word in a title and needs to be erased in translation.
+					}
+				}
+				else if (json[i][j] === 'd') {
+					if (zoterotype === 'bookSection') {
+						newItem.bookTitle += ': ' + json[i][j + 1].replace('@', '');
+					}
+					else {
+						newItem.shortTitle = newItem.title;
+						newItem.title += ': ' + json[i][j + 1].replace('@', '');
 					}
 				}
 			}
 		}
-		else if (json[i][0] === "013D"){
-
-			var contentType
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "013D") {
+			var contentType;
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					contentType = json[i][j+1];
+					contentType = json[i][j + 1];
 					break;
 				}
 			}
 			if (contentType) {
-				if (!newItem.extra == ''){
+				if (newItem.extra) {
 					newItem.extra += "\n" + contentType;
-				} else{ newItem.extra = contentType;}
+				}
+				else {
+					newItem.extra = contentType;
+				}
 			}
 		}
-
-		
-
-
-
-		//date 
-		else if (json[i][0] === "011@"){ 
-			for (j = 0; j < json[i].length; j++){
+		// date
+		else if (json[i][0] === "011@") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					newItem.date = json[i][j+1]
-				} else if (json[i][j] === 'r') {
-					newItem.date === ' [' + json[i][j+1] + ']'
+					newItem.date = json[i][j + 1];
+				}
+				else if (json[i][j] === 'r') {
+					newItem.date = ' [' + json[i][j + 1] + ']';
 				}
 			}
 		}
 
-		//isbn 
-		else if (json[i][0] === "004A"){ 
-			for (j = 0; j < json[i].length; j++){
+		// isbn
+		else if (json[i][0] === "004A") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === '0') {
 					if (isbnFound) {
-						if (newItem.ISBN.length === 17){ //both isbn-10 and isbn-13 will likely be present in a field with the same name
+						if (newItem.ISBN.length === 17) {
+							// both isbn-10 and isbn-13 will likely be present in a field with the same name
 							// but the goal is to get the newer format of isbn-13 that has 17 characters.
 							break;
 						}
 					}
-					newItem.ISBN = ZU.cleanISBN(json[i][j+1]);
-					isbnFound = true;				
-				}
-		}}
-
-
-		
-		//principal authors
-		else if (json[i][0] === "028A") {
-			for (j = 0; j < json[i].length; j++) {
-				if (json[i][j] == 'A' || json[i][j] == 'a'){
-					var princAuthorLastName = json[i][j+1];
-				}
-				if (json[i][j] == 'D' || json[i][j] == 'd'){
-					var princAuthorFirstName = json[i][j+1];
-				}
-				if (json[i][j] == 'B' || json[i][j] == 'b'){
-					var authType = json[i][j+1];
-				}
-				if (json[i][j] == '4'){
-					var authTypeShort = json[i][j+1];
+					newItem.ISBN = ZU.cleanISBN(json[i][j + 1]);
+					isbnFound = true;
 				}
 			}
-			if (zoterotype === "bookSection"){
+		}
+
+		// principal authors
+		else if (json[i][0] === "028A") {
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					var princAuthorLastName = json[i][j + 1];
+				}
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					var princAuthorFirstName = json[i][j + 1];
+				}
+				if (json[i][j] == 'B' || json[i][j] == 'b') {
+					var authType = json[i][j + 1];
+				}
+				if (json[i][j] == '4') {
+					var authTypeShort = json[i][j + 1];
+				}
+			}
+			if (zoterotype === "bookSection") {
 				newItem.creators.push({
 					firstName: princAuthorFirstName,
 					lastName: princAuthorLastName,
 					creatorType: "bookAuthor"
-				})
-			} else {
+				});
+			}
+			else {
 				newItem.creators.push({
 					firstName: princAuthorFirstName,
 					lastName: princAuthorLastName,
 					creatorType: "author"
-				})
+				});
 			}
 
-			if (authTypeShort && authTypeShort !== 'aut'){
-				let extraTmp = `${princAuthorFirstName} ${princAuthorLastName}${authType?`(${authType})`:''}`
-				if (newItem.extra == null){
-					newItem.extra = extraTmp
-				} else {
+			if (authTypeShort && authTypeShort !== 'aut') {
+				let extraTmp = `${princAuthorFirstName} ${princAuthorLastName}${authType ? `(${authType})` : ''}`;
+				if (!newItem.extra) {
+					newItem.extra = extraTmp;
+				}
+				else {
 					newItem.extra += '\n' + extraTmp;
 				}
 			}
 		}
-		//co-authors
-		else if (json[i][0] == "028B"){ 
+		// co-authors
+		else if (json[i][0] == "028B") {
 			for (j = 0; j < json[i].length; j++) {
-				if (json[i][j] == 'A' || json[i][j] == 'a'){
-					var secAuthorLastName = json[i][j+1];
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					var secAuthorLastName = json[i][j + 1];
 				}
-				if (json[i][j] == 'D' || json[i][j] == 'd'){
-						var secAuthorFirstName = json[i][j+1];
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					var secAuthorFirstName = json[i][j + 1];
 				}
 			}
 			newItem.creators.push({
 				firstName: secAuthorFirstName,
 				lastName: secAuthorLastName,
 				creatorType: "author"
-			})
+			});
 		}
 		// other people involved (relation specified in one field)
-		else if (json[i][0] === "028C" 
-				|| json[i][0] === "028G" 
-				|| json[i][0] === "029A" 
-				|| json[i][0].includes("029") ){ 
+		else if (json[i][0] === "028C"
+				|| json[i][0] === "028G"
+				|| json[i][0] === "029A"
+				|| json[i][0].includes("029")) {
 			var contributorFirstName = '';
 			var contributorLastName = '';
 			var contributorType = '';
-			var extraType = false
-			for (j = 0; j < json[i].length; j++){
-				if (json[i][j] === 'B'){
-					contributorType = json[i][j+1];
+			var extraType = false;
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'B') {
+					contributorType = json[i][j + 1];
 				}
-				if (json[i][j] == 'A' || json[i][j] == 'a'){
-					contributorLastName = json[i][j+1];
+				if (json[i][j] == 'A' || json[i][j] == 'a') {
+					contributorLastName = json[i][j + 1];
 				}
-				if (json[i][j] == 'D' || json[i][j] == 'd'){
-					contributorFirstName = json[i][j+1];
-					}
-				if (json[i][j] == 'F' || json[i][j] == 'f'){
-					contributorLastName += json[i][j+1];
-					}
-				if (contributorLastName !== ''){
-					if (json[i][j] === '4'){
-						if (json[i][j+1] === "trl"){
+				if (json[i][j] == 'D' || json[i][j] == 'd') {
+					contributorFirstName = json[i][j + 1];
+				}
+				if (json[i][j] == 'F' || json[i][j] == 'f') {
+					contributorLastName += json[i][j + 1];
+				}
+				if (contributorLastName !== '') {
+					if (json[i][j] === '4') {
+						if (json[i][j + 1] === "trl") {
 							newItem.creators.push({
 								firstName: contributorFirstName,
 								lastName: contributorLastName,
 								creatorType: "translator"
-							})
+							});
 							break;
-						} else if (json[i][j+1] === "edt" || json[i][j+1] === "isb" ) {
+						}
+						else if (json[i][j + 1] === "edt" || json[i][j + 1] === "isb") {
 							newItem.creators.push({
 								firstName: contributorFirstName,
 								lastName: contributorLastName,
 								creatorType: "editor"
-							})
+							});
 							break;
-						} else if (json[i][j+1] === "ctb") {
+						}
+						else if (json[i][j + 1] === "ctb") {
 							newItem.creators.push({
 								firstName: contributorFirstName,
 								lastName: contributorLastName,
 								creatorType: "contributor"
-							})
+							});
 							break;
-						} else if (json[i][j+1] === "aut") {
+						}
+						else if (json[i][j + 1] === "aut") {
 							newItem.creators.push({
 								firstName: contributorFirstName,
 								lastName: contributorLastName,
@@ -600,141 +615,159 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 							});
 							break;
 						}
-					}  else {
+					}
+					else {
 						extraType = true;
 					}
 				}
 			}
 			if (extraType) {
-			 /* All other contributors will be stored in the extra field with their 
-			type of relation to the book specified*/
-				let extraTmp = `${contributorFirstName} ${contributorLastName}${contributorType?`(${contributorType})`:''}`
-				if (newItem.extra == null){
-					newItem.extra = extraTmp
-				} else {
+				// All other contributors will be stored in the extra field with their
+				// type of relation to the book specified)
+				let extraTmp = `${contributorFirstName} ${contributorLastName} ${contributorType ? `(${contributorType})` : ''}`;
+				if (!newItem.extra) {
+					newItem.extra = extraTmp;
+				}
+				else {
 					newItem.extra += '\n' + extraTmp;
 				}
 			}
 		}
 		
 		// publisher and place
-		else if (json[i][0] === "033A"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "033A") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'p') {
-					newItem.place = json[i][j+1];					
-				} else if (json[i][j] === 'n') {
-					newItem.publisher = json[i][j+1];
+					newItem.place = json[i][j + 1];
+				}
+				else if (json[i][j] === 'n') {
+					newItem.publisher = json[i][j + 1];
 				}
 			}
 		}
 		// edition
-		else if (json[i][0] === "032@"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "032@") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					newItem.edition = json[i][j+1];
+					newItem.edition = json[i][j + 1];
 				}
 			}
 		}
 		// pages
-		else if (json[i][0] === "034D"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "034D") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					newItem.numPages = json[i][j+1];
+					newItem.numPages = json[i][j + 1];
 				}
 			}
 		}
 		// connection to a conference (put to extra field)
-		else if (json[i][0] === "030F"){ 
-			for (j = 0; j < json[i].length; j++){
-				var conference_data = ''
+		else if (json[i][0] === "030F") {
+			for (j = 0; j < json[i].length; j++) {
+				var conferenceData = '';
 				if (json[i][j] === 'a') {
-					conference_data += json[i][j+1];					
-				} else if (json[i][j] === 'k') {
-					conference_data += ', ' + json[i][j+1];
-				} else if (json[i][j] === 'p') {
-					conference_data += ', ' + json[i][j+1];
+					conferenceData += json[i][j + 1];
+				}
+				else if (json[i][j] === 'k') {
+					conferenceData += ', ' + json[i][j + 1];
+				}
+				else if (json[i][j] === 'p') {
+					conferenceData += ', ' + json[i][j + 1];
 				}
 			}
-			if (newItem.extra == null){
-				newItem.extra = conference_data
-			} else {
-					newItem.extra += '\n' + conference_data
-				}
+			if (!newItem.extra) {
+				newItem.extra = conferenceData;
+			}
+			else {
+				newItem.extra += '\n' + conferenceData;
+			}
 		}
-		//volume & issue -data
-		else if (json[i][0] === "036C"){ // for journals, newspapers etc. the data would be found in 031a with info on issue etc.
+		// volume & issue -data
+		else if (json[i][0] === "036C") {
+			// for journals, newspapers etc. the data would be found in 031a with info on issue etc.
 			var multipleVolumeTitle;
 			var volumeNumber;
-			for (j = 0; j < json[i].length; j++){
-				if (json[i][j] === 'a') {  /*field for the title of the multiple volume book -- as in that cases the title 
+			for (j = 0; j < json[i].length; j++) {
+				if (json[i][j] === 'a') { /* field for the title of the multiple volume book -- as in that cases the title
 					in 21A is only the issue title, the booktitle and shorttitle will be adapted */
-					multipleVolumeTitle = json[i][j+1].replace('@', '');	
-				} else if (json[i][j] === 'l') {
-					volumeNumber = json[i][j+1]; /*By now there's no information available for me on what values will be put 
+					multipleVolumeTitle = json[i][j + 1].replace('@', '');
+				}
+				else if (json[i][j] === 'l') {
+					volumeNumber = json[i][j + 1];
+
+					/* By now there's no information available for me on what values will be put
 					in this field by the system, so there won't be any string manipulation */
 				}
 			}
 			newItem.volume = volumeNumber;
-			if (newItem.title == null){
+			if (!newItem.title) {
 				newItem.title = multipleVolumeTitle + ' - ' + volumeNumber;
-			} else {
-					newItem.shortTitle = newItem.title
-					newItem.title = multipleVolumeTitle + ' - ' + volumeNumber + ': ' + newItem.title;
-				}
-
-
+			}
+			else {
+				newItem.shortTitle = newItem.title;
+				newItem.title = multipleVolumeTitle + ' - ' + volumeNumber + ': ' + newItem.title;
+			}
 		}
-		//series -data
-		/*there might be multiple series related to a work insight the data set captured as well in 36E fields,
+		// series -data
+		/* there might be multiple series related to a work insight the data set captured as well in 36E fields,
 		as corresponding Zotero fields couldn't capture that, only 036F is used.*/
-		else if (json[i][0] === "036F"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "036F") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					newItem.series = json[i][j+1].replace('@', '');					
-				} else if (json[i][j] === 'l') {
-					newItem.seriesNumber = json[i][j+1]; /*This field isn't just digits but contains different formats of series numerations
+					newItem.series = json[i][j + 1].replace('@', '');
+				}
+				else if (json[i][j] === 'l') {
+					newItem.seriesNumber = json[i][j + 1]; /* This field isn't just digits but contains different formats of series numerations
 					that aren't specified and sometimes contain additional information. Therefore no further processing is done. */
 				}
 			}
-			
 		}
-		//thesis
-		else if (json[i][0] === "037C"){ 
-			for (j = 0; j < json[i].length; j++){
+		// thesis
+		else if (json[i][0] === "037C") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'd') {
-					thesisType = json[i][j+1];
-					isThesis = true;				
-				} else if (json[i][j] === 'e') {
-					thesisInstitution = json[i][j+1];
-				} else if (json[i][j] === 'f') {
-					thesisDate = json[i][j+1];
-				} else if (json[i][j] === 'a') {
-					var unspecifiedThesisData = json[i][j+1];
-				} else if (json[i][j] === 'b') {
-					var unspecifiedThesisDataPlace = json[i][j+1].replace('@', '');
-				} 
+					thesisType = json[i][j + 1];
+					isThesis = true;
+				}
+				else if (json[i][j] === 'e') {
+					thesisInstitution = json[i][j + 1];
+				}
+				else if (json[i][j] === 'f') {
+					thesisDate = json[i][j + 1];
+				}
+				else if (json[i][j] === 'a') {
+					var unspecifiedThesisData = json[i][j + 1];
+				}
+				else if (json[i][j] === 'b') {
+					var unspecifiedThesisDataPlace = json[i][j + 1].replace('@', '');
+				}
 			}
 			if (isThesis) {
-				if (newItem.extra == null){
+				if (!newItem.extra) {
 					newItem.extra = thesisType + ' (' + thesisInstitution + ", " + thesisDate + ')';
-				} else {
+				}
+				else {
 					newItem.extra += '\n' + thesisType + ' (' + thesisInstitution + ", " + thesisDate + ')';
 				}
-			} else {
-				if (newItem.extra == null){
+			}
+			else {
+				// eslint-disable-next-line no-lonely-if
+				if (!newItem.extra) {
 					newItem.extra = unspecifiedThesisDataPlace + ', ' + unspecifiedThesisData;
-				} else {
+				}
+				else {
 					newItem.extra += '\n' + unspecifiedThesisDataPlace + ', ' + unspecifiedThesisData;
 				}
 			}
 		}
 		// Content description
-		else if (json[i][0] === "047I"){
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "047I") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (newItem.extra != null){
+					if (newItem.extra) {
 						newItem.extra += "\n" + json[i][j + 1];
-					} else{
+					}
+					else {
 						newItem.extra = json[i][j + 1];
 					}
 				}
@@ -742,12 +775,13 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 		}
 		
 		// annotations
-		else if (json[i][0] === "037A"){
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "037A") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (newItem.extra != null){
+					if (newItem.extra) {
 						newItem.extra += "\n" + json[i][j + 1];
-					} else{
+					}
+					else {
 						newItem.extra = json[i][j + 1];
 					}
 				}
@@ -755,164 +789,169 @@ function generalParser(json, zoterotype, referencingWorkJson) {
 		}
 
 
-		//Signature - library-catalog
-		else if (json[i][0] === "209A" & !callnumberFound){
-			for (j = 0; j < json[i].length; j++){
+		// Signature - library-catalog
+		else if (json[i][0] === "209A" & !callnumberFound) {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					newItem.callNumber = json[i][j+1];
-					callnumberFound = true
+					newItem.callNumber = json[i][j + 1];
+					callnumberFound = true;
 					break;
 				}
 			}
-			newItem.libraryCatalog = 'Stabikat'
+			newItem.libraryCatalog = 'Stabikat';
 		}
 		// Classification-Data (in an note)
 
-		/*Getting classification data of different library classification systems*/
-		//LCC-classification - not necessarily present in the data
-		else if (json[i][0] === "045A"){ 
-			for (j = 0; j < json[i].length; j++){
+		/* Getting classification data of different library classification systems*/
+		// LCC-classification - not necessarily present in the data
+		else if (json[i][0] === "045A") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (notes_lcc !== ''){
-						notes_lcc += ', ';
+					if (notesLcc !== '') {
+						notesLcc += ', ';
 					}
-					notes_lcc += "'" + json[i][j+1] + "'";
+					notesLcc += "'" + json[i][j + 1] + "'";
 				}
 			}
 		}
 		// different 045*-fields containing other classification data are left out to concentrate on the more relevant.
 		
 		// DDC-Notation
-		//there are two fields for ddc-notation 045F and 045H
-		else if (json[i][0] === "045F"){ 
-			for (j = 0; j < json[i].length; j++){
+		// there are two fields for ddc-notation 045F and 045H
+		else if (json[i][0] === "045F") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (notes_ddc !== ''){
-						notes_ddc += ', ';
+					if (notesDdc !== '') {
+						notesDdc += ', ';
 					}
-					notes_ddc += "'" + json[i][j+1] + "'";
+					notesDdc += "'" + json[i][j + 1] + "'";
 				}
 			}
 		}
-		else if (json[i][0] === "045H"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "045H") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (notes_ddc !== ''){
-						notes_ddc += ', ';
+					if (notesDdc !== '') {
+						notesDdc += ', ';
 					}
-					notes_ddc += "'" + json[i][j+1] + "'";
+					notesDdc += "'" + json[i][j + 1] + "'";
 				}
 			}
 		}
 		// BK (Basisklassifikation)
-		else if (json[i][0] === "045Q"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "045Q") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (notes_bk !== ''){
-						notes_bk += ', ';
+					if (notesBk !== '') {
+						notesBk += ', ';
 					}
-					notes_bk += "'" + json[i][j+1] + "'";
+					notesBk += "'" + json[i][j + 1] + "'";
 				}
 			}
 		}
 		// RVK
-		else if (json[i][0] === "045R"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "045R") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (notes_rvk !== ''){
-						notes_rvk += ', ';
+					if (notesRvk !== '') {
+						notesRvk += ', ';
 					}
-					notes_rvk += "'" + json[i][j+1] + "'";
+					notesRvk += "'" + json[i][j + 1] + "'";
 				}
 			}
 		}
 		// other Classification-Systems stored with specific keys
-		else if (json[i][0] === "045X"){ 
-			for (j = 0; j < json[i].length; j++){
+		else if (json[i][0] === "045X") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'i' || json[i][j] === 'b') {
-					var presKey = "'" + json[i][j+1] + "'";
-					if (extraClassDataDict[presKey] == null)  {
+					presKey = "'" + json[i][j + 1] + "'";
+					if (!extraClassDataDict[presKey]) {
 						extraClassDataDict[presKey] = [];
-						extraClassDataDictKeyList[extraClassDataDictKeyList.length] = presKey;
-					}	
-				} else if (json[i][j] === 'a') {
-					extraClassDataDict[presKey][extraClassDataDict[presKey].length] = json[i][j + 1];
+						extraClassDataDictKeyList.push(presKey);
+					}
+				}
+				else if (json[i][j] === 'a' && presKey) {
+					if (!extraClassDataDict[presKey]) {
+						extraClassDataDict[presKey] = [];
+					}
+					extraClassDataDict[presKey].push(json[i][j + 1]);
 				}
 			}
 		}
 	}
-  
-	var classificationNote = `${notes_lcc? `LCC: ${notes_lcc}\n` : ''}${notes_ddc? `DDC: ${notes_ddc}\n` : ''}${notes_bk? `BK: ${notes_bk}\n` : ''} ${notes_rvk? `RVK: ${notes_rvk}\n` : ''}`
+
+	var classificationNote = `${notesLcc ? `LCC: ${notesLcc}\n` : ''}${notesDdc ? `DDC: ${notesDdc}\n` : ''}${notesBk ? `BK: ${notesBk}\n` : ''} ${notesRvk ? `RVK: ${notesRvk}\n` : ''}`;
 	for (i = 0; i < extraClassDataDictKeyList.length; i++) {
-		tmp = `${extraClassDataDictKeyList[i]} ${JSON.stringify(extraClassDataDict[extraClassDataDictKeyList[i]])}`
-		clasificationNote = classificationNote? `${classificationNote}\n${tmp}` : tmp 
+		var tmp = `${extraClassDataDictKeyList[i]} ${JSON.stringify(extraClassDataDict[extraClassDataDictKeyList[i]])}`;
+		classificationNote = classificationNote ? `${classificationNote}\n${tmp}` : tmp;
 	}
-  
+
 	newItem.notes.push({
-		note:classificationNote,
-		title:"Classification Data"
+		note: classificationNote,
+		title: "Classification Data"
 	});
-	switch(zoterotype){
+	switch (zoterotype) {
 		case 'bookSection':
 		case 'article':
 			if (referencingWorkJson) {
 				newItem = articleParse(referencingWorkJson, newItem);
 			}
-			return newItem
+			return newItem;
 		case 'film':
 			newItem = filmParse(json, newItem);
-			return newItem
+			return newItem;
 		case "artwork":
-			newItem = artParse(json, newItem)
-			return newItem
+			newItem = artParse(json, newItem);
+			return newItem;
 		default:
-			return newItem
+			return newItem;
 	}
-
-
 }
 
-function artParse(json, newItem){
-	for (var i = 0; i < json.length; i++){
+function artParse(json, newItem) {
+	for (var i = 0; i < json.length; i++) {
 		// description of the specimen
-		if (json[i][0] === "034I"){
-			for (var j = 0; j < json[i].length; j++){
+		if (json[i][0] === "034I") {
+			for (var j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-						newItem.artworkSize = json[i][j + 1];
+					newItem.artworkSize = json[i][j + 1];
 				}
-			}		
-		} 	else if (json[i][0] === "237A"){
-			for (j = 0; j < json[i].length; j++){
+			}
+		}
+		else if (json[i][0] === "237A") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-					if (newItem.extra != null){
+					if (newItem.extra) {
 						newItem.extra += "\n" + json[i][j + 1];
-					} else{
+					}
+					else {
 						newItem.extra = json[i][j + 1];
 					}
 				}
 			}
-		} else if (json[i][0] === "002E"){
-			for (j = 0; j < json[i].length; j++){
+		}
+		else if (json[i][0] === "002E") {
+			for (j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-						newItem.artworkMedium = json[i][j + 1];
+					newItem.artworkMedium = json[i][j + 1];
 				}
 			}
 		}
-  }
-  return newItem
+	}
+	return newItem;
 }
 
-function filmParse(json, newItem){
-	for (var i = 0; i < json.length; i++){
-		if (json[i][0] === "002E"){
-			for (var j = 0; j < json[i].length; j++){
+function filmParse(json, newItem) {
+	for (var i = 0; i < json.length; i++) {
+		if (json[i][0] === "002E") {
+			for (var j = 0; j < json[i].length; j++) {
 				if (json[i][j] === 'a') {
-						newItem.videoRecordingFormat = json[i][j + 1];
+					newItem.videoRecordingFormat = json[i][j + 1];
 				}
 			}
 		}
-  }
-  return newItem
+	}
+	return newItem;
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -942,35 +981,7 @@ var testCases = [
 				"tags": [],
 				"notes": [
 					{
-						"note": "BK: '71.02', '71.11'\n ",
-						"title": "Classification Data"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://stabikat.de/DB=1/XMLPRS=N/PPN?PPN=649879910",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Systemtheoretische Literaturwissenschaft: Begriffe - Methoden - Anwendungen",
-				"creators": [],
-				"date": "2011",
-				"ISBN": "9783110219012",
-				"extra": "Niels Werber\nIncludes bibliographical references\nThis handbook gives an overview of systems theory in the field of literature, culture and media studies. The individual entries provide an introduction to the key concepts and problems in such a way that their added heuristic value becomes clear, without requiring a detailed understanding of the whole architecture of Luhmann's theory for this purpose. The book tests these concepts and problems in exemplary applications and thus demonstrates how works of art, texts and media can be observed in concrete individual analyses from a systems-theoretical perspective",
-				"libraryCatalog": "Stabikat",
-				"numPages": "Online-Ressource (IX, 514 S.))",
-				"place": "Berlin [u.a.]",
-				"publisher": "de Gruyter",
-				"shortTitle": "Systemtheoretische Literaturwissenschaft",
-				"attachments": [],
-				"tags": [],
-				"notes": [
-					{
-						"note": "LCC: 'PN6231.S93'\nDDC: '809.001/1'\n RVK: 'EC 1850', 'EC 1820', 'EC 1680'\n",
+						"note": "BK: '71.02', '71.11'\n \n'VLBWG' [\"1720\"]",
 						"title": "Classification Data"
 					}
 				],
@@ -1010,7 +1021,7 @@ var testCases = [
 				"date": "2021",
 				"ISBN": "9781786348357",
 				"callNumber": "10 A 109104",
-				"extra": "Aufsatzsammlung\nOfer Lahav(HerausgeberIn)\nLucy Calder(HerausgeberIn)\nJulian Mayers(HerausgeberIn)\nJoshua A. Frieman(HerausgeberIn)\nIncludes bibliographical references and index\n\"This book is about the Dark Energy Survey, a cosmological experiment designed to investigate the physical nature of dark energy by measuring its effect on the expansion history of the universe and on the growth of large-scale structure. The survey saw first light in 2012, after a decade of planning, and completed observations in 2019. The collaboration designed and built a 570-megapixel camera and installed it on the four-metre Blanco telescope at the Cerro Tololo Inter-American Observatory in the Chilean Andes. The survey data yielded a three-dimensional map of over 300 million galaxies and a catalogue of thousands of supernovae. Analysis of the early data has confirmed remarkably accurately the model of cold dark matter and a cosmological constant. The survey has also offered new insights into galaxies, supernovae, stellar evolution, solar system objects and the nature of gravitational wave events. A project of this scale required the long-term commitment of hundreds of scientists from institutions all over the world. The chapters in the first three sections of the book were either written by these scientists or based on interviews with them. These chapters explain, for a non-specialist reader, the science analysis involved. They also describe how the project was conceived, and chronicle some of the many and diverse challenges involved in advancing our understanding of the universe. The final section is trans-disciplinary, including inputs from a philosopher, an anthropologist, visual artists and a poet. Scientific collaborations are human endeavours and the book aims to convey a sense of the wider context within which science comes about. This book is addressed to scientists, decision makers, social scientists and engineers, as well as to anyone with an interest in contemporary cosmology and astrophysics\"--",
+				"extra": "Aufsatzsammlung\nOfer Lahav (HerausgeberIn)\nLucy Calder (HerausgeberIn)\nJulian Mayers (HerausgeberIn)\nJoshua A. Frieman (HerausgeberIn)\nIncludes bibliographical references and index\n\"This book is about the Dark Energy Survey, a cosmological experiment designed to investigate the physical nature of dark energy by measuring its effect on the expansion history of the universe and on the growth of large-scale structure. The survey saw first light in 2012, after a decade of planning, and completed observations in 2019. The collaboration designed and built a 570-megapixel camera and installed it on the four-metre Blanco telescope at the Cerro Tololo Inter-American Observatory in the Chilean Andes. The survey data yielded a three-dimensional map of over 300 million galaxies and a catalogue of thousands of supernovae. Analysis of the early data has confirmed remarkably accurately the model of cold dark matter and a cosmological constant. The survey has also offered new insights into galaxies, supernovae, stellar evolution, solar system objects and the nature of gravitational wave events. A project of this scale required the long-term commitment of hundreds of scientists from institutions all over the world. The chapters in the first three sections of the book were either written by these scientists or based on interviews with them. These chapters explain, for a non-specialist reader, the science analysis involved. They also describe how the project was conceived, and chronicle some of the many and diverse challenges involved in advancing our understanding of the universe. The final section is trans-disciplinary, including inputs from a philosopher, an anthropologist, visual artists and a poet. Scientific collaborations are human endeavours and the book aims to convey a sense of the wider context within which science comes about. This book is addressed to scientists, decision makers, social scientists and engineers, as well as to anyone with an interest in contemporary cosmology and astrophysics\"--",
 				"libraryCatalog": "Stabikat",
 				"numPages": "xxii, 421 Seiten",
 				"place": "Tokyo",
@@ -1021,6 +1032,34 @@ var testCases = [
 				"notes": [
 					{
 						"note": "LCC: 'QB791.3'\nDDC: '523.01'\nBK: '39.30'\n RVK: 'US 3460'\n",
+						"title": "Classification Data"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://stabikat.de/DB=1/TTL=1/PRS/PPN?PPN=649879910",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Systemtheoretische Literaturwissenschaft: Begriffe - Methoden - Anwendungen",
+				"creators": [],
+				"date": "2011",
+				"ISBN": "9783110219012",
+				"extra": "Niels Werber \nIncludes bibliographical references\nThis handbook gives an overview of systems theory in the field of literature, culture and media studies. The individual entries provide an introduction to the key concepts and problems in such a way that their added heuristic value becomes clear, without requiring a detailed understanding of the whole architecture of Luhmann's theory for this purpose. The book tests these concepts and problems in exemplary applications and thus demonstrates how works of art, texts and media can be observed in concrete individual analyses from a systems-theoretical perspective",
+				"libraryCatalog": "Stabikat",
+				"numPages": "Online-Ressource (IX, 514 S.))",
+				"place": "Berlin [u.a.]",
+				"publisher": "de Gruyter",
+				"shortTitle": "Systemtheoretische Literaturwissenschaft",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "LCC: 'PN6231.S93'\nDDC: '809.001/1'\n RVK: 'EC 1850', 'EC 1820', 'EC 1680'\n\n'BISAC' [\"LIT000000\",\"LIT004130\"]\n'VLBWG' [\"9562\"]",
 						"title": "Classification Data"
 					}
 				],
