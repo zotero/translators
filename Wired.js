@@ -17,7 +17,7 @@
 
 	Copyright © 2018 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata
 	translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		item.itemType = "magazineArticle";
 		if (url.includes("wired.co.uk/article")) {
@@ -66,7 +66,7 @@ function scrape(doc, url) {
 			item.ISSN = "1059-1028";
 			item.date = attr(doc,'meta[name="DisplayDate"], meta[name="parsely-pub-date"]','content');
 			item.creators = [];
-			var authorMetadata = attr(doc,'meta[name="Author"], meta[name="parsely-author"]','content');
+			var authorMetadata = attr(doc,'meta[name="Author"], meta[name="parsely-author"]','content') || text(doc, 'a[href^="/author"]');
 			if (authorMetadata) {
 				item.creators.push(ZU.cleanAuthor(authorMetadata, "author"));
 			}
