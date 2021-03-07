@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2021-03-07 04:16:50"
 }
 
 /*
@@ -206,11 +206,11 @@ function processFields(doc, item, fieldMap, strict) {
 	}
 }
 
-function completeItem(doc, newItem) {
+function completeItem(doc, newItem, hwType) {
 	// Strip off potential junk from RDF
 	newItem.seeAlso = [];
 
-	addHighwireMetadata(doc, newItem);
+	addHighwireMetadata(doc, newItem, hwType);
 	addOtherMetadata(doc, newItem);
 	addLowQualityMetadata(doc, newItem);
 	finalDataCleanup(doc, newItem);
@@ -327,7 +327,7 @@ function init(doc, url, callback, forceLoadRDF) {
 		translator.setHandler("itemDone", function(obj, newItem) {
 			_haveItem = true;
 			// Z.debug(newItem)
-			completeItem(doc, newItem);
+			completeItem(doc, newItem, hwType);
 		});
 
 		translator.getTranslatorObject(function(rdf) {
@@ -336,7 +336,7 @@ function init(doc, url, callback, forceLoadRDF) {
 				rdf.Zotero.RDF.addStatement(statement[0], statement[1], statement[2], true);
 			}
 			var nodes = rdf.getNodes(true);
-			rdf.defaultUnknownType = hwType || hwTypeGuess || generatorType ||
+			rdf.defaultUnknownType = hwTypeGuess || generatorType ||
 				//if we have RDF data, then default to webpage
 				(nodes.length ? "webpage":false);
 
@@ -345,7 +345,10 @@ function init(doc, url, callback, forceLoadRDF) {
 				rdf.itemType = exports.itemType;
 				_itemType = exports.itemType;
 			} else {
-				_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+				if (hwType) _itemType = hwType; // hwTypes are generally most accurate
+				else {
+					_itemType = nodes.length ? rdf.detectType({},nodes[0],{}) : rdf.defaultUnknownType;
+				}
 			}
 
 			RDF = rdf;
@@ -380,7 +383,7 @@ function importRDF(doc, url) {
 /**
  * Adds HighWire metadata and completes the item
  */
-function addHighwireMetadata(doc, newItem) {
+function addHighwireMetadata(doc, newItem, hwType) {
 	// HighWire metadata
 	processFields(doc, newItem, HIGHWIRE_MAPPINGS);
 	var authorNodes = getContent(doc, 'citation_author');
@@ -479,7 +482,13 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.pages = firstpage +
 			( ( lastpage && ( lastpage = lastpage.trim() ) )?'-' + lastpage : '' );
 	}
-
+	
+	// swap in hwType for itemType
+	if (hwType && hwType != newItem.itemType) {
+		newItem.itemType = hwType;
+	}
+	
+	
 	//fall back to some other date options
 	if(!newItem.date) {
 		var onlineDate = getContentText(doc, 'citation_online_date');
@@ -671,7 +680,7 @@ function tryOgAuthors(doc) {
 }
 
 function getAuthorFromByline(doc, newItem) {
-	var bylineClasses = ['byline', 'vcard'];
+	var bylineClasses = ['byline', 'vcard', 'article-byline'];
 	Z.debug("Looking for authors in " + bylineClasses.join(', '));
 	var bylines = [], byline;
 	for(var i=0; i<bylineClasses.length; i++) {
@@ -766,7 +775,8 @@ function getAuthorFromByline(doc, newItem) {
 		var li = actualByline.getElementsByTagName('li');
 		if (li.length) {
 			for (var i=0; i<li.length; i++) {
-				var author = ZU.trimInternal(li[i].textContent);
+				var author = ZU.trimInternal(li[i].textContent).replace(/[,\s]+$/, "");
+				Z.debug(author)
 				newItem.creators.push(ZU.cleanAuthor(fixCase(author), 'author', author.indexOf(',') != -1));
 			}
 		} else {
@@ -836,7 +846,7 @@ function finalDataCleanup(doc, newItem) {
 
 	//Cleanup DOI
 	if (newItem.DOI){
-		newItem.DOI =newItem.DOI.replace(/^doi:\s*/, "");
+		newItem.DOI = ZU.cleanDOI(newItem.DOI);
 	}
 
 	// Add DOI to non-supported item types
@@ -915,15 +925,16 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-01-01",
+				"date": "2011/10/17",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
 				"issue": "4",
+				"journalAbbreviation": "1",
 				"language": "en",
 				"libraryCatalog": "www.ajol.info",
 				"publicationTitle": "Tanzania Journal of Health Research",
-				"rights": "Copyright for articles published in this journal is retained by the journal.",
+				"rights": "Copyright (c)",
 				"url": "https://www.ajol.info/index.php/thrb/article/view/63347",
 				"volume": "13",
 				"attachments": [
@@ -932,7 +943,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -956,7 +968,7 @@ var testCases = [
 					}
 				],
 				"date": "2011",
-				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal actions right now in our private lives and in our communities? One such initiative by private citizens working with Portsmouth NH officials resulted in the installation of energy reducing lighting products on Court St. and the benefits to taxpayers are still coming after over 4 years of operation. This citizen initiative to save money and reduce CO2 emissions, while only one small effort, could easily be duplicated in many towns and cities. Replacing old lamps in just one street fixture with a more energy efficient (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr. life of product) in real electrical energy savings of $>$ {\\$}43. and CO2 emission reduction of $>$ 465 lbs. The return on investment (ROI) was less than 2 years. This is much better than any financial investment available today and far safer. Our street only had 30 such lamps installed; however, the rest of Portsmouth (population 22,000) has at least another 150 street lamp fixtures that are candidates for such an upgrade. The talk will also address other energy reduction measures that green the planet and also put more green in the pockets of citizens and municipalities.",
+				"abstractNote": "Why wait for federal action on incentives to reduce energy use and address  Greenhouse Gas (GHG) reductions (e.g. CO2), when we can take personal  actions right now in our private lives and in our communities? One such  initiative by private citizens working with Portsmouth NH officials resulted  in the installation of energy reducing lighting products on Court St. and  the benefits to taxpayers are still coming after over 4 years of operation.  This citizen initiative to save money and reduce CO2 emissions, while only  one small effort, could easily be duplicated in many towns and cities.  Replacing old lamps in just one street fixture with a more energy efficient  (Non-LED) lamp has resulted after 4 years of operation ($\\sim $15,000 hr.  life of product) in real electrical energy savings of $>$ {\\$}43. and CO2  emission reduction of $>$ 465 lbs. The return on investment (ROI) was less  than 2 years. This is much better than any financial investment available  today and far safer. Our street only had 30 such lamps installed; however,  the rest of Portsmouth (population 22,000) has at least another 150 street  lamp fixtures that are candidates for such an upgrade. The talk will also  address other energy reduction measures that green the planet and also put  more green in the pockets of citizens and municipalities.",
 				"conferenceName": "Climate Change and the Future of Nuclear Power",
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
@@ -964,7 +976,8 @@ var testCases = [
 				"url": "https://scholarworks.umass.edu/climate_nuclearpower/2011/nov19/34",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1010,7 +1023,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1035,7 +1049,7 @@ var testCases = [
 				],
 				"date": "2012",
 				"abstractNote": "This thesis examines decentralized meta-reasoning. For a single agent or multiple agents, it may not be enough for agents to compute correct decisions if they do not do so in a timely or resource efficient fashion. The utility of agent decisions typically increases with decision quality, but decreases with computation time. The reasoning about one's computation process is referred to as meta-reasoning. Aspects of meta-reasoning considered in this thesis include the reasoning about how to allocate computational resources, including when to stop one type of computation and begin another, and when to stop all computation and report an answer. Given a computational model, this translates into computing how to schedule the basic computations that solve a problem. This thesis constructs meta-reasoning strategies for the purposes of monitoring and control in multi-agent settings, specifically settings that can be modeled by the Decentralized Partially Observable Markov Decision Process (Dec-POMDP). It uses decision theory to optimize computation for efficiency in time and space in communicative and non-communicative decentralized settings. Whereas base-level reasoning describes the optimization of actual agent behaviors, the meta-reasoning strategies produced by this thesis dynamically optimize the computational resources which lead to the selection of base-level behaviors.",
-				"extra": "DOI: https://doi.org/10.7275/n8e9-xy93",
+				"extra": "DOI: 10.7275/n8e9-xy93",
 				"language": "en",
 				"libraryCatalog": "scholarworks.umass.edu",
 				"university": "University of Massachusetts Amherst",
@@ -1046,7 +1060,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1057,11 +1072,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+		"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
+				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
 				"creators": [
 					{
 						"firstName": "P. R.",
@@ -1089,11 +1104,11 @@ var testCases = [
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
 				"journalAbbreviation": "Rev. Saúde Pública",
-				"language": "pt",
+				"language": "en",
 				"libraryCatalog": "scielosp.org",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
-				"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+				"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
 				"volume": "41",
 				"attachments": [
 					{
@@ -1101,7 +1116,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1112,7 +1128,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.hindawi.com/journals/mpe/2013/868174/abs/",
+		"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1141,7 +1157,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.hindawi.com",
 				"publicationTitle": "Mathematical Problems in Engineering",
-				"url": "https://www.hindawi.com/journals/mpe/2013/868174/abs/",
+				"url": "https://www.hindawi.com/journals/mpe/2013/868174/",
 				"volume": "2013",
 				"attachments": [
 					{
@@ -1149,7 +1165,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1172,14 +1189,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T11:58:34+00:00",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
+				"date": "2013-12-22T11:58:34-05:00",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1218,7 +1236,8 @@ var testCases = [
 				"websiteTitle": "Harvard Business Review",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1264,7 +1283,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1289,11 +1309,13 @@ var testCases = [
 				],
 				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
+				"language": "en",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1372,7 +1394,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 47 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
@@ -1384,7 +1406,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1409,14 +1432,15 @@ var testCases = [
 				],
 				"date": "1999/04/01",
 				"DOI": "10.1023/A:1021669308832",
-				"ISSN": "0894-9875, 1572-9524",
-				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today.It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's...",
+				"ISSN": "1572-9524",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (exact) wave mechanics unchanged, while the rest of it is observationally meaningless and solely based on classical prejudice.",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
 				"libraryCatalog": "link.springer.com",
 				"pages": "197-200",
 				"publicationTitle": "Foundations of Physics Letters",
+				"rights": "1999 Plenum Publishing Corporation",
 				"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 				"volume": "12",
 				"attachments": [
@@ -1425,7 +1449,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1465,7 +1490,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
