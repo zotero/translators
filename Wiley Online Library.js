@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-02 09:08:13"
+	"lastUpdated": "2021-03-08 16:42:51"
 }
 
 /*
@@ -106,7 +106,7 @@ function addPages (doc, item) {
 			item.pages = pagesMatch;
 	}
 }
- 
+
 function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
 	if ( !title ) return false;
@@ -415,6 +415,12 @@ function scrapeBibTeX(doc, url) {
 				for (let author of getAuthorNameShortReview(doc))
 					item.creators.push(ZU.cleanAuthor(author));
 			}
+
+			// Make sure we pass only the DOI not the whole URL
+			doiURLRegex = /^https:\/\/doi.org\/(.*)/;
+			if (item.DOI && item.DOI.match(doiURLRegex))
+			    item.DOI = item.DOI.replace(/^https:\/\/doi.org\/(.*)/, "$1");
+
 			item.complete();
 		});
 
