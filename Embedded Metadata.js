@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 19:46:46"
+	"lastUpdated": "2020-05-18 01:58:47"
 }
 
 /*
@@ -387,36 +387,13 @@ function addHighwireMetadata(doc, newItem) {
 	if (authorNodes.length == 0) {
 		authorNodes = getContent(doc, 'citation_authors');
 	}
+	var editorNodes = getContent(doc, 'citation_editor');
+	if (editorNodes.length == 0) {
+		editorNodes = getContent(doc, 'citation_editors');
+	}
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
-	newItem.creators = [];
-	for(var i=0, n=authorNodes.length; i<n; i++) {
-		var authors = authorNodes[i].nodeValue.split(/\s*;\s*/);
-		if (authors.length == 1 && authorNodes.length == 1) {
-			/* If there is only one author node and 
-			 we get nothing when splitting by semicolon, and at least two words on
-			 either side of the comma when splitting by comma, we split by comma. */
-			var authorsByComma = authors[0].split(/\s*,\s*/);
-			if (authorsByComma.length > 1
-				&& authorsByComma[0].indexOf(" ") !== -1
-				&& authorsByComma[1].indexOf(" ") !== -1)
-				authors = authorsByComma;
-		}
-		for(var j=0, m=authors.length; j<m; j++) {
-			var author = authors[j].trim();
-
-			//skip empty authors. Try to match something other than punctuation
-			if(!author || !author.match(/[^\s,-.;]/)) continue;
-
-			author = ZU.cleanAuthor(author, "author", author.indexOf(",") !== -1);
-			if(author.firstName) {
-				//fix case for personal names
-				author.firstName = fixCase(author.firstName);
-				author.lastName = fixCase(author.lastName);
-			}
-			newItem.creators.push(author);
-		}
-	}
+	newItem.creators = processHighwireCreators(authorNodes, "author").concat(processHighwireCreators(editorNodes, "editor"));
 
 	if( !newItem.creators.length ) {
 		newItem.creators = rdfCreators;
@@ -546,6 +523,40 @@ function addHighwireMetadata(doc, newItem) {
 		newItem.url = getContentText(doc, "citation_abstract_html_url") ||
 			getContentText(doc, "citation_fulltext_html_url");
 	}
+}
+
+
+// process highwire creators; currently only editor and author, but easy to exten
+function processHighwireCreators(creatorNodes, role) {
+	let itemCreators = [];
+	for(let i=0, n=creatorNodes.length; i<n; i++) {
+		let creators = creatorNodes[i].nodeValue.split(/\s*;\s*/);
+		if (creators.length == 1 && creatorNodes.length == 1) {
+			/* If there is only one author node and 
+			 we get nothing when splitting by semicolon, and at least two words on
+			 either side of the comma when splitting by comma, we split by comma. */
+			var authorsByComma = creators[0].split(/\s*,\s*/);
+			if (authorsByComma.length > 1
+				&& authorsByComma[0].indexOf(" ") !== -1
+				&& authorsByComma[1].indexOf(" ") !== -1)
+				creators = authorsByComma;
+		}
+		for(let j=0, m=creators.length; j<m; j++) {
+			let creator = creators[j].trim();
+
+			//skip empty authors. Try to match something other than punctuation
+			if(!creator || !creator.match(/[^\s,-.;]/)) continue;
+
+			creator = ZU.cleanAuthor(creator, role, creator.indexOf(",") !== -1);
+			if(creator.firstName) {
+				//fix case for personal names
+				creator.firstName = fixCase(creator.firstName);
+				creator.lastName = fixCase(creator.lastName);
+			}
+			itemCreators.push(creator);
+		}
+	}
+	return (itemCreators);
 }
 
 function addOtherMetadata(doc, newItem) {
@@ -1057,11 +1068,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+		"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Impressões sobre o teste rápido para o HIV entre usuários de drogas injetáveis no Brasil",
+				"title": "Perceptions of HIV rapid testing among injecting drug users in Brazil",
 				"creators": [
 					{
 						"firstName": "P. R.",
@@ -1089,11 +1100,11 @@ var testCases = [
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
 				"journalAbbreviation": "Rev. Saúde Pública",
-				"language": "pt",
+				"language": "en",
 				"libraryCatalog": "scielosp.org",
 				"pages": "94-100",
 				"publicationTitle": "Revista de Saúde Pública",
-				"url": "https://scielosp.org/scielo.php?script=sci_abstract&pid=S0034-89102007000900015&lng=en&nrm=iso&tlng=en",
+				"url": "https://scielosp.org/article/rsp/2007.v41suppl2/94-100/en/",
 				"volume": "41",
 				"attachments": [
 					{
@@ -1172,8 +1183,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-12-22T11:58:34+00:00",
-				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal.\nThen we learned from our administration that despite being listed as in institutional member by the ASA,  the university has, after checking, concluded it has no such membership, does not plan to get one, and is unclear why the ASA would list us as institutional member.\nApparently, at least several other schools listed by the ASA as institutional members say they have no such relationship.\nThe ASA has been spending a great deal of energy on political activism far from its mission, but apparently cannot keep its books in order. The association has yet to explain how it has come to list as institutional members so many schools that know nothing about such a membership. The ASA’s membership rolls may get much shorter in the coming weeks even without any quitting.\nHow this confusion came to arise is unclear. ASA membership, like that of many academic organizations, comes with a subscription to their journal. Some have suggested that perhaps  the ASA also counts as members any institution whose library happened to subscribe to the journal, ie tacking on membership to a subscription, rather than vice versa. This would not be fair on their part. A library may subscribe to all sorts of journals for academic research purposes (ie Pravda), without endorsing the organization that publishes it. That is the difference between subscription and membership.\nI eagerly await the ASA’s explanation of the situation. [...]",
+				"date": "2013-12-22T11:58:34-05:00",
+				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
 				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
@@ -1289,6 +1300,7 @@ var testCases = [
 				],
 				"date": "2016-01-07T08:20:02-05:00",
 				"abstractNote": "Excluding female characters in merchandise is an ongoing pattern.",
+				"language": "en",
 				"url": "https://www.vox.com/2016/1/7/10726296/wheres-rey-star-wars-monopoly",
 				"websiteTitle": "Vox",
 				"attachments": [
@@ -1304,7 +1316,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=510",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=1978",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1372,7 +1384,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 47 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
@@ -1409,14 +1421,15 @@ var testCases = [
 				],
 				"date": "1999/04/01",
 				"DOI": "10.1023/A:1021669308832",
-				"ISSN": "0894-9875, 1572-9524",
-				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today.It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's...",
+				"ISSN": "1572-9524",
+				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (exact) wave mechanics unchanged, while the rest of it is observationally meaningless and solely based on classical prejudice.",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
 				"libraryCatalog": "link.springer.com",
 				"pages": "197-200",
 				"publicationTitle": "Foundations of Physics Letters",
+				"rights": "1999 Plenum Publishing Corporation",
 				"url": "https://link.springer.com/article/10.1023/A:1021669308832",
 				"volume": "12",
 				"attachments": [
@@ -1464,6 +1477,62 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Conservation Research, Policy and Practice",
+				"creators": [
+					{
+						"firstName": "William J.",
+						"lastName": "Sutherland",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Peter N. M.",
+						"lastName": "Brotherton",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Zoe G.",
+						"lastName": "Davies",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Nancy",
+						"lastName": "Ockendon",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Nathalie",
+						"lastName": "Pettorelli",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Juliet A.",
+						"lastName": "Vickery",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2020/04",
+				"abstractNote": "Cambridge Core - Ecology and Conservation - Conservation Research, Policy and Practice -  edited by William J. Sutherland",
+				"extra": "DOI: 10.1017/9781108638210",
+				"language": "en",
+				"url": "/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
+				"websiteTitle": "Cambridge Core",
+				"attachments": [
 					{
 						"title": "Snapshot"
 					}
