@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-01 08:54:55"
+	"lastUpdated": "2021-03-03 12:09:16"
 }
 
 /*
@@ -17,7 +17,6 @@
 
 	Taylor and Francis Translator
 	Copyright © 2011 Sebastian Karcher
-
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -147,6 +146,7 @@ function scrape(doc, url) {
 }
 
 
+
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
@@ -164,7 +164,24 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		if (sectionheading.match(/^(Book )?Reviews?$/i))
 			item.tags.push("Book Reviews");
 	}
-
+	
+	// numbering issues with slash, e.g. in case of  double issue "1-2" > "1/2"
+	if (item.issue) item.issue = item.issue.replace('-', '/');
+	
+	//scraping orcid number 
+	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');//Z.debug(authorSectionEntries)
+	for (let authorSectionEntry of authorSectionEntries) {
+		let authorInfo = authorSectionEntry.querySelector('.entryAuthor');
+		let orcidHref = authorSectionEntry.querySelector('.orcid-author');
+		if (authorInfo && orcidHref) {
+			let author = authorInfo.childNodes[0].textContent;
+			let orcid = orcidHref.textContent.replace(/.*(\d+-\d+-\d+-\d+x?)$/i, '$1');
+			item.notes.push({note: "orcid:" + orcid + '|' + author});
+		}
+	}
+	//deduplicate
+	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+	
 	//add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
