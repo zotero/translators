@@ -1,15 +1,15 @@
 {
-	"translatorID": "b550955a-d364-49d0-98f5-209320c5b083",
-	"label": "ubtue_Gottesdienst",
+	"translatorID": "7100a927-4daa-4e1a-8b63-ce883a42b35c",
+	"label": "ubtue_Herder",
 	"creator": "Hjordis Lindeboom",
-	"target": "https://www.herder.de/gd/hefte/",
+	"target": "https://www.herder.de/[a-zA-Z]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-02 14:24:39"
+	"lastUpdated": "2021-03-05 10:06:43"
 }
 
 /*
@@ -34,7 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/\d{4}\/\d+\-\d{4}\/\w+/)) {
+	if (url.match(/\/\d{4}\/(\d+\-)*\d{4}\/\w+/)) {
 		return "journalArticle";
 	} else if (getSearchResults(doc)) {
 		return "multiple";
@@ -45,7 +45,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//ul[@class="magazine-article-li lc-small link-list link-arrows"]//li/a');
+	var rows = ZU.xpath(doc, '//ul[@class="article-list"]//a');
 	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
