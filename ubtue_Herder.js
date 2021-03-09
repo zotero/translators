@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-05 10:06:43"
+	"lastUpdated": "2021-03-09 08:30:43"
 }
 
 /*
@@ -34,7 +34,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/\d{4}\/(\d+\-)*\d{4}\/\w+/)) {
+	if (url.match(/\/(\d+\-)*\d{4}\/[a-z]+/)) {
 		return "journalArticle";
 	} else if (getSearchResults(doc)) {
 		return "multiple";
@@ -75,12 +75,28 @@ function extractYear(doc, item, issueAndYear) {
 		item.date = year[0];
 }
 
+function extractPages(doc) {
+	let itemPath = doc.querySelector('span.article-infoline').textContent;
+	let itemPages = itemPath.match(/\d+\-\d+/gi);
+	let singlePage = itemPath.match(/S\.\s\d+/gi);
+	if (itemPages)
+		return itemPages;
+	else {
+		if (singlePage)
+			return singlePage.toString().trim().replace('S.', '');
+		return false;
+	}
+}
+
 function invokeEmbeddedMetadataTranslator(doc, url) {
 	let translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, item) {
 		item.itemType = 'journalArticle';
+		let itemTitle = doc.querySelector('span.headline').textContent;
+		if (itemTitle)
+		item.title = itemTitle;
 		if (extractAuthors(doc)) {
 			item.creators = [];
 			for (let author of extractAuthors(doc))
@@ -96,6 +112,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 				break;
 			}
 		}
+		item.pages = extractPages(doc);
 		item.complete();
 	});
 	translator.translate();
