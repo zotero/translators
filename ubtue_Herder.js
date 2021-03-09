@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-09 08:30:43"
+	"lastUpdated": "2021-03-09 08:50:05"
 }
 
 /*
@@ -96,7 +96,7 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		item.itemType = 'journalArticle';
 		let itemTitle = doc.querySelector('span.headline').textContent;
 		if (itemTitle)
-		item.title = itemTitle;
+			item.title = itemTitle;
 		if (extractAuthors(doc)) {
 			item.creators = [];
 			for (let author of extractAuthors(doc))
