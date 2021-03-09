@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-09 08:50:05"
+	"lastUpdated": "2021-03-09 08:59:18"
 }
 
 /*
@@ -76,16 +76,20 @@ function extractYear(doc, item, issueAndYear) {
 }
 
 function extractPages(doc) {
-	let itemPath = doc.querySelector('span.article-infoline').textContent;
-	let itemPages = itemPath.match(/\d+\-\d+/gi);
-	let singlePage = itemPath.match(/S\.\s\d+/gi);
-	if (itemPages)
-		return itemPages;
-	else {
-		if (singlePage)
-			return singlePage.toString().trim().replace('S.', '');
-		return false;
+	let itemPath = doc.querySelector('span.article-infoline');
+	if (itemPath) {
+		itemPath = itemPath.textContent;
+		let itemPages = itemPath.match(/\d+\-\d+/gi);
+		let singlePage = itemPath.match(/S\.\s*\d+/gi);
+		if (itemPages)
+			return itemPages;
+		else {
+			if (singlePage)
+				return singlePage.toString().trim().replace('S.', '');
+			return false;
+		}
 	}
+	return false;
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
@@ -94,9 +98,9 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, item) {
 		item.itemType = 'journalArticle';
-		let itemTitle = doc.querySelector('span.headline').textContent;
+		let itemTitle = doc.querySelector('span.headline');
 		if (itemTitle)
-			item.title = itemTitle;
+			item.title = itemTitle.textContent;
 		if (extractAuthors(doc)) {
 			item.creators = [];
 			for (let author of extractAuthors(doc))
