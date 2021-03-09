@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-09 08:59:18"
+	"lastUpdated": "2021-03-09 09:09:00"
 }
 
 /*
@@ -84,8 +84,8 @@ function extractPages(doc) {
 		if (itemPages)
 			return itemPages;
 		else {
-			if (singlePage)
-				return singlePage.toString().trim().replace('S.', '');
+			if (singlePage && singlePage[0])
+				return singlePage[0].replace('S.', '');
 			return false;
 		}
 	}
