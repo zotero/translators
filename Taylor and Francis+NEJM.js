@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-03 12:09:16"
+	"lastUpdated": "2021-03-11 11:12:16"
 }
 
 /*
@@ -182,6 +182,10 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 	
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	let AccessIconLocation = doc.querySelector('.accessIconLocation[alt]');
+	if (AccessIconLocation && AccessIconLocation.alt.match(/open\s+access/gi)) item.notes.push('LF:');
+
 	//add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
