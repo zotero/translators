@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2018-12-26 11:18:52"
+	"lastUpdated": "2021-03-11 13:47:13"
 }
 
 function detectWeb(doc, url) {
@@ -224,15 +224,13 @@ function downloadFunction(text, url, prefs) {
 function getResultList(doc, items, itemInfo) {
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
 			var title, folderData, count = 0;
-	//make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
-  	//http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
+	// make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
+	// https://www.library.umass.edu/
+  	// http://search.ebscohost.com/login.aspx?direct=true&site=eds-live&scope=site&type=0&custid=s4895734&groupid=main&profid=eds&mode=and&lang=en&authtype=ip,guest,athens
 	if (results.length>0) {	
 		var folder = ZU.xpathText(doc, '//span[@class = "item add-to-folder"]/input/@value|.//span[@class = "item add-to-folder"]/a[1]/@data-folder')
 		for(var i=0, n=results.length; i<n; i++) {
-			//we're extra cautious here: When there's not folder, good chance user isn't logged in and import will fail where 
-			//there is no preview icon. We might be able to just rely on the 2nd xpath, but why take the risk
-			if (folder) title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
-			else title = ZU.xpath(results[i], './/a[@class = "title-link color-p4" and following-sibling::span[contains(@id, "hoverPreview")]]');
+			title = ZU.xpath(results[i], './/a[@class = "title-link color-p4"]');
 			if(!title.length) continue;
 			if (folder) {
 			folderData = ZU.xpath(results[i],
@@ -512,44 +510,5 @@ function doDelivery(doc, itemInfo) {
 }
 
 /** BEGIN TEST CASES **/
-var testCases = [
-	{
-		"type": "web",
-		"defer": true,
-		"url": "http://web.ebscohost.com/ehost/detail?sid=4bcfec05-db01-4d69-9028-c40ff1331e56%40sessionmgr15&vid=1&hid=28&bdata=JnNpdGU9ZWhvc3QtbGl2ZQ%3d%3d#db=aph&AN=9606204477",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"creators": [
-					{
-						"lastName": "Brodsky",
-						"firstName": "Joseph",
-						"creatorType": "author"
-					}
-				],
-				"notes": [],
-				"tags": [
-					"POETS, Polish",
-					"HERBERT, Zbigniew, 1924-1998"
-				],
-				"seeAlso": [],
-				"attachments": [],
-				"title": "Zbigniew Herbert",
-				"journalAbbreviation": "Wilson Quarterly",
-				"publicationTitle": "Wilson Quarterly",
-				"volume": "17",
-				"issue": "1",
-				"pages": "112",
-				"publisher": "Woodrow Wilson International Center for Scholars",
-				"ISSN": "03633276",
-				"abstractNote": "Introduces the poetry of Polish poet Zbigniew Herbert. Impression of difficulty in modern poetry; Polish poet Czeslaw Milosz; Herbert's 1980 Nobel Prize; Translations into English; Use of vers libre; Sample poems.",
-				"url": "http://search.ebscohost.com/login.aspx?direct=true&db=aph&AN=9606204477&site=ehost-live",
-				"libraryCatalog": "EBSCOhost",
-				"callNumber": "9606204477",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"date": "Winter 1993"
-			}
-		]
-	}
-]
+var testCases = []
 /** END TEST CASES **/
