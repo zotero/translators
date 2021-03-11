@@ -226,7 +226,7 @@ var bibtex2zoteroTypeMap = {
 	"booklet":"book",
 	"manual":"book",
 	"mastersthesis":"thesis",
-	"misc":"book",
+	"misc":"document",
 	"proceedings":"book",
 	"online":"webpage",
 	// alias for online from BibLaTeX:
