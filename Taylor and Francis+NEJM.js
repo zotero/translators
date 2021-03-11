@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-11 09:49:16"
+	"lastUpdated": "2021-03-11 11:12:16"
 }
 
 /*
@@ -183,9 +183,8 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 	
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
-	let openAccessTag = doc.querySelector('.accessIconLocation');
-	let altLabel = openAccessTag.alt;
-	if (openAccessTag && altLabel.match(/open\saccess/gi)) item.notes.push('LF:');
+	let AccessIconLocation = doc.querySelector('.accessIconLocation[alt]');
+	if (AccessIconLocation && AccessIconLocation.alt.match(/open\s+access/gi)) item.notes.push('LF:');
 
 	//add attachments
 	item.attachments = [{
