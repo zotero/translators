@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-11 11:12:16"
+	"lastUpdated": "2021-03-15 16:07:15"
 }
 
 /*
@@ -169,7 +169,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	
 	//scraping orcid number 
-	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees corresponding ")]');//Z.debug(authorSectionEntries)
+	let authorSectionEntries = ZU.xpath(doc, '//*[contains(@class, "contribDegrees")]');//Z.debug(authorSectionEntries)
 	for (let authorSectionEntry of authorSectionEntries) {
 		let authorInfo = authorSectionEntry.querySelector('.entryAuthor');
 		let orcidHref = authorSectionEntry.querySelector('.orcid-author');
@@ -638,6 +638,141 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/15570274.2021.1874144",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Taiwan’s Covenantal Pluralism",
+				"creators": [
+					{
+						"firstName": "André",
+						"lastName": "Laliberté",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 2, 2021",
+				"DOI": "10.1080/15570274.2021.1874144",
+				"ISSN": "1557-0274",
+				"abstractNote": "Despite its diplomatic isolation, Taiwan shines in East Asia as a beacon for pluralism. This is a rare example of a progressive and liberal society where both deep religious diversity and a tolerant secular state co-exist. Taiwan’s liminality between world empires, and its unique position in the global economy partly explain its openness to a diversity of worldviews, but also exposes it to greater challenges to achieve covenantal pluralism. Taiwan’s hard-won democracy has entrenched positive trends, but three issues threaten to undermine it: the political pressure of a domineering China that limits its own religious diversity and that wants to annex Taiwan; the rise in influence of a rather intransigent and divisive religious minority that demonizes its opponents; and the increasing labor immigration addressing the challenges of an aging society.",
+				"issue": "1",
+				"itemID": "doi:10.1080/15570274.2021.1874144",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "42-55",
+				"publicationTitle": "The Review of Faith & International Affairs",
+				"url": "https://doi.org/10.1080/15570274.2021.1874144",
+				"volume": "19",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Buddhism"
+					},
+					{
+						"tag": "Christianity"
+					},
+					{
+						"tag": "Confucianism"
+					},
+					{
+						"tag": "Taiwan"
+					},
+					{
+						"tag": "democratization"
+					},
+					{
+						"tag": "religious diversity"
+					},
+					{
+						"tag": "religious freedom"
+					},
+					{
+						"tag": "self-determination"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0-0003-3285-5188|André Laliberté"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/0048721X.2020.1792051",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Engineering transformations in the ‘religion-development nexus’: Islamic law, reform, and reconstruction in Aceh",
+				"creators": [
+					{
+						"firstName": "R. Michael",
+						"lastName": "Feener",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 2, 2021",
+				"DOI": "10.1080/0048721X.2020.1792051",
+				"ISSN": "0048-721X",
+				"abstractNote": "This article presents an exploration of the ways in which law, education, and religious propagation have been deployed as mutually reinforcing means for engineering social transformation in the Indonesian province of Aceh, and how these agendas were dramatically accelerated in the context of humanitarian and development interventions in post-conflict/post-disaster reconstruction. In doing so, it demonstrates and critically analyzes the ways in which contemporary Muslim visions of instrumentalist, future-oriented models of Islamic law have been formally implemented through the apparatus of the state as part of an over-arching project of engineering a new society, and of redefining conceptions of proper Islamic religious belief and practice. This case presents a striking instance of an agenda of religious revival envisioned not as an attempt to preserve or resuscitate established tradition, but rather as a tool in interventions for future-oriented projects for ‘improving’ the conditions of Muslims in both this world, and the next.",
+				"issue": "1",
+				"itemID": "doi:10.1080/0048721X.2020.1792051",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "40-57",
+				"publicationTitle": "Religion",
+				"shortTitle": "Engineering transformations in the ‘religion-development nexus’",
+				"url": "https://doi.org/10.1080/0048721X.2020.1792051",
+				"volume": "51",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Aceh"
+					},
+					{
+						"tag": "Indonesia"
+					},
+					{
+						"tag": "Islam"
+					},
+					{
+						"tag": "Shari’a"
+					},
+					{
+						"tag": "Southeast Asia"
+					},
+					{
+						"tag": "social engineering"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0-0002-1222-6766|R. Michael Feener"
+					}
+				],
 				"seeAlso": []
 			}
 		]
