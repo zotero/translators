@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-13 20:27:18"
+	"lastUpdated": "2021-03-17 20:42:32"
 }
 
 /*
@@ -39,21 +39,20 @@
 function detectWeb(doc, url) {
 	if (url.includes('/library/')) {
 		return "document";
-/*
-	} else if ((url.includes('admin/content') || url.endsWith('.edu'))) {
+
+	} else if ((url.includes('admin/content') || url.endsWith('.edu') || url.endsWith('.edu/'))) {
 		return "multiple";
-*/
 	}
 }
 
 
-/* function getSearchResults(doc, checkOnly) {
+ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('tr>td>a[href*="/web/packages/"]');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('a[href*="/library/"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.text);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -61,7 +60,7 @@ function detectWeb(doc, url) {
 	}
 	return found ? items : false;
 }
-*/
+
 
 
 function doWeb(doc, url) {
@@ -88,9 +87,14 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Date")]/following-sibling::dd[1]');
 	item.abstractNote = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Information")]/following-sibling::dd[1]');
 	item.publisher = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Publisher")]/following-sibling::dd[1]');
-	item.creators = ZU.cleanAuthor(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Author")]/following-sibling::dd[1]'), "author", true);
 	item.language = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Language")]/following-sibling::dd[1]');
 	item.url = url;
+	
+	item.creators = [];
+	for (i=1; i<=ZU.xpath(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Author")]/following-sibling::dd[1]/a').length; i++) {
+		item.creators.push(ZU.cleanAuthor(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Author")]/following-sibling::dd[1]/a'.concat("[", i, "]")), "author", true));
+	}
+	
 	item.attachments = [{
 		url: ZU.xpath(doc, '//a[@class="button no-icon"]', '@href').toString(),
 		mimeType: "application/pdf",
