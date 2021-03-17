@@ -1,15 +1,15 @@
 {
 	"translatorID": "d0b1914a-11f1-4dd7-8557-b32fe8a3dd47",
-	"translatorType": 4,
 	"label": "EBSCOhost",
 	"creator": "Simon Kornblith, Michael Berkowitz, Josh Geller",
 	"target": "^https?://[^/]+/(eds|bsi|ehost)/(results|detail|folder|pdfviewer)",
 	"minVersion": "3.0",
-	"maxVersion": null,
+	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
+	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-03-11 17:35:00"
+	"lastUpdated": "2021-03-17 12:39:23"
 }
 
 /*
@@ -244,6 +244,15 @@ function downloadFunction(text, url, prefs) {
 
 // collects item url->title (in items) and item url->database info (in itemInfo)
 function getResultList(doc, items, itemInfo) {
+    // Address RSS problem first observed in "Soccial Justice"
+    // The results returned in the Feed lead to empty results and articles
+    // from other journals are displayed
+    // So skip results if a notification concerning this is found
+    var smartSearchDisclaimer = ZU.xpath(doc, '//*[contains(text(),"Your initial search query did not yield any results")]')
+    if (smartSearchDisclaimer.length > 0) {
+        Z.debug("Skipping all results because we have invalid EBSCO SmartText Searching results")
+        return 0;
+    }
 	var results = ZU.xpath(doc, '//li[@class="result-list-li"]');
 	var title, folderData, count = 0;
 	// make search results work if you can't add to folder, e.g. for EBSCO used as discovery service of library such as
@@ -540,6 +549,3 @@ function doDelivery(doc, itemInfo) {
 	});
 }
 
-/** BEGIN TEST CASES **/
-
-/** END TEST CASES **/
