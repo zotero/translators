@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-04 09:33:30"
+	"lastUpdated": "2021-03-11 11:09:30"
 }
 
 /*
@@ -198,6 +198,9 @@ function scrape(doc, url) {
 					if (tags) item.tags = tags.map(n => n.textContent);
 				}
 			}
+			// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+			let accessIcon = doc.querySelector('.accessIcon[alt]');
+			if (accessIcon && accessIcon.alt.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
 			
 			item.language = ZU.xpathText(doc, '//meta[@name="dc.Language"]/@content');
 			item.attachments.push({
