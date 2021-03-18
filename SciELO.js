@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-03 11:10:11"
+	"lastUpdated": "2021-03-18 11:00:50"
 }
 
 /*
@@ -92,9 +92,13 @@ function scrape(doc, url) {
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
+	const keywordsInAbstractsPrefix = /\n*(Palabras clave|Keywords)\s*:.*/i;
+	const abstractPrefix = /^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i;
 	translator.setHandler('itemDone', function(obj, item) {
-		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, "").replace(/[\n\t]/g, "");
-		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, ""),
+		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
+		                                           replace(keywordsInAbstractsPrefix, "");
+		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(abstractPrefix, "").
+		                                           replace(keywordsInAbstractsPrefix, ""),
 		});
 		//abstract in orginal language
 		if (!abstract && item.ISSN === '0049-3449') {
