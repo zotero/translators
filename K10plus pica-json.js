@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-03-20 23:51:45"
+	"lastUpdated": "2021-03-21 01:49:36"
 }
 
 /*
@@ -229,7 +229,7 @@ function parseInput() {
 	// chunk size shouldn't need to be bigger than 100 characters
 	while ((str = Z.read(100)) !== false) json += str;
 	try {
-		json = JSON.parse(json);
+		json = json ? JSON.parse(json) : "";
 		var typeChecker = json.ppn
 			&& json.ppn instanceof Array
 			&& json.ppn.reduce((p, c) => {
@@ -338,7 +338,7 @@ async function picaObjectParse(picaObj, item) {
 		zoteroType = 'manuscript';
 	}
 	else if (bibliographicalGenre[0] === 'B' && contentSpecification === "Film") {
-		zoteroType =  "film"
+		zoteroType = "film";
 	}
 	else {
 		switch (contentType) {
@@ -378,7 +378,7 @@ async function picaObjectParse(picaObj, item) {
 				zoteroType = 'book';
 		}
 	}
-	item.itemType = getZoteroType(zoteroType);
+	item.itemType = zoteroType;
 	var hasSuperiorWork = superiorWorkPicaObj && !superiorWorkPicaObj.invalidFormat;
 	item = await generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj);
 	return item;
@@ -399,7 +399,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 	}
 	switch (zoteroType) {
 		case 'film':
-			item = filmParse(json, item);
+			item.videoRecordingFormat = picaObj.getSubfield("002E", "a");
 			break;
 		case "artwork":
 			item.artworkSize = picaObj.getSubfield("034I", "a");
@@ -441,7 +441,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 
 	// todo: suport multiple relations of a person to a work /check if that is supported generally/add multiple relations to extra field
 	// principal & co-authors
-
+	let peopleMap = new Map;
 	let principalAuthorsList = picaObj.getField('028A', true);
 	let coAuthorsList = picaObj.getField("028B", true);
 
@@ -450,7 +450,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 			firstName: authorField.getSubfield("D") || authorField.getSubfield("d"),
 			lastName: authorField.getSubfield("A") || authorField.getSubfield("a")
 		};
-		let relationSubfields = authorField.getSubfield()
+		peopleMap.set(author, authorField.getSubfield("B", true));
 		if (zoteroType === "bookSection") {
 			// eslint-disable-next-line
 			item.creators.push( Object.assign(author, { creatorType: "bookAuthor" })); // ?? IS THAT SO?
@@ -469,6 +469,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 			firstName: e.getSubfield('D') || e.getSubfield('d'),
 			lastName: e.getSubfield('A') || e.getSubfield('a')
 		};
+		peopleMap.set(entity, e.getSubfield("B", true));
 		switch (e.getSubfield('4')) {
 			case "trl":
 				item.creators.push(Object.assign(entity, { creatorType: "translator" }));
@@ -484,14 +485,22 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 				item.creators.push(Object.assign(entity, { creatorType: "contributor" }));
 				break;
 			default: {
-				// All other contributors will be stored in the extra field with their
-				// type of relation to the book specified
-				let extraTmp = `${entity.firstName} ${entity.lastName} ${e.getSubfield('B') ? `(${e.getSubfield('B')})` : ''}`;
-				item.extra = item ? item.extra + "\n" + extraTmp : extraTmp;
 				break;
 			}
 		}
 	});
+
+	let contributursStr = "";
+	for (var [key, value] of peopleMap) {
+		contributursStr = contributursStr ? contributursStr + ", " : "";
+		let tmpStr = `${key.firstName} ${key.lastName} (${value[0]}${value.length > 1
+			? value.slice(1, value.length).map((str) => {
+				return `, ${str}`;
+			})
+			: ""})`;
+		contributursStr += tmpStr;
+	}
+	item.extra = contributursStr ? `\nBeteiligte Personen: ${contributursStr}` : item.extra;
 
 	// pages
 	item.numPages = picaObj.getSubfield("034D", "a");
@@ -521,10 +530,10 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 	item.volume = picaObj.getSubfield("036C", "l");
 	var multipleVolumeTitle = cleanString(picaObj.getSubfield("036C", "a"));
 	if (multipleVolumeTitle) {
-		multipleVolumeTitle = `${multipleVolumeTitle}${item.volume ? ` - ${item.volume}` : ""}`
+		multipleVolumeTitle = `${multipleVolumeTitle}${item.volume ? ` - ${item.volume}` : ""}`;
 		if (!item.title) {
-			item.title = multipleVolumeTitle
-		} 
+			item.title = multipleVolumeTitle;
+		}
 		else {
 			item.shortTitle = item.title;
 			item.title = `${multipleVolumeTitle}: ${item.title}`;
@@ -558,7 +567,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 	let thesisAltInfo = picaObj.getSubfield("037C", "a");
 	if (thesisType) {
 		item.extra += `\n${thesisType} (${thesisInstitution}, ${thesisDate})`;
-	} 
+	}
 	else if (thesisAltInfo) {
 		item.extra += "\n" + thesisAltInfo;
 	}
@@ -628,8 +637,8 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 		note: classificationNote
 	});
 
-	item.extra.replace("\n\n", "\n")
-	item.extra.replace(/^\n/, '')
+	item.extra.replace("\n\n", "\n");
+	item.extra.replace(/^\n/, '');
 	return item;
 }
 
@@ -641,6 +650,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Systemtheorie der Gesellschaft",
 				"creators": [
 					{
 						"firstName": "Niklas",
@@ -665,15 +675,19 @@ var testCases = [
 				],
 				"date": "2017",
 				"ISBN": "3518587056",
-				"callNumber": "10 A 17261",
 				"edition": "Erste Auflage",
-				"extra": "Thema: Theorie der Gesellschaft; Laufzeit: 30 Jahre; Kosten: keine« – so lautet die berühmte Antwort, die Niklas Luhmann Ende der 1960er Jahre auf die Frage nach seinem Forschungsprojekt gab. Der Zeitplan wurde eingehalten: 1997 erschien Die Gesellschaft der Gesellschaft, Luhmanns Opus magnum und Kernstück dieses Vorhabens. So bedeutend dieses Werk, so bemerkenswert seine Vorgeschichte. Denn wie der wissenschaftliche Nachlass des Soziologen zeigt, hat Luhmann im Laufe der Jahrzehnte mehrere weitgehend druckreife und inhaltlich eigenständige Fassungen seiner Gesellschaftstheorie geschrieben. 1975 brachte er die erste dieser Fassungen auf nahezu tausend Typoskriptseiten zum Abschluss. Sie ist ohne Frage die soziologisch reichhaltigste Version einer umfassenden Theorie der Gesellschaft, die aus Luhmanns einzigartigem Forschungsprojekt hervorgegangen ist, und wird nun unter dem Titel Systemtheorie der Gesellschaft erstmals publiziert\nHier auch später erschienene, unveränderte Nachdrucke",
+				"extra": "Beteiligte Personen: Niklas Luhmann (VerfasserIn), Johannes F. K. Schmidt (HerausgeberIn), André Kieserling (HerausgeberIn), Christoph Gesigora (MitwirkendeR)\nThema: Theorie der Gesellschaft; Laufzeit: 30 Jahre; Kosten: keine« – so lautet die berühmte Antwort, die Niklas Luhmann Ende der 1960er Jahre auf die Frage nach seinem Forschungsprojekt gab. Der Zeitplan wurde eingehalten: 1997 erschien Die Gesellschaft der Gesellschaft, Luhmanns Opus magnum und Kernstück dieses Vorhabens. So bedeutend dieses Werk, so bemerkenswert seine Vorgeschichte. Denn wie der wissenschaftliche Nachlass des Soziologen zeigt, hat Luhmann im Laufe der Jahrzehnte mehrere weitgehend druckreife und inhaltlich eigenständige Fassungen seiner Gesellschaftstheorie geschrieben. 1975 brachte er die erste dieser Fassungen auf nahezu tausend Typoskriptseiten zum Abschluss. Sie ist ohne Frage die soziologisch reichhaltigste Version einer umfassenden Theorie der Gesellschaft, die aus Luhmanns einzigartigem Forschungsprojekt hervorgegangen ist, und wird nun unter dem Titel Systemtheorie der Gesellschaft erstmals publiziert\nHier auch später erschienene, unveränderte Nachdrucke",
 				"numPages": "1131 Seiten",
 				"place": "Berlin",
 				"publisher": "Suhrkamp",
 				"attachments": [],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					{
+						"title": "Classification Data",
+						"note": "LCC: HM590\nDDC: 301.01, 300, 301.01\nBK: 71.02\nRVK: MR 5400, CI 3824, MQ 3471, MQ 3470"
+					}
+				],
 				"seeAlso": []
 			}
 		]
