@@ -85,7 +85,7 @@ function detectWeb(doc, url) {
 	}
 	else {
 		var type = attr(doc, "#maticon", "alt");
-		return typeMapper(type)
+		return typeMapper(type);
 	}
 }
 
@@ -104,12 +104,11 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		scrape(doc);
 	}
 }
 
-function scrape(doc, url) {
-	var type = detectWeb(doc, url);
+function scrape(doc) {
 	// get the identifaction number necessary for the api call
 	var permalink = attr(doc, ".cnt > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)", "href");
 	var ppn = permalink.slice(permalink.indexOf("PPN=") + 4);
@@ -117,7 +116,7 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('import');
 	translator.setTranslator('041335e4-6984-4540-b683-494bc923057a'); 
 	translator.setString(JSON.stringify({ ppn: [ppn], catalogid }));
-	translator.translate()
+	translator.translate();
 }
 
 function getSearchResults(doc, checkOnly) {

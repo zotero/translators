@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-03-21 01:49:36"
+	"lastUpdated": "2021-03-22 12:06:31"
 }
 
 /*
@@ -35,12 +35,6 @@
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
 	***** END LICENSE BLOCK *****
-*/
-
-/* ??
-possible additional fields:
-013D-a:	Art des Inhalts (Text)
-
 */
 
 /*
@@ -321,6 +315,12 @@ function cleanString(string) {
 	return string;
 }
 
+function itemExtraCleaner(string) {
+	string = string.replace("\n\n", "\n");
+	string = string.replace(/^\n/, '');
+	return string;
+}
+
 /**
  * Translates PicaObject Fields to ZoteroItem
  * @param { PicaObject } picaObj
@@ -388,14 +388,20 @@ async function picaObjectParse(picaObj, item) {
  * Main translation from PicaObject to ZoteroItem
  * @param {PicaObject} picaObj
  * @param {ZoteroItem} item
- * @param {Boolean} hasSuperiorWork
+ * @param {boolean} hasSuperiorWork
  * @param {PicaObject} superiorWorkPicaObj
+ * @param {boolean} isSuperiorWork
  * @returns {ZoteroItem} parsed ZoteroItem
  */
-function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
+function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj, isSuperiorWork) {
 	var zoteroType = item.itemType;
+	if (isSuperiorWork) {
+		item.extra += "\nZum übergeordneten Werk:";
+	}
 	if (hasSuperiorWork) {
-		item = generalParser(superiorWorkPicaObj, item);
+		item = generalParser(superiorWorkPicaObj, item, null, null, true);
+		var superiorWorkExtraTmp = item.extra;
+		item.extra = '';
 	}
 	switch (zoteroType) {
 		case 'film':
@@ -420,14 +426,14 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 			title = `${title}: ${cleanString(titleAddition)}`;
 		}
 	}
-	if (zoteroType === "bookSection") { // ?? is this right? when's the title set then?
+	if (zoteroType === "bookSection" && isSuperiorWork) {
 		item.bookTitle = title;
 	}
 	else {
 		if (shortTitle) {
 			item.shortTitle = shortTitle;
 		}
-		item.title = title || shortTitle || ' ';
+		item.title = title || shortTitle;
 	}
 
 	// date
@@ -451,13 +457,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 			lastName: authorField.getSubfield("A") || authorField.getSubfield("a")
 		};
 		peopleMap.set(author, authorField.getSubfield("B", true));
-		if (zoteroType === "bookSection") {
-			// eslint-disable-next-line
-			item.creators.push( Object.assign(author, { creatorType: "bookAuthor" })); // ?? IS THAT SO?
-		}
-		else {
-			item.creators.push(Object.assign(author, { creatorType: "author" }));
-		}
+		item.creators.push(Object.assign(author, { creatorType: "author" }));
 	});
 
 	// other people involved (relation specified in one field)
@@ -493,19 +493,24 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 	let contributursStr = "";
 	for (var [key, value] of peopleMap) {
 		contributursStr = contributursStr ? contributursStr + ", " : "";
-		let tmpStr = `${key.firstName} ${key.lastName} (${value[0]}${value.length > 1
-			? value.slice(1, value.length).map((str) => {
-				return `, ${str}`;
-			})
-			: ""})`;
+		let tmpStr = `${key.firstName} ${key.lastName}${value.length > 0
+			? `(${value[0]}${value.length > 1
+				? value.slice(1, value.length).map((str) => {
+					return `, ${str}`;
+				})
+				: ""
+			})`
+			: ''}`;
 		contributursStr += tmpStr;
 	}
-	item.extra = contributursStr ? `\nBeteiligte Personen: ${contributursStr}` : item.extra;
+	item.extra += contributursStr ? `\nBeteiligte Personen: ${contributursStr}` : item.extra;
 
 	// pages
 	item.numPages = picaObj.getSubfield("034D", "a");
 
 	if (hasSuperiorWork) {
+		item.title = item.title ? item.title : ' ';
+		item.extra += "\n" + superiorWorkExtraTmp;
 		return item;
 	}
 
@@ -542,7 +547,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 
 	// content type
 	let contentType = picaObj.getSubfield("013D", "a");
-	item.extra = contentType ? `${contentType}${item.extra ? `\n${item.extra}` : ''}` : item.extra;
+	item.extra = contentType ? item.extra + `\n${contentType}` : item.extra;
 	
 	// series data
 	/* there might be multiple series related to a work insight the data set captured as well in multiple 36E and 36F fields,
@@ -588,7 +593,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 		});
 	}
 
-	let ddcDataFields = picaObj.getField("045F", true); // ?? feld toaucht ohne not auf
+	let ddcDataFields = picaObj.getField("045F", true);
 	ddcDataFields = ddcDataFields.concat(picaObj.getField("045H", true));
 	if (ddcDataFields.length > 0) {
 		classData['DDC'] = [];
@@ -631,14 +636,15 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj) {
 		}, '')}`;
 		return newString;
 	}, '');
-
-	item.notes.push({
-		title: "Classification Data",
-		note: classificationNote
-	});
-
-	item.extra.replace("\n\n", "\n");
-	item.extra.replace(/^\n/, '');
+	if (classificationNote) {
+		item.notes.push({
+			title: "Classification Data",
+			note: classificationNote
+		});
+	}
+	item.extra = itemExtraCleaner(item.extra);
+	item.title = item.title ? item.title : ' ';
+	
 	return item;
 }
 
@@ -676,7 +682,7 @@ var testCases = [
 				"date": "2017",
 				"ISBN": "3518587056",
 				"edition": "Erste Auflage",
-				"extra": "Beteiligte Personen: Niklas Luhmann (VerfasserIn), Johannes F. K. Schmidt (HerausgeberIn), André Kieserling (HerausgeberIn), Christoph Gesigora (MitwirkendeR)\nThema: Theorie der Gesellschaft; Laufzeit: 30 Jahre; Kosten: keine« – so lautet die berühmte Antwort, die Niklas Luhmann Ende der 1960er Jahre auf die Frage nach seinem Forschungsprojekt gab. Der Zeitplan wurde eingehalten: 1997 erschien Die Gesellschaft der Gesellschaft, Luhmanns Opus magnum und Kernstück dieses Vorhabens. So bedeutend dieses Werk, so bemerkenswert seine Vorgeschichte. Denn wie der wissenschaftliche Nachlass des Soziologen zeigt, hat Luhmann im Laufe der Jahrzehnte mehrere weitgehend druckreife und inhaltlich eigenständige Fassungen seiner Gesellschaftstheorie geschrieben. 1975 brachte er die erste dieser Fassungen auf nahezu tausend Typoskriptseiten zum Abschluss. Sie ist ohne Frage die soziologisch reichhaltigste Version einer umfassenden Theorie der Gesellschaft, die aus Luhmanns einzigartigem Forschungsprojekt hervorgegangen ist, und wird nun unter dem Titel Systemtheorie der Gesellschaft erstmals publiziert\nHier auch später erschienene, unveränderte Nachdrucke",
+				"extra": "Beteiligte Personen: Niklas Luhmann(VerfasserIn), Johannes F. K. Schmidt(HerausgeberIn), André Kieserling(HerausgeberIn), Christoph Gesigora(MitwirkendeR)\nThema: Theorie der Gesellschaft; Laufzeit: 30 Jahre; Kosten: keine« – so lautet die berühmte Antwort, die Niklas Luhmann Ende der 1960er Jahre auf die Frage nach seinem Forschungsprojekt gab. Der Zeitplan wurde eingehalten: 1997 erschien Die Gesellschaft der Gesellschaft, Luhmanns Opus magnum und Kernstück dieses Vorhabens. So bedeutend dieses Werk, so bemerkenswert seine Vorgeschichte. Denn wie der wissenschaftliche Nachlass des Soziologen zeigt, hat Luhmann im Laufe der Jahrzehnte mehrere weitgehend druckreife und inhaltlich eigenständige Fassungen seiner Gesellschaftstheorie geschrieben. 1975 brachte er die erste dieser Fassungen auf nahezu tausend Typoskriptseiten zum Abschluss. Sie ist ohne Frage die soziologisch reichhaltigste Version einer umfassenden Theorie der Gesellschaft, die aus Luhmanns einzigartigem Forschungsprojekt hervorgegangen ist, und wird nun unter dem Titel Systemtheorie der Gesellschaft erstmals publiziert\nHier auch später erschienene, unveränderte Nachdrucke",
 				"numPages": "1131 Seiten",
 				"place": "Berlin",
 				"publisher": "Suhrkamp",
@@ -688,6 +694,68 @@ var testCases = [
 						"note": "LCC: HM590\nDDC: 301.01, 300, 301.01\nBK: 71.02\nRVK: MR 5400, CI 3824, MQ 3471, MQ 3470"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "{\"ppn\":[\"1701681854\", \"364349824\"]}",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Theodor W. Adorno, Max Horkheimer, Jürgen Habermas und Alfred Schmidt: Kritische Theorie und Nietzsches bürgerliches Denken",
+				"creators": [
+					{
+						"firstName": "Eike",
+						"lastName": "Brock",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jutta",
+						"lastName": "Georg-Lauer",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Jutta",
+						"lastName": "Georg-Lauer",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"ISBN": "9783476047243",
+				"bookTitle": "\"- ein Leser, wie ich ihn verdiene\": Nietzsche-Lektüren in der deutschen Philosophie und Soziologie",
+				"extra": "Beteiligte Personen: Jutta Georg-Lauer(VerfasserIn)\nZum übergeordneten Werk:\nBeteiligte Personen: Eike Brock(HerausgeberIn), Jutta Georg-Lauer(HerausgeberIn)\nAufsatzsammlung\nLiteraturangaben",
+				"place": "Berlin",
+				"publisher": "J.B. Metzler",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"title": "Classification Data",
+						"note": "DDC: 193, \nBK: 08.24\nRVK: CG 5917"
+					}
+				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "book",
+				"title": "Aggression in der Lebenswelt: die Erweiterung des Parsonschen Konzepts der Aggression durch die Beschreibung des Zusammenhags von Jargon, Aggression und Kultur",
+				"creators": [
+					{
+						"firstName": "Alexander C.",
+						"lastName": "Karp",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002",
+				"edition": "[Elektronische Resource]",
+				"extra": "Beteiligte Personen: Alexander C. Karp\nHochschulschrift\nFrankfurt a. M., Univ., Diss., 2002\nTitel auf der Beil",
+				"numPages": "1 CD-ROM",
+				"shortTitle": "Aggression in der Lebenswelt",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
