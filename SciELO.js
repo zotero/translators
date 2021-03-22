@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-22 16:16:40"
+	"lastUpdated": "2021-03-22 16:35:28"
 }
 
 /*
@@ -102,7 +102,7 @@ function scrape(doc, url) {
 		        item.notes.push({note: "abs:" + transAbstract.innerText.replace(abstractPrefix, "").
 		                                           replace(keywordsInAbstractsPrefix, "")});
 		    // we can currently handle one additional language
-		    else {
+		    else if (transAbstract.length > 1) {
 		       item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
 		                                           replace(keywordsInAbstractsPrefix, "")});
 		       item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
