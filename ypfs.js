@@ -1,6 +1,6 @@
 {
 	"translatorID": "5e1f3e08-ca5f-4196-a662-6cf46b3cdaa7",
-	"label": "ypfs",
+	"label": "YPFS",
 	"creator": "Corey Runkel",
 	"target": "^https?://ypfs.som.yale.edu",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-21 21:57:13"
+	"lastUpdated": "2021-03-22 15:57:41"
 }
 
 /*
@@ -38,10 +38,10 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/library/')) {
-		return "document";
+		return 'document';
 
-	} else if ((url.includes('admin/content') || url.endsWith('.edu') || url.endsWith('.edu/'))) {
-		return "multiple";
+	} else if (url.endsWith('.edu') || url.endsWith('.edu/') || url.includes('admin/content')) {
+		return 'multiple';
 	}
 }
 
@@ -63,7 +63,7 @@ function detectWeb(doc, url) {
 
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == 'multiple') {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
@@ -81,17 +81,19 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var type = itemType(ZU.xpath(doc, '//a[@class="button no-icon"]', '@href').toString());
+	var type = itemType(doc.querySelector('a[href*="ypfsresourcelibrary"]').href);
 	var item = new Zotero.Item(type[0]);
 	var pub = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Publisher")]/following-sibling::dd[1]');
 	var lang = ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Language")]/following-sibling::dd[1]'));
 	
-	item.title = ZU.xpathText(doc, '//div[@id="block-ypfs-theme-page-title"]/h1/span');
+	item.title = doc.querySelector('#block-ypfs-theme-page-title').textContent;
 	item.date = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Date")]/following-sibling::dd[1]');
 	item.abstractNote = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Information")]/following-sibling::dd[1]');
 	item.publisher = pub.replace(/.*: | \(.*\)/g, "");
 	item.language = getLocale(lang);
 	item.url = url;
+	item.archive = 'Yale Program on Financial Stability Resource Library';
+	item.archiveLocation = doc.querySelector('link[rel="shortlink"]').href.split(/node\//).pop();
 	item.extra = type[3];
 	
 	item.creators = [];
@@ -101,10 +103,16 @@ function scrape(doc, url) {
 	}
 	
 	item.attachments = [{
-		url: ZU.xpath(doc, '//a[@class="button no-icon"]', '@href').toString(),
+		url: doc.querySelector('a[href*="ypfsresourcelibrary"]').href,
 		mimeType: type[1],
 		title: type[2]
 	}];
+	
+	item.tags = [
+		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Crisis")]/following-sibling::dd[1]'))},
+		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Intervention")]/following-sibling::dd[1]'))},
+		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Country")]/following-sibling::dd[1]'))}
+		];
 
 	item.complete();
 }
@@ -160,3 +168,56 @@ function getLocale(lang) {
 		Turkish: 'tr',
 	}[lang];
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://ypfs.som.yale.edu/library/public-debt-outstanding",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Public Debt Outstanding",
+				"creators": [
+					{
+						"lastName": "Thai Public Debt Management Office",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 05, 2021",
+				"abstractNote": "data showing, among other public debts, those attributed to the FIDF (in billions of baht)",
+				"archive": "Yale Program on Financial Stability Resource Library",
+				"archiveLocation": "16563",
+				"extra": "type: dataset",
+				"language": "en",
+				"libraryCatalog": "Yale Program on Financial Stability",
+				"publisher": "Thai Public Debt Management Office",
+				"url": "https://ypfs.som.yale.edu/library/public-debt-outstanding",
+				"attachments": [
+					{
+						"mimeType": "application/vnd.ms-excel",
+						"title": "Excel Workbook"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Asia Crisis (1997-1998)"
+					},
+					{
+						"tag": "Broad-Based Emergency Liquidity"
+					},
+					{
+						"tag": "Thailand"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ypfs.som.yale.edu/",
+		"items": "multiple"
+	}
+]
+/** END TEST CASES **/
