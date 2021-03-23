@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-22 16:35:28"
+	"lastUpdated": "2021-03-23 09:16:37"
 }
 
 /*
@@ -98,16 +98,12 @@ function scrape(doc, url) {
 		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
 		                                           replace(keywordsInAbstractsPrefix, "");
 		if (transAbstract) {
-			if (transAbstract.length == 1)
-		        item.notes.push({note: "abs:" + transAbstract.innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
+			item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
+		                                    replace(keywordsInAbstractsPrefix, "")});
 		    // we can currently handle one additional language
-		    else if (transAbstract.length > 1) {
-		       item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
-		       item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
-		    }
+		    if (transAbstract.length > 1)
+				item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
+		                                         replace(keywordsInAbstractsPrefix, "")});
 		}
 		//abstract in orginal language
 		if (!abstract && item.ISSN === '0049-3449') {
