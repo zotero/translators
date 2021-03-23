@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-23 09:16:37"
+	"lastUpdated": "2021-03-23 09:33:54"
 }
 
 /*
@@ -97,7 +97,7 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function(obj, item) {
 		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
 		                                           replace(keywordsInAbstractsPrefix, "");
-		if (transAbstract) {
+		if (Array.isArray(transAbstract) && transAbstract.length) {
 			item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
 		                                    replace(keywordsInAbstractsPrefix, "")});
 		    // we can currently handle one additional language
