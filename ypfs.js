@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-22 15:57:41"
+	"lastUpdated": "2021-03-24 13:06:04"
 }
 
 /*
@@ -83,10 +83,10 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var type = itemType(doc.querySelector('a[href*="ypfsresourcelibrary"]').href);
 	var item = new Zotero.Item(type[0]);
-	var pub = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Publisher")]/following-sibling::dd[1]');
-	var lang = ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Language")]/following-sibling::dd[1]'));
+	var pub = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Publisher")]/following-sibling::dd[1]/a');
+	var lang = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Language")]/following-sibling::dd[1]/a');
 	
-	item.title = doc.querySelector('#block-ypfs-theme-page-title').textContent;
+	item.title = doc.querySelector('#block-ypfs-theme-page-title').innerText;
 	item.date = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Date")]/following-sibling::dd[1]');
 	item.abstractNote = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Information")]/following-sibling::dd[1]');
 	item.publisher = pub.replace(/.*: | \(.*\)/g, "");
@@ -109,9 +109,9 @@ function scrape(doc, url) {
 	}];
 	
 	item.tags = [
-		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Crisis")]/following-sibling::dd[1]'))},
-		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Intervention")]/following-sibling::dd[1]'))},
-		{tag: ZU.trimInternal(ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Country")]/following-sibling::dd[1]'))}
+		{tag: ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Crisis")]/following-sibling::dd[1]/a')},
+		{tag: ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Case Series")]/following-sibling::dd[1]/a')},
+		{tag: ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Country")]/following-sibling::dd[1]/a')}
 		];
 
 	item.complete();
@@ -168,8 +168,14 @@ function getLocale(lang) {
 		Turkish: 'tr',
 	}[lang];
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "https://ypfs.som.yale.edu/",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
 		"url": "https://ypfs.som.yale.edu/library/public-debt-outstanding",
@@ -189,7 +195,7 @@ var testCases = [
 				"archiveLocation": "16563",
 				"extra": "type: dataset",
 				"language": "en",
-				"libraryCatalog": "Yale Program on Financial Stability",
+				"libraryCatalog": "YPFS",
 				"publisher": "Thai Public Debt Management Office",
 				"url": "https://ypfs.som.yale.edu/library/public-debt-outstanding",
 				"attachments": [
@@ -213,11 +219,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://ypfs.som.yale.edu/",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
