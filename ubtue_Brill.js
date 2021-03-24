@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-01 12:44:25"
+	"lastUpdated": "2020-03-24 11:24:25"
 }
 
 /*
@@ -40,7 +40,6 @@ function detectWeb(doc, url) {
 	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
 		return "multiple";
  	}
-    return false;
 }
 
 function getSearchResults(doc) {
@@ -52,14 +51,14 @@ function getSearchResults(doc) {
 		links = doc.querySelectorAll(".c-Button--link, [target='_self']");
 	}
 	let text = usesTypography ?
-		    doc.querySelectorAll(".c-Typography--title > span") :
-		    doc.querySelectorAll(".c-Button--link, [target='_self']");
+			doc.querySelectorAll(".c-Typography--title > span") :
+			doc.querySelectorAll(".c-Button--link, [target='_self']");
 	for (let i = 0; i < links.length; ++i) {
 		let href = links[i].href;
 		let title = ZU.trimInternal(text[i].textContent);
-        if (!href || !title) continue;
-        if (!href.match(/article-.+\.xml$/))
-            continue;
+		if (!href || !title) continue;
+		if (!href.match(/article-.+\.xml$/))
+			continue;
 
 		found = true;
 		items[href] = title;
@@ -71,42 +70,39 @@ function postProcess(doc, item) {
 	if (!item.abstractNote) {
 	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
 	  if (item.abstractNote && item.abstractNote.length > 0)
-	     item.abstractNote = item.abstractNote[0].textContent.trim();
+		 item.abstractNote = item.abstractNote[0].textContent.trim();
 	  else
-	     item.abstractNote = '';
-    }
+		 item.abstractNote = '';
+	}
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags)
 		item.tags = item.tags.map(i => i.textContent.trim());
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
-	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag) item.notes.push('LF:');
-	// numbering issues with slash due to cataloguing rule
 	if (item.issue) item.issue = item.issue.replace('-', '/');
-	let date = item.date;
-	//entry for scraping Berichtsjahr
-	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');
-	let berichtsjahr = extractBerichtsjahr(dateEntry);
-	let erscheinungsjahr = extractErscheingunssjahr(date);
-	if (erscheinungsjahr !== berichtsjahr) {
-		item.date = extractBerichtsjahr(dateEntry);
-	} else {
-		item.date;
+	if (!item.itemType)
+			item.itemType = "journalArticle";
+	
+	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
+	if (item.abstractNote.length < 100) delete item.abstractNote;	
+	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
+	if (item.tags)
+		item.tags = item.tags.map(i => i.textContent.trim());
+	//scrape ORCID from website
+	let authorSectionEntries = doc.querySelectorAll('.text-subheading span:nth-child(2)');
+	for (let authorSectionEntry of authorSectionEntries) {
+		let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
+		let orcidHref = authorSectionEntry.querySelector('.orcid');
+		if (authorInfo && orcidHref) {
+			let author = authorInfo.childNodes[0].textContent;
+			var orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+		}
 	}
-  if (!item.itemType)
-            item.itemType = "journalArticle";
-}
-
-function extractErscheingunssjahr(date) {
-	let publicationYear = date.trim().match(/\d{4}/)[0];
-	return publicationYear;
-}
-
-function extractBerichtsjahr(dateEntry) {
-	let dateCandidate = dateEntry.match(/\(\s*(\d{4})\s*\):/);
-	return dateCandidate.length > 1 ? dateCandidate[1] : null;
+	//deduplicate
+	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+	if (orcid) item.notes.push('LF:');
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
@@ -133,5 +129,5 @@ function doWeb(doc, url) {
 			ZU.processDocuments(articles, invokeEmbeddedMetadataTranslator);
 		});
 	} else
-        invokeEmbeddedMetadataTranslator(doc, url);
+		invokeEmbeddedMetadataTranslator(doc, url);
 }
