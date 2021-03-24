@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-24 11:24:25"
+	"lastUpdated": "2020-03-24 15:31:25"
 }
 
 /*
@@ -40,6 +40,7 @@ function detectWeb(doc, url) {
 	} else if (url.match(/issue-\d+(-\d+)?\.xml$/)) {
 		return "multiple";
  	}
+	return false;
 }
 
 function getSearchResults(doc) {
@@ -79,15 +80,20 @@ function postProcess(doc, item) {
 		item.tags = item.tags.map(i => i.textContent.trim());
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
+	// numbering issues with slash due to cataloguing rule
 	if (item.issue) item.issue = item.issue.replace('-', '/');
+	let date = item.date;
+	//entry for scraping Berichtsjahr
+	let dateEntry = ZU.xpathText(doc, '//div[@class="cover cover-image configurable-index-card-cover-image"]//@title');
+	let berichtsjahr = extractBerichtsjahr(dateEntry);
+	let erscheinungsjahr = extractErscheinungsjahr(date);
+	if (erscheinungsjahr !== berichtsjahr) {
+		item.date = extractBerichtsjahr(dateEntry);
+	} else {
+		item.date;
+	}
 	if (!item.itemType)
 			item.itemType = "journalArticle";
-	
-	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
-	if (item.abstractNote.length < 100) delete item.abstractNote;	
-	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
-	if (item.tags)
-		item.tags = item.tags.map(i => i.textContent.trim());
 	//scrape ORCID from website
 	let authorSectionEntries = doc.querySelectorAll('.text-subheading span:nth-child(2)');
 	for (let authorSectionEntry of authorSectionEntries) {
@@ -102,7 +108,18 @@ function postProcess(doc, item) {
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
-	if (orcid) item.notes.push('LF:');
+	if (orcid) item.notes.push('LF:');	
+	let openAccessTag = text(doc, '.has-license span');
+	if (openAccessTag) item.notes.push('LF:');
+}
+
+function extractErscheinungsjahr(date) {
+	return date ? date.trim().match(/\d{4}/)[0] : '';
+}
+
+function extractBerichtsjahr(dateEntry) {
+	let dateCandidate = dateEntry.match(/\(\s*(\d{4})\s*\):/);
+	return dateCandidate.length > 1 ? dateCandidate[1] : null;
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
