@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-23 09:33:54"
+	"lastUpdated": "2021-03-24 10:28:14"
 }
 
 /*
@@ -92,7 +92,7 @@ function scrape(doc, url) {
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	const keywordsInAbstractsPrefix = /\n*(Palabras clave|Keywords|Stichworte)\s*:.*/i;
+	const keywordsInAbstractsPrefix = /\n*(Palabras claves?|Key\s?words|Stichworte)\s*:.*/i;
 	const abstractPrefix = /^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?|ZUSAMMENFASSUNG:?)/i;
 	translator.setHandler('itemDone', function(obj, item) {
 		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
