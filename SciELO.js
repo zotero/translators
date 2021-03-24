@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-22 16:35:28"
+	"lastUpdated": "2021-03-24 10:28:14"
 }
 
 /*
@@ -92,22 +92,18 @@ function scrape(doc, url) {
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
-	const keywordsInAbstractsPrefix = /\n*(Palabras clave|Keywords|Stichworte)\s*:.*/i;
+	const keywordsInAbstractsPrefix = /\n*(Palabras claves?|Key\s?words|Stichworte)\s*:.*/i;
 	const abstractPrefix = /^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?|ZUSAMMENFASSUNG:?)/i;
 	translator.setHandler('itemDone', function(obj, item) {
 		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
 		                                           replace(keywordsInAbstractsPrefix, "");
-		if (transAbstract) {
-			if (transAbstract.length == 1)
-		        item.notes.push({note: "abs:" + transAbstract.innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
+		if (Array.isArray(transAbstract) && transAbstract.length) {
+			item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
+		                                    replace(keywordsInAbstractsPrefix, "")});
 		    // we can currently handle one additional language
-		    else if (transAbstract.length > 1) {
-		       item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
-		       item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
-		                                           replace(keywordsInAbstractsPrefix, "")});
-		    }
+		    if (transAbstract.length > 1)
+				item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
+		                                         replace(keywordsInAbstractsPrefix, "")});
 		}
 		//abstract in orginal language
 		if (!abstract && item.ISSN === '0049-3449') {
