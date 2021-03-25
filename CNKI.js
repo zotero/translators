@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2020-09-09 12:15:25"
+	"lastUpdated": "2021-01-08 06:42:52"
 }
 
 /*
@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefWorksByID(ids, onDataAvailable) {
 	if (!ids.length) return;
-	var { dbname, filename } = ids.shift();
+	var { dbname, filename, queryID, curRec } = ids.shift();
 	var postData = "formfilenames=" + encodeURIComponent(dbname + "!" + filename + "!1!0,")
 		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
 		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
@@ -60,7 +60,7 @@ function getRefWorksByID(ids, onDataAvailable) {
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					}
 				);
-			onDataAvailable(data);
+			onDataAvailable({dbname, filename, queryID, curRec}, data);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
@@ -71,12 +71,13 @@ function getRefWorksByID(ids, onDataAvailable) {
 
 function getIDFromURL(url) {
 	if (!url) return false;
-	
 	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
+	var queryID = url.match(/[?&]queryid=([^&#]*)/i);
+	var curRec = url.match(/[?&]currec=([^&#]*)/i);
 	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
 	
-	return { dbname: dbname[1], filename: filename[1], url: url };
+	return { dbname: dbname[1], filename: filename[1], curRec: curRec[1], queryID: queryID[1], url: url };
 }
 
 
@@ -208,7 +209,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(ids, doc, url, itemInfo) {
-	getRefWorksByID(ids, function (text) {
+	getRefWorksByID(ids, function ({dbname, filename, queryID, curRec}, text) {
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
@@ -260,6 +261,26 @@ function scrape(ids, doc, url, itemInfo) {
 			if (newItem.callNumber) {
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
+			}
+			// 018<lyb018@gmail.com>: 20210108
+			var num = doc.querySelector('#func3 .num');
+			if (!num) {
+				var e = doc.querySelector('[value="' + dbname + '!' + filename + '!' + curRec + '!' + queryID + '"]');
+				if (e) {
+					e = e.parentElement;
+				}
+				if (e) {
+					e = e.parentElement;
+				}
+				if (e) {
+					e = e.querySelector('.quote a');
+				}
+				if (e) {
+					num  = e
+				}
+			}
+			if (num) {
+				newItem.extra = num.textContent.replace(/[^\d*]/g, '');
 			}
 			// don't download PDF/CAJ on searchResult(multiple)
 			var webType = detectWeb(doc, url);
