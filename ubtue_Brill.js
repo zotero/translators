@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-24 15:31:25"
+	"lastUpdated": "2020-03-29 08:31:25"
 }
 
 /*
@@ -101,16 +101,15 @@ function postProcess(doc, item) {
 		let orcidHref = authorSectionEntry.querySelector('.orcid');
 		if (authorInfo && orcidHref) {
 			let author = authorInfo.childNodes[0].textContent;
-			var orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
+			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
 			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
 		}
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
-	if (orcid) item.notes.push('LF:');	
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
 	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag) item.notes.push('LF:');
+	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
 }
 
 function extractErscheinungsjahr(date) {
