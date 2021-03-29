@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-09 14:42:31"
+	"lastUpdated": "2020-03-29 08:31:25"
 }
 
 /*
@@ -80,9 +80,6 @@ function postProcess(doc, item) {
 		item.tags = item.tags.map(i => i.textContent.trim());
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
-	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
-	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag) item.notes.push('LF:');
 	// numbering issues with slash due to cataloguing rule
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	let date = item.date;
@@ -95,8 +92,25 @@ function postProcess(doc, item) {
 	} else {
 		item.date;
 	}
-  if (!item.itemType)
-			item.itemType = "journalArticle";
+
+	//scrape ORCID from website
+	let authorSectionEntries = doc.querySelectorAll('.text-subheading span:nth-child(2)');
+	for (let authorSectionEntry of authorSectionEntries) {
+		let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
+		let orcidHref = authorSectionEntry.querySelector('.orcid');
+		if (authorInfo && orcidHref) {
+			let author = authorInfo.childNodes[0].textContent;
+			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+		}
+	}
+	//deduplicate
+	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
+	let openAccessTag = text(doc, '.has-license span');
+	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
+  
+	if (!item.itemType)	item.itemType = "journalArticle";
 }
 
 function extractErscheinungsjahr(date) {
