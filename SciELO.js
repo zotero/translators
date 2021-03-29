@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-03 11:10:11"
+	"lastUpdated": "2021-03-24 10:28:14"
 }
 
 /*
@@ -87,15 +87,24 @@ function extractAuthors(doc) {
 
 function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]');
-	var transAbstract = ZU.xpathText(doc, '//div[@class="trans-abstract"]');
+	var transAbstract = ZU.xpath(doc, '//div[@class="trans-abstract"]');
 	var translator = Zotero.loadTranslator('web');
 	//use Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
+	const keywordsInAbstractsPrefix = /\n*(Palabras claves?|Key\s?words|Stichworte)\s*:.*/i;
+	const abstractPrefix = /^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?|ZUSAMMENFASSUNG:?)/i;
 	translator.setHandler('itemDone', function(obj, item) {
-		if (abstract) item.abstractNote = abstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, "").replace(/[\n\t]/g, "");
-		if (transAbstract) item.notes.push({note: "abs:" + transAbstract.replace(/^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?)/i, ""),
-		});
+		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
+		                                           replace(keywordsInAbstractsPrefix, "");
+		if (Array.isArray(transAbstract) && transAbstract.length) {
+			item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
+		                                    replace(keywordsInAbstractsPrefix, "")});
+		    // we can currently handle one additional language
+		    if (transAbstract.length > 1)
+				item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
+		                                         replace(keywordsInAbstractsPrefix, "")});
+		}
 		//abstract in orginal language
 		if (!abstract && item.ISSN === '0049-3449') {
  			item.abstractNote = text(doc, ' p:nth-child(4)');

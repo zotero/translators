@@ -92,8 +92,7 @@ function postProcess(doc, item) {
 	} else {
 		item.date;
 	}
-	if (!item.itemType)
-			item.itemType = "journalArticle";
+
 	//scrape ORCID from website
 	let authorSectionEntries = doc.querySelectorAll('.text-subheading span:nth-child(2)');
 	for (let authorSectionEntry of authorSectionEntries) {
@@ -110,6 +109,8 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
+  
+	if (!item.itemType)	item.itemType = "journalArticle";
 }
 
 function extractErscheinungsjahr(date) {
