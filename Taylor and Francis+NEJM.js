@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-15 16:07:15"
+	"lastUpdated": "2021-03-29 10:57:15"
 }
 
 /*
@@ -121,7 +121,10 @@ function scrape(doc, url) {
 				if (/^DA\s+-\s+/m.test(text)) {
 					text = text.replace(/^Y1(\s+-.*)/gm, '');
 				}
-
+				//ubtue: add tag "Book Review"
+				let dcType = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+				if (dcType && dcType.match(/book\s?-?review/gi)) item.tags.push("Book Review");
+				
 				risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
