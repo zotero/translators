@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-12-13 10:42:07"
+	"lastUpdated": "2021-03-31 01:48:00"
 }
 
 /*
@@ -185,6 +185,7 @@ function scrape(doc, url) {
 		var xml = parser.parseFromString(data, "application/xml");
 		
 		var item = new Zotero.Item(type);
+		item.extra = 'QID: ' + qnumber;
 		var nodes = ZU.xpath(xml, '//rdf:Description', namespaces);
 		var creatorsArray = [];
 		for (var i=0; i<nodes.length; i++) {
@@ -300,7 +301,8 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "QID: Q30000000"
 			}
 		]
 	},
@@ -376,7 +378,8 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "QID: Q29121277"
 			}
 		]
 	},
@@ -545,14 +548,15 @@ var testCases = [
 					}
 				],
 				"date": "1974-08-30T00:00:00Z",
-				"genre": "comedy film, parody film, swashbuckler film, film adaptation",
+				"genre": "comedy film, parody film, swashbuckler film, film based on a novel",
 				"libraryCatalog": "Wikidata",
 				"runningTime": "+75",
 				"shortTitle": "Les Charlots en folie",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "QID: Q470573"
 			}
 		]
 	},
@@ -570,7 +574,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1963-01-01T00:00:00Z",
+				"date": "1963-01-01T00:00:00Z, 2000-01-01T00:00:00Z",
 				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"publisher": "Viking Press",
@@ -581,20 +585,21 @@ var testCases = [
 						"tag": "Adolf Eichmann"
 					},
 					{
-						"tag": "the Holocaust"
+						"tag": "The Holocaust"
 					},
 					{
 						"tag": "war crimes trial"
 					}
 				],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "QID: Q480743"
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://www.wikidata.org/wiki/Q30051491",
+		"url": "https://www.wikidata.org/wiki/Q28294211",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -645,7 +650,9 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"extra": "QID: Q28294211",
+				"language": "English"
 			}
 		]
 	}
