@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-10 13:33:01"
+	"lastUpdated": "2021-03-31 08:52:19"
 }
 
 /*
@@ -37,6 +37,7 @@
 
 const entriesXPath = '//td[@class="Text" and @width="543"]//tr//a//ancestor::p';
 const journalInformationXPath = '//*[@class="Apple-style-span"]//b';
+const domainPrefixExpression = /^.*\/\/[^\/]+\//;
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -119,12 +120,12 @@ function extractDOI(doc, key) {
 	let entryXPath1 = '//a[@href="' + key + '"]/ancestor::p/following::a[1]';
 	let doiCandidates1 = ZU.xpath(doc, entryXPath1);
 	if (doiCandidates1 && doiCandidates1.length !== 0 && doiCandidates1[0].href.match(/doi.org/))
-		return doiCandidates1[0].href;
+		return doiCandidates1[0].href.replace(domainPrefixExpression, '');
 	// Case 2: DOI is contained in the same paragraph as the original key URL
 	let entryXPath2 = '//a[@href="' + key + '"]/ancestor::p//img/parent::a';
 	let doiCandidates2 = ZU.xpath(doc, entryXPath2);
 	if (doiCandidates2 && doiCandidates2.length !== 0 && doiCandidates2[0].href.match(/doi.org/))
-		return doiCandidates2[0].href;
+		return doiCandidates2[0].href.replace(domainPrefixExpression, '');
 	return null;
 }
 
@@ -133,18 +134,18 @@ function extractTitleAndAuthors(entry) {
 	let entryCleanedText = ZU.unescapeHTML(ZU.cleanTags(entry.innerHTML.replace(/[\r?\n]/g, "")));
 	let titleAndAuthors =  entryCleanedText.split(/\r?\n/).filter(i => i).filter(i => i.match(/\S+/));
 	if (titleAndAuthors.length == 2)
-	    return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
+		return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
 
-    // In rare cases the author are not inluded in the selected paragraph of entry
-    // Thus the next paragraph is our candidate, so we walk up the tree an make sure we get a plausible result
+	// In rare cases the author are not inluded in the selected paragraph of entry
+	// Thus the next paragraph is our candidate, so we walk up the tree an make sure we get a plausible result
 	if (titleAndAuthors.length == 1) {
-	    let newAuthorAndTitleCandidates = entry.parentNode.querySelectorAll('p');
-	    if (newAuthorAndTitleCandidates[0].isEqualNode(entry) && newAuthorAndTitleCandidates.length >= 2) {
+		let newAuthorAndTitleCandidates = entry.parentNode.querySelectorAll('p');
+		if (newAuthorAndTitleCandidates[0].isEqualNode(entry) && newAuthorAndTitleCandidates.length >= 2) {
 		titleAndAuthors = [titleAndAuthors[0], newAuthorAndTitleCandidates[1].innerText];
 			return titleAndAuthors.map(i => i.replace(/\s\s+/g, " "));
-	    }
+		}
 	}
-    return null;
+	return null;
 }
 
 
