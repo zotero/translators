@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-24 10:28:14"
+	"lastUpdated": "2021-03-31 09:36:46"
 }
 
 /*
@@ -96,14 +96,14 @@ function scrape(doc, url) {
 	const abstractPrefix = /^\s*(ABSTRACT:?|RESUMO:?|RESUMEN:?|ZUSAMMENFASSUNG:?)/i;
 	translator.setHandler('itemDone', function(obj, item) {
 		if (abstract) item.abstractNote = abstract.replace(abstractPrefix, "").replace(/[\n\t]/g, "").
-		                                           replace(keywordsInAbstractsPrefix, "");
+												   replace(keywordsInAbstractsPrefix, "");
 		if (Array.isArray(transAbstract) && transAbstract.length) {
 			item.notes.push({note: "abs:" + transAbstract[0].innerText.replace(abstractPrefix, "").
-		                                    replace(keywordsInAbstractsPrefix, "")});
-		    // we can currently handle one additional language
-		    if (transAbstract.length > 1)
+											replace(keywordsInAbstractsPrefix, "")});
+			// we can currently handle one additional language
+			if (transAbstract.length > 1)
 				item.notes.push({note: "abs1:" + transAbstract[1].innerText.replace(abstractPrefix, "").
-		                                         replace(keywordsInAbstractsPrefix, "")});
+												 replace(keywordsInAbstractsPrefix, "")});
 		}
 		//abstract in orginal language
 		if (!abstract && item.ISSN === '0049-3449') {
@@ -116,13 +116,13 @@ function scrape(doc, url) {
 		// remove duplicate authors
 		let itemCreators = item.creators;
 		item.creators = Array.from(new Set(itemCreators.map(JSON.stringify))).map(JSON.parse);
-		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Keywords")]/..');
-		if (!keywords || keywords.length === 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Keywords")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
+		var keywords = ZU.xpath(doc, '//b[contains(text(), "Keywords:") or contains(text(), "Key words")]/..');
+		if (!keywords || keywords.length === 0) keywords = ZU.xpath(doc, '//strong[contains(text(), "Keywords:") or contains(text(), "Key words")]/.. | /html/body/div[1]/div[2]/div[2]/p[5]');
 		if (keywords && keywords.length > 0) {
 			item.tags = keywords[0].textContent
 						.trim()
 						.replace(/\n/g, "")
-						.replace(/keywords\s*:\s*/ig, "")
+						.replace(/key\s?words\s*:\s*/ig, "")
 						.split(";")
 						.map(function(x) { return x.trim(); })
 						.map(function(y) { return y.charAt(0).toUpperCase() + y.slice(1); });
