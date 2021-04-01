@@ -110,7 +110,7 @@ function postProcess(doc, item) {
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
   // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001 
-	let freeAccess = text(doc, '.color-access-free');Z.debug(freeAccess)
+	let freeAccess = text(doc, '.color-access-free');
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
 }
