@@ -1,7 +1,7 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
 	"label": "Brill",
-	"creator": "Madeesh Kannan, Tiomtheus Kim",
+	"creator": "Madeesh Kannan, Timotheus Kim",
 	"target": "^https?://brill.com/view/journals/",
 	"minVersion": "3.0",
 	"maxVersion": "",
