@@ -1,7 +1,7 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
 	"label": "Brill",
-	"creator": "Madeesh Kannan",
+	"creator": "Madeesh Kannan, Timotheus Kim",
 	"target": "^https?://brill.com/view/journals/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-29 08:31:25"
+	"lastUpdated": "2020-04-01 10:11:25"
 }
 
 /*
@@ -109,7 +109,9 @@ function postProcess(doc, item) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
 	let openAccessTag = text(doc, '.has-license span');
 	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
-  
+  // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001 
+	let freeAccess = text(doc, '.color-access-free');
+	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
 	if (!item.itemType)	item.itemType = "journalArticle";
 }
 
