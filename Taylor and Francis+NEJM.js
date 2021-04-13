@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-29 10:57:15"
+	"lastUpdated": "2021-04-13 16:37:15"
 }
 
 /*
@@ -164,7 +164,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	let sectionheading = ZU.xpathText(doc, '//div[@class="toc-heading"]');
 	if (sectionheading) {
 		sectionheading = sectionheading.trim();
-		if (sectionheading.match(/^(Book )?Reviews?$/i))
+		if (sectionheading.match(/^Book\s+Reviews?$/i))
 			item.tags.push("Book Reviews");
 	}
 	
