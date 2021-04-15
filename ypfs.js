@@ -91,9 +91,8 @@ function scrape(doc, url) {
 	item.abstractNote = ZU.xpathText(doc, '//dl[@class="ypfs-case__details"]/dt[contains(., "Information")]/following-sibling::dd[1]');
 	item.publisher = pub.replace(/.*: | \(.*\)/g, "");
 	item.language = getLocale(lang);
-	item.url = url;
+	item.url = doc.querySelector('link[rel="shortlink"]').href;
 	item.archive = 'Yale Program on Financial Stability Resource Library';
-	item.archiveLocation = doc.querySelector('link[rel="shortlink"]').href.split(/node\//).pop();
 	item.extra = type[3];
 	
 	item.creators = [];
