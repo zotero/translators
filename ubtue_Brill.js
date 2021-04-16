@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-16 11:11:25"
+	"lastUpdated": "2020-04-16 11:53:25"
 }
 
 /*
@@ -80,11 +80,11 @@ function postProcess(doc, item) {
 	if (extractAuthors(doc)) {
 		item.creators = [];
 		for (let author of extractAuthors(doc)) {
-			author = author.split(' ');Z.debug(author)// last name
+			author = author.split(' ');
 			item.creators = {
 			lastName: author.pop().replace('†', ''),
 			firstName: author.join().replace(',', ' '),
-			creatorType: 'author'
+			creatorType: 'author',
 			};
 		}
 	}
