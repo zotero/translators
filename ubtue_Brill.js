@@ -81,11 +81,11 @@ function postProcess(doc, item) {
 		item.creators = [];
 		for (let author of extractAuthors(doc)) {
 			author = author.split(' ');
-			item.creators = {
-			lastName: author.pop().replace('†', ''),
+			item.creators.push({			
 			firstName: author.join().replace(',', ' '),
-			creatorType: 'author',
-			};
+			lastName: author.pop().replace('†', ''),
+			creatorType: 'author'
+			});
 		}
 	}
 	if (!item.abstractNote) {
