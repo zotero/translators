@@ -80,7 +80,7 @@ function postProcess(doc, item) {
 	if (extractAuthors(doc)) {
 		item.creators = [];
 		for (let author of extractAuthors(doc)) {
-			author = author.split(' ');Z.debug(author)
+			author = author.split(' ');
 			item.creators.push({			
 			lastName: author.pop().replace('†', ''),
 			firstName: author.join().replace(',', ' '),
