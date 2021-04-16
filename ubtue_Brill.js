@@ -1,6 +1,6 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
-	"label": "Brill",
+	"label": "ubtue_Brill",
 	"creator": "Madeesh Kannan, Timotheus Kim",
 	"target": "^https?://brill.com/view/journals/",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-01 10:11:25"
+	"lastUpdated": "2020-04-16 11:11:25"
 }
 
 /*
@@ -67,7 +67,27 @@ function getSearchResults(doc) {
 	return found ? items : false;
 }
 
+// extract author names form Open Graph Metadata, if dot is included in names, e.g. "Th. Emil Homerin" https://brill.com/view/journals/jss/9/1/article-p52_3.xml 
+// because in this case the first string of the author name with dot will be removed by the system.
+function extractAuthors(doc) {
+	let authorsElement = ZU.xpathText(doc, '//meta[@property="article:author"]//@content');
+	if (authorsElement.match(/\./))
+		return authorsElement ? authorsElement.split(',') : '';
+	return false;
+}
+
 function postProcess(doc, item) {
+	if (extractAuthors(doc)) {
+		item.creators = [];
+		for (let author of extractAuthors(doc)) {
+			author = author.split(' ');Z.debug(author)// last name
+			item.creators = {
+			lastName: author.pop().replace('†', ''),
+			firstName: author.join().replace(',', ' '),
+			creatorType: 'author'
+			};
+		}
+	}
 	if (!item.abstractNote) {
 	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
 	  if (item.abstractNote && item.abstractNote.length > 0)
