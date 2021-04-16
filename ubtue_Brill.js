@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 90,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-16 11:53:25"
+	"lastUpdated": "2021-04-16 12:05:36"
 }
 
 /*
@@ -80,10 +80,10 @@ function postProcess(doc, item) {
 	if (extractAuthors(doc)) {
 		item.creators = [];
 		for (let author of extractAuthors(doc)) {
-			author = author.split(' ');
+			author = author.split(' ');Z.debug(author)
 			item.creators.push({			
-			firstName: author.join().replace(',', ' '),
 			lastName: author.pop().replace('†', ''),
+			firstName: author.join().replace(',', ' '),
 			creatorType: 'author'
 			});
 		}
