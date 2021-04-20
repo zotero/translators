@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-31 01:48:00"
+	"lastUpdated": "2021-04-20 14:18:00"
 }
 
 /*
@@ -36,47 +36,47 @@
 */
 
 
-//see also https://github.com/UB-Mannheim/zotkat/blob/master/Wikidata%20QuickStatements.js
+// see also https://github.com/UB-Mannheim/zotkat/blob/master/Wikidata%20QuickStatements.js
 var typeMapping = {
-	"Q838948" : "artwork",
-	"Q30070318" : "audioRecording",
-	"Q686822" : "bill",
-	"Q17928402" : "blogPost",
-	"Q571" : "book",
-	"Q3331189" : "book", // Edition
-	"Q47461344" : "book", // written work
-	"Q1980247" : "bookSection",
-	"Q2334719" : "case",
-	"Q40056" : "computerProgram",
-	"Q23927052" : "conferencePaper",
-	"Q30070414" : "dictionaryEntry",
-	"Q49848" : "document",
-	"Q30070439" : "email",
-	"Q17329259" : "encyclopediaArticle",
-	"Q11424" : "film",
-	"Q7216866" : "forumPost",
-	"Q30070550" : "hearing",
-	"Q30070565" : "instantMessage",
-	"Q178651" : "interview",
-	"Q13442814" : "journalArticle",
-	"Q133492" : "letter",
-	"Q30070590" : "magazineArticle",
-	"Q87167" : "manuscript",
-	"Q4006" : "map",
-	"Q5707594" : "newspaperArticle",
-	"Q253623" : "patent",
-	"Q24634210" : "podcast",
-	"Q604733" : "presentation",
-	"Q1555508" : "radioBroadcast",
-	"Q10870555" : "report",
-	"Q820655" : "statute",
-	"Q1266946" : "thesis",
-	"Q15416" : "tvBroadcast",
-	"Q30070675" : "videoRecording",
-	"Q36774" : "webpage"
+	Q838948: "artwork",
+	Q30070318: "audioRecording",
+	Q686822: "bill",
+	Q17928402: "blogPost",
+	Q571: "book",
+	Q3331189: "book", // Edition
+	Q47461344: "book", // written work
+	Q1980247: "bookSection",
+	Q2334719: "case",
+	Q40056: "computerProgram",
+	Q23927052: "conferencePaper",
+	Q30070414: "dictionaryEntry",
+	Q49848: "document",
+	Q30070439: "email",
+	Q17329259: "encyclopediaArticle",
+	Q11424: "film",
+	Q7216866: "forumPost",
+	Q30070550: "hearing",
+	Q30070565: "instantMessage",
+	Q178651: "interview",
+	Q13442814: "journalArticle",
+	Q133492: "letter",
+	Q30070590: "magazineArticle",
+	Q87167: "manuscript",
+	Q4006: "map",
+	Q5707594: "newspaperArticle",
+	Q253623: "patent",
+	Q24634210: "podcast",
+	Q604733: "presentation",
+	Q1555508: "radioBroadcast",
+	Q10870555: "report",
+	Q820655: "statute",
+	Q1266946: "thesis",
+	Q15416: "tvBroadcast",
+	Q30070675: "videoRecording",
+	Q36774: "webpage"
 };
 
-//see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
+// see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
 var mapping = {
 	'wdt:P1476': 'title',
 	'wdt:P1680': 'subtitle',
@@ -85,7 +85,7 @@ var mapping = {
 	'wdt:P356': 'DOI',
 	'wdt:P407': 'language',
 	'wdt:P1433': 'publicationTitle',
-	'wdt:P921': 'tagString', 
+	'wdt:P921': 'tagString',
 	'wdt:P50': 'creator',
 	'wdt:P2093': 'creator',
 	'wdt:P98': 'creator',
@@ -109,7 +109,7 @@ var mapping = {
 	'wdt:P750': 'distributor'
 };
 
-//creators with no special role here are treated as contributor
+// creators with no special role here are treated as contributor
 var creatorMapping = {
 	'wdt:P50': 'author',
 	'wdt:P2093': 'author',
@@ -123,49 +123,50 @@ var creatorMapping = {
 
 
 var namespaces = {
-	"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-	"xsd": "http://www.w3.org/2001/XMLSchema#",
-	"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
-	"owl": "http://www.w3.org/2002/07/owl#",
-	"wikibase": "http://wikiba.se/ontology-beta#",
-	"wdata": "https://www.wikidata.org/wiki/Special:EntityData/",
-	"wd": "http://www.wikidata.org/entity/",
-	"wds": "http://www.wikidata.org/entity/statement/",
-	"wdref": "http://www.wikidata.org/reference/",
-	"wdv": "http://www.wikidata.org/value/",
-	"wdt": "http://www.wikidata.org/prop/direct/",
-	"p": "http://www.wikidata.org/prop/",
-	"ps": "http://www.wikidata.org/prop/statement/",
-	"psv": "http://www.wikidata.org/prop/statement/value/",
-	"psn": "http://www.wikidata.org/prop/statement/value-normalized/",
-	"pq": "http://www.wikidata.org/prop/qualifier/",
-	"pqv": "http://www.wikidata.org/prop/qualifier/value/",
-	"pqn": "http://www.wikidata.org/prop/qualifier/value-normalized/",
-	"pr": "http://www.wikidata.org/prop/reference/",
-	"prv": "http://www.wikidata.org/prop/reference/value/",
-	"prn": "http://www.wikidata.org/prop/reference/value-normalized/",
-	"wdno": "http://www.wikidata.org/prop/novalue/",
-	"skos": "http://www.w3.org/2004/02/skos/core#",
-	"schema": "http://schema.org/",
-	"cc": "http://creativecommons.org/ns#",
-	"geo": "http://www.opengis.net/ont/geosparql#",
-	"prov": "http://www.w3.org/ns/prov#",
-	//usually the defintion of the xml namespace is not needed, but
-	//here we have to explicitely define it before using ZU.xpath
-	"xml": "http://www.w3.org/XML/1998/namespace"
+	rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+	xsd: "http://www.w3.org/2001/XMLSchema#",
+	rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+	owl: "http://www.w3.org/2002/07/owl#",
+	wikibase: "http://wikiba.se/ontology-beta#",
+	wdata: "https://www.wikidata.org/wiki/Special:EntityData/",
+	wd: "http://www.wikidata.org/entity/",
+	wds: "http://www.wikidata.org/entity/statement/",
+	wdref: "http://www.wikidata.org/reference/",
+	wdv: "http://www.wikidata.org/value/",
+	wdt: "http://www.wikidata.org/prop/direct/",
+	p: "http://www.wikidata.org/prop/",
+	ps: "http://www.wikidata.org/prop/statement/",
+	psv: "http://www.wikidata.org/prop/statement/value/",
+	psn: "http://www.wikidata.org/prop/statement/value-normalized/",
+	pq: "http://www.wikidata.org/prop/qualifier/",
+	pqv: "http://www.wikidata.org/prop/qualifier/value/",
+	pqn: "http://www.wikidata.org/prop/qualifier/value-normalized/",
+	pr: "http://www.wikidata.org/prop/reference/",
+	prv: "http://www.wikidata.org/prop/reference/value/",
+	prn: "http://www.wikidata.org/prop/reference/value-normalized/",
+	wdno: "http://www.wikidata.org/prop/novalue/",
+	skos: "http://www.w3.org/2004/02/skos/core#",
+	schema: "http://schema.org/",
+	cc: "http://creativecommons.org/ns#",
+	geo: "http://www.opengis.net/ont/geosparql#",
+	prov: "http://www.w3.org/ns/prov#",
+	// usually the defintion of the xml namespace is not needed, but
+	// here we have to explicitely define it before using ZU.xpath
+	xml: "http://www.w3.org/XML/1998/namespace"
 };
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc) {
 	var p31statement = doc.getElementById("P31");
 	if (p31statement) {
 		var p31values = ZU.xpath(p31statement, './/div[contains(@class, "wikibase-statementlistview")]//div[contains(@class, "wikibase-snakview-value")]/a/@title');
-		for (var i=0; i<p31values.length; i++) {
+		for (var i = 0; i < p31values.length; i++) {
 			if (p31values[i] && typeMapping[p31values[i].textContent]) {
 				return typeMapping[p31values[i].textContent];
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -180,7 +181,7 @@ function scrape(doc, url) {
 	var qposition = url.indexOf('Q');
 	var qnumber = url.substr(qposition);
 	var xmlUrl = ZU.xpathText(doc, '//link[@rel="alternate" and @type="application/rdf+xml"]/@href');
-	ZU.doGet(xmlUrl, function(data) {
+	ZU.doGet(xmlUrl, function (data) {
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(data, "application/xml");
 		
@@ -188,11 +189,11 @@ function scrape(doc, url) {
 		item.extra = 'QID: ' + qnumber;
 		var nodes = ZU.xpath(xml, '//rdf:Description', namespaces);
 		var creatorsArray = [];
-		for (var i=0; i<nodes.length; i++) {
+		for (var i = 0; i < nodes.length; i++) {
 			var rdfabout = nodes[i].getAttribute("rdf:about");
 			if (rdfabout) {
-				var id = rdfabout.substr(rdfabout.length-qnumber.length);
-				if (id==qnumber) {
+				var id = rdfabout.substr(rdfabout.length - qnumber.length);
+				if (id == qnumber) {
 					for (var prop in nodes[i].childNodes) {
 						var propstatement = nodes[i].childNodes[prop];
 						var tagname = propstatement.tagName;
@@ -201,20 +202,22 @@ function scrape(doc, url) {
 							var value = propstatement.textContent;
 							var resource = propstatement.getAttribute("rdf:resource");
 							if (!value && resource) {
-								//Z.debug("Internal look up resource: " + resource);
-								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
-									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="'+resource+'"]/rdfs:label[1]', namespaces);
+								// Z.debug("Internal look up resource: " + resource);
+								value = ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[contains(@xml:lang, "en")][1]', namespaces)
+									|| ZU.xpathText(xml, '//rdf:Description[@rdf:about="' + resource + '"]/rdfs:label[1]', namespaces);
 									
-								//Z.debug(value);
+								// Z.debug(value);
 							}
-							if (zprop=="creator") {
-								var seriesOrdinal = ZU.xpathText(xml, '//rdf:Description[ps:P50[@rdf:resource="'+resource+'"]]/pq:P1545[1]', namespaces)
-									|| ZU.xpathText(xml, '//rdf:Description[ps:P2093[text()="'+value+'"]]/pq:P1545[1]', namespaces);
+							if (zprop == "creator") {
+								var seriesOrdinal = ZU.xpathText(xml, '//rdf:Description[ps:P50[@rdf:resource="' + resource + '"]]/pq:P1545[1]', namespaces)
+									|| ZU.xpathText(xml, '//rdf:Description[ps:P2093[text()="' + value + '"]]/pq:P1545[1]', namespaces);
 								var func = creatorMapping[tagname] || 'contributor';
 								creatorsArray.push([value, func, seriesOrdinal]);
-							} else if (item[zprop]) {
+							}
+							else if (item[zprop]) {
 								item[zprop] += ', ' + value;
-							} else {
+							}
+							else {
 								item[zprop] = value;
 							}
 						}
@@ -226,13 +229,13 @@ function scrape(doc, url) {
 			item.title += ': ' + item.subtitle;
 			delete item.subtitle;
 		}
-		creatorsArray.sort(function(a,b) {
+		creatorsArray.sort(function (a, b) {
 			return a[2] - b[2];
 		});
 		for (let aut of creatorsArray) {
 			item.creators.push(ZU.cleanAuthor(aut[0], aut[1]));
 		}
-		//in Zotero we cannot allow multiple DOIs
+		// in Zotero we cannot allow multiple DOIs
 		if (item.DOI && item.DOI.includes(', ')) {
 			item.DOI = ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#PreferredRank")]]/ps:P356)[1]', namespaces)
 				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#NormalRank")]]/ps:P356)[1]', namespaces)
@@ -240,7 +243,7 @@ function scrape(doc, url) {
 		}
 		if (item.tagString) {
 			var tags = item.tagString.split(', ');
-			for (var j=0; j<tags.length; j++) {
+			for (var j = 0; j < tags.length; j++) {
 				item.tags.push(tags[j]);
 			}
 			delete item.tagString;
@@ -656,5 +659,5 @@ var testCases = [
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/
