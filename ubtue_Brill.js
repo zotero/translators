@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-21 09:05:36"
+	"lastUpdated": "2021-04-21 14:01:36"
 }
 
 /*
@@ -103,6 +103,11 @@ function postProcess(doc, item) {
 			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d+-\d+-\d+x?)$/i, '$1');
 			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
 		}
+	}
+	//delete symbols in names
+	for (let i in item.creators) {
+		item.creators[i].lastName = item.creators[i].lastName.replace('†', '');
+		item.creators[i].firstName = item.creators[i].firstName.replace('†', '');
 	}
 	//deduplicate
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
