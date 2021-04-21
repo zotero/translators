@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-16 12:05:36"
+	"lastUpdated": "2021-04-21 09:05:36"
 }
 
 /*
@@ -69,7 +69,7 @@ function getSearchResults(doc) {
 
 // extract author names form Open Graph Metadata, if dot is included in names, e.g. "Th. Emil Homerin" https://brill.com/view/journals/jss/9/1/article-p52_3.xml 
 // because in this case the first string of the author name with dot will be removed by the system.
-function extractAuthors(doc) {
+function OpenGraphMetadataNameContainsDot(doc) {
 	let authorsElement = ZU.xpathText(doc, '//meta[@property="article:author"]//@content');
 	if (authorsElement.match(/\./))
 		return authorsElement ? authorsElement.split(',') : '';
@@ -77,9 +77,9 @@ function extractAuthors(doc) {
 }
 
 function postProcess(doc, item) {
-	if (extractAuthors(doc)) {
+	if (OpenGraphMetadataNameContainsDot(doc)) {
 		item.creators = [];
-		for (let author of extractAuthors(doc)) {
+		for (let author of OpenGraphMetadataNameContainsDot(doc)) {
 			author = author.split(' ');
 			item.creators.push({			
 			lastName: author.pop().replace('†', ''),
