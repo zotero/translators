@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-15 17:17:15"
+	"lastUpdated": "2021-04-21 09:01:15"
 }
 
 /*
@@ -139,6 +139,10 @@ function scrape(doc, url) {
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title, true);
 					}
+					//ubtue:item.creators retrieved from ris, because bibtex is adding some unuseful "names"
+					//e.g. corporate bodies "Bill Gaventa and National Collaborative on Faith and Disability, with" https://doi.org/10.1080/23312521.2020.1743223
+					//or title like "Rev." https://www.tandfonline.com/doi/full/10.1080/23312521.2020.1738627
+					item.creators = risItem.creators;
 					finalizeItem(item, doc, doi, baseUrl);
 				});
 				risTrans.translate();
