@@ -141,7 +141,7 @@ function scrape(doc, url) {
 					}
 					//ubtue:adding subtitle
 					let subtitle = ZU.xpathText(doc, '//*[@class="NLM_subtitle"]');
-					if (subtitle.length) item.title += ' ' + subtitle;
+					if (subtitle.length) item.title += ': ' + subtitle;
 					//ubtue:item.creators retrieved from ris, because bibtex is adding some unuseful "names"
 					//e.g. corporate bodies "Bill Gaventa and National Collaborative on Faith and Disability, with" https://doi.org/10.1080/23312521.2020.1743223
 					//or title like "Rev." https://www.tandfonline.com/doi/full/10.1080/23312521.2020.1738627
