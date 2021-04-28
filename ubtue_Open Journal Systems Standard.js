@@ -1,6 +1,6 @@
 {
 	"translatorID": "a5d5ca83-b975-4abe-86c9-d956d7b9c8fa",
-	"label": "Open Journal Systems Standard",
+	"label": "ubtue_Open Journal Systems Standard",
 	"creator": "Timotheus Kim",
 	"target": "article|issue/view/",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-02 16:19:54"
+	"lastUpdated": "2021-04-20 14:20:53"
 }
 
 /*
@@ -98,6 +98,10 @@ function invokeEMTranslator(doc) {
 		if (i.pages && i.pages.match(/^\d{1,3}–\d{1,3}-\d{1,3}–\d{1,3}/)) {
 			let firstandlastpages = i.pages.split('–');
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
+		}
+		if (i.ISSN == '2413-3108') {
+			// Fix erroneous firstpage in embedded metadata with issue prefix
+		    i.pages  = i.pages.replace(/(?:\d+\/)?(\d+-\d+)/, "$1");
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
