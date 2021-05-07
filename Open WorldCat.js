@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-03-19 23:26:57"
+	"lastUpdated": "2021-05-07 18:23:01"
 }
 
 // attr()/text() v2
@@ -171,6 +171,10 @@ function scrape(ids, data) {
 			item.title = cleanBrackets(item.title);
 			item.place = cleanBrackets(item.place);
 			item.publisher = cleanBrackets(item.publisher);
+			// Strip possible trailing period
+			if (item.language) {
+				item.language = item.language.replace(/\.$/, '');
+			}
 			//attach notes
 			if (itemData && itemData.notes) {
 				item.notes.push({note: itemData.notes});
@@ -377,7 +381,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
+		"url": "https://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
 		"items": [
 			{
 				"itemType": "book",
@@ -390,6 +394,7 @@ var testCases = [
 					}
 				],
 				"date": "1964",
+				"abstractNote": "\"This book delves into the Argentine past seeking the origins of the political, social, and economic conflicts that have stunted Argentina's development after her spectacular progress during the late nineteenth and early twentieth centuries\"--From book jacket.",
 				"extra": "OCLC: 489605",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
@@ -438,7 +443,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://melvyl.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
+		"url": "https://www.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
 		"items": [
 			{
 				"itemType": "book",
