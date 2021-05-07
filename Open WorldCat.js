@@ -12,6 +12,10 @@
 	"lastUpdated": "2017-03-19 23:26:57"
 }
 
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
 /**
  * Gets Zotero item from a WorldCat icon src
  */
@@ -241,9 +245,9 @@ function doWeb(doc, url) {
 			// Seems like some single search results redirect to the item page,
 			// but the URL is still a search URL. Grab cannonical URL from meta tag
 			// to extract the OCLC ID
-			var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
+			let canonicalURL = attr(doc, "link[rel='canonical']", "href");
 			if (canonicalURL) {
-				oclcID = extractOCLCID(canonicalURL.href);
+				oclcID = extractOCLCID(canonicalURL);
 			}
 		}
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
@@ -343,14 +347,17 @@ function fetchIDs(isbns, ids, callback) {
 			}
 			//but sometimes we have single items
 			else  {
-				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
+				let canonicalURL = attr(doc, "link[rel='canonical']", "href");
    				if (canonicalURL) {
-      					oclcID = extractOCLCID(canonicalURL);
-      					if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-         				scrape([oclcID]);
-   				} else {
-     					 Z.debug("No search results found for ISBN " + isbn);
+					oclcID = extractOCLCID(canonicalURL);
+					if (!oclcID) {
+						throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+					}
+					scrape([oclcID]);
    				}
+				else {
+					Z.debug("No search results found for ISBN " + isbn);
+				}
 			}
 		},
 		function() {
