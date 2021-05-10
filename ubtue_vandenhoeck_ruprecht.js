@@ -129,7 +129,6 @@ function scrape(doc, url) {
 						}
 						item.complete();
 					});
-				//item.complete();
 			});
 			translator.translate();
 		});
