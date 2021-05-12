@@ -1,6 +1,6 @@
 {
-	"translatorID": "30f0052d-e8fc-45ac-a1db-7a729f0da376",
-	"label": "Mohr Siebeck",
+	"translatorID": "ab428b36-d2e3-4443-a4b6-4273b338df51",
+	"label": "ubtue_Mohr Siebeck",
 	"creator": "Madeesh Kannan",
 	"target": "https?://www.mohrsiebeck.com/",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-17 14:20:25"
+	"lastUpdated": "2021-05-10 16:20:25"
 }
 
 /*
@@ -58,12 +58,14 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
+	let subtitle = ZU.xpathText(doc, '//h2[@class="droidserif20 product-detail-h2"]');
+	if (subtitle) item.title = item.title + ': ' + subtitle;
 	if (!item.abstractNote)
 		item.abstractNote = ZU.xpathText(doc, '//div[@id="previewShort"]');
 
 	item.tags = ZU.xpath(doc, '//div[@id="productKeywords"]//a').map(i => i.textContent.trim());
 
-	item.creators = ZU.xpathText(doc, '//h2[contains(@class, "product-heading-author-block")]').split(",").map(i => ZU.cleanAuthor(i));
+	if (item.creators && item.creators.length) item.creators = ZU.xpathText(doc, '//h2[contains(@class, "product-heading-author-block")]').split(",").map(i => ZU.cleanAuthor(i));
 
 	if (!item.language)
 		item.language = ZU.xpathText(doc, '//meta[@name="language"]/@content');
