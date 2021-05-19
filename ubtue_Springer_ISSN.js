@@ -48,7 +48,7 @@ function getApiKey() {
 }
 
 
-function detectSearchMultiple(item) {
+async function detectSearchMultiple(item) {
     if (!item.ISSN.match(/\d{4}-\d{4}/)) {
         Z.debug("item contains no valid issn %o", item);
         return false;
@@ -56,10 +56,11 @@ function detectSearchMultiple(item) {
     if (!getApiKey())
         return false;
 
-    let totalItems = (async () => { await getTotalItems(item, getApiKey()).then(totalItems => { return totalItems;})})();
+    let totalItems = await getTotalItems(item, getApiKey()).then(totalItems => { return totalItems;});
     if (totalItems)
         return "multiple";
-    return false;
+    return
+        false;
 }
 
 
@@ -90,12 +91,14 @@ function getDOIS(url, totalItems) {
     })});};
 
     let iterations = totalItems /  RESULTS_PER_REQUEST + 1;
-    for (let iteration = 1; iteration <= iterations; ++iteration) {
-        url = url.replace(/&s=\d+/, "&s=" + iteration);
+    for (let iteration = 0; iteration < iterations; ++iteration) {
+        let startOffset = (iteration == 0) ? 1 : Math.floor(iteration) * RESULTS_PER_REQUEST + 1;
+        url = url.replace(/&s=\d+/, "&s=" + startOffset);
         promises.push(promiseStep(url));
     }
     return Promise.all(promises).then(chunks => { return chunks }).catch( e => { Z.debug(e) });
 }
+
 
 async function getSearchResults(queryISSN) {
     let springer_api_key = getApiKey();
@@ -107,14 +110,13 @@ async function getSearchResults(queryISSN) {
     for (doi of allChunks) {
         items[doi] = ++i;
     }
-    console.log("ITEMS: %o", items);
+    console.log("ITEMS %o", items);
     return items;
-
 }
 
 
 async function doSearchMultiple(item) {
-    if (detectSearchMultiple(item) !== "multiple")
+    if (await detectSearchMultiple(item) !== "multiple")
         return false;
 
     let springer_api_key = getApiKey();
@@ -129,16 +131,15 @@ async function doSearchMultiple(item) {
     }
 
     let issn = ZU.cleanISSN(item.ISSN);
-    await (async function() { return getSearchResults(issn).then(doiItems => {
-         Zotero.selectItems(doiItems, function (items) {
-             Object.keys(items).forEach(function (key) {
-                 Z.debug("WE HAVE KEY: " + key);
-                 let item = new Zotero.Item("journalArticle");
-                 item.title = key;
-                 item.complete();
-             });
-         });
-    })})();
+    let doiItems = await getSearchResults(issn).then(doiItems => {return doiItems});
+    Zotero.selectItems(doiItems, function (items) {
+        Object.keys(items).forEach(function (key) {
+            Z.debug("WE HAVE KEY: " + key);
+            let item = new Zotero.Item("journalArticle");
+            item.title = key;
+            item.complete();
+        });
+    });
 }
 
 
