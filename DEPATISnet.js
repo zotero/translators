@@ -117,7 +117,7 @@ function scrape(doc, url) {
 
 	var ipcs = [];
 
-	var rows = ZU.xpath(doc, '//table/tbody/tr');			// old line: var rows = ZU.xpath(doc, '//table[@class="tab_detail"]/tbody/tr');
+	var rows = ZU.xpath(doc, '//table/tbody/tr');
 
 	for (var i = 0, n = rows.length; i < n; i++) {
 		var columns = ZU.xpath(rows[i], './td');
@@ -157,9 +157,11 @@ function scrape(doc, url) {
 				break;
 			case "ICM":
 			case "ICS":
-				var ipc = ZU.xpathText(value, './a').split(",");
-				for (let name of ipc) {
-					ipcs.push(ZU.trimInternal(name));
+				if (ZU.xpathText(value, './a')) {
+					var ipc = ZU.xpathText(value, './a').split(",");
+					for (let name of ipc) {
+						ipcs.push(ZU.trimInternal(name));
+					}
 				}
 				break;
 			case "PUB":
@@ -197,14 +199,14 @@ function scrape(doc, url) {
 		snapshot: false
 	});
 	
-	var pages = ZU.xpathText(doc, '/html/body/div[4]/p/span');			// old line: var pages = ZU.xpathText(doc, '//div[@id="inhalt"]/h2');
+	var pages = ZU.xpathText(doc, '//table/caption').replace("(", "$(").split("$").pop();
 	
 	// e.g. "Dokument   DE000004446098C2   (Seiten: 8)"
 	// but there is no PDF available when we have "Seiten: 0"
 	if (pages && /(Seiten|Pages):\s*[1-9][0-9]*/.test(pages)) {
 		var pdfurl = "https://depatisnet.dpma.de/DepatisNet/depatisnet/" + pn + "_all_pages.pdf?window=1&space=menu&content=download_doc_verify&action=download_doc&docid=" + pn;
 		newItem.attachments.push({
-			title: pn,		// old line:  title: "Fulltext",
+			title: pn,
 			url: pdfurl,
 			mimeType: "application/pdf"
 		});
