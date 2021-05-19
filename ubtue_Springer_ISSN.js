@@ -133,11 +133,14 @@ async function doSearchMultiple(item) {
     let issn = ZU.cleanISSN(item.ISSN);
     let doiItems = await getSearchResults(issn).then(doiItems => {return doiItems});
     Zotero.selectItems(doiItems, function (items) {
-        Object.keys(items).forEach(function (key) {
-            Z.debug("WE HAVE KEY: " + key);
-            let item = new Zotero.Item("journalArticle");
-            item.title = key;
-            item.complete();
+        Object.keys(items).forEach(function (doi) {
+            let translator = Zotero.loadTranslator("search");
+            translator.setTranslator("95e0f3ba-ed5b-4ab2-9aa5-0ae1b8ec6eb3");
+            translator.setSearch(doi);
+            translator.setHandler("itemDone", function (t, i) {
+                i.complete();
+            });
+            translator.translate();
         });
     });
 }
