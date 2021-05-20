@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-02-16 04:51:10"
+	"lastUpdated": "2021-05-20 00:12:40"
 }
 
 /**
@@ -31,14 +31,14 @@
 */
 
 function detectWeb(doc, url) {
-	if (doc.getElementById('firstHeading')) {
+	if (doc.getElementById('firstHeading') || doc.getElementById('section_0')) {
 		return 'encyclopediaArticle';
 	}
 }
 
 function doWeb(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
-	item.title = ZU.trimInternal(doc.getElementById('firstHeading').textContent);
+	item.title = ZU.trimInternal((doc.getElementById('firstHeading') || doc.getElementById('section_0')).textContent);
 	
 	/* Removing the creator and publisher. Wikipedia is pushing the creator in their own
   	directions on how to cite http://en.wikipedia.org/w/index.php?title=Special%3ACite&page=Psychology
@@ -76,8 +76,19 @@ function doWeb(doc, url) {
 		item.extra = 'Page Version ID: ' + revID;
 		item.url = doc.location.protocol + '//' + doc.location.hostname
 					+ item.url;
-	} else {
-		item.url = url;
+	}
+	else {
+		// on mobile, we don't get a permalink directly
+		// but it goes into the "retrieved from" footer.
+		// if we can't find that, just use the page URL
+		item.url = attr(doc, 'a[href*="oldid="]', 'href');
+		if (item.url) {
+			revID = item.url.match(/[&?]oldid=(\d+)/)[1];
+			item.extra = 'Page Version ID: ' + revID;
+		}
+		else {
+			item.url = url;
+		}
 	}
 
 	item.attachments.push({
@@ -122,7 +133,9 @@ function doWeb(doc, url) {
 		}
 		item.complete();
 	});
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -210,6 +223,35 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://en.m.wikipedia.org/w/index.php?title=1%25_rule_(Internet_culture)&oldid=999756024",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "1% rule (Internet culture)",
+				"creators": [],
+				"date": "2021-01-11T20:19:42Z",
+				"abstractNote": "In Internet culture, the 1% rule is a rule of thumb pertaining to participation in an internet community, stating that only 1% of the users of a website add content, while the other 99% of the participants only lurk. Variants include the 1–9–90 rule (sometimes 90–9–1 principle or the 89:10:1 ratio), which states that in a collaborative website such as a wiki, 90% of the participants of a community only consume content, 9% of the participants change or update content, and 1% of the participants add content. This also applies, approximately, to Wikipedia.Similar rules are known in information science; for instance, the 80/20 rule known as the Pareto principle states that 20 percent of a group will produce 80 percent of the activity, however the activity is defined.",
+				"encyclopediaTitle": "Wikipedia",
+				"extra": "Page Version ID: 999756024",
+				"language": "en",
+				"libraryCatalog": "Wikipedia",
+				"rights": "Creative Commons Attribution-ShareAlike License",
+				"url": "/w/index.php?title=1%25_rule_(Internet_culture)&diff=prev&oldid=999756024",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html",
+						"snapshot": true
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
-];
+]
 /** END TEST CASES **/
