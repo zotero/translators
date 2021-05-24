@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-24 15:30:53"
+	"lastUpdated": "2021-05-24 23:59:41"
 }
 
 /**
-	Copyright (c) 2012 Aurimas Vinckevicius
+	Copyright (c) 2021 Aurimas Vinckevicius and Abe Jellinek
 	
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -80,8 +80,7 @@ function doWeb(doc, url) {
 		revID = permalink.match(/[&?]oldid=(\d+)/)[1];
 		item.extra = 'Page Version ID: ' + revID;
 		if (permalink.startsWith('/')) {
-			item.url = doc.location.protocol + '//' + doc.location.hostname
-						+ permalink;
+			item.url = 'https://' + doc.location.hostname + permalink;
 		}
 		else {
 			item.url = permalink;
