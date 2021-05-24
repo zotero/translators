@@ -115,7 +115,7 @@ function scrape(doc) {
 		else {
 			item.title = data.alternativeHeadline;
 			if (!item.title) {
-				item.title = '*** UNTITLED ***';
+				item.title = '[Untitled]';
 			}
 		}
 		item.shortTitle = data.headline;
