@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-20 00:12:40"
+	"lastUpdated": "2021-05-24 15:30:53"
 }
 
 /**
@@ -31,6 +31,8 @@
 */
 
 function detectWeb(doc, url) {
+	// on desktop, the article title is in #firstHeading.
+	// on mobile, it's #section_0.
 	if (doc.getElementById('firstHeading') || doc.getElementById('section_0')) {
 		return 'encyclopediaArticle';
 	}
@@ -69,26 +71,25 @@ function doWeb(doc, url) {
 		item.encyclopediaTitle = 'Wikipedia, the free encyclopedia';
 	}
 
-	item.url = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href');
+	// we don't get a permalink directly on mobile, but it goes into the
+	// "retrieved from" footer
+	let permalink = ZU.xpathText(doc, '//li[@id="t-permalink"]/a/@href')
+		|| attr(doc, '.printfooter a', 'href');
 	var revID;
-	if (item.url) {
-		revID = item.url.match(/[&?]oldid=(\d+)/)[1];
+	if (permalink) {
+		revID = permalink.match(/[&?]oldid=(\d+)/)[1];
 		item.extra = 'Page Version ID: ' + revID;
-		item.url = doc.location.protocol + '//' + doc.location.hostname
-					+ item.url;
-	}
-	else {
-		// on mobile, we don't get a permalink directly
-		// but it goes into the "retrieved from" footer.
-		// if we can't find that, just use the page URL
-		item.url = attr(doc, 'a[href*="oldid="]', 'href');
-		if (item.url) {
-			revID = item.url.match(/[&?]oldid=(\d+)/)[1];
-			item.extra = 'Page Version ID: ' + revID;
+		if (permalink.startsWith('/')) {
+			item.url = doc.location.protocol + '//' + doc.location.hostname
+						+ permalink;
 		}
 		else {
-			item.url = url;
+			item.url = permalink;
 		}
+	}
+	else {
+		// if we can't find a link, just use the page URL
+		item.url = url;
 	}
 
 	item.attachments.push({
@@ -239,7 +240,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Wikipedia",
 				"rights": "Creative Commons Attribution-ShareAlike License",
-				"url": "/w/index.php?title=1%25_rule_(Internet_culture)&diff=prev&oldid=999756024",
+				"url": "https://en.wikipedia.org/w/index.php?title=1%25_rule_(Internet_culture)&oldid=999756024",
 				"attachments": [
 					{
 						"title": "Snapshot",
