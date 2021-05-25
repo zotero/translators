@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-10-19 17:04:49"
+	"lastUpdated": "2021-05-25 22:40:15"
 }
 
 function detectImport() {
@@ -461,12 +461,21 @@ var degenerateImportFieldMap = {
  *   not present in the list, the next list is checked. If the RIS tag is
  *   present, but an item type does not match (no __default) or is explicit
  *   excluded from matching (__exclude), the next list is checked.
+ *   The `deprecatedMap` should be a subset of the maps in this list.
+ * @param {Tag <-> zotero field map} deprecatedMap A map, in the same format as
+ *   the entries in the `mapList`, containing deprecated tags that should only
+ *   be used if no other tag maps to the same Zotero item field.
  */
-var TagMapper = function(mapList) {
+var TagMapper = function(mapList, deprecatedMap) {
 	this.cache = {};
 	this.reverseCache = {};
 	this.mapList = mapList;
+	this.deprecatedMap = deprecatedMap;
 };
+
+TagMapper.prototype.isDeprecated = function (tag) {
+	return this.deprecatedMap.hasOwnProperty(tag);
+}
 
 /**
  * Given an item type and a RIS tag, return Zotero field data should be mapped to.
@@ -1201,13 +1210,21 @@ var CitaviCleaner = new function() {
 	}
 }
 
-function processTag(item, tagValue, risEntry) {
+/**
+ * Returns false and fails to process if the provided tag is deprecated and
+ * allowDeprecated is false.
+ */
+function processTag(item, tagValue, risEntry, allowDeprecated) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
 	var rawLine = tagValue.raw;
 	
 	//drop empty fields
 	if (value === "") return;
+	
+	if (!allowDeprecated && importFields.isDeprecated(tag)) {
+		return false;
+	}
 	
 	var zField = importFields.getField(item.itemType, tag);
 	if (!zField) {
@@ -1394,6 +1411,7 @@ function processTag(item, tagValue, risEntry) {
 	}
 
 	applyValue(item, zField[0], value, rawLine);
+	return true;
 }
 
 function applyValue(item, zField, value, rawLine) {
@@ -1729,7 +1747,7 @@ function startImport(resolve, reject) {
 		//set up import field mapper
 		var maps = [fieldMap, degenerateImportFieldMap];
 		if (exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
-		importFields = new TagMapper(maps);
+		importFields = new TagMapper(maps, degenerateImportFieldMap);
 		
 		//prepare some configurable options
 		if (Zotero.getHiddenPref) {
@@ -1784,10 +1802,19 @@ function importNext(resolve, reject) {
 			EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 			CitaviCleaner.cleanTags(entry, item);
 			
+			var deferredEntries = [];
+			
 			for (var i=0, n=entry.length; i<n; i++) {
-				if ((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
-					processTag(item, entry[i], entry);
+				//ignore TY and ER tags
+				if ((['TY', 'ER']).indexOf(entry[i].tag) != -1) continue;
+				
+				if (!processTag(item, entry[i], entry, false)) {
+					deferredEntries.push(entry[i]);
 				}
+			}
+			
+			for (let deferred of deferredEntries) {
+				processTag(item, deferred, entry, true);
 			}
 			
 			var maybePromise = completeItem(item);
@@ -6390,6 +6417,55 @@ var testCases = [
 					"Law"
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nT1  - Reputation and Decision Making under Ambiguity: A Study of U.S. Venture Capital Firms' Investments in the Emerging Clean Energy Sector\nAU  - Petkova, Antoaneta P.\nAU  - Wadhwa, Anu\nAU  - Yao, Xin\nAU  - Jain, Sanjay\nY1  - 2013/05/28\nPY  - 2013\nDA  - 2014/04/01\nN1  - doi: 10.5465/amj.2011.0651\nDO  - 10.5465/amj.2011.0651\nT2  - Academy of Management Journal\nJF  - Academy of Management Journal\nJO  - AMJ\nSP  - 422\nEP  - 448\nVL  - 57\nIS  - 2\nPB  - Academy of Management\nSN  - 0001-4273\nM3  - doi: 10.5465/amj.2011.0651\nUR  - https://doi.org/10.5465/amj.2011.0651\nY2  - 2020/02/19\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Reputation and Decision Making under Ambiguity: A Study of U.S. Venture Capital Firms' Investments in the Emerging Clean Energy Sector",
+				"creators": [
+					{
+						"lastName": "Petkova",
+						"firstName": "Antoaneta P.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wadhwa",
+						"firstName": "Anu",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Yao",
+						"firstName": "Xin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jain",
+						"firstName": "Sanjay",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 1, 2014",
+				"DOI": "10.5465/amj.2011.0651",
+				"ISSN": "0001-4273",
+				"issue": "2",
+				"journalAbbreviation": "AMJ",
+				"pages": "422-448",
+				"publicationTitle": "Academy of Management Journal",
+				"url": "https://doi.org/10.5465/amj.2011.0651",
+				"volume": "57",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>doi: 10.5465/amj.2011.0651</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
