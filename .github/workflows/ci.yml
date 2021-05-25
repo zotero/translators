@@ -45,17 +45,17 @@ jobs:
       #- name: Debugging with tmate
       #  uses: mxschmitt/action-tmate@v3.1
       
-      - name: Lint
-        run: ./lint.sh
-        working-directory: .ci
-      
-      - name: Check deleted.txt
-        run: ./checkDeletedTxt.sh
-        working-directory: .ci
-      
       - name: Test pull request
         if: github.event_name == 'pull_request'
         env:
           BROWSER_EXECUTABLE: /home/runner/work/translators/translators/.ci/pull-request-check/xvfb-run-chrome
         run: ./check-pull-request.sh
         working-directory: .ci/pull-request-check
+      
+      - name: Check deleted.txt
+        run: ./checkDeletedTxt.sh
+        working-directory: .ci
+      
+      - name: Lint
+        run: ./lint.sh
+        working-directory: .ci
