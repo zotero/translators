@@ -1,15 +1,15 @@
 {
 	"translatorID": "fc9b7700-b3cc-4150-ba89-c7e4443bd96d",
 	"label": "Financial Times",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and Abe Jellinek",
 	"target": "^https?://www\\.ft\\.com",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-05-25 18:07:42"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-05-25 18:12:09"
 }
 
 /*
