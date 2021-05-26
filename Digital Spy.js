@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 03:32:16"
+	"lastUpdated": "2021-05-26 19:44:49"
 }
 
 /*
@@ -37,12 +37,14 @@
 */
 
 
-function detectWeb(doc, url) {
-	if (/\/(news|feature|review)\/\w\d+/.test(url)) {
+function detectWeb(doc, _url) {
+	if (doc.querySelector('.content-hed')) {
 		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -59,12 +61,13 @@ function scrape(doc, url) {
 		for (let author of authorMetadata) {
 			item.creators.push(ZU.cleanAuthor(author.text, "author"));
 		}
+		item.tags = []; // tags are pretty SEO-y now
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.addCustomFields({ // pull from meta tags in here
-			'title': 'title'
+			title: 'title'
 		});
 		trans.doWeb(doc, url);
 	});
@@ -74,10 +77,10 @@ function scrape(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.search-results--title, .landing-feed--story-title, .landing-feed--special-title');
-	for (let i=0; i<rows.length; i++) {
+	var rows = doc.querySelectorAll('.simple-item > a');
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+		let title = ZU.trimInternal(text(rows[i], '.item-title'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -92,7 +95,7 @@ function doWeb(doc, url) {
 		case "multiple":
 			Zotero.selectItems(getSearchResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
 				var articles = [];
 				for (var i in items) {
@@ -106,15 +109,16 @@ function doWeb(doc, url) {
 			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.digitalspy.com/gaming/xbox-one/news/a661615/rare-replay-review-roundup-one-of-the-best-collections-in-gaming-history/",
+		"url": "https://www.digitalspy.com/videogames/xbox-one/a661615/rare-replay-review-roundup-one-of-the-best-collections-in-gaming-history/",
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Rare Replay review roundup: \"One of the best collections in gaming history\"",
+				"title": "Is Rare Replay good? First reviews go live",
 				"creators": [
 					{
 						"firstName": "Albaraa",
@@ -126,11 +130,12 @@ var testCases = [
 				"abstractNote": "Early reviews applaud the compilation for comprising countless hours of content.",
 				"blogTitle": "Digital Spy",
 				"language": "en-GB",
-				"shortTitle": "Rare Replay review roundup",
-				"url": "http://www.digitalspy.com/gaming/xbox-one/news/a661615/rare-replay-review-roundup-one-of-the-best-collections-in-gaming-history/",
+				"shortTitle": "Is Rare Replay good?",
+				"url": "http://www.digitalspy.com/videogames/xbox-one/a661615/rare-replay-review-roundup-one-of-the-best-collections-in-gaming-history/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -141,7 +146,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.digitalspy.com/gaming/mass-effect/feature/a786594/mass-effect-andromeda-trailer-news-release-date-uk-story-characters-gameplay/",
+		"url": "https://www.digitalspy.com/videogames/mass-effect/a786594/mass-effect-andromeda-trailer-news-release-date-uk-story-characters-gameplay/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -151,40 +156,20 @@ var testCases = [
 						"firstName": "Sam",
 						"lastName": "Loveridge",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Justin",
-						"lastName": "Mahboubian-Jones",
-						"creatorType": "author"
 					}
 				],
 				"date": "2017-03-13 01:00:00",
 				"abstractNote": "Including story, characters and more.",
 				"blogTitle": "Digital Spy",
 				"language": "en-GB",
-				"url": "http://www.digitalspy.com/gaming/feature/a786594/mass-effect-andromeda-trailer-news-release-date-uk-story-characters-gameplay/",
+				"url": "http://www.digitalspy.com/videogames/mass-effect/a786594/mass-effect-andromeda-trailer-news-release-date-uk-story-characters-gameplay/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Mass Effect"
-					},
-					{
-						"tag": "Mass Effect Andromeda"
-					},
-					{
-						"tag": "PC"
-					},
-					{
-						"tag": "PS4"
-					},
-					{
-						"tag": "Xbox One"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -192,47 +177,30 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.digitalspy.com/search/earthbound",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.digitalspy.com/showbiz/",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.digitalspy.com/movies/review/a822336/get-out-review-horror-race/",
+		"url": "https://www.digitalspy.com/soaps/coronation-street/a36407166/coronation-street-sharon-bentley-tricks-dev-alahan-leanne-search/",
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Get Out review: one of the best horror movies of the year. Oh, and it's *about* something",
+				"title": "Coronation Street's Sharon tricks Dev in her search for Leanne",
 				"creators": [
 					{
-						"firstName": "Rosie",
-						"lastName": "Fletcher",
+						"firstName": "Amy",
+						"lastName": "West",
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-03-17 02:52:00",
-				"abstractNote": "Guess who's coming to Stepford for dinner?",
+				"date": "2021-05-12 03:14:00",
+				"abstractNote": "She won't stop until she's got what she wants.",
 				"blogTitle": "Digital Spy",
 				"language": "en-GB",
-				"shortTitle": "Get Out review",
-				"url": "http://www.digitalspy.com/movies/review/a822336/get-out-review/",
+				"url": "https://www.digitalspy.com/soaps/coronation-street/a36407166/coronation-street-sharon-bentley-tricks-dev-alahan-leanne-search/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Daniel Kaluuya"
-					},
-					{
-						"tag": "Jordan Peele"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -240,7 +208,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.digitalspy.com/movies/review/",
+		"url": "https://www.digitalspy.com/search/?q=xbox",
 		"items": "multiple"
 	}
 ]
