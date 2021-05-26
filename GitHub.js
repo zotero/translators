@@ -3,6 +3,7 @@
 	"label": "GitHub",
 	"creator": "Martin Fenner, Philipp Zumstein",
 	"target": "^https?://(www\\.)?github\\.com/[^/]+/[^/]+",
+	"target": "^https?://(www\\.)?github\\.com/([^/]+/[^/]+|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -47,7 +48,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "repo-list-item")]//h3/a');
+	var rows = doc.querySelectorAll('.repo-list-item .f4 a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
