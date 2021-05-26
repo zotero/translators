@@ -151,9 +151,9 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/zotero",
 				"creators": [],
-				"date": "2019-08-29T02:15:36Z",
+				"date": "2021-05-25T16:50:57Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
-				"company": "zotero",
+				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
@@ -178,7 +178,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "datacite/schema",
 				"creators": [],
-				"date": "2019-08-16T13:21:08Z",
+				"date": "2021-05-25T20:33:01Z",
 				"abstractNote": "DataCite Metadata Schema Repository. Contribute to datacite/schema development by creating an account on GitHub.",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
@@ -206,7 +206,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2019-08-23T12:32:51Z",
+				"date": "2021-05-26T10:08:22Z",
 				"abstractNote": "OCR engine for all the languages. Contribute to mittagessen/kraken development by creating an account on GitHub.",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
@@ -250,7 +250,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2019-07-12T17:57:05Z",
+				"date": "2021-03-20T15:33:50Z",
 				"abstractNote": "Zotero extension for creating Zotero to CSL item type and field mappings.",
 				"extra": "original-date: 2012-05-20T07:53:58Z",
 				"libraryCatalog": "GitHub",
