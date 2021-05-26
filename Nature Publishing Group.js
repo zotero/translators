@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-09 19:57:52"
+	"lastUpdated": "2021-05-26 01:19:13"
 }
 
 /**
@@ -546,7 +546,7 @@ function scrape(doc, url) {
 			item = items[1];
 		}
 		else if (items[1]) {
-			var preferredRisFields = ['journalAbbreviation', 'date', 'abstractNote'];
+			var preferredRisFields = ['date', 'abstractNote'];
 			// palgrave-macmillan journals
 			if (!isNature(url)) {
 				preferredRisFields.push('publisher'); // all others are going to be dropped since we only handle journalArticle
@@ -673,7 +673,9 @@ function scrape(doc, url) {
 		if (item.journalAbbreviation && !item.publicationTitle) {
 			item.publicationTitle = 'Nature';// old articles mess this up
 		}
-		delete item.journalAbbreviation;
+		if (item.journalAbbreviation == item.publicationTitle) {
+			delete item.journalAbbreviation;
+		}
 		var hasPDF = false;
 		for (let attach of item.attachments) {
 			if (attach.mimeType && attach.mimeType == "application/pdf") {
@@ -2926,6 +2928,199 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/s41563-020-00871-7",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Evidence for a higher-order topological insulator in a three-dimensional material built from van der Waals stacking of bismuth-halide chains",
+				"creators": [
+					{
+						"firstName": "Ryo",
+						"lastName": "Noguchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masaru",
+						"lastName": "Kobayashi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zhanzhi",
+						"lastName": "Jiang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kenta",
+						"lastName": "Kuroda",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Takanari",
+						"lastName": "Takahashi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zifan",
+						"lastName": "Xu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Daehun",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Motoaki",
+						"lastName": "Hirayama",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Masayuki",
+						"lastName": "Ochi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tetsuroh",
+						"lastName": "Shirasawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peng",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chun",
+						"lastName": "Lin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cédric",
+						"lastName": "Bareille",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shunsuke",
+						"lastName": "Sakuragi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hiroaki",
+						"lastName": "Tanaka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "So",
+						"lastName": "Kunisada",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kifu",
+						"lastName": "Kurokawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Koichiro",
+						"lastName": "Yaji",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ayumi",
+						"lastName": "Harasawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Viktor",
+						"lastName": "Kandyba",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alessio",
+						"lastName": "Giampietri",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexei",
+						"lastName": "Barinov",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Timur K.",
+						"lastName": "Kim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Cephise",
+						"lastName": "Cacho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Makoto",
+						"lastName": "Hashimoto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Donghui",
+						"lastName": "Lu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shik",
+						"lastName": "Shin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ryotaro",
+						"lastName": "Arita",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Keji",
+						"lastName": "Lai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Takao",
+						"lastName": "Sasagawa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Takeshi",
+						"lastName": "Kondo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-04",
+				"DOI": "10.1038/s41563-020-00871-7",
+				"ISSN": "1476-4660",
+				"abstractNote": "Low-dimensional van der Waals materials have been extensively studied as a platform with which to generate quantum effects. Advancing this research, topological quantum materials with van der Waals structures are currently receiving a great deal of attention. Here, we use the concept of designing topological materials by the van der Waals stacking of quantum spin Hall insulators. Most interestingly, we find that a slight shift of inversion centre in the unit cell caused by a modification of stacking induces a transition from a trivial insulator to a higher-order topological insulator. Based on this, we present angle-resolved photoemission spectroscopy results showing that the real three-dimensional material Bi4Br4 is a higher-order topological insulator. Our demonstration that various topological states can be selected by stacking chains differently, combined with the advantages of van der Waals materials, offers a playground for engineering topologically non-trivial edge states towards future spintronics applications.",
+				"issue": "4",
+				"journalAbbreviation": "Nat. Mater.",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "473-479",
+				"publicationTitle": "Nature Materials",
+				"rights": "2021 The Author(s), under exclusive licence to Springer Nature Limited",
+				"url": "https://www.nature.com/articles/s41563-020-00871-7",
+				"volume": "20",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
