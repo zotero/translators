@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-07 19:10:18"
+	"lastUpdated": "2021-05-26 20:01:12"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 
 function detectWeb(doc, url) {
-	if (/\d{4}\/\d+\/\d+\/\d+\//.test(url)) {
+	if (/\d{4}\/\d+\/\d+\/\d+\//.test(url) || /\/[^/]+\/\d+\//.test(url)) {
 		return "blogPost";
 	} else if (/search\?q=|polygon\.com\/?($|news|reviews|features|guides|videos|movies|tv|comics|podcasts)\/?/.test(url) || getSearchResults(doc, true)) {
 		return "multiple";
@@ -53,6 +53,9 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) { // correct bad metadata in here
 		item.itemType = "blogPost";
+		if (!item.blogTitle) {
+			item.blogTitle = item.publicationTitle;
+		}
 		item.language = "en-US";
 		var authorMetadata = ZU.xpathText(doc, '//script[contains(text(), "dataLayer =")]');
 		if (authorMetadata) { // EM doesn't handle multiple authors, so start from scratch
@@ -122,6 +125,11 @@ var testCases = [
 						"firstName": "Michael",
 						"lastName": "McWhertor",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Arthur",
+						"lastName": "Gies",
+						"creatorType": "author"
 					}
 				],
 				"date": "2015-06-14T18:11:30-04:00",
@@ -131,7 +139,8 @@ var testCases = [
 				"url": "https://www.polygon.com/2015/6/14/8779193/earthbound-mother-famicom-wii-u-virtual-console-nintendo",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -161,7 +170,8 @@ var testCases = [
 				"url": "https://www.polygon.com/2013/11/11/5090912/sega-genesis-retrospective-book-turns-to-kickstarter-for-funding",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -211,7 +221,40 @@ var testCases = [
 				"url": "https://www.heroesneverdie.com/2018/7/2/17524654/overwatch-hammond-lore-controversy",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.polygon.com/interviews/22454722/black-panther-comics-ending-ta-nehisi-coates-interview",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "‘The miracle is Wakanda’: Ta-Nehisi Coates on ending Black Panther",
+				"creators": [
+					{
+						"firstName": "Evan",
+						"lastName": "Narcisse",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05-26T12:34:52-04:00",
+				"abstractNote": "The writer reflects on his half-decade Marvel run",
+				"blogTitle": "Polygon",
+				"language": "en-US",
+				"shortTitle": "‘The miracle is Wakanda’",
+				"url": "https://www.polygon.com/interviews/22454722/black-panther-comics-ending-ta-nehisi-coates-interview",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
