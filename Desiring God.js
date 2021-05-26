@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-01-31 21:10:52"
+	"lastUpdated": "2021-05-26 02:56:25"
 }
 
 /*
@@ -36,28 +36,31 @@
 
 
 var handlers = {
-	blogPost: (doc, item) => { return; },
+	blogPost: (_, __) => {},
 	interview: fetchAudio
-}
+};
 
 function detectWeb(doc, url) {
-	if (url.indexOf("search/results") != -1) {
+	if (url.includes("search/results")) {
 		return "multiple";
-	} else if (url.indexOf("articles") != -1) {
+	}
+	else if (url.includes("articles")) {
 		return "blogPost";
-	} else if (url.indexOf("interviews") != -1) {
+	}
+	else if (url.includes("interviews")) {
 		return "interview";
 	}
+	return false;
 }
 
 function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	switch (type) {
-		case "multiple":
-			let results = getSearchResults(doc, false)
-			if(results) {
+		case "multiple": {
+			let results = getSearchResults(doc, false);
+			if (results) {
 				Zotero.selectItems(results, function (selected) {
-					if (!selected) { return true; }
+					if (!selected) return;
 					var articles = [];
 
 					for (let i in selected) {
@@ -68,9 +71,10 @@ function doWeb(doc, url) {
 				});
 			}
 			break;
+		}
 		case "interview":
 		case "blogPost":
-			item = scrape(doc, url, type);
+			scrape(doc, url, type);
 			break;
 	}
 }
@@ -87,28 +91,28 @@ function scrape(doc, url, type) {
 		var authors = doc.querySelectorAll('.resource .resource__header #authors');
 
 		for (let author of authors) {
-			var name = ZU.cleanAuthor(text(author, ".resource__author span", 0), "author")
+			var name = ZU.cleanAuthor(text(author, ".resource__author span", 0), "author");
 			item.creators.push(name);
 		}
 
 		handlers[type](doc, item);
 		item.complete();
-	})
+	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
 
 function fetchAudio(doc, item) {
-	let downloadLinks = doc.querySelectorAll('.resource .media-menu__item--download ul li')
+	let downloadLinks = doc.querySelectorAll('.resource .media-menu__item--download ul li');
 
 	for (var link of downloadLinks) {
 		let linkUrl = attr(link, 'a', 'href');
-		if(linkUrl.endsWith('.mp3')) {
+		if (linkUrl.endsWith('.mp3')) {
 			item.attachments.push({
 				url: linkUrl,
-				title: "Recorded audio",
+				title: "Recorded Audio",
 				mimeType: "audio/mp3",
 				snapshot: false
 			});
@@ -134,6 +138,7 @@ function getSearchResults(doc, checkOnly) {
 
 	return found ? items : false;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -157,7 +162,8 @@ var testCases = [
 				"url": "https://www.desiringgod.org/articles/too-depressed-to-believe-what-we-know",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -181,16 +187,16 @@ var testCases = [
 					}
 				],
 				"date": "2011-05-25",
-				"abstractNote": "Get Justin's book, Rid of My Disgrace: Hope and Healing for Victims of Sexual Assault.",
 				"language": "en",
 				"libraryCatalog": "www.desiringgod.org",
 				"url": "https://www.desiringgod.org/interviews/discussion-with-justin-holcomb",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
-						"title": "Recorded audio",
+						"title": "Recorded Audio",
 						"mimeType": "audio/mp3",
 						"snapshot": false
 					}
