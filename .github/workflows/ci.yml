@@ -55,7 +55,9 @@ jobs:
       - name: Check deleted.txt
         run: ./checkDeletedTxt.sh
         working-directory: .ci
+        if: ${{ success() || failure() }}
       
       - name: Lint
         run: ./lint.sh
         working-directory: .ci
+        if: ${{ success() || failure() }}
