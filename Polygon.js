@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 20:01:12"
+	"lastUpdated": "2021-05-26 20:04:38"
 }
 
 /*
@@ -40,9 +40,11 @@
 function detectWeb(doc, url) {
 	if (/\d{4}\/\d+\/\d+\/\d+\//.test(url) || /\/[^/]+\/\d+\//.test(url)) {
 		return "blogPost";
-	} else if (/search\?q=|polygon\.com\/?($|news|reviews|features|guides|videos|movies|tv|comics|podcasts)\/?/.test(url) || getSearchResults(doc, true)) {
+	}
+	else if (/search\?q=|polygon\.com\/?($|news|reviews|features|guides|videos|movies|tv|comics|podcasts)\/?/.test(url) || getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -70,7 +72,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
@@ -80,7 +82,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('h2.c-entry-box--compact__title a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -97,7 +99,7 @@ function doWeb(doc, url) {
 		case "multiple":
 			Zotero.selectItems(getSearchResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
 				var articles = [];
 				for (var i in items) {
@@ -111,6 +113,7 @@ function doWeb(doc, url) {
 			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
