@@ -2,14 +2,14 @@
 	"translatorID": "a7747ba7-42c6-4a22-9415-1dafae6262a9",
 	"label": "GitHub",
 	"creator": "Martin Fenner, Philipp Zumstein",
-	"target": "^https?://(www\\.)?github\\.com/[^/]+/[^/]+/?$",
+	"target": "^https?://(www\\.)?github\\.com/[^/]+/[^/]+",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-29 10:16:28"
+	"lastUpdated": "2021-05-26 17:53:36"
 }
 
 /**
@@ -79,13 +79,24 @@ function doWeb(doc, url) {
 }
 
 
-function scrape(doc, _url) {
+function scrape(doc, url) {
 	var item = new Z.Item("computerProgram");
 	
 	var repo = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	
 	// basic metadata from the meta tags in the head
 	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
+	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
+		// github is doing something weird with the og:url meta tag right now -
+		// it always points to the repo root (e.g. zotero/translators), even
+		// when we're in a specific directory/file (e.g. zotero/translators/
+		// blob/master/GitHub.js). this fix (hopefully) won't stick around
+		// long-term, but for now, let's just grab the user-facing permalink
+		let permalink = attr(doc, '.js-permalink-shortcut', 'href');
+		if (permalink) {
+			item.url = 'https://' + doc.location.host + permalink;
+		}
+	}
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0];
 	item.libraryCatalog = "GitHub";
@@ -94,11 +105,6 @@ function scrape(doc, _url) {
 		item.tags.push(topics[i].textContent.trim());
 	}
 
-	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
-	if (item.rights && item.rights.trim() == "View license") {
-		delete item.rights;
-	}
-	
 	// api calls for more information (owner, date, programming language)
 	var apiUrl = "https://api.github.com/";
 	ZU.doGet(apiUrl + "repos/" + repo, function (result) {
@@ -114,7 +120,10 @@ function scrape(doc, _url) {
 		item.programmingLanguage = json.language;
 		item.extra = "original-date: " + json.created_at;
 		item.date = json.updated_at;
-		
+		if (json.license && json.license.spdx_id != "NOASSERTION") {
+			item.rights = json.license.spdx_id;
+		}
+
 		ZU.doGet(apiUrl + "users/" + owner, function (user) {
 			var jsonUser = JSON.parse(user);
 			var ownerName = jsonUser.name || jsonUser.login;
@@ -246,6 +255,28 @@ var testCases = [
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
 				"url": "https://github.com/aurimasv/z2csl",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/zotero/translators/blob/master/GitHub.js",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "zotero/translators",
+				"creators": [],
+				"date": "2021-05-26T17:17:38Z",
+				"abstractNote": "Zotero Translators. Contribute to zotero/translators development by creating an account on GitHub.",
+				"company": "Zotero",
+				"extra": "original-date: 2011-07-03T17:40:38Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"url": "https://github.com/zotero/translators/blob/a913f0c31c61770abe24b4726c76582db61a46e0/GitHub.js",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
