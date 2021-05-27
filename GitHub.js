@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-27 06:08:33"
+	"lastUpdated": "2021-05-27 15:22:04"
 }
 
 /**
@@ -94,7 +94,13 @@ function scrape(doc, url) {
 		// long-term, but for now, let's just grab the user-facing permalink
 		let permalink = attr(doc, '.js-permalink-shortcut', 'href');
 		if (permalink) {
-			item.url = 'https://' + doc.location.host + permalink;
+			item.url = 'https://github.com' + permalink;
+		}
+		else {
+			let clipboardCopyPermalink = attr(doc, '#blob-more-options-details clipboard-copy', 'value');
+			if (clipboardCopyPermalink) {
+				item.url = clipboardCopyPermalink;
+			}
 		}
 	}
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
