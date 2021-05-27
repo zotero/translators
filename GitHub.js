@@ -2,7 +2,6 @@
 	"translatorID": "a7747ba7-42c6-4a22-9415-1dafae6262a9",
 	"label": "GitHub",
 	"creator": "Martin Fenner, Philipp Zumstein",
-	"target": "^https?://(www\\.)?github\\.com/[^/]+/[^/]+",
 	"target": "^https?://(www\\.)?github\\.com/([^/]+/[^/]+|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -10,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 17:53:36"
+	"lastUpdated": "2021-05-27 06:08:33"
 }
 
 /**
@@ -99,7 +98,8 @@ function scrape(doc, url) {
 		}
 	}
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0];
+	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0]
+		.replace(` Contribute to ${repo} development by creating an account on GitHub.`, '');
 	item.libraryCatalog = "GitHub";
 	var topics = doc.getElementsByClassName('topic-tag');
 	for (var i = 0; i < topics.length; i++) {
@@ -124,6 +124,8 @@ function scrape(doc, url) {
 		if (json.license && json.license.spdx_id != "NOASSERTION") {
 			item.rights = json.license.spdx_id;
 		}
+		item.abstractNote = json.description;
+		// always the best source, so use it if we can get it
 
 		ZU.doGet(apiUrl + "users/" + owner, function (user) {
 			var jsonUser = JSON.parse(user);
@@ -179,7 +181,7 @@ var testCases = [
 				"title": "datacite/schema",
 				"creators": [],
 				"date": "2021-05-25T20:33:01Z",
-				"abstractNote": "DataCite Metadata Schema Repository. Contribute to datacite/schema development by creating an account on GitHub.",
+				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
@@ -207,7 +209,7 @@ var testCases = [
 					}
 				],
 				"date": "2021-05-26T10:08:22Z",
-				"abstractNote": "OCR engine for all the languages. Contribute to mittagessen/kraken development by creating an account on GitHub.",
+				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -271,13 +273,13 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/translators",
 				"creators": [],
-				"date": "2021-05-26T17:17:38Z",
-				"abstractNote": "Zotero Translators. Contribute to zotero/translators development by creating an account on GitHub.",
+				"date": "2021-05-27T00:08:19Z",
+				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
 				"extra": "original-date: 2011-07-03T17:40:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
-				"url": "https://github.com/zotero/translators/blob/a913f0c31c61770abe24b4726c76582db61a46e0/GitHub.js",
+				"url": "https://github.com/zotero/translators/blob/5de63ff6404fb439ac9c66ef26af057804b2e2fa/GitHub.js",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
