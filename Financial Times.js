@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-27 16:04:49"
+	"lastUpdated": "2021-05-27 16:17:23"
 }
 
 /*
@@ -88,18 +88,15 @@ function scrapeAmp(doc, url) {
 	
 	item.title = meta.headline;
 	item.date = ZU.strToISO(meta.datePublished);
-	// abstracts and authors usually won't show up in tests - they're rendered
-	// client-side and only the first author makes it into the JSON-LD.
-	// https://github.com/Financial-Times/next-json-ld#example-markup-on-article-page-behind-paywall-as-seen-by-google-bot
 	item.abstractNote = meta.description
-		|| text('.o-topper__standfirst');
+		|| text('.article-standfirst');
 	// something funky is going on with the JSON-LD authors, so we'll just
 	// parse from the HTML
 	item.creators = [...doc.querySelectorAll('a.article-author-byline__author')]
 		.map(link => ZU.cleanAuthor(link.innerText, 'author', false));
 	item.publicationTitle = 'Financial Times';
-	item.section = text('a[data-trackable="primary-brand"]')
-		|| text('a[data-trackable="primary-theme"]');
+	item.section = text('h2.primary-brand a')
+		|| text('h2.primary-theme a');
 	item.url = meta.mainEntityofPage;
 	item.libraryCatalog = '';
 	item.attachments.push({
