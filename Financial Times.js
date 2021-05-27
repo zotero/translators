@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-25 18:12:09"
+	"lastUpdated": "2021-05-27 16:04:49"
 }
 
 /*
@@ -49,7 +49,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.search-item a.js-teaser-heading-link[href*="/content/"]');
+	var rows = doc.querySelectorAll('a.js-teaser-heading-link');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -72,10 +72,17 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape(_doc, url) {
+	ZU.processDocuments(url.replace('www.ft.com/', 'amp.ft.com/'), scrapeAmp);
+}
+
+function scrapeAmp(doc, url) {
 	let item = new Zotero.Item('newspaperArticle');
-	let meta = JSON.parse(text('script[type="application/ld+json"]'));
-	if (meta['@type'] == 'WebSite') {
+	
+	let meta = [...doc.querySelectorAll('script[type="application/ld+json"]')]
+		.map(elem => JSON.parse(elem.textContent))
+		.find(json => json['@type'] != 'WebSite');
+	if (!meta) {
 		throw new Error("No article metadata (probably hit paywall)");
 	}
 	
@@ -88,14 +95,12 @@ function scrape(doc, url) {
 		|| text('.o-topper__standfirst');
 	// something funky is going on with the JSON-LD authors, so we'll just
 	// parse from the HTML
-	item.creators = [...doc.querySelectorAll('a[data-trackable="author"]')]
+	item.creators = [...doc.querySelectorAll('a.article-author-byline__author')]
 		.map(link => ZU.cleanAuthor(link.innerText, 'author', false));
-	if (meta.publisher) {
-		item.publicationTitle = meta.publisher.name;
-	}
+	item.publicationTitle = 'Financial Times';
 	item.section = text('a[data-trackable="primary-brand"]')
 		|| text('a[data-trackable="primary-theme"]');
-	item.url = url;
+	item.url = meta.mainEntityofPage;
 	item.libraryCatalog = '';
 	item.attachments.push({
 		title: "Snapshot",
@@ -115,8 +120,20 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Vonovia and Deutsche Wohnen to combine in €18bn real estate deal",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Olaf",
+						"lastName": "Storbeck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Erika",
+						"lastName": "Solomon",
+						"creatorType": "author"
+					}
+				],
 				"date": "2021-05-25",
+				"abstractNote": "Group will own more than 500,000 flats in Germany as well as property in Sweden and Austria",
 				"publicationTitle": "Financial Times",
 				"url": "https://www.ft.com/content/e57c04ba-c88a-4694-86b8-373c6393bf88",
 				"attachments": [
@@ -139,7 +156,13 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Coinbase wants to be “too big to fail”, lol",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Jemima",
+						"lastName": "Kelly",
+						"creatorType": "author"
+					}
+				],
 				"date": "2018-10-03",
 				"publicationTitle": "Financial Times",
 				"url": "https://www.ft.com/content/08b9f78f-9436-3d59-8c4a-05b67cc3b706",
