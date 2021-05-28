@@ -210,7 +210,7 @@ function getSearchResults(doc, url) {
 		}
 	}
 	else {
-		let papers = ZU.xpath(doc, '//section[@id="main"]//strong/a[@class="align-middle"]');
+		let papers = ZU.xpath(doc, '//section[@id="main"]//strong/a');
 		for (let paper of papers) {
 			items[paper.href] = paper.text;
 		}
