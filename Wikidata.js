@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-20 14:18:00"
+	"lastUpdated": "2021-06-03 02:33:07"
 }
 
 /*
@@ -52,7 +52,8 @@ var typeMapping = {
 	Q30070414: "dictionaryEntry",
 	Q49848: "document",
 	Q30070439: "email",
-	Q17329259: "encyclopediaArticle",
+	Q13433827: "encyclopediaArticle",
+	Q17329259: "encyclopediaArticle", // merged into Q13433827
 	Q11424: "film",
 	Q7216866: "forumPost",
 	Q30070550: "hearing",
@@ -656,6 +657,36 @@ var testCases = [
 				"seeAlso": [],
 				"extra": "QID: Q28294211",
 				"language": "English"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q15892061",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "Ancile",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Habel",
+						"creatorType": "author"
+					}
+				],
+				"date": "1894-01-01T00:00:00Z",
+				"encyclopediaTitle": "Pauly-Wissowa vol. I,2",
+				"extra": "QID: Q15892061",
+				"language": "German",
+				"libraryCatalog": "Wikidata",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "ancile"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
