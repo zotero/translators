@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-03 17:02:51"
+	"lastUpdated": "2021-05-31 17:58:07"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
-	Copyright © 2020 Bo An
+	Copyright © 2020-2021 Bo An
 	This file is part of Zotero.
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -30,30 +30,29 @@
 */
 
 
-
 function detectWeb(doc, url) {
 	const collection = "/collections/search/";
-	const artifact = "/collections/catalog/"
-	const isCollection = url.includes(collection)
-	const isArtifact = url.includes(artifact)
+	const artifact = "/collections/catalog/";
+	const isCollection = url.includes(collection);
+	const isArtifact = url.includes(artifact);
 	if (isCollection) {
 		return 'multiple';
 	}
 	else if (isArtifact) {
-	//todo it'd be better to use different items types according to item types in the collection, i.e. interview, video, audio etc, but for now 'book' has most fields needed.
+	// it'd be better to use different items types according to item types in the collection, i.e. interview, video, audio etc, but for now 'book' has most fields needed.
 		return 'book';
 	}
 	return false;
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) === "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), (items) => {
 			if (!items) {
 				return true;
 			}
-			var articles = [];
-			for (var i in items) {
+			const articles = [];
+			for (const i in items) {
 				articles.push(i);
 			}
 			ZU.processDocuments(articles, scrape);
@@ -83,7 +82,7 @@ function getSearchResults(doc, checkOnly) {
 	return found ? items : false;
 }
 
-function scrape(doc, url) {
+function scrape(doc, _) {
 	const fields = [...doc.querySelectorAll("div.field")];
 
 	let newItem = new Zotero.Item("book");
@@ -91,47 +90,46 @@ function scrape(doc, url) {
 
 	fields.forEach((nodeOriginal) => {
 		// clone the node to avoid altering the document.
-		const node = nodeOriginal.cloneNode(true)
-		const fieldTitleNode = node.querySelector("h4")
-		const fieldTitle = fieldTitleNode.textContent.trim()
-		switch(fieldTitle) {
+		const node = nodeOriginal.cloneNode(true);
+		const fieldTitleNode = node.querySelector("h4");
+		const fieldTitle = fieldTitleNode.textContent.trim();
+		switch (fieldTitle) {
 			case 'Title':
-				newItem.title = getContent(node, fieldTitle)
+				newItem.title = getContent(node, fieldTitle);
 				break;
 			case 'Date':
-				newItem.date = getContent(node, fieldTitle)
+				newItem.date = getContent(node, fieldTitle);
 				break;
 			case 'Participants':
 			case 'Contributor':
-				newItem.creators = getContributors(node)
+				newItem.creators = getContributors(node);
 				break;
 			case 'Publisher':
-				newItem.publisher = getContent(node, fieldTitle)
+				newItem.publisher = getContent(node, fieldTitle);
 				break;
 			case 'Place of Publication':
-				newItem.publisher += '; ' + getContent(node, fieldTitle)
+				newItem.place = getContent(node, fieldTitle);
 				break;
 			case 'Extent':
-				newItem.numPages = getContent(node, fieldTitle).replace(' p.', '')
+				newItem.numPages = getContent(node, fieldTitle).replace(' p.', '');
 				break;
 			case 'Lot Number':
-				newItem.archiveLocation = getContent(node, fieldTitle)
+				newItem.archiveLocation = getContent(node, fieldTitle);
 				break;
 			case 'Description':
-				newItem.abstractNote = insertToTheStartOfAbstract(getContent(node, fieldTitle), newItem.abstractNote)
+				newItem.abstractNote = insertToTheStartOfAbstract(getContent(node, fieldTitle), newItem.abstractNote);
 				break;
 			case 'Biographical Notes':
-				newItem.abstractNote = insertToTheEndOfAbstract(getContent(node, fieldTitle), newItem.abstractNote, fieldTitle)
-				break
+				newItem.abstractNote = insertToTheEndOfAbstract(getContent(node, fieldTitle), newItem.abstractNote, fieldTitle);
+				break;
 			case 'Copyright Holder':
-				newItem.rights = getContent(node, fieldTitle)
+				newItem.rights = getContent(node, fieldTitle);
 				break;
 			// the categories vary therefore many are collapsed under 'extra'.
 			case 'Type':
 			case 'Subject':
 			case 'Category':
 			case 'Collection Title':
-			case 'Copyright Holder':
 			case 'Dimensions':
 			case 'Credit':
 			case 'Place Manufactured':
@@ -143,141 +141,123 @@ function scrape(doc, url) {
 			case 'Platform':
 			case 'Catalog Number':
 				newItem.extra = addToExtra(newItem.extra, getContent(node, fieldTitle), fieldTitle);
-				break
-			// parsing identifying numbers with existing Zotero fields e.g. callNumber & ISBN
+				break;
+			// parsing identifying numbers with existing Zotero fields e.g. ISBN
 			case 'Identifying Numbers':
-				const numberDivs = node.querySelectorAll('tr')
-				numberDivs.forEach(div => {
-					const numberKey = div.querySelector('td.col1').textContent
-					const numberVal = div.querySelector('td.col2').textContent
-					switch(numberKey) {
+				node.querySelectorAll('tr').forEach((div) => {
+					const numberKey = div.querySelector('td.col1').textContent;
+					const numberVal = div.querySelector('td.col2').textContent;
+					switch (numberKey) {
 						case 'ISBN10':
-							newItem.ISBN = numberVal
-							break;
-						case 'LOC call num':
-							newItem.callNumber = numberVal
+							newItem.ISBN = numberVal;
 							break;
 						default:
-							newItem.extra = addToExtra(newItem.extra, numberVal, numberKey)
-							break
+							newItem.extra = addToExtra(newItem.extra, numberVal, numberKey);
+							break;
 					}
-
-				})
-				
-
+				});
 		}
-
 	});
 
 	// add pdf documents
-	let pdfPath = undefined;
 	const pdfDiv = doc.querySelectorAll('div.mediaDocument li a');
 	if (pdfDiv) {
-		pdfDiv.forEach((div, pdfIndex) => {
+		pdfDiv.forEach((div) => {
 			const fileName = div.textContent;
-			pdfPath = div.href
+			const pdfPath = div.href;
 			if (pdfPath) {
 				newItem.attachments.push({
 					url: pdfPath.replace('https', 'http'),
 					mimeType: "application/pdf",
-					title: `${ fileName ? fileName : newItem.title}`,
+					title: `${fileName ? fileName : newItem.title}`,
 				});
 			}
-		})
-
+		});
 	}
-	
+
 	// add audio recordings
-	let audioPath = undefined;
 	const audioDiv = doc.querySelectorAll('div.mediaAudio li a');
 	if (audioDiv) {
-		audioDiv.forEach((div, audioIndex) => {
-			audioPath = div.href
+		audioDiv.forEach((div) => {
+			const audioPath = div.href;
 			const fileName = div.textContent;
 			if (audioPath) {
 				newItem.attachments.push({
 					url: audioPath.replace('https', 'http'),
 					mimeType: "audio/mpeg",
-					title: `${ fileName ? fileName : newItem.title }`
+					title: `${fileName ? fileName : newItem.title}`
 				});
 			}
-		})
-
+		});
 	}
 
 	// add object images
-	let imagePath = undefined;
 	const imageDiv = doc.querySelectorAll('div.mediarow a.media-large img');
 	if (imageDiv) {
-
-		imageDiv.forEach((div, imageIndex) => {
-			imagePath = div.src
+		imageDiv.forEach((div) => {
+			const imagePath = div.src;
 			const fileName = div.textContent;
 			if (imagePath) {
 				newItem.attachments.push({
 					url: imagePath,
-					title: `${ fileName ? fileName : newItem.title }`,
+					title: `${fileName ? fileName : newItem.title}`,
 					mimeType: 'image/png'
 				});
 			}
-		})
-
+		});
 	}
 
 	// add video links
-	let videoPath = undefined;
-	const videoDivs = doc.querySelectorAll('div.mediaVideo iframe')
+	const videoDivs = doc.querySelectorAll('div.mediaVideo iframe');
 	if (videoDivs) {
-		videoDivs.forEach((div, videoIndex) => {
-			videoPath = div.src
+		videoDivs.forEach((div) => {
+			const videoPath = div.src;
 			const fileName = div.textContent;
 			if (videoPath) {
 				newItem.attachments.push({
 					url: videoPath,
-					title: `${ fileName ? fileName : newItem.title }`,
+					title: `${fileName ? fileName : newItem.title}`,
 					snapshot: false
 				});
 			}
-		})
-
+		});
 	}
-
-	newItem.complete()
+	newItem.complete();
 }
 
 
 // helper functions
 function insertToTheStartOfAbstract(insert, abstract, fieldTitle) {
-	const abstractContent = ( fieldTitle !== undefined ? fieldTitle + ': ' : '' ) + insert + '\n' + (abstract ? abstract : '')
-	return abstractContent  ? abstractContent : ''
+	const abstractContent = (fieldTitle !== undefined ? fieldTitle + ': ' : '') + insert + '\n' + (abstract ? abstract : '');
+	return abstractContent ? abstractContent : '';
 }
 
 function insertToTheEndOfAbstract(insert, abstract, fieldTitle) {
-	const abstractContent = (abstract ? abstract + '\n' : '') + ( fieldTitle !== undefined ? fieldTitle + ': ' : '' ) + insert
-	return abstractContent  ? abstractContent : ''
+	const abstractContent = (abstract ? abstract + '\n' : '') + (fieldTitle !== undefined ? fieldTitle + ': ' : '') + insert;
+	return abstractContent ? abstractContent : '';
 }
 
 function getContent(node, fieldTitle) {
-	const content = node.textContent.replace(fieldTitle, '').trim()
-	return content ? content : ''
+	const content = node.textContent.replace(fieldTitle, '').trim();
+	return content ? content : '';
 }
 function addToExtra(oldExtra, newContent, fieldTitle) {
-	return (oldExtra ? oldExtra + '\n' : '') + fieldTitle + ': ' + newContent.replace(/  /g, '').replace(/\n\n/g, '').replace('\n', ': ')
+	return (oldExtra ? oldExtra + '\n' : '') + fieldTitle + ': ' + newContent.replace(/ {2}/g, '').replace(/\n\n/g, '').replace('\n', ': ');
 }
 
 function getContributors(node) {
-	let contributors = []
-	const people = node.querySelectorAll('td')
-	people.forEach(personDiv => {
-		const spans = personDiv.querySelectorAll('span')
-		const name = spans[0].textContent
-		const [lastName, firstName] = name.split(', ')
+	let contributors = [];
+	const people = node.querySelectorAll('td');
+	people.forEach((personDiv) => {
+		const spans = personDiv.querySelectorAll('span');
+		const name = spans[0].textContent;
+		const [lastName, firstName] = name.split(', ');
 		contributors.push({
 			firstName,
 			lastName,
 			creatorType: "contributor"
-		})
-	})
+		});
+	});
 	return contributors;
 }
 
@@ -315,7 +295,8 @@ var testCases = [
 				"extra": "Catalog Number: 102658053\nType: Document\nCategory: Transcription\nSubject: Fellow Award Honoree; Knuth, Donald; IBM 650 (Computer); Combinatorial analysis--Data processing; Combinatorics; Analysis of algorithms; The Art of Computer Programming; Stanford University; TeX; METAFONT; Religion; Literate programming\nCollection Title: Oral history collection",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "73",
-				"publisher": "Computer History Museum; Mountain View, California",
+				"place": "Mountain View, California",
+				"publisher": "Computer History Museum",
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
@@ -343,7 +324,8 @@ var testCases = [
 				"extra": "Catalog Number: 102646282\nType: Document\nOther number: 520-1368\nDimensions: 9 5/8 x 7 6/8 in.\nCategory: Promotional Material\nSubject: 1401 data processing system (Computer); promotional materials; Digital computer: mainframe; 1401 programming systems (Software); COBOL (Software); Business applications; Scientific applications; Software; Digital communications--Social aspects; International Business Machines Corporation (IBM). Data Processing Division",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "6",
-				"publisher": "International Business Machines Corporation. Data Processing Division. (IBM); U.S.",
+				"place": "U.S.",
+				"publisher": "International Business Machines Corporation. Data Processing Division. (IBM)",
 				"rights": "International Business Machines Corporation (IBM). Data Processing Division",
 				"attachments": [
 					{
@@ -374,11 +356,11 @@ var testCases = [
 				"abstractNote": "Second edition.  Signed by McCracken on title page.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3682.2007",
-				"callNumber": "QA76.73.F25 M3 1972",
-				"extra": "Catalog Number: 102623002\nType: Document\nLCCN: 72-4745\nDimensions: 28 cm.\nCategory: Book",
+				"extra": "Catalog Number: 102623002\nType: Document\nLCCN: 72-4745\nLOC call num: QA76.73.F25 M3 1972\nDimensions: 28 cm.\nCategory: Book",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "288",
-				"publisher": "John Wiley & Sons; New York",
+				"place": "New York",
+				"publisher": "John Wiley & Sons",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -513,7 +495,8 @@ var testCases = [
 				"extra": "Catalog Number: 102738167\nType: Document\nFormat: PDF\nCategory: Transcription\nSubject: silicon wafers; Silicon on Insulator; SOI; Dash-necking; Voronkov; SIMOX; Hokkaido University\nCollection Title: CHM oral history collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "24",
-				"publisher": "Computer History Museum; Tokyo, Japan",
+				"place": "Tokyo, Japan",
+				"publisher": "Computer History Museum",
 				"attachments": [
 					{
 						"mimeType": "application/pdf",
@@ -567,7 +550,8 @@ var testCases = [
 				"extra": "Catalog Number: 102746874\nType: Document\nCategory: Transcription\nSubject: Xbox; Xbox 360; Xbox One; Sony Corporation; Microsoft Corporation; Playstation; Windows; International Business Machines Corporation (IBM); ATI Technologies Inc.; Central Processing Unit (CPU); Graphics Processing Unit (GPU); Nvidia Corporation; Media Center PC (personal computer); Halo; Kinect; Performance Optimization With Enhanced RISC--Performance Computing (PowerPC); Flextronics; Wistron; Allard, J; Bach, Robbie\nCollection Title: Oral history collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "27",
-				"publisher": "Computer History Museum; Mountain View, California",
+				"place": "Mountain View, California",
+				"publisher": "Computer History Museum",
 				"rights": "Computer History Museum",
 				"attachments": [
 					{
@@ -611,7 +595,8 @@ var testCases = [
 				"archiveLocation": "X8201.2017",
 				"extra": "Catalog Number: 102738261\nType: Moving image\nFormat: MOV\nCategory: Oral history\nSubject: ITRI; Apple; iPhone; Camera\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
-				"publisher": "Computer History Museum; Mountain View, CA",
+				"place": "Mountain View, CA",
+				"publisher": "Computer History Museum",
 				"attachments": [
 					{
 						"title": "Su, Stephen oral history",
@@ -681,7 +666,8 @@ var testCases = [
 				"archiveLocation": "X7447.2015",
 				"extra": "Catalog Number: 102740039\nType: Moving image\nDuration: 01:31:00\nFormat: MOV\nCategory: Oral history\nSubject: Kramlich, C. Richard; Venture Capital; Rock, Arthur; New Enterprise Associates (NEA); Software; software industry; Graphics; Networking; personal computers (PCs); 3Com; Apple; Forethought, Inc.; PowerPoint; Silicon Graphics; Video Art\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
-				"publisher": "Computer History Museum; Mountain View, California",
+				"place": "Mountain View, California",
+				"publisher": "Computer History Museum",
 				"rights": "Computer History Museum",
 				"attachments": [
 					{
@@ -714,7 +700,8 @@ var testCases = [
 				"archive": "Computer History Museum",
 				"extra": "Catalog Number: 102645840\nType: Moving Image\nOther number: COMPAQ 0248880\nOther number: VIDEO SCF 01\nPlatform: NTSC VHS VCR\nFormat: VHS\nCategory: Lecture\nSeries Title: Stanford Computer Forum Distinguished Lecture Series",
 				"libraryCatalog": "Computer History Museum Archive",
-				"publisher": "Stanford University. Stanford Computer Forum; Palo Alto, CA, US",
+				"place": "Palo Alto, CA, US",
+				"publisher": "Stanford University. Stanford Computer Forum",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -736,7 +723,8 @@ var testCases = [
 				"archiveLocation": "X2595.2004",
 				"extra": "Catalog Number: 102706809\nType: Audio\nOther number: camvchm_000022\nOther number: Tape #8\nFormat: Standard audio cassette\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
 				"libraryCatalog": "Computer History Museum Archive",
-				"publisher": "Butterfly Media Dimensions; San Francisco, CA",
+				"place": "San Francisco, CA",
+				"publisher": "Butterfly Media Dimensions",
 				"attachments": [
 					{
 						"mimeType": "audio/mpeg",
