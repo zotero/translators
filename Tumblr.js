@@ -2,14 +2,14 @@
 	"translatorID": "552cdac3-f130-4763-a88e-8e74b92dcb1b",
 	"label": "Tumblr",
 	"creator": "febrezo",
-	"target": "^https?://.+\\.tumblr\\.com/",
+	"target": "^https?://[^/]+\\.tumblr\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-16 23:30:13"
+	"lastUpdated": "2021-06-01 23:04:10"
 }
 
 /*
@@ -32,14 +32,46 @@
 
 
 function detectWeb(doc, url) {
-	var urlParts = url.split('/');
-	if (urlParts.length <= 4) {
-		return "webpage";
+	if (url.match(/^https?:\/\/www\./)) {
+		// only try to translate subdomain blogs
+		return false;
 	}
-	return "blogPost";
+	if (url.includes('/post/')) {
+		return "blogPost";
+	}
+	if (url.includes('/search/') && getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	return "webpage";
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('#posts article');
+	for (let row of rows) {
+		let href = row.querySelector('a.post-notes').href;
+		let title = ZU.trimInternal(text(row, '.body-text p') || text(row, 'a.tag-link'));
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	var resourceType = detectWeb(doc, url);
 	// Creating the item
 	var newItem = new Zotero.Item(resourceType);
@@ -64,7 +96,7 @@ function doWeb(doc, url) {
 	if (tmpAuthor) {
 		newItem.creators.push({ lastName: tmpAuthor, creatorType: "author", fieldMode: 1 });
 	}
-	newItem.websiteType = "Blogging (Tumblr)";
+	newItem.websiteType = "Tumblr";
 	newItem.url = url;
 	
 	// Adding the attachment
@@ -75,7 +107,9 @@ function doWeb(doc, url) {
 	});
 	
 	newItem.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -91,10 +125,10 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2017-11",
+				"date": "2017-11-19",
 				"blogTitle": "Blog de Programacion y Tecnologia",
 				"url": "https://blogdeprogramacion.tumblr.com/post/167688373297/c%C3%B3mo-integrar-opencv-y-python-en-windows",
-				"websiteType": "Blogging (Tumblr)",
+				"websiteType": "Tumblr",
 				"attachments": [
 					{
 						"title": "Tumblr Snapshot",
@@ -123,7 +157,7 @@ var testCases = [
 				],
 				"url": "https://blogdeprogramacion.tumblr.com/",
 				"websiteTitle": "Blog de programacion, tecnologia, electronica, tutoriales, informatica y sistemas computacionales.",
-				"websiteType": "Blogging (Tumblr)",
+				"websiteType": "Tumblr",
 				"attachments": [
 					{
 						"title": "Tumblr Snapshot",
@@ -135,6 +169,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://montereybayaquarium.tumblr.com/search/turtle",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
