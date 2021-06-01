@@ -9,25 +9,14 @@
 	"inRepository": true,
 	"translatorType": 6,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2015-06-04 03:25:10"
+	"lastUpdated": "2021-06-01 17:17:55"
 }
 
 function detectWeb(doc, url) {
-	var spanTags = doc.getElementsByTagName("span");
-
 	var encounteredType = false;
 	
-	// This and the x: prefix in the XPath are to work around an issue with pages
-	// served as application/xhtml+xml
-	//
-	// https://developer.mozilla.org/en/Introduction_to_using_XPath_in_JavaScript#Implementing_a_default_namespace_for_XML_documents
-	function nsResolver() {
-		return 'http://www.w3.org/1999/xhtml';
-	}
-	
-	var spans = doc.evaluate('//x:span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var span;
-	while (span = spans.iterateNext()) {
+	var spans = doc.querySelectorAll('span.Z3988[title]');
+	for (let span of spans) {
 		// determine if it's a valid type
 		var item = new Zotero.Item;
 		var success = Zotero.Utilities.parseContextObject(span.title, item);
@@ -190,16 +179,9 @@ function doWeb(doc, url) {
 	var newItems = new Array();
 	var needFullItems = new Array();
 	var couldUseFullItems = new Array();
-	
-	
-	// See note in detectWeb()
-	function nsResolver() {
-		return 'http://www.w3.org/1999/xhtml';
-	}
-	
-	var spans = doc.evaluate('//x:span[contains(@class, " Z3988") or contains(@class, "Z3988 ") or @class="Z3988"][@title]', doc, nsResolver, XPathResult.ANY_TYPE, null);
-	var span;
-	while (span = spans.iterateNext()) {
+
+	var spans = doc.querySelectorAll('span.Z3988[title]');
+	for (let span of spans) {
 		var spanTitle = span.title;
 		var newItem = new Zotero.Item();
 		newItem.repository = false;	// do not save repository
