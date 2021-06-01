@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-01 18:22:07"
+	"lastUpdated": "2021-06-01 22:28:52"
 }
 
 /*
@@ -70,11 +70,10 @@ function doWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('#content > div.m-l-r--05-xs > div > div > div:nth-child(5) > div:nth-child(3) > div');
-	var links = doc.querySelectorAll('#content > div.m-l-r--05-xs > div > div > div:nth-child(5) > div:nth-child(3) > div > div > div.box-content > span > div:nth-child(49) > div.col-md-3.col-sm-12 > a');
-	for (let i = 0; i < rows.length; i++) {
+	var links = doc.querySelectorAll('.media-heading a');
+	for (let i = 0; i < links.length; i++) {
 		let href = links[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+		let title = ZU.trimInternal(links[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
