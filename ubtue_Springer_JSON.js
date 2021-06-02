@@ -89,12 +89,12 @@ function doImport() {
 						"firstName": firstName,
 						"creatorType": "author"
 						});
-				
+
 		}
 	}
 
 	item.publisher = data.publisher;
-	item.issn = data.issn ? data.issn : "";
+	item.ISSN = data.issn ? data.issn : "";
 	item.abstractNote = data.abstract ? data.abstract : "";
 
     if (data.keyword && data.keyword.length) {
@@ -105,14 +105,16 @@ function doImport() {
 
     item.volume = data.volume ? data.volume : "";
     item.issue = data.number ? data.number : "";
-    
+
     item.pages = data.startingPage ? data.startingPage : "";
     item.pages = item.pages + (data.endingPage ? '-' + data.endingPage : '-');
 
 	item.DOI = data.doi;
 	for (let url of data.url) {
 		if (url.format == "pdf" || url.format=="html")
-		item.notes.push({"url": url.value});
+            item.notes.push({"url": url.value});
+        else
+            item.url = url.value;
 	}
 
 	item.complete();
