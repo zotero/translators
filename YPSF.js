@@ -39,10 +39,11 @@
 function detectWeb(doc, url) {
 	if (url.includes('/library/')) {
 		return 'document';
-
-	} else if (url.endsWith('.edu') || url.endsWith('.edu/') || url.includes('admin/content')) {
+	}
+	else if (url.endsWith('.edu') || url.endsWith('.edu/') || url.includes('admin/content')) {
 		return 'multiple';
 	}
+	return false;
 }
 
 
@@ -165,7 +166,7 @@ function getLocale(lang) {
 		Swedish: 'sv',
 		Thai: 'th',
 		Turkish: 'tr',
-	}[lang];
+	}[lang] || lang;
 }
 
 /** BEGIN TEST CASES **/
