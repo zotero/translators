@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-31 17:58:07"
+	"lastUpdated": "2021-06-03 07:22:52"
 }
 
 /*
@@ -39,8 +39,7 @@ function detectWeb(doc, url) {
 		return 'multiple';
 	}
 	else if (isArtifact) {
-	// it'd be better to use different items types according to item types in the collection, i.e. interview, video, audio etc, but for now 'book' has most fields needed.
-		return 'book';
+		return getZoteroItemType(doc);
 	}
 	return false;
 }
@@ -83,14 +82,13 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function scrape(doc, _) {
-	const fields = [...doc.querySelectorAll("div.field")];
+	const zoteroItemType = getZoteroItemType(doc);
 
-	let newItem = new Zotero.Item("book");
-	newItem.archive = 'Computer History Museum';
+	let newItem = new Zotero.Item(zoteroItemType);
 
-	fields.forEach((nodeOriginal) => {
-		// clone the node to avoid altering the document.
-		const node = nodeOriginal.cloneNode(true);
+	const nodes = getFieldNodes(doc);
+
+	nodes.forEach((node) => {
 		const fieldTitleNode = node.querySelector("h4");
 		const fieldTitle = fieldTitleNode.textContent.trim();
 		switch (fieldTitle) {
@@ -105,7 +103,12 @@ function scrape(doc, _) {
 				newItem.creators = getContributors(node);
 				break;
 			case 'Publisher':
-				newItem.publisher = getContent(node, fieldTitle);
+				if (newItem.itemType == 'artwork') {
+					newItem.rights = getContent(node, fieldTitle);
+				}
+				else {
+					newItem.publisher = getContent(node, fieldTitle);
+				}
 				break;
 			case 'Place of Publication':
 				newItem.place = getContent(node, fieldTitle);
@@ -125,8 +128,13 @@ function scrape(doc, _) {
 			case 'Copyright Holder':
 				newItem.rights = getContent(node, fieldTitle);
 				break;
-			// the categories vary therefore many are collapsed under 'extra'.
-			case 'Type':
+			// other archival and / or meta info that go into extra.
+			case 'Format':
+				if (newItem.itemType == 'videoRecording') {
+					// note that format field for Video Recording type is not displayed in scaffold.
+					newItem.format = getContent(node, fieldTitle);
+					break;
+				}
 			case 'Subject':
 			case 'Category':
 			case 'Collection Title':
@@ -135,10 +143,10 @@ function scrape(doc, _) {
 			case 'Place Manufactured':
 			case 'Manufacturer':
 			case 'System Requirements':
-			case 'Format':
 			case 'Series Title':
 			case 'Duration':
 			case 'Platform':
+			// the categories vary therefore many are collapsed under 'extra'.
 			case 'Catalog Number':
 				newItem.extra = addToExtra(newItem.extra, getContent(node, fieldTitle), fieldTitle);
 				break;
@@ -222,9 +230,53 @@ function scrape(doc, _) {
 			}
 		});
 	}
+
+	newItem.archive = 'Computer History Museum';
+
 	newItem.complete();
 }
 
+// get field nodes containing item information from html doc.
+function getFieldNodes(doc) {
+	const fields = [...doc.querySelectorAll("div.field")];
+
+	// clone the node to avoid altering the document.
+	return fields.map(nodeOriginal => nodeOriginal.cloneNode(true));
+}
+
+// get the corresponding types. CHM Still Image = Zotero Artwork; CHM Moving Image = Zotero Video Recording; CHM Software = Zotero Computer Program. Other CHM types are all "books".
+function getZoteroItemType(doc) {
+	let type = 'book';
+
+	const nodes = getFieldNodes(doc);
+
+	nodes.forEach((node) => {
+		const fieldTitleNode = node.querySelector("h4");
+		const fieldTitle = fieldTitleNode.textContent.trim();
+		if (fieldTitle == 'Type') {
+			let chmItemType = getContent(node, fieldTitle);
+			
+			chmItemType = chmItemType.toLowerCase();
+
+			switch (chmItemType) {
+				case 'moving image':
+					type = "videoRecording";
+					break;
+				case 'software':
+					type = "computerProgram";
+					break;
+				case 'still image':
+					type = 'artwork';
+					break;
+				default:
+					type = 'book';
+			}
+		}
+		return type;
+	});
+
+	return type;
+}
 
 // helper functions
 function insertToTheStartOfAbstract(insert, abstract, fieldTitle) {
@@ -292,7 +344,7 @@ var testCases = [
 				"abstractNote": "In this wide-ranging interview conducted by Edward Feigenbaum, Donald Knuth talks about the progression of his life and career.  Topics include his family background and early interest in music, physics and mathematics, his first exposure to programming,  finding a mentor, and writing a doctoral thesis.   He describes how \"The Art of Computer Programming\" became \"the story of my life\", and why it was put on hold for the TeX and METAFONT projects.  He also talks about personal work habits, programming style, analysis of algorithms, the influence of religion in his life, and his advice to the next generation of scientists.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3926.2007",
-				"extra": "Catalog Number: 102658053\nType: Document\nCategory: Transcription\nSubject: Fellow Award Honoree; Knuth, Donald; IBM 650 (Computer); Combinatorial analysis--Data processing; Combinatorics; Analysis of algorithms; The Art of Computer Programming; Stanford University; TeX; METAFONT; Religion; Literate programming\nCollection Title: Oral history collection",
+				"extra": "Catalog Number: 102658053\nCategory: Transcription\nSubject: Fellow Award Honoree; Knuth, Donald; IBM 650 (Computer); Combinatorial analysis--Data processing; Combinatorics; Analysis of algorithms; The Art of Computer Programming; Stanford University; TeX; METAFONT; Religion; Literate programming\nCollection Title: Oral history collection",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "73",
 				"place": "Mountain View, California",
@@ -321,7 +373,7 @@ var testCases = [
 				"abstractNote": "The brochure explains the IBM 1401 programming languages and their application to the 1401 data processing system. The brochure is printed in black, white, and blue. The front cover shows the words Programming and Systems in a repetitive design with the name Donald G. McBrien stamped in the upper right corner. The back cover shows the company logo on a blue background. Throughout the inside pages are black and white photographs of the computer and images of reports generated by the system. Text contents include: What is a 1401 program?; What is a stored program machine?; What are 1401 programming systems?; What 1401 programming systems mean to management?; IBM programming systems; Here's how one of the 1401 programming systems -- Report Program Generator -- works to increase programming efficiency; New IBM services include:; Other services available to every IBM customer.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3067.2005",
-				"extra": "Catalog Number: 102646282\nType: Document\nOther number: 520-1368\nDimensions: 9 5/8 x 7 6/8 in.\nCategory: Promotional Material\nSubject: 1401 data processing system (Computer); promotional materials; Digital computer: mainframe; 1401 programming systems (Software); COBOL (Software); Business applications; Scientific applications; Software; Digital communications--Social aspects; International Business Machines Corporation (IBM). Data Processing Division",
+				"extra": "Catalog Number: 102646282\nOther number: 520-1368\nDimensions: 9 5/8 x 7 6/8 in.\nCategory: Promotional Material\nSubject: 1401 data processing system (Computer); promotional materials; Digital computer: mainframe; 1401 programming systems (Software); COBOL (Software); Business applications; Scientific applications; Software; Digital communications--Social aspects; International Business Machines Corporation (IBM). Data Processing Division",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "6",
 				"place": "U.S.",
@@ -356,7 +408,7 @@ var testCases = [
 				"abstractNote": "Second edition.  Signed by McCracken on title page.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X3682.2007",
-				"extra": "Catalog Number: 102623002\nType: Document\nLCCN: 72-4745\nLOC call num: QA76.73.F25 M3 1972\nDimensions: 28 cm.\nCategory: Book",
+				"extra": "Catalog Number: 102623002\nLCCN: 72-4745\nLOC call num: QA76.73.F25 M3 1972\nDimensions: 28 cm.\nCategory: Book",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "288",
 				"place": "New York",
@@ -380,7 +432,7 @@ var testCases = [
 				"abstractNote": "PDF scan of the poster for the Logic Programming Workshop '83 in Algarve Portugal, June 26 - July 1, 1983.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X9292.2020",
-				"extra": "Catalog Number: 102790985\nType: Document\nCategory: Promotional Material",
+				"extra": "Catalog Number: 102790985\nCategory: Promotional Material",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "1; 0.0004 GB",
 				"attachments": [
@@ -405,7 +457,7 @@ var testCases = [
 				"creators": [],
 				"archive": "Computer History Museum",
 				"archiveLocation": "X4248.2008",
-				"extra": "Catalog Number: 102620354\nType: Document\nProgram ID number: 10.1.009\nCategory: Manual\nCollection Title: 1620 Restoration Project Collection\nCredit: Gift of John Maniotes",
+				"extra": "Catalog Number: 102620354\nProgram ID number: 10.1.009\nCategory: Manual\nCollection Title: 1620 Restoration Project Collection\nCredit: Gift of John Maniotes",
 				"libraryCatalog": "Computer History Museum Archive",
 				"publisher": "International Business Machines Corporation (IBM)",
 				"attachments": [],
@@ -426,7 +478,7 @@ var testCases = [
 				"abstractNote": "The object is a series of cardboard punch cards connected by string. The cards are hand numbered sequentially from 6 to 44.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X8070.2017",
-				"extra": "Catalog Number: 102765924\nType: Physical Object\nDimensions: folded for storage: 2 1/2 in x 9 1/4 in x 5 in; unfolded: 1/8 in x 9 1/4 in x 97 1/2 in\nCategory: I/O/punched card device\nCredit: Gift of the Museum of American Heritage",
+				"extra": "Catalog Number: 102765924\nDimensions: folded for storage: 2 1/2 in x 9 1/4 in x 5 in; unfolded: 1/8 in x 9 1/4 in x 97 1/2 in\nCategory: I/O/punched card device\nCredit: Gift of the Museum of American Heritage",
 				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
@@ -451,7 +503,7 @@ var testCases = [
 				"date": "1956",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X5121.2009",
-				"extra": "Catalog Number: 102701957\nType: Physical object\nManufacturer: RCA Corporation\nDimensions: overall: 2 in x 10 in x 11 1/2 in\nCategory: Ephemera/other",
+				"extra": "Catalog Number: 102701957\nManufacturer: RCA Corporation\nDimensions: overall: 2 in x 10 in x 11 1/2 in\nCategory: Ephemera/other",
 				"libraryCatalog": "Computer History Museum Archive",
 				"attachments": [
 					{
@@ -492,7 +544,7 @@ var testCases = [
 				"abstractNote": "Mr. Abe was born in 1936 in Otaru, on Hokkaido, the northern island of Japan. He attended Hokkaido University, majoring in physics. He was recruited by a previous graduate of the same university to come to Tokyo and work for Shin-Etsu Handotai. The year was 1964. Abe requested a job in basic research, but the company needed help in growing crystalline silicon for use in semiconductors. \n\nAbe was given the job to improve the quality of the silicon ingots. He traveled to Bell Labs and to Siemens, as Siemens was the source of their crystal growing equipment. During the interview, Abe describes the ups and downs of the industry and his substantial contributions to the quality of silicon wafers.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7645.2016",
-				"extra": "Catalog Number: 102738167\nType: Document\nFormat: PDF\nCategory: Transcription\nSubject: silicon wafers; Silicon on Insulator; SOI; Dash-necking; Voronkov; SIMOX; Hokkaido University\nCollection Title: CHM oral history collection\nCredit: Computer History Museum",
+				"extra": "Catalog Number: 102738167\nFormat: PDF\nCategory: Transcription\nSubject: silicon wafers; Silicon on Insulator; SOI; Dash-necking; Voronkov; SIMOX; Hokkaido University\nCollection Title: CHM oral history collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "24",
 				"place": "Tokyo, Japan",
@@ -547,7 +599,7 @@ var testCases = [
 				"abstractNote": "Three key members of the original Microsoft Xbox team come together in this oral history to discuss the early development of Xbox and Xbox 360, two of the most significant game consoles in computer history. Architect Nick Baker, head of hardware Todd Holmdahl, and marketing lead Albert Penello cover the early development years of the original Xbox and their attempt to gain a foothold in the highly competitive game console market. They then continue with the history of the Xbox 360 console, the successor to the original, and the changing nature of the video game business during that period that allowed for innovations such as live, interconnected play over a network and the Kinect input capture device. Strategic, technical, and marketing aspects of this history are discussed, as are visions for the future of gaming.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7120.2014",
-				"extra": "Catalog Number: 102746874\nType: Document\nCategory: Transcription\nSubject: Xbox; Xbox 360; Xbox One; Sony Corporation; Microsoft Corporation; Playstation; Windows; International Business Machines Corporation (IBM); ATI Technologies Inc.; Central Processing Unit (CPU); Graphics Processing Unit (GPU); Nvidia Corporation; Media Center PC (personal computer); Halo; Kinect; Performance Optimization With Enhanced RISC--Performance Computing (PowerPC); Flextronics; Wistron; Allard, J; Bach, Robbie\nCollection Title: Oral history collection\nCredit: Computer History Museum",
+				"extra": "Catalog Number: 102746874\nCategory: Transcription\nSubject: Xbox; Xbox 360; Xbox One; Sony Corporation; Microsoft Corporation; Playstation; Windows; International Business Machines Corporation (IBM); ATI Technologies Inc.; Central Processing Unit (CPU); Graphics Processing Unit (GPU); Nvidia Corporation; Media Center PC (personal computer); Halo; Kinect; Performance Optimization With Enhanced RISC--Performance Computing (PowerPC); Flextronics; Wistron; Allard, J; Bach, Robbie\nCollection Title: Oral history collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"numPages": "27",
 				"place": "Mountain View, California",
@@ -575,7 +627,7 @@ var testCases = [
 		"url": "https://www.computerhistory.org/collections/catalog/102738261",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "videoRecording",
 				"title": "Su, Stephen oral history",
 				"creators": [
 					{
@@ -593,10 +645,10 @@ var testCases = [
 				"abstractNote": "Stephen Su grew up on Taiwan, but in 1980 he came to the US to attend high school and college, including studying semiconductors at Caltech. He worked for Motorola for a period of time before returning to school in 1992 to get an MBA from Kellog. Upon graduation, he joined Boston Consulting Group and went to Hong Kong on a consulting assignment. \nIn 1998, Stephen returned to Taiwan, working for Primax.  While there he spent several years managing the Mobile Accessories group, responsible for developing accessories for mobile phone makers like Nokia and Apple.  In particular, he was responsible for developing the camera module for several generations of Apple’s iPhone. He tells many interesting stories about working with Apple on this very important program. \nIn 2009, he was recruited to join ITRI, where he is involved with helping steer Taiwan into lucrative new markets through careful investments in promising new technologies.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X8201.2017",
-				"extra": "Catalog Number: 102738261\nType: Moving image\nFormat: MOV\nCategory: Oral history\nSubject: ITRI; Apple; iPhone; Camera\nCredit: Computer History Museum",
+				"extra": "Catalog Number: 102738261\nCategory: Oral history\nSubject: ITRI; Apple; iPhone; Camera\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Mountain View, CA",
-				"publisher": "Computer History Museum",
+				"studio": "Computer History Museum",
 				"attachments": [
 					{
 						"title": "Su, Stephen oral history",
@@ -619,16 +671,16 @@ var testCases = [
 		"url": "https://www.computerhistory.org/collections/catalog/102796519",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "computerProgram",
 				"title": "TRS-80 word processing applications",
 				"creators": [],
 				"date": "1984",
 				"abstractNote": "One 5 1/4 floppy disk. Label: Single-sided, double-density disk for TRS-80 Word Processing Applications for Profile III Plus for the TRS-80 Model III or Model 4 with 48K memory. ISBN: 0-8359-7881-8.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X4114.2007",
-				"extra": "Catalog Number: 102796519\nType: Software\nSystem Requirements: TRS-80 Model III or Model 4 with 48K memory\nFormat: 5 1/4 inch floppy disk\nCollection Title: Radio Shack collection\nSeries Title: Software",
+				"company": "Reston Publishing Company",
+				"extra": "Catalog Number: 102796519\nSystem Requirements: TRS-80 Model III or Model 4 with 48K memory\nFormat: 5 1/4 inch floppy disk\nCollection Title: Radio Shack collection\nSeries Title: Software",
 				"libraryCatalog": "Computer History Museum Archive",
-				"publisher": "Reston Publishing Company",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -641,7 +693,7 @@ var testCases = [
 		"url": "https://www.computerhistory.org/collections/catalog/102740039",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "videoRecording",
 				"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4",
 				"creators": [
 					{
@@ -664,11 +716,11 @@ var testCases = [
 				"abstractNote": "C. Richard Kramlich co-founded the venture capital firm New Enterprise Associates (NEA) in 1978, serving as its managing general partner for two decades. In this oral history, Kramlich discusses his education at the Harvard Business School, his early career in finance, and his entry into venture capital in a partnership with Arthur Rock starting in 1969. He details the establishment of NEA with his co-founders, his personal investment in Apple Computer, and one of NEA’s earliest investments, 3Com. After noting the rise of the graphical in computing, Kramlich discusses at length his investment and involvement with the Apple Computer spinoff, Forethought Inc., its history, and its development of PowerPoint. The interview concludes with some of his thoughts about his investment in Silicon Graphics, the software industry, NEA’s approach, and collecting video art.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7447.2015",
-				"extra": "Catalog Number: 102740039\nType: Moving image\nDuration: 01:31:00\nFormat: MOV\nCategory: Oral history\nSubject: Kramlich, C. Richard; Venture Capital; Rock, Arthur; New Enterprise Associates (NEA); Software; software industry; Graphics; Networking; personal computers (PCs); 3Com; Apple; Forethought, Inc.; PowerPoint; Silicon Graphics; Video Art\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
+				"extra": "Catalog Number: 102740039\nDuration: 01:31:00\nCategory: Oral history\nSubject: Kramlich, C. Richard; Venture Capital; Rock, Arthur; New Enterprise Associates (NEA); Software; software industry; Graphics; Networking; personal computers (PCs); 3Com; Apple; Forethought, Inc.; PowerPoint; Silicon Graphics; Video Art\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Mountain View, California",
-				"publisher": "Computer History Museum",
 				"rights": "Computer History Museum",
+				"studio": "Computer History Museum",
 				"attachments": [
 					{
 						"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4",
@@ -686,7 +738,7 @@ var testCases = [
 		"url": "https://www.computerhistory.org/collections/catalog/102645840",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "videoRecording",
 				"title": "Challenges and Directions in Fault-Tolerant Computing, lecture by Jack Goldberg",
 				"creators": [
 					{
@@ -698,10 +750,10 @@ var testCases = [
 				"date": "1985-10-02",
 				"abstractNote": "Label taped to the video case reads: \"Two decaes of theoritical and experimental work and numerous recent successful applications have established fault tolerance as a standard objective of high speed, satisfaction of fault tolerance requirements cannot be demonstrated by testing alone, but requires formal analysis.  Most of the work in fault tolerance has been concerned with developing effective design techniques.  Recent work on reliabilitymodeling and formal proof of fault tolerant design and implementation is laying a foundation for a more rigorous design discipline.  The scope of concern has also expanded to include any source of computer reliability, such as design mistakes, in software, hardware, or at any system level.  Current art is barely able to keep up with the rapid pace of computer technology, the stresses of new applications and the new expansion in scope of concerns.  Particular challenges lie in coping with the imperfections of the ultrasamll, i.e., high density VLSI, and the ultra-large, i.e., large software systems.  It is clear that fault tolerance cannot be \"added\" to a design and must be integrated with other design objectives.  Simultaneous demands in future systems for high performance, high security, high evolvability and high fault tolerance will require new theoretical models of computer systems and a much closer integration of practical design techniques.  The talk will discuss the widening scope of research into computer dependability.  New issues include tolerance of design errors (including software), operator errors, and the safety of computer-controlled systems.\"",
 				"archive": "Computer History Museum",
-				"extra": "Catalog Number: 102645840\nType: Moving Image\nOther number: COMPAQ 0248880\nOther number: VIDEO SCF 01\nPlatform: NTSC VHS VCR\nFormat: VHS\nCategory: Lecture\nSeries Title: Stanford Computer Forum Distinguished Lecture Series",
+				"extra": "Catalog Number: 102645840\nOther number: COMPAQ 0248880\nOther number: VIDEO SCF 01\nPlatform: NTSC VHS VCR\nCategory: Lecture\nSeries Title: Stanford Computer Forum Distinguished Lecture Series",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Palo Alto, CA, US",
-				"publisher": "Stanford University. Stanford Computer Forum",
+				"studio": "Stanford University. Stanford Computer Forum",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -721,7 +773,7 @@ var testCases = [
 				"abstractNote": "The West Coast Computer Faire was an annual computer industry conference and exposition. The first fair was held in 1977 and was organized by Jim Warren and Bob Relling. At the time, it was the biggest computer show in the world, intended to popularize the peronal computer in the home.\n\nThis first fair took place on April 16-17, 1977, in San Francisco Civic Auditorium and Brooks Hall, and saw the debut of the Commodre PET, presented by Chuck Peddle, and the Apple II, presented by then 21-year-old Steve Jobs and Steve Wozniak. There were about 180 exhibitors, among them Intel, MITS, and Digitial Research. More than 12,000 people visited the fair.\n\nPapers presented during this session:\n\nR. W. Ulrickson, \"Learning to program microcomputers? Here's how\"\nLarry Tesler, \"Home text editing\"\n\nBiographical Notes: Robert Wayne Ulrickson received a B.S.E.E. from MIT (1959) and M.S.E.E. from SJSC (1966).  He was commissioned and served as a Coast Guard officer before working for Lockheed Missiles and Space in Sunnyvale, California, where he designed PCM telemetry systems for satellites.  He joined John Hulme’s Applications Department at Fairchild as supervisor of Systems Engineering where his team defined the 9300 series TTL MSI devices.  Systems Engineering became a part of Robert Schreiner’s Custom Micromatrix Arrays Department at Fairchild R&D in 1968, where Bob was Section Manager in charge of array architecture, test engineering, and computer aided design.  After CMA’s reorganization, Bob served Fairchild as Manager of Systems and Applications Engineering and as Product Marketing manager for Bipolar ICs.  In 1973 Bob joined John Nichols as co-founder and President of Logical Services Incorporated in Santa Clara.  Logical developed hundreds of new products incorporating microprocessors until and after it was acquired by Smartflex Systems in 1998.  Bob retired to Maui in 2000.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X2595.2004",
-				"extra": "Catalog Number: 102706809\nType: Audio\nOther number: camvchm_000022\nOther number: Tape #8\nFormat: Standard audio cassette\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
+				"extra": "Catalog Number: 102706809\nOther number: camvchm_000022\nOther number: Tape #8\nFormat: Standard audio cassette\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "San Francisco, CA",
 				"publisher": "Butterfly Media Dimensions",
@@ -753,7 +805,7 @@ var testCases = [
 				"abstractNote": "Founded in Oct 1972 as a large-format bimonthly newsprint publication called \"People's Computer Company.\" Name changed to \"People's Computers\" beginning with the May-June 1977 issue and the format changed to a more conventional magazine style, albeit with uncoated paper. Name changed again to \"Recreational Computing\" with Jan-Feb 1979 issue with slicker covers and paper. \n\nNote: The print collection has been augmented with scans provided by Bob Zeidman under lot number X6691.2013. Some issues in the collection exist in digital form only.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X2595.2004",
-				"extra": "Catalog Number: 102661095\nType: Document\nCategory: Periodical\nCredit: Gift of Jim Warren",
+				"extra": "Catalog Number: 102661095\nCategory: Periodical\nCredit: Gift of Jim Warren",
 				"libraryCatalog": "Computer History Museum Archive",
 				"publisher": "People's Computer Company",
 				"attachments": [
@@ -976,6 +1028,32 @@ var testCases = [
 					{
 						"mimeType": "application/pdf",
 						"title": "Recreational Computing, v. 10, no. 2 (Sep-Oct 1981)"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.computerhistory.org/collections/catalog/102630889",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Apple IIe",
+				"creators": [],
+				"abstractNote": "Black and white identification photograph of the Apple IIe main terminal including monitor, disk drive and keyboard. appriximately 1/2 inch white border surrounds main image. Background is gray. Computer is sitting on a ledge.",
+				"archive": "Computer History Museum",
+				"archiveLocation": "X2870.2005",
+				"extra": "Catalog Number: 102630889\nDimensions: 8 x 10 in.\nFormat: Photographic print\nCategory: Identification photograph; Publicity photograph\nSubject: Apple IIe (Computer); Apple Computer, Inc.\nCredit: Gift of CHM AppleLore",
+				"libraryCatalog": "Computer History Museum Archive",
+				"rights": "Apple Computer, Inc.",
+				"attachments": [
+					{
+						"title": "Apple IIe",
+						"mimeType": "image/png"
 					}
 				],
 				"tags": [],
