@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 15:14:43"
+	"lastUpdated": "2021-06-03 15:25:36"
 }
 
 /*
@@ -829,6 +829,7 @@ var testCases = [
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Mountain View, CA",
 				"studio": "Computer History Museum",
+				"videoRecordingFormat": "MOV",
 				"attachments": [
 					{
 						"title": "Su, Stephen oral history",
@@ -915,6 +916,7 @@ var testCases = [
 				"rights": "Computer History Museum",
 				"runningTime": "01:31:00",
 				"studio": "Computer History Museum",
+				"videoRecordingFormat": "MOV",
 				"attachments": [
 					{
 						"title": "Kramlich, Dick (C. Richard) oral history part 1 of 4",
@@ -994,6 +996,7 @@ var testCases = [
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Palo Alto, CA, US",
 				"studio": "Stanford University. Stanford Computer Forum",
+				"videoRecordingFormat": "VHS",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -1013,6 +1016,7 @@ var testCases = [
 				"abstractNote": "The West Coast Computer Faire was an annual computer industry conference and exposition. The first fair was held in 1977 and was organized by Jim Warren and Bob Relling. At the time, it was the biggest computer show in the world, intended to popularize the peronal computer in the home.\n\nThis first fair took place on April 16-17, 1977, in San Francisco Civic Auditorium and Brooks Hall, and saw the debut of the Commodre PET, presented by Chuck Peddle, and the Apple II, presented by then 21-year-old Steve Jobs and Steve Wozniak. There were about 180 exhibitors, among them Intel, MITS, and Digitial Research. More than 12,000 people visited the fair.\n\nPapers presented during this session:\n\nR. W. Ulrickson, \"Learning to program microcomputers? Here's how\"\nLarry Tesler, \"Home text editing\"\n\nBiographical Notes: Robert Wayne Ulrickson received a B.S.E.E. from MIT (1959) and M.S.E.E. from SJSC (1966).  He was commissioned and served as a Coast Guard officer before working for Lockheed Missiles and Space in Sunnyvale, California, where he designed PCM telemetry systems for satellites.  He joined John Hulme’s Applications Department at Fairchild as supervisor of Systems Engineering where his team defined the 9300 series TTL MSI devices.  Systems Engineering became a part of Robert Schreiner’s Custom Micromatrix Arrays Department at Fairchild R&D in 1968, where Bob was Section Manager in charge of array architecture, test engineering, and computer aided design.  After CMA’s reorganization, Bob served Fairchild as Manager of Systems and Applications Engineering and as Product Marketing manager for Bipolar ICs.  In 1973 Bob joined John Nichols as co-founder and President of Logical Services Incorporated in Santa Clara.  Logical developed hundreds of new products incorporating microprocessors until and after it was acquired by Smartflex Systems in 1998.  Bob retired to Maui in 2000.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X2595.2004",
+				"audioRecordingFormat": "Standard audio cassette",
 				"extra": "Catalog Number: 102706809\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
 				"label": "Butterfly Media Dimensions",
 				"libraryCatalog": "Computer History Museum Archive",
