@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 07:39:43"
+	"lastUpdated": "2021-06-03 09:02:44"
 }
 
 /*
@@ -130,27 +130,41 @@ function scrape(doc, _) {
 				break;
 			case 'Subject':
 				const allTagsString = getContent(node, fieldTitle);
-				const allTags = allTagsString.split(';').map(tag => tag.trim());
+				const allTags = allTagsString.split(';').map(tag => tag.trim()).sort();
 				if (allTags && allTags.length > 0) {
 					newItem.tags = allTags;
 				}
 				break;
 			// other archival and / or meta info that go into extra.
 			case 'Format':
-				if (newItem.itemType == 'videoRecording') {
+				if (newItem.itemType == 'videoRecording' || newItem.itemType == 'audioRecording') {
 					// note that format field for Video Recording type is not displayed in scaffold.
 					newItem.format = getContent(node, fieldTitle);
 					break;
 				}
+				if (newItem.itemType == 'artwork') {
+					newItem.medium = getContent(node, fieldTitle);
+					break;
+				}
+			case 'Dimensions':
+				if (newItem.itemType == 'artwork') {
+					newItem.artworkSize = getContent(node, fieldTitle);
+					break;
+				}
+			case 'Duration':
+				if (newItem.itemType == 'videoRecording' || newItem.itemType == 'audioRecording') {
+					// note that format field for Video Recording type is not displayed in scaffold.
+					newItem.runningTime = getContent(node, fieldTitle);
+					break;
+				}
+			// notes that if there are conditional logics for a field, like "dimensions"， they need to come above. Therewise, they might be polluted by stacked switch cases, like "Categories" got mixed with "Dimensions".
 			case 'Category':
 			case 'Collection Title':
-			case 'Dimensions':
 			case 'Credit':
 			case 'Place Manufactured':
 			case 'Manufacturer':
 			case 'System Requirements':
 			case 'Series Title':
-			case 'Duration':
 			case 'Platform':
 			// the categories vary therefore many are collapsed under 'extra'.
 			case 'Catalog Number':
@@ -267,6 +281,9 @@ function getZoteroItemType(doc) {
 			chmItemType = chmItemType.toLowerCase();
 
 			switch (chmItemType) {
+				case 'audio':
+					type = 'audioRecording';
+					break;
 				case 'moving image':
 					type = "videoRecording";
 					break;
@@ -888,10 +905,11 @@ var testCases = [
 				"abstractNote": "C. Richard Kramlich co-founded the venture capital firm New Enterprise Associates (NEA) in 1978, serving as its managing general partner for two decades. In this oral history, Kramlich discusses his education at the Harvard Business School, his early career in finance, and his entry into venture capital in a partnership with Arthur Rock starting in 1969. He details the establishment of NEA with his co-founders, his personal investment in Apple Computer, and one of NEA’s earliest investments, 3Com. After noting the rise of the graphical in computing, Kramlich discusses at length his investment and involvement with the Apple Computer spinoff, Forethought Inc., its history, and its development of PowerPoint. The interview concludes with some of his thoughts about his investment in Silicon Graphics, the software industry, NEA’s approach, and collecting video art.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X7447.2015",
-				"extra": "Catalog Number: 102740039\nDuration: 01:31:00\nCategory: Oral history\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
+				"extra": "Catalog Number: 102740039\nCategory: Oral history\nCollection Title: CHM Oral History Collection\nCredit: Computer History Museum",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "Mountain View, California",
 				"rights": "Computer History Museum",
+				"runningTime": "01:31:00",
 				"studio": "Computer History Museum",
 				"attachments": [
 					{
@@ -984,17 +1002,17 @@ var testCases = [
 		"url": "https://www.computerhistory.org/collections/catalog/102706809",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "audioRecording",
 				"title": "Tutorials on software systems design",
 				"creators": [],
 				"date": "1977-04",
 				"abstractNote": "The West Coast Computer Faire was an annual computer industry conference and exposition. The first fair was held in 1977 and was organized by Jim Warren and Bob Relling. At the time, it was the biggest computer show in the world, intended to popularize the peronal computer in the home.\n\nThis first fair took place on April 16-17, 1977, in San Francisco Civic Auditorium and Brooks Hall, and saw the debut of the Commodre PET, presented by Chuck Peddle, and the Apple II, presented by then 21-year-old Steve Jobs and Steve Wozniak. There were about 180 exhibitors, among them Intel, MITS, and Digitial Research. More than 12,000 people visited the fair.\n\nPapers presented during this session:\n\nR. W. Ulrickson, \"Learning to program microcomputers? Here's how\"\nLarry Tesler, \"Home text editing\"\n\nBiographical Notes: Robert Wayne Ulrickson received a B.S.E.E. from MIT (1959) and M.S.E.E. from SJSC (1966).  He was commissioned and served as a Coast Guard officer before working for Lockheed Missiles and Space in Sunnyvale, California, where he designed PCM telemetry systems for satellites.  He joined John Hulme’s Applications Department at Fairchild as supervisor of Systems Engineering where his team defined the 9300 series TTL MSI devices.  Systems Engineering became a part of Robert Schreiner’s Custom Micromatrix Arrays Department at Fairchild R&D in 1968, where Bob was Section Manager in charge of array architecture, test engineering, and computer aided design.  After CMA’s reorganization, Bob served Fairchild as Manager of Systems and Applications Engineering and as Product Marketing manager for Bipolar ICs.  In 1973 Bob joined John Nichols as co-founder and President of Logical Services Incorporated in Santa Clara.  Logical developed hundreds of new products incorporating microprocessors until and after it was acquired by Smartflex Systems in 1998.  Bob retired to Maui in 2000.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X2595.2004",
-				"extra": "Catalog Number: 102706809\nFormat: Standard audio cassette\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
+				"extra": "Catalog Number: 102706809\nSeries Title: The First West Coast Computer Faire\nCredit: Gift of Jim Warren",
+				"label": "Butterfly Media Dimensions",
 				"libraryCatalog": "Computer History Museum Archive",
 				"place": "San Francisco, CA",
-				"publisher": "Butterfly Media Dimensions",
 				"attachments": [
 					{
 						"mimeType": "audio/mpeg",
@@ -1265,7 +1283,9 @@ var testCases = [
 				"abstractNote": "Black and white identification photograph of the Apple IIe main terminal including monitor, disk drive and keyboard. appriximately 1/2 inch white border surrounds main image. Background is gray. Computer is sitting on a ledge.",
 				"archive": "Computer History Museum",
 				"archiveLocation": "X2870.2005",
-				"extra": "Catalog Number: 102630889\nDimensions: 8 x 10 in.\nFormat: Photographic print\nCategory: Identification photograph; Publicity photograph\nCredit: Gift of CHM AppleLore",
+				"artworkMedium": "Photographic print",
+				"artworkSize": "8 x 10 in.",
+				"extra": "Catalog Number: 102630889\nCategory: Identification photograph; Publicity photograph\nCredit: Gift of CHM AppleLore",
 				"libraryCatalog": "Computer History Museum Archive",
 				"rights": "Apple Computer, Inc.",
 				"attachments": [
