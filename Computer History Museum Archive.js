@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 15:25:36"
+	"lastUpdated": "2021-06-03 16:11:49"
 }
 
 /*
@@ -201,7 +201,7 @@ function scrape(doc, _) {
 			const pdfPath = div.href;
 			if (pdfPath) {
 				newItem.attachments.push({
-					url: pdfPath.replace('https', 'http'),
+					url: pdfPath,
 					mimeType: "application/pdf",
 					title: `${fileName ? fileName : newItem.title}`,
 				});
@@ -217,7 +217,7 @@ function scrape(doc, _) {
 			const fileName = div.textContent;
 			if (audioPath) {
 				newItem.attachments.push({
-					url: audioPath.replace('https', 'http'),
+					url: audioPath,
 					mimeType: "audio/mpeg",
 					title: `${fileName ? fileName : newItem.title}`
 				});
