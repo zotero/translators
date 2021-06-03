@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 09:02:44"
+	"lastUpdated": "2021-06-03 15:14:43"
 }
 
 /*
@@ -137,9 +137,13 @@ function scrape(doc, _) {
 				break;
 			// other archival and / or meta info that go into extra.
 			case 'Format':
-				if (newItem.itemType == 'videoRecording' || newItem.itemType == 'audioRecording') {
+				if (newItem.itemType == 'videoRecording') {
 					// note that format field for Video Recording type is not displayed in scaffold.
-					newItem.format = getContent(node, fieldTitle);
+					newItem.videoRecordingFormat = getContent(node, fieldTitle);
+					break;
+				}
+				if (newItem.itemType == 'audioRecording') {
+					newItem.audioRecordingFormat = getContent(node, fieldTitle);
 					break;
 				}
 				if (newItem.itemType == 'artwork') {
