@@ -6423,47 +6423,18 @@ var testCases = [
 	},
 	{
 		"type": "import",
-		"input": "TY  - JOUR\nT1  - Reputation and Decision Making under Ambiguity: A Study of U.S. Venture Capital Firms' Investments in the Emerging Clean Energy Sector\nAU  - Petkova, Antoaneta P.\nAU  - Wadhwa, Anu\nAU  - Yao, Xin\nAU  - Jain, Sanjay\nY1  - 2013/05/28\nPY  - 2013\nDA  - 2014/04/01\nN1  - doi: 10.5465/amj.2011.0651\nDO  - 10.5465/amj.2011.0651\nT2  - Academy of Management Journal\nJF  - Academy of Management Journal\nJO  - AMJ\nSP  - 422\nEP  - 448\nVL  - 57\nIS  - 2\nPB  - Academy of Management\nSN  - 0001-4273\nM3  - doi: 10.5465/amj.2011.0651\nUR  - https://doi.org/10.5465/amj.2011.0651\nY2  - 2020/02/19\nER  - ",
+		"input": "TY  - JOUR\nT1  - Deprecated tag test\nN1  - The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.\nY1  - 1900/01/01\nDA  - 1950/01/01\nER  - ",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Reputation and Decision Making under Ambiguity: A Study of U.S. Venture Capital Firms' Investments in the Emerging Clean Energy Sector",
-				"creators": [
-					{
-						"lastName": "Petkova",
-						"firstName": "Antoaneta P.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Wadhwa",
-						"firstName": "Anu",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Yao",
-						"firstName": "Xin",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Jain",
-						"firstName": "Sanjay",
-						"creatorType": "author"
-					}
-				],
-				"date": "April 1, 2014",
-				"DOI": "10.5465/amj.2011.0651",
-				"ISSN": "0001-4273",
-				"issue": "2",
-				"journalAbbreviation": "AMJ",
-				"pages": "422-448",
-				"publicationTitle": "Academy of Management Journal",
-				"url": "https://doi.org/10.5465/amj.2011.0651",
-				"volume": "57",
+				"title": "Deprecated tag test",
+				"creators": [],
+				"date": "January 1, 1950",
 				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
-						"note": "<p>doi: 10.5465/amj.2011.0651</p>"
+						"note": "<p>The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.</p>"
 					}
 				],
 				"seeAlso": []
