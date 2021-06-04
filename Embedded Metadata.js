@@ -1287,14 +1287,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://olh.openlibhums.org/article/10.16995/olh.46/",
+		"url": "https://olh.openlibhums.org/article/id/4400/",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Opening the Open Library of Humanities",
 				"creators": [
 					{
-						"firstName": "Martin",
+						"firstName": "Martin Paul",
 						"lastName": "Eve",
 						"creatorType": "author"
 					},
@@ -1304,17 +1304,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28",
+				"date": "2015-09-28 13:00",
 				"DOI": "10.16995/olh.46",
-				"ISSN": "2056-6700",
-				"abstractNote": "Article: Opening the Open Library of Humanities",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
-				"pages": "e1",
 				"publicationTitle": "Open Library of Humanities",
-				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
-				"url": "http://olh.openlibhums.org/article/10.16995/olh.46/",
+				"url": "https://olh.openlibhums.org/article/id/4400/",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1433,7 +1429,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 50 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
