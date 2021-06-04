@@ -2,14 +2,14 @@
 	"translatorID": "e048e70e-8fea-43e9-ac8e-940bc3d71b0b",
 	"label": "LingBuzz",
 	"creator": "Göktuğ Kayaalp and Abe Jellinek",
-	"target": "^https://ling\\.auf\\.net/lingbuzz/(\\d+|_search)",
+	"target": "^https://ling\\.auf\\.net/lingbuzz/(repo/semanticsArchive/article/)?(\\d+|_search)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 21:54:52"
+	"lastUpdated": "2021-06-04 22:24:19"
 }
 
 /*
@@ -49,7 +49,9 @@ function getSearchResults(doc, checkOnly) {
 	var rows = doc.querySelectorAll('td a:not([href*="?_s="])');
 	for (let row of rows) {
 		let href = row.href;
-		let title = ZU.trimInternal(row.textContent);
+		let title = ZU.trimInternal(
+			row.textContent.replace(/\s+\[semanticsArchive\]$/, "")
+		);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -65,7 +67,12 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		if(url.match(/semanticsArchive/)) {
+			scrapeSA(doc, url);
+		}
+		else {
+			scrape(doc, url);
+		}
 	}
 }
 
@@ -108,6 +115,44 @@ function scrape(doc, _url) {
 	newItem.complete();
 }
 
+function scrapeSA(doc, _url) {
+	var newItem = new Zotero.Item("report");
+	newItem.extra = "type: article\n"; // will map to preprint
+
+	// Collect information.
+	var idBlock = doc.querySelector("center");
+	// This is even worse than the usual LingBuzz pages.
+	var title = text(idBlock, "a:first-child");
+	var authors = idBlock.querySelectorAll("a:not(:first-child)");
+	// These are unpleasant but they're the best we have.
+	var date = idBlock.lastChild.textContent;
+
+	let pdfUrl = idBlock.querySelector("a:first-child").href;
+	newItem.attachments.push({ url: pdfUrl,
+							   title: "LingBuzz (SemanticsArchive) Full Text PDF",
+							   mimeType: "application/pdf" });
+
+	var tableRows = doc.querySelectorAll("tbody tr");
+	for (let row of tableRows) {
+		let [left, right] = row.querySelectorAll("td");
+		if (!left || !right) continue;
+		let fieldName = left.innerText.toLowerCase();
+		if (fieldName.includes("keywords")) {
+			newItem.tags.push(...right.innerText.split(/[;,] /));
+		}
+	}
+
+	newItem.title = title;
+	for (let authorLink of authors) {
+		newItem.creators.push(
+			Zotero.Utilities.cleanAuthor(authorLink.innerText, "author"));
+	}
+	newItem.date = ZU.strToISO(date);
+	newItem.attachments.push({ document: doc, title: "Snapshot" });
+	newItem.publisher = "LingBuzz (SemanticsArchive)";
+
+	newItem.complete();
+}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -178,7 +223,79 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"url": "https://ling.auf.net/lingbuzz/repo/semanticsArchive/article/001471",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Review of Barker and Shan (2015) Continuations and Natural Language",
+				"creators": [
+					{
+						"firstName": "Yusuke",
+						"lastName": "Kubota",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-06",
+				"extra": "type: article",
+				"institution": "LingBuzz (SemanticsArchive)",
+				"libraryCatalog": "LingBuzz",
+				"attachments": [
+					{
+						"title": "LingBuzz (SemanticsArchive) Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "binding"
+					},
+					{
+						"tag": "categorial grammar"
+					},
+					{
+						"tag": "continuations"
+					},
+					{
+						"tag": "crossover"
+					},
+					{
+						"tag": "reconstruction"
+					},
+					{
+						"tag": "scope"
+					},
+					{
+						"tag": "semantics"
+					},
+					{
+						"tag": "semanticsarchive"
+					},
+					{
+						"tag": "syntax"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
 		"url": "https://ling.auf.net/lingbuzz/_search?q=svan",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ling.auf.net/lingbuzz/_search?q=construction+grammar",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ling.auf.net/lingbuzz/_search?q=semanticsarchive",
 		"items": "multiple"
 	}
 ]
