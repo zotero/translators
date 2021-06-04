@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-22 19:17:08"
+	"lastUpdated": "2021-06-04 20:08:22"
 }
 
 /*
@@ -131,7 +131,12 @@ var testCases = [
 				"callNumber": "1994.36",
 				"libraryCatalog": "Art Institute of Chicago",
 				"url": "https://www.artic.edu/artworks/129884/starry-night-and-the-astronauts",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -147,9 +152,9 @@ var testCases = [
 				"title": "Chicago Stock Exchange Trading Room: Reconstruction at the Art Institute of Chicago",
 				"creators": [
 					{
-						"lastName": "Adler & Sullivan, Architects",
+						"lastName": "Architects",
 						"creatorType": "artist",
-						"fieldMode": 1
+						"firstName": "Adler & Sullivan"
 					}
 				],
 				"date": "Built 1893–1894",
@@ -159,7 +164,12 @@ var testCases = [
 				"libraryCatalog": "Art Institute of Chicago",
 				"shortTitle": "Chicago Stock Exchange Trading Room",
 				"url": "https://www.artic.edu/artworks/156538/chicago-stock-exchange-trading-room-reconstruction-at-the-art-institute-of-chicago",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -175,9 +185,9 @@ var testCases = [
 				"title": "The Bedroom",
 				"creators": [
 					{
-						"lastName": "Vincent van Gogh",
+						"lastName": "Gogh",
 						"creatorType": "artist",
-						"fieldMode": 1
+						"firstName": "Vincent van"
 					}
 				],
 				"date": "1889",
@@ -186,7 +196,12 @@ var testCases = [
 				"callNumber": "1926.417",
 				"libraryCatalog": "Art Institute of Chicago",
 				"url": "https://www.artic.edu/artworks/28560/the-bedroom",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -207,9 +222,9 @@ var testCases = [
 						"creatorType": "artist"
 					},
 					{
-						"lastName": "Herman Miller Inc.",
+						"lastName": "Inc",
 						"creatorType": "artist",
-						"fieldMode": 1
+						"firstName": "Herman Miller"
 					}
 				],
 				"date": "Designed 1946, Made 1946-1967, c. 1946-1967",
@@ -218,7 +233,12 @@ var testCases = [
 				"callNumber": "1978.141",
 				"libraryCatalog": "Art Institute of Chicago",
 				"url": "https://www.artic.edu/artworks/52273/platform-bench",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -243,7 +263,12 @@ var testCases = [
 				"callNumber": "1958.191",
 				"libraryCatalog": "Art Institute of Chicago",
 				"url": "https://www.artic.edu/artworks/7691/gathering-seaweed-at-omori",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
