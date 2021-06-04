@@ -70,15 +70,15 @@ function scrape(doc) {
 	var artists = ZU.xpath(doc, '//meta[contains(@name, "citation_author")]');
 	for (var i = 0; i < artists.length; i++) {
 		var cleaned = artists[i].content.replace(/\(.*\)$/, '').trim();
-		if (cleaned.split(' ').length > 2) {
-			item.creators.push({ lastName: cleaned, creatorType: 'artist', fieldMode: 1 });
-		}
-		else {
-			item.creators.push(ZU.cleanAuthor(cleaned, 'artist'));
-		}
+        item.creators.push(ZU.cleanAuthor(cleaned, 'artist'));
 	}
 
-	item.date = ZU
+    item.attachments.push({
+        title: 'Snapshot',
+        document: doc
+    });
+
+    item.date = ZU
 		.xpath(doc, '//dl[@id="dl-artwork-details"]/dd[@itemprop="dateCreated"]/*/a')
 		.map(function (date) {
 			return date.textContent;
