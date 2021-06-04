@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-01-08 06:42:52"
+	"lastUpdated": "2021-06-04 02:56:45"
 }
 
 /*
@@ -77,7 +77,7 @@ function getIDFromURL(url) {
 	var curRec = url.match(/[?&]currec=([^&#]*)/i);
 	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
 	
-	return { dbname: dbname[1], filename: filename[1], curRec: curRec[1], queryID: queryID[1], url: url };
+	return { dbname: dbname[1], filename: filename[1], curRec: curRec ? curRec[1] : '', queryID: queryID ? queryID[1] : '', url: url };
 }
 
 
@@ -137,7 +137,6 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	}
 
 	if (!links.length) {
-		// 018<lyb018@gmail.com>: 20200909
 		if (url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
 			return { '': '【提醒：不存在条目。】' };
 		}
@@ -175,7 +174,6 @@ function detectWeb(doc, url) {
 		return getTypeFromDBName(id.dbname);
 	}
 	else if (items || url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
-		// 018<lyb018@gmail.com>: 20200909
 		return "multiple";
 	}
 	else {
@@ -193,7 +191,6 @@ function doWeb(doc, url) {
 			var itemInfoByTitle = {};
 			var ids = [];
 			for (var url in selectedItems) {
-				// 018<lyb018@gmail.com>: 20200909
 				if (url && url.length > 0) {
 					ids.push(itemInfo[url].id);
 					itemInfoByTitle[selectedItems[url]] = itemInfo[url];
@@ -228,7 +225,6 @@ function scrape(ids, doc, url, itemInfo) {
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
 				}
 				else {
-					// 018<lyb018@gmail.com>: 20200909
 					creator.firstName = '';
 				}
 			}
@@ -262,25 +258,10 @@ function scrape(ids, doc, url, itemInfo) {
 			//	newItem.extra = 'CN ' + newItem.callNumber;
 				newItem.callNumber = "";
 			}
-			// 018<lyb018@gmail.com>: 20210108
-			var num = doc.querySelector('#func3 .num');
-			if (!num) {
-				var e = doc.querySelector('[value="' + dbname + '!' + filename + '!' + curRec + '!' + queryID + '"]');
-				if (e) {
-					e = e.parentElement;
-				}
-				if (e) {
-					e = e.parentElement;
-				}
-				if (e) {
-					e = e.querySelector('.quote a');
-				}
-				if (e) {
-					num  = e
-				}
-			}
-			if (num) {
-				newItem.extra = num.textContent.replace(/[^\d*]/g, '');
+			var numEle = doc.querySelector('#func3 .num');
+			if (numEle) {
+				Z.debug(numEle.textContent.replace(/[^\d*]/g, ''))
+				newItem.callNumber = numEle.textContent.replace(/[^\d*]/g, '');
 			}
 			// don't download PDF/CAJ on searchResult(multiple)
 			var webType = detectWeb(doc, url);
