@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 00:42:27"
+	"lastUpdated": "2021-06-04 17:18:26"
 }
 
 /*
@@ -886,13 +886,15 @@ function finalDataCleanup(doc, newItem) {
 		newItem.DOI = ZU.cleanDOI(newItem.DOI);
 	}
 
-	// Add DOI to non-supported item types
-	if (newItem.DOI && !ZU.fieldIsValidForType("DOI", newItem.itemType)) {
-		if (newItem.extra) {
-			newItem.extra += "\nDOI: " + newItem.DOI;
-		}
-		else {
-			newItem.extra = "DOI: " + newItem.DOI;
+	// Add DOI, publisher, place to non-supported item types in extra field
+	for (let key of ["DOI", "publisher", "place"]) {
+		if (newItem[key] && !ZU.fieldIsValidForType(key, newItem.itemType)) {
+			if (newItem.extra) {
+				newItem.extra += "\n" + key + ": " + newItem[key];
+			}
+			else {
+				newItem.extra = key + ": " + newItem[key];
+			}
 		}
 	}
 
@@ -964,6 +966,7 @@ var testCases = [
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.&nbsp; Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio &ndash; demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio &ndash; demographic or socio &ndash; economic factors.&nbsp; However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p &lt; 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
+				"extra": "publisher: National Institute for Medical Research",
 				"issue": "4",
 				"journalAbbreviation": "1",
 				"language": "en",
@@ -1138,6 +1141,7 @@ var testCases = [
 				"DOI": "10.1590/S0034-89102007000900015",
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
+				"extra": "publisher: Faculdade de Saúde Pública da Universidade de São Paulo",
 				"journalAbbreviation": "Rev. Saúde Pública",
 				"language": "en",
 				"libraryCatalog": "scielosp.org",
@@ -1361,7 +1365,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=510",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=-445",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1469,6 +1473,7 @@ var testCases = [
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "1572-9524",
 				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (exact) wave mechanics unchanged, while the rest of it is observationally meaningless and solely based on classical prejudice.",
+				"extra": "publisher: Springer Netherlands",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
@@ -1511,6 +1516,7 @@ var testCases = [
 				"date": "2000",
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
+				"extra": "publisher: Slavica Publishers",
 				"issue": "4",
 				"language": "en",
 				"libraryCatalog": "muse.jhu.edu",
