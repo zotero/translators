@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-01 19:31:46"
+	"lastUpdated": "2021-06-07 19:48:42"
 }
 
 /*
@@ -35,18 +35,18 @@
 	***** END LICENSE BLOCK *****
 */
 
-// Retsinformation exposes two types of data: ELI metadata in the HTML and a
-// custom XML schema via a separate GET request. ELI is standard and their XML
-// is not, so it would be great to use the ELI... but unfortunately, it's
-// inserted client-side by React. in order to make this translator work without
-// a hidden browser, we'll use the XML.
+// Retsinformation exposes two types of data: ELI metadata in the HTML and
+// custom XML/JSON schema via a separate GET request. ELI is standard, so it
+// would be great to use it... but unfortunately, it's inserted client-side
+// by React. in order to make this translator work without a hidden browser,
+// we'll use the JSON.
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, url, true)) {
 		return "multiple";
 	}
 	else if (url.includes("/eli/")) {
-		return getType(doc);
+		return getType(text(doc, '.m-0'));
 	}
 	return false;
 }
@@ -81,38 +81,34 @@ function getSearchResults(doc, url, checkOnly) {
 }
 
 function scrape(doc, url) {
-	ZU.processDocuments(url + '/xml', function (xml) {
-		let item = new Zotero.Item(getType(xml));
-		item.title = text(xml, 'Meta DocumentTitle');
-		item.shortTitle = text(xml, 'Meta PopularTitle');
+	ZU.doGet(url.replace(/\/dan.*/, '').replace('/eli', '/api/document/eli'), function (respText) {
+		let json = JSON.parse(respText)[0];
+		let item = new Zotero.Item(getType(json.shortName));
 		
-		let number = text(xml, 'Meta Number');
-		if (number) {
-			let documentType = text(xml, 'Meta DocumentType');
-			if (documentType.match(/BSF|Beslutningsforslag som fremsat/)) {
-				// the HTML is more authoritative here
-				number = text(doc, '.m-0');
+		let signingDate;
+		let admissionDate;
+		let firstAdmissionDate;
+
+		for (let { displayName: name, displayValue: value } of json.metadata) {
+			if (name == 'Dato for underskrift') {
+				signingDate = value;
 			}
-			else {
-				number = documentType.substring(0, 3) + ' nr ' + number;
+			else if (name == 'Dato for indlæggelse') {
+				admissionDate = value;
+			}
+			else if (name == 'Dato for førstegangsindlæggelse') {
+				firstAdmissionDate = value;
 			}
 		}
+
+		item.title = json.title;
+		item.shortTitle = json.popularTitle;
 		
-		let date = text(xml, 'Meta DiesSigni');
-		// we could go with <DateOfSubmit>, but it sometimes seems wrong.
-		// for example: https://www.retsinformation.dk/eli/lta/2015/167/xml
-		// a 2015 bill with a 2021 <DateOfSubmit>.
-		// for that bill, the old test wants the 2015 date.
-		//
-		// but then see this: https://www.retsinformation.dk/eli/ft/20091BB00193/xml
-		// the old test for that page wants the <DateOfSubmit>, one day later
-		// than the <DiesSigni>.
-		//
-		// this is confusing, so i'll stick with the <DiesSigni> for now and
-		// update old tests.
+		let number = json.shortName;
+		let date = ZU.strToISO(signingDate || admissionDate || firstAdmissionDate);
 
 		if (item.itemType == 'statute') {
-			item.publicLawNumber = number;
+			item.codeNumber = number;
 			item.dateEnacted = date;
 		}
 		else if (item.itemType == 'case') {
@@ -124,22 +120,19 @@ function scrape(doc, url) {
 			item.date = date;
 		}
 		
-		item.creators = [{
-			creatorType: 'author',
-			lastName: text(xml, 'Meta Ministry'),
-			fieldMode: 1
-		}];
+		if (json.ressort) {
+			item.creators.push({
+				creatorType: 'author',
+				lastName: json.ressort,
+				fieldMode: 1
+			});
+		}
 		item.url = url;
 		item.complete();
 	});
 }
 
-function getType(doc) {
-	// if this is called on the XML, we'll get the DocumentType element.
-	// if called on the HTML, fall back on a (not very good) class selector.
-	// it's alright if the HTML gives us junk - we'll figure out the real type
-	// from the XML.
-	var documentType = text(doc, 'Meta DocumentType, .m-0');
+function getType(documentType) {
 	if (/ADI|AND|BEK|BKI|BST|CIR|CIS|DSK|FIN|KON|LBK|LOV|LTB|PJE|SKR|VEJ|ÅBR/
 		.test(documentType)) {
 		return "statute";
@@ -174,7 +167,7 @@ var testCases = [
 					}
 				],
 				"dateEnacted": "2015-02-20",
-				"publicLawNumber": "LBK nr 167",
+				"codeNumber": "LBK nr 167 af 20/02/2015",
 				"shortTitle": "Dagtilbudsloven",
 				"url": "https://www.retsinformation.dk/eli/lta/2015/167",
 				"attachments": [],
@@ -200,7 +193,7 @@ var testCases = [
 					}
 				],
 				"dateEnacted": "2013-12-16",
-				"publicLawNumber": "BEK nr 1490",
+				"codeNumber": "BEK nr 1490 af 16/12/2013",
 				"shortTitle": "Regnskabsbekendtgørelse",
 				"url": "https://www.retsinformation.dk/eli/lta/2013/1490",
 				"attachments": [],
@@ -226,7 +219,7 @@ var testCases = [
 					}
 				],
 				"dateEnacted": "2015-04-30",
-				"publicLawNumber": "BEK nr 599",
+				"codeNumber": "BEK nr 599 af 30/04/2015",
 				"url": "https://www.retsinformation.dk/eli/lta/2015/599",
 				"attachments": [],
 				"tags": [],
@@ -275,7 +268,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "2010-03-26",
+				"date": "2010-03-27",
 				"billNumber": "2009/1 BSF 193",
 				"url": "https://www.retsinformation.dk/eli/ft/20091BB00193",
 				"attachments": [],
@@ -301,8 +294,33 @@ var testCases = [
 					}
 				],
 				"dateEnacted": "2012-09-26",
-				"publicLawNumber": "BEK nr 956",
+				"codeNumber": "BEK nr 956 af 26/09/2012",
 				"url": "https://www.retsinformation.dk/eli/lta/2012/956",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.retsinformation.dk/eli/retsinfo/2016/9874",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Afslag på aktindsigt i form af dataudtræk efter offentlighedslovens § 11. Dataudtræk kunne ikke foretages ved få og enkle kommandoer",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Folketinget",
+						"fieldMode": 1
+					}
+				],
+				"dateDecided": "2016-05-08",
+				"docketNumber": "UDT nr 9874 af 05/08/2016",
+				"url": "https://www.retsinformation.dk/eli/retsinfo/2016/9874",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
