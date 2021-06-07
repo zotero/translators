@@ -113,7 +113,7 @@ function scrape(doc, url) {
 			mimeType: 'application/pdf'
 		});
 		// url
-			newItem.url = url;
+		newItem.url = url;
 		// language: 2 or 3 letters following ISO 639
 		// indicated by the last 1-3 letters in PDF file name (langCode)
 		// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
