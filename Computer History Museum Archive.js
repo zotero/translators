@@ -2,14 +2,14 @@
 	"translatorID": "f3b81c4e-28b4-41ae-9824-55739fe9c91a",
 	"label": "Computer History Museum Archive",
 	"creator": "Bo An",
-	"target": "^https?://www.computerhistory.org/collections/",
+	"target": "^https?://www\\.computerhistory\\.org/collections/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 16:11:49"
+	"lastUpdated": "2021-06-07 16:40:38"
 }
 
 /*

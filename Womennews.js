@@ -2,14 +2,14 @@
 	"translatorID": "c1f99315-2257-4a32-af1e-68cd8b7bc838",
 	"label": "Womennews",
 	"creator": "Kagami Sascha Rosylight",
-	"target": "^https?://www\\.womennews\\.co.kr",
+	"target": "^https?://www\\.womennews\\.co\\.kr",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-18 02:12:44"
+	"lastUpdated": "2021-06-07 16:47:08"
 }
 
 /*
