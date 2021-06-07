@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-03 23:20:12"
+	"lastUpdated": "2021-06-07 21:34:47"
 }
 
 /*
@@ -37,19 +37,24 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("abstract.cfm") != -1) {
+	url = url.toLowerCase();
+	if (url.includes("/abstract.cfm") || url.includes("/viewmedia.cfm")) {
 		var conference = ZU.xpathText(doc, '//meta[@name="citation_conference_title"]/@content');
 		var journal = ZU.xpathText(doc, '//meta[@name="citation_journal_title"]/@content');
 		if (conference) {
 			return "conferencePaper";
-		} else if (journal) {
+		}
+		else if (journal) {
 			return "journalArticle";
-		} else {
+		}
+		else {
 			return "book";
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
-	} 
+	}
+	return false;
 }
 
 
@@ -57,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//ul[@id="results"]/li[contains(@class, "sr-item")]//h3/a|//p[contains(@class, "article-title")]/a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -73,7 +78,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -81,7 +86,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -91,19 +97,36 @@ function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
+	// translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		if (item.abstractNote ) {
+		item.title = decodeEntities(item.title, doc);
+		item.bookTitle = decodeEntities(item.bookTitle, doc);
+		item.publicationTitle = decodeEntities(item.publicationTitle, doc);
+		item.rights = decodeEntities(item.rights, doc);
+		
+		if (item.abstractNote) {
 			item.abstractNote = ZU.trimInternal(item.abstractNote);
 		}
 
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
+}
+
+
+function decodeEntities(str, doc) {
+	if (!str || !str.includes('&') || !doc.createElement) {
+		return str;
+	}
+	
+	// https://stackoverflow.com/questions/7394748/whats-the-right-way-to-decode-a-string-that-has-special-html-entities-in-it/7394787#7394787
+	var textarea = doc.createElement('textarea');
+	textarea.innerHTML = str;
+	return textarea.value;
 }
 
 /** BEGIN TEST CASES **/
@@ -163,6 +186,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.osapublishing.org/search.cfm?q=test&meta=1&cj=1&cc=1",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -258,6 +282,78 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.osapublishing.org/ol/abstract.cfm?uri=ol-40-24-5750",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Metamaterial-waveguide bends with effective bend radius < λ<sub>0</sub>/2",
+				"creators": [
+					{
+						"firstName": "Bing",
+						"lastName": "Shen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Randy",
+						"lastName": "Polson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rajesh",
+						"lastName": "Menon",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015/12/15",
+				"DOI": "10.1364/OL.40.005750",
+				"ISSN": "1539-4794",
+				"abstractNote": "We designed, fabricated, and characterized broadband, efficient, all-dielectric metamaterial-waveguide bends (MWBs) that redirect light by 180&#xA0;deg. The footprint of each MWB is 3&#x2009;&#x2009;&#x3BC;m&#xD7;3&#x2009;&#x2009;&#x3BC;m and redirection is achieved for single-mode waveguides spaced by 1.3&#xA0;&#x3BC;m, which corresponds to an effective bend radius of 0.65&#xA0;&#x3BC;m (&lt;&#x3BB;0/2 for &#x3BB;0=1.55&#x2009;&#x2009;&#x3BC;m). The designed and measured transmission efficiencies are &gt;80% and &#x223C;70%, respectively. Furthermore, the MWBs have an operating bandwidth &gt;66&#x2009;nm (design) and &gt;56&#x2009;&#x2009;nm (experiments). Our design methodology that incorporates fabrication constraints enables highly robust devices. The methodology can be extended to the general routing of light in tight spaces for large-scale photonic integration.",
+				"issue": "24",
+				"journalAbbreviation": "Opt. Lett., OL",
+				"language": "EN",
+				"libraryCatalog": "www.osapublishing.org",
+				"pages": "5750-5753",
+				"publicationTitle": "Optics Letters",
+				"rights": "© 2015 Optical Society of America",
+				"url": "https://www.osapublishing.org/ol/abstract.cfm?uri=ol-40-24-5750",
+				"volume": "40",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bend loss"
+					},
+					{
+						"tag": "Light propagation"
+					},
+					{
+						"tag": "Optical lithography"
+					},
+					{
+						"tag": "Photonic crystals"
+					},
+					{
+						"tag": "Photonic integration"
+					},
+					{
+						"tag": "Plasmon waveguides"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
