@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-31 13:41:42"
+	"lastUpdated": "2021-06-07 20:18:39"
 }
 
 /*
@@ -99,12 +99,10 @@ function scrape(doc, url) {
 				}
 			}
 			// DOI: Some docs contain DOI as a separate paragraph in abs field
-			// use DOI URL as url when DOI exists
 			var DOILead = 'https://doi.org/';
 			if (abs.innerText.includes(DOILead)) {
 				var DOIMatch = abs.innerText.match(/https:\/\/doi\.org\/(.+)/i);
 				newItem.DOI = DOIMatch[1];
-				newItem.url = DOIMatch[0];
 			}
 		}
 		// attach PDF
@@ -114,10 +112,8 @@ function scrape(doc, url) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-		// url when DOI doesn't exist
-		if (!abs.innerText.includes(DOILead)) {
+		// url
 			newItem.url = url;
-		}
 		// language: 2 or 3 letters following ISO 639
 		// indicated by the last 1-3 letters in PDF file name (langCode)
 		// One good example is the various language versions of http://www.fao.org/publications/card/en/c/I2801E
@@ -174,10 +170,10 @@ function scrape(doc, url) {
 		var metaText = ZU.xpath(doc, '//*[@id="mainN0"]')[0].innerText.split('\n'); // scrape text of meta area and split into an array based on line breaks.
 		// get what variables are listed in the page, save to object existingMeta
 		var textVariable = { // declarations for metadata names as appeared in document pages in different languages
-			date: ['سنة النشر', '出版年代', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
+			date: ['سنة النشر', '出版年份', 'Year of publication', 'Année de publication', 'Год издания', 'Fecha de publicación'],
 			publisher: ['الناشر', '出版方', 'Publisher', 'Éditeur', 'Издатель', 'Editor'],
-			place: ['مكان النشر', '出版地點', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
-			pages: ['الصفحات', '页次', 'Pages', 'Страницы', 'Páginas'],
+			place: ['مكان النشر', '出版地点', 'Place of publication', 'Lieu de publication', 'Место публикации', 'Lugar de publicacion'],
+			pages: ['الصفحات', '页数', 'Pages', 'Страницы', 'Páginas'],
 			ISBN: ['الرقم الدولي الموحد للكتاب', 'ISBN'],
 			author: ['الكاتب', '作者', 'Author', 'Auteur', 'Автор', 'Autor'],
 			seriesTitle: ['العنوان التسلسي', '系列标题', 'Serial Title', 'Titre de la série', 'Название серии', 'Título de la serie'],
@@ -357,7 +353,7 @@ var testCases = [
 				"numPages": "4",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
-				"url": "https://doi.org/10.4060/ca8466en",
+				"url": "http://www.fao.org/documents/card/en/c/ca8466en",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -416,7 +412,7 @@ var testCases = [
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
 				"seriesNumber": "No. 1207",
-				"url": "https://doi.org/10.4060/ca8751en",
+				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -538,7 +534,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"shortTitle": "FAO publications catalogue 2020",
-				"url": "https://doi.org/10.4060/ca7988en",
+				"url": "http://www.fao.org/documents/card/en/c/ca7988en/",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -574,14 +570,14 @@ var testCases = [
 				"title": "Vivre et se nourir de la forêt en Afrique centrale",
 				"creators": [
 					{
-						"lastName": "Ousseynou Ndoye",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "O.",
+						"lastName": "Ndoye",
+						"creatorType": "author"
 					},
 					{
-						"lastName": " Paul Vantomme",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "P.",
+						"lastName": "Vantomme",
+						"creatorType": "author"
 					}
 				],
 				"date": "2016",
@@ -592,8 +588,8 @@ var testCases = [
 				"numPages": "251",
 				"place": "Rome, Italy",
 				"publisher": "FAO",
-				"series": "Non-wood forest products working paper",
-				"seriesNumber": "21",
+				"series": "Produits Forestiers Non-Ligneux",
+				"seriesNumber": "No. 21",
 				"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
 				"attachments": [
 					{
@@ -606,64 +602,34 @@ var testCases = [
 						"tag": "Afrique centrale"
 					},
 					{
-						"tag": "Aménagement forestier"
+						"tag": "Commerce international"
 					},
 					{
-						"tag": "Burundi"
-					},
-					{
-						"tag": "Cameroun"
-					},
-					{
-						"tag": "Congo"
+						"tag": "Communauté rurale"
 					},
 					{
 						"tag": "Connaissance indigène"
 					},
 					{
-						"tag": "Conservation de la diversité biologique"
+						"tag": "Nouvelle technologie"
 					},
 					{
-						"tag": "Forêt humide"
+						"tag": "Petite entreprise"
 					},
 					{
-						"tag": "Gabon"
-					},
-					{
-						"tag": "Gnetum"
-					},
-					{
-						"tag": "Guinée Équatoriale"
+						"tag": "Politique forestière"
 					},
 					{
 						"tag": "Produit forestier non ligneux"
 					},
 					{
-						"tag": "Ricinodendron heudelotii"
+						"tag": "Ressource forestière"
 					},
 					{
-						"tag": "Rwanda"
+						"tag": "Sécurité alimentaire"
 					},
 					{
-						"tag": "République centrafricaine"
-					},
-					{
-						"tag": "République démocratique du Congo"
-					},
-					{
-						"tag": "Sao Tomé-et-Principe"
-					},
-					{
-						"tag": "Tchad"
-					},
-					{
-						"tag": "Technologie traditionnelle"
-					},
-					{
-						"tag": "forest products derivation"
-					},
-					{
-						"tag": "méthode traditionnelle"
+						"tag": "Valeur économique"
 					},
 					{
 						"tag": "sustainable forest management"
@@ -855,25 +821,25 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "fishery economics"
+						"tag": "null"
 					},
 					{
-						"tag": "forestry economics"
+						"tag": "null"
 					},
 					{
-						"tag": "gender"
+						"tag": "null"
 					},
 					{
-						"tag": "governance"
-					},
-					{
-						"tag": "guidelines"
-					},
-					{
-						"tag": "land tenure"
+						"tag": "null"
 					},
 					{
 						"tag": "أمن غذائي"
+					},
+					{
+						"tag": "الحكم"
+					},
+					{
+						"tag": "حيازة الأراضي"
 					}
 				],
 				"notes": [],
