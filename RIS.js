@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-10-19 17:04:49"
+	"lastUpdated": "2021-05-25 22:40:15"
 }
 
 function detectImport() {
@@ -461,12 +461,21 @@ var degenerateImportFieldMap = {
  *   not present in the list, the next list is checked. If the RIS tag is
  *   present, but an item type does not match (no __default) or is explicit
  *   excluded from matching (__exclude), the next list is checked.
+ *   The `deprecatedMap` should be a subset of the maps in this list.
+ * @param {Tag <-> zotero field map} deprecatedMap A map, in the same format as
+ *   the entries in the `mapList`, containing deprecated tags that should only
+ *   be used if no other tag maps to the same Zotero item field.
  */
-var TagMapper = function(mapList) {
+var TagMapper = function(mapList, deprecatedMap) {
 	this.cache = {};
 	this.reverseCache = {};
 	this.mapList = mapList;
+	this.deprecatedMap = deprecatedMap;
 };
+
+TagMapper.prototype.isDeprecated = function (tag) {
+	return this.deprecatedMap.hasOwnProperty(tag);
+}
 
 /**
  * Given an item type and a RIS tag, return Zotero field data should be mapped to.
@@ -1201,13 +1210,21 @@ var CitaviCleaner = new function() {
 	}
 }
 
-function processTag(item, tagValue, risEntry) {
+/**
+ * Returns false and fails to process if the provided tag is deprecated and
+ * allowDeprecated is false.
+ */
+function processTag(item, tagValue, risEntry, allowDeprecated) {
 	var tag = tagValue.tag;
 	var value = tagValue.value.trim();
 	var rawLine = tagValue.raw;
 	
 	//drop empty fields
 	if (value === "") return;
+	
+	if (!allowDeprecated && importFields.isDeprecated(tag)) {
+		return false;
+	}
 	
 	var zField = importFields.getField(item.itemType, tag);
 	if (!zField) {
@@ -1394,6 +1411,7 @@ function processTag(item, tagValue, risEntry) {
 	}
 
 	applyValue(item, zField[0], value, rawLine);
+	return true;
 }
 
 function applyValue(item, zField, value, rawLine) {
@@ -1729,7 +1747,7 @@ function startImport(resolve, reject) {
 		//set up import field mapper
 		var maps = [fieldMap, degenerateImportFieldMap];
 		if (exportedOptions.fieldMap) maps.unshift(exportedOptions.fieldMap);
-		importFields = new TagMapper(maps);
+		importFields = new TagMapper(maps, degenerateImportFieldMap);
 		
 		//prepare some configurable options
 		if (Zotero.getHiddenPref) {
@@ -1784,10 +1802,19 @@ function importNext(resolve, reject) {
 			EndNoteCleaner.cleanTags(entry, item); //some tweaks to EndNote export
 			CitaviCleaner.cleanTags(entry, item);
 			
+			var deferredEntries = [];
+			
 			for (var i=0, n=entry.length; i<n; i++) {
-				if ((['TY', 'ER']).indexOf(entry[i].tag) == -1) { //ignore TY and ER tags
-					processTag(item, entry[i], entry);
+				//ignore TY and ER tags
+				if ((['TY', 'ER']).indexOf(entry[i].tag) != -1) continue;
+				
+				if (!processTag(item, entry[i], entry, false)) {
+					deferredEntries.push(entry[i]);
 				}
+			}
+			
+			for (let deferred of deferredEntries) {
+				processTag(item, deferred, entry, true);
 			}
 			
 			var maybePromise = completeItem(item);
@@ -6390,6 +6417,26 @@ var testCases = [
 					"Law"
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nT1  - Deprecated tag test\nN1  - The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.\nY1  - 1900/01/01\nDA  - 1950/01/01\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Deprecated tag test",
+				"creators": [],
+				"date": "January 1, 1950",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]

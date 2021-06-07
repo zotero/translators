@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-08 08:11:55"
+	"lastUpdated": "2021-05-25 05:21:23"
 }
 
 /*
@@ -134,6 +134,7 @@ function scrape(doc, url) {
 		text = text.replace(/container_title/, "container-title");
 
 		var trans = Zotero.loadTranslator('import');
+		// CSL JSON
 		trans.setTranslator('bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7');
 		trans.setString(text);
 		trans.setHandler("itemDone", function(obj, item) {
@@ -171,12 +172,14 @@ function scrape(doc, url) {
 			//something is odd with zenodo's author parsing to CSL on some pages; fix it
 			//e.g. https://zenodo.org/record/569323
 			for (var i = 0; i< item.creators.length; i++) {
-				if (!item.creators[i].firstName) {
-					if (item.creators[i].lastName.includes(",")) {
-						item.creators[i].firstName = item.creators[i].lastName.replace(/.+?,\s*/, "");
-						item.creators[i].lastName = item.creators[i].lastName.replace(/,.+/, "");
+				let creator = item.creators[i];
+				if (!creator.firstName || !creator.firstName.length) {
+					if (creator.lastName.includes(",")) {
+						creator.firstName = creator.lastName.replace(/.+?,\s*/, "");
+						creator.lastName = creator.lastName.replace(/,.+/, "");
 					} else {
-						item.creators[i].fieldMode = true;
+						item.creators[i] = ZU.cleanAuthor(creator.lastName,
+							creator.creatorType, false);
 					}
 				}
 				delete item.creators[i].creatorTypeID;
@@ -186,7 +189,15 @@ function scrape(doc, url) {
 			if (item.itemType == "thesis" && item.publisher == "Zenodo") {
 				item.publisher = "";
 			}
+			// or as institution for reports
+			else if (item.itemType == "report" && item.institution == "Zenodo") {
+				item.institution = "";
+			}
+
 			if (item.date) item.date = ZU.strToISO(item.date);
+			if (url.includes('#')) {
+				url = url.substring(0, url.indexOf('#'));
+			}
 			item.url = url;
 			if (abstract) item.abstractNote = abstract;
 
@@ -360,7 +371,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/45756?ln=en#.VsoJtEKVuYU",
+		"url": "https://zenodo.org/record/45756?ln=en",
 		"items": [
 			{
 				"itemType": "document",
@@ -402,7 +413,7 @@ var testCases = [
 				"extra": "DOI: 10.5281/zenodo.45756\nType: dataset",
 				"libraryCatalog": "Zenodo",
 				"publisher": "Zenodo",
-				"url": "https://zenodo.org/record/45756?ln=en#.VsoJtEKVuYU",
+				"url": "https://zenodo.org/record/45756?ln=en",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
@@ -410,10 +421,18 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Structural Genomics Consortium",
-					"crystallography",
-					"diffraction",
-					"protein structure"
+					{
+						"tag": "Structural Genomics Consortium"
+					},
+					{
+						"tag": "crystallography"
+					},
+					{
+						"tag": "diffraction"
+					},
+					{
+						"tag": "protein structure"
+					}
 				],
 				"notes": [
 					{
@@ -431,7 +450,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://zenodo.org/record/569323#.WUiYiyeQxh9",
+		"url": "https://zenodo.org/record/569323",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -439,8 +458,8 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Schaffer",
-						"creatorType": "author",
-						"firstName": "Frederic Charles"
+						"firstName": "Frederic Charles",
+						"creatorType": "author"
 					}
 				],
 				"date": "2016-12-31",
@@ -450,7 +469,7 @@ var testCases = [
 				"libraryCatalog": "Zenodo",
 				"pages": "52-56",
 				"publicationTitle": "Qualitative & Multi-Method Research",
-				"url": "https://zenodo.org/record/569323#.WUiYiyeQxh9",
+				"url": "https://zenodo.org/record/569323",
 				"volume": "14",
 				"attachments": [
 					{
@@ -459,7 +478,9 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"qualitative methods"
+					{
+						"tag": "qualitative methods"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -472,59 +493,52 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
+				"title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages",
 				"creators": [
 					{
-						"lastName": "Carl Boettiger",
-						"firstName": "",
-						"creatorType": "author",
-						"fieldMode": true
+						"firstName": "Carl",
+						"lastName": "Boettiger",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Maëlle Salmon",
-						"firstName": "",
-						"creatorType": "author",
-						"fieldMode": true
+						"firstName": "Maëlle",
+						"lastName": "Salmon",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Noam Ross",
-						"firstName": "",
-						"creatorType": "author",
-						"fieldMode": true
+						"firstName": "Noam",
+						"lastName": "Ross",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Arfon Smith",
-						"firstName": "",
-						"creatorType": "author",
-						"fieldMode": true
+						"firstName": "Arfon",
+						"lastName": "Smith",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Anna Krystalli",
-						"firstName": "",
-						"creatorType": "author",
-						"fieldMode": true
+						"firstName": "Anna",
+						"lastName": "Krystalli",
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2017-11-13",
+				"abstractNote": "an R package for generating and working with codemeta",
+				"company": "Zenodo",
+				"extra": "DOI: 10.5281/zenodo.1048320",
+				"libraryCatalog": "Zenodo",
+				"shortTitle": "ropensci/codemetar",
+				"url": "https://zenodo.org/record/1048320",
 				"attachments": [
 					{
 						"title": "Zenodo Snapshot",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "ropensci/codemetar: codemetar: Generate CodeMeta Metadata for R Packages",
-				"publisher": "Zenodo",
-				"abstractNote": "an R package for generating and working with codemeta",
-				"date": "2017-11-13",
-				"extra": "DOI: 10.5281/zenodo.1048320",
-				"url": "https://zenodo.org/record/1048320",
-				"libraryCatalog": "Zenodo",
-				"accessDate": "2018-03-07T13:45:35Z",
-				"shortTitle": "ropensci/codemetar",
-				"company": "Zenodo"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	}
-];
+]
 /** END TEST CASES **/

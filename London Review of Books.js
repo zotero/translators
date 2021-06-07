@@ -1,24 +1,22 @@
 {
 	"translatorID": "8a00461c-5b42-4632-8048-339b221ac3a2",
 	"label": "London Review of Books",
-	"creator": "Avram Lyon",
-	"target": "^https?://www\\.lrb\\.co\\.uk",
-	"minVersion": "1.0",
+	"creator": "Philipp Zumstein",
+	"target": "^https?://(www\\.)?lrb\\.co\\.uk",
+	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2016-11-04 20:39:10"
+	"lastUpdated": "2020-05-09 22:08:11"
 }
 
-/* FW LINE 59:b820c6d */ function flatten(t){var e=new Array;for(var i in t){var r=t[i];r instanceof Array?e=e.concat(flatten(r)):e.push(r)}return e}var FW={_scrapers:new Array};FW._Base=function(){this.callHook=function(t,e,i,r){if("object"==typeof this.hooks){var n=this.hooks[t];"function"==typeof n&&n(e,i,r)}},this.evaluateThing=function(t,e,i){var r=typeof t;if("object"===r){if(t instanceof Array){var n=this.evaluateThing,a=t.map(function(t){return n(t,e,i)});return flatten(a)}return t.evaluate(e,i)}return"function"===r?t(e,i):t},this.makeItems=function(t,e,i,r,n){n()}},FW.Scraper=function(t){FW._scrapers.push(new FW._Scraper(t))},FW._Scraper=function(t){for(x in t)this[x]=t[x];this._singleFieldNames=["abstractNote","applicationNumber","archive","archiveLocation","artworkMedium","artworkSize","assignee","audioFileType","audioRecordingType","billNumber","blogTitle","bookTitle","callNumber","caseName","code","codeNumber","codePages","codeVolume","committee","company","conferenceName","country","court","date","dateDecided","dateEnacted","dictionaryTitle","distributor","docketNumber","documentNumber","DOI","edition","encyclopediaTitle","episodeNumber","extra","filingDate","firstPage","forumTitle","genre","history","institution","interviewMedium","ISBN","ISSN","issue","issueDate","issuingAuthority","journalAbbreviation","label","language","legalStatus","legislativeBody","letterType","libraryCatalog","manuscriptType","mapType","medium","meetingName","nameOfAct","network","number","numberOfVolumes","numPages","pages","patentNumber","place","postType","presentationType","priorityNumbers","proceedingsTitle","programTitle","programmingLanguage","publicLawNumber","publicationTitle","publisher","references","reportNumber","reportType","reporter","reporterVolume","rights","runningTime","scale","section","series","seriesNumber","seriesText","seriesTitle","session","shortTitle","studio","subject","system","thesisType","title","type","university","url","version","videoRecordingType","volume","websiteTitle","websiteType"],this._makeAttachments=function(t,e,i,r){if(i instanceof Array)i.forEach(function(i){this._makeAttachments(t,e,i,r)},this);else if("object"==typeof i){var n=i.urls||i.url,a=i.types||i.type,s=i.titles||i.title,o=i.snapshots||i.snapshot,u=this.evaluateThing(n,t,e),l=this.evaluateThing(s,t,e),c=this.evaluateThing(a,t,e),h=this.evaluateThing(o,t,e);u instanceof Array||(u=[u]);for(var f in u){var p,m,v,d=u[f];p=c instanceof Array?c[f]:c,m=l instanceof Array?l[f]:l,v=h instanceof Array?h[f]:h,r.attachments.push({url:d,title:m,mimeType:p,snapshot:v})}}},this.makeItems=function(t,e,i,r,n){var a=new Zotero.Item(this.itemType);a.url=e;for(var s in this._singleFieldNames){var o=this._singleFieldNames[s];if(this[o]){var u=this.evaluateThing(this[o],t,e);u instanceof Array?a[o]=u[0]:a[o]=u}}var l=["creators","tags"];for(var c in l){var h=l[c],f=this.evaluateThing(this[h],t,e);if(f)for(var p in f)a[h].push(f[p])}this._makeAttachments(t,e,this.attachments,a),r(a,this,t,e),n()}},FW._Scraper.prototype=new FW._Base,FW.MultiScraper=function(t){FW._scrapers.push(new FW._MultiScraper(t))},FW._MultiScraper=function(t){for(x in t)this[x]=t[x];this._mkSelectItems=function(t,e){var i=new Object;for(var r in t)i[e[r]]=t[r];return i},this._selectItems=function(t,e,i){var r=new Array;Zotero.selectItems(this._mkSelectItems(t,e),function(t){for(var e in t)r.push(e);i(r)})},this._mkAttachments=function(t,e,i){var r=this.evaluateThing(this.attachments,t,e),n=new Object;if(r)for(var a in i)n[i[a]]=r[a];return n},this._makeChoices=function(t,e,i,r,n){if(t instanceof Array)t.forEach(function(t){this._makeTitlesUrls(t,e,i,r,n)},this);else if("object"==typeof t){var a=t.urls||t.url,s=t.titles||t.title,o=this.evaluateThing(a,e,i),u=this.evaluateThing(s,e,i),l=u instanceof Array;o instanceof Array||(o=[o]);for(var c in o){var h,f=o[c];h=l?u[c]:u,n.push(f),r.push(h)}}},this.makeItems=function(t,e,i,r,n){if(this.beforeFilter){var a=this.beforeFilter(t,e);if(a!=e)return void this.makeItems(t,a,i,r,n)}var s=[],o=[];this._makeChoices(this.choices,t,e,s,o);var u=this._mkAttachments(t,e,o),l=this.itemTrans;this._selectItems(s,o,function(t){if(t){var e=function(t){var e=t.documentURI,i=l;void 0===i&&(i=FW.getScraper(t,e)),void 0===i||i.makeItems(t,e,u[e],r,function(){})};Zotero.Utilities.processDocuments(t,e,n)}else n()})}},FW._MultiScraper.prototype=new FW._Base,FW.WebDelegateTranslator=function(t){return new FW._WebDelegateTranslator(t)},FW._WebDelegateTranslator=function(t){for(x in t)this[x]=t[x];this.makeItems=function(t,e,i,r,n){var a=this,s=Zotero.loadTranslator("web");s.setHandler("itemDone",function(i,n){r(n,a,t,e)}),s.setDocument(t),this.translatorId?(s.setTranslator(this.translatorId),s.translate()):(s.setHandler("translators",function(t,e){e.length&&(s.setTranslator(e[0]),s.translate())}),s.getTranslators()),n()}},FW._WebDelegateTranslator.prototype=new FW._Base,FW._StringMagic=function(){this._filters=new Array,this.addFilter=function(t){return this._filters.push(t),this},this.split=function(t){return this.addFilter(function(e){return e.split(t).filter(function(t){return""!=t})})},this.replace=function(t,e,i){return this.addFilter(function(r){return r.match(t)?r.replace(t,e,i):r})},this.prepend=function(t){return this.replace(/^/,t)},this.append=function(t){return this.replace(/$/,t)},this.remove=function(t,e){return this.replace(t,"",e)},this.trim=function(){return this.addFilter(function(t){return Zotero.Utilities.trim(t)})},this.trimInternal=function(){return this.addFilter(function(t){return Zotero.Utilities.trimInternal(t)})},this.match=function(t,e){return e||(e=0),this.addFilter(function(i){var r=i.match(t);return void 0===r||null===r?void 0:r[e]})},this.cleanAuthor=function(t,e){return this.addFilter(function(i){return Zotero.Utilities.cleanAuthor(i,t,e)})},this.key=function(t){return this.addFilter(function(e){return e[t]})},this.capitalizeTitle=function(){return this.addFilter(function(t){return Zotero.Utilities.capitalizeTitle(t)})},this.unescapeHTML=function(){return this.addFilter(function(t){return Zotero.Utilities.unescapeHTML(t)})},this.unescape=function(){return this.addFilter(function(t){return unescape(t)})},this._applyFilters=function(t,e){for(i in this._filters){t=flatten(t),t=t.filter(function(t){return void 0!==t&&null!==t});for(var r=0;r<t.length;r++)try{if(void 0===t[r]||null===t[r])continue;t[r]=this._filters[i](t[r],e)}catch(n){t[r]=void 0,Zotero.debug("Caught exception "+n+"on filter: "+this._filters[i])}t=t.filter(function(t){return void 0!==t&&null!==t})}return flatten(t)}},FW.PageText=function(){return new FW._PageText},FW._PageText=function(){this._filters=new Array,this.evaluate=function(t){var e=[t.documentElement.innerHTML];return e=this._applyFilters(e,t),0==e.length?!1:e}},FW._PageText.prototype=new FW._StringMagic,FW.Url=function(){return new FW._Url},FW._Url=function(){this._filters=new Array,this.evaluate=function(t,e){var i=[e];return i=this._applyFilters(i,t),0==i.length?!1:i}},FW._Url.prototype=new FW._StringMagic,FW.Xpath=function(t){return new FW._Xpath(t)},FW._Xpath=function(t){this._xpath=t,this._filters=new Array,this.text=function(){var t=function(t){return"object"==typeof t&&t.textContent?t.textContent:t};return this.addFilter(t),this},this.sub=function(t){var e=function(e,i){var r=i.evaluate(t,e,null,XPathResult.ANY_TYPE,null);return r?r.iterateNext():void 0};return this.addFilter(e),this},this.evaluate=function(t){var e=t.evaluate(this._xpath,t,null,XPathResult.ANY_TYPE,null),i=e.resultType,r=new Array;if(i==XPathResult.STRING_TYPE)r.push(e.stringValue);else if(i==XPathResult.BOOLEAN_TYPE)r.push(e.booleanValue);else if(i==XPathResult.NUMBER_TYPE)r.push(e.numberValue);else if(i==XPathResult.ORDERED_NODE_ITERATOR_TYPE||i==XPathResult.UNORDERED_NODE_ITERATOR_TYPE)for(var n;n=e.iterateNext();)r.push(n);return r=this._applyFilters(r,t),0==r.length?!1:r}},FW._Xpath.prototype=new FW._StringMagic,FW.detectWeb=function(t,e){for(var i in FW._scrapers){var r=FW._scrapers[i],n=r.evaluateThing(r.itemType,t,e),a=r.evaluateThing(r.detect,t,e);if(a.length>0&&a[0])return n}},FW.getScraper=function(t,e){var i=FW.detectWeb(t,e);return FW._scrapers.filter(function(r){return r.evaluateThing(r.itemType,t,e)==i&&r.evaluateThing(r.detect,t,e)})[0]},FW.doWeb=function(t,e){var i=FW.getScraper(t,e);i.makeItems(t,e,[],function(t,e,i,r){e.callHook("scraperDone",t,i,r),t.title||(t.title=""),t.complete()},function(){Zotero.done()}),Zotero.wait()};
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	LRB Translator
-	Copyright © 2011 Avram Lyon, ajlyon@gmail.com
-
+	Copyright © 2020 Philipp Zumstein
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,54 +35,97 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) { return FW.detectWeb(doc, url); }
-function doWeb(doc, url) { return FW.doWeb(doc, url); }
 
-FW.Scraper({
-itemType         : 'newspaperArticle',
-detect           : FW.Url().match(/\/v\d+\/n\d+\/.*\//),
-title            : FW.Xpath('//hgroup/h1').text().trim(),
-attachments      : [{ url: FW.Url().append("/print"),
-  title:  "LRB Printable",
-  type: "text/html" }],
-creators         : FW.Xpath('//hgroup/h2').text().cleanAuthor("author"),
-date             : FW.Xpath('//p[@class="meta-info"]/a').text().replace(/^[^·]*·\s*/,''),
-volume             : FW.Xpath('//p[@class="meta-info"]/a').text().replace(/^Vol. (\d+) No. (\d+) ·.*$/,'$1'),
-issue             : FW.Xpath('//p[@class="meta-info"]/a').text().replace(/^Vol. (\d+) No. (\d+) ·.*$/,'$2'),
-pages             : FW.Xpath('//p[@class="meta-info"]/text()[last()]').text().replace(/^[^0-9-,]*([0-9-,]+).*$/,'$1'),
-publicationTitle : "London Review of Books",
-ISSN			: "0260-9592"
-});
+// attr()/text() v2
+// eslint-disable-next-line
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/\/v\d+\/n\d+\/contents/),
-choices			 : {
-	titles            : FW.Xpath('//ul[@class="article-list"]/li[h2/a]/ul').text().trim(),
-	urls            : FW.Xpath('//ul[@class="article-list"]/li[ul]/h2/a/@href').text().trim(),
-}});
 
-FW.MultiScraper({
-itemType         : 'multiple',
-detect           : FW.Url().match(/search\?q=./),
-choices			 : {
-	titles            : FW.Xpath('//ul[@class="search-results"]/li/a').text().trim(),
-	urls            : FW.Xpath('//ul[@class="search-results"]/li/a/@href').text().trim(),
-}});
+function detectWeb(doc, url) {
+	if (/\/the-paper\/v\d+\/n\d+\//.test(url)) {
+		return "magazineArticle";
+	}
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('article .title a, a.toc-item');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+
+	translator.setHandler('itemDone', function (obj, item) {
+		// clean the title as this otherwise also contains
+		// the author and publication information
+		item.title = text('h1 .title') || item.title;
+		
+		let volumeIssue = url.match(/\/the-paper\/v(\d+)\/n(\d+)\//);
+		if (volumeIssue) {
+			item.volume = volumeIssue[1];
+			item.issue = volumeIssue[2];
+		}
+		item.ISSN = "0260-9592";
+		item.publicationTitle = "London Review of Books";
+		let reviewedTitle = text('.article-reviewed-item-title');
+		let reviewedSubTitle = text('.article-reviewed-item-subtitle');
+		if (reviewedTitle) {
+			if (reviewedSubTitle) {
+				reviewedTitle += reviewedSubTitle;
+			}
+			item.extra = "reviewed-title: " + reviewedTitle;
+		}
+		
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = "magazineArticle";
+		trans.doWeb(doc, url);
+	});
+}
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.lrb.co.uk/v21/n21/contents",
+		"url": "https://www.lrb.co.uk/the-paper/v21/n21",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.lrb.co.uk/v21/n21/slavoj-zizek/attempts-to-escape-the-logic-of-capitalism",
+		"url": "https://www.lrb.co.uk/the-paper/v21/n21/slavoj-zizek/attempts-to-escape-the-logic-of-capitalism",
 		"items": [
 			{
-				"itemType": "newspaperArticle",
+				"itemType": "magazineArticle",
 				"title": "Attempts to Escape the Logic of Capitalism",
 				"creators": [
 					{
@@ -93,19 +134,37 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "28 October 1999",
+				"date": "1999-10-28 00:00:00",
 				"ISSN": "0260-9592",
-				"libraryCatalog": "London Review of Books",
-				"pages": "3-6",
+				"extra": "reviewed-title: Václav Havel: A Political Tragedy in Six Acts",
+				"issue": "21",
+				"language": "en",
+				"libraryCatalog": "www.lrb.co.uk",
 				"publicationTitle": "London Review of Books",
-				"url": "http://www.lrb.co.uk/v21/n21/slavoj-zizek/attempts-to-escape-the-logic-of-capitalism",
+				"url": "https://www.lrb.co.uk/the-paper/v21/n21/slavoj-zizek/attempts-to-escape-the-logic-of-capitalism",
+				"volume": "21",
 				"attachments": [
 					{
-						"title": "LRB Printable",
-						"mimeType": "text/html"
+						"title": "Snapshot"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "1946-1999"
+					},
+					{
+						"tag": "Biography"
+					},
+					{
+						"tag": "Czech Republic"
+					},
+					{
+						"tag": "Drama"
+					},
+					{
+						"tag": "Political systems"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -113,8 +172,56 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.lrb.co.uk/search?q=tatar",
+		"url": "https://www.lrb.co.uk/search-results?search=terminator&all=&any=&exclude=&phrase=&dateFrom=&dateTo=&sort=relevance#",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.lrb.co.uk/the-paper/v41/n22/jonathan-ree/the-young-man-one-hopes-for",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "The Young Man One Hopes For",
+				"creators": [
+					{
+						"firstName": "Jonathan",
+						"lastName": "Rée",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-11-19 14:58:10",
+				"ISSN": "0260-9592",
+				"abstractNote": "Wittgenstein wasn’t particularly impress­ed by Bertrand Russell’s adoration. If his philosoph­ical capacities were...",
+				"extra": "reviewed-title: Wittgenstein’s Family Letters: Corresponding with Ludwig",
+				"issue": "22",
+				"language": "en",
+				"libraryCatalog": "www.lrb.co.uk",
+				"publicationTitle": "London Review of Books",
+				"url": "https://www.lrb.co.uk/the-paper/v41/n22/jonathan-ree/the-young-man-one-hopes-for",
+				"volume": "41",
+				"attachments": [
+					{
+						"title": "Snapshot"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Biography"
+					},
+					{
+						"tag": "Ludwig"
+					},
+					{
+						"tag": "Philosophy"
+					},
+					{
+						"tag": "Wittgenstein"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

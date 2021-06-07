@@ -2,14 +2,14 @@
 	"translatorID": "1c5b122c-7e58-4cd5-932b-93f5ca0b7e1a",
 	"label": "National Post",
 	"creator": "Adam Crymble",
-	"target": "http://www.(national|financial)post.com/",
+	"target": "http://www\\.(national|financial)post\\.com/",
 	"minVersion": "1.0.0b4.r5",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2017-05-23 21:23:02"
+	"lastUpdated": "2021-06-07 16:44:39"
 }
 
 function detectWeb(doc, url) {

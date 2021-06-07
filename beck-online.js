@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-06-03 15:12:35"
+	"lastUpdated": "2021-02-22 11:59:55"
 }
 
 /*
@@ -587,8 +587,15 @@ function finalize(doc, url, item) {
 		title: "Snapshot",
 		document: doc
 	}];
+	
+	var perma = ZU.xpathText(doc, '//div[@class="doc-link"]/a/@href');
+	if (perma) {
+		item.url = perma;
+	}
+	
 	item.complete();
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -613,6 +620,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "88-95",
 				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-DNOTZ-SONDERH-B-2012-S-88-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -641,6 +649,7 @@ var testCases = [
 				"reporter": "BKR",
 				"reporterVolume": "2001",
 				"shortTitle": "Infomatec",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-BKR-B-2001-S-99-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -687,6 +696,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "898-903",
 				"publicationTitle": "Neue Juristische Wochenschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-NJW-B-2014-S-898-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -729,6 +739,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "3329-3334",
 				"publicationTitle": "Neue Juristische Wochenschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-NJW-B-2014-S-3329-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -766,6 +777,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "431-436",
 				"publicationTitle": "Gewerblicher Rechtsschutz und Urheberrecht",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-GRUR-B-2014-S-431-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -798,6 +810,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "2261-2267",
 				"publicationTitle": "Deutsches Steuerrecht",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-DSTR-B-2014-S-2261-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -829,6 +842,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "88-95",
 				"publicationTitle": "Sonderheft der Deutschen Notar-Zeitschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-DNOTZ-SONDERH-B-2012-S-88-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -866,6 +880,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "3329-3334",
 				"publicationTitle": "Neue Juristische Wochenschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-NJW-B-2014-S-3329-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -938,6 +953,7 @@ var testCases = [
 				"libraryCatalog": "beck-online",
 				"pages": "898-903",
 				"publicationTitle": "Neue Juristische Wochenschrift",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-NJW-B-2014-S-898-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -962,6 +978,7 @@ var testCases = [
 				"court": "OLG Köln",
 				"docketNumber": "6 U 67/11",
 				"extra": "Jurisdiction: de\nGenre: Urt.",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-BECKRS-B-2012-N-09546",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -993,6 +1010,7 @@ var testCases = [
 				"reporter": "GRUR",
 				"reporterVolume": "2014",
 				"shortTitle": "UPC Telekabel/Constantin Film ua [kino.to]",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-GRUR-B-2014-S-468-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1025,6 +1043,7 @@ var testCases = [
 				"reporter": "NJW",
 				"reporterVolume": "1991",
 				"shortTitle": "Indizierung eines pornographischen Romans (\"Josefine Mutzenbacher\")\n zur Fussnote †",
+				"url": "https://beck-online.beck.de/Bcid/Y-300-Z-NJW-B-1991-S-1471-N-1",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1068,6 +1087,7 @@ var testCases = [
 				"edition": "38",
 				"encyclopediaTitle": "Beck'scher Online-Kommentar BGB",
 				"libraryCatalog": "beck-online",
+				"url": "https://beck-online.beck.de/Bcid/Y-400-W-beckok-G-BGB-P-489",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1112,6 +1132,7 @@ var testCases = [
 				"edition": "2",
 				"encyclopediaTitle": "BGB | Schuldrecht",
 				"libraryCatalog": "beck-online",
+				"url": "https://beck-online.beck.de/Bcid/Y-400-W-DauLanKoBGB-G-BGB-P-489",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1146,6 +1167,7 @@ var testCases = [
 				"edition": "5",
 				"encyclopediaTitle": "Münchener Anwaltshandbuch Erbrecht",
 				"libraryCatalog": "beck-online",
+				"url": "https://beck-online.beck.de/Bcid/Y-400-W-ScheAnwHdb-GL-sect19-II-2-a",
 				"attachments": [
 					{
 						"title": "Snapshot"
@@ -1289,6 +1311,7 @@ var testCases = [
 				"publisher": "Verlag C. H. Beck",
 				"rights": "© 2018 Verlag C. H. Beck oHG",
 				"shortTitle": "Kühling/Buchner, DS-GVO BDSG",
+				"url": "https://beck-online.beck.de/Bcid/Y-400-W-KueBuchnerKoDSGVO",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
