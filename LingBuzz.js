@@ -67,16 +67,16 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		if(url.match(/semanticsArchive/)) {
-			scrapeSA(doc, url);
-		}
-		else {
-			scrape(doc, url);
-		}
+		scrape(doc, url);
 	}
 }
 
-function scrape(doc, _url) {
+function scrape(doc, url) {
+	if (url.match(/semanticsArchive/)) {
+		scrapeSA(doc, url);
+		return;
+	}
+	
 	var newItem = new Zotero.Item("report");
 	newItem.extra = "type: article\n"; // will map to preprint
 
