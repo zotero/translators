@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-04-20 20:15:16"
+	"lastUpdated": "2021-06-07 02:15:00"
 }
 
 /*
