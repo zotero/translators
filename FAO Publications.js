@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 20:18:39"
+	"lastUpdated": "2021-06-08 14:01:41"
 }
 
 /*
@@ -29,9 +29,28 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-	// Just differentiate single and multiple. Correct itemType (either book or conferencePaper) will be determined in scrape().
+	// Just differentiate single and multiple. 
+	// Identify item type (book or conferencePaper) based on "fdr_label" class.
 	if (url.includes('card')) {
-		return 'book';
+		let isConferencePaper = false;
+		let confMetaName = ['اسم الاجتماع', '会议名称', 'Meeting Name', 'Nom de la réunion', 'Название мероприятия', 'Nombre de la reunión'];
+		let labelArray = doc.querySelectorAll('.fdr_label');
+		for (let i = 0; i < labelArray.length; i++) {
+			for (let j = 0; j < confMetaName.length; j++) {
+				isConferencePaper = labelArray[i].innerText.includes(confMetaName[j]);
+				if (isConferencePaper) {
+					break;
+				}
+			}
+			if (isConferencePaper) {
+			break;
+			}
+		}
+	  	if (isConferencePaper) {
+			return 'conferencePaper';
+		} else {
+			return 'book';
+		}
 	}
 
 	/* Multiples currently don't load properly
