@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-25 05:21:23"
+	"lastUpdated": "2021-06-07 05:21:23"
 }
 
 /*
@@ -151,10 +151,10 @@ function scrape(doc, url) {
 			//if (schemaType && schemaType.includes("Dataset")) {
 			if (ZU.xpathText(doc, '//span[@class="pull-right"]/span[contains(@class, "label-default") and contains(., "Dataset")]')) {
 				if (item.extra) {
-					item.extra += "\ntype: dataset";
+					item.extra += "\nType: dataset";
 				}
 				else {
-					item.extra = "type: dataset";
+					item.extra = "Type: dataset";
 				}
 			}
 
@@ -410,7 +410,7 @@ var testCases = [
 				],
 				"date": "2016-02-10",
 				"abstractNote": "This submission includes a tar archive of bzipped diffraction images recorded with the ADSC Q315r detector at the Advanced Photon Source of Argonne National Laboratory, Structural Biology Center beam line 19-ID. Relevant meta data can be found in the headers of those diffraction images. Please find below the content of an input file XDS.INP for the program XDS (Kabsch, 2010), which may be used for data reduction. The \"NAME_TEMPLATE_OF_DATA_FRAMES=\" item inside XDS.INP may need to be edited to point to the location of the downloaded and untarred images. !!! Paste lines below in to a file named XDS.INP DETECTOR=ADSC  MINIMUM_VALID_PIXEL_VALUE=1  OVERLOAD= 65000 DIRECTION_OF_DETECTOR_X-AXIS= 1.0 0.0 0.0 DIRECTION_OF_DETECTOR_Y-AXIS= 0.0 1.0 0.0 TRUSTED_REGION=0.0 1.05 MAXIMUM_NUMBER_OF_JOBS=10 ORGX=   1582.82  ORGY=   1485.54 DETECTOR_DISTANCE= 150 ROTATION_AXIS= -1.0 0.0 0.0 OSCILLATION_RANGE=1 X-RAY_WAVELENGTH= 1.2821511 INCIDENT_BEAM_DIRECTION=0.0 0.0 1.0 FRACTION_OF_POLARIZATION=0.90 POLARIZATION_PLANE_NORMAL= 0.0 1.0 0.0 SPACE_GROUP_NUMBER=20 UNIT_CELL_CONSTANTS= 100.030   121.697    56.554    90.000    90.000    90.000 DATA_RANGE=1  180 BACKGROUND_RANGE=1 6 SPOT_RANGE=1 3 SPOT_RANGE=31 33 MAX_CELL_AXIS_ERROR=0.03 MAX_CELL_ANGLE_ERROR=2.0 TEST_RESOLUTION_RANGE=8.0 3.8 MIN_RFL_Rmeas= 50 MAX_FAC_Rmeas=2.0 VALUE_RANGE_FOR_TRUSTED_DETECTOR_PIXELS= 6000 30000 INCLUDE_RESOLUTION_RANGE=50.0 1.7 FRIEDEL'S_LAW= FALSE STARTING_ANGLE= -100      STARTING_FRAME=1 NAME_TEMPLATE_OF_DATA_FRAMES= ../x247398/t1.0???.img !!! End of XDS.INP",
-				"extra": "DOI: 10.5281/zenodo.45756\ntype: dataset",
+				"extra": "DOI: 10.5281/zenodo.45756\nType: dataset",
 				"libraryCatalog": "Zenodo",
 				"publisher": "Zenodo",
 				"url": "https://zenodo.org/record/45756?ln=en",

@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-06-26 20:49:31"
+	"lastUpdated": "2021-06-07 20:49:31"
 }
 
 /*
@@ -1214,9 +1214,9 @@ function importItem(newItem, node) {
 	/** CUSTOM ITEM TYPE  -- Currently only Dataset **/
 	if (type && (type.toLowerCase() == "dataset" || type.toLowerCase() == "datacatalog")) {
 		if (newItem.extra) {
-			newItem.extra += "\ntype: dataset";
+			newItem.extra += "\nType: dataset";
 		}
-		else newItem.extra = "type: dataset";
+		else newItem.extra = "Type: dataset";
 	}
 
 
