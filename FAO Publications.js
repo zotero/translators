@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-08 14:01:41"
+	"lastUpdated": "2021-06-08 21:19:23"
 }
 
 /*
@@ -48,7 +48,8 @@ function detectWeb(doc, url) {
 		}
 		if (isConferencePaper) {
 			return 'conferencePaper';
-		} else {
+		}
+		else {
 			return 'book';
 		}
 	}
@@ -271,9 +272,9 @@ function scrape(doc, url) {
 			if (key.includes('seriesTitle')) {
 				newItem.series = metaResult;
 			}
-			// seriesNumber: convert first letter to upper case
+			// seriesNumber: extract the number.
 			if (key.includes('seriesNumber')) {
-				newItem.seriesNumber = metaResult[0].toUpperCase() + metaResult.slice(1);
+				newItem.seriesNumber = (metaResult.match(/\d+/) || [])[0];
 			}
 			// conferenceName: save for later conditions.
 			if (key.includes('conference')) {
@@ -430,7 +431,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"series": "FAO Fisheries and Aquaculture Circular",
-				"seriesNumber": "No. 1207",
+				"seriesNumber": "1207",
 				"url": "http://www.fao.org/documents/card/en/c/ca8751en/",
 				"attachments": [
 					{
@@ -608,7 +609,7 @@ var testCases = [
 				"place": "Rome, Italy",
 				"publisher": "FAO",
 				"series": "Produits Forestiers Non-Ligneux",
-				"seriesNumber": "No. 21",
+				"seriesNumber": "21",
 				"url": "http://www.fao.org/publications/card/fr/c/77dbd058-8dd4-4295-af77-23f6b28cc683/",
 				"attachments": [
 					{
