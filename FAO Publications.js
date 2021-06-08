@@ -29,7 +29,7 @@
 	***** END LICENSE BLOCK *****
 */
 function detectWeb(doc, url) {
-	// Just differentiate single and multiple. 
+	// Just differentiate single and multiple.
 	// Identify item type (book or conferencePaper) based on "fdr_label" class.
 	if (url.includes('card')) {
 		let isConferencePaper = false;
@@ -43,10 +43,10 @@ function detectWeb(doc, url) {
 				}
 			}
 			if (isConferencePaper) {
-			break;
+				break;
 			}
 		}
-	  	if (isConferencePaper) {
+		if (isConferencePaper) {
 			return 'conferencePaper';
 		} else {
 			return 'book';
