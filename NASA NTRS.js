@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-09 15:18:03"
+	"lastUpdated": "2021-06-09 17:09:43"
 }
 
 /*
@@ -78,6 +78,8 @@ function doWeb(doc, url) {
 }
 
 function mapType(docType) {
+	if (!docType) return false;
+	
 	docType = docType.trim().toLowerCase();
 
 	let mapping = {
