@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-05 21:35:23"
+	"lastUpdated": "2021-06-09 15:18:03"
 }
 
 /*
@@ -82,7 +82,7 @@ function mapType(docType) {
 
 	let mapping = {
 		'conference paper|conference publication': 'conferencePaper',
-		'bibliograph(y|ic)|report|collected works|brief|memo|white paper': 'report',
+		'bibliograph(y|ic)|report|collected works|brief|memo|note|white paper': 'report',
 		'journal (article|issue)|^reprint': 'journalArticle',
 		'presentation|poster': 'presentation',
 		'thesis|dissertation': 'thesis',
