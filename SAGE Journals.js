@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-06 18:57:06"
+	"lastUpdated": "2021-06-09 14:07:20"
 }
 
 /*
@@ -36,10 +36,6 @@
 */
 
 // SAGE uses Atypon, but as of now this is too distinct from any existing Atypon sites to make sense in the same translator.
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	let articleMatch = /(abs|full|pdf|doi)\/10\./;
