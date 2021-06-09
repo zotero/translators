@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-05-25 22:40:15"
+	"lastUpdated": "2021-06-09 16:35:41"
 }
 
 function detectImport() {
@@ -233,6 +233,17 @@ var fieldMap = {
 		"creators/podcaster":["podcast"],
 		"creators/programmer":["computerProgram"]
 	},
+	A1: {
+		"__default":"creators/author",
+		"creators/artist":["artwork"],
+		"creators/cartographer":["map"],
+		"creators/composer":["audioRecording"],
+		"creators/director":["film", "radioBroadcast", "tvBroadcast", "videoRecording"], //this clashes with audioRecording
+		"creators/interviewee":["interview"],
+		"creators/inventor":["patent"],
+		"creators/podcaster":["podcast"],
+		"creators/programmer":["computerProgram"]
+	},
 	A2: {
 		"creators/sponsor":["bill"],
 		"creators/performer":["audioRecording"],
@@ -390,7 +401,6 @@ var fieldMap = {
 //used ONLY for importing and only if these fields are not specified above (e.g. M3)
 //these are not exported the same way
 var degenerateImportFieldMap = {
-	A1: fieldMap["AU"],
 	AD: {
 		"__default": "unsupported/Author Address",
 		"unsupported/Inventor Address": ["patent"]
@@ -6435,6 +6445,46 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>The Y1 date tag is deprecated. Its value should not be used when DA is present, even if Y1 comes first.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\nTI  - Mixed author tags\nN1  - A1 should not be treated as deprecated or authors will appear out of order.\nA1  - Georgiev, Danko\nAU  - Bello, Leon\nAU  - Carmi, Avishy\nAU  - Cohen, Eliahu\nER  - ",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mixed author tags",
+				"creators": [
+					{
+						"lastName": "Georgiev",
+						"firstName": "Danko",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bello",
+						"firstName": "Leon",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Carmi",
+						"firstName": "Avishy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cohen",
+						"firstName": "Eliahu",
+						"creatorType": "author"
+					}
+				],
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>A1 should not be treated as deprecated or authors will appear out of order.</p>"
 					}
 				],
 				"seeAlso": []
