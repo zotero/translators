@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-09 03:33:11"
+	"lastUpdated": "2021-06-09 14:10:56"
 }
 
 /*
@@ -34,10 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 
 function detectWeb(doc, url) {
@@ -174,6 +170,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://psyarxiv.com/nx2b4/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "report",
@@ -240,6 +237,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://osf.io/b2xmp/",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "report",
@@ -372,6 +370,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://osf.io/preprints/discover?provider=OSFORAgriXivORSocArXiv&q=testing",
+		"defer": true,
 		"items": "multiple"
 	}
 ]

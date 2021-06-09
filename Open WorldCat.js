@@ -9,12 +9,8 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-05-07 18:23:01"
+	"lastUpdated": "2021-06-09 14:41:29"
 }
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 /**
  * Gets Zotero item from a WorldCat icon src

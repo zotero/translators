@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-12 03:27:27"
+	"lastUpdated": "2021-06-09 14:09:23"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- TODO
+	Copyright © 2020 Sebastian Karcher
 	
 	This file is part of Zotero.
 
@@ -34,10 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
