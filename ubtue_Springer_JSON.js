@@ -108,6 +108,7 @@ function doImport() {
 
     item.pages = data.startingPage ? data.startingPage : "";
     item.pages = item.pages + (data.endingPage ? '-' + data.endingPage : '-');
+    item.date = data.publicationDate;
 
 	item.DOI = data.doi;
 	for (let url of data.url) {
