@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-10 17:41:38"
+	"lastUpdated": "2021-06-10 18:00:32"
 }
 
 /*
@@ -85,7 +85,7 @@ function processSubtitles(doc, item) {
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
 	if (primaryHeading) {
-		primaryHeading = primaryHeading.trim();
+		primaryHeading = primaryHeading.trim().replace(/book\s?review.*/i, 'Book Review');
 		if (primaryHeading.match(/(Book Review)|(Review Essays?)|(reviews?)/))
 			item.tags.push(primaryHeading);
 	}
@@ -595,15 +595,12 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
 				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -650,10 +647,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -757,10 +750,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -827,10 +816,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -891,16 +876,13 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -961,16 +943,13 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -1026,10 +1005,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -1077,10 +1052,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1118,6 +1089,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "951-974",
 				"publicationTitle": "The Journal of Finance",
+				"rights": "© 1986 the American Finance Association",
 				"shortTitle": "Volume for Winners and Losers",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.1986.tb04559.x",
 				"volume": "41",
@@ -1125,10 +1097,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1166,7 +1134,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "165-168",
 				"publicationTitle": "Angewandte Chemie International Edition",
-				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
 				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/%28SICI%291521-3773%2820000103%2939%3A1%3C165%3A%3AAID-ANIE165%3E3.0.CO%3B2-B",
 				"volume": "39",
@@ -1174,10 +1141,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
@@ -1234,10 +1197,6 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1275,16 +1234,13 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "25-99",
 				"publicationTitle": "New Directions for Evaluation",
+				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1315,16 +1271,13 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "158-158",
 				"publicationTitle": "Teaching Theology & Religion",
+				"rights": "© 2018 John Wiley & Sons Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436",
 				"volume": "21",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -1357,20 +1310,58 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "article e12657",
 				"publicationTitle": "History Compass",
-				"rights": "© 2021 John Wiley & Sons Ltd.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/hic3.12657",
 				"volume": "19",
 				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
-					},
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/erev.12591",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Aruna Gnanadason, With Courage and Compassion: Women and the Ecumenical Movement. Minneapolis: Fortress Press, 2020. 171 + xiv pp.",
+				"creators": [
+					{
+						"firstName": "Lois M.",
+						"lastName": "Wilson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1111/erev.12591",
+				"ISSN": "1758-6623",
+				"issue": "1",
+				"itemID": "https://doi.org/10.1111/erev.12591",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "194-195",
+				"publicationTitle": "The Ecumenical Review",
+				"rights": "© 2021 World Council of Churches",
+				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
+				"volume": "73",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
