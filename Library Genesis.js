@@ -2,14 +2,14 @@
 	"translatorID": "11614156-f421-4e89-8ce0-a5e69ce3ebed",
 	"label": "Library Genesis",
 	"creator": "Reverend Wicks Cherrycoke",
-	"target": "^https?://(libgen\\.[ir][os]|gen\\.lib\\.rus\\.ec)/",
+	"target": "^https?://(libgen\\.[a-z]{2}|gen\\.lib\\.rus\\.ec)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsi",
-	"lastUpdated": "2021-06-10 10:50:33"
+	"lastUpdated": "2021-06-10 13:41:46"
 }
 
 /*
@@ -102,6 +102,7 @@ function doWeb(doc, url) {
 		translator.translate();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -294,6 +295,37 @@ var testCases = [
 				"libraryCatalog": "Library Genesis",
 				"publisher": "MIT Press",
 				"url": "http://gen.lib.rus.ec/book/index.php?md5=a05be4942325aea362e2aff8c305b0de",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://libgen.st/book/index.php?md5=BD4B66472A15D6F0A2BC350A833581C1",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A Short History of Chinese Philosophy",
+				"creators": [
+					{
+						"firstName": "Fung",
+						"lastName": "Yu-lan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Derek",
+						"lastName": "Bodde",
+						"creatorType": "author"
+					}
+				],
+				"date": "1948",
+				"itemID": "book:885016",
+				"libraryCatalog": "Library Genesis",
+				"publisher": "The Free Press",
+				"url": "http://gen.lib.rus.ec/book/index.php?md5=bd4b66472a15d6f0a2bc350a833581c1",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
