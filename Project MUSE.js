@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-15 03:03:06"
+	"lastUpdated": "2021-06-10 16:32:33"
 }
 
 /*
@@ -102,13 +102,16 @@ function scrape(doc) {
 			let abstract = ZU.xpathText(doc, '//div[@class="abstract"][1]/p');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="description"][1]');
 			if (!abstract) abstract = ZU.xpathText(doc, '//div[contains(@class, "card_summary") and contains(@class, "no_border")]');
-			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');
 			if (abstract) {
 				item.abstractNote = abstract.replace(/^,*\s*Abstract[:,]*/, "").replace(/show (less|more)$/, "").replace(/,\s*$/, "");
 			}
+			let tags = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "kwd-group", " " ))]//p');			
 			if (tags) {
 				item.tags = tags.split(",");
 			}
+			//ubtue: add tag "Book Review"
+			let dcType = ZU.xpathText(doc, '//span[@class="Review"]');
+			if (dcType && dcType.match(/review/i)) item.tags.push("Book Review");
 			item.notes = [];
 			item.complete();
 		});
@@ -310,6 +313,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/issue/44583",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
