@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-10 16:24:47"
+	"lastUpdated": "2021-05-27 07:57:56"
 }
 
 /*
@@ -125,7 +125,7 @@ function scrape(doc, url) {
 					ZU.processDocuments(switchToDE, function (url) {
 						let scrapeAbstractsDE = ZU.xpathText(url, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]');
 						if (scrapeAbstractsDE) {
-							item.abstractNote = ZU.trimInternal(scrapeAbstractsDE.replace(/^(abstract|zusammenfassung)/gi, '')); //+= '\\n4207 ' + ZU.trimInternal(scrapeAbstractsDE.replace(/^(abstract|zusammenfassung)/gi, ''));
+							item.abstractNote = ZU.trimInternal(scrapeAbstractsDE.replace(/^(abstract|summary|zusammenfassung)/gi, '')); //+= '\\n4207 ' + ZU.trimInternal(scrapeAbstractsDE.replace(/^(abstract|zusammenfassung)/gi, ''));
 						}
 						item.complete();
 					});
@@ -134,3 +134,44 @@ function scrape(doc, url) {
 		});
 	});
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.vr-elibrary.de/doi/10.13109/kedo.2021.67.2.148",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Partizipation als Geben und Nehmen im Horizont der \t\t\t\t\tGnade: Zur diakoniewissenschaftlichen Begründung von Teilhabe",
+				"creators": [
+					{
+						"lastName": "Schmidt",
+						"firstName": "Markus",
+						"creatorType": "author"
+					}
+				],
+				"date": "May 21, 2021",
+				"DOI": "10.13109/kedo.2021.67.2.148",
+				"ISSN": "0023-0707",
+				"abstractNote": "In diaconal studies a paradigm shift from “care” to “participation” has taken place. The omnipresent use of “participation” derives from the socio-political progress perspectives based on human rights approaches, e.g. in diaconal practical work. However, a specific theological approach is missing. The article illustrates “participation” as a central theological term and argues for defining it as a mutual process of giving and taking. Participation is fundamentally active and should not be misunderstood as a passive product. A specific diaconal way of talking about “participation” is founded in God’s gift of Christ.",
+				"issue": "2",
+				"language": "de",
+				"libraryCatalog": "ubtue_vandenhoeck_ruprecht",
+				"pages": "148-166",
+				"publicationTitle": "Kerygma und Dogma",
+				"shortTitle": "Partizipation als Geben und Nehmen im Horizont der \t\t\t\t\tGnade",
+				"url": "https://www.vr-elibrary.de/doi/10.13109/kedo.2021.67.2.148",
+				"volume": "67",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>doi: 10.13109/kedo.2021.67.2.148</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
