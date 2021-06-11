@@ -39,9 +39,11 @@
 function detectWeb(doc, url) {
 	if (url.includes('/artikel/')) {
 		return "newspaperArticle";
-	} else if (url.includes('/sok?') && getSearchResults(doc, true)) {
+	}
+	else if (url.includes('/sok?') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -49,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('a.search-item');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -65,7 +67,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -73,7 +75,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -122,7 +125,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "newspaperArticle";
 		trans.addCustomFields({
 			'twitter:description': 'abstractNote'
@@ -130,6 +133,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -372,6 +376,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://sverigesradio.se/sok?query=choklad",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
