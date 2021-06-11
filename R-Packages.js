@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 16:44:56"
+	"lastUpdated": "2021-06-11 17:26:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	R Packages Translator
-	Copyright © 2013 Sebastian Karcher
+	Copyright © 2013-2021 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -42,12 +42,8 @@ https://cloud.r-project.org/web/packages/asciiruler/index.html
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	if (text(doc, 'body>h2')) {
+	if (text(doc, 'h2')) {
 		return "computerProgram";
 	} else if ((url.includes('/available_packages_by_date.html') || url.includes('/available_packages_by_name.html')) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -91,7 +87,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item('computerProgram');
-	item.title = text(doc, 'body>h2');
+	item.title = text(doc, 'h2');
 	
 	var authorString = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Author")]/following-sibling::td');
 	if (authorString) {
@@ -111,7 +107,7 @@ function scrape(doc, url) {
 	}
 	
 	item.versionNumber = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Version")]/following-sibling::td');
-	item.abstractNote = ZU.trimInternal(text(doc, 'body>p') || '');
+	item.abstractNote = ZU.trimInternal(text(doc, 'body p') || '');
 	item.date = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Published")]/following-sibling::td');
 	item.rights = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "License")]/following-sibling::td');
 	
@@ -128,17 +124,17 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://cran.us.r-project.org/web/packages/available_packages_by_name.html#available-packages-B",
+		"url": "http://lib.stat.cmu.edu/R/CRAN/web/packages/available_packages_by_name.html#available-packages-B",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://cran.us.r-project.org/web/packages/available_packages_by_date.html",
+		"url": "http://lib.stat.cmu.edu/R/CRAN/web/packages/available_packages_by_date.html",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://cran.us.r-project.org/web/packages/effects/index.html",
+		"url": "http://lib.stat.cmu.edu/R/CRAN/web/packages/effects/index.html",
 		"items": [
 			{
 				"itemType": "computerProgram",
@@ -152,6 +148,11 @@ var testCases = [
 					{
 						"firstName": "Sanford",
 						"lastName": "Weisberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Brad",
+						"lastName": "Price",
 						"creatorType": "author"
 					},
 					{
@@ -185,13 +186,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-09-15",
+				"date": "2020-08-11",
 				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for various statistical models with linear predictors.",
 				"libraryCatalog": "R-Packages",
 				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
 				"shortTitle": "effects",
 				"url": "https://CRAN.R-project.org/package=effects",
-				"versionNumber": "4.0-0",
+				"versionNumber": "4.2-0",
 				"attachments": [],
 				"tags": [
 					{
@@ -202,6 +203,9 @@ var testCases = [
 					},
 					{
 						"tag": "SocialSciences"
+					},
+					{
+						"tag": "TeachingStatistics"
 					}
 				],
 				"notes": [],
@@ -228,6 +232,11 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Brad",
+						"lastName": "Price",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Michael",
 						"lastName": "Friendly",
 						"creatorType": "author"
@@ -258,13 +267,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-09-15",
+				"date": "2020-08-11",
 				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for various statistical models with linear predictors.",
 				"libraryCatalog": "R-Packages",
 				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
 				"shortTitle": "effects",
 				"url": "https://CRAN.R-project.org/package=effects",
-				"versionNumber": "4.0-0",
+				"versionNumber": "4.2-0",
 				"attachments": [],
 				"tags": [
 					{
@@ -275,6 +284,9 @@ var testCases = [
 					},
 					{
 						"tag": "SocialSciences"
+					},
+					{
+						"tag": "TeachingStatistics"
 					}
 				],
 				"notes": [],
@@ -301,6 +313,11 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "Brad",
+						"lastName": "Price",
+						"creatorType": "author"
+					},
+					{
 						"firstName": "Michael",
 						"lastName": "Friendly",
 						"creatorType": "author"
@@ -331,13 +348,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-09-15",
+				"date": "2020-08-11",
 				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for various statistical models with linear predictors.",
 				"libraryCatalog": "R-Packages",
 				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
 				"shortTitle": "effects",
 				"url": "https://CRAN.R-project.org/package=effects",
-				"versionNumber": "4.0-0",
+				"versionNumber": "4.2-0",
 				"attachments": [],
 				"tags": [
 					{
@@ -348,6 +365,9 @@ var testCases = [
 					},
 					{
 						"tag": "SocialSciences"
+					},
+					{
+						"tag": "TeachingStatistics"
 					}
 				],
 				"notes": [],
@@ -357,72 +377,27 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://cran.stat.ucla.edu/web/packages/effects/",
+		"url": "https://cran.r-project.org/web/packages/DCEtool/index.html",
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "effects: Effect Displays for Linear, Generalized Linear, and Other Models",
+				"title": "DCEtool: Create, Survey and Analyse Discrete Choice Experiments",
 				"creators": [
 					{
-						"firstName": "John",
-						"lastName": "Fox",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sanford",
-						"lastName": "Weisberg",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael",
-						"lastName": "Friendly",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jangman",
-						"lastName": "Hong",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Robert",
-						"lastName": "Andersen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Firth",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Steve",
-						"lastName": "Taylor",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "R Core Team",
-						"fieldMode": true,
+						"firstName": "Daniel Perez",
+						"lastName": "Troncoso",
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-09-15",
-				"abstractNote": "Graphical and tabular effect displays, e.g., of interactions, for various statistical models with linear predictors.",
+				"date": "2021-05-24",
+				"abstractNote": "This app is intended to be a complete package for creating, surveying, and analysing discrete choice experiments. Although all these functionalities are available, the app can also be used only to obtain the design of a discrete choice experiment. Reference: Perez-Troncoso, D. (2021) <https://github.com/danielpereztr/DCEtool>.",
 				"libraryCatalog": "R-Packages",
-				"rights": "GPL-2 | GPL-3 [expanded from: GPL (≥ 2)]",
-				"shortTitle": "effects",
-				"url": "https://CRAN.R-project.org/package=effects",
-				"versionNumber": "4.0-0",
+				"rights": "GPL-3",
+				"shortTitle": "DCEtool",
+				"url": "https://CRAN.R-project.org/package=DCEtool",
+				"versionNumber": "0.2.3",
 				"attachments": [],
-				"tags": [
-					{
-						"tag": "Econometrics"
-					},
-					{
-						"tag": "MachineLearning"
-					},
-					{
-						"tag": "SocialSciences"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
