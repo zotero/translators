@@ -36,7 +36,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-/*Some other sample sites:
+/* Some other sample sites:
 https://stat.ethz.ch/CRAN/web/packages/MCMCpack/
 https://cloud.r-project.org/web/packages/asciiruler/index.html
 */
@@ -45,9 +45,11 @@ https://cloud.r-project.org/web/packages/asciiruler/index.html
 function detectWeb(doc, url) {
 	if (text(doc, 'h2')) {
 		return "computerProgram";
-	} else if ((url.includes('/available_packages_by_date.html') || url.includes('/available_packages_by_name.html')) && getSearchResults(doc, true)) {
+	}
+	else if ((url.includes('/available_packages_by_date.html') || url.includes('/available_packages_by_name.html')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -55,7 +57,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('tr>td>a[href*="/web/packages/"]');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -71,7 +73,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -79,7 +81,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -92,18 +95,18 @@ function scrape(doc, url) {
 	var authorString = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Author")]/following-sibling::td');
 	if (authorString) {
 		var creators = authorString.replace(/\[.+?\]/g, '').split(/\s*,\s*/);
-		for (let i=0; i<creators.length; i++) {
-			if (creators[i].trim()=="R Core Team") {
+		for (let i = 0; i < creators.length; i++) {
+			if (creators[i].trim() == "R Core Team") {
 				item.creators.push({
 					lastName: creators[i].trim(),
 					fieldMode: true,
 					creatorType: "author"
 				});
-			} else {
+			}
+			else {
 				item.creators.push(ZU.cleanAuthor(creators[i], 'author'));
 			}
 		}
-		
 	}
 	
 	item.versionNumber = ZU.xpathText(doc, '//table/tbody/tr/td[contains(text(), "Version")]/following-sibling::td');
@@ -113,7 +116,7 @@ function scrape(doc, url) {
 	
 	item.url = text(doc, 'a>samp') || url;
 	var tags = ZU.xpath(doc, '//td[contains(text(), "views")]/following-sibling::td/a');
-	for (let i=0; i<tags.length; i++) {
+	for (let i = 0; i < tags.length; i++) {
 		item.tags.push(tags[i].textContent);
 	}
 	
