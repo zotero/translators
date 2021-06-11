@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 16:30:10"
+	"lastUpdated": "2021-06-11 16:34:07"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018-2021 czar
-	http://en.wikipedia.org/wiki/User_talk:Czar
+	Copyright © 2018-2021 czar (http://en.wikipedia.org/wiki/User_talk:Czar)
+	                      and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -39,15 +39,17 @@
 
 function detectWeb(doc, url) {
 	if (url.includes("/article/")) {		// does not handle /event/ or /media/ pages, which EM alone can handle
-		if (text(doc,'.article-belongs-to-issue')) {
+		if (text(doc, '.article-belongs-to-issue')) {
 			return "magazineArticle";
 		}
 		else {
 			return "blogPost";
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -59,15 +61,16 @@ function scrape(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
 		item.title = attr(doc, 'meta[property="og:title"]', 'content') || item.title; // EM is putting " | Frieze" at the end
 		item.publicationTitle = "Frieze";
-		item.issue = text(doc,'.article-belongs-to-issue');
+		item.issue = text(doc, '.article-belongs-to-issue');
 		if (item.issue) {
 			item.itemType = "magazineArticle";
 			item.ISSN = "0962-0672";
-			item.issue = item.issue.replace('Issue ','');
-		} else {
+			item.issue = item.issue.replace('Issue ', '');
+		}
+		else {
 			item.itemType = "blogPost";
 		}
-		item.date = text(doc,'.article-header-author-info').split('|')[1].trim();
+		item.date = text(doc, '.article-header-author-info').split('|')[1].trim();
 		if (item.date) {
 			// 21 -> 2021
 			item.date = item.date.replace(/([0-9]{2})$/, '20$1');
@@ -84,7 +87,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.doWeb(doc, url);
 	});
 }
@@ -94,7 +97,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.teaser-title a[href*="/article/"]');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -112,7 +115,7 @@ function doWeb(doc, url) {
 		case "multiple":
 			Zotero.selectItems(getSearchResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
 				var articles = [];
 				for (var i in items) {
@@ -122,11 +125,12 @@ function doWeb(doc, url) {
 			});
 			break;
 		case "magazineArticle":
-		case "blogPost":	
+		case "blogPost":
 			scrape(doc, url);
 			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
