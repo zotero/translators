@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-15 16:59:35"
+	"lastUpdated": "2021-06-11 16:47:46"
 }
 
 /*
@@ -36,9 +36,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 function detectWeb(doc, url) {
 	if (/theintercept\.com\/\d{4}\/\d{2}\/\d{2}\//.test(url)) {
 		return "blogPost";
@@ -64,12 +61,12 @@ function scrape(doc, url) {
 	});
 
 	// Authors
-	if (ldjson.authors.length) {
+	if (ldjson.author.length) {
 		do {
-			item.creators.push(ZU.cleanAuthor(ldjson.authors[0], "author"));
-			ldjson.authors.shift();
+			item.creators.push(ZU.cleanAuthor(ldjson.author[0], "author"));
+			ldjson.author.shift();
 		}
-		while (ldjson.authors.length);
+		while (ldjson.author.length);
 	}
 
 	// Feature articles json omits the feature title
@@ -85,8 +82,8 @@ function scrapeDocument(doc, url) {
 	item.publisher = "The Intercept";
 	item.language = "en-US";
 	item.url = url;
-	item.title = text(doc,'.BasicDocumentDetail-title');
-	item.date = text(doc,'.BasicDocumentDetail-date');
+	item.title = text(doc, '.BasicDocumentPage-title');
+	item.date = text(doc, '.BasicDocumentPage-date');
 	if (item.date) { // don't perform on empty string
 		item.date = ZU.strToISO(item.date);
 	}	
@@ -171,7 +168,8 @@ var testCases = [
 				"url": "https://theintercept.com/2017/06/05/top-secret-nsa-report-details-russian-hacking-effort-days-before-2016-election/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -206,7 +204,8 @@ var testCases = [
 				"url": "https://theintercept.com/2015/11/19/an-fbi-informant-seduced-eric-mcdavid-into-a-bomb-plot-then-the-government-lied-about-it/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
