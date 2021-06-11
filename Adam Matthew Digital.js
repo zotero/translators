@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-24 16:58:29"
+	"lastUpdated": "2021-06-08 17:58:42"
 }
 
 /*
@@ -137,7 +137,7 @@ function scrapeNew(doc, url) {
 	if (pageSelect) {
 		item.numPages = pageSelect.childElementCount;
 	}
-	item.archive = fromTable('Library/Archive');
+	item.archive = fromTable('Library/Archive') || fromTable('Collection');
 	item.archiveLocation = fromTable('Reference');
 	item.libraryCatalog = extractCatalogName(doc.title);
 	item.url = url.replace('/SearchDetails/', '/Details/')
@@ -305,6 +305,7 @@ var testCases = [
 					}
 				],
 				"date": "1840",
+				"archive": "Everett D. Graff Collection of Western Americana",
 				"archiveLocation": "Graff 2445",
 				"libraryCatalog": "American West - Adam Matthew Digital",
 				"url": "https://www.americanwest.amdigital.co.uk/Documents/Details/Graff_2445",
