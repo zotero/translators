@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-09 20:15:40"
+	"lastUpdated": "2021-06-11 13:07:46"
 }
 
 /*
@@ -123,8 +123,13 @@ function scrape(doc, _url) {
 	if (json.dateCreated) {
 		let bceDateMatch = json.dateCreated.match(/([0-9]+) av\./);
 		if (bceDateMatch) {
-			// https://docs.citationstyles.org/en/1.0.1/specification.html#ad-and-bc
-			item.date = '-' + bceDateMatch[1];
+			// this generates a date in EDTF format, which works like ISO 8601:
+			// https://en.wikipedia.org/wiki/ISO_8601#Years
+			// so we need to add one; 200 BCE is represented as -0199
+			let year = parseInt(bceDateMatch[1]);
+			if (!isNaN(year)) {
+				item.date = '-' + (year - 1).toString().padStart(4, '0');
+			}
 		}
 		else {
 			item.date = ZU.strToISO(json.dateCreated);
@@ -226,7 +231,7 @@ var testCases = [
 				"itemType": "artwork",
 				"title": "stèle",
 				"creators": [],
-				"date": "-2300",
+				"date": "-2299",
 				"abstractNote": "stèle ;  ; Décor : scène de victoire ; Sargon d'Akkad (?, kaunakès, masse d'armes, capturant, ennemi : plusieurs, filet) ; Ishtar (?) ; inscription ;  ; Etat de l'oeuvre : incomplet ; Précisions de l'objet : Sommet d'une scène de victoire. Le roi, peut-être Sargon d'Akkad, capture dans un filet des ennemis et assomme le roi vaincu avec sa masse d'armes. La scène se passe devant une divinité, peut-être la déesse Ishtar",
 				"archive": "Louvre",
 				"artworkMedium": "Matériau : diorite ; Technique : bas-relief",
