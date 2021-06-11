@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 16:47:46"
+	"lastUpdated": "2021-06-11 16:49:43"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 czar
+	Copyright © 2017-2021 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
@@ -39,22 +39,25 @@
 function detectWeb(doc, url) {
 	if (/theintercept\.com\/\d{4}\/\d{2}\/\d{2}\//.test(url)) {
 		return "blogPost";
-	} else if (url.includes("/document/")) {
+	}
+	else if (url.includes("/document/")) {
 		return "document";
-	} else if (/(theintercept\.com\/search\/\?s=)|(theintercept\.com\/?$)/.test(url) && getSearchResults(doc, true) ) {
+	}
+	else if (/(theintercept\.com\/search\/\?s=)|(theintercept\.com\/?$)/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var item = new Zotero.Item("blogPost");
 	item.blogTitle = "The Intercept";
 	item.language = "en-US";
-	var ldjson = JSON.parse(text(doc,'script[type="application/ld+json"]'));
+	var ldjson = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	item.url = ldjson.url;
 	item.title = ldjson.headline;
 	item.date = ldjson.dateCreated;
-	item.abstractNote = text(doc,'meta[name="description"]');
+	item.abstractNote = text(doc, 'meta[name="description"]');
 	item.attachments.push({
 		document: doc,
 		title: "Snapshot"
@@ -70,8 +73,8 @@ function scrape(doc, url) {
 	}
 
 	// Feature articles json omits the feature title
-	var featureTitle = text(doc,'.Post-feature-title');
-	if (featureTitle){
+	var featureTitle = text(doc, '.Post-feature-title');
+	if (featureTitle) {
 		item.title = featureTitle.concat(": ", item.title);
 	}
 	item.complete();
@@ -86,12 +89,12 @@ function scrapeDocument(doc, url) {
 	item.date = text(doc, '.BasicDocumentPage-date');
 	if (item.date) { // don't perform on empty string
 		item.date = ZU.strToISO(item.date);
-	}	
+	}
 	// no item.abstractNote: no description given
 	item.attachments.push({
 		title: item.title,
 		mimeType: "application/pdf",
-		url: attr(doc,'a[class$="-navigation-download"]','href')
+		url: attr(doc, 'a[class$="-navigation-download"]', 'href')
 	});
 
 	item.complete();
@@ -102,7 +105,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.Promo-title, h1.HomeFeature-title');
 	var links = doc.querySelectorAll('.Promo-link, a.HomeFeature-link');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = links[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -117,7 +120,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -125,9 +128,11 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else if (detectWeb(doc, url) == "document") {
+	}
+	else if (detectWeb(doc, url) == "document") {
 		scrapeDocument(doc, url);
-	} else if (detectWeb(doc, url) == "blogPost") {
+	}
+	else if (detectWeb(doc, url) == "blogPost") {
 		// if this if statement is removed, the multi page attempts to feed itself into the scrape function
 		scrape(doc, url);
 	}
