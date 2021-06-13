@@ -350,7 +350,7 @@ function stripAuthor(str) {
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
 	// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|.{3})?\)?/g, '')
+		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|\.{3})?\)?/g, '')
 		// Remove creator type like (illustrator)
 		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
