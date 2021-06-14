@@ -38,34 +38,36 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/spip\.php\?article')) {
+	if (url.includes('/spip.php?article')) {
 		return "encyclopediaArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var newItem = new Zotero.Item("encyclopediaArticle");
 	newItem.encyclopediaTitle = "Le Maitron";
 	newItem.language = "fr";
 	
-	newItem.url = attr(doc,'link[rel=canonical]','href'); // url.replace(/#$/,'');
-	newItem.title = text(doc,'.notice-titre');
+	newItem.url = attr(doc, 'link[rel=canonical]', 'href'); // url.replace(/#$/,'');
+	newItem.title = text(doc, '.notice-titre');
 	
 	// if title contains square brackets, take its contents and use as encyclopedia name
 	var subEncyc = newItem.title.match(/\[[^\]]+\]/g);
 	if (subEncyc) {
-		newItem.encyclopediaTitle = subEncyc[subEncyc.length-1].slice(1, -1);
-		newItem.title = newItem.title.slice(0, -1*(newItem.encyclopediaTitle.length+3));
+		newItem.encyclopediaTitle = subEncyc[subEncyc.length - 1].slice(1, -1);
+		newItem.title = newItem.title.slice(0, -1 * (newItem.encyclopediaTitle.length + 3));
 	}
 	newItem.publisher = "Maitron/Editions de l'Atelier";
 	newItem.place = "Paris";
 	
 	// ZU.strToISO chokes on diacritics
-	var prepdate = text(doc,'#copy-text').match(/\d{1,2}\s[^\s]+\s\d{4}/g);
-	prepdate = prepdate[prepdate.length-1].normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+	var prepdate = text(doc, '#copy-text').match(/\d{1,2}\s[^\s]+\s\d{4}/g);
+	prepdate = prepdate[prepdate.length - 1].normalize('NFD').replace(/[\u0300-\u036f]/g, "");
 	prepdate = prepdate
 		.replace('fev', 'feb')
 		.replace('avr', 'apr')
@@ -74,7 +76,7 @@ function scrape(doc, url) {
 		.replace('juil', 'jul')
 		.replace('aout', 'aug');
 	newItem.date = ZU.strToISO(prepdate);
-	newItem.abstractNote = text(doc,'.intro');
+	newItem.abstractNote = text(doc, '.intro');
 	// var articleID = newItem.url.match(/\d{2,}/);
 	newItem.attachments.push({
 		document: doc,
@@ -88,7 +90,7 @@ function scrape(doc, url) {
 	}
 	
 	// Authors – haven't seen more than one attributed at once
-	var authorMetadata = text(doc,'.notice-auteur').match(/\s*Par\s+(.*)/);
+	var authorMetadata = text(doc, '.notice-auteur').match(/\s*Par\s+(.*)/);
 	if (authorMetadata) {
 		newItem.creators.push(ZU.cleanAuthor(authorMetadata[1], "author"));
 	}
@@ -102,7 +104,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.resultats-liste a, .liste-notices li a');
 	var titles = doc.querySelectorAll('.resultats-liste strong, .liste-notices li a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(titles[i].textContent);
 		if (!href || !title) continue;
@@ -118,7 +120,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -126,7 +128,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
