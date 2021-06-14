@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 21:18:33"
+	"lastUpdated": "2021-06-14 21:23:46"
 }
 
 /*
@@ -35,9 +35,35 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/\/search\?/)) return 'multiple';
+	if (url.match(/\/search\?/) && getSearchResults(doc, true)) return 'multiple';
 	if (url.match(/\/view\/Entry\//)) return 'dictionaryEntry';
 	return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('#results .word a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function doWeb(doc, url) {
+	if (detectWeb(doc, url) === 'multiple') {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
 }
 
 function scrape(doc, url) {
@@ -58,24 +84,6 @@ function scrape(doc, url) {
 	item.publicationTitle = 'OED Online';
 
 	item.complete();
-}
-
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) === 'multiple') {
-		let items = {};
-		for (let item of doc.querySelectorAll('div#results .word a')) {
-			let title = item.textContent.trim();
-			let href = item.getAttribute('href');
-			if (title && href) items[href] = title;
-		}
-
-		Zotero.selectItems(items, function (items) {
-			ZU.processDocuments(Object.keys(items), scrape);
-		});
-	}
-	else {
-		scrape(doc, url);
-	}
 }
 
 /** BEGIN TEST CASES **/
