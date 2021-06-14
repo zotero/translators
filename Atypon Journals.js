@@ -97,7 +97,7 @@ function getSearchResults(doc, checkOnly, extras) {
 	}
 	
 	if (!found) {
-		Z.debug("Trying an alternate multiple format");
+		Z.debug("Trying alternate multiple format #1");
 		rows = container.getElementsByClassName("item-details");
 		for (let i = 0; i < rows.length; i++) {
 			let title = ZU.xpathText(rows[i], './h3');
@@ -120,7 +120,7 @@ function getSearchResults(doc, checkOnly, extras) {
 	}
 	
 	if (!found) {
-		Z.debug("Trying another alternate multiple format");
+		Z.debug("Trying alternate multiple format #2");
 		rows = container.querySelectorAll('.issue-item, .item__body');
 		for (let i = 0; i < rows.length; i++) {
 			let title = text(rows[i], 'a');
@@ -1094,7 +1094,6 @@ var testCases = [
 				],
 				"DOI": "10.1128/mSystems.00122-21",
 				"issue": "0",
-				"journalAbbreviation": "mSystems",
 				"libraryCatalog": "journals.asm.org (Atypon)",
 				"pages": "e00122-21",
 				"publicationTitle": "mSystems",
