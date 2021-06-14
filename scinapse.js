@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-05 22:45:05"
+	"lastUpdated": "2021-06-14 21:01:40"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Vincent Carret
+	Copyright © 2019-2021 Vincent Carret
 	
 	This file is part of Zotero.
 
@@ -35,10 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 function detectWeb(doc, url) {
 	if ((url.includes('/journals/') || url.includes('/authors/') || url.includes('/search?')) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -53,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 
-	var rows = doc.querySelectorAll(".title_title_2TG0L");
+	var rows = doc.querySelectorAll("a[href*='/papers/']");
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -76,59 +72,104 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc) {
-	if (doc.querySelector(".doiInPaperShow_doiContext_1p7QW") !== null) {
-		let DOI = text(doc, ".doiInPaperShow_doiContext_1p7QW");
+function scrapeEM(doc, url, postprocess) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
 	
-		const translate = Zotero.loadTranslator("search");
-		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
-		translate.setSearch({ itemType: "journalArticle", DOI: DOI });
-	
-		translate.setHandler("itemDone", function (_translate, item) {
-			if (!item.title) {
-				Zotero.debug("No title available for " + item.DOI);
-				item.title = "[No Title]";
-			}
-			try {
-				item.abstractNote = doc.querySelector(".paperShow_abstractContent_3Zqzc, .mobilePaperShow_abstractContent_3ViME").textContent.replace("Abstract", "");
-			}
-			catch (err) {}
-			item.complete();
+	translator.setHandler('itemDone', function (obj, item) {
+		item.abstractNote = item.abstractNote.replace(/^Abstract/, '')
+			.split(' | ')[0];
+		item.date = ZU.strToISO(item.date);
+		item.attachments = [];
+		postprocess(item);
+	});
+
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = "journalArticle";
+		trans.doWeb(doc, url);
+	});
+}
+
+function scrape(doc, url) {
+	scrapeEM(doc, url, function (item) {
+		item.attachments.push({
+			title: "Full Text PDF",
+			url: attr(doc, 'a[href*=".pdf"][target="_blank"]', 'href'),
+			mimeType: 'application/pdf'
 		});
-		// Don't throw on error
-		translate.setHandler("error", function () {});
-		translate.translate();
-	}
+		
+		var m = url.match(/\/papers\/([^/#?]+)/);
+		if (m) {
+			var bibUrl = "/api/citations/export?pids=" + m[1] + "&format=BIBTEX";
+			ZU.doGet(bibUrl, function (text, xhr) {
+				if (xhr.status != 200) {
+					Z.debug("Couldn't fetch BibTeX");
+					// it's fine, we'll return what EM gave us
+					item.complete();
+					return;
+				}
+				
+				var translator = Zotero.loadTranslator("import");
+				// BibTeX
+				translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+				translator.setString(text);
+				translator.setHandler("itemDone", function (obj, bibItem) {
+					if (bibItem.publicationTitle) {
+						// BibTeX publication title is better
+						delete item.publicationTitle;
+					}
+					
+					if (bibItem.url) {
+						// EM URL is just the page URL
+						delete item.url;
+					}
+					
+					Object.assign(bibItem, item);
+					bibItem.complete();
+				});
+				translator.translate();
+			}, null, null, null, false);
+		}
+	});
 }
 
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://scinapse.io/papers/2981511200",
+		"url": "https://www.scinapse.io/papers/2981511200",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Natural resources in the theory of production: the Georgescu-Roegen/Daly versus Solow/Stiglitz controversy",
 				"creators": [
 					{
-						"creatorType": "author",
 						"firstName": "Quentin",
-						"lastName": "Couix"
+						"lastName": "Couix",
+						"creatorType": "author"
 					}
 				],
 				"date": "2019-10-23",
 				"DOI": "10.1080/09672567.2019.1679210",
-				"ISSN": "0967-2567, 1469-5936",
-				"abstractNote": "This paper provides a theoretical and methodological account of an important controversy between neoclassical resource economics and ecological economics from the early 1970s to the end of ...",
-				"journalAbbreviation": "The European Journal of the History of Economic Thought",
+				"ISSN": "0967-2567",
+				"abstractNote": "This paper provides a theoretical and methodological account of an important controversy between neocl",
+				"issue": "6",
+				"itemID": "Couix_2019",
 				"language": "en",
-				"libraryCatalog": "DOI.org (Crossref)",
-				"pages": "1-38",
+				"libraryCatalog": "www.scinapse.io",
+				"pages": "1341–1378",
 				"publicationTitle": "The European Journal of the History of Economic Thought",
 				"shortTitle": "Natural resources in the theory of production",
-				"url": "https://www.tandfonline.com/doi/full/10.1080/09672567.2019.1679210",
-				"attachments": [],
+				"url": "https://doi.org/10.1080%2F09672567.2019.1679210",
+				"volume": "26",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -144,6 +185,89 @@ var testCases = [
 		"type": "web",
 		"url": "https://scinapse.io/authors/290705619",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.scinapse.io/papers/2908678941",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Electrospun polymer biomaterials",
+				"creators": [
+					{
+						"firstName": "Jianxun",
+						"lastName": "Ding",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jin",
+						"lastName": "Zhang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jiannan",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Di",
+						"lastName": "Li",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Chunsheng",
+						"lastName": "Xiao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Haihua",
+						"lastName": "Xiao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Huanghao",
+						"lastName": "Yang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Huang-Hao",
+						"lastName": "Yang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiuli",
+						"lastName": "Zhuang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xuesi",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-01-14",
+				"DOI": "10.1016/J.PROGPOLYMSCI.2019.01.002",
+				"ISSN": "0079-6700",
+				"abstractNote": "Electrospinning provides a versatile technique for the preparation of matrices with micro/nanoscopi",
+				"itemID": "Ding_2019",
+				"language": "en",
+				"libraryCatalog": "www.scinapse.io",
+				"pages": "1–34",
+				"publicationTitle": "Progress in Polymer Science",
+				"url": "https://doi.org/10.1016%2Fj.progpolymsci.2019.01.002",
+				"volume": "90",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"url": "",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
