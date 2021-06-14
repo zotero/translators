@@ -38,7 +38,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.search(/^https?:\/\/[^\/]+\/toc\/|\/action\/doSearch\?/) != -1) {
+	if (url.search(/^https?:\/\/[^/]+\/toc\/|\/action\/doSearch\?/) != -1) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
@@ -47,11 +47,13 @@ function detectWeb(doc, url) {
 		if (url.includes('/doi/book/')) {
 			return 'book';
 		}
-		else if (url.search(/\.ch\d+$/)!=-1){
+		else if (url.search(/\.ch\d+$/) != -1) {
 			return 'bookSection';
 		}
 		return "journalArticle";
 	}
+
+	return false;
 }
 
 function getSearchResults(doc, checkOnly, extras) {
@@ -67,7 +69,7 @@ function getSearchResults(doc, checkOnly, extras) {
 		found = false,
 		doiLink = 'a[contains(@href, "/doi/abs/") or contains(@href, "/doi/abstract/") or '
 			+ 'contains(@href, "/doi/full/") or contains(@href, "/doi/book/")]';
-	for (var i = 0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var title = rows[i].getElementsByClassName('art_title')[0];
 		if (!title) continue;
 		title = ZU.trimInternal(title.textContent);
@@ -94,15 +96,15 @@ function getSearchResults(doc, checkOnly, extras) {
 		articles[url] = title;
 	}
 	
-	if (!found){
+	if (!found) {
 		Z.debug("Trying an alternate multiple format");
-		var rows = container.getElementsByClassName("item-details");
-		for (var i = 0; i<rows.length; i++) {
-			var title = ZU.xpathText(rows[i], './h3');
+		rows = container.getElementsByClassName("item-details");
+		for (let i = 0; i < rows.length; i++) {
+			let title = ZU.xpathText(rows[i], './h3');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
 			
-			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
+			let url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
 				+ doiLink + ')[1]/@href');
 			if (!url) continue;
 			
@@ -119,13 +121,13 @@ function getSearchResults(doc, checkOnly, extras) {
 	
 	if (!found) {
 		Z.debug("Trying another alternate multiple format");
-		var rows = container.querySelectorAll('.issue-item, .item__body');
-		for (var i = 0; i<rows.length; i++) {
-			var title = text(rows[i], 'a');
+		rows = container.querySelectorAll('.issue-item, .item__body');
+		for (let i = 0; i < rows.length; i++) {
+			let title = text(rows[i], 'a');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
 			
-			var url = attr(rows[i], 'a', 'href');
+			let url = attr(rows[i], 'a', 'href');
 			if (!url) continue;
 			
 			if (checkOnly) return true;
@@ -149,18 +151,18 @@ function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
 	
 	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
-	for (var i=0; i<pdfPaths.length; i++) {
+	for (let i = 0; i < pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
 			return url.replace(replURLRegExp, pdfPaths[i]);
 		}
 	}
 	
 	Z.debug('PDF link not found.');
-	if (root.nodeType != 9 /*DOCUMENT_NODE*/) {
+	if (root.nodeType != 9 /* DOCUMENT_NODE*/) {
 		Z.debug('Available links:');
 		var links = root.getElementsByTagName('a');
 		if (!links.length) Z.debug('No links');
-		for (var i=0; i<links.length; i++) {
+		for (let i = 0; i < links.length; i++) {
 			Z.debug(links[i].href);
 		}
 	}
@@ -173,7 +175,7 @@ function doWeb(doc, url) {
 		var extras = {};
 		Zotero.selectItems(getSearchResults(doc, false, extras), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var itemurl in items) {
@@ -185,9 +187,9 @@ function doWeb(doc, url) {
 			
 			fetchArticles(articles);
 		});
-
-	} else {
-		scrape(doc, url, {pdf: buildPdfUrl(url, doc)});
+	}
+	else {
+		scrape(doc, url, { pdf: buildPdfUrl(url, doc) });
 	}
 }
 
@@ -205,10 +207,10 @@ function fetchArticles(articles) {
 	if (!articles.length) return;
 	
 	var article = articles.shift();
-	ZU.processDocuments(article.url, function(doc, url) {
+	ZU.processDocuments(article.url, function (doc, url) {
 		scrape(doc, url, article.extras);
 	},
-	function() {
+	function () {
 		if (articles.length) fetchArticles(articles);
 	});
 }
@@ -226,7 +228,7 @@ function scrape(doc, url, extras) {
 		var get = '/action/downloadCitation';
 		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
 		ZU.doPost(get, post, function (risText) {
-			//Z.debug(risText);
+			// Z.debug(risText);
 			var translator = Zotero.loadTranslator("import");
 			// Calling the RIS translator
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -275,7 +277,7 @@ function scrape(doc, url, extras) {
 				
 				item.url = url;
 				item.notes = [];
-				for (var i in tags){
+				for (var i in tags) {
 					item.tags.push(tags[i].textContent);
 				}
 				
@@ -302,7 +304,7 @@ function scrape(doc, url, extras) {
 					mimeType: "text/html"
 				});
 				item.libraryCatalog = url.replace(/^https?:\/\/(?:www\.)?/, '')
-					.replace(/[\/:].*/, '') + " (Atypon)";
+					.replace(/[/:].*/, '') + " (Atypon)";
 				item.complete();
 			});
 			translator.translate();
