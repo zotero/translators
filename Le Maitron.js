@@ -2,14 +2,14 @@
 	"translatorID": "ee016722-5f02-4362-8ffe-c96e06872b3e",
 	"label": "Le Maitron",
 	"creator": "czar",
-	"target": "^https?://maitron\\.fr",
+	"target": "^https?://maitron\\.fr/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-08-12 20:31:08"
+	"lastUpdated": "2021-06-14 19:43:57"
 }
 
 /*
@@ -35,10 +35,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -68,8 +64,15 @@ function scrape(doc, url) {
 	newItem.place = "Paris";
 	
 	// ZU.strToISO chokes on diacritics
-	var prepdate = text(doc,'#copy-text').match(/\d{1,2}\s[^\s]+\s\d{4}/g)
+	var prepdate = text(doc,'#copy-text').match(/\d{1,2}\s[^\s]+\s\d{4}/g);
 	prepdate = prepdate[prepdate.length-1].normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+	prepdate = prepdate
+		.replace('fev', 'feb')
+		.replace('avr', 'apr')
+		.replace('mai', 'may')
+		.replace('juin', 'jun')
+		.replace('juil', 'jul')
+		.replace('aout', 'aug');
 	newItem.date = ZU.strToISO(prepdate);
 	newItem.abstractNote = text(doc,'.intro');
 	// var articleID = newItem.url.match(/\d{2,}/);
@@ -85,7 +88,7 @@ function scrape(doc, url) {
 	}
 	
 	// Authors – haven't seen more than one attributed at once
-	var authorMetadata = text(doc,'.notice-auteur').match(/\s+Par\s+(.*)/);
+	var authorMetadata = text(doc,'.notice-auteur').match(/\s*Par\s+(.*)/);
 	if (authorMetadata) {
 		newItem.creators.push(ZU.cleanAuthor(authorMetadata[1], "author"));
 	}
@@ -132,7 +135,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://maitron.fr/spip.php?article155263",
+		"url": "https://maitron.fr/spip.php?article155263",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -151,42 +154,7 @@ var testCases = [
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron.fr/spip.php?article155263",
-				"attachments": [
-					{
-						"title": "Le Maitron snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://maitron-en-ligne.univ-paris1.fr/spip.php?article128360#",
-		"items": [
-			{
-				"itemType": "encyclopediaArticle",
-				"title": "RECLUS Paul, dit GUYOU Georges. Pseudonyme : GUYOU Georges",
-				"creators": [
-					{
-						"firstName": "Jean",
-						"lastName": "Maitron",
-						"creatorType": "author"
-					}
-				],
-				"date": "2010-12-30",
-				"abstractNote": "Né le 25 mai 1858 à Neuilly-sur-Seine (Seine), mort le 19 janvier 1941 à Montpellier (Hérault) ; ingénieur et professeur ; anarchiste.",
-				"encyclopediaTitle": "Le Maitron",
-				"language": "fr",
-				"libraryCatalog": "Le Maitron",
-				"place": "Paris",
-				"publisher": "Maitron/Editions de l'Atelier",
-				"shortTitle": "RECLUS Paul, dit GUYOU Georges",
-				"url": "http://maitron.fr/spip.php?article128360",
+				"url": "https://maitron.fr/spip.php?article155263",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
@@ -206,7 +174,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://maitron.fr/spip.php?article154716",
+		"url": "https://maitron.fr/spip.php?article154716",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -218,14 +186,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014",
+				"date": "2019-01-26",
 				"abstractNote": "Né le 11 août 1882 à Tikhvine (Russie), mort le 18 septembre 1945 à Paris ; militant et théoricien du mouvement anarchiste ; historien du mouvement makhnoviste.",
 				"encyclopediaTitle": "Dictionnaire des anarchistes",
 				"language": "fr",
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron.fr/spip.php?article154716",
+				"url": "https://maitron.fr/spip.php?article154716",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
@@ -245,7 +213,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://maitron.fr/spip.php?article149723&id_mot=216",
+		"url": "https://maitron.fr/spip.php?article149723&id_mot=216",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
@@ -264,7 +232,41 @@ var testCases = [
 				"libraryCatalog": "Le Maitron",
 				"place": "Paris",
 				"publisher": "Maitron/Editions de l'Atelier",
-				"url": "http://maitron.fr/spip.php?article149723",
+				"url": "https://maitron.fr/spip.php?article149723",
+				"attachments": [
+					{
+						"title": "Le Maitron snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://maitron.fr/spip.php?article174841",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "SALANNE René, Jean",
+				"creators": [
+					{
+						"firstName": "Claude",
+						"lastName": "Roccati",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-04-26",
+				"abstractNote": "Né le 31 janvier 1927 à Bayonne (Pyrénées-Atlantiques), mort le 16 avril 2021 à Paris ; modeleur sur bois ; permanent JOC pour la région Sud-Ouest, secrétaire général adjoint (1951-1953) puis vice-président (1953-1955) et enfin président de la JOC (1955-1956), secrétaire général de la JOC internationale (1956-1961) ; secrétaire confédéral CFTC-CFDT (1962-1970), membre de la commission exécutive de la CFDT en charge du secteur international (1970-1979).",
+				"encyclopediaTitle": "Le Maitron",
+				"language": "fr",
+				"libraryCatalog": "Le Maitron",
+				"place": "Paris",
+				"publisher": "Maitron/Editions de l'Atelier",
+				"url": "https://maitron.fr/spip.php?article174841",
 				"attachments": [
 					{
 						"title": "Le Maitron snapshot",
