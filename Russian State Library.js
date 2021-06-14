@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-04-14 16:26:08"
+	"lastUpdated": "2021-06-14 20:16:14"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 PChemGuy
+	Copyright © 2020-2021 PChemGuy
 
 	This file is part of Zotero.
 
@@ -142,34 +142,8 @@ const aRSLFilters = {
 const baseEurl = 'https://dlib.rsl.ru/';
 
 
-function attr(docOrElem, selector, attr, index) {
-	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
-
-
 /**
  *	Adds link attachment to a Zotero item.
- *
- *  Note attachment creation issue.
- *  Problem manifestation:
- *  If 'linkMode: "linked_url"' is not present or is the last (possibly also in
- *  the middle) line in the object definition, the "title" property is ignored,
- *  e.g., for 'research.rsl.ru/ru/record/01004956040' the "title" is set to
- *  "01004956040" regardless of the specified title. If 'linkMode: "linked_url"'
- *  is the first member as below, the "title" field is set as expected.
- *
- *  There appear to be a bug in Zotero routine that creates attachments from JSON
- *  definitions. "linkMode" property affects (determines?) the type of the new
- *  attachment and interpretation of the remaining properties. The routine
- *  apparently enumerates keys of the supplied JSON object, instead of accessing
- *  "linkMode" directly. It processes properties in the order supplied, and if
- *  "linkMode" does not come first, may not process earlier properties correctly.
- *  This is particularly problematic, since there is no guaranteed order of members
- *  in a dictionary, though, apparently, in simple cases at least the members are
- *  returned in the "added first" order. However, this behavior is not relaibly
- *  reproducible.
- *  Windows 7 x64, April 2020.
  *
  *	@param {Object} item - Zotero item
  *	@param {String} title - Link name
@@ -178,11 +152,12 @@ function attr(docOrElem, selector, attr, index) {
  *	@return {None}
  */
 function addLink(item, title, url) {
-	item.attachments.push({ linkMode: "linked_url", // Apparently, should be the first
+	item.attachments.push({
 		title: title,
 		snapshot: false,
 		contentType: "text/html",
-		url: url });
+		url: url
+	});
 }
 
 
@@ -763,7 +738,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01002457709",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -810,7 +784,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01000580022",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -864,7 +837,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01004044482",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -910,13 +882,11 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01008942252",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
 					},
 					{
-						"linkMode": "linked_url",
 						"title": "E-resource",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -950,7 +920,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01007057068",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -983,7 +952,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01000681096",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1025,7 +993,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01002792532",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1065,13 +1032,11 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01004080147",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
 					},
 					{
-						"linkMode": "linked_url",
 						"title": "E-resource",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1131,7 +1096,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01002386114",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1195,7 +1159,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/07000380351",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1237,7 +1200,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01010153224",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1281,7 +1243,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01008033518",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1349,7 +1310,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01010285501",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1398,7 +1358,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01008937943",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1447,7 +1406,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01002444380",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1507,7 +1465,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/01002386114",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
@@ -1542,7 +1499,6 @@ var testCases = [
 				"url": "https://search.rsl.ru/ru/record/07000380352",
 				"attachments": [
 					{
-						"linkMode": "linked_url",
 						"title": "via search",
 						"snapshot": false,
 						"contentType": "text/html"
