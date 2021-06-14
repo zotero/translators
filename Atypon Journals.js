@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 18:56:25"
+	"lastUpdated": "2021-06-14 19:10:57"
 }
 
 /*
@@ -57,7 +57,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly, extras) {
 	var articles = {};
 	var container = doc.getElementsByName('frmSearchResults')[0]
-		|| doc.getElementsByName('frmAbs')[0] || doc.querySelector('.search__body');
+		|| doc.getElementsByName('frmAbs')[0]
+		|| doc.querySelector('.search__body, .search-result, .table-of-content');
 	if (!container) {
 		Z.debug('Atypon: multiples container not found.');
 		return false;
@@ -118,9 +119,9 @@ function getSearchResults(doc, checkOnly, extras) {
 	
 	if (!found) {
 		Z.debug("Trying another alternate multiple format");
-		var rows = container.querySelectorAll('.issue-item__body');
+		var rows = container.querySelectorAll('.issue-item, .item__body');
 		for (var i = 0; i<rows.length; i++) {
-			var title = rows[i].textContent;
+			var title = text(rows[i], 'a');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
 			
@@ -329,7 +330,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
+		"url": "https://pubs.rsna.org/doi/full/10.1148/rg.337125073",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -371,12 +372,11 @@ var testCases = [
 				"ISSN": "0271-5333",
 				"abstractNote": "Sudden cardiac death is defined as death from unexpected circulatory arrest—usually a result of cardiac arrhythmia—that occurs within 1 hour of the onset of symptoms. Proper and timely identification of individuals at risk for sudden cardiac death and the diagnosis of its predisposing conditions are vital. A careful history and physical examination, in addition to electrocardiography and cardiac imaging, are essential to identify conditions associated with sudden cardiac death. Among young adults (18–35 years), sudden cardiac death most commonly results from a previously undiagnosed congenital or hereditary condition, such as coronary artery anomalies and inherited cardiomyopathies (eg, hypertrophic cardiomyopathy, arrhythmogenic right ventricular cardiomyopathy [ARVC], dilated cardiomyopathy, and noncompaction cardiomyopathy). Overall, the most common causes of sudden cardiac death in young adults are, in descending order of frequency, hypertrophic cardiomyopathy, coronary artery anomalies with an interarterial or intramural course, and ARVC. Often, sudden cardiac death is precipitated by ventricular tachycardia or fibrillation and may be prevented with an implantable cardioverter defibrillator (ICD). Risk stratification to determine the need for an ICD is challenging and involves imaging, particularly echocardiography and cardiac magnetic resonance (MR) imaging. Coronary artery anomalies, a diverse group of congenital disorders with a variable manifestation, may be depicted at coronary computed tomographic angiography or MR angiography. A thorough understanding of clinical risk stratification, imaging features, and complementary diagnostic tools for the evaluation of cardiac disorders that may lead to sudden cardiac death is essential to effectively use imaging to guide diagnosis and therapy.",
 				"issue": "7",
-				"journalAbbreviation": "RadioGraphics",
 				"libraryCatalog": "pubs.rsna.org (Atypon)",
 				"pages": "1977-2001",
 				"publicationTitle": "RadioGraphics",
 				"shortTitle": "Congenital and Hereditary Causes of Sudden Cardiac Death in Young Adults",
-				"url": "http://pubs.rsna.org/doi/abs/10.1148/rg.337125073",
+				"url": "https://pubs.rsna.org/doi/full/10.1148/rg.337125073",
 				"volume": "33",
 				"attachments": [
 					{
@@ -401,7 +401,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
+		"url": "https://epubs.siam.org/doi/book/10.1137/1.9780898718553",
 		"items": [
 			{
 				"itemType": "book",
@@ -409,17 +409,17 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Hubert",
-						"firstName": "L.",
+						"firstName": "Lawrence",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Arabie",
-						"firstName": "P.",
+						"firstName": "Phipps",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Meulman",
-						"firstName": "J.",
+						"firstName": "Jacqueline",
 						"creatorType": "author"
 					}
 				],
@@ -431,7 +431,7 @@ var testCases = [
 				"numPages": "172",
 				"publisher": "Society for Industrial and Applied Mathematics",
 				"series": "Discrete Mathematics and Applications",
-				"url": "http://epubs.siam.org/doi/book/10.1137/1.9780898718553",
+				"url": "https://epubs.siam.org/doi/book/10.1137/1.9780898718553",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -450,7 +450,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
+		"url": "https://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -466,7 +466,7 @@ var testCases = [
 				"pages": "103-114",
 				"publisher": "Society for Industrial and Applied Mathematics",
 				"series": "Discrete Mathematics and Applications",
-				"url": "http://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
+				"url": "https://epubs.siam.org/doi/abs/10.1137/1.9780898718553.ch6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -485,7 +485,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+		"url": "https://www.liebertpub.com/doi/full/10.1089/cmb.2009.0238",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -507,16 +507,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "October 20, 2010",
+				"date": "November 1, 2010",
 				"DOI": "10.1089/cmb.2009.0238",
 				"abstractNote": "An accurate genome sequence of a desired species is now a pre-requisite for genome research. An important step in obtaining a high-quality genome sequence is to correctly assemble short reads into longer sequences accurately representing contiguous genomic regions. Current sequencing technologies continue to offer increases in throughput, and corresponding reductions in cost and time. Unfortunately, the benefit of obtaining a large number of reads is complicated by sequencing errors, with different biases being observed with each platform. Although software are available to assemble reads for each individual system, no procedure has been proposed for high-quality simultaneous assembly based on reads from a mix of different technologies. In this paper, we describe a parallel short-read assembler, called Ray, which has been developed to assemble reads obtained from a combination of sequencing platforms. We compared its performance to other assemblers on simulated and real datasets. We used a combination of Roche/454 and Illumina reads to assemble three different genomes. We showed that mixing sequencing technologies systematically reduces the number of contigs and the number of errors. Because of its open nature, this new tool will hopefully serve as a basis to develop an assembler that can be of universal utilization (availability: http://deNovoAssembler.sf.Net/). For online Supplementary Material, see www.liebertonline.com.",
 				"issue": "11",
-				"journalAbbreviation": "Journal of Computational Biology",
 				"libraryCatalog": "liebertpub.com (Atypon)",
 				"pages": "1519-1533",
 				"publicationTitle": "Journal of Computational Biology",
 				"shortTitle": "Ray",
-				"url": "https://www.liebertpub.com/doi/abs/10.1089/cmb.2009.0238",
+				"url": "https://www.liebertpub.com/doi/full/10.1089/cmb.2009.0238",
 				"volume": "17",
 				"attachments": [
 					{
@@ -541,7 +540,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
+		"url": "https://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -562,7 +561,7 @@ var testCases = [
 				"libraryCatalog": "worldscientific.com (Atypon)",
 				"pages": "221-229",
 				"publicationTitle": "International Journal of Quantum Information",
-				"url": "http://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
+				"url": "https://www.worldscientific.com/doi/abs/10.1142/S0219749904000195",
 				"volume": "02",
 				"attachments": [
 					{
@@ -582,7 +581,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
+		"url": "https://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -609,144 +608,8 @@ var testCases = [
 				"pages": "323-355",
 				"publicationTitle": "Annual Review of Materials Research",
 				"shortTitle": "Block Copolymer Thin Films",
-				"url": "http://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
+				"url": "https://www.annualreviews.org/doi/abs/10.1146/annurev.matsci.31.1.323",
 				"volume": "31",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Observations of Ice Microphysics through the Melting Layer",
-				"creators": [
-					{
-						"lastName": "Heymsfield",
-						"firstName": "Andrew J.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Bansemer",
-						"firstName": "Aaron",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Poellot",
-						"firstName": "Michael R.",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Wood",
-						"firstName": "Norm",
-						"creatorType": "author"
-					}
-				],
-				"date": "April 30, 2015",
-				"DOI": "10.1175/JAS-D-14-0363.1",
-				"ISSN": "0022-4928",
-				"abstractNote": "The detailed microphysical processes and properties within the melting layer (ML)—the continued growth of the aggregates by the collection of the small particles, the breakup of these aggregates, the effects of relative humidity on particle melting—are largely unresolved. This study focuses on addressing these questions for in-cloud heights from just above to just below the ML. Observations from four field programs employing in situ measurements from above to below the ML are used to characterize the microphysics through this region. With increasing temperatures from about −4° to +1°C, and for saturated conditions, slope and intercept parameters of exponential fits to the particle size distributions (PSD) fitted to the data continue to decrease downward, the maximum particle size (largest particle sampled for each 5-s PSD) increases, and melting proceeds from the smallest to the largest particles. With increasing temperature from about −4° to +2°C for highly subsaturated conditions, the PSD slope and intercept continue to decrease downward, the maximum particle size increases, and there is relatively little melting, but all particles experience sublimation.",
-				"issue": "8",
-				"journalAbbreviation": "J. Atmos. Sci.",
-				"libraryCatalog": "journals.ametsoc.org (Atypon)",
-				"pages": "2902-2928",
-				"publicationTitle": "Journal of the Atmospheric Sciences",
-				"url": "http://journals.ametsoc.org/doi/abs/10.1175/JAS-D-14-0363.1",
-				"volume": "72",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Development of the Worldwide Harmonized Test Procedure for Light-Duty Vehicles",
-				"creators": [
-					{
-						"lastName": "Ciuffo",
-						"firstName": "Biagio",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Marotta",
-						"firstName": "Alessandro",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Tutuianu",
-						"firstName": "Monica",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Anagnostopoulos",
-						"firstName": "Konstantinos",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Fontaras",
-						"firstName": "Georgios",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Pavlovic",
-						"firstName": "Jelica",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Serra",
-						"firstName": "Simone",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Tsiakmakis",
-						"firstName": "Stefanos",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Zacharof",
-						"firstName": "Nikiforos",
-						"creatorType": "author"
-					}
-				],
-				"date": "January 1, 2015",
-				"DOI": "10.3141/2503-12",
-				"ISSN": "0361-1981",
-				"abstractNote": "To assess vehicle performance on criteria compounds, carbon dioxide emissions, and fuel energy consumption, laboratory tests are generally carried out. During these tests, a vehicle is driven on a chassis dynamometer (which simulates the resistances the vehicle encounters during its motion) to follow a predefined test cycle. In addition, all conditions for running a test must strictly adhere to a predefined test procedure. The procedure is necessary to ensure that all tests are carried out in a comparable way, following the requirements set by the relevant legislation. Test results are used to assess vehicle compliance with emissions limits or to evaluate the fuel consumption that will be communicated to customers. Every region in the world follows its own approach in carrying out these types of tests. The variations in approaches have resulted in a series of drawbacks for vehicle manufacturers and regulating authorities, leading to a plethora of different conditions and results. As a step toward the harmonization of the test procedures, the United Nations Economic Commission for Europe launched a project in 2009 for the development of a worldwide harmonized light-duty test procedure (WLTP), including a new test cycle. The objective of the study reported here was to provide a brief description of WLTP and outline the plausible pathway for its introduction in European legislation.",
-				"journalAbbreviation": "Transportation Research Record: Journal of the Transportation Research Board",
-				"libraryCatalog": "trrjournalonline.trb.org (Atypon)",
-				"pages": "110-118",
-				"publicationTitle": "Transportation Research Record: Journal of the Transportation Research Board",
-				"url": "http://trrjournalonline.trb.org/doi/10.3141/2503-12",
-				"volume": "2503",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
