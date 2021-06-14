@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-10 18:00:32"
+	"lastUpdated": "2021-06-14 12:10:43"
 }
 
 /*
@@ -104,6 +104,12 @@ function addPages (doc, item) {
 		let pagesMatch = pagePath.innerText.match(/\d+\-\d+/);
 		if (pagesMatch)
 			item.pages = pagesMatch;
+	}
+}
+//ubtue: write article number in $y
+function addArticleNumber (doc, item) {
+	if (item.pages.match(/\d{5,}/)) {
+		item.pages = 'article ' + item.pages;	
 	}
 }
 
@@ -227,22 +233,12 @@ function scrapeEM(doc, url) {
 				n--;
 			}
 		}
-		//ubtue: Avoiding full-text download due to possible IP blocking.
-		/*var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
-		if (pdfURL) {
-			pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
-			Z.debug("PDF URL: " + pdfURL);
-			item.attachments.push({
-				url: pdfURL,
-				title: 'Full Text PDF',
-				mimeType: 'application/pdf'
-			});
-		}*/
 		item.complete();
 	});
 
 	addBookReviewTag(doc, item);
 	//validatePageCount(item);
+	addArticleNumber(doc, item);
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -391,24 +387,14 @@ function scrapeBibTeX(doc, url) {
 			processSubtitles(doc, item);
 			//validatePageCount(item);
 			addPages(doc, item);
-
+			addArticleNumber(doc, item);
 			//attachments
 			item.attachments = [{
 				title: 'Snapshot',
 				document: doc,
 				mimeType: 'text/html'
 			}];
-			//ubtue: Avoiding full-text download due to possible IP blocking.
-			/*var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', "content");
-			if (pdfURL) {
-				pdfURL = pdfURL.replace('/pdf/', '/pdfdirect/');
-				Z.debug("PDF URL: " + pdfURL);
-				item.attachments.push({
-					url: pdfURL,
-					title: 'Full Text PDF',
-					mimeType: 'application/pdf'
-				});
-			}*/
+
 			addBookReviewTag(doc, item);
 			// adding author(s) for Short Reviews
 			if (!item.creators[0]) {
@@ -420,8 +406,6 @@ function scrapeBibTeX(doc, url) {
 			doiURLRegex = /^https:\/\/doi.org\/(.*)/;
 			if (item.DOI && item.DOI.match(doiURLRegex))
 				item.DOI = item.DOI.replace(/^https:\/\/doi.org\/(.*)/, "$1");
-			//ubtue: add article number 
-			if (item.pages && item.pages.match(/\d{5,}/)) item.pages = "article " + item.pages;
 			item.complete();
 		});
 
@@ -476,7 +460,7 @@ function scrapeCochraneTrial(doc, url){
 	processSubtitles(doc, item);
 	addBookReviewTag(doc, item);
 	//validatePageCount(item);
-
+	addArticleNumber(doc, item);
 	item.complete();
 }
 
@@ -595,7 +579,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
@@ -876,7 +859,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -1000,6 +982,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
 				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -1046,6 +1029,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "1-18",
 				"publicationTitle": "Journal of Applied Philosophy",
+				"rights": "Published 2011. This article is a U.S. Government work and is in the public domain in the USA.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1468-5930.2011.00548.x",
 				"volume": "29",
 				"attachments": [
@@ -1089,7 +1073,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "951-974",
 				"publicationTitle": "The Journal of Finance",
-				"rights": "© 1986 the American Finance Association",
 				"shortTitle": "Volume for Winners and Losers",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.1986.tb04559.x",
 				"volume": "41",
@@ -1134,6 +1117,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "165-168",
 				"publicationTitle": "Angewandte Chemie International Edition",
+				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
 				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/%28SICI%291521-3773%2820000103%2939%3A1%3C165%3A%3AAID-ANIE165%3E3.0.CO%3B2-B",
 				"volume": "39",
@@ -1256,12 +1240,7 @@ var testCases = [
 			{
 				"itemType": "journalArticle",
 				"title": "Book Reviews",
-				"creators": [
-					{
-						"firstName": "Now available on the Wabash Center",
-						"lastName": "website"
-					}
-				],
+				"creators": [],
 				"date": "2018",
 				"DOI": "10.1111/teth.12436",
 				"ISSN": "1467-9647",
@@ -1271,7 +1250,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "158-158",
 				"publicationTitle": "Teaching Theology & Religion",
-				"rights": "© 2018 John Wiley & Sons Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436",
 				"volume": "21",
 				"attachments": [
@@ -1280,7 +1258,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1347,7 +1329,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "194-195",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
 				"volume": "73",
