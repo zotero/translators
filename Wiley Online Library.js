@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 12:10:43"
+	"lastUpdated": "2021-06-14 15:26:43"
 }
 
 /*
@@ -91,12 +91,6 @@ function addBookReviewTag(doc, item) {
 	}
 }
 
-/*function validatePageCount(item) {
-	// clear page count if invalid
-	if (item.pages && (item.pages.match(/e[0-9]+/) || item.pages.match(/inside_front_cover/)))
-		item.pages = "";
-}*/
-
 function addPages (doc, item) {
 	// add pages manually if removed or not previously filled by BibTex translator
 	let pagePath = doc.querySelector('p.page-range');
@@ -166,7 +160,6 @@ function scrapeBook(doc, url) {
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
 	processSubtitles(doc, newItem);
-	//validatePageCount(newItem);
 	newItem.complete();
 }
 
@@ -237,7 +230,6 @@ function scrapeEM(doc, url) {
 	});
 
 	addBookReviewTag(doc, item);
-	//validatePageCount(item);
 	addArticleNumber(doc, item);
 	item.complete();
 
@@ -385,9 +377,8 @@ function scrapeBibTeX(doc, url) {
 				'//p[@class="copyright" or @id="copyright"]');
 
 			processSubtitles(doc, item);
-			//validatePageCount(item);
-			addPages(doc, item);
 			addArticleNumber(doc, item);
+			addPages(doc, item);
 			//attachments
 			item.attachments = [{
 				title: 'Snapshot',
@@ -459,7 +450,6 @@ function scrapeCochraneTrial(doc, url){
 
 	processSubtitles(doc, item);
 	addBookReviewTag(doc, item);
-	//validatePageCount(item);
 	addArticleNumber(doc, item);
 	item.complete();
 }
@@ -555,7 +545,8 @@ function doWeb(doc, url) {
 			scrape(doc, url);
 		}
 	}
-}/** BEGIN TEST CASES **/
+}
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
