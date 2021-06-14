@@ -1,7 +1,7 @@
 {
 	"translatorID": "5af42734-7cd5-4c69-97fc-bc406999bdba",
 	"label": "Atypon Journals",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and Abe Jellinek",
 	"target": "^https?://[^?#]+(/doi/((abs|abstract|full|figure|ref|citedby|book)/)?10\\.|/action/doSearch\\?)|^https?://[^/]+/toc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-02 15:43:51"
+	"lastUpdated": "2021-06-14 18:56:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Atypon Journals Translator
-	Copyright © 2011-2014 Sebastian Karcher
+	Copyright © 2011-2021 Sebastian Karcher and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -42,8 +42,8 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var citLinks = ZU.xpath(doc, '//a[contains(@href, "/action/showCitFormats")]');
-	if (citLinks.length > 0) {
+	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"]');
+	if (citLink) {
 		if (url.includes('/doi/book/')) {
 			return 'book';
 		}
@@ -57,7 +57,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly, extras) {
 	var articles = {};
 	var container = doc.getElementsByName('frmSearchResults')[0]
-		|| doc.getElementsByName('frmAbs')[0];
+		|| doc.getElementsByName('frmAbs')[0] || doc.querySelector('.search__body');
 	if (!container) {
 		Z.debug('Atypon: multiples container not found.');
 		return false;
@@ -103,6 +103,28 @@ function getSearchResults(doc, checkOnly, extras) {
 			
 			var url = ZU.xpathText(rows[i], '(.//ul[contains(@class, "icon-list")]/li/'
 				+ doiLink + ')[1]/@href');
+			if (!url) continue;
+			
+			if (checkOnly) return true;
+			found = true;
+			
+			if (extras) {
+				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
+			}
+			
+			articles[url] = title;
+		}
+	}
+	
+	if (!found) {
+		Z.debug("Trying another alternate multiple format");
+		var rows = container.querySelectorAll('.issue-item__body');
+		for (var i = 0; i<rows.length; i++) {
+			var title = rows[i].textContent;
+			if (!title) continue;
+			title = ZU.trimInternal(title);
+			
+			var url = attr(rows[i], 'a', 'href');
 			if (!url) continue;
 			
 			if (checkOnly) return true;
@@ -197,25 +219,56 @@ function scrape(doc, url, extras) {
 	var abstract = doc.getElementsByClassName('abstractSection')[0];
 	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
-	ZU.processDocuments(citationurl, function(citationDoc){
-		var filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+	
+	function finalize(filename) {
 		Z.debug("Filename: " + filename);
 		var get = '/action/downloadCitation';
 		var post = 'doi=' + doi + '&downloadFileName=' + filename + '&format=ris&direct=true&include=cit';
-		ZU.doPost(get, post, function (text) {
-			//Z.debug(text);
+		ZU.doPost(get, post, function (risText) {
+			//Z.debug(risText);
 			var translator = Zotero.loadTranslator("import");
 			// Calling the RIS translator
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
-			translator.setString(text);
+			translator.setString(risText);
 			translator.setHandler("itemDone", function (obj, item) {
 				// Sometimes we get titles and authors in all caps
 				item.title = fixCase(item.title);
 				
-				for (var i=0; i<item.creators.length; i++) {
-					item.creators[i].lastName = fixCase(item.creators[i].lastName, true);
-					if (item.creators[i].firstName) {
-						item.creators[i].firstName = fixCase(item.creators[i].firstName, true);
+				if (item.journalAbbreviation == item.publicationTitle) {
+					delete item.journalAbbreviation;
+				}
+				
+				if (url.startsWith('https://journals.asm.org/')) {
+					// the creator names ASM gives us in their RIS look like
+					// "Kirstahler Philipp" - reversed with no comma.
+					// we'll just use the HTML.
+					item.creators = [];
+					let contributors = doc.querySelector('div.contributors');
+					for (let authorLink of contributors.querySelectorAll('[property="author"] a:first-child')) {
+						let givenName = text(authorLink, '[property="givenName"]');
+						let familyName = text(authorLink, '[property="familyName"]');
+						if (!givenName && !familyName) {
+							item.creators.push({
+								lastName: authorLink.innerText,
+								creatorType: 'author',
+								fieldMode: 1
+							});
+						}
+						else {
+							item.creators.push({
+								firstName: givenName,
+								lastName: familyName,
+								creatorType: 'author'
+							});
+						}
+					}
+				}
+				else {
+					for (let creator of item.creators) {
+						creator.lastName = fixCase(creator.lastName, true);
+						if (creator.firstName) {
+							creator.firstName = fixCase(creator.firstName, true);
+						}
 					}
 				}
 				
@@ -253,7 +306,18 @@ function scrape(doc, url, extras) {
 			});
 			translator.translate();
 		});
-	});
+	}
+	
+	if (doc.querySelector('a[href*="#pill-citations')) { // newer Atypon installs
+		let filename = attr(doc, 'input[name="downloadFileName"]', 'value');
+		finalize(filename);
+	}
+	else {
+		ZU.processDocuments(citationurl, function (citationDoc) {
+			let filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+			finalize(filename);
+		});
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -698,6 +762,499 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.asm.org/doi/10.1128/mSystems.00122-21",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Dietary Supplements and Nutraceuticals under Investigation for COVID-19 Prevention and Treatment",
+				"creators": [
+					{
+						"firstName": "Ronan",
+						"lastName": "Lordan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Halie M.",
+						"lastName": "Rando",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "COVID-19 Review Consortium",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "John P.",
+						"lastName": "Barton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simina M.",
+						"lastName": "Boca",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Brueffer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James Brian",
+						"lastName": "Byrd",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen",
+						"lastName": "Capone",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shikta",
+						"lastName": "Das",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anna Ada",
+						"lastName": "Dattoli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John J.",
+						"lastName": "Dziak",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeffrey M.",
+						"lastName": "Field",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Soumita",
+						"lastName": "Ghosh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony",
+						"lastName": "Gitter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rishi Raj",
+						"lastName": "Goel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Casey S.",
+						"lastName": "Greene",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marouen Ben",
+						"lastName": "Guebila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fengling",
+						"lastName": "Hu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nafisa M.",
+						"lastName": "Jadavji",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sergey",
+						"lastName": "Knyazev",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Likhitha",
+						"lastName": "Kolla",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandra J.",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ronan",
+						"lastName": "Lordan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tiago",
+						"lastName": "Lubiana",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Temitayo",
+						"lastName": "Lukan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adam L.",
+						"lastName": "MacLean",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Mai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Serghei",
+						"lastName": "Mangul",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Manheim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lucy",
+						"lastName": "D'Agostino McGowan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "YoSon",
+						"lastName": "Park",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dimitri",
+						"lastName": "Perrin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yanjun",
+						"lastName": "Qi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Diane N.",
+						"lastName": "Rafizadeh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bharath",
+						"lastName": "Ramsundar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Halie M.",
+						"lastName": "Rando",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sandipan",
+						"lastName": "Ray",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael P.",
+						"lastName": "Robson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elizabeth",
+						"lastName": "Sell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lamonica",
+						"lastName": "Shinholster",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashwin N.",
+						"lastName": "Skelly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuchen",
+						"lastName": "Sun",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gregory L.",
+						"lastName": "Szeto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ryan",
+						"lastName": "Velazquez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jinhui",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nils",
+						"lastName": "Wellhausen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Vikas",
+						"lastName": "Bansal",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John P.",
+						"lastName": "Barton",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Simina M.",
+						"lastName": "Boca",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Brueffer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James Brian",
+						"lastName": "Byrd",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen",
+						"lastName": "Capone",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shikta",
+						"lastName": "Das",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anna Ada",
+						"lastName": "Dattoli",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John J.",
+						"lastName": "Dziak",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeffrey M.",
+						"lastName": "Field",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Soumita",
+						"lastName": "Ghosh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony",
+						"lastName": "Gitter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rishi Raj",
+						"lastName": "Goel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Casey S.",
+						"lastName": "Greene",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Marouen Ben",
+						"lastName": "Guebila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fengling",
+						"lastName": "Hu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nafisa M.",
+						"lastName": "Jadavji",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sergey",
+						"lastName": "Knyazev",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Likhitha",
+						"lastName": "Kolla",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandra J.",
+						"lastName": "Lee",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ronan",
+						"lastName": "Lordan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tiago",
+						"lastName": "Lubiana",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Temitayo",
+						"lastName": "Lukan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adam L.",
+						"lastName": "MacLean",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Mai",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Serghei",
+						"lastName": "Mangul",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Manheim",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lucy",
+						"lastName": "D'Agostino McGowan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "YoSon",
+						"lastName": "Park",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dimitri",
+						"lastName": "Perrin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yanjun",
+						"lastName": "Qi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Diane N.",
+						"lastName": "Rafizadeh",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bharath",
+						"lastName": "Ramsundar",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Halie M.",
+						"lastName": "Rando",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sandipan",
+						"lastName": "Ray",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael P.",
+						"lastName": "Robson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Elizabeth",
+						"lastName": "Sell",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lamonica",
+						"lastName": "Shinholster",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ashwin N.",
+						"lastName": "Skelly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Yuchen",
+						"lastName": "Sun",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gregory L.",
+						"lastName": "Szeto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ryan",
+						"lastName": "Velazquez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jinhui",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nils",
+						"lastName": "Wellhausen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Casey S.",
+						"lastName": "Greene",
+						"creatorType": "author"
+					}
+				],
+				"DOI": "10.1128/mSystems.00122-21",
+				"issue": "0",
+				"journalAbbreviation": "mSystems",
+				"libraryCatalog": "journals.asm.org (Atypon)",
+				"pages": "e00122-21",
+				"publicationTitle": "mSystems",
+				"url": "https://journals.asm.org/doi/10.1128/mSystems.00122-21",
+				"volume": "0",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.asm.org/action/doSearch?AllField=E.+coli&SeriesKey=mra",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
