@@ -105,6 +105,8 @@ function doImport() {
 
     item.volume = data.volume ? data.volume : "";
     item.issue = data.number ? data.number : "";
+    if (item.issue.match(/\d+-\d+/))
+        item.issue = item.issue.replace("-", "/");
 
     item.pages = data.startingPage ? data.startingPage : "";
     item.pages = item.pages + (data.endingPage ? '-' + data.endingPage : '-');
