@@ -115,7 +115,7 @@ function doImport() {
 	item.DOI = data.doi;
 	for (let url of data.url) {
 		if (url.format == "pdf" || url.format=="html")
-            item.notes.push({"url": url.value});
+            item.notes.push({note: "url:" + url.value});
         else
             item.url = url.value;
 	}
