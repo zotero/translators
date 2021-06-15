@@ -105,6 +105,8 @@ function doImport() {
 
     item.volume = data.volume ? data.volume : "";
     item.issue = data.number ? data.number : "";
+    if (item.issue.match(/\d+-\d+/))
+        item.issue = item.issue.replace("-", "/");
 
     item.pages = data.startingPage ? data.startingPage : "";
     item.pages = item.pages + (data.endingPage ? '-' + data.endingPage : '-');
@@ -113,7 +115,7 @@ function doImport() {
 	item.DOI = data.doi;
 	for (let url of data.url) {
 		if (url.format == "pdf" || url.format=="html")
-            item.notes.push({"url": url.value});
+            item.notes.push({note: "url:" + url.value});
         else
             item.url = url.value;
 	}
