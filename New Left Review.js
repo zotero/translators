@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-12 07:59:12"
+	"lastUpdated": "2021-06-15 09:28:43"
 }
 
 /*
@@ -64,17 +64,14 @@ function getSearchResults(doc) {
 	let items = {};
 	let found = false;
 
-	const articleLinks = ZU.xpath(doc, '//a[@class="article-link"]');
-	const titles = ZU.xpath(doc, '//span[@class="programme-note__title"]');
-	const authors = ZU.xpath(doc, '//span[@class="programme-note__author"]');
+	const articleLinks = doc.querySelectorAll('a.article-link');
 
 	articleLinks.forEach((articleLink, articleIndex) => {
 		const href = articleLink.href;
-		let title = titles[articleIndex].innerText;
-		let author = authors[articleIndex];
+		let title = text(articleLink, '.programme-note__title');
+		const author = text(articleLink, '.programme-note__author');
 		if (author) {
-			const authorNames = author.innerText;
-			title += ` (${authorNames})`;
+			title += ` (${author})`;
 		}
 		items[href] = title;
 		if (found === false) {
@@ -89,46 +86,37 @@ function scrape(doc, _) {
 	const newItem = new Zotero.Item('journalArticle');
 
 	newItem.publicationTitle = "New Left Review";
-	newItem.journalAbbreviation = "NLR";
+	newItem.journalAbbreviation = "New Left Rev.";
 
 	const title = ZU.xpath(doc, '//meta[@itemprop="name"]/@content')[0].value;
-
 	newItem.title = title;
 
 	const description = ZU.xpathText(doc, '//meta[@name="description"]/@content');
-
 	if (description) {
 		newItem.abstractNote = description;
 	}
 
 	const authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
-
 	const authorFullNames = authors.map(author => author.value);
-
 	authorFullNames.forEach((authorFullName) => {
-		newItem.creators.push({
-			lastName: authorFullName,
-			creatorType: "author",
-			fieldMode: 1
-		});
+		newItem.creators.push(ZU.cleanAuthor(authorFullName, "author", false));
 	});
 
 	const issueNum = ZU.xpathText(doc, '//span[@class="article-publication-details__issue_number"]');
-
 	newItem.issue = issueNum;
 
 	const pageStart = ZU.xpathText(doc, '//meta[@itemprop="pageStart"]/@content');
-
 	const pageEnd = ZU.xpathText(doc, '//meta[@itemprop="pageEnd"]/@content');
-
 	newItem.pages = `${pageStart}-${pageEnd}`;
 
 	const publicationDate = ZU.xpathText(doc, '//time[@itemprop="datePublished"]/@datetime');
-
 	newItem.date = publicationDate;
 
-	const pdfUrl = ZU.xpath(doc, '//a[@title="Download PDF version"]')[0].href;
-
+	let pdfUrl = undefined;
+	const pdfUrlEl = ZU.xpath(doc, '//a[@title="Download PDF version"]');
+	if (pdfUrlEl[0]) {
+		pdfUrl = pdfUrlEl[0].href;
+	};
 	if (pdfUrl) {
 		newItem.attachments.push({
 			url: pdfUrl,
@@ -151,23 +139,19 @@ var testCases = [
 				"title": "A Small World War",
 				"creators": [
 					{
-						"lastName": "Georgi Derluguian",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Georgi",
+						"lastName": "Derluguian",
+						"creatorType": "author"
 					}
 				],
 				"date": "2021-04-30",
 				"abstractNote": "At the intersection of Eurasia’s pre-modern empires, Transcaucasia has long been a battlezone. With the waning of American-led globalization, and its legacy of militarization, are their avatars—Russia, Turkey, Iran—re-emerging, equipped with Israeli drones? Georgi Derluguian locates the 2020 war for Nagorno Karabagh in the geopolitical longue durée.",
 				"issue": "128",
-				"journalAbbreviation": "NLR",
+				"journalAbbreviation": "New Left Rev",
 				"libraryCatalog": "New Left Review",
 				"pages": "24-46",
 				"publicationTitle": "New Left Review",
-				"attachments": [
-					{
-						"mimeType": "application/pdf"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -183,28 +167,24 @@ var testCases = [
 				"title": "An Improbable Movement?",
 				"creators": [
 					{
-						"lastName": "Didier Fassin",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Didier",
+						"lastName": "Fassin",
+						"creatorType": "author"
 					},
 					{
-						"lastName": "Anne-Claire Defossez",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Anne-Claire",
+						"lastName": "Defossez",
+						"creatorType": "author"
 					}
 				],
 				"date": "2019-02-01",
 				"abstractNote": "The policies and pretensions of a Bourbonnais president as background to the political insurgency of provincial France. Origins and complexion of the gilets jaunes mobilization, with the Elysée resorting to the worst police violence since May 68.",
 				"issue": "115",
-				"journalAbbreviation": "NLR",
+				"journalAbbreviation": "New Left Rev",
 				"libraryCatalog": "New Left Review",
 				"pages": "77-92",
 				"publicationTitle": "New Left Review",
-				"attachments": [
-					{
-						"mimeType": "application/pdf"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -225,23 +205,19 @@ var testCases = [
 				"title": "Domesticating Hegel",
 				"creators": [
 					{
-						"lastName": "Michael Lipkin",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Michael",
+						"lastName": "Lipkin",
+						"creatorType": "author"
 					}
 				],
 				"date": "2021-04-30",
 				"abstractNote": "Michael Lipkin on Klaus Vieweg, Hegel: Der Philosoph der Freiheit. The author of Philosophy of Right as roistering liberal.",
 				"issue": "128",
-				"journalAbbreviation": "NLR",
+				"journalAbbreviation": "New Left Rev",
 				"libraryCatalog": "New Left Review",
 				"pages": "153-160",
 				"publicationTitle": "New Left Review",
-				"attachments": [
-					{
-						"mimeType": "application/pdf"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
