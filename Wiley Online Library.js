@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 15:26:43"
+	"lastUpdated": "2021-06-15 14:48:22"
 }
 
 /*
@@ -102,7 +102,7 @@ function addPages (doc, item) {
 }
 //ubtue: write article number in $y
 function addArticleNumber (doc, item) {
-	if (item.pages.match(/\d{5,}/)) {
+	if (item.pages && item.pages.match(/\d{5,}/)) {
 		item.pages = 'article ' + item.pages;	
 	}
 }
@@ -388,7 +388,7 @@ function scrapeBibTeX(doc, url) {
 
 			addBookReviewTag(doc, item);
 			// adding author(s) for Short Reviews
-			if (!item.creators[0]) {
+			if (!item.creators[0] && getAuthorNameShortReview(doc).length > 20) {
 				for (let author of getAuthorNameShortReview(doc))
 					item.creators.push(ZU.cleanAuthor(author));
 			}
@@ -600,12 +600,7 @@ var testCases = [
 			{
 				"itemType": "bookSection",
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
-				"creators": [
-					{
-						"firstName": "This chapter contains sections",
-						"lastName": "titled"
-					}
-				],
+				"creators": [],
 				"date": "2008",
 				"ISBN": "9781444304794",
 				"abstractNote": "This chapter contains sections titled: Historical and Political Overview of the Period Context11 Film Scenes: Close Readings Directors (Life and Works) Critical Commentary",
@@ -916,7 +911,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -973,7 +967,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -1209,7 +1202,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "25-99",
 				"publicationTitle": "New Directions for Evaluation",
-				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
 				"attachments": [
@@ -1320,6 +1312,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "194-195",
 				"publicationTitle": "The Ecumenical Review",
+				"rights": "© 2021 World Council of Churches",
 				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
 				"volume": "73",
@@ -1334,6 +1327,69 @@ var testCases = [
 						"tag": "Book Review"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/erev.12515",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Issue Information",
+				"creators": [],
+				"date": "2021",
+				"DOI": "10.1111/erev.12515",
+				"ISSN": "1758-6623",
+				"issue": "2",
+				"itemID": "https://doi.org/10.1111/erev.12515",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"publicationTitle": "The Ecumenical Review",
+				"rights": "© (2021) World Council of Churches",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12515",
+				"volume": "73",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/erev.12592",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Ecumenical Chronicle",
+				"creators": [],
+				"date": "2021",
+				"DOI": "10.1111/erev.12592",
+				"ISSN": "1758-6623",
+				"issue": "1",
+				"itemID": "https://doi.org/10.1111/erev.12592",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "182-190",
+				"publicationTitle": "The Ecumenical Review",
+				"rights": "© 2021 World Council of Churches",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12592",
+				"volume": "73",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
