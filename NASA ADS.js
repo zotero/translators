@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-15 15:35:37"
+	"lastUpdated": "2021-06-15 15:43:55"
 }
 
 /*
@@ -53,7 +53,7 @@ function getSearchResults(doc) {
 }
 
 function extractId(url) {
-	return /\/abs\/(.*)\/abstract/.exec(url)[1];
+	return /\/abs\/([^/]+)/.exec(url)[1];
 }
 
 function getTypeFromId(id) {
@@ -109,7 +109,7 @@ function scrape(ids, doc) {
 			translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
 			translator.setString(json.export);
 			translator.setHandler("itemDone", function (obj, item) {
-				const id = ids.pop();
+				const id = extractId(item.url);
 				item.itemType = getTypeFromId(id);
 				item.attachments.push({
 					url: makePdfUrl(id),
