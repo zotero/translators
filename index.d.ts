@@ -131,8 +131,8 @@ declare namespace Zotero {
 			url: string,
 			body: string,
 			onDone: (text: string, xmlhttp: XMLHttpRequest) => void,
-			responseCharset?: string,
 			requestHeaders?: { [header: string]: string },
+			responseCharset?: string,
 			successCodes?: number[]
 		): boolean;
 		function urlToProxy(url: string): string;
