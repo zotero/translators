@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-20 09:37:49"
+	"lastUpdated": "2021-06-16 22:44:27"
 }
 
 /*
@@ -35,16 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr() v2
-function attr (docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; }
-
 var courtAbbrevs = {
 	"hoge raad": "HR",
 	"raad van state": "ABRvS",
 	"centrale raad van beroep": "CRvB",
 	"college van beroep voor het bedrijfsleven": "CBb",
-	"gerechtshof": "Hof",
-	"rechtbank": "Rb.",
+	gerechtshof: "Hof",
+	rechtbank: "Rb.",
 	"raad van beroep": "RvB",
 	"gerecht in eerste aanleg van": "GiEA",
 	"gemeenschappelijk hof van justitie": "Gem. Hof",
@@ -53,7 +50,7 @@ var courtAbbrevs = {
 
 // ReplaceAll solution from https://stackoverflow.com/questions/15604140/replace-multiple-strings-with-multiple-other-strings
 // All keys should be lowercase.
-function replaceAll (str, mapObj) {
+function replaceAll(str, mapObj) {
 	var re = new RegExp(Object.keys(mapObj).join("|"), "gi");
 
 	return str.replace(re, function (matched) {
@@ -65,11 +62,11 @@ var esc = ZU.unescapeHTML;
 
 
 // Custom cleaning function for scraping, adapted from utilities.js
-function cleanTags (x) {
-	if(x === null) { // account for cases without abstractNote
+function cleanTags(x) {
+	if (x === null) { // account for cases without abstractNote
 		return undefined;
 	}
-	else if(typeof (x) != "string") {
+	else if (typeof (x) != "string") {
 		throw new Error("cleanTags: argument must be a string");
 	}
 	x = x.replace(/<(\/para|br)[^>]*>/gi, "\n"); // account for dcterms:abstract newlines
@@ -77,7 +74,7 @@ function cleanTags (x) {
 	return esc(x);
 }
 
-function detectWeb (doc, url) {
+function detectWeb(doc, url) {
 	if (url.includes('inziendocument')) {
 		return "case";
 	}
@@ -90,7 +87,7 @@ function detectWeb (doc, url) {
 	return false;
 }
 
-function getSearchResults (doc, checkOnly) {
+function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('h3>a.titel[href*="inziendocument"]');
@@ -105,7 +102,7 @@ function getSearchResults (doc, checkOnly) {
 	return found ? items : false;
 }
 
-function doWeb (doc, url) {
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
@@ -116,7 +113,7 @@ function doWeb (doc, url) {
 	}
 }
 
-function scrape (doc, url) {
+function scrape(doc, _url) {
 	var newItem = new Zotero.Item("case");
 
 	// First, scrape easy properties
@@ -127,7 +124,7 @@ function scrape (doc, url) {
 	newItem.language = attr(doc, 'meta[property="dcterms:language"]', 'content');
 	newItem.abstractNote = cleanTags(attr(doc, 'meta[property="dcterms:abstract"]', 'content'));
 	newItem.url = "https://deeplink.rechtspraak.nl/uitspraak?id=" + newItem.docketNumber;
-	newItem.shortTitle = null;
+	newItem.shortTitle = '';
 
 	// Pursuant to most citation styles (including Leidraad voor juridische auteurs), we abbreviate the court names
 	var fullCourtName = cleanTags(attr(doc, 'meta[property="dcterms:creator"]', 'content'));
@@ -136,13 +133,12 @@ function scrape (doc, url) {
 	// Because we do not know which reporter the user wants to cite, add them all to abstractNote
 	newItem.abstractNote = newItem.abstractNote.concat("\nVindplaatsen:", cleanTags(ZU.xpathText(doc, "//dt[text()='Vindplaatsen']//following::dd[1]")));
 
-	// References, though CSL-specified and having an according zotero field (History), do not show up in the library. Fetch them anyway
-	var relation = doc.querySelectorAll('link[rel="dcterms:relation"]');
+	// References go in the History field
 	var relationArray = [];
-	for (let i = 0; i < relation.length; i++) {
-		relationArray.push(relation[i].getAttribute('title'));
+	for (let relation of doc.querySelectorAll('link[rel="dcterms:relation"]')) {
+		relationArray.push(relation.getAttribute('title'));
 	}
-	newItem.references = relationArray.join('; ');
+	newItem.history = relationArray.join('; ');
 
 	// Add fields of law as tags
 	var tags = attr(doc, 'link[rel="dcterms:subject"]', 'title');
@@ -150,20 +146,18 @@ function scrape (doc, url) {
 		newItem.tags = tags.split('; ');
 	}
 
-	// Attachments: PDF and Snapshot
-	var pdfurl = "https://uitspraken.rechtspraak.nl" + attr(doc, 'a.pdfUitspraak', 'href');
+	// Attachments
+	var pdfurl = attr(doc, 'a.pdfUitspraak', 'href');
 	newItem.attachments = [{
-		"url": pdfurl,
-		"title": "Rechtspraak.nl PDF",
-		"mimeType": "application/pdf",
+		url: pdfurl,
+		title: "Rechtspraak.nl PDF",
+		mimeType: "application/pdf",
 	}];
-	newItem.attachments.push({
-		"title": "Snapshot",
-		"document": doc
-	});
 
 	newItem.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -177,17 +171,13 @@ var testCases = [
 				"abstractNote": "Klimaatzaak Urgenda. Onrechtmatige daad. Schending zorgplicht ex artikelen 2 en 8 EVRM. Staat moet broeikasgassen nu verder terugdringen. Vonnis bekrachtigd\n\nVindplaatsen:\nRechtspraak.nl \nJM 2018/128 met annotatie van W.Th. Douma \nAB 2018/417 met annotatie van G.A. van der Veen, Ch.W. Backes \nO&A 2018/66 \nO&A 2018/51 met annotatie van G.A. van der Veen, T.G. Oztürk \nSEW 2019, afl. 1, p. 35 \nJB 2019/10 met annotatie van Sanderink, D.G.J. \nOGR-Updates.nl 2018-0234 \nPS-Updates.nl 2018-0814 \nJOM 2018/1182 \nJOM 2018/1154 \nJA 2019/37 \nJIN 2019/78 met annotatie van Sanderink, D.G.J.",
 				"court": "Hof Den Haag",
 				"docketNumber": "ECLI:NL:GHDHA:2018:2591",
-				"extra": "Soort: Uitspraak",
+				"extra": "Soort: Uitspraak\nReferences: Eerste aanleg: ECLI:NL:RBDHA:2015:7145, Bekrachtiging/bevestiging; Cassatie: ECLI:NL:HR:2019:2006, Bekrachtiging/bevestiging",
 				"language": "nl",
 				"url": "https://deeplink.rechtspraak.nl/uitspraak?id=ECLI:NL:GHDHA:2018:2591",
 				"attachments": [
 					{
 						"title": "Rechtspraak.nl PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -212,17 +202,13 @@ var testCases = [
 				"abstractNote": "Conclusie P-G: Bedreiging. Voldoende bepaald vreesobject. Conclusie strekt tot verwerping.\n\nVindplaatsen:\nRechtspraak.nl",
 				"court": "Parket bij de HR",
 				"docketNumber": "ECLI:NL:PHR:2019:1016",
-				"extra": "Soort: Conclusie",
+				"extra": "Soort: Conclusie\nReferences: Arrest Hoge Raad: ECLI:NL:HR:2020:44",
 				"language": "nl",
 				"url": "https://deeplink.rechtspraak.nl/uitspraak?id=ECLI:NL:PHR:2019:1016",
 				"attachments": [
 					{
 						"title": "Rechtspraak.nl PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -254,10 +240,6 @@ var testCases = [
 					{
 						"title": "Rechtspraak.nl PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
