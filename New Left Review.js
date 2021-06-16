@@ -2,14 +2,14 @@
 	"translatorID": "b97af278-52c1-4fc4-9c8b-5175c83941f2",
 	"label": "New Left Review",
 	"creator": "Bo An",
-	"target": "^https?://(www.)?newleftreview.org/issues/",
+	"target": "^https?://(www\\.)?newleftreview\\.org/issues/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-16 16:25:48"
+	"lastUpdated": "2021-06-16 21:17:31"
 }
 
 /*
