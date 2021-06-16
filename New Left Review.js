@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-16 09:54:20"
+	"lastUpdated": "2021-06-16 16:25:48"
 }
 
 /*
@@ -151,7 +151,11 @@ var testCases = [
 				"libraryCatalog": "New Left Review",
 				"pages": "24-46",
 				"publicationTitle": "New Left Review",
-				"attachments": [],
+				"attachments": [
+					{
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -184,7 +188,11 @@ var testCases = [
 				"libraryCatalog": "New Left Review",
 				"pages": "77-92",
 				"publicationTitle": "New Left Review",
-				"attachments": [],
+				"attachments": [
+					{
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -217,7 +225,11 @@ var testCases = [
 				"libraryCatalog": "New Left Review",
 				"pages": "153-160",
 				"publicationTitle": "New Left Review",
-				"attachments": [],
+				"attachments": [
+					{
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
