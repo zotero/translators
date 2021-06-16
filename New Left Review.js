@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-15 09:28:43"
+	"lastUpdated": "2021-06-16 09:52:21"
 }
 
 /*
@@ -86,7 +86,7 @@ function scrape(doc, _) {
 	const newItem = new Zotero.Item('journalArticle');
 
 	newItem.publicationTitle = "New Left Review";
-	newItem.journalAbbreviation = "New Left Rev.";
+	newItem.journalAbbreviation = "New Left Rev";
 
 	const title = ZU.xpath(doc, '//meta[@itemprop="name"]/@content')[0].value;
 	newItem.title = title;
@@ -116,7 +116,7 @@ function scrape(doc, _) {
 	const pdfUrlEl = ZU.xpath(doc, '//a[@title="Download PDF version"]');
 	if (pdfUrlEl[0]) {
 		pdfUrl = pdfUrlEl[0].href;
-	};
+	}
 	if (pdfUrl) {
 		newItem.attachments.push({
 			url: pdfUrl,
@@ -147,7 +147,7 @@ var testCases = [
 				"date": "2021-04-30",
 				"abstractNote": "At the intersection of Eurasia’s pre-modern empires, Transcaucasia has long been a battlezone. With the waning of American-led globalization, and its legacy of militarization, are their avatars—Russia, Turkey, Iran—re-emerging, equipped with Israeli drones? Georgi Derluguian locates the 2020 war for Nagorno Karabagh in the geopolitical longue durée.",
 				"issue": "128",
-				"journalAbbreviation": "New Left Rev",
+				"journalAbbreviation": "New Left Rev.",
 				"libraryCatalog": "New Left Review",
 				"pages": "24-46",
 				"publicationTitle": "New Left Review",
@@ -180,7 +180,7 @@ var testCases = [
 				"date": "2019-02-01",
 				"abstractNote": "The policies and pretensions of a Bourbonnais president as background to the political insurgency of provincial France. Origins and complexion of the gilets jaunes mobilization, with the Elysée resorting to the worst police violence since May 68.",
 				"issue": "115",
-				"journalAbbreviation": "New Left Rev",
+				"journalAbbreviation": "New Left Rev.",
 				"libraryCatalog": "New Left Review",
 				"pages": "77-92",
 				"publicationTitle": "New Left Review",
@@ -213,7 +213,7 @@ var testCases = [
 				"date": "2021-04-30",
 				"abstractNote": "Michael Lipkin on Klaus Vieweg, Hegel: Der Philosoph der Freiheit. The author of Philosophy of Right as roistering liberal.",
 				"issue": "128",
-				"journalAbbreviation": "New Left Rev",
+				"journalAbbreviation": "New Left Rev.",
 				"libraryCatalog": "New Left Review",
 				"pages": "153-160",
 				"publicationTitle": "New Left Review",
