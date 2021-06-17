@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-04-07 17:23:07"
+	"lastUpdated": "2021-06-17 04:08:06"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -37,7 +36,11 @@
 */
 
 function detectWeb(doc, url) {
-	if (getPMCID(url)) {
+	// Make sure the page have a PMCID and we're on a valid item page, 
+	// PDF, or report page
+	if (getPMCID(url) && (url.includes(".pdf") 
+	|| url.includes("/?report"))
+	|| 	doc.getElementsByClassName('fm-ids').length ) {
 		return "journalArticle";
 	}
 	
@@ -192,6 +195,11 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 			else if (firstPage) {
 				newItem.pages = firstPage;
 			}
+			// use elocationid where we don't have itemIDs			
+			if (!newItem.pages) {
+				newItem.pages = ZU.xpathText(article, 'elocationid');
+			}
+			
 
 			var pubDate = ZU.xpath(article, 'pubdate[@pubtype="ppub"]');
 			if (!pubDate.length) {
