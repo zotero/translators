@@ -1,16 +1,16 @@
-{
-	"translatorID": "e034d9be-c420-42cf-8311-23bca5735a32",
-	"label": "Baidu Scholar",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?xueshu\\.baidu\\.com/",
-	"minVersion": "3.0",
-	"maxVersion": "",
-	"priority": 100,
-	"inRepository": true,
-	"translatorType": 4,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-16 17:43:54"
-}
+// {
+// 	"translatorID": "e034d9be-c420-42cf-8311-23bca5735a32",
+// 	"label": "Baidu Scholar",
+// 	"creator": "Philipp Zumstein",
+// 	"target": "^https?://(www\\.)?xueshu\\.baidu\\.com/",
+// 	"minVersion": "3.0",
+// 	"maxVersion": "",
+// 	"priority": 100,
+// 	"inRepository": true,
+// 	"translatorType": 4,
+// 	"browserSupport": "gcsibv",
+// 	"lastUpdated": "2021-06-16 17:43:54"
+// }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -88,13 +88,11 @@ function doWeb(doc, url) {
 
 function scrape(doc, _url) {
 	var dataUrl = attr(doc, 'i.reqdata', 'url');
-	var diversion = attr(doc, 'i.reqdata', 'diversion');
-	var sign = attr(doc, 'a.sc_q', 'data-sign');
 	let paperId = undefined;
 	const paperIdMatches = _url.match(/paperid=([a-z0-9]*)/i);
 	if (paperIdMatches[1]) {
 		paperId = paperIdMatches[1];
-	} 
+	}
 	const risUrl = `https://xueshu.baidu.com/u/citation?type=ris&paperid=${paperId}`;
 	var title = doc.title.replace('_百度学术', '');
 
