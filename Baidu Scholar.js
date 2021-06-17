@@ -88,13 +88,11 @@ function doWeb(doc, url) {
 
 function scrape(doc, _url) {
 	var dataUrl = attr(doc, 'i.reqdata', 'url');
-	var diversion = attr(doc, 'i.reqdata', 'diversion');
-	var sign = attr(doc, 'a.sc_q', 'data-sign');
 	let paperId = undefined;
 	const paperIdMatches = _url.match(/paperid=([a-z0-9]*)/i);
 	if (paperIdMatches[1]) {
 		paperId = paperIdMatches[1];
-	} 
+	}
 	const risUrl = `https://xueshu.baidu.com/u/citation?type=ris&paperid=${paperId}`;
 	var title = doc.title.replace('_百度学术', '');
 
