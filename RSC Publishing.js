@@ -35,23 +35,22 @@
 
 	***** END LICENSE BLOCK *****
 */
+
 function getResults(doc) {
-	/**Both search result and book ToC pages use javascript to load content, so
+	/** Both search result and book ToC pages use javascript to load content, so
 	 * this actually doesn't work as intended. Search results will work, but
 	 * will also trigger on empty result set. detectWeb for book ToC does not
 	 * work, but doWeb does,
 	 */
-	return ZU.xpath(doc, '//div[@id="all" or @id="chapterList"]\
-						//div[contains(@class,"title_text")]\
-						//a[not(contains(@href,"/database/"))]');
+	return ZU.xpath(doc, '//div[@id="all" or @id="chapterList"]//div[contains(@class,"title_text")]//a[not(contains(@href,"/database/"))]');
 }
 
 function detectWeb(doc, url) {
-	if (url.search(/\/results[?\/]/i) != -1 || url.indexOf('/ebook/') != -1  &&
-		getResults(doc).length) {
+	if (url.match(/\/results[?/]/i) != -1 || url.includes('/ebook/')
+		&& getResults(doc).length) {
 		return 'multiple';
 	}
-	//apparently URLs sometimes have upper case as in /Content/ArticleLanding/
+	// apparently URLs sometimes have upper case as in /Content/ArticleLanding/
 	if (url.search(/\/content\/articlelanding\//i) != -1 && ZU.xpathText(doc, '//meta[@name="citation_title"]/@content')) {
 		return 'journalArticle';
 	}
@@ -59,17 +58,19 @@ function detectWeb(doc, url) {
 	if (url.search(/\/content\/chapter\//i) != -1) {
 		return 'bookSection';
 	}
+
+	return false;
 }
 
 function scrape(doc, url, type) {
 	var translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setDocument(doc);
-	translator.setHandler('itemDone', function(obj, item) {
+	translator.setHandler('itemDone', function (obj, item) {
 	//	item.itemType = type;
 
 
-		//keywords is frequently an empty string
+		// keywords is frequently an empty string
 		if (item.tags.length == 1 && !item.tags[0]) {
 			item.tags = [];
 		}
@@ -91,7 +92,7 @@ function scrape(doc, url, type) {
 
 		item.complete();
 	});
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = type;
 		trans.doWeb(doc, url);
 	});
@@ -101,25 +102,28 @@ function doWeb(doc, url) {
 	var type = detectWeb(doc, url);
 	if (type == 'multiple') {
 		var results = getResults(doc);
-		var items = new Object();
-		for (var i=0, n=results.length; i<n; i++) {
+		var items = {};
+		for (var i = 0, n = results.length; i < n; i++) {
 			items[results[i].href] = ZU.trimInternal(
 				ZU.xpathText(results[i], './node()', null, ' '));
 		}
 
-		Zotero.selectItems(items, function(selectedItems) {
-				if (!selectedItems) return true;
+		Zotero.selectItems(items, function (selectedItems) {
+			if (!selectedItems) return;
 
-				var urls = new Array();
-				for (var i in selectedItems) {
-					urls.push(i);
-				}
-				ZU.processDocuments(urls,doWeb);
-			});
-	} else {
+			var urls = [];
+			for (var i in selectedItems) {
+				urls.push(i);
+			}
+			ZU.processDocuments(urls, doWeb);
+		});
+	}
+	else {
 		scrape(doc, url, type);
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
