@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-17 17:48:00"
+	"lastUpdated": "2021-06-17 20:30:35"
 }
 
 /*
@@ -284,12 +284,12 @@ function init(doc, url, callback, forceLoadRDF) {
 				prefix = parts[0].toLowerCase();
 				prefixLength = parts[0].length;
 			}
-			if(_prefixes[prefix]) {
+			if (_prefixes[prefix]) {
 				var prop = tag.substr(prefixLength + 1);
 				prop = prop.charAt(0).toLowerCase() + prop.slice(1);
-				//bib and bibo types are special, they use rdf:type to define type
-				var specialNS = [_prefixes['bib'], _prefixes['bibo']];
-				if(prop == 'type' && specialNS.indexOf(_prefixes[prefix]) != -1) {
+				// bib and bibo types are special, they use rdf:type to define type
+				var specialNS = [_prefixes.bib, _prefixes.bibo];
+				if (prop == 'type' && specialNS.includes(_prefixes[prefix])) {
 					value = _prefixes[prefix] + value;
 					prefix = 'rdf';
 				}
