@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2017-06-20 13:43:21"
+	"lastUpdated": "2021-06-17 15:29:15"
 }
 
 /*
@@ -77,6 +77,17 @@ function scrape(doc, url, type) {
 		if (item.date) {
 			item.date = ZU.strToISO(item.date);
 		}
+		
+		for (let link of doc.querySelectorAll('.list__item-link')) {
+			if (link.textContent.includes('Supplementary information')) {
+				item.attachments.push({
+					url: link.href,
+					title: 'Supplementary Information PDF',
+					mimeType: 'application/pdf'
+				});
+				break;
+			}
+		}
 
 		item.complete();
 	});
@@ -112,7 +123,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
+		"url": "https://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f#!divAbstract",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -148,19 +159,13 @@ var testCases = [
 				"DOI": "10.1039/C1EE02148F",
 				"ISSN": "1754-5706",
 				"abstractNote": "Poly(2,2,6,6-tetramethyl-1-piperidinyloxy-4-yl methacrylate) (PTMA) displays a two–electron process redox reaction, high capacity of up to 222 mA h g−1, good rate performance and long cycle life, which is promoted by graphene as cathode material for lithium rechargeable batteries.",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"company": "The Royal Society of Chemistry",
-				"distributor": "The Royal Society of Chemistry",
-				"institution": "The Royal Society of Chemistry",
 				"issue": "1",
 				"journalAbbreviation": "Energy Environ. Sci.",
-				"label": "The Royal Society of Chemistry",
 				"language": "en",
 				"libraryCatalog": "pubs.rsc.org",
 				"pages": "5221-5225",
 				"publicationTitle": "Energy & Environmental Science",
-				"publisher": "The Royal Society of Chemistry",
-				"url": "http://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
+				"url": "https://pubs.rsc.org/en/content/articlelanding/2012/ee/c1ee02148f",
 				"volume": "5",
 				"attachments": [
 					{
@@ -168,7 +173,12 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Supplementary Information PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
@@ -179,7 +189,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8#!divabstract",
+		"url": "https://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8#!divabstract",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -209,14 +219,15 @@ var testCases = [
 				"libraryCatalog": "pubs.rsc.org",
 				"pages": "330-355",
 				"shortTitle": "Chapter 14",
-				"url": "http://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
+				"url": "https://pubs.rsc.org/en/content/chapter/bk9781849730518-00330/978-1-84973-051-8",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
