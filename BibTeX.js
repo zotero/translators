@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-11-30 10:00:00"
+	"lastUpdated": "2020-03-13 03:07:49"
 }
 
 /*
@@ -226,7 +226,7 @@ var bibtex2zoteroTypeMap = {
 	"booklet":"book",
 	"manual":"book",
 	"mastersthesis":"thesis",
-	"misc":"book",
+	"misc":"document",
 	"proceedings":"book",
 	"online":"webpage",
 	// alias for online from BibLaTeX:
@@ -1307,14 +1307,14 @@ function doExport() {
 		// Case of words with uppercase characters in non-initial positions is
 		// preserved with braces.
 		// Two extra captures because of the other regexp below
-		protectCapsRE = new ZU.XRegExp("()()\\b(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)", 'g');
+		protectCapsRE = new ZU.XRegExp("()()\\b([\\p{Letter}\\d]+\\p{Uppercase_Letter}[\\p{Letter}\\d]*)", 'g');
 	} else {
 		// Protect all upper case letters, even if the uppercase letter is only in
 		// initial position of the word.
 		// Don't protect first word if only first letter is capitalized
 		protectCapsRE = new ZU.XRegExp(
-			"(.)\\b(\\p{Letter}*\\p{Uppercase_Letter}\\p{Letter}*)" // Non-initial words with capital letter anywhere
-				+ "|^(\\p{Letter}+\\p{Uppercase_Letter}\\p{Letter}*)" // Initial word with capital in non-initial position
+			"(.)\\b([\\p{Letter}\\d]*\\p{Uppercase_Letter}[\\p{Letter}\\d]*)" // Non-initial words with capital letter anywhere
+				+ "|^([\\p{Letter}\\d]+\\p{Uppercase_Letter}[\\p{Letter}\\d]*)" // Initial word with capital in non-initial position
 			, 'g');
 	}
 	
@@ -1533,8 +1533,10 @@ function doExport() {
 			}
 		}
 		
-		Zotero.write("\n}");
+		Zotero.write(",\n}");
 	}
+	
+	Zotero.write("\n");
 }
 
 var exports = {

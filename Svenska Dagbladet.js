@@ -16,7 +16,7 @@
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2018 Sebastian Berlin
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -123,11 +123,11 @@ function scrape(doc, url) {
 
 		// Remove suffix not part of the title.
 		item.title = item.title.replace(/( \(SvD Premium\))? \| SvD$/, "");
-		
+
  		item.ISSN = "1101-2412";
- 		
+
  		item.publicationTitle = "Svenska Dagbladet";
- 		
+
  		var articleTags = doc.querySelectorAll(".ArticleTags-tag-link");
  		for(let i = 0; i < articleTags.length; i++) {
  			let tag = articleTags[i].textContent;
@@ -136,7 +136,7 @@ function scrape(doc, url) {
 
 		item.complete();
 	});
-	
+
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = "newspaperArticle";
 		trans.addCustomFields({
@@ -263,7 +263,7 @@ var testCases = [
 					"SvD Premium",
 					"Tom Petty",
 					"USA",
-					"Östberga",
+					"Östberga"
 				],
 				"notes": [],
 				"seeAlso": []
