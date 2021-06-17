@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 00:42:27"
+	"lastUpdated": "2021-06-04 17:18:26"
 }
 
 /*
@@ -886,13 +886,15 @@ function finalDataCleanup(doc, newItem) {
 		newItem.DOI = ZU.cleanDOI(newItem.DOI);
 	}
 
-	// Add DOI to non-supported item types
-	if (newItem.DOI && !ZU.fieldIsValidForType("DOI", newItem.itemType)) {
-		if (newItem.extra) {
-			newItem.extra += "\nDOI: " + newItem.DOI;
-		}
-		else {
-			newItem.extra = "DOI: " + newItem.DOI;
+	// Add DOI, publisher, place to non-supported item types in extra field
+	for (let key of ["DOI", "publisher", "place"]) {
+		if (newItem[key] && !ZU.fieldIsValidForType(key, newItem.itemType)) {
+			if (newItem.extra) {
+				newItem.extra += "\n" + key + ": " + newItem[key];
+			}
+			else {
+				newItem.extra = key + ": " + newItem[key];
+			}
 		}
 	}
 
@@ -1138,6 +1140,7 @@ var testCases = [
 				"DOI": "10.1590/S0034-89102007000900015",
 				"ISSN": "0034-8910, 0034-8910, 1518-8787",
 				"abstractNote": "OBJETIVO: Descrever as impressões, experiências, conhecimentos, crenças e a receptividade de usuários de drogas injetáveis para participar das estratégias de testagem rápida para HIV. MÉTODOS: Estudo qualitativo exploratório foi conduzido entre usuários de drogas injetáveis, de dezembro de 2003 a fevereiro de 2004, em cinco cidades brasileiras, localizadas em quatro regiões do País. Um roteiro de entrevista semi-estruturado contendo questões fechadas e abertas foi usado para avaliar percepções desses usuários sobre procedimentos e formas alternativas de acesso e testagem. Foram realizadas 106 entrevistas, aproximadamente 26 por região. RESULTADOS: Características da população estudada, opiniões sobre o teste rápido e preferências por usar amostras de sangue ou saliva foram apresentadas junto com as vantagens e desvantagens associadas a cada opção. Os resultados mostraram a viabilidade do uso de testes rápidos entre usuários de drogas injetáveis e o interesse deles quanto à utilização destes métodos, especialmente se puderem ser equacionadas questões relacionadas à confidencialidade e confiabilidade dos testes. CONCLUSÕES: Os resultados indicam que os testes rápidos para HIV seriam bem recebidos por essa população. Esses testes podem ser considerados uma ferramenta valiosa, ao permitir que mais usuários de drogas injetáveis conheçam sua sorologia para o HIV e possam ser referidos para tratamento, como subsidiar a melhoria das estratégias de testagem entre usuários de drogas injetáveis.",
+				"extra": "publisher: Faculdade de Saúde Pública da Universidade de São Paulo",
 				"journalAbbreviation": "Rev. Saúde Pública",
 				"language": "en",
 				"libraryCatalog": "scielosp.org",
@@ -1189,6 +1192,7 @@ var testCases = [
 				"DOI": "10.1155/2013/868174",
 				"ISSN": "1024-123X",
 				"abstractNote": "The problem of network-based robust filtering for stochastic systems with sensor nonlinearity is investigated in this paper. In the network environment, the effects of the sensor saturation, output quantization, and network-induced delay are taken into simultaneous consideration, and the output measurements received in the filter side are incomplete. The random delays are modeled as a linear function of the stochastic variable described by a Bernoulli random binary distribution. The derived criteria for performance analysis of the filtering-error system and filter design are proposed which can be solved by using convex optimization method. Numerical examples show the effectiveness of the design method.",
+				"extra": "publisher: Hindawi",
 				"language": "en",
 				"libraryCatalog": "www.hindawi.com",
 				"publicationTitle": "Mathematical Problems in Engineering",
@@ -1283,14 +1287,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://olh.openlibhums.org/article/10.16995/olh.46/",
+		"url": "https://olh.openlibhums.org/article/id/4400/",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Opening the Open Library of Humanities",
 				"creators": [
 					{
-						"firstName": "Martin",
+						"firstName": "Martin Paul",
 						"lastName": "Eve",
 						"creatorType": "author"
 					},
@@ -1300,17 +1304,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28",
+				"date": "2015-09-28 13:00",
 				"DOI": "10.16995/olh.46",
-				"ISSN": "2056-6700",
-				"abstractNote": "Article: Opening the Open Library of Humanities",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
-				"pages": "e1",
 				"publicationTitle": "Open Library of Humanities",
-				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
-				"url": "http://olh.openlibhums.org/article/10.16995/olh.46/",
+				"url": "https://olh.openlibhums.org/article/id/4400/",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1361,7 +1361,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=510",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=-445",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1429,7 +1429,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 50 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
@@ -1469,6 +1469,7 @@ var testCases = [
 				"DOI": "10.1023/A:1021669308832",
 				"ISSN": "1572-9524",
 				"abstractNote": "This is a brief reply to S. Goldstein's article “Quantum theory without observers” in Physics Today. It is pointed out that Bohm's pilot wave theory is successful only because it keeps Schrödinger's (exact) wave mechanics unchanged, while the rest of it is observationally meaningless and solely based on classical prejudice.",
+				"extra": "publisher: Springer Netherlands",
 				"issue": "2",
 				"journalAbbreviation": "Found Phys Lett",
 				"language": "en",
@@ -1511,6 +1512,7 @@ var testCases = [
 				"date": "2000",
 				"DOI": "10.1353/kri.2008.0061",
 				"ISSN": "1538-5000",
+				"extra": "publisher: Slavica Publishers",
 				"issue": "4",
 				"language": "en",
 				"libraryCatalog": "muse.jhu.edu",
