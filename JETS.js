@@ -2,7 +2,7 @@
 	"translatorID": "e7bb82b1-cebf-432c-96df-1c5211f59927",
 	"label": "JETS",
 	"creator": "Luke van der Hoeven",
-	"target": "^https?://(www.)?etsjets.org/",
+	"target": "^https?://(www\\.)?etsjets\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
