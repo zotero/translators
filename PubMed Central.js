@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-17 04:08:06"
+	"lastUpdated": "2021-06-18 01:38:35"
 }
 
 /*
@@ -484,6 +484,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "PLoS One",
 				"libraryCatalog": "PubMed Central",
+				"pages": "e8653",
 				"publicationTitle": "PLoS ONE",
 				"url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2801612/",
 				"volume": "5",
