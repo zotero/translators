@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-17 20:45:01"
+	"lastUpdated": "2021-06-18 15:50:04"
 }
 
 /*
@@ -916,6 +916,10 @@ function finalDataCleanup(doc, newItem) {
 }
 
 function relativeToAbsolute(doc, url) {
+	if (ZU.resolveURL) {
+		return ZU.resolveURL(url);
+	}
+	
 	// adapted from Nuclear Receptor Signaling translator
 
 	if (!url) {
