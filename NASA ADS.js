@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-15 15:43:55"
+	"lastUpdated": "2021-06-18 17:02:40"
 }
 
 /*
@@ -120,6 +120,9 @@ function scrape(ids, doc) {
 					title: "Snapshot",
 					document: doc
 				});
+				if (item.journalAbbreviation == item.publicationTitle) {
+					item.journalAbbreviation = '';
+				}
 				item.complete();
 			});
 			translator.translate();
@@ -131,7 +134,7 @@ function scrape(ids, doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://ui.adsabs.harvard.edu/search/q=star&sort=date%20desc%2C%20bibcode%20desc&p_=0",
+		"url": "https://ui.adsabs.harvard.edu/search/p_=0&q=star&sort=date%20desc%2C%20bibcode%20desc",
 		"defer": true,
 		"items": "multiple"
 	},
@@ -173,7 +176,6 @@ var testCases = [
 				"DOI": "10.1016/j.cnsns.2019.105014",
 				"ISSN": "1007-5704",
 				"abstractNote": "Cerebellar stellate cells are inhibitory molecular interneurons that regulate the firing properties of Purkinje cells, the sole output of cerebellar cortex. Recent evidence suggests that these cells exhibit temporal increase in excitability during whole-cell patch-clamp configuration in a phenomenon termed runup. They also exhibit a non-monotonic first-spike latency profile as a function of the holding potential in response to a fixed step-current. In this study, we use modeling approaches to unravel the dynamics of runup and categorize the firing behavior of cerebellar stellate cells as either type I or type II oscillators. We then extend this analysis to investigate how the non-monotonic latency profile manifests itself during runup. We employ a previously developed, but revised, Hodgkin-Huxley type model to show that stellate cells are indeed type I oscillators possessing a saddle node on an invariant cycle (SNIC) bifurcation. The SNIC in the model acts as a \"threshold\" for tonic firing and produces a slow region in the phase space called the ghost of the SNIC. The model reveals that (i) the SNIC gets left-shifted during runup with respect to Iapp =Itest in the current-step protocol, and (ii) both the distance from the stable limit cycle along with the slow region produce the non-monotonic latency profile as a function of holding potential. Using the model, we elucidate how latency can be made arbitrarily large for a specific range of holding potentials close to the SNIC during pre-runup (post-runup). We also demonstrate that the model can produce transient single spikes in response to step-currents entirely below ISNIC, and that a pair of dynamic inhibitory and excitatory post-synaptic inputs can robustly evoke action potentials, provided that the magnitude of the inhibition is either low or high but not intermediate. Our results show that the topology of the SNIC is the key to explaining such behaviors.",
-				"journalAbbreviation": "Communications in Nonlinear Science and Numerical Simulations",
 				"libraryCatalog": "NASA ADS",
 				"pages": "105014",
 				"publicationTitle": "Communications in Nonlinear Science and Numerical Simulations",
@@ -320,7 +322,6 @@ var testCases = [
 				"DOI": "10.1016/j.ymssp.2021.108010",
 				"ISSN": "0888-3270",
 				"abstractNote": "Inspired by the cushioning effect of the felid paws in contact with the ground, a novel bio-inspired toe-like structure (TLS) is developed and systematically studied for low-frequency vibration isolation. The TLS consists of two rods with different length (as phalanxes) and a linear spring (as muscle). Based on Hamiltonian principle, the dynamic model is established considering spring deformation and joint rotation damping. The derived equivalent stiffness reveals that the proposed TLS possesses favorable high static and low dynamic stiffness (HSLDS) characteristics in a wide displacement range. Besides, displacement transmissibility suggests that the proposed TLS isolator has low resonance frequency and can effectively isolate base excitation at low frequencies. Comprehensive parameter analysis shows that the inherent nonlinearities in stiffness and damping is conductive to vibration isolation and can be designed/adjusted on demand by selecting suitable structural parameters. This flexibility gives TLS advantages and great potential in extensive engineering applications when subjected to variable vibration loads. A prototype is fabricated and tested for a comprehensive recognize of its advantageous vibration isolation performance in low frequency band. The vibration with excitation frequency higher than 3 Hz can be effectively isolated. This novel bio-inspired TLS provides a feasible approach to passive vibration control and isolation in low frequency band.",
-				"journalAbbreviation": "Mechanical Systems and Signal Processing",
 				"libraryCatalog": "NASA ADS",
 				"pages": "108010",
 				"publicationTitle": "Mechanical Systems and Signal Processing",
