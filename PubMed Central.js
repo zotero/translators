@@ -36,11 +36,11 @@
 */
 
 function detectWeb(doc, url) {
-	// Make sure the page have a PMCID and we're on a valid item page, 
+	// Make sure the page have a PMCID and we're on a valid item page,
 	// PDF, or report page
-	if (getPMCID(url) && (url.includes(".pdf") 
+	if (getPMCID(url) && (url.includes(".pdf")
 	|| url.includes("/?report"))
-	|| 	doc.getElementsByClassName('fm-ids').length ) {
+	|| 	doc.getElementsByClassName('fm-ids').length) {
 		return "journalArticle";
 	}
 	
@@ -195,7 +195,7 @@ function lookupPMCIDs(ids, doc, pdfLink) {
 			else if (firstPage) {
 				newItem.pages = firstPage;
 			}
-			// use elocationid where we don't have itemIDs			
+			// use elocationid where we don't have itemIDs
 			if (!newItem.pages) {
 				newItem.pages = ZU.xpathText(article, 'elocationid');
 			}
