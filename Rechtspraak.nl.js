@@ -171,7 +171,8 @@ var testCases = [
 				"abstractNote": "Klimaatzaak Urgenda. Onrechtmatige daad. Schending zorgplicht ex artikelen 2 en 8 EVRM. Staat moet broeikasgassen nu verder terugdringen. Vonnis bekrachtigd\n\nVindplaatsen:\nRechtspraak.nl \nJM 2018/128 met annotatie van W.Th. Douma \nAB 2018/417 met annotatie van G.A. van der Veen, Ch.W. Backes \nO&A 2018/66 \nO&A 2018/51 met annotatie van G.A. van der Veen, T.G. Oztürk \nSEW 2019, afl. 1, p. 35 \nJB 2019/10 met annotatie van Sanderink, D.G.J. \nOGR-Updates.nl 2018-0234 \nPS-Updates.nl 2018-0814 \nJOM 2018/1182 \nJOM 2018/1154 \nJA 2019/37 \nJIN 2019/78 met annotatie van Sanderink, D.G.J.",
 				"court": "Hof Den Haag",
 				"docketNumber": "ECLI:NL:GHDHA:2018:2591",
-				"extra": "Soort: Uitspraak\nReferences: Eerste aanleg: ECLI:NL:RBDHA:2015:7145, Bekrachtiging/bevestiging; Cassatie: ECLI:NL:HR:2019:2006, Bekrachtiging/bevestiging",
+				"extra": "Soort: Uitspraak",
+				"history": "Eerste aanleg: ECLI:NL:RBDHA:2015:7145, Bekrachtiging/bevestiging; Cassatie: ECLI:NL:HR:2019:2006, Bekrachtiging/bevestiging",
 				"language": "nl",
 				"url": "https://deeplink.rechtspraak.nl/uitspraak?id=ECLI:NL:GHDHA:2018:2591",
 				"attachments": [
@@ -202,7 +203,8 @@ var testCases = [
 				"abstractNote": "Conclusie P-G: Bedreiging. Voldoende bepaald vreesobject. Conclusie strekt tot verwerping.\n\nVindplaatsen:\nRechtspraak.nl",
 				"court": "Parket bij de HR",
 				"docketNumber": "ECLI:NL:PHR:2019:1016",
-				"extra": "Soort: Conclusie\nReferences: Arrest Hoge Raad: ECLI:NL:HR:2020:44",
+				"extra": "Soort: Conclusie",
+				"history": "Arrest Hoge Raad: ECLI:NL:HR:2020:44",
 				"language": "nl",
 				"url": "https://deeplink.rechtspraak.nl/uitspraak?id=ECLI:NL:PHR:2019:1016",
 				"attachments": [
