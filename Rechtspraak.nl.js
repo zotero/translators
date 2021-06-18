@@ -2,7 +2,7 @@
 	"translatorID": "aede3fda-1894-4dfc-8bca-1c3463f11076",
 	"label": "Rechtspraak.nl",
 	"creator": "Pieter van der Wees",
-	"target": "^https?://*uitspraken\\.rechtspraak\\.nl/",
+	"target": "^https?://uitspraken\\.rechtspraak\\.nl/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
