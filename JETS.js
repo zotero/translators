@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-02-01 22:41:29"
+	"lastUpdated": "2021-06-18 00:00:50"
 }
 
 /*
   ***** BEGIN LICENSE BLOCK *****
 
-  Copyright © 2019 Luke van der Hoeven
+  Copyright © 2019-2021 Luke van der Hoeven
   This file is part of Zotero.
 
   Zotero is free software: you can redistribute it and/or modify
@@ -35,51 +35,46 @@
 */
 
 function detectWeb(doc, url) {
-  if (url.indexOf("JETS_current") != -1) {
-	return "multiple";
-  } else if (url.indexOf("JETS") != -1) {
-	return "multiple";
-  } else if (url.indexOf("node") != -1) {
-	return "multiple";
-  }
-  
+	if (url.includes("/JETS_current") || url.includes("/JETS/") || url.includes("/node/")) {
+		return "multiple";
+	}
+	return false;
 }
 
-function doWeb(doc, url) {
-  var type = detectWeb(doc, url);
-  switch (type) {
-	case "multiple":
-	  let results = getSearchResults(doc, false)
-	  if(results) {
+function doWeb(doc, _url) {
+	let results = getSearchResults(doc, false);
+	if (results) {
 		Zotero.selectItems(results, function (selected) {
-		  if (!selected) { return true; }
-		  for (let url in selected)
-		  scrape(selected[url], url)
+			if (!selected) {
+				return;
+			}
+			for (let url in selected) scrape(selected[url], url);
 		});
-	  }
-	  break;
-  }
+	}
 }
 
 function scrape(titleAuthor, url) {
 	let [title, author] = titleAuthor.split(". . .");
 	let pdfTitle = url.split('/').pop();
-	let [_shortname, issue, pages, _authorLast] = pdfTitle.split('_');
+	let [, issue, pages] = pdfTitle.split('_');
 	
 	var item = new Zotero.Item('journalArticle');
 	item.url = url;
-	item.journalAbbreviation = "JETS"
-	item.publicationTitle = "Journal of the Evangelical Theological Society"
-	item.title = ZU.trimInternal(title)
+	item.journalAbbreviation = "J. Evang. Theol. Soc."; // ISO 4 abbreviation
+	item.publicationTitle = "Journal of the Evangelical Theological Society";
+	item.title = ZU.trimInternal(title);
 	
-	if(author) { item.creators.push(ZU.cleanAuthor(author, 'author', false)); }
+	if (author) {
+		item.creators.push(ZU.cleanAuthor(author, 'author', false));
+	}
 	
-	item.pages = pages
-	item.volume = issue.split('.')[0]
-	item.issue = issue.split('.')[1]
-	
+	if (pages.match(/[0-9]+(-[0-9]+)?/)) {
+		item.pages = pages;
+	}
+	[item.volume, item.issue] = issue.split('.');
+
 	item.attachments.push({
-		title: pdfTitle,
+		title: "Full Text PDF",
 		mimeType: 'application/pdf',
 		url: url
 	});
@@ -88,23 +83,24 @@ function scrape(titleAuthor, url) {
 }
 
 function getSearchResults(doc, checkOnly) {
-  var items = {};
-  var found = false;
-  let results = doc.querySelectorAll('div.content p a');
+	var items = {};
+	var found = false;
+	let results = doc.querySelectorAll('div.content p a');
 
-  for (var result of results) {
-	let href = result.href;
-	let title = ZU.capitalizeTitle(ZU.trimInternal(result.innerText).toLowerCase(), true);
+	for (var result of results) {
+		let href = result.href;
+		let title = ZU.capitalizeTitle(ZU.trimInternal(result.innerText).toLowerCase(), true);
 
-	if (!href || !title || !href.endsWith(".pdf")) continue;
-	if (checkOnly) return true;
+		if (!href || !title || !href.endsWith(".pdf")) continue;
+		if (checkOnly) return true;
 
-	found = true;
-	items[href] = title;
-  }
+		found = true;
+		items[href] = title;
+	}
 
-  return found ? items : false;
+	return found ? items : false;
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
