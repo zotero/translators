@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-06-26 23:04:25"
+	"lastUpdated": "2021-06-18 17:31:29"
 }
 
 /*
@@ -196,6 +196,54 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.mja.com.au/search?search=vaccination",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.mja.com.au/journal/2021/215/1/potentially-preventable-hospitalisations-people-intellectual-disability-new",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Potentially preventable hospitalisations of people with intellectual disability in New South Wales",
+				"creators": [
+					{
+						"firstName": "Janelle C.",
+						"lastName": "Weise",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Preeyaporn",
+						"lastName": "Srasuebkul",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julian N.",
+						"lastName": "Trollor",
+						"creatorType": "author"
+					}
+				],
+				"date": "14 June 2021",
+				"ISSN": "0025-729X",
+				"abstractNote": "Objective: To determine rates of potentially preventable hospitalisation of people with intellectual disability in New South Wales, and compare them with those for the NSW population.\n\nDesign: Retrospective cohort study.\n\nSetting: Potentially preventable hospitalisations in NSW, as defined by the National Healthcare Agreement progress indicator 18, 1 July 2001 ‒ 30 June 2015.\n\nParticipants: Data collected in a retrospective data linkage study of 92 542 people with intellectual disability in NSW; potentially preventable hospitalisations data for NSW published by HealthStats NSW.\n\nMain outcome measures: Age‐adjusted rates of potentially preventable hospitalisation by group (people with intellectual disability, NSW population), medical condition type (acute, chronic, vaccine‐preventable), and medical condition.\n\nResults: The annual age‐standardised rate for people with intellectual disability ranged between 5286 and 6301 per 100 000 persons, and for the NSW population between 1278 and 1511 per 100 000 persons; the rate ratio (RR) ranged between 3.5 (95% CI, 3.3–3.7) in 2014–15 and 4.5 (95% CI, 4.2–4.9) in 2002–03. The difference was greatest for admissions with acute (RR range: 5.3 [95% CI, 4.9–5.7] in 2014–15 to 8.1 [95% CI, 7.4–8.8] in 2002–03) and vaccine‐preventable conditions (RR range: 2.1 [95% CI, 1.6–3.0] in 2007–08 to 3.4 [95% CI, 2.2–5.2] in 2004–05). By specific condition, the highest age‐standardised rate was for admissions with convulsions and epilepsy (all years, 2567 per 100 000 population; v NSW population: RR, 22.2; 95% CI, 21.3–23.1).\n\nConclusion: Age‐standardised rates of potentially preventable hospitalisation are higher for people with intellectual disability than for the general population. The reasons for these differences should be investigated, and strategies for averting potentially preventable hospitalisation developed.",
+				"journalAbbreviation": "Med. J. Aust.",
+				"libraryCatalog": "eMJA",
+				"publicationTitle": "Medical Journal of Australia",
+				"url": "https://www.mja.com.au/journal/2021/215/1/potentially-preventable-hospitalisations-people-intellectual-disability-new",
+				"volume": "Online first",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
