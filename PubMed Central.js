@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-18 17:51:31"
+	"lastUpdated": "2021-06-18 17:55:11"
 }
 
 /*
@@ -37,7 +37,7 @@
 
 function detectWeb(doc, url) {
 	// Make sure the page have a PMCID and we're on a valid item page,
-	// PDF, or report page
+	// or looking at a PDF
 	if (getPMCID(url) && (url.includes(".pdf")
 	|| 	doc.getElementsByClassName('fm-ids').length)) {
 		return "journalArticle";
