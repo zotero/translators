@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-17 20:30:35"
+	"lastUpdated": "2021-06-18 15:50:04"
 }
 
 /*
@@ -36,11 +36,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 /* eslint-disable camelcase */
@@ -905,6 +900,12 @@ function finalDataCleanup(doc, newItem) {
 			newItem.extra = "DOI: " + newItem.DOI;
 		}
 	}
+	
+	// URLs in meta tags can technically be relative (see the ccc.de test for
+	// an example), so we need to handle that
+	if (newItem.url) {
+		newItem.url = relativeToAbsolute(doc, newItem.url);
+	}
 
 
 	// remove itemID - comes from RDF translator, doesn't make any sense for online data
@@ -912,6 +913,38 @@ function finalDataCleanup(doc, newItem) {
 
 	// worst case, if this is not called from another translator, use URL for title
 	if (!newItem.title && !Zotero.parentTranslator) newItem.title = newItem.url;
+}
+
+function relativeToAbsolute(doc, url) {
+	if (ZU.resolveURL) {
+		return ZU.resolveURL(url);
+	}
+	
+	// adapted from Nuclear Receptor Signaling translator
+
+	if (!url) {
+		return doc.location.toString();
+	}
+
+	// check whether it's already absolute
+	if (url.match(/^(\w+:)?\/\//)) {
+		return url;
+	}
+
+	if (url[0] == '/') {
+		// relative to root
+		return doc.location.protocol + '//' + doc.location.host
+			+ (doc.location.port.length ? ':' + doc.location.port : '')
+			+ url;
+	}
+	else {
+		// relative to current directory
+		let location = doc.location.toString();
+		if (location.includes('?')) {
+			location = location.slice(0, location.indexOf('?'));
+		}
+		return location.replace(/([^/]\/)[^/]+$/, '$1') + url;
+	}
 }
 
 var exports = {
@@ -1534,6 +1567,37 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://media.ccc.de/v/35c3-9386-introduction_to_deep_learning",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Introduction to Deep Learning",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "teubi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-12-27 01:00:00 +0100",
+				"abstractNote": "This talk will teach you the fundamentals of machine learning and give you a sneak peek into the internals of the mystical black box. You...",
+				"language": "en",
+				"libraryCatalog": "media.ccc.de",
+				"url": "https://media.ccc.de/v/35c3-9386-introduction_to_deep_learning",
+				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
