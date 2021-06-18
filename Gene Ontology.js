@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-18 21:21:40"
+	"lastUpdated": "2021-06-18 21:31:51"
 }
 
 /*
@@ -85,7 +85,9 @@ function searchWithPMID(pmid, callback) {
 	translate.setSearch(item);
 	
 	// Don't throw on error
-	translate.setHandler("error", function () {});
+	translate.setHandler("error", function () {
+		callback(null);
+	});
 
 	// don't save immediately when item is done
 	translate.setHandler("itemDone", function (translate, item) {
@@ -97,9 +99,13 @@ function searchWithPMID(pmid, callback) {
 }
 
 function itemLookupComplete(item) {
-	choices[item.itemID] = item.title;
-	items[item.itemID] = item;
 	itemsRemaining--;
+	
+	if (item) {
+		choices[item.itemID] = item.title;
+		items[item.itemID] = item;
+	}
+	
 	if (itemsRemaining <= 0) {
 		Zotero.selectItems(choices, function (selected) {
 			if (selected) {
