@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-19 00:13:04"
+	"lastUpdated": "2021-06-19 01:22:49"
 }
 
 /*
@@ -56,7 +56,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.citation-title > a[href*="/article/"]');
 	for (let row of rows) {
-		let href = row.href;
+		let href = getJSONURL(row.href);
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -69,22 +69,30 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), scrape);
+			if (!items) return;
+			Object.keys(items).forEach(scrape);
 		});
 	}
 	else {
-		scrape(doc, url);
+		let jsonURL = getJSONURL(url);
+		if (jsonURL) {
+			scrape(jsonURL);
+		}
+		else {
+			ZU.logError('Couldn\'t extract ID from URL: ' + url);
+		}
 	}
 }
 
-function scrape(doc, url) {
-	ZU.doGet(getJSONURL(url), function (respText) {
+function scrape(jsonURL) {
+	ZU.doGet(jsonURL, function (respText) {
 		processJSON(JSON.parse(respText));
 	});
 }
 
 function getJSONURL(pageURL) {
-	let id = pageURL.match(/\/article\/[^/]+\/([^/?]+)/)[1];
+	let id = (pageURL.match(/\/article\/[^/]+\/([^/?]+)/) || [])[1];
+	if (!id) return null;
 	return `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=ext_id%3A${id}&resultType=core&format=json`;
 }
 
@@ -327,16 +335,21 @@ var testCases = [
 				"DOI": "10.1103/physreva.102.032208",
 				"ISSN": "2469-9934",
 				"abstractNote": "We show how quantum many-body systems on hyperbolic lattices with nearest-neighbor hopping and local interactions can be mapped onto quantum field theories in continuous negatively curved space. The underlying lattices have recently been realized experimentally with superconducting resonators and therefore allow for a table-top quantum simulation of quantum physics in curved background. Our mapping provides a computational tool to determine observables of the discrete system even for large lattices, where exact diagonalization fails. As an application and proof of principle we quantitatively reproduce the ground state energy, spectral gap, and correlation functions of the noninteracting lattice system by means of analytic formulas on the Poincaré disk, and show how conformal symmetry emerges for large lattices. This sets the stage for studying interactions and disorder on hyperbolic graphs in the future. Importantly, our analysis reveals that even relatively small discrete hyperbolic lattices emulate the continuous geometry of negatively curved space, and thus can be used to experimentally resolve fundamental open problems at the interface of interacting many-body systems, quantum field theory in curved space, and quantum gravity.",
-				"extra": "PMID: 34136733",
+				"extra": "PMID: 34136733\nPMCID: PMC8204532",
 				"issue": "3",
 				"journalAbbreviation": "Phys Rev A (Coll Park)",
 				"language": "eng",
 				"libraryCatalog": "Europe PMC",
 				"publicationTitle": "Physical review A",
 				"shortTitle": "Quantum simulation of hyperbolic space with circuit quantum electrodynamics",
-				"url": "https://doi.org/10.1103/PhysRevA.102.032208",
+				"url": "https://europepmc.org/articles/PMC8204532",
 				"volume": "102",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF (Free)",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
