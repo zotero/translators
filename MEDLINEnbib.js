@@ -150,7 +150,7 @@ function processTag(item, tag, value) {
 	else if (tag == "LID") {
 		// Pubmed adds all sorts of different IDs in here, so make sure these are URLs
 		if (value.startsWith("http")) {
-			item.attachments.push({url: value, title: "Catalog Link", snapshot: false});
+			item.attachments.push({ url: value, title: "Catalog Link", snapshot: false });
 		}
 	}
 	else if (tag == "MH" || tag == "OT") {
