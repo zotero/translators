@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-12-27 04:34:53"
+	"lastUpdated": "2021-06-19 00:00:44"
 }
 
 /*
@@ -145,6 +145,13 @@ function processTag(item, tag, value) {
 	}
 	else if (tag == "DP") {
 		item.date = value;
+	}
+	// Save link to attached link
+	else if (tag == "LID") {
+		// Pubmed adds all sorts of different IDs in here, so make sure these are URLs
+		if (value.startsWith("http")) {
+			item.attachments.push({url: value, title: "Catalog Link", snapshot: false});
+		}
 	}
 	else if (tag == "MH" || tag == "OT") {
 		item.tags.push(value);
