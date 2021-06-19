@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-19 01:22:49"
+	"lastUpdated": "2021-06-19 08:52:49"
 }
 
 /*
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 			scrape(jsonURL);
 		}
 		else {
-			ZU.logError('Couldn\'t extract ID from URL: ' + url);
+			Z.debug('Couldn\'t extract ID from URL: ' + url);
 		}
 	}
 }
@@ -93,12 +93,13 @@ function scrape(jsonURL) {
 function getJSONURL(pageURL) {
 	let id = (pageURL.match(/\/article\/[^/]+\/([^/?]+)/) || [])[1];
 	if (!id) return null;
-	return `https://www.ebi.ac.uk/europepmc/webservices/rest/search?query=ext_id%3A${id}&resultType=core&format=json`;
+	let idField = id.match(/pmc/i) ? 'PMCID' : 'ext_id';
+	return `https://europepmc.org/api/get/articleApi?query=${idField}:${id}&resultType=core&format=json`;
 }
 
 function processJSON(json) {
 	if (!json.resultList || !json.resultList.result || !json.resultList.result.length) {
-		Z.logError('Query returned no results');
+		Z.debug('Query returned no results');
 		return;
 	}
 	
@@ -159,7 +160,8 @@ function processJournalInfo(journalInfo, item) {
 	item.journalAbbreviation = journalInfo.journal.isoabbreviation;
 	item.volume = journalInfo.volume;
 	item.issue = journalInfo.issue;
-	item.ISSN = journalInfo.journal.essn || journalInfo.journal.issn;
+	item.ISSN = journalInfo.journal.ESSN || journalInfo.journal.essn
+		|| journalInfo.journal.ISSN || journalInfo.journal.issn;
 	item.date = journalInfo.printPublicationDate;
 }
 
@@ -392,6 +394,46 @@ var testCases = [
 		"url": "https://europepmc.org/search?query=symmetry",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://europepmc.org/article/pmc/pmc3198533",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Zotero: A bibliographic assistant to researcher",
+				"creators": [
+					{
+						"firstName": "K K Mueen",
+						"lastName": "Ahmed",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Bandar E",
+						"lastName": "Al Dhubaib",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011-10-01",
+				"DOI": "10.4103/0976-500x.85940",
+				"ISSN": "0976-5018",
+				"extra": "PMID: 22025866\nPMCID: PMC3198533",
+				"issue": "4",
+				"journalAbbreviation": "J Pharmacol Pharmacother",
+				"language": "eng",
+				"libraryCatalog": "Europe PMC",
+				"pages": "303-305",
+				"publicationTitle": "Journal of pharmacology & pharmacotherapeutics",
+				"rights": "cc by-nc-sa",
+				"shortTitle": "Zotero",
+				"url": "https://europepmc.org/articles/PMC3198533",
+				"volume": "2",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
