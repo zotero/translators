@@ -36,10 +36,10 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes("/item") != -1) {
+	if (url.includes("/item/")) {
 		return "artwork";
 	}
-	else if (url.includes("/search") != -1) {
+	else if (url.includes("/search/")) {
 		return "multiple";
 	}
 	return false;
@@ -57,7 +57,7 @@ function scrape(doc, url) {
 			item.title = data.titles[0].title;
 			item.shortTitle = data.objectType;
 		}
-		else if (data.objectType !== "") {
+		else if (data.objectType) {
 			item.title = data.objectType;
 			item.shortTitle = data.objectType;
 		}
@@ -106,7 +106,7 @@ function scrape(doc, url) {
 		for (var j = 0; j < artistMakerPeople.length; j++) {
 			item.creators.push({
 				lastName: artistMakerPeople[j].name.text,
-				fieldMode: "1",
+				fieldMode: 1,
 				creatorType: "author"
 			});
 		}
@@ -115,14 +115,14 @@ function scrape(doc, url) {
 		for (var k = 0; k < artistMakerOrganisations.length; k++) {
 			item.creators.push({
 				lastName: artistMakerOrganisations[k].name.text,
-				fieldMode: "1",
+				fieldMode: 1,
 				creatorType: "author"
 			});
 		}
 
 		item.attachments.push({
 			url: url,
-			title: "Explore the Collections (snapshot)",
+			title: "Snapshot",
 			snapshot: true
 		});
 
