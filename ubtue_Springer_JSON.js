@@ -114,10 +114,11 @@ function doImport() {
 
 	item.DOI = data.doi;
 	for (let url of data.url) {
-		if (url.format == "pdf" || url.format=="html")
-            item.notes.push({note: "url:" + url.value});
-        else
+        // Prevent double insertion of DOI-Url
+        if (!item.url && !url.value.includes("doi.org"))
             item.url = url.value;
+        else if (url.format == "pdf" || url.format=="html")
+            item.notes.push({note: "url:" + url.value});
 	}
 
 	item.complete();
