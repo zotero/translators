@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-21 16:51:49"
+	"lastUpdated": "2021-06-21 17:07:37"
 }
 
 /*
@@ -57,7 +57,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, _url) {
+function scrape(doc, url) {
 	// use Embeded Metadata
 	var trans = Zotero.loadTranslator('web');
 	trans.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -143,7 +143,9 @@ function scrape(doc, _url) {
 		item.complete();
 	});
 
-	trans.translate();
+	trans.getTranslatorObject(function (trans) {
+		trans.doWeb(doc, url);
+	});
 }
 
 
@@ -193,7 +195,7 @@ var testCases = [
 				"pages": "279-311",
 				"publicationTitle": "Dialogue & Discourse",
 				"shortTitle": "On Incrementality in Dialogue",
-				"url": "362.html",
+				"url": "http://journals.linguisticsociety.org/elanguage/dad/article/view/362.html",
 				"volume": "2",
 				"attachments": [
 					{
@@ -201,7 +203,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -233,6 +236,7 @@ var testCases = [
 				"DOI": "10.2218/ijdc.v8i2.263",
 				"ISSN": "1746-8256",
 				"abstractNote": "Academic librarians are increasingly engaging in data curation by providing infrastructure (e.g., institutional repositories) and offering services (e.g., data management plan consultations) to support the management of research data on their campuses. Efforts to develop these resources may benefit from a greater understanding of disciplinary differences in research data management needs. After conducting a survey of data management practices and perspectives at our research university, we categorized faculty members into four research domains—arts and humanities, social sciences, medical sciences, and basic sciences—and analyzed variations in their patterns of survey responses. We found statistically significant differences among the four research domains for nearly every survey item, revealing important disciplinary distinctions in data management actions, attitudes, and interest in support services. Serious consideration of both the similarities and dissimilarities among disciplines will help guide academic librarians and other data curation professionals in developing a range of data-management services that can be tailored to the unique needs of different scholarly researchers.",
+				"issue": "2",
 				"language": "en",
 				"libraryCatalog": "www.ijdc.net",
 				"pages": "5-26",
@@ -242,7 +246,8 @@ var testCases = [
 				"volume": "8",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "Full Text PDF",
@@ -321,6 +326,7 @@ var testCases = [
 				"ISSN": "2297-3249",
 				"abstractNote": "Zwischen dem 7. und 11. März 2016 fand der erste Bibcast, eine Webcast-Serie zu bibliothekarisch relevanten Themen statt. Aus der Idee heraus entstanden, abgelehnten Einreichungen für den Bibliothekskongress ein alternatives Forum zu bieten, hat sich der Bibcast als interessantes, flexibles und innovatives Format herausgestellt, das die Landschaft der Präsenzkonferenzen zukünftig sinnvoll ergänzen kann. In diesem Praxisbeitrag soll über Entstehung und Ablauf berichtet, Mehrwerte und Stolpersteine veranschaulicht und damit zugleich eine Anleitung zur Organisation von Webkonferenzen gegeben werden.",
 				"issue": "2",
+				"journalAbbreviation": "ip",
 				"language": "de",
 				"libraryCatalog": "journals.ub.uni-heidelberg.de",
 				"publicationTitle": "Informationspraxis",
@@ -333,7 +339,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -370,7 +377,8 @@ var testCases = [
 				"volume": "0",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -396,14 +404,14 @@ var testCases = [
 				"date": "2016/03/14",
 				"DOI": "10.12685/027.7-4-1-101",
 				"ISSN": "2296-0597",
-				"abstractNote": "Der Artikel beschreibt die drei Preisverfahren, die im Preismanagement angewendet werden und zeigt, dass trotz neuer Preisverfahren die Preismodelle bei wissenschaftlichen Zeitschriften immer noch kostenorientiert oder wettbewerbsorientiert sind. Das nutzenorientierte Preisverfahren wartet noch auf seine Umsetzung.This article describes the three modes of pricing which have been applied by price management. Although new pricing models are existing pricing models at scientific journals remain cost oriented or competitor oriented. The value oriented pricing is still waiting for realisation.",
 				"issue": "1",
+				"journalAbbreviation": "027.7",
 				"language": "de",
 				"libraryCatalog": "0277.ch",
 				"pages": "11-17",
-				"publicationTitle": "027.7 Zeitschrift für Bibliothekskultur / Journal for Library Culture",
+				"publicationTitle": "027.7 Zeitschrift für Bibliothekskultur",
 				"rights": "Copyright (c) 2016 027.7 Zeitschrift für Bibliothekskultur / Journal for Library Culture",
-				"url": "https://0277.ch/ojs/index.php/cdrs_0277/article/view/101",
+				"url": "https://0277.ch/index.php/cdrs_0277/article/view/101",
 				"volume": "4",
 				"attachments": [
 					{
@@ -411,7 +419,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -422,7 +431,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.qualitative-research.net/index.php/fqs/article/view/2477",
+		"url": "https://www.qualitative-research.net/index.php/fqs/article/view/2477",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -444,11 +453,12 @@ var testCases = [
 				"ISSN": "1438-5627",
 				"abstractNote": "The application of computer-assisted qualitative data analysis software (CAQDAS) in the field of qualitative sociology is becoming more popular. However, in Polish scientific research, the use of computer software to aid qualitative data analysis is uncommon. Nevertheless, the Polish qualitative research community is turning to CAQDAS software increasingly often. One noticeable result of working with CAQDAS is an increase in methodological awareness, which is reflected in higher accuracy and precision in qualitative data analysis. Our purpose in this article is to describe the qualitative researchers' environment in Poland and to consider the use of computer-assisted qualitative data analysis. In our deliberations, we focus mainly on the social sciences, especially sociology.URN: http://nbn-resolving.de/urn:nbn:de:0114-fqs160344",
 				"issue": "3",
+				"journalAbbreviation": "FQS",
 				"language": "en",
 				"libraryCatalog": "www.qualitative-research.net",
 				"publicationTitle": "Forum Qualitative Sozialforschung / Forum: Qualitative Social Research",
 				"rights": "Copyright (c) 2016 Jakub Niedbalski, Izabela Ślęzak",
-				"url": "http://www.qualitative-research.net/index.php/fqs/article/view/2477",
+				"url": "https://www.qualitative-research.net/index.php/fqs/article/view/2477",
 				"volume": "17",
 				"attachments": [
 					{
@@ -456,7 +466,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -464,25 +475,10 @@ var testCases = [
 						"tag": "CAQDAS"
 					},
 					{
-						"tag": "Polen"
-					},
-					{
 						"tag": "Polish sociology"
 					},
 					{
-						"tag": "Software"
-					},
-					{
-						"tag": "Soziologie"
-					},
-					{
 						"tag": "computer-assisted qualitative data analysis"
-					},
-					{
-						"tag": "computergestützte Datenanalyse"
-					},
-					{
-						"tag": "qualitative Forschung"
 					},
 					{
 						"tag": "qualitative research"
@@ -512,6 +508,7 @@ var testCases = [
 				"ISSN": "2191-6411",
 				"abstractNote": "Alexandra David-Neel had already been acquainted with the Himalayas for a long time before the visits to Tibet in 1924 that would make her a mainstream figure of modern Buddhism. In fact, her encounter with Tibet and Tibetan Buddhism can be linked with Sikkim, where she arrived in 1912 after visiting India. An exploration of her Sikkim stay invites us to reconsider the self-fashioning of David-Neel’s image as an explorer of what she called the “land of marvels.” This paper highlights her construction of Sikkim as the locality that helped her create her singular vision of Tibet. Her encounters with local Buddhists in Sikkim provided her with the lofty images of a spiritual Tibet that she contributed to publicizing in the wake of the globalization of Buddhism.",
 				"issue": "1",
+				"journalAbbreviation": "Journal of Transcultural Studies",
 				"language": "en",
 				"libraryCatalog": "heiup.uni-heidelberg.de",
 				"pages": "149-186",
@@ -519,34 +516,18 @@ var testCases = [
 				"rights": "Copyright (c) 2016 Samuel Thevoz",
 				"shortTitle": "On the Threshold of the \"Land of Marvels",
 				"url": "https://heiup.uni-heidelberg.de/journals/index.php/transcultural/article/view/23541",
+				"volume": "7",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					{
-						"tag": "Alexandra David-Neel"
-					},
-					{
-						"tag": "Cultural Globalization"
-					},
-					{
-						"tag": "Himalayan Borderlands"
-					},
-					{
-						"tag": "Modern Buddhism"
-					},
-					{
-						"tag": "Tibetan Buddhism"
-					},
-					{
-						"tag": "Travel Writing"
-					},
 					{
 						"tag": "World Literature"
 					}
@@ -586,7 +567,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -613,10 +595,11 @@ var testCases = [
 				"DOI": "10.11588/mira.2015.0.22445",
 				"ISSN": "2363-8087",
 				"abstractNote": "La obra fotográfica del artista puertorriqueño Carlos Ruiz-Valarino plantea un marcado contraste con una de las tradiciones más arraigadas en la historia del arte de esta isla del Caribe, que es la representación de una identidad cultural construida a través de símbolos. Recurriendo a la parodia a través de tres géneros pictóricos, como son el paisaje, el retrato y el objeto (en el marco de la naturaleza muerta), Ruiz-Valarino cuestiona los símbolos que reiteradamente se emplean en la construcción de un concepto tan controvertido como es el de identidad, conversando para ello con la tradición iconográfica de la fotografía antropológica y etnográfica, así como la de la ilustración científica o la caricatura.",
+				"journalAbbreviation": "mira",
 				"language": "es",
 				"libraryCatalog": "journals.ub.uni-heidelberg.de",
 				"pages": "36-49",
-				"publicationTitle": "Miradas - Elektronische Zeitschrift für Iberische und Ibero-amerikanische Kunstgeschichte",
+				"publicationTitle": "Miradas - Zeitschrift für Kunst- und Kulturgeschichte der Amérikas und der iberischen Halbinsel",
 				"rights": "Copyright (c) 2015",
 				"url": "https://journals.ub.uni-heidelberg.de/index.php/miradas/article/view/22445",
 				"volume": "2",
@@ -626,7 +609,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -663,7 +647,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -705,20 +690,41 @@ var testCases = [
 				"volume": "17",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Anonymität",
-					"Bestattung",
-					"Genderdifferenzen",
-					"Säkularisierung",
-					"Tod",
-					"anonymity",
-					"burial",
-					"death",
-					"gender difference",
-					"secularisation"
+					{
+						"tag": "Anonymität"
+					},
+					{
+						"tag": "Bestattung"
+					},
+					{
+						"tag": "Genderdifferenzen"
+					},
+					{
+						"tag": "Säkularisierung"
+					},
+					{
+						"tag": "Tod"
+					},
+					{
+						"tag": "anonymity"
+					},
+					{
+						"tag": "burial"
+					},
+					{
+						"tag": "death"
+					},
+					{
+						"tag": "gender difference"
+					},
+					{
+						"tag": "secularisation"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -769,7 +775,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-01-01",
+				"date": "2011/10/17",
 				"DOI": "10.4314/thrb.v13i4.63347",
 				"ISSN": "1821-9241",
 				"abstractNote": "The synergistic interaction between Human Immunodeficiency virus (HIV) disease and Malaria makes it mandatory for patients with HIV to respond appropriately in preventing and treating malaria. Such response will help to control the two diseases. This study assessed the knowledge of 495 patients attending the HIV clinic, in Lagos University Teaching Hospital, Nigeria.  Their treatment seeking, preventive practices with regards to malaria, as well as the impact of socio – demographic / socio - economic status were assessed. Out of these patients, 245 (49.5 %) used insecticide treated bed nets; this practice was not influenced by socio – demographic or socio – economic factors.  However, knowledge of the cause, knowledge of prevention of malaria, appropriate use of antimalarial drugs and seeking treatment from the right source increased with increasing level of education (p < 0.05). A greater proportion of the patients, 321 (64.9 %) utilized hospitals, pharmacy outlets or health centres when they perceived an attack of malaria. Educational intervention may result in these patients seeking treatment from the right place when an attack of malaria fever is perceived.",
@@ -777,7 +783,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "www.ajol.info",
 				"publicationTitle": "Tanzania Journal of Health Research",
-				"rights": "Copyright for articles published in this journal is retained by the journal.",
+				"rights": "Copyright (c)",
 				"url": "https://www.ajol.info/index.php/thrb/article/view/63347",
 				"volume": "13",
 				"attachments": [
@@ -786,16 +792,29 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"HIV patients",
-					"Nigeria",
-					"knowledge",
-					"malaria",
-					"prevention",
-					"treatment"
+					{
+						"tag": "HIV patients"
+					},
+					{
+						"tag": "Nigeria"
+					},
+					{
+						"tag": "knowledge"
+					},
+					{
+						"tag": "malaria"
+					},
+					{
+						"tag": "prevention"
+					},
+					{
+						"tag": "treatment"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -804,11 +823,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/ameriquests/article/view/220",
+		"url": "https://ejournals.library.vanderbilt.edu/index.php/ameriquests/article/view/220",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Open Journal Systems",
+				"title": "Canadian Literature in the Early Twenty-First Century: The Emergence of an Inter-American Perspective",
 				"creators": [
 					{
 						"firstName": "Earl E.",
@@ -816,31 +835,29 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2011/07/28",
 				"DOI": "10.15695/amqst.v8i1.220",
-				"abstractNote": "Historically, Canadian literature has been chary of entering too far into the new discipline of inter-American literary study.  Rightly concerned about the danger of blurring its identity as a distinctive national literature (one made up, as is well known, of two great strands, the French and the English), Canadian writing has, however, come of age, both nationally and internationally.  One dramatic aspect of this transformation is that we now have mounting evidence that both English and French Canadian writers are actively engaging with the literatures and cultures of their hemispheric neighbors.  By extending the methodologies of Comparative Literature to the inter-American paradigm, Canadian writers, critics, and literary historians are finding ways to maintain their status as members of a unique and under-appreciated national literature while also entering into the kinds of comparative studies that demonstrate their New World ties as well.",
+				"ISSN": "1553-4316",
+				"issue": "1",
+				"journalAbbreviation": "AMQST",
+				"language": "en",
 				"libraryCatalog": "ejournals.library.vanderbilt.edu",
-				"url": "http://ejournals.library.vanderbilt.edu/ojs/index.php/ameriquests/article/view/220",
+				"publicationTitle": "AmeriQuests",
+				"rights": "Copyright (c) 2015 AmeriQuests",
+				"shortTitle": "Canadian Literature in the Early Twenty-First Century",
+				"url": "https://ejournals.library.vanderbilt.edu/index.php/ameriquests/article/view/220",
+				"volume": "8",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					"American studies",
-					"Canadian studies",
-					"american dream",
-					"brazilian studies",
-					"center for the americas",
-					"free trade",
-					"inter-american literature",
-					"latin american studies",
-					"literature and law",
-					"migration",
-					"native american studies",
-					"quebec studies",
-					"storytelling",
-					"vanderbilt"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -860,8 +877,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-12-18",
-				"ISSN": "08245053",
+				"date": "2010",
+				"ISSN": "1918-610X",
 				"language": "en",
 				"libraryCatalog": "jms.uwinnipeg.ca",
 				"pages": "203-224",
@@ -872,11 +889,12 @@ var testCases = [
 				"volume": "28",
 				"attachments": [
 					{
-						"title": "Snapshot"
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -887,7 +905,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100/115",
+		"url": "https://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100/115",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -908,7 +926,7 @@ var testCases = [
 				"publicationTitle": "Journal of MultiDisciplinary Evaluation",
 				"rights": "Copyright (c)",
 				"shortTitle": "The Value of Evaluation Standards",
-				"url": "http://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100",
+				"url": "https://journals.sfu.ca/jmde/index.php/jmde_1/article/view/100",
 				"volume": "2",
 				"attachments": [
 					{
@@ -916,7 +934,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -942,8 +961,8 @@ var testCases = [
 				"date": "2019/06/30",
 				"DOI": "10.15503/jecs20191.173.184",
 				"ISSN": "2081-1640",
-				"abstractNote": "Aim. The aim of the article is to analyse the ways African American children’s characters are constructed in selected picture-books and to determine whether they have any impact on the conduct of contemporary black youth facing discrimination in their own lives. It also argues that picture-books are one of the most influential media in the representation of racial problems.Methods. The subjects of the study are picture-books. The analysis pertains to the visual and the verbal narrative of the books, with a special emphasis being placed on the interplay between text and image as well as on the ways the meaning of the books is created. The texts are analysed using a number of existing research methods used for examining the picture-book format. Results. The article shows that the actions of selected children’s characters, whether real or imaginary, may serve as an incentive for contemporary youth to struggle for equal rights and contribute to the process of racial integration on a daily basis.Conclusions. The results can be considered in the process of establishing educational curricula for students from minority groups who need special literature that would empower them to take action and join in the efforts of adult members of their communities.",
 				"issue": "1",
+				"journalAbbreviation": "JECS",
 				"language": "en",
 				"libraryCatalog": "jecs.pl",
 				"pages": "173-184",
@@ -957,24 +976,13 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
 					{
-						"tag": "African American children's literature"
-					},
-					{
-						"tag": "picture-books"
-					},
-					{
 						"tag": "political agents"
-					},
-					{
-						"tag": "racism"
-					},
-					{
-						"tag": "text-image relationships"
 					}
 				],
 				"notes": [],
