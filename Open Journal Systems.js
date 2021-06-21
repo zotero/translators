@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-08 11:33:52"
+	"lastUpdated": "2021-06-21 16:51:49"
 }
 
 /*
@@ -38,7 +38,8 @@
 function detectWeb(doc, _url) {
 	var pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
 	if (ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/'	// some sites remove this
-		|| pkpLibraries.length >= 1) {
+		|| pkpLibraries.length >= 1
+		|| attr(doc, 'meta[name="generator"]', 'content').startsWith('Open Journal Systems')) {
 		return 'journalArticle';
 	}
 	return false;
@@ -117,11 +118,26 @@ function scrape(doc, _url) {
 		var pdfUrl = doc.querySelector("a.obj_galley_link.pdf");
 		// add linked PDF if there isn't one listed in the header
 		if (!pdfAttachment && pdfUrl) {
+			pdfAttachment = true;
 			item.attachments.push({
 				title: "Full Text PDF",
 				mimeType: "application/pdf",
 				url: pdfUrl.href.replace(/\/article\/view\//, '/article/download/')
 			});
+		}
+		
+		// add linked PDF if there isn't one listed in the header
+		if (!pdfAttachment) {
+			for (let link of doc.querySelectorAll("a.obj_galley_link")) {
+				if (link.textContent.includes('PDF')) {
+					item.attachments.push({
+						title: "Full Text PDF",
+						mimeType: "application/pdf",
+						url: link.href.replace(/\/article\/view\//, '/article/download/')
+					});
+					break;
+				}
+			}
 		}
 
 		item.complete();
@@ -959,6 +975,129 @@ var testCases = [
 					},
 					{
 						"tag": "text-image relationships"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journal.meteohistory.org/index.php/hom/article/view/79",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Trajectories and reconversions of the Center for Weather Forecasting and Climate Studies (CPTEC): Forming the meteorological science elite in Brazil",
+				"creators": [
+					{
+						"firstName": "Thales de",
+						"lastName": "Andrade",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paulo",
+						"lastName": "Escada",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/05/18",
+				"ISSN": "1555-5763",
+				"archiveLocation": "Brazil, 1970-2000",
+				"journalAbbreviation": "MeteoHist",
+				"language": "en",
+				"libraryCatalog": "journal.meteohistory.org",
+				"pages": "1-23",
+				"publicationTitle": "History of Meteorology",
+				"rights": "Copyright (c) 2021 Thales de Andrade, Paulo Escada",
+				"shortTitle": "Trajectories and reconversions of the Center for Weather Forecasting and Climate Studies (CPTEC)",
+				"url": "https://journal.meteohistory.org/index.php/hom/article/view/79",
+				"volume": "10",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "scientific elites"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.revistacomunicar.com/ojs/index.php/comunicar/article/view/C67-2021-02",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Jóvenes ante el ciberodio: El rol de la mediación parental y el apoyo familiar",
+				"creators": [
+					{
+						"firstName": "Michelle F.",
+						"lastName": "Wright",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sebastian",
+						"lastName": "Wachs",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Manuel",
+						"lastName": "Gámez-Guadix",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/04/01",
+				"DOI": "10.3916/C67-2021-02",
+				"ISSN": "1988-3293",
+				"issue": "67",
+				"journalAbbreviation": "comunicar",
+				"language": "es",
+				"libraryCatalog": "www.revistacomunicar.com",
+				"pages": "21-33",
+				"publicationTitle": "Comunicar",
+				"rights": "Derechos de autor",
+				"shortTitle": "Jóvenes ante el ciberodio",
+				"url": "https://www.revistacomunicar.com/ojs/index.php/comunicar/article/view/C67-2021-02",
+				"volume": "29",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ciberodio"
+					},
+					{
+						"tag": "afrontamiento"
+					},
+					{
+						"tag": "apoyo familiar"
+					},
+					{
+						"tag": "discurso del odio"
+					},
+					{
+						"tag": "educación mediática"
+					},
+					{
+						"tag": "mediación parental"
 					}
 				],
 				"notes": [],
