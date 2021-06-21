@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-18 15:50:04"
+	"lastUpdated": "2021-06-21 17:09:36"
 }
 
 /*
@@ -923,7 +923,7 @@ function relativeToAbsolute(doc, url) {
 	// adapted from Nuclear Receptor Signaling translator
 
 	if (!url) {
-		return doc.location.toString();
+		return doc.location.href;
 	}
 
 	// check whether it's already absolute
@@ -934,12 +934,11 @@ function relativeToAbsolute(doc, url) {
 	if (url[0] == '/') {
 		// relative to root
 		return doc.location.protocol + '//' + doc.location.host
-			+ (doc.location.port.length ? ':' + doc.location.port : '')
 			+ url;
 	}
 	else {
 		// relative to current directory
-		let location = doc.location.toString();
+		let location = doc.location.href;
 		if (location.includes('?')) {
 			location = location.slice(0, location.indexOf('?'));
 		}
