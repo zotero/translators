@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-22 20:44:12"
+	"lastUpdated": "2021-06-22 23:53:19"
 }
 
 /*
@@ -82,14 +82,13 @@ function scrape(doc, _url) {
 	item.manuscriptType = 'Restaurant menu';
 	item.libraryCatalog = 'New York Public Library Menu Collection';
 	item.numPages = '' + doc.querySelector('.pages').childElementCount;
+	item.url = attr(doc, '.pages a', 'href');
+	if (item.url.startsWith('/')) {
+		// only one case (/menu_pages/12345) to deal with here.
+		// no HTTPS.
+		item.url = 'http://menus.nypl.org' + item.url;
+	}
 	item.extra = '';
-	
-	item.attachments.push({
-		title: 'Cover Page',
-		url: attr(doc, '.pages a', 'href'),
-		mimeType: 'text/html',
-		snapshot: false
-	});
 	
 	for (let p of doc.querySelectorAll('.metadata p')) {
 		let text = ZU.trimInternal(p.innerText);
@@ -154,13 +153,8 @@ var testCases = [
 				"manuscriptType": "Restaurant menu",
 				"numPages": "9",
 				"place": "Zum Durnbrau",
-				"attachments": [
-					{
-						"title": "Cover Page",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://menus.nypl.org/menu_pages/46080",
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -186,13 +180,8 @@ var testCases = [
 				"libraryCatalog": "New York Public Library Menu Collection",
 				"manuscriptType": "Restaurant menu",
 				"numPages": "6",
-				"attachments": [
-					{
-						"title": "Cover Page",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://menus.nypl.org/menu_pages/54352/explore",
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -218,13 +207,8 @@ var testCases = [
 				"libraryCatalog": "New York Public Library Menu Collection",
 				"manuscriptType": "Restaurant menu",
 				"numPages": "62",
-				"attachments": [
-					{
-						"title": "Cover Page",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://menus.nypl.org/menu_pages/62720",
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -249,13 +233,8 @@ var testCases = [
 				"libraryCatalog": "New York Public Library Menu Collection",
 				"manuscriptType": "Restaurant menu",
 				"numPages": "4",
-				"attachments": [
-					{
-						"title": "Cover Page",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://menus.nypl.org/menu_pages/55736/explore",
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
@@ -282,13 +261,8 @@ var testCases = [
 				"manuscriptType": "Restaurant menu",
 				"numPages": "4",
 				"place": "MERCHANTS CLUB,NY",
-				"attachments": [
-					{
-						"title": "Cover Page",
-						"mimeType": "text/html",
-						"snapshot": false
-					}
-				],
+				"url": "http://menus.nypl.org/menu_pages/35366/explore",
+				"attachments": [],
 				"tags": [],
 				"notes": [
 					{
