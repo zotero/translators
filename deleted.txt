@@ -1,4 +1,4 @@
-62  # Increment number when modifying file
+63  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -108,3 +108,4 @@ fef07360-ee97-4f67-b022-6f64d5ec0c25 # KOBV; included in new portal and shutdown
 f520b141-9ce8-42f4-93ec-a39e375a9516 # PubGet doesn't exist anymore
 8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd # CiteULike was shut down on March 30, 2019
 2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2 # MIT Press Journals became MIT Press Direct, covered by Silverchair
+edfa5803-e331-47db-84d1-db3cf8d6f460 # Replaced by US National Archives Research Catalog; this translator covered only a long-defunct subdomain.
