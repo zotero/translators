@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsb",
-	"lastUpdated": "2021-06-17 15:29:15"
+	"lastUpdated": "2021-06-22 14:44:14"
 }
 
 /*
@@ -46,7 +46,7 @@ function getResults(doc) {
 }
 
 function detectWeb(doc, url) {
-	if (url.match(/\/results[?/]/i) != -1 || url.includes('/ebook/')
+	if (/\/results[?/]/i.test(url) || url.includes('/ebook/')
 		&& getResults(doc).length) {
 		return 'multiple';
 	}
