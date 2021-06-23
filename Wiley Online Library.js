@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 11:26:27"
+	"lastUpdated": "2021-06-23 11:42:20"
 }
 
 /*
@@ -63,23 +63,6 @@ function getAuthorName(text) {
 	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)(\.?|(?=\s|$))/gi,'');	//remove salutations
 
 	return fixCase(text.trim());
-}
-
-function processSubtitles(doc, item) {
-	// add subtitle to the main title if not already present
-	var subtitle = ZU.xpathText(doc, '//h3[@class="citation__subtitle"]');
-	if (subtitle) {
-		var title = item.title;
-		if (!title)
-			title = ZU.xpathText(doc, '//h3[@class="citation__title"]');
-
-		if (!title.toLowerCase().includes(subtitle.toLowerCase())) {
-			item.shortTitle = title;
-			title = title + ": " + subtitle;
-		}
-
-		item.title = title;
-	}
 }
 
 function addBookReviewTag(doc, item) {
@@ -159,7 +142,6 @@ function scrapeBook(doc, url) {
 			'/following-sibling::p'].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
-	processSubtitles(doc, newItem);
 	newItem.complete();
 }
 
@@ -215,8 +197,6 @@ function scrapeEM(doc, url) {
 
 		//set correct print publication date
 		if (date) item.date = date;
-
-		processSubtitles(doc, item);
 
 		//remove pdf attachments
 		for (var i=0, n=item.attachments.length; i<n; i++) {
@@ -376,7 +356,6 @@ function scrapeBibTeX(doc, url) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 
-			processSubtitles(doc, item);
 			addArticleNumber(doc, item);
 			addPages(doc, item);
 			//attachments
@@ -448,7 +427,6 @@ function scrapeCochraneTrial(doc, url){
 		}
 	}
 
-	processSubtitles(doc, item);
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
 	item.complete();
@@ -570,6 +548,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
 				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
@@ -611,6 +590,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "1-20",
 				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781444304794.ch1",
 				"attachments": [
 					{
@@ -1160,7 +1140,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "875-885",
 				"publicationTitle": "Journal of Heterocyclic Chemistry",
-				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/jhet.5570200408",
 				"volume": "20",
 				"attachments": [
@@ -1235,6 +1214,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "158-158",
 				"publicationTitle": "Teaching Theology & Religion",
+				"rights": "© 2018 John Wiley & Sons Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436",
 				"volume": "21",
 				"attachments": [
@@ -1420,7 +1400,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "533-536",
 				"publicationTitle": "Zygon®",
-				"rights": "© 2021 by the Joint Publication Board of Zygon",
 				"shortTitle": "Religion and the Philosophy of Life. By Gavin Flood. Oxford",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/zygo.12687",
 				"volume": "56",
