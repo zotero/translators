@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-15 14:48:22"
+	"lastUpdated": "2021-06-23 15:35:38"
 }
 
 /*
@@ -65,29 +65,10 @@ function getAuthorName(text) {
 	return fixCase(text.trim());
 }
 
-function processSubtitles(doc, item) {
-	// add subtitle to the main title if not already present
-	var subtitle = ZU.xpathText(doc, '//h3[@class="citation__subtitle"]');
-	if (subtitle) {
-		var title = item.title;
-		if (!title)
-			title = ZU.xpathText(doc, '//h3[@class="citation__title"]');
-
-		if (!title.toLowerCase().includes(subtitle.toLowerCase())) {
-			item.shortTitle = title;
-			title = title + ": " + subtitle;
-		}
-
-		item.title = title;
-	}
-}
-
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
-	if (primaryHeading) {
-		primaryHeading = primaryHeading.trim().replace(/book\s?review.*/i, 'Book Review');
-		if (primaryHeading.match(/(Book Review)|(Review Essays?)|(reviews?)/))
-			item.tags.push(primaryHeading);
+	if (primaryHeading.match(/Book Review|Review Essays?|Reviews?/i)) {
+		item.tags.push('Book Review');
 	}
 }
 
@@ -159,7 +140,6 @@ function scrapeBook(doc, url) {
 			'/following-sibling::p'].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
 
-	processSubtitles(doc, newItem);
 	newItem.complete();
 }
 
@@ -215,8 +195,6 @@ function scrapeEM(doc, url) {
 
 		//set correct print publication date
 		if (date) item.date = date;
-
-		processSubtitles(doc, item);
 
 		//remove pdf attachments
 		for (var i=0, n=item.attachments.length; i<n; i++) {
@@ -376,7 +354,6 @@ function scrapeBibTeX(doc, url) {
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
 
-			processSubtitles(doc, item);
 			addArticleNumber(doc, item);
 			addPages(doc, item);
 			//attachments
@@ -448,7 +425,6 @@ function scrapeCochraneTrial(doc, url){
 		}
 	}
 
-	processSubtitles(doc, item);
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
 	item.complete();
@@ -570,6 +546,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
 				"publisher": "John Wiley & Sons, Ltd",
+				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
@@ -1101,7 +1078,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "165-168",
 				"publicationTitle": "Angewandte Chemie International Edition",
-				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
 				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/%28SICI%291521-3773%2820000103%2939%3A1%3C165%3A%3AAID-ANIE165%3E3.0.CO%3B2-B",
 				"volume": "39",
@@ -1312,7 +1288,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "194-195",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
 				"volume": "73",
@@ -1348,7 +1323,6 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Wiley Online Library",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© (2021) World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12515",
 				"volume": "73",
 				"attachments": [
@@ -1380,7 +1354,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "182-190",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12592",
 				"volume": "73",
 				"attachments": [
@@ -1390,6 +1363,48 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/zygo.12687",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Religion and the Philosophy of Life. By Gavin Flood. Oxford: Oxford University Press, 2019. 464 pages. $50.00. (Hardback).",
+				"creators": [
+					{
+						"firstName": "Lluis",
+						"lastName": "Oviedo",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1111/zygo.12687",
+				"ISSN": "1467-9744",
+				"issue": "2",
+				"itemID": "https://doi.org/10.1111/zygo.12687",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "533-536",
+				"publicationTitle": "Zygon®",
+				"shortTitle": "Religion and the Philosophy of Life. By Gavin Flood. Oxford",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/zygo.12687",
+				"volume": "56",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
