@@ -263,7 +263,7 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "978-1-4912-5316-8",
+				"ISBN": "9781491253168",
 				"language": "eng",
 				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
 				"place": "Lexington, KY",
@@ -271,7 +271,8 @@ var testCases = [
 				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
 				"publisher": "CreateSpace" ,
 				"date": "2013",
-				"extra": "OCLC: 860902984"
+				"extra": "OCLC: 860902984",
+				"shortTitle": "Classroom activities for the busy teacher"
 			}
 		]
 	}
