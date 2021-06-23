@@ -190,7 +190,13 @@ declare namespace Zotero {
 		itemType: ItemType;
 		[field: string]: string; // support unknown fields
 		attachments: Attachment[];
+		notes: Note[];
 		complete(): void;
+	}
+
+	interface Note {
+		title: string;
+		note: string;
 	}
 
 	interface Collection {}
