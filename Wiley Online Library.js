@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 11:42:20"
+	"lastUpdated": "2021-06-23 12:04:30"
 }
 
 /*
@@ -68,8 +68,8 @@ function getAuthorName(text) {
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
 	if (primaryHeading) {
-		primaryHeading = primaryHeading.trim().replace(/(book\s?review.*)|(reviews?.*)|(review\sessays?.*)/i, 'Book Review');
 		if (primaryHeading.match(/(book\s?review)|(review\sessays?)|(reviews?)/i))
+			primaryHeading = primaryHeading.trim().replace(/(book\s?review.*)|(reviews?.*)|(review\sessays?.*)/i, 'Book Review');
 			item.tags.push(primaryHeading);
 	}
 }
