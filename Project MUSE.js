@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-10 16:32:33"
+	"lastUpdated": "2021-06-23 16:41:28"
 }
 
 /*
@@ -110,8 +110,11 @@ function scrape(doc) {
 				item.tags = tags.split(",");
 			}
 			//ubtue: add tag "Book Review"
-			let dcType = ZU.xpathText(doc, '//span[@class="Review"]');
-			if (dcType && dcType.match(/review/i)) item.tags.push("Book Review");
+			let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content');
+			if (dcType && dcType.match(/Review/i)) {
+				item.tags.push("Book Review");
+			}
+			
 			item.notes = [];
 			item.complete();
 		});
@@ -318,6 +321,41 @@ var testCases = [
 		"type": "web",
 		"url": "https://muse.jhu.edu/issue/44583",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://muse.jhu.edu/article/795002",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Climate Change and the Art of Devotion: Geoaesthetics in the Land of Krishna, 1550–1850 by Sugata Ray (review)",
+				"creators": [
+					{
+						"lastName": "Barbato",
+						"firstName": "Melanie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1353/cro.2021.0019",
+				"ISSN": "1939-3881",
+				"issue": "2",
+				"libraryCatalog": "Project MUSE",
+				"pages": "222-225",
+				"publicationTitle": "CrossCurrents",
+				"shortTitle": "Climate Change and the Art of Devotion",
+				"url": "https://muse.jhu.edu/article/795002",
+				"volume": "71",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
