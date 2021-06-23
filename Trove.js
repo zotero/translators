@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 05:46:24"
+	"lastUpdated": "2021-06-23 05:56:37"
 }
 
 /*
@@ -346,10 +346,10 @@ function scrapeWork(doc, url) {
 	var thumbnailURL;
 
 	var workID = url.match(/\/work\/([0-9]+)/)[1];
+	// version ID seems to always be undefined now
 	var bibtexURL = `https://trove.nla.gov.au/api/citation/work/${workID}?version=undefined`;
 	
 	if (doc) {
-		// version ID seems to always be undefined now
 		thumbnailURL = attr(doc, '.thumbnail img', 'src');
 	}
 
