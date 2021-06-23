@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 13:36:58"
+	"lastUpdated": "2021-06-23 15:35:38"
 }
 
 /*
@@ -67,9 +67,8 @@ function getAuthorName(text) {
 
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
-	if (primaryHeading.match(/(book\s?review)|(review\sessays?)|(reviews?)/i)) {
-			primaryHeading = primaryHeading.trim().replace(/(book\s?review.*)|(reviews?.*)|(review\sessays?.*)/i, 'Book Review');
-			item.tags.push(primaryHeading);
+	if (primaryHeading.match(/Book Review|Review Essays?|Reviews?/i)) {
+		item.tags.push('Book Review');
 	}
 }
 
@@ -589,7 +588,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "1-20",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781444304794.ch1",
 				"attachments": [
 					{
@@ -758,7 +756,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -825,7 +822,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -948,7 +944,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -1039,7 +1034,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "951-974",
 				"publicationTitle": "The Journal of Finance",
-				"rights": "© 1986 the American Finance Association",
 				"shortTitle": "Volume for Winners and Losers",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1540-6261.1986.tb04559.x",
 				"volume": "41",
@@ -1141,7 +1135,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "875-885",
 				"publicationTitle": "Journal of Heterocyclic Chemistry",
-				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/jhet.5570200408",
 				"volume": "20",
 				"attachments": [
@@ -1185,7 +1178,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "25-99",
 				"publicationTitle": "New Directions for Evaluation",
-				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
 				"attachments": [
@@ -1217,7 +1209,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "158-158",
 				"publicationTitle": "Teaching Theology & Religion",
-				"rights": "© 2018 John Wiley & Sons Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/teth.12436",
 				"volume": "21",
 				"attachments": [
@@ -1332,7 +1323,6 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Wiley Online Library",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© (2021) World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12515",
 				"volume": "73",
 				"attachments": [
@@ -1364,7 +1354,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "182-190",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12592",
 				"volume": "73",
 				"attachments": [
