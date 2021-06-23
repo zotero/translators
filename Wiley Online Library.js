@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 12:04:30"
+	"lastUpdated": "2021-06-23 13:36:58"
 }
 
 /*
@@ -67,8 +67,7 @@ function getAuthorName(text) {
 
 function addBookReviewTag(doc, item) {
 	var primaryHeading = ZU.xpathText(doc, '//span[@class="primary-heading"]');
-	if (primaryHeading) {
-		if (primaryHeading.match(/(book\s?review)|(review\sessays?)|(reviews?)/i))
+	if (primaryHeading.match(/(book\s?review)|(review\sessays?)|(reviews?)/i)) {
 			primaryHeading = primaryHeading.trim().replace(/(book\s?review.*)|(reviews?.*)|(review\sessays?.*)/i, 'Book Review');
 			item.tags.push(primaryHeading);
 	}
@@ -759,6 +758,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -825,6 +825,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
+				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -1140,6 +1141,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "875-885",
 				"publicationTitle": "Journal of Heterocyclic Chemistry",
+				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/jhet.5570200408",
 				"volume": "20",
 				"attachments": [
@@ -1183,6 +1185,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "25-99",
 				"publicationTitle": "New Directions for Evaluation",
+				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
 				"attachments": [
@@ -1257,7 +1260,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "article e12657",
 				"publicationTitle": "History Compass",
-				"rights": "© 2021 John Wiley & Sons Ltd.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/hic3.12657",
 				"volume": "19",
 				"attachments": [
@@ -1295,7 +1297,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "194-195",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
 				"volume": "73",
@@ -1363,6 +1364,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "182-190",
 				"publicationTitle": "The Ecumenical Review",
+				"rights": "© 2021 World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12592",
 				"volume": "73",
 				"attachments": [
