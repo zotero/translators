@@ -40,8 +40,9 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	//search the ISBN or text over the SRU of the GBV, and take the result it as MARCXML
-	//documentation: https://www.gbv.de/wikis/cls/SRU
+	//K10plus is the merged catalog of GBV and SWB
+	//search the ISBN or text over the SRU of K10plus, and take the result it as MARCXML
+	//documentation: https://wiki.k10plus.de/display/K10PLUS/SRU
 	
 	let url;
 	if (item.ISBN) {
