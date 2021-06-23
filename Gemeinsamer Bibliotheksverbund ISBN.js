@@ -46,10 +46,10 @@ function doSearch(item) {
 	let url;
 	if (item.ISBN) {
 		var queryISBN = ZU.cleanISBN(item.ISBN);
-		url = "http://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
+		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
 	}
 	else if (item.query) {
-		url = "http://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
+		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
 	}
 	
 	//Z.debug(url);
