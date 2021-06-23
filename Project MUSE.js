@@ -111,7 +111,7 @@ function scrape(doc) {
 			}
 			//ubtue: add tag "Book Review"
 			let dcType = ZU.xpathText(doc, '//span[@class="Review"] | //meta[@name="citation_article_type"]/@content');
-			if (dcType && dcType.match(/review/i)) {
+			if (dcType && dcType.match(/Review/i)) {
 				item.tags.push("Book Review");
 			}
 			
