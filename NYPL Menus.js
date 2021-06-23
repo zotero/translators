@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-22 23:53:19"
+	"lastUpdated": "2021-06-23 00:03:16"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	if (/\/menu(s|_pages)\/\d+/.test(url)) {
-		return "manuscript";
+		return "document";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -77,18 +77,17 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, _url) {
-	let item = new Zotero.Item('manuscript');
+	let item = new Zotero.Item('document');
 	item.title = text(doc, 'div.modes') + ' menu';
-	item.manuscriptType = 'Restaurant menu';
 	item.libraryCatalog = 'New York Public Library Menu Collection';
 	item.numPages = '' + doc.querySelector('.pages').childElementCount;
-	item.url = attr(doc, '.pages a', 'href');
+	item.url = attr(doc, '.pages a', 'href').replace(/\/explore$/, '');
 	if (item.url.startsWith('/')) {
 		// only one case (/menu_pages/12345) to deal with here.
 		// no HTTPS.
 		item.url = 'http://menus.nypl.org' + item.url;
 	}
-	item.extra = '';
+	item.extra = 'genre: Restaurant menu\n';
 	
 	for (let p of doc.querySelectorAll('.metadata p')) {
 		let text = ZU.trimInternal(p.innerText);
@@ -101,8 +100,8 @@ function scrape(doc, _url) {
 			item.date = ZU.strToISO(text);
 		}
 		else if (text.startsWith('Place')) {
-			text = text.substring('Place'.length);
-			item.place = text;
+			text = text.substring('Place'.length).trim();
+			item.extra += `Place: ${text}\n`;
 		}
 		else if (text.startsWith('Physical description')) {
 			text = text.substring('Physical description'.length).trim();
@@ -142,17 +141,14 @@ var testCases = [
 		"url": "http://menus.nypl.org/menus/26680",
 		"items": [
 			{
-				"itemType": "manuscript",
+				"itemType": "document",
 				"title": "Zum Durnbrau menu",
 				"creators": [],
 				"date": "2005-01-14",
 				"abstractNote": "Dieter Zander Collection; includes three paper inserts.",
 				"callNumber": "Zander 324",
-				"extra": "Restaurant Location: Zum Durnbrau\nPhysical Description: Tri-fold; 11.75 x 16.5 inches folded",
+				"extra": "genre: Restaurant menu\nRestaurant Location: Zum Durnbrau\nPlace: Zum Durnbrau\nPhysical Description: Tri-fold; 11.75 x 16.5 inches folded",
 				"libraryCatalog": "New York Public Library Menu Collection",
-				"manuscriptType": "Restaurant menu",
-				"numPages": "9",
-				"place": "Zum Durnbrau",
 				"url": "http://menus.nypl.org/menu_pages/46080",
 				"attachments": [],
 				"tags": [],
@@ -170,17 +166,15 @@ var testCases = [
 		"url": "http://menus.nypl.org/menus/28929/explore",
 		"items": [
 			{
-				"itemType": "manuscript",
+				"itemType": "document",
 				"title": "The Famous Anchor Sea Food House menu",
 				"creators": [],
 				"date": "1962-07-29",
 				"abstractNote": "German is secondary language",
 				"callNumber": "1962-0040_wotm",
-				"extra": "Restaurant Location: The Famous Anchor Sea Food House\nPhysical Description: 33.5x25.5cm folded; 33.5x51cm open",
+				"extra": "genre: Restaurant menu\nRestaurant Location: The Famous Anchor Sea Food House\nPhysical Description: 33.5x25.5cm folded; 33.5x51cm open",
 				"libraryCatalog": "New York Public Library Menu Collection",
-				"manuscriptType": "Restaurant menu",
-				"numPages": "6",
-				"url": "http://menus.nypl.org/menu_pages/54352/explore",
+				"url": "http://menus.nypl.org/menu_pages/54352",
 				"attachments": [],
 				"tags": [],
 				"notes": [
@@ -197,16 +191,14 @@ var testCases = [
 		"url": "http://menus.nypl.org/menus/31054",
 		"items": [
 			{
-				"itemType": "manuscript",
+				"itemType": "document",
 				"title": "Plaza Hotel menu",
 				"creators": [],
 				"date": "1933",
 				"abstractNote": "62 menus bound into 1 volume",
 				"callNumber": "1933-0128_wotm",
-				"extra": "Restaurant Location: Plaza Hotel\nPhysical Description: 30x21",
+				"extra": "genre: Restaurant menu\nRestaurant Location: Plaza Hotel\nPhysical Description: 30x21",
 				"libraryCatalog": "New York Public Library Menu Collection",
-				"manuscriptType": "Restaurant menu",
-				"numPages": "62",
 				"url": "http://menus.nypl.org/menu_pages/62720",
 				"attachments": [],
 				"tags": [],
@@ -224,16 +216,14 @@ var testCases = [
 		"url": "http://menus.nypl.org/menu_pages/55739",
 		"items": [
 			{
-				"itemType": "manuscript",
+				"itemType": "document",
 				"title": "Legal Sea Foods menu",
 				"creators": [],
 				"date": "1998-01-26",
 				"callNumber": "1998-0005_wotm",
-				"extra": "Restaurant Location: Legal Sea Foods\nPhysical Description: 37.5x23 folded; 37.5x46cm open",
+				"extra": "genre: Restaurant menu\nRestaurant Location: Legal Sea Foods\nPhysical Description: 37.5x23 folded; 37.5x46cm open",
 				"libraryCatalog": "New York Public Library Menu Collection",
-				"manuscriptType": "Restaurant menu",
-				"numPages": "4",
-				"url": "http://menus.nypl.org/menu_pages/55736/explore",
+				"url": "http://menus.nypl.org/menu_pages/55736",
 				"attachments": [],
 				"tags": [],
 				"notes": [
@@ -250,18 +240,15 @@ var testCases = [
 		"url": "http://menus.nypl.org/menu_pages/35364/explore",
 		"items": [
 			{
-				"itemType": "manuscript",
+				"itemType": "document",
 				"title": "American Asiatic Association menu",
 				"creators": [],
 				"date": "1906-02-03",
 				"abstractNote": "WINES INCLUDED; EVENT WAS 1P.M. MENU MORE APPROPIATE FOR LUNCH THAN BREAKFAST;",
 				"callNumber": "1906-126",
-				"extra": "Restaurant Location: American Asiatic Association\nPhysical Description: BOOKLET; ILLUS; 4.5X7;",
+				"extra": "genre: Restaurant menu\nRestaurant Location: American Asiatic Association\nPlace: MERCHANTS CLUB,NY\nPhysical Description: BOOKLET; ILLUS; 4.5X7;",
 				"libraryCatalog": "New York Public Library Menu Collection",
-				"manuscriptType": "Restaurant menu",
-				"numPages": "4",
-				"place": "MERCHANTS CLUB,NY",
-				"url": "http://menus.nypl.org/menu_pages/35366/explore",
+				"url": "http://menus.nypl.org/menu_pages/35366",
 				"attachments": [],
 				"tags": [],
 				"notes": [
