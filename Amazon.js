@@ -353,6 +353,8 @@ function scrape(doc, url) {
 				key = key.replace(/\s*:\s*$/, "");
 				// Extra colon in Language field as of 9/4/2020
 				key = key.replace(/\s*:$/, '');
+				// The colon is surrounded by RTL/LTR marks as of 6/24/2021
+				key = key.replace(/[\s\u200e\u200f]*:[\s\u200e\u200f]*$/, '');
 				info[key.toLowerCase()] = value.trim();
 			}
 		}
