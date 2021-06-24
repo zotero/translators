@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-21 17:07:37"
+	"lastUpdated": "2021-06-24 21:50:13"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2012 Aurimas Vinckevicius
+	Copyright © 2012-2021 Aurimas Vinckevicius
 
 	This file is part of Zotero.
 
@@ -82,10 +82,13 @@ function scrape(doc, url) {
 			}
 		}
 		
-		if (item.journalAbbreviation && item.journalAbbreviation == "1") {
-			delete item.journalAbbreviation;
-		}
-		
+		// OJS journal abbreviations are rarely correct. sometimes they're
+		// generated from the journal's URL slug, other times they're just the
+		// number "1", or the full name of the journal, or an abbreviation that
+		// isn't correct according to ISO 4 or the journal's editors
+		// (see MeteoHistory test).
+		delete item.journalAbbreviation;
+
 		var doiNode = doc.getElementById('pub-id::doi');
 		if (!item.DOI && doiNode) {
 			item.DOI = doiNode.textContent;
@@ -326,7 +329,6 @@ var testCases = [
 				"ISSN": "2297-3249",
 				"abstractNote": "Zwischen dem 7. und 11. März 2016 fand der erste Bibcast, eine Webcast-Serie zu bibliothekarisch relevanten Themen statt. Aus der Idee heraus entstanden, abgelehnten Einreichungen für den Bibliothekskongress ein alternatives Forum zu bieten, hat sich der Bibcast als interessantes, flexibles und innovatives Format herausgestellt, das die Landschaft der Präsenzkonferenzen zukünftig sinnvoll ergänzen kann. In diesem Praxisbeitrag soll über Entstehung und Ablauf berichtet, Mehrwerte und Stolpersteine veranschaulicht und damit zugleich eine Anleitung zur Organisation von Webkonferenzen gegeben werden.",
 				"issue": "2",
-				"journalAbbreviation": "ip",
 				"language": "de",
 				"libraryCatalog": "journals.ub.uni-heidelberg.de",
 				"publicationTitle": "Informationspraxis",
@@ -405,7 +407,6 @@ var testCases = [
 				"DOI": "10.12685/027.7-4-1-101",
 				"ISSN": "2296-0597",
 				"issue": "1",
-				"journalAbbreviation": "027.7",
 				"language": "de",
 				"libraryCatalog": "0277.ch",
 				"pages": "11-17",
@@ -453,7 +454,6 @@ var testCases = [
 				"ISSN": "1438-5627",
 				"abstractNote": "The application of computer-assisted qualitative data analysis software (CAQDAS) in the field of qualitative sociology is becoming more popular. However, in Polish scientific research, the use of computer software to aid qualitative data analysis is uncommon. Nevertheless, the Polish qualitative research community is turning to CAQDAS software increasingly often. One noticeable result of working with CAQDAS is an increase in methodological awareness, which is reflected in higher accuracy and precision in qualitative data analysis. Our purpose in this article is to describe the qualitative researchers' environment in Poland and to consider the use of computer-assisted qualitative data analysis. In our deliberations, we focus mainly on the social sciences, especially sociology.URN: http://nbn-resolving.de/urn:nbn:de:0114-fqs160344",
 				"issue": "3",
-				"journalAbbreviation": "FQS",
 				"language": "en",
 				"libraryCatalog": "www.qualitative-research.net",
 				"publicationTitle": "Forum Qualitative Sozialforschung / Forum: Qualitative Social Research",
@@ -508,7 +508,6 @@ var testCases = [
 				"ISSN": "2191-6411",
 				"abstractNote": "Alexandra David-Neel had already been acquainted with the Himalayas for a long time before the visits to Tibet in 1924 that would make her a mainstream figure of modern Buddhism. In fact, her encounter with Tibet and Tibetan Buddhism can be linked with Sikkim, where she arrived in 1912 after visiting India. An exploration of her Sikkim stay invites us to reconsider the self-fashioning of David-Neel’s image as an explorer of what she called the “land of marvels.” This paper highlights her construction of Sikkim as the locality that helped her create her singular vision of Tibet. Her encounters with local Buddhists in Sikkim provided her with the lofty images of a spiritual Tibet that she contributed to publicizing in the wake of the globalization of Buddhism.",
 				"issue": "1",
-				"journalAbbreviation": "Journal of Transcultural Studies",
 				"language": "en",
 				"libraryCatalog": "heiup.uni-heidelberg.de",
 				"pages": "149-186",
@@ -595,7 +594,6 @@ var testCases = [
 				"DOI": "10.11588/mira.2015.0.22445",
 				"ISSN": "2363-8087",
 				"abstractNote": "La obra fotográfica del artista puertorriqueño Carlos Ruiz-Valarino plantea un marcado contraste con una de las tradiciones más arraigadas en la historia del arte de esta isla del Caribe, que es la representación de una identidad cultural construida a través de símbolos. Recurriendo a la parodia a través de tres géneros pictóricos, como son el paisaje, el retrato y el objeto (en el marco de la naturaleza muerta), Ruiz-Valarino cuestiona los símbolos que reiteradamente se emplean en la construcción de un concepto tan controvertido como es el de identidad, conversando para ello con la tradición iconográfica de la fotografía antropológica y etnográfica, así como la de la ilustración científica o la caricatura.",
-				"journalAbbreviation": "mira",
 				"language": "es",
 				"libraryCatalog": "journals.ub.uni-heidelberg.de",
 				"pages": "36-49",
@@ -839,7 +837,6 @@ var testCases = [
 				"DOI": "10.15695/amqst.v8i1.220",
 				"ISSN": "1553-4316",
 				"issue": "1",
-				"journalAbbreviation": "AMQST",
 				"language": "en",
 				"libraryCatalog": "ejournals.library.vanderbilt.edu",
 				"publicationTitle": "AmeriQuests",
@@ -962,7 +959,6 @@ var testCases = [
 				"DOI": "10.15503/jecs20191.173.184",
 				"ISSN": "2081-1640",
 				"issue": "1",
-				"journalAbbreviation": "JECS",
 				"language": "en",
 				"libraryCatalog": "jecs.pl",
 				"pages": "173-184",
@@ -1012,7 +1008,6 @@ var testCases = [
 				"date": "2021/05/18",
 				"ISSN": "1555-5763",
 				"archiveLocation": "Brazil, 1970-2000",
-				"journalAbbreviation": "MeteoHist",
 				"language": "en",
 				"libraryCatalog": "journal.meteohistory.org",
 				"pages": "1-23",
@@ -1069,7 +1064,6 @@ var testCases = [
 				"DOI": "10.3916/C67-2021-02",
 				"ISSN": "1988-3293",
 				"issue": "67",
-				"journalAbbreviation": "comunicar",
 				"language": "es",
 				"libraryCatalog": "www.revistacomunicar.com",
 				"pages": "21-33",
