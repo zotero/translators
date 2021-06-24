@@ -386,9 +386,10 @@ function scrape(doc, url) {
 			item.edition = m[2].trim()
 				.replace(/^(Auflage|Édition)\s?:/, '')
 				// "FISCHER Taschenbuch; 15. Auflage (1. Mai 1992)""
-				.replace(/\. (Auflage|Édition)\s*/, '');
+				.replace(/\. (Auflage|[EÉ]dition)\s*/, '');
 		}
-		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
+		// Looks like a date
+		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = ZU.strToISO(m[3].trim());
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
 	if (pages) item.numPages = parseInt(pages);
