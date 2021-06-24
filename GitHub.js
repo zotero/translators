@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-27 15:22:04"
+	"lastUpdated": "2021-06-24 21:22:14"
 }
 
 /**
-	Copyright (c) 2017 Martin Fenner, Philipp Zumstein
+	Copyright (c) 2017-2021 Martin Fenner, Philipp Zumstein
 
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -37,10 +37,19 @@ function detectWeb(doc, url) {
 			return "multiple";
 		}
 	}
-	else if (ZU.xpathText(doc, '/html/head/meta[@property="og:type" and @content="object"]/@content')) {
-		return "computerProgram";
+	
+	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
+		// exclude the home page and marketing pages
+		return false;
 	}
-	return false;
+	
+	if (!/^[^/\s]+\/[^/\s]+$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
+		// and anything without a repo name (abc/xyz) as its og:title.
+		// deals with repo pages that we can't scrape, like GitHub Discussions.
+		return false;
+	}
+	
+	return "computerProgram";
 }
 
 
@@ -82,10 +91,10 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Z.Item("computerProgram");
 	
-	var repo = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	var repo = attr(doc, 'meta[property="og:title"]', 'content');
 	
 	// basic metadata from the meta tags in the head
-	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
+	item.url = attr(doc, 'meta[property="og:url"]', 'content');
 	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
 		// github is doing something weird with the og:url meta tag right now -
 		// it always points to the repo root (e.g. zotero/translators), even
@@ -103,8 +112,8 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0]
+	item.title = attr(doc, 'meta[property="og:title"]', 'content');
+	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
 		.replace(` Contribute to ${repo} development by creating an account on GitHub.`, '');
 	item.libraryCatalog = "GitHub";
 	var topics = doc.getElementsByClassName('topic-tag');
