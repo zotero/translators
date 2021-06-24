@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-13 12:28:57"
+	"lastUpdated": "2021-06-24 02:22:53"
 }
 
 /*
@@ -35,8 +35,25 @@
 	***** END LICENSE BLOCK *****
 */
 
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}function trim(content){return content.replace(/^[\xA0\s]+/gm, '').replace(/[\xA0\s]+$/gm, '').replace(/\n+/g, '\n').replace(/:\n+/g, ': ').replace(/]\n/g, ']').replace(/】\n/g, '】').replace(/\n\/\n/g, '/')}
+function attr(docOrElem, selector, attr, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.getAttribute(attr) : null;
+}
+
+function text(docOrElem, selector, index) {
+	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
+
+function trim(content) {
+	return content.replace(/^[\xA0\s]+/gm, '')
+		.replace(/[\xA0\s]+$/gm, '')
+		.replace(/\n+/g, '\n')
+		.replace(/:\n+/g, ': ')
+		.replace(/]\n/g, ']')
+		.replace(/】\n/g, '】')
+		.replace(/\n\/\n/g, '/')
+}
 
 // https://aurimasv.github.io/z2csl/typeMap.xml#map-book
 // https://aurimasv.github.io/z2csl/typeMap.xml#map-conferencePaper
@@ -53,18 +70,18 @@ var TYPE_MAP = {
 
 function doPerson(item, data) {
 	// （日）本田晃一著；朱运程译 translator author
-	if (!data || data.length <= 0) return;
+	if (!data) return;
 	const persons = data.split(/；|;/g);
 	for (var person of persons) {
 		if (person.endsWith('著')) {
 			item.creators.push({
-				lastName: person.trim().replace(/著/g, ''),
+				lastName: person.trim().replace(/著$/g, ''),
 				creatorType: 'author',
 				fieldMode: 1
 			});
 		} else if (person.endsWith('译')) {
 			item.creators.push({
-				lastName: person.trim().replace(/译/g, ''),
+				lastName: person.trim().replace(/译$/g, ''),
 				creatorType: 'translator',
 				fieldMode: 1
 			});
@@ -80,7 +97,7 @@ function doPerson(item, data) {
 
 function doInventor(item, data) {
 	if (!data || data.length <= 0) return;
-	const persons = data.split(/，/g);
+	const persons = data.split('，');
 	for (var person of persons) {
 		item.creators.push({
 			lastName: person,
