@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-25 14:29:36"
+	"lastUpdated": "2021-06-25 15:07:56"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.ng-binding');
+	var rows = doc.querySelectorAll('a.ng-binding');//Z.debug(rows)//a.ng-binding
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -82,9 +82,7 @@ function postProcess(doc, item) {
 	let abstractEntry = ZU.xpathText(doc, '//p[@class="summary"]');
 	if (!item.abstractNote && abstractEntry) item.abstractNote = abstractEntry;
 	item.complete();
-}
-
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -299,58 +297,6 @@ var testCases = [
 					},
 					{
 						"tag": "two noble families from Kurilovac"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.ceeol.com/search/chapter-detail?id=934511",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "About the Legal Value of the Decision Pronounced by the Administrative-Fiscal Contentious Court before the Criminal Court (or, rather, about the lack of any value)",
-				"creators": [
-					{
-						"firstName": "Angelica",
-						"lastName": "Roșu",
-						"creatorType": "author"
-					}
-				],
-				"date": "0",
-				"language": "English",
-				"libraryCatalog": "www.ceeol.com",
-				"pages": "118-130",
-				"publicationTitle": "Administrative Law and Public Administration in the Global Social System",
-				"url": "https://www.ceeol.com/search/chapter-detail?id=934511",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "administrative contentious"
-					},
-					{
-						"tag": "criminal proceedings"
-					},
-					{
-						"tag": "legal security"
-					},
-					{
-						"tag": "res judicata authority"
-					},
-					{
-						"tag": "unconstitutionality"
 					}
 				],
 				"notes": [],
