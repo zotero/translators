@@ -80,8 +80,8 @@ function invokeEMTranslator(doc) {
 //scraping abstractNote from HTML, that is not included in Embedded Metadata
 function postProcess(doc, item) {
 	let abstractEntry = ZU.xpathText(doc, '//p[@class="summary"]');
-		if (!item.abstractNote && abstractEntry) item.abstractNote = abstractEntry;
-		item.complete();
+	if (!item.abstractNote && abstractEntry) item.abstractNote = abstractEntry;
+	item.complete();
 }
 
 /** BEGIN TEST CASES **/
