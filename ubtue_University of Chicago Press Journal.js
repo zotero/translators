@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 80,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2021-06-25 08:14:04"
 }
 
 /*
@@ -78,15 +78,17 @@ function scrape(doc, url) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
-			var tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
-			for (var i in tags) {
+			let tags = ZU.xpath(doc, '//meta[@name="dc.Subject"]');
+			for (let i in tags) {
 				let tagentry = tags[i].content.split(/;/);
-				for (var v in tagentry) {
+				for (let v in tagentry) {
 					item.tags.push(tagentry[v]);
 				}
 			}
-			var abstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
+			let abstract = ZU.xpathText(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "abstractInFull", " " ))]//p');
 			if (item.abstractNote) item.abstractNote = abstract;
+			let bookReviewTag = ZU.xpathText(doc, '//meta[@name="dc.Type"]/@content');
+			if (bookReviewTag && bookReviewTag.match(/book-review/i)) item.tags.push('Book Review');
 			item.complete();
 		});
 		translator.translate();
@@ -110,12 +112,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "März 20, 2020",
+				"date": "March 20, 2020",
 				"DOI": "10.1086/708235",
 				"ISSN": "0003-097X",
 				"abstractNote": "The Shephelah, one of Judah’s 8th century b.c.e. settlement hubs, was sparsely settled during the Iron Age I, when only a small Canaanite enclave survived in its eastern part. The resettlement of the Shephelah, beginning during the Iron Age I–II transition and lasting over 200 years, was a complex process that had two different facets. The first, better-known facet is the gradual establishment of dozens of new sites, the vast majority of which had clear connections to the highlands polity (e.g., Lachish, Tel Zayit, Tel Burna). The second, less-discussed facet is the transformations experienced by the few settlements that existed in the region in the Iron Age I, most notably Tell Beit Mirsim, Beth-Shemesh, Tel ʿEton, and Tel Halif. After presenting background data, the article will offer a detailed reconstruction of the processes through which the Shephelah became part of the highland polity, with a special focus on Tel ʿEton and on the enigmatic, earlier, and short-lived site of Khirbet Qeiyafa. The paper will conclude with a detailed refutation of the recent suggestion that the small Iron Age I Canaanite enclave that existed in the eastern Shephelah developed into a large Iron Age IIA Canaanite polity.",
-				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
-				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal",
 				"pages": "115-136",
 				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
 				"shortTitle": "Between the Highland Polity and Philistia",
@@ -171,12 +172,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Januar 29, 2020",
+				"date": "January 29, 2020",
 				"DOI": "10.1086/707494",
 				"ISSN": "0003-097X",
 				"abstractNote": "One of the notable features of the Sardis Synagogue was its extensive decoration with floor mosaics, wall paintings, marble revetment, and opus sectile, with an ornamental relief arcade also appearing in the forecourt. Reliefs carved in the distinctive “champlevé” technique presented a series of arches with spandrels featuring vases, vines, and birds set against a reddish ground. The sculptural approach is not well known in the region, although examples of similar work have been reported across Europe and the east Mediterranean, most notably at Aizanoi, Antioch, and Kourion. Other fragments of incised and color-inlaid relief at Sardis suggest that the Synagogue arcade was carved by sculptors who were both familiar with the site and aware of broader trends in architectural ornament in the 6th century c.e., *Remembering Gene Kleinbauer (1937–2019)—teacher, mentor, and friend",
-				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
-				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal",
 				"pages": "97-113",
 				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
 				"url": "https://doi.org/10.1086/707494",
@@ -234,12 +234,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Februar 6, 2020",
+				"date": "February 6, 2020",
 				"DOI": "10.1086/707583",
 				"ISSN": "0003-097X",
 				"abstractNote": "Stone vessels were used in Judaea and the Galilee from the second half of the 1st century b.c.e. until the 2nd century c.e., when it is widely accepted that they were phased out. This study focuses on the major types of chalkstone vessels uncovered in Roman Sepphoris, identifies the unique forms in the assemblage, and discusses the technological issues pertaining to their production. The findings presented in this study suggest that the stone vessels in the Galilee, unlike those in Judaea, did not disappear immediately but were found in layers associated with the Late Roman period (mid-2nd to 4th centuries), thus indicating their continual use. In tracing the sources of the chalkstone vessels, the geochemical analysis employed in this study shows that large numbers of vessels used by Sepphoreans were evidently produced in local quarries of the Lower Galilee.",
-				"journalAbbreviation": "Bulletin of the American Schools of Oriental Research",
-				"libraryCatalog": "ubtue_University of Chicago Press Journal_test_ris",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal",
 				"pages": "79-95",
 				"publicationTitle": "Bulletin of the American Schools of Oriental Research",
 				"shortTitle": "Chalkstone Vessels from Sepphoris",
@@ -266,6 +265,45 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1086/707583</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.journals.uchicago.edu/doi/10.1086/712900",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Patrick Carey, Confession: Catholics, Repentance, and Forgiveness in America",
+				"creators": [
+					{
+						"lastName": "Dugan",
+						"firstName": "Katherine",
+						"creatorType": "author"
+					}
+				],
+				"date": "April 1, 2021",
+				"DOI": "10.1086/712900",
+				"ISSN": "0022-4189",
+				"issue": "2",
+				"libraryCatalog": "ubtue_University of Chicago Press Journal",
+				"pages": "270-271",
+				"publicationTitle": "The Journal of Religion",
+				"shortTitle": "Patrick Carey, Confession",
+				"url": "https://doi.org/10.1086/712900",
+				"volume": "101",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1086/712900</p>"
 					}
 				],
 				"seeAlso": []
