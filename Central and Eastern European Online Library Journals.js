@@ -1,5 +1,5 @@
 {
-	"translatorID" : "19cef926-c5b6-42e2-a91c-6f2722f8b36d",
+	"translatorID": "19cef926-c5b6-42e2-a91c-6f2722f8b36d",
 	"label": "Central and Eastern European Online Library Journals",
 	"creator": "Timotheus Kim",
 	"target": "^https://www\\.ceeol\\.com/search",
@@ -70,11 +70,11 @@ function doWeb(doc, url) {
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-  translator.setDocument(doc);
-  translator.setHandler("itemDone", function (t, i) {
-       postProcess(doc, i);
-   });
-   translator.translate();
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, i) {
+		postProcess(doc, i);
+	});
+	translator.translate();
 }
 
 //scraping abstractNote from HTML, that is not included in Embedded Metadata
