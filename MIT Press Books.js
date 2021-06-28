@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-28 18:25:46"
+	"lastUpdated": "2021-06-28 22:21:37"
 }
 
 /*
@@ -76,13 +76,7 @@ function scrape(doc, url) {
 	let editionRegex = /, (([\w ]+) edition( [\w ]+)?)/i;
 	let matchedEdition = title.match(editionRegex);
 	if (matchedEdition) {
-		// Only include "Edition" in the field if there's text after it
-		if (matchedEdition[3]) {
-			item.edition = matchedEdition[1];
-		}
-		else {
-			item.edition = matchedEdition[2];
-		}
+		item.edition = cleanEdition(matchedEdition[1]);
 		title = title.replace(matchedEdition[0], '');
 	}
 	
@@ -147,7 +141,68 @@ function scrape(doc, url) {
 		}
 	}
 	
-	item.complete();
+	let seriesURL = attr(doc, '.book__series a', 'href');
+	if (seriesURL) {
+		ZU.processDocuments(seriesURL, function (seriesDoc) {
+			let seriesEditors = text(seriesDoc, '.series__editors')
+				.split(/,| and /);
+			for (let seriesEditor of seriesEditors) {
+				let creator = ZU.cleanAuthor(seriesEditor, 'seriesEditor');
+				
+				// sometimes series editors are also editors of individual
+				// volumes, and it doesn't make sense to include the same name
+				// twice. not an efficient approach but we're dealing with 4-5
+				// contributors max.
+				let duplicate = false;
+				for (let other of item.creators) {
+					if (other.firstName == creator.firstName && other.lastName == creator.lastName) {
+						duplicate = true;
+					}
+				}
+				
+				if (!duplicate) {
+					item.creators.push(creator);
+				}
+			}
+			item.complete();
+		});
+	}
+	else {
+		item.complete();
+	}
+}
+
+function cleanEdition(text) {
+	if (!text) return text;
+	
+	// from Taylor & Francis eBooks translator, slightly adapted
+	
+	const ordinals = {
+		first: "1",
+		second: "2",
+		third: "3",
+		fourth: "4",
+		fifth: "5",
+		sixth: "6",
+		seventh: "7",
+		eighth: "8",
+		ninth: "9",
+		tenth: "10"
+	};
+	
+	text = ZU.trimInternal(text).replace(/[[\]]/g, '');
+	// this somewhat complicated regex tries to isolate the number (spelled out
+	// or not) and make sure that it isn't followed by any extra info
+	let matches = text
+		.match(/^(?:(?:([0-9]+)(?:st|nd|rd|th)?)|(first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth))(?:\s?ed?\.?|\sedition)?$/i);
+	if (matches) {
+		let edition = matches[1] || matches[2];
+		edition = ordinals[edition.toLowerCase()] || edition;
+		return edition == "1" ? null : edition;
+	}
+	else {
+		return text;
+	}
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -213,6 +268,11 @@ var testCases = [
 						"firstName": "Bernhard",
 						"lastName": "Schölkopf",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Francis",
+						"lastName": "Bach",
+						"creatorType": "seriesEditor"
 					}
 				],
 				"date": "2017-11-29",
@@ -291,12 +351,12 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "2020-10-11",
+				"date": "2020-08-11",
 				"ISBN": "9781913029579",
 				"abstractNote": "Perspectives from philosophy, aesthetics, and art on how to envisage the construction site of possible worlds.",
 				"language": "en",
 				"libraryCatalog": "MIT Press Books",
-				"numPages": "136",
+				"numPages": "276",
 				"place": "Cambridge, MA, USA",
 				"publisher": "Urbanomic",
 				"attachments": [],
@@ -363,12 +423,17 @@ var testCases = [
 						"firstName": "Ameet",
 						"lastName": "Talwalkar",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Francis",
+						"lastName": "Bach",
+						"creatorType": "seriesEditor"
 					}
 				],
 				"date": "2018-12-25",
 				"ISBN": "9780262039406",
 				"abstractNote": "A new edition of a graduate-level machine learning textbook that focuses on the analysis and theory of algorithms.",
-				"edition": "Second",
+				"edition": "2",
 				"language": "en",
 				"libraryCatalog": "MIT Press Books",
 				"numPages": "504",
@@ -436,12 +501,17 @@ var testCases = [
 						"firstName": "Andrew G.",
 						"lastName": "Barto",
 						"creatorType": "author"
+					},
+					{
+						"firstName": "Francis",
+						"lastName": "Bach",
+						"creatorType": "seriesEditor"
 					}
 				],
 				"date": "2018-11-13",
 				"ISBN": "9780262039246",
 				"abstractNote": "The significantly expanded and updated new edition of a widely used text on reinforcement learning, one of the most active research areas in artificial intelligence.",
-				"edition": "Second",
+				"edition": "2",
 				"language": "en",
 				"libraryCatalog": "MIT Press Books",
 				"numPages": "552",
@@ -498,28 +568,48 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://mitpress.mit.edu/books/america-over-water-revised-and-expanded-edition",
+		"url": "https://mitpress.mit.edu/books/acquired-tastes",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "America Over the Water: A Historic Journey into the Cultural Roots of Traditional American Music",
+				"title": "Acquired Tastes: Stories about the Origins of Modern Food",
 				"creators": [
 					{
-						"firstName": "Shirley",
-						"lastName": "Collins",
-						"creatorType": "author"
+						"firstName": "Benjamin R.",
+						"lastName": "Cohen",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Michael S.",
+						"lastName": "Kideckel",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Anna",
+						"lastName": "Zeide",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Gottlieb",
+						"creatorType": "seriesEditor"
+					},
+					{
+						"firstName": "Nevin",
+						"lastName": "Cohen",
+						"creatorType": "seriesEditor"
 					}
 				],
-				"date": "2020-10-20",
-				"ISBN": "9781907222924",
-				"abstractNote": "The chronicle of a year spent discovering the traditional musicians of the American South, including Mississippi Fred McDowell, Muddy Waters, and many others.",
-				"edition": "Revised And Expanded",
+				"date": "2021-08-17",
+				"ISBN": "9780262542913",
+				"abstractNote": "How modern food helped make modern society between 1870 and 1930: stories of power and food, from bananas and beer to bread and fake meat.",
 				"language": "en",
 				"libraryCatalog": "MIT Press Books",
-				"numPages": "248",
+				"numPages": "290",
 				"place": "Cambridge, MA, USA",
-				"publisher": "Strange Attractor Press",
-				"shortTitle": "America Over the Water",
+				"publisher": "MIT Press",
+				"series": "Food, Health, and the Environment",
+				"shortTitle": "Acquired Tastes",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
