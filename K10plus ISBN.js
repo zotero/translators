@@ -1,6 +1,6 @@
 {
 	"translatorID": "de0eef58-cb39-4410-ada0-6b39f43383f9",
-	"label": "Gemeinsamer Bibliotheksverbund ISBN",
+	"label": "K10plus ISBN",
 	"creator": "Philipp Zumstein",
 	"target": "",
 	"minVersion": "4.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-04-13 13:41:00"
+	"lastUpdated": "2021-06-23 09:20:00"
 }
 
 /*
@@ -40,16 +40,17 @@ function detectSearch(item) {
 }
 
 function doSearch(item) {
-	//search the ISBN or text over the SRU of the GBV, and take the result it as MARCXML
-	//documentation: https://www.gbv.de/wikis/cls/SRU
+	//K10plus is the merged catalog of GBV and SWB
+	//search the ISBN or text over the SRU of K10plus, and take the result it as MARCXML
+	//documentation: https://wiki.k10plus.de/display/K10PLUS/SRU
 	
 	let url;
 	if (item.ISBN) {
 		var queryISBN = ZU.cleanISBN(item.ISBN);
-		url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
+		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=pica.isb=" + queryISBN + " AND pica.mat%3DB&maximumRecords=1";
 	}
 	else if (item.query) {
-		url = "http://sru.gbv.de/gvk?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
+		url = "https://sru.k10plus.de/opac-de-627?version=1.1&operation=searchRetrieve&query=" + encodeURIComponent(item.query) + "&maximumRecords=50";
 	}
 	
 	//Z.debug(url);
@@ -137,7 +138,7 @@ var testCases = [
 						"mimeType": "application/pdf"
 						}
 				],
-				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"libraryCatalog": "K10plus ISBN",
 				"place": "Münster",
 				"ISBN": "9783830931492",
 				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
@@ -187,7 +188,7 @@ var testCases = [
 				"numPages": "387",
 				"series": "Slavolinguistica",
 				"seriesNumber": "15",
-				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"libraryCatalog": "K10plus ISBN",
 				"shortTitle": "Bilinguale Lexik",
 				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
 				"publisher": "Sagner",
@@ -232,7 +233,7 @@ var testCases = [
 				"numPages": "222",
 				"series": "BAR International series",
 				"seriesNumber": "1930",
-				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"libraryCatalog": "K10plus ISBN",
 				"publisher": "Archaeopress" ,
 				"date": "2009",
 				"extra": "OCLC: 320755805"
@@ -263,15 +264,16 @@ var testCases = [
 				"tags": [],
 				"seeAlso": [],
 				"attachments": [],
-				"ISBN": "978-1-4912-5316-8",
+				"ISBN": "9781491253168",
 				"language": "eng",
 				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
 				"place": "Lexington, KY",
 				"numPages": "93",
-				"libraryCatalog": "Gemeinsamer Bibliotheksverbund ISBN",
+				"libraryCatalog": "K10plus ISBN",
 				"publisher": "CreateSpace" ,
 				"date": "2013",
-				"extra": "OCLC: 860902984"
+				"extra": "OCLC: 860902984",
+				"shortTitle": "Classroom activities for the busy teacher"
 			}
 		]
 	}
