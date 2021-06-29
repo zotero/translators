@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-11-18 23:01:07"
+	"lastUpdated": "2021-06-29 13:57:07"
 }
 
 /*
@@ -91,7 +91,7 @@ function scrape(doc, url) {
 			item.abstractNote = abstract;
 		}
 		var abstractImage = ZU.xpath(doc, '//div[@class="abstract-image-replacement"]');
-		if (abstractImage && abstractImage.length) {
+		if (abstractImage && abstractImage.length || item.abstractNote.includes('/static.cambridge.org')) {
 			// clear the abstract field, since it will contain a URL
 			item.abstractNote = "";
 		}
@@ -111,7 +111,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -133,7 +133,7 @@ var testCases = [
 				"pages": "227-243",
 				"publicationTitle": "Journal of American Studies",
 				"shortTitle": "“SAMO© as an Escape Clause”",
-				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 				"volume": "45",
 				"attachments": [
 					{
@@ -141,7 +141,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -152,7 +153,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -182,7 +183,7 @@ var testCases = [
 				"libraryCatalog": "Cambridge Core",
 				"pages": "437-469",
 				"publicationTitle": "Journal of Fluid Mechanics",
-				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 				"volume": "590",
 				"attachments": [
 					{
@@ -190,7 +191,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -214,7 +216,67 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.cambridge.org/core/search?q=labor&sort=&aggs%5BonlyShowAvailable%5D%5Bfilters%5D=&aggs%5BopenAccess%5D%5Bfilters%5D=&aggs%5BproductTypes%5D%5Bfilters%5D=JOURNAL_ARTICLE&aggs%5BproductDate%5D%5Bfilters%5D=&aggs%5BproductSubject%5D%5Bfilters%5D=&aggs%5BproductJournal%5D%5Bfilters%5D=&aggs%5BproductPublisher%5D%5Bfilters%5D=&aggs%5BproductSociety%5D%5Bfilters%5D=&aggs%5BproductPublisherSeries%5D%5Bfilters%5D=&aggs%5BproductCollection%5D%5Bfilters%5D=&showJackets=&filters%5BauthorTerms%5D=&filters%5BdateYearRange%5D%5Bfrom%5D=&filters%5BdateYearRange%5D%5Bto%5D=&hideArticleGraphicalAbstracts=true",
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Search",
+				"creators": [],
+				"abstractNote": "Welcome to Cambridge Core",
+				"language": "en",
+				"libraryCatalog": "Cambridge Core",
+				"url": "https://www.cambridge.org/core/search?q=labor&sort=&aggs%5BonlyShowAvailable%5D%5Bfilters%5D=&aggs%5BopenAccess%5D%5Bfilters%5D=&aggs%5BproductTypes%5D%5Bfilters%5D=JOURNAL_ARTICLE&aggs%5BproductDate%5D%5Bfilters%5D=&aggs%5BproductSubject%5D%5Bfilters%5D=&aggs%5BproductJournal%5D%5Bfilters%5D=&aggs%5BproductPublisher%5D%5Bfilters%5D=&aggs%5BproductSociety%5D%5Bfilters%5D=&aggs%5BproductPublisherSeries%5D%5Bfilters%5D=&aggs%5BproductCollection%5D%5Bfilters%5D=&showJackets=&filters%5BauthorTerms%5D=&filters%5BdateYearRange%5D%5Bfrom%5D=&filters%5BdateYearRange%5D%5Bto%5D=&hideArticleGraphicalAbstracts=true",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/abs/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A history of Christian conversion. By David W. Kling. Pp. xvi + 836 incl. 14 maps. Oxford–New York: Oxford University Press, 2020. £97. 978 0 19 532092 3",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Bebbington",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/07",
+				"DOI": "10.1017/S002204692100035X",
+				"ISSN": "0022-0469, 1469-7637",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "Cambridge Core",
+				"pages": "612-613",
+				"publicationTitle": "The Journal of Ecclesiastical History",
+				"shortTitle": "A history of Christian conversion. By David W. Kling. Pp. xvi + 836 incl. 14 maps. Oxford–New York",
+				"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/abs/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
+				"volume": "72",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
