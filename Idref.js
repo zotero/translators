@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-28 12:08:46"
+	"lastUpdated": "2021-06-29 09:01:54"
 }
 
 /*
@@ -160,6 +160,19 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.idref.fr/199676100",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.idref.fr/236948326",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.idref.fr/056894546",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
