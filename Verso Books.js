@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-28 08:49:20"
+	"lastUpdated": "2021-06-29 07:01:44"
 }
 
 /*
@@ -37,11 +37,13 @@
 
 function detectWeb(doc, url) {
 	const isSubject = url.includes("subjects/");
-	if (isSubject) {
+	if (isSubject && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
-	else {
+	else if (doc.querySelector('.edition-single--book-title')) {
 		return 'book';
+	} else {
+		return false;
 	}
 }
 
@@ -240,7 +242,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-01",
+				"date": "2014-02",
 				"ISBN": "9781781681237",
 				"abstractNote": "The “yellow peril” is one of the oldest and most pervasive racist ideas in Western culture—dating back to the birth of European colonialism during the Enlightenment. Yet while Fu Manchu looks almost quaint today, the prejudices that gave him life persist in modern culture. Yellow Peril! is the first comprehensive repository of anti-Asian images and writing, and it surveys the extent of this iniquitous form of paranoia.\n\nWritten by two dedicated scholars and replete with paintings, photographs, and images drawn from pulp novels, posters, comics, theatrical productions, movies, propagandistic and pseudo-scholarly literature, and a varied world of pop culture ephemera, this is both a unique and fascinating archive and a modern analysis of this crucial historical formation.",
 				"libraryCatalog": "Verso Books",
