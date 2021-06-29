@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2021-06-29 14:36:50"
 }
 
 /*
@@ -65,9 +65,12 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		// update abstract from the webpage as the embedded data is often incomplete
 		var abstractText = ZU.xpathText(doc, '//section[@class="abstract"]');
 		if (abstractText) i.abstractNote = abstractText;
-		var tagreview = ZU.xpathText(doc, '//*[(@id = "ContentTab")]//a');
-		if (tagreview.match(/Reviews|Book Reviews/i)) delete i.abstractNote;
-		if (tagreview.match(/Reviews|Book Reviews/i)) i.tags.push('Book Review');
+		
+		let tagreview = ZU.xpathText(doc, '//*[(@id = "ContentTab")]//a');
+		if (tagreview.match(/Reviews+|Book Reviews+/i)) i.tags.push('Book Review');
+		// if the article are review article, then the full text extract is scraped from the HTML
+		let extractText = ZU.xpathText(doc, '//p[@class="chapter-para"]');
+		if (tagreview.match(/Reviews+|Book Reviews+/i) && extractText) i.abstractNote = extractText
 		i.complete();
 	});
 	translator.translate();
@@ -93,7 +96,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://academic.oup.com/jss/article/65/1/245/5738633",
+		"url": "https://academic.oup.com/jss/article-abstract/65/1/245/5738633?redirectedFrom=fulltext",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -136,6 +139,58 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/litthe/article-abstract/34/1/122/5245305?redirectedFrom=fulltext",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mariner: A Voyage with Samuel Taylor Coleridge. By Malcolm Guite",
+				"creators": [
+					{
+						"firstName": "Robin",
+						"lastName": "Schofield",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/03/01",
+				"DOI": "10.1093/litthe/fry035",
+				"ISSN": "0269-1205",
+				"abstractNote": "This is an ambitious revisionary study. Malcolm Guite combines literary, theological, and ecological perspectives to shed new light on the ‘rich spirituality’ of Coleridge’s work, in the sacramental theology of his Rime of the Ancient Mariner (p. 8). Guite recounts Coleridge’s life story around a religious and ecological, ultimately polemical, reading of the Rime. Guite’s rationale for the biographical strand of his study is based on the poet’s retrospective self-identification with his protagonist. The book is divided into two sections. In Part One, Guite narrates Coleridge’s life up to the year of extraordinary creativity at Nether Stowey, which spanned summer 1797 to summer 1798. The seven chapters in Part Two...",
+				"issue": "1",
+				"journalAbbreviation": "Literature and Theology",
+				"language": "en",
+				"libraryCatalog": "academic.oup.com",
+				"pages": "122-124",
+				"publicationTitle": "Literature and Theology",
+				"shortTitle": "Mariner",
+				"url": "https://academic.oup.com/litthe/article/34/1/122/5245305",
+				"volume": "34",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/litthe/issue/35/2",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
