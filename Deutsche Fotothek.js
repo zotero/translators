@@ -119,7 +119,7 @@ function scrapeManifest(manifestJSON) {
 				}
 				else {
 					// is this worth it? i'm not sure. but the catalog has a lot
-					// of misbracketed von-names and it's 
+					// of misbracketed von-names
 					value = value.replace(/(\w+),\s*(\w+)\s+(von|van|de|St\.)\s*$/, '$3 $1, $2');
 					item.creators.push(ZU.cleanAuthor(value, 'artist', true));
 				}
