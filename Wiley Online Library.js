@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-28 17:49:33"
+	"lastUpdated": "2021-06-29 10:34:33"
 }
 
 /*
@@ -209,7 +209,7 @@ function scrapeEM(doc, url) {
 
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
-	freeAccessTag(doc, item)
+	addFreeAccessTag(doc, item)
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -375,7 +375,7 @@ function scrapeBibTeX(doc, url) {
 			doiURLRegex = /^https:\/\/doi.org\/(.*)/;
 			if (item.DOI && item.DOI.match(doiURLRegex))
 				item.DOI = item.DOI.replace(/^https:\/\/doi.org\/(.*)/, "$1");
-			freeAccessTag(doc, item);
+			addFreeAccessTag(doc, item);
 			item.complete();
 		});
 
@@ -384,7 +384,7 @@ function scrapeBibTeX(doc, url) {
 }
 
 //ubtue:tag an article as open access
-function freeAccessTag(doc, item) {
+function addFreeAccessTag(doc, item) {
 	let tagEntry = ZU.xpathText(doc, '//div[@class="doi-access"]');
 	if (tagEntry && tagEntry.match(/Free Access/i)) {
 		item.tags.push('LF:');
