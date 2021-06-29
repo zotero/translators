@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 13:57:07"
+	"lastUpdated": "2021-06-29 15:14:26"
 }
 
 /*
@@ -80,6 +80,13 @@ function doWeb(doc, url) {
 	}
 }
 
+function addOpenAccessTag (doc, item) {
+	let tagEntry = ZU.xpathText(doc, '//span[@class="open-access"]');
+	if (tagEntry && tagEntry.match(/Open Access/i)) {
+		item.tags.push('LF:');
+	}
+}
+
 function scrape(doc, url) {
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
@@ -95,9 +102,10 @@ function scrape(doc, url) {
 			// clear the abstract field, since it will contain a URL
 			item.abstractNote = "";
 		}
-
+		
 		item.title = ZU.unescapeHTML(item.title);
 		item.libraryCatalog = "Cambridge Core";
+		addOpenAccessTag(doc, item);
 		item.complete();
 	});
 
@@ -273,6 +281,76 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/charity-as-social-justice-antonio-rosmini-and-the-great-irish-famine/7D177F707EA3722731C61AE58DB601F6",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Charity as Social Justice: Antonio Rosmini and the Great Irish Famine",
+				"creators": [
+					{
+						"firstName": "Francesco",
+						"lastName": "Zavatti",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/07",
+				"DOI": "10.1017/S0022046920001499",
+				"ISSN": "0022-0469, 1469-7637",
+				"abstractNote": "The article sheds light on the significant fundraising and relief activities for Ireland during the Great Famine (1845–50) initiated in 1847 by the Italian philosopher and cleric Antonio Rosmini and his network in Savoy-Piedmont, Lombardy-Venetia and England. By analysing Rosmini's philosophical and political writings, the article demonstrates that Rosmini considered aid in times of crisis as an act of social justice for which individuals have to take responsibility. By analysing documents from the Italian and Irish archives, the article gives an account of the fundraising effort's practices of networking, appealing, almsgiving and delivery.",
+				"issue": "3",
+				"language": "en",
+				"libraryCatalog": "Cambridge Core",
+				"pages": "573-589",
+				"publicationTitle": "The Journal of Ecclesiastical History",
+				"shortTitle": "Charity as Social Justice",
+				"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/charity-as-social-justice-antonio-rosmini-and-the-great-irish-famine/7D177F707EA3722731C61AE58DB601F6",
+				"volume": "72",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Archive of the Institute of Charity"
+					},
+					{
+						"tag": "Archivo Generalizio"
+					},
+					{
+						"tag": "Dublin"
+					},
+					{
+						"tag": "Dublin Diocesan Archive"
+					},
+					{
+						"tag": "LF:"
+					},
+					{
+						"tag": "New Collection"
+					},
+					{
+						"tag": "Pontifical Irish College"
+					},
+					{
+						"tag": "Rome"
+					},
+					{
+						"tag": "Stresa"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
