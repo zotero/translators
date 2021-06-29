@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-25 15:07:56"
+	"lastUpdated": "2021-06-29 10:13:39"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.ng-binding');//Z.debug(rows)//a.ng-binding
+	var rows = doc.querySelectorAll('a.ng-binding');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -82,7 +82,10 @@ function postProcess(doc, item) {
 	let abstractEntry = ZU.xpathText(doc, '//p[@class="summary"]');
 	if (!item.abstractNote && abstractEntry) item.abstractNote = abstractEntry;
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
@@ -299,6 +302,30 @@ var testCases = [
 						"tag": "two noble families from Kurilovac"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.ceeol.com/search/journal-detail?id=1266",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Philosophy and Canon Law",
+				"creators": [],
+				"ISSN": "2450-4955, 2451-2141",
+				"language": "en",
+				"libraryCatalog": "www.ceeol.com",
+				"url": "https://www.ceeol.com/search/journal-detail?id=1266",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
