@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 10:13:39"
+	"lastUpdated": "2021-06-29 10:20:32"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('article')) return "journalArticle";
+	if (url.includes('/article-detail?')) return "journalArticle";
 	else if (getSearchResults(doc, true)) return "multiple";
 	else return false;
 }
