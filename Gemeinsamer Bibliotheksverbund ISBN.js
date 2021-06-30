@@ -9,7 +9,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-30 02:24:48"
+	"lastUpdated": "2021-06-30 03:15:48"
 }
 
 // This is a temporary placeholder translator to fix the broken-identifier-lookup-until-restart-after-
