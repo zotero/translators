@@ -78,12 +78,12 @@ function getPDFLink(doc, onDone) {
 		return;
 	}
 	
-	// when using a partnered institution network access, construct the the PDF URL directly
-	var pdfURLdirect = doc.querySelector('link[rel="canonical"]').href;
-	if (pdfURLdirect) {
-		pdfURLdirect = pdfURLdirect + '/pdfft?isDTMRedir=true&download=true';
-		//Zotero.debug("Trying to construct PDF URL using: " + pdfURLdirect);
-		onDone(pdfURLdirect);
+	// When using partnered institution network access, construct the PDF URL directly
+	var pdfURL = attr(doc, 'link[rel="canonical"]', 'href')
+	if (pdfURL) {
+		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
+		//Zotero.debug("Trying to construct PDF URL using: " + pdfURL);
+		onDone(pdfURL);
 		return;
 	}
 		
