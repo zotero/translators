@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-30 21:49:56"
+	"lastUpdated": "2021-06-30 23:49:56"
 }
 
 /*
@@ -70,7 +70,6 @@ function doWeb(doc, url) {
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	// Embedded Metadata
-	// Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
@@ -79,16 +78,16 @@ function invokeEMTranslator(doc) {
 	translator.translate();
 }
 
-//scraping abstractNote from HTML, that is not included in Embedded Metadata
+// scraping abstractNote from HTML, that is not included in Embedded Metadata
 function postProcess(doc, item) {
 	let abstractEntry = ZU.xpathText(doc, '//p[@class="summary"]');
 	if (!item.abstractNote && abstractEntry) item.abstractNote = abstractEntry;
 	for (let i = 0; i < item.attachments.length; i++) {
-	if (item.attachments[i].title == 'Snapshot') {
-		item.attachments.splice(i, 1);
-		break;
+		if (item.attachments[i].title == 'Snapshot') {
+			item.attachments.splice(i, 1);
+			break;
+		}
 	}
-}
 	item.complete();
 }
 
