@@ -300,6 +300,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.ceeol.com/search/journal-detail?id=1266",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "journalArticle",
