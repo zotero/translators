@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 04:08:30"
+	"lastUpdated": "2021-06-23 05:56:37"
 }
 
 /*
    Trove Translator
    Copyright (C) 2016-2021 Tim Sherratt (tim@discontents.com.au, @wragge)
-                           and Abe Jellinek
+						   and Abe Jellinek
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -40,22 +40,21 @@ function detectWeb(doc, url) {
 		return "newspaperArticle";
 	}
 	else if (url.includes('/work/')) {
-		let format = text('#workContainer .format');
-		if (!format && doc.querySelector('.versions')) {
-			return "multiple";
+		let formatContainer = doc.querySelector('#workContainer .format');
+		if (!formatContainer) {
+			if (doc.querySelector('.versions')) {
+				return "multiple";
+			}
+			else {
+				// monitoring the entire body feels like overkill, but no other
+				// selector works. we just monitor until the page is built and
+				// we can detect a type.
+				Zotero.monitorDOMChanges(doc.body);
+				return false;
+			}
 		}
-		else if (format.includes('Journal or magazine article')) {
-			return "magazineArticle";
-		}
-		else if (format.includes('Photograph')) {
-			return "artwork";
-		}
-		else if (format.includes('Book chapter')) {
-			return "bookSection";
-		}
-		else {
-			return "book";
-		}
+		
+		return checkType(formatContainer.innerText);
 	}
 	return false;
 }
@@ -225,42 +224,44 @@ function cleanPlace(place) {
 
 var troveTypes = {
 	Book: "book",
-	"Article Article/Book chapter": "bookSection",
+	"Article/Book chapter": "bookSection",
 	Thesis: "thesis",
 	"Archived website": "webpage",
 	"Conference Proceedings": "book",
 	"Audio book": "book",
 	Article: "journalArticle",
-	"Article Article/Journal or magazine article": "journalArticle",
-	"Article Article/Conference paper": "conferencePaper",
-	"Article Article/Report": "report",
+	"Article/Journal or magazine article": "journalArticle",
+	"Article/Conference paper": "conferencePaper",
+	"Article/Report": "report",
+	Map: "map",
+	"Map/Aerial photograph; Photograph": "map",
 	Photograph: "artwork",
 	"Poster, chart, other": "artwork",
 	"Art work": "artwork",
 	Object: "artwork",
-	"Microform Photograph": "artwork",
-	"Microform Object": "artwork",
 	Sound: "audioRecording",
 	Video: "videoRecording",
 	"Printed music": "book",
-	Map: "map",
 	Unpublished: "manuscript",
 	Published: "document"
 };
 
 
-// The function ...
+// Map a semicolon-separated Trove item type string to one Zotero item type
 function checkType(string) {
-	var types = string.split("; ");
-	var newString;
-	while (types.length > 0) {
-		newString = types.join(" ");
-		if (troveTypes.hasOwnProperty(newString)) {
-			return troveTypes[newString];
+	for (let [trove, zotero] of Object.entries(troveTypes)) {
+		if (string.endsWith(trove)) {
+			return zotero;
 		}
-		types.pop();
 	}
-	return "book";
+	
+	let lastSemicolon = string.lastIndexOf('; ');
+	if (lastSemicolon != -1) {
+		return checkType(string.substring(0, lastSemicolon));
+	}
+	else {
+		return 'book';
+	}
 }
 
 
@@ -345,10 +346,10 @@ function scrapeWork(doc, url) {
 	var thumbnailURL;
 
 	var workID = url.match(/\/work\/([0-9]+)/)[1];
+	// version ID seems to always be undefined now
 	var bibtexURL = `https://trove.nla.gov.au/api/citation/work/${workID}?version=undefined`;
 	
 	if (doc) {
-		// version ID seems to always be undefined now
 		thumbnailURL = attr(doc, '.thumbnail img', 'src');
 	}
 
