@@ -78,6 +78,15 @@ function getPDFLink(doc, onDone) {
 		return;
 	}
 	
+	// when using a partnered institution network access, construct the the PDF URL directly
+	var pdfURLdirect = doc.querySelector('link[rel="canonical"]').href;
+	if (pdfURLdirect) {
+		pdfURLdirect = pdfURLdirect + '/pdfft?isDTMRedir=true&download=true';
+		//Zotero.debug("Trying to construct PDF URL using: " + pdfURLdirect);
+		onDone(pdfURLdirect);
+		return;
+	}
+		
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
