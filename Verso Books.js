@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 07:01:44"
+	"lastUpdated": "2021-06-30 18:30:46"
 }
 
 /*
@@ -93,16 +93,13 @@ function scrape(doc, _) {
 	const newItem = new Zotero.Item('book');
 
 	newItem.publisher = "Verso Books";
-
-	const title = doc.getElementsByClassName('edition-single--book-title')[0].textContent;
-	const subtitle = doc.getElementsByClassName('edition-single--book-subtitle')[0].textContent;
+	const title = text(doc, '.edition-single--book-title');
+	const subtitle = text(doc, '.edition-single--book-subtitle');
 	newItem.title = title + (subtitle ? `: ${subtitle}` : '');
 
-	const contributors = doc.getElementsByClassName('edition-single--book-contributors')[0];
-	const contributorsEls = contributors.querySelectorAll('span');
+	const contributorsEls = doc.querySelectorAll('.edition-single--book-contributors > span');
 	contributorsEls.forEach((contributorEl) => {
 		const authors = contributorEl.querySelectorAll('a');
-		if (authors.length > 0) {
 			authors.forEach((authorEl) => {
 				let role = 'author';
 				const isAuthor = authorEl.href.includes('authors');
@@ -115,7 +112,6 @@ function scrape(doc, _) {
 					newItem.creators.push(ZU.cleanAuthor(authorFullName, role, false));
 				}
 			});
-		}
 		// check if translator
 		const spanText = contributorEl.textContent;
 		const isTranslator = spanText.toLowerCase().includes('translated by');
@@ -125,14 +121,13 @@ function scrape(doc, _) {
 		}
 	});
 
-	const description = doc.getElementsByClassName('edition-single--book-description')[0].textContent;
+	const description = text(doc, '.edition-single--book-description');
 	if (description) {
 		newItem.abstractNote = description;
 	}
 
-	const details = doc.querySelectorAll('.edition-single--product-card > .details');
-	if (details.length > 0) {
-		const detailsText = details[0].textContent;
+	const detailsText = text(doc, '.edition-single--product-card > .details');
+	if (detailsText.length > 0) {
 		const detailsArray = detailsText.split('/');
 		const pages = detailsArray[0].replace('pages', '');
 		const date = detailsArray[1];
@@ -147,11 +142,12 @@ function scrape(doc, _) {
 		}
 
 		if (ISBN) {
-			newItem.ISBN = ISBN;
+			newItem.ISBN = ZU.cleanISBN(ISBN);
 		}
 	}
 	newItem.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -242,7 +238,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-02",
+				"date": "2014-01",
 				"ISBN": "9781781681237",
 				"abstractNote": "The “yellow peril” is one of the oldest and most pervasive racist ideas in Western culture—dating back to the birth of European colonialism during the Enlightenment. Yet while Fu Manchu looks almost quaint today, the prejudices that gave him life persist in modern culture. Yellow Peril! is the first comprehensive repository of anti-Asian images and writing, and it surveys the extent of this iniquitous form of paranoia.\n\nWritten by two dedicated scholars and replete with paintings, photographs, and images drawn from pulp novels, posters, comics, theatrical productions, movies, propagandistic and pseudo-scholarly literature, and a varied world of pop culture ephemera, this is both a unique and fascinating archive and a modern analysis of this crucial historical formation.",
 				"libraryCatalog": "Verso Books",
