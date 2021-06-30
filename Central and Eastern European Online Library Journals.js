@@ -70,6 +70,7 @@ function doWeb(doc, url) {
 function invokeEMTranslator(doc) {
 	var translator = Zotero.loadTranslator("web");
 	// Embedded Metadata
+	// Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
