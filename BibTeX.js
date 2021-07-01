@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2020-12-31 02:57:15"
+	"lastUpdated": "2021-07-01 19:05:10"
 }
 
 /*
@@ -3342,7 +3342,7 @@ var testCases = [
 		"input": "@misc{american_rights_at_work_public_2012,\n    title = {Public Service Research Foundation},\n\turl = {http://www.americanrightsatwork.org/blogcategory-275/},\n\turldate = {2012-07-27},\n\tauthor = {American Rights at Work},\n\tyear = {2012},\n\thowpublished = {http://www.americanrightsatwork.org/blogcategory-275/},\n}",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "document",
 				"title": "Public Service Research Foundation",
 				"creators": [
 					{
