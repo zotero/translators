@@ -303,10 +303,16 @@ function processRIS(doc, text) {
 		for (var i = 0, n = item.creators.length; i < n; i++) {
 			// add spaces after initials
 			if (item.creators[i].firstName) {
-				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
+				item.creators[i].firstName = item.creators[i].firstName
+					.replace(/\.\s*(?=\S)/g, '. ')
+					.replace(/\s/g, ' '); // NBSP, etc -> space
+			}
+			if (item.creators[i].lastName) {
+				item.creators[i].lastName = item.creators[i].lastName
+					.replace(/\s/g, ' ');
 			}
 			// fix all uppercase lastnames
-			if (item.creators && item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
+			if (item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
 				item.creators[i].lastName = item.creators[i].lastName.charAt(0) + item.creators[i].lastName.slice(1).toLowerCase();
 			}
 		}
