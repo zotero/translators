@@ -30,7 +30,7 @@
 */
 
 function detectWeb(doc, url) {
-	var regex = /\/r\/[A-Za-z\d_]+\/comments\//;
+	var regex = /\/r\/[a-z\d_]+\/comments\//i;
 	if (regex.test(url)) {
 		return 'forumPost';
 	}
@@ -58,7 +58,7 @@ function getSearchResults(doc, checkOnly) {
 
 function doWeb(doc, url) {
 	var jsonUrl = url.split("?")[0] + '.json';
-	var commentRegex = /\/r\/[A-Za-z\d_]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\//;
+	var commentRegex = /\/r\/[a-z\d_]+\/comments\/[a-z\d]+\/[a-z\d_]+\/[a-z\d]+\//i;
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
