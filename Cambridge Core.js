@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 15:14:26"
+	"lastUpdated": "2021-07-02 13:37:43"
 }
 
 /*
@@ -83,7 +83,7 @@ function doWeb(doc, url) {
 function addOpenAccessTag (doc, item) {
 	let tagEntry = ZU.xpathText(doc, '//span[@class="open-access"]');
 	if (tagEntry && tagEntry.match(/Open Access/i)) {
-		item.tags.push('LF:');
+		item.notes.push('LF:');
 	}
 }
 
@@ -336,9 +336,6 @@ var testCases = [
 						"tag": "Dublin Diocesan Archive"
 					},
 					{
-						"tag": "LF:"
-					},
-					{
 						"tag": "New Collection"
 					},
 					{
@@ -351,7 +348,9 @@ var testCases = [
 						"tag": "Stresa"
 					}
 				],
-				"notes": [],
+				"notes": [
+					"LF:"
+				],
 				"seeAlso": []
 			}
 		]
