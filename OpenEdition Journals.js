@@ -125,6 +125,14 @@ function scrape(doc, url) {
 					}
 				}
 			}
+			
+			for (let i = 0; i < item.attachments.length; i++) {
+				if (item.attachments[i].title == 'Snapshot') {
+					item.attachments.splice(i, 1);
+					break;
+				}
+			}
+			
 			// store the language-specific url
 			item.url = url;
 
@@ -204,10 +212,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -284,10 +288,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -366,10 +366,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -408,10 +404,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [
