@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-07 20:28:00"
+	"lastUpdated": "2021-07-02 00:22:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Aurimas Vinckevicius, Pierre-Alain Mignot, Michael Berkowitz, Hélène Prieto, Jean-François Rivière
+	Copyright © 2020-2021 Aurimas Vinckevicius, Pierre-Alain Mignot, Michael Berkowitz, Hélène Prieto, Jean-François Rivière
 
 	This file is part of Zotero.
 
@@ -116,12 +116,12 @@ function scrape(doc, url) {
 
 			delete item.extra;
 		
-			// The site lists all editor of journals as editor in the header. Turn them into contributors.
+			// The site lists all editor of journals as editor in the header. Remove them.
 			// I don't think there is a use case for editors for journal articles
 			if (item.itemType === "journalArticle") {
 				for (let i = 0; i < item.creators.length; i++) {
 					if (item.creators[i].creatorType === "editor") {
-						item.creators[i].creatorType = "contributor";
+						item.creators.splice(i--, 1);
 					}
 				}
 			}
@@ -188,11 +188,6 @@ var testCases = [
 						"firstName": "Georges",
 						"lastName": "Martin",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Georges",
-						"lastName": "Martin",
-						"creatorType": "contributor"
 					}
 				],
 				"date": "2008/02/01",
@@ -211,23 +206,50 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Alphonse VI de Castille et de León",
-					"Elvire Fernandez",
-					"Ferdinand Ier de Castille et de León",
-					"Saint-Isidore de León",
-					"Sancie Raimundez",
-					"Urraque Fernandez",
-					"XIe siècle",
-					"infantat",
-					"infantaticum",
-					"infante Elvire",
-					"infante Sancie",
-					"infante Urraque",
-					"testament"
+					{
+						"tag": "Alphonse VI de Castille et de León"
+					},
+					{
+						"tag": "Elvire Fernandez"
+					},
+					{
+						"tag": "Ferdinand Ier de Castille et de León"
+					},
+					{
+						"tag": "Saint-Isidore de León"
+					},
+					{
+						"tag": "Sancie Raimundez"
+					},
+					{
+						"tag": "Urraque Fernandez"
+					},
+					{
+						"tag": "XIe siècle"
+					},
+					{
+						"tag": "infantat"
+					},
+					{
+						"tag": "infantaticum"
+					},
+					{
+						"tag": "infante Elvire"
+					},
+					{
+						"tag": "infante Sancie"
+					},
+					{
+						"tag": "infante Urraque"
+					},
+					{
+						"tag": "testament"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -246,11 +268,6 @@ var testCases = [
 						"firstName": "Georges",
 						"lastName": "Martin",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Georges",
-						"lastName": "Martin",
-						"creatorType": "contributor"
 					}
 				],
 				"date": "2008/02/01",
@@ -269,23 +286,50 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Alphonse VI de Castille et de León",
-					"Elvire Fernandez",
-					"Ferdinand Ier de Castille et de León",
-					"Saint-Isidore de León",
-					"Sancie Raimundez",
-					"Urraque Fernandez",
-					"XIe siècle",
-					"infantat",
-					"infantaticum",
-					"infante Elvire",
-					"infante Sancie",
-					"infante Urraque",
-					"testament"
+					{
+						"tag": "Alphonse VI de Castille et de León"
+					},
+					{
+						"tag": "Elvire Fernandez"
+					},
+					{
+						"tag": "Ferdinand Ier de Castille et de León"
+					},
+					{
+						"tag": "Saint-Isidore de León"
+					},
+					{
+						"tag": "Sancie Raimundez"
+					},
+					{
+						"tag": "Urraque Fernandez"
+					},
+					{
+						"tag": "XIe siècle"
+					},
+					{
+						"tag": "infantat"
+					},
+					{
+						"tag": "infantaticum"
+					},
+					{
+						"tag": "infante Elvire"
+					},
+					{
+						"tag": "infante Sancie"
+					},
+					{
+						"tag": "infante Urraque"
+					},
+					{
+						"tag": "testament"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -324,7 +368,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -345,16 +390,6 @@ var testCases = [
 						"firstName": "Ann",
 						"lastName": "Morning",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Marco",
-						"lastName": "Martiniello",
-						"creatorType": "contributor"
-					},
-					{
-						"firstName": "Patrick",
-						"lastName": "Simon",
-						"creatorType": "contributor"
 					}
 				],
 				"date": "2005/06/01",
@@ -362,28 +397,39 @@ var testCases = [
 				"ISSN": "0765-0752",
 				"abstractNote": "In 1997, the United States’ federal guidelines on racial classification were amended to permit individual respondents to identify themselves as members of more than one race. This measure, taken at the urging of a vocal community of mixed-race individuals and organizations, was seen by many as having important consequences. In this article I examine the predictions about the impact of multiple-race classification, and assess how accurate they have proved to be. I conclude however that neither the hopes nor fears associated with multiracial recognition have been realized. Instead, the most important legacy of the recognition of mixed-race America is likely to be its contribution to the debate about classifying a much larger segment of the population: the Hispanic community.",
 				"issue": "2",
-				"volume": "21",
 				"language": "en",
 				"libraryCatalog": "journals.openedition.org",
 				"pages": "111-134",
 				"publicationTitle": "Revue européenne des migrations internationales",
 				"rights": "© Université de Poitiers",
 				"url": "https://journals.openedition.org/remi/2495",
+				"volume": "21",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"États-Unis",
-					"ethnicisation",
-					"méthodologie",
-					"recensement",
-					"statistiques"
+					{
+						"tag": "ethnicisation"
+					},
+					{
+						"tag": "méthodologie"
+					},
+					{
+						"tag": "recensement"
+					},
+					{
+						"tag": "statistiques"
+					},
+					{
+						"tag": "États-Unis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
