@@ -78,15 +78,6 @@ function getPDFLink(doc, onDone) {
 		return;
 	}
 	
-	// When using partnered institution network access, construct the PDF URL directly
-	var pdfURL = attr(doc, 'link[rel="canonical"]', 'href')
-	if (pdfURL) {
-		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
-		//Zotero.debug("Trying to construct PDF URL using: " + pdfURL);
-		onDone(pdfURL);
-		return;
-	}
-		
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
@@ -115,6 +106,46 @@ function getPDFLink(doc, onDone) {
 			parseIntermediatePDFPage(intermediateURL, onDone);
 			return;
 		}
+	}
+	
+	// Attempting to use json data, which might be available to construct a direct pdf link.
+	// A json data element might be available when using partnered institution network access.
+	// The same pdf url is created that would be available from the embedded pdf object,
+	// however the embedded object code may not always be available for parsing.
+	var jsondata = doc.querySelector('script[type="application/json"]').innerHTML;
+	if (jsondata) {
+		try {
+			jsondata = JSON.parse(jsondata);
+			Zotero.debug("Found json data");
+		}
+		catch {
+			Zotero.debug(e, 2);
+		}
+		var path = jsondata.article.pdfDownload.urlMetadata.path;
+		var pdfExtension = jsondata.article.pdfDownload.urlMetadata.pdfExtension;
+		var pii = jsondata.article.pdfDownload.urlMetadata.pii;
+		var md5 = jsondata.article.pdfDownload.urlMetadata.queryParams.md5;
+		var pid = jsondata.article.pdfDownload.urlMetadata.queryParams.pid;
+		if (path && pdfExtension && pii && md5 && pid){
+			pdfURL = doc.location.protocol + '//' + doc.location.hostname + '/' + path + '/' + pii + pdfExtension + '?md5=' + md5 + '&pid=' + pid + '&isDTMRedir=Y';
+			Zotero.debug("Created pdfURL from json data: " + pdfURL);
+			onDone(pdfURL);
+			return;
+		}
+		else {
+			Zotero.debug("Missing elements in json data required for url creation.");
+		}
+	}
+
+	// The intermediate page provides a download button that uses a canonical link to download the pdf.
+	// In case, the intermediate page fails to load, the pdf can still be downloaded directly without loading
+	// the intermediate page. By creating the same canonical url link format, the pdf can be retrieved directly. 
+	var pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
+	if (pdfURL) {
+		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
+		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
+		onDone(pdfURL);
+		return;
 	}
 	
 	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
