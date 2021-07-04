@@ -93,7 +93,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let risEmbedURL = attr(doc, '.sharingItem.ris', 'href');
 	let accessURL = attr(doc, '#links-box a', 'href');
 	let publishedIn = ZU.trimInternal(text(doc, '.series .internal'));
@@ -122,7 +122,7 @@ function scrape(doc, url) {
 					item.publicationTitle = parts[0];
 					item.volume = (parts[1].match(/\s*([\d/-]+)/) || [])[1];
 					item.issue = (parts[1].match(/,\s*(\d+)\s*,/) || [])[1];
-					item.pages = (parts[1].match(/Seite ([\d\s\-]+)/) || [])[1];
+					item.pages = (parts[1].match(/Seite ([\d\s-]+)/) || [])[1];
 				}
 			}
 			else if (item.itemType == 'bookSection' && !item.bookTitle) {
