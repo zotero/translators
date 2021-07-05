@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 10:34:33"
+	"lastUpdated": "2021-07-02 13:32:15"
 }
 
 /*
@@ -387,7 +387,7 @@ function scrapeBibTeX(doc, url) {
 function addFreeAccessTag(doc, item) {
 	let tagEntry = ZU.xpathText(doc, '//div[@class="doi-access"]');
 	if (tagEntry && tagEntry.match(/Free Access/i)) {
-		item.tags.push('LF:');
+		item.notes.push('LF:');
 	};
 }
 
@@ -556,7 +556,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2009 Curtis J. Bonk. All rights reserved.",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
@@ -598,7 +597,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "1-20",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2009 Tatjana Pavlović, Inmaculada Alvarez, Rosana Blanco-Cano, Anitra Grisales, Alejandra Osorio, and Alejandra Sánchez",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781444304794.ch1",
 				"attachments": [
 					{
@@ -701,7 +699,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -768,7 +765,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -835,7 +831,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"rights": "Copyright © 2012 WILEY-VCH Verlag GmbH & Co. KGaA, Weinheim",
 				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
@@ -958,7 +953,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -1092,7 +1086,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "165-168",
 				"publicationTitle": "Angewandte Chemie International Edition",
-				"rights": "© 2000 WILEY-VCH Verlag GmbH, Weinheim, Fed. Rep. of Germany",
 				"shortTitle": "Phosphane-Free Palladium-Catalyzed Coupling Reactions",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/%28SICI%291521-3773%2820000103%2939%3A1%3C165%3A%3AAID-ANIE165%3E3.0.CO%3B2-B",
 				"volume": "39",
@@ -1150,7 +1143,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "875-885",
 				"publicationTitle": "Journal of Heterocyclic Chemistry",
-				"rights": "Copyright © 1983 Journal of Heterocyclic Chemistry",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/jhet.5570200408",
 				"volume": "20",
 				"attachments": [
@@ -1194,7 +1186,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "25-99",
 				"publicationTitle": "New Directions for Evaluation",
-				"rights": "© Wiley Periodicals, Inc., and the American Evaluation Association",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
 				"attachments": [
@@ -1276,11 +1267,7 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "LF:"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1309,7 +1296,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "194-195",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"shortTitle": "Aruna Gnanadason, With Courage and Compassion",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12591",
 				"volume": "73",
@@ -1353,12 +1339,10 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "LF:"
-					}
+				"tags": [],
+				"notes": [
+					"LF:"
 				],
-				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -1380,7 +1364,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "182-190",
 				"publicationTitle": "The Ecumenical Review",
-				"rights": "© 2021 World Council of Churches",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/erev.12592",
 				"volume": "73",
 				"attachments": [
@@ -1476,7 +1459,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "291-308",
 				"publicationTitle": "Journal for the Scientific Study of Religion",
-				"rights": "© 2020 The Society for the Scientific Study of Religion",
 				"shortTitle": "Religion and Refugee Well-Being",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/jssr.12702",
 				"volume": "60",
@@ -1487,9 +1469,6 @@ var testCases = [
 					}
 				],
 				"tags": [
-					{
-						"tag": "LF:"
-					},
 					{
 						"tag": "Utica"
 					},
@@ -1509,7 +1488,9 @@ var testCases = [
 						"tag": "well-being"
 					}
 				],
-				"notes": [],
+				"notes": [
+					"LF:"
+				],
 				"seeAlso": []
 			}
 		]
