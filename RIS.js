@@ -1395,9 +1395,16 @@ function processTag(item, tagValue, risEntry, allowDeprecated) {
 					
 					//get title from file name
 					title = url.match(/([^\/\\]+)(?:\.\w{1,8})$/);
-					if (title) title = decodeURIComponent(title[1]);
-					else title = "Attachment";
-					
+					if (title) {
+						try {
+							title = decodeURIComponent(title[1]);
+						}
+						catch (e) {}
+					}
+					else {
+						title = "Attachment";
+					}
+
 					if (zField[1] == 'HTML') {
 						title = "Full Text (HTML)";
 						mimeType = "text/html";
