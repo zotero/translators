@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-21 17:09:36"
+	"lastUpdated": "2021-07-05 00:12:30"
 }
 
 /*
@@ -932,18 +932,23 @@ function relativeToAbsolute(doc, url) {
 	}
 
 	if (url[0] == '/') {
-		// relative to root
-		return doc.location.protocol + '//' + doc.location.host
-			+ url;
-	}
-	else {
-		// relative to current directory
-		let location = doc.location.href;
-		if (location.includes('?')) {
-			location = location.slice(0, location.indexOf('?'));
+		if (url[1] == '/') {
+			// protocol-relative
+			return doc.location.protocol + url;
 		}
-		return location.replace(/([^/]\/)[^/]+$/, '$1') + url;
+		else {
+			// relative to root
+			return doc.location.protocol + '//' + doc.location.host
+				+ url;
+		}
 	}
+	
+	// relative to current directory
+	let location = doc.location.href;
+	if (location.includes('?')) {
+		location = location.slice(0, location.indexOf('?'));
+	}
+	return location.replace(/([^/]\/)[^/]+$/, '$1') + url;
 }
 
 var exports = {
