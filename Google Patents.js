@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-05 17:08:40"
+	"lastUpdated": "2021-07-05 17:15:19"
 }
 
 /*
@@ -36,17 +36,7 @@
 */
 
 
-/* 
-   Test cases for new interface does not work within Scaffold
-   Thus, one has to test them outside.
-   
-   Another test case:
-   https://patents.google.com/patent/US20090197681A1/en?q=networks&q=G06Q30%2f02
- 
-*/
-
-
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	// The subtree changes from multiple search results to a single result
 	// when clicking on one entry or back to the search results, and thus
 	// we have to monitor this.
@@ -60,6 +50,7 @@ function detectWeb(doc, url) {
 		|| doc.querySelector('meta[name^="citation_patent_"]')) {
 		return "patent";
 	}
+	return false;
 }
 
 
@@ -67,32 +58,33 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var urlParts = url.split('/?');
 		var jsonUrl = urlParts[0] + '/xhr/query?url=' + encodeURIComponent(urlParts[1]);
-		//Z.debug(jsonUrl);
-		ZU.doGet(jsonUrl, function(text) {
+		// Z.debug(jsonUrl);
+		ZU.doGet(jsonUrl, function (text) {
 			var json = JSON.parse(text);
 			var results = json.results.cluster[0].result;
 			var selectResults = {};
-			for (let i=0; i<results.length; i++) {
+			for (let i = 0; i < results.length; i++) {
 				selectResults[i] = ZU.cleanTags(results[i].patent.title);
 			}
-			Zotero.selectItems(selectResults, function(items) {
-				if (!items) return true;
+			Zotero.selectItems(selectResults, function (items) {
+				if (!items) return;
 				for (var i in items) {
 					let resultUrl = urlParts[0] + '/patent/' + results[i].patent.publication_number;
 					scrapeJson(results[i].patent, resultUrl);
 				}
 			});
 		});
-	} else {
+	}
+	else {
 		// Some old urls miss the language part, which we have to add before
 		// calling other urls.
-		var includeLanguageCode = url.match(/\/patent\/[^\/\?#]+\/[a-z][a-z]\b/);
+		var includeLanguageCode = url.match(/\/patent\/[^/?#]+\/[a-z][a-z]\b/);
 		if (!includeLanguageCode) {
-			url = url.replace(/(\/patent\/[^\/\?#]+)\b/, "$1/en");
+			url = url.replace(/(\/patent\/[^/?#]+)\b/, "$1/en");
 		}
 		var xhrUrl = url.replace('/patent/', '/xhr/result?id=patent/');
-		ZU.doGet(xhrUrl, function(text) {
-			//Z.debug(text);
+		ZU.doGet(xhrUrl, function (text) {
+			// Z.debug(text);
 			var parser = new DOMParser();
 			var doc = parser.parseFromString(text, "text/html");
 			scrape(doc, url);
@@ -103,19 +95,20 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var metadata = doc.querySelectorAll('*[itemprop]');
 	var json = {};
-	for (let i=0; i<metadata.length; i++) {
+	for (let i = 0; i < metadata.length; i++) {
 		let label = metadata[i].getAttribute('itemprop');
 		// We stop before going into the publications, related entries etc.
-		if (label=='description' || label=='pubs') break;
+		if (label == 'description' || label == 'pubs') break;
 		let value = microdataValue(metadata[i], true);
 		if (label && value) {
-			if (metadata[i].getAttribute('repeat')==='') {
+			if (metadata[i].getAttribute('repeat') === '') {
 				if (!json[label]) json[label] = [];
 				json[label].push(value);
-			} else {
+			}
+			else if (!json[label]) {
 				// don't overwrite values
-				if (!json[label]) json[label] = value;
-				//else Z.debug(label)
+				json[label] = value;
+				// else Z.debug(label)
 			}
 		}
 	}
@@ -127,7 +120,7 @@ function microdataValue(propertyNode, firstCall) {
 	if (propertyNode.hasAttribute("itemscope") && firstCall) {
 		var metadata = propertyNode.querySelectorAll('*[itemprop]');
 		var innerJson = {};
-		for (let i=0; i<metadata.length; i++) {
+		for (let i = 0; i < metadata.length; i++) {
 			let label = metadata[i].getAttribute('itemprop');
 			let value = microdataValue(metadata[i], false);
 			innerJson[label] = value;
@@ -137,7 +130,6 @@ function microdataValue(propertyNode, firstCall) {
 	switch (propertyNode.tagName.toLowerCase()) {
 		case "meta":
 			return propertyNode.getAttribute("content");
-			break;
 		case "audio":
 		case "embed":
 		case "iframe":
@@ -146,27 +138,22 @@ function microdataValue(propertyNode, firstCall) {
 		case "track":
 		case "video":
 			return propertyNode.getAttribute("src");
-			break;
 		case "a":
 		case "area":
 		case "link":
 			return propertyNode.getAttribute("href");
-			break;
 		case "object":
 			return propertyNode.getAttribute("data");
-			break;
 		case "data":
 		case "meter":
 			return propertyNode.getAttribute("value");
-			break;
 		case "time":
 			return propertyNode.getAttribute("datetime");
-			break;
-		case "span"://non-standard, but can occur
+		case "span":// non-standard, but can occur
 			if (propertyNode.childNodes.length > 1 && propertyNode.getAttribute("content")) {
 				return propertyNode.getAttribute("content");
-				break;
 			}
+			return propertyNode.textContent;
 		default:
 			return propertyNode.textContent;
 	}
@@ -174,12 +161,12 @@ function microdataValue(propertyNode, firstCall) {
 
 
 function scrapeJson(json, url, doc) {
-	//Z.debug(json);
+	// Z.debug(json);
 	var item = new Zotero.Item('patent');
 	item.title = ZU.cleanTags(json.title).replace(/\.\s*$/, '');
 	if (json.inventor) {
 		if (typeof json.inventor === 'string') json.inventor = [json.inventor];
-		for (let i=0; i<json.inventor.length; i++) {
+		for (let i = 0; i < json.inventor.length; i++) {
 			item.creators.push(ZU.cleanAuthor(json.inventor[i], 'inventor'));
 		}
 	}
@@ -188,19 +175,20 @@ function scrapeJson(json, url, doc) {
 	item.patentNumber = json.publicationNumber || json.publication_number;
 	if (json.assigneeOriginal && !(typeof json.assigneeOriginal === 'string')) {
 		item.assignee = json.assigneeOriginal.join(', '); // or assigneeCurrent
-	} else {
+	}
+	else {
 		item.assignee = json.assigneeOriginal || json.assignee;
 	}
 	item.applicationNumber = (json.applicationNumber || '').replace(/[/,]/g, '');
 	// This status is sometimes not what would be expected
-	//if (json.legalStatusIfi) item.legalStatus = json.legalStatusIfi.status;
+	// if (json.legalStatusIfi) item.legalStatus = json.legalStatusIfi.status;
 	item.country = json.countryCode;
 	if (item.country) item.issuingAuthority = getPatentOffice(item.country);
 	item.language = json.primaryLanguage;
 	
 	// Keywords
 	if (json.priorArtKeywords) {
-		for (let i=0; i<json.priorArtKeywords.length; i++) {
+		for (let i = 0; i < json.priorArtKeywords.length; i++) {
 			item.tags.push(json.priorArtKeywords[i]);
 		}
 	}
@@ -208,32 +196,33 @@ function scrapeJson(json, url, doc) {
 	// Abstract
 	if (json.abstract) {
 		item.abstractNote = json.abstract.content;
-	} else if (doc) {
+	}
+	else if (doc) {
 		item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
 	}
 	
 	// Classifications
 	if (json.cpcs) {
 		var classifications = [];
-		for (let i=0; i<json.cpcs.length; i++) {
+		for (let i = 0; i < json.cpcs.length; i++) {
 			if (json.cpcs[i].Leaf && !json.cpcs[i].cpcs) {
 				classifications.push(json.cpcs[i].Code + ': ' + json.cpcs[i].Description);
 			}
 		}
-		if (classifications.length>0) {
-			item.notes.push({note: "<h2>Classifications</h2>\n" + classifications.join("<br/>\n")});
+		if (classifications.length > 0) {
+			item.notes.push({ note: "<h2>Classifications</h2>\n" + classifications.join("<br/>\n") });
 		}
 	}
 	
 	item.url = url;
 	let pdfurl = json.pdfLink || json.pdf;
 	if (pdfurl) {
-		//Relative links don't resolve correctly in all cases. Let's make sure we're getting this all from 
-		//the right place on the google API
+		// Relative links don't resolve correctly in all cases. Let's make sure we're getting this all from
+		// the right place on the google API
 		if (!pdfurl.includes("https://")) {
 			pdfurl = "https://patentimages.storage.googleapis.com/" + pdfurl;
 		}
-		//Z.debug(pdfurl);
+		// Z.debug(pdfurl);
 		item.attachments.push({
 			url: pdfurl,
 			title: "Full Text PDF",
@@ -246,19 +235,24 @@ function scrapeJson(json, url, doc) {
 
 
 function getPatentOffice(number) {
-	//get the PatentOffice from the first two letters of the patentNumber
+	// get the PatentOffice from the first two letters of the patentNumber
 	var country;
 	if (number.indexOf('EP') === 0) {
 		country = 'European Union';
-	} else if (number.indexOf('US') === 0) {
+	}
+	else if (number.indexOf('US') === 0) {
 		country = 'United States';
-	} else if (number.indexOf('WO') === 0) {
+	}
+	else if (number.indexOf('WO') === 0) {
 		country = 'World Intellectual Property Organization';
-	} else if (number.indexOf('CN') === 0) {
+	}
+	else if (number.indexOf('CN') === 0) {
 		country = 'China';
-	} else if (number.indexOf('CA') === 0) {
+	}
+	else if (number.indexOf('CA') === 0) {
 		country = 'Canada';
-	} else if (number.indexOf('DE') === 0) {
+	}
+	else if (number.indexOf('DE') === 0) {
 		country = 'Germany';
 	}
 	return country;
