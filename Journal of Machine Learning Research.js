@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-06 20:37:20"
+	"lastUpdated": "2021-07-06 20:46:27"
 }
 
 /*
@@ -36,14 +36,21 @@
 */
 
 
-function detectWeb(doc, _url) {
+function detectWeb(doc, url) {
 	if (doc.querySelector('meta[name="citation_title"]')) {
 		if (doc.querySelector('meta[name="citation_conference_title"]')) {
-			return 'conferencePaper';
+			return "conferencePaper";
 		}
 		else {
 			return "journalArticle";
 		}
+	}
+	else if (url.endsWith('.pdf')) {
+		// not as good of a heuristic as when we can look at the <meta> tags,
+		// but it'll do
+		return url.includes('//proceedings.mlr.press')
+			? "conferencePaper"
+			: "journalArticle";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -74,7 +81,12 @@ function doWeb(doc, url) {
 		});
 	}
 	else {
-		scrape(doc, url);
+		if (url.endsWith('.pdf')) {
+			ZU.processDocuments(url.replace(/volume([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
+		}
+		else {
+			scrape(doc, url);
+		}
 	}
 }
 
