@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-22 20:02:45"
+	"lastUpdated": "2021-07-06 13:11:55"
 }
 
 /*
@@ -35,22 +35,12 @@
 	***** END LICENSE BLOCK *****
 */
 
-function getDateFromUrl(url) {
-	var parsedDate = url.match(/(\d{4})\/(\d{2})\/(\d{2})/);
-	if (parsedDate) {
-		return parsedDate[1] + "-" + parsedDate[2] + "-" + parsedDate[3];
-	}
-	return null;
-}
-
-function detectWeb(doc, url) {
-	var publicationDate = getDateFromUrl(url);
-	
-	if (publicationDate) {
+function detectWeb(doc, _url) {
+	if (ZU.xpathText(doc, '//meta[@property="og:type"]/@content') == "article") {
 		return 'newspaperArticle';
 	}
 	
-	if (ZU.xpath(doc, "//div[@class='articles-list']")) {
+	if (getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	
@@ -62,7 +52,6 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('article.article .article-wrapper');
 	for (var i = 0; i < rows.length; i++) {
-		// Adjust if required, use Zotero.debug(rows) to check
 		var row = rows[i];
 		var a = row.querySelector('a');
 		
@@ -90,23 +79,30 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
+	item.language = "fr-FR";
 	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
 	item.publication = "Sud Ouest";
 	item.ISSN = "1760-6454";
 	item.url = url;
 	item.abstract = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
+	
+	var publicationDate = ZU.xpathText(doc, "(//div[@class='publishing']/time)[1]");
+	if (publicationDate) {
+		item.date = ZU.strToISO(publicationDate);
+	}
 
-	// There might be a better option to isolate the author but this one works
-	var publishing = ZU.xpath(doc, "//div[@class='publishing']");
-	var author = Array.prototype.filter.call(publishing[0].childNodes, function (element) {
-		return element.nodeType === 3; /* Node.TEXT_NODE */
-	}).map(function (element) {
-		return element.textContent;
-	}).join("");
-	
+	var author = ZU.xpathText(doc, "//div[@class='publishing']/text()");
 	author = author.replace("Par ", "");
-	item.creators.push({ lastName: author, fieldMode: 1, creatorType: "author" });
 	
+	if (author != "SudOuest.fr avec AFP") {
+		item.creators.push(ZU.cleanAuthor(author, "author", false));
+	}
+
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
+  
 	item.complete();
 }
 
@@ -114,22 +110,24 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.sudouest.fr/2020/11/03/agglomeration-rochefort-ocean-les-prets-de-livres-reprennent-8037128-1504.php",
+		"url": "https://www.sudouest.fr/charente-maritime/echillais/agglomeration-rochefort-ocean-les-prets-de-livres-reprennent-1678268.php",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Agglomération Rochefort Océan : les prêts de livres reprennent",
+				"title": "Agglomération Rochefort Océan : les prêts de livres reprennent",
 				"creators": [
 					{
-						"lastName": "Jennyfer Delrieux",
-						"fieldMode": 1,
+						"firstName": "Jennyfer",
+						"lastName": "Delrieux",
 						"creatorType": "author"
 					}
 				],
+				"date": "2020-11-03",
 				"ISSN": "1760-6454",
+				"language": "fr-FR",
 				"libraryCatalog": "Sud Ouest",
 				"shortTitle": "Agglomération Rochefort Océan",
-				"url": "https://www.sudouest.fr/2020/11/03/agglomeration-rochefort-ocean-les-prets-de-livres-reprennent-8037128-1504.php",
+				"url": "https://www.sudouest.fr/charente-maritime/echillais/agglomeration-rochefort-ocean-les-prets-de-livres-reprennent-1678268.php",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -139,22 +137,24 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.sudouest.fr/2020/10/14/le-label-grand-site-devient-officielobtenir-le-label-ca-veut-dire-quoi-exactement-7960790-10413.php",
+		"url": "https://www.sudouest.fr/charente-maritime/breuil-magne/estuaire-de-la-charente-et-arsenal-de-rochefort-le-label-grand-site-devient-officiel-1707458.php",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Estuaire de la Charente et Arsenal de Rochefort : le label Grand Site devient officiel",
+				"title": "Estuaire de la Charente et Arsenal de Rochefort : le label Grand Site devient officiel",
 				"creators": [
 					{
-						"lastName": "Nathalie Daury-Pain",
-						"fieldMode": 1,
+						"firstName": "Nathalie",
+						"lastName": "Daury-Pain",
 						"creatorType": "author"
 					}
 				],
+				"date": "2020-10-14",
 				"ISSN": "1760-6454",
+				"language": "fr-FR",
 				"libraryCatalog": "Sud Ouest",
 				"shortTitle": "Estuaire de la Charente et Arsenal de Rochefort",
-				"url": "https://www.sudouest.fr/2020/10/14/le-label-grand-site-devient-officielobtenir-le-label-ca-veut-dire-quoi-exactement-7960790-10413.php",
+				"url": "https://www.sudouest.fr/charente-maritime/breuil-magne/estuaire-de-la-charente-et-arsenal-de-rochefort-le-label-grand-site-devient-officiel-1707458.php",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
