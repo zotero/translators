@@ -203,7 +203,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "November 2011",
+				"date": "2011-11",
 				"abstractNote": "We study the determinants of the dynamics of firm lobbying behavior using a panel data set covering 1998-2006. Our data exhibit three striking facts: (i) few firms lobby, (ii) lobbying status is strongly associated with firm size, and (iii) lobbying status is highly persistent over time. Estimating a model of a firm's decision to engage in lobbying, we find significant evidence that up-front costs associated with entering the political process help explain all three facts. We then exploit a natural experiment in the expiration in legislation surrounding the H-1B visa cap for high-skilled immigrant workers to study how these costs affect firms' responses to policy changes. We find that companies primarily adjusted on the intensive margin: the firms that began to lobby for immigration were those who were sensitive to H-1B policy changes and who were already advocating for other issues, rather than firms that became involved in lobbying anew. For a firm already lobbying, the response is determined by the importance of the issue to the firm's business rather than the scale of the firm's prior lobbying efforts. These results support the existence of significant barriers to entry in the lobbying process.",
 				"extra": "DOI: 10.3386/w17577",
 				"institution": "National Bureau of Economic Research",
@@ -231,7 +231,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://papers.nber.org/new.html",
+		"url": "https://www.nber.org/papers?page=1&perPage=50&sortBy=public_date",
 		"items": "multiple"
 	},
 	{
@@ -248,7 +248,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "September 2020",
+				"date": "2020-09",
 				"bookTitle": "Economics of Research and Innovation in Agriculture",
 				"itemID": "NBERc14291",
 				"libraryCatalog": "National Bureau of Economic Research",
@@ -256,7 +256,6 @@ var testCases = [
 				"url": "https://www.nber.org/books-and-chapters/economics-research-and-innovation-agriculture/introduction-economics-research-and-innovation-agriculture",
 				"attachments": [
 					{
-						"url": "",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
