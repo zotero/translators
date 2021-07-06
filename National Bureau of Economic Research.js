@@ -41,7 +41,6 @@ const pdfSlugRe = /\/files(\/[^/]+\/[^/]+)/;
 function detectWeb(doc, url) {
 	if (doc.querySelector('meta[name="citation_title"]')
 		|| (pdfSlugRe.test(url) && url.endsWith('.pdf'))) {
-		
 		if (url.includes('/papers/')) {
 			return "report";
 		}
@@ -57,7 +56,6 @@ function detectWeb(doc, url) {
 		else if (url.includes('/chapters/')) {
 			return "bookSection";
 		}
-		
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -106,7 +104,7 @@ function scrape(doc, url) {
 		let catalogSlug = url.match(pdfSlugRe);
 		if (catalogSlug && catalogSlug != url) {
 			catalogSlug = catalogSlug[1];
-			ZU.processDocuments(catalogSlug, (doc) => scrape(doc, catalogSlug));
+			ZU.processDocuments(catalogSlug, doc => scrape(doc, catalogSlug));
 		}
 	}
 	else if (doc.querySelector('.table-of-contents__title a')) {
