@@ -1,4 +1,4 @@
-59  # Increment number when modifying file
+65  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -105,3 +105,9 @@ fef07360-ee97-4f67-b022-6f64d5ec0c25 # KOBV; included in new portal and shutdown
 9f1fb86b-92c8-4db7-b8ee-0b481d456428 # Remove Datacite search translator; now handled by DOI content negotiation with Datacite JSON import translator
 11645bd1-0420-45c1-badb-53fb41eeb753 # Remove Crossref search translator; now handled by DOI content negotiation with Crossref Unixref import translator
 9b2f2d29-02e3-4693-b728-4cd435650669 # ACLAnthology was only for the transitional home of the anthology; now handled again by ACLWeb translator
+f520b141-9ce8-42f4-93ec-a39e375a9516 # PubGet doesn't exist anymore
+8917b41c-8527-4ee7-b2dd-bcbc3fa5eabd # CiteULike was shut down on March 30, 2019
+2e43f4a9-d2e2-4112-a6ef-b3528b39b4d2 # MIT Press Journals became MIT Press Direct, covered by Silverchair
+d9a16cf3-8b86-4cab-8610-dbd913ad1a44 # Archives Canada-France is defunct
+e13b0f9d-44ba-4ece-aa22-77993bb26ef2 # Chadwyck Literature Online merged with ProQuest in 2018
+edfa5803-e331-47db-84d1-db3cf8d6f460 # Replaced by US National Archives Research Catalog; this translator covered only a long-defunct subdomain
