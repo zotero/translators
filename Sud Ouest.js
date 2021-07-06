@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-06 13:16:21"
+	"lastUpdated": "2021-07-06 17:27:22"
 }
 
 /*
@@ -128,7 +128,12 @@ var testCases = [
 				"libraryCatalog": "Sud Ouest",
 				"shortTitle": "Agglomération Rochefort Océan",
 				"url": "https://www.sudouest.fr/charente-maritime/echillais/agglomeration-rochefort-ocean-les-prets-de-livres-reprennent-1678268.php",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -155,7 +160,12 @@ var testCases = [
 				"libraryCatalog": "Sud Ouest",
 				"shortTitle": "Estuaire de la Charente et Arsenal de Rochefort",
 				"url": "https://www.sudouest.fr/charente-maritime/breuil-magne/estuaire-de-la-charente-et-arsenal-de-rochefort-le-label-grand-site-devient-officiel-1707458.php",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
