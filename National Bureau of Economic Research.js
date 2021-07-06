@@ -2,14 +2,14 @@
 	"translatorID": "99f958ab-0732-483d-833f-6bd8e42f6277",
 	"label": "National Bureau of Economic Research",
 	"creator": "Michael Berkowitz, Philipp Zumstein, Abe Jellinek",
-	"target": "^https?://(papers\\.|www\\.)?nber\\.org/(papers|s|new|custom|books-and-chapters)",
+	"target": "^https?://(papers\\.|www2?\\.)?nber\\.org/(system/files/)?(papers|s|new|custom|books-and-chapters|chapters)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 14:41:25"
+	"lastUpdated": "2021-07-06 17:08:46"
 }
 
 /*
@@ -36,9 +36,13 @@
 */
 
 
+const pdfSlugRe = /\/files(\/[^/]+\/[^/]+)/;
+
 function detectWeb(doc, url) {
-	if (doc.querySelector('meta[name="citation_title"]')) {
-		if (url.includes('nber.org/papers/')) {
+	if (doc.querySelector('meta[name="citation_title"]')
+		|| (pdfSlugRe.test(url) && url.endsWith('.pdf'))) {
+		
+		if (url.includes('/papers/')) {
 			return "report";
 		}
 		else if (url.includes('/books-and-chapters/')) {
@@ -50,6 +54,10 @@ function detectWeb(doc, url) {
 				return "book";
 			}
 		}
+		else if (url.includes('/chapters/')) {
+			return "bookSection";
+		}
+		
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -91,12 +99,25 @@ function scrape(doc, url) {
 	if (doc.querySelector('form.download-citation')) {
 		scrapeWithBib(doc, url, getBibURL(doc));
 	}
-	else {
+	else if (doc.querySelector('a[href$=".bib"]')) {
+		scrapeWithBib(doc, url, attr(doc, 'a[href$=".bib"]', 'href'));
+	}
+	else if (url.endsWith('.pdf')) {
+		let catalogSlug = url.match(pdfSlugRe);
+		if (catalogSlug && catalogSlug != url) {
+			catalogSlug = catalogSlug[1];
+			ZU.processDocuments(catalogSlug, (doc) => scrape(doc, catalogSlug));
+		}
+	}
+	else if (doc.querySelector('.table-of-contents__title a')) {
 		// if we're on a book page without a citation form, we'll navigate to
 		// the first chapter and grab the BibTeX from there. it'll contain a
 		// citation for the book.
 		ZU.processDocuments(attr(doc, '.table-of-contents__title a', 'href'),
 			chapterDoc => scrapeWithBib(doc, url, getBibURL(chapterDoc)));
+	}
+	else {
+		throw new Error('No BibTeX source found');
 	}
 }
 
@@ -125,9 +146,12 @@ function scrapeWithBib(doc, url, bibURL) {
 				return;
 			}
 			
-			var pdfurl = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
+			var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
+			if (!pdfURL) {
+				pdfURL = attr(doc, '.page-header__intro-links a[href$=".pdf"]', 'href');
+			}
 			item.attachments.push({
-				url: pdfurl,
+				url: pdfURL,
 				title: "Full Text PDF",
 				mimeType: "application/pdf"
 			});
@@ -271,6 +295,38 @@ var testCases = [
 				"attachments": [
 					{
 						"url": "",
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www2.nber.org/chapters/c14291",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Introduction to “Economics of Research and Innovation in Agriculture”",
+				"creators": [
+					{
+						"firstName": "Petra",
+						"lastName": "Moser",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-09",
+				"bookTitle": "Economics of Research and Innovation in Agriculture",
+				"itemID": "NBERc14291",
+				"libraryCatalog": "National Bureau of Economic Research",
+				"publisher": "University of Chicago Press",
+				"url": "http://www.nber.org/chapters/c14291",
+				"attachments": [
+					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
