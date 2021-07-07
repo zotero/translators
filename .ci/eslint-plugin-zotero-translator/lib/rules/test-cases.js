@@ -19,11 +19,14 @@ module.exports = {
 				const translator = translators.get(context.getFilename());
 
 				const declaration = node.body.find(node => node.type === 'VariableDeclaration' && node.declarations.length === 1 && node.declarations[0].id.name === 'testCases');
+
+				/* eslint-disable indent */
 				const testCases = declaration
 					&& declaration.declarations[0].init
 					&& declaration.declarations[0].init.type === 'ArrayExpression'
 						? declaration.declarations[0].init.elements
 						: [];
+				/* eslint-enable indent */
 
 				if (declaration) {
 					const sourceCode = context.getSourceCode();

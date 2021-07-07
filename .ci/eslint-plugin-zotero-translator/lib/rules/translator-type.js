@@ -43,13 +43,13 @@ module.exports = {
 				let browserSupportNode = null;
 				for (const [p, v] of Object.entries(header.properties)) {
 					switch (p) {
-					case 'translatorType':
-						translatorTypeNode = v;
-						translatorType = v.value;
-						break;
-					case 'browserSupport':
-						browserSupportNode = v;
-						break;
+						case 'translatorType':
+							translatorTypeNode = v;
+							translatorType = v.value;
+							break;
+						case 'browserSupport':
+							browserSupportNode = v;
+							break;
 					}
 				}
 
