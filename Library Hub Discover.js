@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-16 17:25:26"
+	"lastUpdated": "2021-07-07 18:57:47"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Vincent Carret
+	Copyright © 2019-2021 Vincent Carret
 	
 	This file is part of Zotero.
 
@@ -35,9 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 var typeMapping = {
 	book: "book",
@@ -94,8 +91,32 @@ function doWeb(doc, url) {
 function scrape(url) {
 	ZU.doGet(url, function (text) {
 		var translator = Zotero.loadTranslator('import');
+		// MODS
 		translator.setTranslator('0e2235e7-babf-413c-9acf-f27cce5f059c');
 		translator.setString(text);
+		
+		translator.setHandler('itemDone', function (_, item) {
+			if (item.itemType == 'document' && (item.ISBN || item.edition)) {
+				item.itemType = 'book';
+			}
+			
+			delete item.archiveLocation; // list of libraries it's available in
+			
+			if (item.title) {
+				item.title = item.title.replace(/\.$/, '');
+			}
+			
+			if (item.edition) {
+				item.edition = item.edition.replace(/\.$/, '');
+			}
+			
+			if (item.publisher) {
+				item.publisher = item.publisher.replace(/\.$/, '');
+			}
+			
+			item.complete();
+		});
+		
 		translator.translate();
 	});
 }
@@ -112,20 +133,45 @@ var testCases = [
 		"url": "https://discover.libraryhub.jisc.ac.uk/search?q=test%20sound&rn=1",
 		"items": [
 			{
-				"itemType": "audioRecording",
-				"title": "Second sound test.",
-				"creators": [],
-				"date": "2016",
-				"abstractNote": "A sound test record.",
-				"archiveLocation": "Wellcome Library; wel",
-				"label": "Wellcome test records",
-				"language": "English",
+				"itemType": "document",
+				"title": "Application study of ultrasonic nondestructive inspection for tire compliance testing. Final report",
+				"creators": [
+					{
+						"firstName": "Richard N.",
+						"lastName": "Pierce",
+						"creatorType": "author"
+					}
+				],
+				"date": "1971",
 				"libraryCatalog": "Library Hub Discover",
-				"numberOfVolumes": "1",
-				"place": "London",
-				"runningTime": "00:00",
+				"url": "http://hdl.handle.net/2027/mdp.39015071778685",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Compliance."
+					},
+					{
+						"tag": "Defect/ Defective."
+					},
+					{
+						"tag": "Defects."
+					},
+					{
+						"tag": "Testing equipment."
+					},
+					{
+						"tag": "Tire Test Equipment."
+					},
+					{
+						"tag": "Tires."
+					},
+					{
+						"tag": "Ultrasonic Sound/ Supersonic Sound."
+					},
+					{
+						"tag": "Ultrasonic waves."
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -137,7 +183,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "map",
-				"title": "The Americas [and] Bird migration in the Americas: produced by the Cartographic Division, National Geographic Society.",
+				"title": "The Americas [and] Bird migration in the Americas: produced by the Cartographic Division, National Geographic Society",
 				"creators": [
 					{
 						"lastName": "National Geographic Society (U.S.)",
@@ -146,7 +192,6 @@ var testCases = [
 					}
 				],
 				"date": "1979",
-				"archiveLocation": "British Library; bli",
 				"callNumber": "912.7, 912.8",
 				"language": "English",
 				"libraryCatalog": "Library Hub Discover",
@@ -190,14 +235,13 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "document",
-				"title": "Which hi-fi.",
+				"title": "Which hi-fi",
 				"creators": [],
 				"date": "1983",
-				"archiveLocation": "British Library; bli",
 				"callNumber": "TK7881.7, 621.389/3, 621.389/3, RW 51",
 				"language": "English",
 				"libraryCatalog": "Library Hub Discover",
-				"publisher": "Haymarket Pub.",
+				"publisher": "Haymarket Pub",
 				"attachments": [],
 				"tags": [
 					{
@@ -222,6 +266,89 @@ var testCases = [
 					},
 					{
 						"note": "linking entry complexity: Continues: Hi-fi annual and test."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://discover.libraryhub.jisc.ac.uk/id/9603828",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A clockwork orange",
+				"creators": [
+					{
+						"firstName": "Anthony",
+						"lastName": "Burgess",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew",
+						"lastName": "Biswell",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2013",
+				"ISBN": "9789780141196 9780141970684 9780141197531",
+				"abstractNote": "In this nightmare vision of youth in revolt, 15 year-old Alex and his friends set out on a diabolical orgy of robbery, rape, torture and murder. Alex is jailed for his teenage delinquency and the State tries to reform him - but at what cost? ; Fully restored edition of Anthony Burgess' original text of A Clockwork Orange, with a glossary of the teen slang 'Nadsat', explanatory notes, pages from the original typescript, interviews, articles and reviews Edited by Andrew Biswell With a Foreword by Martin Amis 'It is a horrorshow story ...' Fifteen-year-old Alex likes lashings of ultraviolence. He and his gang of friends rob, kill and rape their way through a nightmarish future, until the State puts a stop to his riotous excesses. But what will his re-education mean? A dystopian horror, a black comedy, an exploration of choice, A Clockwork Orange is also a work of exuberant invention which created a new language for its characters. This critical edition restores the text of the novel as Anthony Burgess originally wrote it, and includes a glossary of the teen slang 'Nadsat', explanatory notes, pages from the original typescript, interviews, articles and reviews, shedding light on the enduring fascination of the novel's 'sweet and juicy criminality'. Anthony Burgess was born in Manchester in 1917 and educated at Xaverian College and Manchester University. He spent six years in the British Army before becoming a schoolmaster and colonial education officer in Malaya and Brunei. After the success of his Malayan Trilogy, he became a full-time writer in 1959. His books have been published all over the world, and they include The Complete Enderby, Nothing Like the Sun, Napoleon Symphony, Tremor of Intent, Earthly Powers and A Dead Man in Deptford. Anthony Burgess died in London in 1993. Andrew Biswell is the Professor of Modern Literature at Manchester Metropolitan University and the Director of the International Anthony Burgess Foundation. His publications include a biography, The Real Life of Anthony Burgess, which won the Portico Prize in 2006. He is currently editing the letters and short stories of Anthony Burgess.",
+				"callNumber": "PR6052.U638, 823.914, YK4",
+				"edition": "Restored edition",
+				"language": "English",
+				"libraryCatalog": "Library Hub Discover",
+				"place": "London",
+				"publisher": "Penguin Books",
+				"url": "http://whel-primo.hosted.exlibrisgroup.com/openurl/44WHELF_NLW/44WHELF_NLW_services_page?u.ignore_date_coverage=true&rft.mms_id=99929011902419",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "1900-1999"
+					},
+					{
+						"tag": "Criminals"
+					},
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "Juvenile delinquency"
+					},
+					{
+						"tag": "Juvenile delinquency"
+					},
+					{
+						"tag": "Juvenile delinquency."
+					},
+					{
+						"tag": "Literature, Experimental"
+					},
+					{
+						"tag": "Satire, English"
+					},
+					{
+						"tag": "Satire, English."
+					},
+					{
+						"tag": "Teenage boys"
+					}
+				],
+				"notes": [
+					{
+						"note": "statement of responsibility: Anthony Burgess."
+					},
+					{
+						"note": "bibliography: Includes bibliographical references."
+					},
+					{
+						"note": "additional physical form: Also available in printed form ISBN 9780141197531"
+					},
+					{
+						"note": "reproduction: Electronic reproduction. Askews and Holts. Mode of access: World Wide Web."
+					},
+					{
+						"note": "Table of Contents: About the author -- Foreword by Martin Amis -- Introduction by Andrew Biswell -- A clockwork orange -- Notes -- Nadsat glossary -- Prologue to A clockwork orange: a play with music Anthony Burgess, 1986 -- Epilogue: 'a malenky govoreet about the molodoy' Anthony Burgess, 1987 -- Essays, articles and reviews -- Annotated pages from Anthony Burgess's 1961 typescript of A clockwork orange."
 					}
 				],
 				"seeAlso": []
