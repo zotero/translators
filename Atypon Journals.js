@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-14 19:10:57"
+	"lastUpdated": "2021-07-07 17:32:12"
 }
 
 /*
@@ -42,13 +42,16 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"]');
+	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"], .actions-block-container__export-citation');
 	if (citLink) {
 		if (url.includes('/doi/book/')) {
 			return 'book';
 		}
 		else if (url.search(/\.ch\d+$/) != -1) {
 			return 'bookSection';
+		}
+		else if (isConference(doc)) {
+			return 'conferencePaper';
 		}
 		return "journalArticle";
 	}
@@ -203,6 +206,15 @@ function fixCase(str, titleCase) {
 	return str.charAt(0) + str.substr(1).toLowerCase();
 }
 
+function isConference(doc) {
+	for (let label of doc.querySelectorAll('.publication-details__list .label')) {
+		if (label.innerText.trim() == 'Conference:') {
+			return true;
+		}
+	}
+	return false;
+}
+
 function fetchArticles(articles) {
 	if (!articles.length) return;
 	
@@ -220,7 +232,7 @@ function scrape(doc, url, extras) {
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
 	var abstract = doc.getElementsByClassName('abstractSection')[0];
-	var tags = ZU.xpath(doc, '//p[@class="fulltext"]//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
+	var tags = ZU.xpath(doc, '//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	
 	function finalize(filename) {
@@ -241,10 +253,12 @@ function scrape(doc, url, extras) {
 					delete item.journalAbbreviation;
 				}
 				
-				if (url.startsWith('https://journals.asm.org/')) {
-					// the creator names ASM gives us in their RIS look like
-					// "Kirstahler Philipp" - reversed with no comma.
-					// we'll just use the HTML.
+				if (item.itemType == 'journalArticle' && isConference(doc)) {
+					item.itemType = 'conferencePaper';
+				}
+				
+				if (doc.querySelector('div.contributors')) {
+					// the HTML is better, so we'll use that.
 					item.creators = [];
 					let contributors = doc.querySelector('div.contributors');
 					for (let authorLink of contributors.querySelectorAll('[property="author"] a:first-child')) {
@@ -268,13 +282,22 @@ function scrape(doc, url, extras) {
 				}
 				else {
 					for (let creator of item.creators) {
+						if (creator.fieldMode == 1) {
+							// add a comma after the last name
+							// "Smith Todd G" -> "Smith, Todd G"
+							let name = creator.lastName.replace(/(\w+)/, '$1,');
+							let cleaned = ZU.cleanAuthor(name, creator.creatorType, true);
+							delete creator.fieldMode;
+							Object.assign(creator, cleaned);
+						}
+						
 						creator.lastName = fixCase(creator.lastName, true);
 						if (creator.firstName) {
 							creator.firstName = fixCase(creator.firstName, true);
 						}
 					}
 				}
-				
+
 				item.url = url;
 				item.notes = [];
 				for (var i in tags) {
@@ -285,7 +308,7 @@ function scrape(doc, url, extras) {
 					// Drop "Abstract" prefix
 					// This is not excellent, since some abstracts could
 					// conceivably begin with the word "abstract"
-					item.abstractNote = abstract.textContent
+					item.abstractNote = abstract.innerText
 						.replace(/^[^\w\d]*abstract\s*/i, '');
 				}
 				
@@ -298,13 +321,17 @@ function scrape(doc, url, extras) {
 					});
 				}
 				
-				item.attachments.push({
-					document: doc,
-					title: "Snapshot",
-					mimeType: "text/html"
-				});
 				item.libraryCatalog = url.replace(/^https?:\/\/(?:www\.)?/, '')
 					.replace(/[/:].*/, '') + " (Atypon)";
+				
+				if (item.series == 'Non-serials') {
+					delete item.series;
+				}
+				
+				if (item.numberOfVolumes == '0') {
+					delete item.numberOfVolumes;
+				}
+				
 				item.complete();
 			});
 			translator.translate();
@@ -384,10 +411,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -438,13 +461,22 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "combinatorial optimization"
+					},
+					{
+						"tag": "least-squares optimization"
+					},
+					{
+						"tag": "ultrametric and additive tree representations"
+					},
+					{
+						"tag": "unidimensional and multidimensional scaling"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -460,11 +492,10 @@ var testCases = [
 				"creators": [],
 				"date": "January 1, 2001",
 				"ISBN": "9780898714784",
-				"abstractNote": "6.1 Introduction There are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
+				"abstractNote": "6.1 Introduction\n\nThere are a variety of extensions of the topics introduced in the previous chapters that could be pursued, several of which have been mentioned earlier along with a comment that they would not be developed in any detail within this monograph. Among some of these possibilities are: (a) the development of a mechanism for generating all the optimal solutions for a specific optimization task when multiple optima may be present, not just one representative exemplar; (b) the incorporation of other loss or merit measures within the various sequencing and partitioning contexts discussed; (c) extensions to the analysis of arbitrary t-mode data, with possible (order) restrictions on some modes but not others, or to a framework in which proximity is given on more than just a pair of objects, e.g., proximity could be defined for all distinct object triples (see Daws (1996)); (d) the generalization of the task of constructing optimal ordered partitions to a two- or higher-mode context that may be hierarchical and/or have various types of order or precedence constraints imposed; and (e) the extension of object ordering constraints when they are to be imposed (e.g., in various partitioning and two-mode sequencing tasks) to the use of circular object orders, where optimal subsets or ordered sequences must now be consistent with respect to a circular contiguity structure.",
 				"bookTitle": "Combinatorial Data Analysis",
 				"extra": "DOI: 10.1137/1.9780898718553.ch6",
 				"libraryCatalog": "epubs.siam.org (Atypon)",
-				"numberOfVolumes": "0",
 				"pages": "103-114",
 				"publisher": "Society for Industrial and Applied Mathematics",
 				"series": "Discrete Mathematics and Applications",
@@ -473,10 +504,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -523,13 +550,19 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "de Bruijn graphs"
+					},
+					{
+						"tag": "genome assembly"
+					},
+					{
+						"tag": "high-throughput sequencing"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -569,13 +602,34 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Born's rule"
+					},
+					{
+						"tag": "Born's rule"
+					},
+					{
+						"tag": "envariance"
+					},
+					{
+						"tag": "envariance"
+					},
+					{
+						"tag": "interpretation of quantum mechanics"
+					},
+					{
+						"tag": "interpretation of quantum mechanics"
+					},
+					{
+						"tag": "probability"
+					},
+					{
+						"tag": "probability"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -616,13 +670,28 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "confinement"
+					},
+					{
+						"tag": "nanoarray"
+					},
+					{
+						"tag": "nanopattern"
+					},
+					{
+						"tag": "self-assembly"
+					},
+					{
+						"tag": "self-consistent field"
+					},
+					{
+						"tag": "wetting"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1093,20 +1162,16 @@ var testCases = [
 					}
 				],
 				"DOI": "10.1128/mSystems.00122-21",
-				"issue": "0",
+				"issue": "3",
 				"libraryCatalog": "journals.asm.org (Atypon)",
 				"pages": "e00122-21",
 				"publicationTitle": "mSystems",
 				"url": "https://journals.asm.org/doi/10.1128/mSystems.00122-21",
-				"volume": "0",
+				"volume": "6",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1119,6 +1184,105 @@ var testCases = [
 		"type": "web",
 		"url": "https://journals.asm.org/action/doSearch?AllField=E.+coli&SeriesKey=mra",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://search.informit.org/doi/10.3316/informit.147509991486632",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Comparison of a micro-neutralization test with the rapid fluorescent focus inhibition test for measuring rabies virus neutralizing antibodies",
+				"creators": [
+					{
+						"lastName": "Smith",
+						"creatorType": "author",
+						"firstName": "Todd G."
+					},
+					{
+						"lastName": "Gilbert",
+						"creatorType": "author",
+						"firstName": "Amy T."
+					}
+				],
+				"DOI": "10.3316/informit.147509991486632",
+				"abstractNote": "The rapid fluorescent focus inhibition test (RFFIT) is routinely used in the United States to measure rabies virus neutralizing antibodies (rVNA). RFFIT has a long history of reproducible and reliable results. The test has been modified over the years to use smaller volumes of reagents and samples, but requires a 50 muL minimum volume of test serum. To conduct pathogenesis studies, small laboratory animals such as mice are regularly tested for rVNA, but the minimum volume for a standard RFFIT may be impossible to obtain, particularly in scenarios of repeated sampling. To address this problem, a micro-neutralization test was developed previously. In the current study, the micro-neutralization test was compared to the RFFIT using 129 mouse serum samples from rabies vaccine studies. Using a cut-off value of 0.1 IU/mL, the sensitivity, specificity, and concordance of the micro-neutralization test were 100%, 97.5%, and 98%, respectively. The geometric mean titer of all samples above the cut-off was 2.0 IU/mL using RFFIT and 3.4 IU/mL using the micro-neutralization test, indicating that titers determined using the micro-neutralization test are not equivalent to RFFIT titers. Based on four rVNA-positive hamster serum samples, the intra-assay coefficient of variability was 24% and inter-assay coefficient of variability was 30.4%. These results support continued use of the micro-neutralization test to determine rabies virus neutralizing antibody titers for low-volume serum samples.",
+				"issue": "3",
+				"libraryCatalog": "search.informit.org (Atypon)",
+				"pages": "1-5",
+				"publicationTitle": "Tropical Medicine and Infectious Disease",
+				"url": "https://search.informit.org/doi/10.3316/informit.147509991486632",
+				"volume": "2",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Diagnosis, Laboratory"
+					},
+					{
+						"tag": "Neutralization (Chemistry)"
+					},
+					{
+						"tag": "Rabies virus"
+					},
+					{
+						"tag": "Rabies--Diagnosis"
+					},
+					{
+						"tag": "Viral antibodies"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://search.informit.org/doi/10.3316/informit.745150560334180",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "The Defense Test and Evaluation Professional Institute's Role in Supporting the Department of Defense Test and Evaluation Community",
+				"creators": [
+					{
+						"lastName": "Engel",
+						"creatorType": "author",
+						"firstName": "Jim"
+					}
+				],
+				"DOI": "10.3316/informit.745150560334180",
+				"libraryCatalog": "search.informit.org (Atypon)",
+				"pages": "29-31",
+				"proceedingsTitle": "AIM-TEC 94: Third Australasian Instrumentation and Measurement Conference; Test and Evaluation in the Asia-Pacific Region; Preprints of Papers",
+				"url": "https://search.informit.org/doi/10.3316/informit.745150560334180",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Armed Forces--Equipment--Testing"
+					},
+					{
+						"tag": "Defense Test and Evaluation Professional Institute (DTEPI)"
+					},
+					{
+						"tag": "Military weapons--Testing"
+					},
+					{
+						"tag": "United States"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
