@@ -91,9 +91,11 @@ declare namespace Zotero {
 		// varDump
 		function itemToCSLJSON(item: Zotero.Item): any | Promise<any>;
 		function itemFromCSLJSON(item: Zotero.Item, cslItem: any): void;
-		function parseURL(
-			url: string
-		): { fileName: string; fileExtension: string; fileBaseName: string };
+		function parseURL(url: string): {
+			fileName: string;
+			fileExtension: string;
+			fileBaseName: string;
+		};
 		function resolveIntermediateURL(url: string): string;
 		function stringToUTF8Array(
 			s: string,
@@ -137,14 +139,33 @@ declare namespace Zotero {
 		): boolean;
 		function urlToProxy(url: string): string;
 		function urlToProper(url: string): string;
+		function formatDate(date: Date, shortFormat?: boolean): string;
+		function strToDate(str: string): Date;
+		function strToISO(str: string): string;
+		function createContextObject(
+			item: Zotero.Item,
+			version: string,
+			asObj?: boolean
+		);
+		function parseContextObject(
+			co: string,
+			item: Zotero.Item[]
+		): Zotero.Item[] | false;
 	}
 
 	interface Attachment {
 		title: string;
 		snapshot?: boolean;
-		mimeType: string;
+		mimeType?: string;
 		url?: string;
 		document?: Document;
+	}
+
+	interface Creator {
+		lastName: string?;
+		firstName: string?;
+		creatorType: string;
+		fieldMode: 1?;
 	}
 
 	type ItemType =
@@ -188,7 +209,8 @@ declare namespace Zotero {
 	class Item {
 		constructor(itemType?: ItemType);
 		itemType: ItemType;
-		[field: string]: string; // support unknown fields
+		creators: Creator[];
+		[field: string]: (string | false | 0)?; // support unknown fields
 		attachments: Attachment[];
 		notes: Note[];
 		complete(): void;
@@ -235,6 +257,14 @@ declare namespace Zotero {
 
 		detectWeb(doc: Document, url: string): string | false;
 		doWeb(doc: Document, url: string): void;
+
+		detectImport(): string | false;
+		doImport(): void;
+
+		doExport(): void;
+
+		detectSearch(items: Zotero.Item[] | Zotero.Item);
+		doSearch(items: Zotero.Item[] | Zotero.Item);
 	}
 
 	interface Translate {
@@ -365,14 +395,28 @@ declare namespace Zotero {
 		}): void;
 	}
 
+	// common
+	function getOption(option: string): any;
+	function getHiddenPref(pref: string): any;
+	function loadTranslator(
+		translatorType: "web" | "import" | "export" | "search"
+	): Zotero.Translate;
+	function done(returnValue: string | false): void;
+	function debug(str: string, level?: 1 | 2 | 3 | 4 | 5): void;
+
+	// web
 	function selectItems(
 		items: { [id: string]: string },
 		callback: (items: { [id: string]: string }) => void
 	): void;
 	function monitorDOMChanges(target: Node, config: MutationObserverInit): void;
-	function loadTranslator(
-		translatorType: "web" | "import" | "export" | "search"
-	): Zotero.Translate;
+
+	// import & export
+	function setProgress(value: number): void;
+
+	// export
+	function nextItem(): Zotero.Item;
+	function nextCollection(): any;
 }
 
 import Z = Zotero;
