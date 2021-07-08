@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-02 13:32:15"
+	"lastUpdated": "2021-07-08 08:52:02"
 }
 
 /*
@@ -386,7 +386,7 @@ function scrapeBibTeX(doc, url) {
 //ubtue:tag an article as open access
 function addFreeAccessTag(doc, item) {
 	let tagEntry = ZU.xpathText(doc, '//div[@class="doi-access"]');
-	if (tagEntry && tagEntry.match(/Free Access/i)) {
+	if (tagEntry && tagEntry.match(/(Free|Open)\s+Access/i)) {
 		item.notes.push('LF:');
 	};
 }
@@ -1008,7 +1008,9 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [],
+				"notes": [
+					"LF:"
+				],
 				"seeAlso": []
 			}
 		]
@@ -1486,6 +1488,50 @@ var testCases = [
 					},
 					{
 						"tag": "well-being"
+					}
+				],
+				"notes": [
+					"LF:"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/rirt.13991",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Reasons to Hope, Werner G. Jeanrond, T&T Clark, 2020 (ISBN: 978-0-5676-6894-3), xiv + 222 pp., hb £65",
+				"creators": [
+					{
+						"firstName": "David Mark",
+						"lastName": "Dunning",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1111/rirt.13991",
+				"ISSN": "1467-9418",
+				"issue": "2",
+				"itemID": "https://doi.org/10.1111/rirt.13991",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "203-206",
+				"publicationTitle": "Reviews in Religion & Theology",
+				"shortTitle": "Reasons to Hope, Werner G. Jeanrond, T&T Clark, 2020 (ISBN",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/rirt.13991",
+				"volume": "28",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
 					}
 				],
 				"notes": [
