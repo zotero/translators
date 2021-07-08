@@ -9,12 +9,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      
-      # We're in a shallow single-branch clone, so get the origin/master HEAD if not already on master
-      # and get more history on the current branch so we can find the branch point
-      - run: git fetch origin master:master --depth=1
-        if: github.ref != 'refs/heads/master'
-      - run: git fetch --update-shallow origin $(git rev-list HEAD)
+          fetch-depth: 0
       
       - name: Install Node
         uses: actions/setup-node@v1
