@@ -59,13 +59,13 @@ function filterQuery(items) {
 	return dois;
 }
 
-function doSearch(items) {
+async function doSearch(items) {
 	let dois = filterQuery(items);
 	if (!dois.length) return;
 	processDOIs(dois);
 }
 
-function processDOIs(dois) {
+async function processDOIs(dois) {
 	let doi = dois.pop();
     // Make sure we have a Springer DOI
     if (!doi.match(/^10\.1007\//))
@@ -78,7 +78,7 @@ function processDOIs(dois) {
     }
 
     ZU.doGet('https://api.springernature.com/meta/v2/json?q=doi:' + encodeURIComponent(doi) + '&api_key=' + springer_api_key,
-        function (text) {
+        async function (text) {
             if (!text)
                 return;
             Z.debug(text);
@@ -89,9 +89,10 @@ function processDOIs(dois) {
                  item.complete();
             });
             trans.translate();
-        }, function () {
+        }, async function () {
 	    	if (dois.length) processDOIs(dois);
-	    });
+	    }
+    );
 }
 
 /** BEGIN TEST CASES **/
