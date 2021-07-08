@@ -115,6 +115,13 @@ async function getSearchResults(queryISSN) {
 }
 
 
+function delay(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+
 async function doSearchMultiple(item) {
     if (await detectSearchMultiple(item) !== "multiple")
         return false;
@@ -132,17 +139,24 @@ async function doSearchMultiple(item) {
 
     let issn = ZU.cleanISSN(item.ISSN);
     let doiItems = await getSearchResults(issn).then(doiItems => {return doiItems});
-    Zotero.selectItems(doiItems, function (items) {
-        Object.keys(items).forEach(function (doi) {
-            let translator = Zotero.loadTranslator("search");
-            translator.setTranslator("95e0f3ba-ed5b-4ab2-9aa5-0ae1b8ec6eb3");
-            translator.setSearch(doi);
-            translator.setHandler("itemDone", function (t, i) {
-                i.complete();
-            });
-            translator.translate();
-        });
-    });
+    let promises = [];
+    const { promisify } = require('util');
+    Zotero.selectItems[promisify.custom] = (items) => { return new Promise((resolve, reject) => { Zotero.selectItems(items, resolve, reject); })};
+    const selectItems = promisify(Zotero.selectItems);
+    await selectItems(doiItems).then(async function (items) {
+       let i=0;
+       for (doi in items) {
+           await delay(250).then((resolve) => {
+                let translator = Zotero.loadTranslator("search");
+                translator.setTranslator("95e0f3ba-ed5b-4ab2-9aa5-0ae1b8ec6eb3");
+                translator.setSearch(doi);
+                translator.setHandler("itemDone", function (t, i) {
+                    i.complete();
+                });
+                return translator.translate();
+           });
+       }
+    }).catch((err) => { console.log("Springer ISSN selectItems error: %o", err); });
 }
 
 
