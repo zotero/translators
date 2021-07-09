@@ -164,6 +164,7 @@ function scrape(doc, url) {
 	
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
