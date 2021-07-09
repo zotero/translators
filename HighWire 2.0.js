@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2020-12-05 19:48:04"
+	"lastUpdated": "2021-07-09 17:29:53"
 }
 
 /*
@@ -383,6 +383,11 @@ function detectWeb(doc, url) {
 		// lets hope this installations don't tweak this...
 		highwiretest = ZU.xpath(doc,
 			"//link[@href='/shared/css/hw-global.css']|//link[contains(@href,'highwire.css')]").length;
+	}
+	
+	if (!highwiretest) {
+		// (they did)
+		highwiretest = doc.querySelector('.highwire-article-citation');
 	}
 	
 	if (highwiretest) {
@@ -983,7 +988,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.pnas.org/content/early/2020/11/24/2020346117.long",
+		"url": "https://www.pnas.org/content/117/50/31591.long",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1035,17 +1040,20 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2020/11/25",
+				"date": "2020/12/15",
 				"DOI": "10.1073/pnas.2020346117",
 				"ISSN": "0027-8424, 1091-6490",
 				"abstractNote": "Clathrin-mediated endocytosis (CME) begins with the nucleation of clathrin assembly on the plasma membrane, followed by stabilization and growth/maturation of clathrin-coated pits (CCPs) that eventually pinch off and internalize as clathrin-coated vesicles. This highly regulated process involves a myriad of endocytic accessory proteins (EAPs), many of which are multidomain proteins that encode a wide range of biochemical activities. Although domain-specific activities of EAPs have been extensively studied, their precise stage-specific functions have been identified in only a few cases. Using single-guide RNA (sgRNA)/dCas9 and small interfering RNA (siRNA)-mediated protein knockdown, combined with an image-based analysis pipeline, we have determined the phenotypic signature of 67 EAPs throughout the maturation process of CCPs. Based on these data, we show that EAPs can be partitioned into phenotypic clusters, which differentially affect CCP maturation and dynamics. Importantly, these clusters do not correlate with functional modules based on biochemical activities. Furthermore, we discover a critical role for SNARE proteins and their adaptors during early stages of CCP nucleation and stabilization and highlight the importance of GAK throughout CCP maturation that is consistent with GAK’s multifunctional domain architecture. Together, these findings provide systematic, mechanistic insights into the plasticity and robustness of CME.",
 				"extra": "PMID: 33257546",
+				"issue": "50",
 				"journalAbbreviation": "PNAS",
 				"language": "en",
 				"libraryCatalog": "www.pnas.org",
+				"pages": "31591-31602",
 				"publicationTitle": "Proceedings of the National Academy of Sciences",
 				"rights": "Copyright © 2020 the Author(s). Published by PNAS.. https://creativecommons.org/licenses/by-nc-nd/4.0/This open access article is distributed under Creative Commons Attribution-NonCommercial-NoDerivatives License 4.0 (CC BY-NC-ND).",
-				"url": "https://www.pnas.org/content/early/2020/11/24/2020346117",
+				"url": "https://www.pnas.org/content/117/50/31591",
+				"volume": "117",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -1076,6 +1084,136 @@ var testCases = [
 					},
 					{
 						"tag": "total internal reflection fluorescence microscopy"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pnas.org/content/114/13/3521",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Overcoming catastrophic forgetting in neural networks",
+				"creators": [
+					{
+						"firstName": "James",
+						"lastName": "Kirkpatrick",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Razvan",
+						"lastName": "Pascanu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Rabinowitz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joel",
+						"lastName": "Veness",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guillaume",
+						"lastName": "Desjardins",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrei A.",
+						"lastName": "Rusu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kieran",
+						"lastName": "Milan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "John",
+						"lastName": "Quan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tiago",
+						"lastName": "Ramalho",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Agnieszka",
+						"lastName": "Grabska-Barwinska",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Demis",
+						"lastName": "Hassabis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Claudia",
+						"lastName": "Clopath",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dharshan",
+						"lastName": "Kumaran",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raia",
+						"lastName": "Hadsell",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017/03/28",
+				"DOI": "10.1073/pnas.1611835114",
+				"ISSN": "0027-8424, 1091-6490",
+				"abstractNote": "The ability to learn tasks in a sequential fashion is crucial to the development of artificial intelligence. Until now neural networks have not been capable of this and it has been widely thought that catastrophic forgetting is an inevitable feature of connectionist models. We show that it is possible to overcome this limitation and train networks that can maintain expertise on tasks that they have not experienced for a long time. Our approach remembers old tasks by selectively slowing down learning on the weights important for those tasks. We demonstrate our approach is scalable and effective by solving a set of classification tasks based on a hand-written digit dataset and by learning several Atari 2600 games sequentially.",
+				"extra": "PMID: 28292907",
+				"issue": "13",
+				"journalAbbreviation": "PNAS",
+				"language": "en",
+				"libraryCatalog": "www.pnas.org",
+				"pages": "3521-3526",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
+				"rights": "©  . Freely available online through the PNAS open access option.",
+				"url": "https://www.pnas.org/content/114/13/3521",
+				"volume": "114",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "artificial intelligence"
+					},
+					{
+						"tag": "continual learning"
+					},
+					{
+						"tag": "deep learning"
+					},
+					{
+						"tag": "stability plasticity"
+					},
+					{
+						"tag": "synaptic consolidation"
 					}
 				],
 				"notes": [],
