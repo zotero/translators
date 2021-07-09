@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-09 22:23:13"
+	"lastUpdated": "2021-07-09 22:29:09"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelector('meta[name="citation_title"]')) {
 		return "journalArticle";
 	}
@@ -96,6 +96,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
