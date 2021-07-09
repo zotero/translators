@@ -1399,7 +1399,9 @@ function processTag(item, tagValue, risEntry, allowDeprecated) {
 						try {
 							title = decodeURIComponent(title[1]);
 						}
-						catch (e) {}
+						catch (e) {
+							title = title[1];
+						}
 					}
 					else {
 						title = "Attachment";
