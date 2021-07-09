@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-09 20:40:31"
+	"lastUpdated": "2021-07-09 20:47:02"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelector('meta[name="citation_title"]')) {
 		return "journalArticle";
 	}
@@ -95,6 +95,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -234,6 +235,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://doaj.org/search/articles?source=%7B%22query%22%3A%7B%22query_string%22%3A%7B%22query%22%3A%22test%22%2C%22default_operator%22%3A%22AND%22%7D%7D%2C%22size%22%3A50%2C%22sort%22%3A%5B%7B%22created_date%22%3A%7B%22order%22%3A%22desc%22%7D%7D%5D%7D",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
