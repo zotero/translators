@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-06-09 16:35:41"
+	"lastUpdated": "2021-07-09 05:32:22"
 }
 
 function detectImport() {
