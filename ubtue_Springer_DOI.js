@@ -62,7 +62,11 @@ function filterQuery(items) {
 async function doSearch(items) {
 	let dois = filterQuery(items);
 	if (!dois.length) return;
-	processDOIs(dois);
+    try {
+	    processDOIs(dois);
+    } catch (err) {
+        console.log("Error in doSearch - processDOIs %o", err);
+    }
 }
 
 async function processDOIs(dois) {
