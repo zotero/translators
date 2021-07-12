@@ -65,38 +65,53 @@ async function doSearch(items) {
     try {
 	    processDOIs(dois);
     } catch (err) {
-        console.log("Error in doSearch - processDOIs %o", err);
+        Z.debug("Error in doSearch - processDOIs %o", err);
     }
 }
 
 async function processDOIs(dois) {
 	let doi = dois.pop();
+    Z.debug("SPRINGER DOI : Processing DOI: " + doi);
     // Make sure we have a Springer DOI
-    if (!doi.match(/^10\.1007\//))
+    if (!doi.match(/^10\.10(07|23)\//)) {
+        Z.debug("DOI not matching: " + doi);
         return;
+    }
 
     let springer_api_key=process.env.SPRINGER_API_KEY;
     if (!springer_api_key || springer_api_key.startsWith('$')) {
         Z.debug("Api key apparently unset")
         return;
     }
-
-    ZU.doGet('https://api.springernature.com/meta/v2/json?q=doi:' + encodeURIComponent(doi) + '&api_key=' + springer_api_key,
-        async function (text) {
-            if (!text)
-                return;
-            Z.debug(text);
-            let trans = Zotero.loadTranslator('import');
-            trans.setString(text);
-            trans.setTranslator('5665af6e-d9a3-4658-b92e-8c0dcd326f72')
-            trans.setHandler('itemDone', function (obj, item) {
-                 item.complete();
-            });
-            trans.translate();
-        }, async function () {
-	    	if (dois.length) processDOIs(dois);
-	    }
-    );
+    try {
+        ZU.doGet('https://api.springernature.com/meta/v2/json?q=doi:' + encodeURIComponent(doi) + '&api_key=' + springer_api_key,
+            async function (text) {
+                if (!text)
+                    return;
+                Z.debug(text);
+                try {
+                let trans = Zotero.loadTranslator('import');
+                trans.setString(text);
+                trans.setTranslator('5665af6e-d9a3-4658-b92e-8c0dcd326f72')
+                trans.setHandler('itemDone', function (obj, item) {
+                     item.complete();
+                });
+                trans.translate();
+                } catch (err) {
+                    Z.debug("Error in calling subtranslator in ubtue_Springer_DOIs in function processDOIs: %o", err);
+                }
+            }, async function () {
+                try {
+                    if (dois.length)
+                        processDOIs(dois);
+                } catch (err) {
+                    Z.debug("Error in ubtue_Springer_DOIs callback");
+                }
+            }
+        );
+    } catch(err) {
+        Z.debug("Error in ubtue_Springer_DOIs executing a doGet-Request %o", err);
+    }
 }
 
 /** BEGIN TEST CASES **/
