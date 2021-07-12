@@ -154,9 +154,9 @@ async function doSearchMultiple(item) {
                    i.complete();
                });
                return translator.translate();
-           }).catch((err) => { console.log("Springer ISSN selectItems subtranslator call error: %o", err);});
+           }).catch((err) => { Z.debug("Springer ISSN selectItems subtranslator call error: %o", err);});
        }
-    }).catch((err) => { console.log("Springer ISSN selectItems error: %o", err);});
+    }).catch((err) => { Z.debug("Springer ISSN selectItems error: %o", err);});
 }
 
 
