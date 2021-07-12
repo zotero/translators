@@ -2,20 +2,20 @@
 	"translatorID": "d2c0d2f4-42c0-41e0-8021-3b87b52b27d2",
 	"label": "Landesbibliographie Baden-Württemberg",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?statistik\\.baden-wuerttemberg\\.de/LABI",
+	"target": "^https?://(www\\.)?(statistik\\.baden-wuerttemberg|statistik-bw)\\.de/LABI",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-11-01 18:12:21"
+	"lastUpdated": "2021-07-12 18:14:55"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Philipp Zumstein
+	Copyright © 2018-2021 Philipp Zumstein
 	
 	This file is part of Zotero.
 
@@ -34,10 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -98,6 +94,8 @@ function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var risURL = attr(doc, 'a.export', 'href');
 	ZU.doGet(risURL, function(text) {
+		// institutional authors are ending up in A3 now
+		text = text.replace(/^A3/m, 'AU');
 		// for coorperate bodies the place is in brackets sometimes
 		// e.g. AU  - Universität <Mannheim>
 		text = text.replace(/AU\s+-\s+(.*)\s+<(.*)>/g, "AU  - $1 $2");
@@ -147,7 +145,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=63amFSWsgYL&K1=10&T1=mannheim&TA=5",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?K1=10&T1=%C3%9Cberfordert%3A+Mozart%3A+Don+Giovanni%3A+Mannheim%2C+Nationaltheater&O1=&K2=2&T2=&O2=&K3=11&T3=&JV=&JB=&EV=&EB=&EF=",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -200,7 +198,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=53amwU0Dwj6&K1=10&T1=mannheim&TA=12",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?K1=10&T1=Hafen+Mannheim+2018%3A+150+Jahre+Mannheimer+Akte&O1=&K2=2&T2=&O2=&K3=11&T3=&JV=&JB=&EV=&EB=&EF=",
 		"items": [
 			{
 				"itemType": "book",
@@ -265,7 +263,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.statistik.baden-wuerttemberg.de/LABI/LABI.asp?HC=53anjtk4Avy&K1=10&T1=mannheim&EF=Z&TA=87",
+		"url": "http://www.statistik-bw.de/LABI/LABI.asp?HC=53uayhgF7jf&K1=10&T1=Rechenschaftsbericht+...+des+Rektors&TA=13",
 		"items": [
 			{
 				"itemType": "report",
