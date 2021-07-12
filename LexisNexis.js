@@ -2,14 +2,15 @@
 	"translatorID": "b047a13c-fe5c-6604-c997-bef15e502b09",
 	"label": "LexisNexis",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://[^/]*lexis-?nexis\\.com",
+	"target": "^https?://[^/]*(lexis)?-?nexis\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
+	"targetAll": "^https?://[^/]*lexis-?nexis\\.com/lnacui2api/frame.do\?",
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2014-03-20 20:48:18"
+	"lastUpdated": "2018-05-08 13:49:17"
 }
 
 /*
@@ -38,6 +39,17 @@
 //	single: (2nd) = Results Navigation Frame = Ergebnisnavigation
 //	multiple: (5th) = Ergebnisanzeige
 
+
+// Test Cases Examples:
+// 1. https://www.nexis.com/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=280434&oc=00240&perma=true
+// 2. https://www.nexis.com/docview/getDocForCuiReq?lni=5BRW-BGR1-JD34-V3FB&csi=280434&oc=00240&perma=true
+// 3. https://www.nexis.com/docview/getDocForCuiReq?lni=5BS7-5CJ1-DYR7-33T8&csi=280434&oc=00240&perma=true
+// 4. https://www.nexis.com/docview/getDocForCuiReq?lni=4WMW-WG80-TXFX-11XY&csi=6443&oc=00240&perma=true
+// 5. https://www.nexis.com/docview/getDocForCuiReq?lni=59H1-X9C0-00CV-70R0&csi=7416&oc=00240&perma=true
+// 6. https://www.nexis.com/docview/getDocForCuiReq?lni=5BPR-K321-JDMN-J0G3&csi=339134&oc=00240&perma=true
+
+// http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?oc=00240&hnsd=f&hgn=t&lni=5BY7-7RC1-JC0G-402V&hns=t&perma=true&hv=t&hl=t&csi=270944%2C270077%2C11059%2C8411&secondRedirectIndicator=true
+
 function detectWeb(doc, url) {
 	//besides deciding whether it is a single item or multiple items
 	//it is also important here to select the correct frame! Zotero
@@ -47,6 +59,9 @@ function detectWeb(doc, url) {
 	//let's go for the navigation bar (2nd frame from top) to call new urls with hidden variables
 	//(this is maybe not the natural choice, but it seems to work)
 	if (url.indexOf("parent=docview") != -1 && url.indexOf("target=results_listview_resultsNav") != -1 ) {
+		return "newspaperArticle";
+	}
+	if (url.includes("/results/enhdocview.do") || url.includes("/docview/")) {
 		return "newspaperArticle";
 	}
 	
@@ -70,93 +85,124 @@ function scrape(doc, url) {
 	//e.g. http://www.lexisnexis.com/uk/nexis/
 	//or   http://www.lexisnexis.com/us/lnacademic/
 	//or   http://www.lexisnexis.com/lnacui2api/
+	//or   https://www.nexis.com/
 	var urlParts = url.split('/');
-	var base = urlParts.slice(0,Math.min(5, urlParts.length-1)).join('/') + '/';
-
-	var permaLink = ZU.xpathText(doc,'//input[@name="bookmarkUrl"]/@value');
+	var minimum = (url.includes("www.nexis.com")) ? 3 : 5;
+	var base = urlParts.slice(0,Math.min(minimum, urlParts.length-1)).join('/') + '/';
 	
 	var risb = ZU.xpathText(doc,'//input[@name="risb"]/@value');
+	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value') || "";
 	
-	var cisb = ZU.xpathText(doc,'//input[@name="cisb"]/@value');
-	if (!cisb) {
-		cisb = "";
-	}
-
-	var urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
-
-	var hiddenInputs = ZU.xpath(doc, '//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]');
-	//if (hiddenInputs.length==0) {
-	//	hiddenInputs = ZU.xpath(doc, '//input[@type="hidden" and not(@name="tagData")]');
-	//}
+	var urlIntermediateSite;
 	var poststring="";
-	for (var i=0; i<hiddenInputs.length; i++) {
-		poststring = poststring+"&"+encodeURIComponent(hiddenInputs[i].name)+"="+encodeURIComponent(hiddenInputs[i].value);
-	};
 	
-	poststring += "&focusTerms=&nextSteps=0";
-	
+	// OLD interface
+	var hiddenInputs = ZU.xpath(doc, '//form[@name="results_docview_DocumentForm"]//input[@type="hidden" and not(@name="tagData")]');
+	//if (hiddenInputs.length==0) hiddenInputs = ZU.xpath(doc, '//input[@type="hidden" and not(@name="tagData")]');
+	if (hiddenInputs.length>0) {
+		Z.debug("Old Interface");
+		urlIntermediateSite = base+"results/listview/delPrep.do?cisb="+encodeURIComponent(cisb)+"&risb="+encodeURIComponent(risb)+"&mode=delivery_refworks";
+		for (var i=0; i<hiddenInputs.length; i++) {
+			poststring = poststring+"&"+encodeURIComponent(hiddenInputs[i].name)+"="+encodeURIComponent(hiddenInputs[i].value);
+		}
+	} else {
+		// NEW interface
+		Z.debug("New interface");
+		urlIntermediateSite = base + "results/enhDelPrep.do?";
+		var erskey = ZU.xpathText(doc, '//input[@id="ersKey"]/@value');
+		poststring = "mode=delivery_refworks&formatStr=GNBFULL&tagData=null&fromEnhListView=true&ersKey=" + erskey + "&random=" + Math.random() + "&offset=1";
+	}
+	//Z.debug(urlIntermediateSite);
+	//Z.debug(poststring);
+
 	ZU.doPost(urlIntermediateSite, poststring, function(text) {
-		
-		var urlRis = base+"delivery/rwBibiographicDelegate.do";
-		var disb = /<input type="hidden" name="disb" value="([^"]+)">/.exec(text);
-		var initializationPage = /<input type="hidden" name="initializationPage" value="([^"]+)">/.exec(text);
-		
-		var poststring2 = "screenReaderSupported=false&delRange=cur&selDocs=&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1]);
-		//Z.debug(poststring2);
-
-		ZU.doPost(urlRis, poststring2, function(text) {
-			var risData = text;
-			//type is GEN, but better NEWS (or CASE, JOUR)
-			text = text.replace(/^TY\s+-\s+GEN\s*$/mg, 'TY  - NEWS');
-			//the title information is sometimes somewhere else
-			if ( text.search(/^TI\s+-/m) == -1) {
-				if ( text.search(/^N2\s+-/m) != -1 ) {//see e.g. Test Case 5
-					text = text.replace(/^N2\s+-/m,"TI  -");
-					text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - JOUR');
-				} else if ( text.search(/^U3\s+-/m) != -1 ) {//see e.g. Test Case 4
-					text = text.replace(/^U3\s+-/m,"TI  -");
-					text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - CASE');
-				}
-			} 
-			//most authors are saved in N1 tag, correct that:
-			text = text.replace(/^N1\s+-[ \f\r\t\v\u00A0\u2028\u2029]+(\w.*)$/mg, cleanAuthorFields );//the range in the regexp is actually just \s without the line break
-			//correct date format in RIS e.g. PY - 2013/05/09/
-			text = text.replace(/^PY\s+-\//mg, "DA  -");
-			//correct page information, e.g. SP - WORLD; Pg. 8
-			text = text.replace(/^SP\s+-\s+(\w.*)$/mg, function(totalMatch, pageString){
-				var pageAbbreviations = ["Pg.", "S.", "Pag.", "Blz.", "Pág."];
-				var pageArray = pageString.split(";");
-				var pageArray2 = ZU.trimInternal(pageArray[pageArray.length-1]).split(" ");
-				if (pageArray2.length == 2 && pageAbbreviations.indexOf(pageArray2[0]) > -1) {//see e.g. Test Cases 1,2,3
-					return 'SP  - ' + pageArray2.slice(1).join(" ") + "\nSE  - " + pageArray.slice(0,-1).join(";");
-				} else {//see e.g. Test Case 6
-					return 'SE  - ' + pageString;
-				}
+		// Follow redirect if there is a meta tag with http-equiv="refresh"
+		var m = text.match(/<meta[^>]*http-equiv="refresh"[^>]*content="\d+;url="([^>]*)"/);
+		if (m) {
+			Z.debug("Redirected to " + m[1]);
+			var redirect = m[1];
+			ZU.doPost(redirect, poststring, function(redirectedText) {
+				scrapeRis(redirectedText, url, base, doc);
 			});
-			Z.debug(text);
-			
-			var trans = Zotero.loadTranslator('import');
-			trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');//https://github.com/zotero/translators/blob/master/RIS.js
-			trans.setString(text);
-
-			trans.setHandler('itemDone', function (obj, item) {
-				
-				item.url = permaLink;
-				
-				//for debugging TODO: delete later
-				item.notes.push({note:risData});
-				
-				item.attachments.push( {
-					url: url.replace("target=results_listview_resultsNav","target=results_DocumentContent"),
-					title: "LexisNexis Entry",
-					mimeType: "text/html",
-				} );
-				item.complete();
-			});
+		} else {
+			scrapeRis(text, url, base, doc);
+		}
+	});
+}
 		
-			trans.translate();
-			
+		
+function scrapeRis(text, url, base, doc) {
+	var permaLink = ZU.xpathText(doc,'//input[@name="bookmarkUrl"]/@value');
+	var docNo = ZU.xpathText(doc,'//input[@name="docNo"]/@value') || "";
+	//Z.debug(text);
+	var urlRis = base + "delivery/rwBibiographicDelegate.do";
+	//Z.debug(urlRis);
+	var disb = /<input type="hidden" name="disb" value="([^"]+)">/.exec(text);
+	var initializationPage = /<input type="hidden" name="initializationPage" value="([^"]+)">/.exec(text);
+	if (!disb) Z.debug(/<title>([^<>]*)<\/title>/.exec(text)[1]);
+	
+	var poststring = "screenReaderSupported=false&exportType=dnldBiblio&disb="+encodeURIComponent(disb[1])+"&initializationPage="+encodeURIComponent(initializationPage[1]);
+	if (docNo) {
+		poststring += "&delRange=sel&selDocs="+docNo;
+	} else {
+		poststring += "&delRange=all";
+	}
+	//Z.debug(poststring);
+
+	ZU.doPost(urlRis, poststring, function(text) {
+		var risData = text;
+		//type is GEN, but better NEWS (or CASE, JOUR)
+		text = text.replace(/^TY\s+-\s+GEN\s*$/mg, 'TY  - NEWS');
+		//the title information is sometimes somewhere else
+		if ( text.search(/^TI\s+-/m) == -1 && text.search(/^T1\s+-/m) == -1 ) {
+			if ( text.search(/^N2\s+-/m) != -1 ) {//see e.g. Test Case 5
+				text = text.replace(/^N2\s+-/m,"TI  -");
+				text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - JOUR');
+			} else if ( text.search(/^U3\s+-/m) != -1 ) {//see e.g. Test Case 4
+				text = text.replace(/^U3\s+-/m,"TI  -");
+				text = text.replace(/^TY\s+-\s+NEWS\s*$/mg, 'TY  - CASE');
+			} else {
+				Z.debug("Warning: No title in RIS found");
+			}
+		} 
+		//most authors are saved in N1 tag, correct that:
+		text = text.replace(/^N1\s+-[ \f\r\t\v\u00A0\u2028\u2029]+(\w.*)$/mg, cleanAuthorFields );//the range in the regexp is actually just \s without the line break
+		//correct date format in RIS e.g. PY - 2013/05/09/
+		text = text.replace(/^PY\s+-\//mg, "DA  -");
+		//correct page information, e.g. SP - WORLD; Pg. 8
+		text = text.replace(/^SP\s+-\s+(\w.*)$/mg, function(totalMatch, pageString){
+			var pageAbbreviations = ["Pg.", "S.", "Pag.", "Blz.", "Pág."];
+			var pageArray = pageString.split(";");
+			var pageArray2 = ZU.trimInternal(pageArray[pageArray.length-1]).split(" ");
+			if (pageArray2.length == 2 && pageAbbreviations.indexOf(pageArray2[0]) > -1) {//see e.g. Test Cases 1,2,3
+				return 'SP  - ' + pageArray2.slice(1).join(" ") + "\nSE  - " + pageArray.slice(0,-1).join(";");
+			} else {//see e.g. Test Case 6
+				return 'SE  - ' + pageString;
+			}
 		});
+		//Z.debug(text);
+		
+		var trans = Zotero.loadTranslator('import');
+		trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');//https://github.com/zotero/translators/blob/master/RIS.js
+		trans.setString(text);
+
+		trans.setHandler('itemDone', function (obj, item) {
+			
+			if (permaLink) item.url = permaLink;
+			
+			//for debugging TODO: delete later
+			item.notes.push({note:risData});
+			
+			item.attachments.push( {
+				url: url.replace("target=results_listview_resultsNav","target=results_DocumentContent"),
+				title: "LexisNexis Entry",
+				mimeType: "text/html",
+			} );
+			item.complete();
+		});
+	
+		trans.translate();
+		
 	});
 }
 
@@ -200,8 +246,8 @@ function cleanAuthorFields(m, authorStr) {//see e.g. Test Cases 2,3
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		
-		var items = new Object();
-		var articles = new Array();
+		var items = {};
+		var articles = [];
 		
 		//if the detectWeb is not clear on the iframe, we might need
 		//tempDoc instead of doc:
@@ -241,10 +287,11 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.lexisnexis.com/uk/nexis/frame.do?tokenKey=rsh-23.293114.58735663886&target=results_listview_resultsNav&returnToKey=20_T19483687921&parent=docview&rand=1395341618309&reloadEntirePage=true",
+		"url": "https://www.nexis.com/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=280434&oc=00240&perma=true",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Zweifel an Hoeneß' Angaben zur Quelle der Schweizer Millionen; Opposition: Offene Fragen. Koalition erschwert Straffreiheit",
 				"creators": [
 					{
 						"lastName": "Steven Geyer",
@@ -252,29 +299,28 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nT1  - Zweifel an Hoeneß&apos; Angaben zur Quelle der Schweizer Millionen;  Opposition: Offene Fragen. Koalition erschwert Straffreiheit\r\nJO  -  Berliner Zeitung\r\nPY  - 2014/03/17/\r\nSP  - POL; S. 5\r\nM3  - 479 Wörter\r\nN1  - Steven Geyer\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-03-17",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Berliner Zeitung",
+				"libraryCatalog": "LexisNexis",
+				"pages": "5",
+				"publicationTitle": "Berliner Zeitung",
+				"section": "POL",
+				"shortTitle": "Zweifel an Hoeneß' Angaben zur Quelle der Schweizer Millionen; Opposition",
+				"url": "http://www.lexisnexis.com/uk/nexis/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=5949&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Zweifel an Hoeneß' Angaben zur Quelle der Schweizer Millionen; Opposition: Offene Fragen. Koalition erschwert Straffreiheit",
-				"journalAbbreviation": "Berliner Zeitung",
-				"date": "2014-03-17",
-				"pages": "5",
-				"section": "POL",
-				"publicationTitle": "Berliner Zeitung",
-				"url": "http://www.lexisnexis.com/uk/nexis/docview/getDocForCuiReq?lni=5BS1-R651-DYJR-P1N8&csi=5949&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "Zweifel an Hoeneß' Angaben zur Quelle der Schweizer Millionen; Opposition"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nT1  - Zweifel an Hoeneß&apos; Angaben zur Quelle der Schweizer Millionen;  Opposition: Offene Fragen. Koalition erschwert Straffreiheit\r\nJO  -  Berliner Zeitung\r\nPY  - 2014/03/17/\r\nSP  - POL; S. 5\r\nM3  - 479 Wörter\r\nN1  - Steven Geyer\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -284,6 +330,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Hijack fear as al-Qaeda plot revealed Plane systems turned off by someone aboard;  FLIGHT MH370",
 				"creators": [
 					{
 						"lastName": "Bibby",
@@ -306,28 +353,27 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nT1  - Hijack fear as al-Qaeda plot revealed Plane systems turned off by someone aboard;  FLIGHT MH370\r\nJO  -  The Age (Melbourne, Australia)\r\nPY  - 2014/03/17/\r\nSP  - NEWS; Pg. 6\r\nM3  - 1219 words\r\nN1  - Paul Bibby, Lindsay Murdoch, Jason Koutsoukis, Tom Allard\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-03-17",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "The Age (Melbourne, Australia)",
+				"libraryCatalog": "LexisNexis",
+				"pages": "6",
+				"publicationTitle": "The Age (Melbourne, Australia)",
+				"section": "NEWS",
+				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BRW-BGR1-JD34-V3FB&csi=314239&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Hijack fear as al-Qaeda plot revealed Plane systems turned off by someone aboard;  FLIGHT MH370",
-				"journalAbbreviation": "The Age (Melbourne, Australia)",
-				"date": "2014-03-17",
-				"pages": "6",
-				"section": "NEWS",
-				"publicationTitle": "The Age (Melbourne, Australia)",
-				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BRW-BGR1-JD34-V3FB&csi=314239&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nT1  - Hijack fear as al-Qaeda plot revealed Plane systems turned off by someone aboard;  FLIGHT MH370\r\nJO  -  The Age (Melbourne, Australia)\r\nPY  - 2014/03/17/\r\nSP  - NEWS; Pg. 6\r\nM3  - 1219 words\r\nN1  - Paul Bibby, Lindsay Murdoch, Jason Koutsoukis, Tom Allard\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -337,6 +383,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Australia extends search",
 				"creators": [
 					{
 						"lastName": "Hussain",
@@ -384,28 +431,27 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nT1  - Australia extends search\r\nJO  -  New Straits Times (Malaysia)\r\nPY  - 2014/03/18/\r\nSP  - LOCAL; Pg. 7\r\nM3  - 358 words\r\nN1  - Haris Hussain; Farrah Naz Karim; Zulita Mustafa; Syed Umar Ariff; Arman Ahmad; Rozanna Latiff; Alang Bendahara; Akil Yunus; Hariz Mohd;\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-03-18",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "New Straits Times (Malaysia)",
+				"libraryCatalog": "LexisNexis",
+				"pages": "7",
+				"publicationTitle": "New Straits Times (Malaysia)",
+				"section": "LOCAL",
+				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BS7-5CJ1-DYR7-33T8&csi=151977&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Australia extends search",
-				"journalAbbreviation": "New Straits Times (Malaysia)",
-				"date": "2014-03-18",
-				"pages": "7",
-				"section": "LOCAL",
-				"publicationTitle": "New Straits Times (Malaysia)",
-				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BS7-5CJ1-DYR7-33T8&csi=151977&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nT1  - Australia extends search\r\nJO  -  New Straits Times (Malaysia)\r\nPY  - 2014/03/18/\r\nSP  - LOCAL; Pg. 7\r\nM3  - 358 words\r\nN1  - Haris Hussain; Farrah Naz Karim; Zulita Mustafa; Syed Umar Ariff; Arman Ahmad; Rozanna Latiff; Alang Bendahara; Akil Yunus; Hariz Mohd;\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -415,27 +461,27 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "case",
+				"title": "Ricci v. DeStefano,",
+				"caseName": "Ricci v. DeStefano,",
 				"creators": [],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nU3  - Ricci v. DeStefano, \r\nM2  - (No. 07-1428), (No. 08-328)\r\nPB  - SUPREME COURT OF THE UNITED STATES\r\nM2  - 557 U.S. 557; 129 S. Ct. 2658; 174 L. Ed. 2d 490; 2009 U.S. LEXIS 4945; 77 U.S.L.W. 4639; 106 Fair Empl. Prac. Cas. (BNA) 929; 92 Empl. Prac. Dec. (CCH) P43,602; 21 Fla. L. Weekly Fed. S 1049\r\nU2  -  The LEXIS pagination of this document is subject to change pending release of the final published version.\r\nU1  - Related proceeding at Luschenat v. City of New Haven, 2013 U.S. Dist. LEXIS 15929 (D. Conn., Feb. 6, 2013)\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"accessDate": "CURRENT_TIMESTAMP",
+				"court": "SUPREME COURT OF THE UNITED STATES",
+				"extra": "(No. 07-1428), (No. 08-328); 557 U.S. 557; 129 S. Ct. 2658; 174 L. Ed. 2d 490; 2009 U.S. LEXIS 4945; 77 U.S.L.W. 4639; 106 Fair Empl. Prac. Cas. (BNA) 929; 92 Empl. Prac. Dec. (CCH) P43,602; 21 Fla. L. Weekly Fed. S 1049",
+				"libraryCatalog": "LexisNexis",
+				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=4WMW-WG80-TXFX-11XY&csi=6443&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"caseName": "Ricci v. DeStefano,",
-				"extra": "(No. 07-1428), (No. 08-328); 557 U.S. 557; 129 S. Ct. 2658; 174 L. Ed. 2d 490; 2009 U.S. LEXIS 4945; 77 U.S.L.W. 4639; 106 Fair Empl. Prac. Cas. (BNA) 929; 92 Empl. Prac. Dec. (CCH) P43,602; 21 Fla. L. Weekly Fed. S 1049",
-				"court": "SUPREME COURT OF THE UNITED STATES",
-				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=4WMW-WG80-TXFX-11XY&csi=6443&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"title": "Ricci v. DeStefano,"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nU3  - Ricci v. DeStefano, \r\nM2  - (No. 07-1428), (No. 08-328)\r\nPB  - SUPREME COURT OF THE UNITED STATES\r\nM2  - 557 U.S. 557; 129 S. Ct. 2658; 174 L. Ed. 2d 490; 2009 U.S. LEXIS 4945; 77 U.S.L.W. 4639; 106 Fair Empl. Prac. Cas. (BNA) 929; 92 Empl. Prac. Dec. (CCH) P43,602; 21 Fla. L. Weekly Fed. S 1049\r\nU2  -  The LEXIS pagination of this document is subject to change pending release of the final published version.\r\nU1  - Related proceeding at Luschenat v. City of New Haven, 2013 U.S. Dist. LEXIS 15929 (D. Conn., Feb. 6, 2013)\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -445,28 +491,28 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW: SETTLEMENT OF DISPUTES: Guatemala and United States CAFTA-DR Labor Standards Arbitration Suspended",
 				"creators": [],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nPB  - Copyright (c) 2013 The American Society of International Law American Journal of International Law\r\nPY  - 2013/07/01/\r\nM2  - 107 A.J.I.L. 684\r\nM3  - 1167 words\r\nN2  - CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW: SETTLEMENT OF DISPUTES: Guatemala and United States CAFTA-DR Labor Standards Arbitration Suspended\r\nU3  - EDITED BY JOHN R. CROOK\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2013-07-01",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"extra": "107 A.J.I.L. 684",
+				"libraryCatalog": "LexisNexis",
+				"publisher": "Copyright (c) 2013 The American Society of International Law American Journal of International Law",
+				"shortTitle": "CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW",
+				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=59H1-X9C0-00CV-70R0&csi=7416&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"publisher": "Copyright (c) 2013 The American Society of International Law American Journal of International Law",
-				"date": "2013-07-01",
-				"extra": "107 A.J.I.L. 684",
-				"title": "CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW: SETTLEMENT OF DISPUTES: Guatemala and United States CAFTA-DR Labor Standards Arbitration Suspended",
-				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=59H1-X9C0-00CV-70R0&csi=7416&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP",
-				"shortTitle": "CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nPB  - Copyright (c) 2013 The American Society of International Law American Journal of International Law\r\nPY  - 2013/07/01/\r\nM2  - 107 A.J.I.L. 684\r\nM3  - 1167 words\r\nN2  - CONTEMPORARY PRACTICE OF THE UNITED STATES RELATING TO INTERNATIONAL LAW: SETTLEMENT OF DISPUTES: Guatemala and United States CAFTA-DR Labor Standards Arbitration Suspended\r\nU3  - EDITED BY JOHN R. CROOK\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -476,28 +522,28 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
+				"title": "Smartphones steuern fast alles;  MESSE Auf dem Mobile World Congress bestimmt Vernetzungstrend das Geschehen",
 				"creators": [],
-				"notes": [
-					{
-						"note": "TY  - GEN\r\nT1  - Smartphones steuern fast alles;  MESSE Auf dem Mobile World Congress bestimmt Vernetzungstrend das Geschehen\r\nJO  -  Bürstädter Zeitung (Germany)\r\nPY  - 2014/03/11/\r\nSP  - MULTIMEDIA\r\nM3  - 587 Wörter\r\nER  -\r\n"
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014-03-11",
+				"accessDate": "CURRENT_TIMESTAMP",
+				"journalAbbreviation": "Bürstädter Zeitung (Germany)",
+				"libraryCatalog": "LexisNexis",
+				"publicationTitle": "Bürstädter Zeitung (Germany)",
+				"section": "MULTIMEDIA",
+				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BPR-K321-JDMN-J0G3&csi=339134&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
 				"attachments": [
 					{
 						"title": "LexisNexis Entry",
 						"mimeType": "text/html"
 					}
 				],
-				"title": "Smartphones steuern fast alles;  MESSE Auf dem Mobile World Congress bestimmt Vernetzungstrend das Geschehen",
-				"journalAbbreviation": "Bürstädter Zeitung (Germany)",
-				"date": "2014-03-11",
-				"section": "MULTIMEDIA",
-				"publicationTitle": "Bürstädter Zeitung (Germany)",
-				"url": "http://www.lexisnexis.com/lnacui2api/api/version1/getDocCui?lni=5BPR-K321-JDMN-J0G3&csi=339134&hl=t&hv=t&hnsd=f&hns=t&hgn=t&oc=00240&perma=true",
-				"libraryCatalog": "LexisNexis",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [
+					{
+						"note": "TY  - GEN\r\nT1  - Smartphones steuern fast alles;  MESSE Auf dem Mobile World Congress bestimmt Vernetzungstrend das Geschehen\r\nJO  -  Bürstädter Zeitung (Germany)\r\nPY  - 2014/03/11/\r\nSP  - MULTIMEDIA\r\nM3  - 587 Wörter\r\nER  -\r\n"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}
