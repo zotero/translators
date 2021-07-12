@@ -99,7 +99,7 @@ function invokeEMTranslator(doc) {
 			let firstandlastpages = i.pages.split('–');
 			i.pages = firstandlastpages[0] + '-' + firstandlastpages[2]; // Z.debug(item.pages)
 		}
-		if (i.ISSN == '2413-3108') {
+		if (i.ISSN == '2413-3108' && i.pages) {
 			// Fix erroneous firstpage in embedded metadata with issue prefix
 		    i.pages  = i.pages.replace(/(?:\d+\/)?(\d+-\d+)/, "$1");
 		}
