@@ -39,20 +39,22 @@
 function detectWeb(doc, url) {
 	if (/[?&]query=/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (ZU.xpathText(doc, '//h3[@itemprop="headline"]')) {
-		if (url.indexOf('/newspapers/')>-1) {
+	}
+	else if (ZU.xpathText(doc, '//h3[@itemprop="headline"]')) {
+		if (url.includes('/newspapers/')) {
 			return "newspaperArticle";
 		}
-		if (url.indexOf('/periodicals/')>-1) {
+		if (url.includes('/periodicals/')) {
 			return "journalArticle";
 		}
-		if (url.indexOf('/manuscripts/')>-1) {
+		if (url.includes('/manuscripts/')) {
 			return "letter";
 		}
-		if (url.indexOf('/parliamentary/')>-1) {
+		if (url.includes('/parliamentary/')) {
 			return "report";
 		}
 	}
+	return false;
 }
 
 
@@ -60,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.search-results .article-preview__title a');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -76,7 +78,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -84,7 +86,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -123,21 +126,20 @@ function scrape(doc, url) {
 	
 	if (type == "letter") {
 		var author = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Author"]]/td[2]');
-		//e.g. 42319/Mackay, James, 1831-1912
-		if (author && author.indexOf("Unknown") == -1) {
-			author = author.replace(/^[0-9\/]*/, '').replace(/[0-9\-]*$/, '').replace('(Sir)', '');
+		// e.g. 42319/Mackay, James, 1831-1912
+		if (author && !author.includes("Unknown")) {
+			author = author.replace(/^[0-9/]*/, '').replace(/[0-9-]*$/, '').replace('(Sir)', '');
 			item.creators.push(ZU.cleanAuthor(author, "author"));
 		}
 		var recipient = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Recipient"]]/td[2]');
-		if (recipient && recipient.indexOf("Unknown") == -1) {
-			recipient = recipient.replace(/^[0-9\/]*/, '').replace(/[0-9\-]*$/, '').replace('(Sir)', '');
+		if (recipient && !recipient.includes("Unknown")) {
+			recipient = recipient.replace(/^[0-9/]*/, '').replace(/[0-9-]*$/, '').replace('(Sir)', '');
 			item.creators.push(ZU.cleanAuthor(recipient, "recipient"));
 		}
 		
 		item.date = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Date"]]/td[2]');
 		
 		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Language"]]/td[2]');
-		
 	}
 	
 	item.abstractNote = text(doc, '#tab-english');
@@ -166,6 +168,7 @@ function scrape(doc, url) {
 		item.complete();
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
