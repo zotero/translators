@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
@@ -104,6 +104,7 @@ function scrape(items, doc) {
 		item.complete();
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
