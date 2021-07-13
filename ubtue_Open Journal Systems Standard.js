@@ -9,7 +9,7 @@
 	"inRepository": false,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-20 14:20:53"
+	"lastUpdated": "2021-07-13 14:50:46"
 }
 
 /*
@@ -65,17 +65,41 @@ function splitDotSeparatedKeywords(item) {
 
 function getOrcids(doc) {
 	let authorSections = ZU.xpath(doc, '//ul[@class="authors-string"]/li');
+	let notes = [];
 	for (let authorSection of authorSections) {
-		//Z.debug(authorSection);
-		let authorLink = ZU.xpath(authorSection, '//a[@class="author-string-href"]/span');
-		let orcidLink = ZU.xpath(authorSection, '//a[starts-with(@href, "https://orcid.org")]/@href');
-		if (authorLink && authorLink[0] && orcidLink && orcidLink[0]) {
-			let author = authorLink[0].innerText;
-			let orcid = orcidLink[0].value.match(/\d+-\d+-\d+-\d+x?/i);
-			return {note: "orcid:" + orcid + '|' + author};
+		let authorLink = authorSection.querySelector('a.author-string-href span');
+		let orcidLink = authorSection.querySelector('[href*="https://orcid.org"]');
+		if (authorLink && orcidLink) {
+			let author = authorLink.innerText;
+			let orcid = orcidLink.value.match(/\d+-\d+-\d+-\d+x?/i);
+			if (!orcid)
+			    continue;
+			notes.push({note: "orcid:" + orcid + '|' + author});
 		}
 	}
-	return null;
+	if (notes.length)
+		return notes;
+
+	authorSections = ZU.xpath(doc, '//ul[@class="item authors"]/li');
+	for (let authorSection of authorSections) {
+		let authorSpans = authorSection.querySelector('span[class="name"]');
+		let orcidSpans = authorSection.querySelector('span[class="orcid"]');
+		if (authorSpans && orcidSpans) {
+		   let author = authorSpans.innerText;
+		   let orcidAnchor =  orcidSpans.querySelector('a');
+		   if (!orcidAnchor)
+			   continue;
+		   let orcidUrl = orcidAnchor.href;
+		   if (!orcidUrl)
+			   continue;
+		   let orcid = orcidUrl.match(/\d+-\d+-\d+-\d+x?/i);
+		   if (!orcid)
+		       continue;
+		   notes.push( {note: "orcid:" + orcid + '|' + author});
+		}
+	}
+
+	return notes;
 }
 
 
@@ -101,13 +125,13 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.ISSN == '2413-3108' && i.pages) {
 			// Fix erroneous firstpage in embedded metadata with issue prefix
-		    i.pages  = i.pages.replace(/(?:\d+\/)?(\d+-\d+)/, "$1");
+			i.pages  = i.pages.replace(/(?:\d+\/)?(\d+-\d+)/, "$1");
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
 		let orcids = getOrcids(doc);
-		if (orcids)
-			i.notes.push(orcids);
+		if (orcids.length)
+			i.notes.push(...orcids);
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
