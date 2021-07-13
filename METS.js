@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-12 16:17:28"
+	"lastUpdated": "2021-07-13 20:44:34"
 }
 
 /*
@@ -157,11 +157,16 @@ function processData(mdType, data, attachments) {
 				item => item.callNumber = ''
 			);
 			break;
+		case 'OTHER':
+			// this usually indicates some kind of internal metadata that isn't
+			// essential to parse.
+			Z.debug('Skipping \'OTHER\' metadata');
+			break;
 		case 'EAD':
 			// todo: an EAD translator. does anyone use EAD?
 			// https://www.loc.gov/ead/
 		default:
-			Z.debug(`Unsupported metadata type: ${mdType}`);
+			throw new Error(`Unsupported metadata type: ${mdType}`);
 	}
 }
 
