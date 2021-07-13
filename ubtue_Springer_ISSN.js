@@ -146,7 +146,7 @@ async function doSearchMultiple(item) {
     await selectItems(doiItems).then(async function (items) {
        let i=0;
        for (doi in items) {
-           await delay(600).then((resolve) => {
+           await delay(800).then((resolve) => {
                let translator = Zotero.loadTranslator("search");
                translator.setTranslator("95e0f3ba-ed5b-4ab2-9aa5-0ae1b8ec6eb3");
                translator.setSearch(doi);
