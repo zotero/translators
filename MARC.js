@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-13 23:18:07"
+	"lastUpdated": "2021-07-13 23:35:05"
 }
 
 /*
@@ -42,36 +42,45 @@ function detectImport() {
 	}
 	return false;
 }
-// test
-var fieldTerminator = "\x1E";
-var recordTerminator = "\x1D";
-var subfieldDelimiter = "\x1F";
+
+const fieldTerminator = "\x1E";
+const recordTerminator = "\x1D";
+const subfieldDelimiter = "\x1F";
 
 /*
  * CLEANING FUNCTIONS
  */
 
 
-// general purpose cleaning
+/**
+ * Strip punctuation, parens, and brackets from the beginning and end of a
+ * string and coalesce adjacent spaces.
+ * @param {string} value The string to clean.
+ * @returns {string|null}
+ */
 function clean(value) {
-	if (value === undefined) {
+	if (value === undefined || value === null) {
 		return null;
 	}
 	value = value.replace(/^[\s.,/:;]+/, '');
 	value = value.replace(/[\s.,/:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
 
-	var char1 = value.substr(0, 1);
-	var char2 = value.substr(value.length - 1);
-	if ((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
-		// chop of extraneous characters
+	var first = value[0];
+	var last = value[value.length - 1];
+	if ((first == "[" && last == "]") || (first == "(" && last == ")")) {
+		// chop off extraneous characters
 		return value.substr(1, value.length - 2);
 	}
 
 	return value;
 }
 
-// number extraction
+/**
+ * Extract the first sequence of one or more digits from a string.
+ * @param {string} text
+ * @returns {string}
+ */
 function pullNumber(text) {
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
@@ -81,23 +90,13 @@ function pullNumber(text) {
 	return "";
 }
 
-// ISBN extraction
-function pullISBN(text) {
-	var pullRe = /[0-9X-]+/;
-	var m = pullRe.exec(text);
-	if (m) {
-		return m[0];
-	}
-	return "";
-}
-
-
-// regular author extraction
-function author(author, type, useComma) {
-	return Zotero.Utilities.cleanAuthor(author, type, useComma);
-}
-
-
+/**
+ * Concatenate two strings, adding the provided delimiter if the first does not
+ * end with punctuation.
+ * @param {string} part1
+ * @param {string} part2
+ * @param {string} delimiter
+ */
 function glueTogether(part1, part2, delimiter) {
 	if (!part1 && !part2) {
 		return null;
@@ -111,7 +110,7 @@ function glueTogether(part1, part2, delimiter) {
 	if (!delimiter) {
 		return part1 + ' ' + part2;
 	}
-	// we only add the delimiter, if part1 is not ending with a punctation
+	// we only add the delimiter if part1 does not end with punctuation
 	if (part1.search(/[?:,.!;]\s*$/) > -1) {
 		return part1 + ' ' + part2;
 	}
@@ -257,8 +256,8 @@ class Record {
 		var fields = this.getField(tag);
 		var returnFields = [];
 	
-		for (var i = 0, n = fields.length; i < n; i++) {
-			returnFields[i] = this.extractSubfields(fields[i][1], tag);
+		for (let field of fields) {
+			returnFields[i] = this.extractSubfields(field[1], tag);
 		}
 	
 		return returnFields;
@@ -382,9 +381,9 @@ class Record {
 			}
 	
 			// Extract ISBNs
-			this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+			this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
 			// Extract ISSNs
-			this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+			this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISBN);
 	
 			// Extract creators (700, 701 & 702)
 			for (let i = 700; i < 703; i++) {
@@ -493,9 +492,9 @@ class Record {
 			}
 	
 			// Extract ISBNs
-			this._associateDBField(item, "020", "a", "ISBN", pullISBN);
+			this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
 			// Extract ISSNs
-			this._associateDBField(item, "022", "a", "ISSN", pullISBN);
+			this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISBN);
 			// Extract language
 			this._associateDBField(item, "041", "a", "language");
 			// Extract creators
