@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 03:34:29"
+	"lastUpdated": "2021-07-14 03:42:40"
 }
 
 /*
@@ -134,7 +134,7 @@ function scrape(doc, url) {
 				}
 				
 				if (!item.url || item.url.includes('//doi.org/')) {
-					item.url = url;
+					item.url = url.replace(/[?#].*/, '');
 				}
 				
 				cleanItem(item);
@@ -159,6 +159,7 @@ function cleanItem(item) {
 		item.edition = item.edition.replace(/(^\[)|(\]$)/g, '');
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -731,7 +732,7 @@ var testCases = [
 				"libraryCatalog": "Library Catalog (Visual Library 2021)",
 				"place": "Firenze",
 				"publisher": "Le Monnier",
-				"url": "https://menadoc.bibliothek.uni-halle.de/ssg/content/titleinfo/293863?query=test",
+				"url": "https://menadoc.bibliothek.uni-halle.de/ssg/content/titleinfo/293863",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
