@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-14 15:23:17"
+	"lastUpdated": "2021-07-14 15:40:40"
 }
 
 /*
@@ -1289,36 +1289,34 @@ function doImport() {
 		
 		// Language
 		// create an array of languages
-		var languages = [];
+		var languageNames = [];
+		var languageCodes = [];
 		var languageNodes = ZU.xpath(modsElement, 'm:language', xns);
-		for (let i = 0; i < languageNodes.length; i++) {
-			var code = false,
-				languageNode = languageNodes[i],
-				languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
-				
-			for (let j = 0; j < languageTerms.length; j++) {
-				var term = languageTerms[j],
-					termType = term.getAttribute("type");
-				
+		for (let languageNode of languageNodes) {
+			var languageTerms = ZU.xpath(languageNode, 'm:languageTerm', xns);
+			
+			if (!languageTerms.length
+				&& languageNode.childNodes.length === 1
+				&& languageNode.firstChild.nodeType === 3 /* Node.TEXT_NODE*/) {
+				languageCodes.push(languageNode.firstChild.nodeValue);
+				continue;
+			}
+			
+			for (let term of languageTerms) {
+				var termType = term.getAttribute("type");
+
 				if (termType === "text") {
-					languages.push(term.textContent);
-					code = false;
-					break;
-				// code authorities should be used, not ignored
-				// but we ignore them for now
+					languageNames.push(term.textContent);
 				}
 				else if (termType === "code" || term.hasAttribute("authority")) {
-					code = term.textContent;
+					languageCodes.push(term.textContent);
 				}
 			}
-			// If we have a code or text content of the node
-			// (prefer the former), then we add that
-			if (code || (languageNode.childNodes.length === 1
-					&& languageNode.firstChild.nodeType === 3 /* Node.TEXT_NODE*/
-					&& (code = languageNode.firstChild.nodeValue))) {
-				languages.push(code);
-			}
 		}
+		
+		// prefer language codes to avoid localized language names in metadata
+		let languages = languageCodes.length ? languageCodes : languageNames;
+		
 		// join the list separated by semicolons & add it to zotero item
 		newItem.language = languages.join('; ');
 		
@@ -1375,15 +1373,21 @@ var testCases = [
 					}
 				],
 				"date": "1889",
-				"language": "English",
+				"language": "eng",
 				"rights": "Personal, noncommercial use of this item is permitted in the United States of America. Please see http://digital.library.upenn.edu/women/ for other rights and restrictions that may apply to this resource.",
 				"url": "http://digital.library.upenn.edu/women/alleman/gettysburg/gettysburg.html",
 				"websiteTitle": "A Celebration of Women Writers: Americana",
 				"attachments": [],
 				"tags": [
-					"Gettysburg (Pa.) -- History -- Civil War, 1861-1865",
-					"Gettysburg, Battle of, Gettysburg, Pa., 1863",
-					"United States -- History -- Civil War, 1861-1865 -- Campaigns"
+					{
+						"tag": "Gettysburg (Pa.) -- History -- Civil War, 1861-1865"
+					},
+					{
+						"tag": "Gettysburg, Battle of, Gettysburg, Pa., 1863"
+					},
+					{
+						"tag": "United States -- History -- Civil War, 1861-1865 -- Campaigns"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2087,7 +2091,7 @@ var testCases = [
 				],
 				"date": "2021",
 				"archiveLocation": "Semantics Kommunikationsmanagement GmbH; Semantics Kommunikationsmanagement GmbH",
-				"language": "Deutsch",
+				"language": "ger",
 				"attachments": [],
 				"tags": [],
 				"notes": [
