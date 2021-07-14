@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-12 16:56:23"
+	"lastUpdated": "2021-07-14 21:52:42"
 }
 
 /*
@@ -98,7 +98,19 @@ function scrape(doc, url) {
 				item.place = value;
 				break;
 			case 'Date published':
+			case 'First published':
+			case 'This edition first published':
 				item.date = ZU.strToISO(value);
+				break;
+			case 'ISBN 10':
+			case 'ISBN 13':
+				item.ISBN = ZU.cleanISBN(value);
+				break;
+			default:
+				if (!item.date && /\bpublished\b/i.test(key)) {
+					// handle odd date labels, just in case
+					item.date = ZU.strToISO(value);
+				}
 				break;
 		}
 	}
@@ -166,6 +178,33 @@ var testCases = [
 				"place": "Chicago",
 				"publisher": "John A. Hertel Company",
 				"url": "https://www.biblio.com/book/charming-children-dickens-stories-dickens-charles/d/1397028696",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.biblio.com/book/birds-without-wings-bernieres-louis/d/920369973",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Birds Without Wings",
+				"creators": [
+					{
+						"firstName": "LOUIS",
+						"lastName": "DE BERNIERES",
+						"creatorType": "author"
+					}
+				],
+				"date": "2005-06-28",
+				"ISBN": "9781400079322",
+				"libraryCatalog": "Biblio.com",
+				"place": "New York",
+				"publisher": "Vintage",
+				"url": "https://www.biblio.com/book/birds-without-wings-bernieres-louis/d/920369973",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
