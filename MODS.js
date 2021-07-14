@@ -1274,16 +1274,20 @@ function doImport() {
 
 		// attachments and url
 		var urlNodes = ZU.xpath(modsElement, 'm:location/m:url', xns);
-		for (let i = 0; i < urlNodes.length; i++) {
-			var urlNode = urlNodes[0],
-				access = urlNode.getAttribute("access"),
+		for (let urlNode of urlNodes) {
+			var access = urlNode.getAttribute("access"),
 				usage = urlNode.getAttribute("usage");
 			if (access === "raw object") {
 				var attachment = {
 					title: (urlNode.getAttribute("displayLabel") || "Attachment"),
-					path: urlNode.textContent
+					url: urlNode.textContent
 				};
-				if (attachment.path.substr(-4) === ".pdf") attachment.mimeType = "application/pdf";
+				if (attachment.url.substr(-4) === ".pdf") {
+					attachment.mimeType = "application/pdf";
+				}
+				else if (/\.html?$/.test(attachment.url)) {
+					attachment.mimeType = "text/html";
+				}
 				newItem.attachments.push(attachment);
 			}
 			
