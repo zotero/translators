@@ -126,6 +126,7 @@ function extractPlace(leadText) {
 		return '';
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
