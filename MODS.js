@@ -863,22 +863,44 @@ function processCreator(name, itemType, defaultCreatorType) {
 	// Look for roles
 	let roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="text" or not(@type)]', xns);
 	var validCreatorsForItemType = ZU.getCreatorsForType(itemType);
-	for (let i = 0; i < roles.length; i++) {
-		const roleStr = roles[i].textContent.toLowerCase();
+	for (let role of roles) {
+		const roleStr = role.textContent.toLowerCase();
 		if (validCreatorsForItemType.includes(roleStr)) {
 			creator.creatorType = roleStr;
 		}
 	}
+	
+	// we want to exclude names with no role other than publisher, distributor,
+	// etc., because they aren't really creators in Zotero's sense of the term
+	// (and they'll end up in other fields later). so we'll keep track of whether
+	// we've encountered one of [pbl, dst] and *no other* relator types, and if
+	// we do, we throw the creator away.
+	let onlyPublisher;
 	
 	if (!creator.creatorType) {
 		// Look for MARC roles
 		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")]', xns);
 		for (let i = 0; i < roles.length; i++) {
 			const roleStr = roles[i].textContent.toLowerCase();
-			if (marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
+			if (roleStr == 'pbl' || roleStr == 'dst') {
+				if (onlyPublisher === undefined) {
+					onlyPublisher = true;
+				}
+			}
+			else {
+				onlyPublisher = false;
+			}
+			let marcType = marcRelators[roleStr];
+			if (marcType && validCreatorsForItemType.includes(marcType)) {
+				creator.creatorType = marcRelators[roleStr];
+			}
 		}
 		
 		if (!creator.creatorType) creator.creatorType = defaultCreatorType;
+	}
+	
+	if (onlyPublisher) {
+		return null;
 	}
 
 	return creator;
@@ -1072,7 +1094,8 @@ function doImport() {
 		// TODO: thesisType, type
 		
 		// creators
-		processCreators(modsElement, newItem, "author");
+		let defaultCreatorType = ZU.getCreatorsForType(newItem.itemType)[0];
+		processCreators(modsElement, newItem, defaultCreatorType);
 		// source
 		newItem.source = ZU.xpathText(modsElement, 'm:recordInfo/m:recordContentSource', xns);
 		// accessionNumber
