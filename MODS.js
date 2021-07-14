@@ -847,8 +847,9 @@ function processCreator(name, itemType, defaultCreatorType) {
 		if (!backupName) return null;
 		
 		if (isPersonalName) {
-			creator = ZU.cleanAuthor(backupName.replace(/[[(][^A-Za-z]*[\])]/g, ''),
-				"author", true);
+			let cleanedBackupName = backupName.replace(/[[(][^A-Za-z]*[\])]/g, '');
+			creator = ZU.cleanAuthor(cleanedBackupName,
+				"author", cleanedBackupName.includes(','));
 			delete creator.creatorType;
 		}
 		else {
