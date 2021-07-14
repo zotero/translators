@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.body.id == 'news' && doc.querySelector('script[type="application/ld+json"]')) {
 		if (doc.querySelector('h1.transcript a')) {
 			if (attr(doc, '.slug a', 'href').includes('npr.org/podcasts/')) {
@@ -62,7 +62,7 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	let detected = detectWeb(doc, url);
 	switch (detected) {
-		case 'multiple':
+		case 'multiple': {
 			// we're detecting "multiple" because we have audio and text,
 			// so we can just hardcode the options here
 			let options = { text: 'Text', audio: 'Audio' };
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 					scrapeAudio(doc, url);
 				}
 			});
-			break;
+			break; }
 		case 'newspaperArticle':
 			scrapeText(doc, url);
 			break;
@@ -85,7 +85,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrapeText(doc, url) {
+function scrapeText(doc, _url) {
 	let item = new Zotero.Item('newspaperArticle');
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	
@@ -111,9 +111,10 @@ function scrapeText(doc, url) {
 	item.complete();
 }
 
-function scrapeAudio(doc, url) {
+function scrapeAudio(doc, _url) {
 	// first we need to figure out whether we're looking at a radio broadcast
 	// or a podcast
+	let itemType;
 	if (doc.querySelector('h1.transcript a')) {
 		// if we're on a transcript page, the slug link will include /podcasts/
 		// if the show in question is a podcast
@@ -124,15 +125,13 @@ function scrapeAudio(doc, url) {
 			itemType = 'radioBroadcast';
 		}
 	}
-	else {
+	else if (doc.querySelector('.program-block a')) {
 		// if we're on an article page, there'll be a .program-block link iff
 		// the show aired on a radio program
-		if (doc.querySelector('.program-block a')) {
-			itemType = 'radioBroadcast';
-		}
-		else {
-			itemType = 'podcast';
-		}
+		itemType = 'radioBroadcast';
+	}
+	else {
+		itemType = 'podcast';
 	}
 	
 	let item = new Zotero.Item(itemType);
@@ -155,7 +154,8 @@ function scrapeAudio(doc, url) {
 				item.programTitle = JSON.parse(
 					attr(doc, 'div[data-audio]', 'data-audio')
 				).program;
-			} catch (_) {}
+			}
+			catch (_) {}
 		}
 		item.network = 'NPR';
 	}
@@ -194,6 +194,7 @@ function scrapeAudio(doc, url) {
 	
 	item.complete();
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
