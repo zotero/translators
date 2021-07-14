@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 19:38:45"
+	"lastUpdated": "2021-07-14 19:41:44"
 }
 
 /*
@@ -103,6 +103,7 @@ function scrape(doc, url) {
 	}
 	
 	item.language = attr(doc, 'meta[name="language"]', 'content');
+	item.libraryCatalog = 'AJC.com';
 	
 	for (let author of json.author.name.split(', ')) {
 		item.creators.push(ZU.cleanAuthor(author, 'author'));
@@ -144,7 +145,7 @@ var testCases = [
 				"ISSN": "1539-7459",
 				"abstractNote": "ROME — The organizers at the door handed out soft-pink “Trump Won” signs to each attendee. An out-of-state radio host spouted far-right conspiracies.",
 				"language": "English",
-				"libraryCatalog": "Atlanta Journal-Constitution",
+				"libraryCatalog": "AJC.com",
 				"place": "Rome",
 				"publicationTitle": "The Atlanta Journal-Constitution",
 				"section": "Politics",
@@ -217,7 +218,7 @@ var testCases = [
 				"ISSN": "1539-7459",
 				"abstractNote": "Property values have surged during the pandemic, but Marietta officials say homeowners will pay less in taxes.",
 				"language": "English",
-				"libraryCatalog": "Atlanta Journal-Constitution",
+				"libraryCatalog": "AJC.com",
 				"publicationTitle": "The Atlanta Journal-Constitution",
 				"section": "Cobb County",
 				"shortTitle": "Marietta officials",
@@ -255,7 +256,7 @@ var testCases = [
 				"ISSN": "1539-7459",
 				"abstractNote": "Check out four of the best patios in metro Atlanta to eat and drink, including the Chastain, Delbar, Banshee and Willow Bar.",
 				"language": "English",
-				"libraryCatalog": "Atlanta Journal-Constitution",
+				"libraryCatalog": "AJC.com",
 				"publicationTitle": "The Atlanta Journal-Constitution",
 				"section": "Restaurant Refresh",
 				"shortTitle": "Atlanta patio picks",
