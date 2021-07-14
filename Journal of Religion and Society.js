@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-05 22:56:10"
+	"lastUpdated": "2021-07-14 20:06:32"
 }
 
 /*
@@ -35,27 +35,21 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	// Three possible cases : the list of articles of an issue, the list of content of a supplement, or the list of the supplements
-	if (getSearchResults(doc, true) && (url.includes('/toc/SS') || url.includes('/toc/Supplement'))) {
-		return "multiple";
-	}
-	else if (getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
-	var items = [];
+	var items = {};
 	var found = false;
 	
 	// We have a different querySelector according to the page (respectively, all supplements page, journal issue page, and supplement issue page)
-	var rows = doc.querySelectorAll('div[class^=pubs] p.SuppVolume em,div[class^=pubs] p.title, div[class^=pubs] p.chap');
+	var rows = doc.querySelectorAll('div[class^=pubs] p.SuppVolume em, div[class^=pubs] p.title, div[class^=pubs] p.chap');
 	for (let row of rows) {
 		let title = row.textContent;
 		if (!title) continue;
@@ -70,7 +64,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) {
-				for (var id in items) {
+				for (var id of Object.keys(items)) {
 					scrape(id, doc, url);
 				}
 			}
@@ -155,6 +149,7 @@ function scrape(id, doc, url) {
 	}
 	
 	item.libraryCatalog = "Journal of Religion and Society";
+	item.ISSN = "1522-5658";
 	item.complete();
 }
 
