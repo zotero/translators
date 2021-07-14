@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-14 15:40:40"
+	"lastUpdated": "2021-07-14 23:10:45"
 }
 
 /*
@@ -74,7 +74,6 @@ var fromMarcGenre = {
 	folktale: "book",
 	//		"font":XXX,
 	//		"game":XXX,
-	"government publication": "book",
 	graphic: "artwork",
 	globe: "map",
 	handbook: "book",
@@ -812,11 +811,18 @@ function processItemType(contextElement) {
 		}
 	}
 	
-	var letter = ZU.xpath(contextElement,
+	var isLetter = !!ZU.xpath(contextElement,
 		'm:name/m:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")][text()="rcp"]',
 		xns).length;
-	if (letter) {
+	if (isLetter) {
 		return 'letter';
+	}
+	
+	// for US congressional publications
+	// (this is a nonstandard extension field)
+	var isHearing = !!ZU.xpath(contextElement, '//m:congCommittee', xns).length;
+	if (isHearing) {
+		return 'hearing';
 	}
 
 	// As a last resort, if it has a host, let's set it to book chapter, so we can import
@@ -1072,6 +1078,19 @@ function doImport() {
 		newItem.accessionNumber = ZU.xpathText(modsElement, 'm:recordInfo/m:recordIdentifier', xns);
 		// rights
 		newItem.rights = ZU.xpathText(modsElement, 'm:accessCondition', xns);
+		
+		/** US GOVERNMENT EXTENSIONS **/
+		
+		if (newItem.itemType == 'hearing') {
+			newItem.committee = ZU.xpathText(modsElement,
+				'm:extension/m:congCommittee/m:name[@type="authority-standard"]', xns);
+			newItem.legislativeBody = ZU.capitalizeTitle(ZU.xpathText(modsElement,
+				'm:extension/m:chamber', xns), true);
+			newItem.session = ZU.xpathText(modsElement,
+				'm:extension/m:congress', xns); // this is not great
+			newItem.documentNumber = ZU.xpathText(modsElement,
+				'm:extension/m:number', xns);
+		}
 		
 		/** SUPPLEMENTAL FIELDS **/
 		
