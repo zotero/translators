@@ -131,7 +131,7 @@ function downloadFunction(text, url, prefs) {
 			}
 			
 			if (subtitle) {
-				item.title += `: ` + subtitle;
+				item.title += `: ${subtitle}`;
 			}
 		}
 
