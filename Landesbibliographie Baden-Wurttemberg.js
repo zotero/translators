@@ -40,7 +40,8 @@ function detectWeb(doc, url) {
 	if (url.includes('/LABI.asp?')) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
-		} else {
+		}
+		else {
 			var labels = doc.querySelectorAll('td>b');
 			for (let label of labels) {
 				if (label.textContent == 'ISBN:') {
@@ -53,6 +54,7 @@ function detectWeb(doc, url) {
 			return "report";
 		}
 	}
+	return false;
 }
 
 
@@ -60,7 +62,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('td.right + td>a');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -76,7 +78,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -84,7 +86,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -93,7 +96,7 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var type = detectWeb(doc, url);
 	var risURL = attr(doc, 'a.export', 'href');
-	ZU.doGet(risURL, function(text) {
+	ZU.doGet(risURL, function (text) {
 		// institutional authors are ending up in A3 now
 		text = text.replace(/^A3/m, 'AU');
 		// for coorperate bodies the place is in brackets sometimes
@@ -103,11 +106,11 @@ function scrape(doc, url) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item.itemType = type;
 			// fixes the added author information in the title,
 			// which might be fixed by them in the future
-			item.title = item.title.replace(/\/[^\/]*$/, '').replace(/ : /g, ': ');
+			item.title = item.title.replace(/\/[^/]*$/, '').replace(/ : /g, ': ');
 			// number of pages land in pages for a book
 			if (type == "book" && item.pages) {
 				let m = item.pages.match(/(\d+) Seiten/);
@@ -125,7 +128,8 @@ function scrape(doc, url) {
 				let m = item.date.match(/(\d+)/);
 				if (m) {
 					item.date = m[1];
-				} else {
+				}
+				else {
 					delete item.date;
 				}
 			}
