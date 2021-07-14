@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-13 23:35:05"
+	"lastUpdated": "2021-07-21 16:13:21"
 }
 
 /*
@@ -183,7 +183,7 @@ class Record {
 			indicator = indicator.substr(0, this.indicatorLength);
 		}
 		else if (indicator.length != this.indicatorLength) {
-			indicator = Zotero.Utilities.lpad(indicator, " ", this.indicatorLength);
+			indicator = ZU.lpad(indicator, " ", this.indicatorLength);
 		}
 	
 		// add terminator
@@ -257,14 +257,14 @@ class Record {
 		var returnFields = [];
 	
 		for (let field of fields) {
-			returnFields[i] = this.extractSubfields(field[1], tag);
+			returnFields.push(this.extractSubfields(field[1], tag));
 		}
 	
 		return returnFields;
 	}
 	
 	// add field to DB
-	_associateDBField(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+	_associateDBField(item, fieldNo, part, fieldName, valueMapper) {
 		var field = this.getFieldSubfields(fieldNo);
 	
 		Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
@@ -285,8 +285,8 @@ class Record {
 				if (value) {
 					value = clean(value);
 	
-					if (execMe) {
-						value = execMe(value, arg1, arg2);
+					if (valueMapper) {
+						value = valueMapper(value);
 					}
 	
 					if (fieldName == "creator") {
@@ -332,9 +332,442 @@ class Record {
 	
 		for (var i in field) {
 			for (var j = 0; j < part.length; j++) {
-				var myPart = part.substr(j, 1);
+				var myPart = part[j];
 				if (field[i][myPart]) {
 					item.tags.push(clean(field[i][myPart]));
+				}
+			}
+		}
+	}
+	
+	_processUNIMARC(item) {
+		Z.debug('Processing as UNIMARC record');
+		
+		// If we've got a 328 field, we're on a thesis
+		if (this.getFieldSubfields("328")[0]) {
+			item.itemType = "thesis";
+		}
+
+		// Extract ISBNs
+		this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
+		// Extract ISSNs
+		this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISBN);
+
+		// Extract creators (700, 701 & 702)
+		for (let i = 700; i <= 702; i++) {
+			let authorTab = this.getFieldSubfields(i);
+			for (let j in authorTab) {
+				var aut = authorTab[j];
+				var authorText = "";
+				if ((aut.b) && (aut.a)) {
+					authorText = aut.a.replace(/,\s*$/, '') + ", " + aut.b;
+				}
+				else {
+					authorText = aut.a;
+				}
+				// prevent this from crashing with empty author tags
+				if (authorText) item.creators.push(ZU.cleanAuthor(authorText, "author", true));
+			}
+		}
+
+		// Extract corporate creators (710, 711 & 712)
+		for (let i = 710; i < 713; i++) {
+			let authorTab = this.getFieldSubfields(i);
+			for (let subfield of authorTab) {
+				if (subfield.a) {
+					item.creators.push({ lastName: subfield.a, creatorType: "contributor", fieldMode: true });
+				}
+			}
+		}
+
+		// Extract language. In the 101$a there's a 3 chars code, would be better to
+		// have a translation somewhere
+		this._associateDBField(item, "101", "a", "language");
+
+		// Extract abstractNote
+		this._associateDBField(item, "328", "a", "abstractNote");
+		this._associateDBField(item, "330", "a", "abstractNote");
+
+		// Extract tags
+		// TODO : Ajouter les autres champs en 6xx avec les autorités construites.
+		// nécessite de reconstruire les autorités
+		this._associateTags(item, "610", "a");
+
+		// Extract scale (for maps)
+		this._associateDBField(item, "206", "a", "scale");
+
+		// Extract title
+		var title = this.getField("200")[0][1]	// non-repeatable
+						.replace(	// chop off any translations, since they may have repeated $e fields
+							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
+		title = this.extractSubfields(title, '200');
+		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
+
+		// Extract edition
+		this._associateDBField(item, "205", "a", "edition");
+
+
+		// Field 214 replaces 210 in newer version of UNIMARC; the two are exclusive
+		// 214 uses numbered subfields to describe different types of bibliographic information
+		// currently not using that
+		// see https://www.transition-bibliographique.fr/wp-content/uploads/2019/08/B214-2019.pdf
+		if (this.getField("214").length) {
+			this._associateDBField(item, "214", "a", "place");
+			if (item.itemType == "film") {
+				this._associateDBField(item, "214", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "214", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "214", "d", "date", pullNumber);
+		}
+		else {
+			// Extract place info
+			this._associateDBField(item, "210", "a", "place");
+
+			// Extract publisher/distributor
+			if (item.itemType == "film") {
+				this._associateDBField(item, "210", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "210", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "210", "d", "date", pullNumber);
+		}
+
+
+		// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
+		// this._associateDBField(item, "215", "a", "pages", pullNumber);
+
+		// Extract series
+		this._associateDBField(item, "225", "a", "series");
+		// Extract series number
+		this._associateDBField(item, "225", "v", "seriesNumber");
+
+		// Extract call number
+		this._associateDBField(item, "686", "ab", "callNumber");
+		this._associateDBField(item, "676", "a", "callNumber");
+		this._associateDBField(item, "675", "a", "callNumber");
+		this._associateDBField(item, "680", "ab", "callNumber");
+	}
+	
+	_processMARC21(item) {
+		Z.debug('Processing as MARC21 record');
+		
+		// If we've got a 502 field, we're on a thesis, either published on its own (thesis)
+		// or by a publisher and therefore with an ISBN number (book).
+		if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0]) {
+			item.itemType = "thesis";
+		}
+
+		// Extract ISBNs
+		this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
+		// Extract ISSNs
+		this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISBN);
+		// Extract language
+		this._associateDBField(item, "041", "a", "language");
+		// Extract creators
+		// http://www.loc.gov/marc/relators/relaterm.html
+		var RELATERM = {
+			act: "castMember",
+			asn: "contributor", // Associated name
+			aut: "author",
+			cmp: "composer",
+			ctb: "contributor",
+			drt: "director",
+			edt: "editor",
+			pbl: "SKIP", // publisher
+			prf: "performer",
+			pro: "producer",
+			pub: "SKIP", // publication place
+			trl: "translator"
+		};
+
+		var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
+		for (let i = 0; i < creatorFields.length; i++) {
+			var authorTab = this.getFieldSubfields(creatorFields[i]);
+			for (let j in authorTab) {
+				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
+					continue;
+				}
+				var creatorObject = {};
+				if (authorTab[j].a) {
+					if (creatorFields[i] == "100" || creatorFields[i] == "700") {
+						creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
+					}
+					else {
+						// same replacements as in the function ZU.cleanAuthor for institutional authors:
+						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
+							.replace(/[\s\u00A0.,/[\]:]+$/, '')
+							.replace(/[\s\u00A0]+/, ' ');
+						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
+					}
+					// some heuristic for the default values:
+					// in a book without any person as a main entry (no 100 field)
+					// it is likely that all persons (in 700 fields) are editors
+					if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
+						creatorObject.creatorType = "editor";
+					}
+					if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']]) {
+						creatorObject.creatorType = RELATERM[authorTab[j]['4']];
+					}
+					item.creators.push(creatorObject);
+				}
+			}
+		}
+
+		this._associateDBField(item, "111", "a", "meetingName");
+		this._associateDBField(item, "711", "a", "meetingName");
+
+		if (item.itemType == "book" && !item.creators.length) {
+			// some LOC entries have no listed author, but have the author in the person subject field as the first entry
+			var field = this.getFieldSubfields("600");
+			if (field[0]) {
+				item.creators.push(ZU.cleanAuthor(field[0].a, "author", true));
+			}
+		}
+
+		// Extract tags
+		// personal
+		this._associateTags(item, "600", "aqtxyzv");
+		// corporate
+		this._associateTags(item, "610", "abxyzv");
+		// meeting
+		this._associateTags(item, "611", "abtxyzv");
+		// uniform title
+		this._associateTags(item, "630", "acetxyzv");
+		// chronological
+		this._associateTags(item, "648", "atxyzv");
+		// topical
+		this._associateTags(item, "650", "axyzv");
+		// geographic
+		this._associateTags(item, "651", "abcxyzv");
+		// uncontrolled
+		this._associateTags(item, "653", "axyzv");
+		// faceted topical term (whatever that means)
+		this._associateTags(item, "654", "abcyzv");
+		// genre/form
+		this._associateTags(item, "655", "abcxyzv");
+		// occupation
+		this._associateTags(item, "656", "axyzv");
+		// function
+		this._associateTags(item, "657", "axyzv");
+		// curriculum objective
+		this._associateTags(item, "658", "ab");
+		// hierarchical geographic place name
+		this._associateTags(item, "662", "abcdfgh");
+
+		// Extract note fields
+		// http://www.loc.gov/marc/bibliographic/bd5xx.html
+		// general note
+		this._associateNotes(item, "500", "a");
+		// dissertation note
+		this._associateNotes(item, "502", "a");
+		// formatted contents (table of contents)
+		this._associateNotes(item, "505", "art");
+		// summary
+		// Store as abstract if not already available and only one such note exists
+		if (!item.abstractNote && this.getField("520").length == 1) {
+			this._associateDBField(item, "520", "ab", "abstractNote");
+		}
+		else {
+			this._associateNotes(item, "520", "ab");
+		}
+		// biographical or historical data
+		this._associateNotes(item, "545", "ab");
+
+		// Extract title
+		//  a = main title
+		//  b = subtitle
+		//  n = Number of part/section of a work
+		//  p = Name of part/section of a work
+		var titlesubfields = this.getFieldSubfields("245")[0];
+		item.title = glueTogether(
+			glueTogether(clean(titlesubfields.a), clean(titlesubfields.b), ": "),
+			glueTogether(clean(titlesubfields.n), clean(titlesubfields.p), ": "),
+			". "
+		);
+
+		// Extract edition
+		this._associateDBField(item, "250", "a", "edition");
+		// Extract place info
+		this._associateDBField(item, "260", "a", "place");
+
+		// Extract publisher/distributor
+		if (item.itemType == "film") {
+			this._associateDBField(item, "260", "b", "distributor");
+		}
+		else {
+			this._associateDBField(item, "260", "b", "publisher");
+		}
+
+		// Extract year
+		this._associateDBField(item, "260", "c", "date", pullNumber);
+		// Extract pages
+		this._associateDBField(item, "300", "a", "numPages", pullNumber);
+		// Extract series and series number
+		// The current preference is 490
+		this._associateDBField(item, "490", "a", "series");
+		this._associateDBField(item, "490", "v", "seriesNumber");
+		// 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
+		this._associateDBField(item, "440", "a", "series");
+		this._associateDBField(item, "440", "v", "seriesNumber");
+		// Extract call number
+		this._associateDBField(item, "084", "ab", "callNumber");
+		this._associateDBField(item, "082", "a", "callNumber");
+		this._associateDBField(item, "080", "ab", "callNumber");
+		this._associateDBField(item, "070", "ab", "callNumber");
+		this._associateDBField(item, "060", "ab", "callNumber");
+		this._associateDBField(item, "050", "ab", "callNumber");
+		this._associateDBField(item, "090", "ab", "callNumber");
+		this._associateDBField(item, "099", "a", "callNumber");
+		this._associateDBField(item, "852", "khim", "callNumber");
+		// OCLC numbers are useful info to save in extra
+		var controlNumber = this.getFieldSubfields("035")[0];
+		if (controlNumber && controlNumber.a && controlNumber.a.indexOf("(OCoLC)") == 0) {
+			item.extra = "OCLC: " + controlNumber.a.substring(7);
+		}
+		// Extract URL for electronic resources
+		this._associateDBField(item, "245", "h", "medium");
+		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
+
+		// Field 264 instead of 260
+		if (!item.place) this._associateDBField(item, "264", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "264", "b", "publisher");
+		if (!item.date) this._associateDBField(item, "264", "c", "date", pullNumber);
+
+		// German
+		if (!item.place) this._associateDBField(item, "410", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
+		if (!item.title) this._associateDBField(item, "331", "a", "title");
+		if (!item.title) this._associateDBField(item, "1300", "a", "title");
+		if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
+		if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
+		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
+		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
+
+		// Spanish
+		if (!item.title) this._associateDBField(item, "200", "a", "title");
+		if (!item.place) this._associateDBField(item, "210", "a", "place");
+		if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
+		if (!item.date) this._associateDBField(item, "210", "d", "date");
+		if (!item.creators) {
+			for (let i = 700; i < 703; i++) {
+				if (this.getFieldSubfields(i)[0]) {
+					Zotero.debug(i + " is AOK");
+					Zotero.debug(this.getFieldSubfields(i.toString()));
+					let aut = this.getFieldSubfields(i)[0];
+					if (aut.b) {
+						aut = aut.b.replace(/,\W+/g, "") + " " + aut.a.replace(/,\s/g, "");
+					}
+					else {
+						aut = aut.a.split(", ").join(" ");
+					}
+					item.creators.push(ZU.cleanAuthor(aut, "author"));
+				}
+			}
+		}
+		if (item.title) {
+			item.title = ZU.capitalizeTitle(item.title);
+		}
+		if (this.getFieldSubfields("335")[0]) {
+			item.title = item.title + ": " + this.getFieldSubfields("335")[0].a;
+		}
+		var otherIds = this.getFieldSubfields("024");
+		for (let id of otherIds) {
+			if (id['2'] == "doi") {
+				item.DOI = id.a;
+			}
+		}
+		var container = this.getFieldSubfields("773")[0];
+		if (container) {
+			var type = container['7'];
+			switch (type) {
+				case "nnam":
+					item.itemType = "bookSection";
+					break;
+				case "nnas":
+					item.itemType = "journalArticle";
+					break;
+				case "m2am":
+					item.itemType = "conferencePaper";
+					break;
+				default: // some catalogs don't have the $7 subfield
+					if (container.t && container.z) { // if there is an ISBN assume book section
+						item.itemType = "bookSection";
+					}
+					else if (container.t) { // else default to journal article
+						item.itemType = "journalArticle";
+					}
+			}
+			var publication = container.t;
+			if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
+				var pubinfo = container.d;
+				if (pubinfo) {
+					item.place = pubinfo.replace(/:.+/, "");
+					var publisher = pubinfo.match(/:\s*(.+),\s*\d{4}/);
+					if (publisher) item.publisher = publisher[1];
+					var year = pubinfo.match(/,\s*(\d{4})/);
+					if (year) item.date = year[1];
+				}
+				if (publication) {
+					var publicationTitle = publication.replace(/\..*/, "");
+					if (item.itemType == "bookSection") {
+						item.bookTitle = publicationTitle;
+					}
+					else {
+						item.proceedingsTitle = publicationTitle;
+					}
+					if (publication.includes("Edited by")) {
+						var editors = publication.match(/Edited by\s+(.+)\.?/)[1];
+						editors = editors.split(/\s+and\s+|\s*,\s*|\s*;\s*/);
+						for (let i = 0; i < editors.length; i++) {
+							item.creators.push(ZU.cleanAuthor(editors[i], "editor"));
+						}
+					}
+				}
+				var pages = container.g;
+				if (pages) {
+					pagerange = pages.match(/[ps]\.\s*(\d+(-\d+)?)/);
+					// if we don't have a page marker, we'll guess that a number range is good enough but
+					if (!pagerange) pagerange = pages.match(/(\d+-\d+)/);
+					if (pagerange) item.pages = pagerange[1];
+				}
+				var event = container.a;
+				if (event) {
+					item.conferenceName = event.replace(/[{}]/g, "");
+				}
+				item.ISBN = container.z;
+			}
+			else {
+				if (publication) {
+					item.publicationTitle = publication.replace(/[.,\s]+$/, "");
+				}
+				item.journalAbbreviation = container.p;
+				var locators = container.g;
+				if (locators) {
+					// unfortunately there is no standardization whatsoever here
+					var pagerange = locators.match(/[ps]\.\s*(\d+(-\d+)?)/);
+					// For Journals, since there are a lot of issue-ranges we require the first number to have >=2 digits
+					if (!pagerange) pagerange = locators.match(/(\d\d+-\d+)/);
+					if (pagerange) item.pages = pagerange[1];
+					var date = locators.match(/((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?\s*)?\d{4}/);
+					if (date) {
+						item.date = date[0];
+					}
+					if (locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)) {
+						item.volume = locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)[1];
+					}
+					if (locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)) {
+						item.issue = locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)[1];
+					}
+					if (!item.volume && locators.match(/\d+:\d+/)) {
+						item.volume = locators.match(/(\d+):\d+/)[1];
+						item.issue = locators.match(/\d+:(\d+)/)[1];
+					}
+					item.ISSN = container.x;
 				}
 			}
 		}
@@ -375,431 +808,10 @@ class Record {
 		// So if we have a 200 and no 245, we can think we are with an unimarc record.
 		// Otherwise, we use the original association.
 		if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
-			// If we've got a 328 field, we're on a thesis
-			if (this.getFieldSubfields("328")[0]) {
-				item.itemType = "thesis";
-			}
-	
-			// Extract ISBNs
-			this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
-			// Extract ISSNs
-			this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISBN);
-	
-			// Extract creators (700, 701 & 702)
-			for (let i = 700; i < 703; i++) {
-				let authorTab = this.getFieldSubfields(i);
-				for (let j in authorTab) {
-					var aut = authorTab[j];
-					var authorText = "";
-					if ((aut.b) && (aut.a)) {
-						authorText = aut.a.replace(/,\s*$/, '') + ", " + aut.b;
-					}
-					else {
-						authorText = aut.a;
-					}
-					// prevent this from crashing with empty author tags
-					if (authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
-				}
-			}
-	
-			// Extract corporate creators (710, 711 & 712)
-			for (let i = 710; i < 713; i++) {
-				let authorTab = this.getFieldSubfields(i);
-				for (let j in authorTab) {
-					if (authorTab[j].a) {
-						item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true });
-					}
-				}
-			}
-	
-			// Extract language. In the 101$a there's a 3 chars code, would be better to
-			// have a translation somewhere
-			this._associateDBField(item, "101", "a", "language");
-	
-			// Extract abstractNote
-			this._associateDBField(item, "328", "a", "abstractNote");
-			this._associateDBField(item, "330", "a", "abstractNote");
-	
-			// Extract tags
-			// TODO : Ajouter les autres champs en 6xx avec les autorités construites.
-			// nécessite de reconstruire les autorités
-			this._associateTags(item, "610", "a");
-	
-			// Extract scale (for maps)
-			this._associateDBField(item, "206", "a", "scale");
-	
-			// Extract title
-			var title = this.getField("200")[0][1]	// non-repeatable
-							.replace(	// chop off any translations, since they may have repeated $e fields
-								new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
-			title = this.extractSubfields(title, '200');
-			item.title = glueTogether(clean(title.a), clean(title.e), ': ');
-	
-			// Extract edition
-			this._associateDBField(item, "205", "a", "edition");
-	
-	
-			// Field 214 replaces 210 in newer version of UNIMARC; the two are exclusive
-			// 214 uses numbered subfields to describe different types of bibliographic information
-			// currently not using that
-			// see https://www.transition-bibliographique.fr/wp-content/uploads/2019/08/B214-2019.pdf
-			if (this.getField("214").length) {
-				this._associateDBField(item, "214", "a", "place");
-				if (item.itemType == "film") {
-					this._associateDBField(item, "214", "c", "distributor");
-				}
-				else {
-					this._associateDBField(item, "214", "c", "publisher");
-				}
-				// Extract year
-				this._associateDBField(item, "214", "d", "date", pullNumber);
-			}
-			else {
-				// Extract place info
-				this._associateDBField(item, "210", "a", "place");
-	
-				// Extract publisher/distributor
-				if (item.itemType == "film") {
-					this._associateDBField(item, "210", "c", "distributor");
-				}
-				else {
-					this._associateDBField(item, "210", "c", "publisher");
-				}
-				// Extract year
-				this._associateDBField(item, "210", "d", "date", pullNumber);
-			}
-	
-	
-			// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
-			// this._associateDBField(item, "215", "a", "pages", pullNumber);
-	
-			// Extract series
-			this._associateDBField(item, "225", "a", "series");
-			// Extract series number
-			this._associateDBField(item, "225", "v", "seriesNumber");
-	
-			// Extract call number
-			this._associateDBField(item, "686", "ab", "callNumber");
-			this._associateDBField(item, "676", "a", "callNumber");
-			this._associateDBField(item, "675", "a", "callNumber");
-			this._associateDBField(item, "680", "ab", "callNumber");
+			this._processUNIMARC(item);
 		}
 		else {
-			// If we've got a 502 field, we're on a thesis, either published on its own (thesis)
-			// or by a publisher and therefore with an ISBN number (book).
-			if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0]) {
-				item.itemType = "thesis";
-			}
-	
-			// Extract ISBNs
-			this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
-			// Extract ISSNs
-			this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISBN);
-			// Extract language
-			this._associateDBField(item, "041", "a", "language");
-			// Extract creators
-			// http://www.loc.gov/marc/relators/relaterm.html
-			var RELATERM = {
-				act: "castMember",
-				asn: "contributor", // Associated name
-				aut: "author",
-				cmp: "composer",
-				ctb: "contributor",
-				drt: "director",
-				edt: "editor",
-				pbl: "SKIP", // publisher
-				prf: "performer",
-				pro: "producer",
-				pub: "SKIP", // publication place
-				trl: "translator"
-			};
-	
-			var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
-			for (let i = 0; i < creatorFields.length; i++) {
-				var authorTab = this.getFieldSubfields(creatorFields[i]);
-				for (let j in authorTab) {
-					if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
-						continue;
-					}
-					var creatorObject = {};
-					if (authorTab[j].a) {
-						if (creatorFields[i] == "100" || creatorFields[i] == "700") {
-							creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
-						}
-						else {
-							// same replacements as in the function ZU.cleanAuthor for institutional authors:
-							authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
-								.replace(/[\s\u00A0.,/[\]:]+$/, '')
-								.replace(/[\s\u00A0]+/, ' ');
-							creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
-						}
-						// some heuristic for the default values:
-						// in a book without any person as a main entry (no 100 field)
-						// it is likely that all persons (in 700 fields) are editors
-						if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
-							creatorObject.creatorType = "editor";
-						}
-						if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']]) {
-							creatorObject.creatorType = RELATERM[authorTab[j]['4']];
-						}
-						item.creators.push(creatorObject);
-					}
-				}
-			}
-	
-			this._associateDBField(item, "111", "a", "meetingName");
-			this._associateDBField(item, "711", "a", "meetingName");
-	
-			if (item.itemType == "book" && !item.creators.length) {
-				// some LOC entries have no listed author, but have the author in the person subject field as the first entry
-				var field = this.getFieldSubfields("600");
-				if (field[0]) {
-					item.creators.push(Zotero.Utilities.cleanAuthor(field[0].a, "author", true));
-				}
-			}
-	
-			// Extract tags
-			// personal
-			this._associateTags(item, "600", "aqtxyzv");
-			// corporate
-			this._associateTags(item, "610", "abxyzv");
-			// meeting
-			this._associateTags(item, "611", "abtxyzv");
-			// uniform title
-			this._associateTags(item, "630", "acetxyzv");
-			// chronological
-			this._associateTags(item, "648", "atxyzv");
-			// topical
-			this._associateTags(item, "650", "axyzv");
-			// geographic
-			this._associateTags(item, "651", "abcxyzv");
-			// uncontrolled
-			this._associateTags(item, "653", "axyzv");
-			// faceted topical term (whatever that means)
-			this._associateTags(item, "654", "abcyzv");
-			// genre/form
-			this._associateTags(item, "655", "abcxyzv");
-			// occupation
-			this._associateTags(item, "656", "axyzv");
-			// function
-			this._associateTags(item, "657", "axyzv");
-			// curriculum objective
-			this._associateTags(item, "658", "ab");
-			// hierarchical geographic place name
-			this._associateTags(item, "662", "abcdfgh");
-	
-			// Extract note fields
-			// http://www.loc.gov/marc/bibliographic/bd5xx.html
-			// general note
-			this._associateNotes(item, "500", "a");
-			// dissertation note
-			this._associateNotes(item, "502", "a");
-			// formatted contents (table of contents)
-			this._associateNotes(item, "505", "art");
-			// summary
-			// Store as abstract if not already available and only one such note exists
-			if (!item.abstractNote && this.getField("520").length == 1) {
-				this._associateDBField(item, "520", "ab", "abstractNote");
-			}
-			else {
-				this._associateNotes(item, "520", "ab");
-			}
-			// biographical or historical data
-			this._associateNotes(item, "545", "ab");
-	
-			// Extract title
-			//  a = main title
-			//  b = subtitle
-			//  n = Number of part/section of a work
-			//  p = Name of part/section of a work
-			var titlesubfields = this.getFieldSubfields("245")[0];
-			item.title = glueTogether(
-				glueTogether(clean(titlesubfields.a), clean(titlesubfields.b), ": "),
-				glueTogether(clean(titlesubfields.n), clean(titlesubfields.p), ": "),
-				". "
-			);
-	
-			// Extract edition
-			this._associateDBField(item, "250", "a", "edition");
-			// Extract place info
-			this._associateDBField(item, "260", "a", "place");
-	
-			// Extract publisher/distributor
-			if (item.itemType == "film") {
-				this._associateDBField(item, "260", "b", "distributor");
-			}
-			else {
-				this._associateDBField(item, "260", "b", "publisher");
-			}
-	
-			// Extract year
-			this._associateDBField(item, "260", "c", "date", pullNumber);
-			// Extract pages
-			this._associateDBField(item, "300", "a", "numPages", pullNumber);
-			// Extract series and series number
-			// The current preference is 490
-			this._associateDBField(item, "490", "a", "series");
-			this._associateDBField(item, "490", "v", "seriesNumber");
-			// 440 was made obsolete as of 2008; see http://www.loc.gov/marc/bibliographic/bd4xx.html
-			this._associateDBField(item, "440", "a", "series");
-			this._associateDBField(item, "440", "v", "seriesNumber");
-			// Extract call number
-			this._associateDBField(item, "084", "ab", "callNumber");
-			this._associateDBField(item, "082", "a", "callNumber");
-			this._associateDBField(item, "080", "ab", "callNumber");
-			this._associateDBField(item, "070", "ab", "callNumber");
-			this._associateDBField(item, "060", "ab", "callNumber");
-			this._associateDBField(item, "050", "ab", "callNumber");
-			this._associateDBField(item, "090", "ab", "callNumber");
-			this._associateDBField(item, "099", "a", "callNumber");
-			this._associateDBField(item, "852", "khim", "callNumber");
-			// OCLC numbers are useful info to save in extra
-			var controlNumber = this.getFieldSubfields("035")[0];
-			if (controlNumber && controlNumber.a && controlNumber.a.indexOf("(OCoLC)") == 0) {
-				item.extra = "OCLC: " + controlNumber.a.substring(7);
-			}
-			// Extract URL for electronic resources
-			this._associateDBField(item, "245", "h", "medium");
-			if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
-	
-			// Field 264 instead of 260
-			if (!item.place) this._associateDBField(item, "264", "a", "place");
-			if (!item.publisher) this._associateDBField(item, "264", "b", "publisher");
-			if (!item.date) this._associateDBField(item, "264", "c", "date", pullNumber);
-	
-			// German
-			if (!item.place) this._associateDBField(item, "410", "a", "place");
-			if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
-			if (!item.title) this._associateDBField(item, "331", "a", "title");
-			if (!item.title) this._associateDBField(item, "1300", "a", "title");
-			if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
-			if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
-			if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
-			if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
-	
-			// Spanish
-			if (!item.title) this._associateDBField(item, "200", "a", "title");
-			if (!item.place) this._associateDBField(item, "210", "a", "place");
-			if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
-			if (!item.date) this._associateDBField(item, "210", "d", "date");
-			if (!item.creators) {
-				for (let i = 700; i < 703; i++) {
-					if (this.getFieldSubfields(i)[0]) {
-						Zotero.debug(i + " is AOK");
-						Zotero.debug(this.getFieldSubfields(i.toString()));
-						let aut = this.getFieldSubfields(i)[0];
-						if (aut.b) {
-							aut = aut.b.replace(/,\W+/g, "") + " " + aut.a.replace(/,\s/g, "");
-						}
-						else {
-							aut = aut.a.split(", ").join(" ");
-						}
-						item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
-					}
-				}
-			}
-			if (item.title) {
-				item.title = Zotero.Utilities.capitalizeTitle(item.title);
-			}
-			if (this.getFieldSubfields("335")[0]) {
-				item.title = item.title + ": " + this.getFieldSubfields("335")[0].a;
-			}
-			var otherIds = this.getFieldSubfields("024");
-			for (let id of otherIds) {
-				if (id['2'] == "doi") {
-					item.DOI = id.a;
-				}
-			}
-			var container = this.getFieldSubfields("773")[0];
-			if (container) {
-				var type = container['7'];
-				switch (type) {
-					case "nnam":
-						item.itemType = "bookSection";
-						break;
-					case "nnas":
-						item.itemType = "journalArticle";
-						break;
-					case "m2am":
-						item.itemType = "conferencePaper";
-						break;
-					default: // some catalogs don't have the $7 subfield
-						if (container.t && container.z) { // if there is an ISBN assume book section
-							item.itemType = "bookSection";
-						}
-						else if (container.t) { // else default to journal article
-							item.itemType = "journalArticle";
-						}
-				}
-				var publication = container.t;
-				if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
-					var pubinfo = container.d;
-					if (pubinfo) {
-						item.place = pubinfo.replace(/:.+/, "");
-						var publisher = pubinfo.match(/:\s*(.+),\s*\d{4}/);
-						if (publisher) item.publisher = publisher[1];
-						var year = pubinfo.match(/,\s*(\d{4})/);
-						if (year) item.date = year[1];
-					}
-					if (publication) {
-						var publicationTitle = publication.replace(/\..*/, "");
-						if (item.itemType == "bookSection") {
-							item.bookTitle = publicationTitle;
-						}
-						else {
-							item.proceedingsTitle = publicationTitle;
-						}
-						if (publication.includes("Edited by")) {
-							var editors = publication.match(/Edited by\s+(.+)\.?/)[1];
-							editors = editors.split(/\s+and\s+|\s*,\s*|\s*;\s*/);
-							for (let i = 0; i < editors.length; i++) {
-								item.creators.push(ZU.cleanAuthor(editors[i], "editor"));
-							}
-						}
-					}
-					var pages = container.g;
-					if (pages) {
-						pagerange = pages.match(/[ps]\.\s*(\d+(-\d+)?)/);
-						// if we don't have a page marker, we'll guess that a number range is good enough but
-						if (!pagerange) pagerange = pages.match(/(\d+-\d+)/);
-						if (pagerange) item.pages = pagerange[1];
-					}
-					var event = container.a;
-					if (event) {
-						item.conferenceName = event.replace(/[{}]/g, "");
-					}
-					item.ISBN = container.z;
-				}
-				else {
-					if (publication) {
-						item.publicationTitle = publication.replace(/[.,\s]+$/, "");
-					}
-					item.journalAbbreviation = container.p;
-					var locators = container.g;
-					if (locators) {
-						// unfortunately there is no standardization whatsoever here
-						var pagerange = locators.match(/[ps]\.\s*(\d+(-\d+)?)/);
-						// For Journals, since there are a lot of issue-ranges we require the first number to have >=2 digits
-						if (!pagerange) pagerange = locators.match(/(\d\d+-\d+)/);
-						if (pagerange) item.pages = pagerange[1];
-						var date = locators.match(/((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?\s*)?\d{4}/);
-						if (date) {
-							item.date = date[0];
-						}
-						if (locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)) {
-							item.volume = locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)[1];
-						}
-						if (locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)) {
-							item.issue = locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)[1];
-						}
-						if (!item.volume && locators.match(/\d+:\d+/)) {
-							item.volume = locators.match(/(\d+):\d+/)[1];
-							item.issue = locators.match(/\d+:(\d+)/)[1];
-						}
-						item.ISSN = container.x;
-					}
-				}
-			}
+			this._processMARC21(item);
 		}
 		// editors get mapped as contributors - but so do many others who should be
 		// --> for books that don't have an author, turn contributors into editors.
