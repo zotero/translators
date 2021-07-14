@@ -1,7 +1,7 @@
 {
 	"translatorID": "0e2235e7-babf-413c-9acf-f27cce5f059c",
 	"label": "MODS",
-	"creator": "Simon Kornblith and Richard Karnesky",
+	"creator": "Simon Kornblith, Richard Karnesky, and Abe Jellinek",
 	"target": "xml",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -14,14 +14,13 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2020-05-29 00:25:03"
+	"lastUpdated": "2021-07-14 15:23:17"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Simon Kornblith and Richard Karnesky
+	Copyright © 2019-2021 Simon Kornblith, Richard Karnesky, and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -303,7 +302,9 @@ var marcRelators = {
 	trl: "translator",
 	cmp: "composer",
 	lyr: "wordsBy",
-	prf: "performer"
+	prf: "performer",
+	cre: "author",
+	rcp: "recipient"
 };
 
 // Item types that are part of a larger work
@@ -335,7 +336,7 @@ function detectImport() {
 	if (!doc) {
 		return false;
 	}
-	return doc.namespaceURI === "http://www.loc.gov/mods/v3" && (doc.tagName === "modsCollection" || doc.tagName === "mods");
+	return doc.namespaceURI === "http://www.loc.gov/mods/v3" && (doc.tagName.endsWith("modsCollection") || doc.tagName.endsWith("mods"));
 }
 
 /**
@@ -414,7 +415,7 @@ function doExport() {
 			var creator = item.creators[j],
 				roleTerm = "";
 			if (creator.creatorType == "author") {
-				roleTerm = "aut";
+				roleTerm = item.itemType == "letter" ? "cre" : "aut";
 			}
 			else if (creator.creatorType == "editor") {
 				roleTerm = "edt";
@@ -433,6 +434,9 @@ function doExport() {
 			}
 			else if (creator.creatorType == "performer") {
 				roleTerm = "prf";
+			}
+			else if (creator.creatorType == "recipient") {
+				roleTerm = "rcp";
 			}
 
 			else {
@@ -807,6 +811,13 @@ function processItemType(contextElement) {
 			return modsInternetMediaTypes[internetMediaTypeStr];
 		}
 	}
+	
+	var letter = ZU.xpath(contextElement,
+		'm:name/m:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")][text()="rcp"]',
+		xns).length;
+	if (letter) {
+		return 'letter';
+	}
 
 	// As a last resort, if it has a host, let's set it to book chapter, so we can import
 	// more info. Otherwise default to document
@@ -854,13 +865,12 @@ function processCreator(name, itemType, defaultCreatorType) {
 	
 	if (!creator.creatorType) {
 		// Look for MARC roles
-		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][@authority="marcrelator"]', xns);
+		roles = ZU.xpath(name, 'm:role/m:roleTerm[@type="code"][contains(@authority, "marc") or contains(@authority, "MARC")]', xns);
 		for (let i = 0; i < roles.length; i++) {
 			const roleStr = roles[i].textContent.toLowerCase();
 			if (marcRelators[roleStr]) creator.creatorType = marcRelators[roleStr];
 		}
 		
-		// Default to author
 		if (!creator.creatorType) creator.creatorType = defaultCreatorType;
 	}
 
@@ -1935,7 +1945,7 @@ var testCases = [
 					{
 						"lastName": "Roustabouts (Musical group)",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "performer"
 					}
 				],
 				"date": "1980",
@@ -1946,8 +1956,12 @@ var testCases = [
 				"place": "Charlotte, NC",
 				"attachments": [],
 				"tags": [
-					"Bluegrass music",
-					"Country music"
+					{
+						"tag": "Bluegrass music"
+					},
+					{
+						"tag": "Country music"
+					}
 				],
 				"notes": [
 					{
@@ -2031,6 +2045,57 @@ var testCases = [
 				"notes": [
 					{
 						"note": "reproduction: Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2014-02-07"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<mods:mods xmlns:mods=\"http://www.loc.gov/mods/v3\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-7.xsd\" version=\"3.7\">\n\t<mods:titleInfo>\n\t\t<mods:title>[Brief Josef Blaas' an Albrecht Penck]</mods:title>\n\t</mods:titleInfo>\n\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/116198427\">\n\t\t<mods:displayForm>Blaas, Josef</mods:displayForm>\n\t\t<mods:namePart>Blaas, Josef</mods:namePart>\n\t\t<mods:role>\n\t\t\t<mods:roleTerm authority=\"MARC Code List for Relators Scheme\" authorityURI=\"http://id.loc.gov/vocabulary/relators/\" type=\"code\" lang=\"eng\" valueURI=\"http://id.loc.gov/vocabulary/relators/cre\">cre</mods:roleTerm>\n\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Verfasser</mods:roleTerm>\n\t\t</mods:role>\n\t</mods:name>\n\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/118739883\">\n\t\t<mods:displayForm>Penck, Albrecht</mods:displayForm>\n\t\t<mods:namePart>Penck, Albrecht</mods:namePart>\n\t\t<mods:role>\n\t\t\t<mods:roleTerm authority=\"MARC Code List for Relators Scheme\" authorityURI=\"http://id.loc.gov/vocabulary/relators/\" type=\"code\" lang=\"eng\" valueURI=\"http://id.loc.gov/vocabulary/relators/rcp\">rcp</mods:roleTerm>\n\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Adressat</mods:roleTerm>\n\t\t</mods:role>\n\t</mods:name>\n\t<mods:genre lang=\"ger\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/4008240-4\" authority=\"local\">Brief</mods:genre>\n\t<mods:originInfo>\n\t\t<mods:dateCreated encoding=\"w3cdtf\" keyDate=\"yes\">1930-01-14</mods:dateCreated>\n\t\t<mods:dateCreated>14.01.1930</mods:dateCreated>\n\t\t<mods:place>\n\t\t\t<mods:placeTerm type=\"text\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/4027096-8\">Innsbruck</mods:placeTerm>\n\t\t</mods:place>\n\t</mods:originInfo>\n\t<mods:originInfo>\n\t\t<mods:publisher>semantics</mods:publisher>\n\t\t<mods:place>\n\t\t\t<mods:placeTerm type=\"text\">Aachen</mods:placeTerm>\n\t\t</mods:place>\n\t\t<mods:dateIssued>2021</mods:dateIssued>\n\t\t<mods:edition>[Electronic ed.]</mods:edition>\n\t</mods:originInfo>\n\t<mods:language>\n\t\t<mods:languageTerm authority=\"iso639-2b\" authorityURI=\"http://id.loc.gov/vocabulary/iso639-2/\" valueURI=\"http://id.loc.gov/vocabulary/iso639-2/ger\" type=\"code\">ger</mods:languageTerm>\n\t\t<mods:languageTerm type=\"text\" lang=\"ger\">Deutsch</mods:languageTerm>\n\t</mods:language>\n\t<mods:physicalDescription>\n\t\t<mods:extent>1 Bl. ; 2 Bl.</mods:extent>\n\t</mods:physicalDescription>\n\t<mods:note type=\"formerShelvingLocation\">B E</mods:note>\n\t<mods:note type=\"systemDetails\">Handschrift</mods:note>\n\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-HS-3584958</mods:identifier>\n\t<mods:relatedItem type=\"host\">\n\t\t<mods:titleInfo>\n\t\t\t<mods:title>Korrespondenzen (Titel)</mods:title>\n\t\t</mods:titleInfo>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/116198427\">\n\t\t\t<mods:displayForm>Blaas, Josef</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Josef</mods:namePart>\n\t\t\t<mods:namePart type=\"given\">J.</mods:namePart>\n\t\t\t<mods:namePart type=\"family\">Blaas</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1851-04-29</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/1210871378\">\n\t\t\t<mods:displayForm>Blaas, Leo</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Leo</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1891-01-14</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:name type=\"personal\" authority=\"DE-588\" authorityURI=\"http://d-nb.info/gnd/\" valueURI=\"http://d-nb.info/gnd/1210871084\">\n\t\t\t<mods:displayForm>Blaas, Erich</mods:displayForm>\n\t\t\t<mods:namePart>Blaas, Erich</mods:namePart>\n\t\t\t<mods:namePart type=\"date\">1884-04-19</mods:namePart>\n\t\t\t<mods:role>\n\t\t\t\t<mods:roleTerm type=\"text\" lang=\"ger\">Bestandsbildner</mods:roleTerm>\n\t\t\t</mods:role>\n\t\t</mods:name>\n\t\t<mods:originInfo>\n\t\t\t<mods:edition>[Electronic ed.]</mods:edition>\n\t\t\t<mods:place>\n\t\t\t\t<mods:placeTerm type=\"text\">Aachen</mods:placeTerm>\n\t\t\t</mods:place>\n\t\t\t<mods:publisher>semantics</mods:publisher>\n\t\t\t<mods:dateIssued>2021</mods:dateIssued>\n\t\t</mods:originInfo>\n\t\t<mods:note type=\"systemDetails\">Nicht in EAD Vorhanden</mods:note>\n\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77880</mods:identifier>\n\t\t<mods:relatedItem type=\"host\">\n\t\t\t<mods:titleInfo>\n\t\t\t\t<mods:title>Teilnachlass Familie Blaas</mods:title>\n\t\t\t</mods:titleInfo>\n\t\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77879</mods:identifier>\n\t\t\t<mods:recordInfo>\n\t\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77879</mods:recordIdentifier>\n\t\t\t</mods:recordInfo>\n\t\t</mods:relatedItem>\n\t\t<mods:relatedItem type=\"constituent\">\n\t\t\t<mods:titleInfo>\n\t\t\t\t<mods:title>Nachlass Blaas</mods:title>\n\t\t\t</mods:titleInfo>\n\t\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77878</mods:identifier>\n\t\t\t<mods:recordInfo>\n\t\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77878</mods:recordIdentifier>\n\t\t\t</mods:recordInfo>\n\t\t</mods:relatedItem>\n\t\t<mods:location>\n\t\t\t<mods:physicalLocation authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:physicalLocation>\n\t\t\t<mods:shelfLocator>K</mods:shelfLocator>\n\t\t</mods:location>\n\t\t<mods:extension>\n\t\t\t<vlz:info xmlns:vlz=\"http://visuallibrary.net/vlz/1.0/\" version=\"2\" />\n\t\t</mods:extension>\n\t\t<mods:recordInfo>\n\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77880</mods:recordIdentifier>\n\t\t\t<mods:recordCreationDate encoding=\"iso8601\">20200414</mods:recordCreationDate>\n\t\t\t<mods:recordChangeDate encoding=\"iso8601\">20200414</mods:recordChangeDate>\n\t\t\t<mods:recordChangeDate encoding=\"w3cdtf\">2020-12-16T14:37:29+01:00</mods:recordChangeDate>\n\t\t\t<mods:recordContentSource authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:recordContentSource>\n\t\t</mods:recordInfo>\n\t\t<mods:extension>\n\t\t\t<vl:id xmlns:vl=\"http://visuallibrary.net/vl\">510999</vl:id>\n\t\t\t<vl:odid xmlns:vl=\"http://visuallibrary.net/vl\">18</vl:odid>\n\t\t\t<vl:datatype xmlns:vl=\"http://visuallibrary.net/vl\">1</vl:datatype>\n\t\t\t<vl:type xmlns:vl=\"http://visuallibrary.net/vl\">60</vl:type>\n\t\t\t<vl:state xmlns:vl=\"http://visuallibrary.net/vl\">1</vl:state>\n\t\t</mods:extension>\n\t</mods:relatedItem>\n\t<mods:relatedItem type=\"constituent\">\n\t\t<mods:titleInfo>\n\t\t\t<mods:title>Nachlass Blaas</mods:title>\n\t\t</mods:titleInfo>\n\t\t<mods:identifier type=\"uri\">https://kalliope-verbund.info/DE-611-BF-77878</mods:identifier>\n\t\t<mods:recordInfo>\n\t\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-BF-77878</mods:recordIdentifier>\n\t\t</mods:recordInfo>\n\t</mods:relatedItem>\n\t<mods:location>\n\t\t<mods:physicalLocation authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:physicalLocation>\n\t\t<mods:shelfLocator>Br E_O.</mods:shelfLocator>\n\t</mods:location>\n\t<mods:extension>\n\t\t<vlz:info xmlns:vlz=\"http://visuallibrary.net/vlz/1.0/\" version=\"2\" />\n\t</mods:extension>\n\t<mods:recordInfo>\n\t\t<mods:recordIdentifier source=\"DE-611\">DE-611-HS-3584958</mods:recordIdentifier>\n\t\t<mods:recordCreationDate encoding=\"iso8601\">20200428</mods:recordCreationDate>\n\t\t<mods:recordChangeDate encoding=\"iso8601\">20200428</mods:recordChangeDate>\n\t\t<mods:recordChangeDate encoding=\"w3cdtf\">2020-12-16T14:37:29+01:00</mods:recordChangeDate>\n\t\t<mods:recordContentSource authority=\"German ISIL- and Library Codes Agency\" authorityURI=\"http://ld.zdb-services.de/resource/organisations/\" valueURI=\"http://ld.zdb-services.de/resource/organisations/DE-2836\">Semantics Kommunikationsmanagement GmbH</mods:recordContentSource>\n\t</mods:recordInfo>\n\t<mods:identifier type=\"urn\">urn:nbn:de:s2w-13771</mods:identifier>\n</mods:mods>",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "[Brief Josef Blaas' an Albrecht Penck]",
+				"creators": [
+					{
+						"firstName": "Josef",
+						"lastName": "Blaas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Albrecht",
+						"lastName": "Penck",
+						"creatorType": "recipient"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Leo",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Erich",
+						"lastName": "Blaas",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2021",
+				"archiveLocation": "Semantics Kommunikationsmanagement GmbH; Semantics Kommunikationsmanagement GmbH",
+				"language": "Deutsch",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "formerShelvingLocation: B E"
+					},
+					{
+						"note": "systemDetails: Handschrift"
 					}
 				],
 				"seeAlso": []
