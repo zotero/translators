@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-14 23:42:53"
+	"lastUpdated": "2021-07-14 23:47:43"
 }
 
 /*
@@ -163,7 +163,7 @@ var toMarcGenre = {
 	encyclopediaArticle: "encyclopedia",
 	film: "motion picture",
 	forumPost: "web site",
-	// "hearing":XXX,
+	hearing: "government publication",
 	instantMessage: "letter",
 	interview: "interview",
 	journalArticle: "journal",
