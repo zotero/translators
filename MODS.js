@@ -1395,10 +1395,18 @@ var testCases = [
 				"websiteTitle": "Election 2002 Web Archive",
 				"attachments": [],
 				"tags": [
-					"Democratic Party (AK)",
-					"Election",
-					"Elections",
-					"Governors"
+					{
+						"tag": "Democratic Party (AK)"
+					},
+					{
+						"tag": "Election"
+					},
+					{
+						"tag": "Elections"
+					},
+					{
+						"tag": "Governors"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1452,7 +1460,7 @@ var testCases = [
 					{
 						"firstName": "Charles Weever",
 						"lastName": "Cushman",
-						"creatorType": "author"
+						"creatorType": "artist"
 					}
 				],
 				"date": "2003",
@@ -1461,10 +1469,18 @@ var testCases = [
 				"url": "http://purl.dlib.indiana.edu/iudl/archives/cushman/P07803",
 				"attachments": [],
 				"tags": [
-					"Mountains",
-					"Snow",
-					"Telescope Peak (Inyo County, Calif.)",
-					"Zabriskie Point (Calif.)"
+					{
+						"tag": "Mountains"
+					},
+					{
+						"tag": "Snow"
+					},
+					{
+						"tag": "Telescope Peak (Inyo County, Calif.)"
+					},
+					{
+						"tag": "Zabriskie Point (Calif.)"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1494,10 +1510,18 @@ var testCases = [
 				"volume": "3",
 				"attachments": [],
 				"tags": [
-					"College librarians",
-					"College librarians",
-					"Recruiting",
-					"Selection and appointment"
+					{
+						"tag": "College librarians"
+					},
+					{
+						"tag": "College librarians"
+					},
+					{
+						"tag": "Recruiting"
+					},
+					{
+						"tag": "Selection and appointment"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1527,14 +1551,30 @@ var testCases = [
 				"publisher": "Cornell University Press",
 				"attachments": [],
 				"tags": [
-					"Journalism",
-					"Mass media",
-					"Political aspects",
-					"Political aspects",
-					"Politics and government",
-					"Press and politics",
-					"Talk shows",
-					"Television and politics"
+					{
+						"tag": "Journalism"
+					},
+					{
+						"tag": "Mass media"
+					},
+					{
+						"tag": "Political aspects"
+					},
+					{
+						"tag": "Political aspects"
+					},
+					{
+						"tag": "Politics and government"
+					},
+					{
+						"tag": "Press and politics"
+					},
+					{
+						"tag": "Talk shows"
+					},
+					{
+						"tag": "Television and politics"
+					}
 				],
 				"notes": [
 					{
@@ -1711,8 +1751,12 @@ var testCases = [
 				"publisher": "Nova Music",
 				"attachments": [],
 				"tags": [
-					"Operas",
-					"Songs (High voice) with instrumental ensemble"
+					{
+						"tag": "Operas"
+					},
+					{
+						"tag": "Songs (High voice) with instrumental ensemble"
+					}
 				],
 				"notes": [
 					{
@@ -1764,13 +1808,27 @@ var testCases = [
 				"publisher": "Center for Computer Assisted Research in the Humanities",
 				"attachments": [],
 				"tags": [
-					"Data processing",
-					"Data processing",
-					"Music",
-					"Musicians",
-					"Musicologists",
-					"Musicology",
-					"Musicology"
+					{
+						"tag": "Data processing"
+					},
+					{
+						"tag": "Data processing"
+					},
+					{
+						"tag": "Music"
+					},
+					{
+						"tag": "Musicians"
+					},
+					{
+						"tag": "Musicologists"
+					},
+					{
+						"tag": "Musicology"
+					},
+					{
+						"tag": "Musicology"
+					}
 				],
 				"notes": [
 					{
@@ -1798,12 +1856,12 @@ var testCases = [
 					{
 						"lastName": "Library of Congress: Music Division.",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "programmer"
 					},
 					{
 						"lastName": "Library of Congress: National Digital Library Program.",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "programmer"
 					}
 				],
 				"date": "1998",
@@ -1814,7 +1872,9 @@ var testCases = [
 				"url": "http://hdl.loc.gov/loc.music/collmus.mu000010",
 				"attachments": [],
 				"tags": [
-					"Ballroom dancing"
+					{
+						"tag": "Ballroom dancing"
+					}
 				],
 				"notes": [
 					{
@@ -1862,16 +1922,18 @@ var testCases = [
 				],
 				"date": "1994",
 				"ISBN": "1563963442",
-				"bookTitle": "Journal of vacuum science & technology. B, Microelectronics and nanometer structures processing, measurement and phenomena",
 				"callNumber": "TS695.25 .I57 1993, 621.3815/2",
 				"language": "eng",
-				"pages": "813-998",
 				"place": "New York",
 				"publisher": "Published for the American Vacuum Society by the American Institute of Physics",
 				"attachments": [],
 				"tags": [
-					"Congresses",
-					"Ion implantation"
+					{
+						"tag": "Congresses"
+					},
+					{
+						"tag": "Ion implantation"
+					}
 				],
 				"notes": [
 					{
@@ -1896,7 +1958,7 @@ var testCases = [
 					{
 						"lastName": "Campbell County Chamber of Commerce",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "cartographer"
 					}
 				],
 				"date": "1982",
@@ -1907,7 +1969,9 @@ var testCases = [
 				"scale": "1:510,000",
 				"attachments": [],
 				"tags": [
-					"Maps"
+					{
+						"tag": "Maps"
+					}
 				],
 				"notes": [
 					{
@@ -1932,6 +1996,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "",
 						"lastName": "Joseph",
 						"creatorType": "author"
 					},
@@ -1952,11 +2017,21 @@ var testCases = [
 				"publisher": "Nova Music",
 				"attachments": [],
 				"tags": [
-					"Excerpts, Arranged",
-					"Operas",
-					"Scores and parts",
-					"Scores and parts",
-					"Songs (High voice) with instrumental ensemble"
+					{
+						"tag": "Excerpts, Arranged"
+					},
+					{
+						"tag": "Operas"
+					},
+					{
+						"tag": "Scores and parts"
+					},
+					{
+						"tag": "Scores and parts"
+					},
+					{
+						"tag": "Songs (High voice) with instrumental ensemble"
+					}
 				],
 				"notes": [
 					{
@@ -2043,8 +2118,12 @@ var testCases = [
 				"rights": "Open to research.",
 				"attachments": [],
 				"tags": [
-					"Registers of births, etc",
-					"Registers of births, etc"
+					{
+						"tag": "Registers of births, etc"
+					},
+					{
+						"tag": "Registers of births, etc"
+					}
 				],
 				"notes": [
 					{
@@ -2149,6 +2228,170 @@ var testCases = [
 						"note": "systemDetails: Handschrift"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<mods xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:exslt=\"http://exslt.org/common\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://www.loc.gov/mods/v3\" version=\"3.3\" xsi:schemaLocation=\"http://www.loc.gov/mods/v3 http://www.loc.gov/standards/mods/v3/mods-3-3.xsd\" ID=\"P0b002ee180250051\">\n<name type=\"corporate\">\n <namePart>United States Government Publishing Office</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">publisher</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">pbl</roleTerm>\n</role>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">distributor</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">dst</roleTerm>\n</role>\n</name>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Congress</namePart>\n <namePart>Senate</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">author</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">aut</roleTerm>\n</role>\n <description>Government Organization</description>\n</name>\n<typeOfResource>text</typeOfResource>\n<genre authority=\"marcgt\">government publication</genre>\n<language>\n <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</language>\n<extension>\n <collectionCode>CHRG</collectionCode>\n <category>Congressional Committee Materials</category>\n <waisDatabaseName>111_senate_hearings</waisDatabaseName>\n <branch>legislative</branch>\n <dateIngested>2010-06-05</dateIngested>\n</extension>\n<titleInfo>\n <title>AFGHANISTAN</title>\n</titleInfo>\n<titleInfo type=\"alternative\"></titleInfo>\n<location>\n <url displayLabel=\"Content Detail\" access=\"object in context\">https://www.govinfo.gov/app/details/CHRG-111shrg56419</url>\n <url displayLabel=\"HTML rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/CHRG-111shrg56419/html/CHRG-111shrg56419.htm</url>\n <url displayLabel=\"PDF rendition\" access=\"raw object\">https://www.govinfo.gov/content/pkg/CHRG-111shrg56419/pdf/CHRG-111shrg56419.pdf</url>\n</location>\n<originInfo>\n <publisher>U.S. Government Publishing Office</publisher>\n <dateIssued encoding=\"w3cdtf\">2009-12-02</dateIssued>\n <issuance>monographic</issuance>\n</originInfo>\n<physicalDescription>\n <note type=\"source content type\">deposited</note>\n <digitalOrigin>born digital</digitalOrigin>\n <extent>191 p.</extent>\n</physicalDescription>\n<classification authority=\"sudocs\">Y 4.AR 5/3:S.HRG.111-415</classification>\n<identifier type=\"uri\">https://www.govinfo.gov/app/details/CHRG-111shrg56419</identifier>\n<identifier type=\"local\">P0b002ee180250051</identifier>\n<identifier type=\"ILS system id\">000704270</identifier>\n<recordInfo>\n <recordContentSource authority=\"marcorg\">DGPO</recordContentSource>\n <recordCreationDate encoding=\"w3cdtf\">2010-06-05</recordCreationDate>\n <recordChangeDate encoding=\"w3cdtf\">2020-01-02</recordChangeDate>\n <recordIdentifier source=\"DGPO\">CHRG-111shrg56419</recordIdentifier>\n <recordOrigin>machine generated</recordOrigin>\n <languageOfCataloging>\n  <languageTerm type=\"code\" authority=\"iso639-2b\">eng</languageTerm>\n</languageOfCataloging>\n</recordInfo>\n<accessCondition type=\"GPO scope determination\">fdlp</accessCondition>\n<extension>\n <docClass>SHRG</docClass>\n <accessId>CHRG-111shrg56419</accessId>\n <type>G</type>\n <chamber>SENATE</chamber>\n <congress>111</congress>\n <session>1</session>\n <number>415</number>\n <heldDate>2009-12-02</heldDate>\n <heldDate>2009-12-08</heldDate>\n</extension>\n<extension>\n <searchTitle>AFGHANISTAN</searchTitle>\n <granuleClass>OTHERPART</granuleClass>\n <accessId>CHRG-111shrg56419</accessId>\n <graphicsInPDF>true</graphicsInPDF>\n <isAppropriation>false</isAppropriation>\n <jacketId>56-419</jacketId>\n <congCommittee authorityId=\"ssas00\" chamber=\"S\" congress=\"111\" type=\"S\">\n                          <name type=\"authority-standard\">Committee on Armed Services</name>\n                          <name type=\"authority-short\">Armed Services</name>\n                    </congCommittee>\n <congMember authorityId=\"1226\" bioGuideId=\"W000437\" chamber=\"S\" congress=\"111\" gpoId=\"8263\" party=\"R\" role=\"COMMMEMBER\" state=\"MS\">\n                          <name type=\"parsed\">ROGER F. WICKER of Mississippi</name>\n                          <name type=\"authority-fnf\">Roger F. Wicker</name>\n                          <name type=\"authority-lnf\">Wicker, Roger F.</name>\n                          <name type=\"authority-other\">Roger Wicker</name>\n                    </congMember>\n <congMember authorityId=\"1299\" bioGuideId=\"B001210\" chamber=\"S\" congress=\"111\" gpoId=\"5833\" party=\"D\" role=\"COMMMEMBER\" state=\"WV\">\n                          <name type=\"parsed\">ROBERT C. BYRD of West Virginia</name>\n                          <name type=\"authority-fnf\">Robert C. Byrd</name>\n                          <name type=\"authority-lnf\">Byrd, Robert C.</name>\n                          <name type=\"authority-other\">Robert Carlyle Byrd</name>\n                    </congMember>\n <congMember authorityId=\"1384\" bioGuideId=\"L000261\" chamber=\"S\" congress=\"111\" gpoId=\"8243\" party=\"D\" role=\"COMMMEMBER\" state=\"MI\">\n                          <name type=\"parsed\">CARL LEVIN of Michigan</name>\n                          <name type=\"authority-fnf\">Carl Levin</name>\n                          <name type=\"authority-lnf\">Levin, Carl</name>\n                          <name type=\"authority-other\">Carl Milton Levin</name>\n                    </congMember>\n <congMember authorityId=\"1385\" bioGuideId=\"L000304\" chamber=\"S\" congress=\"111\" gpoId=\"8246\" party=\"I\" role=\"COMMMEMBER\" state=\"CT\">\n                          <name type=\"parsed\">JOSEPH I. LIEBERMAN of Connecticut</name>\n                          <name type=\"authority-fnf\">Joseph I. Lieberman</name>\n                          <name type=\"authority-lnf\">Lieberman, Joseph I.</name>\n                          <name type=\"authority-other\">Joseph Lieberman</name>\n                    </congMember>\n <congMember authorityId=\"1534\" bioGuideId=\"T000250\" chamber=\"S\" congress=\"111\" gpoId=\"8257\" party=\"R\" role=\"COMMMEMBER\" state=\"SD\">\n                          <name type=\"parsed\">JOHN THUNE of South Dakota</name>\n                          <name type=\"authority-fnf\">John Thune</name>\n                          <name type=\"authority-lnf\">Thune, John</name>\n                          <name type=\"authority-other\">John R. Thune</name>\n                    </congMember>\n <congMember authorityId=\"153\" bioGuideId=\"B001135\" chamber=\"S\" congress=\"111\" gpoId=\"8286\" party=\"R\" role=\"COMMMEMBER\" state=\"NC\">\n                          <name type=\"parsed\">RICHARD BURR of North Carolina</name>\n                          <name type=\"authority-fnf\">Richard Burr</name>\n                          <name type=\"authority-lnf\">Burr, Richard</name>\n                    </congMember>\n <congMember authorityId=\"1541\" bioGuideId=\"C001035\" chamber=\"S\" congress=\"111\" gpoId=\"8291\" party=\"R\" role=\"COMMMEMBER\" state=\"ME\">\n                          <name type=\"parsed\">SUSAN M. COLLINS of Maine</name>\n                          <name type=\"authority-fnf\">Susan M. Collins</name>\n                          <name type=\"authority-lnf\">Collins, Susan M.</name>\n                          <name type=\"authority-other\">Susan Margaret Collins</name>\n                    </congMember>\n <congMember authorityId=\"1548\" bioGuideId=\"S001141\" chamber=\"S\" congress=\"111\" gpoId=\"8281\" party=\"R\" role=\"COMMMEMBER\" state=\"AL\">\n                          <name type=\"parsed\">JEFF SESSIONS of Alabama</name>\n                          <name type=\"authority-fnf\">Jeff Sessions</name>\n                          <name type=\"authority-lnf\">Sessions, Jeff</name>\n                    </congMember>\n <congMember authorityId=\"1572\" bioGuideId=\"B001233\" chamber=\"S\" congress=\"111\" gpoId=\"5765\" party=\"D\" role=\"COMMMEMBER\" state=\"IN\">\n                          <name type=\"parsed\">EVAN BAYH of Indiana</name>\n                          <name type=\"authority-fnf\">Evan Bayh</name>\n                          <name type=\"authority-lnf\">Bayh, Evan</name>\n                    </congMember>\n <congMember authorityId=\"1595\" bioGuideId=\"U000038\" chamber=\"S\" congress=\"111\" gpoId=\"8259\" party=\"D\" role=\"COMMMEMBER\" state=\"CO\">\n                          <name type=\"parsed\">MARK UDALL of Colorado</name>\n                          <name type=\"authority-fnf\">Mark Udall</name>\n                          <name type=\"authority-lnf\">Udall, Mark</name>\n                    </congMember>\n <congMember authorityId=\"1609\" bioGuideId=\"V000127\" chamber=\"S\" congress=\"111\" gpoId=\"8267\" party=\"R\" role=\"COMMMEMBER\" state=\"LA\">\n                          <name type=\"parsed\">DAVID VITTER of Louisiana</name>\n                          <name type=\"authority-fnf\">David Vitter</name>\n                          <name type=\"authority-lnf\">Vitter, David</name>\n                    </congMember>\n <congMember authorityId=\"1820\" bioGuideId=\"M001170\" chamber=\"S\" congress=\"111\" gpoId=\"8252\" party=\"D\" role=\"COMMMEMBER\" state=\"MO\">\n                          <name type=\"parsed\">CLAIRE McCASKILL of Missouri</name>\n                          <name type=\"authority-fnf\">Claire McCaskill</name>\n                          <name type=\"authority-lnf\">McCaskill, Claire</name>\n                    </congMember>\n <congMember authorityId=\"1822\" bioGuideId=\"W000803\" chamber=\"S\" congress=\"111\" gpoId=\"8268\" party=\"D\" role=\"COMMMEMBER\" state=\"VA\">\n                          <name type=\"parsed\">JIM WEBB of Virginia</name>\n                          <name type=\"authority-fnf\">Jim Webb</name>\n                          <name type=\"authority-lnf\">Webb, Jim</name>\n                          <name type=\"authority-other\">Mr. James Webb</name>\n                    </congMember>\n <congMember authorityId=\"188\" bioGuideId=\"C000286\" chamber=\"S\" congress=\"111\" gpoId=\"8284\" party=\"R\" role=\"COMMMEMBER\" state=\"GA\">\n                          <name type=\"parsed\">SAXBY CHAMBLISS of Georgia</name>\n                          <name type=\"authority-fnf\">Saxby Chambliss</name>\n                          <name type=\"authority-lnf\">Chambliss, Saxby</name>\n                    </congMember>\n <congMember authorityId=\"1898\" bioGuideId=\"B001265\" chamber=\"S\" congress=\"111\" gpoId=\"8301\" party=\"D\" role=\"COMMMEMBER\" state=\"AK\">\n                          <name type=\"parsed\">MARK BEGICH of Alaska</name>\n                          <name type=\"authority-fnf\">Mark Begich</name>\n                          <name type=\"authority-lnf\">Begich, Mark</name>\n                    </congMember>\n <congMember authorityId=\"1902\" bioGuideId=\"H001049\" chamber=\"S\" congress=\"111\" gpoId=\"8318\" party=\"D\" role=\"COMMMEMBER\" state=\"NC\">\n                          <name type=\"parsed\">KAY R. HAGAN of North Carolina</name>\n                          <name type=\"authority-fnf\">Kay R. Hagan</name>\n                          <name type=\"authority-lnf\">Hagan, Kay R.</name>\n                          <name type=\"authority-other\">Mrs. Kay Hagan</name>\n                    </congMember>\n <congMember authorityId=\"1963\" bioGuideId=\"B001266\" chamber=\"S\" congress=\"111\" gpoId=\"7753\" party=\"D\" role=\"COMMMEMBER\" state=\"IL\">\n                          <name type=\"parsed\">ROLAND W. BURRIS of Illinois</name>\n                          <name type=\"authority-fnf\">Roland Burris</name>\n                          <name type=\"authority-lnf\">Burris, Roland</name>\n                    </congMember>\n <congMember authorityId=\"1971\" bioGuideId=\"L000572\" chamber=\"S\" congress=\"111\" gpoId=\"7772\" party=\"R\" role=\"COMMMEMBER\" state=\"FL\">\n                          <name type=\"parsed\">GEORGE S. LeMIEUX of Florida</name>\n                          <name type=\"authority-fnf\">George S. LeMieux</name>\n                          <name type=\"authority-lnf\">LeMieux, George S.</name>\n                          <name type=\"authority-other\">Mr. George Lemieux</name>\n                    </congMember>\n <congMember authorityId=\"452\" bioGuideId=\"G000359\" chamber=\"S\" congress=\"111\" gpoId=\"8335\" party=\"R\" role=\"COMMMEMBER\" state=\"SC\">\n                          <name type=\"parsed\">LINDSEY GRAHAM of South Carolina</name>\n                          <name type=\"authority-fnf\">Lindsey Graham</name>\n                          <name type=\"authority-lnf\">Graham, Lindsey</name>\n                          <name type=\"authority-other\">Lindsey O. Graham</name>\n                    </congMember>\n <congMember authorityId=\"583\" bioGuideId=\"I000024\" chamber=\"S\" congress=\"111\" gpoId=\"8322\" party=\"R\" role=\"COMMMEMBER\" state=\"OK\">\n                          <name type=\"parsed\">JAMES M. INHOFE of Oklahoma</name>\n                          <name type=\"authority-fnf\">James M. Inhofe</name>\n                          <name type=\"authority-lnf\">Inhofe, James M.</name>\n                          <name type=\"authority-other\">Jim Inhofe</name>\n                    </congMember>\n <congMember authorityId=\"754\" bioGuideId=\"M000303\" chamber=\"S\" congress=\"111\" gpoId=\"8253\" party=\"R\" role=\"COMMMEMBER\" state=\"AZ\">\n                          <name type=\"parsed\">JOHN McCAIN of Arizona</name>\n                          <name type=\"authority-fnf\">John McCain</name>\n                          <name type=\"authority-lnf\">McCain, John</name>\n                          <name type=\"authority-other\">John Sidney Mccain</name>\n                    </congMember>\n <congMember authorityId=\"7\" bioGuideId=\"A000069\" chamber=\"S\" congress=\"111\" gpoId=\"8305\" party=\"D\" role=\"COMMMEMBER\" state=\"HI\">\n                          <name type=\"parsed\">DANIEL K. AKAKA of Hawaii</name>\n                          <name type=\"authority-fnf\">Daniel K. Akaka</name>\n                          <name type=\"authority-lnf\">Akaka, Daniel K.</name>\n                          <name type=\"authority-other\">Daniel Kohikina Akaka</name>\n                    </congMember>\n <congMember authorityId=\"859\" bioGuideId=\"N000032\" chamber=\"S\" congress=\"111\" gpoId=\"8236\" party=\"D\" role=\"COMMMEMBER\" state=\"FL\">\n                          <name type=\"parsed\">BILL NELSON of Florida</name>\n                          <name type=\"authority-fnf\">Bill Nelson</name>\n                          <name type=\"authority-lnf\">Nelson, Bill</name>\n                          <name type=\"authority-other\">Clarence William Nelson</name>\n                    </congMember>\n <congMember authorityId=\"949\" bioGuideId=\"R000122\" chamber=\"S\" congress=\"111\" gpoId=\"8272\" party=\"D\" role=\"COMMMEMBER\" state=\"RI\">\n                          <name type=\"parsed\">JACK REED of Rhode Island</name>\n                          <name type=\"authority-fnf\">Jack Reed</name>\n                          <name type=\"authority-lnf\">Reed, Jack</name>\n                          <name type=\"authority-other\">John Reed</name>\n                    </congMember>\n <bill congress=\"111\" context=\"BODY\" number=\"2346\" type=\"HR\"></bill>\n <congReport congress=\"111\" number=\"105\" type=\"H\"></congReport>\n <isNomination>false</isNomination>\n <isErrata>false</isErrata>\n</extension>\n<name type=\"corporate\">\n <namePart>United States</namePart>\n <namePart>Congress</namePart>\n <namePart>Senate</namePart>\n <namePart>Committee on Armed Services</namePart>\n <role>\n  <roleTerm authority=\"marcrelator\" type=\"text\">associated name</roleTerm>\n  <roleTerm authority=\"marcrelator\" type=\"code\">asn</roleTerm>\n</role>\n <description>Government Organization</description>\n</name>\n<name type=\"personal\">\n <namePart>Roger F. Wicker</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Robert C. Byrd</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Carl Levin</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Joseph I. Lieberman</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>John Thune</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Richard Burr</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Susan M. Collins</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jeff Sessions</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Evan Bayh</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Mark Udall</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>David Vitter</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Claire McCaskill</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jim Webb</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Saxby Chambliss</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Mark Begich</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Kay R. Hagan</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Roland Burris</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>George S. LeMieux</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Lindsey Graham</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>James M. Inhofe</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>John McCain</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Daniel K. Akaka</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Bill Nelson</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<name type=\"personal\">\n <namePart>Jack Reed</namePart>\n <affiliation>United States Senate</affiliation>\n <role>\n  <roleTerm type=\"text\">committee member</roleTerm>\n</role>\n <description>United States Congressional Member</description>\n</name>\n<relatedItem type=\"isReferencedBy\">\n <identifier type=\"Jacket citation\"></identifier>\n</relatedItem>\n<relatedItem type=\"isReferencedBy\">\n <titleInfo>\n  <title>United States House Bill 2346 (111th Congress)</title>\n</titleInfo>\n <identifier type=\"Congressional Bill citation\">H.R. 2346</identifier>\n <extension>\n  <congress>111</congress>\n  <context>BODY</context>\n</extension>\n</relatedItem>\n<relatedItem type=\"isReferencedBy\">\n <titleInfo>\n  <title>United States House Report 105 (111th Congress)</title>\n</titleInfo>\n <identifier type=\"congressional report citation\">H. Rept. 111-105</identifier>\n</relatedItem>\n</mods>",
+		"items": [
+			{
+				"itemType": "hearing",
+				"title": "AFGHANISTAN",
+				"creators": [
+					{
+						"lastName": "United States: Congress: Senate",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"lastName": "United States: Congress: Senate: Committee on Armed Services",
+						"fieldMode": 1,
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Roger F.",
+						"lastName": "Wicker",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Robert C.",
+						"lastName": "Byrd",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Carl",
+						"lastName": "Levin",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Joseph I.",
+						"lastName": "Lieberman",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "John",
+						"lastName": "Thune",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Richard",
+						"lastName": "Burr",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Susan M.",
+						"lastName": "Collins",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jeff",
+						"lastName": "Sessions",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Evan",
+						"lastName": "Bayh",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Udall",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Vitter",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Claire",
+						"lastName": "McCaskill",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jim",
+						"lastName": "Webb",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Saxby",
+						"lastName": "Chambliss",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Begich",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Kay R.",
+						"lastName": "Hagan",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Roland",
+						"lastName": "Burris",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "George S.",
+						"lastName": "LeMieux",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Lindsey",
+						"lastName": "Graham",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "James M.",
+						"lastName": "Inhofe",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "John",
+						"lastName": "McCain",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Daniel K.",
+						"lastName": "Akaka",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Bill",
+						"lastName": "Nelson",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Jack",
+						"lastName": "Reed",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2009-12-02",
+				"committee": "Committee on Armed Services",
+				"documentNumber": "415",
+				"language": "eng",
+				"legislativeBody": "Senate",
+				"publisher": "U.S. Government Publishing Office",
+				"rights": "fdlp",
+				"session": "111",
+				"url": "https://www.govinfo.gov/app/details/CHRG-111shrg56419",
+				"attachments": [
+					{
+						"title": "HTML rendition",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF rendition",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
