@@ -72,7 +72,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let item = new Zotero.Item('book');
 	
 	for (let keyElem of doc.querySelectorAll('#d-book-details dt')) {
