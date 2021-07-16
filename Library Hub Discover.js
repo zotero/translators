@@ -188,7 +188,7 @@ var testCases = [
 					{
 						"lastName": "National Geographic Society (U.S.)",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "cartographer"
 					}
 				],
 				"date": "1979",
