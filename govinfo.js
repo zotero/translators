@@ -36,10 +36,10 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelector('#mods')) {
-		 // document is usually correct, and the page offers few clues. we would
-		 // have to resort to regex to make more specific guesses.
+		// document is usually correct, and the page offers few clues. we would
+		// have to resort to regex to make more specific guesses.
 		return "document";
 	}
 	// no clear way to do multiples: metadata URLs differ depending on whether
@@ -52,7 +52,7 @@ function doWeb(doc, url) {
 	scrape(doc, url);
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let modsURL = attr(doc, '#mods', 'href');
 	ZU.doGet(modsURL, function (respText) {
 		var translator = Zotero.loadTranslator("import");
