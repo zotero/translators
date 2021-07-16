@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-07 18:57:47"
+	"lastUpdated": "2021-07-14 15:57:12"
 }
 
 /*
@@ -188,12 +188,12 @@ var testCases = [
 					{
 						"lastName": "National Geographic Society (U.S.)",
 						"fieldMode": 1,
-						"creatorType": "author"
+						"creatorType": "cartographer"
 					}
 				],
 				"date": "1979",
 				"callNumber": "912.7, 912.8",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Library Hub Discover",
 				"place": "Washington, D.C.",
 				"publisher": "National Geographic Society",
@@ -239,7 +239,7 @@ var testCases = [
 				"creators": [],
 				"date": "1983",
 				"callNumber": "TK7881.7, 621.389/3, 621.389/3, RW 51",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Library Hub Discover",
 				"publisher": "Haymarket Pub",
 				"attachments": [],
@@ -294,9 +294,9 @@ var testCases = [
 				"date": "2013",
 				"ISBN": "9789780141196 9780141970684 9780141197531",
 				"abstractNote": "In this nightmare vision of youth in revolt, 15 year-old Alex and his friends set out on a diabolical orgy of robbery, rape, torture and murder. Alex is jailed for his teenage delinquency and the State tries to reform him - but at what cost? ; Fully restored edition of Anthony Burgess' original text of A Clockwork Orange, with a glossary of the teen slang 'Nadsat', explanatory notes, pages from the original typescript, interviews, articles and reviews Edited by Andrew Biswell With a Foreword by Martin Amis 'It is a horrorshow story ...' Fifteen-year-old Alex likes lashings of ultraviolence. He and his gang of friends rob, kill and rape their way through a nightmarish future, until the State puts a stop to his riotous excesses. But what will his re-education mean? A dystopian horror, a black comedy, an exploration of choice, A Clockwork Orange is also a work of exuberant invention which created a new language for its characters. This critical edition restores the text of the novel as Anthony Burgess originally wrote it, and includes a glossary of the teen slang 'Nadsat', explanatory notes, pages from the original typescript, interviews, articles and reviews, shedding light on the enduring fascination of the novel's 'sweet and juicy criminality'. Anthony Burgess was born in Manchester in 1917 and educated at Xaverian College and Manchester University. He spent six years in the British Army before becoming a schoolmaster and colonial education officer in Malaya and Brunei. After the success of his Malayan Trilogy, he became a full-time writer in 1959. His books have been published all over the world, and they include The Complete Enderby, Nothing Like the Sun, Napoleon Symphony, Tremor of Intent, Earthly Powers and A Dead Man in Deptford. Anthony Burgess died in London in 1993. Andrew Biswell is the Professor of Modern Literature at Manchester Metropolitan University and the Director of the International Anthony Burgess Foundation. His publications include a biography, The Real Life of Anthony Burgess, which won the Portico Prize in 2006. He is currently editing the letters and short stories of Anthony Burgess.",
-				"callNumber": "PR6052.U638, 823.914, YK4",
+				"callNumber": "PR6052.U638, 823.914",
 				"edition": "Restored edition",
-				"language": "English",
+				"language": "eng",
 				"libraryCatalog": "Library Hub Discover",
 				"place": "London",
 				"publisher": "Penguin Books",
