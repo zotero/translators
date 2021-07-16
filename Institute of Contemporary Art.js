@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-16 15:32:23"
+	"lastUpdated": "2021-07-16 15:43:34"
 }
 
 /*
@@ -49,12 +49,9 @@ function detectWeb(doc, _url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
-	var rows = doc.querySelectorAll('h2 > a.title[href*="/article/"]');
+	var rows = doc.querySelectorAll('.teaser-title a[href*="/art/"]');
 	for (let row of rows) {
-		// TODO: check and maybe adjust
 		let href = row.href;
-		// TODO: check and maybe adjust
 		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -173,6 +170,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.icaboston.org/search?search_api_multi_fulltext=man&content_type%5B%5D=artwork",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
