@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-04 02:38:14"
+	"lastUpdated": "2021-07-18 23:05:26"
 }
 
 /*
@@ -148,6 +148,12 @@ function scrape(doc, url) {
 		if (item.itemType == 'blogPost') {
 			delete item.websiteType; // "post"
 			item.blogTitle = item.publisher;
+		}
+		
+		if (item.publicationTitle && item.seriesTitle
+			&& item.publicationTitle == item.seriesTitle
+			&& ZU.fieldIsValidForType('publicationTitle', item.itemType)) {
+			delete item.seriesTitle;
 		}
 		
 		// we could handle special cases for every possible item type,
@@ -374,6 +380,46 @@ var testCases = [
 		"type": "web",
 		"url": "https://fatcat.wiki/release/search?q=Zotero&generic=1",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://fatcat.wiki/release/q5bn52bkmvgfnfpyj3fa6wfnzy",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Maxc Systems",
+				"creators": [
+					{
+						"firstName": "E. R.",
+						"lastName": "Fiala",
+						"creatorType": "author"
+					}
+				],
+				"date": "1978",
+				"DOI": "10.1109/c-m.1978.218184",
+				"ISSN": "0018-9162",
+				"extra": "Fatcat ID: release_q5bn52bkmvgfnfpyj3fa6wfnzy",
+				"language": "en",
+				"libraryCatalog": "fatcat.wiki",
+				"pages": "57-67",
+				"publicationTitle": "Computer",
+				"url": "https://web.archive.org/web/2017/https://www.computer.org/web/csdl/index/-/csdl/mags/co/1978/05/01646959.pdf",
+				"volume": "11",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
