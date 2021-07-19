@@ -16,8 +16,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"browserSupport": "gcv",
-	"lastUpdated": "2018-06-12 09:00:41"
+	"lastUpdated": "2021-07-14 20:41:42"
 }
 
 function detectImport() {
@@ -244,6 +243,7 @@ var fieldMap = {
 	"full-title": "publicationTitle",
 	language: "language",
 	"access-date": "accessDate",
+	// label: "Citation Key", (handled below, since it has to go into Extra)
 	//These two are in the RIS - not sure what they'd be in Endnote XML
 	//DB:"archive",
 	//AN:"archiveLocation",
@@ -671,8 +671,12 @@ function importNext(records, index, resolve, reject) {
 						(newItem.itemType == "book" || newItem.itemType ==  "bookSection" || newItem.itemType == "journalArticle")) {
 					//it'd be nice if we could do PMIDs as well, but doesn't look like they're mapped and we can't test for them reliably
 					if (node.textContent.search(/PMC\d+/i) != -1) {
-						newItem.extra = "PMCID: " + node.textContent.match(/PMC\d+/i)[0];
+						newItem.extra =  (newItem.extra || '') +
+							"PMCID: " + node.textContent.match(/PMC\d+/i)[0] + "\n";
 					}
+				} else if (field == "label") {
+					newItem.extra = (newItem.extra || '')
+						+ `Citation Key: ${node.textContent}\n`;
 				} else if (field == "database" || field == "source-app" || field == "rec-number" || field == "ref-type" 
 					|| field == "foreign-keys"){
 						//skipping these fields
@@ -1353,6 +1357,45 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Plain <b>Bold</b><i> Italics</i> Underline <sup>Superscript</sup> <sub>Subscript</sub> SymbolFont CourierNew SmallerSize Size12 <b><i><sup>TimesNewRoman-Bold-Italics-Underline-Superscript</sup></i></b>",
 				"creators": [],
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\" ?><xml><records><record><database name=\"My EndNote Library.enl\" path=\"My EndNote Library.enl\">My EndNote Library.enl</database><source-app name=\"EndNote\" version=\"20.1\">EndNote</source-app><rec-number>1</rec-number><foreign-keys><key app=\"EN\" db-id=\"rvtvez0v1e2ezne5ws050zwvfrezp0w20se2\">1</key></foreign-keys><ref-type name=\"Book\">6</ref-type><contributors><authors><author><style face=\"normal\" font=\"default\" size=\"100%\">Author, Test</style></author></authors></contributors><titles><title><style face=\"normal\" font=\"default\" size=\"100%\">A test item (with a citekey)</style></title></titles><dates><year><style face=\"normal\" font=\"default\" size=\"100%\">2021</style></year></dates><label><style face=\"normal\" font=\"default\" size=\"100%\">test_item_2021</style></label><urls></urls></record><record><database name=\"My EndNote Library.enl\" path=\"/Users/abe/Documents/My EndNote Library.enl\">My EndNote Library.enl</database><source-app name=\"EndNote\" version=\"20.1\">EndNote</source-app><rec-number>2</rec-number><foreign-keys><key app=\"EN\" db-id=\"rvtvez0v1e2ezne5ws050zwvfrezp0w20se2\">2</key></foreign-keys><ref-type name=\"Book\">6</ref-type><contributors><authors><author><style face=\"normal\" font=\"default\" size=\"100%\">Author, Test Jr.</style></author></authors></contributors><titles><title><style face=\"normal\" font=\"default\" size=\"100%\">A test item (without a citekey)</style></title></titles><dates><year><style face=\"normal\" font=\"default\" size=\"100%\">2021</style></year></dates><urls></urls></record></records></xml>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "A test item (with a citekey)",
+				"creators": [
+					{
+						"firstName": "Test",
+						"lastName": "Author",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"extra": "Citation Key: test_item_2021",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			},
+			{
+				"itemType": "book",
+				"title": "A test item (without a citekey)",
+				"creators": [
+					{
+						"firstName": "Test Jr",
+						"lastName": "Author",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
