@@ -2,14 +2,14 @@
 	"translatorID": "d23f01f1-6037-439b-87fb-23b8f3b9067f",
 	"label": "Library Catalog (Visual Library 2021)",
 	"creator": "Abe Jellinek",
-	"target": "/search/quick\\?|/nav/index/|/(content|periodical)/",
+	"target": "/search(/quick)?\\?|/nav/index/|/(content|periodical)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 16:35:22"
+	"lastUpdated": "2021-07-19 16:39:31"
 }
 
 /*
@@ -70,7 +70,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a.title');
+	var rows = doc.querySelectorAll('#searchResult .metadataTable a.title');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -754,6 +754,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://menadoc.bibliothek.uni-halle.de/search/quick?query=test",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://menadoc.bibliothek.uni-halle.de/search?operation=searchRetrieve&query=%28cql.anywhere%3Dtesting+and+dc.title%3Dtest%29+and+vl.domain%3D%28menadoc%29+sortBy+relevance%2Fasc&index1=cql.anywhere&term1=testing&bool2=and&index2=dc.title&term2=test&bool3=and&index3=bib.personalName&term3=&bool4=and&index4=vl.printer-publisher&term4=&bool5=and&index5=bib.originPlace&term5=&bool6=and&index6=dc.date&term6=&bool7=and&index7=dc.subject&term7=&bool8=and&index8=dc.identifier&term8=&vlFulltext=&searchDomain=menadoc&startRecord=1&vlsearch_sortBy=relevance&maximumRecords=10&vlsearch_sortOrder=asc&truncate=",
 		"items": "multiple"
 	}
 ]
