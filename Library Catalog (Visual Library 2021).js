@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 03:42:40"
+	"lastUpdated": "2021-07-19 16:35:22"
 }
 
 /*
@@ -53,6 +53,9 @@ function detectWeb(doc, url) {
 		}
 		else if (docType.includes('Thesis') || docType.endsWith('arbeit')) {
 			return "thesis";
+		}
+		else if (doc.querySelector('#mods_name-roleTerm_Recipient')) {
+			return "letter";
 		}
 		else {
 			return "book";
@@ -176,6 +179,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
+						"firstName": "",
 						"lastName": "Barhebraeus",
 						"creatorType": "author"
 					}
@@ -224,11 +228,6 @@ var testCases = [
 					{
 						"firstName": "Johann Gottlob",
 						"lastName": "Worbs",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Christian Gotthelf",
-						"lastName": "Anton",
 						"creatorType": "author"
 					}
 				],
@@ -407,7 +406,7 @@ var testCases = [
 		"url": "https://visuallibrary.net/dms/content/titleinfo/511462",
 		"items": [
 			{
-				"itemType": "bookSection",
+				"itemType": "letter",
 				"title": "[Brief Josef Blaas' an Albrecht Penck]",
 				"creators": [
 					{
@@ -418,7 +417,7 @@ var testCases = [
 					{
 						"firstName": "Albrecht",
 						"lastName": "Penck",
-						"creatorType": "author"
+						"creatorType": "recipient"
 					},
 					{
 						"firstName": "J.",
@@ -438,12 +437,8 @@ var testCases = [
 				],
 				"date": "2021",
 				"archiveLocation": "Semantics Kommunikationsmanagement GmbH; Semantics Kommunikationsmanagement GmbH",
-				"bookTitle": "Korrespondenzen (Titel)",
-				"edition": "Electronic ed.",
-				"language": "Deutsch",
+				"language": "ger",
 				"libraryCatalog": "Library Catalog (Visual Library 2021)",
-				"place": "Aachen",
-				"publisher": "semantics",
 				"url": "https://visuallibrary.net/dms/content/titleinfo/511462",
 				"attachments": [],
 				"tags": [],
