@@ -1,23 +1,22 @@
 {
 	"translatorID": "17b1a93f-b342-4b54-ad50-08ecc26e0ac3",
 	"label": "INSPIRE",
-	"creator": "Sebastian Karcher",
+	"creator": "Abe Jellinek",
 	"target": "^https?://inspirehep\\.net/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2014-08-26 03:46:51"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-07-19 16:22:40"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	INSPIRE Translator
-	Copyright © 2014 Sebastian Karcher
-
+	Copyright © 2021 Abe Jellinek
+	
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,81 +34,87 @@
 
 	***** END LICENSE BLOCK *****
 */
+
+
 function detectWeb(doc, url) {
-	if (url.indexOf("/record/") != -1) {
-		return "journalArticle"
-	} else if (url.indexOf("search?") != -1) {
-		return "multiple";
+	if (url.includes('/literature')) {
+		if (doc.querySelector('meta[name="citation_title"]')) {
+			return "journalArticle";
+		}
+		else if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		else {
+			Z.monitorDOMChanges(doc.querySelector('#root'));
+		}
 	}
+	return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('a.result-item-title[href*="/literature"]');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		items = {};
-		articles = [];
-		var titles = ZU.xpath(doc, '//div[@class="record_body"]/a[@class="titlelink"]');
-		for (var i = 0; i < titles.length; i++) {
-			items[titles[i].href] = titles[i].textContent;
-		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				Zotero.done();
-				return true;
-			}
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-		})
-	} else {
-		scrape(doc, url)
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
 	}
 }
 
 function scrape(doc, url) {
-	var pdfurl = ZU.xpathText(doc, '//a[text()="PDF"]/@href');
-	var xmlurl = url.replace(/(\d+)\/.+/, "$1") + "/export/xe";
-	var keywords = ZU.xpath(doc, '//div/small/a[contains(@href, "p=keyword:")]');
-	var notes = ZU.xpathText(doc, '//div/small[strong[contains(text(), "Note")]]/text()');
-	ZU.doGet(xmlurl, function (text) {
-		//add namespace to modsCollection
-		//Z.debug(text)
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("eb7059a4-35ec-4961-a915-3cf58eb9784b"); // Endnote XML -translator
-		translator.setString(text);
+	var bibUrl = url.replace('/literature/', '/api/literature/');
+	ZU.doGet(bibUrl, function (ris) {
+		let translator = Zotero.loadTranslator("import");
+		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+		translator.setString(ris);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.attachments = [];
-			item.tags = [];
-			item.notes = [];
-			for (i = 0; i < keywords.length; i++) {
-				item.tags.push(keywords[i].textContent);
+			for (let tag of doc.querySelectorAll('.ant-tag')) {
+				item.tags.push({ tag: tag.textContent.trim() });
 			}
-			if (notes) item.notes.push(notes);
-			item.attachments.push({
-				document: doc,
-				title: "INSPIRE Snapshot",
-				mimeType: "text/html"
-			});
-			if (pdfurl) item.attachments.push({
-				url: pdfurl,
-				title: "INSPIRE PDF Full Text",
-				mimeType: "application/pdf`"
-			});
+			
+			for (let action of doc.querySelectorAll('.__ListItemAction__ a')) {
+				if (/\bpdf\b/i.test(action.textContent)) {
+					item.attachments.push({
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf',
+						url: action.href
+					});
+				}
+			}
+			
 			item.complete();
-		})
+		});
 		translator.translate();
-	})
+	}, null, null, { Accept: 'application/x-bibtex' });
+}
 
-}/** BEGIN TEST CASES **/
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://inspirehep.net/search?ln=en&p=find+plasma+light&of=hb&action_search=Search",
+		"url": "https://inspirehep.net/literature?sort=mostrecent&size=25&page=1&q=find%20plasma%20light",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://inspirehep.net/record/1284987",
+		"url": "https://inspirehep.net/literature/1284987",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -126,52 +131,61 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-08-12",
+				"date": "2014",
 				"DOI": "10.1103/PhysRevC.90.025204",
-				"abstractNote": "We discuss the general features of the electromagnetic radiation from a thermal hadronic gas as constrained by chiral symmetry. The medium effects on the electromagnetic spectral functions and the partial restoration of chiral symmetry are quantified in terms of the pion densities. The results are compared with the electromagnetic radiation from a strongly interacting quark-gluon plasma in terms of the leading gluon condensate operators. We use the spectral functions as constrained by the emission rates to estimate the electric conductivity, the light flavor susceptibility and diffusion constant across the transition from the correlated hadronic gas to a strongly interacting quark-gluon plasma.",
+				"issue": "2",
+				"itemID": "Lee:2014pwa",
 				"libraryCatalog": "INSPIRE",
 				"pages": "025204",
-				"publicationTitle": "Phys.Rev.",
+				"publicationTitle": "Phys. Rev. C",
 				"shortTitle": "Electromagnetic Radiation in Hot QCD Matter",
-				"volume": "C90",
+				"volume": "90",
 				"attachments": [
 					{
-						"title": "INSPIRE Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "INSPIRE PDF Full Text",
-						"mimeType": "application/pdf`"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [
-					"conductivity: electric",
-					"diffusion",
-					"flavor",
-					"flux",
-					"gluon: condensation",
-					"hadron: gas",
-					"matter: effect",
-					"pi: density",
-					"quantum chromodynamics: matter",
-					"quark gluon: interaction",
-					"quark gluon: plasma",
-					"radiation: electromagnetic",
-					"spectral representation",
-					"susceptibility",
-					"symmetry: chiral",
-					"thermal"
+					{
+						"tag": "25.75.Cj"
+					},
+					{
+						"tag": "25.75.Dw"
+					},
+					{
+						"tag": "25.75.Gz"
+					},
+					{
+						"tag": "25.75.Nq"
+					},
+					{
+						"tag": "conductivity: electric"
+					},
+					{
+						"tag": "quantum chromodynamics: matter"
+					},
+					{
+						"tag": "quark gluon: interaction"
+					},
+					{
+						"tag": "quark gluon: plasma"
+					},
+					{
+						"tag": "radiation: electromagnetic"
+					},
+					{
+						"tag": "symmetry: chiral"
+					}
 				],
-				"notes": [
-					"27 pages, 11 figures "
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://inspirehep.net/record/1282171",
+		"url": "https://inspirehep.net/literature/1282171",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -203,24 +217,25 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2013-10-28",
+				"date": "2013",
 				"DOI": "10.1103/PhysRevE.88.043105",
-				"abstractNote": "The relativistically induced transparency acceleration (RITA) scheme of proton and ion acceleration using laser-plasma interactions is introduced, modeled, and compared to the existing schemes. Protons are accelerated with femtosecond relativistic pulses to produce quasimonoenergetic bunches with controllable peak energy. The RITA scheme works by a relativistic laser inducing transparency to densities higher than the cold-electron critical density, while the background heavy ions are stationary. The rising laser pulse creates a traveling acceleration structure at the relativistic critical density by ponderomotively driving a local electron density inflation, creating an electron snowplow and a co-propagating electrostatic potential. The snowplow advances with a velocity determined by the rate of the rise of the laser's intensity envelope and the heavy-ion-plasma density gradient scale length. The rising laser is incrementally rendered transparent to higher densities such that the relativistic-electron plasma frequency is resonant with the laser frequency. In the snowplow frame, trace density protons reflect off the electrostatic potential and get snowplowed, while the heavier background ions are relatively unperturbed. Quasimonoenergetic bunches of velocity equal to twice the snowplow velocity can be obtained and tuned by controlling the snowplow velocity using laser-plasma parameters. An analytical model for the proton energy as a function of laser intensity, rise time, and plasma density gradient is developed and compared to 1D and 2D PIC OSIRIS simulations. We model the acceleration of protons to GeV energies with tens-of-femtoseconds laser pulses of a few petawatts. The scaling of proton energy with laser power compares favorably to other mechanisms for ultrashort pulses.",
+				"issue": "4",
+				"itemID": "Sahai:2013tih",
 				"libraryCatalog": "INSPIRE",
 				"pages": "043105",
-				"publicationTitle": "Phys.Rev.",
-				"volume": "E88",
+				"publicationTitle": "Phys. Rev. E",
+				"volume": "88",
 				"attachments": [
 					{
-						"title": "INSPIRE Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "INSPIRE PDF Full Text",
-						"mimeType": "application/pdf`"
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "52.38.Kd"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
