@@ -94,7 +94,7 @@ function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API ins
 				return " (exception préliminaire)";
 			}
 
-			if (description.includes("radiation du rôle")) return " (radiation du rôle)";
+			if (description.includes("radiation du rôle")) return " (radiation)";
 			if (description.includes("interprétation"))	return " (interprétation)";
 			if (description.includes("révision")) return " (révision)";
 		}
@@ -201,7 +201,7 @@ function detectWeb(doc, url) {
 		// Exclude translations and press releases.
 		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
 			|| docType.includes("Communiqué de presse")
-			|| dtext(doc, "title").toLowerCase().includes("résumé juridique"))) {
+			|| text(doc, "title").toLowerCase().includes("résumé juridique"))) {
 			return "case";
 		}
 	}
