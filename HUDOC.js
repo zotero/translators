@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-23 13:29:01"
+	"lastUpdated": "2021-07-19 13:43:19"
 }
 
 /*
@@ -53,8 +53,6 @@ decision-making body ("originatingbody"), keywords ("kpthesaurus"), ...
 Check compiled.js on the HUDOC website in order to learn how to query these aspects.
 Search for "// ###..//sites/echr/echr.js ###"" in compiled.js to find most API fields.
 */
-
-function text(docOrElem, selector, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent: null; }
 
 // Scrapes some metadata from the document
 // TODO: integrate function into scrape
