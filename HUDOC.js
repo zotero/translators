@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 16:27:17"
+	"lastUpdated": "2021-07-19 18:22:52"
 }
 
 /*
@@ -252,7 +252,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		});
 
 		let titleNumMatch = splitTitle.findIndex(function(elem) {
-			if (/^(no.|II|III|IV|V\)|VI|VII|IX|X\))/i.test(elem)) {
+			if (/^((No\.|N°)|(II|III|IV|V|VI|VII|VIII|IX|X)\))/i.test(elem)) {
 						return true;
 			}
 			return false;
