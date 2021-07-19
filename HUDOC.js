@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:42:05"
+	"lastUpdated": "2021-07-19 15:46:40"
 }
 
 /*
@@ -339,9 +339,9 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		var docname = json.docname;
 
 		var pdfurl = "https://hudoc.echr.coe.int/app/conversion/docx/pdf?library=ECHR&id="
-					+ getItemID(url) + "&filename=" + docname + ".pdf";
+					+ getItemID(url) + "&filename=" + encodeURIComponent(docname) + ".pdf";
 
-		pdfurl = encodeURI(pdfurl); // the "docname" may contain chars not part of the URI schema
+		// pdfurl = encodeURI(pdfurl); // the "docname" may contain chars not part of the URI schema
 
 		Zotero.debug("Getting PDF at: " + pdfurl);
 
