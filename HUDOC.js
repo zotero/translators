@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 13:43:19"
+	"lastUpdated": "2021-07-19 15:23:59"
 }
 
 /*
@@ -174,7 +174,7 @@ function getLegalSummary(item, appno) {
 
 				item.notes.push({
 					title: "HUDOC Legal Summary",
-					note: "<h1> HUDOC Legal Summary </h1> </br>" + text
+					note: "<h1> HUDOC Legal Summary </h1> </br>" + text // H1 necessary, otherwise title is lost
 				});
 
 				item.complete();
@@ -313,21 +313,14 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 
 		Zotero.debug("Queried HUDOC API at: " + queryUrl);
 
-		// Application numbers
-		// FIXME: Decide whether to prepend "app. no.". Some styles automatically add "no." (Chicago)
-		// while most others do not (OSCOLA, APA).
+		// Docket number
+		// NOTE: This translator doesn't add "app. no.". (See commit history for alternative)
+		// Some styles add "no." (Chicago), while other styles don't add anything (OSCOLA, APA)
+		// However, most citation style guides require adding the numbering system to the docket number ("app. no."/"no."),
+		// so users may need to correct their fields, depending on the style used.
+		
 		var appno = json.appno.split(";");
-		if (appno.toString().length !== 0) { // Only if not empty
-			if (appno.length > 1) {
-				var length = appno.length;
-				var commaPart = appno.slice(0, length - 1);
-				var appnos = commaPart.join(", ") + " and " + appno[length - 1].toString();
-
-				item.docketNumber = "app. nos. " + appnos;
-			} else {
-				item.docketNumber = "app. no. " + appno;
-			}
-		}
+		item.docketNumber = appno.join(", ");
 
 		// Abstract
 		item.abstractNote = json.conclusion.replace(/;/g, "; ");
