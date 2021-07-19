@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:27:53"
+	"lastUpdated": "2021-07-19 15:42:05"
 }
 
 /*
@@ -300,7 +300,14 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	// convert to simple ISO: yyyy-mm-dd dd.mm.yyyy.
 	item.dateDecided = scrapeMetaData(doc, "judgementdate").split("/").reverse().join('-');
 
-	item.url = "http://hudoc.echr.coe.int/eng?i=" + getItemID(url);
+	// URL
+	if (url.includes("hudoc.echr.coe.int/fre#")) {
+		item.url = "https://hudoc.echr.coe.int/fre?i=" + getItemID(url);
+	}
+	else {
+		item.url = "https://hudoc.echr.coe.int/eng?i=" + getItemID(url);
+	}
+	
 
 	// Query remaining metadata from API
 	var queryUrl = "https://hudoc.echr.coe.int/app/query/results?query=(contentsitename=ECHR) AND "
