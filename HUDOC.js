@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:46:40"
+	"lastUpdated": "2021-07-19 16:27:17"
 }
 
 /*
@@ -240,8 +240,10 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	// If title already contains the type, remove it.
 	// Exclude non-split titles and advisory opinions
 	if (!(splitTitle.length == 1) &&
-			!scrapeMetaData(doc, "typedescription").includes("Advisory Opinion")) {
-
+			!(scrapeMetaData(doc, "typedescription").includes("Advisory Opinion") 
+				|| scrapeMetaData(doc, "typedescription").includes("Avis consultatif"))) {
+		
+		// Find right cut-off point: Either the part that contains the v./c. or the part that contains the number of the case
 		let titleVersusMatch = splitTitle.findIndex(function(elem) {
 			if (elem.includes("V.") || elem.includes("C.")) {
 						return true;
@@ -250,7 +252,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		});
 
 		let titleNumMatch = splitTitle.findIndex(function(elem) {
-			if (/^(no.|II|IV|V\)|VI|IX|X\))/i.test(elem)) {
+			if (/^(no.|II|III|IV|V\)|VI|VII|IX|X\))/i.test(elem)) {
 						return true;
 			}
 			return false;
@@ -275,7 +277,21 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 	var court = scrapeMetaData(doc, "originatingbody");
 
 	if (url.includes("hudoc.echr.coe.int/fre#")) {
-		item.court = "ECtHR";
+		if (text(doc, "title").includes("Avis consultatif")) {
+			item.court = "ECtHR [GC]";
+		}
+		else if (court.includes("Grande Chambre")) {
+			item.court = "ECtHR [GC]";
+		}
+		else if (court.includes("Commission")) {
+			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead? 
+		}
+		else if (court == "Comité des Ministres") { // For resolutions (which are currently not supported)
+			item.court = "Comité des Ministres";
+		}
+		else {
+			item.court = "ECtHR";
+		}
 	}
 	else {
 		if (text(doc, "title").includes("Advisory Opinion")) {
@@ -285,7 +301,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 			item.court = "ECtHR [GC]";
 		}
 		else if (court.includes("Commission")) {
-			item.court = "Commission";
+			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead? 
 		}
 		else if (court == "Committee of Ministers") { // For resolutions (which are currently not supported)
 			item.court = "Committee of Ministers";
