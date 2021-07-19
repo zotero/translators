@@ -102,7 +102,6 @@ function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API ins
 		if (description.includes("Décision")) return " (déc.)";
 		if (description.includes("Affaire Communiquée")) return " (communiquée)"; // TODO: Rather use abbreviation?
 		if (description.includes("Révision")) return " (déc. de révision)"; // TODO: Rather use abbreviation?
-		if (description.includes("Res-")) return " (résolution)"; // TODO: Add later handlers, that maybe change item type and author/court
 	
 		return "";
 
@@ -128,7 +127,6 @@ function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API ins
 	if (description.includes("Decision")) return " (dec.)";
 	if (description.includes("Communicated")) return " (communicated)"; // TODO: Rather use abbreviation?
 	if (description.includes("Revision")) return " (dec. on revision)"; // TODO: Rather use abbreviation?
-	if (description.includes("Res-")) return " (resolution)"; // TODO: Check if correct, maybe different Zotero type?
 
 	return "";
 }
@@ -198,7 +196,7 @@ function detectWeb(doc, url) {
 		if ((docType.includes("Arrêt")
 			|| docType.includes("Décision")
 			|| docType.includes("Avis consultatif")
-			|| docType.includes("Res-")
+			// || docType.includes("Res-") // Removed support for resolutions (not a case and requires info scraped from the text)
 			|| docType.includes("Affaire Communiquée"))
 		// Exclude translations and press releases.
 		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
@@ -211,7 +209,7 @@ function detectWeb(doc, url) {
 		if ((docType.includes("Judgment")
 			|| docType.includes("Decision")
 			|| docType.includes("Advisory Opinion")
-			|| docType.includes("Res-")
+			// || docType.includes("Res-") // Removed support for resolutions (not a case and requires info scraped from the text)
 			|| docType.includes("Communicated"))
 		// Exclude translations and press releases.
 		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
@@ -231,6 +229,7 @@ function doWeb(doc, url) {
 }
 
 function scrapeDecision(doc, url) { // Works for both Court judgments and decisions
+	//Item type: case
 	var item = new Zotero.Item("case");
 
 	// Title
@@ -288,7 +287,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		else if (court.includes("Commission")) {
 			item.court = "Commission";
 		}
-		else if (court == "Committee of Ministers") {
+		else if (court == "Committee of Ministers") { // For resolutions (which are currently not supported)
 			item.court = "Committee of Ministers";
 		}
 		else {
