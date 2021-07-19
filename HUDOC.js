@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 20:35:37"
+	"lastUpdated": "2021-07-19 20:43:38"
 }
 
 /*
@@ -60,6 +60,9 @@ decision-making body ("originatingbody"), keywords ("kpthesaurus"), ...
 Check compiled.js on the HUDOC website in order to learn how to query these aspects.
 Search for "// ###..//sites/echr/echr.js ###"" in compiled.js to find most API fields.
 */
+
+// After removing text(), eslint complains
+/* eslint-disable no-undef */
 
 // Scrapes some metadata from the document
 // TODO: integrate function into scrape
@@ -133,7 +136,6 @@ function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API ins
 
 // Downloads the legal summary in HUDOC
 function getLegalSummary(item, appno) {
-
 	var appnoString = appno.join(" AND appno:");
 
 	// Save the French version if user visited the French version of the judgment
@@ -164,11 +166,11 @@ function getLegalSummary(item, appno) {
 
 			// Request text of legal summary
 			ZU.doGet(textUrl, function (text) {
-				//Remove styles and span tags
+				// Remove styles and span tags
 				text = text
 					.replace(/<style>[\s\S]*<\/style>/g, "")
-					.replace(/<\/?span[^>]*>/g,"")
-					.replace(/class\=\'s\S+\'/g, "");
+					.replace(/<\/?span[^>]*>/g, "")
+					.replace(/class='s\S+'/g, "");
 
 				item.notes.push({
 					title: "HUDOC Legal Summary",
@@ -184,7 +186,7 @@ function getLegalSummary(item, appno) {
 	});
 }
 
-// eslint-disable-next-line no-unused-vars: "url"
+// eslint-disable-next-line no-unused-vars: "url  "
 function detectWeb(doc, url) {
 	// We're waiting until the loading symbol is gone
 	Zotero.monitorDOMChanges(doc.querySelector("#notification div"), { attributes: true, attributeFilter: ["style"] });
@@ -192,28 +194,28 @@ function detectWeb(doc, url) {
 	var docType = scrapeMetaData(doc, "typedescription");
 
 	if (url.includes("hudoc.echr.coe.int/fre#")) {
-		//French website
+		// French website
 		if ((docType.includes("Arrêt")
 			|| docType.includes("Décision")
 			|| docType.includes("Avis consultatif")
 			// || docType.includes("Res-") // Removed support for resolutions (not a case and requires info scraped from the text)
 			|| docType.includes("Affaire Communiquée"))
 		// Exclude translations and press releases.
-		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
+		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translati o n" is sometimes capitalized
 			|| docType.includes("Communiqué de presse")
 			|| text(doc, "title").toLowerCase().includes("résumé juridique"))) {
 			return "case";
 		}
 	}
 	else if (url.includes("hudoc.echr.coe.int/eng#")) {
-		//English website (so won't work for Spanish or German)
+		// English website (so won't work for Spanish or German)
 		if ((docType.includes("Judgment")
 			|| docType.includes("Decision")
 			|| docType.includes("Advisory Opinion")
 			// || docType.includes("Res-") // Removed support for resolutions (not a case and requires info scraped from the text)
 			|| docType.includes("Communicated"))
 		// Exclude translations and press releases.
-		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLowerCase() is added because "translation" is sometimes capitalized
+		&& !(text(doc, "title").toLowerCase().includes("translation]") // toLow er Case() is added because "translation" is sometimes capitalized
 			|| docType.includes("Press Release")
 			|| text(doc, "title").toLowerCase().includes("legal summary"))) {
 			return "case";
@@ -231,7 +233,7 @@ function doWeb(doc, url) {
 }
 
 function scrapeDecision(doc, url) { // Works for both Court judgments and decisions
-	//Item type: case
+	// Item type: case
 	var item = new Zotero.Item("case");
 
 	// Title
@@ -243,29 +245,26 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 
 	// If title already contains the type, remove it.
 	// Exclude non-split titles and advisory opinions
-	if (!(splitTitle.length == 1) &&
-			!(scrapeMetaData(doc, "typedescription").includes("Advisory Opinion") 
+	if (!(splitTitle.length == 1)
+			&&	!(scrapeMetaData(doc, "typedescription").includes("Advisory Opinion")
 				|| scrapeMetaData(doc, "typedescription").includes("Avis consultatif"))) {
-		
 		// Find right cut-off point: Either the part that contains the v./c. or the part that contains the number of the case
-		let titleVersusMatch = splitTitle.findIndex(function(elem) {
+		let titleVersusMatch = splitTitle.findIndex(function (elem) {
 			if (elem.includes("V.") || elem.includes("C.")) {
-						return true;
+				return true;
 			}
 			return false;
 		});
 
-		let titleNumMatch = splitTitle.findIndex(function(elem) {
+		let titleNumMatch = splitTitle.findIndex(function (elem) {
 			if (/^((No\.|N°)|(II|III|IV|V|VI|VII|VIII|IX|X)\))/i.test(elem)) {
-						return true;
+				return true;
 			}
 			return false;
 		});
 
 		let titleIndex = Math.max(titleVersusMatch, titleNumMatch);
-
-
-		capTitle = splitTitle.slice(0, titleIndex+1).join("(");
+		capTitle = splitTitle.slice(0, titleIndex + 1).join("(");
 	}
 
 	// Zotero capitalizes the "v."/"c.", so we need to correct that for English and French cases
@@ -288,7 +287,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 			item.court = "ECtHR [GC]";
 		}
 		else if (court.includes("Commission")) {
-			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead? 
+			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead?
 		}
 		else if (court == "Comité des Ministres") { // For resolutions (which are currently not supported)
 			item.court = "Comité des Ministres";
@@ -297,6 +296,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 			item.court = "ECtHR";
 		}
 	}
+	/* eslint-disable no-lonely-if */
 	else {
 		if (text(doc, "title").includes("Advisory Opinion")) {
 			item.court = "ECtHR [GC]";
@@ -305,7 +305,7 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 			item.court = "ECtHR [GC]";
 		}
 		else if (court.includes("Commission")) {
-			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead? 
+			item.court = "EComHR"; // TODO: Since the Commission is defunct, should the full title maybe be used instead?
 		}
 		else if (court == "Committee of Ministers") { // For resolutions (which are currently not supported)
 			item.court = "Committee of Ministers";
@@ -313,11 +313,14 @@ function scrapeDecision(doc, url) { // Works for both Court judgments and decisi
 		else {
 			item.court = "ECtHR";
 		}
+	/* eslint-enable no-lonely-if */
 	}
 
 	// Date of decision
 	// convert to simple ISO: yyyy-mm-dd dd.mm.yyyy.
-	item.dateDecided = scrapeMetaData(doc, "judgementdate").split("/").reverse().join('-');
+	item.dateDecided = scrapeMetaData(doc, "judgementdate").split("/")
+		.reverse()
+		.join('-');
 
 	// URL
 	if (url.includes("hudoc.echr.coe.int/fre#")) {
