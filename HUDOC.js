@@ -36,6 +36,13 @@
 */
 
 /*
+	Key guides for citation:
+	- French: https://www.echr.coe.int/documents/note_citation_fra.pdf
+	- English: https://www.echr.coe.int/documents/note_citation_eng.pdf
+	- OSCOLA: https://www.law.ox.ac.uk/sites/files/oxlaw/oscola_4th_edn_hart_2012.pdf#page=37&zoom=auto,-270,529
+*/
+
+/*
 
 TODO:
 - Handle friendly settlements (the addition to the case name)
@@ -76,17 +83,30 @@ function getItemID(url) {
 // Adds the type of judgment at the end of the name
 function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API instead
 	var description = scrapeMetaData(doc, "typedescription");
-	var language = scrapeMetaData(doc, "typedescription");
 
-	//Simpler logic for French that just takes over the type (unless it's a judgment)
-	// TODO: Add comprehensive logic like for English
+	// The logic assumes the user wants French descriptors if they use the French website
 	if (url.includes("hudoc.echr.coe.int/fre#")) {
 		if (description.includes("Arrêt")) {
-			return "";
+			if (description.includes("satisfaction équitable") && !description.includes("au principal")) {
+				return " (satisfaction équitable)"; // Some papers use "(arrêt satisfaction équitable)"
+			}
+			if (description.includes("exception préliminaire") || description.includes("incompétence")) {
+				return " (exception préliminaire)";
+			}
+
+			if (description.includes("radiation du rôle")) return " (radiation du rôle)";
+			if (description.includes("interprétation"))	return " (interprétation)";
+			if (description.includes("révision")) return " (révision)";
 		}
-		else {
-			return " (" + description.split("(")[0].toLowerCase() + ")";
-		}
+
+		if (description.includes("Décision")) return " (déc.)";
+		if (description.includes("Affaire Communiquée")) return " (communiquée)"; // TODO: Rather use abbreviation?
+		if (description.includes("Révision")) return " (déc. de révision)"; // TODO: Rather use abbreviation?
+		if (description.includes("Res-")) return " (résolution)"; // TODO: Add later handlers, that maybe change item type and author/court
+	
+		return "";
+
+		// return " (" + description.split("(")[0].toLowerCase() + ")";
 	}
 
 	if (description.includes("Judgment")) {
@@ -106,8 +126,8 @@ function getTypeBit(doc, url) { // TODO: Switch to 'url' once we use the API ins
 	}
 
 	if (description.includes("Decision")) return " (dec.)";
-	if (description.includes("Communicated")) return " (communicated)"; // TODO: Check if correct
-	if (description.includes("Revision")) return " (dec. on revision)"; // TODO: Check if correct
+	if (description.includes("Communicated")) return " (communicated)"; // TODO: Rather use abbreviation?
+	if (description.includes("Revision")) return " (dec. on revision)"; // TODO: Rather use abbreviation?
 	if (description.includes("Res-")) return " (resolution)"; // TODO: Check if correct, maybe different Zotero type?
 
 	return "";
