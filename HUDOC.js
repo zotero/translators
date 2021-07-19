@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:23:59"
+	"lastUpdated": "2021-07-19 15:27:53"
 }
 
 /*
@@ -189,7 +189,7 @@ function getLegalSummary(item, appno) {
 // eslint-disable-next-line no-unused-vars: "url"
 function detectWeb(doc, url) {
 	// We're waiting until the loading symbol is gone
-	Zotero.monitorDOMChanges(doc.querySelector("#notification div"), { attributes: true, attributeFiler: ["style"] });
+	Zotero.monitorDOMChanges(doc.querySelector("#notification div"), { attributes: true, attributeFilter: ["style"] });
 
 	var docType = scrapeMetaData(doc, "typedescription");
 
