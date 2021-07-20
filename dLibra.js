@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-02-26 11:45:18"
+	"lastUpdated": "2021-07-21 11:39:27"
 }
 
 /*
@@ -35,11 +35,35 @@
 	***** END LICENSE BLOCK *****
 */
 
+let POLISH_TYPE_MAPPINGS = {
+	"dokument dźwiękowy":"audioRecording",
+	"książka":"book",
+	"rozdział": "bookSection",
+	"artykuł":"journalArticle",
+	"czasopismo":"journalArticle",
+	"manuskrypt":"manuscript",
+	"rękopis":"manuscript",
+	"mapa": "map",
+	"raport":"report",
+	"praca dyplomowa":"thesis",
+	"rozprawa doktorska":"thesis"
+};
+
 function detectWeb(doc, url) {
 	let singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	let multipleRe = /.*dlibra\/(collectiondescription|results|planned).*|.*\/dlibra\/?/;
 	if (singleRe.test(url)) {
-		return "document";
+		let types = doc.evaluate('//meta[@name="DC.type"]/@content', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+		let type;
+		for (let i = 0, length = types.snapshotLength; i < length; ++i) {
+			let item = types.snapshotItem(i).textContent;
+			if(POLISH_TYPE_MAPPINGS[item]) {
+				type = POLISH_TYPE_MAPPINGS[item];
+				break;
+			}
+			type = item;
+		}
+		return type ? type : "document";
 	}
 	if (multipleRe.test(url)) {
 		return "multiple";
@@ -90,44 +114,64 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-	let reDlibra5Single = new RegExp("(.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*).*");
+	let reDlibra5Single = new RegExp("((.*/dlibra)/(?:doccontent|docmetadata|publication).*[?&]id=([0-9]*)).*");
 	let m = reDlibra5Single.exec(url);
 	if (m) {
-		dlibra5Scrape(m[1], m[2]);
+		dlibraScrape(doc, m[1], m[2], "e", m[3]);
 	}
 	else {
-		dlibra6Scrape(doc, url);
+		let reDlibra6Single = new RegExp("((.*/dlibra)/publication/([0-9]*)(/edition/([0-9]*))?).*");
+		let m = reDlibra6Single.exec(url);
+		if (m) {
+			if (m[4]) {
+				dlibraScrape(doc, m[1], m[2], "e", m[5]);
+			}
+			else {
+				dlibraScrape(doc, m[1], m[2], "p", m[3]);
+			}
+		}
 	}
 }
 
-function dlibra5Scrape(baseUrl, id) {
-	ZU.HTTP.doGet(baseUrl + "/rdf.xml?type=e&id=" + id, function (rdf) {
+function dlibraScrape(doc, objUrl, baseUrl, objType, id) {
+	ZU.HTTP.doGet(baseUrl + "/rdf.xml?type=" + objType + "&id=" + id, function (rdf) {
 		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
+		let dcTypeRegex = new RegExp("<dc:type .*>(.*)</dc:type>", "gi");
+		let m, type;
+		while (m = dcTypeRegex.exec(rdf)) {
+			if(POLISH_TYPE_MAPPINGS[m[1]]) {
+				type = POLISH_TYPE_MAPPINGS[m[1]];
+				break;
+			}
+		}
 		let translator = Zotero.loadTranslator("import");
 		// RDF importer
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setString(rdf);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (item.extra) item.notes.push(item.extra);
+			item.url = objUrl;
 			item.extra = "";
 			item.itemID = "";
+			addAttachments(doc, item);
 			item.complete();
 		});
 		translator.getTranslatorObject(function (trans) {
-			trans.defaultUnknownType = 'document';
+			if (type) {
+				trans.defaultUnknownType = type;
+			}
 			trans.doImport();
 		});
 	});
 }
 
-function dlibra6Scrape(doc, url) {
-	let translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	translator.setDocument(doc);
-	translator.getTranslatorObject(function (trans) {
-		trans.doWeb(doc, url);
-	});
+function addAttachments(doc, item) {
+	let pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content');
+	if(pdfURL.length) {
+		pdfURL = pdfURL[0].textContent;
+		item.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
+	}
+	item.attachments.push({document:doc, title:"Snapshot"});
 }
 
 /** BEGIN TEST CASES **/
@@ -137,7 +181,7 @@ var testCases = [
 		"url": "http://cyfrowa.bibliotekakolbuszowa.pl/dlibra/docmetadata?id=945&from=&dirids=1&ver_id=&lp=4&QI=",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "journalArticle",
 				"title": "Gazeta Świerczowska. Nr 5 (2020)",
 				"creators": [
 					{
@@ -151,7 +195,16 @@ var testCases = [
 				"libraryCatalog": "dLibra",
 				"publisher": "Sołectwo Świerczów",
 				"rights": "Prawa zastrzeżone - dostęp nieograniczony / Rights Reserved - Free Access",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Rada sołecka"
@@ -161,7 +214,8 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": []
+				"seeAlso": [],
+				"url": "http://cyfrowa.bibliotekakolbuszowa.pl/dlibra/docmetadata?id=945"
 			}
 		]
 	},
@@ -185,7 +239,7 @@ var testCases = [
 		"url": "https://demo.dl.psnc.pl/dlibra/publication/1502/edition/1243",
 		"items": [
 			{
-				"itemType": "document",
+				"itemType": "book",
 				"title": "Pan Tadeusz",
 				"creators": [
 					{
@@ -195,10 +249,10 @@ var testCases = [
 					}
 				],
 				"date": "1882",
-				"abstractNote": "Adam Mickiewicz, Pan Tadeusz, poezja polska, ilustracje: E. M. Andriolli. (Skan POLONA)",
+				"abstractNote": "Epilog",
 				"url": "https://demo.dl.psnc.pl/dlibra/publication/1502/edition/1243",
 				"language": "pol",
-				"libraryCatalog": "demo.dl.psnc.pl",
+				"libraryCatalog": "dLibra",
 				"publisher": "Lwów, Nakładem Księgarni F. H. Richtera. (H. Altbenberg)",
 				"rights": "Open Access",
 				"attachments": [
