@@ -78,7 +78,7 @@ function postProcess(doc, item) {
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags) {
 		let allTags = item.tags.map(i => i.textContent.trim());
-		//deduplicate
+		//deduplicate allTags
 		item.tags = Array.from(new Set(allTags.map(JSON.stringify))).map(JSON.parse);
 	}
 	let reviewEntry = text(doc, '.articlecategory');
