@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-21 14:01:36"
+	"lastUpdated": "2021-07-20 14:02:03"
 }
 
 /*
@@ -76,8 +76,10 @@ function postProcess(doc, item) {
 		 item.abstractNote = '';
 	}
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
-	if (item.tags)
-		item.tags = item.tags.map(i => i.textContent.trim());
+	if (item.tags) {
+		let deduplicateTags = item.tags.map(i => i.textContent.trim());
+		item.tags = Array.from(new Set(deduplicateTags.map(JSON.stringify))).map(JSON.parse);
+	}
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
 	// numbering issues with slash due to cataloguing rule
@@ -155,3 +157,65 @@ function doWeb(doc, url) {
 	} else
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/vt/71/3/article-p365_5.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Future of the Past: Literarische Prophetien, Prophetenspruchsammlungen und die Anfänge der Schriftprophetie",
+				"creators": [
+					{
+						"firstName": "Alexandra",
+						"lastName": "Grund-Wittenberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/02/18",
+				"DOI": "10.1163/15685330-12341069",
+				"ISSN": "0042-4935, 1568-5330",
+				"abstractNote": "<section class=\"abstract\"><h2 class=\"abstractTitle text-title my-1\" id=\"d312172225e149\">Abstract</h2><p>The article is a contribution to the current discussion about the beginnings of prophetic books in ancient Israel. It investigates the significance of the so-called „Literary Predictive Texts“ (<span style=\"font-variant: small-caps;\">LPT</span>) and the Neo-Assyrian prophecies for our understanding of the emergence of prophetic writings in Israel. The<span style=\"font-variant: small-caps;\">LPT</span>in particular had received only little attention so far. Tying in critically with some recent studies, this article compares the Marduk prophecy and the Neo-Assyrian tablet <span style=\"font-variant: small-caps;\">SAA</span>9 3 with selected passages from the book of Amos (Amos 3–6* and Amos 6*). It concludes that in contrast to the Neo-Assyrian collective tablets the <span style=\"font-variant: small-caps;\">LPT</span>cannot serve as appropriate analogies to early prophetic scrolls, but that they are helpful to understand the phenomenon of tradent prophecy.</p></section>",
+				"issue": "3",
+				"language": "ger",
+				"libraryCatalog": "brill.com",
+				"pages": "365-396",
+				"publicationTitle": "Vetus Testamentum",
+				"shortTitle": "The Future of the Past",
+				"url": "https://brill.com/view/journals/vt/71/3/article-p365_5.xml",
+				"volume": "71",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Amos"
+					},
+					{
+						"tag": "Literary Prophetic Texts"
+					},
+					{
+						"tag": "Marduk prophecy"
+					},
+					{
+						"tag": "Neo-Assyrian prophecies"
+					},
+					{
+						"tag": "early stages of prophetic books"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
