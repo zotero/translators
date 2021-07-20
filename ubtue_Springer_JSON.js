@@ -68,8 +68,10 @@ var mappingTypes = {
 
 function doImport() {
 	let data_complete = parseInput();
-	if (!(data_complete && data_complete.records && data_complete.records.length))
+	if (!(data_complete && data_complete.records && data_complete.records.length)) {
+        Z.debug("Parsed data apparently incorrect");
 	    return false;
+    }
 
     let data = data_complete.records[0];
 
@@ -120,6 +122,9 @@ function doImport() {
         else if (url.format == "pdf" || url.format=="html")
             item.notes.push({note: "url:" + url.value});
 	}
+
+    if (data.openaccess && data.openaccess == "true")
+        item.notes.push('LF:');
 
 	item.complete();
 }
