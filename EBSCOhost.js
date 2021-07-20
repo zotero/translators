@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-03-11 13:47:13"
+	"lastUpdated": "2021-07-14 17:40:37"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -84,6 +83,25 @@ function downloadFunction(text, url, prefs) {
 	// hopefully EBCSOhost doesn't use this for anything useful
 	text = text.replace(/^M3\s\s?-.*/gm, '');
 	
+	// we'll save this for later, in case we have to throw away a subtitle
+	// from the RIS
+	let subtitle;
+	
+	// EBSCOhost uses nonstandard tags to represent journal titles on some items
+	// no /g flag so we don't create duplicate tags
+	let journalRe = /^(JO|JF|J1)/m;
+	if (journalRe.test(text)) {
+		let subtitleRe = /^T2\s\s?-\s?(.*)/m;
+		let subtitleMatch = text.match(subtitleRe);
+		if (subtitleMatch) {
+			// if there's already something in T2, store it and erase it from the RIS
+			subtitle = subtitleMatch[1];
+			text = text.replace(subtitleRe, '');
+		}
+		
+		text = text.replace(journalRe, 'T2');
+	}
+	
 	// Let's try to keep season info
 	// Y1  - 1993///Winter93
 	// Y1  - 2009///Spring2009
@@ -110,6 +128,10 @@ function downloadFunction(text, url, prefs) {
 			
 			if (item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
+			}
+			
+			if (subtitle) {
+				item.title += `: ${subtitle}`;
 			}
 		}
 
@@ -542,5 +564,5 @@ function doDelivery(doc, itemInfo) {
 }
 
 /** BEGIN TEST CASES **/
-
+var testCases = []
 /** END TEST CASES **/

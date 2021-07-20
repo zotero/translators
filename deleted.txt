@@ -1,4 +1,4 @@
-65  # Increment number when modifying file
+69  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -111,3 +111,7 @@ f520b141-9ce8-42f4-93ec-a39e375a9516 # PubGet doesn't exist anymore
 d9a16cf3-8b86-4cab-8610-dbd913ad1a44 # Archives Canada-France is defunct
 e13b0f9d-44ba-4ece-aa22-77993bb26ef2 # Chadwyck Literature Online merged with ProQuest in 2018
 edfa5803-e331-47db-84d1-db3cf8d6f460 # Replaced by US National Archives Research Catalog; this translator covered only a long-defunct subdomain
+b86bb082-6310-4772-a93c-913eaa3dfa1b # Early English Books Online merged with ProQuest
+bbf1617b-d836-4665-9aae-45f223264460 # A Contra Corriente is better handled by PKP Catalog Systems (Open Journal Systems)
+1fdc31af-065d-4923-9e90-ab4afe5cca8b # Informit Australia now runs Atypon
+5e684d82-73a3-9a34-095f-19b112d77bbe # Digital Medievalist now runs Ubiquity Journals

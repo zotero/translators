@@ -34,8 +34,15 @@ function detectWeb(doc, url) {
 		}
 	}
 
-	if (url.search(/\/search[?/]/) != -1 && getArticleList(doc).length > 0) {
-		return "multiple";
+	if (url.search(/\/search[?/]/) != -1) {
+		if (getArticleList(doc).length > 0) {
+			return "multiple";
+		}
+		else if (doc.querySelector('.LoadingOverlay.show')) {
+			// monitor and update the toolbar icon when results have loaded
+			Z.monitorDOMChanges(doc.querySelector('.results-container'));
+			return false;
+		}
 	}
 	if (!url.includes("pdf")) {
 		// Book sections have the ISBN in the URL
@@ -325,10 +332,16 @@ function processRIS(doc, text) {
 		for (var i = 0, n = item.creators.length; i < n; i++) {
 			// add spaces after initials
 			if (item.creators[i].firstName) {
-				item.creators[i].firstName = item.creators[i].firstName.replace(/\.\s*(?=\S)/g, '. ');
+				item.creators[i].firstName = item.creators[i].firstName
+					.replace(/\.\s*(?=\S)/g, '. ')
+					.replace(/\s/g, ' '); // NBSP, etc -> space
+			}
+			if (item.creators[i].lastName) {
+				item.creators[i].lastName = item.creators[i].lastName
+					.replace(/\s/g, ' ');
 			}
 			// fix all uppercase lastnames
-			if (item.creators && item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
+			if (item.creators[i].lastName.toUpperCase() == item.creators[i].lastName) {
 				item.creators[i].lastName = item.creators[i].lastName.charAt(0) + item.creators[i].lastName.slice(1).toLowerCase();
 			}
 		}
@@ -527,12 +540,12 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Schaaf",
-						"firstName": "Christian P.",
+						"firstName": "Christian P.",
 						"creatorType": "author"
 					},
 					{
 						"lastName": "Zoghbi",
-						"firstName": "Huda Y.",
+						"firstName": "Huda Y.",
 						"creatorType": "author"
 					}
 				],
@@ -546,11 +559,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "806-808",
 				"publicationTitle": "Neuron",
-				"url": "http://www.sciencedirect.com/science/article/pii/S0896627311004430",
+				"url": "https://www.sciencedirect.com/science/article/pii/S0896627311004430",
 				"volume": "70",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "ScienceDirect Full Text PDF",
@@ -614,16 +628,12 @@ var testCases = [
 				"pages": "1286-1302",
 				"publicationTitle": "Biochimica et Biophysica Acta (BBA) - Molecular Cell Research",
 				"series": "Apoptosis in yeast",
-				"url": "http://www.sciencedirect.com/science/article/pii/S016748890800116X",
+				"url": "https://www.sciencedirect.com/science/article/pii/S016748890800116X",
 				"volume": "1783",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf",
-						"proxy": false
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -653,7 +663,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.sciencedirect.com/science/book/9780123694683",
+		"url": "https://www.sciencedirect.com/book/9780123694683/computational-materials-engineering",
 		"items": "multiple"
 	},
 	{
@@ -704,10 +714,11 @@ var testCases = [
 				"pages": "267-316",
 				"place": "Burlington",
 				"publisher": "Academic Press",
-				"url": "http://www.sciencedirect.com/science/article/pii/B9780123694683500083",
+				"url": "https://www.sciencedirect.com/science/article/pii/B9780123694683500083",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -745,10 +756,11 @@ var testCases = [
 				"pages": "295-305",
 				"place": "Oxford",
 				"publisher": "Academic Press",
-				"url": "http://www.sciencedirect.com/science/article/pii/B9780123706263000508",
+				"url": "https://www.sciencedirect.com/science/article/pii/B9780123706263000508",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -808,7 +820,7 @@ var testCases = [
 					},
 					{
 						"lastName": "Smith",
-						"firstName": "Jeremy C.",
+						"firstName": "Jeremy C.",
 						"creatorType": "author"
 					},
 					{
@@ -828,11 +840,12 @@ var testCases = [
 				"pages": "849-858",
 				"publicationTitle": "Biophysical Journal",
 				"shortTitle": "Unwrapping of Nucleosomal DNA Ends",
-				"url": "http://www.sciencedirect.com/science/article/pii/S0006349512000835",
+				"url": "https://www.sciencedirect.com/science/article/pii/S0006349512000835",
 				"volume": "102",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "ScienceDirect Full Text PDF",
@@ -910,15 +923,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "267-276",
 				"publicationTitle": "The Lancet",
-				"url": "http://www.sciencedirect.com/science/article/pii/S014067361362228X",
+				"url": "https://www.sciencedirect.com/science/article/pii/S014067361362228X",
 				"volume": "383",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -929,7 +939,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.sciencedirect.com/science/article/abs/pii/0584853976801316",
+		"url": "https://www.sciencedirect.com/science/article/pii/0584853976801316",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -966,15 +976,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "663-672",
 				"publicationTitle": "Spectrochimica Acta Part A: Molecular Spectroscopy",
-				"url": "http://www.sciencedirect.com/science/article/pii/0584853976801316",
+				"url": "https://www.sciencedirect.com/science/article/pii/0584853976801316",
 				"volume": "32",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1007,15 +1014,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "255-261",
 				"publicationTitle": "Journal of Sound and Vibration",
-				"url": "http://www.sciencedirect.com/science/article/pii/0022460X72904348",
+				"url": "https://www.sciencedirect.com/science/article/pii/0022460X72904348",
 				"volume": "25",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -1053,11 +1057,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "2775-2785",
 				"publicationTitle": "Journal of Integrative Agriculture",
-				"url": "http://www.sciencedirect.com/science/article/pii/S2095311916614284",
+				"url": "https://www.sciencedirect.com/science/article/pii/S2095311916614284",
 				"volume": "15",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "ScienceDirect Full Text PDF",
@@ -1090,6 +1095,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://www.sciencedirect.com/search?qs=zotero&show=25&sortBy=relevance",
+		"defer": true,
 		"items": "multiple"
 	},
 	{
@@ -1146,16 +1152,12 @@ var testCases = [
 				"libraryCatalog": "ScienceDirect",
 				"pages": "2766-2774",
 				"publicationTitle": "Acta de Investigación Psicológica",
-				"url": "http://www.sciencedirect.com/science/article/pii/S2007471917300571",
+				"url": "https://www.sciencedirect.com/science/article/pii/S2007471917300571",
 				"volume": "7",
 				"attachments": [
 					{
-						"title": "ScienceDirect Snapshot"
-					},
-					{
-						"title": "ScienceDirect Full Text PDF",
-						"mimeType": "application/pdf",
-						"proxy": false
+						"title": "ScienceDirect Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -1198,6 +1200,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.sciencedirect.com/search/advanced?qs=testing",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
