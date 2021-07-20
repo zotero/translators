@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2020-03-13 03:07:49"
+	"lastUpdated": "2021-07-01 19:05:10"
 }
 
 /*
@@ -226,7 +226,7 @@ var bibtex2zoteroTypeMap = {
 	"booklet":"book",
 	"manual":"book",
 	"mastersthesis":"thesis",
-	"misc":"book",
+	"misc":"document",
 	"proceedings":"book",
 	"online":"webpage",
 	// alias for online from BibLaTeX:
@@ -303,6 +303,9 @@ function processField(item, field, value, rawValue) {
 		//map DOIs + Label to Extra for unsupported item types
 		if (field == "doi" &&!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
 			item._extraFields.push({field: "DOI", value: ZU.cleanDOI(value)});
+		}
+		if (field == "url") { // pass raw values for URL
+			item.url = rawValue;	
 		}
 		else {
 			item[fieldMap[field]] = value;
@@ -391,9 +394,9 @@ function processField(item, field, value, rawValue) {
 		if (item.date) {
 			if (value.includes(item.date)) {
 				// value contains year and more
-				item.date = value;
+				item.date = ZU.strToISO(value);
 			} else {
-				item.date = value+item.date;
+				item.date = ZU.strToISO(value+item.date);
 			}
 		} else {
 			item.date = value;
@@ -402,7 +405,7 @@ function processField(item, field, value, rawValue) {
 		if (item.date) {
 			if (!item.date.includes(value)) {
 				// date does not already contain year
-				item.date += value;
+				item.date =ZU.strToISO(item.date+value);
 			}
 		} else {
 			item.date = value;
@@ -858,6 +861,10 @@ function beginRecord(type, closeChar) {
 		}
 		var item = new Zotero.Item(zoteroType);
 		item._extraFields = [];
+	} 
+	else if (type == "preamble") { // Preamble (keeping separate in case we want to do something with these)
+		Zotero.debug("discarded preamble from BibTeX");
+		return;
 	}
 	
 	// For theses write the thesisType determined by the BibTeX type.
@@ -1048,6 +1055,7 @@ function readString(resolve, reject) {
 function writeField(field, value, isMacro) {
 	if (!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
+
 	Zotero.write(",\n\t" + field + " = ");
 	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
@@ -3213,7 +3221,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "October 2006",
+				"date": "2006-10",
 				"itemID": "conference:06",
 				"attachments": [],
 				"tags": [],
@@ -3334,7 +3342,7 @@ var testCases = [
 		"input": "@misc{american_rights_at_work_public_2012,\n    title = {Public Service Research Foundation},\n\turl = {http://www.americanrightsatwork.org/blogcategory-275/},\n\turldate = {2012-07-27},\n\tauthor = {American Rights at Work},\n\tyear = {2012},\n\thowpublished = {http://www.americanrightsatwork.org/blogcategory-275/},\n}",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "document",
 				"title": "Public Service Research Foundation",
 				"creators": [
 					{
@@ -3597,7 +3605,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "March 2013",
+				"date": "2013-03",
 				"DOI": "10.1161/CIR.0b013e318288b4dd",
 				"ISSN": "1524-4539",
 				"extra": "PMID: 23439512",
@@ -3610,16 +3618,36 @@ var testCases = [
 				"volume": "127",
 				"attachments": [],
 				"tags": [
-					"Administrative Personnel",
-					"American Heart Association",
-					"Cardiopulmonary Resuscitation",
-					"Community Health Services",
-					"Health Personnel",
-					"Heart Arrest",
-					"Humans",
-					"Leadership",
-					"Public Health",
-					"United States"
+					{
+						"tag": "Administrative Personnel"
+					},
+					{
+						"tag": "American Heart Association"
+					},
+					{
+						"tag": "Cardiopulmonary Resuscitation"
+					},
+					{
+						"tag": "Community Health Services"
+					},
+					{
+						"tag": "Health Personnel"
+					},
+					{
+						"tag": "Heart Arrest"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Leadership"
+					},
+					{
+						"tag": "Public Health"
+					},
+					{
+						"tag": "United States"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -3913,12 +3941,102 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "März 1942",
+				"date": "1942-03",
 				"itemID": "sweig42",
 				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@preamble{BibTeX for papers by David Kotz; for complete/updated list see\nhttps://www.cs.dartmouth.edu/~kotz/research/papers.html}\n\n@Article{batsis:rural,\n  author =        {John A. Batsis and Curtis L. Petersen and Matthew M. Clark and Summer B. Cook and David Kotz and Tyler L. Gooding and Meredith N. Roderka and Rima I. Al-Nimr and Dawna M. Pidgeon and Ann Haedrich and KC Wright and Christina Aquila and Todd A. Mackenzie},\n  title =         {A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity},\n  journal =       {BMC Geriatrics},\n  year =          2020,\n  month =         {December},\n  copyright =     {the authors},\n  URL =           {https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html},\n  note =          {Accepted for publication},\n}\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity",
+				"creators": [
+					{
+						"firstName": "John A.",
+						"lastName": "Batsis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Curtis L.",
+						"lastName": "Petersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew M.",
+						"lastName": "Clark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Summer B.",
+						"lastName": "Cook",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Kotz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tyler L.",
+						"lastName": "Gooding",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Meredith N.",
+						"lastName": "Roderka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rima I.",
+						"lastName": "Al-Nimr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dawna M.",
+						"lastName": "Pidgeon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ann",
+						"lastName": "Haedrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. C.",
+						"lastName": "Wright",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christina",
+						"lastName": "Aquila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Todd A.",
+						"lastName": "Mackenzie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-12",
+				"itemID": "batsis:rural",
+				"publicationTitle": "BMC Geriatrics",
+				"rights": "the authors",
+				"url": "https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Accepted for publication</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]

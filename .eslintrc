@@ -16,6 +16,9 @@
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
 		"XMLSerializer": "readonly",
+		"attr": "readonly",
+		"innerText": "readonly",
+		"text": "readonly",
 		"atob": "readonly"
 	},
 	"rules": {
