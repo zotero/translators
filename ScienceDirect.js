@@ -78,7 +78,7 @@ function getPDFLink(doc, onDone) {
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
 		Zotero.debug("Found embedded PDF URL: " + intermediateURL);
-		if (intermediateURL.includes('isDTMRedir=Y')) {
+		if (/[?&]isDTMRedir=(Y|true)/i.test(intermediateURL)) {
 			onDone(intermediateURL);
 		}
 		else {
@@ -117,7 +117,7 @@ function getPDFLink(doc, onDone) {
 	// separate network request. If we find it, we can take advantage of it to
 	// grab the PDF url's parts directly, constructing it in the same way that
 	// the site's frontend JavaScript would.
-	var json = doc.querySelector('script[type="application/json"]').innerHTML;
+	var json = text(doc, 'script[type="application/json"]');
 	if (json) {
 		try {
 			json = JSON.parse(json);
