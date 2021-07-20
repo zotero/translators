@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 14:02:03"
+	"lastUpdated": "2021-07-20 17:33:03"
 }
 
 /*
@@ -77,8 +77,9 @@ function postProcess(doc, item) {
 	}
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags) {
-		let deduplicateTags = item.tags.map(i => i.textContent.trim());
-		item.tags = Array.from(new Set(deduplicateTags.map(JSON.stringify))).map(JSON.parse);
+		let allTags = item.tags.map(i => i.textContent.trim());
+		//deduplicate
+		item.tags = Array.from(new Set(allTags.map(JSON.stringify))).map(JSON.parse);
 	}
 	let reviewEntry = text(doc, '.articlecategory');
 	if (reviewEntry && reviewEntry.match(/book\sreview/i)) item.tags.push('Book Review');
