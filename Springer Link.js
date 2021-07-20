@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-11-24 11:01:57"
+	"lastUpdated": "2021-07-20 08:20:23"
 }
 
 function detectWeb(doc, url) {
@@ -130,6 +130,9 @@ function complementItem(doc, item) {
 		if (!item.journalAbbreviation || item.publicationTitle == item.journalAbbreviation) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
+		let oa_desc = ZU.xpathText(doc, '//span[@data-test="open-access"]');
+		if (oa_desc && oa_desc.match(/open access/i))
+			item.notes.push('LF:');
 	}
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
 		// look for editors
