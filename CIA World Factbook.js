@@ -37,11 +37,11 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('/article/')) {
-		return "encyclopediaArticle";
-	}
-	else if (getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
+	}
+	else if (doc.querySelector('h1.hero-title')) {
+		return "encyclopediaArticle";
 	}
 	return false;
 }
