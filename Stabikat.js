@@ -112,10 +112,9 @@ function scrape(doc) {
 	// get the identifaction number necessary for the api call
 	var permalink = attr(doc, ".cnt > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)", "href");
 	var ppn = permalink.slice(permalink.indexOf("PPN=") + 4);
-	var catalogid = "stabikat";
 	var translator = Zotero.loadTranslator('import');
-	translator.setTranslator('041335e4-6984-4540-b683-494bc923057a'); 
-	translator.setString(JSON.stringify({ ppn: [ppn], catalogid }));
+	translator.setTranslator('041335e4-6984-4540-b683-494bc923057a');
+	translator.setString(JSON.stringify({ ppn: [ppn]}));
 	translator.translate();
 }
 
