@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 18:14:30"
+	"lastUpdated": "2021-07-21 19:14:55"
 }
 
 /*
@@ -419,7 +419,8 @@ function addHighwireMetadata(doc, newItem, hwType) {
 			two-word Spanish surname, we split by comma. */
 			
 			let lang = getContentText(doc, 'citation_language');
-			let twoWordName = ['es', 'spa', 'Spanish', 'español'].includes(lang)
+			let twoWordName = authorsByComma.length == 2
+				&& ['es', 'spa', 'Spanish', 'español'].includes(lang)
 				&& authorsByComma[0].split(' ').length == 2;
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
