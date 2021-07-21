@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 08:52:02"
+	"lastUpdated": "2021-07-21 07:23:01"
 }
 
 /*
@@ -60,7 +60,7 @@ function getAuthorName(text) {
 	//lower case words at the end of a name are probably not part of a name
 	text = text.replace(/(\s+[a-z]+)+\s*$/,'');
 
-	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)(\.?|(?=\s|$))/gi,'');	//remove salutations
+	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)\b(\.?|(?=\s|$))/gi,'');	//remove salutations
 
 	return fixCase(text.trim());
 }
@@ -370,7 +370,12 @@ function scrapeBibTeX(doc, url) {
 				for (let author of getAuthorNameShortReview(doc))
 					item.creators.push(ZU.cleanAuthor(author));
 			}
-
+			if (!item.creators[0] && item.ISSN == "1748-0922") {
+				let author = ZU.xpathText(doc, '//section[@class="article-section__content"]/p[last()-1]/i');
+				if (author) {
+					item.creators.push(ZU.cleanAuthor(getAuthorName(author), 'author', false));
+				}
+			}
 			// Make sure we pass only the DOI not the whole URL
 			doiURLRegex = /^https:\/\/doi.org\/(.*)/;
 			if (item.DOI && item.DOI.match(doiURLRegex))
@@ -532,6 +537,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
