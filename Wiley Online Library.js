@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 08:52:02"
+	"lastUpdated": "2021-07-21 07:29:05"
 }
 
 /*
@@ -60,7 +60,7 @@ function getAuthorName(text) {
 	//lower case words at the end of a name are probably not part of a name
 	text = text.replace(/(\s+[a-z]+)+\s*$/,'');
 
-	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)(\.?|(?=\s|$))/gi,'');	//remove salutations
+	text = text.replace(/(^|[\s,])(PhD|MA|Prof|Dr)\b(\.?|(?=\s|$))/gi,'');	//remove salutations
 
 	return fixCase(text.trim());
 }
@@ -370,7 +370,12 @@ function scrapeBibTeX(doc, url) {
 				for (let author of getAuthorNameShortReview(doc))
 					item.creators.push(ZU.cleanAuthor(author));
 			}
-
+			if (!item.creators[0] && item.ISSN == "1748-0922") {
+				let author = ZU.xpathText(doc, '//section[@class="article-section__content"]/p[last()-1]/i');
+				if (author) {
+					item.creators.push(ZU.cleanAuthor(getAuthorName(author), 'author', false));
+				}
+			}
 			// Make sure we pass only the DOI not the whole URL
 			doiURLRegex = /^https:\/\/doi.org\/(.*)/;
 			if (item.DOI && item.DOI.match(doiURLRegex))
@@ -532,6 +537,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -659,72 +665,6 @@ var testCases = [
 		"type": "web",
 		"url": "https://ceramics.onlinelibrary.wiley.com/doi/book/10.1002/9780470320419",
 		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "A mass spectrometry-based method to screen for α-amidated peptides",
-				"creators": [
-					{
-						"firstName": "Zhenming",
-						"lastName": "An",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yudan",
-						"lastName": "Chen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John M.",
-						"lastName": "Koomen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David J.",
-						"lastName": "Merkler",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012",
-				"DOI": "10.1002/pmic.201100327",
-				"ISSN": "1615-9861",
-				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
-				"issue": "2",
-				"itemID": "https://doi.org/10.1002/pmic.201100327",
-				"language": "en",
-				"libraryCatalog": "Wiley Online Library",
-				"pages": "173-182",
-				"publicationTitle": "PROTEOMICS",
-				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
-				"volume": "12",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Post-translational modification"
-					},
-					{
-						"tag": "Spectral pairing"
-					},
-					{
-						"tag": "Technology"
-					},
-					{
-						"tag": "α-Amidated peptide"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
 	},
 	{
 		"type": "web",
@@ -1490,9 +1430,7 @@ var testCases = [
 						"tag": "well-being"
 					}
 				],
-				"notes": [
-					"LF:"
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
