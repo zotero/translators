@@ -1,21 +1,20 @@
 {
 	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
 	"label": "MARC",
-	"creator": "Simon Kornblith, Sylvain Machefert",
+	"creator": "Simon Kornblith, Sylvain Machefert, and Abe Jellinek",
 	"target": "marc",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-10-14 14:41:53"
+	"lastUpdated": "2021-07-21 16:13:21"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Simon Kornblith, Sylvain Machefert
+	Copyright © 2021 Simon Kornblith, Sylvain Machefert, and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -43,36 +42,45 @@ function detectImport() {
 	}
 	return false;
 }
-// test
-var fieldTerminator = "\x1E";
-var recordTerminator = "\x1D";
-var subfieldDelimiter = "\x1F";
+
+const fieldTerminator = "\x1E";
+const recordTerminator = "\x1D";
+const subfieldDelimiter = "\x1F";
 
 /*
  * CLEANING FUNCTIONS
  */
 
 
-// general purpose cleaning
+/**
+ * Strip punctuation, parens, and brackets from the beginning and end of a
+ * string and coalesce adjacent spaces.
+ * @param {string} value The string to clean.
+ * @returns {string|null}
+ */
 function clean(value) {
-	if (value === undefined) {
+	if (value === undefined || value === null) {
 		return null;
 	}
 	value = value.replace(/^[\s.,/:;]+/, '');
 	value = value.replace(/[\s.,/:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
 
-	var char1 = value.substr(0, 1);
-	var char2 = value.substr(value.length - 1);
-	if ((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
-		// chop of extraneous characters
+	var first = value[0];
+	var last = value[value.length - 1];
+	if ((first == "[" && last == "]") || (first == "(" && last == ")")) {
+		// chop off extraneous characters
 		return value.substr(1, value.length - 2);
 	}
 
 	return value;
 }
 
-// number extraction
+/**
+ * Extract the first sequence of one or more digits from a string.
+ * @param {string} text
+ * @returns {string}
+ */
 function pullNumber(text) {
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
@@ -82,23 +90,13 @@ function pullNumber(text) {
 	return "";
 }
 
-// ISBN extraction
-function pullISBN(text) {
-	var pullRe = /[0-9X-]+/;
-	var m = pullRe.exec(text);
-	if (m) {
-		return m[0];
-	}
-	return "";
-}
-
-
-// regular author extraction
-function author(author, type, useComma) {
-	return Zotero.Utilities.cleanAuthor(author, type, useComma);
-}
-
-
+/**
+ * Concatenate two strings, adding the provided delimiter if the first does not
+ * end with punctuation.
+ * @param {string} part1
+ * @param {string} part2
+ * @param {string} delimiter
+ */
 function glueTogether(part1, part2, delimiter) {
 	if (!part1 && !part2) {
 		return null;
@@ -112,7 +110,7 @@ function glueTogether(part1, part2, delimiter) {
 	if (!delimiter) {
 		return part1 + ' ' + part2;
 	}
-	// we only add the delimiter, if part1 is not ending with a punctation
+	// we only add the delimiter if part1 does not end with punctuation
 	if (part1.search(/[?:,.!;]\s*$/) > -1) {
 		return part1 + ' ' + part2;
 	}
@@ -123,273 +121,240 @@ function glueTogether(part1, part2, delimiter) {
  * END CLEANING FUNCTIONS
  */
 
-var record = function () {
-	this.directory = {};
-	this.leader = "";
-	this.content = "";
-
-	// defaults
-	this.indicatorLength = 2;
-	this.subfieldCodeLength = 2;
-};
-
-// import a binary MARC record into this record
-record.prototype.importBinary = function (record) {
-	// get directory and leader
-	var directory = record.substr(0, record.indexOf(fieldTerminator));
-	this.leader = directory.substr(0, 24);
-	directory = directory.substr(24);
-
-	// get various data
-	this.indicatorLength = parseInt(this.leader.substr(10, 1));
-	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1));
-	var baseAddress = parseInt(this.leader.substr(12, 5));
-
-	// get record data
-	var contentTmp = record.substr(baseAddress);
-
-	// MARC wants one-byte characters, so when we have multi-byte UTF-8
-	// sequences, add null characters so that the directory shows up right. we
-	// can strip the nulls later.
-	this.content = "";
-	for (i = 0; i < contentTmp.length; i++) {
-		this.content += contentTmp.substr(i, 1);
-		if (contentTmp.charCodeAt(i) > 0x00FFFF) {
-			this.content += "\x00\x00\x00";
+class Record {
+	constructor() {
+		this.directory = {};
+		this.leader = "";
+		this.content = "";
+	
+		// defaults
+		this.indicatorLength = 2;
+		this.subfieldCodeLength = 2;
+	}
+	
+	importBinary(record) {
+		// get directory and leader
+		var directory = record.substr(0, record.indexOf(fieldTerminator));
+		this.leader = directory.substr(0, 24);
+		directory = directory.substr(24);
+	
+		// get various data
+		this.indicatorLength = parseInt(this.leader.substr(10, 1));
+		this.subfieldCodeLength = parseInt(this.leader.substr(11, 1));
+		var baseAddress = parseInt(this.leader.substr(12, 5));
+	
+		// get record data
+		var contentTmp = record.substr(baseAddress);
+	
+		// MARC wants one-byte characters, so when we have multi-byte UTF-8
+		// sequences, add null characters so that the directory shows up right. we
+		// can strip the nulls later.
+		this.content = "";
+		for (i = 0; i < contentTmp.length; i++) {
+			this.content += contentTmp.substr(i, 1);
+			if (contentTmp.charCodeAt(i) > 0x00FFFF) {
+				this.content += "\x00\x00\x00";
+			}
+			else if (contentTmp.charCodeAt(i) > 0x0007FF) {
+				this.content += "\x00\x00";
+			}
+			else if (contentTmp.charCodeAt(i) > 0x00007F) {
+				this.content += "\x00";
+			}
 		}
-		else if (contentTmp.charCodeAt(i) > 0x0007FF) {
-			this.content += "\x00\x00";
+	
+		// read directory
+		for (var i = 0; i < directory.length; i += 12) {
+			var tag = parseInt(directory.substr(i, 3));
+			var fieldLength = parseInt(directory.substr(i + 3, 4));
+			var fieldPosition = parseInt(directory.substr(i + 7, 5));
+	
+			if (!this.directory[tag]) {
+				this.directory[tag] = [];
+			}
+			this.directory[tag].push([fieldPosition, fieldLength]);
 		}
-		else if (contentTmp.charCodeAt(i) > 0x00007F) {
-			this.content += "\x00";
+	}
+	
+	addField(field, indicator, value) {
+		field = parseInt(field);
+		// make sure indicator is the right length
+		if (indicator.length > this.indicatorLength) {
+			indicator = indicator.substr(0, this.indicatorLength);
 		}
-	}
-
-	// read directory
-	for (var i = 0; i < directory.length; i += 12) {
-		var tag = parseInt(directory.substr(i, 3));
-		var fieldLength = parseInt(directory.substr(i + 3, 4));
-		var fieldPosition = parseInt(directory.substr(i + 7, 5));
-
-		if (!this.directory[tag]) {
-			this.directory[tag] = [];
+		else if (indicator.length != this.indicatorLength) {
+			indicator = ZU.lpad(indicator, " ", this.indicatorLength);
 		}
-		this.directory[tag].push([fieldPosition, fieldLength]);
+	
+		// add terminator
+		value = indicator + value + fieldTerminator;
+	
+		// add field to directory
+		if (!this.directory[field]) {
+			this.directory[field] = [];
+		}
+		this.directory[field].push([this.content.length, value.length]);
+	
+		// add field to record
+		this.content += value;
 	}
-};
-
-// add a field to this record
-record.prototype.addField = function (field, indicator, value) {
-	field = parseInt(field);
-	// make sure indicator is the right length
-	if (indicator.length > this.indicatorLength) {
-		indicator = indicator.substr(0, this.indicatorLength);
-	}
-	else if (indicator.length != this.indicatorLength) {
-		indicator = Zotero.Utilities.lpad(indicator, " ", this.indicatorLength);
-	}
-
-	// add terminator
-	value = indicator + value + fieldTerminator;
-
-	// add field to directory
-	if (!this.directory[field]) {
-		this.directory[field] = [];
-	}
-	this.directory[field].push([this.content.length, value.length]);
-
-	// add field to record
-	this.content += value;
-};
-
-// get all fields with a certain field number
-record.prototype.getField = function (field) {
-	field = parseInt(field);
-	var fields = [];
-
-	// make sure fields exist
-	if (!this.directory[field]) {
+	
+	// get all fields with a certain field number
+	getField(field) {
+		field = parseInt(field);
+		var fields = [];
+	
+		// make sure fields exist
+		if (!this.directory[field]) {
+			return fields;
+		}
+	
+		// get fields
+		for (var i in this.directory[field]) {
+			var location = this.directory[field][i];
+	
+			// add to array, replacing null characters
+			fields.push([this.content.substr(location[0], this.indicatorLength),
+				this.content.substr(location[0] + this.indicatorLength,
+					location[1] - this.indicatorLength - 1).replace(/\x00/g, "")]);
+		}
+	
 		return fields;
 	}
-
-	// get fields
-	for (var i in this.directory[field]) {
-		var location = this.directory[field][i];
-
-		// add to array, replacing null characters
-		fields.push([this.content.substr(location[0], this.indicatorLength),
-			this.content.substr(location[0] + this.indicatorLength,
-				location[1] - this.indicatorLength - 1).replace(/\x00/g, "")]);
-	}
-
-	return fields;
-};
-
-// given a field string, split it into subfields
-record.prototype.extractSubfields = function (fieldStr, tag /* for error message only*/) {
-	if (!tag) tag = '<no tag>';
-
-	var returnSubfields = {};
-
-	var subfields = fieldStr.split(subfieldDelimiter);
-	if (subfields.length == 1) {
-		returnSubfields["?"] = fieldStr;
-	}
-	else {
-		for (var j in subfields) {
-			if (subfields[j]) {
-				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength - 1);
-				if (!returnSubfields[subfieldIndex]) {
-					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength - 1);
+	
+	// given a field string, split it into subfields
+	extractSubfields(fieldStr, tag /* for error message only*/) {
+		if (!tag) tag = '<no tag>';
+	
+		var returnSubfields = {};
+	
+		var subfields = fieldStr.split(subfieldDelimiter);
+		if (subfields.length == 1) {
+			returnSubfields["?"] = fieldStr;
+		}
+		else {
+			for (var j in subfields) {
+				if (subfields[j]) {
+					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength - 1);
+					if (!returnSubfields[subfieldIndex]) {
+						returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength - 1);
+					}
+					else {
+						// Duplicate subfield
+						Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfields[j]);
+						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength - 1);
+					}
 				}
-				else {
-					// Duplicate subfield
-					Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfields[j]);
-					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength - 1);
+			}
+		}
+	
+		return returnSubfields;
+	}
+	
+	// get subfields from a field
+	getFieldSubfields(tag) { // returns a two-dimensional array of values
+		var fields = this.getField(tag);
+		var returnFields = [];
+	
+		for (let field of fields) {
+			returnFields.push(this.extractSubfields(field[1], tag));
+		}
+	
+		return returnFields;
+	}
+	
+	// add field to DB
+	_associateDBField(item, fieldNo, part, fieldName, valueMapper) {
+		var field = this.getFieldSubfields(fieldNo);
+	
+		Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
+		if (field) {
+			for (var i in field) {
+				var value = false;
+				for (var j = 0; j < part.length; j++) {
+					var myPart = part.substr(j, 1);
+					if (field[i][myPart]) {
+						if (value) {
+							value += " " + field[i][myPart];
+						}
+						else {
+							value = field[i][myPart];
+						}
+					}
+				}
+				if (value) {
+					value = clean(value);
+	
+					if (valueMapper) {
+						value = valueMapper(value);
+					}
+	
+					if (fieldName == "creator") {
+						item.creators.push(value);
+					}
+					else if (fieldName == "ISBN") {
+						if (!item[fieldName]) {
+							item[fieldName] = value;
+						}
+						else {
+							item[fieldName] += ' ' + value;
+						}
+					}
+					else {
+						item[fieldName] = value;
+						return;
+					}
 				}
 			}
 		}
 	}
-
-	return returnSubfields;
-};
-
-// get subfields from a field
-record.prototype.getFieldSubfields = function (tag) { // returns a two-dimensional array of values
-	var fields = this.getField(tag);
-	var returnFields = [];
-
-	for (var i = 0, n = fields.length; i < n; i++) {
-		returnFields[i] = this.extractSubfields(fields[i][1], tag);
-	}
-
-	return returnFields;
-};
-
-// add field to DB
-record.prototype._associateDBField = function (item, fieldNo, part, fieldName, execMe, arg1, arg2) {
-	var field = this.getFieldSubfields(fieldNo);
-
-	Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
-	if (field) {
+	
+	// add field to DB as note
+	_associateNotes(item, fieldNo, part) {
+		var field = this.getFieldSubfields(fieldNo);
+		var texts = [];
+	
 		for (var i in field) {
-			var value = false;
 			for (var j = 0; j < part.length; j++) {
 				var myPart = part.substr(j, 1);
 				if (field[i][myPart]) {
-					if (value) {
-						value += " " + field[i][myPart];
-					}
-					else {
-						value = field[i][myPart];
-					}
+					texts.push(clean(field[i][myPart]));
 				}
 			}
-			if (value) {
-				value = clean(value);
-
-				if (execMe) {
-					value = execMe(value, arg1, arg2);
-				}
-
-				if (fieldName == "creator") {
-					item.creators.push(value);
-				}
-				else if (fieldName == "ISBN") {
-					if (!item[fieldName]) {
-						item[fieldName] = value;
-					}
-					else {
-						item[fieldName] += ' ' + value;
-					}
-				}
-				else {
-					item[fieldName] = value;
-					return;
+		}
+		var text = texts.join(' ');
+		if (text.trim() != "") item.notes.push({ note: text });
+	}
+	
+	// add field to DB as tags
+	_associateTags(item, fieldNo, part) {
+		var field = this.getFieldSubfields(fieldNo);
+	
+		for (var i in field) {
+			for (var j = 0; j < part.length; j++) {
+				var myPart = part[j];
+				if (field[i][myPart]) {
+					item.tags.push(clean(field[i][myPart]));
 				}
 			}
 		}
 	}
-};
-
-// add field to DB as note
-record.prototype._associateNotes = function (item, fieldNo, part) {
-	var field = this.getFieldSubfields(fieldNo);
-	var texts = [];
-
-	for (var i in field) {
-		for (var j = 0; j < part.length; j++) {
-			var myPart = part.substr(j, 1);
-			if (field[i][myPart]) {
-				texts.push(clean(field[i][myPart]));
-			}
-		}
-	}
-	var text = texts.join(' ');
-	if (text.trim() != "") item.notes.push({ note: text });
-};
-
-// add field to DB as tags
-record.prototype._associateTags = function (item, fieldNo, part) {
-	var field = this.getFieldSubfields(fieldNo);
-
-	for (var i in field) {
-		for (var j = 0; j < part.length; j++) {
-			var myPart = part.substr(j, 1);
-			if (field[i][myPart]) {
-				item.tags.push(clean(field[i][myPart]));
-			}
-		}
-	}
-};
-
-// this function loads a MARC record into our database
-record.prototype.translate = function (item) {
-	// get item type
-	if (this.leader) {
-		var marcType = this.leader.substr(6, 1);
-		if (marcType == "g") {
-			item.itemType = "film";
-		}
-		else if (marcType == "j" || marcType == "i") {
-			item.itemType = "audioRecording";
-		}
-		else if (marcType == "e" || marcType == "f") {
-			item.itemType = "map";
-		}
-		else if (marcType == "k") {
-			item.itemType = "artwork";
-		}
-		else if (marcType == "t" || marcType == "b") {
-			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
-			item.itemType = "manuscript";
-		}
-		else {
-			item.itemType = "book";
-		}
-	}
-	else {
-		item.itemType = "book";
-	}
-
-	// Starting from there, we try to distinguish between unimarc and other marc flavours.
-	// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
-	// In marc-21, the title is in the 245 field and this field isn't used in unimarc
-	// So if we have a 200 and no 245, we can think we are with an unimarc record.
-	// Otherwise, we use the original association.
-	if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
+	
+	_processUNIMARC(item) {
+		Z.debug('Processing as UNIMARC record');
+		
 		// If we've got a 328 field, we're on a thesis
 		if (this.getFieldSubfields("328")[0]) {
 			item.itemType = "thesis";
 		}
 
 		// Extract ISBNs
-		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+		this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+		this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISBN);
 
 		// Extract creators (700, 701 & 702)
-		for (let i = 700; i < 703; i++) {
+		for (let i = 700; i <= 702; i++) {
 			let authorTab = this.getFieldSubfields(i);
 			for (let j in authorTab) {
 				var aut = authorTab[j];
@@ -401,16 +366,16 @@ record.prototype.translate = function (item) {
 					authorText = aut.a;
 				}
 				// prevent this from crashing with empty author tags
-				if (authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
+				if (authorText) item.creators.push(ZU.cleanAuthor(authorText, "author", true));
 			}
 		}
 
 		// Extract corporate creators (710, 711 & 712)
 		for (let i = 710; i < 713; i++) {
 			let authorTab = this.getFieldSubfields(i);
-			for (let j in authorTab) {
-				if (authorTab[j].a) {
-					item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true });
+			for (let subfield of authorTab) {
+				if (subfield.a) {
+					item.creators.push({ lastName: subfield.a, creatorType: "contributor", fieldMode: true });
 				}
 			}
 		}
@@ -487,7 +452,10 @@ record.prototype.translate = function (item) {
 		this._associateDBField(item, "675", "a", "callNumber");
 		this._associateDBField(item, "680", "ab", "callNumber");
 	}
-	else {
+	
+	_processMARC21(item) {
+		Z.debug('Processing as MARC21 record');
+		
 		// If we've got a 502 field, we're on a thesis, either published on its own (thesis)
 		// or by a publisher and therefore with an ISBN number (book).
 		if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0]) {
@@ -495,9 +463,9 @@ record.prototype.translate = function (item) {
 		}
 
 		// Extract ISBNs
-		this._associateDBField(item, "020", "a", "ISBN", pullISBN);
+		this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "022", "a", "ISSN", pullISBN);
+		this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISBN);
 		// Extract language
 		this._associateDBField(item, "041", "a", "language");
 		// Extract creators
@@ -557,7 +525,7 @@ record.prototype.translate = function (item) {
 			// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 			var field = this.getFieldSubfields("600");
 			if (field[0]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(field[0].a, "author", true));
+				item.creators.push(ZU.cleanAuthor(field[0].a, "author", true));
 			}
 		}
 
@@ -677,8 +645,8 @@ record.prototype.translate = function (item) {
 		if (!item.title) this._associateDBField(item, "1300", "a", "title");
 		if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
 		if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
-		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
-		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
+		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
+		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
 
 		// Spanish
 		if (!item.title) this._associateDBField(item, "200", "a", "title");
@@ -697,12 +665,12 @@ record.prototype.translate = function (item) {
 					else {
 						aut = aut.a.split(", ").join(" ");
 					}
-					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+					item.creators.push(ZU.cleanAuthor(aut, "author"));
 				}
 			}
 		}
 		if (item.title) {
-			item.title = Zotero.Utilities.capitalizeTitle(item.title);
+			item.title = ZU.capitalizeTitle(item.title);
 		}
 		if (this.getFieldSubfields("335")[0]) {
 			item.title = item.title + ": " + this.getFieldSubfields("335")[0].a;
@@ -804,24 +772,66 @@ record.prototype.translate = function (item) {
 			}
 		}
 	}
-	// editors get mapped as contributors - but so do many others who should be
-	// --> for books that don't have an author, turn contributors into editors.
-	if (item.itemType == "book") {
-		var hasAuthor = false;
-		for (let i = 0; i < item.creators.length; i++) {
-			if (item.creators[i].creatorType == "author") {
-				hasAuthor = true;
+	
+	// this function loads a MARC record into our database
+	translate(item) {
+		// get item type
+		if (this.leader) {
+			var marcType = this.leader.substr(6, 1);
+			if (marcType == "g") {
+				item.itemType = "film";
+			}
+			else if (marcType == "j" || marcType == "i") {
+				item.itemType = "audioRecording";
+			}
+			else if (marcType == "e" || marcType == "f") {
+				item.itemType = "map";
+			}
+			else if (marcType == "k") {
+				item.itemType = "artwork";
+			}
+			else if (marcType == "t" || marcType == "b") {
+				// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
+				item.itemType = "manuscript";
+			}
+			else {
+				item.itemType = "book";
 			}
 		}
-		if (!hasAuthor) {
+		else {
+			item.itemType = "book";
+		}
+	
+		// Starting from there, we try to distinguish between unimarc and other marc flavours.
+		// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
+		// In marc-21, the title is in the 245 field and this field isn't used in unimarc
+		// So if we have a 200 and no 245, we can think we are with an unimarc record.
+		// Otherwise, we use the original association.
+		if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
+			this._processUNIMARC(item);
+		}
+		else {
+			this._processMARC21(item);
+		}
+		// editors get mapped as contributors - but so do many others who should be
+		// --> for books that don't have an author, turn contributors into editors.
+		if (item.itemType == "book") {
+			var hasAuthor = false;
 			for (let i = 0; i < item.creators.length; i++) {
-				if (item.creators[i].creatorType == "contributor") {
-					item.creators[i].creatorType = "editor";
+				if (item.creators[i].creatorType == "author") {
+					hasAuthor = true;
+				}
+			}
+			if (!hasAuthor) {
+				for (let i = 0; i < item.creators.length; i++) {
+					if (item.creators[i].creatorType == "contributor") {
+						item.creators[i].creatorType = "editor";
+					}
 				}
 			}
 		}
 	}
-};
+}
 
 function doImport() {
 	var text;
@@ -839,7 +849,7 @@ function doImport() {
 				var newItem = new Zotero.Item();
 
 				// create new record
-				var rec = new record();
+				var rec = new Record();
 				rec.importBinary(records[i]);
 				rec.translate(newItem);
 
@@ -853,7 +863,8 @@ function doImport() {
 }
 
 var exports = {
-	record: record,
+	Record: Record,
+	record: Record, // for backwards compatibility
 	fieldTerminator: fieldTerminator,
 	recordTerminator: recordTerminator,
 	subfieldDelimiter: subfieldDelimiter
