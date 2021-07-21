@@ -8,36 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcs",
-	"lastUpdated": "2021-03-22 18:01:00"
-}
-
-/*
-	***** BEGIN LICENSE BLOCK *****
-
-	Copyright © 2021 Marcel Klotz
-
-	This file is part of Zotero.
-
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
-	***** END LICENSE BLOCK *****
-*/
-
-function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-07-21 17:41:17"
 }
 
 function typeMapper(type) {
@@ -110,11 +82,19 @@ function doWeb(doc, url) {
 
 function scrape(doc) {
 	// get the identifaction number necessary for the api call
-	var permalink = attr(doc, ".cnt > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(4) > td:nth-child(1) > table:nth-child(1) > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2) > a:nth-child(1)", "href");
+	// This is somehow not perfect, but there is no class or id specific for the permalink element, but the picture used for the link. 
+	var el = doc.querySelector("img[src='https://stabikat.de:443/img_psi/2.0/gui/permalink_du.gif']");
+	var permalink = el.parentElement.href;
 	var ppn = permalink.slice(permalink.indexOf("PPN=") + 4);
-	var translator = Zotero.loadTranslator('import');
+	var otherParams = ppn.indexOf("&");
+	if (otherParams !== -1) {
+		ppn = ppn.slice(0,otherParams);
+	}
+	var translator = Zotero.loadTranslator('search');
+	// Set translator to search translator, K10Plus PICA JSON
 	translator.setTranslator('041335e4-6984-4540-b683-494bc923057a');
-	translator.setString(JSON.stringify({ ppn: [ppn]}));
+	Zotero.debug(ppn);
+	translator.setSearch({ ppn: ppn });
 	translator.translate();
 }
 

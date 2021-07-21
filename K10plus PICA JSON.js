@@ -1,6 +1,6 @@
 {
 	"translatorID": "041335e4-6984-4540-b683-494bc923057a",
-	"label": "K10plus pica-json",
+	"label": "K10plus PICA JSON",
 	"creator": "Marcel Klotz",
 	"target": "json",
 	"minVersion": "4.0.27",
@@ -10,8 +10,8 @@
 		"async": true
 	},
 	"inRepository": true,
-	"translatorType": 1,
-	"lastUpdated": "2021-07-20 17:25:32"
+	"translatorType": 8,
+	"lastUpdated": "2021-07-21 20:14:00"
 }
 
 /*
@@ -39,18 +39,18 @@
 
 /*
 	***** Description of the translator *****
-This translator can translate Pica-JSON data that conforms to the K10Plus Classification
+This translator can translate PICA JSON data that conforms to the K10Plus Classification
 System (for K10Plus find out more at: https://wiki.k10plus.de/display/K10PLUS/K10plus+Format-Dokumentation)
 While there might be other use cases it's designed to retrieve entries from those
 institions that parttake in the K10Plus (find out more here: https://wiki.k10plus.de/display/K10PLUS/Teilnahme+am+K10plus)
-The translator fetches Pica-JSON data from the K10-unApi-Server and parses it.
+The translator fetches PICA JSON data from the K10plus-unApi-Server and parses it.
 
 The expected input contains a pica production number (ppn) and optionally
 a catalog id if there is a specific catalog on the unApi server that you want to use.
 
 The expected format is a JSON string of the form:
   {
-	"ppn": <Array of ppn strings >,
+	"ppn": < ppn string >,
 	"catalogid": <catalog id>
   }
 */
@@ -172,96 +172,55 @@ function picaObjectFieldConstructor(rawField) {
 	return structuredField;
 }
 
-function detectImport() {
-	try {
-		var parsedData = parseInput();
-		if (!parsedData) {
-			return false;
-		}
-		else {
-			return true;
-		}
-	}
-	catch (e) {
-		Zotero.debug(e);
-		return false;
-	}
+function detectSearch(items) {
+	return parseItems(items).length > 0
 }
 
-// eslint-disable-next-line consistent-return
-function doImport() {
+function parseItems(items) {
+	if (!items) return [];
+	if (!(items instanceof Array)) items = [items];
+	
+	// filter out invalid queries
+	var ppns = [];
+	for ( let item of items) {
+		if (! item.ppn || typeof item.ppn !== "string") continue
+		if (item.catalogid && typeof item.catalogid !== "string") {
+			item.catalogid = undefined
+		}
+		ppns = ppns.concat(item)
+	};
+	return ppns
+
+}
+
+function doSearch(items) {
+	Zotero.debug("Start Do Search");
+	items = parseItems(items)
 	if (typeof Promise == 'undefined') {
-		startImport(
+		startSearch(
 			function () {},
 			function (e) {
 				throw e;
-			}
+			},
+			items
 		);
 	}
 	else {
 		return new Promise(function (resolve, reject) {
-			startImport(resolve, reject);
+			startSearch(resolve, reject, items);
 		});
 	}
 }
 
-function startImport(resolve, reject) {
+async function startSearch(resolve, reject, entries) {
 	try {
-		var parsedData = parseInput();
-		if (!parsedData) resolve();
-		importNext(parsedData, resolve, reject);
-	}
-	catch (e) {
-		reject(e);
-	}
-}
-
-function parseInput() {
-	var str, json = "";
-
-	// Read in the whole file at once, since we can't easily parse a JSON stream. The
-	// chunk size shouldn't need to be bigger than 100 characters
-	while ((str = Z.read(100)) !== false) json += str;
-	try {
-		json = json ? JSON.parse(json) : "";
-		var typeChecker = json.ppn
-			&& json.ppn instanceof Array
-			&& json.ppn.reduce((p, c) => {
-				if (!p || typeof c !== "string") {
-					return false;
-				}
-				else {
-					return true;
-				}
-			}, true)
-			&& (!json.catalogid || typeof json.catalogid === "string");
-
-		if (typeChecker) {
-			return {
-				ppn: json.ppn,
-				catalogid: json.catalogid && typeof json.catalogid === 'string'
-					? json.catalogid
-					: undefined
-			};
-		}
-		else {
-			return false;
-		}
-	}
-	catch (e) {
-		Zotero.debug(e);
-		return false;
-	}
-}
-
-async function importNext(parsedData, resolve, reject) {
-	var item;
-	try {
-		var ppnList = parsedData.ppn;
-		for (var ppn of ppnList) {
+		if (!entries) resolve();
+		var entry, item;
+		for ( entry of entries) {
 			item = new Z.Item();
 			item.extra = "";
-			let picaObj = await getPicaObject(ppn, parsedData.catalogid);
+
+			let picaObj = await getPicaObject(entry.ppn, entry.catalogid);
 			if (picaObj.invalidFormat) {
 				reject(picaObj.fields.error);
 			}
@@ -270,11 +229,11 @@ async function importNext(parsedData, resolve, reject) {
 				item.complete();
 			}
 		}
+		resolve();
 	}
 	catch (e) {
 		reject(e);
 	}
-	resolve();
 }
 
 function asyncDoGet(url) {
@@ -550,7 +509,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj, isSu
 	item.extra = contentType ? item.extra + `\n${contentType}` : item.extra;
 	
 	// series data
-	/* there might be multiple series related to a work insight the data set captured as well in multiple 36E and 36F fields,
+	/* there might be multiple series related to a work inside the data set captured as well in multiple 36E and 36F fields,
 	*	as corresponding Zotero fields couldn't capture that, only the first 036E field is used.*/
 	item.series = picaObj.getSubfield("036E", "a");
 	if (item.series) {
@@ -651,8 +610,8 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj, isSu
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
-		"type": "import",
-		"input": "{\"ppn\":[\"88511759X\"], \"catalogid\": \"stabikat\"}",
+		"type": "search",
+		"input": "{\"ppn\": \"88511759X\"}",
 		"items": [
 			{
 				"itemType": "book",
@@ -699,8 +658,8 @@ var testCases = [
 		]
 	},
 	{
-		"type": "import",
-		"input": "{\"ppn\":[\"1701681854\", \"364349824\"]}",
+		"type": "search",
+		"input": "{\"ppn\":\"1701681854\"}",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -737,28 +696,6 @@ var testCases = [
 					}
 				],
 				"seeAlso": []
-			},
-			{
-				"itemType": "book",
-				"title": "Aggression in der Lebenswelt: die Erweiterung des Parsonschen Konzepts der Aggression durch die Beschreibung des Zusammenhags von Jargon, Aggression und Kultur",
-				"creators": [
-					{
-						"firstName": "Alexander C.",
-						"lastName": "Karp",
-						"creatorType": "author"
-					}
-				],
-				"date": "2002",
-				"edition": "[Elektronische Resource]",
-				"extra": "Beteiligte Personen: Alexander C. Karp\nHochschulschrift\nFrankfurt a. M., Univ., Diss., 2002\nTitel auf der Beil",
-				"numPages": "1 CD-ROM",
-				"shortTitle": "Aggression in der Lebenswelt",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
 			}
-		]
-	}
 ]
 /** END TEST CASES **/
