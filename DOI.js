@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-13 02:38:54"
+	"lastUpdated": "2021-07-20 16:33:34"
 }
 
 /*
@@ -152,6 +152,12 @@ function retrieveDOIs(dois) {
 						select[doi] = item.title || "[" + item.DOI + "]";
 					}
 				}
+				
+				if (!Object.keys(select).length) {
+					Z.debug('No DOIs resolved correctly; select dialog will not display');
+					return;
+				}
+				
 				Zotero.selectItems(select, function (selectedDOIs) {
 					if (!selectedDOIs) return;
 					
