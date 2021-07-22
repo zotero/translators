@@ -611,7 +611,7 @@ function generalParser(picaObj, item, hasSuperiorWork, superiorWorkPicaObj, isSu
 var testCases = [
 	{
 		"type": "search",
-		"input": "{\"ppn\": \"88511759X\"}",
+		"input": { "ppn": "88511759X" },
 		"items": [
 			{
 				"itemType": "book",
@@ -659,7 +659,7 @@ var testCases = [
 	},
 	{
 		"type": "search",
-		"input": "{\"ppn\":\"1701681854\"}",
+		"input": { "ppn": "1701681854" },
 		"items": [
 			{
 				"itemType": "bookSection",
