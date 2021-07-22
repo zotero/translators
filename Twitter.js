@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 02:25:24"
+	"lastUpdated": "2021-07-22 20:11:59"
 }
 
 /*
@@ -61,7 +61,7 @@ function unshortenURLs(doc, str) {
 
 function unshortenURL(doc, tCoURL) {
 	var a = doc.querySelector('a[href*="' + tCoURL + '"]');
-	return (a ? a.title : false) || tCoURL;
+	return (a ? a.textContent.replace(/…$/, '') : false) || tCoURL;
 }
 
 function extractURLs(doc, str) {
@@ -270,7 +270,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://t.co/bRvJgRy",
+				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://zotero.org/blog/announcing-zotero-3-0-beta-release/",
 				"creators": [
 					{
 						"lastName": "Zotero",
@@ -289,7 +289,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Link",
+						"title": "Link (zotero.org)",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
@@ -344,7 +344,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "You don’t have to send students to a site that will spam them with ads or try to charge them money just to build a bibliography. Instead, tell them about ZoteroBib, the free, open-source, privacy-protecting bibliography generator from Zotero. https://t.co/iPP102WB1D",
+				"title": "You don’t have to send students to a site that will spam them with ads or try to charge them money just to build a bibliography. Instead, tell them about ZoteroBib, the free, open-source, privacy-protecting bibliography generator from Zotero. https://zbib.org",
 				"creators": [
 					{
 						"lastName": "Zotero",
@@ -363,7 +363,7 @@ var testCases = [
 						"mimeType": "text/html"
 					},
 					{
-						"title": "Link",
+						"title": "Link (zbib.org)",
 						"mimeType": "text/html",
 						"snapshot": false
 					}
