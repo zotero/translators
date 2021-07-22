@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 17:34:36"
+	"lastUpdated": "2021-07-22 15:32:35"
 }
 
 /*
@@ -92,11 +92,6 @@ function scrape(doc, url) {
 	item.language = 'en';
 	item.url = url;
 	
-	item.attachments.push({
-		title: 'Snapshot',
-		document: doc
-	});
-	
 	let pdfURL = attr(doc, '#FullReportDiv .link-item a', 'href');
 	if (pdfURL) {
 		item.attachments.push({
@@ -155,10 +150,6 @@ var testCases = [
 				"url": "https://www.ntsb.gov/investigations/AccidentReports/Pages/MAR2102.aspx",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
@@ -186,10 +177,6 @@ var testCases = [
 				"reportType": "Accident report",
 				"url": "https://www.ntsb.gov/investigations/AccidentReports/Pages/MAB2109.aspx",
 				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
@@ -219,10 +206,6 @@ var testCases = [
 				"shortTitle": "Preliminary Report - Highway",
 				"url": "https://www.ntsb.gov/investigations/AccidentReports/Pages/HWY21MH006-preliminary-report.aspx",
 				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
