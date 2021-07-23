@@ -16,7 +16,7 @@
 	"inRepository": true,
 	"translatorType": 3,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-09-01 13:38:00"
+	"lastUpdated": "2021-07-23 04:15:05"
 }
 
 var n = {
