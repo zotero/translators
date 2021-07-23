@@ -116,7 +116,7 @@ function scrape(doc, url) {
 		}
 	}
 	// Do not rely on `og:title` since GitHub isn't consistent with its meta attribute.
-	item.title = item.url.split('/').slice(3,5).join('/');
+	item.title = item.url.split('/').slice(3, 5).join('/');
 	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
 		.replace(` Contribute to ${item.title} development by creating an account on GitHub.`, '');
 	item.libraryCatalog = "GitHub";
