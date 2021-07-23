@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 19:37:21"
+	"lastUpdated": "2021-07-23 03:39:49"
 }
 
 /*
@@ -49,26 +49,24 @@ function detectWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("magazineArticle");
 	item.libraryCatalog = "UNZ";
-	item.title = doc.querySelector('.block .head').textContent;
+	item.title = text('.block .head');
 	var authorMetadata = doc.querySelectorAll('#pub-heading .byline a');
 	for (let author of authorMetadata) {
-		item.creators.push(ZU.cleanAuthor(author.text, "author"));
+		item.creators.push(ZU.cleanAuthor(author.textContent, "author"));
 	}
-	var subhead = doc.querySelector('#pub-heading .subhead');
-	if (subhead) { // test whether previous XPath was positive
-		subhead = subhead.innerText;
+	var subhead = text('#pub-heading .subhead');
+	if (subhead) {
 		var reviewedAuthor = subhead.replace(/.*\sby\s(.*)/,'$1');
 		item.creators.push(Zotero.Utilities.cleanAuthor(reviewedAuthor, "reviewedAuthor"));
-		item.tags[0] = subhead.replace(/(.*),\sby\s.*/,'$1');
 	}
-	var sourceline = doc.querySelector('#pub-heading .sourceline');
+	var sourceline = text('#pub-heading .sourceline');
 	if (sourceline) {
 		item.publicationTitle = doc.querySelector('.sourceline i').textContent;
-		item.date = doc.querySelector('.sourceline a').textContent;
-		item.pages = sourceline.textContent.replace(/.*p+\.\s(\d+(-\d+)?).*/,'$1'); // http://regexr.com/3du86	
+		item.date = ZU.strToISO(doc.querySelector('.sourceline a').textContent);
+		item.pages = sourceline.replace(/.*p+\.\s(\d+(-\d+)?).*/,'$1'); // http://regexr.com/3du86	
 	}
 	item.language = "en";
-	item.extra = url;	// no need to reference the page once citation is taken w/ link attachment, but can be useful see whence the citation came
+	item.url = url.replace(/[?#].*/, '');
 	var pdfURL = doc.querySelector('iframe#insert-pdf');
 	if (pdfURL) {
 		pdfURL = pdfURL.getAttribute('src');
@@ -123,11 +121,12 @@ function doWeb(doc, url) {
 			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/NYRevBooks-1969nov20-00027",
+		"url": "https://www.unz.com/print/NYRevBooks-1969nov20-00027",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -139,12 +138,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "November 20, 1969",
-				"extra": "http://www.unz.com/print/NYRevBooks-1969nov20-00027",
+				"date": "1969-11-20",
 				"language": "en",
 				"libraryCatalog": "UNZ",
 				"pages": "27-33",
 				"publicationTitle": "The New York Review of Books",
+				"url": "https://www.unz.com/print/NYRevBooks-1969nov20-00027",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -154,7 +153,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/Freeman-1958oct-00058",
+		"url": "https://www.unz.com/print/Freeman-1958oct-00058",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -171,23 +170,19 @@ var testCases = [
 						"creatorType": "reviewedAuthor"
 					}
 				],
-				"date": "October 1958",
-				"extra": "http://www.unz.com/print/Freeman-1958oct-00058",
+				"date": "1958-10",
 				"language": "en",
 				"libraryCatalog": "UNZ",
 				"pages": "58-61",
 				"publicationTitle": "The Freeman",
+				"url": "https://www.unz.com/print/Freeman-1958oct-00058",
 				"attachments": [
 					{
 						"title": "Mental Prep vs. Pragmatic Tech",
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Schools Without Scholars"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -195,27 +190,27 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/author/GoodmanPaul/",
+		"url": "https://www.unz.com/print/author/GoodmanPaul/",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/Politics-1946nov",
+		"url": "https://www.unz.com/print/Politics-1946nov",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/Harpers/Contents/?Period=1982",
+		"url": "https://www.unz.com/print/Harpers/Contents/?Period=1982",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/Search/?Author=goodman&ContentType=Print&PubType=All&Action=Search",
+		"url": "https://www.unz.com/print/Search/?Author=goodman&ContentType=Print&PubType=All&Action=Search",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/NewRepublic-1943dec20-00878",
+		"url": "https://www.unz.com/print/NewRepublic-1943dec20-00878",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -232,12 +227,12 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "December 20, 1943",
-				"extra": "http://www.unz.com/print/NewRepublic-1943dec20-00878",
+				"date": "1943-12-20",
 				"language": "en",
 				"libraryCatalog": "UNZ",
 				"pages": "878-882",
 				"publicationTitle": "The New Republic",
+				"url": "https://www.unz.com/print/NewRepublic-1943dec20-00878",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -247,7 +242,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.unz.com/print/NYRevBooks-1970may21-00003/",
+		"url": "https://www.unz.com/print/NYRevBooks-1970may21-00003/",
 		"items": [
 			{
 				"itemType": "magazineArticle",
@@ -264,18 +259,14 @@ var testCases = [
 						"creatorType": "reviewedAuthor"
 					}
 				],
-				"date": "May 21, 1970",
-				"extra": "http://www.unz.com/print/NYRevBooks-1970may21-00003/",
+				"date": "1970-05-21",
 				"language": "en",
 				"libraryCatalog": "UNZ",
 				"pages": "3-4",
 				"publicationTitle": "The New York Review of Books",
+				"url": "https://www.unz.com/print/NYRevBooks-1970may21-00003/",
 				"attachments": [],
-				"tags": [
-					{
-						"tag": "Hawkweed: Poems"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
