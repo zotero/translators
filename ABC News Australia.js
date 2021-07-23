@@ -1,6 +1,6 @@
 {
 	"translatorID": "92d45016-5f7b-4bcf-bb63-193033f02f2b",
-	"label": "ABC News",
+	"label": "ABC News Australia",
 	"creator": "Joyce Chia",
 	"target": "https?://(www).abc.net.au/news/*",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-31 04:35:58"
+	"lastUpdated": "2021-07-23 00:07:01"
 }
 
 /*
@@ -38,7 +38,7 @@
 
 function detectWeb(doc, url) {
 	if (ZU.xpathText(doc, '//meta[@property="ABC.ContentType" and @content="CMChannel"]/@content')>-1 
-	        && getSearchResults(doc, true)) {
+			&& getSearchResults(doc, true)) {
 		return 'multiple';
 	}
 	else if (ZU.xpathText(doc, '//meta[@property="ABC.ContentType" and @content="ABCVideo"]/@content')) {
