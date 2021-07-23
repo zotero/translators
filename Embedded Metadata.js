@@ -705,7 +705,7 @@ function getAuthorFromByline(doc, newItem) {
 	for (var i = 0; i < bylineClasses.length; i++) {
 		byline = doc.getElementsByClassName(bylineClasses[i]);
 		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
-		for(var j = 0; j < byline.length; j++) {
+		for (var j = 0; j < byline.length; j++) {
 			if (!byline[j].innerText.trim()) continue;
 
 			bylines.push(byline[j]);
