@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 05:01:40"
+	"lastUpdated": "2021-07-23 05:07:24"
 }
 
 /*
@@ -82,7 +82,7 @@ function doWeb(doc, url) {
 	}
 	else {
 		if (url.endsWith('.pdf')) {
-			ZU.processDocuments(url.replace(/volume([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
+			ZU.processDocuments(url.replace(/v(olume)?([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
 		}
 		else {
 			scrape(doc, url);
