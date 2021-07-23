@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-24 21:22:14"
+	"lastUpdated": "2021-07-23 14:14:10"
 }
 
 /**
@@ -43,7 +43,12 @@ function detectWeb(doc, url) {
 		return false;
 	}
 	
-	if (!/^[^/\s]+\/[^/\s]+$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
+	// `og:title` is messed up when browsing a file.
+	if (url.startsWith(attr(doc, 'meta[property="og:url"]', 'content') + '/blob/')) {
+		return "computerProgram";
+	}
+
+	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
 		// and anything without a repo name (abc/xyz) as its og:title.
 		// deals with repo pages that we can't scrape, like GitHub Discussions.
 		return false;
@@ -91,8 +96,6 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Z.Item("computerProgram");
 	
-	var repo = attr(doc, 'meta[property="og:title"]', 'content');
-	
 	// basic metadata from the meta tags in the head
 	item.url = attr(doc, 'meta[property="og:url"]', 'content');
 	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
@@ -112,9 +115,10 @@ function scrape(doc, url) {
 			}
 		}
 	}
-	item.title = attr(doc, 'meta[property="og:title"]', 'content');
+	// Do not rely on `og:title` since GitHub isn't consistent with its meta attribute.
+	item.title = item.url.split('/').slice(3, 5).join('/');
 	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
-		.replace(` Contribute to ${repo} development by creating an account on GitHub.`, '');
+		.replace(` Contribute to ${item.title} development by creating an account on GitHub.`, '');
 	item.libraryCatalog = "GitHub";
 	var topics = doc.getElementsByClassName('topic-tag');
 	for (var i = 0; i < topics.length; i++) {
@@ -123,7 +127,7 @@ function scrape(doc, url) {
 
 	// api calls for more information (owner, date, programming language)
 	var apiUrl = "https://api.github.com/";
-	ZU.doGet(apiUrl + "repos/" + repo, function (result) {
+	ZU.doGet(apiUrl + "repos/" + item.title, function (result) {
 		var json = JSON.parse(result);
 		// Z.debug(json);
 		if (json.message && json.message.includes("API rate limit exceeded")) {
@@ -168,7 +172,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/zotero",
 				"creators": [],
-				"date": "2021-06-24T17:42:05Z",
+				"date": "2021-07-23T09:05:23Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
 				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
@@ -195,7 +199,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "datacite/schema",
 				"creators": [],
-				"date": "2021-05-25T20:33:01Z",
+				"date": "2021-07-23T10:14:44Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
@@ -223,7 +227,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2021-06-23T04:54:38Z",
+				"date": "2021-07-19T13:36:46Z",
 				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
@@ -288,13 +292,13 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/translators",
 				"creators": [],
-				"date": "2021-06-24T18:06:16Z",
+				"date": "2021-07-23T05:55:12Z",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
 				"extra": "original-date: 2011-07-03T17:40:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
-				"url": "https://github.com/zotero/translators/blob/b96d50feb4a6e74c4ac5583437e4f16323203ca5/GitHub.js",
+				"url": "https://github.com/zotero/translators/blob/d55c3f90189a7d4725f949aa3f1e6a7d040cde70/GitHub.js",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
