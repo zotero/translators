@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 18:25:30"
+	"lastUpdated": "2021-07-26 18:28:41"
 }
 
 /*
@@ -308,6 +308,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000230445900101",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "conferencePaper",
