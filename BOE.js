@@ -2,14 +2,14 @@
 	"translatorID": "3f1b68b1-8ee7-4ab7-a514-185d72b2f80d",
 	"label": "BOE",
 	"creator": "Félix Brezo (@febrezo)",
-	"target": "^https?://([a-z]+\\.)?boe.es",
+	"target": "^https?://([a-z]+\\.)?boe\\.es/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 17:06:33"
+	"lastUpdated": "2021-07-26 17:07:40"
 }
 
 /*
