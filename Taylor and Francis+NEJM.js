@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-29 05:39:46"
+	"lastUpdated": "2021-07-26 18:03:05"
 }
 
 /*
@@ -138,6 +138,7 @@ function scrape(doc, url) {
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title, true);
 					}
+					if (risItem.creators) item.creators = risItem.creators;
 					finalizeItem(item, doc, doi, baseUrl);
 				});
 				risTrans.translate();
