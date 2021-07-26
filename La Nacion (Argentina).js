@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-11 18:18:54"
+	"lastUpdated": "2021-07-23 03:22:23"
 }
 
 /*
@@ -94,17 +94,15 @@ function scrape(doc, url) {
 	item.title = attr(doc, 'meta[property="og:title"]', 'content');
 	
 	for (let author of json.author || json.creator) {
-		author = author.replace(/LA NACION/, "").trim();
-		// Z.debug(author);
-		// Most Argentine names have two last names, one first name;
-		let authorName = author.match(/^(.+?)\s(.+)$/);
-		if (!authorName || author == 'Redacción LA NACION') {
-			item.creators.push({ lastName: authorName, creatorType: "author", fieldMode: 1 });
+		if (author.trim() == 'Redacción LA NACION') {
+			item.creators.push({
+				lastName: author,
+				creatorType: 'author',
+				fieldMode: 1
+			});
 		}
 		else {
-			let firstName = authorName[1];
-			let lastName = authorName[2];
-			item.creators.push({ firstName: firstName, lastName: lastName, creatorType: "author" });
+			item.creators.push(ZU.cleanAuthor(author, 'author', false));
 		}
 	}
 	item.section = json.articleSection;
@@ -124,13 +122,13 @@ var testCases = [
 				"title": "Aerolíneas Argentinas: sancionarán a los pilotos que usan los vuelos para criticar al Gobierno",
 				"creators": [
 					{
-						"firstName": "Alan",
-						"lastName": "Soria Guadalupe",
+						"firstName": "Alan Soria",
+						"lastName": "Guadalupe",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "María",
-						"lastName": "Julieta Rumi",
+						"firstName": "María Julieta",
+						"lastName": "Rumi",
 						"creatorType": "author"
 					}
 				],
@@ -196,7 +194,13 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Alberto Fernández: \"Cristina es una gran dirigente, pero no fue Perón\"",
-				"creators": [],
+				"creators": [
+					{
+						"lastName": "Redacción LA NACION",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
 				"date": "2020-11-23",
 				"ISSN": "0325-0946",
 				"language": "es-AR",

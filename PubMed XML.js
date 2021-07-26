@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-06-17 15:24:06"
+	"lastUpdated": "2021-07-21 03:05:39"
 }
 
 /*
@@ -107,6 +107,7 @@ function doImport() {
 		var article = ZU.xpath(citation, 'Article')[0];
 
 		let title = ZU.xpathText(article, 'ArticleTitle');
+		if (!title) title = ZU.xpathText(article, 'VernacularTitle');
 		if (title) {
 			if (title.charAt(title.length - 1) == ".") {
 				title = title.substring(0, title.length - 1);
@@ -1083,6 +1084,52 @@ var testCases = [
 						"tag": "synapse formation"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\"?>\n<!DOCTYPE PubmedArticleSet PUBLIC \"-//NLM//DTD PubMedArticle, 1st January 2015//EN\" \"http://www.ncbi.nlm.nih.gov/corehtml/query/DTD/pubmed_150101.dtd\">\n<PubmedArticleSet>\n<PubmedArticle>\n    <MedlineCitation Status=\"In-Process\" Owner=\"NLM\">\n        <PMID Version=\"1\">29292925</PMID>\n        <DateRevised>\n            <Year>2018</Year>\n            <Month>01</Month>\n            <Day>02</Day>\n        </DateRevised>\n        <Article PubModel=\"Electronic\">\n            <Journal>\n                <ISSN IssnType=\"Electronic\">1652-7518</ISSN>\n                <JournalIssue CitedMedium=\"Internet\">\n                    <Volume>114</Volume>\n                    <PubDate>\n                        <Year>2017</Year>\n                        <Month>Nov</Month>\n                        <Day>09</Day>\n                    </PubDate>\n                </JournalIssue>\n                <Title>Lakartidningen</Title>\n                <ISOAbbreviation>Lakartidningen</ISOAbbreviation>\n            </Journal>\n            <ArticleTitle/>\n            <ELocationID EIdType=\"pii\" ValidYN=\"Y\">EWLS</ELocationID>\n            <Abstract>\n                <AbstractText>Mental illness and terrorism There is little evidence supporting the concept of mental illness as a part of, or reason behind radicalization towards violent extremism and terrorism. There is weak evidence that lone gunmen, particularly those involved in school shootings, may suffer from mental illness to a larger degree than the general population, whereas organized terrorist groups such as jihadists and right-wing extremists seem to avoid mentally unstable individuals. Clinical use of the instruments developed for screening and risk assessment of individuals suspected of radicalization towards violent extremism will compromise the trust placed in the Swedish health care system by the citizens it is there to serve. The usage of empirically grounded risk assessment instruments should be restricted to forensic psychiatric clinics. Individuals at risk of radicalization towards violent extremism who present signs and symptoms of mental illness should be offered psychiatric treatment.</AbstractText>\n            </Abstract>\n            <AuthorList CompleteYN=\"Y\">\n                <Author ValidYN=\"Y\">\n                    <LastName>Köhler</LastName>\n                    <ForeName>Per</ForeName>\n                    <Initials>P</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>n/a - Vuxenpsykiatrin Malmö Malmö, Sweden n/a - Vuxenpsykiatrin Malmö Malmö, Sweden.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Krona</LastName>\n                    <ForeName>Hedvig</ForeName>\n                    <Initials>H</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Lunds Universitet - Medicinska fakulteten Lund, Sweden Lunds Universitet - Medicinska fakulteten Lund, Sweden.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n                <Author ValidYN=\"Y\">\n                    <LastName>Josefsson</LastName>\n                    <ForeName>Johanna</ForeName>\n                    <Initials>J</Initials>\n                    <AffiliationInfo>\n                        <Affiliation>Psykiatri Skåne - Vuxenpsykiatriska kliniken Malmö Malmö, Sweden Psykiatri Skåne - Vuxenpsykiatriska kliniken Malmö Malmö, Sweden.</Affiliation>\n                    </AffiliationInfo>\n                </Author>\n            </AuthorList>\n            <Language>swe</Language>\n            <PublicationTypeList>\n                <PublicationType UI=\"D004740\">English Abstract</PublicationType>\n                <PublicationType UI=\"D016428\">Journal Article</PublicationType>\n            </PublicationTypeList>\n            <VernacularTitle>Psykisk ohälsa, radikalisering och terrorism - Inget säkert samband har kunnat påvisas.</VernacularTitle>\n            <ArticleDate DateType=\"Electronic\">\n                <Year>2017</Year>\n                <Month>11</Month>\n                <Day>09</Day>\n            </ArticleDate>\n        </Article>\n        <MedlineJournalInfo>\n            <Country>Sweden</Country>\n            <MedlineTA>Lakartidningen</MedlineTA>\n            <NlmUniqueID>0027707</NlmUniqueID>\n            <ISSNLinking>0023-7205</ISSNLinking>\n        </MedlineJournalInfo>\n    </MedlineCitation>\n</PubmedArticle>\n\n</PubmedArticleSet>\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Psykisk ohälsa, radikalisering och terrorism - Inget säkert samband har kunnat påvisas",
+				"creators": [
+					{
+						"firstName": "Per",
+						"lastName": "Köhler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hedvig",
+						"lastName": "Krona",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Johanna",
+						"lastName": "Josefsson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017-11-09",
+				"ISSN": "1652-7518",
+				"abstractNote": "Mental illness and terrorism There is little evidence supporting the concept of mental illness as a part of, or reason behind radicalization towards violent extremism and terrorism. There is weak evidence that lone gunmen, particularly those involved in school shootings, may suffer from mental illness to a larger degree than the general population, whereas organized terrorist groups such as jihadists and right-wing extremists seem to avoid mentally unstable individuals. Clinical use of the instruments developed for screening and risk assessment of individuals suspected of radicalization towards violent extremism will compromise the trust placed in the Swedish health care system by the citizens it is there to serve. The usage of empirically grounded risk assessment instruments should be restricted to forensic psychiatric clinics. Individuals at risk of radicalization towards violent extremism who present signs and symptoms of mental illness should be offered psychiatric treatment.",
+				"extra": "PMID: 29292925",
+				"journalAbbreviation": "Lakartidningen",
+				"language": "swe",
+				"pages": "EWLS",
+				"publicationTitle": "Lakartidningen",
+				"volume": "114",
+				"attachments": [
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

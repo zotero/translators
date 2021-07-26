@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 02:51:14"
+	"lastUpdated": "2021-07-26 18:25:30"
 }
 
 /*
@@ -48,6 +48,7 @@ function detectWeb(doc, url) {
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	Z.monitorDOMChanges(doc.querySelector('app-wos'));
 	return false;
 }
 
