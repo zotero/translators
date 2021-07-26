@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-25 14:00:50"
+	"lastUpdated": "2021-07-26 16:26:30"
 }
 
 /**
@@ -31,11 +31,21 @@
 */
 
 function detectWeb(doc, url) {
+	// specifically exclude the editor interface, since it doesn't give us much
+	// to work with and users are unlikely to want to add it as an
+	// encyclopediaArticle.
+	// e.g., this excludes https://en.wikipedia.org/w/index.php?title=Main_Page&action=edit
+	if (doc.body.matches('.action-edit')) {
+		return false;
+	}
+	
 	// on desktop, the article title is in #firstHeading.
 	// on mobile, it's #section_0.
 	if (doc.getElementById('firstHeading') || doc.getElementById('section_0')) {
 		return 'encyclopediaArticle';
 	}
+	
+	return false;
 }
 
 function doWeb(doc, url) {
