@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-07-21 14:41:33"
+	"lastUpdated": "2021-07-26 17:06:33"
 }
 
 /*
 	BOE Translator
-	Copyright (C) 2020 Félix Brezo, felixbrezo@disroot.org
+	Copyright (C) 2020-2021 Félix Brezo, felixbrezo@disroot.org
 	
 	This program is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
@@ -32,7 +32,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("diario_boe") > -1 || url.indexOf("www.boe.es/eli") > -1 || url.indexOf("/doc.php") > -1) {
+	if (url.includes("diario_boe") || url.includes("www.boe.es/eli") || url.includes("/doc.php")) {
 		return "statute";
 	}
 	return false;
@@ -43,13 +43,13 @@ function doWeb(doc, url) {
 	var newItem = new Zotero.Item(resourceType);
 	
 	var metadataUri;
-	if (url.indexOf("/xml") <= -1) {
+	if (!url.includes("/xml")) {
 		var index = 0;
 		
 		while (true) {
 			index++;
 			metadataUri = ZU.xpathText(doc, "(//meta[@property='http://data.europa.eu/eli/ontology#is_embodied_by'])[" + index + "]/@resource");
-			if (!metadataUri || metadataUri.indexOf("/xml") > 0) {
+			if (!metadataUri || metadataUri.includes("/xml")) {
 				break;
 			}
 		}
