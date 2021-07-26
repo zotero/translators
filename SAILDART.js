@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-19 15:30:09"
+	"lastUpdated": "2021-07-26 17:34:38"
 }
 
 /*
@@ -39,13 +39,24 @@
 let taglineRe = /perm filename ([^[]+)\[([^,]+),([^\]]+)\](\d*).+filedate ([^\s]+)/;
 
 function detectWeb(doc, _url) {
+	let viewFrame = doc.querySelector('frame[name="view"]');
+	if (viewFrame) {
+		doc = viewFrame.contentWindow.document;
+	}
+	
 	if (taglineRe.test(text(doc, 'div#tagline'))) {
 		return "computerProgram";
 	}
+	
 	return false;
 }
 
 function doWeb(doc, url) {
+	let viewFrame = doc.querySelector('frame[name="view"]');
+	if (viewFrame) {
+		doc = viewFrame.contentWindow.document;
+	}
+	
 	let item = new Zotero.Item('computerProgram');
 	let meta = text(doc, 'div#tagline').match(taglineRe);
 	
