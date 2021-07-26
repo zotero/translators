@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 04:03:16"
+	"lastUpdated": "2021-07-26 16:26:30"
 }
 
 /**
@@ -163,12 +163,12 @@ function filterTagsInHTML(html, allowSelector) {
 
 function filterTags(root, allowSelector) {
 	for (let node of root.childNodes) {
-		if (!(node instanceof Element)) {
-			return;
+		if (!node.tagName) {
+			continue;
 		}
-		
+
 		if (node.matches(allowSelector)) {
-			filterTags(node);
+			filterTags(node, allowSelector);
 		}
 		else {
 			while (node.firstChild) {

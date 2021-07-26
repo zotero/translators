@@ -9,32 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-01 19:17:31"
+	"lastUpdated": "2021-07-20 00:44:51"
 }
-
-/*
-	***** BEGIN LICENSE BLOCK *****
-
-	Copyright © 2021 Michael Berkowitz and Aurimas Vinckevicius
-	
-	This file is part of Zotero.
-
-	Zotero is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	Zotero is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
-
-	You should have received a copy of the GNU Affero General Public License
-	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-
-	***** END LICENSE BLOCK *****
-*/
-
 
 function detectWeb(doc, url) {
 	if (!doc.body.textContent.trim()) return false;
@@ -100,6 +76,7 @@ function getPDFLink(doc, onDone) {
 	var pdfURL = attr(doc, '#pdfLink', 'href');
 	if (!pdfURL) pdfURL = attr(doc, '[name="citation_pdf_url"]', 'content');
 	if (pdfURL && pdfURL != '#') {
+		Z.debug('Found intermediate URL in head: ' + pdfURL);
 		parseIntermediatePDFPage(pdfURL, onDone);
 		return;
 	}
@@ -107,15 +84,23 @@ function getPDFLink(doc, onDone) {
 	// If intermediate page URL is available, use that directly
 	var intermediateURL = attr(doc, '.PdfEmbed > object', 'data');
 	if (intermediateURL) {
-		// Zotero.debug("Embedded intermediate PDF URL: " + intermediateURL);
-		parseIntermediatePDFPage(intermediateURL, onDone);
+		Zotero.debug("Found embedded PDF URL: " + intermediateURL);
+		if (/[?&]isDTMRedir=(Y|true)/i.test(intermediateURL)) {
+			onDone(intermediateURL);
+		}
+		else {
+			parseIntermediatePDFPage(intermediateURL, onDone);
+		}
 		return;
 	}
 	
 	// Simulate a click on the "Download PDF" button to open the menu containing the link with the URL
 	// for the intermediate page, which doesn't seem to be available in the DOM after the page load.
 	// This is an awful hack, and we should look out for a better way to get the URL, but it beats
-	// refetching the original source as we do below.
+	// refetching the original source. Works and should be imperceptible to users
+	// when run from the browser, does not work from non-browser translation
+	// environments (e.g. Find Available PDFs in the client). In those cases we
+	// fall back to approach #3: embedded JSON metadata.
 	var pdfLink = doc.querySelector('#pdfLink');
 	if (pdfLink) {
 		// Just in case
@@ -134,15 +119,58 @@ function getPDFLink(doc, onDone) {
 		}
 	}
 	
-	// If none of that worked for some reason, get the URL from the initial HTML, where it is present,
-	// by fetching the page source again. Hopefully this is never actually used.
+	// On some institutional networks with access to ScienceDirect, the site
+	// serves JSON metadata probably used to preload dynamic content without a
+	// separate network request. If we find it, we can take advantage of it to
+	// grab the PDF url's parts directly, constructing it in the same way that
+	// the site's frontend JavaScript would.
+	var json = text(doc, 'script[type="application/json"]');
+	if (json) {
+		try {
+			json = JSON.parse(json);
+			Zotero.debug("Trying to construct PDF URL from JSON data");
+			
+			let urlMetadata = json.article.pdfDownload.urlMetadata;
+			
+			let path = urlMetadata.path;
+			let pdfExtension = urlMetadata.pdfExtension;
+			let pii = urlMetadata.pii;
+			let md5 = urlMetadata.queryParams.md5;
+			let pid = urlMetadata.queryParams.pid;
+			if (path && pdfExtension && pii && md5 && pid){
+				pdfURL = `/${path}/${pii}${pdfExtension}?md5=${md5}&pid=${pid}&isDTMRedir=Y`;
+				Zotero.debug("Created PDF URL from JSON data: " + pdfURL);
+				onDone(pdfURL);
+				return;
+			}
+			else {
+				Zotero.debug("Missing elements in JSON data required for URL creation");
+			}
+		}
+		catch (e) {
+			Zotero.debug(e, 2);
+		}
+	}
+
+	// In most cases, appending the suffix seen below to the page's canonical URL
+	// should get us directly to the PDF; it'll yield a URL similar to the one
+	// created by the JSON but without the md5 and pid parameters. It should be
+	// enough to get us through even without those parameters.
+	pdfURL = attr(doc, 'link[rel="canonical"]', 'href');
+	if (pdfURL) {
+		pdfURL = pdfURL + '/pdfft?isDTMRedir=true&download=true';
+		Zotero.debug("Trying to construct PDF URL from canonical link: " + pdfURL);
+		onDone(pdfURL);
+		return;
+	}
+	
+	// If none of that worked for some reason, get the URL from the initial HTML,
+	// where it is present, by fetching the page source again. Hopefully this is
+	// never actually used.
 	var url = doc.location.href;
 	Zotero.debug("Refetching HTML for PDF link");
-	ZU.doGet(url, function (html) {
-		// TODO: Switch to HTTP.request() and get a Document from the XHR
-		var dp = new DOMParser();
-		var doc = dp.parseFromString(html, 'text/html');
-		var intermediateURL = attr(doc, '.pdf-download-btn-link', 'href');
+	ZU.processDocuments(url, function (reloadedDoc) {
+		var intermediateURL = attr(reloadedDoc, '.pdf-download-btn-link', 'href');
 		// Zotero.debug("Intermediate PDF URL: " + intermediateURL);
 		if (intermediateURL) {
 			parseIntermediatePDFPage(intermediateURL, onDone);
@@ -155,6 +183,7 @@ function getPDFLink(doc, onDone) {
 
 function parseIntermediatePDFPage(url, onDone) {
 	// Get the PDF URL from the meta refresh on the intermediate page
+	Z.debug('Parsing intermediate page to find redirect: ' + url);
 	ZU.doGet(url, function (html) {
 		var dp = new DOMParser();
 		var doc = dp.parseFromString(html, 'text/html');
@@ -404,12 +433,7 @@ function doWeb(doc, url) {
 
 		Zotero.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return;
-
-			// var articles = [];
-			for (var i in selectedItems) {
-				// articles.push(i);
-				ZU.processDocuments(i, scrape); // move this out of the loop when ZU.processDocuments is fixed
-			}
+			ZU.processDocuments(Object.keys(selectedItems), scrape);
 		});
 	}
 	else {
@@ -476,7 +500,7 @@ function scrape(doc, url) {
 		}
 		if (pii) {
 			let risUrl = '/sdfe/arp/cite?pii=' + pii + '&format=application%2Fx-research-info-systems&withabstract=true';
-			// Z.debug(risUrl)
+			Z.debug('Fetching RIS using PII: ' + risUrl);
 			ZU.doGet(risUrl, function (text) {
 				processRIS(doc, text);
 			});

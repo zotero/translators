@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 02:33:07"
+	"lastUpdated": "2021-07-21 02:25:40"
 }
 
 /*
@@ -107,7 +107,9 @@ var mapping = {
 	'wdt:P136': 'genre',
 	'wdt:P275': 'rights',
 	'wdt:P2047': 'runningTime',
-	'wdt:P750': 'distributor'
+	'wdt:P750': 'distributor',
+	'wdt:P698': 'PMID',
+	'wdt:P932': 'PMCID'
 };
 
 // creators with no special role here are treated as contributor
@@ -215,6 +217,18 @@ function scrape(doc, url) {
 								var func = creatorMapping[tagname] || 'contributor';
 								creatorsArray.push([value, func, seriesOrdinal]);
 							}
+							else if (zprop == "tagString") {
+								for (let tag of value.split(', ')) {
+									item.tags.push(tag);
+								}
+							}
+							else if (["PMID", "PMCID"].includes(zprop)) {
+								Z.debug(`Property added to extra: ${zprop}`);
+								if (zprop == "PMCID") {
+									value = `PMC${value.trim()}`;
+								}
+								item.extra += `\n${zprop}: ${value}`;
+							}
 							else if (item[zprop]) {
 								item[zprop] += ', ' + value;
 							}
@@ -241,13 +255,6 @@ function scrape(doc, url) {
 			item.DOI = ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#PreferredRank")]]/ps:P356)[1]', namespaces)
 				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#NormalRank")]]/ps:P356)[1]', namespaces)
 				|| ZU.xpathText(xml, '(//rdf:Description[wikibase:rank[contains(@rdf:resource, "#DeprecatedRank")]]/ps:P356)[1]', namespaces);
-		}
-		if (item.tagString) {
-			var tags = item.tagString.split(', ');
-			for (var j = 0; j < tags.length; j++) {
-				item.tags.push(tags[j]);
-			}
-			delete item.tagString;
 		}
 
 		item.complete();
@@ -292,6 +299,7 @@ var testCases = [
 				],
 				"date": "2002-04-01T00:00:00Z",
 				"DOI": "10.1210/MEND.16.4.0808",
+				"extra": "QID: Q30000000\nPMID: 11923479",
 				"issue": "4",
 				"language": "English",
 				"libraryCatalog": "Wikidata",
@@ -305,8 +313,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": [],
-				"extra": "QID: Q30000000"
+				"seeAlso": []
 			}
 		]
 	},
@@ -366,6 +373,7 @@ var testCases = [
 				],
 				"date": "2013-06-01T00:00:00Z",
 				"DOI": "10.1016/J.IJMEDINF.2013.01.005",
+				"extra": "QID: Q29121277\nPMID: 23462700",
 				"issue": "6",
 				"libraryCatalog": "Wikidata",
 				"pages": "528-538",
@@ -382,8 +390,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": [],
-				"extra": "QID: Q29121277"
+				"seeAlso": []
 			}
 		]
 	},
@@ -552,6 +559,7 @@ var testCases = [
 					}
 				],
 				"date": "1974-08-30T00:00:00Z",
+				"extra": "QID: Q470573",
 				"genre": "comedy film, parody film, swashbuckler film, film based on a novel",
 				"libraryCatalog": "Wikidata",
 				"runningTime": "+75",
@@ -559,8 +567,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"extra": "QID: Q470573"
+				"seeAlso": []
 			}
 		]
 	},
@@ -579,6 +586,7 @@ var testCases = [
 					}
 				],
 				"date": "1963-01-01T00:00:00Z, 2000-01-01T00:00:00Z",
+				"extra": "QID: Q480743",
 				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"publisher": "Viking Press",
@@ -596,8 +604,7 @@ var testCases = [
 					}
 				],
 				"notes": [],
-				"seeAlso": [],
-				"extra": "QID: Q480743"
+				"seeAlso": []
 			}
 		]
 	},
@@ -646,7 +653,9 @@ var testCases = [
 					}
 				],
 				"date": "1999-01-01T00:00:00Z",
+				"extra": "QID: Q28294211\nPMID: 9892020",
 				"issue": "1",
+				"language": "English",
 				"libraryCatalog": "Wikidata",
 				"pages": "148-155",
 				"publicationTitle": "Molecular Endocrinology",
@@ -654,9 +663,7 @@ var testCases = [
 				"attachments": [],
 				"tags": [],
 				"notes": [],
-				"seeAlso": [],
-				"extra": "QID: Q28294211",
-				"language": "English"
+				"seeAlso": []
 			}
 		]
 	},
@@ -685,6 +692,82 @@ var testCases = [
 						"tag": "ancile"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q30000000",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Synergistic Activity of Thyroid Transcription Factor 1 and Pax 8 Relies on the Promoter/Enhancer Interplay",
+				"creators": [
+					{
+						"firstName": "Stefania",
+						"lastName": "Miccadei",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rossana De",
+						"lastName": "Leo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Enrico",
+						"lastName": "Zammarchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pier Giorgio",
+						"lastName": "Natali",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Donato",
+						"lastName": "Civitareale",
+						"creatorType": "author"
+					}
+				],
+				"date": "2002-04-01T00:00:00Z",
+				"DOI": "10.1210/MEND.16.4.0808",
+				"extra": "QID: Q30000000\nPMID: 11923479",
+				"issue": "4",
+				"language": "English",
+				"libraryCatalog": "Wikidata",
+				"pages": "837-846",
+				"publicationTitle": "Molecular Endocrinology",
+				"volume": "16",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "transcription"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q58732106",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Practical Medicine and Therapeutics",
+				"creators": [],
+				"date": "1837-04-01T00:00:00Z",
+				"extra": "QID: Q58732106\nPMID: 30161437\nPMCID: PMC5589313",
+				"issue": "6",
+				"language": "English",
+				"libraryCatalog": "Wikidata",
+				"pages": "548-556",
+				"volume": "3",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
