@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-22 20:11:59"
+	"lastUpdated": "2021-07-27 20:38:17"
 }
 
 /*
@@ -40,7 +40,7 @@
 let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
 
 function detectWeb(doc, _url) {
-	if (_url.includes('/status/') && titleRe.test(doc.title)) {
+	if (_url.includes('/status/')) {
 		return "blogPost";
 	}
 	return false;
