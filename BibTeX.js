@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-01 19:05:10"
+	"lastUpdated": "2021-07-27 00:08:37"
 }
 
 /*
@@ -151,6 +151,28 @@ var eprintIds = {
 	'hdl': 'HDL',
 	'googlebooks': 'GoogleBooksID'
 };
+
+function dateFieldsToDate(year, month, day) {
+	// per the latest ISO 8601 standard, you can't have a month/day without a
+	// year (and it would be silly anyway)
+	if (year) {
+		let date = year;
+		if (month) {
+			if (month.includes(date)) {
+				date = month;
+			}
+			else {
+				date += `-${month}`;
+			}
+			
+			if (day) {
+				date += `-${day}`;
+			}
+		}
+		return ZU.strToISO(date);
+	}
+	return false;
+}
 
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
@@ -383,33 +405,19 @@ function processField(item, field, value, rawValue) {
 		} else {
 			item.issue = value;
 		}
+	} else if (field == "day") {
+		// this and the following two blocks assign to temporary fields that
+		// are cleared before the item is completed.
+		item.day = value;
 	} else if (field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
 		if (monthIndex != -1) {
 			value = Zotero.Utilities.formatDate({month:monthIndex});
-		} else {
-			value += " ";
 		}
 		
-		if (item.date) {
-			if (value.includes(item.date)) {
-				// value contains year and more
-				item.date = ZU.strToISO(value);
-			} else {
-				item.date = ZU.strToISO(value+item.date);
-			}
-		} else {
-			item.date = value;
-		}
+		item.month = value;
 	} else if (field == "year") {
-		if (item.date) {
-			if (!item.date.includes(value)) {
-				// date does not already contain year
-				item.date =ZU.strToISO(item.date+value);
-			}
-		} else {
-			item.date = value;
-		}
+		item.year = value;
 	} else if (field == "date") {
 	//We're going to assume that "date" and the date parts don't occur together. If they do, we pick date, which should hold all.
 		item.date = value;
@@ -966,6 +974,13 @@ function beginRecord(type, closeChar) {
 					}
 					delete item.backupLocation;
 				}
+				
+				if (!item.date) {
+					item.date = dateFieldsToDate(item.year, item.month, item.day);
+				}
+				delete item.year;
+				delete item.month;
+				delete item.day;
 				
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
@@ -4035,6 +4050,43 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>Accepted for publication</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@techreport{ietf-bmwg-evpntest-09,\n\tnumber =\t{draft-ietf-bmwg-evpntest-09},\n\ttype =\t\t{Internet-Draft},\n\tinstitution =\t{Internet Engineering Task Force},\n\tpublisher =\t{Internet Engineering Task Force},\n\tnote =\t\t{Work in Progress},\n\turl =\t\t{https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09},\n        author =\t{sudhin jacob and Kishore Tiruveedhula},\n\ttitle =\t\t{{Benchmarking Methodology for EVPN and PBB-EVPN}},\n\tpagetotal =\t28,\n\tyear =\t\t2021,\n\tmonth =\t\tjun,\n\tday =\t\t18,\n\tabstract =\t{This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.},\n}\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Benchmarking Methodology for EVPN and PBB-EVPN",
+				"creators": [
+					{
+						"firstName": "sudhin",
+						"lastName": "jacob",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kishore",
+						"lastName": "Tiruveedhula",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-18",
+				"abstractNote": "This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.",
+				"institution": "Internet Engineering Task Force",
+				"itemID": "ietf-bmwg-evpntest-09",
+				"reportNumber": "draft-ietf-bmwg-evpntest-09",
+				"reportType": "Internet-Draft",
+				"url": "https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Work in Progress</p>"
 					}
 				],
 				"seeAlso": []
