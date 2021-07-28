@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 14:14:10"
+	"lastUpdated": "2021-07-28 21:36:53"
 }
 
 /**
@@ -30,6 +30,8 @@
 	<http://www.gnu.org/licenses/>.
 */
 
+
+const apiUrl = "https://api.github.com/";
 
 function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
@@ -125,11 +127,8 @@ function scrape(doc, url) {
 		item.tags.push(topics[i].textContent.trim());
 	}
 
-	// api calls for more information (owner, date, programming language)
-	var apiUrl = "https://api.github.com/";
 	ZU.doGet(apiUrl + "repos/" + item.title, function (result) {
 		var json = JSON.parse(result);
-		// Z.debug(json);
 		if (json.message && json.message.includes("API rate limit exceeded")) {
 			// finish and stop in this case
 			item.complete();
@@ -144,24 +143,64 @@ function scrape(doc, url) {
 			item.rights = json.license.spdx_id;
 		}
 		item.abstractNote = json.description;
-		// always the best source, so use it if we can get it
 
-		ZU.doGet(apiUrl + "users/" + owner, function (user) {
-			var jsonUser = JSON.parse(user);
-			var ownerName = jsonUser.name || jsonUser.login;
-			if (jsonUser.type == "User") {
-				item.creators.push(ZU.cleanAuthor(ownerName, "programmer"));
-			}
-			else {
-				item.company = ownerName;
+		ZU.doGet(`/${item.title}/hovercards/citation`, function (respText, xhr) {
+			if (xhr.status == 200) {
+				let doc = new DOMParser().parseFromString(respText, 'text/html');
+				let bibtex = attr(doc, '[aria-labelledby="bibtex-tab"] input', 'value');
+				
+				if (bibtex && bibtex.trim()) {
+					completeWithBibTeX(item, bibtex);
+					return;
+				}
 			}
 			
+			// if there was no CITATION.cff or the response didn't include a
+			// BibTeX representation, we fall back to filling in the title and
+			// authorship using the API.
+			completeWithAPI(item, owner);
+		}, null, null, {'X-Requested-With': 'XMLHttpRequest'}, false);
+	});
+}
+
+function completeWithBibTeX(item, bibtex) {
+	var translator = Zotero.loadTranslator("import");
+	// BibTeX
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtex);
+	
+	translator.setHandler("itemDone", function (obj, bibItem) {
+		delete bibItem.itemType;
+		delete bibItem.attachments;
+		delete bibItem.itemID;
+		Object.assign(item, bibItem);
+		
+		item.complete();
+	});
+	
+	translator.translate();
+}
+
+function completeWithAPI(item, owner) {
+	ZU.doGet(apiUrl + "users/" + owner, function (user) {
+		var jsonUser = JSON.parse(user);
+		var ownerName = jsonUser.name || jsonUser.login;
+		if (jsonUser.type == "User") {
+			item.creators.push(ZU.cleanAuthor(ownerName, "programmer"));
+		}
+		else {
+			item.company = ownerName;
+		}
+		
+		ZU.processDocuments(`/${item.title}`, function (rootDoc) {
+			let readmeTitle = text(rootDoc, '#readme h1');
+			if (readmeTitle) {
+				item.title = readmeTitle;
+			}
 			item.complete();
 		});
 	});
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -170,9 +209,9 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "zotero/zotero",
+				"title": "Zotero",
 				"creators": [],
-				"date": "2021-07-23T09:05:23Z",
+				"date": "2021-07-28T20:43:37Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
 				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
@@ -197,7 +236,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "datacite/schema",
+				"title": "DataCite Schema Repository",
 				"creators": [],
 				"date": "2021-07-23T10:14:44Z",
 				"abstractNote": "DataCite Metadata Schema Repository",
@@ -227,7 +266,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2021-07-19T13:36:46Z",
+				"date": "2021-07-28T14:40:17Z",
 				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
@@ -263,7 +302,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "aurimasv/z2csl",
+				"title": "z2csl - Zotero to CSL extension and mappings",
 				"creators": [
 					{
 						"firstName": "Aurimas",
@@ -292,13 +331,149 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/translators",
 				"creators": [],
-				"date": "2021-07-23T05:55:12Z",
+				"date": "2021-07-28T16:11:33Z",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
 				"extra": "original-date: 2011-07-03T17:40:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
-				"url": "https://github.com/zotero/translators/blob/d55c3f90189a7d4725f949aa3f1e6a7d040cde70/GitHub.js",
+				"url": "https://github.com/zotero/translators/blob/a4b752694db9f2d6eef955bd7df695f9e7004b63/GitHub.js",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Citation File Format",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05",
+				"abstractNote": "A machine-readable and human-readable and -writable format for CITATION files. CITATION files provide reference and citation information for (research/scientific) software.",
+				"extra": "DOI: 10.5281/zenodo.4751536",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format/blob/main/test/pytest.ini",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Citation File Format",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05",
+				"abstractNote": "A machine-readable and human-readable and -writable format for CITATION files. CITATION files provide reference and citation information for (research/scientific) software.",
+				"extra": "DOI: 10.5281/zenodo.4751536",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format/blob/9879c64a37a9d4f3f18b67594aa3f3bf763fb69a/test/pytest.ini",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
