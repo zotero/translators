@@ -498,7 +498,7 @@ var BnfClass = function () {
 	}
 
 	// Process UNIMARC URL.
-	this.processMarcUrl = function (newDoc, url) {
+	this.processMarcUrl = function (newDoc, _url) {
 		// Init MARC record.
 		// Load MARC
 		var translator = Zotero.loadTranslator("import");
