@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-28 18:11:05"
+	"lastUpdated": "2021-07-28 18:34:03"
 }
 
 /*
@@ -213,9 +213,7 @@ class Record {
 		}
 	
 		// get fields
-		for (var i in this.directory[field]) {
-			var location = this.directory[field][i];
-	
+		for (let location of this.directory[field]) {
 			// add to array, replacing null characters
 			fields.push([this.content.substr(location[0], this.indicatorLength),
 				this.content.substr(location[0] + this.indicatorLength,
@@ -236,16 +234,16 @@ class Record {
 			returnSubfields["?"] = fieldStr;
 		}
 		else {
-			for (var j in subfields) {
-				if (subfields[j]) {
-					var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength - 1);
+			for (let subfield of subfields) {
+				if (subfield) {
+					var subfieldIndex = subfield.substr(0, this.subfieldCodeLength - 1);
 					if (!returnSubfields[subfieldIndex]) {
-						returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength - 1);
+						returnSubfields[subfieldIndex] = subfield.substr(this.subfieldCodeLength - 1);
 					}
 					else {
 						// Duplicate subfield
-						Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfields[j]);
-						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength - 1);
+						Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfield);
+						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfield.substr(this.subfieldCodeLength - 1);
 					}
 				}
 			}
@@ -333,11 +331,10 @@ class Record {
 	_associateTags(item, fieldNo, part) {
 		var field = this.getFieldSubfields(fieldNo);
 	
-		for (var i in field) {
-			for (var j = 0; j < part.length; j++) {
-				var myPart = part[j];
-				if (field[i][myPart]) {
-					item.tags.push(clean(field[i][myPart]));
+		for (let subfield of field) {
+			for (let myPart of part) {
+				if (subfield[myPart]) {
+					item.tags.push(clean(subfield[myPart]));
 				}
 			}
 		}
@@ -359,8 +356,7 @@ class Record {
 		// Extract creators (700, 701 & 702)
 		for (let i = 700; i <= 702; i++) {
 			let authorTab = this.getFieldSubfields(i);
-			for (let j in authorTab) {
-				var aut = authorTab[j];
+			for (let aut of authorTab) {
 				var authorText = "";
 				if ((aut.b) && (aut.a)) {
 					authorText = aut.a.replace(/,\s*$/, '') + ", " + aut.b;
@@ -374,7 +370,7 @@ class Record {
 		}
 
 		// Extract corporate creators (710, 711 & 712)
-		for (let i = 710; i < 713; i++) {
+		for (let i = 710; i <= 712; i++) {
 			let authorTab = this.getFieldSubfields(i);
 			for (let subfield of authorTab) {
 				if (subfield.a) {
@@ -401,7 +397,7 @@ class Record {
 
 		// Extract title
 		var title = this.getField("200")[0][1]	// non-repeatable
-						.replace(	// chop off any translations, since they may have repeated $e fields
+						.replace( // chop off any translations, since they may have repeated $e fields
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
 		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
@@ -489,32 +485,32 @@ class Record {
 		};
 
 		var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
-		for (let i = 0; i < creatorFields.length; i++) {
-			var authorTab = this.getFieldSubfields(creatorFields[i]);
-			for (let j in authorTab) {
-				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
+		for (let creatorField of creatorFields) {
+			var authorTab = this.getFieldSubfields(creatorField);
+			for (let author of authorTab) {
+				if (author['4'] && RELATERM[author['4']] && RELATERM[author['4']] == "SKIP") {
 					continue;
 				}
 				var creatorObject = {};
-				if (authorTab[j].a) {
-					if (creatorFields[i] == "100" || creatorFields[i] == "700") {
-						creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
+				if (author.a) {
+					if (creatorField == "100" || creatorField == "700") {
+						creatorObject = ZU.cleanAuthor(author.a, "author", true);
 					}
 					else {
 						// same replacements as in the function ZU.cleanAuthor for institutional authors:
-						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
+						author.a = author.a.replace(/^[\s\u00A0.,/[\]:]+/, '')
 							.replace(/[\s\u00A0.,/[\]:]+$/, '')
 							.replace(/[\s\u00A0]+/, ' ');
-						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
+						creatorObject = { lastName: author.a, creatorType: "contributor", fieldMode: true };
 					}
 					// some heuristic for the default values:
 					// in a book without any person as a main entry (no 100 field)
 					// it is likely that all persons (in 700 fields) are editors
-					if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
+					if (creatorField == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
 						creatorObject.creatorType = "editor";
 					}
-					if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']]) {
-						creatorObject.creatorType = RELATERM[authorTab[j]['4']];
+					if (author['4'] && RELATERM[author['4']]) {
+						creatorObject.creatorType = RELATERM[author['4']];
 					}
 					item.creators.push(creatorObject);
 				}
@@ -638,7 +634,9 @@ class Record {
 		}
 		// Extract URL for electronic resources
 		this._associateDBField(item, "245", "h", "medium");
-		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
+		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") {
+			this._associateDBField(item, "856", "u", "url");
+		}
 
 		// Field 264 instead of 260
 		if (!item.place) this._associateDBField(item, "264", "a", "place");
@@ -661,7 +659,7 @@ class Record {
 		if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
 		if (!item.date) this._associateDBField(item, "210", "d", "date");
 		if (!item.creators) {
-			for (let i = 700; i < 703; i++) {
+			for (let i = 700; i <= 703; i++) {
 				if (this.getFieldSubfields(i)[0]) {
 					Zotero.debug(i + " is AOK");
 					Zotero.debug(this.getFieldSubfields(i.toString()));
@@ -851,12 +849,12 @@ function doImport() {
 			records[0] = holdOver + records[0];
 			holdOver = records.pop(); // skip last record, since it's not done
 
-			for (var i in records) {
+			for (let binaryRecord of records) {
 				var newItem = new Zotero.Item();
 
 				// create new record
 				var rec = new Record();
-				rec.importBinary(records[i]);
+				rec.importBinary(binaryRecord);
 				rec.translate(newItem);
 
 				newItem.complete();
