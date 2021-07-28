@@ -407,7 +407,8 @@ function processField(item, field, value, rawValue) {
 		}
 	} else if (field == "day") {
 		// this and the following two blocks assign to temporary fields that
-		// are cleared before the item is completed.
+		// are cleared before the item is completed. "day" isn't an official
+		// field, but some sites use it.
 		item.day = value;
 	} else if (field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
