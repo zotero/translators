@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-28 21:36:53"
+	"lastUpdated": "2021-07-28 21:40:03"
 }
 
 /**
@@ -159,7 +159,7 @@ function scrape(doc, url) {
 			// BibTeX representation, we fall back to filling in the title and
 			// authorship using the API.
 			completeWithAPI(item, owner);
-		}, null, null, {'X-Requested-With': 'XMLHttpRequest'}, false);
+		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
 	});
 }
 
@@ -201,6 +201,7 @@ function completeWithAPI(item, owner) {
 		});
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
