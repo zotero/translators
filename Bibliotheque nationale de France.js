@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-28 18:07:14"
+	"lastUpdated": "2021-07-28 15:19:15"
 }
 
 /*
@@ -579,11 +579,11 @@ var typeMapping = {
 	"sound recording": "audioRecording",
 	"cartographic resource": "map",
 	"still image": "artwork",
-	kit: "single",
+	kit: "document",
 	"modern manuscript or archive": "manuscript",
-	"coin or medal": "single",
-	"physical object": "single",
-	"three dimensional object": "single"
+	"coin or medal": "document",
+	"physical object": "document",
+	"three dimensional object": "document"
 };
 
 function detectWeb(doc, url) {
@@ -595,7 +595,7 @@ function detectWeb(doc, url) {
 			return typeMapping[itemType];
 		}
 		else {
-			return "single";
+			return "document";
 		}
 	}
 	// Muliple result ?
