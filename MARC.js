@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-21 16:13:21"
+	"lastUpdated": "2021-07-28 18:11:05"
 }
 
 /*
@@ -65,6 +65,9 @@ function clean(value) {
 	value = value.replace(/^[\s.,/:;]+/, '');
 	value = value.replace(/[\s.,/:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
+	
+	// strip 'START OF STRING' and 'STRING TERMINATOR' control characters
+	value = value.replace(/[\u0098\u009c]/g, '');
 
 	var first = value[0];
 	var last = value[value.length - 1];
@@ -351,7 +354,7 @@ class Record {
 		// Extract ISBNs
 		this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISBN);
+		this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISSN);
 
 		// Extract creators (700, 701 & 702)
 		for (let i = 700; i <= 702; i++) {
@@ -465,7 +468,7 @@ class Record {
 		// Extract ISBNs
 		this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISBN);
+		this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISSN);
 		// Extract language
 		this._associateDBField(item, "041", "a", "language");
 		// Extract creators
@@ -767,7 +770,7 @@ class Record {
 						item.volume = locators.match(/(\d+):\d+/)[1];
 						item.issue = locators.match(/\d+:(\d+)/)[1];
 					}
-					item.ISSN = container.x;
+					item.ISSN = ZU.cleanISSN(container.x);
 				}
 			}
 		}
@@ -1031,6 +1034,76 @@ var testCases = [
 					"(VLB-PF)BC: Paperback",
 					"(VLB-WN)1632: HC/Informatik, EDV/Informatik"
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "02250cam  2200385   450 001002100000003004700021039001900068100004100087101000800128102000700136105001800143106000600161181001900167181002400186182001000210182002000220200022800240210007800468215002000546300038300566321001600949423005200965532005301017620001001070700007101080702007501151801007001226930002401296423017801320701007901498423007001577701007801647423006401725701007501789\u001eFRBNF301683260000007\u001ehttp://catalogue.bnf.fr/ark:/12148/cb301683267\u001e  \u001foOPL\u001fa013994700\u001e  \u001fa19910922d1667    m  y0frey50      ba\u001e0 \u001falat\u001e  \u001faFR\u001e  \u001fa||||z   00|||\u001e  \u001far\u001e 0\u001f601\u001fai \u001fbxxxe  \u001e  \u001f602\u001fctxt\u001f2rdacontent\u001e 0\u001f601\u001fan\u001e  \u001f602\u001fcn\u001f2rdamedia\u001e1 \u001faAenigmati Patavino Oedipus e Germania, hoc est : Marmoris Patavini inscripti obscuri interpretatio , triplici commentariolo confecta, e museo Reinesii. Cum Mantissa pro viris clarissimis philologis Patavinis\u001fbTexte imprimé\u001e  \u001frParisiis, apud Sebastianum Cramoisy, via Jacobaea, sub signo Famae [1667]\u001e  \u001fa[2]-32 p.\u001fdin-4\u001e  \u001faRéunit une épître dédicatoire de Friedrich Brummer, datée de février 1667, et 4 textes dont le dernier est aussi de Brummer : \"Antiquariis examinandum saxum suspendam...\", signé Reinesius ; \"Fortunii Liceti... de saxo Patavino Maguriano divinatio\" ; \"Lucae Holstenii de monumento Maguriano, ad Joannem Rhodium epistola\" ; \"Mantissa pro antiquariis & philologis Patavinis\"\u001e1 \u001faCG, XX, 481\u001e 0\u001ftMantissa pro antiquariis & philologis Patavinis\u001e13\u001faMantissa pro antiquariis et philologis Patavinis\u001e  \u001fdParis\u001e |\u001f311997125\u001foISNI0000000061250290\u001faBrummer\u001fbFriedrich\u001ff1642-1668\u001f4070\u001e |\u001f316745582\u001foISNI0000000427722038\u001faCramoisy\u001fbSébastien\u001ff163.?-1708?\u001f4160\u001e 0\u001faFR\u001fbFR-751131015\u001fc19910922\u001fgAFNOR\u001fhFRBNF301683260000007\u001f2intermrc\u001e  \u001f5FR-751131007:J-4124\u001e 1\u001f9a001000\u001ftAntiquariis examinandum saxum suspendam XII. uncias altum, XXII. longum in hortis Sertorii Ursati, Patavini nobilis et medici ad thermas Aponi non ita pridem erutum\u001e |\u001f9a001000\u001f310450301\u001foISNI0000000122807081\u001faReinesius\u001fbThomas\u001ff1587-1667\u001f4070\u001e 1\u001f9a002000\u001ftFortunii Liceti,... de Saxo patavino maguriano divinatio\u001e |\u001f9a002000\u001f312221958\u001foISNI0000000121017678\u001faLiceti\u001fbFortunio\u001ff1577-1657\u001f4070\u001e 1\u001f9a003000\u001ftLucae Holstenii de Monumento maguriano... epistola\u001e |\u001f9a003000\u001f312071587\u001foISNI0000000080885873\u001faHolste\u001fbLukas\u001ff1596-1661\u001f4070\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Aenigmati Patavino Oedipus e Germania, hoc est : Marmoris Patavini inscripti obscuri interpretatio , triplici commentariolo confecta, e museo Reinesii. Cum Mantissa pro viris clarissimis philologis Patavinis",
+				"creators": [
+					{
+						"firstName": "Friedrich",
+						"lastName": "Brummer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Reinesius",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fortunio",
+						"lastName": "Liceti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lukas",
+						"lastName": "Holste",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sébastien",
+						"lastName": "Cramoisy",
+						"creatorType": "author"
+					}
+				],
+				"language": "lat",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01387cam  2200337   450 001002100000003004700021010003300068020001700101021002000118039001900138100004100157101000800198102000700206105001800213106000600231181003100237181002900268182001000297182002000307200009800327210005500425215005300480225008000533410005600613608010900669686007000778700006700848801007000915930003200985930003201017\u001eFRBNF345506170000002\u001ehttp://catalogue.bnf.fr/ark:/12148/cb345506176\u001e  \u001fa2-01-002402-8\u001fbRel.\u001fd19,50 F\u001e  \u001faFR\u001fb07602058\u001e  \u001faFR\u001fbDL 75-23560\u001e  \u001foOPL\u001fa000025466\u001e  \u001fa19760121d1975    a  y0frey50      ba\u001e0 \u001fafre\u001e  \u001faFR\u001e  \u001faa   t   00|y|\u001e  \u001far\u001e 0\u001f601\u001fai \u001fbxxxe  \u001fab \u001fbxb2e  \u001e  \u001f602\u001fctxt\u001fcsti\u001f2rdacontent\u001e 0\u001f601\u001fan\u001e  \u001f602\u001fcn\u001f2rdamedia\u001e1 \u001faLa Résistance\u001fbTexte imprimé\u001feles armées de l'ombre\u001fftexte et dessins de Pierre Dupuis\u001e  \u001faParis\u001fcHachette\u001fd1975\u001fe95-Argenteuil\u001fgImpr. A.I.P.\u001e  \u001fa46 p.\u001fcill. en coul., couv. ill. en coul.\u001fd30 cm\u001e| \u001faB.D. Hachette\u001fiBande mauve\u001fiLa Seconde guerre mondiale en bandes dessinées\u001e 0\u001f034231103\u001ftB.D. Hachette. Bande mauve.\u001fx0337-0739\u001fv4\u001e  \u001faBandes dessinées\u001f2CNLJ\u001fkAvis critique donné par le Centre national de la littérature pour la jeunesse\u001e  \u001fa92 \u001f2Cadre de classement de la Bibliographie nationale française\u001e |\u001f311901257\u001foISNI000000010796314X\u001faDupuis\u001fbPierre\u001ff1931-....\u001f4440\u001e 0\u001faFR\u001fbFR-751131015\u001fc19760121\u001fgAFNOR\u001fhFRBNF345506170000002\u001f2intermrc\u001e  \u001f5FR-751131010:EL 4-Y-736 (4)\u001e  \u001f5FR-751131010:FOL-CNLJB-5348\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "La Résistance: les armées de l'ombre",
+				"creators": [
+					{
+						"firstName": "Pierre",
+						"lastName": "Dupuis",
+						"creatorType": "author"
+					}
+				],
+				"date": "1975",
+				"ISBN": "2010024028",
+				"callNumber": "92",
+				"language": "fre",
+				"place": "Paris",
+				"publisher": "Hachette",
+				"series": "B.D. Hachette",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
