@@ -586,10 +586,14 @@ class Record {
 		//  b = subtitle
 		//  n = Number of part/section of a work
 		//  p = Name of part/section of a work
-		var titlesubfields = this.getFieldSubfields("245")[0];
+		var titleSubfields = this.getFieldSubfields("245")[0];
+		if (!titleSubfields) {
+			throw new Error('MARC record has no title field (245). This probably indicates that the record data is corrupt.');
+		}
+		
 		item.title = glueTogether(
-			glueTogether(clean(titlesubfields.a), clean(titlesubfields.b), ": "),
-			glueTogether(clean(titlesubfields.n), clean(titlesubfields.p), ": "),
+			glueTogether(clean(titleSubfields.a), clean(titleSubfields.b), ": "),
+			glueTogether(clean(titleSubfields.n), clean(titleSubfields.p), ": "),
 			". "
 		);
 
@@ -838,10 +842,9 @@ class Record {
 
 function doImport() {
 	var text;
-	var holdOver = "";	// part of the text held over from the last loop
+	var holdOver = ""; // part of the text held over from the last loop
 
-	// eslint-disable-next-line no-cond-assign
-	while (text = Zotero.read(4096)) {	// read in 4096 byte increments
+	while ((text = Zotero.read(4096))) { // read in 4096 byte increments
 		var records = text.split("\x1D");
 
 		if (records.length > 1) {
