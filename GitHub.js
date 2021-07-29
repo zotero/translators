@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-28 21:40:03"
+	"lastUpdated": "2021-07-29 19:26:28"
 }
 
 /**
@@ -170,12 +170,25 @@ function completeWithBibTeX(item, bibtex) {
 	translator.setString(bibtex);
 	
 	translator.setHandler("itemDone", function (obj, bibItem) {
+		let path = item.title;
+		
 		delete bibItem.itemType;
 		delete bibItem.attachments;
 		delete bibItem.itemID;
 		Object.assign(item, bibItem);
 		
-		item.complete();
+		if (item.version) {
+			item.complete();
+		}
+		else {
+			ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
+				let version = cffText.match(/^\s*(?:"version"|version)\s*:\s*"?(.+)"?\s*$/m);
+				if (version) {
+					item.versionNumber = version[1];
+				}
+				item.complete();
+			}, null, null, null, false);
+		}
 	});
 	
 	translator.translate();
@@ -212,7 +225,7 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "Zotero",
 				"creators": [],
-				"date": "2021-07-28T20:43:37Z",
+				"date": "2021-07-29T14:50:36Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
 				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
@@ -267,7 +280,7 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2021-07-28T14:40:17Z",
+				"date": "2021-07-29T12:26:11Z",
 				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
@@ -332,13 +345,13 @@ var testCases = [
 				"itemType": "computerProgram",
 				"title": "zotero/translators",
 				"creators": [],
-				"date": "2021-07-28T16:11:33Z",
+				"date": "2021-07-29T04:53:43Z",
 				"abstractNote": "Zotero Translators",
 				"company": "Zotero",
 				"extra": "original-date: 2011-07-03T17:40:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
-				"url": "https://github.com/zotero/translators/blob/a4b752694db9f2d6eef955bd7df695f9e7004b63/GitHub.js",
+				"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -407,6 +420,7 @@ var testCases = [
 				"programmingLanguage": "Python",
 				"rights": "CC-BY-4.0",
 				"url": "https://github.com/citation-file-format/citation-file-format",
+				"versionNumber": "1.1.0",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
@@ -475,6 +489,7 @@ var testCases = [
 				"programmingLanguage": "Python",
 				"rights": "CC-BY-4.0",
 				"url": "https://github.com/citation-file-format/citation-file-format/blob/9879c64a37a9d4f3f18b67594aa3f3bf763fb69a/test/pytest.ini",
+				"versionNumber": "1.1.0",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
