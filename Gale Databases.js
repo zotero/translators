@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 22:32:15"
+	"lastUpdated": "2021-07-29 22:40:29"
 }
 
 /*
@@ -38,7 +38,8 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/ps/eToc.do')
-		|| text(doc, 'h1.page-header').includes("Table of Contents")) {
+		|| text(doc, 'h1.page-header').includes("Table of Contents")
+		|| doc.querySelector('.bookPreview')) {
 		return "book";
 	}
 	if (doc.querySelector('#searchResults')
@@ -59,7 +60,11 @@ function detectWeb(doc, url) {
 	if (doc.querySelector('a[data-gtm-feature="bookView"]')) {
 		return "bookSection";
 	}
-	return "magazineArticle";
+	else if (doc.body.classList.contains('document-page')) {
+		// not the greatest fallback... other guesses we could use?
+		return "magazineArticle";
+	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
