@@ -639,7 +639,7 @@ var testCases = [
 					}
 				],
 				"date": "2017",
-				"ISBN": "3518587056",
+				"ISBN": "9783518587058",
 				"edition": "Erste Auflage",
 				"extra": "Beteiligte Personen: Niklas Luhmann(VerfasserIn), Johannes F. K. Schmidt(HerausgeberIn), André Kieserling(HerausgeberIn), Christoph Gesigora(MitwirkendeR)\nThema: Theorie der Gesellschaft; Laufzeit: 30 Jahre; Kosten: keine« – so lautet die berühmte Antwort, die Niklas Luhmann Ende der 1960er Jahre auf die Frage nach seinem Forschungsprojekt gab. Der Zeitplan wurde eingehalten: 1997 erschien Die Gesellschaft der Gesellschaft, Luhmanns Opus magnum und Kernstück dieses Vorhabens. So bedeutend dieses Werk, so bemerkenswert seine Vorgeschichte. Denn wie der wissenschaftliche Nachlass des Soziologen zeigt, hat Luhmann im Laufe der Jahrzehnte mehrere weitgehend druckreife und inhaltlich eigenständige Fassungen seiner Gesellschaftstheorie geschrieben. 1975 brachte er die erste dieser Fassungen auf nahezu tausend Typoskriptseiten zum Abschluss. Sie ist ohne Frage die soziologisch reichhaltigste Version einer umfassenden Theorie der Gesellschaft, die aus Luhmanns einzigartigem Forschungsprojekt hervorgegangen ist, und wird nun unter dem Titel Systemtheorie der Gesellschaft erstmals publiziert\nHier auch später erschienene, unveränderte Nachdrucke",
 				"numPages": "1131 Seiten",
@@ -650,10 +650,11 @@ var testCases = [
 				"notes": [
 					{
 						"title": "Classification Data",
-						"note": "LCC: HM590\nDDC: 301.01, 300, 301.01\nBK: 71.02\nRVK: MR 5400, CI 3824, MQ 3471, MQ 3470"
+						"note": "LCC: HM590\nDDC: 301.01, 300, 301.01\nBK: 71.02\nRVK: MR 5400"
 					}
 				],
-				"seeAlso": []
+				"seeAlso": [],
+				"libraryCatalog": "K10plus PICA JSON"
 			}
 		]
 	},
@@ -695,7 +696,11 @@ var testCases = [
 						"note": "DDC: 193, \nBK: 08.24\nRVK: CG 5917"
 					}
 				],
-				"seeAlso": []
+				"seeAlso": [],
+				"libraryCatalog": "K10plus PICA JSON",
+				"shortTitle": "Theodor W. Adorno, Max Horkheimer, Jürgen Habermas und Alfred Schmidt"
 			}
+		]
+	}
 ]
 /** END TEST CASES **/
