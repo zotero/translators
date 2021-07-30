@@ -5,11 +5,11 @@
 	"target": "",
 	"minVersion": "4.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 98,
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-30 16:09:00"
+	"lastUpdated": "2021-07-30 21:23:00"
 }
 
 /*
@@ -47,7 +47,7 @@ function detectSearch(item) {
 
 function doSearch(item) {
 	let ISBN = ZU.cleanISBN(item.ISBN);
-	let url = `http://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=bib.isbn%20all%20%22${ISBN}%22`;
+	let url = `https://catalogue.bnf.fr/api/SRU?version=1.2&operation=searchRetrieve&query=bib.isbn%20all%20%22${ISBN}%22`;
 	ZU.doGet(url, function (xmlText) {
 		let parser = new DOMParser();
 		let xml = parser.parseFromString(xmlText, 'application/xml');
