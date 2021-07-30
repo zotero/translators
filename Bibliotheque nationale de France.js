@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-28 18:07:14"
+	"lastUpdated": "2021-07-28 15:50:57"
 }
 
 /*
@@ -30,9 +30,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 /* Bnf namespace. */
 var BnfClass = function () {
@@ -501,7 +498,7 @@ var BnfClass = function () {
 	}
 
 	// Process UNIMARC URL.
-	this.processMarcUrl = function (newDoc, url) {
+	this.processMarcUrl = function (newDoc, _url) {
 		// Init MARC record.
 		// Load MARC
 		var translator = Zotero.loadTranslator("import");
@@ -552,15 +549,7 @@ var BnfClass = function () {
 			postprocessMarc(record, newItem);
 			// Check for Gallica URL
 			checkGallica(record, newItem);
-			// We have to restore the public view for the next actions
-			// by the users, which is achieved by opening the url with
-			// public ending again.
-			if (url.includes('.public')) {
-				url = url.replace('.unimarc', '') + '.public';
-			}
-			ZU.doGet(url, function () {
-				newItem.complete();
-			});
+			newItem.complete();
 		});
 	};
 };
@@ -579,11 +568,11 @@ var typeMapping = {
 	"sound recording": "audioRecording",
 	"cartographic resource": "map",
 	"still image": "artwork",
-	kit: "single",
+	kit: "document",
 	"modern manuscript or archive": "manuscript",
-	"coin or medal": "single",
-	"physical object": "single",
-	"three dimensional object": "single"
+	"coin or medal": "document",
+	"physical object": "document",
+	"three dimensional object": "document"
 };
 
 function detectWeb(doc, url) {
@@ -595,7 +584,7 @@ function detectWeb(doc, url) {
 			return typeMapping[itemType];
 		}
 		else {
-			return "single";
+			return "document";
 		}
 	}
 	// Muliple result ?
