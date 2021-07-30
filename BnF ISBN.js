@@ -63,6 +63,16 @@ function doSearch(item) {
 			for (let marcRecord of marcRecords) {
 				marcRecord.setAttribute('xmlns:marc', 'http://www.loc.gov/MARC21/slim');
 
+				// Here we convert the XML we get from BnF from the original
+				// MarcXchange format into MARCXML by search-and-replacing
+				// the namespace. MARCXML and and MarcXchange are essentially
+				// the same format: the latter is a "generalization (mainly by
+				// weakening restrictions)" of the former. We didn't enforce
+				// those restrictions to begin with.
+
+				// MarcXchange spec:
+				// https://www.loc.gov/standards/iso25577/ISO_DIS_25577__E_.pdf
+
 				let marcxchangeText = new XMLSerializer().serializeToString(marcRecord);
 				let marcXMLText = marcxchangeText.replace(/<mxc:/g, '<marc:').replace(/<\/mxc:/g, '</marc:');
 
