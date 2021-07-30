@@ -173,7 +173,7 @@ function picaObjectFieldConstructor(rawField) {
 }
 
 function detectSearch(items) {
-	return parseItems(items).length > 0
+	return parseItems(items).length > 0;
 }
 
 function parseItems(items) {
@@ -182,20 +182,18 @@ function parseItems(items) {
 	
 	// filter out invalid queries
 	var ppns = [];
-	for ( let item of items) {
-		if (! item.ppn || typeof item.ppn !== "string") continue
+	for (let item of items) {
+		if (!item.ppn || typeof item.ppn !== "string") continue;
 		if (item.catalogid && typeof item.catalogid !== "string") {
-			item.catalogid = undefined
+			item.catalogid = undefined;
 		}
-		ppns = ppns.concat(item)
-	};
-	return ppns
-
+		ppns = ppns.concat(item);
+	}
+	return ppns;
 }
 
 function doSearch(items) {
-	Zotero.debug("Start Do Search");
-	items = parseItems(items)
+	items = parseItems(items);
 	if (typeof Promise == 'undefined') {
 		startSearch(
 			function () {},
@@ -216,7 +214,7 @@ async function startSearch(resolve, reject, entries) {
 	try {
 		if (!entries) resolve();
 		var entry, item;
-		for ( entry of entries) {
+		for (entry of entries) {
 			item = new Z.Item();
 			item.extra = "";
 
