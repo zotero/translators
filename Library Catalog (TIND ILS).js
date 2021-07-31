@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-30 23:40:53"
+	"lastUpdated": "2021-07-31 00:43:21"
 }
 
 /*
@@ -79,7 +79,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let marcXMLURL = attr(doc, 'a[href$="/export/xm"], a[download$=".xml"]', 'href');
 	ZU.doGet(marcXMLURL, function (respText) {
 		var translator = Zotero.loadTranslator("import");
@@ -88,7 +88,7 @@ function scrape(doc, url) {
 		translator.setString(respText);
 		
 		translator.setHandler("itemDone", function (obj, item) {
-			item.libraryCatalog = text('#headerlogo')
+			item.libraryCatalog = text(doc, '#headerlogo')
 				|| attr(doc, 'meta[property="og:site_name"]', 'content');
 			
 			let erURL = attr(doc, '.er-link', 'href');
