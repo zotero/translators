@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-07-14 17:40:37"
+	"lastUpdated": "2021-08-02 10:36:24"
 }
 
 /*
@@ -43,8 +43,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 
-	var persistentLink = doc.getElementsByClassName("permalink-link");
-	if (persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
+	if (doc.querySelector("a.permalink-link")) {
 		return "journalArticle";
 	}
 	else if (ZU.xpathText(doc, '//section[@class="record-header"]/h2')) {
