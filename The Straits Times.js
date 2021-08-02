@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-29 09:10:26"
+	"lastUpdated": "2021-08-02 15:38:26"
 }
 
 /*
@@ -36,12 +36,14 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.match(/(advertise-with-the-straits-times|newsletter-signup)/)) {
-		return 'webpage';
-	}
 	var pageClass = ZU.xpathText(doc, '//meta[@name="cXenseParse:pageclass"]/@content');
 	if (pageClass === 'article') {
-		return 'newspaperArticle';
+		var testPath = url.replace(/^https?:\/\/(www.)?straitstimes.com\//, '');
+		if (testPath.split('/').length > 1 ){
+			return 'newspaperArticle';
+		} else {
+			return 'webpage';
+		}
 	}
 	if (pageClass === 'frontpage') {
 		return 'multiple';
@@ -64,7 +66,7 @@ function scrape(doc, url, type) {
 	newItem.url = url;
 	newItem.publicationTitle = 'The Straits Times';
 	newItem.title = ZU.xpathText(doc, '//meta[@name="dcterms.title"]/@content');
-	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="dcterms.description"]/@content') ? ZU.xpathText(doc, '//meta[@name="dcterms.description"]/@content').replace('Read more at straitstimes.com.', '').trim() : '';
+	newItem.abstractNote = (ZU.xpathText(doc, '//meta[@name="dcterms.description"]/@content') || '').replace('Read more at straitstimes.com.', '').trim();
 	newItem.date = ZU.xpathText(doc, '//meta[@name="dcterms.date"]/@content');
 	newItem.place = 'Singapore';
 	newItem.language = 'en';
@@ -72,12 +74,20 @@ function scrape(doc, url, type) {
 	for (var i = 0; i < authors.length; i++) {
 		insertCreator(authors[i].getAttribute('content'), newItem);
 	}
+	// for opinion/forum contributors
+	if (!authors.length) {
+		var author = ZU.xpath(doc, '//div[contains(@class, "field-byline-custom")]');
+		if (author.length) {
+			insertCreator(ZU.xpathText(doc, '//div[contains(@class, "field-byline-custom")]'), newItem);
+		}
+	}
+	
 	newItem.attachments = [{
 		document: doc,
-		title: "The Straits Times Snapshot",
+		title: "Snapshot",
 	}];
 	if (doc.evaluate('//div[@class="paid-premium st-flag-1"]', doc, null, XPathResult.ANY_TYPE, null).iterateNext()) {
-		newItem.extra = "(Subscription only)";
+		newItem.extra = "Straits Times Access: Subscription only";
 	}
 	newItem.complete();
 }
@@ -90,7 +100,7 @@ function getMultipleItems(doc, url) {
 		if (rows.length) {
 			for (var i = 0; i < rows.length; i++) {
 				var searchItem = rows[i];
-				var searchItemUrl = searchItem.querySelector('a') ? searchItem.querySelector('a').href : '';
+				var searchItemUrl = attr(searchItem, 'a', 'href');
 				items.push(searchItemUrl);
 			}
 		}
@@ -99,7 +109,7 @@ function getMultipleItems(doc, url) {
 		if (rows.length) {
 			for (var k = 0; k < rows.length; k++) {
 				var headlineItem = rows[k];
-				var headlineItemUrl = headlineItem.href ? headlineItem.href : '';
+				var headlineItemUrl = headlineItem.href;
 				items.push(headlineItemUrl);
 			}
 		}
@@ -119,15 +129,27 @@ function insertCreator(authorName, newItem) {
 	// list derived from searching in Google with the follow search pattern: authors site:straitstimes.com/authors
 	var authorList = {
 		'Alison de Souza': { first: 'Alison', last: 'de Souza' },
+		'Arnoud de Meyer': { first: 'Arnoud', last: 'de Meyer' },
 		'Aw Cheng Wei': { first: 'Cheng Wei', last: 'Aw' },
-		'Benjamin Kang Lim': { first: 'Kang', last: 'Benjamin, Lim' },
+		'Baey Zo-Er': { first: 'Zo-Er', last: 'Baey' },
+		'Benjamin Kang Lim': { first: 'Benjamin Kang', last: 'Lim' },
+		'Chang Ai-Lien': { first: 'Ai-Lien', last: 'Chang' },
 		'Chang May Choon': { first: 'May Choon', last: 'Chang' },
+		'Cheong Suk-Wai': { first: 'Suk-Wai', last: 'Cheong' },
+		'Chin Hui Shan': { first: 'Hui Shan', last: 'Chin' },
+		'Chng Choon Hiong': { first: 'Choon Hion', last: 'Chng' },
 		'Chong Jun Liang': { first: 'Jun Liang', last: 'Chong' },
 		'Choo Yun Ting': { first: 'Yun Ting', last: 'Choo' },
+		'Chua Mui Hoong': { first: 'Mui Hoong', last: 'Chua' },
+		'Chua Siang Yee': { first: 'Siang Yee', last: 'Chua' },
 		'Feng Zengkun': { first: 'Zengkun', last: 'Feng' },
+		'Goh Ruoxue': { first: 'Ruoxue', last: 'Goh' },
+		'Goh Sui Noi': { first: 'Sui Noi', last: 'Goh' },
 		'Goh Yan Han': { first: 'Yan Han', last: 'Goh' },
 		'Ho Ai Li': { first: 'Ai Li', last: 'Ho' },
-		'Joy Pang Minle': { first: 'Pang', last: 'Joy, Minle' },
+		'Ho Cai Jun': { first: 'Cai Jun', last: 'Ho' },
+		'Jeremy Au Yong': { first: 'Jeremy', last: 'Au Yong' },
+		'Joy Pang Minle': { first: 'Joy, Minle', last: 'Pang' },
 		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
 		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
 		'Lai Shueh Yuan': { first: 'Shueh Yuan', last: 'Lai' },
@@ -137,39 +159,60 @@ function insertCreator(authorName, newItem) {
 		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
 		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
 		'Lee Seok Hwai': { first: 'Seok Hwai', last: 'Lee' },
+		'Lee Si Xuan': { first: 'Si Xuan', last: 'Lee' },
 		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
+		'Lee Wei Ling': { first: 'Wei Ling', last: 'Lee' },
 		'Li Xueying': { first: 'Xueying', last: 'Li' },
 		'Lian Szu Jin': { first: 'Szu Jin', last: 'Lian' },
 		'Liew Ai Xin': { first: 'Ai Xin', last: 'Liew' },
+		'Lim Ai Leen': { first: 'Ai Leen', last: 'Lim' },
 		'Lim Min Zhang': { first: 'Min Zhang', last: 'Lim' },
 		'Lim Rei Enn': { first: 'Rei Enn', last: 'Lim' },
 		'Lim Ruey Yan': { first: 'Ruey Yan', last: 'Lim' },
+		'Lim Yan Liang': { first: 'Yan Liang', last: 'Lim' },
 		'Lim Yaohui': { first: 'Yaohui', last: 'Lim' },
+		'Lim Yi Han': { first: 'Yi Han', last: 'Lim' },
 		'Lin Yangchen': { first: 'Yanchen', last: 'Lin' },
 		'Loh Guo Pei': { first: 'Guo Pei', last: 'Loh' },
 		'Low Lin Fhoong': { first: 'Lin Fhoong', last: 'Low' },
 		'Mok Qiu Lin': { first: 'Qiu Lin', last: 'Mok' },
+		'Moon Jae-in': { first: 'Jae-in', last: 'Moon' },
+		'Nicholas De Silva': { first: 'Nicholas', last: 'De Silva' },
+		'Ng Kane Gene': { first: 'Kane Gene', last: 'Ng'},
 		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
+		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
 		'Quah Ting Wen': { first: 'Ting Wen', last: 'Quah' },
-		'Raynold Toh YK': { first: 'Toh', last: 'Raynold, YK' },
-		'Rebecca Tan Hui Qing': { first: 'Tan', last: 'Rebecca, Hui Qing' },
+		'Raynold Toh YK': { first: 'Raynold, YK', last: 'Toh' },
+		'Rebecca Tan Hui Qing': { first: 'Rebecca, Hui Qing', last: 'Tan' },
 		'Seow Bei Yi': { first: 'Bei Yi', last: 'Seow' },
+		'Siow Li Sen': { first: 'Li Sen', last: 'Siow' },
 		'Tan Dawn Wei': { first: 'Dawn Wei', last: 'Tan' },
 		'Tan Fong Han': { first: 'Fong Han', last: 'Tan' },
 		'Tan Hsueh Yun': { first: 'Hsueh Yun', last: 'Tan' },
 		'Tan Hui Yee': { first: 'Hui Yee', last: 'Tan' },
 		'Tan Jia Ning': { first: 'Jia Ning', last: 'Tan' },
+		'Tan Ooi Boon': { first: 'Ooi Boon', last: 'Tan' },
+		'Tan Shu Yan': { first: 'Shu Yan', last: 'Tan' },
+		'Tan Tai Yong': { first: 'Tai Yong', last: 'Tan' },
 		'Tan Tam Mei': { first: 'Tam Mei', last: 'Tan' },
 		'Tan Weizhen': { first: 'Weizhen', last: 'Tan' },
 		'Tang Fan Xi': { first: 'Fan Xi', last: 'Tang' },
+		'Tang Wee Cheow': { first: 'Wee Choew', last: 'Tang' },
 		'Tay Hong Yi': { first: 'Hong Yi', last: 'Tay' },
 		'Tee Zhuo': { first: 'Zhuo', last: 'Tee' },
 		'Teo Cheng Wee': { first: 'Cheng Wee', last: 'Teo' },
 		'Tham Yuen-C': { first: 'Yuen-C', last: 'Tham' },
 		'Thong Yong Jun': { first: 'Yong Jun', last: 'Thong' },
 		'Toh Wen Li': { first: 'Wen Li', last: 'Toh' },
+		'Toh Ting Wei': { first: 'Ting Wei', last: 'Toh' },
+		'Tong Ming Chien': { first: 'Ming Chien', last: 'Tong' },
+		'Wong Ah Yoke': { first: 'Ah Yoke', last: 'Wong' },
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
+		'Wong Shiying': { first: 'Shiying', last: 'Wong' },
+		'Wong Yang': { first: 'Yang', last: 'Wong' },
+		'Yeo Shu Hui': { first: 'Shu Hui', last: 'Yeo' },
+		'Yuen Sin': { first: 'Sin', last: 'Yuen' },
 		'Zhao Jiayi': { first: 'Jiayi', last: 'Zhao' }
 	};
 	if (authorList[authorName]) {
@@ -182,6 +225,7 @@ function insertCreator(authorName, newItem) {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -204,7 +248,7 @@ var testCases = [
 				"websiteTitle": "The Straits Times",
 				"attachments": [
 					{
-						"title": "The Straits Times Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -221,7 +265,13 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Fast and Furious. Can we trust the speedy development of Covid-19 vaccines?",
-				"creators": [],
+				"creators": [
+					{
+						"firstName": "Danny",
+						"lastName": "Soon",
+						"creatorType": "author"
+					}
+				],
 				"date": "2020-12-28T05:00+08:00",
 				"ISSN": "0585-3923",
 				"abstractNote": "For life to become more normal, and for businesses to get back on their feet, more people need to become immune to the virus.",
@@ -232,7 +282,7 @@ var testCases = [
 				"url": "https://www.straitstimes.com/singapore/fast-and-furious-can-we-trust-the-speedy-development-of-covid-19-vaccines",
 				"attachments": [
 					{
-						"title": "The Straits Times Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -272,7 +322,7 @@ var testCases = [
 				"url": "https://www.straitstimes.com/singapore/more-employees-eligible-for-covid-19-support-grant-application-start-date-pushed-back-msf",
 				"attachments": [
 					{
-						"title": "The Straits Times Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
