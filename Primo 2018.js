@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-06-14 05:49:37"
+	"lastUpdated": "2020-10-18 08:33:02"
 }
 
 /*
@@ -99,48 +99,93 @@ function scrape(doc, pnxurl) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,zotero&tab=everything&search_scope=TCCDALMA_EVERYTHING&vid=TCCDALMA&lang=en_US&offset=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/fulldisplay?vid=TCCDALMA&search_scope=TCCDALMA_EVERYTHING&tab=everything&docid=TCCD_ALMA2136169630001641&lang=en_US&context=L&adaptor=Local%20Search%20Engine&isFrbr=true&query=any,contains,adam%20smith&sortby=rank&offset=0",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://primo-qa.hosted.exlibrisgroup.com/primo-explore/search?query=any,contains,mannheim&tab=everything&search_scope=TCCDALMA_EVERYTHING&vid=TCCDALMA&sortby=rank&lang=en_US",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://primo-demo.exlibrisgroup.com:1701/primo-explore/fulldisplay?docid=TN_gvrl_refCX4183000563&context=PC&vid=NORTH&search_scope=PC&tab=articles&lang=en_US",
+		"url": "http://virtuose.uqam.ca/primo-explore/fulldisplay?vid=UQAM&docid=UQAM_BIB000969205&context=L",
+		"defer": true,
 		"items": [
 			{
-				"itemType": "encyclopediaArticle",
-				"title": "Water",
-				"creators": [],
-				"date": "2012",
-				"ISBN": "9781452218557",
+				"itemType": "book",
+				"title": "War",
+				"creators": [
+					{
+						"lastName": "Baynes",
+						"firstName": "Ken",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ken",
+						"lastName": "Baynes",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Welsh Arts Council",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Glynn Vivian Art Gallery",
+						"creatorType": "contributor",
+						"fieldMode": 1
+					}
+				],
+				"date": "1970",
+				"callNumber": "NX650G8B38",
 				"language": "eng",
-				"libraryCatalog": "primo-demo.exlibrisgroup.com:1701",
-				"pages": "1775–1778",
+				"libraryCatalog": "virtuose.uqam.ca",
+				"place": "Boston",
+				"publisher": "Book and Art Chop",
+				"series": "Art and society 1",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Drinking Water"
+						"tag": "ART; GUERRE; WAR"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "http://bcujas-catalogue.univ-paris1.fr/primo-explore/fulldisplay?vid=CUJAS_V1&docid=33CUJAS_ALEPH000070200&context=L&search_scope=LSCOP_ALL",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Test pattern for living",
+				"creators": [
+					{
+						"firstName": "Nicholas",
+						"lastName": "Johnson",
+						"creatorType": "author"
+					}
+				],
+				"date": "1972",
+				"callNumber": "203.206",
+				"language": "eng",
+				"libraryCatalog": "bcujas-catalogue.univ-paris1.fr",
+				"numPages": "xx+154",
+				"place": "Toronto New York",
+				"publisher": "Bantam Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Mass media"
 					},
 					{
-						"tag": "Fresh Water"
+						"tag": "Social aspects"
 					},
 					{
-						"tag": "Residential Water Supply"
+						"tag": "United States"
 					},
 					{
-						"tag": "Water Distribution"
+						"tag": "United States"
 					},
 					{
-						"tag": "Water Treatment"
+						"tag": "Social conditions"
+					},
+					{
+						"tag": "1960-"
 					}
 				],
 				"notes": [],

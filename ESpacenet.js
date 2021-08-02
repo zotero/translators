@@ -1,7 +1,7 @@
 {
 	"translatorID": "176948f7-9df8-4afc-ace7-4c1c7318d426",
 	"label": "ESpacenet",
-	"creator": "Sebastian Karcher, Aurimas Vinckevicius, Philipp Zumstein",
+	"creator": "Sebastian Karcher, Aurimas Vinckevicius, Philipp Zumstein, and Abe Jellinek",
 	"target": "^https?://(worldwide|[a-z][a-z])\\.espacenet\\.com/",
 	"minVersion": "4.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-08 21:20:32"
+	"lastUpdated": "2021-07-06 19:45:27"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	ESpacenet translator - Copyright © 2011 Sebastian Karcher
+	ESpacenet translator - Copyright © 2011-2021 Sebastian Karcher
 	
 	This file is part of Zotero.
 	
@@ -36,11 +36,6 @@
 */
 
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	// multiples are not working (easily) because the website
 	// has to fully load before Zotero can extract its
@@ -56,12 +51,34 @@ function detectWeb(doc, url) {
 		&& getTitle(doc)) {
 		return "patent";
 	}
+	else if (url.includes('/searchResults') && getSearchResults(doc, true)) {
+		return "multiple";
+	}
 	return false;
 }
 
 
-function getTitle(_doc) {
-	var title = text('#pagebody>h3, #biblio-title-content');
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('a.publicationLinkClass[href*="/publicationDetails/"]');
+	for (let row of rows) {
+		let href = row.href;
+		// replace the AJAX-populated page with the static page that it
+		// populates from
+		href = href.replace('/publicationDetails/', '/data/publicationDetails/');
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+
+function getTitle(doc) {
+	var title = text(doc, '#pagebody>h3, #biblio-title-content');
 	if (title) {
 		if (title.toUpperCase() == title) {
 			title = ZU.capitalizeTitle(title, true);
@@ -89,7 +106,7 @@ function scrape(doc, url) {
 	var newItem = new Zotero.Item("patent");
 	newItem.title = getTitle(doc);
 
-	cleanNames(text('#inventors, #biblio-inventors-content'),
+	cleanNames(text(doc, '#inventors, #biblio-inventors-content'),
 		function (name) {
 			newItem.creators.push(
 				ZU.cleanAuthor(name.replace(/,?\s/, ', '),	// format displayed is LAST FIRST MIDDLE, so we add a comma after LAST
@@ -97,7 +114,7 @@ function scrape(doc, url) {
 		});
 	
 	var assignees = [];
-	cleanNames(text('#applicants, #biblio-applicants-content'),
+	cleanNames(text(doc, '#applicants, #biblio-applicants-content'),
 		function (name) {
 			assignees.push(name);
 		});
@@ -120,19 +137,19 @@ function scrape(doc, url) {
 
 	var rows = ZU.xpath(doc, '//tr[@class="noPrint" or ./th[@class="printTableText"]]');
 
-	var pn = text('#biblio-publication-number-content');
+	var pn = text(doc, '#biblio-publication-number-content');
 	if (pn) { // new design
 		var datePnumber = pn.split('·');
 		if (datePnumber.length == 2) {
 			newItem.patentNumber = datePnumber[0];
 		}
 		newItem.issueDate = ZU.strToISO(datePnumber);
-		var application = text('#biblio-application-number-content').split('·');
+		var application = text(doc, '#biblio-application-number-content').split('·');
 		if (application.length == 2) {
 			newItem.applicationNumber = application[0];
 			newItem.filingDate = application[1];
 		}
-		newItem.priorityNumbers = text('#biblio-priority-numbers-label ~ div');
+		newItem.priorityNumbers = text(doc, '#biblio-priority-numbers-label ~ div');
 	}
 	else { // old design
 		for (var i = 0, n = rows.length; i < n; i++) {
@@ -158,15 +175,15 @@ function scrape(doc, url) {
 			}
 		}
 		
-		var date = text('#pagebody>h1');
+		var date = text(doc, '#pagebody>h1');
 		if (date) {
 			newItem.issueDate = ZU.strToISO(date);
 		}
-		newItem.patentNumber = text('span.sel');
+		newItem.patentNumber = text(doc, 'span.sel');
 	}
 	
 	newItem.abstractNote = ZU.trimInternal(
-		text('p.printAbstract, #biblio-abstract-content') || '');
+		text(doc, 'p.printAbstract, #biblio-abstract-content') || '');
 
 	newItem.attachments.push({
 		title: "Espacenet patent record",
@@ -178,8 +195,14 @@ function scrape(doc, url) {
 }
 
 function doWeb(doc, url) {
-	// only single items need to be handled
-	scrape(doc, url);
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
 }
 
 /** BEGIN TEST CASES **/
@@ -432,6 +455,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://worldwide.espacenet.com/searchResults?compact=false&page=0&ST=advanced&AB=&PR=&IN=&rnd=1589809439894&locale=cn_EP&AP=&PA=&PD=&TI=pesticide&CPC=&IC=&DB=EPODOC&PN=",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

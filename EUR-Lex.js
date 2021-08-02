@@ -2,14 +2,14 @@
 	"translatorID": "bf053edc-a8c3-458c-93db-6d04ead2e636",
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/TXT/|search.html\\?)",
+	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/TXT/|search\\.html\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-12-21 20:27:07"
+	"lastUpdated": "2021-06-07 16:46:01"
 }
 
 /*

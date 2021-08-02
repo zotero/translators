@@ -1240,6 +1240,7 @@ var testCases = [
 				"journalAbbreviation": "Elife",
 				"language": "eng",
 				"libraryCatalog": "PubMed",
+				"pages": "e51710",
 				"publicationTitle": "eLife",
 				"volume": "9",
 				"attachments": [
@@ -1251,13 +1252,40 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Animals"
+					},
+					{
 						"tag": "D. melanogaster"
+					},
+					{
+						"tag": "Drosophila Proteins"
+					},
+					{
+						"tag": "Drosophila melanogaster"
+					},
+					{
+						"tag": "Imaginal Discs"
+					},
+					{
+						"tag": "Larva"
+					},
+					{
+						"tag": "Muscles"
 					},
 					{
 						"tag": "Myoglianin"
 					},
 					{
 						"tag": "Myostatin"
+					},
+					{
+						"tag": "Signal Transduction"
+					},
+					{
+						"tag": "Smad Proteins, Receptor-Regulated"
+					},
+					{
+						"tag": "Transforming Growth Factor beta"
 					},
 					{
 						"tag": "developmental biology"

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-11-11 22:15:02"
+	"lastUpdated": "2021-06-03 17:51:31"
 }
 
 /*
@@ -34,12 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
 	if (url.search(/\/watch\?(?:.*)\bv=[0-9a-zA-Z_-]+/) != -1) {
@@ -103,7 +97,8 @@ function scrape(doc, url) {
 	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
-	var author = text(doc, '#text-container .ytd-channel-name');
+	var author = text(doc, '#meta-contents #text-container .ytd-channel-name')
+		|| text(doc, '#text-container .ytd-channel-name');
 	if (author) {
 		item.creators.push({
 			lastName: author,
@@ -111,9 +106,9 @@ function scrape(doc, url) {
 			fieldMode: 1
 		});
 	}
-	var description = doc.getElementById("description");
+	var description = text(doc, '#description .content') || text(doc, '#description');
 	if (description) {
-		item.abstractNote = ZU.cleanTags(description.innerHTML);
+		item.abstractNote = description;
 	}
 	
 	item.complete();

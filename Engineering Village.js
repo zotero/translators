@@ -2,20 +2,20 @@
 	"translatorID": "1f40baef-eece-43e4-a1cc-27d20c0ce086",
 	"label": "Engineering Village",
 	"creator": "Ben Parr, Sebastian Karcher",
-	"target": "^https?://(www\\.)?engineeringvillage(2)?\\.(com|org)",
+	"target": "^https?://(www\\.)?engineeringvillage(2)?\\.(com|org)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-10-07 10:02:04"
+	"lastUpdated": "2021-07-21 01:45:41"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Engineering Village Translator - Copyright © 2018 Sebastian Karcher 
+	Engineering Village Translator - Copyright © 2018-2021 Sebastian Karcher 
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 */
 
 function detectWeb(doc, url) {
-	Z.monitorDOMChanges(doc.getElementById("ev-application"), {childList: true});
+	Z.monitorDOMChanges(doc.getElementById("ev-application"));
 	var printlink = doc.getElementById('printlink');
 	if (url.includes("/search/doc/") && printlink && getDocIDs(printlink.href)) {
 		return "journalArticle";
