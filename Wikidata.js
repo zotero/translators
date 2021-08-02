@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 02:25:40"
+	"lastUpdated": "2021-07-29 16:07:10"
 }
 
 /*
@@ -74,7 +74,8 @@ var typeMapping = {
 	Q1266946: "thesis",
 	Q15416: "tvBroadcast",
 	Q30070675: "videoRecording",
-	Q36774: "webpage"
+	Q36774: "webpage",
+	Q1172284: "document" // dataset
 };
 
 // see also https://www.wikidata.org/wiki/Template:Bibliographical_properties
@@ -234,6 +235,12 @@ function scrape(doc, url) {
 							}
 							else {
 								item[zprop] = value;
+							}
+						}
+						else if (tagname == 'wdt:P31') {
+							let resource = propstatement.getAttribute('rdf:resource');
+							if (resource.endsWith('/Q1172284')) {
+								item.extra += '\nType: dataset';
 							}
 						}
 					}
@@ -766,6 +773,57 @@ var testCases = [
 				"libraryCatalog": "Wikidata",
 				"pages": "548-556",
 				"volume": "3",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.wikidata.org/wiki/Q107586230",
+		"items": [
+			{
+				"itemType": "document",
+				"title": "Camptochaeta luxemburgensis Heller, Hippa and Vilkamaa spec. nov. (Diptera: Sciaridae), a new cavernicolous species from Luxembourg",
+				"creators": [
+					{
+						"firstName": "Dieter",
+						"lastName": "Weber",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alain C.",
+						"lastName": "Frantz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heikki",
+						"lastName": "Hippa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pekka",
+						"lastName": "Vilkamaa",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Björn",
+						"lastName": "Rulik",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kai",
+						"lastName": "Heller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-01-01T00:00:00Z",
+				"extra": "QID: Q107586230\nType: dataset",
+				"libraryCatalog": "Wikidata",
+				"publisher": "Barcode of Life Data Systems",
+				"shortTitle": "Camptochaeta luxemburgensis Heller, Hippa and Vilkamaa spec. nov. (Diptera",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
