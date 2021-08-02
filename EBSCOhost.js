@@ -43,8 +43,7 @@ function detectWeb(doc, url) {
 		return "multiple";
 	}
 
-	var persistentLink = doc.getElementsByClassName("permalink-link");
-	if (persistentLink.length && persistentLink[0].nodeName.toUpperCase() == 'A') {
+	if (doc.querySelector("a.permalink-link")) {
 		return "journalArticle";
 	}
 	else if (ZU.xpathText(doc, '//section[@class="record-header"]/h2')) {
