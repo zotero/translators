@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-03 06:07:41"
+	"lastUpdated": "2021-08-03 06:23:36"
 }
 
 /*
@@ -39,7 +39,7 @@ function detectWeb(doc, url) {
 	var pageClass = ZU.xpathText(doc, '//meta[@name="cXenseParse:pageclass"]/@content');
 	if (pageClass === 'article') {
 		var testPath = url.replace(/^https?:\/\/(www.)?straitstimes.com\//, '');
-		if (testPath.split('/').length > 1 ){
+		if (testPath.split('/').length > 1) {
 			return 'newspaperArticle';
 		}
 	}
