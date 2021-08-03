@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-02 15:38:26"
+	"lastUpdated": "2021-08-03 06:07:41"
 }
 
 /*
@@ -41,8 +41,6 @@ function detectWeb(doc, url) {
 		var testPath = url.replace(/^https?:\/\/(www.)?straitstimes.com\//, '');
 		if (testPath.split('/').length > 1 ){
 			return 'newspaperArticle';
-		} else {
-			return 'webpage';
 		}
 	}
 	if (pageClass === 'frontpage') {
@@ -56,12 +54,12 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
 		getMultipleItems(doc, url);
 	} else {
-		scrape(doc, url, detectWeb(doc, url));
+		scrape(doc, url);
 	}
 }
 
-function scrape(doc, url, type) {
-	var newItem = new Zotero.Item(type || 'newspaperArticle');
+function scrape(doc, url) {
+	var newItem = new Zotero.Item('newspaperArticle');
 	newItem.ISSN = '0585-3923';
 	newItem.url = url;
 	newItem.publicationTitle = 'The Straits Times';
@@ -231,35 +229,6 @@ function insertCreator(authorName, newItem) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.straitstimes.com/asia",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.straitstimes.com/advertise-with-the-straits-times",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Advertise with The Straits Times",
-				"creators": [],
-				"date": "2020-08-04T04:00+08:00",
-				"language": "en",
-				"url": "https://www.straitstimes.com/advertise-with-the-straits-times",
-				"websiteTitle": "The Straits Times",
-				"attachments": [
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.straitstimes.com/singapore/fast-and-furious-can-we-trust-the-speedy-development-of-covid-19-vaccines",
 		"items": [
 			{
@@ -291,11 +260,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.straitstimes.com/",
-		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -331,6 +295,80 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/asia/east-asia/hong-kong-recalibrates-covid-19-strategy-to-maintain-zero-infection-record",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Hong Kong recalibrates Covid-19 strategy to maintain zero-infection record",
+				"creators": [
+					{
+						"firstName": "Claire",
+						"lastName": "Huang",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-02T21:04+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "Under the tweaked rules, non-residents from high-risk areas can also enter Hong Kong if they are fully vaccinated.",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"url": "https://www.straitstimes.com/asia/east-asia/hong-kong-recalibrates-covid-19-strategy-to-maintain-zero-infection-record",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/opinion/facebooks-next-frontier-the-metaverse-what-does-that-mean",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Facebook's next frontier - the metaverse. What does that mean?",
+				"creators": [
+					{
+						"firstName": "Daniel",
+						"lastName": "Broby",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-03T05:00+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "Advertising dominates Facebook's social-networking business model. Zuckerberg's move to create a virtual world raises the possibility of new revenue sources.",
+				"extra": "Straits Times Access: Subscription only",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"url": "https://www.straitstimes.com/opinion/facebooks-next-frontier-the-metaverse-what-does-that-mean",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
