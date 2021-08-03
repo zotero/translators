@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-03 06:23:36"
+	"lastUpdated": "2021-08-03 06:47:27"
 }
 
 /*
@@ -176,7 +176,7 @@ function insertCreator(authorName, newItem) {
 		'Mok Qiu Lin': { first: 'Qiu Lin', last: 'Mok' },
 		'Moon Jae-in': { first: 'Jae-in', last: 'Moon' },
 		'Nicholas De Silva': { first: 'Nicholas', last: 'De Silva' },
-		'Ng Kane Gene': { first: 'Kane Gene', last: 'Ng'},
+		'Ng Kane Gene': { first: 'Kane Gene', last: 'Ng' },
 		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
 		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
