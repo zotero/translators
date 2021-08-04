@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-07-28 18:34:03"
+	"lastUpdated": "2021-08-04 16:11:40"
 }
 
 /*
@@ -703,11 +703,13 @@ class Record {
 					if (container.t && container.z) { // if there is an ISBN assume book section
 						item.itemType = "bookSection";
 					}
-					else if (container.t) { // else default to journal article
+					else if (container.t || container.s) { // else default to journal article
 						item.itemType = "journalArticle";
 					}
 			}
-			var publication = container.t;
+			// some catalogs put the journal title in 773$s
+			// https://vufind.org/jira/si/jira.issueviews:issue-html/VUFIND-258/VUFIND-258.html#comment-header-10385
+			var publication = container.t || container.s;
 			if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				var pubinfo = container.d;
 				if (pubinfo) {
@@ -750,7 +752,9 @@ class Record {
 				if (publication) {
 					item.publicationTitle = publication.replace(/[.,\s]+$/, "");
 				}
+
 				item.journalAbbreviation = container.p;
+
 				var locators = container.g;
 				if (locators) {
 					// unfortunately there is no standardization whatsoever here
@@ -772,6 +776,15 @@ class Record {
 						item.volume = locators.match(/(\d+):\d+/)[1];
 						item.issue = locators.match(/\d+:(\d+)/)[1];
 					}
+				}
+
+				if (!item.volume) {
+					// LoC discussion paper suggested this in 2002 and it seems to be used (rarely)
+					// https://www.loc.gov/marc/marbi/2003/2003-dp01.html, see section 4.1
+					item.volume = container.v;
+				}
+				
+				if (container.x) {
 					item.ISSN = ZU.cleanISSN(container.x);
 				}
 			}
@@ -1105,6 +1118,34 @@ var testCases = [
 				"series": "B.D. Hachette",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01371nam a22002297a 4500001000800000044002100008100007300029245007400102260004300176300001200219336002800231653035600259773038700615856004401002930000901046999001701055995001401072995001201086995001601098995001501114995001201129\u001e0324653\u001e  \u001fbالسعودية\u001e  \u001f9271543\u001faابن عبيد، محمد بن عبدالكريم\u001feمؤلف\u001e  \u001faالتلقين وأثره في الرواية عند المحدثين\u001e  \u001fbجامعة أم القرى\u001fc1998\u001fm1419\u001e  \u001fa16 - 82\u001e  \u001faبحوث ومقالات\u001e  \u001faالناسخ والمنسوخ\u001faالاحاديث النبوية\u001faرواة الحديث\u001faالصحابة والتابعون\u001faاسناد الحديث\u001faالتلقين\u001faالحديث\u001faضبط الحديث\u001faالاحاديث الصحيحة\u001faالاحاديث المتواترة\u001faتدوين الحديث\u001faالمذاهب الفقهية\u001faالفقه الاسلامي\u001e  \u001f4العلوم الإنسانية ، متعددة التخصصات\u001f4العلوم الاجتماعية ، متعددة التخصصات\u001f6Humanities, Multidisciplinary\u001f6Social Sciences, Interdisciplinary\u001fc001\u001feUmm Al-Qura Uiversity Journal\u001ffMiğalaẗ Ǧamiʼaẗ Umm al-Quraẗ\u001fl018\u001fm س  11, ع 18\u001fo0007\u001fsمجلة جامعة أم القرى للبحوث العلمية\u001fv011\u001fx1319-4216\u001e  \u001fuhttp://search.mandumah.com/Record/58382\u001e  \u001fdy\u001fpy\u001e  \u001fc58382\u001fd58382\u001e  \u001faEduSearch\u001e  \u001faEcoLink\u001e  \u001faIslamicInfo\u001e  \u001faHumanIndex\u001e  \u001faAraBase\u001e\u001d",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "التلقين وأثره في الرواية عند المحدثين",
+				"creators": [
+					{
+						"lastName": "ابن عبيد، محمد بن عبدالكريم",
+						"creatorType": "author"
+					}
+				],
+				"date": "1998",
+				"ISSN": "1319-4216",
+				"publicationTitle": "مجلة جامعة أم القرى للبحوث العلمية",
+				"volume": "011",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "الناسخ والمنسوخ الاحاديث النبوية رواة الحديث الصحابة والتابعون اسناد الحديث التلقين الحديث ضبط الحديث الاحاديث الصحيحة الاحاديث المتواترة تدوين الحديث المذاهب الفقهية الفقه الاسلامي"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
