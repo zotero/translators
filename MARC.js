@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-08-04 16:11:40"
+	"lastUpdated": "2021-08-04 16:24:43"
 }
 
 /*
@@ -243,7 +243,7 @@ class Record {
 					else {
 						// Duplicate subfield
 						Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfield);
-						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfield.substr(this.subfieldCodeLength - 1);
+						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + "  " + subfield.substr(this.subfieldCodeLength - 1);
 					}
 				}
 			}
@@ -334,7 +334,9 @@ class Record {
 		for (let subfield of field) {
 			for (let myPart of part) {
 				if (subfield[myPart]) {
-					item.tags.push(clean(subfield[myPart]));
+					for (let tag of subfield[myPart].split('  ')) {
+						item.tags.push(clean(tag));
+					}
 				}
 			}
 		}
@@ -912,10 +914,13 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Biography Early works to 1800"
+						"tag": "Biography"
 					},
 					{
 						"tag": "Cuellar y Mosquera, Gabriel de"
+					},
+					{
+						"tag": "Early works to 1800"
 					},
 					{
 						"tag": "Early works to 1800"
@@ -1042,11 +1047,21 @@ var testCases = [
 				"publisher": "Springer Vieweg",
 				"attachments": [],
 				"tags": [
-					"(VLB-FS)Diskrete Mathematik",
-					"(VLB-FS)Lineare Algebra",
-					"(VLB-FS)Mathematik für Informatiker",
-					"(VLB-PF)BC: Paperback",
-					"(VLB-WN)1632: HC/Informatik, EDV/Informatik"
+					{
+						"tag": "(VLB-FS)Diskrete Mathematik"
+					},
+					{
+						"tag": "(VLB-FS)Lineare Algebra"
+					},
+					{
+						"tag": "(VLB-FS)Mathematik für Informatiker"
+					},
+					{
+						"tag": "(VLB-PF)BC: Paperback"
+					},
+					{
+						"tag": "(VLB-WN)1632: HC/Informatik, EDV/Informatik"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1143,7 +1158,43 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "الناسخ والمنسوخ الاحاديث النبوية رواة الحديث الصحابة والتابعون اسناد الحديث التلقين الحديث ضبط الحديث الاحاديث الصحيحة الاحاديث المتواترة تدوين الحديث المذاهب الفقهية الفقه الاسلامي"
+						"tag": "اسناد الحديث"
+					},
+					{
+						"tag": "الاحاديث الصحيحة"
+					},
+					{
+						"tag": "الاحاديث المتواترة"
+					},
+					{
+						"tag": "الاحاديث النبوية"
+					},
+					{
+						"tag": "التلقين"
+					},
+					{
+						"tag": "الحديث"
+					},
+					{
+						"tag": "الصحابة والتابعون"
+					},
+					{
+						"tag": "الفقه الاسلامي"
+					},
+					{
+						"tag": "المذاهب الفقهية"
+					},
+					{
+						"tag": "الناسخ والمنسوخ"
+					},
+					{
+						"tag": "تدوين الحديث"
+					},
+					{
+						"tag": "رواة الحديث"
+					},
+					{
+						"tag": "ضبط الحديث"
 					}
 				],
 				"notes": [],
