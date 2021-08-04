@@ -53,7 +53,8 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) === "multiple") {
 		getMultipleItems(doc, url);
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -102,7 +103,8 @@ function getMultipleItems(doc, url) {
 				items.push(searchItemUrl);
 			}
 		}
-	} else {
+	}
+	else {
 		rows = ZU.xpath(doc, '//a[@class="block-link"]|//span[@class="story-headline"]/a');
 		if (rows.length) {
 			for (var k = 0; k < rows.length; k++) {
@@ -113,7 +115,7 @@ function getMultipleItems(doc, url) {
 		}
 	}
 	if (!!items && items.length) {
-		items = items.filter(function(item) {
+		items = items.filter(function (item) {
 			return (!!item.match(/^https:\/\/www\.straitstimes.com/));
 		});
 		if (items.length) {
@@ -219,7 +221,8 @@ function insertCreator(authorName, newItem) {
 			firstName: authorList[authorName].first,
 			creatorType: 'author'
 		});
-	} else {
+	}
+	else {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
