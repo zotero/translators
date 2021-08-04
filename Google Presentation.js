@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-08-28 15:33:15"
+	"lastUpdated": "2021-08-02 16:55:40"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -50,14 +49,14 @@ function doWeb(doc, url) {
 
 	var titleMatch = textContent.match(/SK_config\['title'\]\s?=\s?'([^;]*)';/);
 	item.title = titleMatch[1];
-	
+
 	//SK_config['lastModified'] = ["Lydia Pintscher", 1495520656216, 2];
 	var modifiedMatch = textContent.match(/SK_config\['lastModified'\]\s?=\s?([^;]*);/);
-	if (modifiedMatch) {
+	if (modifiedMatch && modifiedMatch[1] != 'null') {
 		var modifiedData = JSON.parse(modifiedMatch[1]);
 		item.creators.push(ZU.cleanAuthor(modifiedData[0], "author"));
 		var date = new Date(modifiedData[1]);
-    		item.date = date.toISOString();
+			item.date = date.toISOString();
 	}
 	
 	var urlparts = url.split('/');
@@ -82,48 +81,12 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://docs.google.com/presentation/d/1XX-yzT98fglAfFkHoixOI1XC1uwrS6f0u1xjdZT9TYI/edit#slide=id.p",
-		"items": [
-			{
-				"itemType": "presentation",
-				"title": "WikiCite 2017: Wikidata: Current trends and priorities (and trivia)",
-				"creators": [
-					{
-						"firstName": "Lydia",
-						"lastName": "Pintscher",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017-05-23T06:24:16.216Z",
-				"shortTitle": "WikiCite 2017",
-				"url": "https://docs.google.com/presentation/d/1XX-yzT98fglAfFkHoixOI1XC1uwrS6f0u1xjdZT9TYI",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://docs.google.com/presentation/d/13O08buimOzZWbv6GHxMv5LJS3TUAWF2R7_fwToggA64/edit#slide=id.i0",
 		"items": [
 			{
 				"itemType": "presentation",
 				"title": "16.1 powerpoint",
-				"creators": [
-					{
-						"firstName": "Katie",
-						"lastName": "Hulse",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012-11-20T19:32:53.370Z",
+				"creators": [],
 				"url": "https://docs.google.com/presentation/d/13O08buimOzZWbv6GHxMv5LJS3TUAWF2R7_fwToggA64",
 				"attachments": [
 					{

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-19 17:08:22"
+	"lastUpdated": "2021-07-29 22:40:29"
 }
 
 /*
@@ -38,16 +38,33 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/ps/eToc.do')
-		|| text(doc, 'h1.page-header').includes("Table of Contents")) {
+		|| text(doc, 'h1.page-header').includes("Table of Contents")
+		|| doc.querySelector('.bookPreview')) {
 		return "book";
 	}
-	if (url.includes('Search.do') && getSearchResults(doc, true)) {
-		return "multiple";
+	if (doc.querySelector('#searchResults')
+		|| url.includes('/Search.do')
+		|| url.includes('/paginate.do')) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		else if (doc.querySelector('#searchResults')) {
+			Z.monitorDOMChanges(doc.querySelector('#searchResults'));
+		}
+	}
+	let publisherType = attr(doc, '.zotero', 'data-zoterolabel');
+	if (publisherType) {
+		Z.debug('Using publisher-provided item type: ' + publisherType);
+		return publisherType;
 	}
 	if (doc.querySelector('a[data-gtm-feature="bookView"]')) {
 		return "bookSection";
 	}
-	return "magazineArticle";
+	else if (doc.body.classList.contains('document-page')) {
+		// not the greatest fallback... other guesses we could use?
+		return "magazineArticle";
+	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -78,23 +95,25 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	let citeData = doc.querySelector('input.citationToolsData');
-	let documentUrl = decodeURIComponent(citeData.dataset.url);
-	let mcode = citeData.dataset.mcode; // undefined for bookSections
-	let productName = citeData.dataset.productname;
-	let docId = mcode ? undefined : decodeURIComponent(url.match(/(?:docId|id)=([^&]+)/)[1]);
-	let risPostBody = JSON.stringify([{
-		documentUrl: `<span class="docUrl">${documentUrl}</span>`,
-		mcode,
+	let documentUrl = citeData.getAttribute('data-url');
+	let mcode = citeData.getAttribute('data-mcode');
+	let productName = citeData.getAttribute('data-productname');
+	let docId = mcode ? undefined : citeData.getAttribute('data-docid');
+	let documentData = JSON.stringify({
 		docId,
+		mcode,
+		documentUrl,
 		productName
-	}]);
+	});
+	let risPostBody = "citationFormat=RIS&documentData=" + encodeURIComponent(documentData).replace(/%20/g, "+");
+	
 	let pdfURL = attr(doc, 'button[data-gtm-feature="download"]', 'data-url');
 
-	ZU.doPost('https://go.gale.com/ps/citationtools/rest/cite/getcitations/', risPostBody, function (text) {
-		let citations = JSON.parse(text);
+	ZU.doPost('/ps/citationtools/rest/cite/download', risPostBody, function (text) {
 		let translator = Zotero.loadTranslator("import");
-		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
-		translator.setString(citations.RIS[0]);
+		// RIS
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
+		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			if (pdfURL) {
 				item.attachments.push({
@@ -103,18 +122,25 @@ function scrape(doc, url) {
 					mimeType: "application/pdf"
 				});
 			}
+			
+			if (item.ISSN) {
+				item.ISSN = Zotero.Utilities.cleanISSN(item.ISSN);
+			}
+			
+			if (item.pages && item.pages.endsWith("+")) {
+				item.pages = item.pages.replace(/\+/, "-");
+			}
+			
 			item.attachments.push({
 				title: "Snapshot",
 				document: doc
 			});
+			
 			item.notes = [];
 			item.url = item.url.replace(/u=[^&]+&?/, '');
 			item.complete();
 		});
 		translator.translate();
-	}, {
-		'Content-Type': 'application/json; charset=utf-8',
-		Accept: 'application/json'
 	});
 }
 
@@ -122,7 +148,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://link.gale.com/apps/pub/5BBU/GVRL?sid=GVRL",
+		"url": "https://go.gale.com/ps/i.do?p=GVRL&id=GALE%7C5BBU&v=2.1&it=etoc&sid=GVRL",
 		"items": [
 			{
 				"itemType": "book",
@@ -160,7 +186,7 @@ var testCases = [
 				"place": "Detroit, MI",
 				"publisher": "Gale",
 				"series": "Ancient Egypt 2675-332 B.C.E.",
-				"url": "https://link.gale.com/apps/pub/5BBU/GVRL?sid=GVRL",
+				"url": "https://link.gale.com/apps/pub/5BBU/GVRL?sid=bookmark-GVRL",
 				"volume": "1",
 				"attachments": [
 					{
@@ -176,7 +202,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://link.gale.com/apps/doc/CX3427400755/GVRL?sid=GVRL&xid=77ea673e",
+		"url": "https://go.gale.com/ps/i.do?p=GVRL&id=GALE%7CCX3427400755&v=2.1&it=r&sid=GVRL&asid=77ea673e",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -217,7 +243,7 @@ var testCases = [
 				"place": "Detroit, MI",
 				"publisher": "Gale",
 				"series": "Renaissance Europe 1300-1600",
-				"url": "https://link.gale.com/apps/doc/CX3427400755/GVRL?sid=GVRL&xid=77ea673e",
+				"url": "https://link.gale.com/apps/doc/CX3427400755/GVRL?sid=bookmark-GVRL&xid=77ea673e",
 				"volume": "4",
 				"attachments": [
 					{
@@ -238,6 +264,53 @@ var testCases = [
 					},
 					{
 						"tag": "Poets"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://go.gale.com/ps/i.do?st=Newspapers&lm=DA~119760101+-+119861231&searchResultsType=SingleTab&qt=TXT~%E2%80%9Csex+discrimination%E2%80%9D+AND+%28work+OR+employment%29+NOT+%22equal+pay%22&sw=w&ty=as&it=search&sid=bookmark-TTDA&p=TTDA&s=Pub+Date+Forward+Chron&v=2.1&asid=c2011dd0",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://link.gale.com/apps/doc/CS168394274/TTDA?sid=bookmark-TTDA&xid=9943afcd",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "The Times Diary",
+				"creators": [
+					{
+						"lastName": "PHS",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "January 2, 1976",
+				"ISSN": "0140-0460",
+				"archive": "The Times Digital Archive",
+				"extra": "10",
+				"language": "English",
+				"libraryCatalog": "Gale",
+				"pages": "10",
+				"publicationTitle": "The Times",
+				"url": "https://link.gale.com/apps/doc/CS168394274/TTDA?sid=bookmark-TTDA&xid=9943afcd",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Political parties"
+					},
+					{
+						"tag": "Wilson, Harold (British prime minister)"
 					}
 				],
 				"notes": [],

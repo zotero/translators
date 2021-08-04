@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-10 04:35:01"
+	"lastUpdated": "2021-07-27 20:38:17"
 }
 
 /*
@@ -36,9 +36,8 @@
    	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
 
 function detectWeb(doc, _url) {
 	if (_url.includes('/status/')) {
@@ -62,7 +61,7 @@ function unshortenURLs(doc, str) {
 
 function unshortenURL(doc, tCoURL) {
 	var a = doc.querySelector('a[href*="' + tCoURL + '"]');
-	return (a ? a.title : false) || tCoURL;
+	return (a ? a.textContent.replace(/…$/, '') : false) || tCoURL;
 }
 
 function extractURLs(doc, str) {
@@ -96,10 +95,10 @@ function scrape(doc, url) {
 	if (!/[A-Z]/.test(canonicalURL)) {
 		canonicalURL = url.match(/^([^?#]+)/)[1];
 	}
-	var originalTitle = text(doc, 'title');
+	var originalTitle = doc.title;
 	var unshortenedTitle = ZU.unescapeHTML(unshortenURLs(doc, originalTitle));
 	// Extract tweet from "[optional count] [Display Name] on Twitter: “[tweet]”"
-	var matches = unshortenedTitle.match(/^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/);
+	var matches = unshortenedTitle.match(titleRe);
 	var [, author, tweet] = matches;
 	
 	// Title is tweet with newlines removed
@@ -271,7 +270,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/",
+				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://zotero.org/blog/announcing-zotero-3-0-beta-release/",
 				"creators": [
 					{
 						"lastName": "Zotero",
@@ -296,11 +295,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>“Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!&nbsp; http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/”</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
