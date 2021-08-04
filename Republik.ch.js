@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-06-13 15:02:28"
+	"lastUpdated": "2021-08-04 20:28:12"
 }
 
 /*
@@ -126,3 +126,263 @@ function scrape(doc, url) {
 	newItem.complete();
 
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/08/04/bruder-berg-und-schwester-schwein",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Bruder Berg und Schwester Schwein",
+				"creators": [
+					{
+						"firstName": "Markus",
+						"lastName": "Schärli",
+						"creatorType": "author"
+					}
+				],
+				"date": "04.08.2021",
+				"abstractNote": "Nicht nur Menschen haben Rechte. Auch Stiftungen und Aktiengesellschaften dürfen ein Gericht anrufen, ihre Interessen vertreten. Warum aber bleiben Natur und Tiere davon ausgeschlossen?",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/08/04/bruder-berg-und-schwester-schwein",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/08/04/der-maler-und-die-moerder",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Der Maler und die Mörder",
+				"creators": [
+					{
+						"firstName": "William",
+						"lastName": "Stern",
+						"creatorType": "author"
+					}
+				],
+				"date": "04.08.2021",
+				"abstractNote": "Fotografieren und Filmen ist an Gerichten verboten, deshalb gibt es Gerichts­zeichner. Einer der bekanntesten – und letzten – ist Robert Honegger. «Gerechtigkeit ist etwas so Schönes wie die Liebe – und ebenso kompliziert und aufwendig», findet er.",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/08/04/der-maler-und-die-moerder",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/07/23/spionage-skandal-erschuettert-die-welt-long-covid-verursacht-iv-faelle-und-zwoelf-impf-gegner-mit-grosser-wirkung",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Spionageskandal erschüttert die Welt, Long Covid verursacht IV-Fälle – und zwölf Impf­gegner mit grosser Wirkung",
+				"creators": [
+					{
+						"firstName": "Reto",
+						"lastName": "Aschwanden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ronja",
+						"lastName": "Beck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Theresa",
+						"lastName": "Hein",
+						"creatorType": "author"
+					}
+				],
+				"date": "23.07.2021",
+				"abstractNote": "Woche 29/2021 – das Nachrichten­briefing aus der Republik-Redaktion.",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/07/23/spionage-skandal-erschuettert-die-welt-long-covid-verursacht-iv-faelle-und-zwoelf-impf-gegner-mit-grosser-wirkung",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/07/30/hayeks-bastarde",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Hayeks Bastarde",
+				"creators": [
+					{
+						"firstName": "Quinn",
+						"lastName": "Slobodian",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sarah",
+						"lastName": "Fuhrmann",
+						"creatorType": "contributor"
+					},
+					{
+						"firstName": "Ben",
+						"lastName": "Jones",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "30.07.2021",
+				"abstractNote": "Die neoliberalen Wurzeln der Rechtspopulisten.",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/07/30/hayeks-bastarde",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/07/16/profitmaschine-pflegeheim",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Profitmaschine Pflegeheim",
+				"creators": [
+					{
+						"firstName": "Philipp",
+						"lastName": "Albrecht",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nico",
+						"lastName": "Schmidt",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Harald",
+						"lastName": "Schumann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "",
+						"lastName": "Flacoux",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "16.07.2021",
+				"abstractNote": "In Europa kaufen Konzerne und Finanzinvestoren Heime, setzen den Rotstift an und verstecken Gewinne vor dem Steueramt. Diese Entwicklung macht auch vor der Schweiz nicht halt. Mit drastischen Folgen für Angestellte und Bewohnerinnen.",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/07/16/profitmaschine-pflegeheim",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/07/28/der-turmbau-zu-arles",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Der Turmbau zu Arles",
+				"creators": [
+					{
+						"firstName": "Laura Helena",
+						"lastName": "Wurth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Karla Hiraldo",
+						"lastName": "Voleau",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "28.07.2021",
+				"abstractNote": "Kunstmäzenin Maja Hoffmann hat eine Ausstellungs­anlage eröffnet, die mehr sein will als ein Museum: ein Kreativ-Campus, ein Thinktank, ein Ort der Zukunfts­visionen. Und darin versteckt sich sogar Globalisierungskritik.",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"url": "https://www.republik.ch/2021/07/28/der-turmbau-zu-arles",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
