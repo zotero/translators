@@ -55,7 +55,7 @@ function doWeb(doc, url) {
 	scrape(doc, url);
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	let wikidataURL = attr(doc, 'h1 a[href^="https://www.wikidata.org/wiki/Q"]', 'href');
 	loadWikidataTranslator((wikidata) => {
 		loadWikidataPage(wikidataURL, (doc, url) => {
