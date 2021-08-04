@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-04 20:29:42"
+	"lastUpdated": "2021-08-04 20:31:29"
 }
 
 /*
-Tagesspiegel Translator
+Republik.ch Translator
 Copyright (C) 2021 Johannes Wüthrich
 
 This program is free software: you can redistribute it and/or modify
