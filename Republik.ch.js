@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-04 20:28:12"
+	"lastUpdated": "2021-08-04 20:29:42"
 }
 
 /*
@@ -53,8 +53,8 @@ function scrape(doc, url) {
 	var abstract = ZU.xpathText(doc, "//article//section[@class='title-block']/h1/following::p[1]");
 	var meta = ZU.xpathText(doc, "//article//section[@class='title-block']/h1/following::p[2]");
 	
-	Zotero.debug(abstract);
-	Zotero.debug(meta);
+	// Zotero.debug(abstract);
+	// Zotero.debug(meta);
 	
 	if(abstract.localeCompare(meta) == 0) {
 		// Catch case without any description / abstract
@@ -82,7 +82,7 @@ function scrape(doc, url) {
 		
 			authors = authors[1].split(/,\s|\sund\s/);
 			
-			Zotero.debug(authors);
+			// Zotero.debug(authors);
 		
 			for(var aa in authors){
 
