@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-04 20:31:29"
+	"lastUpdated": "2021-08-05 08:34:36"
 }
 
 /*
@@ -105,18 +105,18 @@ function scrape(doc, url) {
 
 	newItem.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content') || url;
 
-	newItem.attachments.push({
-		url: newItem.url,
-		title: "Snapshot",
-		mimeType: "text/html"
-	});
 
 	var pdfURL = ZU.xpathText(doc, "//article//a[@title='PDF-Optionen']/@href");
 	if(pdfURL) {
 		newItem.attachments.push({
 			url: pdfURL,
-			title: "PDF",
+			title: "Full Text PDF",
 			mimeType: "application/pdf"
+		});
+	} else {
+		newItem.attachments.push({
+			document: doc,
+			title: "Snapshot",
 		});
 	}
 
@@ -150,11 +150,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/08/04/bruder-berg-und-schwester-schwein",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -186,11 +182,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/08/04/der-maler-und-die-moerder",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -232,11 +224,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/07/23/spionage-skandal-erschuettert-die-welt-long-covid-verursacht-iv-faelle-und-zwoelf-impf-gegner-mit-grosser-wirkung",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -278,11 +266,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/07/30/hayeks-bastarde",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -329,11 +313,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/07/16/profitmaschine-pflegeheim",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
@@ -370,11 +350,7 @@ var testCases = [
 				"url": "https://www.republik.ch/2021/07/28/der-turmbau-zu-arles",
 				"attachments": [
 					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					},
-					{
-						"title": "PDF",
+						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
 				],
