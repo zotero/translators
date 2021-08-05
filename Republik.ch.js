@@ -50,13 +50,13 @@ function scrape(doc, url) {
 
 	newItem.title = ZU.xpathText(doc, "//article//section[@class='title-block']/h1");
 	
-	var abstract = ZU.xpathText(doc, "//article//section[@class='title-block']/h1/following::p[1]");
-	var meta = ZU.xpathText(doc, "//article//section[@class='title-block']/h1/following::p[2]");
+	var abstract = text(doc, "article section.title-block > p:nth-last-of-type(2)")
+	var meta = text(doc, "article section.title-block > p:nth-last-of-type(1)")
 	
 	// Zotero.debug(abstract);
 	// Zotero.debug(meta);
 	
-	if(abstract.localeCompare(meta) == 0) {
+	if(meta == "" || abstract.localeCompare(meta) == 0) {
 		// Catch case without any description / abstract
 		meta = abstract
 		abstract = "";
@@ -352,6 +352,32 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.republik.ch/2021/08/05/7-uhr-newsletter",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Interview mit der Regisseurin des ersten Spielfilms über Srebrenica. Dazu: eine Recherche zum E-Voting",
+				"creators": [],
+				"date": "2021-08-05",
+				"language": "de-CH",
+				"libraryCatalog": "Republik.ch",
+				"publicationTitle": "Republik",
+				"shortTitle": "Interview mit der Regisseurin des ersten Spielfilms über Srebrenica. Dazu",
+				"url": "https://www.republik.ch/2021/08/05/7-uhr-newsletter",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
