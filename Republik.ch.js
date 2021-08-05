@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-05 08:34:36"
+	"lastUpdated": "2021-08-05 08:40:03"
 }
 
 /*
@@ -88,17 +88,17 @@ function scrape(doc, url) {
 
 				var author = authors[aa].trim();
 				
-				var fction = "author";
+				var type = "author";
 				
 				var clean = author.match(reg_function);
 				if(clean) {
 					author = clean[1];
 					if(clean[2] == "Bilder" || clean[2] == "Illustration" || clean[2] == "Übersetzung") {
-						fction = "contributor";
+						type = "contributor";
 					}
 				}
 				
-				newItem.creators.push(ZU.cleanAuthor(author, fction));
+				newItem.creators.push(ZU.cleanAuthor(author, type));
 			}
 		}
 	}
