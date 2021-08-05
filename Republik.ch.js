@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-05 08:40:03"
+	"lastUpdated": "2021-08-05 08:56:38"
 }
 
 /*
@@ -70,10 +70,10 @@ function scrape(doc, url) {
 	var date = meta.match(reg_date)
 	
 	if(!date) {
-		newItem.date = meta;
+		newItem.date = ZU.strToISO(meta);
 	} else {
 		
-		newItem.date = date[2];
+		newItem.date = ZU.strToISO(date[2]);
 		
 		var rest = date[1];
 		
@@ -142,7 +142,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "04.08.2021",
+				"date": "2021-08-04",
 				"abstractNote": "Nicht nur Menschen haben Rechte. Auch Stiftungen und Aktiengesellschaften dürfen ein Gericht anrufen, ihre Interessen vertreten. Warum aber bleiben Natur und Tiere davon ausgeschlossen?",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
@@ -174,7 +174,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "04.08.2021",
+				"date": "2021-08-04",
 				"abstractNote": "Fotografieren und Filmen ist an Gerichten verboten, deshalb gibt es Gerichts­zeichner. Einer der bekanntesten – und letzten – ist Robert Honegger. «Gerechtigkeit ist etwas so Schönes wie die Liebe – und ebenso kompliziert und aufwendig», findet er.",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
@@ -216,7 +216,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "23.07.2021",
+				"date": "2021-07-23",
 				"abstractNote": "Woche 29/2021 – das Nachrichten­briefing aus der Republik-Redaktion.",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
@@ -258,7 +258,7 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"date": "30.07.2021",
+				"date": "2021-07-30",
 				"abstractNote": "Die neoliberalen Wurzeln der Rechtspopulisten.",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
@@ -305,7 +305,7 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"date": "16.07.2021",
+				"date": "2021-07-16",
 				"abstractNote": "In Europa kaufen Konzerne und Finanzinvestoren Heime, setzen den Rotstift an und verstecken Gewinne vor dem Steueramt. Diese Entwicklung macht auch vor der Schweiz nicht halt. Mit drastischen Folgen für Angestellte und Bewohnerinnen.",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
@@ -342,7 +342,7 @@ var testCases = [
 						"creatorType": "contributor"
 					}
 				],
-				"date": "28.07.2021",
+				"date": "2021-07-28",
 				"abstractNote": "Kunstmäzenin Maja Hoffmann hat eine Ausstellungs­anlage eröffnet, die mehr sein will als ein Museum: ein Kreativ-Campus, ein Thinktank, ein Ort der Zukunfts­visionen. Und darin versteckt sich sogar Globalisierungskritik.",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
