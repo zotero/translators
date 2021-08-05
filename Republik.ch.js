@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "g",
-	"lastUpdated": "2021-08-05 08:56:38"
+	"lastUpdated": "2021-08-05 09:57:59"
 }
 
 /*
@@ -48,7 +48,7 @@ function scrape(doc, url) {
 
 	var newItem = new Zotero.Item("newspaperArticle");
 
-	newItem.title = ZU.xpathText(doc, "//article//section[@class='title-block']/h1");
+	newItem.title = text(doc, "article section.title-block h1");
 	
 	var abstract = text(doc, "article section.title-block > p:nth-last-of-type(2)")
 	var meta = text(doc, "article section.title-block > p:nth-last-of-type(1)")
@@ -103,10 +103,10 @@ function scrape(doc, url) {
 		}
 	}
 
-	newItem.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content') || url;
+	newItem.url = attr(doc, 'meta[property="og:url"]', 'content') || url;
 
 
-	var pdfURL = ZU.xpathText(doc, "//article//a[@title='PDF-Optionen']/@href");
+	var pdfURL = attr(doc, 'article a[title="PDF-Optionen"]', 'href');
 	if(pdfURL) {
 		newItem.attachments.push({
 			url: pdfURL,
