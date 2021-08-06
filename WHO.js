@@ -2,14 +2,14 @@
 	"translatorID": "cd587058-6125-4b33-a876-8c6aae48b5e8",
 	"label": "WHO",
 	"creator": "Mario Trojan, Philipp Zumstein",
-	"target": "^http://apps\\.who\\.int/iris/",
+	"target": "^https?://apps\\.who\\.int/iris/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-09-02 14:34:27"
+	"lastUpdated": "2021-08-06 10:03:19"
 }
 
 /*
