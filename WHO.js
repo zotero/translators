@@ -39,7 +39,7 @@
 function detectWeb(doc, url) {
 	if (url.includes("/handle/") && text(doc, 'div.item-summary-view-metadata')) {
 		var type = attr(doc, 'meta[name="DC.type"]', 'content');
-		//Z.debug(type);
+		// Z.debug(type);
 		if (type && type.includes("articles")) {
 			return "journalArticle";
 		}
@@ -47,9 +47,11 @@ function detectWeb(doc, url) {
 			return "book";
 		}
 		return "report";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -58,9 +60,9 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 
 	var rows = doc.querySelectorAll('h4.artifact-title>a');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		var title = rows[i].textContent;
+	for (let row of rows) {
+		let href = row.href;
+		var title = row.textContent;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -75,7 +77,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -83,7 +85,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -113,9 +116,9 @@ function scrape(doc, url) {
 		var firstAuthor = attr(doc, 'meta[name="DC.creator"]', 'content');
 		if (firstAuthor && !firstAuthor.includes(',')) {
 			item.creators[0] = {
-				"lastName": firstAuthor,
-				"creatorType": "author",
-				"fieldMode": true
+				lastName: firstAuthor,
+				creatorType: "author",
+				fieldMode: 1
 			};
 		}
 		
@@ -127,7 +130,6 @@ function scrape(doc, url) {
 			if (numPages) {
 				if (ZU.fieldIsValidForType("numPages", item.itemType)) {
 					item.numPages = numPages[1];
-
 				}
 				else if (!item.extra) {
 					item.extra = "number-of-pages: " + numPages[1];
@@ -143,7 +145,7 @@ function scrape(doc, url) {
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = type;
 		trans.doWeb(doc, url);
 	});
