@@ -1,21 +1,21 @@
 {
 	"translatorID": "cd587058-6125-4b33-a876-8c6aae48b5e8",
 	"label": "WHO",
-	"creator": "Mario Trojan, Philipp Zumstein",
+	"creator": "Mario Trojan, Philipp Zumstein, and Abe Jellinek",
 	"target": "^https?://apps\\.who\\.int/iris/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 96,
 	"inRepository": true,
-	"translatorType": 4,
+	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-06 10:03:19"
+	"lastUpdated": "2021-08-09 17:50:46"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 Mario Trojan
+	Copyright © 2018-2021 Mario Trojan and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -34,11 +34,6 @@
 
 	***** END LICENSE BLOCK *****
 */
-
-
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
-function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -154,6 +149,36 @@ function scrape(doc, url) {
 	});
 }
 
+function detectSearch(item) {
+	return item.ISBN && ZU.cleanISBN(item.ISBN).startsWith('978924');
+}
+
+function doSearch(item) {
+	let ISBN = ZU.cleanISBN(item.ISBN);
+	let url = `https://apps.who.int/iris/discover/export?format=refman&list=discover&rpp=10&etal=0&query=${ISBN}&group_by=none&page=1`;
+	ZU.doGet(url, function (risText) {
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
+		translator.setString(risText);
+		translator.setHandler("itemDone", function (obj, item) {
+			item.libraryCatalog = 'WHO IRIS';
+			item.archive = '';
+			
+			if (item.url) {
+				ZU.processDocuments(item.url, function (recordDoc) {
+					item.attachments.push({
+						title: 'Full Text PDF',
+						mimeType: 'application/pdf',
+						url: attr(recordDoc, 'meta[name="citation_pdf_url"]', 'content')
+					});
+				});
+			}
+			
+			item.complete();
+		});
+		translator.translate();
+	});
+}
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -176,16 +201,16 @@ var testCases = [
 				"institution": "World Health Organization",
 				"language": "en",
 				"libraryCatalog": "apps.who.int",
-				"place": "Geneva",
 				"reportNumber": "WHO/CDS/CSR/GAR/2003.11",
-				"url": "http://apps.who.int/iris/handle/10665/70863",
+				"url": "https://apps.who.int/iris/handle/10665/70863",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -193,13 +218,10 @@ var testCases = [
 						"tag": "Communicable Diseases and their Control"
 					},
 					{
-						"tag": "Disease outbreaks"
+						"tag": "Disease Outbreaks"
 					},
 					{
-						"tag": "Epidemiologic surveillance"
-					},
-					{
-						"tag": "Severe acute respiratory syndrome"
+						"tag": "Severe Acute Respiratory Syndrome"
 					}
 				],
 				"notes": [],
@@ -268,7 +290,7 @@ var testCases = [
 				"publicationTitle": "Bulletin of the World Health Organization",
 				"rights": "http://creativecommons.org/licenses/by/3.0/igo/legalcode",
 				"shortTitle": "Providing oxygen to children in hospitals",
-				"url": "http://apps.who.int/iris/handle/10665/272081",
+				"url": "https://apps.who.int/iris/handle/10665/272081",
 				"volume": "95",
 				"attachments": [
 					{
@@ -276,7 +298,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -316,14 +339,15 @@ var testCases = [
 				"publisher": "Всемирная организация здравоохранения",
 				"rights": "CC BY-NC-SA 3.0 IGO",
 				"shortTitle": "Сборник руководящих принципов и стандартов ВОЗ",
-				"url": "http://apps.who.int/iris/handle/10665/273678",
+				"url": "https://apps.who.int/iris/handle/10665/273678",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -359,13 +383,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://apps.who.int/iris/handle/10665/165097",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "http://apps.who.int/iris/discover?query=acupuncture",
 		"items": "multiple"
 	}
-];
+]
 /** END TEST CASES **/
