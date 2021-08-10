@@ -2,14 +2,14 @@
 	"translatorID": "8c1f42d5-02fa-437b-b2b2-73afc768eb07",
 	"label": "HighWire 2.0",
 	"creator": "Matt Burton, Sebastian Karcher",
-	"target": "^[^?#]+(/content/([0-9]+[A-Z\\-]*/|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.|/search/.)",
+	"target": "^[^?#]+(/content/([0-9.]+[A-Z\\-]*/|current|firstcite|early)|/search\\?.*?\\bsubmit=|/search(/results)?\\?fulltext=|/cgi/collection/.|/search/.)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2021-07-09 17:29:53"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-08-05 15:33:20"
 }
 
 /*
@@ -287,6 +287,15 @@ function addEmbMeta(doc, url) {
 	translator.setDocument(doc);
 
 	translator.setHandler("itemDone", function (obj, item) {
+		if (item.publicationTitle.endsWith('Rxiv')) {
+			item.itemType = 'report';
+			item.extra = (item.extra || '') + '\nType: article';
+			item.libraryCatalog = item.publicationTitle;
+			delete item.publicationTitle;
+			delete item.publisher; // "Cold Spring Harbor Laboratory Press"
+			delete item.institution;
+		}
+		
 		// remove all caps in Names and Titles
 		for (let i = 0; i < item.creators.length; i++) {
 			// Z.debug(item.creators[i])
@@ -394,7 +403,12 @@ function detectWeb(doc, url) {
 		if (/content\/(early\/)?[0-9]+/.test(url)
 			&& !url.includes('/suppl/')
 		) {
-			return "journalArticle";
+			if (url.includes('medrxiv.org') || url.includes('biorxiv.org')) {
+				return "report";
+			}
+			else {
+				return "journalArticle";
+			}
 		}
 		else if (getSearchResults(doc, url, true)) {
 			return "multiple";
@@ -1216,6 +1230,117 @@ var testCases = [
 						"tag": "synaptic consolidation"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.biorxiv.org/content/10.1101/2021.08.03.454978v1",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Endothelial Semaphorin 3fb regulates Vegf pathway-mediated angiogenic sprouting",
+				"creators": [
+					{
+						"firstName": "Charlene",
+						"lastName": "Watterston",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rami",
+						"lastName": "Halabi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sarah",
+						"lastName": "McFarlane",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sarah J.",
+						"lastName": "Childs",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-05",
+				"abstractNote": "Vessel growth integrates diverse extrinsic signals with intrinsic signaling cascades to coordinate cell migration and sprouting morphogenesis. The pro-angiogenic effects of Vascular Endothelial Growth Factor (VEGF) are carefully controlled during sprouting to generate an efficiently patterned vascular network. We identify crosstalk between VEGF signaling and that of the secreted ligand Semaphorin 3fb (Sema3fb), one of two zebrafish paralogs of mammalian Sema3F. The sema3fb gene is expressed by endothelial cells in actively sprouting vessels. Loss of sema3fb results in abnormally wide and stunted intersegmental vessel artery sprouts. Although the sprouts initiate at the correct developmental time, they have a reduced migration speed. These sprouts have persistent filopodia and abnormally spaced nuclei suggesting dysregulated control of actin assembly. sema3fb mutants show simultaneously higher expression of pro-angiogenic (VEGF receptor 2 (vegfr2) and delta-like 4 (dll4)) and anti-angiogenic (soluble VEGF receptor 1 (svegfr1)/ soluble Fms Related Receptor Tyrosine Kinase 1 (sflt1)) pathway components. We show increased phospho-ERK staining in migrating angioblasts, consistent with enhanced Vegf activity. Reducing Vegfr2 kinase activity in sema3fb mutants rescues angiogenic sprouting. Our data suggest that Sema3fb plays a critical role in promoting endothelial sprouting through modulating the VEGF signaling pathway, acting as an autocrine cue that modulates intrinsic growth factor signaling.",
+				"extra": "Type: article",
+				"language": "en",
+				"libraryCatalog": "bioRxiv",
+				"pages": "2021.08.03.454978",
+				"rights": "© 2021, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-NonCommercial-NoDerivs 4.0 International), CC BY-NC-ND 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/",
+				"url": "https://www.biorxiv.org/content/10.1101/2021.08.03.454978v1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.medrxiv.org/content/10.1101/2021.06.16.21258632v1",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "A System Dynamics Model for Effects of Workplace Violence and Clinician Burnout on Agitation Management in the Emergency Department",
+				"creators": [
+					{
+						"firstName": "Ambrose H.",
+						"lastName": "Wong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nasim S.",
+						"lastName": "Sabounchi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannah R.",
+						"lastName": "Roncallo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jessica M.",
+						"lastName": "Ray",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rebekah",
+						"lastName": "Heckmann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-22",
+				"abstractNote": "Background Over 1.7 million episodes of agitation occur annually across the United States in emergency departments (EDs), some of which lead to workplace assaults on clinicians and require invasive methods like physical restraints to maintain staff and patient safety. Recent studies demonstrated that experiences of workplace violence lead to symptoms of burnout, which may impact future decisions regarding use of physical restraints on agitated patients. To capture the dynamic interactions between clinicians and agitated patients under their care, we applied qualitative system dynamics methods to develop a model that describes causal feedback mechanisms of clinician burnout and the use of physical restraints to manage agitation.\nMethods We convened an interprofessional panel of clinician stakeholders and agitation experts for a series of model building sessions to develop the current model. The panel derived the final version of our model over ten sessions of iterative refinement and modification, each lasting approximately three to four hours. We incorporated findings from prior studies on agitation and burnout as a result of workplace violence, identifying interpersonal and psychological factors likely to influence our outcomes of interest to form the basis of our model.\nResults The final model resulted in five main sets of feedback loops that describe key narratives regarding the relationship between clinician burnout and agitated patients becoming physically restrained: (1) use of restraints decreases agitation and risk of assault, leading to increased perceptions of safety and decreasing use of restraints in a balancing feedback loop which stabilizes the system; (2) clinician stress leads to a perception of decreased safety and lower threshold to restrain, causing more stress in a negatively reinforcing loop; (3) clinician burnout leads to a decreased perception of colleague support which leads to more burnout in a negatively reinforcing loop; (4) clinician burnout leads to negative perceptions of patient intent during agitation, thus lowering threshold to restrain and leading to higher task load, more likelihood of workplace assaults, and higher burnout in a negatively reinforcing loop; and (5) mutual trust between clinicians causes increased perceptions of safety and improved team control, leading to decreased clinician stress and further increased mutual trust in a positively reinforcing loop.\nConclusions Our system dynamics approach led to the development of a robust qualitative model that illustrates a number of important feedback cycles that underly the relationships between clinician experiences of workplace violence, stress and burnout, and impact on decisions to physically restrain agitated patients. This work identifies potential opportunities at multiple targets to break negatively reinforcing cycles and support positive influences on safety for both clinicians and patients in the face of physical danger.",
+				"extra": "Type: article",
+				"language": "en",
+				"libraryCatalog": "medRxiv",
+				"pages": "2021.06.16.21258632",
+				"rights": "© 2021, Posted by Cold Spring Harbor Laboratory. The copyright holder for this pre-print is the author. All rights reserved. The material may not be redistributed, re-used or adapted without the author's permission.",
+				"url": "https://www.medrxiv.org/content/10.1101/2021.06.16.21258632v1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
