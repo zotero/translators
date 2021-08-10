@@ -188,7 +188,7 @@ let citations = {
 			title: 'Climate change information for regional impact and for risk assessment',
 			creators: report6Ch12Authors
 		}),
-		'Atlas': chapter('Atlas', {
+		Atlas: chapter('Atlas', {
 			title: 'Atlas',
 			creators: report6AtlasAuthors,
 			url: 'https://interactive-atlas.ipcc.ch/'
@@ -255,15 +255,25 @@ let citations = {
 	})
 };
 
-function detectWeb(doc, url) {
-	if (citations[doc.location.pathname]) {
+function detectWeb(doc, _url) {
+	let pathname = doc.location.pathname;
+	if (pathname == '/report/sixth-assessment-report-working-group-i/') {
+		pathname = '/report/ar6/wg1/';
+	}
+
+	if (citations[pathname]) {
 		return "multiple";
 	}
 	return false;
 }
 
-function doWeb(doc, url) {
-	let chapters = citations[doc.location.pathname];
+function doWeb(doc, _url) {
+	let pathname = doc.location.pathname;
+	if (pathname == '/report/sixth-assessment-report-working-group-i/') {
+		pathname = '/report/ar6/wg1/';
+	}
+
+	let chapters = citations[pathname];
 	Zotero.selectItems(chapters, function (items) {
 		if (items) {
 			for (let key of Object.keys(items)) {
