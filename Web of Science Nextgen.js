@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-17 22:35:32"
+	"lastUpdated": "2021-07-26 18:28:41"
 }
 
 /*
@@ -38,11 +38,17 @@
 
 function detectWeb(doc, url) {
 	if (url.includes('/full-record/') && getItemID(url)) {
-		return "journalArticle";
+		if (text(doc, '#FullRTa-doctype-0').trim().toLowerCase() == 'proceedings paper') {
+			return "conferencePaper";
+		}
+		else {
+			return "journalArticle";
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	Z.monitorDOMChanges(doc.querySelector('app-wos'));
 	return false;
 }
 
@@ -196,10 +202,10 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "Clin. Liver Dis.",
 				"language": "English",
-				"libraryCatalog": "New Web of Science",
+				"libraryCatalog": "Web of Science Nextgen",
 				"pages": "11-+",
 				"publicationTitle": "Clinics in Liver Disease",
-				"url": "https://linkinghub.elsevier.com/retrieve/pii/S1089326118300771",
+				"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000454372400003",
 				"volume": "23",
 				"attachments": [],
 				"tags": [
@@ -281,7 +287,7 @@ var testCases = [
 				"issue": "2",
 				"journalAbbreviation": "Rev. Mod. Phys.",
 				"language": "English",
-				"libraryCatalog": "New Web of Science",
+				"libraryCatalog": "Web of Science Nextgen",
 				"pages": "205-212",
 				"publicationTitle": "Reviews of Modern Physics",
 				"url": "https://journals.aps.org/rmp/abstract/10.1103/RevModPhys.29.205",
@@ -296,7 +302,54 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.webofscience.com/wos/author/record/483204",
+		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.webofscience.com/wos/woscc/full-record/WOS:000230445900101",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "A conference control protocol for small scale video conferencing system",
+				"creators": [
+					{
+						"firstName": "L.",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2005",
+				"DOI": "10.1109/ICACT.2005.245926",
+				"abstractNote": "Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.",
+				"extra": "WOS:000230445900101",
+				"language": "English",
+				"libraryCatalog": "Web of Science Nextgen",
+				"pages": "532-537",
+				"place": "New York",
+				"proceedingsTitle": "7th International Conference on Advanced Communication Technology, Vols 1 and 2, Proceedings",
+				"publisher": "Ieee",
+				"url": "https://ieeexplore.ieee.org/document/1461931/",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "conference control   protocol"
+					},
+					{
+						"tag": "full mesh"
+					},
+					{
+						"tag": "loosely coupled"
+					},
+					{
+						"tag": "video conferencing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

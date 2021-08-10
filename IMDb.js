@@ -1,7 +1,7 @@
 {
 	"translatorID": "a30274ac-d3d1-4977-80f4-5320613226ec",
 	"label": "IMDb",
-	"creator": "Philipp Zumstien",
+	"creator": "Philipp Zumstien and Abe Jellinek",
 	"target": "^https?://www\\.imdb\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-02 17:44:45"
+	"lastUpdated": "2021-07-22 20:36:51"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2021 Philipp Zumstein
+	Copyright © 2021 Philipp Zumstein and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -36,8 +36,14 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/title/tt')) {
-		return "film";
+	if (url.includes('/title/tt') && doc.querySelector('script[type="application/ld+json"]')) {
+		let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+		if (json['@type'] == 'TVEpisode') {
+			return 'tvBroadcast';
+		}
+		else {
+			return "film";
+		}
 	}
 	else if (url.includes('/find?') && getSearchResults(doc, true)) {
 		return "multiple";
@@ -79,11 +85,20 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, _url) {
-	var item = new Zotero.Item("film");
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
-	item.title = json.name;// note that json only has the original title
+	var item = new Zotero.Item(
+		json['@type'] == 'TVEpisode'
+			? 'tvBroadcast'
+			: 'film');
+	
+	item.title = json.name; // note that json only has the original title
 	var transTitle = ZU.trimInternal(ZU.xpathText(doc, "//h1/text()"));
 	if (transTitle && transTitle !== item.title) addExtra(item, "Translated title: " + transTitle);
+	
+	item.programTitle = doc.title.match(/(?:"([^"]+)")?/)[1];
+	let episodeNumberParts = doc.querySelectorAll('[class*="EpisodeNavigationForTVEpisode__SeasonEpisodeNumbersItem"]');
+	item.episodeNumber = [...episodeNumberParts].map(el => el.textContent.trim()).join(' ');
+	
 	item.date = json.datePublished;
 	item.runningTime = "duration" in json ? json.duration.replace("PT", "").toLowerCase() : "";
 	item.genre = Array.isArray(json.genre) ? json.genre.join(", ") : json.genre;
@@ -91,7 +106,7 @@ function scrape(doc, _url) {
 	var creatorsMapping = {
 		director: "director",
 		creator: "scriptwriter",
-		actor: "contributor"
+		actor: "castMember"
 	};
 	for (var role in creatorsMapping) {
 		if (!json[role]) continue;
@@ -160,17 +175,17 @@ var testCases = [
 					{
 						"firstName": "Norma",
 						"lastName": "Aleandro",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Héctor",
 						"lastName": "Alterio",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Chunchuna",
 						"lastName": "Villafañe",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					}
 				],
 				"date": "1985-11-08",
@@ -234,17 +249,17 @@ var testCases = [
 					{
 						"firstName": "Eero",
 						"lastName": "Melasniemi",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Kristiina",
 						"lastName": "Halkola",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					},
 					{
 						"firstName": "Pekka",
 						"lastName": "Autiovuori",
-						"creatorType": "contributor"
+						"creatorType": "castMember"
 					}
 				],
 				"date": "1966-10-21",
@@ -272,6 +287,38 @@ var testCases = [
 						"tag": "topless"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.imdb.com/title/tt6142646/",
+		"items": [
+			{
+				"itemType": "tvBroadcast",
+				"title": "Islands",
+				"creators": [
+					{
+						"firstName": "Elizabeth",
+						"lastName": "White",
+						"creatorType": "director"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Attenborough",
+						"creatorType": "castMember"
+					}
+				],
+				"date": "2017-02-18",
+				"abstractNote": "Wildlife documentary series with David Attenborough, beginning with a look at the remote islands which offer sanctuary to some of the planet&apos;s rarest creatures.",
+				"episodeNumber": "S1 E1",
+				"extra": "IMDb ID: tt6142646\nevent-location: United Kingdom",
+				"libraryCatalog": "IMDb",
+				"programTitle": "Planet Earth II",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

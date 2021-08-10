@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 19:14:55"
+	"lastUpdated": "2021-08-10 19:53:00"
 }
 
 /*
@@ -712,7 +712,7 @@ function getAuthorFromByline(doc, newItem) {
 		byline = doc.getElementsByClassName(bylineClasses[i]);
 		Z.debug("Found " + byline.length + " elements with '" + bylineClasses[i] + "' class");
 		for (var j = 0; j < byline.length; j++) {
-			if (!byline[j].textContent.trim()) continue;
+			if (!byline[j].innerText.trim()) continue;
 
 			bylines.push(byline[j]);
 		}
@@ -729,7 +729,7 @@ function getAuthorFromByline(doc, newItem) {
 	else if (newItem.title) {
 		Z.debug(bylines.length + " bylines found:");
 		Z.debug(bylines.map(function (n) {
-			return ZU.trimInternal(n.textContent);
+			return ZU.trimInternal(n.innerText);
 		}).join('\n'));
 		Z.debug("Locating the one closest to title.");
 
@@ -812,7 +812,7 @@ function getAuthorFromByline(doc, newItem) {
 			}
 		}
 		
-		byline = ZU.trimInternal(actualByline.textContent);
+		byline = ZU.trimInternal(actualByline.innerText);
 		Z.debug("Extracting author(s) from byline: " + byline);
 		var li = actualByline.getElementsByTagName('li');
 		if (li.length) {

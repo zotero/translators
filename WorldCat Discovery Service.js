@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-28 18:41:34"
+	"lastUpdated": "2021-07-23 05:54:09"
 }
 
 /*
@@ -55,7 +55,7 @@ function detectWeb(doc, url) {
 			
 			return displayItemType;
 		}
-		else if (url.includes('/search')) {
+		else {
 			Z.monitorDOMChanges(doc.querySelector('div#root'));
 		}
 	}

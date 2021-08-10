@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-01 19:05:10"
+	"lastUpdated": "2021-08-02 17:13:50"
 }
 
 /*
@@ -151,6 +151,28 @@ var eprintIds = {
 	'hdl': 'HDL',
 	'googlebooks': 'GoogleBooksID'
 };
+
+function dateFieldsToDate(year, month, day) {
+	// per the latest ISO 8601 standard, you can't have a month/day without a
+	// year (and it would be silly anyway)
+	if (year) {
+		let date = year;
+		if (month) {
+			if (month.includes(date)) {
+				date = month;
+			}
+			else {
+				date += `-${month}`;
+			}
+			
+			if (day) {
+				date += `-${day}`;
+			}
+		}
+		return ZU.strToISO(date);
+	}
+	return false;
+}
 
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
@@ -383,33 +405,20 @@ function processField(item, field, value, rawValue) {
 		} else {
 			item.issue = value;
 		}
+	} else if (field == "day") {
+		// this and the following two blocks assign to temporary fields that
+		// are cleared before the item is completed. "day" isn't an official
+		// field, but some sites use it.
+		item.day = value;
 	} else if (field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
 		if (monthIndex != -1) {
 			value = Zotero.Utilities.formatDate({month:monthIndex});
-		} else {
-			value += " ";
 		}
 		
-		if (item.date) {
-			if (value.includes(item.date)) {
-				// value contains year and more
-				item.date = ZU.strToISO(value);
-			} else {
-				item.date = ZU.strToISO(value+item.date);
-			}
-		} else {
-			item.date = value;
-		}
+		item.month = value;
 	} else if (field == "year") {
-		if (item.date) {
-			if (!item.date.includes(value)) {
-				// date does not already contain year
-				item.date =ZU.strToISO(item.date+value);
-			}
-		} else {
-			item.date = value;
-		}
+		item.year = value;
 	} else if (field == "date") {
 	//We're going to assume that "date" and the date parts don't occur together. If they do, we pick date, which should hold all.
 		item.date = value;
@@ -966,6 +975,13 @@ function beginRecord(type, closeChar) {
 					}
 					delete item.backupLocation;
 				}
+				
+				if (!item.date) {
+					item.date = dateFieldsToDate(item.year, item.month, item.day);
+				}
+				delete item.year;
+				delete item.month;
+				delete item.day;
 				
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
@@ -2638,6 +2654,7 @@ var reversemappingTable = {
 	"{\\textunderscore}"              : "\u2017", // DOUBLE LOW LINE
 	"{\\textquoteleft}"               : "\u2018", // LEFT SINGLE QUOTATION MARK
 	"{\\textquoteright}"              : "\u2019", // RIGHT SINGLE QUOTATION MARK
+	"{\\textquotesingle}"              : "'", // APOSTROPHE / NEUTRAL SINGLE QUOTATION MARK
 	"{\\quotesinglbase}"              : "\u201A", // SINGLE LOW-9 QUOTATION MARK
 	"{\\textquotedblleft}"            : "\u201C", // LEFT DOUBLE QUOTATION MARK
 	"{\\textquotedblright}"           : "\u201D", // RIGHT DOUBLE QUOTATION MARK
@@ -4037,6 +4054,105 @@ var testCases = [
 						"note": "<p>Accepted for publication</p>"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@techreport{ietf-bmwg-evpntest-09,\n\tnumber =\t{draft-ietf-bmwg-evpntest-09},\n\ttype =\t\t{Internet-Draft},\n\tinstitution =\t{Internet Engineering Task Force},\n\tpublisher =\t{Internet Engineering Task Force},\n\tnote =\t\t{Work in Progress},\n\turl =\t\t{https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09},\n        author =\t{sudhin jacob and Kishore Tiruveedhula},\n\ttitle =\t\t{{Benchmarking Methodology for EVPN and PBB-EVPN}},\n\tpagetotal =\t28,\n\tyear =\t\t2021,\n\tmonth =\t\tjun,\n\tday =\t\t18,\n\tabstract =\t{This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.},\n}\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Benchmarking Methodology for EVPN and PBB-EVPN",
+				"creators": [
+					{
+						"firstName": "sudhin",
+						"lastName": "jacob",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kishore",
+						"lastName": "Tiruveedhula",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-18",
+				"abstractNote": "This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.",
+				"institution": "Internet Engineering Task Force",
+				"itemID": "ietf-bmwg-evpntest-09",
+				"reportNumber": "draft-ietf-bmwg-evpntest-09",
+				"reportType": "Internet-Draft",
+				"url": "https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Work in Progress</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@inproceedings{NIPS2009_0188e8b8,\n author = {Cuturi, Marco and Vert, Jean-philippe and D\\textquotesingle aspremont, Alexandre},\n booktitle = {Advances in Neural Information Processing Systems},\n editor = {Y. Bengio and D. Schuurmans and J. Lafferty and C. Williams and A. Culotta},\n pages = {},\n publisher = {Curran Associates, Inc.},\n title = {White Functionals for Anomaly Detection in Dynamical Systems},\n url = {https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf},\n volume = {22},\n year = {2009}\n}",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "White Functionals for Anomaly Detection in Dynamical Systems",
+				"creators": [
+					{
+						"firstName": "Marco",
+						"lastName": "Cuturi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jean-philippe",
+						"lastName": "Vert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandre",
+						"lastName": "D' aspremont",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Bengio",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Schuurmans",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Lafferty",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Williams",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Culotta",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2009",
+				"itemID": "NIPS2009_0188e8b8",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf",
+				"volume": "22",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
