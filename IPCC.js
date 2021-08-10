@@ -35,49 +35,49 @@
 	***** END LICENSE BLOCK *****
 */
 
-let report6Editors = 'V. Masson-Delmotte, P. Zhai, A. Pirani, S. L. Connors, C. Péan, S. Berger, N. Caud, Y. Chen, L. Goldfarb, M. I. Gomis, M. Huang, K. Leitzell, E. Lonnoy, J. B. R. Matthews, T. K. Maycock, T. Waterfield, O. Yelekçi, R. Yu, B. Zhou'
+let report6Editors = 'V. Masson-Delmotte, Panmao Zhai, Anna Pirani, Sarah L. Connors, C. Péan, Sophie Berger, N. Caud, Y. Chen, Leah Goldfarb, Melissa I. Gomis, M. Huang, K. Leitzell, E. Lonnoy, J. B. R. Matthews, Thomas K. Maycock, T. Waterfield, O. Yelekçi, R. Yu, B. Zhou'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'editor'));
 
-let report6TechSummaryAuthors = 'P. A. Arias, N. Bellouin, E. Coppola, R. G. Jones, G. Krinner, J. Marotzke, V. Naik, M. D. Palmer, G-K. Plattner, J. Rogelj, M. Rojas, J. Sillmann, T. Storelvmo, P. W. Thorne, B. Trewin, K. Achuta Rao, B. Adhikary, R. P. Allan, K. Armour, G. Bala, R. Barimalala, S. Berger, J. G. Canadell, C. Cassou, A. Cherchi, W. Collins, W. D. Collins, S. L. Connors, S. Corti, F. Cruz, F. J. Dentener, C. Dereczynski, A. Di Luca, A. Diongue Niang, F. J. Doblas-Reyes, A. Dosio, H. Douville, F. Engelbrecht, V. Eyring, E. Fischer, P. Forster, B. Fox-Kemper, J. S. Fuglestvedt, J. C. Fyfe, N. P. Gillett, L. Goldfarb, I. Gorodetskaya, J. M. Gutierrez, R. Hamdi, E. Hawkins, H. T. Hewitt, P. Hope, A. S. Islam, C. Jones, D. S. Kaufman, R. E. Kopp, Y. Kosaka, J. Kossin, S. Krakovska, J-Y. Lee, J. Li, T. Mauritsen, T. K. Maycock, M. Meinshausen, S-K. Min, P. M. S. Monteiro, T. Ngo-Duc, F. Otto, I. Pinto, A. Pirani, K. Raghavan, R. Ranasinghe, A. C. Ruane, L. Ruiz, J-B. Sallée, B. H. Samset, S. Sathyendranath, S. I. Seneviratne, A. A. Sörensson, S. Szopa, I. Takayabu, A-M. Treguier, B. van den Hurk, R. Vautard, K. von Schuckmann, S. Zaehle, X. Zhang, K. Zickfeld'
+let report6TechSummaryAuthors = 'Paola A. Arias, Nicolas Bellouin, Erika Coppola, Richard G. Jones, Gerhard Krinner, Jochem Marotzke, Vaishali Naik, Matthew D. Palmer, Gian-Kasper Plattner, Joeri Rogelj, Maisa Rojas, Jana Sillmann, Trude Storelvmo, Peter W. Thorne, Blair Trewin, Krishna M. Achuta Rao, Bhupesh Adhikary, Richard P. Allan, Kyle Armour, Govindasamy Bala, Rondrotiana Barimalala, Sophie Berger, Josep G. Canadell, Christophe Cassou, Annalisa Cherchi, William Collins, William D. Collins, Sarah L. Connors, Susanna Corti, Faye A. Cruz, Frank J. Dentener, Claudine Dereczynski, Alejandro Di Luca, Aïda Diongue-Niang, Francisco J. Doblas-Reyes, Alessandro Dosio, Hervé Douville, François Engelbrecht, Veronika Eyring, Erich Fischer, Piers Forster, Baylor Fox-Kemper, Jan S. Fuglestvedt, John C. Fyfe, Nathan P. Gillett, Leah Goldfarb, Irina V. Gorodetskaya, José Manuel Gutiérrez, Rafiq Hamdi, Ed Hawkins, Helene T. Hewitt, Pandora Hope, Akm Saiful Islam, Christopher Jones, Darrell S. Kaufman, Robert E. Kopp, Yu Kosaka, James Kossin, Svitlana Krakovska, June-Yi Lee, Jian Li, Thorsten Mauritsen, Thomas K. Maycock, Malte Meinshausen, Seung-Ki Min, Pedro M. S. Monteiro, Thanh Ngo-Duc, Friederike Otto, Izidine Pinto, Anna Pirani, Krishnan Raghavan, Roshanka Ranasinghe, Alex C. Ruane, Lucas Ruiz, Jean-Baptiste Sallée, Bjørn H. Samset, Shubha Sathyendranath, Sonia I. Seneviratne, Anna A. Sörensson, Sophie Szopa, Izuru Takayabu, Anne-Marie Treguier, Bart van den Hurk, Robert Vautard, Karina von Schuckmann, Sönke Zaehle, Xuebin Zhang, Kirsten Zickfeld'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch1Authors = 'D. Chen, M. Rojas, B. H. Samset, K. Cobb, A. Diongue Niang, P. Edwards, S. Emori, S. H. Faria, E. Hawkins, P. Hope, P. Huybrechts, M. Meinshausen, S. K. Mustafa, G. K. Plattner, A. M. Tréguier'
+let report6Ch1Authors = 'Deliang Chen, Maisa Rojas, Bjørn H. Samset, K. Cobb, Aïda Diongue-Niang, P. Edwards, S. Emori, S. H. Faria, Ed Hawkins, Pandora Hope, P. Huybrechts, Malte Meinshausen, S. K. Mustafa, Gian-Kasper Plattner, A. M. Tréguier'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch2Authors = 'S. K. Gulev, P. W. Thorne, J. Ahn, F. J. Dentener, C. M. Domingues, S. Gerland, D. Gong, D. S. Kaufman, H. C. Nnamchi, J. Quaas, J. A. Rivera, S. Sathyendranath, S. L. Smith, B. Trewin, K. von Shuckmann, R. S. Vose'
+let report6Ch2Authors = 'Sergey K. Gulev, Peter W. Thorne, J. Ahn, Frank J. Dentener, C. M. Domingues, S. Gerland, D. Gong, Darrell S. Kaufman, H. C. Nnamchi, J. Quaas, J. A. Rivera, Shubha Sathyendranath, S. L. Smith, Blair Trewin, K. von Shuckmann, R. S. Vose'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch3Authors = 'V. Eyring, N. P. Gillett, K. M. Achuta Rao, R. Barimalala, M. Barreiro Parrillo, N. Bellouin, C. Cassou, P. J. Durack, Y. Kosaka, S. McGregor, S. Min, O. Morgenstern, Y. Sun'
+let report6Ch3Authors = 'Veronika Eyring, Nathan P. Gillett, Krishna M. Achuta Rao, Rondrotiana Barimalala, M. Barreiro Parrillo, Nicolas Bellouin, Christophe Cassou, P. J. Durack, Yu Kosaka, S. McGregor, Seung-Ki Min, O. Morgenstern, Y. Sun'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch4Authors = 'J. Y. Lee, J. Marotzke, G. Bala, L. Cao, S. Corti, J. P. Dunne, F. Engelbrecht, E. Fischer, J. C. Fyfe, C. Jones, A. Maycock, J. Mutemi, O. Ndiaye, S. Panickal, T. Zhou'
+let report6Ch4Authors = 'June-Yi Lee, Jochem Marotzke, Govindasamy Bala, L. Cao, Susanna Corti, J. P. Dunne, François Engelbrecht, Erich Fischer, John C. Fyfe, Christopher Jones, A. Maycock, J. Mutemi, O. Ndiaye, S. Panickal, T. Zhou'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch5Authors = 'J. G. Canadell, P. M.S. Monteiro, M. H. Costa, L. Cotrim da Cunha, P. M. Cox, A. V. Eliseev, S. Henson, M. Ishii, S. Jaccard, C. Koven, A. Lohila, P. K. Patra, S. Piao, J. Rogelj, S. Syampungani, S. Zaehle, K. Zickfeld'
+let report6Ch5Authors = 'Josep G. Canadell, Pedro M. S. Monteiro, M. H. Costa, L. Cotrim da Cunha, Peter M. Cox, A. V. Eliseev, S. Henson, M. Ishii, S. Jaccard, C. Koven, A. Lohila, P. K. Patra, S. Piao, J. Rogelj, S. Syampungani, Sönke Zaehle, Kirsten Zickfeld'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch6Authors = 'V. Naik, S. Szopa, B. Adhikary, P. Artaxo, T. Berntsen, W. D. Collins, S. Fuzzi, L. Gallardo, A. Kiendler Scharr, Z. Klimont, H. Liao, N. Unger, P. Zanis'
+let report6Ch6Authors = 'Vaishali Naik, Sophie Szopa, Bhupesh Adhikary, P. Artaxo, T. Berntsen, William D. Collins, S. Fuzzi, L. Gallardo, A. Kiendler Scharr, Zbigniew Klimont, H. Liao, N. Unger, P. Zanis'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch7Authors = 'P. Forster, T. Storelvmo, K. Armour, W. Collins, J. L. Dufresne, D. Frame, D. J. Lunt, T. Mauritsen, M. D. Palmer, M. Watanabe, M. Wild, H. Zhang'
+let report6Ch7Authors = 'Piers Forster, Trude Storelvmo, Kyle Armour, William Collins, J. L. Dufresne, D. Frame, D. J. Lunt, Thorsten Mauritsen, Matthew D. Palmer, M. Watanabe, M. Wild, Xuebin Zhang'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch8Authors = 'H. Douville, K. Raghavan, J. Renwick, R. P. Allan, P. A. Arias, M. Barlow, R. Cerezo-Mota, A. Cherchi, T. Y. Gan, J. Gergis, D. Jiang, A. Khan, W. Pokam Mba, D. Rosenfeld, J. Tierney, O. Zolina'
+let report6Ch8Authors = 'Hervé Douville, Krishnan Raghavan, J. Renwick, Richard P. Allan, Paola A. Arias, M. Barlow, R. Cerezo-Mota, Annalisa Cherchi, T. Y. Gan, J. Gergis, D. Jiang, A. Khan, W. Pokam Mba, D. Rosenfeld, J. Tierney, O. Zolina'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch9Authors = 'Fox-Kemper, B., H. T. Hewitt, C. Xiao, G. Aðalgeirsdóttir, S. S. Drijfhout, T. L. Edwards, N. R. Golledge, M. Hemer, R. E. Kopp, G. Krinner, A. Mix, D. Notz, S. Nowicki, I. S. Nurhati, L. Ruiz, J-B. Sallée, A. B. A. Slangen, Y. Yu'
+let report6Ch9Authors = 'Baylor Fox-Kemper, Helene T. Hewitt, C. Xiao, G. Aðalgeirsdóttir, S. S. Drijfhout, T. L. Edwards, N. R. Golledge, M. Hemer, Robert E. Kopp, Gerhard Krinner, A. Mix, D. Notz, S. Nowicki, I. S. Nurhati, Lucas Ruiz, Jean-Baptiste Sallée, A. B. A. Slangen, Y. Yu'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch10Authors = 'F. J. Doblas-Reyes, A. A. Sörensson, M. Almazroui, A. Dosio, W. J. Gutowski, R. Haarsma, R. Hamdi, B.  Hewitson, W-T. Kwon, B. L. Lamptey, D. Maraun, T. S. Stephenson, I. Takayabu, L. Terray, A. Turner, Z. ZUo'
+let report6Ch10Authors = 'Francisco J. Doblas-Reyes, Anna A. Sörensson, M. Almazroui, Alessandro Dosio, W. J. Gutowski, R. Haarsma, Rafiq Hamdi, B.  Hewitson, W-T. Kwon, B. L. Lamptey, D. Maraun, T. S. Stephenson, Izuru Takayabu, L. Terray, A. Turner, Z. ZUo'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch11Authors = 'S. I. Seneviratne, X. Zhang, M. Adnan, W. Badi, C. Dereczynski, A. Di Luca, S. Ghosh, I. Iskandar, J. Kossin, S. Lewis, F. Otto, I. Pinto, M. Satoh, S. M. Vicente-Serrano, M. Wehner, B. Zhou'
+let report6Ch11Authors = 'Sonia I. Seneviratne, Xuebin Zhang, M. Adnan, W. Badi, Claudine Dereczynski, Alejandro Di Luca, S. Ghosh, I. Iskandar, James Kossin, S. Lewis, Friederike Otto, Izidine Pinto, M. Satoh, S. M. Vicente-Serrano, M. Wehner, B. Zhou'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6Ch12Authors = 'R. Ranasinghe, A. C. Ruane, R. Vautard, N. Arnell, E. Coppola, F. A. Cruz, S. Dessai, A. S. Islam, M. Rahimi, D. Ruiz Carrascal, J. Sillmann, M. B. Sylla, C. Tebaldi, W. Wang, R. Zaaboul'
+let report6Ch12Authors = 'Roshanka Ranasinghe, Alex C. Ruane, Robert Vautard, N. Arnell, E. Coppola, Faye A. Cruz, S. Dessai, Akm Saiful Islam, M. Rahimi, D. Ruiz Carrascal, J. Sillmann, M. B. Sylla, C. Tebaldi, W. Wang, R. Zaaboul'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
-let report6AtlasAuthors = 'J. M. Gutiérrez, R. G. Jones, G. T. Narisma, L. M. Alves, M. Amjad, I. V. Gorodetskaya, M. Grose, N. A. B. Klutse, S. Krakovska, J. Li, D. Martínez-Castro, L. O. Mearns, S. H. Mernild, T. Ngo-Duc, B. van den Hurk, J-H. Yoon'
+let report6AtlasAuthors = 'José Manuel Gutiérrez, Richard G. Jones, G. T. Narisma, L. M. Alves, M. Amjad, Irina V. Gorodetskaya, M. Grose, N. A. B. Klutse, Svitlana Krakovska, Jian Li, D. Martínez-Castro, L. O. Mearns, S. H. Mernild, Thanh Ngo-Duc, Bart van den Hurk, J-H. Yoon'
 	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
 
 function chapter(slug, itemTemplate) {
@@ -198,57 +198,57 @@ let citations = {
 			// the IPCC's recommended citations call annex authors "editors,"
 			// but we'll call them authors so they show up before the section
 			// in the citation, separately from the book editors
-			creators: [ZU.cleanAuthor('B. Trewin', 'author')]
+			creators: [ZU.cleanAuthor('Blair Trewin', 'author')]
 		}),
 		'Annex II Models': chapter('Annex_II', {
 			title: 'Annex II: Models',
 			creators: [
-				ZU.cleanAuthor('J. M. Gutiérrez', 'author'),
-				ZU.cleanAuthor('A-M. Treguier', 'author')
+				ZU.cleanAuthor('José Manuel Gutiérrez', 'author'),
+				ZU.cleanAuthor('Anne-Marie Treguier', 'author')
 			]
 		}),
 		'Annex III Radiative Forcing': chapter('Annex_III', {
 			title: 'Annex III: Tables of historical and projected well-mixed greenhouse gas mixing ratios and effective radiative forcing of all climate forcers',
 			creators: [
-				ZU.cleanAuthor('F. J. Dentener', 'author'),
+				ZU.cleanAuthor('Frank J. Dentener', 'author'),
 				ZU.cleanAuthor('B. Hall', 'author'),
-				ZU.cleanAuthor('C. Smith', 'author')
+				ZU.cleanAuthor('Chris Smith', 'author')
 			]
 		}),
 		'Annex IV Modes of Variability': chapter('Annex_IV', {
 			title: 'Annex IV: Modes of variability',
 			creators: [
-				ZU.cleanAuthor('C. Cassou', 'author'),
-				ZU.cleanAuthor('A. Cherchi', 'author'),
-				ZU.cleanAuthor('Y. Kosaka', 'author')
+				ZU.cleanAuthor('Christophe Cassou', 'author'),
+				ZU.cleanAuthor('Annalisa Cherchi', 'author'),
+				ZU.cleanAuthor('Yu Kosaka', 'author')
 			]
 		}),
 		'Annex V Monsoons': chapter('Annex_V', {
 			title: 'Annex V: Monsoons',
 			creators: [
-				ZU.cleanAuthor('A. Cherchi', 'author'),
+				ZU.cleanAuthor('Annalisa Cherchi', 'author'),
 				ZU.cleanAuthor('A. Turner', 'author')
 			]
 		}),
 		'Annex VI Climatic Impact-Driver and Extreme Indices': chapter('Annex_VI', {
 			title: 'Annex VI: Climatic impact-driver and extreme indices',
 			creators: [
-				ZU.cleanAuthor('J. M. Gutiérrez', 'author'),
-				ZU.cleanAuthor('R. Ranasinghe', 'author'),
-				ZU.cleanAuthor('A. C. Ruane', 'author'),
-				ZU.cleanAuthor('R. Vautard', 'author')
+				ZU.cleanAuthor('José Manuel Gutiérrez', 'author'),
+				ZU.cleanAuthor('Roshanka Ranasinghe', 'author'),
+				ZU.cleanAuthor('Alex C. Ruane', 'author'),
+				ZU.cleanAuthor('Robert Vautard', 'author')
 			]
 		}),
 		'Annex VII Glossary': chapter('Annex_VII', {
 			title: 'Annex VII: Glossary',
 			creators: [
 				ZU.cleanAuthor('J. B. R. Matthews', 'author'),
-				ZU.cleanAuthor('J. S. Fuglestvedt', 'author'),
-				ZU.cleanAuthor('V. Masson-Delmotte', 'author'),
+				ZU.cleanAuthor('Jan S. Fuglestvedt', 'author'),
+				ZU.cleanAuthor('Valérie Masson-Delmotte', 'author'),
 				ZU.cleanAuthor('V. Möller', 'author'),
 				ZU.cleanAuthor('C. Méndez', 'author'),
 				ZU.cleanAuthor('van Diemen, R.', 'author', true),
-				ZU.cleanAuthor('A. Reisinger', 'author'),
+				ZU.cleanAuthor('Andy Reisinger', 'author'),
 				ZU.cleanAuthor('S. Semenov', 'author')
 			]
 		})
