@@ -227,7 +227,7 @@ let citations = {
 			title: 'Annex V: Monsoons',
 			creators: [
 				ZU.cleanAuthor('Annalisa Cherchi', 'author'),
-				ZU.cleanAuthor('A. Turner', 'author')
+				ZU.cleanAuthor('Andrew Turner', 'author')
 			]
 		}),
 		'Annex VI Climatic Impact-Driver and Extreme Indices': chapter('Annex_VI', {
@@ -242,14 +242,14 @@ let citations = {
 		'Annex VII Glossary': chapter('Annex_VII', {
 			title: 'Annex VII: Glossary',
 			creators: [
-				ZU.cleanAuthor('J. B. R. Matthews', 'author'),
+				ZU.cleanAuthor('J. B. Robin Matthews', 'author'),
 				ZU.cleanAuthor('Jan S. Fuglestvedt', 'author'),
 				ZU.cleanAuthor('Valérie Masson-Delmotte', 'author'),
-				ZU.cleanAuthor('V. Möller', 'author'),
-				ZU.cleanAuthor('C. Méndez', 'author'),
-				ZU.cleanAuthor('van Diemen, R.', 'author', true),
+				ZU.cleanAuthor('Vincent Möller', 'author'),
+				ZU.cleanAuthor('Carlos Méndez', 'author'),
+				ZU.cleanAuthor('van Diemen, Renée', 'author', true),
 				ZU.cleanAuthor('Andy Reisinger', 'author'),
-				ZU.cleanAuthor('S. Semenov', 'author')
+				ZU.cleanAuthor('Sergey Semenov', 'author')
 			]
 		})
 	})
