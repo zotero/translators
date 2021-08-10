@@ -35,50 +35,50 @@
 	***** END LICENSE BLOCK *****
 */
 
-let report6Editors = 'V. Masson-Delmotte, Panmao Zhai, Anna Pirani, Sarah L. Connors, C. Péan, Sophie Berger, N. Caud, Y. Chen, Leah Goldfarb, Melissa I. Gomis, M. Huang, K. Leitzell, E. Lonnoy, J. B. R. Matthews, Thomas K. Maycock, T. Waterfield, O. Yelekçi, R. Yu, B. Zhou'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'editor'));
+let report6Editors = 'Valérie Masson-Delmotte; Panmao Zhai; Anna Pirani; Sarah L. Connors; C. Péan; Sophie Berger; Nada Caud; Y. Chen; Leah Goldfarb; Melissa I. Gomis; Mengtian Huang; Katherine Leitzell; Elisabeth Lonnoy; J. B. Robin Matthews; Thomas K. Maycock; Tim Waterfield; Özge Yelekçi; R. Yu; Botao Zhou'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'editor', name.includes(', ')));
 
-let report6TechSummaryAuthors = 'Paola A. Arias, Nicolas Bellouin, Erika Coppola, Richard G. Jones, Gerhard Krinner, Jochem Marotzke, Vaishali Naik, Matthew D. Palmer, Gian-Kasper Plattner, Joeri Rogelj, Maisa Rojas, Jana Sillmann, Trude Storelvmo, Peter W. Thorne, Blair Trewin, Krishna M. Achuta Rao, Bhupesh Adhikary, Richard P. Allan, Kyle Armour, Govindasamy Bala, Rondrotiana Barimalala, Sophie Berger, Josep G. Canadell, Christophe Cassou, Annalisa Cherchi, William Collins, William D. Collins, Sarah L. Connors, Susanna Corti, Faye A. Cruz, Frank J. Dentener, Claudine Dereczynski, Alejandro Di Luca, Aïda Diongue-Niang, Francisco J. Doblas-Reyes, Alessandro Dosio, Hervé Douville, François Engelbrecht, Veronika Eyring, Erich Fischer, Piers Forster, Baylor Fox-Kemper, Jan S. Fuglestvedt, John C. Fyfe, Nathan P. Gillett, Leah Goldfarb, Irina V. Gorodetskaya, José Manuel Gutiérrez, Rafiq Hamdi, Ed Hawkins, Helene T. Hewitt, Pandora Hope, Akm Saiful Islam, Christopher Jones, Darrell S. Kaufman, Robert E. Kopp, Yu Kosaka, James Kossin, Svitlana Krakovska, June-Yi Lee, Jian Li, Thorsten Mauritsen, Thomas K. Maycock, Malte Meinshausen, Seung-Ki Min, Pedro M. S. Monteiro, Thanh Ngo-Duc, Friederike Otto, Izidine Pinto, Anna Pirani, Krishnan Raghavan, Roshanka Ranasinghe, Alex C. Ruane, Lucas Ruiz, Jean-Baptiste Sallée, Bjørn H. Samset, Shubha Sathyendranath, Sonia I. Seneviratne, Anna A. Sörensson, Sophie Szopa, Izuru Takayabu, Anne-Marie Treguier, Bart van den Hurk, Robert Vautard, Karina von Schuckmann, Sönke Zaehle, Xuebin Zhang, Kirsten Zickfeld'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6TechSummaryAuthors = 'Paola A. Arias; Nicolas Bellouin; Erika Coppola; Richard G. Jones; Gerhard Krinner; Jochem Marotzke; Vaishali Naik; Matthew D. Palmer; Gian-Kasper Plattner; Joeri Rogelj; Maisa Rojas; Jana Sillmann; Trude Storelvmo; Peter W. Thorne; Blair Trewin; Krishna M. Achutarao; Bhupesh Adhikary; Richard P. Allan; Kyle Armour; Govindasamy Bala; Rondrotiana Barimalala; Sophie Berger; Josep G. Canadell; Christophe Cassou; Annalisa Cherchi; William Collins; William D. Collins; Sarah L. Connors; Susanna Corti; Faye A. Cruz; Frank J. Dentener; Claudine Dereczynski; Di Luca, Alejandro; Aïda Diongue-Niang; Francisco J. Doblas-Reyes; Alessandro Dosio; Hervé Douville; François Engelbrecht; Veronika Eyring; Erich Fischer; Piers Forster; Baylor Fox-Kemper; Jan S. Fuglestvedt; John C. Fyfe; Nathan P. Gillett; Leah Goldfarb; Irina V. Gorodetskaya; José Manuel Gutiérrez; Rafiq Hamdi; Ed Hawkins; Helene T. Hewitt; Pandora Hope; Akm Saiful Islam; Christopher Jones; Darrell S. Kaufman; Robert E. Kopp; Yu Kosaka; James Kossin; Svitlana Krakovska; June-Yi Lee; Jian Li; Thorsten Mauritsen; Thomas K. Maycock; Malte Meinshausen; Seung-Ki Min; Scheel Monteiro, Pedro; Thanh Ngo-Duc; Friederike Otto; Izidine Pinto; Anna Pirani; Krishnan Raghavan; Roshanka Ranasinghe; Alex C. Ruane; Lucas Ruiz; Jean-Baptiste Sallée; Bjørn H. Samset; Shubha Sathyendranath; Sonia I. Seneviratne; Anna A. Sörensson; Sophie Szopa; Izuru Takayabu; Anne-Marie Treguier; Bart van den Hurk; Robert Vautard; von Schuckmann, Karina; Sönke Zaehle; Xuebin Zhang; Kirsten Zickfeld'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch1Authors = 'Deliang Chen, Maisa Rojas, Bjørn H. Samset, K. Cobb, Aïda Diongue-Niang, P. Edwards, S. Emori, S. H. Faria, Ed Hawkins, Pandora Hope, P. Huybrechts, Malte Meinshausen, S. K. Mustafa, Gian-Kasper Plattner, A. M. Tréguier'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch1Authors = 'Deliang Chen; Maisa Rojas; Bjørn H. Samset; Kim Cobb; Aïda Diongue-Niang; Paul Edwards; Seita Emori; Sergio Henrique Faria; Ed Hawkins; Pandora Hope; Philippe Huybrechts; Malte Meinshausen; Sawsan K. Mustafa; Gian-Kasper Plattner; Anne Marie Tréguier'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch2Authors = 'Sergey K. Gulev, Peter W. Thorne, J. Ahn, Frank J. Dentener, C. M. Domingues, S. Gerland, D. Gong, Darrell S. Kaufman, H. C. Nnamchi, J. Quaas, J. A. Rivera, Shubha Sathyendranath, S. L. Smith, Blair Trewin, K. von Shuckmann, R. S. Vose'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch2Authors = 'Sergey K. Gulev; Peter W. Thorne; Jinho Ahn; Frank J. Dentener; Catia M. Domingues; Sebastian Gerland; Daoyi Gong; Darrell S. Kaufman; Hyacinth C. Nnamchi; Johannes Quaas; Juan Antonio Rivera; Shubha Sathyendranath; Sharon L. Smith; Blair Trewin; von Shuckmann, Karina; Russell S. Vose'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch3Authors = 'Veronika Eyring, Nathan P. Gillett, Krishna M. Achuta Rao, Rondrotiana Barimalala, M. Barreiro Parrillo, Nicolas Bellouin, Christophe Cassou, P. J. Durack, Yu Kosaka, S. McGregor, Seung-Ki Min, O. Morgenstern, Y. Sun'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch3Authors = 'Veronika Eyring; Nathan P. Gillett; Krishna M. Achutarao; Rondrotiana Barimalala; Barreiro Parrillo, Marcelo; Nicolas Bellouin; Christophe Cassou; Paul J. Durack; Yu Kosaka; Shayne McGregor; Seung-Ki Min; Olaf Morgenstern; Ying Sun'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch4Authors = 'June-Yi Lee, Jochem Marotzke, Govindasamy Bala, L. Cao, Susanna Corti, J. P. Dunne, François Engelbrecht, Erich Fischer, John C. Fyfe, Christopher Jones, A. Maycock, J. Mutemi, O. Ndiaye, S. Panickal, T. Zhou'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch4Authors = 'June-Yi Lee; Jochem Marotzke; Govindasamy Bala; Long Cao; Susanna Corti; John P. Dunne; François Engelbrecht; Erich Fischer; John C. Fyfe; Christopher Jones; Amanda Maycock; Joseph Mutemi; Ousman Ndiaye; Swapna Panickal; Tianjun Zhou'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch5Authors = 'Josep G. Canadell, Pedro M. S. Monteiro, M. H. Costa, L. Cotrim da Cunha, Peter M. Cox, A. V. Eliseev, S. Henson, M. Ishii, S. Jaccard, C. Koven, A. Lohila, P. K. Patra, S. Piao, J. Rogelj, S. Syampungani, Sönke Zaehle, Kirsten Zickfeld'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch5Authors = 'Josep G. Canadell; Scheel Monteiro, Pedro; Marcos H. Costa; Cotrim da Cunha, Leticia; Peter M. Cox; Alexey V. Eliseev; Stephanie Henson; Masao Ishii; Samuel Jaccard; Charles Koven; Annalea Lohila; Prabir K. Patra; Shilong Piao; Joeri Rogelj; Stephen Syampungani; Sönke Zaehle; Kirsten Zickfeld'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch6Authors = 'Vaishali Naik, Sophie Szopa, Bhupesh Adhikary, P. Artaxo, T. Berntsen, William D. Collins, S. Fuzzi, L. Gallardo, A. Kiendler Scharr, Zbigniew Klimont, H. Liao, N. Unger, P. Zanis'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch6Authors = 'Vaishali Naik; Sophie Szopa; Bhupesh Adhikary; Artaxo Netto, Paulo Eduardo; Terje Berntsen; William D. Collins; Sandro Fuzzi; Laura Gallardo; Astrid Kiendler-Scharr; Zbigniew Klimont; Hong Liao; Nadine Unger; Prodromos Zanis'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch7Authors = 'Piers Forster, Trude Storelvmo, Kyle Armour, William Collins, J. L. Dufresne, D. Frame, D. J. Lunt, Thorsten Mauritsen, Matthew D. Palmer, M. Watanabe, M. Wild, Xuebin Zhang'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch7Authors = 'Piers Forster; Trude Storelvmo; Kyle Armour; William Collins; Jean-Luis Dufresne; David Frame; Daniel J. Lunt; Thorsten Mauritsen; Matthew D. Palmer; Masahiro Watanabe; Martin Wild; Xuebin Zhang'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch8Authors = 'Hervé Douville, Krishnan Raghavan, J. Renwick, Richard P. Allan, Paola A. Arias, M. Barlow, R. Cerezo-Mota, Annalisa Cherchi, T. Y. Gan, J. Gergis, D. Jiang, A. Khan, W. Pokam Mba, D. Rosenfeld, J. Tierney, O. Zolina'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch8Authors = 'Hervé Douville; Krishnan Raghavan; James A. Renwick; Richard P. Allan; Paola A. Arias; M. Barlow; Cerezo Mota, Ruth; Annalisa Cherchi; Thian Yew Gan; Joelle Gergis; Dabang Jiang; Asif Khan; Pokam Mba, Wilfried; Daniel Rosenfeld; Jessica Tierney; Olga Zolina'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch9Authors = 'Baylor Fox-Kemper, Helene T. Hewitt, C. Xiao, G. Aðalgeirsdóttir, S. S. Drijfhout, T. L. Edwards, N. R. Golledge, M. Hemer, Robert E. Kopp, Gerhard Krinner, A. Mix, D. Notz, S. Nowicki, I. S. Nurhati, Lucas Ruiz, Jean-Baptiste Sallée, A. B. A. Slangen, Y. Yu'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch9Authors = 'Baylor Fox-Kemper; Helene T. Hewitt; Cunde Xiao; Guðfinna Aðalgeirsdóttir; Sybren S. Drijfhout; Tamsin L. Edwards; Nicholas R. Golledge; Mark Hemer; Robert E. Kopp; Gerhard Krinner; Alan Mix; Dirk Notz; Sophie Nowicki; Intan S. Nurhati; Lucas Ruiz; Jean-Baptiste Sallée; Aimée B. A. Slangen; Yongqiang Yu'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch10Authors = 'Francisco J. Doblas-Reyes, Anna A. Sörensson, M. Almazroui, Alessandro Dosio, W. J. Gutowski, R. Haarsma, Rafiq Hamdi, B.  Hewitson, W-T. Kwon, B. L. Lamptey, D. Maraun, T. S. Stephenson, Izuru Takayabu, L. Terray, A. Turner, Z. ZUo'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch10Authors = 'Francisco J. Doblas-Reyes; Anna A. Sörensson; M. Almazroui; Alessandro Dosio; William J. Gutowski; Rein Haarsma; Rafiq Hamdi; Bruce Hewitson; Won-Tae Kwon; Benjamin L. Lamptey; Douglas Maraun; Tannecia S. Stephenson; Izuru Takayabu; Laurent Terray; Andrew Turner; Zhiyan Zuo'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch11Authors = 'Sonia I. Seneviratne, Xuebin Zhang, M. Adnan, W. Badi, Claudine Dereczynski, Alejandro Di Luca, S. Ghosh, I. Iskandar, James Kossin, S. Lewis, Friederike Otto, Izidine Pinto, M. Satoh, S. M. Vicente-Serrano, M. Wehner, B. Zhou'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch11Authors = 'Sonia I. Seneviratne; Xuebin Zhang; M. Adnan; W. Badi; Claudine Dereczynski; Di Luca, Alejandro; S. Ghosh; Iskhaq Iskandar; James Kossin; Sophie Lewis; Friederike Otto; Izidine Pinto; Masaki Satoh; Sergio M. Vicente-Serrano; Michael Wehner; Botao Zhou'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6Ch12Authors = 'Roshanka Ranasinghe, Alex C. Ruane, Robert Vautard, N. Arnell, E. Coppola, Faye A. Cruz, S. Dessai, Akm Saiful Islam, M. Rahimi, D. Ruiz Carrascal, J. Sillmann, M. B. Sylla, C. Tebaldi, W. Wang, R. Zaaboul'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6Ch12Authors = 'Roshanka Ranasinghe; Alex C. Ruane; Robert Vautard; Nigel Arnell; Erika Coppola; Faye A. Cruz; Suraje Dessai; Akm Saiful Islam; Mohammad Rahimi; Ruiz Carrascal, Daniel; Jana Sillmann; Mouhamadou Bamba Sylla; Claudia Tebaldi; Wen Wang; Rashyd Zaaboul'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
-let report6AtlasAuthors = 'José Manuel Gutiérrez, Richard G. Jones, G. T. Narisma, L. M. Alves, M. Amjad, Irina V. Gorodetskaya, M. Grose, N. A. B. Klutse, Svitlana Krakovska, Jian Li, D. Martínez-Castro, L. O. Mearns, S. H. Mernild, Thanh Ngo-Duc, Bart van den Hurk, J-H. Yoon'
-	.split(', ').map(name => ZU.cleanAuthor(name, 'author'));
+let report6AtlasAuthors = 'José Manuel Gutiérrez; Richard G. Jones; Gemma Teresa Narisma; Muniz Alves, Lincoln; Muhammad Amjad; Irina V. Gorodetskaya; Michael Grose; Nana Ama Browne Klutse; Svitlana Krakovska; Jian Li; Daniel Martínez-Castro; Linda O. Mearns; Sebastian H. Mernild; Thanh Ngo-Duc; van den Hurk, Bart; Jin-Ho Yoon'
+	.split('; ').map(name => ZU.cleanAuthor(name, 'author', name.includes(', ')));
 
 function chapter(slug, itemTemplate) {
 	return Object.assign(new Zotero.Item('bookSection'), itemTemplate, {
