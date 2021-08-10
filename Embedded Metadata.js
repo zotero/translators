@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 03:54:33"
+	"lastUpdated": "2021-08-10 19:53:00"
 }
 
 /*
@@ -414,12 +414,18 @@ function addHighwireMetadata(doc, newItem, hwType) {
 			var authorsByComma = authors[0].split(/\s*,\s*/);
 			
 			/* If there is only one author node and
-			we get nothing when splitting by semicolon, and at least two words on
-			either side of the comma when splitting by comma, we split by comma. */
+			we get nothing when splitting by semicolon, there are at least two
+			words on either side of a comma, and it doesn't appear to be a
+			two-word Spanish surname, we split by comma. */
 			
+			let lang = getContentText(doc, 'citation_language');
+			let twoWordName = authorsByComma.length == 2
+				&& ['es', 'spa', 'Spanish', 'español'].includes(lang)
+				&& authorsByComma[0].split(' ').length == 2;
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
-				&& authorsByComma[1].includes(" ")) authors = authorsByComma;
+				&& authorsByComma[1].includes(" ")
+				&& !twoWordName) authors = authorsByComma;
 		}
 		for (var j = 0, m = authors.length; j < m; j++) {
 			var author = authors[j].trim();
@@ -1602,6 +1608,46 @@ var testCases = [
 				"libraryCatalog": "media.ccc.de",
 				"url": "https://media.ccc.de/v/35c3-9386-introduction_to_deep_learning",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://upcommons.upc.edu/handle/2117/114657",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Necesidad y morfología: la forma racional",
+				"creators": [
+					{
+						"firstName": "Antonio A.",
+						"lastName": "García García",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-06",
+				"ISBN": "9788460842118",
+				"abstractNote": "Abstracts aceptados sin presentacion / Accepted abstracts without presentation",
+				"conferenceName": "International Conference Arquitectonics Network: Architecture, Education and Society, Barcelona, 3-5 June 2015: Abstracts",
+				"language": "spa",
+				"libraryCatalog": "upcommons.upc.edu",
+				"publisher": "GIRAS. Universitat Politècnica de Catalunya",
+				"rights": "Open Access",
+				"shortTitle": "Necesidad y morfología",
+				"url": "https://upcommons.upc.edu/handle/2117/114657",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
