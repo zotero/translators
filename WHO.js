@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-09 17:50:46"
+	"lastUpdated": "2021-08-10 16:40:28"
 }
 
 /*
@@ -152,13 +152,17 @@ function scrape(doc, url) {
 }
 
 function detectSearch(item) {
-	return item.ISBN && ZU.cleanISBN(item.ISBN).startsWith('978924');
+	return item.ISBN && (ZU.cleanISBN(item.ISBN) || '').startsWith('978924');
 }
 
 function doSearch(item) {
 	let ISBN = ZU.cleanISBN(item.ISBN);
 	let url = `https://apps.who.int/iris/discover/export?format=refman&list=discover&rpp=10&etal=0&query=${ISBN}&group_by=none&page=1`;
 	ZU.doGet(url, function (risText) {
+		if (!risText) return;
+
+		risText = risText.replace(/^SE(\s*-\s*[0-9]+).*$/m, 'SP$1');
+
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
 		translator.setString(risText);
@@ -168,15 +172,20 @@ function doSearch(item) {
 			
 			if (item.url) {
 				ZU.processDocuments(item.url, function (recordDoc) {
-					item.attachments.push({
-						title: 'Full Text PDF',
-						mimeType: 'application/pdf',
-						url: attr(recordDoc, 'meta[name="citation_pdf_url"]', 'content')
-					});
+					let pdfURL = attr(recordDoc, 'meta[name="citation_pdf_url"]', 'content');
+					if (pdfURL) {
+						item.attachments.push({
+							title: 'Full Text PDF',
+							mimeType: 'application/pdf',
+							url: pdfURL
+						});
+					}
+					item.complete();
 				});
 			}
-			
-			item.complete();
+			else {
+				item.complete();
+			}
 		});
 		translator.translate();
 	});
