@@ -1,15 +1,15 @@
 {
 	"translatorID": "e391620a-0a33-415b-b08b-521fdbb2c257",
-	"label": "PubAg",
+	"label": "National Agriculture Library",
 	"creator": "Abe Jellinek",
-	"target": "^https?://pubag\\.nal\\.usda\\.gov/",
+	"target": "^https?://(pubag|naldc)\\.nal\\.usda\\.gov/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 18:50:01"
+	"lastUpdated": "2021-08-11 22:01:59"
 }
 
 /*
@@ -35,6 +35,10 @@
 	***** END LICENSE BLOCK *****
 */
 
+
+// This translator targets PubAg and NALDC, which are both Blacklight-based
+// catalogs. It does not cover AGRICOLA, which runs Voyager 7 and is covered by
+// that translator.
 
 function detectWeb(doc, _url) {
 	if (doc.querySelector('#document')) {
@@ -83,16 +87,23 @@ function scrape(doc, url) {
 				.replace(/^A4/gm, 'A1');
 		}
 		
+		// remove ca./b. dates from author names
+		risText = risText.replace(/^(A[U1-4].\s*-\s*.*)(?:ca\.|b\.).*$/m, '$1');
+		
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7"); // RIS
 		translator.setString(risText);
 		translator.setHandler("itemDone", function (obj, item) {
-			item.libraryCatalog = 'PubAg';
-			
-			if (item.archiveLocation) {
-				// like a PMID
-				item.extra = (item.extra || '') + `\nPubAg AGID: ${item.archiveLocation}`;
-				delete item.archiveLocation;
+			if (url.includes('naldc.nal.usda.gov')) {
+				item.libraryCatalog = 'National Agricultural Library Digital Collections';
+			}
+			else {
+				item.libraryCatalog = 'PubAg';
+				if (item.archiveLocation) {
+					// like a PMID
+					item.extra = (item.extra || '')
+						+ `\nPubAg AGID: ${item.archiveLocation}`;
+				}
 			}
 			
 			let PMID = text(doc, 'a[href*="/pubmed/?term="] span');
@@ -110,8 +121,12 @@ function scrape(doc, url) {
 					item.url = externalURL;
 				}
 			}
+			else if (item.url.includes('doi.org')) {
+				delete item.url;
+			}
 			
 			delete item.archive; // 'PubAg'
+			delete item.archiveLocation; // AGID, etc.
 			delete item.numPages; // volume/issue
 			
 			if (item.journalAbbreviation == item.publicationTitle) {
@@ -132,6 +147,14 @@ function scrape(doc, url) {
 			
 			if (!item.ISSN) {
 				item.ISSN = ZU.cleanISSN(attr(doc, 'meta[name="citation_issn"]', 'content'));
+			}
+			
+			if (doc.querySelector('.pdf a')) {
+				item.attachments.push({
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf',
+					url: attr(doc, '.pdf a', 'href')
+				});
 			}
 			
 			item.complete();
@@ -380,6 +403,121 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://pubag.nal.usda.gov/?q=soy&search_field=all_fields",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://naldc.nal.usda.gov/catalog/6964450",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Southern Plains Assessment of Vulnerability and Preliminary Adaptation and Mitigation Strategies for Farmers, Ranchers and Forest Land Owners",
+				"creators": [
+					{
+						"lastName": "Jean Steiner",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Jeanne Schneider",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Clay Pope",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Sarah Pope",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Paulette Ford",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "Rachel Steele",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2015",
+				"DOI": "10.32747/2015.6964450.ch",
+				"abstractNote": "The Southern Plains region contributes significantly to the Nation’s wheat and beef production. Winter wheat is the principal annual crop, with much of it serving dual-use as a cool-season annual forage in addition to grain production. Cattle are raised on extensive pasture and rangelands across the region.",
+				"language": "English",
+				"libraryCatalog": "National Agricultural Library Digital Collections",
+				"pages": "1 online resource (61 pages)",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://naldc.nal.usda.gov/catalog/7232772",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Heartwood taper in Northern Red Oak (Quercus rubra L.)",
+				"creators": [
+					{
+						"lastName": "John P. Brown",
+						"creatorType": "author",
+						"fieldMode": 1
+					},
+					{
+						"lastName": "United States. Forest Service. Northern Research Station",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2019",
+				"abstractNote": "To better understand how the practice of long-term tree retention affects value, northern red oak (Quercus rubra L.) trees from the Menominee Indian Reservation in Wisconsin were harvested and examined for patterns of heartwood development in relation to several tree characteristics. A total of 69 mature northern red oak trees from three dbh size classes, small (34-47 cm, 20 trees), medium (48-60 cm, 20 trees), and large (>= 61 cm, 29 trees), were logged and optimally bucked. Cross-sectional disks were then removed from the tops of the stumps and each log and were analyzed for patterns of change in heartwood radius. Four factors were found to have a statistically significant effect on heartwood radius: age of the tree, size class, height, and inside bark radius. The inside bark radius was the strongest predictor of heartwood radius. A 1 cm increase in inside bark radius led to approximately a 0.95 cm increase in heartwood radius. Increasing height had a small negative effect, with heartwood radius decreasing approximately 0.05 cm for each meter above ground. Age of the tree had a small positive effect of 0.0016 cm per year and was only significant in one expert model considered. These results provide consumers of oak logs and forest managers insight to the interior heartwood pattern and can lead to improved value assessments for northern red oak logs.",
+				"language": "English",
+				"libraryCatalog": "National Agricultural Library Digital Collections",
+				"pages": "1 online resource (9 pages) : one color illustration.-USDA",
+				"url": "https://purl.fdlp.gov/GPO/gpo117952",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Dendrochronology"
+					},
+					{
+						"tag": "Forest management"
+					},
+					{
+						"tag": "Green tree retention"
+					},
+					{
+						"tag": "Heartwood"
+					},
+					{
+						"tag": "Quercus rubra"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://naldc.nal.usda.gov/?utf8=%E2%9C%93&search_field=all_fields&q=trees",
 		"items": "multiple"
 	}
 ]
