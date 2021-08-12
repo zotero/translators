@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-27 20:38:17"
+	"lastUpdated": "2021-08-09 22:56:38"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Twitter Translator
-	Copyright © 2020 Bo An, Dan Stillman
+	Copyright © 2020-2021 Bo An, Dan Stillman
 	
 	This file is part of Zotero.
 	
@@ -40,9 +40,10 @@
 let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
 
 function detectWeb(doc, _url) {
-	if (_url.includes('/status/')) {
+	if (_url.includes('/status/') && titleRe.test(doc.title)) {
 		return "blogPost";
 	}
+	Z.monitorDOMChanges(doc.querySelector('title'));
 	return false;
 }
 
