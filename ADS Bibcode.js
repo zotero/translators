@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-07 22:49:32"
+	"lastUpdated": "2021-08-11 04:43:0"
 }
 
 /*
@@ -77,6 +77,9 @@ function getTypeFromId(id) {
 	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
 		return "thesis";
 	}
+	else if (bibstem.startsWith("arXiv")) {
+		return "report"; // preprint
+	}
 	else {
 		// now scan past the bibstem and find the volume number/type abbrev.
 		const volume = bibstem.substring(5, 9);
@@ -118,6 +121,17 @@ function scrape(ids) {
 				if (detectedType != item.itemType) {
 					Z.debug(`Changing item type: ${item.itemType} -> ${detectedType}`);
 					item.itemType = detectedType;
+				}
+
+				item.extra = (item.extra || '') + `\nCitation Key: ${id}`;
+
+				if (id.slice(4).startsWith('arXiv')) {
+					item.extra += '\nType: article'; // will map to preprint
+				}
+
+				if (item.pages.startsWith('arXiv:')) {
+					// not sure why this ends up in the SP tag
+					delete item.pages;
 				}
 				
 				item.attachments.push({

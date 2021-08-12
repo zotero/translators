@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 16:01:29"
+	"lastUpdated": "2021-08-12 04:57:34"
 }
 
 /*
@@ -61,6 +61,9 @@ function getTypeFromId(id) {
 	const bibstem = id.slice(4);
 	if (bibstem.startsWith("MsT") || bibstem.startsWith("PhDT")) {
 		return "thesis";
+	}
+	else if (bibstem.startsWith("arXiv")) {
+		return "report"; // preprint
 	}
 	else {
 		// now scan past the bibstem and find the volume number/type abbrev.
@@ -308,6 +311,78 @@ var testCases = [
 					},
 					{
 						"tag": "Vibration isolation"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://ui.adsabs.harvard.edu/abs/2020arXiv201207436Z/abstract",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Informer: Beyond Efficient Transformer for Long Sequence Time-Series Forecasting",
+				"creators": [
+					{
+						"lastName": "Zhou",
+						"firstName": "Haoyi",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhang",
+						"firstName": "Shanghang",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Peng",
+						"firstName": "Jieqi",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhang",
+						"firstName": "Shuai",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Li",
+						"firstName": "Jianxin",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Xiong",
+						"firstName": "Hui",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Zhang",
+						"firstName": "Wancai",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-12-01",
+				"abstractNote": "Many real-world applications require the prediction of long sequence time-series, such as electricity consumption planning. Long sequence time-series forecasting (LSTF) demands a high prediction capacity of the model, which is the ability to capture precise long-range dependency coupling between output and input efficiently. Recent studies have shown the potential of Transformer to increase the prediction capacity. However, there are several severe issues with Transformer that prevent it from being directly applicable to LSTF, including quadratic time complexity, high memory usage, and inherent limitation of the encoder-decoder architecture. To address these issues, we design an efficient transformer-based model for LSTF, named Informer, with three distinctive characteristics: (i) a $ProbSparse$ self-attention mechanism, which achieves $O(L \\log L)$ in time complexity and memory usage, and has comparable performance on sequences' dependency alignment. (ii) the self-attention distilling highlights dominating attention by halving cascading layer input, and efficiently handles extreme long input sequences. (iii) the generative style decoder, while conceptually simple, predicts the long time-series sequences at one forward operation rather than a step-by-step way, which drastically improves the inference speed of long-sequence predictions. Extensive experiments on four large-scale datasets demonstrate that Informer significantly outperforms existing methods and provides a new solution to the LSTF problem.",
+				"extra": "Citation Key: 2020arXiv201207436Z\nType: article",
+				"libraryCatalog": "NASA ADS",
+				"shortTitle": "Informer",
+				"url": "https://ui.adsabs.harvard.edu/abs/2020arXiv201207436Z",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Computer Science - Artificial Intelligence"
+					},
+					{
+						"tag": "Computer Science - Information Retrieval"
+					},
+					{
+						"tag": "Computer Science - Machine Learning"
 					}
 				],
 				"notes": [],
