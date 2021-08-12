@@ -129,7 +129,7 @@ function scrape(ids) {
 					item.extra += '\nType: article'; // will map to preprint
 				}
 
-				if (item.pages.startsWith('arXiv:')) {
+				if (item.pages && item.pages.startsWith('arXiv:')) {
 					// not sure why this ends up in the SP tag
 					delete item.pages;
 				}
