@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 23:22:27"
+	"lastUpdated": "2021-08-13 05:39:41"
 }
 
 /*
@@ -54,7 +54,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('#searchContent .text-headline a');
+	var rows = doc.querySelectorAll('#searchContent .text-headline a, .type-article .text-headline a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -312,6 +312,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/ejjs/15/2/ejjs.15.issue-2.xml",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
