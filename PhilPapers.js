@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	Copyright © 2012 Sebastian Karcher 
+	Copyright © 2012 Sebastian Karcher
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,17 +35,18 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.search(/\/s|pub\//)!=-1) return "multiple";
-	if (url.indexOf("/browse/")!=-1 && ZU.xpathText(doc, '//ol[@class="entryList"]/li/@id')!= null) return "multiple";
-	if (url.indexOf("/rec/")!=-1) return "journalArticle";
+	if (/\/s|pub\//.test(url)) return "multiple";
+	if (url.includes("/browse/") && ZU.xpathText(doc, '//ol[@class="entryList"]/li/@id') !== null) return "multiple";
+	if (url.includes("/rec/")) return "journalArticle";
+	return false;
 }
 	
 
-function doWeb(doc, url){
+function doWeb(doc, url) {
 	let isPhilArchive = /^https?:\/\/philarchive\.org\//.test(url);
 
-	var ids = new Array();
-	if (detectWeb(doc, url) == "multiple") { 
+	var ids = [];
+	if (detectWeb(doc, url) == "multiple") {
 		var items = {};
 		var titles = ZU.xpath(doc, '//li/span[@class="citation"]//span[contains (@class, "articleTitle")]');
 		var identifiers = ZU.xpath(doc, '//ol[@class="entryList"]/li/@id');
@@ -54,34 +55,32 @@ function doWeb(doc, url){
 		}
 		Zotero.selectItems(items, function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			for (var i in items) {
 				ids.push(i.replace(/^e/, ""));
 			}
 			scrape(ids, isPhilArchive);
 		});
-	} else {
-		var identifier = url.match(/(\/rec\/)([A-Z-\d]+)/)[2]
-		//Z.debug(identifier)
+	}
+	else {
+		var identifier = url.match(/(\/rec\/)([A-Z-\d]+)/)[2];
+		// Z.debug(identifier)
 		scrape([identifier], isPhilArchive);
 	}
 }
 
-function scrape(identifiers, isPhilArchive){
-	for (let id of identifiers){
-		var bibtexurl= "/export.html?__format=bib&eId="+id+"&formatName=BibTeX";
-		//Z.debug(bibtexurl);
-		Zotero.Utilities.HTTP.doGet(bibtexurl, function (text) {
-		//Z.debug(text);
-		//remove line breaks, then match match the bibtex.
-		bibtex = text.replace(/\n/g, "").match(/<pre class='export'>.+<\/pre>/)[0];
-		//Zotero.debug(bibtex)
-	 	var url = "/rec/" + id;
+function scrape(identifiers, isPhilArchive) {
+	for (let id of identifiers) {
+		let bibtexURL = "/export.html?__format=bib&eId=" + id + "&formatName=BibTeX";
+		Zotero.Utilities.HTTP.doGet(bibtexURL, function (text) {
+			// remove line breaks, then match match the bibtex.
+			var bibtex = text.replace(/\n/g, "").match(/<pre class='export'>.+<\/pre>/)[0];
+			var url = "/rec/" + id;
 			var translator = Zotero.loadTranslator("import");
 			translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 			translator.setString(bibtex);
-			translator.setHandler("itemDone", function(obj, item) {
+			translator.setHandler("itemDone", function (obj, item) {
 				if (isPhilArchive) {
 					item.libraryCatalog = 'PhilArchive';
 					item.url = `https://philarchive.org/rec/${id}`; // full-text
@@ -94,11 +93,13 @@ function scrape(identifiers, isPhilArchive){
 				
 				item.attachments.push({ url, title: "Snapshot", mimeType: "text/html" });
 				item.complete();
-				});	
-			translator.translate();
 			});
-	}	
-}/** BEGIN TEST CASES **/
+			translator.translate();
+		});
+	}
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
