@@ -15,7 +15,7 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein, Bao Trinh
+	Copyright © 2017-2021 Philipp Zumstein, Bao Trinh
 	
 	This file is part of Zotero.
 
