@@ -55,10 +55,10 @@ function detectWeb(doc) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[data-test-id="mediacard"]');
+	var rows = doc.querySelectorAll('a[class*="-mediacard"]');
 	for (let row of rows) {
 		let href = row.href;
-		let title = text(row, '*[data-test-id="mediacard-headline"]');
+		let title = text(row, 'h3');
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -267,6 +267,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.thestar.com/news/canada.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.thestar.com/authors.sarrouh_maria.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.thestar.com/topic.ottawa.html",
 		"items": "multiple"
 	}
 ]
