@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 20:26:44"
+	"lastUpdated": "2021-08-13 20:38:46"
 }
 
 /*
@@ -39,7 +39,7 @@
 
 function detectWeb(doc, url) {
 	if (/\/(news|analysis|blog|comment|preview|review)\/./.test(url)) {
-		return "magazineArticle";
+		return text(doc, '.af-issue-number') ? "magazineArticle" : "blogPost";
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -49,10 +49,12 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, _url) {
-	var issue = text(doc, '.af-issue-number a'); // when issue info is available ("Appeared in The Art Newspaper"), change type to magazineArticle
+	var issue = text(doc, '.af-issue-number'); // when issue info is available ("Appeared in The Art Newspaper"), change type to magazineArticle
 	var item;
 	if (issue) {
 		item = new Zotero.Item("magazineArticle");
+		
+		issue = issue.replace(/^,\s*/, '');
 		item.issue = issue.substr(0, issue.indexOf(' '));
 		item.date = issue.substr(issue.indexOf(' ') + 1);
 		item.ISSN = '0960-6556';
@@ -65,15 +67,12 @@ function scrape(doc, _url) {
 		var json = JSON.parse(jsonLD.textContent);
 		item.title = json.headline;
 		if (!item.date) {
-			item.date = json.datePublished;
+			item.date = ZU.strToISO(json.dateModified || json.datePublished);
 		}
 		for (let author of json.author) {
-			item.creators.push(ZU.cleanAuthor(author, "author"));
-		}
-		if (item.creators[0].lastName == "Newspaper") {			// fix generalized authorship
-			delete item.creators[0].firstName; // remove the firstName param
-			item.creators[0].lastName = "The Art Newspaper";	// write the desired name to lastName
-			item.creators[0].fieldMode = 1; // change to single-field mode
+			if (author != 'The Art Newspaper') {
+				item.creators.push(ZU.cleanAuthor(author, "author"));
+			}
 		}
 	}
 	
@@ -84,7 +83,7 @@ function scrape(doc, _url) {
 	
 	item.attachments.push({
 		document: doc,
-		title: "The Art Newspaper snapshot",
+		title: "Snapshot",
 		mimeType: "text/html"
 	});
 	
@@ -148,10 +147,10 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "The Art Newspaper",
 				"publicationTitle": "The Art Newspaper",
-				"url": "http://theartnewspaper.com/comment/does-venice-still-matter",
+				"url": "https://www.theartnewspaper.com/comment/does-venice-still-matter",
 				"attachments": [
 					{
-						"title": "The Art Newspaper snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -193,10 +192,10 @@ var testCases = [
 				"libraryCatalog": "The Art Newspaper",
 				"publicationTitle": "The Art Newspaper",
 				"shortTitle": "Notre Dame",
-				"url": "http://theartnewspaper.com/news/what-next-for-notre-dame",
+				"url": "https://www.theartnewspaper.com/news/what-next-for-notre-dame",
 				"attachments": [
 					{
-						"title": "The Art Newspaper snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -213,13 +212,7 @@ var testCases = [
 			{
 				"itemType": "magazineArticle",
 				"title": "Frieze New York diary: from Tom Sachs channelling Family Guy to an art handler taking centre stage",
-				"creators": [
-					{
-						"lastName": "The Art Newspaper",
-						"creatorType": "author",
-						"fieldMode": 1
-					}
-				],
+				"creators": [],
 				"date": "2019",
 				"ISSN": "0960-6556",
 				"abstractNote": "Plus, Helena Christensen supports MFA graduates and MoMA screens the de-installation of Picasso's Guernica",
@@ -227,10 +220,41 @@ var testCases = [
 				"libraryCatalog": "The Art Newspaper",
 				"publicationTitle": "The Art Newspaper",
 				"shortTitle": "Frieze New York diary",
-				"url": "http://theartnewspaper.com/blog/frieze-new-york-diary-from-tom-sachs-channeling-family-guy-to-an-art-handler-at-centre-stage",
+				"url": "https://www.theartnewspaper.com/blog/frieze-new-york-diary-from-tom-sachs-channeling-family-guy-to-an-art-handler-at-centre-stage",
 				"attachments": [
 					{
-						"title": "The Art Newspaper snapshot",
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.theartnewspaper.com/review/lynn-hershman-leeson-digital-art-pioneer-traces-the-tangled-web-of-virtual-life",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Lynn Hershman Leeson, digital art pioneer, traces the tangled web of virtual life",
+				"creators": [
+					{
+						"firstName": "Gabriella",
+						"lastName": "Angeleti",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-13",
+				"abstractNote": "A sprawling retrospective at the New Museum, featuring early online works and recent projects exploring DNA, proves how farsighted her work has been",
+				"blogTitle": "The Art Newspaper",
+				"language": "en",
+				"url": "https://www.theartnewspaper.com/review/lynn-hershman-leeson-digital-art-pioneer-traces-the-tangled-web-of-virtual-life",
+				"attachments": [
+					{
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
