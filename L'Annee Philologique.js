@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 02:16:55"
+	"lastUpdated": "2021-08-13 02:22:54"
 }
 
 /*
@@ -82,8 +82,6 @@ function scrape(doc, url) {
 	let risURL = attr(doc, 'a.icon-export', 'href');
 	let body = 'export_filename=export.ris&export_type=download&export_format=ris';
 	
-	let pdfURL = findPDFURL(doc);
-
 	ZU.doPost(risURL, body, function (risText) {
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -92,13 +90,7 @@ function scrape(doc, url) {
 			delete item.archive;
 			item.libraryCatalog = "L'Année Philologique";
 			
-			if (pdfURL) {
-				item.attachments.push({
-					title: 'Full Text PDF',
-					mimeType: 'application/pdf',
-					url: pdfURL
-				});
-			}
+			addAttachment(item, doc);
 			
 			item.complete();
 		});
@@ -106,17 +98,28 @@ function scrape(doc, url) {
 	});
 }
 
-function findPDFURL(doc) {
+function addAttachment(item, doc) {
 	// no meaningful classes or IDs here, so we'll crawl manually.
 	// it's easier than XPath!
 	for (let link of doc.querySelectorAll('table li a')) {
-		if (!link.href.endsWith('.pdf')) continue; // could be a DOI link, ...
 		// "(Full text)" is the label across languages
 		if (link.nextSibling && link.nextSibling.textContent.includes('(Full text)')) {
-			return link.href;
+			if (link.href.endsWith('.pdf')) {
+				item.attachments.push({
+					title: 'Full Text PDF',
+					mimeType: 'application/pdf',
+					url: link.href
+				});
+			}
+			else {
+				item.attachments.push({
+					title: 'Full Text Source',
+					mimeType: 'text/html',
+					url: link.href
+				});
+			}
 		}
 	}
-	return null;
 }
 
 /** BEGIN TEST CASES **/
@@ -225,7 +228,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://cpps.brepolis.net/aph/search.cfm?action=search_simple_detail_single&startrow=1&endrow=1&search_order=year_desc&ALLFIELDS=environment&PERIOD_CLOSE_MATCHES=0&search_selection=&search_selection=",
+		"url": "http://cpps.brepolis.net/aph/search.cfm?ALLFIELDS=environment&action=search_simple_detail_single&endrow=1&PERIOD_CLOSE_MATCHES=0&startrow=1&search_selection=,&&search_order=year_desc",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -248,7 +251,12 @@ var testCases = [
 				"shortTitle": "Echoes of empire",
 				"url": "https://doi.org/10.1353/jla.2020.0017",
 				"volume": "13",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Full Text Source",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
