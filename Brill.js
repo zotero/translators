@@ -2,14 +2,14 @@
 	"translatorID": "6d087de8-f858-4ac5-9fbd-2bf2b35ee41a",
 	"label": "Brill",
 	"creator": "Abe Jellinek",
-	"target": "^https?://(www\\.)?brill\\.com/",
+	"target": "^https?://(www\\.|referenceworks\\.)?brill(online)?\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 05:39:41"
+	"lastUpdated": "2021-08-13 05:52:18"
 }
 
 /*
@@ -41,6 +41,9 @@ function detectWeb(doc, url) {
 		if (url.includes('/journals/')) {
 			return 'journalArticle';
 		}
+		else if (url.includes('referenceworks.brillonline.com/entries/')) {
+			return 'encyclopediaArticle';
+		}
 		else {
 			return 'book';
 		}
@@ -54,7 +57,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('#searchContent .text-headline a, .type-article .text-headline a');
+	var rows = doc.querySelectorAll('#searchContent .text-headline a, .type-article .text-headline a, .result-item .book-title a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -116,12 +119,19 @@ function scrape(doc, url) {
 			}
 		}
 		
-		item.attachments = item.attachments.filter(at => at.title != 'Snapshot');
+		if (item.attachments.length > 1) {
+			// only remove snapshot if we get a PDF
+			item.attachments = item.attachments.filter(at => at.title != 'Snapshot');
+		}
 		
 		item.complete();
 	});
 
 	translator.getTranslatorObject(function (trans) {
+		if (url.includes('referenceworks.brillonline.com/entries/')) {
+			trans.itemType = 'encyclopediaArticle';
+		}
+		
 		trans.doWeb(doc, url);
 	});
 }
@@ -299,7 +309,12 @@ var testCases = [
 				"libraryCatalog": "brill.com",
 				"publisher": "Brill",
 				"url": "https://brill.com/view/title/58302",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "General"
@@ -316,6 +331,43 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://brill.com/view/journals/ejjs/15/2/ejjs.15.issue-2.xml",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://referenceworks.brillonline.com/entries/encyclopaedia-iranica-online/abaev-vasilii-ivanovich-COM_362360",
+		"items": [
+			{
+				"itemType": "encyclopediaArticle",
+				"title": "ABAEV, VASILIĬ IVANOVICH",
+				"creators": [
+					{
+						"firstName": "Ilya",
+						"lastName": "Yakubovich",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05-10",
+				"encyclopediaTitle": "Encyclopaedia Iranica Online",
+				"language": "en",
+				"libraryCatalog": "referenceworks.brillonline.com",
+				"publisher": "Brill",
+				"url": "https://referenceworks.brillonline.com/entries/encyclopaedia-iranica-online/abaev-vasilii-ivanovich-COM_362360",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://referenceworks.brillonline.com/browse/encyclopaedia-iranica-online/alpha/e",
 		"items": "multiple"
 	}
 ]
