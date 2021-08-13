@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-13 04:02:22"
+	"lastUpdated": "2021-08-13 15:59:47"
 }
 
 /*
@@ -118,6 +118,7 @@ function scrape(doc, url) {
 		for (let tag of doc.querySelectorAll('div.tags a')) {
 			item.tags.push(tag.textContent);
 		}
+		item.tags = item.tags.filter(tag => !tag.includes('_'));
 
 		item.complete();
 	});
@@ -303,19 +304,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "CP_URGENCY_2"
-					},
-					{
-						"tag": "CP_health"
-					},
-					{
 						"tag": "Canada"
-					},
-					{
-						"tag": "FEEDPROVIDER_CP"
-					},
-					{
-						"tag": "FEED_automated"
 					},
 					{
 						"tag": "Health"
@@ -325,9 +314,6 @@ var testCases = [
 					},
 					{
 						"tag": "bc"
-					},
-					{
-						"tag": "smg_canada"
 					},
 					{
 						"tag": "social"
