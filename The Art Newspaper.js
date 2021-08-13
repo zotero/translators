@@ -2,20 +2,20 @@
 	"translatorID": "7ae2681a-185b-4724-8754-f046d96884c8",
 	"label": "The Art Newspaper",
 	"creator": "czar",
-	"target": "https?://(www\\.)?theartnewspaper\\.com",
+	"target": "^https?://(www\\.)?theartnewspaper\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-05-04 19:49:15"
+	"lastUpdated": "2021-08-13 20:26:44"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 czar
+	Copyright © 2019-2021 czar
 	http://en.wikipedia.org/wiki/User_talk:Czar
 	
 	This file is part of Zotero.
@@ -37,51 +37,50 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (/\/(news|analysis|blog|comment|preview|review)\/./.test(url)) {
 		return "magazineArticle";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
-function scrape(doc, url) {
-	var issue = text(doc,'.af-issue-number a'); // when issue info is available ("Appeared in The Art Newspaper"), change type to magazineArticle
+function scrape(doc, _url) {
+	var issue = text(doc, '.af-issue-number a'); // when issue info is available ("Appeared in The Art Newspaper"), change type to magazineArticle
 	var item;
 	if (issue) {
 		item = new Zotero.Item("magazineArticle");
-		item.issue = issue.substr(0,issue.indexOf(' '));
-		item.date = issue.substr(issue.indexOf(' ')+1);
+		item.issue = issue.substr(0, issue.indexOf(' '));
+		item.date = issue.substr(issue.indexOf(' ') + 1);
 		item.ISSN = '0960-6556';
-	} else {
+	}
+	else {
 		item = new Zotero.Item("blogPost");
 	}
-	var json_ld = doc.querySelector('script[type="application/ld+json"]'); // JSON-LD not yet built into EM
-	if (json_ld) {
-		var json = JSON.parse(json_ld.textContent);
+	var jsonLD = doc.querySelector('script[type="application/ld+json"]'); // JSON-LD not yet built into EM
+	if (jsonLD) {
+		var json = JSON.parse(jsonLD.textContent);
 		item.title = json.headline;
 		if (!item.date) {
 			item.date = json.datePublished;
 		}
-		for (let author of json.author) { 
+		for (let author of json.author) {
 			item.creators.push(ZU.cleanAuthor(author, "author"));
 		}
 		if (item.creators[0].lastName == "Newspaper") {			// fix generalized authorship
-			delete item.creators[0].firstName;                  // remove the firstName param
+			delete item.creators[0].firstName; // remove the firstName param
 			item.creators[0].lastName = "The Art Newspaper";	// write the desired name to lastName
-			item.creators[0].fieldMode = 1;                     // change to single-field mode
+			item.creators[0].fieldMode = 1; // change to single-field mode
 		}
 	}
 	
 	item.publicationTitle = "The Art Newspaper";
 	item.language = "en";
-	item.url = attr(doc,'link[rel=canonical]','href');
-	item.abstractNote = attr(doc,'meta[name="description"]','content');
+	item.url = attr(doc, 'link[rel=canonical]', 'href');
+	item.abstractNote = attr(doc, 'meta[name="description"]', 'content');
 	
 	item.attachments.push({
 		document: doc,
@@ -98,7 +97,7 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('.ais-Hits__root a, a.cp-link'); // 1st selector is search results; 2nd is CMS
 	var titles = doc.querySelectorAll('.sr-furniture h4, a.cp-link');
-	for (let i=0; i<rows.length; i++) {
+	for (let i = 0; i < rows.length; i++) {
 		let href = rows[i].href;
 		let title = ZU.trimInternal(titles[i].textContent);
 		if (!href || !title) continue;
@@ -122,7 +121,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }/** BEGIN TEST CASES **/
