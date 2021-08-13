@@ -105,10 +105,10 @@ function scrape(doc, url) {
 				if (articleData.author) {
 					if (Array.isArray(articleData.author)) {
 						for (let author of articleData.author) {
-							item.creators.push(ZU.cleanAuthor(author.name, 'author'));
+							if (author.name) item.creators.push(ZU.cleanAuthor(author.name, 'author'));
 						}
 					}
-					else {
+					else if (articleData.author.name) {
 						item.creators.push(ZU.cleanAuthor(articleData.author.name, 'author'));
 					}
 				}
@@ -278,6 +278,68 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.thestar.com/topic.ottawa.html",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.thestar.com/news/canada/2021/08/12/yukon-reports-nine-new-cases-of-covid-19-territory-has-45-active-infections.html",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Yukon reports nine new cases of COVID-19; territory has 45 active infections",
+				"creators": [],
+				"date": "2021-08-12",
+				"ISSN": "0319-0781",
+				"abstractNote": "WHITEHORSE - Yukon health officials are reporting nine new cases of COVID-19.",
+				"language": "en-CA",
+				"libraryCatalog": "Toronto Star",
+				"publicationTitle": "The Toronto Star",
+				"section": "Canada",
+				"url": "https://www.thestar.com/news/canada/2021/08/12/yukon-reports-nine-new-cases-of-covid-19-territory-has-45-active-infections.html",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "CP_URGENCY_2"
+					},
+					{
+						"tag": "CP_health"
+					},
+					{
+						"tag": "Canada"
+					},
+					{
+						"tag": "FEEDPROVIDER_CP"
+					},
+					{
+						"tag": "FEED_automated"
+					},
+					{
+						"tag": "Health"
+					},
+					{
+						"tag": "Whitehorse"
+					},
+					{
+						"tag": "bc"
+					},
+					{
+						"tag": "smg_canada"
+					},
+					{
+						"tag": "social"
+					},
+					{
+						"tag": "yukon territory"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
