@@ -67,12 +67,12 @@ function getRISElement(doc) {
 }
 
 function getItem(doc) {
-	var text = getRISElement(doc).textContent.trim();
-	//	Z.debug(text);
+	var risText = getRISElement(doc).textContent.trim();
+	//	Z.debug(risText);
 	var trans = Zotero.loadTranslator('import');
 	// RIS
 	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
-	trans.setString(text);
+	trans.setString(risText);
 	trans.setHandler('itemDone', function (obj, item) {
 		item.url = ZU.xpathText(doc, '//div[@class="actions-bar__urltext"]');
 
