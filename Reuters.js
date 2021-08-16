@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-05 19:27:07"
+	"lastUpdated": "2021-07-05 16:50:37"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Reuters Translator
-	Copyright © 2011 Avram Lyon, ajlyon@gmail.com, Sebastian Karcher
+	Copyright © 2011-2021 Avram Lyon, Sebastian Karcher, and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -37,18 +37,14 @@
 */
 
 
-// attr()/text() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
-	if (url.includes("/article/")) {
+	if (attr(doc, 'meta[property="og:type"]', 'content') == 'article') {
 		return "newspaperArticle";
-	} else if (url.includes("blogs.reuters.com")) {
-	  return "blogPost";
-	} else if (url.includes('/search/') && getSearchResults(doc, true)) {
-	  return "multiple";
 	}
+	else if (url.includes('/search/') && getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	return false;
 }
 
 
@@ -56,9 +52,9 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('h3.search-result-title>a');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -72,7 +68,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -80,67 +76,38 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
 function scrape(doc, url) {
-	var type = detectWeb(doc, url);
-	// copy meta tags in body to head
-	var head = doc.getElementsByTagName('head');
-	var metasInBody = ZU.xpath(doc, '//body/meta');
-	for (var i=0; i<metasInBody.length; i++) {
-		head[0].append(metasInBody[i]);
-	}
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
-	
+	translator.setDocument(doc);
+
 	translator.setHandler('itemDone', function (obj, item) {
-		if (detectWeb(doc, url) == "newspaperArticle") {
-			item.date = attr(doc, 'meta[name="REVISION_DATE"]', 'content');
-			var authors = doc.querySelectorAll('[class*="BylineBar_byline_"] a');
-			var byline = ZU.xpathText(doc, '//div[@id="articleInfo"]//p[@class="byline"]');
-			for (let i=0; i<authors.length; i++) {
-				item.creators.push(authorFix(authors[i].textContent));
-			}
-			item.publicationTitle = "Reuters";
-		}
-		if (detectWeb(doc, url) == "blogPost") {
-			item.date = text(doc, '#thebyline .timestamp');
-			var byline = text(doc, 'div.author');
-			if (byline) {
-				var authors = byline.split(/and |,/);
-				for (let i=0; i<authors.length; i++) {
-					item.creators.push(authorFix(authors[i]));
-				}
-			}
-	
-			var blogtitle = text(doc, 'h1');
-			if (blogtitle) item.publicationTitle = "Reuters Blogs - " + blogtitle;
-			else item.publicationTitle = "Reuters Blogs";
+		item.creators = [];
+		let authors = doc.querySelectorAll('[rel="author"]');
+		for (let author of authors) {
+			item.creators.push(authorFix(author.textContent));
 		}
 		
-		if (item.date) {
-			item.date = ZU.strToISO(item.date);
-		}
-		item.place = ZU.xpathText(doc, '//div[@id="articleInfo"]//span[@class="location"]');
-		if (item.place) {
-			if (item.place == item.place.toUpperCase()) item.place = Zotero.Utilities.capitalizeTitle(item.place.toLowerCase(), true);
-		}
-
+		item.publicationTitle = "Reuters";
+		item.tags = attr(doc, 'meta[property$="article:tag"]', 'content')
+			.split(/\s*[/,]\s*/).map(tag => ({ tag }));
+		
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
-		trans.itemType = type;
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = detectWeb(doc);
 		trans.doWeb(doc, url);
 	});
 }
-
 
 function authorFix(author) {
 	// Sometimes we have "By Author"
@@ -148,9 +115,10 @@ function authorFix(author) {
 
 	var cleaned = Zotero.Utilities.cleanAuthor(author, "author");
 	// If we have only one name, set the author to one-name mode
-	if (cleaned.firstName == "") {
-		cleaned["fieldMode"] = true;
-	} else {
+	if (!cleaned.firstName) {
+		cleaned.fieldMode = 1;
+	}
+	else {
 		// We can check for all lower-case and capitalize if necessary
 		// All-uppercase is handled by cleanAuthor
 		cleaned.firstName = (cleaned.firstName == cleaned.firstName.toLowerCase()) ? Zotero.Utilities.capitalizeTitle(cleaned.firstName, true) : cleaned.firstName;
@@ -168,57 +136,33 @@ var testCases = [
 			{
 				"itemType": "newspaperArticle",
 				"title": "Europe could be in worst hour since WW2: Merkel",
-				"creators": [
-					{
-						"firstName": "James",
-						"lastName": "Mackenzie",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Barry",
-						"lastName": "Moody",
-						"creatorType": "author"
-					}
-				],
-				"date": "2011-11-14",
+				"creators": [],
+				"date": "2011-11-14T00:16:09Z",
 				"abstractNote": "Prime Minister-designate Mario Monti meets the leaders of Italy's biggest two parties on Tuesday to discuss the \"many sacrifices\" needed to reverse a collapse in market confidence that is driving an ever deepening euro zone debt crisis.",
 				"language": "en",
 				"libraryCatalog": "www.reuters.com",
 				"publicationTitle": "Reuters",
+				"section": "Business News",
 				"shortTitle": "Europe could be in worst hour since WW2",
-				"url": "https://www.reuters.com/article/us-eurozone/new-italian-greek-governments-race-to-limit-damage-idUSTRE7AC15K20111114",
+				"url": "https://www.reuters.com/article/us-eurozone-idUSTRE7AC15K20111114",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
 					{
-						"tag": "Angela Merkel"
+						"tag": "Debt"
 					},
 					{
-						"tag": "Angela Merkel"
-					},
-					{
-						"tag": "Angela Merkel"
-					},
-					{
-						"tag": "Antonis Samaras"
-					},
-					{
-						"tag": "Antonis Samaras"
-					},
-					{
-						"tag": "Debt / Fixed Income Markets"
-					},
-					{
-						"tag": "Diplomacy / Foreign Policy"
+						"tag": "Diplomacy"
 					},
 					{
 						"tag": "EUROZONE"
 					},
 					{
-						"tag": "Economic Events"
+						"tag": "Economic News"
 					},
 					{
 						"tag": "Euro Zone as a Whole"
@@ -230,25 +174,13 @@ var testCases = [
 						"tag": "European Union"
 					},
 					{
-						"tag": "George Papandreou"
+						"tag": "Fixed Income Markets"
 					},
 					{
-						"tag": "George Papandreou"
+						"tag": "Foreign Policy"
 					},
 					{
-						"tag": "Germany"
-					},
-					{
-						"tag": "Germany"
-					},
-					{
-						"tag": "Germany"
-					},
-					{
-						"tag": "Giorgio Napolitano"
-					},
-					{
-						"tag": "Government / Politics"
+						"tag": "Government"
 					},
 					{
 						"tag": "Government Finances"
@@ -257,73 +189,13 @@ var testCases = [
 						"tag": "Greece"
 					},
 					{
-						"tag": "Greece"
-					},
-					{
-						"tag": "Greece"
-					},
-					{
-						"tag": "Harry Papachristou"
-					},
-					{
-						"tag": "Harry Papachristou"
-					},
-					{
 						"tag": "Italy"
-					},
-					{
-						"tag": "Italy"
-					},
-					{
-						"tag": "Italy"
-					},
-					{
-						"tag": "Jack Ablin"
-					},
-					{
-						"tag": "Jens Weidmann"
-					},
-					{
-						"tag": "Jens Weidmann"
-					},
-					{
-						"tag": "Kai Pfaffenbach"
-					},
-					{
-						"tag": "Kai Pfaffenbach"
-					},
-					{
-						"tag": "Lucas Papademos"
-					},
-					{
-						"tag": "Lucas Papademos"
-					},
-					{
-						"tag": "Mario Monti"
-					},
-					{
-						"tag": "Mario Monti"
 					},
 					{
 						"tag": "National Government Debt"
 					},
 					{
-						"tag": "Olli Rehn"
-					},
-					{
-						"tag": "Olli Rehn"
-					},
-					{
-						"tag": "Philip Pullella"
-					},
-					{
-						"tag": "Philip Pullella"
-					},
-					{
-						"tag": "Silvio Berlusconi"
-					},
-					{
-						"tag": "Silvio Berlusconi"
+						"tag": "Politics"
 					},
 					{
 						"tag": "US"
@@ -339,113 +211,41 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://blogs.reuters.com/lawrencesummers/2012/03/26/its-too-soon-to-return-to-normal-policies/",
-		"items": [
-			{
-				"itemType": "blogPost",
-				"title": "It’s too soon to return to normal policies",
-				"creators": [
-					{
-						"firstName": "Lawrence",
-						"lastName": "Summers",
-						"creatorType": "author"
-					}
-				],
-				"date": "2012-03-26",
-				"abstractNote": "After years when the risks to the consensus modest-growth forecast were to the downside, they are now very much two-sided.",
-				"blogTitle": "Reuters Blogs",
-				"url": "http://blogs.reuters.com/lawrencesummers/2012/03/26/its-too-soon-to-return-to-normal-policies/",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
 		"url": "https://www.reuters.com/search/news?blob=europe",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://de.reuters.com/article/deutschland-koalition-csu-idDEKBN1GH2GW",
+		"url": "https://www.reuters.com/world/americas/perus-indigenous-hope-voice-last-under-new-president-2021-07-05/",
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "CSU besetzt Ministerien nur mit Männern",
-				"creators": [],
-				"date": "2018-03-05",
-				"abstractNote": "Die CSU schickt anders als ihre Koalitionspartner CDU und SPD ausschließlich Männer an die Spitze der ihr zustehenden Bundesministerien.",
-				"language": "de",
-				"libraryCatalog": "de.reuters.com",
+				"title": "Peru's indigenous hope for a voice, at last, under new president",
+				"creators": [
+					{
+						"firstName": "Stefanie",
+						"lastName": "Eschenbacher",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Angela",
+						"lastName": "Ponce",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-07-05T10:00:00Z",
+				"abstractNote": "Maxima Ccalla, 60, an indigenous Quechua woman, has spent her life tilling the harsh soil in Peru's Andean highlands, resigned to a fate far removed from the vast riches buried deep beneath her feet in seams of copper, zinc and gold.",
+				"libraryCatalog": "www.reuters.com",
 				"publicationTitle": "Reuters",
-				"url": "https://de.reuters.com/article/deutschland-koalition-csu-idDEKBN1GH2GW",
+				"section": "Americas",
+				"url": "https://www.reuters.com/world/americas/perus-indigenous-hope-voice-last-under-new-president-2021-07-05/",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Africa"
-					},
-					{
-						"tag": "Auto and Truck Manufacturers (TRBC)"
-					},
-					{
-						"tag": "CSU"
-					},
-					{
-						"tag": "Conflicts / War / Peace"
-					},
-					{
-						"tag": "DEUTSCHLAND"
-					},
-					{
-						"tag": "Elections / Voting"
-					},
-					{
-						"tag": "Euro Zone"
-					},
-					{
-						"tag": "Europe"
-					},
-					{
-						"tag": "General"
-					},
-					{
-						"tag": "German Language"
-					},
-					{
-						"tag": "Germany"
-					},
-					{
-						"tag": "Government / Politics"
-					},
-					{
-						"tag": "International / National Security"
-					},
-					{
-						"tag": "Internet / World Wide Web"
-					},
-					{
-						"tag": "KOALITION"
-					},
-					{
-						"tag": "Science"
-					},
-					{
-						"tag": "Technology / Media / Telecoms"
-					},
-					{
-						"tag": "Western Europe"
-					}
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

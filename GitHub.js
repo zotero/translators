@@ -2,18 +2,18 @@
 	"translatorID": "a7747ba7-42c6-4a22-9415-1dafae6262a9",
 	"label": "GitHub",
 	"creator": "Martin Fenner, Philipp Zumstein",
-	"target": "^https?://(www\\.)?github\\.com/[^/]+/[^/]+/?$",
+	"target": "^https?://(www\\.)?github\\.com/([^/]+/[^/]+|search\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-08-29 10:16:28"
+	"lastUpdated": "2021-07-29 19:26:28"
 }
 
 /**
-	Copyright (c) 2017 Martin Fenner, Philipp Zumstein
+	Copyright (c) 2017-2021 Martin Fenner, Philipp Zumstein
 
 	This program is free software: you can redistribute it and/or
 	modify it under the terms of the GNU Affero General Public License
@@ -31,23 +31,39 @@
 */
 
 
+const apiUrl = "https://api.github.com/";
+
 function detectWeb(doc, url) {
 	if (url.includes("/search?")) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
 	}
-	else if (ZU.xpathText(doc, '/html/head/meta[@property="og:type" and @content="object"]/@content')) {
+	
+	if (!doc.querySelector('meta[property="og:type"][content="object"]')) {
+		// exclude the home page and marketing pages
+		return false;
+	}
+	
+	// `og:title` is messed up when browsing a file.
+	if (url.startsWith(attr(doc, 'meta[property="og:url"]', 'content') + '/blob/')) {
 		return "computerProgram";
 	}
-	return false;
+
+	if (!/^(GitHub - )?[^/\s]+\/[^/\s]+(: .*)?$/.test(attr(doc, 'meta[property="og:title"]', 'content'))) {
+		// and anything without a repo name (abc/xyz) as its og:title.
+		// deals with repo pages that we can't scrape, like GitHub Discussions.
+		return false;
+	}
+	
+	return "computerProgram";
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(@class, "repo-list-item")]//h3/a');
+	var rows = doc.querySelectorAll('.repo-list-item .f4 a');
 	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
@@ -79,31 +95,40 @@ function doWeb(doc, url) {
 }
 
 
-function scrape(doc, _url) {
+function scrape(doc, url) {
 	var item = new Z.Item("computerProgram");
 	
-	var repo = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	
 	// basic metadata from the meta tags in the head
-	item.url = ZU.xpathText(doc, '//meta[@property="og:url"]/@content');
-	item.title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	item.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content').split(' - ')[0];
+	item.url = attr(doc, 'meta[property="og:url"]', 'content');
+	if (url.includes('/blob/') && !item.url.includes('/blob/')) {
+		// github is doing something weird with the og:url meta tag right now -
+		// it always points to the repo root (e.g. zotero/translators), even
+		// when we're in a specific directory/file (e.g. zotero/translators/
+		// blob/master/GitHub.js). this fix (hopefully) won't stick around
+		// long-term, but for now, let's just grab the user-facing permalink
+		let permalink = attr(doc, '.js-permalink-shortcut', 'href');
+		if (permalink) {
+			item.url = 'https://github.com' + permalink;
+		}
+		else {
+			let clipboardCopyPermalink = attr(doc, '#blob-more-options-details clipboard-copy', 'value');
+			if (clipboardCopyPermalink) {
+				item.url = clipboardCopyPermalink;
+			}
+		}
+	}
+	// Do not rely on `og:title` since GitHub isn't consistent with its meta attribute.
+	item.title = item.url.split('/').slice(3, 5).join('/');
+	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content').split(' - ')[0]
+		.replace(` Contribute to ${item.title} development by creating an account on GitHub.`, '');
 	item.libraryCatalog = "GitHub";
 	var topics = doc.getElementsByClassName('topic-tag');
 	for (var i = 0; i < topics.length; i++) {
 		item.tags.push(topics[i].textContent.trim());
 	}
 
-	item.rights = ZU.xpathText(doc, '//a[*[contains(@class, "octicon-law")]]');
-	if (item.rights && item.rights.trim() == "View license") {
-		delete item.rights;
-	}
-	
-	// api calls for more information (owner, date, programming language)
-	var apiUrl = "https://api.github.com/";
-	ZU.doGet(apiUrl + "repos/" + repo, function (result) {
+	ZU.doGet(apiUrl + "repos/" + item.title, function (result) {
 		var json = JSON.parse(result);
-		// Z.debug(json);
 		if (json.message && json.message.includes("API rate limit exceeded")) {
 			// finish and stop in this case
 			item.complete();
@@ -114,22 +139,81 @@ function scrape(doc, _url) {
 		item.programmingLanguage = json.language;
 		item.extra = "original-date: " + json.created_at;
 		item.date = json.updated_at;
-		
-		ZU.doGet(apiUrl + "users/" + owner, function (user) {
-			var jsonUser = JSON.parse(user);
-			var ownerName = jsonUser.name || jsonUser.login;
-			if (jsonUser.type == "User") {
-				item.creators.push(ZU.cleanAuthor(ownerName, "programmer"));
-			}
-			else {
-				item.company = ownerName;
+		if (json.license && json.license.spdx_id != "NOASSERTION") {
+			item.rights = json.license.spdx_id;
+		}
+		item.abstractNote = json.description;
+
+		ZU.doGet(`/${item.title}/hovercards/citation`, function (respText, xhr) {
+			if (xhr.status == 200) {
+				let doc = new DOMParser().parseFromString(respText, 'text/html');
+				let bibtex = attr(doc, '[aria-labelledby="bibtex-tab"] input', 'value');
+				
+				if (bibtex && bibtex.trim()) {
+					completeWithBibTeX(item, bibtex);
+					return;
+				}
 			}
 			
+			// if there was no CITATION.cff or the response didn't include a
+			// BibTeX representation, we fall back to filling in the title and
+			// authorship using the API.
+			completeWithAPI(item, owner);
+		}, null, null, { 'X-Requested-With': 'XMLHttpRequest' }, false);
+	});
+}
+
+function completeWithBibTeX(item, bibtex) {
+	var translator = Zotero.loadTranslator("import");
+	// BibTeX
+	translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
+	translator.setString(bibtex);
+	
+	translator.setHandler("itemDone", function (obj, bibItem) {
+		let path = item.title;
+		
+		delete bibItem.itemType;
+		delete bibItem.attachments;
+		delete bibItem.itemID;
+		Object.assign(item, bibItem);
+		
+		if (item.version) {
+			item.complete();
+		}
+		else {
+			ZU.doGet(`https://raw.githubusercontent.com/${path}/HEAD/CITATION.cff`, function (cffText) {
+				let version = cffText.match(/^\s*(?:"version"|version)\s*:\s*"?(.+)"?\s*$/m);
+				if (version) {
+					item.versionNumber = version[1];
+				}
+				item.complete();
+			}, null, null, null, false);
+		}
+	});
+	
+	translator.translate();
+}
+
+function completeWithAPI(item, owner) {
+	ZU.doGet(apiUrl + "users/" + owner, function (user) {
+		var jsonUser = JSON.parse(user);
+		var ownerName = jsonUser.name || jsonUser.login;
+		if (jsonUser.type == "User") {
+			item.creators.push(ZU.cleanAuthor(ownerName, "programmer"));
+		}
+		else {
+			item.company = ownerName;
+		}
+		
+		ZU.processDocuments(`/${item.title}`, function (rootDoc) {
+			let readmeTitle = text(rootDoc, '#readme h1');
+			if (readmeTitle) {
+				item.title = readmeTitle;
+			}
 			item.complete();
 		});
 	});
 }
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -139,11 +223,11 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "zotero/zotero",
+				"title": "Zotero",
 				"creators": [],
-				"date": "2019-08-29T02:15:36Z",
+				"date": "2021-07-29T14:50:36Z",
 				"abstractNote": "Zotero is a free, easy-to-use tool to help you collect, organize, cite, and share your research sources.",
-				"company": "zotero",
+				"company": "Zotero",
 				"extra": "original-date: 2011-10-27T07:46:48Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
@@ -166,10 +250,10 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "datacite/schema",
+				"title": "DataCite Schema Repository",
 				"creators": [],
-				"date": "2019-08-16T13:21:08Z",
-				"abstractNote": "DataCite Metadata Schema Repository. Contribute to datacite/schema development by creating an account on GitHub.",
+				"date": "2021-07-23T10:14:44Z",
+				"abstractNote": "DataCite Metadata Schema Repository",
 				"company": "DataCite",
 				"extra": "original-date: 2011-04-13T07:08:41Z",
 				"libraryCatalog": "GitHub",
@@ -196,8 +280,8 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2019-08-23T12:32:51Z",
-				"abstractNote": "OCR engine for all the languages. Contribute to mittagessen/kraken development by creating an account on GitHub.",
+				"date": "2021-07-29T12:26:11Z",
+				"abstractNote": "OCR engine for all the languages",
 				"extra": "original-date: 2015-05-19T09:24:38Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "Python",
@@ -232,7 +316,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "computerProgram",
-				"title": "aurimasv/z2csl",
+				"title": "z2csl - Zotero to CSL extension and mappings",
 				"creators": [
 					{
 						"firstName": "Aurimas",
@@ -240,12 +324,172 @@ var testCases = [
 						"creatorType": "programmer"
 					}
 				],
-				"date": "2019-07-12T17:57:05Z",
+				"date": "2021-03-20T15:33:50Z",
 				"abstractNote": "Zotero extension for creating Zotero to CSL item type and field mappings.",
 				"extra": "original-date: 2012-05-20T07:53:58Z",
 				"libraryCatalog": "GitHub",
 				"programmingLanguage": "JavaScript",
 				"url": "https://github.com/aurimasv/z2csl",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/zotero/translators/blob/master/GitHub.js",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "zotero/translators",
+				"creators": [],
+				"date": "2021-07-29T04:53:43Z",
+				"abstractNote": "Zotero Translators",
+				"company": "Zotero",
+				"extra": "original-date: 2011-07-03T17:40:38Z",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "JavaScript",
+				"url": "https://github.com/zotero/translators/blob/eb4f39007e62d3d632448e184b1fd3671b3a1349/GitHub.js",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Citation File Format",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05",
+				"abstractNote": "A machine-readable and human-readable and -writable format for CITATION files. CITATION files provide reference and citation information for (research/scientific) software.",
+				"extra": "DOI: 10.5281/zenodo.4751536",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format",
+				"versionNumber": "1.1.0",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://github.com/citation-file-format/citation-file-format/blob/main/test/pytest.ini",
+		"items": [
+			{
+				"itemType": "computerProgram",
+				"title": "Citation File Format",
+				"creators": [
+					{
+						"firstName": "Stephan",
+						"lastName": "Druskat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jurriaan H.",
+						"lastName": "Spaaks",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Neil",
+						"lastName": "Chue Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert",
+						"lastName": "Haines",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Baker",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Spencer",
+						"lastName": "Bliven",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Egon",
+						"lastName": "Willighagen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Pérez-Suárez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexander",
+						"lastName": "Konovalov",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-05",
+				"abstractNote": "A machine-readable and human-readable and -writable format for CITATION files. CITATION files provide reference and citation information for (research/scientific) software.",
+				"extra": "DOI: 10.5281/zenodo.4751536",
+				"libraryCatalog": "GitHub",
+				"programmingLanguage": "Python",
+				"rights": "CC-BY-4.0",
+				"url": "https://github.com/citation-file-format/citation-file-format/blob/9879c64a37a9d4f3f18b67594aa3f3bf763fb69a/test/pytest.ini",
+				"versionNumber": "1.1.0",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
