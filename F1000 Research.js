@@ -5,7 +5,7 @@
 	"target": "^https?://(www\\.)?(((openresearchcentral|(aas|amrc|hrb|wellcome|gates)openresearch)\\.org)|(f1000research|emeraldopenresearch)\\.com)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 200,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
