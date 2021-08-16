@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 20:26:42"
+	"lastUpdated": "2021-08-16 15:24:50"
 }
 
 /*
@@ -152,7 +152,11 @@ function scrape(doc, url) {
 		if (item.abstractNote) {
 			item.abstractNote = item.abstractNote.trim().replace(/^Abstract:?\s*/, '');
 		}
-		
+
+		if (!item.abstractNote) {
+			item.abstractNote = attr(doc, 'meta[name="DC.Description"]', 'content');
+		}
+
 		if (!item.ISBN) {
 			item.ISBN = ZU.cleanISBN(text(doc, '.identification_code .value'));
 		}
@@ -460,6 +464,7 @@ var testCases = [
 				"date": "2016-03-14",
 				"DOI": "10.12685/027.7-4-1-101",
 				"ISSN": "2296-0597",
+				"abstractNote": "Der Artikel beschreibt die drei Preisverfahren, die im Preismanagement angewendet werden und zeigt, dass trotz neuer Preisverfahren die Preismodelle bei wissenschaftlichen Zeitschriften immer noch kostenorientiert oder wettbewerbsorientiert sind. Das nutzenorientierte Preisverfahren wartet noch auf seine Umsetzung.This article describes the three modes of pricing which have been applied by price management. Although new pricing models are existing pricing models at scientific journals remain cost oriented or competitor oriented. The value oriented pricing is still waiting for realisation.",
 				"issue": "1",
 				"language": "de",
 				"libraryCatalog": "0277.ch",
@@ -857,6 +862,7 @@ var testCases = [
 				"date": "2011-07-28",
 				"DOI": "10.15695/amqst.v8i1.220",
 				"ISSN": "1553-4316",
+				"abstractNote": "Historically, Canadian literature has been chary of entering too far into the new discipline of inter-American literary study.  Rightly concerned about the danger of blurring its identity as a distinctive national literature (one made up, as is well known, of two great strands, the French and the English), Canadian writing has, however, come of age, both nationally and internationally.  One dramatic aspect of this transformation is that we now have mounting evidence that both English and French Canadian writers are actively engaging with the literatures and cultures of their hemispheric neighbors.  By extending the methodologies of Comparative Literature to the inter-American paradigm, Canadian writers, critics, and literary historians are finding ways to maintain their status as members of a unique and under-appreciated national literature while also entering into the kinds of comparative studies that demonstrate their New World ties as well.",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "ejournals.library.vanderbilt.edu",
@@ -967,6 +973,7 @@ var testCases = [
 				"date": "2019-06-30",
 				"DOI": "10.15503/jecs20191.173.184",
 				"ISSN": "2081-1640",
+				"abstractNote": "Aim. The aim of the article is to analyse the ways African American children’s characters are constructed in selected picture-books and to determine whether they have any impact on the conduct of contemporary black youth facing discrimination in their own lives. It also argues that picture-books are one of the most influential media in the representation of racial problems.Methods. The subjects of the study are picture-books. The analysis pertains to the visual and the verbal narrative of the books, with a special emphasis being placed on the interplay between text and image as well as on the ways the meaning of the books is created. The texts are analysed using a number of existing research methods used for examining the picture-book format. Results. The article shows that the actions of selected children’s characters, whether real or imaginary, may serve as an incentive for contemporary youth to struggle for equal rights and contribute to the process of racial integration on a daily basis.Conclusions. The results can be considered in the process of establishing educational curricula for students from minority groups who need special literature that would empower them to take action and join in the efforts of adult members of their communities.",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "jecs.pl",
@@ -1012,6 +1019,7 @@ var testCases = [
 				],
 				"date": "2021-05-18",
 				"ISSN": "1555-5763",
+				"abstractNote": "The process that created the Center for Weather Forecasting and Climate Studies (CPTEC) in Brazil in the 1980s and 90s, which introduced Numerical Weather Prediction (NWP) models, was also a moment for reconversion of a meteorological science elite in the country. This double-sided process occurred in view of a series of favorable historical conditions, such as the institutionalization of space research, as well as of the implementation of new scientific policies in Brazil. CPTEC was formed by young scientists from the National Institute for Space Research (INPE) who had recently obtained their doctoral degrees abroad. While defending the modernization of Brazilian meteorology, through the creation of this new meteorological center, these scientists, based on their trajectories and attributes of scientific excellence, constituted a group of science elite. The introduction of research on climate change would be a new opportunity for recognition of part of these researchers as members of this elite. This study describes how the trajectories of certain scientists shaped their careers, producing what we call reconversion of science elites, as well as the scientific field in the implementation of the first NWP center in Brazil.",
 				"archiveLocation": "Brazil, 1970-2000",
 				"language": "en",
 				"libraryCatalog": "journal.meteohistory.org",

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-01 01:18:46"
+	"lastUpdated": "2021-08-12 22:40:03"
 }
 
 /*
@@ -51,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, #searchResultsPage .al-title a[href*="/article"]');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -79,6 +79,12 @@ function getArticleId(doc) {
 	if (!id) {
 		id = attr(doc, 'a[data-article-id]', 'data-article-id');
 	}
+	if (!id) {
+		id = attr(doc, '[data-resource-id]', 'data-resource-id');
+	}
+	if (!id) {
+		throw new Error('ID not found in document');
+	}
 	return id;
 }
 
@@ -94,6 +100,10 @@ function scrape(doc) {
 	var pdfURL = attr(doc, 'a.article-pdfLink', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function (text) {
+		if (text.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
+			throw new Error('Rate-limited');
+		}
+		
 		// Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
@@ -560,6 +570,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.geoscienceworld.org/georef/search-results?page=1&q=test&SearchSourceType=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

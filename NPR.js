@@ -2,14 +2,14 @@
 	"translatorID": "bc2fbf38-3061-4335-8644-69ce68580b20",
 	"label": "NPR",
 	"creator": "Abe Jellinek",
-	"target": "https?://www\\.npr\\.org/",
+	"target": "^https?://www\\.npr\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-14 01:27:42"
+	"lastUpdated": "2021-08-13 21:08:15"
 }
 
 /*
@@ -36,8 +36,14 @@
 */
 
 
-function detectWeb(doc, _url) {
-	if (doc.body.id == 'news' && doc.querySelector('script[type="application/ld+json"]')) {
+function detectWeb(doc, url) {
+	// NPR assumes that only a crawler (which always loads pages fresh rather
+	// than letting the SPA framework fake a reload) would want JSON-LD, so we
+	// can't use that as our only check, and we'll have to manually reload the
+	// page to get it in doWeb.
+	// The JSON-LD also sticks around when you navigate to a non-story page,
+	// which is odd, so we can't use it as a test for a story page at all!
+	if (doc.querySelector('#storytext')) {
 		if (doc.querySelector('h1.transcript a')) {
 			if (attr(doc, '.slug a', 'href').includes('npr.org/podcasts/')) {
 				return "podcast";
@@ -53,6 +59,10 @@ function detectWeb(doc, _url) {
 			return "newspaperArticle";
 		}
 	}
+	else if (/^https?:\/\/www\.npr\.org\/.+/.test(url)) {
+		// wait for SPA reload
+		Z.monitorDOMChanges(doc.querySelector('#loading-bar'));
+	}
 	// we can't really do search results, because each result might be a
 	// multiple and there's no way to tell from the search page
 	return false;
@@ -60,6 +70,17 @@ function detectWeb(doc, _url) {
 
 
 function doWeb(doc, url) {
+	if (doc.querySelector('script[type="application/ld+json"]')) {
+		scrape(doc, url);
+	}
+	else {
+		// See comment in detectWeb. Have to add a # to ensure that
+		// processDocuments doesn't use the already-loaded page.
+		ZU.processDocuments(url + '#', scrape);
+	}
+}
+
+function scrape(doc, url) {
 	let detected = detectWeb(doc, url);
 	switch (detected) {
 		case 'multiple': {
