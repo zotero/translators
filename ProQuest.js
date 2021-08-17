@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-11 03:55:14"
+	"lastUpdated": "2021-08-17 02:26:57"
 }
 
 /*
@@ -33,10 +33,6 @@
  	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
  	***** END LICENSE BLOCK ******/
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 var language = "English";
@@ -289,6 +285,36 @@ function scrape(doc, url, type) {
 						ZU.cleanAuthor(value[j], creatorType, value[j].includes(',')));
 				}
 				break;
+			case 'Signator':
+				if (item.itemType == 'letter') {
+					for (let signator of rows[i].childNodes[1].querySelectorAll('a')) {
+						let name = signator.textContent;
+						item.creators.push(
+							ZU.cleanAuthor(name, 'author', name.includes(',')));
+					}
+				}
+				break;
+			case 'Recipient':
+				if (item.itemType == 'letter') {
+					for (let recipient of rows[i].childNodes[1].querySelectorAll('a')) {
+						let name = recipient.textContent;
+						if (/\b(department|bureau|office|director)\b/i.test(name)) {
+							// a general edge case that we handle specifically,
+							// but institutional recipients are common and we'd
+							// like not to split the name when we can
+							item.creators.push({
+								lastName: name,
+								creatorType: 'recipient',
+								fieldMode: 1
+							});
+						}
+						else {
+							item.creators.push(
+								ZU.cleanAuthor(name, 'recipient', name.includes(',')));
+						}
+					}
+				}
+				break;
 			case 'Publication title':
 				item.publicationTitle = value.replace(/;.+/, "");
 				break;
@@ -362,6 +388,7 @@ function scrape(doc, url, type) {
 
 			// multiple dates are provided
 			// more complete dates are preferred
+			case 'Date':
 			case 'Publication date':
 				dates[2] = value;
 				break;
@@ -372,9 +399,17 @@ function scrape(doc, url, type) {
 				dates[0] = value;
 				break;
 
-			// we know about these, skip
+			// we already know about these; we can skip them unless we want to
+			// disambiguate a general item type
 			case 'Source type':
+				break;
 			case 'Document type':
+				if (item.itemType == 'letter') {
+					if (value.trim().toLowerCase() != 'letter') {
+						item.letterType = value;
+					}
+				}
+				break;
 			case 'Record type':
 			case 'Database':
 				break;
@@ -533,6 +568,9 @@ function getItemType(types) {
 		}
 		else if (testString.includes("statute")) {
 			return "statute";
+		}
+		else if (testString.includes("letter") || testString.includes("cable")) {
+			guessType = "letter";
 		}
 	}
 
@@ -1709,6 +1747,114 @@ var testCases = [
 					},
 					{
 						"tag": "Sociology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/dnsa/docview/1679056926/fulltextPDF/8C1FDDD8E506429BPQ/1",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "Kidnapping of Ambassador Dubs: Sitrep No. 3",
+				"creators": [
+					{
+						"lastName": "United States. Department of State",
+						"creatorType": "recipient",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "J. Bruce",
+						"lastName": "Amstutz",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 14, 1979",
+				"language": "English",
+				"letterType": "Cable",
+				"libraryCatalog": "ProQuest",
+				"shortTitle": "Kidnapping of Ambassador Dubs",
+				"url": "https://www.proquest.com/dnsa/docview/1679056926/abstract/F71353DE52F74E3BPQ/1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Adolph Kidnapping (14 February 1979)"
+					},
+					{
+						"tag": "Afghanistan. National Police"
+					},
+					{
+						"tag": "Dubs"
+					},
+					{
+						"tag": "Police officers"
+					},
+					{
+						"tag": "Soviet advisors"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "[Dear Colleague Letter regarding Prosecution of Yasir Arafat; Includes Letter to Edwin Meese, List of Senators Signing Letter, and Washington Times Article Dated February 7, 1986]",
+				"creators": [
+					{
+						"firstName": "Joseph R.",
+						"lastName": "Biden",
+						"creatorType": "recipient"
+					},
+					{
+						"firstName": "Charles E.",
+						"lastName": "Grassley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frank R.",
+						"lastName": "Lautenberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 24, 1986",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Indictments"
+					},
+					{
+						"tag": "Khartoum Embassy Takeover and Assassinations (1973)"
+					},
+					{
+						"tag": "Washington Post"
+					},
+					{
+						"tag": "Washington Times"
 					}
 				],
 				"notes": [],
