@@ -1,7 +1,7 @@
 {
 	"translatorID": "0fba73bf-f113-4d36-810f-2c654fa985fb",
 	"label": "The New Yorker",
-	"creator": "Philipp Zumstein",
+	"creator": "Philipp Zumstein and Abe Jellinek",
 	"target": "^https?://www\\.newyorker\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-12 22:00:35"
+	"lastUpdated": "2021-08-17 15:23:53"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2021 Philipp Zumstein and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -37,27 +37,27 @@
 
 
 function detectWeb(doc, url) {
-	var bodyClass = ZU.xpathText(doc, '//body/@class');
-	if (bodyClass && bodyClass.indexOf('article')>-1) {
+	if (doc.querySelector('article.article')) {
 		return "magazineArticle";
-	} else if (url.indexOf('/search/')>-1 && getSearchResults(doc, true)) {
+	}
+	else if (url.includes('/search/') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//li//a[h4]');
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
 	}
-	Z.debug(items);
 	return found ? items : false;
 }
 
@@ -66,15 +66,12 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -82,33 +79,36 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var data = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
-	var json = JSON.parse(data);
-	//Z.debug(json);
+	var json = JSON.parse(data)[0];
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	//translator.setDocument(doc);
+	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		if (item.creators.length==0 && json.author) {
-			//json.author can either be an array, or a object containing an array
+		if (item.creators.length <= 1 && json.author) {
+			item.creators = [];
+			// json.author can either be an array, or a object containing an array
 			if (Array.isArray(json.author)) {
-				for (var i=0; i<json.author.length; i++) {
-					item.creators.push(ZU.cleanAuthor(json.author[i].name, "author"));
+				for (let author of json.author) {
+					item.creators.push(ZU.cleanAuthor(author.name, "author"));
 				}
-			} else if (json.author.name) {
-				for (var i=0; i<json.author.name.length; i++) {
-					item.creators.push(ZU.cleanAuthor(json.author.name[i], "author"));
+			}
+			else if (json.author.name) {
+				for (let name of json.author.name) {
+					item.creators.push(ZU.cleanAuthor(name, "author"));
 				}
 			}
 		}
-		item.date = json.datePublished;
+		
+		item.publicationTitle = 'The New Yorker';
+		item.date = ZU.strToISO(json.dateModified || json.datePublished);
 		item.section = json.articleSection;
 		item.ISSN = "0028-792X";
 		item.complete();
 	});
 
-	translator.getTranslatorObject(function(trans) {
+	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "magazineArticle";
 		trans.doWeb(doc, url);
 	});
@@ -130,24 +130,83 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2011-10-20T04:00:00.000Z",
+				"date": "2011-10-20",
 				"ISSN": "0028-792X",
 				"abstractNote": "The Republican professionals know it. The numbers show that more than half the country identifies the economy as the most pressing issue of the campaign; …",
+				"language": "en-US",
 				"libraryCatalog": "www.newyorker.com",
 				"publicationTitle": "The New Yorker",
 				"url": "https://www.newyorker.com/magazine/2011/10/31/foreign-campaigns",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"2012 election",
-					"arab league",
-					"arab spring",
-					"barack obama",
-					"death",
-					"dictators"
+					{
+						"tag": "2012 election"
+					},
+					{
+						"tag": "arab league"
+					},
+					{
+						"tag": "arab spring"
+					},
+					{
+						"tag": "barack obama"
+					},
+					{
+						"tag": "death"
+					},
+					{
+						"tag": "dictators"
+					},
+					{
+						"tag": "elections"
+					},
+					{
+						"tag": "foreign policy"
+					},
+					{
+						"tag": "herman cain"
+					},
+					{
+						"tag": "idi amin"
+					},
+					{
+						"tag": "libya"
+					},
+					{
+						"tag": "middle east"
+					},
+					{
+						"tag": "mitt romney"
+					},
+					{
+						"tag": "muammar qaddafi"
+					},
+					{
+						"tag": "osama bin laden"
+					},
+					{
+						"tag": "politics"
+					},
+					{
+						"tag": "presidential candidates"
+					},
+					{
+						"tag": "republican party"
+					},
+					{
+						"tag": "republicans"
+					},
+					{
+						"tag": "rick perry"
+					},
+					{
+						"tag": "uzbekistan"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -168,20 +227,26 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-02-24T23:12:35.000Z",
+				"date": "2012-02-24",
 				"ISSN": "0028-792X",
 				"abstractNote": "I’m a week late with this, but Chris Matthews had a pretty devastating take on Santorum’s “phony theology” attack on Obama’s concern about what …",
+				"language": "en-US",
 				"libraryCatalog": "www.newyorker.com",
 				"publicationTitle": "The New Yorker",
 				"url": "https://www.newyorker.com/news/hendrik-hertzberg/is-that-rick-santorum-on-the-cafeteria-line",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"catholics",
-					"rick santorum"
+					{
+						"tag": "catholics"
+					},
+					{
+						"tag": "rick santorum"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -207,24 +272,35 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-06-12T04:00:00Z",
+				"date": "2017-06-12",
 				"ISSN": "0028-792X",
 				"abstractNote": "DNA evidence exonerated six convicted killers. So why do some of them recall the crime so clearly?",
+				"language": "en-US",
 				"libraryCatalog": "www.newyorker.com",
 				"publicationTitle": "The New Yorker",
 				"url": "https://www.newyorker.com/magazine/2017/06/19/remembering-the-murder-you-didnt-commit",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Crime",
-					"FalseMemories",
-					"Memory",
-					"Murder",
-					"Nebraska",
-					"Psychology"
+					{
+						"tag": "crime"
+					},
+					{
+						"tag": "memory"
+					},
+					{
+						"tag": "murder"
+					},
+					{
+						"tag": "nebraska"
+					},
+					{
+						"tag": "psychology"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
