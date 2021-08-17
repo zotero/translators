@@ -98,10 +98,8 @@ function scrape(doc, url) {
 	}
 	
 	newItem.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
-	// Printurl (add "v_print," before the article ID and "?p=" at the end) 
-	var printurl = newItem.url.replace(/^(.*\/)(\d+.html$)/, '$1v_print,$2?p=');
 	newItem.attachments.push({
-		url: printurl,
+		url: newItem.url,
 		title: "Snapshot",
 		mimeType: "text/html"
 	}); 
