@@ -1,7 +1,7 @@
 {
 	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
 	"label": "Tagesspiegel",
-	"creator": "Martin Meyerhoff, Sebastian Karcher",
+	"creator": "Martin Meyerhoff, Sebastian Karcher,Jaco Lüken",
 	"target": "^https?://www\\.tagesspiegel\\.de",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-28 18:07:21"
+	"lastUpdated": "2021-08-17 14:28:25"
 }
 
 /*
@@ -82,8 +82,9 @@ function scrape(doc, url) {
 
 	newItem.title = ZU.xpathText(doc, "//meta[@property='og:title']/@content");
 	newItem.date = ZU.xpathText(doc, "//time[@itemprop='datePublished']/@datetime");
-	newItem.abstractNote = ZU.xpathText(doc, ".//p[@class='hcf-teaser']");
-	newItem.section = ZU.xpathText(doc, '//ul[contains(@class, "ts-main-nav-items")]/li[contains(@class, "ts-active-point")]/a');
+	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
+	// Note: doesn't work with subsections
+	newItem.section = ZU.xpathText(doc, '//ul[contains(@class, "ts-main-nav-items")]/li[contains(@class, "ts-active")]/a');
 
 	// Authors 
 	var author  = ZU.xpathText(doc, "//header[contains(@class, 'ts-article-header')]//a[@rel='author']");
@@ -106,8 +107,27 @@ function scrape(doc, url) {
 	}); 
 	
 	// Tags
-	var tags = ZU.xpathText(doc, "//meta[@name='news_keywords']/@content");
-	if (tags) var tags= tags.split(","); // this seems to work even if there's no |
+	/* We read the tags from the initialisation of variable cmsObject.
+	 * This object and the keywords are defined in a head script tag.
+	 */
+	let tags = [];
+	let scriptItems = doc.querySelectorAll('head > script');
+	if (scriptItems) {
+		for (let i = 0; i < scriptItems.length; i++) {
+			let scriptItemText = scriptItems[i].textContent;
+			// search for script tag that declares the variable
+			if (!scriptItemText.match(/var\scmsObject\s=/)) {
+				continue;
+			}
+			// the pid seems to be added at the end of the keywords, so we remove it
+			let matches = scriptItemText.match(/keywords:\s"(.+?)(\,pid\d+)?"\,/);
+			if (!matches) {
+				continue;
+			}
+			tags = matches[1].split(',');
+			break;
+		}
+	}
 	for (let tag of tags) {
 		newItem.tags.push(tag.trim());
 	}
@@ -139,12 +159,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-10-04T22:00:00Z",
+				"date": "2012-10-05T00:00:00+02:00",
 				"ISSN": "1865-2263",
 				"language": "de-DE",
 				"libraryCatalog": "Tagesspiegel",
 				"publicationTitle": "Der Tagesspiegel Online",
-				"url": "http://www.tagesspiegel.de/meinung/ddr-drama-der-turm-ich-leb-mein-leben/7216226.html",
+				"url": "https://www.tagesspiegel.de/meinung/ddr-drama-der-turm-ich-leb-mein-leben/7216226.html",
+				"abstractNote": "Das DDR-Familiendrama \"Der Turm\" hat zwei Abende lang Deutschlands Fernsehzuschauer bewegt, die Gedanken flogen zurück in die gemeinsam geteilte Vergangenheit. 17 Millionen Menschen sind irgendwann einmal mit der Frage konfrontiert worden: Dafür oder dagegen? Verrat an Freunden oder der eigenen Karriere?",
+				"section": "Meinung",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -154,7 +176,7 @@ var testCases = [
 				"tags": [
 					"ARD",
 					"DDR",
-					"Der Turm"
+					"Der_Turm"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -185,12 +207,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2017-06-27T16:20:46Z",
+				"date": "2017-06-27T18:20:46+02:00",
 				"ISSN": "1865-2263",
 				"language": "de-DE",
 				"libraryCatalog": "Tagesspiegel",
 				"publicationTitle": "Der Tagesspiegel Online",
-				"url": "http://www.tagesspiegel.de/berlin/queerspiegel/bundestagsabstimmung-ohne-fraktionszwang-ehe-fuer-alle-noch-diese-woche/19984104.html",
+				"url": "https://www.tagesspiegel.de/gesellschaft/queerspiegel/bundestagsabstimmung-ohne-fraktionszwang-ehe-fuer-alle-noch-diese-woche/19984104.html",
+				"abstractNote": "Erst gestern hat Angela Merkel ihre Position zur \"Ehe für alle\" geändert - nun soll der Bundestag wohl schon am Freitag darüber abstimmen.",
+				"section": "Gesellschaft",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -198,16 +222,16 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"#btw17",
-					"Angela Merkel",
-					"Bundestagswahl 2017",
+					"Angela_Merkel",
+					"Bundestagswahl_2017",
 					"CDU",
 					"CSU",
-					"Ehe für alle",
-					"Grosse-Böhmer",
+					"Ehe_fuer_alle",
+					"Grosse_Boehmer",
 					"Queerspiegel",
-					"Renate Künast",
-					"SPD"
+					"Renate_Kuenast",
+					"SPD",
+					"_btw17"
 				],
 				"notes": [],
 				"seeAlso": []
