@@ -1,7 +1,7 @@
 {
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
-	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle, Jaco Lüken",
 	"target": "^https?://([^/]+\\.)?youtube\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-06-03 17:51:31"
+	"lastUpdated": "2021-08-17 15:18:35"
 }
 
 /*
@@ -90,15 +90,14 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
 	item.title = text(doc, '#info-contents h1.title');
-	item.url = url;
+	item.url = ZU.xpathText(doc, '//link[@rel="canonical"]/@href') || url;
 	item.runningTime = text(doc, '#movie_player .ytp-time-duration');
 	
-	item.date = text(doc, '#info-text #date');
+	item.date = ZU.xpathText(doc, '//meta[@itemprop="datePublished"]/@content');
 	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
-	var author = text(doc, '#meta-contents #text-container .ytd-channel-name')
-		|| text(doc, '#text-container .ytd-channel-name');
+	var author = text(doc, '#text-container.ytd-channel-name > yt-formatted-string > a');
 	if (author) {
 		item.creators.push({
 			lastName: author,
@@ -109,6 +108,18 @@ function scrape(doc, url) {
 	var description = text(doc, '#description .content') || text(doc, '#description');
 	if (description) {
 		item.abstractNote = description;
+	}
+	let tags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
+	if (tags) {
+		tags.split(',').forEach(function (tag) {
+			item.tags.push(tag.trim());
+		});
+	}
+	
+	// add video key as signatur
+	let signaturMatches = item.url.match(/.+v=(.+)$/);
+	if (signaturMatches) {
+		item.callNumber = signaturMatches[1];
 	}
 	
 	item.complete();
@@ -136,8 +147,26 @@ var testCases = [
 				"libraryCatalog": "YouTube",
 				"runningTime": "2:51",
 				"url": "https://www.youtube.com/watch?v=pq94aBrc0pY",
+				"callNumber": "pq94aBrc0pY",
 				"attachments": [],
-				"tags": [],
+				"tags": [
+					"2.0",
+					"Center",
+					"George",
+					"History",
+					"Mason",
+					"Media",
+					"Mozilia",
+					"New",
+					"Research",
+					"University",
+					"Web",
+					"Zotero",
+					"and",
+					"bibliography",
+					"for",
+					"Reference"
+				],
 				"notes": [],
 				"seeAlso": []
 			}
