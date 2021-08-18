@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-08-04 16:24:43"
+	"lastUpdated": "2021-08-18 16:53:20"
 }
 
 /*
@@ -609,7 +609,7 @@ class Record {
 		}
 
 		// Extract year
-		this._associateDBField(item, "260", "c", "date", pullNumber);
+		this._associateDBField(item, "260", "c", "date", ZU.strToISO);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
 		// Extract series and series number
@@ -705,7 +705,9 @@ class Record {
 					if (container.t && container.z) { // if there is an ISBN assume book section
 						item.itemType = "bookSection";
 					}
-					else if (container.t || container.s) { // else default to journal article
+					else if ((container.t || container.s) && item.itemType != 'artwork') {
+						// else default to journal article, unless it's artwork, in which
+						// case this is probably a collection name
 						item.itemType = "journalArticle";
 					}
 			}
