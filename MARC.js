@@ -816,9 +816,6 @@ class Record {
 				// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
 				item.itemType = "manuscript";
 			}
-			else if (marcType == "m") {
-				item.itemType = "computerProgram";
-			}
 			else {
 				item.itemType = "book";
 			}
