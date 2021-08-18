@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 14:28:25"
+	"lastUpdated": "2021-08-18 12:46:30"
 }
 
 /*
@@ -32,9 +32,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, "//meta[@property='og:type']/@content")=="article" ){ 
+	if (ZU.xpathText(doc, "//meta[@property='og:type']/@content")=="article" ){
 		return "newspaperArticle";
-	} else if (url.indexOf('/suchergebnis/')>-1){ 
+	} else if (url.indexOf('/suchergebnis/')>-1){
 		return "multiple";
 	} else if (getSearchResults(doc, true)  ) {
 		return "multiple";
@@ -83,10 +83,10 @@ function scrape(doc, url) {
 	newItem.title = ZU.xpathText(doc, "//meta[@property='og:title']/@content");
 	newItem.date = ZU.xpathText(doc, "//time[@itemprop='datePublished']/@datetime");
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@name="description"]/@content');
-	// Note: doesn't work with subsections
+	// Note: it only grabs the top-level section
 	newItem.section = ZU.xpathText(doc, '//ul[contains(@class, "ts-main-nav-items")]/li[contains(@class, "ts-active")]/a');
 
-	// Authors 
+	// Authors
 	var author  = ZU.xpathText(doc, "//header[contains(@class, 'ts-article-header')]//a[@rel='author']");
 	//Zotero.debug(author);
 	if (author) {
@@ -114,11 +114,11 @@ function scrape(doc, url) {
 		for (let i = 0; i < scriptItems.length; i++) {
 			let scriptItemText = scriptItems[i].textContent;
 			// search for script tag that declares the variable
-			if (!scriptItemText.match(/var\scmsObject\s=/)) {
+			if (!scriptItemText.match(/var\s+cmsObject\s*=/)) {
 				continue;
 			}
 			// the pid seems to be added at the end of the keywords, so we remove it
-			let matches = scriptItemText.match(/keywords:\s"(.+?)(\,pid\d+)?"\,/);
+			let matches = scriptItemText.match(/keywords:\s*"(.+?)(\,pid\d+)?"\,/);
 			if (!matches) {
 				continue;
 			}
@@ -127,7 +127,10 @@ function scrape(doc, url) {
 		}
 	}
 	for (let tag of tags) {
-		newItem.tags.push(tag.trim());
+		if (tag.match(/^\s*_/)) {
+			continue;
+		}
+		newItem.tags.push(tag.replace(/_/g, ' ').trim());
 	}
 	newItem.publicationTitle = "Der Tagesspiegel Online";
 	newItem.language = "de-DE";
@@ -174,7 +177,7 @@ var testCases = [
 				"tags": [
 					"ARD",
 					"DDR",
-					"Der_Turm"
+					"Der Turm"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -220,16 +223,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Angela_Merkel",
-					"Bundestagswahl_2017",
+					"Angela Merkel",
+					"Bundestagswahl 2017",
 					"CDU",
 					"CSU",
-					"Ehe_fuer_alle",
-					"Grosse_Boehmer",
+					"Ehe fuer alle",
+					"Grosse Boehmer",
 					"Queerspiegel",
-					"Renate_Kuenast",
-					"SPD",
-					"_btw17"
+					"Renate Kuenast",
+					"SPD"
 				],
 				"notes": [],
 				"seeAlso": []
