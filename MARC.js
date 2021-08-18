@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-08-18 16:53:20"
+	"lastUpdated": "2021-08-18 17:41:44"
 }
 
 /*
@@ -1200,6 +1200,57 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01945ckd a22003857a 4500001000900000005001700009007000700026007001500033008004100048906004500089955002100134010001700155037006600172040001900238050004800257245003100305260001900336300002600355520019600381540013400577500002100711500001500732500016600747500004400913580011000957600002401067650005101091650002601142655003801168773011201206852012701318856009301445985001101538991001001549\u001e17673423\u001e20130326113625.0\u001ekh|bo|\u001ecr |||||||||||\u001e130326s1950    |||nnn       ||   kneng  \u001e  \u001fa0\u001fbibc\u001fcorignew\u001fdu\u001fencip\u001ff20\u001fgy-printpho\u001e  \u001faqw30, 2013-03-26\u001e  \u001fa  2013646400\u001e  \u001faLC-DIG-ds-03716\u001fbDLC\u001fc(digital file from original photograph)\u001e  \u001faDLC\u001fcDLC\u001fegihc\u001e00\u001faNYWTS - SUBJ/GEOG--Football Helmets\u001fb[item]\u001e00\u001faTesting helmet\u001fh[graphic].\u001e  \u001fc1950 Sept. 13.\u001e  \u001fa1 photographic print.\u001e0 \u001faPhotograph shows a pendulum after it pounded into a plastic helmet worn for testing by Dr. Charles F. Lombard, Director of the University of Southern California, Dept. of Aviation Physiology.\u001e  \u001faPublication may be restricted. For information see \"New York World-Telegram & ...,\"\u001fuhttp://www.loc.gov/rr/print/res/076_nyw.html\u001e  \u001faACME Photograph.\u001e  \u001faNo. LA333.\u001e  \u001faTesting is part of a program being worked out to improve equipment, especially headgear for football players, to cut down fatalities and injuries among gridders.\u001e  \u001faTitle from news agency caption on item.\u001e  \u001faForms part of: New York World-Telegram and the Sun Newspaper Photograph Collection (Library of Congress).\u001e10\u001faLombard, Charles F.\u001e 7\u001faTesting\u001fzCalifornia\u001fzLos Angeles\u001fy1950.\u001f2lctgm\u001e 7\u001faHelmets\u001fy1950.\u001f2lctgm\u001e 7\u001faPhotographic prints\u001fy1950.\u001f2gmgpc\u001e0 \u001ftNew York World-Telegram and the Sun Newspaper Photograph Collection (Library of Congress)\u001fw(DLC)   94505083\u001e  \u001faLibrary of Congress\u001fbPrints and Photographs Division\u001feWashington, D.C. 20540 USA\u001fndcu\u001fuhttp://hdl.loc.gov/loc.pnp/pp.print\u001e41\u001f3digital file from original photograph\u001fdds\u001ff03716\u001fqp\u001fuhttp://hdl.loc.gov/loc.pnp/ds.03716\u001e  \u001fapp/cph\u001e  \u001fbc-P&P\u001e\u001d",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Testing helmet",
+				"creators": [],
+				"date": "1950-09-13",
+				"abstractNote": "Photograph shows a pendulum after it pounded into a plastic helmet worn for testing by Dr. Charles F. Lombard, Director of the University of Southern California, Dept. of Aviation Physiology",
+				"artworkMedium": "graphic",
+				"callNumber": "NYWTS - SUBJ/GEOG--Football Helmets [item]",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "California"
+					},
+					{
+						"tag": "Helmets"
+					},
+					{
+						"tag": "Lombard, Charles F"
+					},
+					{
+						"tag": "Los Angeles"
+					},
+					{
+						"tag": "Photographic prints"
+					},
+					{
+						"tag": "Testing"
+					}
+				],
+				"notes": [
+					{
+						"note": "ACME Photograph No. LA333 Testing is part of a program being worked out to improve equipment, especially headgear for football players, to cut down fatalities and injuries among gridders Title from news agency caption on item"
+					}
+				],
 				"seeAlso": []
 			}
 		]
