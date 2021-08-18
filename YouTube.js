@@ -1,7 +1,7 @@
 {
 	"translatorID": "d3b1d34c-f8a1-43bb-9dd6-27aa6403b217",
 	"label": "YouTube",
-	"creator": "Sean Takats, Michael Berkowitz, Matt Burton, Rintze Zelle",
+	"creator": "Sean Takats, Michael Berkowitz, Matt Burton and Rintze Zelle",
 	"target": "^https?://([^/]+\\.)?youtube\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -97,7 +97,7 @@ function scrape(doc, url) {
 	if (item.date) {
 		item.date = ZU.strToISO(item.date);
 	}
-	var author = 	text(doc, '#meta-contents #text-container .ytd-channel-name')
+	var author = text(doc, '#meta-contents #text-container .ytd-channel-name')
 		|| text(doc, '#text-container .ytd-channel-name');
 	if (author) {
 		item.creators.push({
