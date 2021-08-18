@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-08-18 17:41:44"
+	"lastUpdated": "2021-08-18 17:54:54"
 }
 
 /*
@@ -91,6 +91,16 @@ function pullNumber(text) {
 		return m[0];
 	}
 	return "";
+}
+
+/**
+ * Try to extract a date from a string using ZU.strToISO, falling back to
+ * pullNumber if nothing can be found.
+ * @param {string} text
+ * @returns {string}
+ */
+function pullDate(text) {
+	return ZU.strToISO(text) || pullNumber(text);
 }
 
 /**
@@ -421,7 +431,7 @@ class Record {
 				this._associateDBField(item, "214", "c", "publisher");
 			}
 			// Extract year
-			this._associateDBField(item, "214", "d", "date", pullNumber);
+			this._associateDBField(item, "214", "d", "date", pullDate);
 		}
 		else {
 			// Extract place info
@@ -435,7 +445,7 @@ class Record {
 				this._associateDBField(item, "210", "c", "publisher");
 			}
 			// Extract year
-			this._associateDBField(item, "210", "d", "date", pullNumber);
+			this._associateDBField(item, "210", "d", "date", pullDate);
 		}
 
 
@@ -609,7 +619,7 @@ class Record {
 		}
 
 		// Extract year
-		this._associateDBField(item, "260", "c", "date", ZU.strToISO);
+		this._associateDBField(item, "260", "c", "date", pullDate);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
 		// Extract series and series number
