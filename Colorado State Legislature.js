@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-18 19:48:07"
+	"lastUpdated": "2021-08-18 19:52:53"
 }
 
 /*
@@ -64,33 +64,27 @@ function getSearchResults(doc, checkOnly) {
 function scrape(doc) {
 	var item = new Zotero.Item("bill");
 
-	item.title = doc.querySelector(`h1.node-title`).textContent;
+	item.title = text(doc, 'h1.node-title');
 
-	let billNumber = doc.querySelector(
-		`div.field.field-name-field-bill-number.field-type-text.field-label-hidden`
-	).textContent;
+	let billNumber = text(doc, '.field-name-field-bill-number');
 
 	if (billNumber) {
 		item.billNumber = ZU.trimInternal(billNumber);
 	}
 
-	let sponsors = doc.querySelectorAll(
-		`div.sponsor-item>div.member>div.member-details>h4`
-	);
+	let sponsors = [...doc.querySelectorAll('.sponsor-item .member h4')].reverse();
 
-	for (var i = sponsors.length - 1; i >= 0; i--) {
-		let sponsorName = ZU.trimInternal(sponsors[i].textContent);
+	for (let sponsor of sponsors) {
+		let sponsorName = ZU.trimInternal(sponsor.textContent);
 		item.creators.push(ZU.cleanAuthor(sponsorName, "sponsor", false));
 	}
 	item.legislativeBody = 'Colorado General Assembly';
 
-	item.session = doc.querySelector(
-		`div.bill-session>div>div.field-items>div`
-	).textContent;
+	item.session = text(doc, '.bill-session .field-items > *');
 
 	item.attachments.push({ title: "Snapshot", document: doc });
 
-	let tags = doc.querySelectorAll(`div.bill-subjects>div>div.field-items>div.field-item`);
+	let tags = doc.querySelectorAll('.bill-subjects .field-item');
 	for (let tag of tags) {
 		item.tags.push(tag.textContent);
 	}
@@ -135,7 +129,8 @@ var testCases = [
 				"session": "2020 Regular Session",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -177,7 +172,8 @@ var testCases = [
 				"session": "2019 Regular Session",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -205,7 +201,8 @@ var testCases = [
 				"session": "2017 Extraordinary Session",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
