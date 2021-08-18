@@ -1,6 +1,6 @@
 {
 	"translatorID": "1a615592-77b0-4715-a509-702b66196ff1",
-	"label": "Colorado Leg",
+	"label": "Colorado State Legislature",
 	"creator": "Andrew Schwartz",
 	"target": "^https?://leg\\.colorado\\.gov/(bills|bill-search)",
 	"minVersion": "3.0",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-02-16 21:38:12"
+	"lastUpdated": "2021-08-18 19:48:07"
 }
 
 /*
