@@ -1,7 +1,7 @@
 {
 	"translatorID": "374ac2a5-dd45-461e-bf1f-bf90c2eb7085",
 	"label": "Tagesspiegel",
-	"creator": "Martin Meyerhoff, Sebastian Karcher,Jaco Lüken",
+	"creator": "Martin Meyerhoff, Sebastian Karcher, Jaco Lüken",
 	"target": "^https?://www\\.tagesspiegel\\.de",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -32,13 +32,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
 function detectWeb(doc, url) {
-	if (ZU.xpathText(doc, "//meta[@property='og:type']/@content")=="article" ){
+	if (ZU.xpathText(doc, "//meta[@property='og:type']/@content") == "article") {
 		return "newspaperArticle";
-	} else if (url.indexOf('/suchergebnis/')>-1){
-		return "multiple";
-	} else if (getSearchResults(doc, true)  ) {
+	}
+	else if (url.includes('/suchergebnis/')) {
 		return "multiple";
 	}
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
+	return false;
 }
 
 
@@ -46,7 +49,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//h2/a[span[contains(@class, "hcf-headline")]]');
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.xpathText(rows[i], './span[contains(@class, "hcf-headline")]');
 		if (!href || !title) continue;
@@ -62,7 +65,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -70,14 +73,14 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
 function scrape(doc, url) {
-
 	var newItem = new Zotero.Item("newspaperArticle");
 
 	newItem.title = ZU.xpathText(doc, "//meta[@property='og:title']/@content");
@@ -87,12 +90,12 @@ function scrape(doc, url) {
 	newItem.section = ZU.xpathText(doc, '//ul[contains(@class, "ts-main-nav-items")]/li[contains(@class, "ts-active")]/a');
 
 	// Authors
-	var author  = ZU.xpathText(doc, "//header[contains(@class, 'ts-article-header')]//a[@rel='author']");
-	//Zotero.debug(author);
+	var author = ZU.xpathText(doc, "//header[contains(@class, 'ts-article-header')]//a[@rel='author']");
+	// Zotero.debug(author);
 	if (author) {
 		author = author.replace(/^[Vv]on\s|Kommentar\svon\s/g, '');
 		author = author.split(/,\s|\sund\s/);
-		for (var i=0; i<author.length; i++) {
+		for (var i = 0; i < author.length; i++) {
 			newItem.creators.push(ZU.cleanAuthor(author[i], "author"));
 		}
 	}
@@ -102,7 +105,7 @@ function scrape(doc, url) {
 		url: newItem.url,
 		title: "Snapshot",
 		mimeType: "text/html"
-	}); 
+	});
 	
 	// Tags
 	/* We read the tags from the initialisation of variable cmsObject.
@@ -118,7 +121,7 @@ function scrape(doc, url) {
 				continue;
 			}
 			// the pid seems to be added at the end of the keywords, so we remove it
-			let matches = scriptItemText.match(/keywords:\s*"(.+?)(\,pid\d+)?"\,/);
+			let matches = scriptItemText.match(/keywords:\s*"(.+?)(,pid\d+)?",/);
 			if (!matches) {
 				continue;
 			}
@@ -136,7 +139,6 @@ function scrape(doc, url) {
 	newItem.language = "de-DE";
 	newItem.ISSN = "1865-2263";
 	newItem.complete();
-	
 }
 
 /** BEGIN TEST CASES **/
