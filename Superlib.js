@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-24 02:22:53"
+	"lastUpdated": "2021-08-18 19:42:33"
 }
 
 /*
@@ -35,16 +35,6 @@
 	***** END LICENSE BLOCK *****
 */
 
-function attr(docOrElem, selector, attr, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.getAttribute(attr) : null;
-}
-
-function text(docOrElem, selector, index) {
-	var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
-	return elem ? elem.textContent : null;
-}
-
 function trim(content) {
 	return content.replace(/^[\xA0\s]+/gm, '')
 		.replace(/[\xA0\s]+$/gm, '')
@@ -52,7 +42,7 @@ function trim(content) {
 		.replace(/:\n+/g, ': ')
 		.replace(/]\n/g, ']')
 		.replace(/】\n/g, '】')
-		.replace(/\n\/\n/g, '/')
+		.replace(/\n\/\n/g, '/');
 }
 
 // https://aurimasv.github.io/z2csl/typeMap.xml#map-book
@@ -79,13 +69,15 @@ function doPerson(item, data) {
 				creatorType: 'author',
 				fieldMode: 1
 			});
-		} else if (person.endsWith('译')) {
+		}
+		else if (person.endsWith('译')) {
 			item.creators.push({
 				lastName: person.trim().replace(/译$/g, ''),
 				creatorType: 'translator',
 				fieldMode: 1
 			});
-		} else {
+		}
+		else {
 			item.creators.push({
 				lastName: person,
 				creatorType: 'author',
@@ -127,7 +119,8 @@ function detectType(doc) {
 function detectWeb(doc, url) {
 	if (url.includes('/search')) {
 		return getSearchResults(doc, true) ? 'multiple' : false;
-	} else {
+	}
+	else {
 		var dType = detectType(doc, url);
 		if (dType) {
 			return dType;
@@ -142,7 +135,7 @@ function getSearchResults(doc, checkOnly, itemInfo) {
 	var found = false;
 	var rows = doc.querySelectorAll('.book1');
 	for (let row of rows) {
-		let a = row.querySelector('td>table .px14');
+		let a = row.querySelector('td > table .px14');
 		if (!a) {
 			a = row.querySelector('a');
 		}
@@ -190,7 +183,8 @@ function doWeb(doc, url) {
 				scrapeItem(Object.keys(items), itemInfo);
 			}
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -215,8 +209,8 @@ function scrape(doc, url, pdfurl) {
 			item.title = text(doc, '.tutilte');
 			var infos = text(doc, '.tubox dl');
 			infos = trim(infos);
-			for (var section0 of Object.values(infos.split('\n'))) {
-				if (!section0 || section0.trim().length <= 0) continue;
+			for (var section0 of infos.split('\n')) {
+				if (!section0.trim()) continue;
 		
 				let index = section0.indexOf('】');
 				if (index <= -1) continue;
@@ -431,7 +425,8 @@ function scrape(doc, url, pdfurl) {
 			title: 'Full Text PDF',
 			mimeType: 'application/pdf'
 		});
-	} else {
+	}
+	else {
 		var download = doc.querySelector('.link a');
 		if (download && download.textContent == 'PDF下载') {
 			item.attachments.push({
@@ -469,7 +464,9 @@ var testCases = [
 				"date": "2019.04",
 				"ISBN": "9787221152459",
 				"abstractNote": "在这个发展迅速的世界，每个人都承受着前所未有的压力和挑战。一个人想要取得成功，不是去苛求外部环境，而是要打破固有认知，扩展人生格局，形成更加高效的认知系统。作者将在成功人士身上得到的启发，通过验证形成了自己的认知。通过这些认知，作者将父亲负债累累濒临破产的企业转亏为盈，并积累下了巨额财富。本书将这些认知通过轻松幽默的语言，结合自己的经历阐述出来，为我们看待事物提供与众不同的视角，帮助我们重新认识自我、认清世界。通过本书可以迅速提高认知、扩展格局，快速找到事物本质，打破生活和事业中的困境，让我们成为一个有竞争力的人。",
+				"archiveLocation": "B848.4-49",
 				"libraryCatalog": "Superlib",
+				"numPages": "239",
 				"publisher": "贵州人民出版社",
 				"url": "http://book.ucdrs.superlib.net/views/specific/2929/bookDetail.jsp?dxNumber=000018108791&d=F788C1F57DDBFD163B5EDCB5371550F0&fenlei=02140804",
 				"attachments": [],
