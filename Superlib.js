@@ -2,14 +2,14 @@
 	"translatorID": "33553736-4ea9-4b1a-b1e1-d43b2a918156",
 	"label": "Superlib",
 	"creator": "018<lyb018@gmail.com>",
-	"target": "https?://(book|jour)\\.ucdrs\\.superlib\\.net/(search|views/specific)",
+	"target": "^https?://(book|jour)\\.ucdrs\\.superlib\\.net/(search|views/specific)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-18 19:42:33"
+	"lastUpdated": "2021-08-18 19:44:00"
 }
 
 /*
