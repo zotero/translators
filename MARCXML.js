@@ -8,14 +8,13 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-07-11 13:12:18"
+	"lastUpdated": "2021-08-18 17:45:57"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2012 Sebastian Karcher
+	Copyright © 2012-2021 Sebastian Karcher
 
 	This file is part of Zotero.
 
@@ -71,7 +70,7 @@ function doImport() {
 		var records = ZU.xpath(xml, '//marc:record', ns);
 		for (let rec of records) {
 			// create one new item per record
-			var record = new marc.record();
+			var record = new marc.Record();
 			var newItem = new Zotero.Item();
 			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
 			var fields = ZU.xpath(rec, "./marc:datafield", ns);
@@ -353,7 +352,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "17",
+				"date": "2018-08-17",
 				"abstractNote": "'A design system is crucial for sustaining both the continuity and the advancement of a website's design. But it's hard to create such a system when content, technology, and staff are constantly changing. This is the situation faced by the Digital team at the New York Public Library. When those are the conditions of the problem, the design system needs to be modular, distributed, and standardized, so that it can withstand constant change and provide a reliable foundation. NYPL's design system has gone through three major iterations, each a step towards the best way to manage design principles across an abundance of heterogeneous content and many contributors who brought different skills to the team and department at different times. Starting from an abstracted framework that provided a template for future systems, then a specific component system for a new project, and finally a system of interoperable components and layouts, NYPL's Digital team continues to grow and adapt its digital design resource.'",
 				"publisher": "The Code4Lib Journal",
 				"attachments": [],
