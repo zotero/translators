@@ -1,22 +1,22 @@
 {
 	"translatorID": "283d6b78-d3d7-48d4-8fc0-0bdabef7c4ee",
 	"label": "Baruch Foundation",
-	"creator": "^https?://baruchfoundation\\.org/",
-	"target": "",
+	"creator": "Abe Jellinek",
+	"target": "^https?://baruchfoundation\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-14 17:50:51"
+	"lastUpdated": "2021-08-20 18:55:13"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2021 Abe Jellinek
-	
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -74,7 +74,7 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	let item = new Zotero.Item('artwork');
-	
+
 	item.title = text(doc, 'h1#title b');
 	item.abstractNote = text(doc, '.description');
 	item.artworkMedium = [...doc.querySelectorAll('.taglist a')]
@@ -85,18 +85,18 @@ function scrape(doc, url) {
 	item.archive = 'Baruch Foundation';
 	item.url = url;
 	item.rights = text(doc, '.credit');
-	
+
 	item.creators.push(ZU.cleanAuthor(
 		text(doc, '#img-artist em').replace(/^Dr\.?\b/, ''),
 		'artist'
 	));
-	
+
 	item.attachments.push({
 		title: 'Image',
 		mimeType: 'image/jpeg',
 		url: attr(doc, '#img-full', 'href')
 	});
-	
+
 	item.complete();
 }
 
