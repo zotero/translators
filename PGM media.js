@@ -1,7 +1,7 @@
 
 {
 	"translatorID": "6714072a-7967-4600-aaa5-a507b067d0d5",
-	"label": "PGM Media,
+	"label": "PGM Media",
 	"creator": "Vera de Kok",
 	"target": "^https?://(www\\.)?(myprivacy\\.dpgmedia|ad|bndestem|deondernemer|destentor|ed|gelderlander|pzc|tubantia)\\.nl/",
 	"minVersion": "3.0",
