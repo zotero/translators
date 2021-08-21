@@ -3,7 +3,7 @@
 	"translatorID": "6714072a-7967-4600-aaa5-a507b067d0d5",
 	"label": "PGM Media",
 	"creator": "Vera de Kok",
-	"target": "^https?://(www\\.)?(myprivacy\\.dpgmedia|ad|bndestem|deondernemer|destentor|ed|gelderlander|pzc|tubantia)\\.nl/",
+	"target": "^https?://(www\\.)?(myprivacy\\.dpgmedia|ad|bd|bndestem|deondernemer|destentor|ed|gelderlander|pzc|tubantia)\\.nl/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -60,6 +60,9 @@ function doWeb(doc, url) {
 
 	if (new_url.indexOf('ad.nl') != -1) {
 		item.publicationTitle = 'Algemeen Dagblad';
+	}
+	else if (new_url.indexOf('bd.nl') != -1) {
+		item.publicationTitle = 'Brabands Dagblad';
 	}
 	else if (new_url.indexOf('bndestem.nl') != -1) {
 		item.publicationTitle = 'BN DeStem';
@@ -118,6 +121,25 @@ var testCases = [
 				"language": "nl",
 				"publicationTitle": "Algemeen Dagblad",
 				"url": "https://www.ad.nl/politiek/nu-135-nederlanders-en-afghanen-geevacueerd~ae2a8bc5/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [],
+				"libraryCatalog": "DPG Media"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bd.nl/binnenland/live-opnieuw-protest-in-frankrijk-tegen-coronapas-rivm-meldt-bijna-2500-nieuwe-besmettingen~a940db22/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Live Opnieuw Protest in Frankrijk Tegen Coronapas Rivm Meldt Bijna 2500 Nieuwe Besmettingen",
+				"creators": [],
+				"language": "nl",
+				"publicationTitle": "Brabands Dagblad",
+				"url": "https://www.bd.nl/binnenland/live-opnieuw-protest-in-frankrijk-tegen-coronapas-rivm-meldt-bijna-2500-nieuwe-besmettingen~a940db22/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
