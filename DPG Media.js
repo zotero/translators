@@ -3,7 +3,7 @@
 	"translatorID": "6714072a-7967-4600-aaa5-a507b067d0d5",
 	"label": "DPG Media",
 	"creator": "Vera de Kok",
-	"target": "^https?://(www\\.)?(myprivacy\\.dpgmedia|ad|bd|bndestem|deondernemer|destentor|ed|gelderlander|pzc|tubantia)\\.nl/",
+	"target": "^https?://(www\\.)?((myprivacy\\.dpgmedia|ad|bd|bndestem|deondernemer|destentor|ed|gelderlander|pzc|tubantia)\\.nl|(myprivacy\\.dpgmedia|demorgen|hln|7sur7)\\.be)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
@@ -12,6 +12,8 @@
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2021-08-21 22:09:00"
 }
+
+
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -61,9 +63,6 @@ function doWeb(doc, url) {
 	if (new_url.indexOf('ad.nl') != -1) {
 		item.publicationTitle = 'Algemeen Dagblad';
 	}
-	else if (new_url.indexOf('bd.nl') != -1) {
-		item.publicationTitle = 'Brabands Dagblad';
-	}
 	else if (new_url.indexOf('bndestem.nl') != -1) {
 		item.publicationTitle = 'BN DeStem';
 	}
@@ -85,10 +84,19 @@ function doWeb(doc, url) {
 	else if (new_url.indexOf('tubantia.nl') != -1) {
 		item.publicationTitle = 'De Twentsche Courant Tubantia';
 	}
+	else if (new_url.indexOf('demorgen.be') != -1) {
+		item.publicationTitle = 'De Morgen';
+	}
+	else if (new_url.indexOf('hln.be') != -1) {
+		item.publicationTitle = 'Het Laatste Nieuws';
+	}
+	else if (new_url.indexOf('7sur7.be') != -1) {
+		item.publicationTitle = '7sur7';
+		item.language = 'fr';
+	}
 
 	item.complete();
 }
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -292,6 +300,63 @@ var testCases = [
 				"language": "nl",
 				"publicationTitle": "Algemeen Dagblad",
 				"url": "https://www.ad.nl/buitenland/kaag-nederland-wil-bijdragen-aan-versterken-vliegveld-kaboel~abf44305/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [],
+				"libraryCatalog": "DPG Media"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.demorgen.be/nieuws/de-cnn-reporter-in-kaboel-die-door-mannen-met-geweren-wordt-aangestaard-soms-verrast-soms-vijandig~b70a4e2e/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "De Cnn Reporter in Kaboel Die Door Mannen Met Geweren Wordt Aangestaard Soms Verrast Soms Vijandig",
+				"creators": [],
+				"language": "nl",
+				"publicationTitle": "De Morgen",
+				"url": "https://www.demorgen.be/nieuws/de-cnn-reporter-in-kaboel-die-door-mannen-met-geweren-wordt-aangestaard-soms-verrast-soms-vijandig~b70a4e2e/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [],
+				"libraryCatalog": "DPG Media"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.hln.be/buitenland/belgische-c-130-met-93-mensen-aan-boord-vanuit-kaboel-geland-in-islamabad-tweede-vlucht-uitgevoerd~a11913e0/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Belgische C 130 Met 93 Mensen Aan Boord Vanuit Kaboel Geland in Islamabad Tweede Vlucht Uitgevoerd",
+				"creators": [],
+				"language": "nl",
+				"publicationTitle": "Het Laatste Nieuws",
+				"url": "https://www.hln.be/buitenland/belgische-c-130-met-93-mensen-aan-boord-vanuit-kaboel-geland-in-islamabad-tweede-vlucht-uitgevoerd~a11913e0/",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": [],
+				"libraryCatalog": "DPG Media"
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.7sur7.be/belgique/critique-pour-sa-gestion-des-inondations-herve-jamar-repond-on-ne-pourra-jamais-me-reprocher-de-prendre-neuf-jours-de-conges~a8d3dacc/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Critique Pour Sa Gestion Des Inondations Herve Jamar Repond on Ne Pourra Jamais Me Reprocher De Prendre Neuf Jours De Conges",
+				"creators": [],
+				"language": "fr",
+				"publicationTitle": "7sur7",
+				"url": "https://www.7sur7.be/belgique/critique-pour-sa-gestion-des-inondations-herve-jamar-repond-on-ne-pourra-jamais-me-reprocher-de-prendre-neuf-jours-de-conges~a8d3dacc/",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
