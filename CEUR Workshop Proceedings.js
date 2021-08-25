@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-05 16:48:19"
+	"lastUpdated": "2021-08-25 17:43:52"
 }
 
 /*
@@ -64,16 +64,17 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (items) scrapeIDs(doc, Object.keys(items));
+			if (items) scrapeIDs(doc, url, Object.keys(items));
 		});
 	}
 	else {
 		let id = url.match(/([^/])\.pdf/)[1];
-		ZU.processDocuments('index.html', doc => scrapeIDs(doc, [id]));
+		ZU.processDocuments('index.html', doc =>
+			scrapeIDs(doc, url.replace(/[^/]+\.pdf.*/, ''), [id]));
 	}
 }
 
-function scrapeIDs(doc, ids) {
+function scrapeIDs(doc, url, ids) {
 	for (let id of ids) {
 		let row = doc.getElementById(id);
 		
@@ -81,13 +82,12 @@ function scrapeIDs(doc, ids) {
 		item.title = text(row, '.CEURTITLE')
 			|| text(row, '.AUXTITLE').replace(' (invited paper)', '')
 			|| row.textContent;
-		item.date = ZU.strToISO(
-			text(doc, '.CEURPUBDATE') || text(doc, '.CEURLOCTIME')
-		);
+		item.date = ZU.strToISO(text(doc, '.CEURLOCTIME'))
+			|| ZU.strToISO(text(doc, '.CEURPUBDATE'));
 		item.proceedingsTitle = text(doc, '.CEURFULLTITLE');
 		item.conferenceName = text(doc, '.CEURVOLTITLE');
 		item.place = text(doc, '.CEURLOCTIME')
-			.match(/((?:(?:,\s*)?[^\d]+)*)/)[1]
+			.match(/((?:(?:,\s*)?[^\d,]+){0,2})/)[1]
 			.replace(/,\s*$/, '');
 		item.publisher = 'CEUR';
 		item.volume = text(doc, '.CEURVOLNR').replace('Vol-', '');
@@ -95,9 +95,14 @@ function scrapeIDs(doc, ids) {
 		item.pages = text(row, '.CEURPAGES');
 		item.language = 'en';
 		item.ISSN = '1613-0073';
+		item.url = url.replace(/[#?].*/, '') + '#' + id;
 		
 		for (let author of row.querySelectorAll('.CEURAUTHOR, .AUXAUTHOR')) {
 			item.creators.push(ZU.cleanAuthor(author.textContent, 'author'));
+		}
+		
+		for (let author of text(row, '.CEURAUTHORS').split(', ')) {
+			item.creators.push(ZU.cleanAuthor(author, 'author'));
 		}
 		
 		for (let editor of doc.querySelectorAll('.CEURVOLEDITOR')) {
@@ -124,6 +129,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "http://ceur-ws.org/Vol-2919/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ceur-ws.org/Vol-1117/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "http://ceur-ws.org/Vol-2636/",
 		"items": "multiple"
 	}
 ]
