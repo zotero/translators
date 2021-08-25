@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 07:02:07"
+	"lastUpdated": "2021-08-25 07:03:16"
 }
 
 /*
@@ -97,11 +97,9 @@ function scrape(doc) {
 		
 		// currently, we only check for editors; everything else will be treated as authors
 		if (creator.textContent.includes("Hrsg.")) {
-			Z.debug(creatorName + " ist Herausgeber");
 			creatorRole = "editor";
 		}
 		else if (creator.textContent.includes("Übersetzung")) {
-			Z.debug(creatorName + " ist Übersetzer");
 			creatorRole = "translator";
 		}
 		else {
