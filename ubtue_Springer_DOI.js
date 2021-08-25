@@ -69,11 +69,21 @@ async function doSearch(items) {
     }
 }
 
+// Use
+// curl 'https://gist.githubusercontent.com/TomDemeranville/8699224/raw/9a5ca0eed28a24bf83e5fc96962d9d008218949f/doi-prefix-publishers.csv' |
+// grep -E '^10[^,]+,"?Springer' | cut -d ',' -f1 | sed -e 's/^10\.//' |  paste -sd '|' -
+// to obtain the list
+const SPRINGER_DOI_NUMBERS_EXPRESSION = '1007|1251|1186|4076|1114|1023|5819|1361|1379|1065|1381|' +
+                                        '7603|1385|4098|3758|1617|5052|1245|4333|1365|1891|1140'
+
+
+
 async function processDOIs(dois) {
 	let doi = dois.pop();
     Z.debug("SPRINGER DOI : Processing DOI: " + doi);
-    // Make sure we have a Springer DOI
-    if (!doi.match(/^10\.10(07|23)\//)) {
+    // Make sure we have Springer DOI
+    let springer_doi_re = new RegExp('^10\.(' + SPRINGER_DOI_NUMBERS_EXPRESSION + '\/)');
+    if (!doi.match(springer_doi_re)) {
         Z.debug("DOI not matching: " + doi);
         return;
     }
