@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-19 01:35:40"
+	"lastUpdated": "2021-08-25 17:02:37"
 }
 
 /*
@@ -42,15 +42,14 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function parseArtwork(uniqueId){
+function parseArtwork(uniqueId) {
 	let jsonURL = `https://searchthecollection.nga.gov.au/stcapi/service/stc/node?uniqueId=${uniqueId}`;
 
 	ZU.doGet(jsonURL, function (respText) {
-
 		let newArtwork = new Zotero.Item("artwork");
 		let json = JSON.parse(respText);
 
-		if (parseInt(json.responseCode) != 200){
+		if (parseInt(json.responseCode) != 200) {
 			throw new Error(`NGA Collection API request failed: ${json.responseMessage}`);
 		}
 
@@ -81,7 +80,8 @@ function parseArtwork(uniqueId){
 				// if we get a person, we should treat their name like
 				// a personal name and attempt to parse it
 				newArtwork.creators.push(ZU.cleanAuthor(name, "artist"));
-			} else {
+			}
+			else {
 				// if we get an organization, we should pass its name
 				// through as-is
 				newArtwork.creators.push({
@@ -96,7 +96,7 @@ function parseArtwork(uniqueId){
 		newArtwork.tags = data.aatTerTerm;
 
 		// provenance info (if present) is a useful thing to store in the notes field
-		if(data.provenance){
+		if (data.provenance) {
 			newArtwork.notes.push(data.provenance);
 		}
 
@@ -112,6 +112,7 @@ function doWeb(doc, url) {
 		parseArtwork(uniqueId);
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -166,7 +167,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://searchthecollection.nga.gov.au/object?uniqueId=13972",
+		"url": "https://searchthecollection.nga.gov.au/landing-info?uniqueId=13972",
 		"items": [
 			{
 				"itemType": "artwork",
@@ -181,11 +182,6 @@ var testCases = [
 						"lastName": "Nash Editions",
 						"creatorType": "contributor",
 						"fieldMode": 1
-					},
-					{
-						"firstName": "David",
-						"lastName": "Hockney",
-						"creatorType": "artist"
 					}
 				],
 				"date": "1995",
