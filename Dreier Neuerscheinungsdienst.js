@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 08:26:22"
+	"lastUpdated": "2021-08-25 08:40:51"
 }
 
 /*
@@ -146,29 +146,29 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.dietmardreier.de/de/detail/ISBN-9781626168084/Mosher-Lucinda/A-World-of-Inequalities",
 		"items": [
-			 {
-             "itemType": "book",
-             "creators": [
-               {
-                 "firstName": "Lucinda",
-                 "lastName": "Mosher",
-                 "creatorType": "editor"
-               }
-             ],
-             "notes": [],
-             "tags": [],
-             "seeAlso": [],
-             "attachments": [],
-             "title": "A World of Inequalities: Christian and Muslim Perspectives",
-             "ISBN": "9781626168084",
-             "publisher": "Georgetown University Press",
-             "place": "Washington, DC",
-             "date": "2021",
-             "numPages": "253 Seiten",
-             "abstractNote": "In this volume, leading Christian and Muslim scholars respond to the global crisis of inequality by demanding and modeling interreligious dialogue. Essays explore the roots of these realities, how they are treated in Christian and Muslim traditions and texts, and how the two faiths can work together to address inequality.",
-             "libraryCatalog": "Dreier Neuerscheinungsdienst",
-             "shortTitle": "A World of Inequalities"
-           }
+			{
+				"itemType": "book",
+				"creators": [
+					{
+						"firstName": "Lucinda",
+						"lastName": "Mosher",
+						"creatorType": "editor"
+					}
+				],
+				"notes": [],
+				"tags": [],
+				"seeAlso": [],
+				"attachments": [],
+				"title": "A World of Inequalities: Christian and Muslim Perspectives",
+				"ISBN": "9781626168084",
+				"publisher": "Georgetown University Press",
+				"place": "Washington, DC",
+				"date": "2021",
+				"numPages": "253 Seiten",
+				"abstractNote": "In this volume, leading Christian and Muslim scholars respond to the global crisis of inequality by demanding and modeling interreligious dialogue. Essays explore the roots of these realities, how they are treated in Christian and Muslim traditions and texts, and how the two faiths can work together to address inequality.",
+				"libraryCatalog": "Dreier Neuerscheinungsdienst",
+				"shortTitle": "A World of Inequalities"
+			}
 		]
 	},
 	{
