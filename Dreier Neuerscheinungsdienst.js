@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 07:42:34"
+	"lastUpdated": "2021-08-25 07:54:49"
 }
 
 /*
@@ -78,17 +78,18 @@ function scrape(doc) {
 	item.title = ZU.xpathText(doc, '//h1[@class="biblioTitle"]');
 	if (ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]')) item.title += ": " + ZU.xpathText(doc, '//div[@class="titles"]/div[@class="biblioSubTitle"]');
 	// ISBN
-	item.ISBN = (doc.querySelector('.biblioId .value').textContent) ? doc.querySelector('.biblioId .value').textContent : "";
+	item.ISBN = text(doc, '.biblioId .value');
 	// Publisher
-	item.publisher = (doc.querySelector('.biblioPublisher .value').textContent) ? doc.querySelector('.biblioPublisher .value').textContent : "";
+	//item.publisher = (doc.querySelector('.biblioPublisher .value').textContent) ? doc.querySelector('.biblioPublisher .value').textContent : "";
+	item.publisher = text(doc, '.biblioPublisher .value');
 	// Publisher Location
-	item.place = (doc.querySelector('.biblioPublicationTown .value').textContent) ? doc.querySelector('.biblioPublicationTown .value').textContent : "";
+	item.place = text(doc, '.biblioPublicationTown .value');
 	// Publication Date
-	item.date = (doc.querySelector('.biblioPublishingYear .value').textContent) ? doc.querySelector('.biblioPublishingYear .value').textContent : "";
+	item.date = text(doc, '.biblioPublishingYear .value');
 	// Number of pages
-	item.numPages = (doc.querySelector('.biblioPages .value').textContent) ? doc.querySelector('.biblioPages .value').textContent : "";
+	item.numPages = text(doc, '.biblioPages .value');
 	// Abstract
-	item.abstractNote = (doc.querySelector('.description .blurb .value').textContent) ? doc.querySelector('.description .blurb .value').textContent : "";
+	item.abstractNote = text(doc, '.description .blurb .value');
 	// Get Creators
 	var creators = doc.querySelectorAll('.authorMain .biblioAuthor');
 	for (let creator of creators) {
