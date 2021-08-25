@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-08-19 11:44:55"
+	"lastUpdated": "2021-08-25 19:44:19"
 }
 
 /*
@@ -97,7 +97,7 @@ function scrape(doc, url) {
 
 	item.title = text(doc, '#info-contents h1.title');
 	// try to scrape only the canonical url, excluding additional query parameters
-	item.url = url.replace(/^(.+\/watch\?\bv=[0-9a-zA-Z_-]+).*/, "$1");
+	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1");
 	item.runningTime = text(doc, '#movie_player .ytp-time-duration');
 	item.date = ZU.strToISO(text(doc, '#info-strings yt-formatted-string'));
 
