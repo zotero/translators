@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-25 07:03:16"
+	"lastUpdated": "2021-08-25 07:19:52"
 }
 
 /*
@@ -94,14 +94,15 @@ function scrape(doc) {
 	for (let creator of creators) {
 		let creatorName = creator.querySelector('.value').textContent;
 		let creatorRole;
-		
-		// currently, we only check for editors; everything else will be treated as authors
-		if (creator.textContent.includes("Hrsg.")) {
+		// check for editors
+		if ((creator.textContent.includes("Hrsg.")) || (creator.textContent.includes("Editor")) || (creator.textContent.includes("Editeur")))  {
 			creatorRole = "editor";
 		}
-		else if (creator.textContent.includes("Übersetzung")) {
+		// check for translators
+		else if ((creator.textContent.includes("Übersetzung")) || (creator.textContent.includes("Translator")) || (creator.textContent.includes("Traduction"))) {
 			creatorRole = "translator";
 		}
+		// everything else will be treated as authors
 		else {
 			creatorRole = "author";
 		}
