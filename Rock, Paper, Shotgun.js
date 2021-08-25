@@ -1,7 +1,7 @@
 {
 	"translatorID": "5a5b1fcd-8491-4c56-84a7-5dba19fe2c02",
 	"label": "Rock, Paper, Shotgun",
-	"creator": "czar",
+	"creator": "czar, Bao Trinh",
 	"target": "^https?://(www\\.)?rockpapershotgun\\.(com|de)",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-21 01:56:54"
+	"lastUpdated": "2021-08-15 21:00:12"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2018 czar
+	Copyright © 2018-2021 czar, Bao Trinh
 	http://en.wikipedia.org/wiki/User_talk:Czar
 
 	This file is part of Zotero.
@@ -37,67 +37,30 @@
 */
 
 
-function detectWeb(doc, url) {
-	if (/\/\d{4}\/\d{2}\/\d{2}\//.test(url)) {
-		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
-		return "multiple";
+function detectWeb(doc) {
+	let contentType = attr(doc, 'meta[property="og:type"]', 'content');
+	switch (contentType) {
+		case "article":
+			return "magazineArticle";
+		case "website":
+		case null:
+		default:
+			if (getSearchResults(doc, true)) {
+				return "multiple";
+			}
+			break;
 	}
-}
-
-
-function scrape(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata (EM)
-	translator.setDocument(doc);
-	
-	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
-		item.itemType = "blogPost";
-		item.publicationTitle = "Rock, Paper, Shotgun";
-		item.date = ZU.strToISO(url.match(/\d{4}\/\d{2}\/\d{2}/));
-		item.tags = []; // reset bad tag metadata
-		var tags = doc.querySelectorAll('.tags a');
-		for (let tagObj of tags) {
-			var tag = tagObj.textContent;
-			if (tag == tag.toLowerCase()) {
-				tag = tag.replace(/\w/, c => c.toUpperCase());
-			}
-			item.tags.push(tag);
-		}
-		item.creators = []; // reset bad author metadata
-		var tld = url.match(/\.com|\.de/);
-		var jsonURL = 'https://www.rockpapershotgun'+tld+'/wp-json/oembed/1.0/embed?url='+url;
-		ZU.doGet(jsonURL, function(text) {
-			var isValidJSON = true;
-			try { JSON.parse(text) } catch (e) { isValidJSON = false }
-			if (isValidJSON) {
-				var json = JSON.parse(text);
-				if (json.author_name) {
-					item.creators.push(ZU.cleanAuthor(json.author_name, "author"));
-					if (item.creators[0].lastName == "UK") {
-						delete item.creators[0].firstName;      // remove the firstName param
-						item.creators[0].lastName = "RPS UK";	// write the desired name to lastName
-						item.creators[0].fieldMode = 1;         // change to single-field mode
-					}
-				}
-			}
-			item.complete();
-		});
-	});
-
-	translator.getTranslatorObject(function(trans) {
-		trans.doWeb(doc, url);
-	});
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
-	var items = {};
-	var found = false;
-	var rows = doc.querySelectorAll('.content h1 a, .block td a, main p.title a, div.gsc-thumbnail-inside a.gs-title');
-	for (let i=0; i<rows.length; i++) {
-		let href = rows[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	let items = {};
+	let found = false;
+	let rows = doc.querySelectorAll('.archive_list article .details .title a , .gsc-results .gsc-result .gsc-thumbnail-inside a.gs-title , main article .title a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -107,33 +70,65 @@ function getSearchResults(doc, checkOnly) {
 }
 
 
+function scrape(doc, url) {
+	const translator = Zotero.loadTranslator('web');
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48'); // embedded metadata (EM)
+	translator.setDocument(doc);
+
+	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
+		item.publicationTitle = "Rock, Paper, Shotgun";
+
+		item.tags = []; // reset bad tag metadata
+		for (const tag of doc.querySelectorAll('meta[property="article:tag"]')) {
+			item.tags.push(tag.getAttribute('content'));
+		}
+
+		let linkedData = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+		if (linkedData) {
+			if (linkedData.headline) item.title = linkedData.headline;
+			if (linkedData.description) item.abstractNote = linkedData.description;
+			if (linkedData.datePublished) item.date = linkedData.datePublished;
+			item.creators.push(ZU.cleanAuthor(linkedData.author.name, 'author'));
+		}
+
+		item.complete();
+	});
+
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = detectWeb(doc, url);
+		trans.doWeb(doc, url);
+	});
+}
+
+
 function doWeb(doc, url) {
-	switch (detectWeb(doc, url)) {
-		case "multiple":
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return true;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
-			});
-			break;
-		default:
-			scrape(doc, url);
-			break;
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), (items) => {
+			if (!items) {
+				return true;
+			}
+			const articles = [];
+			for (const i in items) {
+				articles.push(i);
+			}
+			ZU.processDocuments(articles, scrape);
+			return true;
+		});
 	}
-}/** BEGIN TEST CASES **/
+	else {
+		scrape(doc, url);
+	}
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.rockpapershotgun.com/2015/12/04/dr-langeskov-the-tiger-and-the-terribly-cursed-emerald-a-whirlwind-heist-review/",
+		"url": "https://www.rockpapershotgun.com/dr-langeskov-the-tiger-and-the-terribly-cursed-emerald-a-whirlwind-heist-review",
 		"items": [
 			{
-				"itemType": "blogPost",
-				"title": "Wot I Think – Dr. Langeskov, The Tiger and The Terribly Cursed Emerald: A Whirlwind Heist",
+				"itemType": "magazineArticle",
+				"title": "Wot I Think - Dr. Langeskov, The Tiger and The Terribly Cursed Emerald: A Whirlwind Heist",
 				"creators": [
 					{
 						"firstName": "Alec",
@@ -141,18 +136,23 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-12-04",
-				"abstractNote": "Dr. Langeskov, The Tiger and The Terribly Cursed Emerald: A Whirlwind Heist is the new game from the new studio from William Pugh, co-developer of The Stanley",
-				"blogTitle": "Rock, Paper, Shotgun",
-				"language": "en-US",
-				"shortTitle": "Wot I Think – Dr. Langeskov, The Tiger and The Terribly Cursed Emerald",
-				"url": "https://www.rockpapershotgun.com/2015/12/04/dr-langeskov-the-tiger-and-the-terribly-cursed-emerald-a-whirlwind-heist-review/",
+				"date": "2015-12-04T17:00:03+00:00",
+				"abstractNote": "PC gaming news, previews, reviews, opinion.",
+				"language": "en",
+				"libraryCatalog": "www.rockpapershotgun.com",
+				"publicationTitle": "Rock, Paper, Shotgun",
+				"shortTitle": "Wot I Think - Dr. Langeskov, The Tiger and The Terribly Cursed Emerald",
+				"url": "https://www.rockpapershotgun.com/dr-langeskov-the-tiger-and-the-terribly-cursed-emerald-a-whirlwind-heist-review",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
+					{
+						"tag": "Action Adventure"
+					},
 					{
 						"tag": "Crows Crows Crows"
 					},
@@ -163,7 +163,7 @@ var testCases = [
 						"tag": "Feature"
 					},
 					{
-						"tag": "Free"
+						"tag": "Free games"
 					},
 					{
 						"tag": "Review"
@@ -178,7 +178,7 @@ var testCases = [
 						"tag": "William Pugh"
 					},
 					{
-						"tag": "Wot i think"
+						"tag": "Wot I Think"
 					}
 				],
 				"notes": [],
@@ -188,11 +188,11 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.rockpapershotgun.com/2012/02/23/thought-mass-effects-day-one-dlc-explained-considered/",
+		"url": "https://www.rockpapershotgun.com/thought-mass-effects-day-one-dlc-explained-considered",
 		"items": [
 			{
-				"itemType": "blogPost",
-				"title": "Thought: Mass Effect’s Day One DLC Explained, Pondered",
+				"itemType": "magazineArticle",
+				"title": "Thought: Mass Effect's Day One DLC Explained, Pondered",
 				"creators": [
 					{
 						"firstName": "John",
@@ -200,15 +200,17 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-02-23",
-				"abstractNote": "A cause of occasional, but rather fervent ire of recent times has been day one DLC. Why do people get pissed off? Because times were you’d buy a game, and",
-				"blogTitle": "Rock, Paper, Shotgun",
-				"language": "en-US",
+				"date": "2012-02-23T09:06:27+00:00",
+				"abstractNote": "PC gaming news, previews, reviews, opinion.",
+				"language": "en",
+				"libraryCatalog": "www.rockpapershotgun.com",
+				"publicationTitle": "Rock, Paper, Shotgun",
 				"shortTitle": "Thought",
-				"url": "https://www.rockpapershotgun.com/2012/02/23/thought-mass-effects-day-one-dlc-explained-considered/",
+				"url": "https://www.rockpapershotgun.com/thought-mass-effects-day-one-dlc-explained-considered",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -240,52 +242,63 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.rockpapershotgun.com/?s=earthbound",
+		"url": "http://www.rockpapershotgun.com/search?q=earthbound",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://www.rockpapershotgun.de/",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://www.rockpapershotgun.de/2018/04/27/eastward-sieht-aus-wie-ein-umwerfend-huebscher-last-of-us-vorfahre-aus-der-snes-aera/",
+		"url": "https://www.rockpapershotgun.com/have-you-played-welcome-to-elk",
 		"items": [
 			{
-				"itemType": "blogPost",
-				"title": "Eastward sieht aus wie ein (umwerfend hübscher) Last-of-Us-Vorfahre aus der SNES-Ära",
+				"itemType": "magazineArticle",
+				"title": "Have You Played... Welcome To Elk?",
 				"creators": [
 					{
-						"lastName": "RPS UK",
-						"creatorType": "author",
-						"fieldMode": 1
+						"firstName": "Katharine",
+						"lastName": "Castle",
+						"creatorType": "author"
 					}
 				],
-				"date": "2018-04-27",
-				"blogTitle": "Rock, Paper, Shotgun",
-				"language": "de-DE",
-				"url": "https://www.rockpapershotgun.de/2018/04/27/eastward-sieht-aus-wie-ein-umwerfend-huebscher-last-of-us-vorfahre-aus-der-snes-aera/",
+				"date": "2021-05-05T07:30:00+00:00",
+				"abstractNote": "Welcome To Elk is a heartfelt narrative game based on the real-life stories of a remote island community. Don't be fooled by its cartoon visuals.",
+				"language": "en",
+				"libraryCatalog": "www.rockpapershotgun.com",
+				"publicationTitle": "Rock, Paper, Shotgun",
+				"url": "https://www.rockpapershotgun.com/have-you-played-welcome-to-elk",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
 					{
-						"tag": "Chucklefish"
+						"tag": "Feature"
 					},
 					{
-						"tag": "Eastward"
+						"tag": "Have You Played"
 					},
 					{
-						"tag": "Pixpil"
+						"tag": "Triple Topping"
+					},
+					{
+						"tag": "Welcome To Elk"
 					}
 				],
 				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.rockpapershotgun.com/hardware",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.rockpapershotgun.com/",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

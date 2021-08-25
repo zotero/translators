@@ -25,7 +25,7 @@ main() {
     deletions+=($(git diff-index --diff-filter=D --name-only --find-renames $MASTER|grep -v '\.ci'|grep 'js$'))
     if (( ${#deletions[@]} > 0 ));then
         for f in "${deletions[@]}";do
-            local id=$(git show $MASTER:"$f" | grep_translator_id)
+            local id=$(git show $MASTER:"$f" | get_translator_id)
             if ! grep -qF "$id" '../deleted.txt';then
                 echo "${color_notok}not ok${color_reset} - $id ($f) should be added to deleted.txt"
                 (( failed += 1))

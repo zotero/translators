@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-10-09 03:33:11"
+	"lastUpdated": "2021-08-16 23:46:39"
 }
 
 /*
@@ -35,19 +35,15 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
-
 
 function detectWeb(doc, url) {
-	Z.monitorDOMChanges(doc.body, { childList: true });
 	if (text(doc, 'h1#preprintTitle')) {
 		return "report";
 	}
 	else if (url.includes("discover?") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	Z.monitorDOMChanges(doc.body);
 	return false;
 }
 

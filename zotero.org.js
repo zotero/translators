@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2020-02-21 14:40:54"
+	"lastUpdated": "2021-07-18 22:33:42"
 }
 
 /*
@@ -138,7 +138,8 @@ function detectWeb(doc, url) {
 
 	const multipleItemsDataEl = doc.querySelector('script#translator-items-list');
 
-	if (multipleItemsDataEl) {
+	if (multipleItemsDataEl
+		&& Object.keys(JSON.parse(multipleItemsDataEl.textContent)).length) {
 		return 'multiple';
 	}
 
@@ -306,6 +307,5 @@ var testCases = [
 		"defer": true,
 		"items": "multiple"
 	}
-
 ]
 /** END TEST CASES **/
