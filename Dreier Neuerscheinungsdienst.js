@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-01 16:21:37"
+	"lastUpdated": "2021-08-25 07:02:07"
 }
 
 /*
@@ -49,7 +49,6 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	// TODO: adjust the CSS selector
 	var rows = doc.querySelectorAll('h4 a');
 	for (let row of rows) {
 		let href = row.href;
