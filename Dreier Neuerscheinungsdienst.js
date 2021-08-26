@@ -2,7 +2,7 @@
 	"translatorID": "60888261-7f17-41bd-95be-6982f05c01b3",
 	"label": "Dreier Neuerscheinungsdienst",
 	"creator": "Denis Maier",
-	"target": "https://www.dietmardreier.de/",
+	"target": "^https?://www\\.dietmardreier\\.de/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
