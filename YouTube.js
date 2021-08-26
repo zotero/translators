@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-06-03 17:51:31"
+	"lastUpdated": "2021-08-25 19:44:19"
 }
 
 /*
@@ -89,14 +89,18 @@ function doWeb(doc, url) {
 
 function scrape(doc, url) {
 	var item = new Zotero.Item("videoRecording");
+
+	/* YouTube won't update the meta tags for the user,
+	 * if they open e.g. a suggested video in the same tab.
+	 * Thus we scrape them from screen instead.
+	 */
+
 	item.title = text(doc, '#info-contents h1.title');
-	item.url = url;
+	// try to scrape only the canonical url, excluding additional query parameters
+	item.url = url.replace(/^(.+\/watch\?v=[0-9a-zA-Z_-]+).*/, "$1");
 	item.runningTime = text(doc, '#movie_player .ytp-time-duration');
-	
-	item.date = text(doc, '#info-text #date');
-	if (item.date) {
-		item.date = ZU.strToISO(item.date);
-	}
+	item.date = ZU.strToISO(text(doc, '#info-strings yt-formatted-string'));
+
 	var author = text(doc, '#meta-contents #text-container .ytd-channel-name')
 		|| text(doc, '#text-container .ytd-channel-name');
 	if (author) {
@@ -110,7 +114,7 @@ function scrape(doc, url) {
 	if (description) {
 		item.abstractNote = description;
 	}
-	
+
 	item.complete();
 }
 
