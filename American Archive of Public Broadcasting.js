@@ -36,7 +36,7 @@
 */
 
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.querySelector('meta[property="og:video"]')) {
 		return "tvBroadcast";
 	}
@@ -135,7 +135,7 @@ function scrape(doc, url) {
 	
 				switch (key) {
 					case 'Contributing Organization':
-					case 'Producing Organization':
+					case 'Producing Organization': {
 						if (item.network) break;
 						
 						if (!item.creators.length) {
@@ -155,6 +155,7 @@ function scrape(doc, url) {
 						if (place) item.place = place;
 						
 						break;
+					}
 					case 'Date':
 					case 'Created':
 						if (!item.date) {
