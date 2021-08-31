@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 13:10:21"
+	"lastUpdated": "2021-08-31 14:05:23"
 }
 
 /*
@@ -295,7 +295,10 @@ function scrapeBibTeX(doc, url) {
 			if (item.title && item.title.toUpperCase() == item.title) {
 				item.title = ZU.capitalizeTitle(item.title, true);
 			}
-
+			//subtitle
+			let citationSubtitle = ZU.xpathText(doc, '//*[@class="citation__subtitle"]');
+			if (item.title && citationSubtitle) item.title = item.title + ': ' + citationSubtitle;
+			
 			if (!item.date) {
 				item.date = ZU.xpathText(doc, '//meta[@name="citation_publication_date"]/@content');
 			}
@@ -1650,6 +1653,50 @@ var testCases = [
 					{
 						"note": "orcid:0000-0001-5709-9265 | Nadav Davidovitch"
 					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/moth.12677",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "What Is That To You?: A Response to Peter Ochs’s Religion without Violence",
+				"creators": [
+					{
+						"firstName": "Ben",
+						"lastName": "Quash",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1111/moth.12677",
+				"ISSN": "1468-0025",
+				"issue": "3",
+				"itemID": "https://doi.org/10.1111/moth.12677",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "759-768",
+				"publicationTitle": "Modern Theology",
+				"shortTitle": "What Is That To You?",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/moth.12677",
+				"volume": "37",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					"LF:"
 				],
 				"seeAlso": []
 			}
