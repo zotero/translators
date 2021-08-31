@@ -1,4 +1,4 @@
-70  # Increment number when modifying file
+71  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -117,3 +117,4 @@ bbf1617b-d836-4665-9aae-45f223264460 # A Contra Corriente is better handled by P
 5e684d82-73a3-9a34-095f-19b112d77bbe # Digital Medievalist now runs Ubiquity Journals
 80bc4fd3-747c-4dc2-86e9-da7b251e1407 # jmlr -> Journal of Machine Learning Research; duplicated by mistake
 c2f5f114-c255-4cf7-a7b8-d5c95e82291f # Hoovers.com is defunct
+097c963e-3866-4c6f-a6b4-f5e9d0d15530 # DTU Orbit now runs Elsevier Pure
