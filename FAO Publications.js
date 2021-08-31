@@ -2,14 +2,14 @@
 	"translatorID": "4883f662-29df-44ad-959e-27c9d036d165",
 	"label": "FAO Publications",
 	"creator": "Bin Liu <lieubean@gmail.com>",
-	"target": "^https?://www\\.fao\\.org/documents|publications/",
+	"target": "^https?://www\\.fao\\.org/(documents|publications)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-08 21:19:23"
+	"lastUpdated": "2021-08-31 04:00:00"
 }
 
 /*
