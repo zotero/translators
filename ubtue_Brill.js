@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 17:33:03"
+	"lastUpdated": "2021-08-31 13:42:36"
 }
 
 /*
@@ -97,7 +97,7 @@ function postProcess(doc, item) {
 	}
 
 	//scrape ORCID from website
-	let authorSectionEntries = doc.querySelectorAll('.text-subheading span:nth-child(2)');
+	let authorSectionEntries = doc.querySelectorAll('.text-subheading span');
 	for (let authorSectionEntry of authorSectionEntries) {
 		let authorInfo = authorSectionEntry.querySelector('.c-Button--link');
 		let orcidHref = authorSectionEntry.querySelector('.orcid');
@@ -177,7 +177,7 @@ var testCases = [
 				"date": "2021/02/18",
 				"DOI": "10.1163/15685330-12341069",
 				"ISSN": "0042-4935, 1568-5330",
-				"abstractNote": "<section class=\"abstract\"><h2 class=\"abstractTitle text-title my-1\" id=\"d312172225e149\">Abstract</h2><p>The article is a contribution to the current discussion about the beginnings of prophetic books in ancient Israel. It investigates the significance of the so-called „Literary Predictive Texts“ (<span style=\"font-variant: small-caps;\">LPT</span>) and the Neo-Assyrian prophecies for our understanding of the emergence of prophetic writings in Israel. The<span style=\"font-variant: small-caps;\">LPT</span>in particular had received only little attention so far. Tying in critically with some recent studies, this article compares the Marduk prophecy and the Neo-Assyrian tablet <span style=\"font-variant: small-caps;\">SAA</span>9 3 with selected passages from the book of Amos (Amos 3–6* and Amos 6*). It concludes that in contrast to the Neo-Assyrian collective tablets the <span style=\"font-variant: small-caps;\">LPT</span>cannot serve as appropriate analogies to early prophetic scrolls, but that they are helpful to understand the phenomenon of tradent prophecy.</p></section>",
+				"abstractNote": "Abstract The article is a contribution to the current discussion about the beginnings of prophetic books in ancient Israel. It investigates the significance of the so-called „Literary Predictive Texts“ (LPT) and the Neo-Assyrian prophecies for our understanding of the emergence of prophetic writings in Israel. TheLPTin particular had received only little attention so far. Tying in critically with some recent studies, this article compares the Marduk prophecy and the Neo-Assyrian tablet SAA9 3 with selected passages from the book of Amos (Amos 3–6* and Amos 6*). It concludes that in contrast to the Neo-Assyrian collective tablets the LPTcannot serve as appropriate analogies to early prophetic scrolls, but that they are helpful to understand the phenomenon of tradent prophecy.",
 				"issue": "3",
 				"language": "ger",
 				"libraryCatalog": "brill.com",
@@ -214,6 +214,61 @@ var testCases = [
 					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/rag/11/1/article-p1_1.xml",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Looking Back and Moving Forward: The 10th Anniversary of Religion and Gender",
+				"creators": [
+					{
+						"firstName": "Anne-Marie",
+						"lastName": "Korte",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nella van den",
+						"lastName": "Brandt",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/06/23",
+				"DOI": "10.1163/18785417-01101019",
+				"ISSN": "2589-8051, 1878-5417",
+				"abstractNote": "\"Looking Back and Moving Forward\" published on 23 Jun 2021 by Brill.",
+				"issue": "1",
+				"language": "eng",
+				"libraryCatalog": "brill.com",
+				"pages": "1-14",
+				"publicationTitle": "Religion and Gender",
+				"shortTitle": "Looking Back and Moving Forward",
+				"url": "https://brill.com/view/journals/rag/11/1/article-p1_1.xml",
+				"volume": "11",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "orcid:0000-0002-1738-9994 | Anne-Marie Korte"
+					},
+					{
+						"note": "orcid:0000-0002-0934-5422 | Nella van den Brandt"
+					},
+					"LF:"
+				],
 				"seeAlso": []
 			}
 		]
