@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-08 08:52:02"
+	"lastUpdated": "2021-08-31 11:48:40"
 }
 
 /*
@@ -209,7 +209,8 @@ function scrapeEM(doc, url) {
 
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
-	addFreeAccessTag(doc, item)
+	addFreeAccessTag(doc, item);
+	getORCID(doc, item);
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -376,6 +377,7 @@ function scrapeBibTeX(doc, url) {
 			if (item.DOI && item.DOI.match(doiURLRegex))
 				item.DOI = item.DOI.replace(/^https:\/\/doi.org\/(.*)/, "$1");
 			addFreeAccessTag(doc, item);
+			getORCID(doc, item);
 			item.complete();
 		});
 
@@ -391,6 +393,21 @@ function addFreeAccessTag(doc, item) {
 	};
 }
 
+function getORCID(doc, item) {
+	let authorOrcidEntries = doc.querySelectorAll('#sb-1 span');
+	for (let authorOrcidEntry of authorOrcidEntries) {
+		let authorEntry = authorOrcidEntry.querySelector('.author-name accordion-tabbed__control, span');
+		let orcidEntry = authorOrcidEntry.querySelector('*[href^="https://orcid"]');
+		if (authorEntry && orcidEntry) {
+			let author = authorEntry.textContent;
+			let orcid = orcidEntry.text.match(/\d+-\d+-\d+-\d+x?/i)[0];
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+			item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
+		}
+	}
+}
+
+	
 function scrapeCochraneTrial(doc, url){
 	Z.debug("Scraping Cochrane External Sources");
 	var item = new Zotero.Item('journalArticle');
@@ -1536,6 +1553,80 @@ var testCases = [
 				],
 				"notes": [
 					"LF:"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/10.1111/bioe.12883",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "From bioethics to biopolitics: “Playing the Nazi card” in public health ethics—the case of Israel",
+				"creators": [
+					{
+						"firstName": "Hagai",
+						"lastName": "Boas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nadav",
+						"lastName": "Davidovitch",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dani",
+						"lastName": "Filc",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rakefet",
+						"lastName": "Zalashik",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.1111/bioe.12883",
+				"ISSN": "1467-8519",
+				"abstractNote": "While bioethicist Arthur Caplan claims that “The Nazi analogy is equivalent to dropping a nuclear bomb in ethical battles about science and medicine”, we claim that such total exclusion of this analogy is equally problematic. Our analysis builds on Roberto Esposito’s conceptualization of immunitas and communitas as key elements of biopolitics. Within public health theories and practices there is an inherent tension between exclusion (immunitas) and inclusion (communitas) forces. Taking the immunitas logic to the extreme, as National Socialist medicine did in the name of securing the German race, is a constant danger that needs to be taken seriously into consideration when discussing public health policies. The tension between the silencing of the Holocaust in bioethical debates on one side, and the persistent use of National Socialist medicine metaphors, on the other hand, is the focus of this paper. By delving into the meanings and the implications of this two-edged discourse, we argue that comparing post-war bioethics with pre-war medical practices from a biopolitical perspective has the potential to depict a more nuanced account of continuities and discontinuities in bioethics.",
+				"issue": "6",
+				"itemID": "https://doi.org/10.1111/bioe.12883",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "540-548",
+				"publicationTitle": "Bioethics",
+				"shortTitle": "From bioethics to biopolitics",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/bioe.12883",
+				"volume": "35",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Holocaust"
+					},
+					{
+						"tag": "Nazi medicine"
+					},
+					{
+						"tag": "biopolitics"
+					},
+					{
+						"tag": "public health ethics"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-8201-1886 | Hagai Boas"
+					},
+					{
+						"note": "orcid:0000-0001-5709-9265 | Nadav Davidovitch"
+					}
 				],
 				"seeAlso": []
 			}
