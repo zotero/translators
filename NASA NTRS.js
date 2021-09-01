@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-09 17:09:43"
+	"lastUpdated": "2021-09-01 04:47:52"
 }
 
 /*
@@ -36,8 +36,13 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('/search') && getSearchResults(doc, true)) {
-		return "multiple";
+	if (url.includes('/search')) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		else {
+			Z.monitorDOMChanges(doc.querySelector('app-search'));
+		}
 	}
 	else if (url.includes('/citations/')) {
 		return mapType(
@@ -180,7 +185,7 @@ function processJSON(json) {
 			item.conferenceName = meeting.name;
 			item.place = meeting.location;
 		}
-		else {
+		else if (meeting.startDate && meeting.endDate) {
 			let start = meeting.startDate.substring(0, 10);
 			let end = meeting.endDate.substring(0, 10);
 			addToExtra('Meeting Information', `${meeting.name}; ${start} to ${end}; ${meeting.place}`);
@@ -558,6 +563,50 @@ var testCases = [
 		"url": "https://ntrs.nasa.gov/search?q=saturn%20v",
 		"defer": true,
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://ntrs.nasa.gov/citations/20205011830",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Fitting Leak Test Report",
+				"creators": [
+					{
+						"firstName": "Jared",
+						"lastName": "Sass",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Angela",
+						"lastName": "Krenn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-12-28",
+				"abstractNote": "Many Human Landing System flight elements are anticipated to implement mechanically connected joints in cryogenic fluid lines to simplify system assembly. These joints will need to survive launch vibration, while cold, and remain as leak‐free as possible to minimize commodity loss. Threaded fluid fittings should be qualified for use in their expected environments to reduce risk and ensure mission success. A new ground‐based test apparatus was developed and validated to obtain quantifiable low leak rate test data for a small component, such as a pressurized threaded fluid fitting, while in the temperature range of liquid hydrogen. A cryocooler is used to attain the cold test temperature and helium leakage from a pressurized fitting mounted within a vacuum test chamber is measured using a mass spectrometer leak detector. Two different sizes of Swagelok VCR fittings with three different types of seal rings were selected as the test articles for the initial proof of concept testing. Each fitting configuration was subjected to two consecutive cryogenic thermal cycles and cold leak measurement tests, followed by exposure to a high vibration test profile at ambient temperature on a shaker table, and then two additional cold leak measurement tests. Very low leak rates, below the acceptable leak rate threshold, were measured at the pressures tested. Several enhancements to the test hardware are discussed that would facilitate a comprehensive fitting qualification test campaign by enabling a higher test throughput rate and ensuring a repeatable test profile.",
+				"extra": "NTRS Author Affiliations: Kennedy Space Center\nNTRS Document ID: 20205011830\nNTRS Research Center: Kennedy Space Center (KSC)",
+				"libraryCatalog": "NASA NTRS",
+				"url": "https://ntrs.nasa.gov/citations/20205011830",
+				"attachments": [
+					{
+						"title": "Fitting Leak Test Report Public Release - Dec 2020.pdf",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Engineering (General)"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
