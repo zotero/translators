@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-07-20 08:20:23"
+	"lastUpdated": "2021-09-02 14:53:26"
 }
 
 function detectWeb(doc, url) {
@@ -134,6 +134,7 @@ function complementItem(doc, item) {
 		if (oa_desc && oa_desc.match(/open access/i))
 			item.notes.push('LF:');
 	}
+	
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
 		// look for editors
 		var editors = ZU.xpath(doc, '//ul[@class="editors"]/li[@itemprop="editor"]/a[@class="person"]');
@@ -180,7 +181,7 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
-		// in some cases we get the beginning of the article as abstract
+	// in some cases we get the beginning of the article as abstract
 	if (undesirableAbstractPresent(doc, item))
 		item.abstractNote = '';
 	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
@@ -225,7 +226,22 @@ function complementItem(doc, item) {
 
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
 	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
+	// ORCID
+	getORCID(doc, item);//Z.debug(item.notes)
 	return item;
+}
+	// ORCID
+function getORCID(doc, item) {
+	let authorOrcidEntries = ZU.xpath(doc, '//*[@class="c-article-author-list__item"]');
+	for (let authorOrcidEntry of authorOrcidEntries) {
+		let authorEntry = authorOrcidEntry.innerText;
+		let orcidEntry = authorOrcidEntry.innerHTML;
+		if (authorEntry && orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)) {
+			let author = ZU.trimInternal(authorEntry.replace(/&/g, ''));
+			let orcid = orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)[0]
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
+		}
+	}
 }
 
 function shouldPostprocessWithEmbeddedMetadata(item) {
@@ -530,19 +546,19 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": " Analytical solutions "
+						"tag": "Analytical solutions"
 					},
 					{
-						"tag": " Elastic storage "
+						"tag": "Coastal aquifers"
 					},
 					{
-						"tag": " Submarine outlet-capping "
+						"tag": "Elastic storage"
 					},
 					{
-						"tag": " Tidal loading efficiency "
+						"tag": "Submarine outlet-capping"
 					},
 					{
-						"tag": "Coastal aquifers "
+						"tag": "Tidal loading efficiency"
 					}
 				],
 				"notes": [],
@@ -664,19 +680,23 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": " Bank Islam Malaysia Berhad"
-					},
-					{
-						"tag": " Islamic banking"
-					},
-					{
-						"tag": " Malaysia"
+						"tag": "Bank Islam Malaysia Berhad"
 					},
 					{
 						"tag": "Economic anthropology/sociology"
+					},
+					{
+						"tag": "Islamic banking"
+					},
+					{
+						"tag": "Malaysia"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6700-731X | Hideki Kitamura"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -703,7 +723,7 @@ var testCases = [
 				"date": "2020-06-01",
 				"DOI": "10.1007/s00481-019-00556-z",
 				"ISSN": "1437-1618",
-				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden., Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.\n\nDefinition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Arguments: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Conclusion: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account.",
+				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden., Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.",
 				"issue": "2",
 				"journalAbbreviation": "Ethik Med",
 				"language": "de",
@@ -721,37 +741,154 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": " Infertility"
+						"tag": "Infertility"
 					},
 					{
-						"tag": " Kinderwunschbehandlung"
-					},
-					{
-						"tag": " Leidenslinderung"
-					},
-					{
-						"tag": " Relief of suffering"
-					},
-					{
-						"tag": " Reproductive medicine"
-					},
-					{
-						"tag": " Reproduktionsmedizin"
-					},
-					{
-						"tag": " Suffering"
-					},
-					{
-						"tag": " Unerfüllter Kinderwunsch"
-					},
-					{
-						"tag": " Unfulfilled desire to have children"
+						"tag": "Kinderwunschbehandlung"
 					},
 					{
 						"tag": "Leiden"
+					},
+					{
+						"tag": "Leidenslinderung"
+					},
+					{
+						"tag": "Relief of suffering"
+					},
+					{
+						"tag": "Reproductive medicine"
+					},
+					{
+						"tag": "Reproduktionsmedizin"
+					},
+					{
+						"tag": "Suffering"
+					},
+					{
+						"tag": "Unerfüllter Kinderwunsch"
+					},
+					{
+						"tag": "Unfulfilled desire to have children"
 					}
 				],
-				"notes": [],
+				"notes": [
+					"LF:",
+					{
+						"note": "abs:Definition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Arguments: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Conclusion: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account."
+					},
+					{
+						"note": "orcid:0000-0002-7194-6034 | Ibrahim Alkatout M.D., PhD, M.A., MaHM"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11153-020-09772-w",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Fitting prepositional gratitude to god is metaphysically impossible",
+				"creators": [
+					{
+						"lastName": "Hunt",
+						"firstName": "Marcus William",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-04-01",
+				"DOI": "10.1007/s11153-020-09772-w",
+				"ISSN": "1572-8684",
+				"abstractNote": "It is argued that God cannot be a fitting target of prepositional gratitude. The first premise is that if someone cannot be benefited, then they cannot be a fitting target of prepositional gratitude. The second premise is that God cannot be benefited. Concerning the first premise, it is argued that a necessary component of prepositional gratitude is the desire to benefit one’s benefactor. Then it is argued that such a desire is fitting only if one’s benefactor can in fact be benefited. Concerning the second premise, it is noted that classical theism widely attributes blessedness to God. It is argued that if God is blessed then God necessarily has as much well-being as it is possible for God to have, and hence God cannot be benefited. Also noted are some ways in which God’s blessedness is compatible with less orthodox ideas about God’s passibility. The argument is then defended against eight objections.",
+				"issue": "2",
+				"journalAbbreviation": "Int J Philos Relig",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "153-170",
+				"publicationTitle": "International Journal for Philosophy of Religion",
+				"url": "https://doi.org/10.1007/s11153-020-09772-w",
+				"volume": "89",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Blessedness"
+					},
+					{
+						"tag": "Classical theism"
+					},
+					{
+						"tag": "Fittingness"
+					},
+					{
+						"tag": "Gratitude"
+					},
+					{
+						"tag": "Philosophy of the emotions"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6858-1903 | Marcus William Hunt"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s11153-021-09790-2",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "After Pascal’s Wager: on religious belief, regulated and rationally held",
+				"creators": [
+					{
+						"lastName": "Warman",
+						"firstName": "Jack",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Efird",
+						"firstName": "David",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-08-01",
+				"DOI": "10.1007/s11153-021-09790-2",
+				"ISSN": "1572-8684",
+				"abstractNote": "In Pascal’s famous wager, he claims that the seeking non-believer can induce genuine religious belief in herself by joining a religious community and taking part in its rituals. This form of belief regulation is epistemologically puzzling: can we form beliefs in this way, and could such beliefs be rationally held? In the first half of the paper, we explain how the regimen could allow the seeking non-believer to regulate her religious beliefs by intervening on her evidence and epistemic standards. In the second half of the paper, we argue that regulated religious beliefs can be rationally held.",
+				"issue": "1",
+				"journalAbbreviation": "Int J Philos Relig",
+				"language": "en",
+				"libraryCatalog": "Springer Link",
+				"pages": "61-78",
+				"publicationTitle": "International Journal for Philosophy of Religion",
+				"shortTitle": "After Pascal’s Wager",
+				"url": "https://doi.org/10.1007/s11153-021-09790-2",
+				"volume": "90",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6447-4158 | Jack Warman"
+					},
+					{
+						"note": "orcid:0000-0001-5935-1938 | David Efird"
+					}
+				],
 				"seeAlso": []
 			}
 		]
