@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-22 18:06:54"
+	"lastUpdated": "2021-09-02 00:33:38"
 }
 
 /*
@@ -38,12 +38,16 @@
 
 
 function detectWeb(doc, url) {
-	if (/-\d{5,}$/.test(url)) {
-		if (doc.querySelector('h3.print-article__issue-title')) return "magazineArticle";
+	if (/-\d{5,}([?#].*)?$/.test(url)) {
+		if (doc.querySelector('h3.print-article__issue-title')) {
+			return "magazineArticle";
+		}
 		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -53,12 +57,17 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
-		item.itemType = "blogPost";
 		item.publicationTitle = "Artforum";
-		var json_ld = doc.querySelector('script[type="application/ld+json"]');
-		if (json_ld) {
-			json_ld = json_ld.textContent;
-			item.date = json_ld.match(/"datePublished"\s?:\s?"([^"]*)"/)[1].split(":")[0];
+		item.language = 'en-US';
+		var jsonLD = doc.querySelector('script[type="application/ld+json"]');
+		if (jsonLD) {
+			jsonLD = JSON.parse(jsonLD.textContent);
+			item.title = jsonLD.name;
+			item.date = jsonLD.dateModified || jsonLD.datePublished;
+			
+			if (!item.creators.length && jsonLD.author) {
+				item.creators.push(ZU.cleanAuthor(jsonLD.author.name, 'author'));
+			}
 		}
 		var authorMetadata = doc.querySelectorAll('.contrib-link a');
 		for (let author of authorMetadata) {
@@ -70,10 +79,8 @@ function scrape(doc, url) {
 			var issueDate = doc.querySelector('h3.print-article__issue-title');
 			if (issueDate) {
 				item.date = issueDate.textContent.trim().replace('PRINT ','');
-				var issueURL = [];
-				issueURL.push(issueDate.querySelector('a').href);
-				ZU.HTTP.doGet(issueURL, function (text) {
-					var voliss = text.match(/Vol\.\s(\d+),\sNo\.\s(\d+)/);
+				ZU.doGet(issueDate.querySelector('a').href, function (respText) {
+					var voliss = respText.match(/Vol\.\s(\d+),\sNo\.\s(\d+)/);
 					item.volume = voliss[1];
 					item.issue = voliss[2];
 					item.complete();
@@ -83,6 +90,7 @@ function scrape(doc, url) {
 	});
 
 	translator.getTranslatorObject(function(trans) {
+		trans.itemType = 'blogPost';
 		trans.doWeb(doc, url);
 	});
 }
@@ -93,9 +101,12 @@ function getSearchResults(doc, checkOnly) {
 	var found = false;
 	// 1st for search page, 2nd for issue ToC, 3rd/4th/5th for sections, 5th+ for homepage
 	var rows = doc.querySelectorAll('h1.results-list__h1, .toc-article__title, .news-list h1, .reviews-list h1, .article-list h1, p.hp-singlefeature-author__writer, h3.hp-news__title, h3.hp-twocolumn__title a, h3.hp-artguide__title, p.hp-bloglist__teaser a');
-	var links = doc.querySelectorAll('h1.results-list__h1 a, .toc-article__title a, .news-list h1 a, .reviews-list h1 a, .article-list h1 a, h3.hp-singlefeature-author__title > a, a.hp-news__article, h3.hp-twocolumn__title a, .hp-artguide div.image-container > a, p.hp-bloglist__teaser a');
-	for (let i=0; i<rows.length; i++) {
-		let href = links[i].href;
+	for (let i = 0; i < rows.length; i++) {
+		let href = attr(rows[i], 'a', 'href');
+		if (!href) {
+			let link = rows[i].closest('a');
+			if (link) href = link.href;
+		}
 		let title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -111,13 +122,9 @@ function doWeb(doc, url) {
 		case "multiple":
 			Zotero.selectItems(getSearchResults(doc, false), function (items) {
 				if (!items) {
-					return true;
+					return;
 				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
+				ZU.processDocuments(Object.keys(items), scrape);
 			});
 			break;
 		default:
@@ -125,6 +132,7 @@ function doWeb(doc, url) {
 			break;
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -142,7 +150,8 @@ var testCases = [
 				"url": "https://www.artforum.com/news/ugochukwu-smooth-nzewi-appointed-curator-of-hood-museum-40747",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -172,7 +181,8 @@ var testCases = [
 				"url": "https://www.artforum.com/diary/kaitlin-phillips-at-the-11th-new-york-art-book-fair-63626",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -187,7 +197,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Alex Da Corte at Art + Practice",
+				"title": "Alex Da Corte",
 				"creators": [
 					{
 						"firstName": "Aria",
@@ -202,7 +212,8 @@ var testCases = [
 				"url": "https://www.artforum.com/picks/alex-da-corte-62421",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -232,7 +243,8 @@ var testCases = [
 				"url": "https://www.artforum.com/film/nick-pinkerton-on-gimme-shelter-hollywood-north-66885",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -247,7 +259,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Whitney Biennial 2017 at Whitney Museum of American Art",
+				"title": "Whitney Biennial 2017",
 				"creators": [
 					{
 						"firstName": "Beau",
@@ -258,13 +270,16 @@ var testCases = [
 				"date": "January 2017",
 				"ISSN": "0004-3532",
 				"abstractNote": "Curated by Christopher Y. Lew and Mia LocksFollowing a three-year hiatus to accommodate the museum’s move downtown, the Whitney Biennial makes its Gansevoort Street debut this March. As the republic falls before our very eyes, one hopes that this divisive survey of American art will react against, and not just reflect, the current state of affairs. This year’s roster of sixty-three artists and collectives is thankfully diverse in perspectives and refreshingly full of emerging and underrecognized voices&#151;absent are the many elder statesmen often gratuitously included in these affairs. The",
+				"issue": "5",
 				"language": "en-US",
 				"libraryCatalog": "www.artforum.com",
 				"publicationTitle": "Artforum",
 				"url": "https://www.artforum.com/print/previews/201701/whitney-biennial-2017-65484",
+				"volume": "55",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -294,7 +309,8 @@ var testCases = [
 				"url": "https://www.artforum.com/interviews/jamie-stewart-talks-about-xiu-xiu-s-record-forget-and-recent-collaborations-66615",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -309,7 +325,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Chika Okeke-Agulu on Dak’Art 2014",
+				"title": "Dak’Art 2014",
 				"creators": [
 					{
 						"firstName": "Chika",
@@ -320,13 +336,16 @@ var testCases = [
 				"date": "October 2014",
 				"ISSN": "0004-3532",
 				"abstractNote": "THE ELEVENTH EDITION of the Dak’Art Biennial of Contemporary African Art, which took place this past summer, may well have been the most ambitious since the exhibition’s inception in 1992. It was the largest and most diverse yet, not only showcasing emerging artists from across Africa but also including the work of many superstars from the established biennial circuit. This roster showed that the global art world must reckon with Dak’Art, which seems poised to take its place among the most established international art shows. Yet this year’s iteration also suggested that the biennial is still",
+				"issue": "2",
 				"language": "en-US",
 				"libraryCatalog": "www.artforum.com",
 				"publicationTitle": "Artforum",
 				"url": "https://www.artforum.com/print/reviews/201408/dak-art-2014-48214",
+				"volume": "53",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -354,6 +373,66 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.artforum.com/print/201806",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.artforum.com/news/levy-gorvy-amalia-dayan-salon-94-merge-to-form-upper-east-side-megagallery-86598",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "New York Dealers Lévy Gorvy, Amalia Dayan, Salon 94, Announce Merger",
+				"creators": [],
+				"date": "2021-09-01",
+				"abstractNote": "Two New York galleries—Lévy Gorvy and Salon 94—and dealer Amalia Dayan have announced that they are joining forces to establish a single consortium, called LGDR, whose flagship will be situated on the city’s tony Upper East Side. The news, first reported in the New York Times, is said to have come as a shock to a number of the galleries’ artists, whose fate is unclear.The new entity, which takes its name from the last initials of its owners—Dominique Lévy and Brett Gorvy, cofounders of Lévy Gorvy; veteran dealer Amalia Dayan; and Jeanne Greenberg Rohatyn, the owner of Salon 94—will occupy digs",
+				"blogTitle": "Artforum",
+				"language": "en-US",
+				"url": "https://www.artforum.com/news/levy-gorvy-amalia-dayan-salon-94-merge-to-form-upper-east-side-megagallery-86598",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.artforum.com/print/202107/david-salle-on-janet-malcolm-86314",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "JANET MALCOLM (1934–2021)",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Salle",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 2021",
+				"ISSN": "0004-3532",
+				"abstractNote": "ABOUT TWENTY-FIVE YEARS AGO Janet Malcolm published a profile of me in the New Yorker that became something of a touchstone of art journalism. It served as the title essay of one of her collections, and has been reprinted several times. I’m told it’s often assigned in classes on art writing, on the assumption that it sheds some light on that murky enterprise.It’s uncommon for the subject of a profile to warmly remember the profiler, and my friendship with Janet struck some people as odd. For some, it would be hard, or so they imagined, to get past the discomforts of so much self-exposure, and",
+				"issue": "1",
+				"language": "en-US",
+				"libraryCatalog": "www.artforum.com",
+				"publicationTitle": "Artforum",
+				"url": "https://www.artforum.com/print/202107/david-salle-on-janet-malcolm-86314",
+				"volume": "60",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
