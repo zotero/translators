@@ -2,7 +2,7 @@
 	"translatorID": "a127f012-4ea4-4d05-a657-24d47f91b016",
 	"label": "Artforum",
 	"creator": "czar",
-	"target": "^https?://(www\\.)?artforum\\.com",
+	"target": "^https?://(www\\.)?artforum\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
