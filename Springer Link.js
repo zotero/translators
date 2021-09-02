@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-02 14:53:26"
+	"lastUpdated": "2021-09-02 15:00:29"
 }
 
 function detectWeb(doc, url) {
@@ -227,7 +227,7 @@ function complementItem(doc, item) {
 	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
 	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
 	// ORCID
-	getORCID(doc, item);//Z.debug(item.notes)
+	getORCID(doc, item);
 	return item;
 }
 	// ORCID
