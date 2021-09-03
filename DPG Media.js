@@ -47,50 +47,50 @@ function doWeb(doc, url) {
 	var item = new Zotero.Item('newspaperArticle');
 	item.libraryCatalog = "DPG Media";
 	item.language = 'nl';
-	var new_url = url.split('callbackUrl=')[1];
-	new_url = decodeURIComponent(new_url);
-	new_url = decodeURIComponent(new_url);
-	new_url = new_url.replace(/(.+)(?:privacy-gate\/accept-tcf2|privacygate-confirm|privacy-wall\/accept)\?redirectUri=\/(.+)/, '$1$2')
-	item.url = new_url
+	var newUrl = url.split('callbackUrl=')[1];
+	newUrl = decodeURIComponent(newUrl);
+	newUrl = decodeURIComponent(newUrl);
+	newUrl = newUrl.replace(/(.+)(?:privacy-gate\/accept-tcf2|privacygate-confirm|privacy-wall\/accept)\?redirectUri=\/(.+)/, '$1$2')
+	item.url = newUrl
 	
 	
-	var title = new_url.replace(/.+\/(.+)~.+/, '$1')
+	var title = newUrl.replace(/.+\/(.+)~.+/, '$1')
 	title = title.replace(/-/g, " ")
 	title = Zotero.Utilities.capitalizeTitle(title, true)
 	title = title.replace(/ En /g, " en ")
 	item.title = title
 
-	if (new_url.indexOf('ad.nl') != -1) {
+	if (newUrl.indexOf('ad.nl') != -1) {
 		item.publicationTitle = 'Algemeen Dagblad';
 	}
-	else if (new_url.indexOf('bndestem.nl') != -1) {
+	else if (newUrl.indexOf('bndestem.nl') != -1) {
 		item.publicationTitle = 'BN DeStem';
 	}
-	else if (new_url.indexOf('gelderlander.nl') != -1) {
+	else if (newUrl.indexOf('gelderlander.nl') != -1) {
 		item.publicationTitle = 'De Gelderlander';
 	}
-	else if (new_url.indexOf('deondernemer.nl') != -1) {
+	else if (newUrl.indexOf('deondernemer.nl') != -1) {
 		item.publicationTitle = 'De Ondernemer';
 	}
-	else if (new_url.indexOf('destentor.nl') != -1) {
+	else if (newUrl.indexOf('destentor.nl') != -1) {
 		item.publicationTitle = 'De Stentor';
 	}
-	else if (new_url.indexOf('ed.nl') != -1) {
+	else if (newUrl.indexOf('ed.nl') != -1) {
 		item.publicationTitle = 'Eindhovens Dagblad';
 	}
-	else if (new_url.indexOf('pzc.nl') != -1) {
+	else if (newUrl.indexOf('pzc.nl') != -1) {
 		item.publicationTitle = 'Provinciale Zeeuwse Courant';
 	}
-	else if (new_url.indexOf('tubantia.nl') != -1) {
+	else if (newUrl.indexOf('tubantia.nl') != -1) {
 		item.publicationTitle = 'De Twentsche Courant Tubantia';
 	}
-	else if (new_url.indexOf('demorgen.be') != -1) {
+	else if (newUrl.indexOf('demorgen.be') != -1) {
 		item.publicationTitle = 'De Morgen';
 	}
-	else if (new_url.indexOf('hln.be') != -1) {
+	else if (newUrl.indexOf('hln.be') != -1) {
 		item.publicationTitle = 'Het Laatste Nieuws';
 	}
-	else if (new_url.indexOf('7sur7.be') != -1) {
+	else if (newUrl.indexOf('7sur7.be') != -1) {
 		item.publicationTitle = '7sur7';
 		item.language = 'fr';
 	}
