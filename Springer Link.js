@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-02 15:00:29"
+	"lastUpdated": "2021-09-06 14:44:03"
 }
 
 function detectWeb(doc, url) {
@@ -236,7 +236,7 @@ function getORCID(doc, item) {
 	for (let authorOrcidEntry of authorOrcidEntries) {
 		let authorEntry = authorOrcidEntry.innerText;
 		let orcidEntry = authorOrcidEntry.innerHTML;
-		if (authorEntry && orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)) {
+		if (authorEntry && orcidEntry && orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)) {
 			let author = ZU.trimInternal(authorEntry.replace(/&/g, ''));
 			let orcid = orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)[0]
 			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
