@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-04-28 12:46:55"
+	"lastUpdated": "2021-09-08 13:53:10"
 }
 
 /*
@@ -155,7 +155,12 @@ function scrape(doc, url) {
 	});
 }
 
-
+//ubtue: write article number in $y
+function addArticleNumber (doc, item) {
+	if (item.pages.match(/\d{5,}/)) {
+		item.pages = 'article ' + item.pages;	
+	}
+}
 
 function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
@@ -195,26 +200,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 	let AccessIconLocation = doc.querySelector('.accessIconLocation[alt]');
 	if (AccessIconLocation && AccessIconLocation.alt.match(/open\s+access/gi)) item.notes.push('LF:');
-
-	//add attachments
-	item.attachments = [{
-		title: 'Full Text PDF',
-		url: pdfurl + doi,
-		mimeType: 'application/pdf'
-	}];
-	if (doc) {
-		item.attachments.push({
-			title: 'Snapshot',
-			document: doc
-		});
-	} else {
-		item.attachments.push({
-			title: 'Snapshot',
-			url: item.url || absurl + doi,
-			mimeType: 'text/html'
-		});
-	}
-
+	addArticleNumber(doc, item);
 	item.complete();
 }
 
@@ -223,25 +209,25 @@ function finalizeItem(item, doc, doi, baseUrl) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/17487870802543480",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Informality and productivity in the labor market in Peru",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -254,23 +240,25 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://dx.doi.org/10.1080/17487870802543480",
+				"url": "https://doi.org/10.1080/17487870802543480",
 				"volume": "11",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"tag": "Peru"
 					},
 					{
-						"title": "Snapshot"
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
 					}
-				],
-				"tags": [
-					"Peru",
-					"employment",
-					"informality",
-					"labor costs",
-					"training"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -279,30 +267,30 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/toc/clah20/22/4",
+		"url": "https://www.tandfonline.com/toc/clah20/22/4",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/full/10.1080/17487870802543480",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/17487870802543480",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Informality and productivity in the labor market in Peru",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -315,23 +303,25 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://dx.doi.org/10.1080/17487870802543480",
+				"url": "https://doi.org/10.1080/17487870802543480",
 				"volume": "11",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"tag": "Peru"
 					},
 					{
-						"title": "Snapshot"
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
 					}
-				],
-				"tags": [
-					"Peru",
-					"employment",
-					"informality",
-					"labor costs",
-					"training"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -340,20 +330,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/00036846.2011.568404",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Estimating willingness to pay by risk adjustment mechanism",
 				"creators": [
 					{
-						"firstName": "Joo Heon",
 						"lastName": "Park",
+						"firstName": "Joo   Heon",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Douglas L.",
 						"lastName": "MacLachlan",
+						"firstName": "Douglas   L.",
 						"creatorType": "author"
 					}
 				],
@@ -366,25 +356,31 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "37-46",
 				"publicationTitle": "Applied Economics",
-				"url": "http://dx.doi.org/10.1080/00036846.2011.568404",
+				"url": "https://doi.org/10.1080/00036846.2011.568404",
 				"volume": "45",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
-					"D12",
-					"D81",
-					"M31",
-					"adjustment mechanism",
-					"contigent valuation method",
-					"purchase decisions",
-					"willingness to pay"
+					{
+						"tag": "D12"
+					},
+					{
+						"tag": "D81"
+					},
+					{
+						"tag": "M31"
+					},
+					{
+						"tag": "adjustment mechanism"
+					},
+					{
+						"tag": "contigent valuation method"
+					},
+					{
+						"tag": "purchase decisions"
+					},
+					{
+						"tag": "willingness to pay"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -393,76 +389,15 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nejm.org/toc/nejm/medical-journal",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Cutting Family Planning in Texas",
-				"creators": [
-					{
-						"firstName": "Kari",
-						"lastName": "White",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Daniel",
-						"lastName": "Grossman",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Kristine",
-						"lastName": "Hopkins",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Joseph E.",
-						"lastName": "Potter",
-						"creatorType": "author"
-					}
-				],
-				"date": "September 27, 2012",
-				"DOI": "10.1056/NEJMp1207920",
-				"ISSN": "0028-4793",
-				"abstractNote": "In 2011, Texas slashed funding for family planning services and imposed new restrictions on abortion care, affecting the health care of many low-income women. For demographically similar states, Texas's experience may be a harbinger of public health effects to come.",
-				"extra": "PMID: 23013071",
-				"issue": "13",
-				"itemID": "doi:10.1056/NEJMp1207920",
-				"libraryCatalog": "Taylor and Francis+NEJM",
-				"pages": "1179-1181",
-				"publicationTitle": "New England Journal of Medicine",
-				"url": "http://dx.doi.org/10.1056/NEJMp1207920",
-				"volume": "367",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
+		"url": "https://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Multicriteria Evaluation of High-speed Rail, Transrapid Maglev and Air Passenger Transport in Europe",
 				"creators": [
 					{
-						"firstName": "Milan",
 						"lastName": "Janic",
+						"firstName": "Milan",
 						"creatorType": "author"
 					}
 				],
@@ -475,23 +410,25 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "491-512",
 				"publicationTitle": "Transportation Planning and Technology",
-				"url": "http://dx.doi.org/10.1080/0308106032000167373",
+				"url": "https://doi.org/10.1080/0308106032000167373",
 				"volume": "26",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"tag": "Entropy method; "
 					},
 					{
-						"title": "Snapshot"
+						"tag": "Europe; "
+					},
+					{
+						"tag": "High-speed transport systems; "
+					},
+					{
+						"tag": "Interest groups "
+					},
+					{
+						"tag": "Multicriteria analysis; "
 					}
-				],
-				"tags": [
-					"Entropy method; ",
-					"Europe; ",
-					"High-speed transport systems; ",
-					"Interest groups ",
-					"Multicriteria analysis; "
 				],
 				"notes": [],
 				"seeAlso": []
@@ -500,25 +437,25 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/action/doSearch?AllField=labor+market",
+		"url": "https://www.tandfonline.com/action/doSearch?AllField=labor+market&",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/00380768.1991.10415050#.U_vX3WPATVE",
+		"url": "https://www.tandfonline.com/doi/abs/10.1080/00380768.1991.10415050#.U_vX3WPATVE",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Concentration dependence of CO2 evolution from soil in chamber with low CO2 concentration (< 2,000 ppm), and CO2 diffusion/sorption model in soil",
 				"creators": [
 					{
-						"firstName": "Takahiko",
 						"lastName": "Naganawa",
+						"firstName": "Takahiko",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kazutake",
 						"lastName": "Kyuma",
+						"firstName": "Kazutake",
 						"creatorType": "author"
 					}
 				],
@@ -531,22 +468,22 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "381-386",
 				"publicationTitle": "Soil Science and Plant Nutrition",
-				"url": "http://dx.doi.org/10.1080/00380768.1991.10415050",
+				"url": "https://doi.org/10.1080/00380768.1991.10415050",
 				"volume": "37",
-				"attachments": [
+				"attachments": [],
+				"tags": [
 					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
+						"tag": "CO2 diffusion"
 					},
 					{
-						"title": "Snapshot"
+						"tag": "CO2 evolution"
+					},
+					{
+						"tag": "CO2 sorption"
+					},
+					{
+						"tag": "concentration dependence"
 					}
-				],
-				"tags": [
-					"CO2 diffusion",
-					"CO2 evolution",
-					"CO2 sorption",
-					"concentration dependence"
 				],
 				"notes": [],
 				"seeAlso": []
@@ -555,25 +492,25 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/figure/10.1080/00014788.2016.1157680?scroll=top&needAccess=true",
+		"url": "https://www.tandfonline.com/doi/figure/10.1080/00014788.2016.1157680?scroll=top&needAccess=true&",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Stakeholder perceptions of performance audit credibility",
 				"creators": [
 					{
-						"firstName": "Warwick",
 						"lastName": "Funnell",
+						"firstName": "Warwick",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Margaret",
 						"lastName": "Wade",
+						"firstName": "Margaret",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Robert",
 						"lastName": "Jupe",
+						"firstName": "Robert",
 						"creatorType": "author"
 					}
 				],
@@ -586,23 +523,10 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "601-619",
 				"publicationTitle": "Accounting and Business Research",
-				"url": "http://dx.doi.org/10.1080/00014788.2016.1157680",
+				"url": "https://doi.org/10.1080/00014788.2016.1157680",
 				"volume": "46",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					"Australian National Audit Office",
-					"credibility",
-					"performance auditing",
-					"source"
-				],
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -617,12 +541,12 @@ var testCases = [
 				"title": "(Un)believing in modern society: religion, spirituality, and religious-secular competition",
 				"creators": [
 					{
-						"firstName": "Claire",
 						"lastName": "Wanless",
+						"firstName": "Claire",
 						"creatorType": "author"
 					}
 				],
-				"date": "Januar 2, 2019",
+				"date": "January 2, 2019",
 				"DOI": "10.1080/14755610.2019.1572099",
 				"ISSN": "1475-5610",
 				"issue": "1",
@@ -633,16 +557,11 @@ var testCases = [
 				"shortTitle": "(Un)believing in modern society",
 				"url": "https://doi.org/10.1080/14755610.2019.1572099",
 				"volume": "20",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot"
-					}
-				],
+				"attachments": [],
 				"tags": [
+					{
+						"tag": "Book Review"
+					},
 					{
 						"tag": "Book Reviews"
 					}
@@ -661,8 +580,8 @@ var testCases = [
 				"title": "Taiwan’s Covenantal Pluralism",
 				"creators": [
 					{
-						"firstName": "André",
 						"lastName": "Laliberté",
+						"firstName": "André",
 						"creatorType": "author"
 					}
 				],
@@ -677,16 +596,7 @@ var testCases = [
 				"publicationTitle": "The Review of Faith & International Affairs",
 				"url": "https://doi.org/10.1080/15570274.2021.1874144",
 				"volume": "19",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Buddhism"
@@ -715,7 +625,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "orcid:0-0003-3285-5188|André Laliberté"
+						"note": "orcid:0000-0003-3285-5188|André Laliberté"
 					}
 				],
 				"seeAlso": []
@@ -731,8 +641,8 @@ var testCases = [
 				"title": "Engineering transformations in the ‘religion-development nexus’: Islamic law, reform, and reconstruction in Aceh",
 				"creators": [
 					{
-						"firstName": "R. Michael",
 						"lastName": "Feener",
+						"firstName": "R. Michael",
 						"creatorType": "author"
 					}
 				],
@@ -748,16 +658,7 @@ var testCases = [
 				"shortTitle": "Engineering transformations in the ‘religion-development nexus’",
 				"url": "https://doi.org/10.1080/0048721X.2020.1792051",
 				"volume": "51",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Aceh"
@@ -780,8 +681,64 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "orcid:0-0002-1222-6766|R. Michael Feener"
+						"note": "orcid:0000-0002-1222-6766|R. Michael Feener"
 					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.tandfonline.com/doi/abs/10.1080/20797222.2020.1850489",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Facing challenges and drawing strength from adversity: Lived experiences of Tibetan refugee youth in exile in India",
+				"creators": [
+					{
+						"lastName": "Sapam",
+						"firstName": "Kiran Dolly",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Jijina",
+						"firstName": "Parisha",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 1, 2020",
+				"DOI": "10.1080/20797222.2020.1850489",
+				"ISSN": "2079-7222",
+				"abstractNote": "The current study is a qualitative investigation aimed at exploring the lived experiences of Tibetan youth who had escaped to India as unaccompanied minors and since then have been living as refugees in India without their parents. The study attempts to explore the challenges, struggles and coping of this unique population of youth refugees growing up in exile in India without the support of parents. Ten Tibetan refugee youth now studying at university level were interviewed in depth. Interpretative phenomenological analysis was used to analyse their narratives. Major findings included the unique sociocultural, political and emotional challenges they faced related to acclimatisation, status of their own political identity, difficulties pertaining to retaining their Tibetan culture in a host country, and loneliness. Their adaptation in the host country was perceived to be facilitated by their unique Buddhist spiritual and cultural beliefs, strong faith in the Dalai Lama, community bonding and peer support and the use of social media to communicate with family in Tibet. The Tibetan refugee youth derived a sense of growth from their adversities related to appreciating the value of family, personal growth in the form of self-reliance, and finding meaning in life by feeling part of a larger purpose related to the Tibetan cause. Implications for practice: The study highlights the unique psychosocial issues of Tibetan refugee youth in exile in India. Culturally sensitive psychosocial support and an understanding of traditional spiritual and religious coping mechanisms may be integrated into health services for the Tibetan refugees who lack family support and may not be familiar with the Western constructs of mental health.",
+				"issue": "1",
+				"itemID": "doi:10.1080/20797222.2020.1850489",
+				"libraryCatalog": "Taylor and Francis+NEJM",
+				"pages": "article e1850489",
+				"publicationTitle": "Indo-Pacific Journal of Phenomenology",
+				"shortTitle": "Facing challenges and drawing strength from adversity",
+				"url": "https://doi.org/10.1080/20797222.2020.1850489",
+				"volume": "20",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Tibetan refugee"
+					},
+					{
+						"tag": "challenges of Tibetan refugees"
+					},
+					{
+						"tag": "coping of Tibetan refugees"
+					},
+					{
+						"tag": "interpretative phenomenological analysis"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0002-7049-9383|Parisha Jijina"
+					},
+					"LF:"
 				],
 				"seeAlso": []
 			}
