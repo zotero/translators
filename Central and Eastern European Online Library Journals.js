@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-07 08:34:00"
+	"lastUpdated": "2021-06-30 23:49:56"
 }
 
 /*
@@ -44,7 +44,7 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('a[href*="/search/article-detail?"]');
+	var rows = doc.querySelectorAll('.description a');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -301,7 +301,21 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.ceeol.com/search/journal-detail?id=1266",
 		"defer": true,
-		"items": "multiple"
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Philosophy and Canon Law",
+				"creators": [],
+				"ISSN": "2450-4955, 2451-2141",
+				"language": "en",
+				"libraryCatalog": "www.ceeol.com",
+				"url": "https://www.ceeol.com/search/journal-detail?id=1266",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
