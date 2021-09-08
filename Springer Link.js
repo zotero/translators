@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-06 14:44:03"
+	"lastUpdated": "2021-09-08 16:13:57"
 }
 
 function detectWeb(doc, url) {
@@ -198,18 +198,16 @@ function complementItem(doc, item) {
 		item.abstractNote = abstract.trim();
 	} else {
 		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
-		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
-		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
+		let otherAbstracts = doc.querySelectorAll('#Abs2-section');//Z.debug(otherAbstracts)
+		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]');
 		item.abstractNote = titleTextGerman ? titleTextGerman : '';
 		let secondAbstract = "";
-		for (let i = 0; i < sectionTitles.length; ++i) {
-			let titleText = sectionTitles[i].textContent.trim();
-			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
-			secondAbstract += titleText + ": " + sectionBody + "\n\n";
+		for (let part of otherAbstracts) {
+			var otherAbstract = part.innerText.replace(/\b\n{2}/g, ': ');
 		}
-		if (secondAbstract) {
+		if (otherAbstract) {
 			item.notes.push({
-				note: "abs:" + ZU.trimInternal(secondAbstract).replace(/^Abstract[:\s]*/, "").trim()
+				note: "abs:" + ZU.trimInternal(otherAbstract).replace(/^Abstract[:\s]*/, "").replace('\n\n', ': ')
 			});
 		}
 	}
@@ -887,6 +885,101 @@ var testCases = [
 					},
 					{
 						"note": "orcid:0000-0001-5935-1938 | David Efird"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-021-00606-5",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Intensivpflege in Zeiten der COVID-19 Pandemie: Zur Frage des Verhältnisses von Fürsorge und Selbstsorge",
+				"creators": [
+					{
+						"lastName": "Kuhn",
+						"firstName": "Eva",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Seidlein",
+						"firstName": "Anna-Henrikje",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-03-01",
+				"DOI": "10.1007/s00481-021-00606-5",
+				"ISSN": "1437-1618",
+				"abstractNote": "Die COVID-19 Pandemie stellt eine beträchtliche Herausforderung für die Kapazität und Funktionalität der Intensivversorgung dar. Dies betrifft nicht nur Ressourcen, sondern vor allem auch die körperlichen und psychischen Grenzen von Pflegefachpersonen. Der Frage, wie sich Fürsorge und Selbstsorge von Pflegefachpersonen auf Intensivstationen im Rahmen der COVID-19 Pandemie zueinander verhalten, wurde bislang im öffentlichen und wissenschaftlichen Diskurs keine Aufmerksamkeit geschenkt. Der vorliegende Beitrag reflektiert dieses Verhältnis mit Hilfe des Ethikkodex des International Council of Nurses, unter besonderer Berücksichtigung der Prinzipienethik und der Care-Ethik nach Joan Tronto und zeigt einen Korridor ethisch vertretbarer Pflege auf.Die Arbeit leistet damit einen wichtigen Beitrag zu einer differenzierten ethischen Betrachtung der Rechte und Verantwortlichkeiten von Pflegefachpersonen als moralischen Akteuren innerhalb des Pandemiegeschehens in Deutschland. Damit schafft er eine erste Voraussetzung für einen breiten gesellschaftlichen und politischen Diskurs, der über die Pandemie hinaus dringend notwendig ist, um die Situation der Pflegefachpersonen und der Gepflegten nachhaltig zu verbessern.",
+				"issue": "1",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "51-70",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Intensivpflege in Zeiten der COVID-19 Pandemie",
+				"url": "https://doi.org/10.1007/s00481-021-00606-5",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "COVID-19"
+					},
+					{
+						"tag": "Care"
+					},
+					{
+						"tag": "Care Ethik"
+					},
+					{
+						"tag": "Care ethics"
+					},
+					{
+						"tag": "Code of ethics"
+					},
+					{
+						"tag": "Ethikkodex"
+					},
+					{
+						"tag": "Fürsorge"
+					},
+					{
+						"tag": "Intensive care nursing"
+					},
+					{
+						"tag": "Intensivpflege"
+					},
+					{
+						"tag": "Pandemic"
+					},
+					{
+						"tag": "Pandemie"
+					},
+					{
+						"tag": "Selbstsorge"
+					},
+					{
+						"tag": "Self-care"
+					}
+				],
+				"notes": [
+					"LF:",
+					{
+						"note": "abs:Definition of the problem: The COVID-19 pandemic poses a considerable challenge to the capacity and functionality of intensive care. This concerns not only resources but, above all, the physical and psychological boundaries of nursing professionals. The question of how care for others and self-care of nurses in intensive care units are related to each other in the context of the COVID-19 pandemic has not been addressed in public and scientific discourse so far. Arguments: The present contribution reflects this relationship with reference to the Code of Ethics of the International Council of Nurses, particularly considering principlism and the Care Ethics according to Joan Tronto. As a result, it shows a corridor of ethically justifiable care with several borders, above all: (1) self-care must not be given up completely for the benefit of care for others, and (2) a categorical subordination of care for others to self-care is ethically not justifiable. Conclusion: The article makes an important contribution to a differentiated ethical consideration of the rights and responsibilities of intensive care nurses as moral actors within the pandemic in Germany. It, thus, provides a first starting point for a broad social and political discourse which is urgently needed not only during but also after the pandemic in order to improve the situation of intensive care nurses and those who are cared for."
+					},
+					{
+						"note": "orcid:0000-0002-8337-9639 | Eva Kuhn Mag.theol., B.A."
+					},
+					{
+						"note": "orcid:0000-0002-7690-567X | Anna-Henrikje Seidlein M.Sc., B.A."
 					}
 				],
 				"seeAlso": []
