@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-08 16:15:45"
+	"lastUpdated": "2021-09-08 19:15:09"
 }
 
 function detectWeb(doc, url) {
@@ -197,7 +197,6 @@ function complementItem(doc, item) {
 
 		item.abstractNote = abstract.trim();
 	} else {
-		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
 		let otherAbstracts = doc.querySelectorAll('#Abs2-section');
 		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]');
 		item.abstractNote = titleTextGerman ? titleTextGerman : '';
@@ -207,7 +206,7 @@ function complementItem(doc, item) {
 		}
 		if (otherAbstract) {
 			item.notes.push({
-				note: "abs:" + ZU.trimInternal(otherAbstract).replace(/^Abstract[:\s]*/, "").replace('\n\n', ': ')
+				note: "abs:" + ZU.trimInternal(otherAbstract).replace(/^Abstract[:\s]*/, "")
 			});
 		}
 	}
