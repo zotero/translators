@@ -2,20 +2,20 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)/|search-results?|\\/issue(/|$)",
+	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 280,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-12 22:40:03"
+	"lastUpdated": "2021-09-07 20:12:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Sebastian Karcher
+	Copyright © 2020-2021 Sebastian Karcher and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -37,7 +37,7 @@
 
 
 function detectWeb(doc, url) {
-	let articleRegex = /\/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)\//;
+	let articleRegex = /\/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)(\/|\.aspx)/;
 	if (articleRegex.test(url) && getArticleId(doc)) {
 		return "journalArticle";
 	}
@@ -51,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"]');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -109,6 +109,12 @@ function scrape(doc) {
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.pages) {
+				// if item.pages only spans one page (4-4), replace the range
+				// with a single page number (4).
+				item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
+			}
+			
 			if (pdfURL) {
 				item.attachments.push({
 					url: pdfURL,
@@ -574,6 +580,58 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://pubs.geoscienceworld.org/georef/search-results?page=1&q=test&SearchSourceType=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/article.aspx?articleid=2503433",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Testing models of peripheral encoding using metamerism in an oddity paradigm",
+				"creators": [
+					{
+						"lastName": "Wallis",
+						"firstName": "Thomas S. A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bethge",
+						"firstName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wichmann",
+						"firstName": "Felix A.",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 11, 2016",
+				"DOI": "10.1167/16.2.4",
+				"ISSN": "1534-7362",
+				"abstractNote": "Most of the visual field is peripheral, and the periphery encodes visual input with less fidelity compared to the fovea. What information is encoded, and what is lost in the visual periphery? A systematic way to answer this question is to determine how sensitive the visual system is to different kinds of lossy image changes compared to the unmodified natural scene. If modified images are indiscriminable from the original scene, then the information discarded by the modification is not important for perception under the experimental conditions used. We measured the detectability of modifications of natural image structure using a temporal three-alternative oddity task, in which observers compared modified images to original natural scenes. We consider two lossy image transformations, Gaussian blur and Portilla and Simoncelli texture synthesis. Although our paradigm demonstrates metamerism (physically different images that appear the same) under some conditions, in general we find that humans can be capable of impressive sensitivity to deviations from natural appearance. The representations we examine here do not preserve all the information necessary to match the appearance of natural scenes in the periphery.",
+				"issue": "2",
+				"journalAbbreviation": "Journal of Vision",
+				"libraryCatalog": "Silverchair",
+				"pages": "4",
+				"publicationTitle": "Journal of Vision",
+				"url": "https://doi.org/10.1167/16.2.4",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/issues.aspx?issueid=934904&journalid=178#issueid=934904",
 		"items": "multiple"
 	}
 ]
