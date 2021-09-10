@@ -7,7 +7,7 @@
 		"@zotero"
 	],
 	"parserOptions": {
-		"ecmaVersion": 7
+		"ecmaVersion": 2017
 	},
 	"globals": {
 		"Zotero": "readonly",
@@ -16,6 +16,9 @@
 		"DOMParser": "readonly",
 		"XPathResult": "readonly",
 		"XMLSerializer": "readonly",
+		"attr": "readonly",
+		"innerText": "readonly",
+		"text": "readonly",
 		"atob": "readonly"
 	},
 	"rules": {
@@ -23,10 +26,12 @@
 			"error",
 			{
 				"argsIgnorePattern": "^_",
-				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$"
+				"varsIgnorePattern": "^detectWeb$|^doWeb$|^detectImport$|^doImport$|^doExport$|^detectSearch$|^doSearch$|^exports$"
 			}
 		],
-		
+
+		"no-redeclare": ["error", {"builtinGlobals": true}],
+
 		"zotero-translator/not-executable": "error",
 		"zotero-translator/header-valid-json": "error",
 		"zotero-translator/translator-id": "error",

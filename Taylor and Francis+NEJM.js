@@ -2,14 +2,14 @@
 	"translatorID": "dac476e4-401d-430a-8571-a97c31c3b65e",
 	"label": "Taylor and Francis+NEJM",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)",
+	"target": "^https?://(www\\.)?(tandfonline\\.com|nejm\\.org)/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-29 05:39:46"
+	"lastUpdated": "2021-07-26 18:03:05"
 }
 
 /*
@@ -40,22 +40,27 @@
 function detectWeb(doc, url) {
 	if (url.match(/\/doi\/(abs|full|figure)\/10\./)) {
 		return "journalArticle";
-	} else if ((url.indexOf('/action/doSearch?')>-1 || url.indexOf('/toc/')>-1) && getSearchResults(doc, true)) {
+	}
+	else if ((url.includes('/action/doSearch?') || url.includes('/toc/')) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//multiples in search results:
+	// multiples in search results:
 	var rows = ZU.xpath(doc, '//article[contains(@class, "searchResultItem")]//a[contains(@href, "/doi/") and contains(@class, "ref")]');
-	if (rows.length==0) {
-		//multiples in toc view:
+	if (rows.length == 0) {
+		// multiples in toc view:
 		rows = ZU.xpath(doc, '//div[contains(@class, "articleLink") or contains(@class, "art_title")]/a[contains(@href, "/doi/") and contains(@class, "ref")]');
+		if (!rows.length) {
+			rows = doc.querySelectorAll('.o-results li > a[href*="/doi/"]');
+		}
 	}
-	for (var i=0; i<rows.length; i++) {
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -71,15 +76,12 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -89,26 +91,26 @@ function scrape(doc, url) {
 	var match = url.match(/\/doi\/(?:abs|full|figure)\/(10\.[^?#]+)/);
 	var doi = match[1];
 
-	var baseUrl = url.match(/https?:\/\/[^\/]+/)[0];
+	var baseUrl = url.match(/https?:\/\/[^/]+/)[0];
 	var postUrl = baseUrl + '/action/downloadCitation';
-	var postBody = 	'downloadFileName=citation&' +
-					'direct=true&' +
-					'include=abs&' +
-					'doi=';
+	var postBody = 	'downloadFileName=citation&'
+					+ 'direct=true&'
+					+ 'include=abs&'
+					+ 'doi=';
 	var risFormat = '&format=ris';
 	var bibtexFormat = '&format=bibtex';
 
-	ZU.doPost(postUrl, postBody + doi + bibtexFormat, function(text) {
+	ZU.doPost(postUrl, postBody + doi + bibtexFormat, function (text) {
 		var translator = Zotero.loadTranslator("import");
 		// Use BibTeX translator
 		translator.setTranslator("9cb70025-a888-4a29-a210-93ec52da40d4");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			// BibTeX content can have HTML entities (e.g. &amp;) in various fields
 			// We'll just try to unescape the most likely fields to contain these entities
 			// Note that RIS data is not always correct, so we avoid using it
 			var unescapeFields = ['title', 'publicationTitle', 'abstractNote'];
-			for (var i=0; i<unescapeFields.length; i++) {
+			for (var i = 0; i < unescapeFields.length; i++) {
 				if (item[unescapeFields[i]]) {
 					item[unescapeFields[i]] = ZU.unescapeHTML(item[unescapeFields[i]]);
 				}
@@ -116,28 +118,29 @@ function scrape(doc, url) {
 			
 			item.bookTitle = item.publicationTitle;
 
-			//unfortunately, bibtex is missing some data
-			//publisher, ISSN/ISBN
-			ZU.doPost(postUrl, postBody + doi + risFormat, function(text) {
+			// unfortunately, bibtex is missing some data
+			// publisher, ISSN/ISBN
+			ZU.doPost(postUrl, postBody + doi + risFormat, function (text) {
 				// Y1 is online publication date
 				if (/^DA\s+-\s+/m.test(text)) {
 					text = text.replace(/^Y1(\s+-.*)/gm, '');
 				}
 				
-				risTrans = Zotero.loadTranslator("import");
+				var risTrans = Zotero.loadTranslator("import");
 				risTrans.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 				risTrans.setString(text);
-				risTrans.setHandler("itemDone", function(obj, risItem) {
-					if (!item.title) item.title = "<no title>";	//RIS title can be even worse, it actually says "null"
+				risTrans.setHandler("itemDone", function (obj, risItem) {
+					if (!item.title) item.title = "<no title>";	// RIS title can be even worse, it actually says "null"
 					if (risItem.date) item.date = risItem.date; // More complete
 					item.publisher = risItem.publisher;
 					item.ISSN = risItem.ISSN;
 					item.ISBN = risItem.ISBN;
-					//clean up abstract removing Abstract:, Summary: or Abstract Summary:
+					// clean up abstract removing Abstract:, Summary: or Abstract Summary:
 					if (item.abstractNote) item.abstractNote = item.abstractNote.replace(/^(Abstract)?\s*(Summary)?:?\s*/i, "");
 					if (item.title.toUpperCase() == item.title) {
 						item.title = ZU.capitalizeTitle(item.title, true);
 					}
+					if (risItem.creators) item.creators = risItem.creators;
 					finalizeItem(item, doc, doi, baseUrl);
 				});
 				risTrans.translate();
@@ -152,13 +155,13 @@ function finalizeItem(item, doc, doi, baseUrl) {
 	var pdfurl = baseUrl + '/doi/pdf/';
 	var absurl = baseUrl + '/doi/abs/';
 	
-	//add keywords
+	// add keywords
 	var keywords = ZU.xpath(doc, '//div[contains(@class, "abstractKeywords")]//a');
-	for (var i=0; i<keywords.length; i++) {
+	for (var i = 0; i < keywords.length; i++) {
 		item.tags.push(keywords[i].textContent);
 	}
 	
-	//add attachments
+	// add attachments
 	item.attachments = [{
 		title: 'Full Text PDF',
 		url: pdfurl + doi,
@@ -169,7 +172,8 @@ function finalizeItem(item, doc, doi, baseUrl) {
 			title: 'Snapshot',
 			document: doc
 		});
-	} else {
+	}
+	else {
 		item.attachments.push({
 			title: 'Snapshot',
 			url: item.url || absurl + doi,
@@ -184,25 +188,25 @@ function finalizeItem(item, doc, doi, baseUrl) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/17487870802543480",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/17487870802543480",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Informality and productivity in the labor market in Peru",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -215,7 +219,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://dx.doi.org/10.1080/17487870802543480",
+				"url": "https://doi.org/10.1080/17487870802543480",
 				"volume": "11",
 				"attachments": [
 					{
@@ -223,15 +227,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Peru",
-					"employment",
-					"informality",
-					"labor costs",
-					"training"
+					{
+						"tag": "Peru"
+					},
+					{
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -245,25 +260,25 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/full/10.1080/17487870802543480",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/17487870802543480",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Informality and productivity in the labor market in Peru",
 				"creators": [
 					{
-						"firstName": "Alberto",
 						"lastName": "Chong",
+						"firstName": "Alberto",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jose",
 						"lastName": "Galdo",
+						"firstName": "Jose",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Jaime",
 						"lastName": "Saavedra",
+						"firstName": "Jaime",
 						"creatorType": "author"
 					}
 				],
@@ -276,7 +291,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "229-245",
 				"publicationTitle": "Journal of Economic Policy Reform",
-				"url": "http://dx.doi.org/10.1080/17487870802543480",
+				"url": "https://doi.org/10.1080/17487870802543480",
 				"volume": "11",
 				"attachments": [
 					{
@@ -284,15 +299,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Peru",
-					"employment",
-					"informality",
-					"labor costs",
-					"training"
+					{
+						"tag": "Peru"
+					},
+					{
+						"tag": "employment"
+					},
+					{
+						"tag": "informality"
+					},
+					{
+						"tag": "labor costs"
+					},
+					{
+						"tag": "training"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -301,20 +327,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/00036846.2011.568404",
+		"url": "https://www.tandfonline.com/doi/full/10.1080/00036846.2011.568404",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Estimating willingness to pay by risk adjustment mechanism",
 				"creators": [
 					{
-						"firstName": "Joo Heon",
 						"lastName": "Park",
+						"firstName": "Joo   Heon",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Douglas L.",
 						"lastName": "MacLachlan",
+						"firstName": "Douglas   L.",
 						"creatorType": "author"
 					}
 				],
@@ -327,7 +353,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "37-46",
 				"publicationTitle": "Applied Economics",
-				"url": "http://dx.doi.org/10.1080/00036846.2011.568404",
+				"url": "https://doi.org/10.1080/00036846.2011.568404",
 				"volume": "45",
 				"attachments": [
 					{
@@ -335,17 +361,32 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"D12",
-					"D81",
-					"M31",
-					"adjustment mechanism",
-					"contigent valuation method",
-					"purchase decisions",
-					"willingness to pay"
+					{
+						"tag": "D12"
+					},
+					{
+						"tag": "D81"
+					},
+					{
+						"tag": "M31"
+					},
+					{
+						"tag": "adjustment mechanism"
+					},
+					{
+						"tag": "contigent valuation method"
+					},
+					{
+						"tag": "purchase decisions"
+					},
+					{
+						"tag": "willingness to pay"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -359,44 +400,44 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.nejm.org/doi/full/10.1056/NEJMp1207920",
+		"url": "https://www.nejm.org/doi/full/10.1056/NEJMp1207920",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Cutting Family Planning in Texas",
 				"creators": [
 					{
-						"firstName": "Kari",
 						"lastName": "White",
+						"firstName": "Kari",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Daniel",
 						"lastName": "Grossman",
+						"firstName": "Daniel",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kristine",
 						"lastName": "Hopkins",
+						"firstName": "Kristine",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Joseph E.",
 						"lastName": "Potter",
+						"firstName": "Joseph E.",
 						"creatorType": "author"
 					}
 				],
 				"date": "September 27, 2012",
 				"DOI": "10.1056/NEJMp1207920",
 				"ISSN": "0028-4793",
-				"abstractNote": "In 2011, Texas slashed funding for family planning services and imposed new restrictions on abortion care, affecting the health care of many low-income women. For demographically similar states, Texas's experience may be a harbinger of public health effects to come.",
+				"abstractNote": "Four fundamental principles drive public funding for family planning. First, unintended pregnancy is associated with negative health consequences, including reduced use of prenatal care, lower breast-feeding rates, and poor maternal and neonatal outcomes.1,2 Second, governments realize substantial cost savings by investing in family planning, which reduces the rate of unintended pregnancies and the costs of prenatal, delivery, postpartum, and infant care.3 Third, all Americans have the right to choose the timing and number of their children. And fourth, family planning enables women to attain their educational and career goals and families to provide for their children. These principles led . . .",
 				"extra": "PMID: 23013071",
 				"issue": "13",
 				"itemID": "doi:10.1056/NEJMp1207920",
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "1179-1181",
 				"publicationTitle": "New England Journal of Medicine",
-				"url": "http://dx.doi.org/10.1056/NEJMp1207920",
+				"url": "https://doi.org/10.1056/NEJMp1207920",
 				"volume": "367",
 				"attachments": [
 					{
@@ -404,7 +445,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -415,15 +457,15 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
+		"url": "https://www.tandfonline.com/doi/abs/10.1080/0308106032000167373",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Multicriteria Evaluation of High-speed Rail, Transrapid Maglev and Air Passenger Transport in Europe",
 				"creators": [
 					{
-						"firstName": "Milan",
 						"lastName": "Janic",
+						"firstName": "Milan",
 						"creatorType": "author"
 					}
 				],
@@ -436,7 +478,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "491-512",
 				"publicationTitle": "Transportation Planning and Technology",
-				"url": "http://dx.doi.org/10.1080/0308106032000167373",
+				"url": "https://doi.org/10.1080/0308106032000167373",
 				"volume": "26",
 				"attachments": [
 					{
@@ -444,15 +486,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Entropy method; ",
-					"Europe; ",
-					"High-speed transport systems; ",
-					"Interest groups ",
-					"Multicriteria analysis; "
+					{
+						"tag": "Entropy method; "
+					},
+					{
+						"tag": "Europe; "
+					},
+					{
+						"tag": "High-speed transport systems; "
+					},
+					{
+						"tag": "Interest groups "
+					},
+					{
+						"tag": "Multicriteria analysis; "
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -466,20 +519,20 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/abs/10.1080/00380768.1991.10415050#.U_vX3WPATVE",
+		"url": "https://www.tandfonline.com/doi/abs/10.1080/00380768.1991.10415050#.U_vX3WPATVE",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Concentration dependence of CO2 evolution from soil in chamber with low CO2 concentration (< 2,000 ppm), and CO2 diffusion/sorption model in soil",
 				"creators": [
 					{
-						"firstName": "Takahiko",
 						"lastName": "Naganawa",
+						"firstName": "Takahiko",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Kazutake",
 						"lastName": "Kyuma",
+						"firstName": "Kazutake",
 						"creatorType": "author"
 					}
 				],
@@ -492,7 +545,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "381-386",
 				"publicationTitle": "Soil Science and Plant Nutrition",
-				"url": "http://dx.doi.org/10.1080/00380768.1991.10415050",
+				"url": "https://doi.org/10.1080/00380768.1991.10415050",
 				"volume": "37",
 				"attachments": [
 					{
@@ -500,14 +553,23 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"CO2 diffusion",
-					"CO2 evolution",
-					"CO2 sorption",
-					"concentration dependence"
+					{
+						"tag": "CO2 diffusion"
+					},
+					{
+						"tag": "CO2 evolution"
+					},
+					{
+						"tag": "CO2 sorption"
+					},
+					{
+						"tag": "concentration dependence"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -516,25 +578,25 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.tandfonline.com/doi/figure/10.1080/00014788.2016.1157680?scroll=top&needAccess=true",
+		"url": "https://www.tandfonline.com/doi/figure/10.1080/00014788.2016.1157680?scroll=top&needAccess=true&",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Stakeholder perceptions of performance audit credibility",
 				"creators": [
 					{
-						"firstName": "Warwick",
 						"lastName": "Funnell",
+						"firstName": "Warwick",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Margaret",
 						"lastName": "Wade",
+						"firstName": "Margaret",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Robert",
 						"lastName": "Jupe",
+						"firstName": "Robert",
 						"creatorType": "author"
 					}
 				],
@@ -547,7 +609,7 @@ var testCases = [
 				"libraryCatalog": "Taylor and Francis+NEJM",
 				"pages": "601-619",
 				"publicationTitle": "Accounting and Business Research",
-				"url": "http://dx.doi.org/10.1080/00014788.2016.1157680",
+				"url": "https://doi.org/10.1080/00014788.2016.1157680",
 				"volume": "46",
 				"attachments": [
 					{
@@ -555,15 +617,11 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					"Australian National Audit Office",
-					"credibility",
-					"performance auditing",
-					"source"
-				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

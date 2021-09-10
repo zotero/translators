@@ -8,18 +8,42 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-01-30 09:40:41"
+	"lastUpdated": "2020-10-14 14:41:53"
 }
 
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2020 Simon Kornblith, Sylvain Machefert
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 function detectImport() {
-	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/
+	var marcRecordRegexp = /^[0-9]{5}[a-z ]{3}$/;
 	var read = Zotero.read(8);
 	if (marcRecordRegexp.test(read)) {
 		return true;
 	}
+	return false;
 }
-//test
+// test
 var fieldTerminator = "\x1E";
 var recordTerminator = "\x1D";
 var subfieldDelimiter = "\x1F";
@@ -27,26 +51,24 @@ var subfieldDelimiter = "\x1F";
 /*
  * CLEANING FUNCTIONS
  */
- 
 
- 
 
 // general purpose cleaning
 function clean(value) {
-	if (value == null) {
+	if (value === undefined) {
 		return null;
 	}
-	value = value.replace(/^[\s\.\,\/\:;]+/, '');
-	value = value.replace(/[\s\.\,\/\:;]+$/, '');
+	value = value.replace(/^[\s.,/:;]+/, '');
+	value = value.replace(/[\s.,/:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
-	
+
 	var char1 = value.substr(0, 1);
-	var char2 = value.substr(value.length-1);
+	var char2 = value.substr(value.length - 1);
 	if ((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
 		// chop of extraneous characters
-		return value.substr(1, value.length-2);
+		return value.substr(1, value.length - 2);
 	}
-	
+
 	return value;
 }
 
@@ -57,21 +79,19 @@ function pullNumber(text) {
 	if (m) {
 		return m[0];
 	}
+	return "";
 }
 
 // ISBN extraction
 function pullISBN(text) {
-	var pullRe = /[0-9X\-]+/;
+	var pullRe = /[0-9X-]+/;
 	var m = pullRe.exec(text);
 	if (m) {
 		return m[0];
 	}
+	return "";
 }
 
-// corporate author extraction
-function corpAuthor(author, type) {
-	return {lastName:author, fieldMode:true, creatorType: type};
-}
 
 // regular author extraction
 function author(author, type, useComma) {
@@ -92,203 +112,213 @@ function glueTogether(part1, part2, delimiter) {
 	if (!delimiter) {
 		return part1 + ' ' + part2;
 	}
-	//we only add the delimiter, if part1 is not ending with a punctation
+	// we only add the delimiter, if part1 is not ending with a punctation
 	if (part1.search(/[?:,.!;]\s*$/) > -1) {
 		return part1 + ' ' + part2;
 	}
 	return part1 + delimiter + part2;
 }
+
 /*
  * END CLEANING FUNCTIONS
  */
 
-var record = function() {
-	this.directory = new Object();
+var record = function () {
+	this.directory = {};
 	this.leader = "";
 	this.content = "";
-	
+
 	// defaults
 	this.indicatorLength = 2;
 	this.subfieldCodeLength = 2;
-}
+};
 
 // import a binary MARC record into this record
-record.prototype.importBinary = function(record) {
+record.prototype.importBinary = function (record) {
 	// get directory and leader
 	var directory = record.substr(0, record.indexOf(fieldTerminator));
 	this.leader = directory.substr(0, 24);
-	var directory = directory.substr(24);
-	
+	directory = directory.substr(24);
+
 	// get various data
-	this.indicatorLength = parseInt(this.leader.substr(10, 1), 10);
-	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1), 10);
-	var baseAddress = parseInt(this.leader.substr(12, 5), 10);
-	
+	this.indicatorLength = parseInt(this.leader.substr(10, 1));
+	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1));
+	var baseAddress = parseInt(this.leader.substr(12, 5));
+
 	// get record data
 	var contentTmp = record.substr(baseAddress);
-	
+
 	// MARC wants one-byte characters, so when we have multi-byte UTF-8
 	// sequences, add null characters so that the directory shows up right. we
 	// can strip the nulls later.
 	this.content = "";
-	for (i=0; i<contentTmp.length; i++) {
+	for (i = 0; i < contentTmp.length; i++) {
 		this.content += contentTmp.substr(i, 1);
 		if (contentTmp.charCodeAt(i) > 0x00FFFF) {
 			this.content += "\x00\x00\x00";
-		} else if (contentTmp.charCodeAt(i) > 0x0007FF) {
+		}
+		else if (contentTmp.charCodeAt(i) > 0x0007FF) {
 			this.content += "\x00\x00";
-		} else if (contentTmp.charCodeAt(i) > 0x00007F) {
+		}
+		else if (contentTmp.charCodeAt(i) > 0x00007F) {
 			this.content += "\x00";
 		}
 	}
-	
+
 	// read directory
-	for (var i=0; i<directory.length; i+=12) {
-		var tag = parseInt(directory.substr(i, 3), 10);
-		var fieldLength = parseInt(directory.substr(i+3, 4), 10);
-		var fieldPosition = parseInt(directory.substr(i+7, 5), 10);
-		
+	for (var i = 0; i < directory.length; i += 12) {
+		var tag = parseInt(directory.substr(i, 3));
+		var fieldLength = parseInt(directory.substr(i + 3, 4));
+		var fieldPosition = parseInt(directory.substr(i + 7, 5));
+
 		if (!this.directory[tag]) {
-			this.directory[tag] = new Array();
+			this.directory[tag] = [];
 		}
 		this.directory[tag].push([fieldPosition, fieldLength]);
 	}
-}
+};
 
 // add a field to this record
-record.prototype.addField = function(field, indicator, value) {
-	field = parseInt(field, 10);
+record.prototype.addField = function (field, indicator, value) {
+	field = parseInt(field);
 	// make sure indicator is the right length
 	if (indicator.length > this.indicatorLength) {
 		indicator = indicator.substr(0, this.indicatorLength);
-	} else if (indicator.length != this.indicatorLength) {
+	}
+	else if (indicator.length != this.indicatorLength) {
 		indicator = Zotero.Utilities.lpad(indicator, " ", this.indicatorLength);
 	}
-	
+
 	// add terminator
-	value = indicator+value+fieldTerminator;
-	
+	value = indicator + value + fieldTerminator;
+
 	// add field to directory
 	if (!this.directory[field]) {
-		this.directory[field] = new Array();
+		this.directory[field] = [];
 	}
 	this.directory[field].push([this.content.length, value.length]);
-	
+
 	// add field to record
 	this.content += value;
-}
+};
 
 // get all fields with a certain field number
-record.prototype.getField = function(field) {
-	field = parseInt(field, 10);
-	var fields = new Array();
-	
+record.prototype.getField = function (field) {
+	field = parseInt(field);
+	var fields = [];
+
 	// make sure fields exist
 	if (!this.directory[field]) {
 		return fields;
 	}
-	
+
 	// get fields
 	for (var i in this.directory[field]) {
 		var location = this.directory[field][i];
-		
+
 		// add to array, replacing null characters
 		fields.push([this.content.substr(location[0], this.indicatorLength),
-			this.content.substr(location[0]+this.indicatorLength,
-			location[1]-this.indicatorLength-1).replace(/\x00/g, "")]);
+			this.content.substr(location[0] + this.indicatorLength,
+				location[1] - this.indicatorLength - 1).replace(/\x00/g, "")]);
 	}
-	
-	return fields;
-}
 
-//given a field string, split it into subfields
-record.prototype.extractSubfields = function(fieldStr, tag /*for error message only*/) {
+	return fields;
+};
+
+// given a field string, split it into subfields
+record.prototype.extractSubfields = function (fieldStr, tag /* for error message only*/) {
 	if (!tag) tag = '<no tag>';
 
-	returnSubfields = new Object();
+	var returnSubfields = {};
 
 	var subfields = fieldStr.split(subfieldDelimiter);
 	if (subfields.length == 1) {
 		returnSubfields["?"] = fieldStr;
-	} else {
+	}
+	else {
 		for (var j in subfields) {
 			if (subfields[j]) {
-				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength-1);
+				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength - 1);
 				if (!returnSubfields[subfieldIndex]) {
-					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength-1);
-				} else {
+					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength - 1);
+				}
+				else {
 					// Duplicate subfield
-					Zotero.debug("Duplicate subfield '"+tag+" "+subfieldIndex+"="+subfields[j]);
-					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength-1);
+					Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfields[j]);
+					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength - 1);
 				}
 			}
 		}
 	}
 
 	return returnSubfields;
-}
+};
 
 // get subfields from a field
-record.prototype.getFieldSubfields = function(tag) { // returns a two-dimensional array of values
+record.prototype.getFieldSubfields = function (tag) { // returns a two-dimensional array of values
 	var fields = this.getField(tag);
-	var returnFields = new Array();
-	
-	for (var i=0, n=fields.length; i<n; i++) {
+	var returnFields = [];
+
+	for (var i = 0, n = fields.length; i < n; i++) {
 		returnFields[i] = this.extractSubfields(fields[i][1], tag);
 	}
-	
+
 	return returnFields;
-}
+};
 
 // add field to DB
-record.prototype._associateDBField = function(item, fieldNo, part, fieldName, execMe, arg1, arg2) {
+record.prototype._associateDBField = function (item, fieldNo, part, fieldName, execMe, arg1, arg2) {
 	var field = this.getFieldSubfields(fieldNo);
-	
-	Zotero.debug('MARC: found '+field.length+' matches for '+fieldNo+part);
+
+	Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
 	if (field) {
 		for (var i in field) {
 			var value = false;
-			for (var j=0; j<part.length; j++) {
+			for (var j = 0; j < part.length; j++) {
 				var myPart = part.substr(j, 1);
 				if (field[i][myPart]) {
 					if (value) {
-						value += " "+field[i][myPart];
-					} else {
+						value += " " + field[i][myPart];
+					}
+					else {
 						value = field[i][myPart];
 					}
 				}
 			}
 			if (value) {
 				value = clean(value);
-				
+
 				if (execMe) {
 					value = execMe(value, arg1, arg2);
 				}
-				
+
 				if (fieldName == "creator") {
 					item.creators.push(value);
-				} else if (fieldName == "ISBN") {
+				}
+				else if (fieldName == "ISBN") {
 					if (!item[fieldName]) {
 						item[fieldName] = value;
-					} else {
+					}
+					else {
 						item[fieldName] += ' ' + value;
 					}
-				} else {
+				}
+				else {
 					item[fieldName] = value;
 					return;
 				}
 			}
 		}
 	}
-}
+};
 
 // add field to DB as note
-record.prototype._associateNotes = function(item, fieldNo, part) {
+record.prototype._associateNotes = function (item, fieldNo, part) {
 	var field = this.getFieldSubfields(fieldNo);
-	var texts = [];	
+	var texts = [];
 
 	for (var i in field) {
-		for (var j=0; j<part.length; j++) {
+		for (var j = 0; j < part.length; j++) {
 			var myPart = part.substr(j, 1);
 			if (field[i][myPart]) {
 				texts.push(clean(field[i][myPart]));
@@ -296,163 +326,174 @@ record.prototype._associateNotes = function(item, fieldNo, part) {
 		}
 	}
 	var text = texts.join(' ');
-	if (text.trim() != "")
-		item.notes.push({note: text});
-}
+	if (text.trim() != "") item.notes.push({ note: text });
+};
 
 // add field to DB as tags
-record.prototype._associateTags = function(item, fieldNo, part) {
+record.prototype._associateTags = function (item, fieldNo, part) {
 	var field = this.getFieldSubfields(fieldNo);
-	
+
 	for (var i in field) {
-		for (var j=0; j<part.length; j++) {
+		for (var j = 0; j < part.length; j++) {
 			var myPart = part.substr(j, 1);
 			if (field[i][myPart]) {
 				item.tags.push(clean(field[i][myPart]));
 			}
 		}
 	}
-}
+};
 
 // this function loads a MARC record into our database
-record.prototype.translate = function(item) {
+record.prototype.translate = function (item) {
 	// get item type
 	if (this.leader) {
 		var marcType = this.leader.substr(6, 1);
 		if (marcType == "g") {
 			item.itemType = "film";
-		} else if (marcType == "j" || marcType == "i") {
+		}
+		else if (marcType == "j" || marcType == "i") {
 			item.itemType = "audioRecording";
-		} else if (marcType == "e" || marcType == "f") {
+		}
+		else if (marcType == "e" || marcType == "f") {
 			item.itemType = "map";
-		} else if (marcType == "k") {
+		}
+		else if (marcType == "k") {
 			item.itemType = "artwork";
-		} else if (marcType == "t" || marcType == "b") {
+		}
+		else if (marcType == "t" || marcType == "b") {
 			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
 			item.itemType = "manuscript";
-		} else {
+		}
+		else {
 			item.itemType = "book";
 		}
-	} else {
+	}
+	else {
 		item.itemType = "book";
 	}
 
 	// Starting from there, we try to distinguish between unimarc and other marc flavours.
 	// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
 	// In marc-21, the title is in the 245 field and this field isn't used in unimarc
-	// So if we have a 200 and no 245, we can think we are with an unimarc record. 
+	// So if we have a 200 and no 245, we can think we are with an unimarc record.
 	// Otherwise, we use the original association.
-	if ( (this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0])) )
-	{
+	if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
 		// If we've got a 328 field, we're on a thesis
-		if (this.getFieldSubfields("328")[0])
-		{
+		if (this.getFieldSubfields("328")[0]) {
 			item.itemType = "thesis";
 		}
-		
+
 		// Extract ISBNs
 		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
 		// Extract ISSNs
 		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
-		
+
 		// Extract creators (700, 701 & 702)
-		for (var i = 700; i < 703; i++)
-		{
-			var authorTab = this.getFieldSubfields(i);
-			for (var j in authorTab) 
-			{
+		for (let i = 700; i < 703; i++) {
+			let authorTab = this.getFieldSubfields(i);
+			for (let j in authorTab) {
 				var aut = authorTab[j];
 				var authorText = "";
-				if ( (aut.b) && (aut.a) ){
-					authorText = aut['a'].replace(/,\s*$/,'') + ", " + aut['b'];
-				} 
-				else
-				{
-					authorText = aut['a'];
+				if ((aut.b) && (aut.a)) {
+					authorText = aut.a.replace(/,\s*$/, '') + ", " + aut.b;
 				}
-				//prevent this from crashing with empty author tags 
+				else {
+					authorText = aut.a;
+				}
+				// prevent this from crashing with empty author tags
 				if (authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
 			}
 		}
-		
+
 		// Extract corporate creators (710, 711 & 712)
-		for (var i = 710; i < 713; i++)
-		{
-			var authorTab = this.getFieldSubfields(i);
-			for (var j in authorTab)
-			{
-				if (authorTab[j]['a'])
-				{
-					item.creators.push({lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true});
+		for (let i = 710; i < 713; i++) {
+			let authorTab = this.getFieldSubfields(i);
+			for (let j in authorTab) {
+				if (authorTab[j].a) {
+					item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true });
 				}
 			}
 		}
-		
+
 		// Extract language. In the 101$a there's a 3 chars code, would be better to
 		// have a translation somewhere
 		this._associateDBField(item, "101", "a", "language");
-		
+
 		// Extract abstractNote
 		this._associateDBField(item, "328", "a", "abstractNote");
 		this._associateDBField(item, "330", "a", "abstractNote");
-		
+
 		// Extract tags
-		// TODO : Ajouter les autres champs en 6xx avec les autorités construites. 
+		// TODO : Ajouter les autres champs en 6xx avec les autorités construites.
 		// nécessite de reconstruire les autorités
 		this._associateTags(item, "610", "a");
-		
+
 		// Extract scale (for maps)
 		this._associateDBField(item, "206", "a", "scale");
-		
+
 		// Extract title
-		var title = this.getField("200")[0][1]	//non-repeatable
-						.replace(	//chop off any translations, since they may have repeated $e fields
+		var title = this.getField("200")[0][1]	// non-repeatable
+						.replace(	// chop off any translations, since they may have repeated $e fields
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
 		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
-		item.title = item.title;
 
 		// Extract edition
 		this._associateDBField(item, "205", "a", "edition");
-		
-		// Extract place info
-		this._associateDBField(item, "210", "a", "place");
-		
-		// Extract publisher/distributor
-		if (item.itemType == "film")
-		{
-			this._associateDBField(item, "210", "c", "distributor");
+
+
+		// Field 214 replaces 210 in newer version of UNIMARC; the two are exclusive
+		// 214 uses numbered subfields to describe different types of bibliographic information
+		// currently not using that
+		// see https://www.transition-bibliographique.fr/wp-content/uploads/2019/08/B214-2019.pdf
+		if (this.getField("214").length) {
+			this._associateDBField(item, "214", "a", "place");
+			if (item.itemType == "film") {
+				this._associateDBField(item, "214", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "214", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "214", "d", "date", pullNumber);
 		}
-		else
-		{
-			this._associateDBField(item, "210", "c", "publisher");
+		else {
+			// Extract place info
+			this._associateDBField(item, "210", "a", "place");
+
+			// Extract publisher/distributor
+			if (item.itemType == "film") {
+				this._associateDBField(item, "210", "c", "distributor");
+			}
+			else {
+				this._associateDBField(item, "210", "c", "publisher");
+			}
+			// Extract year
+			this._associateDBField(item, "210", "d", "date", pullNumber);
 		}
-		
-		// Extract year
-		this._associateDBField(item, "210", "d", "date", pullNumber);
+
+
 		// Extract pages. Not working well because 215$a often contains pages + volume informations : 1 vol ()
 		// this._associateDBField(item, "215", "a", "pages", pullNumber);
-		
+
 		// Extract series
 		this._associateDBField(item, "225", "a", "series");
 		// Extract series number
 		this._associateDBField(item, "225", "v", "seriesNumber");
-		
+
 		// Extract call number
 		this._associateDBField(item, "686", "ab", "callNumber");
 		this._associateDBField(item, "676", "a", "callNumber");
 		this._associateDBField(item, "675", "a", "callNumber");
 		this._associateDBField(item, "680", "ab", "callNumber");
 	}
-	else
-	{
+	else {
 		// If we've got a 502 field, we're on a thesis, either published on its own (thesis)
 		// or by a publisher and therefore with an ISBN number (book).
-		if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0])
-		{
+		if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0]) {
 			item.itemType = "thesis";
 		}
-		
+
 		// Extract ISBNs
 		this._associateDBField(item, "020", "a", "ISBN", pullISBN);
 		// Extract ISSNs
@@ -460,43 +501,44 @@ record.prototype.translate = function(item) {
 		// Extract language
 		this._associateDBField(item, "041", "a", "language");
 		// Extract creators
-		//http://www.loc.gov/marc/relators/relaterm.html
+		// http://www.loc.gov/marc/relators/relaterm.html
 		var RELATERM = {
-			"act" : "castMember",
-			"asn" : "contributor", //Associated name
-			"aut" : "author",
-			"cmp" : "composer",
-			"ctb" : "contributor",
-			"drt" : "director",
-			"edt" : "editor",
-			"pbl" : "SKIP", //publisher
-			"prf" : "performer",
-			"pro" : "producer",
-			"pub" : "SKIP", //publication place
-			"trl" : "translator"
+			act: "castMember",
+			asn: "contributor", // Associated name
+			aut: "author",
+			cmp: "composer",
+			ctb: "contributor",
+			drt: "director",
+			edt: "editor",
+			pbl: "SKIP", // publisher
+			prf: "performer",
+			pro: "producer",
+			pub: "SKIP", // publication place
+			trl: "translator"
 		};
-		
-		var creatorFields = ["100", "110", "700", "710"];//"111", "711" are meeting name
-		for (var i = 0; i < creatorFields.length; i++) {
+
+		var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
+		for (let i = 0; i < creatorFields.length; i++) {
 			var authorTab = this.getFieldSubfields(creatorFields[i]);
-			for (var j in authorTab) {
+			for (let j in authorTab) {
 				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
 					continue;
 				}
 				var creatorObject = {};
-				if (authorTab[j]['a']) {
-					if (creatorFields[i] == "100" || creatorFields[i] == "700" ) {
-						creatorObject = ZU.cleanAuthor(authorTab[j]['a'], "author", true)
-					} else {
-						//same replacements as in the function ZU.cleanAuthor for institutional authors:
-						authorTab[j]['a'] = authorTab[j]['a'].replace(/^[\s\u00A0\.\,\/\[\]\:]+/, '')
-							.replace(/[\s\u00A0\.\,\/\[\]\:]+$/, '')
-							.replace(/[\s\u00A0]+/, ' ');
-						creatorObject = {lastName:authorTab[j]['a'], creatorType:"contributor", fieldMode:true}
+				if (authorTab[j].a) {
+					if (creatorFields[i] == "100" || creatorFields[i] == "700") {
+						creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
 					}
-					//some heuristic for the default values:
-					//in a book without any person as a main entry (no 100 field)
-					//it is likely that all persons (in 700 fields) are editors
+					else {
+						// same replacements as in the function ZU.cleanAuthor for institutional authors:
+						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
+							.replace(/[\s\u00A0.,/[\]:]+$/, '')
+							.replace(/[\s\u00A0]+/, ' ');
+						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
+					}
+					// some heuristic for the default values:
+					// in a book without any person as a main entry (no 100 field)
+					// it is likely that all persons (in 700 fields) are editors
 					if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
 						creatorObject.creatorType = "editor";
 					}
@@ -507,18 +549,18 @@ record.prototype.translate = function(item) {
 				}
 			}
 		}
-		
+
 		this._associateDBField(item, "111", "a", "meetingName");
 		this._associateDBField(item, "711", "a", "meetingName");
-		
+
 		if (item.itemType == "book" && !item.creators.length) {
 			// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 			var field = this.getFieldSubfields("600");
 			if (field[0]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(field[0]["a"], "author", true));	
+				item.creators.push(Zotero.Utilities.cleanAuthor(field[0].a, "author", true));
 			}
 		}
-		
+
 		// Extract tags
 		// personal
 		this._associateTags(item, "600", "aqtxyzv");
@@ -554,19 +596,20 @@ record.prototype.translate = function(item) {
 		// general note
 		this._associateNotes(item, "500", "a");
 		// dissertation note
-		this._associateNotes(item, "502", "a");        
+		this._associateNotes(item, "502", "a");
 		// formatted contents (table of contents)
 		this._associateNotes(item, "505", "art");
 		// summary
 		// Store as abstract if not already available and only one such note exists
 		if (!item.abstractNote && this.getField("520").length == 1) {
-		this._associateDBField(item, "520", "ab", "abstractNote");
-		} else {
+			this._associateDBField(item, "520", "ab", "abstractNote");
+		}
+		else {
 			this._associateNotes(item, "520", "ab");
 		}
 		// biographical or historical data
 		this._associateNotes(item, "545", "ab");
-		
+
 		// Extract title
 		//  a = main title
 		//  b = subtitle
@@ -574,24 +617,24 @@ record.prototype.translate = function(item) {
 		//  p = Name of part/section of a work
 		var titlesubfields = this.getFieldSubfields("245")[0];
 		item.title = glueTogether(
-			glueTogether(clean(titlesubfields["a"]), clean(titlesubfields["b"]), ": "),
-			glueTogether(clean(titlesubfields["n"]), clean(titlesubfields["p"]), ": "),
+			glueTogether(clean(titlesubfields.a), clean(titlesubfields.b), ": "),
+			glueTogether(clean(titlesubfields.n), clean(titlesubfields.p), ": "),
 			". "
 		);
-		item.title = item.title;
-		
+
 		// Extract edition
 		this._associateDBField(item, "250", "a", "edition");
 		// Extract place info
 		this._associateDBField(item, "260", "a", "place");
-		
+
 		// Extract publisher/distributor
 		if (item.itemType == "film") {
 			this._associateDBField(item, "260", "b", "distributor");
-		} else {
+		}
+		else {
 			this._associateDBField(item, "260", "b", "publisher");
 		}
-		
+
 		// Extract year
 		this._associateDBField(item, "260", "c", "date", pullNumber);
 		// Extract pages
@@ -613,21 +656,21 @@ record.prototype.translate = function(item) {
 		this._associateDBField(item, "090", "ab", "callNumber");
 		this._associateDBField(item, "099", "a", "callNumber");
 		this._associateDBField(item, "852", "khim", "callNumber");
-		//OCLC numbers are useful info to save in extra
+		// OCLC numbers are useful info to save in extra
 		var controlNumber = this.getFieldSubfields("035")[0];
-		if (controlNumber && controlNumber["a"] && controlNumber["a"].indexOf("(OCoLC)") == 0) {
-			item.extra = "OCLC: " + controlNumber["a"].substring(7);
+		if (controlNumber && controlNumber.a && controlNumber.a.indexOf("(OCoLC)") == 0) {
+			item.extra = "OCLC: " + controlNumber.a.substring(7);
 		}
 		// Extract URL for electronic resources
-		this._associateDBField(item, "245", "h", "medium")
+		this._associateDBField(item, "245", "h", "medium");
 		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
-		
-		//Field 264 instead of 260
+
+		// Field 264 instead of 260
 		if (!item.place) this._associateDBField(item, "264", "a", "place");
 		if (!item.publisher) this._associateDBField(item, "264", "b", "publisher");
 		if (!item.date) this._associateDBField(item, "264", "c", "date", pullNumber);
-		
-		//German
+
+		// German
 		if (!item.place) this._associateDBField(item, "410", "a", "place");
 		if (!item.publisher) this._associateDBField(item, "412", "a", "publisher");
 		if (!item.title) this._associateDBField(item, "331", "a", "title");
@@ -636,22 +679,23 @@ record.prototype.translate = function(item) {
 		if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
 		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
 		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
-		
-		//Spanish
+
+		// Spanish
 		if (!item.title) this._associateDBField(item, "200", "a", "title");
 		if (!item.place) this._associateDBField(item, "210", "a", "place");
 		if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
 		if (!item.date) this._associateDBField(item, "210", "d", "date");
 		if (!item.creators) {
-			for (var i = 700; i < 703; i++) {
+			for (let i = 700; i < 703; i++) {
 				if (this.getFieldSubfields(i)[0]) {
 					Zotero.debug(i + " is AOK");
 					Zotero.debug(this.getFieldSubfields(i.toString()));
-					var aut = this.getFieldSubfields(i)[0];
+					let aut = this.getFieldSubfields(i)[0];
 					if (aut.b) {
-						aut = aut['b'].replace(/,\W+/g, "") + " " + aut['a'].replace(/,\s/g, "");
-					} else {
-						aut = aut['a'].split(", ").join(" ");
+						aut = aut.b.replace(/,\W+/g, "") + " " + aut.a.replace(/,\s/g, "");
+					}
+					else {
+						aut = aut.a.split(", ").join(" ");
 					}
 					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
 				}
@@ -661,12 +705,18 @@ record.prototype.translate = function(item) {
 			item.title = Zotero.Utilities.capitalizeTitle(item.title);
 		}
 		if (this.getFieldSubfields("335")[0]) {
-			item.title = item.title + ": " + this.getFieldSubfields("335")[0]['a'];
+			item.title = item.title + ": " + this.getFieldSubfields("335")[0].a;
 		}
-		var container;
-		if (container = this.getFieldSubfields("773")[0]) {
+		var otherIds = this.getFieldSubfields("024");
+		for (let id of otherIds) {
+			if (id['2'] == "doi") {
+				item.DOI = id.a;
+			}
+		}
+		var container = this.getFieldSubfields("773")[0];
+		if (container) {
 			var type = container['7'];
-			switch (type){
+			switch (type) {
 				case "nnam":
 					item.itemType = "bookSection";
 					break;
@@ -676,136 +726,137 @@ record.prototype.translate = function(item) {
 				case "m2am":
 					item.itemType = "conferencePaper";
 					break;
-				default: //some catalogs don't have the $7 subfield
-					if (container['t'] && container['z']){ //if there is an ISBN assume book section
-						item.itemType = "bookSection"
+				default: // some catalogs don't have the $7 subfield
+					if (container.t && container.z) { // if there is an ISBN assume book section
+						item.itemType = "bookSection";
 					}
-					else if (container['t']){//else default to journal article
-						item.itemType = "journalArticle"
+					else if (container.t) { // else default to journal article
+						item.itemType = "journalArticle";
 					}
 			}
-			if (item.itemType=="bookSection"||item.itemType=="conferencePaper"){
-				var pubinfo = container['d'];
-				if (pubinfo){
+			var publication = container.t;
+			if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
+				var pubinfo = container.d;
+				if (pubinfo) {
 					item.place = pubinfo.replace(/:.+/, "");
 					var publisher = pubinfo.match(/:\s*(.+),\s*\d{4}/);
 					if (publisher) item.publisher = publisher[1];
 					var year = pubinfo.match(/,\s*(\d{4})/);
 					if (year) item.date = year[1];
 				}
-				var publication = container['t'];
-				if (publication){
-					var title = publication.replace(/\..*/, "");
-					if (item.itemType=="bookSection"){
-						item.bookTitle = title;
+				if (publication) {
+					var publicationTitle = publication.replace(/\..*/, "");
+					if (item.itemType == "bookSection") {
+						item.bookTitle = publicationTitle;
 					}
 					else {
-						item.proceedingsTitle = title;
+						item.proceedingsTitle = publicationTitle;
 					}
-					if (publication.indexOf("Edited by")!=-1){
+					if (publication.includes("Edited by")) {
 						var editors = publication.match(/Edited by\s+(.+)\.?/)[1];
-						var editors = editors.split(/\s+and\s+|\s*,\s*|\s*;\s*/);
-						for (var i = 0; i<editors.length; i++){
-							item.creators.push(ZU.cleanAuthor(editors[i], "editor"))
+						editors = editors.split(/\s+and\s+|\s*,\s*|\s*;\s*/);
+						for (let i = 0; i < editors.length; i++) {
+							item.creators.push(ZU.cleanAuthor(editors[i], "editor"));
 						}
 					}
 				}
-				var pages = container['g'];
-				if (pages){
-					pagerange = pages.match(/[ps]\.\s*(\d+(\-\d+)?)/);
-					//if we don't have a page marker, we'll guess that a number range is good enough but
-					if (!pagerange) pagerange = pages.match(/(\d+\-\d+)/);
+				var pages = container.g;
+				if (pages) {
+					pagerange = pages.match(/[ps]\.\s*(\d+(-\d+)?)/);
+					// if we don't have a page marker, we'll guess that a number range is good enough but
+					if (!pagerange) pagerange = pages.match(/(\d+-\d+)/);
 					if (pagerange) item.pages = pagerange[1];
 				}
-				var event = container['a'];
-				if (event){
-					item.conferenceName = event.replace(/[\{\}]/g, "");
+				var event = container.a;
+				if (event) {
+					item.conferenceName = event.replace(/[{}]/g, "");
 				}
-				item.ISBN = container['z'];
+				item.ISBN = container.z;
 			}
 			else {
-				var publication = container['t'];
-				if (publication){
-					item.publicationTitle=publication.replace(/[\.,\s]+$/, "")
+				if (publication) {
+					item.publicationTitle = publication.replace(/[.,\s]+$/, "");
 				}
-				item.journalAbbreviation = container['p'];
-				var locators = container['g'];
-				if (locators){
-					//unfortunately there is no standardization whatsoever here
-					var pagerange = locators.match(/[ps]\.\s*(\d+(\-\d+)?)/);
+				item.journalAbbreviation = container.p;
+				var locators = container.g;
+				if (locators) {
+					// unfortunately there is no standardization whatsoever here
+					var pagerange = locators.match(/[ps]\.\s*(\d+(-\d+)?)/);
 					// For Journals, since there are a lot of issue-ranges we require the first number to have >=2 digits
-					if (!pagerange) pagerange - locators.match(/(\d\d+\-\d+)/);
+					if (!pagerange) pagerange = locators.match(/(\d\d+-\d+)/);
 					if (pagerange) item.pages = pagerange[1];
-					var date = locators. match(/((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?\s*)?\d{4}/);
-					if (date){
+					var date = locators.match(/((Jan(uary)?|Feb(ruary)?|Mar(ch)?|Apr(il)?|May|Jun(e)?|Jul(y)?|Aug(ust)?|Sep(tember)?|Oct(ober)?|Nov(ember)?|Dec(ember)?)\.?\s*)?\d{4}/);
+					if (date) {
 						item.date = date[0];
 					}
-					if (locators.match(/vol\.\s*(\d+)/)) {
-						item.volume = locators.match(/vol\.\s*(\d+)/i)[1];
+					if (locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)) {
+						item.volume = locators.match(/(?:vol\.|bd\.)\s*(\d+)/i)[1];
 					}
-					if (locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)) {
-						item.issue = locators.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/i)[1];
+					if (locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)) {
+						item.issue = locators.match(/(?:vol\.|bd\.)\s*\d+\s*,\s*(?:no\.|nr\.)\s*(\d[\d/]*)/i)[1];
 					}
-					if (!item.volume && locators.match(/\d+:\d+/)){
+					if (!item.volume && locators.match(/\d+:\d+/)) {
 						item.volume = locators.match(/(\d+):\d+/)[1];
-						item.issue = locators.match(/\d+:(\d+)/)[1]
+						item.issue = locators.match(/\d+:(\d+)/)[1];
 					}
-				item.ISSN = container['x'];	
-				}	
+					item.ISSN = container.x;
+				}
 			}
 		}
 	}
-	//editors get mapped as contributors - but so do many others who should be
+	// editors get mapped as contributors - but so do many others who should be
 	// --> for books that don't have an author, turn contributors into editors.
-	if (item.itemType=="book"){
+	if (item.itemType == "book") {
 		var hasAuthor = false;
-		for (var i=0; i<item.creators.length; i++) {
-			if (item.creators[i].creatorType=="author") {
+		for (let i = 0; i < item.creators.length; i++) {
+			if (item.creators[i].creatorType == "author") {
 				hasAuthor = true;
 			}
 		}
 		if (!hasAuthor) {
-			for (var i=0; i<item.creators.length; i++) {
-		 		if (item.creators[i].creatorType=="contributor") {
-					item.creators[i].creatorType="editor";
+			for (let i = 0; i < item.creators.length; i++) {
+				if (item.creators[i].creatorType == "contributor") {
+					item.creators[i].creatorType = "editor";
 				}
 			}
 		}
-	}	
-}
+	}
+};
 
 function doImport() {
 	var text;
 	var holdOver = "";	// part of the text held over from the last loop
-	
+
+	// eslint-disable-next-line no-cond-assign
 	while (text = Zotero.read(4096)) {	// read in 4096 byte increments
 		var records = text.split("\x1D");
-		
+
 		if (records.length > 1) {
 			records[0] = holdOver + records[0];
 			holdOver = records.pop(); // skip last record, since it's not done
-			
+
 			for (var i in records) {
 				var newItem = new Zotero.Item();
-				
+
 				// create new record
-				var rec = new record();	
+				var rec = new record();
 				rec.importBinary(records[i]);
 				rec.translate(newItem);
-				
+
 				newItem.complete();
 			}
-		} else {
+		}
+		else {
 			holdOver += text;
 		}
 	}
 }
 
 var exports = {
-	"record":record,
-	"fieldTerminator":fieldTerminator,
-	"recordTerminator":recordTerminator,
-	"subfieldDelimiter":subfieldDelimiter
+	record: record,
+	fieldTerminator: fieldTerminator,
+	recordTerminator: recordTerminator,
+	subfieldDelimiter: subfieldDelimiter
 };
 
 /** BEGIN TEST CASES **/

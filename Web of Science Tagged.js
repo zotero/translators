@@ -8,14 +8,13 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2015-06-02 21:33:13"
+	"lastUpdated": "2021-07-21 02:48:00"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2015-2019 Michael Berkowitz, Avram Lyon
+	Copyright © 2015-2021 Michael Berkowitz, Avram Lyon
 
 	This file is part of Zotero.
 
@@ -64,6 +63,10 @@ function processTag(item, field, content) {
 		if (item.itemType === undefined) {
 			item.itemType = "journalArticle";
 			Zotero.debug("Unknown type: " + content);
+		}
+	} else if (field == "DT") {
+		if (content.trim().toLowerCase() == "proceedings paper") {
+			item.itemType = "conferencePaper";
 		}
 	} else if ((field == "AF" || field == "AU")) {
 		//Z.debug("author: " + content);
@@ -224,12 +227,10 @@ function doImport(text) {
 	
 	var rawLine;
 	while ((rawLine = Zotero.read()) !== false) {    // until EOF
-		// trim leading space if this line is not part of a note
-		line = rawLine.replace(/^\s+/, "");
-		//Z.debug("line: " + line);
-		var split = line.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
+		//Z.debug("line: " + rawLine);
+		let split = rawLine.match(/^([A-Z0-9]{2})\s(?:([^\n]*))?/);
 		// Force a match for ER
-		if (line == "ER") split = ["","ER",""];
+		if (rawLine == "ER") split = ["","ER",""];
 		if (split) {
 			// if this line is a tag, take a look at the previous line to map
 			// its tag
@@ -240,7 +241,7 @@ function doImport(text) {
 
 			// then fetch the tag and data from this line
 			tag = split[1];
-			data = split[2];
+			data = split[2] || '';
 			
 			if (tag == "ER") {	       // ER signals end of reference
 				// unset info
@@ -878,6 +879,79 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "import",
+		"input": "FN Clarivate Analytics Web of Science\nVR 1.0\nPT P\nAU YANG Y\n   LI W\nTI Use of reagent for detecting syntaxin 12 protein autoantibodies in\n   preparation of lung cancer screening kit\nPN CN110836969-A\nAE UNIV SICHUAN WEST CHINA HOSPITAL\nAB \n   NOVELTY - Use of reagent for detecting syntaxin 12 (STX12) protein\n   autoantibodies, is claimed in preparation of a lung cancer screening\n   kit.\n   USE - The reagent for detecting STX12 protein autoantibodies is useful\n   in preparation of a lung cancer screening kit (claimed).\n   ADVANTAGE - The reagent realizes effective screening of lung cancer and\n   detects that the autoantibody level of the STX12 protein in the serum of\n   lung cancer patients is significantly lower than that of healthy\n   patients.\nZ9 0\nUT DIIDW:202018799C\nER\n\nEF",
+		"items": [
+			{
+				"itemType": "patent",
+				"title": "Use of reagent for detecting syntaxin 12 protein autoantibodies in preparation of lung cancer screening kit",
+				"creators": [
+					{
+						"firstName": "YANG",
+						"lastName": "Y",
+						"creatorType": "inventor"
+					},
+					{
+						"firstName": "LI",
+						"lastName": "W",
+						"creatorType": "inventor"
+					}
+				],
+				"abstractNote": "NOVELTY - Use of reagent for detecting syntaxin 12 (STX12) protein autoantibodies, is claimed in preparation of a lung cancer screening kit. USE - The reagent for detecting STX12 protein autoantibodies is useful in preparation of a lung cancer screening kit (claimed). ADVANTAGE - The reagent realizes effective screening of lung cancer and detects that the autoantibody level of the STX12 protein in the serum of lung cancer patients is significantly lower than that of healthy patients.",
+				"assignee": "UNIV SICHUAN WEST CHINA HOSPITAL",
+				"extra": "DIIDW:202018799C",
+				"patentNumber": "CN110836969-A",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "FN Clarivate Analytics Web of Science\nVR 1.0\nPT B\nAU Chen, L\nAF Chen, L\nGP IEEE\nTI A conference control protocol for small scale video conferencing system\nSO 7TH INTERNATIONAL CONFERENCE ON ADVANCED COMMUNICATION TECHNOLOGY, VOLS\n   1 AND 2, PROCEEDINGS\nLA English\nDT Proceedings Paper\nCT 7th International Conference on Advanced Communication Technology\nCY FEB 21-23, 2005\nCL Phoenix Pk, SOUTH KOREA\nSP Minist Informat & Commun, NCA, ETRI, Nida, IEEE Commun Soc Tech, Osia, KICS, KIF, IEEK ComSoc\nDE video conferencing; full mesh; loosely coupled; conference control\n   protocol\nAB Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.\nC1 Zhejiang Univ, Coll Comp Sci, Hangzhou 310027, Peoples R China.\nRP Chen, L (corresponding author), Zhejiang Univ, Coll Comp Sci, Hangzhou 310027, Peoples R China.\nEM lingchen@cs.zju.edu.cn\nRI Chen, Ling/AAY-3744-2020\nNR 7\nTC 0\nZ9 0\nU1 0\nU2 3\nPU IEEE\nPI NEW YORK\nPA 345 E 47TH ST, NEW YORK, NY 10017 USA\nPY 2005\nBP 532\nEP 537\nDI 10.1109/ICACT.2005.245926\nPG 6\nWC Computer Science, Artificial Intelligence; Computer Science, Information\n   Systems; Telecommunications\nSC Computer Science; Telecommunications\nGA BCO79\nUT WOS:000230445900101\nDA 2021-07-21\nER\n\nEF",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "A conference control protocol for small scale video conferencing system",
+				"creators": [
+					{
+						"firstName": "L.",
+						"lastName": "Chen",
+						"creatorType": "author"
+					}
+				],
+				"date": "2005",
+				"DOI": "10.1109/ICACT.2005.245926",
+				"abstractNote": "Increased speeds of PCs and networks have made video conferencing systems possible in Internet. The proposed conference control protocol suits small scale video conferencing systems which employ full mesh conferencing architecture and loosely coupled conferencing mode. The protocol can ensure the number of conference member is less than the maximum value. Instant message services are used to do member authentication and notification. The protocol is verified in 32 concurrent conferencing scenarios and implemented in DigiParty which is a small scale video conferencing add-in application for MSN Messenger.",
+				"extra": "WOS:000230445900101",
+				"language": "English",
+				"pages": "532-537",
+				"place": "New York",
+				"proceedingsTitle": "7th International Conference on Advanced Communication Technology, Vols 1 and 2, Proceedings",
+				"publisher": "Ieee",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "conference control   protocol"
+					},
+					{
+						"tag": "full mesh"
+					},
+					{
+						"tag": "loosely coupled"
+					},
+					{
+						"tag": "video conferencing"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
-];
+]
 /** END TEST CASES **/

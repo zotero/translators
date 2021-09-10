@@ -8,24 +8,47 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2018-08-25 14:14:34"
+	"lastUpdated": "2019-07-11 13:12:18"
 }
+
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2012 Sebastian Karcher
+
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
 
 function detectImport() {
 	var line;
 	var i = 0;
 	while ((line = Zotero.read()) !== false) {
 		if (line !== "") {
-			if (line.match(/<(marc\:)?(collection|record) xmlns(\:marc)?=\"http:\/\/www\.loc\.gov\/MARC21\/slim\"/)) {
+			if (line.match(/xmlns(:marc)?="http:\/\/www\.loc\.gov\/MARC21\/slim"/)) {
 				return true;
-			} else {
-				if (i++ > 5) {
-					return false;
-				}
+			}
+			else if (i++ > 5) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -35,39 +58,37 @@ function doImport() {
 	while ((line = Zotero.read()) !== false) {
 		text += line;
 	}
-	//call MARC translator
+	// call MARC translator
 	var translator = Zotero.loadTranslator("import");
 	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
 	translator.getTranslatorObject(function (marc) {
-
 		var parser = new DOMParser();
 		var xml = parser.parseFromString(text, 'text/xml');
-		//define the marc namespace
+		// define the marc namespace
 		var ns = {
-			"marc": "http://www.loc.gov/MARC21/slim"
+			marc: "http://www.loc.gov/MARC21/slim"
 		};
 		var records = ZU.xpath(xml, '//marc:record', ns);
 		for (let rec of records) {
-
-			//create one new item per record
+			// create one new item per record
 			var record = new marc.record();
 			var newItem = new Zotero.Item();
 			record.leader = ZU.xpathText(rec, "./marc:leader", ns);
 			var fields = ZU.xpath(rec, "./marc:datafield", ns);
 			for (let field of fields) {
-				//go through every datafield (corresponds to a MARC field)
+				// go through every datafield (corresponds to a MARC field)
 				var subfields = ZU.xpath(field, "./marc:subfield", ns);
 				var tag = "";
 				for (let subfield of subfields) {
-					//get the subfields and their codes...
+					// get the subfields and their codes...
 					var code = ZU.xpathText(subfield, "./@code", ns);
 					var sf = ZU.xpathText(subfield, "./text()", ns);
-					//delete non-sorting symbols
-					//e.g. &#152;Das&#156; Adam-Smith-Projekt
+					// delete non-sorting symbols
+					// e.g. &#152;Das&#156; Adam-Smith-Projekt
 					if (sf) {
-						sf = sf.replace(/[\x80-\x9F]/g,"");
-						//concat all subfields in one datafield, with subfield delimiter and code between them
-						tag = tag + marc.subfieldDelimiter + code + sf
+						sf = sf.replace(/[\x80-\x9F]/g, "");
+						// concat all subfields in one datafield, with subfield delimiter and code between them
+						tag = tag + marc.subfieldDelimiter + code + sf;
 					}
 				}
 				record.addField(ZU.xpathText(field, "./@tag", ns), ZU.xpathText(field, "./@ind1", ns) + ZU.xpathText(field, "./@ind2"), tag);
@@ -75,8 +96,9 @@ function doImport() {
 			record.translate(newItem);
 			newItem.complete();
 		}
-	}); //get Translator end
+	}); // get Translator end
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{

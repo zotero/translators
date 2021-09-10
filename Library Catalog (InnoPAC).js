@@ -2,14 +2,14 @@
 	"translatorID": "4fd6b89b-2316-2dc4-fd87-61a97dd941e8",
 	"label": "Library Catalog (InnoPAC)",
 	"creator": "Simon Kornblith and Michael Berkowitz",
-	"target": "(search~|/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=[bi][0-9]+(~S[0-9])?|/search/q\\?)",
+	"target": "(search~|/search\\?|(a|X|t|Y|w)\\?|\\?(searchtype|searchscope)|frameset&FF|record=[bi]?[0-9]+(~S[0-9])?|/search/q\\?)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-09-26 22:26:13"
+	"lastUpdated": "2021-08-04 21:15:52"
 }
 
 function detectWeb(doc, url) {
@@ -254,122 +254,47 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://clues.concordia.ca/search/?searchtype=X&SORT=D&searcharg=history+of+communication",
+		"url": "https://las.sinica.edu.tw/search*eng/a?searchtype=Y&searcharg=test&SORT=D&submit.x=0&submit.y=0",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://libcat.dartmouth.edu/record=b4054652~S1",
+		"url": "https://science-catalogue.canada.ca/record=3038268~S6",
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Black mass: apocalyptic religion and the death of utopia",
+				"title": "Nonparametric statistics: a step-by-step approach",
 				"creators": [
 					{
-						"firstName": "John",
-						"lastName": "Gray",
+						"firstName": "Gregory W.",
+						"lastName": "Corder",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dale I.",
+						"lastName": "Foreman",
 						"creatorType": "author"
 					}
 				],
-				"date": "2007",
-				"ISBN": "9780374105983",
-				"callNumber": "BL65.P7 G69 2007",
-				"edition": "1st American ed",
-				"libraryCatalog": "libcat.dartmouth.edu Library Catalog",
-				"numPages": "242",
-				"place": "New York",
-				"publisher": "Farrar Straus and Giroux",
-				"shortTitle": "Black mass",
-				"attachments": [],
-				"tags": [
-					"20th century",
-					"21st century",
-					"Conservatism",
-					"Religion and politics",
-					"Religious aspects",
-					"Religious aspects",
-					"Revolutions",
-					"Utopias",
-					"World politics",
-					"World politics"
-				],
-				"notes": [
-					{
-						"note": "The death of utopia -- Enlightenment and terror in the twentieth century -- Utopia enters the mainstream -- The Americanization of the apocalypse -- Armed missionaries --Post-apocalypse"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://tulips.ntu.edu.tw/search/c?searchtype=Y&searcharg=test&searchscope=5",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://las.sinica.edu.tw:1085/search~S0*eng/?searchtype=a&searcharg=%E9%BB%83%E5%8B%97%E5%90%BE&sortdropdown=-&SORT=D&extended=0&SUBMIT=Search&searchlimits=&searchorigarg=aborges",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://lib.hope.edu/record=i2182237",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Preaching the women of the Old Testament: who they were and why they matter",
-				"creators": [
-					{
-						"firstName": "Lynn",
-						"lastName": "Japinga",
-						"creatorType": "author"
-					}
-				],
-				"date": "2017",
-				"ISBN": "9780664259693",
-				"abstractNote": "Women played an important role in the Old Testament. However, their stories are often untold in both the classroom and from the pulpit-- until now. Inside Preaching the Women of the Old Testament author Lynn Japinga explores the stories of over forty fierce, faithful, and strong women featured in the Old Testament, including Eve, Rebekah, Dinah, Tamar, Miriam, Deborah, Jael, Abigail, Bathsheba, and Vashti. Along with providingan interpretation of their stories, Japinga demonstrates how each woman's story has been read in Christian tradition and offers sermon ideas that connect each story to various contemporary issues. This unique resource is ideal for pastors who want to know more about the many women in the Old Testament and how to better incorporate them into their sermons. - back of the book",
-				"callNumber": "BS575 .J38 2017",
-				"edition": "First edition",
-				"extra": "OCLC: 954719851",
-				"libraryCatalog": "lib.hope.edu Library Catalog",
-				"numPages": "221",
-				"place": "Louisville, Kentucky",
-				"publisher": "Westminster John Knox Press",
-				"shortTitle": "Preaching the women of the Old Testament",
+				"date": "2014",
+				"ISBN": "9781118840313",
+				"callNumber": "QA278.8 C67 2014",
+				"edition": "Second edition",
+				"extra": "OCLC: ocn862066449",
+				"libraryCatalog": "science-catalogue.canada.ca Library Catalog",
+				"numPages": "267",
+				"place": "Hoboken, New Jersey",
+				"publisher": "Wiley",
+				"shortTitle": "Nonparametric statistics",
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Bible"
-					},
-					{
-						"tag": "Bible"
-					},
-					{
-						"tag": "Women in the Bible"
-					},
-					{
-						"tag": "Sermons, American"
-					},
-					{
-						"tag": "Sermons, American"
-					},
-					{
-						"tag": "Women in the Bible"
-					},
-					{
-						"tag": "Biography"
-					},
-					{
-						"tag": "Sermons"
+						"tag": "Nonparametric statistics"
 					}
 				],
 				"notes": [
 					{
-						"note": "Includes bibliographical references and indexes"
-					},
-					{
-						"note": "Eve -- Sarah and Hagar -- Lot's wife and daughters -- Rebekah -- Rachel and Leah -- Dinah -- Tamar (Genesis) -- Potiphar's wife -- The women who kept Moses alive -- Miriam -- Zipporah -- Daughters of Zelophehad -- Rahab -- Achsah -- Deborah -- Jael -- Jephthah's daughter -- Samson's mother/Manoah's wife -- Delilah -- The Levite's concubine -- Ruth and Naomi -- Hannah -- Michal -- Abigail-- The medium at Endor -- Bathsheba -- Tamar (2 Samuel) --Rizpah -- The Queen of Sheba -- Jezebel -- The widow of Zarephath -- The woman with the oil -- The Shunammite woman -- The maid of Naaman's wife -- Huldah -- Vashti -- Esther -- Job's wife -- The woman in Proverbs 31 -- Gomer"
+						"note": "\"This Second Edition presents nonparametric statistical procedures in a clear manner and was specifically written for readers with a background in the social, behavioral, and health sciences. The book continues to follow the sameformat in all chapters to aid in reader comprehension, andeach chapter begins with a general introduction and a listof the chapter's main learning objectives. A nonparametricprocedure is then presented and is followed by context-based examples in a step-by-step fashion. Next, updated SPSS(r) screen captures are used to demonstrate how to perform and how to identify the steps in the various procedures. Finally, the authors identify and briefly describe actual examples of corresponding nonparametric tests from diverse fields. Additional tests including the sign test and the Kolmogorov-Smirnov two sample test have been added in addition to new coverage on statistical power. Data sets and odd-numbered solutions are provided in an appendix, and tables of critical values are also provided for reader reference. The authors have also prepared new supplementary material to aid in reader comprehension, which includes: narrated videos and screen animations with step-by-step instructions on how to followthe tests using SPSS; online decision trees to help users determine the needed type of statistical test; and additional solutions not found within the book. Chapter coverage includes: Nonparametric Statistics: An Introduction; Testing Your Data for Normality; Comparing Two Related Samples: The Wilcoxon Signed Rank Test; Comparing Two Unrelated Samples: The Mann-Whitney U Test; Comparing More Than Two Related Samples: Friedman's Test; Comparing More Than Two Unrelated Samples: Kruskal-Wallis H Test; Comparing Variables of Ordinal or Dichotomous Scales: Spearman Rank-Order, Point-Biserial, and Biserial Correlations; Tests for Nominal Scale Data: Chi-Square Tests; and Test for Randomness: Runs Test\"-- \"The book continues to follow the same format in all chapters to aid in reader comprehension, and each chapter begins with a general introduction and a list of the chapter's main learning objectives\"--"
 					}
 				],
 				"seeAlso": []

@@ -1,21 +1,21 @@
 {
 	"translatorID": "fd8dc5f6-a6dd-42b2-948f-600f5da844ea",
 	"label": "WorldCat Discovery Service",
-	"creator": "Sebastian Karcher",
+	"creator": "Sebastian Karcher and Abe Jellinek",
 	"target": "^https?://[^/]+\\.worldcat\\.org/",
 	"minVersion": "3.0.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-25 19:26:46"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-07-23 05:54:09"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 	
-	WorldCat Discovery Service translator; Copyright © 2015 Sebastian Karcher 
+	Copyright © 2015-2021 Sebastian Karcher and Abe Jellinek
 	This file is part of Zotero.
 	
 	Zotero is free software: you can redistribute it and/or modify
@@ -35,37 +35,55 @@
 */
 
 function detectWeb(doc, url) {
-
-	var results = getSearchResults(doc);
-	if (results.length) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 
-
-	//single result
-	// generate item and return type
-	var co = getFirstContextObj(doc);
-	if (!co || !url.includes("?databaseList")) return false;
-
-	return generateItem(doc, co).itemType;
+	if (doc.querySelector('div#root')) {
+		if (extractOCLCID(url)) {
+			// we're on a v2 page
+			// we need to get the item type. this selector isn't stable, but the
+			// worst that can happen is an incorrect toolbar button icon.
+			
+			let displayItemType = displayTypeToZotero(
+				text(doc, '[data-testid="publisher-info"] strong')
+			);
+			
+			if (!displayItemType) {
+				Z.monitorDOMChanges(doc.querySelector('div#root'));
+			}
+			
+			return displayItemType;
+		}
+		else {
+			Z.monitorDOMChanges(doc.querySelector('div#root'));
+		}
+	}
+	else {
+		var co = getFirstContextObj(doc);
+		if (ZU.xpathText(doc, '//input[@id="dbList"]/@value') && co) {
+			return generateItem(doc, co).itemType;
+		}
+	}
+	
+	return false;
 }
 
+function displayTypeToZotero(displayType) {
+	if (!displayType) return false;
+	
+	if (displayType.includes('©')) {
+		displayType = displayType.substring(displayType.indexOf('©'));
+	}
 
-/**
- * Gets Zotero item from a WorldCat icon src
- */
-function getZoteroType(iconSrc) {
-	// only specify types not specified in COinS
-	if (iconSrc.includes("icon-rec")) {
-		return "audioRecording";
+	displayType = ZU.trimInternal(displayType.replace(/\d/g, ''));
+
+	switch (displayType) {
+		case 'Article':
+			return 'journalArticle';
+		default:
+			return 'book';
 	}
-	if (iconSrc.includes("icon-com")) {
-		return "computerProgram";
-	}
-	if (iconSrc.includes("icon-map")) {
-		return "map";
-	}
-	return false;
 }
 
 /**
@@ -75,146 +93,171 @@ function getZoteroType(iconSrc) {
 function generateItem(doc, co) {
 	var item = new Zotero.Item();
 	ZU.parseContextObject(co, item);
-	// item types not covered by COinS will still need to be covered. Leaving the corresponding code from open Worldcat
-	// here as a reminder.
-
-	/*
-		var type = ZU.xpathText(doc,
-			'//img[@class="icn"][contains(@src, "icon-")][1]/@src');
-		if (type) {
-			type = getZoteroType(type);
-			if (type) item.itemType = type;
-		} */
-
+	// item types not covered by COinS will still need to be covered. See the corresponding code in Open Worldcat.
 	return item;
 }
 
-function getSearchResults(doc) {
-	var results = ZU.xpath(doc, '//ol[@class="results"]/li[contains(@id, "record")]');
-	return results;
-}
-
-function getTitleNode(searchResult) {
-	return ZU.xpath(searchResult, './div[@class="title"]/a')[0];
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('a[href*="/search/detail/"]');
+	if (!rows.length) {
+		rows = doc.querySelectorAll('ol.results li[id*="record"]');
+	}
+	
+	for (let row of rows) {
+		let title = ZU.xpathText(row, './/div[contains(@class, "title") and a[@class="record-title"]]');
+		if (!title) title = ZU.trimInternal(row.textContent); // v2
+		let oclcID = ZU.xpathText(row, './@data-oclcnum');
+		if (!oclcID) oclcID = extractOCLCID(row.href); // v2
+		let databaseID = ZU.xpathText(row, './@data-database-list');
+		let risURL = composeURL(oclcID, databaseID);
+		if (!title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[risURL] = title;
+	}
+	return found ? items : false;
 }
 
 function getFirstContextObj(doc) {
 	return ZU.xpathText(doc, '//span[contains(@class, "Z3988")][1]/@title');
 }
 
-
-
 /**
  * Given an item URL, extract OCLC ID
  */
 function extractOCLCID(url) {
-	var id = url.match(/\/oclc\/([^?]+)/);
+	var id = url.match(/\/(?:oclc|detail)\/([^?]+)/);
 	if (!id) return false;
 	return id[1];
 }
 
-
 /**
  * Given an item URL, extract database ID
  */
-function extractDatabaseID(url) {
-	var id = url.match(/databaseList=([^&#]+)/);
-	if (!id) return false;
-	return decodeURIComponent(id[1]);
+function extractDatabaseID(doc) {
+	return ZU.xpathText(doc, '//input[@id="dbList"]/@value');
 }
 
 function composeURL(oclcID, databaseID) {
 	var risURL = "/share/citation.ris?oclcNumber=" + oclcID + "&databaseIds=" + encodeURIComponent(databaseID);
 	return risURL;
-
 }
+
 /**
  * RIS Scraper Function
  *
  */
 
 function scrape(risURL) {
+	ZU.doGet(risURL, function (text) {
+		// Z.debug(text);
 
-	ZU.doGet(risURL, function(text) {
-		//Z.debug(text);
-		//conference proceedings exported as CONF, but fields match BOOK better
-		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+?\n\s*ER\s+-/g, function(m) {
+		if (!/^TY {1,2}- /m.test(text)) {
+			throw new Error("RIS not found in response");
+		}
+
+		// conference proceedings exported as CONF, but fields match BOOK better
+		text = text.replace(/TY\s+-\s+CONF\s+[\s\S]+?\n\s*ER\s+-/g, function (m) {
 			return m.replace(/^TY\s+-\s+CONF\s*$/mg, 'TY  - BOOK')
-				//authors are actually editors
+				// authors are actually editors
 				.replace(/^A1\s+-\s+/mg, 'A3  - ');
 		});
 
-		//Zotero.debug("Importing corrected RIS: \n" + text);
+		// Zotero.debug("Importing corrected RIS: \n" + text);
 
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
-		translator.setHandler("itemDone", function(obj, item) {
+		translator.setHandler("itemDone", function (obj, item) {
 			item.extra = undefined;
 			item.archive = undefined;
-			//clean up ISBNs
+			// clean up ISBNs
 			if (item.ISBN) {
 				var ISBN = item.ISBN.split(/\s/);
 				var ISBNarray = [];
-				for (var i = 0; i < ISBN.length; i++) {
+				for (let i = 0; i < ISBN.length; i++) {
 					if (ZU.cleanISBN(ISBN[i])) {
 						ISBNarray.push(ZU.cleanISBN(ISBN[i]));
 					}
 				}
 				item.ISBN = ISBNarray.join(" ");
 			}
-			//remove space before colon
+			// remove space before colon
 			item.title = item.title.replace(/\s+:/, ":");
 
-			//remove trailing colon after place
+			// remove trailing colon and brackets from place
 			if (item.place) {
-				item.place = item.place.replace(/:\s*$/, "");
+				item.place = item.place
+					.replace(/:\s*$/, "")
+					.replace(/\[(.*)\]/, '$1');
 			}
 
-			//remove traling period after publication
+			// remove traling period after publication
 
 			if (item.publicationTitle) {
 				item.publicationTitle = item.publicationTitle.replace(/\.\s*$/, "");
 			}
-			//remove trailing commar after publisher
+			// remove trailing commar after publisher
 			if (item.publisher) {
 				item.publisher = item.publisher.replace(/,\s*$/, "");
 			}
-			//correct field mode for corporate authors
-			for (var i = 0; i < item.creators.length; i++) {
+			// correct field mode for corporate authors
+			for (let i = 0; i < item.creators.length; i++) {
 				if (!item.creators[i].firstName) {
 					item.creators[i].fieldMode = 1;
 				}
 			}
 
-			//number of pages gets mapped to section???
+			// number of pages gets mapped to section???
 			if (item.section) {
-				//extract possible roman numerals and number of pages without the p
+				// extract possible roman numerals and number of pages without the p
 				var numPages = item.section.match(/(([lxiv]+,\s*)?\d+)\s*p/);
 				if (numPages) item.numPages = numPages[1];
 			}
 			
-			//the url field sometimes contains an additional label, e.g. for TOC
-			//"url": "Table of contents http://bvbr.bib-bvb.de:8991/...
+			// the url field sometimes contains an additional label, e.g. for TOC
+			// "url": "Table of contents http://bvbr.bib-bvb.de:8991/...
 			if (item.url) {
 				var posUrl = item.url.indexOf('http');
-				if (posUrl>0) {
+				if (posUrl > 0
+					|| item.url.includes("http://bvbr.bib-bvb.de:8991")
+				) {
 					item.attachments.push({
 						url: item.url.substr(posUrl),
-						title: item.url.substr(0, posUrl),
+						title: posUrl > 0 ? item.url.substr(0, posUrl) : "Table of contents",
 						snapshot: false
 					});
 					delete item.url;
 				}
 			}
+			
+			if (item.series) {
+				item.series = item.series.replace(/\.$/, '');
+				if (item.series.split(';').length == 2) {
+					[item.series, item.seriesNumber] = item.series.split(';');
+				}
+			}
+			
+			if (item.edition) {
+				item.edition = item.edition.replace(/\.$/, '');
+			}
+			
+			for (let creator of item.creators) {
+				if (!creator.firstName) continue;
+				creator.firstName = creator.firstName
+					.replace(/\(?[\d-,:\s]+\)?(\.*$)/, '$1')
+					.replace(/(\w{2,})\./, '$1');
+			}
 
 			item.complete();
 		});
-		translator.getTranslatorObject(function(trans) {
-			trans.options.defaultItemType = 'book'; //if not supplied, default to book
+		translator.getTranslatorObject(function (trans) {
+			trans.options.defaultItemType = 'book'; // if not supplied, default to book
 			trans.options.typeMap = {
-				'ELEC': 'book'
-			}; //ebooks should be imported as books
+				ELEC: 'book'
+			}; // ebooks should be imported as books
 
 			trans.doImport();
 		});
@@ -222,41 +265,23 @@ function scrape(risURL) {
 }
 
 function doWeb(doc, url) {
-	var results = getSearchResults(doc);
 	if (detectWeb(doc, url) == "multiple") {
-		var items = {};
-		var articles = [];
-		for (var i = 0, n = results.length; i < n; i++) {
-			var title = ZU.xpathText(results[i], './/div[contains(@class, "title") and a[@class="record-title"]]');
-			//Z.debug(title)
-			if (!title) continue;
-			var oclcID = ZU.xpathText(results[i], './@data-oclcnum');
-			//Z.debug(oclcID)
-			var databaseID = ZU.xpathText(results[i], './@data-database-list');
-			//Z.debug(databaseID)
-			var risURL = composeURL(oclcID, databaseID);
-			Z.debug(risURL);
-			items[risURL] = title.trim();
-
-		}
-
-		Zotero.selectItems(items, function(items) {
-			if (!items) return true;
-
-			for (var i in items) {
-				articles.push(i);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) {
+				scrape(Object.keys(items));
 			}
-			scrape(articles);
 		});
-	} else {
-		var oclcID = extractOCLCID(url);
-		var databaseID = extractDatabaseID(url);
+	}
+	else {
+		let oclcID = extractOCLCID(url);
+		let databaseID = extractDatabaseID(doc);
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-		var risURL = composeURL(oclcID, databaseID);
+		let risURL = composeURL(oclcID, databaseID);
 		Z.debug("risURL= " + risURL);
 		scrape(risURL);
 	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -289,12 +314,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
+		"url": "https://lpts.on.worldcat.org/search?queryString=au:Mary%20GrandPre%CC%81&databaseList=638",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
+		"url": "https://sbts.on.worldcat.org/search?databaseList=&queryString=runge+discourse+grammar",
 		"items": "multiple"
 	},
 	{
@@ -318,11 +343,11 @@ var testCases = [
 				"numPages": "xx, 404",
 				"place": "Peabody, Mass.",
 				"publisher": "Hendrickson Publishers Marketing",
-				"series": "Lexham Bible reference series; Lexham Bible reference series.",
+				"series": "Lexham Bible reference series",
 				"shortTitle": "Discourse grammar of the Greek New Testament",
 				"attachments": [
 					{
-						"title": "Table of contents ",
+						"title": "Table of contents",
 						"snapshot": false
 					}
 				],
@@ -331,6 +356,237 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://goshen.on.worldcat.org/v2/search/detail/62727772?queryString=Human-Computer%20Interaction&clusterResults=true&groupVariantRecords=false",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Encyclopedia of human computer interaction",
+				"creators": [
+					{
+						"lastName": "Ghaoui",
+						"firstName": "Claude",
+						"creatorType": "author"
+					}
+				],
+				"date": "2006",
+				"ISBN": "9781591407980 9781280706820 9786610706822",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numberOfVolumes": "1 online resource (xviii, 738, [24] pages) : illustrations",
+				"place": "Hershey PA",
+				"publisher": "Idea Group Reference",
+				"series": "Gale virtual reference library",
+				"url": "http://www.books24x7.com/marc.asp?bookid=14703",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://goshen.on.worldcat.org/v2/search/detail/57358293?queryString=harry%20potter&clusterResults=true&groupVariantRecords=false",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Harry Potter and the Half-Blood Prince",
+				"creators": [
+					{
+						"lastName": "Rowling",
+						"firstName": "J. K.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "GrandPré",
+						"firstName": "Mary",
+						"creatorType": "author"
+					}
+				],
+				"date": "2005",
+				"ISBN": "9780439784542 9780439786775 9780439791328 9780439785969 9780329552510 9780605000230 9781408835012 9780545582995 9781415592946 9780329414382 9780786277452 9781419354342 9780439906296 9781338299199 9780756967659",
+				"edition": "First American edition",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numPages": "x, 652",
+				"place": "New York, NY",
+				"publisher": "Arthur A. Levine Books, an imprint of Scholastic Inc.",
+				"series": "Harry Potter Series",
+				"seriesNumber": "6",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://goshen.on.worldcat.org/v2/search?queryString=foundation%20asimov&clusterResults=true&groupVariantRecords=false",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://illinois.on.worldcat.org/v2/oclc/1233323459",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Pride and prejudice",
+				"creators": [
+					{
+						"lastName": "Austen",
+						"firstName": "Jane",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"ISBN": "9781513263427 9781513220963",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numPages": "308",
+				"place": "Portland, Oregon",
+				"publisher": "Mint Editions",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://illinois.on.worldcat.org/v2/oclc/432674",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Quantitative modeling of the physiological factors in radiation lethality,",
+				"creators": [
+					{
+						"lastName": "Iberall",
+						"firstName": "Arthur S.",
+						"creatorType": "author"
+					}
+				],
+				"date": "1967",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"publicationTitle": "Annals of the New York Academy of Sciences",
+				"url": "http://www3.interscience.wiley.com/cgi-bin/fulltext/119756235/PDFSTART",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://illinois.on.worldcat.org/v2/oclc/6995902131",
+		"defer": true,
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Jews Working in Agriculture in Poland in the First Years after the Second World War",
+				"creators": [
+					{
+						"lastName": "Rykala A.",
+						"creatorType": "author",
+						"fieldMode": 1
+					}
+				],
+				"date": "2016",
+				"DOI": "10.1515/esrp-2016-0010",
+				"ISSN": "1231-1952",
+				"issue": "2",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"pages": "49-63",
+				"publicationTitle": "European Spatial Research and Policy",
+				"volume": "23",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://illinois.on.worldcat.org/v2/oclc/1080997809",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The ego and the id",
+				"creators": [
+					{
+						"lastName": "Freud",
+						"firstName": "Sigmund",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Berasaluce",
+						"firstName": "Andrea Jones",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019",
+				"ISBN": "9781945186790",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numPages": "66",
+				"place": "New York, NY",
+				"publisher": "Clydesdale Press",
+				"series": "Clydesdale classics",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://illinois.on.worldcat.org/v2/oclc/654235026",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "International financial policy: essays in honor of Jacques J. Polak",
+				"creators": [
+					{
+						"lastName": "Polak",
+						"firstName": "J. J. (Jacques Jacobus)",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Frenkel",
+						"firstName": "Jacob A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Goldstein",
+						"firstName": "Morris",
+						"creatorType": "author"
+					}
+				],
+				"date": "1991",
+				"ISBN": "9781455248681 9781283536660 9781455295173",
+				"language": "English",
+				"libraryCatalog": "WorldCat Discovery Service",
+				"numberOfVolumes": "1 online resource (xiv, 508 pages) : illustrations",
+				"place": "Washington, D.C.",
+				"publisher": "International Monetary Fund",
+				"shortTitle": "International financial policy",
+				"url": "https://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=449390",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
-];
+]
 /** END TEST CASES **/
