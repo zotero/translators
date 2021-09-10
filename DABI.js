@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-01-03 19:28:23"
+	"lastUpdated": "2021-09-10 18:58:10"
 }
 
 /*
@@ -40,27 +40,24 @@
 function detectWeb(doc, url) {
 	if (url.includes("/vollanzeige.pl?")) {
 		return "journalArticle";
-	} else if (url.includes("/suche.pl?") && getSearchResults(doc, true)) {
+	}
+	else if (url.includes("/suche.pl?") && getSearchResults(doc, true)) {
 		return 'multiple';
 	}
+	return false;
 }
 
 
 function doWeb(doc, url) {
-	var ids = [];
-
 	if (detectWeb(doc, url) == "multiple") {
-		Z.selectItems(getSearchResults(doc, false), function(data) {
-			if (!data) return true;
-			for (var i in data) {
-				ids.push(i);
-				ZU.processDocuments(ids, scrape);
-			}
+		Z.selectItems(getSearchResults(doc, false), function (data) {
+			if (!data) return;
+			ZU.processDocuments(Object.keys(data), scrape);
 		});
-	} else if (detectWeb(doc, url) == "journalArticle") {
+	}
+	else if (detectWeb(doc, url) == "journalArticle") {
 		scrape(doc, url);
 	}
-
 }
 
 
@@ -74,10 +71,12 @@ function getSearchResults(doc, checkOnly) {
 		var url = ZU.xpathText(tds, './a/@href'),
 			author = tds[1].textContent,
 			title = tds[2].textContent.replace(/<br>/g, '. ');
+		var item;
 		if (author) {
-			var item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
-		} else {
-			var item = title;
+			item = title + " (" + author.replace(/;.*/, ' et al.') + ")";
+		}
+		else {
+			item = title;
 		}
 		if (!item || !url) continue;
 		
@@ -89,7 +88,7 @@ function getSearchResults(doc, checkOnly) {
 	return found ? data : false;
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var newItem = new Zotero.Item('journalArticle');
 	var trs = doc.getElementsByTagName("tr"),
 		data = {};
@@ -101,9 +100,9 @@ function scrape(doc, url) {
 		data[headers.replace(/\s+/g, '')] = contents.trim();
 	}
 
-	//set url to fulltext resource, if present
-	if (data["URL"]) {
-		newItem.url = data["URL"].replace(/<a.*?href=\"(.*?)\".*/,"$1");
+	// set url to fulltext resource, if present
+	if (data.URL) {
+		newItem.url = data.URL.replace(/<a.*?href="(.*?)".*/, "$1");
 
 		if (/\.pdf(#.*)?$/.test(newItem.url)) {
 			newItem.attachments = [{
@@ -115,55 +114,56 @@ function scrape(doc, url) {
 		}
 	}
 
-	//Formatting and saving "title" fields
-	//Sometimes titles are missing
-	if (!data["Titel"]) {
-		data["Titel"] = data["Untertitel"];
-		delete data["Untertitel"];
+	// Formatting and saving "title" fields
+	// Sometimes titles are missing
+	if (!data.Titel) {
+		data.Titel = data.Untertitel;
+		delete data.Untertitel;
 	}
 	
-	if (data["Titel"]) {
-		newItem.title = data["Titel"].replace(/\*/g, '');
+	if (data.Titel) {
+		newItem.title = data.Titel.replace(/\*/g, '');
 		
-		if (data["Untertitel"]) {
+		if (data.Untertitel) {
 			if (/(\?|!|\.)\W?$/.test(newItem.title)) {
-				newItem.title += " " + data["Untertitel"];
-			} else {
-				newItem.title += ": " + data["Untertitel"];
+				newItem.title += " " + data.Untertitel;
+			}
+			else {
+				newItem.title += ": " + data.Untertitel;
 			}
 		}
 	}
 
-	//Formatting and saving "Author" field
-	if (data["Autoren"]) {
-		var authors = data["Autoren"].split("; ");
-		for (var i = 0; i < authors.length; i++) {
-			newItem.creators.push(ZU.cleanAuthor(authors[i], "author", true));
+	// Formatting and saving "Author" field
+	if (data.Autoren) {
+		var authors = data.Autoren.split("; ");
+		for (let author of authors) {
+			newItem.creators.push(ZU.cleanAuthor(author, "author", true));
 		}
 	}
 
-	//Formatting and saving "pages" field
-	 if (data["Anfangsseite"] > 0) {
-		newItem.pages = data["Anfangsseite"] + (data["Endseite"] > data["Anfangsseite"] ? "-" + data["Endseite"] : "");
+	// Formatting and saving "pages" field
+	if (data.Anfangsseite > 0) {
+		newItem.pages = data.Anfangsseite + (data.Endseite > data.Anfangsseite ? "-" + data.Endseite : "");
 	}
 
-	//Saving the tags to Zotero
+	// Saving the tags to Zotero
 	if (data["Schlagwörter"]) {
 		newItem.tags = data["Schlagwörter"].split("; ");
 	}
 
-	//Making the publication title orthographic
-	if (data["Zeitschrift"]) {
-		newItem.publicationTitle = data["Zeitschrift"].replace(/ : /g, ": ");
+	// Making the publication title orthographic
+	if (data.Zeitschrift) {
+		newItem.publicationTitle = data.Zeitschrift.replace(/ : /g, ": ");
 	}
 
-	//Associating and saving the well formatted data to Zotero
-	newItem["date"] = data["Jahr"];
-	newItem["issue"] = data["Heft"];
-	newItem["volume"] = data["Band"];
-	newItem["abstractNote"] = data["Abstract"];
+	// Associating and saving the well formatted data to Zotero
+	newItem.date = data.Jahr;
+	newItem.issue = data.Heft;
+	newItem.volume = data.Band;
+	newItem.abstractNote = data.Abstract;
 	
-	//Scrape is COMPLETE!
+	// Scrape is COMPLETE!
 	newItem.complete();
 }
 
