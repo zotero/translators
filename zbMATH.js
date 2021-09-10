@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-10 18:45:46"
+	"lastUpdated": "2021-09-10 18:47:46"
 }
 
 /*
@@ -35,52 +35,53 @@
 */
 
 
-function detectWeb(doc, url) {
-	if ( ZU.xpath(doc, '//div[@class="list"]/article').length>0 ) {
+function detectWeb(doc, _url) {
+	if (ZU.xpath(doc, '//div[@class="list"]/article').length > 0) {
 		return "multiple";
-	} else if (ZU.xpath(doc, '//a[contains(@class, "bib")]').length>0 ) {//contains
-		//it is a single entry --> generic fallback = journalArticle
+	}
+	else if (ZU.xpath(doc, '//a[contains(@class, "bib")]').length > 0) { // contains
+		// it is a single entry --> generic fallback = journalArticle
 		return "journalArticle";
 	}
+	return false;
 }
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var bibArray = doc.getElementsByClassName("bib");
-	var bibUrl = bibArray[0].getAttribute('href');//e.g. "bibtex/06115874.bib"
+	var bibUrl = bibArray[0].getAttribute('href');// e.g. "bibtex/06115874.bib"
 
-	ZU.doGet(bibUrl, function(text) {
-		//Z.debug(text);
+	ZU.doGet(bibUrl, function (text) {
+		// Z.debug(text);
 		
 		var trans = Zotero.loadTranslator('import');
-		trans.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');//https://github.com/zotero/translators/blob/master/BibTeX.js
+		trans.setTranslator('9cb70025-a888-4a29-a210-93ec52da40d4');// https://github.com/zotero/translators/blob/master/BibTeX.js
 		trans.setString(text);
 
 		trans.setHandler('itemDone', function (obj, item) {
-			
 			item.title = item.title.replace(/\.$/, '');
 			
 			if (item.publisher) {
-				var publisherSeperation = item.publisher.indexOf(":");
-				if (publisherSeperation != -1) {
-					item.place = item.publisher.substr(0,publisherSeperation);
-					item.publisher = item.publisher.substr(publisherSeperation+1);
+				var publisherSeparation = item.publisher.indexOf(":");
+				if (publisherSeparation != -1) {
+					item.place = item.publisher.substr(0, publisherSeparation);
+					item.publisher = item.publisher.substr(publisherSeparation + 1);
 				}
 			}
 			
-			//keywords are normally not in the bib file, so we take them from the page
-			//moreover, the meaning of the MSC classification is also only given on the page
-			if (item.tags.length==0 ) {
+			// keywords are normally not in the bib file, so we take them from the page
+			// moreover, the meaning of the MSC classification is also only given on the page
+			if (item.tags.length == 0) {
 				var keywords = ZU.xpath(doc, '//div[@class="keywords"]/a');
-				for (var i=0; i<keywords.length; i++) {
-					item.tags.push( keywords[i].textContent );
+				for (var i = 0; i < keywords.length; i++) {
+					item.tags.push(keywords[i].textContent);
 				}
 				var classifications = ZU.xpath(doc, '//div[@class="classification"]//tr');
-				for (var i=0; i<classifications.length; i++) {
-					item.extra = (item.extra ? item.extra + "\n" : '') + 'MSC2010: ' + ZU.trimInternal(ZU.xpathText(classifications[i], './td' , null , " = "));
+				for (let classification of classifications) {
+					item.extra = (item.extra ? item.extra + "\n" : '') + 'MSC2010: ' + ZU.trimInternal(ZU.xpathText(classification, './td', null, " = "));
 				}
 			}
 			
-			//add abstract but not review
+			// add abstract but not review
 			var abstractOrReview = ZU.xpathText(doc, '//div[@class="abstract"]');
 			if (abstractOrReview.indexOf('Summary') == 0) {
 				item.abstractNote = abstractOrReview.replace(/^Summary:?\s*/, '');
@@ -88,7 +89,7 @@ function scrape(doc, url) {
 			
 			item.attachments = [{
 				title: "Snapshot",
-				document:doc
+				document: doc
 			}];
 
 			var id = ZU.xpath(doc, '//div[@class="title"]/a[@class="label"]')[0];
@@ -97,40 +98,33 @@ function scrape(doc, url) {
 				else item.extra += "\n";
 				
 				item.extra += 'Zbl: ' + ZU.trimInternal(id.textContent)
-					.replace(/^\s*Zbl\s+/i, ''); //e.g. Zbl 1255.05045
+					.replace(/^\s*Zbl\s+/i, ''); // e.g. Zbl 1255.05045
 				item.url = id.href;
 			}
 			
 			item.complete();
-			//Z.debug(item);
+			// Z.debug(item);
 		});
 		
 		trans.translate();
 	});
-
 }
 
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = new Object();
-		var articles = new Array();
+		var items = {};
 		var rows = ZU.xpath(doc, '//div[@class="list"]/article');
-		for (var i=0; i<rows.length; i++) {
-			var title = ZU.xpathText(rows[i], './div[@class="title"]/a[1]');
-			var link = ZU.xpathText(rows[i], './div[@class="title"]/a[1]/@href');
+		for (let row of rows) {
+			var title = ZU.xpathText(row, './div[@class="title"]/a[1]');
+			var link = ZU.xpathText(row, './div[@class="title"]/a[1]/@href');
 			items[link] = title;
 		}
 		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return true;
-			}
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
