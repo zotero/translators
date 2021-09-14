@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 03:01:34"
+	"lastUpdated": "2021-09-14 19:42:03"
 }
 
 /*
@@ -37,14 +37,15 @@
 
 function detectWeb(doc, url) {
 	let generator = attr(doc, 'meta[name="generator"]', 'content')
-		|| text('#developedBy');
+		|| text(doc, '#developedBy');
 	if (!generator && doc.body.id.includes('openJournalSystems')) {
 		generator = 'Open Journal Systems';
 	}
 	
 	if (generator.startsWith('Open ')
 		&& (url.includes('/search/search')
-			|| doc.querySelector('.obj_issue_toc .cmp_article_list'))) {
+			|| doc.querySelector('.obj_issue_toc .cmp_article_list')
+			|| doc.querySelector('#content > .tocArticle'))) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
@@ -67,7 +68,8 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"]');
+	var rows = doc.querySelectorAll('.title a[href*="/view/"], .title a[href*="/catalog/"], \
+		.tocTitle a[href*="/view/"], .tocTitle a[href*="/catalog/"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -442,44 +444,6 @@ var testCases = [
 				"shortTitle": "World War II in American Movie Theatres from 1942-45",
 				"url": "http://www.mediaesthetics.org/index.php/mae/article/view/50",
 				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://0277.ch/ojs/index.php/cdrs_0277/article/view/101",
-		"items": [
-			{
-				"itemType": "journalArticle",
-				"title": "Pricing bei wissenschaftlichen Zeitschriften",
-				"creators": [
-					{
-						"firstName": "Raymond",
-						"lastName": "Dettwiler",
-						"creatorType": "author"
-					}
-				],
-				"date": "2016-03-14",
-				"DOI": "10.12685/027.7-4-1-101",
-				"ISSN": "2296-0597",
-				"abstractNote": "Der Artikel beschreibt die drei Preisverfahren, die im Preismanagement angewendet werden und zeigt, dass trotz neuer Preisverfahren die Preismodelle bei wissenschaftlichen Zeitschriften immer noch kostenorientiert oder wettbewerbsorientiert sind. Das nutzenorientierte Preisverfahren wartet noch auf seine Umsetzung.This article describes the three modes of pricing which have been applied by price management. Although new pricing models are existing pricing models at scientific journals remain cost oriented or competitor oriented. The value oriented pricing is still waiting for realisation.",
-				"issue": "1",
-				"language": "de",
-				"libraryCatalog": "0277.ch",
-				"pages": "11-17",
-				"publicationTitle": "027.7 Zeitschrift für Bibliothekskultur",
-				"rights": "Copyright (c) 2016 027.7 Zeitschrift für Bibliothekskultur / Journal for Library Culture",
-				"url": "https://0277.ch/index.php/cdrs_0277/article/view/101",
-				"volume": "4",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -1480,17 +1444,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://0277.ch/index.php/cdrs_0277/search/search?csrfToken=017cade77ce16869bd99998cabc91f74&query=Zeitschriften",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://kurdishstudies.net/journal/ks/issue/view/59",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
 		"url": "https://jnp.journals.yorku.ca/index.php/default",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.journals.aiac.org.au/index.php/IJALEL/issue/view/273",
 		"items": "multiple"
 	}
 ]
