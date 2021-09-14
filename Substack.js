@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 02:11:47"
+	"lastUpdated": "2021-09-14 03:54:37"
 }
 
 /*
@@ -72,7 +72,7 @@ function doWeb(doc, url) {
 	}
 }
 
-function scrape(doc, _url) {
+function scrape(doc, url) {
 	let item = new Zotero.Item('blogPost');
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	
@@ -81,7 +81,7 @@ function scrape(doc, _url) {
 	item.date = ZU.strToISO(json.dateModified || json.datePublished);
 	item.creators.push(ZU.cleanAuthor(json.author.name, 'author'));
 	item.blogTitle = json.publisher.name;
-	item.url = attr(doc, 'link[rel="canonical"]', 'href');
+	item.url = url.replace(/[#?].*$/, '');
 	item.attachments.push({
 		title: 'Snapshot',
 		document: doc
