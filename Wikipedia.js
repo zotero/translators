@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 16:26:30"
+	"lastUpdated": "2021-09-15 00:36:59"
 }
 
 /**
@@ -31,11 +31,19 @@
 */
 
 function detectWeb(doc, url) {
+	// first check if we're on a search page. I don't know if anyone will commonly
+	// want to scrape multiples on Wikipedia, but there's no harm in supporting it
+	// (and thus preventing search result pages from being scraped as ordinary
+	// encyclopedia articles).
+	if (doc.body.classList.contains('ns-special') && getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	
 	// specifically exclude the editor interface, since it doesn't give us much
 	// to work with and users are unlikely to want to add it as an
 	// encyclopediaArticle.
 	// e.g., this excludes https://en.wikipedia.org/w/index.php?title=Main_Page&action=edit
-	if (doc.body.matches('.action-edit')) {
+	if (doc.body.classList.contains('action-edit')) {
 		return false;
 	}
 	
@@ -48,7 +56,33 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.mw-search-result .mw-search-result-heading > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
 	item.title = ZU.trimInternal((doc.getElementById('firstHeading') || doc.getElementById('section_0')).textContent);
 	
@@ -327,6 +361,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://en.wikipedia.org/w/index.php?search=zotero&title=Special%3ASearch&fulltext=1&ns0=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
