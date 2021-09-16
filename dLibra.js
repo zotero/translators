@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-21 11:39:27"
+	"lastUpdated": "2021-09-16 11:11:55"
 }
 
 /*
@@ -53,19 +53,18 @@ function detectWeb(doc, url) {
 	let singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
 	let multipleRe = /.*dlibra\/(collectiondescription|results|planned).*|.*\/dlibra\/?/;
 	if (singleRe.test(url)) {
-		let types = doc.evaluate('//meta[@name="DC.type"]/@content', doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+		let types = Array.from(doc.querySelectorAll('meta[name="DC.type"]')).map(meta => meta.content);
 		let type;
-		for (let i = 0, length = types.snapshotLength; i < length; ++i) {
-			let item = types.snapshotItem(i).textContent;
-			if(POLISH_TYPE_MAPPINGS[item]) {
-				type = POLISH_TYPE_MAPPINGS[item];
+		for (let i = 0; i < types.length; i++) {
+			if(POLISH_TYPE_MAPPINGS[types[i]]) {
+				type = POLISH_TYPE_MAPPINGS[types[i]];
 				break;
 			}
-			type = item;
+			type = types[i];
 		}
 		return type ? type : "document";
 	}
-	if (multipleRe.test(url)) {
+	if (multipleRe.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -73,37 +72,11 @@ function detectWeb(doc, url) {
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		let items = {};
-
-		let dlibra5ItemsXPath = '//ol[@class="itemlist"]/li/a | //td[@class="searchhit"]/b/a | //p[@class="resultTitle"]/b/a[@class="dLSearchResultTitle"]';
-		let titles = doc.evaluate(dlibra5ItemsXPath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-		if (titles.snapshotLength > 0) {
-			for (let i = 0, length = titles.snapshotLength; i < length; ++i) {
-				let item = titles.snapshotItem(i);
-				items[item.href] = item.textContent;
-			}
-		}
-		else {
-			let dlibra6ItemsXPath = '//h2[@class="objectbox__text--title"]';
-			titles = doc.evaluate(dlibra6ItemsXPath, doc, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-			for (let i = 0, length = titles.snapshotLength; i < length; ++i) {
-				let item = titles.snapshotItem(i);
-				// skip 'Similar in FBC'
-				if (item.getAttribute('title')) {
-					items[item.firstElementChild.getAttribute('href')] = item.getAttribute('title');
-				}
-			}
-		}
-
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
 				return true;
 			}
-			let objects = [];
-			for (let i in items) {
-				objects.push(i);
-			}
-			ZU.processDocuments(objects, scrape);
+			ZU.processDocuments(Object.keys(items), scrape);
 			return false;
 		});
 	}
@@ -111,6 +84,39 @@ function doWeb(doc, url) {
 		scrape(doc, url);
 	}
 	return false;
+}
+
+function getSearchResults(doc, checkOnly) {
+	let items = {};
+	let found = false;
+	//dLibra 5
+	let rows = doc.querySelectorAll('.dLSearchResultTitle');
+	if (rows.length) {
+		for (let i = 0; i < rows.length; i++) {
+			let href = rows[i].href;
+			let title = ZU.trimInternal(text(rows[i], '#src_titleLink_fullTitle > span.src_titleLink_title'));
+			if (!href || !title) continue;
+			if (checkOnly) return true;
+			found = true;
+			items[href] = title;
+		}
+	}
+	else {
+		//dLibra 6
+		rows = doc.querySelectorAll('.objectbox__text--title');
+		for (let i = 0; i < rows.length; i++) {
+			// skip 'Similar in FBC'
+			if (rows[i].getAttribute('title')) {
+				let href = attr(rows[i], 'a', 'href');
+				let title = ZU.trimInternal(rows[i].getAttribute('title'));
+				if (!href || !title) continue;
+				if (checkOnly) return true;
+				found = true;
+				items[href] = title;
+			}
+		}
+	}
+	return found ? items : false;
 }
 
 function scrape(doc, url) {
@@ -136,7 +142,7 @@ function scrape(doc, url) {
 function dlibraScrape(doc, objUrl, baseUrl, objType, id) {
 	ZU.HTTP.doGet(baseUrl + "/rdf.xml?type=" + objType + "&id=" + id, function (rdf) {
 		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
-		let dcTypeRegex = new RegExp("<dc:type .*>(.*)</dc:type>", "gi");
+		let dcTypeRegex = /<dc:type[^>]*>([^<]+)<\/dc:type>/gi;
 		let m, type;
 		while (m = dcTypeRegex.exec(rdf)) {
 			if(POLISH_TYPE_MAPPINGS[m[1]]) {
@@ -149,9 +155,7 @@ function dlibraScrape(doc, objUrl, baseUrl, objType, id) {
 		translator.setTranslator("5e3ad958-ac79-463d-812b-a86a9235c28f");
 		translator.setString(rdf);
 		translator.setHandler("itemDone", function (obj, item) {
-			if (item.extra) item.notes.push(item.extra);
 			item.url = objUrl;
-			item.extra = "";
 			item.itemID = "";
 			addAttachments(doc, item);
 			item.complete();
@@ -174,27 +178,47 @@ function addAttachments(doc, item) {
 	item.attachments.push({document:doc, title:"Snapshot"});
 }
 
+function attr(docOrElem, selector, attr, index) {
+	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.getAttribute(attr) : null;
+}
+
+function text(docOrElem, selector, index) {
+	let elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector);
+	return elem ? elem.textContent : null;
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://cyfrowa.bibliotekakolbuszowa.pl/dlibra/docmetadata?id=945&from=&dirids=1&ver_id=&lp=4&QI=",
+		"url": "http://mbc.cyfrowemazowsze.pl/dlibra/docmetadata?id=84344",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Gazeta Świerczowska. Nr 5 (2020)",
 				"creators": [
 					{
-						"firstName": "Janusz",
-						"lastName": "Tokarz",
+						"firstName": "Tadeusz (1889-1960) Red odpowiedzialny",
+						"lastName": "Synowiec",
 						"creatorType": "author"
 					}
 				],
-				"date": "2020",
-				"language": "pol",
-				"libraryCatalog": "dLibra",
-				"publisher": "Sołectwo Świerczów",
-				"rights": "Prawa zastrzeżone - dostęp nieograniczony / Rights Reserved - Free Access",
+				"notes": [],
+				"tags": [
+					{
+						"tag": "wiadomości sportowe"
+					},
+					{
+						"tag": "sport"
+					},
+					{
+						"tag": "czasopismo sportowe"
+					},
+					{
+						"tag": "prasa polska"
+					}
+				],
+				"seeAlso": [],
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -205,17 +229,15 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [
-					{
-						"tag": "Rada sołecka"
-					},
-					{
-						"tag": "Świerczów"
-					}
-				],
-				"notes": [],
-				"seeAlso": [],
-				"url": "http://cyfrowa.bibliotekakolbuszowa.pl/dlibra/docmetadata?id=945"
+				"title": "Przegląd Sportowy : tygodnik ilustrowany, poświęcony wszelkim gałęziom sportu : oficjalny organ Polskiego Związku Piłki Nożnej oraz Krakowskiego, Warszawskiego, Lwowskiego i Łódzkiego Związku Okręgowego Piłki Nożnej. R. 2, 1922 nr 6 (10 II)",
+				"rights": "Licencja udzielona Bibliotece Głównej im. Jędrzeja Śniadeckiego Akademii Wychowania Fizycznego Józefa Piłsudskiego w Warszawie",
+				"publisher": "Dembiński, Aleksander",
+				"date": "1922",
+				"abstractNote": "16 s. : il. ; 31 cm",
+				"language": "pol",
+				"url": "http://mbc.cyfrowemazowsze.pl/dlibra/docmetadata?id=84344",
+				"libraryCatalog": "dLibra",
+				"shortTitle": "Przegląd Sportowy"
 			}
 		]
 	},
