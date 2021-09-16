@@ -80,13 +80,11 @@ function doWeb(doc, url) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
+	else if (url.endsWith('.pdf')) {
+		ZU.processDocuments(url.replace(/v(?:olume)?([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
+	}
 	else {
-		if (url.endsWith('.pdf')) {
-			ZU.processDocuments(url.replace(/v(?:olume)?([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
-		}
-		else {
-			scrape(doc, url);
-		}
+		scrape(doc, url);
 	}
 }
 
