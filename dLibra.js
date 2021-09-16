@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-16 11:11:55"
+	"lastUpdated": "2021-09-16 20:31:45"
 }
 
 /*
@@ -36,17 +36,17 @@
 */
 
 let POLISH_TYPE_MAPPINGS = {
-	"dokument dźwiękowy":"audioRecording",
-	"książka":"book",
-	"rozdział": "bookSection",
-	"artykuł":"journalArticle",
-	"czasopismo":"journalArticle",
-	"manuskrypt":"manuscript",
-	"rękopis":"manuscript",
-	"mapa": "map",
-	"raport":"report",
-	"praca dyplomowa":"thesis",
-	"rozprawa doktorska":"thesis"
+	"dokument dźwiękowy": "audioRecording",
+	książka: "book",
+	rozdział: "bookSection",
+	artykuł: "journalArticle",
+	czasopismo: "journalArticle",
+	manuskrypt: "manuscript",
+	rękopis: "manuscript",
+	mapa: "map",
+	raport: "report",
+	"praca dyplomowa": "thesis",
+	"rozprawa doktorska": "thesis"
 };
 
 function detectWeb(doc, url) {
@@ -55,12 +55,12 @@ function detectWeb(doc, url) {
 	if (singleRe.test(url)) {
 		let types = Array.from(doc.querySelectorAll('meta[name="DC.type"]')).map(meta => meta.content);
 		let type;
-		for (let i = 0; i < types.length; i++) {
-			if(POLISH_TYPE_MAPPINGS[types[i]]) {
-				type = POLISH_TYPE_MAPPINGS[types[i]];
+		for (let possibleType of types) {
+			if (POLISH_TYPE_MAPPINGS[possibleType]) {
+				type = POLISH_TYPE_MAPPINGS[possibleType];
 				break;
 			}
-			type = types[i];
+			type = possibleType;
 		}
 		return type ? type : "document";
 	}
@@ -89,12 +89,12 @@ function doWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	let items = {};
 	let found = false;
-	//dLibra 5
+	// dLibra 5
 	let rows = doc.querySelectorAll('.dLSearchResultTitle');
 	if (rows.length) {
-		for (let i = 0; i < rows.length; i++) {
-			let href = rows[i].href;
-			let title = ZU.trimInternal(text(rows[i], '#src_titleLink_fullTitle > span.src_titleLink_title'));
+		for (let row of rows) {
+			let href = row.href;
+			let title = ZU.trimInternal(text(row, '#src_titleLink_fullTitle > span.src_titleLink_title'));
 			if (!href || !title) continue;
 			if (checkOnly) return true;
 			found = true;
@@ -102,13 +102,13 @@ function getSearchResults(doc, checkOnly) {
 		}
 	}
 	else {
-		//dLibra 6
+		// dLibra 6
 		rows = doc.querySelectorAll('.objectbox__text--title');
-		for (let i = 0; i < rows.length; i++) {
+		for (let row of rows) {
 			// skip 'Similar in FBC'
-			if (rows[i].getAttribute('title')) {
-				let href = attr(rows[i], 'a', 'href');
-				let title = ZU.trimInternal(rows[i].getAttribute('title'));
+			if (row.getAttribute('title')) {
+				let href = attr(row, 'a', 'href');
+				let title = ZU.trimInternal(row.getAttribute('title'));
 				if (!href || !title) continue;
 				if (checkOnly) return true;
 				found = true;
@@ -144,8 +144,8 @@ function dlibraScrape(doc, objUrl, baseUrl, objType, id) {
 		rdf = rdf.replace(/<\?xml[^>]*\?>/, "");
 		let dcTypeRegex = /<dc:type[^>]*>([^<]+)<\/dc:type>/gi;
 		let m, type;
-		while (m = dcTypeRegex.exec(rdf)) {
-			if(POLISH_TYPE_MAPPINGS[m[1]]) {
+		while ((m = dcTypeRegex.exec(rdf))) {
+			if (POLISH_TYPE_MAPPINGS[m[1]]) {
 				type = POLISH_TYPE_MAPPINGS[m[1]];
 				break;
 			}
@@ -171,11 +171,11 @@ function dlibraScrape(doc, objUrl, baseUrl, objType, id) {
 
 function addAttachments(doc, item) {
 	let pdfURL = ZU.xpath(doc, '//meta[@name="citation_pdf_url"]/@content');
-	if(pdfURL.length) {
+	if (pdfURL.length) {
 		pdfURL = pdfURL[0].textContent;
-		item.attachments.push({title:"Full Text PDF", url:pdfURL, mimeType:"application/pdf"});
+		item.attachments.push({ title: "Full Text PDF", url: pdfURL, mimeType: "application/pdf" });
 	}
-	item.attachments.push({document:doc, title:"Snapshot"});
+	item.attachments.push({ document: doc, title: "Snapshot" });
 }
 
 function attr(docOrElem, selector, attr, index) {
@@ -196,6 +196,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
+				"title": "Przegląd Sportowy : tygodnik ilustrowany, poświęcony wszelkim gałęziom sportu : oficjalny organ Polskiego Związku Piłki Nożnej oraz Krakowskiego, Warszawskiego, Lwowskiego i Łódzkiego Związku Okręgowego Piłki Nożnej. R. 2, 1922 nr 6 (10 II)",
 				"creators": [
 					{
 						"firstName": "Tadeusz (1889-1960) Red odpowiedzialny",
@@ -203,7 +204,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
+				"date": "1922",
+				"abstractNote": "16 s. : il. ; 31 cm",
+				"language": "pol",
+				"libraryCatalog": "dLibra",
+				"publisher": "Dembiński, Aleksander",
+				"rights": "Licencja udzielona Bibliotece Głównej im. Jędrzeja Śniadeckiego Akademii Wychowania Fizycznego Józefa Piłsudskiego w Warszawie",
+				"shortTitle": "Przegląd Sportowy",
+				"url": "http://mbc.cyfrowemazowsze.pl/dlibra/docmetadata?id=84344",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "wiadomości sportowe"
@@ -218,26 +236,8 @@ var testCases = [
 						"tag": "prasa polska"
 					}
 				],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
-				"title": "Przegląd Sportowy : tygodnik ilustrowany, poświęcony wszelkim gałęziom sportu : oficjalny organ Polskiego Związku Piłki Nożnej oraz Krakowskiego, Warszawskiego, Lwowskiego i Łódzkiego Związku Okręgowego Piłki Nożnej. R. 2, 1922 nr 6 (10 II)",
-				"rights": "Licencja udzielona Bibliotece Głównej im. Jędrzeja Śniadeckiego Akademii Wychowania Fizycznego Józefa Piłsudskiego w Warszawie",
-				"publisher": "Dembiński, Aleksander",
-				"date": "1922",
-				"abstractNote": "16 s. : il. ; 31 cm",
-				"language": "pol",
-				"url": "http://mbc.cyfrowemazowsze.pl/dlibra/docmetadata?id=84344",
-				"libraryCatalog": "dLibra",
-				"shortTitle": "Przegląd Sportowy"
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -272,11 +272,11 @@ var testCases = [
 				],
 				"date": "1882",
 				"abstractNote": "Epilog",
-				"url": "https://demo.dl.psnc.pl/dlibra/publication/1502/edition/1243",
 				"language": "pol",
 				"libraryCatalog": "dLibra",
 				"publisher": "Lwów, Nakładem Księgarni F. H. Richtera. (H. Altbenberg)",
 				"rights": "Open Access",
+				"url": "https://demo.dl.psnc.pl/dlibra/publication/1502/edition/1243",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
