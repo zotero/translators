@@ -52,13 +52,13 @@ function getRefWorksByID(ids, onDataAvailable) {
 				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
 				.replace(/;;/g, ';') // 保留作者中一个英文分号
 				.replace(/^ AB/g, 'AB') // 去除AB前空格
-				.replace(/vo (\d+)\n/, "VO $1\n")  // 修改vo 大小写
+				.replace(/vo (\d+)\n/, "VO $1\n") // 修改vo 大小写
 				.replace(
 					/^(A[1-4]|U2)\s*([^\r\n]+)/gm,
 					function (m, tag, authors) {
 						authors = authors.split(/\s*[;，,]\s*/); // that's a special comma
 						if (!authors[authors.length - 1].trim()) authors.pop();
-						return 'A1' + ' ' + authors.join('\n' + 'A1' + ' ');  // Use A1 tag instead
+						return 'A1' + ' ' + authors.join('\n' + 'A1' + ' '); // Use A1 tag instead
 					}
 				);
 			Z.debug(data);
@@ -78,14 +78,13 @@ function getIDFromURL(url) {
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
 	var dbcode = url.match(/[?&]dbcode=([^&#]*)/i);
 	if (
-		!filename ||
-		!filename[1] ||
-		!dbcode ||
-		!dbcode[1] ||
-		!dbname ||
-		!dbname[1]
-	)
-		return false;
+		!filename
+		|| !filename[1]
+		|| !dbcode
+		|| !dbcode[1]
+		|| !dbname
+		|| !dbname[1]
+	) return false;
 	return { dbname: dbname[1], filename: filename[1], dbcode: dbcode[1], url: url };
 }
 
@@ -95,9 +94,9 @@ function getIDFromHeader(doc, url) {
 	var dbcode = ZU.xpath(doc, "//input[@id='paramdbcode']");
 	var filename = ZU.xpath(doc, "//input[@id='paramfilename']");
 	if (
-		filename.length +
-		dbcode.length +
-		dbname.length < 3
+		filename.length
+		+ dbcode.length
+		+ dbname.length < 3
 	) {
 		return false;
 	}
@@ -110,7 +109,7 @@ function getIDFromPage(doc, url) {
 		|| getIDFromHeader(doc, url);
 }
 
-function getTypeFromDBName(dbname) {
+function getTypeFromDBName(id) {
 	var dbType = {
 		CJFQ: "journalArticle",
 		CJFD: "journalArticle",
@@ -129,13 +128,8 @@ function getTypeFromDBName(dbname) {
 		IPFD: "conferencePaper",
 		SCPD: "patent"
 	};
-	var db = dbname.substr(0, 4).toUpperCase();
-	if (dbType[db]) {
-		return dbType[db];
-	}
-	else {
-		return false;
-	}
+	var db = id.dbname.substr(0, 4).toUpperCase();
+	return dbType[db] || dbType[id.dbcode];
 }
 
 function getItemsFromSearchResults(doc, url, itemInfo) {
@@ -146,7 +140,6 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		fileXpath = "./ul/li/a";
 	}
 	else { // for search result page
-		var result = doc.querySelector('table.result-table-list');
 		links = doc.querySelectorAll("table.result-table-list tbody tr");
 		aXpath = './td/a[@class="fz14"]';
 		fileXpath = "./td[@class='operat']/a[contains(@class, 'downloadlink')]";
@@ -173,7 +166,8 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 				dbcode: td[1].getAttribute("data-dbname"),
 				url: itemUrl
 			};
-		} else {
+		}
+		else {
 			itemUrl = `https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=${id.dbcode}&dbname=${id.dbname}&filename=${id.filename}&v=`;
 			id.url = itemUrl;
 		}
@@ -200,14 +194,14 @@ function detectWeb(doc, url) {
 	var id = getIDFromPage(doc, url);
 	Z.debug(id);
 	if (id) {
-		return getTypeFromDBName(id.dbname);
+		return getTypeFromDBName(id);
 	}
 	// Add new version kns8
 	else if (
 		url.match(/kns\/brief\/(default_)?result\.aspx/i)
 		|| url.includes("/KNavi/") // Article list in Navigation page
 		|| url.match(/kns8?\/defaultresult\/index/i) // search page
-		|| url.match(/KNS8?\/AdvSearch\?/i)) {  // search page
+		|| url.match(/KNS8?\/AdvSearch\?/i)) { // search page
 		return "multiple";
 	}
 	else {
@@ -243,7 +237,7 @@ function scrape(ids, doc, itemInfo) {
 		translator.setString(text);
 		translator.setHandler('itemDone', function (obj, newItem) {
 			// add PDF/CAJ attachments
-			var cite = citeStr = pubType = pubTypeStr = "";
+			var cite, citeStr, pubType, pubTypeStr = "";
 			// If you want CAJ instead of PDF, set keepPDF = false
 			// 如果你想将PDF文件替换为CAJ文件，将下面一行 keepPDF 设为 false
 			var keepPDF = Z.getHiddenPref('CNKIPDF');
@@ -261,7 +255,8 @@ function scrape(ids, doc, itemInfo) {
 						title: "Snapshot",
 						document: doc
 					});
-				} else {
+				}
+				else {
 					var pdfurl = getPDF(doc, newItem.itemType);
 					var cajurl = getCAJ(doc, newItem.itemType);
 					newItem.attachments = getAttachments(pdfurl, cajurl, keepPDF);
@@ -269,8 +264,9 @@ function scrape(ids, doc, itemInfo) {
 				cite = doc.querySelector("span.num");
 				cite = cite ? cite.innerText.split('\n')[0] : "";
 				pubType = ZU.xpath(doc, "//div[@class='top-tip']//a[@class='type']");
-				pubTypeStr = pubType.length > 0 ? "<" + pubType.map(ele => ele.innerText)
-					.join(", ") + ">" : "";
+				pubTypeStr = pubType.length > 0
+					? "<" + pubType.map(ele => ele.innerText).join(", ") + ">"
+					: "";
 				var doi = ZU.xpath(doc, "//*[contains(text(), 'DOI')]/parent::li | //div[@class='tips']"); // add DOI
 				if (doi.length > 0 && doi[0].innerText.includes("DOI")) {
 					var DOI = doi[0].innerText.split("DOI");
@@ -283,7 +279,7 @@ function scrape(ids, doc, itemInfo) {
 				}
 			}
 			var timestamp = new Date().toLocaleDateString().replace(/\//g, '-');
-			var citeStr = cite ? `${cite} citations(CNKI)[${timestamp}]` : "";
+			citeStr = cite ? `${cite} citations(CNKI)[${timestamp}]` : "";
 			newItem.extra = (citeStr + pubTypeStr).trim();
 			// split names, Chinese name split depends on Zotero Connector preference translators.zhnamesplit
 			var zhnamesplit = Z.getHiddenPref('zhnamesplit');
@@ -292,8 +288,8 @@ function scrape(ids, doc, itemInfo) {
 			}
 			for (var i = 0, n = newItem.creators.length; i < n; i++) {
 				var creator = newItem.creators[i];
-				if (newItem.itemType == 'thesis' && i != 0) {  // Except first author are Advisors in thesis
-					creator.creatorType = 'contributor';  // Here is contributor
+				if (newItem.itemType == 'thesis' && i != 0) { // Except first author are Advisors in thesis
+					creator.creatorType = 'contributor'; // Here is contributor
 				}
 				if (creator.firstName) continue;
 
@@ -367,7 +363,8 @@ function getAttachments(pdfurl, cajurl, keepPDF) {
 			mimeType: "application/pdf",
 			url: pdfurl ? pdfurl : cajurl.includes("&dflag=nhdown") ? cajurl.replace('&dflag=nhdown', '&dflag=pdfdown') : cajurl + '&dflag=pdfdown'
 		});
-	} else if (cajurl) {
+	}
+	else if (cajurl) {
 		attachments.push({
 			title: "Full Text CAJ",
 			mimeType: "application/caj",
