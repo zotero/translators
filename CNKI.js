@@ -2,14 +2,14 @@
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
 	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
-	"target": "https?://.*?/(kns8?/defaultresult/index|kns8?/AdvSearch|kcms/detail|KXReader/Detail\\?|KNavi/)",
+	"target": "https?://([^/]+\\.)?cnki.net/(kns8?/defaultresult/index|kns8?/AdvSearch|kcms/detail|KXReader/Detail\\?|KNavi/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-03-17 10:39:20"
+	"lastUpdated": "2021-09-19 20:28:20"
 }
 
 /*
@@ -29,6 +29,10 @@
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 	***** END LICENSE BLOCK *****
 */
+
+// 帮助：如果你在校外使用代理访问知网，浏览器插件 Zotero Connector 抓取失败
+// 可以尝试将本文件第5行 target 开头的代码修改为下面这行（请去掉前面的两个右划线）：
+// "target": "https?://.*?/(kns8?/defaultresult/index|kns8?/AdvSearch|kcms/detail|KXReader/Detail\\?|KNavi/)",
 
 // Target regex for default search, advance search, detail page and journal articles pages.
 // Fetches RefWorks records for provided IDs and calls onDataAvailable with resulting text
