@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-26 16:26:30"
+	"lastUpdated": "2021-09-15 00:36:59"
 }
 
 /**
@@ -30,12 +30,20 @@
 	<http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
+	// first check if we're on a search page. I don't know if anyone will commonly
+	// want to scrape multiples on Wikipedia, but there's no harm in supporting it
+	// (and thus preventing search result pages from being scraped as ordinary
+	// encyclopedia articles).
+	if (doc.body.classList.contains('ns-special') && getSearchResults(doc, true)) {
+		return 'multiple';
+	}
+	
 	// specifically exclude the editor interface, since it doesn't give us much
 	// to work with and users are unlikely to want to add it as an
 	// encyclopediaArticle.
 	// e.g., this excludes https://en.wikipedia.org/w/index.php?title=Main_Page&action=edit
-	if (doc.body.matches('.action-edit')) {
+	if (doc.body.classList.contains('action-edit')) {
 		return false;
 	}
 	
@@ -48,7 +56,33 @@ function detectWeb(doc, url) {
 	return false;
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.mw-search-result .mw-search-result-heading > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
+		});
+	}
+	else {
+		scrape(doc, url);
+	}
+}
+
+function scrape(doc, url) {
 	var item = new Zotero.Item('encyclopediaArticle');
 	item.title = ZU.trimInternal((doc.getElementById('firstHeading') || doc.getElementById('section_0')).textContent);
 	
@@ -68,16 +102,17 @@ function doWeb(doc, url) {
 	*/
 	item.rights = 'Creative Commons Attribution-ShareAlike License';
 
-	//turns out it's not that trivial to get the localized title for Wikipedia
-	//we can try to strip it from the page title though
-	//test for all sorts of dashes to account for different locales
-	/**TODO: there's probably a better way to do this, since sometimes page
+	// turns out it's not that trivial to get the localized title for Wikipedia
+	// we can try to strip it from the page title though
+	// test for all sorts of dashes to account for different locales
+	/** TODO: there's probably a better way to do this, since sometimes page
 	 * title only says "- Wikipedia" (in some other language)
 	 */
 	var m = doc.title.match(/[\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B]\s*([^\u002D\u00AD\u2010-\u2015\u2212\u2E3A\u2E3B]+)$/);
 	if (m) {
 		item.encyclopediaTitle = m[1];
-	} else {
+	}
+	else {
 		item.encyclopediaTitle = 'Wikipedia, the free encyclopedia';
 	}
 
@@ -110,7 +145,7 @@ function doWeb(doc, url) {
 
 	item.language = doc.documentElement.lang;
 	
-	//last modified date is hard to get from the page because it is localized
+	// last modified date is hard to get from the page because it is localized
 	var pageInfoURL = '/w/api.php?action=query&format=json'
 		+ '&inprop=url%7Cdisplaytitle'
 		+ '&exintro=true&explaintext=true' // Intro section in plain text
@@ -119,14 +154,15 @@ function doWeb(doc, url) {
 			? '%7Crevisions&rvprop=timestamp&revids=' + encodeURIComponent(revID)
 			: '&titles=' + encodeURIComponent(item.title)
 		);
-	ZU.doGet(pageInfoURL, function(text) {
+	ZU.doGet(pageInfoURL, function (text) {
 		var retObj = JSON.parse(text);
 		if (retObj && !retObj.query.pages['-1']) {
 			var pages = retObj.query.pages;
 			for (var i in pages) {
 				if (pages[i].revisions) {
 					item.date = pages[i].revisions[0].timestamp;
-				} else {
+				}
+				else {
 					item.date = pages[i].touched;
 				}
 
@@ -146,8 +182,8 @@ function doWeb(doc, url) {
 				// not necessarily the revision that is being queried
 				item.abstractNote = pages[i].extract;
 				
-				//we should never have more than one page returned,
-				//but break just in case
+				// we should never have more than one page returned,
+				// but break just in case
 				break;
 			}
 		}
@@ -192,7 +228,7 @@ var testCases = [
 				"title": "Россия",
 				"creators": [],
 				"date": "2012-04-06T20:11:32Z",
-				"abstractNote": "Росси́я или Росси́йская Федера́ция (РФ), — государство в Восточной Европе и Северной Азии. Территория России в её конституционных границах составляет 17 125 191 км²; население страны (в пределах её заявленной территории) составляет 146 171 015 чел. (2021). Занимает первое место в мире по территории, шестое — по объёму ВВП по ППС, и девятое — по численности населения.\nСтолица — Москва. Государственный язык — русский. Денежная единица — российский рубль.\nГосударственный строй — президентско-парламентская республика с федеративным устройством. С 31 декабря 1999 года (с перерывом в 2008—2012 годах, когда Дмитрий Медведев был президентом) должность президента Российской Федерации занимает Владимир Путин. C 16 января 2020 года должность председателя Правительства РФ занимает Михаил Мишустин.\nРоссия имеет 18 границ (16 сухопутных и 2 морских). В состав Российской Федерации входят 85 субъектов, 46 из которых именуются областями, 22 — республиками, 9 — краями, 3 — городами федерального значения, 4 — автономными округами и 1 — автономной областью. Всего в стране около 157 тысяч населённых пунктов. Россия является самой холодной страной в мире: 65 % её территории покрыты вечной мерзлотой; в России самая низкая среднегодовая температура воздуха среди всех стран мира, составляющая −5,5 °С; в России расположены: Северный полюс холода; Санкт-Петербург — самый северный в мире город с населением более одного миллиона человек; Мурманск — крупнейший в мире город, расположенный за Северным полярным кругом, и крупнейший такой город в Европе; Норильск — крупнейший заполярный город Азии; Сабетта — крупнейшее поселение севернее 70° с. ш. Также Россия является страной с максимальным перепадом температур в мире: 116,6 °C.\nРоссия — многонациональное государство с широким этнокультурным многообразием. Бо́льшая часть населения (около 75 %) относит себя к православию, что делает Россию страной с самым многочисленным православным населением в мире.\nРоссия — ядерная держава; одна из ведущих промышленных и космических держав мира; занимает 3-е место в рейтинге самых влиятельных стран мира (2020). Русский язык — язык мирового значения, один из шести официальных и рабочих языков ООН, ЮНЕСКО и других международных организаций.\nРоссия является постоянным членом Совета Безопасности ООН с правом вето; одна из современных великих держав мира. Также Россия состоит в ряде международных организаций: ООН, G20, ОБСЕ, Совете Европы, ЕАЭС, СНГ, ОДКБ, ВТО, ШОС, АТЭС, БРИКС, МОК и других.\nПосле распада СССР в конце 1991 года Российская Федерация была признана международным сообществом как государство-правопреемник СССР в вопросах ядерного потенциала, внешнего долга, государственной собственности за рубежом, а также членства в Совете Безопасности ООН.\nПо данным МВФ, объём ВВП по номиналу за 2019 год составил 1,7 трлн долларов (11 585 долларов на человека, 61-е место в мире). Объём ВВП по ППС за 2019 год составил 4,39 трлн долларов (29 181 долларов на человека, 50-е место в мире).",
+				"abstractNote": "Росси́я или Росси́йская Федера́ция (РФ), — государство в Восточной Европе и Северной Азии. Территория России в её конституционных границах составляет 17 125 191 км²; население страны (в пределах её заявленной территории) составляет 146 171 015 чел. (2021). Занимает первое место в мире по территории, шестое — по объёму ВВП по ППС, и девятое — по численности населения.\nСтолица — Москва. Государственный язык на всей территории страны — русский, в ряде регионов России также установлены свои официальные языки. Денежная единица — российский рубль.\nРоссия — федеративная президентско-парламентская республика. С 31 декабря 1999 года (с перерывом в 2008—2012 годах, когда Дмитрий Медведев был президентом) должность президента Российской Федерации занимает Владимир Путин. C 16 января 2020 года должность председателя Правительства РФ занимает Михаил Мишустин.\nРоссия имеет 18 границ (16 сухопутных и 2 морских). В состав Российской Федерации входят 85 субъектов, 46 из которых именуются областями, 22 — республиками, 9 — краями, 3 — городами федерального значения, 4 — автономными округами и 1 — автономной областью. Всего в стране около 157 тысяч населённых пунктов. Россия является самой холодной страной в мире: 65 % её территории покрыты вечной мерзлотой; в России самая низкая среднегодовая температура воздуха среди всех стран мира, составляющая −5,5 °С; в России расположены: Северный полюс холода; Санкт-Петербург — самый северный в мире город с населением более одного миллиона человек; Мурманск — крупнейший в мире город, расположенный за Северным полярным кругом; Норильск — крупнейший заполярный город Азии; Сабетта — крупнейшее поселение севернее 70° с. ш. Также Россия является страной с максимальным перепадом температур в мире: 116,6 °C.\nРоссия — многонациональное государство с широким этнокультурным многообразием. Бо́льшая часть населения (около 75 %) относит себя к православию, что делает Россию страной с самым многочисленным православным населением в мире.\nРоссия — ядерная держава; одна из ведущих космических держав мира. Русский язык — язык мирового значения, один из шести официальных и рабочих языков ООН, ЮНЕСКО и других международных организаций.\nРоссия является постоянным членом Совета Безопасности ООН с правом вето; одна из современных великих держав мира. Также Россия состоит в ряде международных организаций: ООН, G20, ОБСЕ, Совете Европы, ЕАЭС, СНГ, ОДКБ, ВТО, ШОС, АТЭС, БРИКС, МОК и других.\nПосле распада СССР в конце 1991 года Российская Федерация была признана международным сообществом как государство-правопреемник СССР в вопросах ядерного потенциала, внешнего долга, государственной собственности за рубежом, а также членства в Совете Безопасности ООН.\nПо данным МВФ, объём ВВП по номиналу за 2019 год составил 1,7 трлн долларов (11 585 долларов на человека, 61-е место в мире). Объём ВВП по ППС за 2019 год составил 4,39 трлн долларов (29 181 долларов на человека, 50-е место в мире).",
 				"encyclopediaTitle": "Википедия",
 				"extra": "Page Version ID: 43336101",
 				"language": "ru",
@@ -279,7 +315,7 @@ var testCases = [
 				"title": "1% rule (Internet culture)",
 				"creators": [],
 				"date": "2021-01-11T20:19:42Z",
-				"abstractNote": "In Internet culture, the 1% rule is a rule of thumb pertaining to participation in an internet community, stating that only 1% of the users of a website add content, while the other 99% of the participants only lurk. Variants include the 1–9–90 rule (sometimes 90–9–1 principle or the 89:10:1 ratio), which states that in a collaborative website such as a wiki, 90% of the participants of a community only consume content, 9% of the participants change or update content, and 1% of the participants add content. This also applies, approximately, to Wikipedia.Similar rules are known in information science; for instance, the 80/20 rule known as the Pareto principle states that 20 percent of a group will produce 80 percent of the activity, however the activity is defined.",
+				"abstractNote": "In Internet culture, the 1% rule is a rule of thumb pertaining to participation in an internet community, stating that only 1% of the users of a website add content, while the other 99% of the participants only lurk. Variants include the 1–9–90 rule (sometimes 90–9–1 principle or the 89:10:1 ratio), which states that in a collaborative website such as a wiki, 90% of the participants of a community only consume content, 9% of the participants change or update content, and 1% of the participants add content. \nSimilar rules are known in information science; for instance, the 80/20 rule known as the Pareto principle states that 20 percent of a group will produce 80 percent of the activity, however the activity is defined.",
 				"encyclopediaTitle": "Wikipedia",
 				"extra": "Page Version ID: 999756024",
 				"language": "en",
@@ -327,6 +363,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://en.wikipedia.org/w/index.php?search=zotero&title=Special%3ASearch&fulltext=1&ns0=1",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
