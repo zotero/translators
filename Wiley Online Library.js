@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-03 16:43:04"
+	"lastUpdated": "2021-09-19 21:50:56"
 }
 
 /*
@@ -246,15 +246,6 @@ function scrapeBibTeX(doc, url) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function (obj, item) {
-			// BibTeX throws the last names and first names together
-			// Therefore, we prefer creators names from EM (if available)
-			var authors = doc.querySelectorAll('meta[name="citation_author"]');
-			if (authors && authors.length > 0) {
-				item.creators = [];
-				for (let i = 0; i < authors.length; i++) {
-					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
-				}
-			}
 			// fix author case
 			for (let i = 0, n = item.creators.length; i < n; i++) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
@@ -924,8 +915,8 @@ var testCases = [
 				"title": "β-Rezeptorenblocker",
 				"creators": [
 					{
-						"firstName": "L. von",
-						"lastName": "Meyer",
+						"firstName": "L.",
+						"lastName": "von Meyer",
 						"creatorType": "author"
 					},
 					{
@@ -944,7 +935,6 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
 				"publisher": "John Wiley & Sons, Ltd",
-				"rights": "Copyright © 2002 Wiley-VCH Verlag GmbH",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -1213,6 +1203,72 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2020JC016068",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Labrador Sea Water Transport Across the Charlie-Gibbs Fracture Zone",
+				"creators": [
+					{
+						"firstName": "Afonso",
+						"lastName": "Gonçalves Neto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jaime B.",
+						"lastName": "Palter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Amy",
+						"lastName": "Bower",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heather",
+						"lastName": "Furey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiaobiao",
+						"lastName": "Xu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1029/2020JC016068",
+				"ISSN": "2169-9291",
+				"abstractNote": "Labrador Sea Water (LSW) is a major component of the deep limb of the Atlantic Meridional Overturning Circulation, yet LSW transport pathways and their variability lack a complete description. A portion of the LSW exported from the subpolar gyre is advected eastward along the North Atlantic Current and must contend with the Mid-Atlantic Ridge before reaching the eastern basins of the North Atlantic. Here, we analyze observations from a mooring array and satellite altimetry, together with outputs from a hindcast ocean model simulation, to estimate the mean transport of LSW across the Charlie-Gibbs Fracture Zone (CGFZ), a primary gateway for the eastward transport of the water mass. The LSW transport estimated from the 25-year altimetry record is 5.3 ± 2.9 Sv, where the error represents the combination of observational variability and the uncertainty in the projection of the surface velocities to the LSW layer. Current velocities modulate the interannual to higher-frequency variability of the LSW transport at the CGFZ, while the LSW thickness becomes important on longer time scales. The modeled mean LSW transport for 1993–2012 is higher than the estimate from altimetry, at 8.2 ± 4.1 Sv. The modeled LSW thickness decreases substantially at the CGFZ between 1996 and 2009, consistent with an observed decline in LSW volume in the Labrador Sea after 1994. We suggest that satellite altimetry and continuous hydrographic measurements in the central Labrador Sea, supplemented by profiles from Argo floats, could be sufficient to quantify the LSW transport at the CGFZ.",
+				"issue": "8",
+				"itemID": "doi:10.1029/2020JC016068",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "e2020JC016068",
+				"publicationTitle": "Journal of Geophysical Research: Oceans",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1029/2020JC016068",
+				"volume": "125",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>e2020JC016068 10.1029/2020JC016068</p>"
+					}
+				],
 				"seeAlso": []
 			}
 		]
