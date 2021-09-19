@@ -2,14 +2,14 @@
 	"translatorID": "23bacc11-98e3-4b78-b1ef-cc2c9a04b893",
 	"label": "reddit",
 	"creator": "Lukas Kawerau",
-	"target": "^https?://www\\.reddit\\.com",
+	"target": "^https?://[^/]+\\.reddit\\.com",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-01 20:08:22"
+	"lastUpdated": "2021-09-15 00:18:40"
 }
 
 /*
@@ -44,10 +44,19 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = ZU.xpath(doc, '//a[div/h3]');
+	if (!rows.length) rows = doc.querySelectorAll('.entry');
 	for (let row of rows) {
-		var href = row.href + '.json';
-		var title = ZU.trimInternal(row.textContent);
+		let href, title;
+		if (row.href) {
+			href = row.href;
+			title = ZU.trimInternal(row.textContent);
+		}
+		else {
+			href = attr(row, '.comments', 'href');
+			title = text(row, '.title > a');
+		}
 		if (!href || !title) continue;
+		href += '.json';
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -214,6 +223,40 @@ var testCases = [
 				"forumTitle": "r/Professors",
 				"postType": "Reddit Post",
 				"url": "www.reddit.com/r/Professors/comments/o5pixw/for_tt_t_professors_why_exactly_is_vacation_and/",
+				"attachments": [
+					{
+						"title": "Reddit Post Snapshot",
+						"mimetype": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://old.reddit.com/r/zotero/",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://old.reddit.com/r/zotero/comments/plh1kr/firefox_google_docs_reimplementation/",
+		"items": [
+			{
+				"itemType": "forumPost",
+				"title": "Firefox Google Docs re-implementation",
+				"creators": [
+					{
+						"lastName": "RedRoseTemplate",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-09-10T08:34:50.000Z",
+				"forumTitle": "r/zotero",
+				"postType": "Reddit Post",
+				"url": "www.reddit.com/r/zotero/comments/plh1kr/firefox_google_docs_reimplementation/",
 				"attachments": [
 					{
 						"title": "Reddit Post Snapshot",
