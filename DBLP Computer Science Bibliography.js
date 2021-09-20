@@ -129,20 +129,6 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 	trans.translate();
 }
 
-function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
-			}
-			ZU.processDocuments(Object.keys(items), scrape);
-		});
-	}
-	else {
-		scrape(doc, url);
-	}
-}
-
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
