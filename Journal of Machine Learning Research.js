@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 05:16:02"
+	"lastUpdated": "2021-09-16 20:23:32"
 }
 
 /*
@@ -80,13 +80,11 @@ function doWeb(doc, url) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
+	else if (url.endsWith('.pdf')) {
+		ZU.processDocuments(url.replace(/v(?:olume)?([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
+	}
 	else {
-		if (url.endsWith('.pdf')) {
-			ZU.processDocuments(url.replace(/v(?:olume)?([^/]+\/[^/]+)\/.*/, 'v$1'), scrape);
-		}
-		else {
-			scrape(doc, url);
-		}
+		scrape(doc, url);
 	}
 }
 
@@ -97,12 +95,27 @@ function scrape(doc, url) {
 	translator.setDocument(doc);
 	
 	translator.setHandler('itemDone', function (obj, item) {
-		// it would be nice to use nextSibling here to fetch the text node next
-		// to the "Abstract" heading, but that doesn't work in processDocuments.
-		let content = innerText(doc, '#content');
-		item.abstractNote = content.substring(
-			content.indexOf('Abstract') + 8, content.indexOf('[abs]')
-		);
+		if (item.itemType == 'conferencePaper') {
+			item.proceedingsTitle = item.proceedingsTitle || item.publicationTitle || '';
+			delete item.publicationTitle;
+			
+			let maybeContainerTitle = text(doc, '#info > i');
+			if (maybeContainerTitle.includes('Proceedings of ')
+				&& !item.proceedingsTitle.includes('Proceedings of ')) {
+				item.proceedingsTitle = maybeContainerTitle;
+			}
+		}
+		
+		item.abstractNote = text(doc, '#abstract');
+		if (!item.abstractNote) {
+			// it would be nice to use nextSibling here to fetch the text node
+			// next to the "Abstract" heading, but that doesn't work in
+			// processDocuments.
+			let content = innerText(doc, '#content');
+			item.abstractNote = content
+				.replace(/^[\s\S]*Abstract/, '')
+				.replace(/\[abs][\s\S]*$/, '');
+		}
 		
 		item.date = ZU.strToISO(item.date);
 		
@@ -307,11 +320,12 @@ var testCases = [
 					}
 				],
 				"date": "2020-02-08",
+				"abstractNote": "Recent advancements in deep generative modeling make it possible to learn prior distributions from complex data that subsequently can be used for Bayesian inference. However, we find that distributions learned by deep generative models for audio signals do not exhibit the right properties that are necessary for tasks like audio source separation using a probabilistic approach. We observe that the learned prior distributions are either discriminative and extremely peaked or smooth and non-discriminative. We quantify this behavior for two types of deep generative models on two audio datasets.",
 				"language": "en",
 				"libraryCatalog": "proceedings.mlr.press",
 				"pages": "53-59",
 				"publisher": "PMLR",
-				"url": "http://proceedings.mlr.press/v137/frank20a.html",
+				"url": "https://proceedings.mlr.press/v137/frank20a.html",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -343,14 +357,15 @@ var testCases = [
 					}
 				],
 				"date": "2020-09-01",
+				"abstractNote": "Modern machine learning research has explored numerous approaches to solving reinforce- ment learning with multiple goals and sparse rewards as well as learning correct actions from a small number of exploratory samples. We explore the ability of a self-supervised system which automatically creates and tests symbolic hypotheses about the world to ad- dress these same issues. Leela is a system which builds an understanding of the world using constructivist artificial intelligence. For our study, we create an N ∗ N grid world with goals related to proprioceptive or visual positions for exploration. We compare Leela to a DQN which includes hindsight for improving multigoal learning with sparse rewards. Our results show that Leela is able to learn to solve multigoal problems in an N ∗ N world with approximately 160N2 exploratory steps compared to 360N2.7 steps required by the DQN.",
 				"conferenceName": "International Workshop on Self-Supervised Learning",
 				"language": "en",
 				"libraryCatalog": "proceedings.mlr.press",
 				"pages": "72-88",
-				"proceedingsTitle": "International Workshop on Self-Supervised Learning",
+				"proceedingsTitle": "Proceedings of the First International Workshop on Self-Supervised Learning",
 				"publisher": "PMLR",
 				"shortTitle": "Self-Supervised Learning for Multi-Goal Grid World",
-				"url": "http://proceedings.mlr.press/v131/kommrusch20a.html",
+				"url": "https://proceedings.mlr.press/v131/kommrusch20a.html",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -367,6 +382,60 @@ var testCases = [
 		"type": "web",
 		"url": "http://proceedings.mlr.press/v130/",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://proceedings.mlr.press/v130/lyle21a.html",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "On the Effect of Auxiliary Tasks on Representation Dynamics",
+				"creators": [
+					{
+						"firstName": "Clare",
+						"lastName": "Lyle",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mark",
+						"lastName": "Rowland",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Georg",
+						"lastName": "Ostrovski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Will",
+						"lastName": "Dabney",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-03-18",
+				"abstractNote": "While auxiliary tasks play a key role in shaping the representations learnt by reinforcement learning agents, much is still unknown about the mechanisms through which this is achieved. This work develops our understanding of the relationship between auxiliary tasks, environment structure, and representations by analysing the dynamics of temporal difference algorithms. Through this approach, we establish a connection between the spectral decomposition of the transition operator and the representations induced by a variety of auxiliary tasks. We then leverage insights from these theoretical results to inform the selection of auxiliary tasks for deep reinforcement learning agents in sparse-reward environments.",
+				"conferenceName": "International Conference on Artificial Intelligence and Statistics",
+				"language": "en",
+				"libraryCatalog": "proceedings.mlr.press",
+				"pages": "1-9",
+				"proceedingsTitle": "Proceedings of The 24th International Conference on Artificial Intelligence and Statistics",
+				"publisher": "PMLR",
+				"url": "https://proceedings.mlr.press/v130/lyle21a.html",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Supplementary PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
