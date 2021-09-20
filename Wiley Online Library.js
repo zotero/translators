@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-20 17:26:05"
+	"lastUpdated": "2021-09-20 17:30:48"
 }
 
 /*
@@ -262,9 +262,11 @@ function scrapeBibTeX(doc, url) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function(obj, item) {
-			// fix author case
- 			for (let i = 0, n = item.creators.length; i < n; i++) {
- 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
+			
+			//fix author case
+			for (var i=0, n=item.creators.length; i<n; i++) {
+				item.creators[i].firstName = fixCase(item.creators[i].firstName);
+				item.creators[i].lastName = fixCase(item.creators[i].lastName);
 			}
 
 			//delete nonsense author Null, Null
@@ -997,12 +999,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Deane-Peter",
-						"lastName": "BAKER",
+						"lastName": "Baker",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "James",
-						"lastName": "PATTISON",
+						"lastName": "Pattison",
 						"creatorType": "author"
 					}
 				],
@@ -1042,12 +1044,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Josef",
-						"lastName": "LAKONISHOK",
+						"lastName": "Lakonishok",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Seymour",
-						"lastName": "SMIDT",
+						"lastName": "Smidt",
 						"creatorType": "author"
 					}
 				],
