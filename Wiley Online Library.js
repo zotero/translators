@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 14:05:23"
+	"lastUpdated": "2021-09-20 17:26:05"
 }
 
 /*
@@ -262,19 +262,9 @@ function scrapeBibTeX(doc, url) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function(obj, item) {
-			// BibTeX throws the last names and first names together
-			// Therefore, we prefer creators names from EM (if available)
-			var authors = doc.querySelectorAll('meta[name="citation_author"]');
-			if (authors && authors.length>0) {
-				item.creators = [];
-				for (let i=0; i<authors.length; i++) {
-					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
-				}
-			}
-			//fix author case
-			for (var i=0, n=item.creators.length; i<n; i++) {
-				item.creators[i].firstName = fixCase(item.creators[i].firstName);
-				item.creators[i].lastName = fixCase(item.creators[i].lastName);
+			// fix author case
+ 			for (let i = 0, n = item.creators.length; i < n; i++) {
+ 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
 			}
 
 			//delete nonsense author Null, Null
@@ -726,7 +716,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
@@ -792,7 +782,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
@@ -858,7 +848,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
@@ -924,7 +914,7 @@ var testCases = [
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "173-182",
 				"publicationTitle": "PROTEOMICS",
-				"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 				"volume": "12",
 				"attachments": [
 					{
@@ -960,8 +950,8 @@ var testCases = [
 				"title": "β-Rezeptorenblocker",
 				"creators": [
 					{
-						"firstName": "L. von",
-						"lastName": "Meyer",
+						"firstName": "L.",
+						"lastName": "von Meyer",
 						"creatorType": "author"
 					},
 					{
@@ -1007,12 +997,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Deane-Peter",
-						"lastName": "Baker",
+						"lastName": "BAKER",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "James",
-						"lastName": "Pattison",
+						"lastName": "PATTISON",
 						"creatorType": "author"
 					}
 				],
@@ -1052,12 +1042,12 @@ var testCases = [
 				"creators": [
 					{
 						"firstName": "Josef",
-						"lastName": "Lakonishok",
+						"lastName": "LAKONISHOK",
 						"creatorType": "author"
 					},
 					{
 						"firstName": "Seymour",
-						"lastName": "Smidt",
+						"lastName": "SMIDT",
 						"creatorType": "author"
 					}
 				],
