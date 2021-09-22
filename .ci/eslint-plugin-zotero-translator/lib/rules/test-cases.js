@@ -29,7 +29,7 @@ module.exports = {
 					const sourceCode = context.getSourceCode();
 					if (astUtils.isSemicolonToken(sourceCode.getLastToken(node))) {
 						context.report({
-							message: 'testcases should not have trailing semicolon',
+							message: 'testCases should not have trailing semicolon',
 							loc: declaration.loc.end,
 						});
 					}
@@ -79,11 +79,11 @@ module.exports = {
 					}
 					else if (testCase.type === 'search') {
 						// console.log(JSON.stringify(testCase.input))
-						const term = Object.keys(testCase.input).join('/');
-						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject'];
-						if (!expected.includes(term)) {
+						const expected = ['DOI', 'ISBN', 'PMID', 'identifiers', 'contextObject', 'adsBibcode'];
+						if (!Object.keys(testCase.input).every(key => expected.includes(key))) {
+							let invalidKey = Object.keys(testCase.input).find(key => !expected.includes(key));
 							context.report({
-								message: `${prefix} of type "${testCase.type}" has search term '${term}', expected one of ${expected.join(', ')}`,
+								message: `${prefix} of type "${testCase.type}" has invalid search term '${invalidKey}' - expected one of ${expected.join(', ')}`,
 								loc,
 							});
 						}
