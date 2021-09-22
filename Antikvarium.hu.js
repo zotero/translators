@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-11-11 15:26:37"
+	"lastUpdated": "2021-09-22 19:39:49"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Velősy Péter Kristóf
+	Copyright © 2017-2021 Velősy Péter Kristóf
 	
 	This file is part of Zotero.
 
@@ -108,24 +108,22 @@ function scrape(doc, url) {
 		newItem.volume = newItem.seriesNumber;
 	}
 
-	var publisherElement = doc.querySelector('[itemprop=publisher]');
-	if (publisherElement) {
-
-		var publisherName = text(publisherElement, '[itemprop=name]', 0);
-		if (publisherName) {
-			newItem.publisher = publisherName;
-		}
-
-		var publisherPlace = text(publisherElement, '[itemprop=address]', 0);
-		if (publisherPlace) {
-			newItem.place = publisherPlace.replace('(', '').replace(')', '');
-		}
+	var publisherName = text(doc, '#konyvAdatlapKiadoLink [itemprop=name]')
+		|| text(doc, '[itemprop=name]', 1);
+	if (publisherName) {
+		newItem.publisher = publisherName;
 	}
-	newItem.date = text(doc, '[itemprop=datePublished]');
 
-	newItem.numPages = text(doc, '[itemprop=numberOfPages]', 0);
+	var publisherPlace = firstText(doc, '[itemprop=address]');
+	if (publisherPlace) {
+		newItem.place = publisherPlace.replace('(', '').replace(')', '');
+	}
+		
+	newItem.date = firstText(doc, '[itemprop=datePublished]');
+
+	newItem.numPages = firstText(doc, '[itemprop=numberOfPages]');
 	
-	newItem.language = text(doc, '[itemprop=inLanguage]', 0);
+	newItem.language = firstText(doc, '[itemprop=inLanguage]');
 
 	var isbnElement = getElementByInnerText(doc, 'th', 'ISBN:');
 	if (isbnElement) {
@@ -140,6 +138,18 @@ function scrape(doc, url) {
 	newItem.attachments.push({document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
 
 	newItem.complete();
+}
+
+/**
+ * Return the first element matching the selector with non-empty text.
+ */
+function firstText(docOrElem, selector) {
+	for (let elem of docOrElem.querySelectorAll(selector)) {
+		let elemText = elem.textContent.trim();
+		if (elemText) return elemText;
+	}
+	
+	return '';
 }
 
 function getElementByInnerText(doc, elementType, innerText) {
@@ -224,6 +234,53 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.antikvarium.hu/index.php?type=search&ksz=atlasz&reszletes=0&newSearch=1&searchstart=ksz&interfaceid=101",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.antikvarium.hu/konyv/peter-harrison-mary-harrison-misztikus-erok-51027-0",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Misztikus erők: Mistic forces/testen túli tapasztalatok",
+				"creators": [
+					{
+						"firstName": "Harrison",
+						"lastName": "Peter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Harrison",
+						"lastName": "Mary",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nóra",
+						"lastName": "Rohonczi",
+						"creatorType": "author"
+					}
+				],
+				"ISBN": "9789637994043",
+				"language": "Magyar",
+				"libraryCatalog": "Antikvarium.hu",
+				"numPages": "274",
+				"place": "Budapest",
+				"publisher": "Pesti Szalon Könyvkiadó",
+				"shortTitle": "Misztikus erők",
+				"attachments": [
+					{
+						"title": "Antikvarium.hu Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "TARTALOM\nKöszönetnyilvánítás\t3\nElőszó\t5\nBevezetés\t9\nMi a TTT?\t13\nA fény\t23\nA magaslati nézőpont\t35\nA mennyországban?\t49\nA gyógyító erő\t55\nKülönös hatóerők\t75\nÁllatok\t91\nZene\t105\nA határterület\t111\nIdőutazások\t121\nA döntés\t141\nAz ezüstzsinór\t151\nEgybeesések\t163\nA fátum\t173\nMenekülés\t193\nGyermekek\t201\nA halálfélelem legyőzése\t213\nMegérzések\t231\nAz okkultizmus veszélyei\t235\nA lélek illata\t247\nAngyalok\t257\nPozitív végkövetkeztetések\t273"
+					}
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
