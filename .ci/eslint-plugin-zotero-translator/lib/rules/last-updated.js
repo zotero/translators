@@ -21,7 +21,7 @@ module.exports = {
 
 				const translator = translators.get(context.getFilename());
 
-				const updated = (new Date)
+				const now = new Date()
 					.toISOString()
 					.replace('T', ' ')
 					.replace(/\..*/, '');
@@ -32,12 +32,21 @@ module.exports = {
 						message: 'Header needs lastUpdated field'
 					});
 				}
+				else if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(header.properties.lastUpdated.value)) {
+					context.report({
+						node: header.properties.lastUpdated,
+						message: `lastUpdated field must be in YYYY-MM-DD HH:MM:SS format`,
+						fix: function (fixer) {
+							return fixer.replaceText(header.properties.lastUpdated, `"${now}"`);
+						},
+					});
+				}
 				else if (translator.lastUpdated && translator.lastUpdated >= header.properties.lastUpdated.value) {
 					context.report({
 						node: header.properties.lastUpdated,
 						message: `lastUpdated field must be updated to be > ${translator.lastUpdated} to push to clients`,
 						fix: function (fixer) {
-							return fixer.replaceText(header.properties.lastUpdated, `"${updated}"`);
+							return fixer.replaceText(header.properties.lastUpdated, `"${now}"`);
 						},
 					});
 				}
