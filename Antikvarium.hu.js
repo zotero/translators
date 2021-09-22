@@ -36,16 +36,14 @@
 */
 
 
-//Zotero attr() and text() functions:
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
-
 function detectWeb(doc, url) {
 	if (url.includes('konyv')) {
 		return "book";
-	} else if (url.includes('index.php?type=search') && getSearchResults(doc, true)){
+	}
+	else if (url.includes('index.php?type=search') && getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 
@@ -53,9 +51,9 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.src-result-book');
-	for (var i=0; i<rows.length; i++) {
-		var href = attr(rows[i], '#searchResultKonyv-csempes', 'href');
-		var title = ZU.trimInternal(text(rows[i], '.book-title-src'));
+	for (let row of rows) {
+		var href = attr(row, '#searchResultKonyv-csempes', 'href');
+		var title = ZU.trimInternal(text(row, '.book-title-src'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -68,22 +66,16 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 
-function scrape(doc, url) {
+function scrape(doc, _url) {
 	var newItem = new Zotero.Item('book');
 
 	newItem.title = text(doc, '[itemprop=name]', 0).trim();
@@ -132,10 +124,10 @@ function scrape(doc, url) {
 
 	var contentsElement = doc.getElementById('tartalomFull');
 	if (contentsElement) {
-		newItem.notes.push({note: contentsElement.innerText});
+		newItem.notes.push({ note: contentsElement.innerText });
 	}
 
-	newItem.attachments.push({document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
+	newItem.attachments.push({ document: doc, title: "Antikvarium.hu Snapshot", mimeType: "text/html" });
 
 	newItem.complete();
 }
@@ -166,7 +158,8 @@ function getElementByInnerText(doc, elementType, innerText) {
 function cleanHungarianAuthor(authorName) {
 	if (authorName.includes(',')) {
 		return Zotero.Utilities.cleanAuthor(authorName, 'author', true);
-	} else {
+	}
+	else {
 		var author = Zotero.Utilities.cleanAuthor(authorName, 'author', false);
 		var firstName = author.lastName;
 		var lastName = author.firstName;
@@ -179,7 +172,7 @@ function cleanHungarianAuthor(authorName) {
 function capitalizeHungarianTitle(title) {
 	title = title[0].toUpperCase() + title.substring(1).toLowerCase();
 	var words = title.split(/[ !"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/);
-	words.forEach(w => {
+	words.forEach((w) => {
 		if (isRomanNumeral(w)) {
 			title = title.replace(w, w.toUpperCase());
 		}
@@ -189,8 +182,9 @@ function capitalizeHungarianTitle(title) {
 
 function isRomanNumeral(word) {
 	var romanRegex = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/;
-	return word.toUpperCase().match(romanRegex) ? true : false;
+	return !!word.toUpperCase().match(romanRegex);
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
