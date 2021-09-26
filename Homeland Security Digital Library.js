@@ -36,7 +36,8 @@
 */
 
 
-const sourceRe = /([^(]+).*v\.(\S+).*no\.(\S+),.*p\.(\S+)/;
+const sourceRe = /([^(]+).*v\.([^\s,]+).*no\.([^\s,]+).*/;
+const pagesRe = /p\.(\S+)/;
 
 function detectWeb(doc, url) {
 	if (url.includes('?abstract')) {
@@ -120,11 +121,12 @@ function scrape(doc, url) {
 					let matches = value.match(sourceRe);
 					if (matches) {
 						item.itemType = 'journalArticle';
-						[, item.publicationTitle, item.volume, item.issue, item.pages] = matches;
+						[, item.publicationTitle, item.volume, item.issue] = matches;
 					}
 					else {
 						item.extra = (item.extra || '') + `\nHSDL Source: ${value}`;
 					}
+					item.pages = (value.match(pagesRe) || [])[1] || item.pages;
 					break;
 				}
 				case 'URL:':
@@ -390,6 +392,35 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.hsdl.org/?search=&searchfield=&all=drought&collection=documents&submitted=Search",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.hsdl.org/?abstract&did=810249",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "MMWR: Morbidity and Mortality Weekly Report: Surveillance Summaries, September 8, 2017",
+				"creators": [],
+				"date": "2017-09-08",
+				"abstractNote": "Alternate Title: BRCA Genetic Testing and Receipt of Preventive Interventions Among Women Aged 18-64 Years with Employer-Sponsored Health Insurance in Nonmetropolitan and Metropolitan Areas - United States, 2009-2014",
+				"issue": "15",
+				"libraryCatalog": "Homeland Security Digital Library",
+				"publicationTitle": "MMWR: Morbidity and Mortality Weekly Report",
+				"rights": "Public Domain",
+				"shortTitle": "MMWR",
+				"url": "https://www.hsdl.org/?abstract&did=810249",
+				"volume": "66",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
