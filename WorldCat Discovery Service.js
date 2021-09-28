@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-23 05:54:09"
+	"lastUpdated": "2021-09-28 00:02:21"
 }
 
 /*
@@ -42,18 +42,14 @@ function detectWeb(doc, url) {
 	if (doc.querySelector('div#root')) {
 		if (extractOCLCID(url)) {
 			// we're on a v2 page
-			// we need to get the item type. this selector isn't stable, but the
-			// worst that can happen is an incorrect toolbar button icon.
-			
-			let displayItemType = displayTypeToZotero(
-				text(doc, '[data-testid="publisher-info"] strong')
-			);
-			
-			if (!displayItemType) {
-				Z.monitorDOMChanges(doc.querySelector('div#root'));
+			let co = getFirstContextObj(doc);
+			if (co) {
+				return generateItem(doc, co).itemType;
 			}
-			
-			return displayItemType;
+			else {
+				return displayTypeToZotero(text(doc, '[data-testid^="item-detail-record-type"]'))
+					|| "book";
+			}
 		}
 		else {
 			Z.monitorDOMChanges(doc.querySelector('div#root'));
@@ -360,6 +356,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://goshen.on.worldcat.org/v2/search/detail/62727772?queryString=Human-Computer%20Interaction&clusterResults=true&groupVariantRecords=false",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -390,6 +387,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://goshen.on.worldcat.org/v2/search/detail/57358293?queryString=harry%20potter&clusterResults=true&groupVariantRecords=false",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -432,6 +430,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://illinois.on.worldcat.org/v2/oclc/1233323459",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -517,6 +516,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://illinois.on.worldcat.org/v2/oclc/1080997809",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -551,6 +551,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://illinois.on.worldcat.org/v2/oclc/654235026",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
