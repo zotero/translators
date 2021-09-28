@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 02:26:57"
+	"lastUpdated": "2021-09-28 00:25:33"
 }
 
 /*
@@ -73,7 +73,7 @@ function getTextValue(doc, fields) {
 function initLang(doc) {
 	var lang = ZU.xpathText(doc, '//a[span[contains(@class,"uxf-globe")]]');
 	if (lang && lang.trim() != "English") {
-		lang = lang.trim();
+		lang = lang.trim().split(',')[0];
 
 		// if already initialized, don't need to do anything else
 		if (lang == language) return;
@@ -824,6 +824,7 @@ var fieldNames = {
 		"Publication year": 'Année de publication',
 		Year: 'Année',
 		Pages: 'Pages',
+		"First page": 'Première page',
 		School: 'École',
 		Degree: 'Diplôme',
 		Publisher: 'Éditeur',
