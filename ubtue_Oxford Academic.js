@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-29 14:36:50"
+	"lastUpdated": "2021-09-08 10:31:59"
 }
 
 /*
@@ -71,6 +71,9 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		// if the article are review article, then the full text extract is scraped from the HTML
 		let extractText = ZU.xpathText(doc, '//p[@class="chapter-para"]');
 		if (tagreview.match(/Reviews+|Book Reviews+/i) && extractText) i.abstractNote = extractText
+		// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
+		let openAccessTag = ZU.xpathText(doc, '//*[@class="icon-availability_open"]//@title'); Z.debug(openAccessTag)
+		if (openAccessTag && openAccessTag.match(/open\s+access/gi)) i.notes.push('LF:');
 		i.complete();
 	});
 	translator.translate();
@@ -111,6 +114,7 @@ var testCases = [
 				"date": "2020/04/01",
 				"DOI": "10.1093/jss/fgz049",
 				"ISSN": "0022-4480",
+				"abstractNote": "George Savran; Nevada Levi Delapp, Theophanic “Type-Scenes” in the Pentateuch: Visions of YHWH, Journal of Semitic Studies, Volume 65, Issue 1, 1 April 2020, Pa",
 				"issue": "1",
 				"journalAbbreviation": "J Semit Stud",
 				"language": "en",
@@ -191,6 +195,51 @@ var testCases = [
 		"type": "web",
 		"url": "https://academic.oup.com/litthe/issue/35/2",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://academic.oup.com/socrel/article/82/3/281/6177665",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Humanist Weddings in Poland: The Various Motivations of Couples",
+				"creators": [
+					{
+						"firstName": "Agata",
+						"lastName": "Rejowska",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/06/15",
+				"DOI": "10.1093/socrel/sraa060",
+				"ISSN": "1069-4404",
+				"abstractNote": "There has been a recent increase in the popularity of humanist (individualized and mostly secular) marriage ceremonies in Poland. The propagators of humanist weddings consider these rites of passage as an alternative to both civil ceremonies, which are seen as “bland” and “template,” and also to their religious, especially Catholic, counterparts. The conducted research reveals the various motivations of people who decide on a humanist marriage ceremony. In addition to “nonreligious” or “antireligious” motivation, the analysis also pinpoints “anti-institutional,” “individualistic,” and “practical” motives. The paper analyzes these various motivations. It additionally addresses the issue of the individualization of humanist weddings and the limits of this process. By drawing upon Neil Gross’s distinction between regulative and meaning-constitutive traditions, I argue that while humanist ceremonies are a sign of the undermining of the regulative traditions and their power, couples still deploy meaning-constitutive traditions to anchor their ceremonies.",
+				"issue": "3",
+				"journalAbbreviation": "Sociol Relig",
+				"language": "en",
+				"libraryCatalog": "academic.oup.com",
+				"pages": "281-304",
+				"publicationTitle": "Sociology of Religion",
+				"shortTitle": "Humanist Weddings in Poland",
+				"url": "https://academic.oup.com/socrel/article/82/3/281/6177665",
+				"volume": "82",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [
+					"LF:"
+				],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

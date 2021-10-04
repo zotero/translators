@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-09-06 14:44:03"
+	"lastUpdated": "2021-09-09 07:22:40"
 }
 
 function detectWeb(doc, url) {
@@ -197,19 +197,15 @@ function complementItem(doc, item) {
 
 		item.abstractNote = abstract.trim();
 	} else {
-		let absSections = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//p');
-		let sectionTitles = ZU.xpath(doc, '//*[(@id = "Abs2-content")]//*[contains(concat( " ", @class, " " ), concat( " ", "c-article__sub-heading", " " ))]');
-		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]//p');
+		let otherAbstracts = doc.querySelectorAll('#Abs2-section');
+		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]');
 		item.abstractNote = titleTextGerman ? titleTextGerman : '';
-		let secondAbstract = "";
-		for (let i = 0; i < sectionTitles.length; ++i) {
-			let titleText = sectionTitles[i].textContent.trim();
-			let sectionBody = ZU.xpathText(absSections[i], '//*[(@id = "Abs2-content")]//p').trim();
-			secondAbstract += titleText + ": " + sectionBody + "\n\n";
+		for (let part of otherAbstracts) {
+			var otherAbstract = part.innerText.replace(/\b\n{2}/g, ': ');
 		}
-		if (secondAbstract) {
+		if (otherAbstract) {
 			item.notes.push({
-				note: "abs:" + ZU.trimInternal(secondAbstract).replace(/^Abstract[:\s]*/, "").trim()
+				note: "abs:" + ZU.trimInternal(otherAbstract).replace(/^Abstract[:\s]*/, "")
 			});
 		}
 	}
@@ -561,7 +557,11 @@ var testCases = [
 						"tag": "Tidal loading efficiency"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "abs:Résumé Cet article considère les fluctuations piézométriques dues à la marée dans un aquifère côtier captif simple s’étendant à une certaine distance sous la mer. Son exutoire sous-marin est recouvert par un dépôt silteux de propriétés différentes de celles de l’aquifère. Récemment, Li et autres (2007) ont donné une représentation analytique d’un tel système tenant compte de l’effet d’emmagasinement élastique du réservoir sous le toit à l’exutoire. Cet article présente une solution analytique qui généralise le modèle en introduisant l’emmagasinement élastique à l’exutoire. Il démontre que si la couveture à l’exutoire est assez épaisse en direction, l’emmagasinement élastique a un effet amplificateur important sur la fluctuation piézométrique due à la marée. Ignorer cet emmagasinement élastique conduirait à des erreurs importantes sur le rapport entre la hauteur piézométrique réelle et la hauteur telle qu’elle ressort des caractéristiques de l’aquifère. Le modèle montre donc l’effet de l’emmagasinement élastique sur la fluctuation du niveau de l’aquifère. Il indique les seuils en dessous desquels l’effet de cet emmagasinement élastique sur la fluctuation de l’aquifère induite par la marée est négligeable. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -723,7 +723,7 @@ var testCases = [
 				"date": "2020-06-01",
 				"DOI": "10.1007/s00481-019-00556-z",
 				"ISSN": "1437-1618",
-				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden., Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.",
+				"abstractNote": "Der Begriff Leiden ist in der Medizin und in der Bioethik bisher kaum reflektiert und dahingehend in normativer Hinsicht wenig bestimmt. Dennoch bildet das Leiden an einer Unfruchtbarkeit den Ausgangspunkt für die medizintechnischen Interventionen der assistierten reproduktionsmedizinischen Behandlung. Dabei wird implizit angenommen, dass der unerfüllte Kinderwunsch ein Leiden ist. Ob der unerfüllte Kinderwunsch allerdings ein Leiden darstellt, ist bisher nicht eindeutig geklärt worden.Ziel dieses Beitrages ist es, die Annahme, dass es sich beim unerfüllten Kinderwunsch um ein Leiden handelt, zu überprüfen. Anhand der Darstellung einiger gängiger Leidenskonzeptionen werden Merkmale von Leiden herausgearbeitet, die als treffende Grundannahmen für eine Leidensbestimmung gelten können. Es wird sich zeigen, dass der unerfüllte Kinderwunsch, entsprechend der Leidenskonzeptionen, als ein Leiden angesehen werden sollte, und ihm somit ein normativer Stellenwert zukommt. In einem weiteren Schritt ist zu klären, ob das Leiden an einem unerfüllten Kinderwunsch als ein Rechtfertigungsgrund für reproduktionsmedizinische Interventionen gelten kann. Dafür wird zum einen der Stellenwert von Leiden, als eine anthropologische Grundbedingung, im Zusammenhang mit dem Leidenslinderungsauftrag der Medizin diskutiert. Zum anderen werden die Risiken der reproduktionsmedizinischen Therapien sowie deren Bedeutung als Gesundheitsressourcen erörtert. Dabei wird deutlich, dass Leiden an einem unerfüllten Kinderwunsch immer ein psychosomatischer Komplex ist. Nur unter Berücksichtigung der psychoexistenziellen Dimension des Leidens ergibt sich eine Legitimation für eine angemessene somatische Intervention.",
 				"issue": "2",
 				"journalAbbreviation": "Ethik Med",
 				"language": "de",
@@ -774,7 +774,7 @@ var testCases = [
 				"notes": [
 					"LF:",
 					{
-						"note": "abs:Definition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Arguments: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account. Conclusion: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified., Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed., We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account."
+						"note": "abs:Definition of the problem: In medicine and bioethics, the term “suffering” is not clearly defined from a normative point of view. Nevertheless, suffering due to infertility is the starting point for medical interventions in assisted reproductive medicine. This implies that the unfulfilled desire to have children is a form of suffering, but the validity of this statement has not yet been clarified. Arguments: Based on descriptions of some common concepts, certain characteristics of suffering are identified. We discuss the significance of suffering as an anthropological condition in connection with the mission of medicine to alleviate human suffering. Furthermore, the risks of reproductive treatment and their significance for health are addressed. Conclusion: We conclude that the unfulfilled desire to have children is a form of suffering, and therefore has a normative value. The legitimacy of appropriate somatic intervention can only be established by taking the psycho-existential dimension of suffering into account."
 					},
 					{
 						"note": "orcid:0000-0002-7194-6034 | Ibrahim Alkatout M.D., PhD, M.A., MaHM"
@@ -887,6 +887,101 @@ var testCases = [
 					},
 					{
 						"note": "orcid:0000-0001-5935-1938 | David Efird"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s00481-021-00606-5",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Intensivpflege in Zeiten der COVID-19 Pandemie: Zur Frage des Verhältnisses von Fürsorge und Selbstsorge",
+				"creators": [
+					{
+						"lastName": "Kuhn",
+						"firstName": "Eva",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Seidlein",
+						"firstName": "Anna-Henrikje",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-03-01",
+				"DOI": "10.1007/s00481-021-00606-5",
+				"ISSN": "1437-1618",
+				"abstractNote": "Die COVID-19 Pandemie stellt eine beträchtliche Herausforderung für die Kapazität und Funktionalität der Intensivversorgung dar. Dies betrifft nicht nur Ressourcen, sondern vor allem auch die körperlichen und psychischen Grenzen von Pflegefachpersonen. Der Frage, wie sich Fürsorge und Selbstsorge von Pflegefachpersonen auf Intensivstationen im Rahmen der COVID-19 Pandemie zueinander verhalten, wurde bislang im öffentlichen und wissenschaftlichen Diskurs keine Aufmerksamkeit geschenkt. Der vorliegende Beitrag reflektiert dieses Verhältnis mit Hilfe des Ethikkodex des International Council of Nurses, unter besonderer Berücksichtigung der Prinzipienethik und der Care-Ethik nach Joan Tronto und zeigt einen Korridor ethisch vertretbarer Pflege auf.Die Arbeit leistet damit einen wichtigen Beitrag zu einer differenzierten ethischen Betrachtung der Rechte und Verantwortlichkeiten von Pflegefachpersonen als moralischen Akteuren innerhalb des Pandemiegeschehens in Deutschland. Damit schafft er eine erste Voraussetzung für einen breiten gesellschaftlichen und politischen Diskurs, der über die Pandemie hinaus dringend notwendig ist, um die Situation der Pflegefachpersonen und der Gepflegten nachhaltig zu verbessern.",
+				"issue": "1",
+				"journalAbbreviation": "Ethik Med",
+				"language": "de",
+				"libraryCatalog": "Springer Link",
+				"pages": "51-70",
+				"publicationTitle": "Ethik in der Medizin",
+				"shortTitle": "Intensivpflege in Zeiten der COVID-19 Pandemie",
+				"url": "https://doi.org/10.1007/s00481-021-00606-5",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "COVID-19"
+					},
+					{
+						"tag": "Care"
+					},
+					{
+						"tag": "Care Ethik"
+					},
+					{
+						"tag": "Care ethics"
+					},
+					{
+						"tag": "Code of ethics"
+					},
+					{
+						"tag": "Ethikkodex"
+					},
+					{
+						"tag": "Fürsorge"
+					},
+					{
+						"tag": "Intensive care nursing"
+					},
+					{
+						"tag": "Intensivpflege"
+					},
+					{
+						"tag": "Pandemic"
+					},
+					{
+						"tag": "Pandemie"
+					},
+					{
+						"tag": "Selbstsorge"
+					},
+					{
+						"tag": "Self-care"
+					}
+				],
+				"notes": [
+					"LF:",
+					{
+						"note": "abs:Definition of the problem: The COVID-19 pandemic poses a considerable challenge to the capacity and functionality of intensive care. This concerns not only resources but, above all, the physical and psychological boundaries of nursing professionals. The question of how care for others and self-care of nurses in intensive care units are related to each other in the context of the COVID-19 pandemic has not been addressed in public and scientific discourse so far. Arguments: The present contribution reflects this relationship with reference to the Code of Ethics of the International Council of Nurses, particularly considering principlism and the Care Ethics according to Joan Tronto. As a result, it shows a corridor of ethically justifiable care with several borders, above all: (1) self-care must not be given up completely for the benefit of care for others, and (2) a categorical subordination of care for others to self-care is ethically not justifiable. Conclusion: The article makes an important contribution to a differentiated ethical consideration of the rights and responsibilities of intensive care nurses as moral actors within the pandemic in Germany. It, thus, provides a first starting point for a broad social and political discourse which is urgently needed not only during but also after the pandemic in order to improve the situation of intensive care nurses and those who are cared for."
+					},
+					{
+						"note": "orcid:0000-0002-8337-9639 | Eva Kuhn Mag.theol., B.A."
+					},
+					{
+						"note": "orcid:0000-0002-7690-567X | Anna-Henrikje Seidlein M.Sc., B.A."
 					}
 				],
 				"seeAlso": []
