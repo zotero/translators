@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-10 02:09:56"
+	"lastUpdated": "2021-10-10 02:27:10"
 }
 
 /*
@@ -360,7 +360,7 @@ function scrape(doc, url, type) {
 				item.thesisType = value;
 				break;
 			case 'Publisher':
-			case 'Printer/Publisher':	
+			case 'Printer/Publisher':
 				item.publisher = value;
 				break;
 
@@ -698,7 +698,7 @@ var fieldNames = {
 		School: 'Sekolah',
 		Degree: 'Gelar',
 		Publisher: 'Penerbit',
-		"Printer/Publisher": 'Pencetak/Penerbit', 
+		"Printer/Publisher": 'Pencetak/Penerbit',
 		"Place of publication": 'Tempat publikasi',
 		"School location": 'Lokasi sekolah',
 		"Country of publication": 'Negara publikasi',
