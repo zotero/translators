@@ -470,7 +470,7 @@ function scrape(doc, url, type) {
 
 	var date = ZU.xpathText(byline, './text()');
 	if (date) date = date.match(/]\s+(.+?):/);
-	// Convert date to ISO to make sure we don't random strings
+	// Convert date to ISO to make sure we don't save random strings
 	if (date) date = ZU.strToISO(date[1]);
 	// add date if we only have a year and date is longer in the byline
 	if (date
