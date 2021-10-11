@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsib",
-	"lastUpdated": "2021-08-02 10:36:24"
+	"lastUpdated": "2021-10-11 01:07:25"
 }
 
 /*
@@ -232,6 +232,11 @@ function downloadFunction(text, url, prefs) {
 
 				ZU.processDocuments(pdf,
 					function (pdfDoc) {
+						if (!isCorrectViewerPage(pdfDoc)) {
+							Z.debug('PDF viewer page doesn\'t appear to be serving the correct PDF. Skipping PDF attachment.');
+							return;
+						}
+						
 						var realpdf = findPdfUrl(pdfDoc);
 						if (realpdf) {
 							item.attachments.push({
@@ -359,6 +364,21 @@ function urlToArgs(url) {
 	}
 
 	return args;
+}
+
+// given a PDF viewer document, returns whether it appears to be displaying
+// the correct PDF corresponding to the requested item. EBSCO sometimes returns
+// the PDF for a previously viewed item when the current item doesn't have an
+// associated PDF, but it won't serve metadata on the PDF viewer page in these
+// cases.
+function isCorrectViewerPage(pdfDoc) {
+	let citationAmplitude = attr(pdfDoc, 'a[name="citation"][data-amplitude]', 'data-amplitude');
+	if (!citationAmplitude || !citationAmplitude.startsWith('{')) {
+		Z.debug('PDF viewer page structure has changed - assuming PDF is correct');
+		return true;
+	}
+	
+	return !!JSON.parse(citationAmplitude).result_index;
 }
 
 // given a pdfviewer page, extracts the PDF url
