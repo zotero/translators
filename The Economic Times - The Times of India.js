@@ -132,11 +132,13 @@ function scrape(doc, url) {
 	
 	newItem.attachments = ({
 		url: url,
-		title: "The Economic Times Snapshot",
+		title: "Snapshot",
 		mimeType: "text/html"
 	});
 	newItem.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
