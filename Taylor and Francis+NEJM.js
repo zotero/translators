@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-08 13:53:10"
+	"lastUpdated": "2021-10-12 17:18:10"
 }
 
 /*
@@ -191,7 +191,7 @@ function finalizeItem(item, doc, doi, baseUrl) {
 		if (authorInfo && orcidHref) {
 			let author = authorInfo.childNodes[0].textContent;
 			let orcid = orcidHref.textContent.replace(/.*(\d{4}-\d{4}-\d{4}-\d+x?)$/i, '$1');
-			item.notes.push({note: "orcid:" + orcid + '|' + author});
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author});
 		}
 	}
 	//deduplicate
