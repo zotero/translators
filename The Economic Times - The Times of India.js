@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-11 16:09:34"
+	"lastUpdated": "2021-10-12 19:47:11"
 }
 
 /*
@@ -103,19 +103,25 @@ function scrape(doc, url) {
 	}
 
 	// get headline
-	var title = ZU.xpathText(doc, '//article/h1');
-	if (!title) title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
+	var title = text(doc, 'h1');
+	if (!title) title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content').replace(/\|.+/, "").trim();
 	newItem.title = title;
 
 	// get abstract
 	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
 	
 	// get date
-	var date = text(doc, '.bylineBox time');
+	var date = text(doc, '.bylineBox time, .byline-content .time_cptn');
 	if (date) {
 		newItem.date = ZU.strToISO(date);
 	}
-
+	else {
+		// ToI
+		date = text(doc, 'div.byline');
+		if (date) {
+			newItem.date = ZU.strToISO(date);
+		}
+	}
 	// get author or organization
 	var authors = ZU.xpath(doc, '//a[@rel="author"]');
 	for (let author of authors) {
@@ -156,7 +162,7 @@ var testCases = [
 				"url": "https://economictimes.indiatimes.com/news/economy/policy/cabinet-may-tomorrow-consider-gst-supplementary-legislations/articleshow/57716927.cms",
 				"attachments": {
 					"url": "https://economictimes.indiatimes.com/news/economy/policy/cabinet-may-tomorrow-consider-gst-supplementary-legislations/articleshow/57716927.cms",
-					"title": "The Economic Times Snapshot",
+					"title": "Snapshot",
 					"mimeType": "text/html"
 				},
 				"tags": [],
@@ -188,7 +194,7 @@ var testCases = [
 				"url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/vat-in-uae-will-not-affect-trade-dubai-chamber-chairman/articleshow/57671214.cms",
 				"attachments": {
 					"url": "https://economictimes.indiatimes.com/news/economy/foreign-trade/vat-in-uae-will-not-affect-trade-dubai-chamber-chairman/articleshow/57671214.cms",
-					"title": "The Economic Times Snapshot",
+					"title": "Snapshot",
 					"mimeType": "text/html"
 				},
 				"tags": [],
@@ -200,27 +206,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://economictimes.indiatimes.com/topic/nuclear",
-		"items": [
-			{
-				"itemType": "newspaperArticle",
-				"title": "nuclear: Latest News & Videos, Photos about nuclear  | The Economic Times - Page 1",
-				"creators": [],
-				"ISSN": "0013-0389",
-				"abstractNote": "nuclear Latest Breaking News, Pictures, Videos, and Special Reports from The Economic Times. nuclear  Blogs, Comments and Archive News on Economictimes.com",
-				"libraryCatalog": "The Economic Times - The Times of India",
-				"publicationTitle": "The Economic Times",
-				"shortTitle": "nuclear",
-				"url": "https://economictimes.indiatimes.com/topic/nuclear",
-				"attachments": {
-					"url": "https://economictimes.indiatimes.com/topic/nuclear",
-					"title": "The Economic Times Snapshot",
-					"mimeType": "text/html"
-				},
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -245,7 +231,7 @@ var testCases = [
 				"url": "https://economictimes.indiatimes.com/news/how-to/educational-services-tax-on-coaching-centres-in-india/articleshow/86886821.cms",
 				"attachments": {
 					"url": "https://economictimes.indiatimes.com/news/how-to/educational-services-tax-on-coaching-centres-in-india/articleshow/86886821.cms",
-					"title": "The Economic Times Snapshot",
+					"title": "Snapshot",
 					"mimeType": "text/html"
 				},
 				"tags": [],
@@ -260,17 +246,18 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "Coronavirus China: Novel coronavirus cannot pass from mother to child late in pregnancy | World News - Times of India",
+				"title": "Novel coronavirus cannot pass from mother to child late in pregnancy: Lancet Study",
 				"creators": [],
+				"date": "2020-02-13",
 				"ISSN": "0971-8257",
 				"abstractNote": "China News: As per a study published in The Lancet journal, the 2019 novel coronavirus disease (COVID-19) may not pass to the child in the womb during late pregna",
 				"libraryCatalog": "The Economic Times - The Times of India",
 				"publicationTitle": "The Times of India",
-				"shortTitle": "Coronavirus China",
+				"shortTitle": "Novel coronavirus cannot pass from mother to child late in pregnancy",
 				"url": "https://timesofindia.indiatimes.com/world/china/novel-coronavirus-cannot-pass-from-mother-to-child-late-in-pregnancy-lancet-study/articleshow/74112066.cms",
 				"attachments": {
 					"url": "https://timesofindia.indiatimes.com/world/china/novel-coronavirus-cannot-pass-from-mother-to-child-late-in-pregnancy-lancet-study/articleshow/74112066.cms",
-					"title": "The Economic Times Snapshot",
+					"title": "Snapshot",
 					"mimeType": "text/html"
 				},
 				"tags": [],
@@ -285,7 +272,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "newspaperArticle",
-				"title": "An ode to a song! Here’s how you can fill the world with a song this World Music Day - Times of India",
+				"title": "An ode to a song! Here’s how you can fill the world with a song this World Music Day",
 				"creators": [
 					{
 						"firstName": "Anirban",
@@ -293,6 +280,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2021-06-24",
 				"ISSN": "0971-8257",
 				"abstractNote": "Spotlight News: Smule is a social karaoke app that is perfect if you like singing. The app allows you to sing & collaborate with people. The ethos of the platform is",
 				"libraryCatalog": "The Economic Times - The Times of India",
@@ -300,7 +288,7 @@ var testCases = [
 				"url": "https://timesofindia.indiatimes.com/spotlight/an-ode-to-a-song-heres-how-you-can-fill-the-world-with-a-song-this-world-music-day/articleshow/83714933.cms",
 				"attachments": {
 					"url": "https://timesofindia.indiatimes.com/spotlight/an-ode-to-a-song-heres-how-you-can-fill-the-world-with-a-song-this-world-music-day/articleshow/83714933.cms",
-					"title": "The Economic Times Snapshot",
+					"title": "Snapshot",
 					"mimeType": "text/html"
 				},
 				"tags": [],
