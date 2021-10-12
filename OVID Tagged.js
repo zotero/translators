@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-10-08 04:38:40"
+	"lastUpdated": "2021-10-12 19:49:27"
 }
 
 /*
@@ -121,7 +121,7 @@ function processTag(item, tag, value) {
 			var type = "editor";
 		}
 		value = value.replace(/[0-9\,+\*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "").replace(
-			/ (?:MD|[BM]Sc|[BM]A|MPH|MB)(\,\s*)?$/gi, "");
+			/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(\,\s*)?)+$/gi, "");
 		//Z.debug(value)
 		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
 	} else if (tag == "UI") {
@@ -211,8 +211,10 @@ function finalizeItem(item) {
 	}
 	delete item.creatorsBackup;
 	if (!item.itemType) item.itemType = inputTypeMap["Journal Article"];
-	item.title = item.title.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "");
-	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+/;
+	item.title = item.title
+		.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "")
+		.replace(/^\s*"(.+)"\s*$/, '$1');
+	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+\b/;
 	var value = item.citation
 	if (!value && item.itemType == "bookSection") value = item.bookTitle
 	if (item.itemType == "journalArticle" && value) {
@@ -236,8 +238,8 @@ function finalizeItem(item) {
 		}
 		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
 		if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
-		if (value.match(/^\s*[J|j]ournal[-\s\w&]+/)) {
-			item.publicationTitle = value.match(/^\s*[J|j]ournal[-\s\w&]+/)[0];
+		if (value.match(/^\s*[J|j]ournal[-\s\w&:]+/)) {
+			item.publicationTitle = value.match(/^\s*[J|j]ournal[-\s\w&:]+/)[0];
 		} else {
 			item.publicationTitle = Zotero.Utilities.trimInternal(value.split(/(\.|;|(,\s*vol\.))/)[0]);
 		}
@@ -1065,10 +1067,10 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "\"Injury, Illness, and Work Restriction in Merchant Seafarers\"",
+				"title": "Injury, Illness, and Work Restriction in Merchant Seafarers",
 				"creators": [
 					{
-						"firstName": "Rafael Y. MD",
+						"firstName": "Rafael Y.",
 						"lastName": "Lefkowitz",
 						"creatorType": "author"
 					},
@@ -1078,7 +1080,7 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Carrie A. MD",
+						"firstName": "Carrie A.",
 						"lastName": "Redlich",
 						"creatorType": "author"
 					}
@@ -1112,6 +1114,26 @@ var testCases = [
 						"tag": "telemedicine"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "\n<6. >\nVN  - Ovid Technologies\nTI  - Test\nSO  - A Nonexistent Journal of Marriage and Family Therapy: With a Subtitle June 2019;1(6):123-456\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Test",
+				"creators": [],
+				"date": "2019 June",
+				"issue": "6",
+				"pages": "123-456",
+				"publicationTitle": "A Nonexistent Journal of Marriage and Family Therapy: With a Subtitle",
+				"volume": "1",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
