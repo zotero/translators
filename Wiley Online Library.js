@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-22 19:01:57"
+	"lastUpdated": "2021-10-12 18:02:11"
 }
 
 /*
@@ -170,7 +170,7 @@ function scrapeEM(doc, url) {
 
 		// set correct print publication date
 		if (date) item.date = date;
-
+		
 		// remove pdf attachments
 		for (let i = 0, n = item.attachments.length; i < n; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
@@ -332,6 +332,11 @@ function scrapeBibTeX(doc, url) {
 			// rights
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
+			
+			// try to detect invalid data in pages (e.g. "inside_front_cover")
+			if (item.pages && /[a-zA-Z]_[a-zA-Z]/.test(item.pages)) {
+				delete item.pages;
+			}
 
 			// attachments
 			item.attachments = [{
@@ -1265,6 +1270,47 @@ var testCases = [
 						"note": "<p>e2020JC016068 10.1029/2020JC016068</p>"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/full/10.1002/hast.1072",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Precision (Mis)Education",
+				"creators": [
+					{
+						"firstName": "Lucas J.",
+						"lastName": "Matthews",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1002/hast.1072",
+				"ISSN": "1552-146X",
+				"abstractNote": "In August of 2018, the results of the largest genomic investigation in human history were published. Scanning the DNA of over one million participants, a genome-wide association study was conducted to identify genetic variants associated with the number of years of education a person has completed. This measure, called “educational attainment,” is often treated as a proxy for intelligence and cognitive ability. The study raises a host of hard philosophical questions about study design and strength of evidence. It also sets the basis for something far more controversial. Using a new genomic method that generates “polygenic scores,” researchers are now able to use the results of the study to predict a person's educational potential from a blood or saliva sample. Going a step further, some researchers have begun to promote “precision education,” which would tailor students’ school plans to their genetic profiles. The idea of precision education provokes concerns about stigma and self-fulfilling prophecies.",
+				"issue": "1",
+				"itemID": "doi:10.1002/hast.1072",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"publicationTitle": "Hastings Center Report",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/hast.1072",
+				"volume": "50",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
