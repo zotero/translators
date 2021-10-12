@@ -118,3 +118,4 @@ bbf1617b-d836-4665-9aae-45f223264460 # A Contra Corriente is better handled by P
 80bc4fd3-747c-4dc2-86e9-da7b251e1407 # jmlr -> Journal of Machine Learning Research; duplicated by mistake
 c2f5f114-c255-4cf7-a7b8-d5c95e82291f # Hoovers.com is defunct
 097c963e-3866-4c6f-a6b4-f5e9d0d15530 # DTU Orbit now runs Elsevier Pure
+ba10b5bc-562f-11e1-b20d-a3084924019b # Nuclear Receptor Signaling no longer exists
