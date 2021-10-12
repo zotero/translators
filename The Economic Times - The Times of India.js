@@ -136,11 +136,10 @@ function scrape(doc, url) {
 	}
 
 	
-	newItem.attachments = ({
-		url: url,
+	newItem.attachments = [{
 		title: "Snapshot",
-		mimeType: "text/html"
-	});
+		document: doc
+	}];
 	newItem.complete();
 }
 
