@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-10-12 19:49:27"
+	"lastUpdated": "2021-10-12 19:51:31"
 }
 
 /*
@@ -16,7 +16,7 @@
 
 	OVID Tagged import translator
 	(Based on hhttp://ospguides.ovid.com/OSPguides/medline.htm#PT and lots of testing
-	Created as part of the 2014 Zotero Trainer Workshop in Syracus 
+	Created as part of the 2014 Zotero Trainer Workshop in Syracus
 	and with contributions from participants.)
 	Copyright © 2014 Sebastian Karcher
 
@@ -44,16 +44,16 @@ function detectImport() {
 	while ((line = Zotero.read()) !== false) {
 		line = line.replace(/^\s+/, "");
 		if (line != "") {
-			//All Ovid databases have this at the top:
+			// All Ovid databases have this at the top:
 			if (line.match(/^VN\s{1,2}- Ovid Technologies/)) {
 				return true;
-			} else {
-				if (i++ > 3) {
-					return false;
-				}
+			}
+			else if (i++ > 3) {
+				return false;
 			}
 		}
 	}
+	return false;
 }
 
 var fieldMap = {
@@ -81,72 +81,83 @@ var fieldMap = {
 
 // Only the most basic types. Mostly guessing from existing Ovid records here
 var inputTypeMap = {
-	"Book": "book",
+	Book: "book",
 	"Book Chapter": "bookSection",
 	"Book chapter": "bookSection",
-	"Chapter": "bookSection",
-	"Dissertation": "thesis",
+	Chapter: "bookSection",
+	Dissertation: "thesis",
 	"Dissertation Abstract": "thesis",
 	"Journal Article": "journalArticle",
 	"Newspaper Article": "newspaperArticle",
 	"Video-Audio Media": "videoRecording",
 	"Technical Report": "report",
 	"Legal Case": "case",
-	"Legislation": "statute",
-	"Patent": "patent"
+	Legislation: "statute",
+	Patent: "patent"
 };
-
-var isEndNote = false;
 
 function processTag(item, tag, value) {
 	value = Zotero.Utilities.trim(value);
 	if (fieldMap[tag]) {
 		item[fieldMap[tag]] = value;
-	} else if (tag == "PT" || tag == "DT") {
+	}
+	else if (tag == "PT" || tag == "DT") {
 		if (inputTypeMap[value]) { // first check inputTypeMap
-			item.itemType = inputTypeMap[value]
+			item.itemType = inputTypeMap[value];
 		}
-	//I don't think FED or ED exist, but let's keep them to be safe
-	} else if (tag == "FA" || tag == "FED") {
+	// I don't think FED or ED exist, but let's keep them to be safe
+	}
+	else if (tag == "FA" || tag == "FED") {
+		let type;
 		if (tag == "FA") {
-			var type = "author";
-		} else if (tag == "FED") {
-			var type = "editor";
+			type = "author";
 		}
-		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "AU" || tag == "ED") {
+		else if (tag == "FED") {
+			type = "editor";
+		}
+		item.creators.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "AU" || tag == "ED") {
+		let type;
 		if (tag == "AU") {
-			var type = "author";
-		} else if (tag == "ED") {
-			var type = "editor";
+			type = "author";
 		}
-		value = value.replace(/[0-9\,+\*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "").replace(
-			/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(\,\s*)?)+$/gi, "");
-		//Z.debug(value)
-		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.indexOf(",") != -1));
-	} else if (tag == "UI") {
+		else if (tag == "ED") {
+			type = "editor";
+		}
+		value = value.replace(/[0-9,+*\s]+$/, "").replace(/ Ph\.?D\.?.*/, "").replace(/\[.+/, "")
+			.replace(/(\b(?:MD|[BM]Sc|[BM]A|MPH|MB)(,\s*)?)+$/gi, "");
+		// Z.debug(value)
+		item.creatorsBackup.push(Zotero.Utilities.cleanAuthor(value, type, value.includes(",")));
+	}
+	else if (tag == "UI") {
 		item.PMID = "PMID: " + value;
-	} else if (tag == "DI" || tag == "DO") {
-		if (value.indexOf("10.") != -1) item.DOI = value
-	} else if (tag == "YR") {
+	}
+	else if (tag == "DI" || tag == "DO") {
+		if (value.includes("10.")) item.DOI = value;
+	}
+	else if (tag == "YR") {
 		item.date = value;
-	} else if (tag == "IN") {
+	}
+	else if (tag == "IN") {
 		item.institution = value;
-	}  else if (tag == "SO") {
+	}
+	else if (tag == "SO") {
 		item.citation = value;
-	}  else if (tag == "PU") {
+	}
+	else if (tag == "PU") {
 		item.publishing = value;
-	}  else if (tag == "KW") {
-		tags = value.split(/;\s*/);
-		for (var i in tags) {
-			item.tags.push(tags[i]);
+	}
+	else if (tag == "KW") {
+		let tags = value.split(/;\s*/);
+		for (let tag of tags) {
+			item.tags.push({ tag });
 		}
 	}
 }
 
 function doImport() {
 	var line = true;
-	var tag = data = false;
 	var potentialItemID, checkID;
 	do { // first valid line is type
 		Zotero.debug("ignoring " + line);
@@ -190,18 +201,17 @@ function doImport() {
 			}
 			
 			data = line.substr(line.indexOf("-") + 1);
-		} else {
+		}
+		else if (tag) {
 			// otherwise, assume this is data from the previous line continued
-			if (tag) {
-				data += " " + line;
-			}
+			data += " " + line;
 		}
 	}
 
 	if (tag) { // save any unprocessed tags
 		processTag(item, tag, data);
 		// and finalize with some post-processing
-		finalizeItem(item)
+		finalizeItem(item);
 	}
 }
 
@@ -215,16 +225,16 @@ function finalizeItem(item) {
 		.replace(/(\.\s*)?(\[(Article|Report|Miscellaneous|References)\])?([.\s]*)?$/, "")
 		.replace(/^\s*"(.+)"\s*$/, '$1');
 	var monthRegex = /(?:[-/]?(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?))+\b/;
-	var value = item.citation
-	if (!value && item.itemType == "bookSection") value = item.bookTitle
+	var value = item.citation;
+	if (!value && item.itemType == "bookSection") value = item.bookTitle;
 	if (item.itemType == "journalArticle" && value) {
 		if (value.match(/\d{4}/)) {
 			if (!item.date) item.date = value.match(/\d{4}/)[0];
 		}
 		var month = monthRegex.exec(value);
 		if (month) item.date = item.date += " " + (month)[0];
-		if (value.match(/(\d+)\((\d+(?:\-\d+)?)\)/)) {
-			var voliss = value.match(/(\d+)\((\d+(?:\-\d+)?)\)/);
+		if (value.match(/(\d+)\((\d+(?:-\d+)?)\)/)) {
+			var voliss = value.match(/(\d+)\((\d+(?:-\d+)?)\)/);
 
 			item.volume = voliss[1];
 			item.issue = voliss[2];
@@ -236,42 +246,43 @@ function finalizeItem(item) {
 		if (value.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)) {
 			item.issue = value.match(/vol\.\s*\d+\s*,\s*no\.\s*(\d+)/)[1];
 		}
-		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
-		if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
+		if (value.match(/:\s*\d+-\d+/)) item.pages = value.match(/:\s*(\d+-\d+)/)[1];
+		if (value.match(/pp\.\s*(\d+-\d+)/)) item.pages = value.match(/pp\.\s*(\d+-\d+)/)[1];
 		if (value.match(/^\s*[J|j]ournal[-\s\w&:]+/)) {
 			item.publicationTitle = value.match(/^\s*[J|j]ournal[-\s\w&:]+/)[0];
-		} else {
+		}
+		else {
 			item.publicationTitle = Zotero.Utilities.trimInternal(value.split(/(\.|;|(,\s*vol\.))/)[0]);
 		}
 		item.publicationTitle = item.publicationTitle.split(monthRegex)[0];
 	}
 	if (item.itemType == "bookSection" && value) {
-		if (!item.pages){
-			if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
-			if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
+		if (!item.pages) {
+			if (value.match(/:\s*\d+-\d+/)) item.pages = value.match(/:\s*(\d+-\d+)/)[1];
+			if (value.match(/pp\.\s*(\d+-\d+)/)) item.pages = value.match(/pp\.\s*(\d+-\d+)/)[1];
 		}
-		//editors are only listed as part of the citation...
-		if (value.match(/(.+?)\[Ed(itor|\.|\])/)) {
+		// editors are only listed as part of the citation...
+		if (/(.+?)\[Ed(itor|\.|\])/.test(value)) {
 			var editors = value.match(/.+?\[Ed(itor|\.|\])/g);
-			for (var i in editors) {
-				editor = editors[i].replace(/\[Ed(itor|\.|\]).*$/, "").replace(/.*?\][,\s]*/, "");
-				item.creators.push(ZU.cleanAuthor(editor, "editor", true))
+			for (let editor of editors) {
+				editor = editor.replace(/\[Ed(itor|\.|\]).*$/, "").replace(/.*?\][,\s]*/, "");
+				item.creators.push(ZU.cleanAuthor(editor, "editor", true));
 			}
 		}
-		if (value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*([^\.]+)/)) {
-			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)?\][\.\s]*(?:\(\d{4}\)\.)?([^\.]+)/)[1]
-		};
+		if (value.match(/.+\[Ed(?:\.|itor)?\][.\s]*([^.]+)/)) {
+			item.bookTitle = value.match(/.+\[Ed(?:\.|itor)?\][.\s]*(?:\(\d{4}\)\.)?([^.]+)/)[1];
+		}
 	}
-	//fix all caps authors
+	// fix all caps authors
 	for (var i in item.creators) {
 		if (item.creators[i].lastName && item.creators[i].lastName == item.creators[i].lastName.toUpperCase()) {
 			item.creators[i].lastName = ZU.capitalizeTitle(item.creators[i].lastName.toLowerCase(), true);
 		}
 	}
 	if (item.pages) {
-		//Z.debug(item.pages)
-		//where page ranges are given in an abbreviated format, convert to full
-		//taken verbatim from NCBI Pubmed translator
+		// Z.debug(item.pages)
+		// where page ranges are given in an abbreviated format, convert to full
+		// taken verbatim from NCBI Pubmed translator
 		var pageRangeRE = /(\d+)-(\d+)/g;
 		pageRangeRE.lastIndex = 0;
 		var range = pageRangeRE.exec(item.pages);
@@ -282,26 +293,26 @@ function finalizeItem(item) {
 			if (diff > 0) {
 				pageRangeEnd = pageRangeStart.substring(0, diff) + pageRangeEnd;
 				var newRange = pageRangeStart + "-" + pageRangeEnd;
-				var fullPageRange = item.pages.substring(0, range.index) //everything before current range
-				+ newRange //insert the new range
-				+ item.pages.substring(range.index + range[0].length); //everything after the old range
-				//adjust RE index
+				var fullPageRange = item.pages.substring(0, range.index) // everything before current range
+				+ newRange // insert the new range
+				+ item.pages.substring(range.index + range[0].length); // everything after the old range
+				// adjust RE index
 				pageRangeRE.lastIndex += newRange.length - range[0].length;
 				item.pages = fullPageRange;
 			}
 		}
 	}
-	if ((item.itemType == "book" ||item.itemType == "bookSection")&& !item.publisher){
+	if ((item.itemType == "book" || item.itemType == "bookSection") && !item.publisher) {
 		item.publisher = item.publishing;
 	}
 	
 	if (item.publisher && !item.pace) {
 		if (item.publisher.search(/,./) != -1) {
 			item.place = item.publisher.match(/,(.+?)$/)[1];
-			item.publisher = item.publisher.replace(/,.+?$/, "")
+			item.publisher = item.publisher.replace(/,.+?$/, "");
 		}
 	}
-	if (item.itemType == "thesis" && item.institution){
+	if (item.itemType == "thesis" && item.institution) {
 		item.publisher = item.institution.replace(/^.+:\s*/, "");
 		delete item.institution;
 	}
@@ -311,17 +322,19 @@ function finalizeItem(item) {
 	if (item.callNumber) {
 		item.callNumber = item.callNumber.replace(/[.\s]+$/, '');
 	}
-	//strip extraneous label at the end of title (reported for Psycinfo)
-	if (item.libraryCatalog && item.libraryCatalog.indexOf("MEDLINE") != -1 && item.PMID) {
+	// strip extraneous label at the end of title (reported for Psycinfo)
+	if (item.libraryCatalog && item.libraryCatalog.includes("MEDLINE") && item.PMID) {
 		item.extra = item.PMID;
 		delete item.PMID;
 	}
 
-	delete item.publishing
+	delete item.publishing;
 	delete item.citation;
 	delete item.itemID;
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "import",
