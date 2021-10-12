@@ -275,7 +275,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Gabriel García Márquez",
+				"title": "Gabriel García Márquez: A Critical Companion",
 				"creators": [
 					{
 						"firstName": "Rubén",
@@ -283,13 +283,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Rubén Pelayo",
-						"lastName": "Coutiño",
+						"firstName": "Rube ́n",
+						"lastName": "Pelayo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Rube ́n",
-						"lastName": "Pelayo",
+						"firstName": "Rubén Pelayo",
+						"lastName": "Coutiño",
 						"creatorType": "author"
 					}
 				],
@@ -301,6 +301,7 @@ var testCases = [
 				"libraryCatalog": "Google Books",
 				"numPages": "208",
 				"publisher": "Greenwood Publishing Group",
+				"shortTitle": "Gabriel García Márquez",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -309,9 +310,6 @@ var testCases = [
 					}
 				],
 				"tags": [
-					{
-						"tag": "Literary Criticism / Caribbean & Latin American"
-					},
 					{
 						"tag": "Literary Criticism / European / Spanish & Portuguese"
 					}
@@ -464,7 +462,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Google Books",
 				"numPages": "176",
-				"publisher": "Perfection Learning Corporation",
+				"publisher": "Turtleback",
 				"attachments": [
 					{
 						"title": "Google Books Link",
