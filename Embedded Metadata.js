@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-12 19:19:00"
+	"lastUpdated": "2021-10-13 01:54:53"
 }
 
 /*
@@ -412,7 +412,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 	}
 	//save rdfCreators for later
 	var rdfCreators = newItem.creators;
-	newItem.creators = processHighwireCreators(authorNodes, "author").concat(processHighwireCreators(editorNodes, "editor"));
+	newItem.creators = processHighwireCreators(authorNodes, "author", doc).concat(processHighwireCreators(editorNodes, "editor", doc));
 
 
 	if (!newItem.creators.length) {
@@ -556,7 +556,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 
 // process highwire creators; currently only editor and author, but easy to exten
-function processHighwireCreators(creatorNodes, role) {
+function processHighwireCreators(creatorNodes, role, doc) {
 	let itemCreators = [];
 	for(let i=0, n=creatorNodes.length; i<n; i++) {
 		let creators = creatorNodes[i].nodeValue.split(/\s*;\s*/);
@@ -566,7 +566,7 @@ function processHighwireCreators(creatorNodes, role) {
 			 either side of the comma when splitting by comma, we split by comma. */
 			var authorsByComma = creators[0].split(/\s*,\s*/);
 			
-    
+	
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, there are at least two
 			words on either side of a comma, and it doesn't appear to be a
@@ -984,6 +984,7 @@ var exports = {
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
 };
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
