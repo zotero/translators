@@ -410,7 +410,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 	if (editorNodes.length == 0) {
 		editorNodes = getContent(doc, 'citation_editors');
 	}
-	//save rdfCreators for later
+	// save rdfCreators for later
 	var rdfCreators = newItem.creators;
 	newItem.creators = processHighwireCreators(authorNodes, "author", doc).concat(processHighwireCreators(editorNodes, "editor", doc));
 
@@ -438,7 +438,7 @@ function addHighwireMetadata(doc, newItem, hwType) {
 		}
 
 		/* This may introduce duplicates
-		//if there are leftover creators from RDF, we should use them
+		// if there are leftover creators from RDF, we should use them
 		if(rdfCreators.length) {
 			for(var i=0, n=rdfCreators.length; i<n; i++) {
 				newItem.creators.push(rdfCreators[i]);
@@ -582,12 +582,12 @@ function processHighwireCreators(creatorNodes, role, doc) {
 		for (let creator of creators) {
 			creator = creator.trim();
 
-			//skip empty authors. Try to match something other than punctuation
+			// skip empty authors. Try to match something other than punctuation
 			if(!creator || !creator.match(/[^\s,-.;]/)) continue;
 
 			creator = ZU.cleanAuthor(creator, role, creator.includes(","));
 			if(creator.firstName) {
-				//fix case for personal names
+				// fix case for personal names
 				creator.firstName = fixCase(creator.firstName);
 				creator.lastName = fixCase(creator.lastName);
 			}
@@ -981,8 +981,6 @@ var exports = {
 	splitTags: true,
 	fixSchemaURI: setPrefixRemap
 };
-
-
 
 /** BEGIN TEST CASES **/
 var testCases = [
