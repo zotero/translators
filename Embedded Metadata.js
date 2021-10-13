@@ -558,12 +558,9 @@ function addHighwireMetadata(doc, newItem, hwType) {
 // process highwire creators; currently only editor and author, but easy to exten
 function processHighwireCreators(creatorNodes, role, doc) {
 	let itemCreators = [];
-	for(let i=0, n=creatorNodes.length; i<n; i++) {
-		let creators = creatorNodes[i].nodeValue.split(/\s*;\s*/);
+	for (let creatorNode of creatorNodes) {
+		let creators = creatorNode.nodeValue.split(/\s*;\s*/);
 		if (creators.length == 1 && creatorNodes.length == 1) {
-			/* If there is only one author node and 
-			 we get nothing when splitting by semicolon, and at least two words on
-			 either side of the comma when splitting by comma, we split by comma. */
 			var authorsByComma = creators[0].split(/\s*,\s*/);
 			
 	
@@ -582,13 +579,13 @@ function processHighwireCreators(creatorNodes, role, doc) {
 				&& !twoWordName) authors = authorsByComma;
 		}
 		
-		for(let j=0, m=creators.length; j<m; j++) {
-			let creator = creators[j].trim();
+		for (let creator of creators) {
+			creator = creator.trim();
 
 			//skip empty authors. Try to match something other than punctuation
 			if(!creator || !creator.match(/[^\s,-.;]/)) continue;
 
-			creator = ZU.cleanAuthor(creator, role, creator.indexOf(",") !== -1);
+			creator = ZU.cleanAuthor(creator, role, creator.includes(","));
 			if(creator.firstName) {
 				//fix case for personal names
 				creator.firstName = fixCase(creator.firstName);
@@ -597,7 +594,7 @@ function processHighwireCreators(creatorNodes, role, doc) {
 			itemCreators.push(creator);
 		}
 	}
-	return (itemCreators);
+	return itemCreators;
 }
 
 function addOtherMetadata(doc, newItem) {
