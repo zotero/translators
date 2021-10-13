@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-13 01:54:53"
+	"lastUpdated": "2021-10-13 02:07:31"
 }
 
 /*
@@ -986,6 +986,7 @@ var exports = {
 };
 
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -1284,7 +1285,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
+		"url": "https://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -1300,7 +1301,7 @@ var testCases = [
 				"abstractNote": "Northwestern University recently condemned the American Studies Association boycott of Israel. Unlike some other schools that quit their institutional membership in the ASA over the boycott, Northwestern has not. Many of my Northwestern colleagues were about to start urging a similar withdrawal. Then we learned from our administration that despite being listed as in institutional …",
 				"blogTitle": "The Volokh Conspiracy",
 				"language": "en-US",
-				"url": "http://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
+				"url": "https://volokh.com/2013/12/22/northwestern-cant-quit-asa-boycott-member/",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -1355,14 +1356,14 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://olh.openlibhums.org/article/10.16995/olh.46/",
+		"url": "https://olh.openlibhums.org/article/id/4400/",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Opening the Open Library of Humanities",
 				"creators": [
 					{
-						"firstName": "Martin",
+						"firstName": "Martin Paul",
 						"lastName": "Eve",
 						"creatorType": "author"
 					},
@@ -1372,17 +1373,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28",
+				"date": "2015-09-28 00:00",
 				"DOI": "10.16995/olh.46",
-				"ISSN": "2056-6700",
-				"abstractNote": "Article: Opening the Open Library of Humanities",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
-				"pages": "e1",
 				"publicationTitle": "Open Library of Humanities",
-				"rights": "Authors who publish with this journal agree to the following terms:    Authors retain copyright and grant the journal right of first publication with the work simultaneously licensed under a  Creative Commons Attribution License  that allows others to share the work with an acknowledgement of the work's authorship and initial publication in this journal.  Authors are able to enter into separate, additional contractual arrangements for the non-exclusive distribution of the journal's published version of the work (e.g., post it to an institutional repository or publish it in a book), with an acknowledgement of its initial publication in this journal.  Authors are permitted and encouraged to post their work online (e.g., in institutional repositories or on their website) prior to and during the submission process, as it can lead to productive exchanges, as well as earlier and greater citation of published work (See  The Effect of Open Access ).  All third-party images reproduced on this journal are shared under Educational Fair Use. For more information on  Educational Fair Use , please see  this useful checklist prepared by Columbia University Libraries .   All copyright  of third-party content posted here for research purposes belongs to its original owners.  Unless otherwise stated all references to characters and comic art presented on this journal are ©, ® or ™ of their respective owners. No challenge to any owner’s rights is intended or should be inferred.",
-				"url": "http://olh.openlibhums.org/article/10.16995/olh.46/",
+				"url": "https://olh.openlibhums.org/article/id/4400/",
 				"volume": "1",
 				"attachments": [
 					{
@@ -1433,7 +1430,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=3874",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=334",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1501,7 +1498,7 @@ var testCases = [
 					}
 				],
 				"date": "2013",
-				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 49 universities and research institutions.",
+				"abstractNote": "DiVA portal is a finding tool for research publications and student theses written at the following 50 universities and research institutions.",
 				"conferenceName": "Netmob 2013 - Third International Conference on the Analysis of Mobile Phone Datasets, May 1-3, 2013, MIT, Cambridge, MA, USA",
 				"language": "eng",
 				"libraryCatalog": "www.diva-portal.org",
@@ -1747,14 +1744,15 @@ var testCases = [
 					}
 				],
 				"date": "2020/04",
-				"abstractNote": "Cambridge Core - Ecology and Conservation - Conservation Research, Policy and Practice -  edited by William J. Sutherland",
+				"abstractNote": "Conservation research is essential for advancing knowledge but to make an impact scientific evidence must influence conservation policies, decision making and practice. This raises a multitude of challenges. How should evidence be collated and presented to policymakers to maximise its impact? How can effective collaboration between conservation scientists and decision-makers be established? How can the resulting messages be communicated to bring about change? Emerging from a successful international symposium organised by the British Ecological Society and the Cambridge Conservation Initiative, this is the first book to practically address these questions across a wide range of conservation topics. Well-renowned experts guide readers through global case studies and their own experiences. A must-read for practitioners, researchers, graduate students and policymakers wishing to enhance the prospect of their work 'making a difference'. This title is also available as Open Access on Cambridge Core.",
 				"extra": "DOI: 10.1017/9781108638210",
 				"language": "en",
-				"url": "/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
+				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
 				"websiteTitle": "Cambridge Core",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
