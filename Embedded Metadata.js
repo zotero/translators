@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-13 02:07:31"
+	"lastUpdated": "2021-10-13 18:27:50"
 }
 
 /*
@@ -554,15 +554,13 @@ function addHighwireMetadata(doc, newItem, hwType) {
 	}
 }
 
-
-// process highwire creators; currently only editor and author, but easy to exten
+// process highwire creators; currently only editor and author, but easy to extend
 function processHighwireCreators(creatorNodes, role, doc) {
 	let itemCreators = [];
 	for (let creatorNode of creatorNodes) {
 		let creators = creatorNode.nodeValue.split(/\s*;\s*/);
 		if (creators.length == 1 && creatorNodes.length == 1) {
 			var authorsByComma = creators[0].split(/\s*,\s*/);
-			
 	
 			/* If there is only one author node and
 			we get nothing when splitting by semicolon, there are at least two
