@@ -66,7 +66,6 @@ function doWeb(doc, url) {
 		var voliss = text(doc, 'h1.title');
 		var date = text(doc, 'p.da_story_info');
 		for (let i = 0; i < rows.length; i++) {
-
 			var title = text(rows[i], 'span > a[title="View Article"]');
 			var id = attr(rows[i], 'span > a[title="View Article"]', "href");
 			if (!title) {
