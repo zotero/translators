@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2019-12-09 13:35:39"
+	"lastUpdated": "2021-10-12 18:13:54"
 }
 
 /*
@@ -129,10 +129,16 @@ function scrape(doc, url) {
 		var canonicalUrl = ZU.xpath(doc, '/html/head/link[@rel="canonical"]')[0].href;
 		id = canonicalUrl.match(/[&?]id=([^&]+)/)[1];
 	}
-	ZU.doGet("//books.google.com/books/feeds/volumes/" + id, parseXML);
+	
+	// somewhat of a hack to recover from a rare situation in which the XML
+	// doesn't have a dc:title tag (bad metadata on Google's end).
+	// the Google Books suffix appears consistent across languages.
+	let fallbackTitle = doc.title.replace(/(\s*-\s*)?Google Books/, '');
+	ZU.doGet("//books.google.com/books/feeds/volumes/" + id,
+		text => parseXML(text, fallbackTitle));
 }
 
-function parseXML(text) {
+function parseXML(text, fallbackTitle) {
 	// Z.debug(text);
 	// Remove xml parse instruction and doctype
 	var parser = new DOMParser();
@@ -180,7 +186,7 @@ function parseXML(text) {
 	newItem.ISBN = ISBN;
 	
 	newItem.publisher = ZU.xpathText(xml, "dc:publisher", ns);
-	newItem.title = ZU.xpathText(xml, "dc:title", ns, ": ");
+	newItem.title = ZU.xpathText(xml, "dc:title", ns, ": ") || fallbackTitle;
 	newItem.language = ZU.xpathText(xml, 'dc:language', ns);
 	newItem.abstractNote = ZU.xpathText(xml, 'dc:description', ns);
 	newItem.date = ZU.xpathText(xml, "dc:date", ns);
@@ -269,7 +275,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
-				"title": "Gabriel García Márquez",
+				"title": "Gabriel García Márquez: A Critical Companion",
 				"creators": [
 					{
 						"firstName": "Rubén",
@@ -277,13 +283,13 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Rubén Pelayo",
-						"lastName": "Coutiño",
+						"firstName": "Rube ́n",
+						"lastName": "Pelayo",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Rube ́n",
-						"lastName": "Pelayo",
+						"firstName": "Rubén Pelayo",
+						"lastName": "Coutiño",
 						"creatorType": "author"
 					}
 				],
@@ -295,6 +301,7 @@ var testCases = [
 				"libraryCatalog": "Google Books",
 				"numPages": "208",
 				"publisher": "Greenwood Publishing Group",
+				"shortTitle": "Gabriel García Márquez",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -303,9 +310,6 @@ var testCases = [
 					}
 				],
 				"tags": [
-					{
-						"tag": "Literary Criticism / Caribbean & Latin American"
-					},
 					{
 						"tag": "Literary Criticism / European / Spanish & Portuguese"
 					}
@@ -458,7 +462,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Google Books",
 				"numPages": "176",
-				"publisher": "Perfection Learning Corporation",
+				"publisher": "Turtleback",
 				"attachments": [
 					{
 						"title": "Google Books Link",
@@ -512,6 +516,33 @@ var testCases = [
 						"tag": "Psychology / General"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.google.com/books/edition/_/IG1qDwAAQBAJ?hl=en",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Recursive Macroeconomic Theory",
+				"creators": [],
+				"ISBN": "9780262038669",
+				"extra": "Google-Books-ID: IG1qDwAAQBAJ",
+				"language": "en",
+				"libraryCatalog": "Google Books",
+				"numPages": "1477",
+				"publisher": "MIT Press",
+				"attachments": [
+					{
+						"title": "Google Books Link",
+						"snapshot": false,
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
