@@ -19,7 +19,7 @@
 		"Full TEI Document": false,
 		"Export Collections": false
 	},
-	"lastUpdated": "2019-01-31 00:12:00"
+	"lastUpdated": "2020-07-23 18:31:53"
 }
 
 // ********************************************************************
@@ -586,7 +586,7 @@ function doExport() {
 		= parser.parseFromString('<TEI xmlns="http://www.tei-c.org/ns/1.0"><teiHeader><fileDesc><titleStmt><title>Exported from Zotero</title></titleStmt><publicationStmt><p>unpublished</p></publicationStmt><sourceDesc><p>Generated from Zotero database</p></sourceDesc></fileDesc></teiHeader></TEI>', 'application/xml');
 
 	var item = null;
-	while (item == Zotero.nextItem()) { // eslint-disable-line no-cond-assign
+	while (item = Zotero.nextItem()) { // eslint-disable-line no-cond-assign
 		allItems[item.uri] = item;
 	}
 

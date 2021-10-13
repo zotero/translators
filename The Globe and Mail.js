@@ -1,7 +1,7 @@
 {
 	"translatorID": "e0234bcf-bc56-4577-aa94-fe86a27f6fd6",
 	"label": "The Globe and Mail",
-	"creator": "Sonali Gupta",
+	"creator": "Sonali Gupta and Abe Jellinek",
 	"target": "^https?://www\\.theglobeandmail\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-04-29 17:01:57"
+	"lastUpdated": "2021-07-14 21:43:14"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Sonali Gupta
+	Copyright © 2017-2021 Sonali Gupta and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -37,21 +37,22 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf("/search/") != -1 && getSearchResults(doc, true)) {
+	if (url.includes("/search/") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	else if (ZU.xpathText(doc, '//article')) {
 		return "newspaperArticle";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//article/h3/a');
-	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	var rows = doc.querySelectorAll('.c-search-results-news a');
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(text(row, '.c-card__hed-text'));
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -65,86 +66,44 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
 
 function scrape(doc, url) {
+	var translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
+	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
+	translator.setDocument(doc);
 	
-	newItem = new Zotero.Item("newspaperArticle");
-	newItem.url = url;
-
-	//get headline
-	var title = ZU.xpathText(doc, '//article/h1');
-	if (!title) title = ZU.xpathText(doc, '//meta[@property="og:title"]/@content');
-	newItem.title = title;
-
-	//get abstract
-	newItem.abstractNote = ZU.xpathText(doc, '//meta[@property="og:description"]/@content');
-	
-	//get date
-	var xpathdate = '//time[@itemprop="datePublished"]';
-	var date = ZU.xpathText(doc, xpathdate);
-	if (date) {
-		newItem.date = ZU.strToISO(date);
-	}
-
-	//get author
-	var authors = ZU.xpath(doc, '//meta[@itemprop="author"]/@content');
-	for (var i = 0; i<authors.length; i++){
-		newItem.creators.push(ZU.cleanAuthor(authors[i].textContent, "author"));
-	}
-
-	var publishers = ZU.xpath(doc, '//article/header//div[@itemprop="publisher"]//p');
-	for (var i = 0; i<publishers.length; i++){
-		newItem.creators.push( {
-		"lastName" : publishers[i].innerText,
-		"creatorType" : "contributor",
-		"fieldmode" : 1
-		});
-	}
-
-	newItem.language = ZU.xpathText(doc, '//meta[@http-equiv="Content-Language"]/@content');
-	
-	newItem.section = ZU.xpathText(doc, '//meta[@name="article:type"]/@content');
-
-	var xpathtags = ZU.xpathText(doc, '//meta[@name="keywords"]/@content');
-	newItem.tags = xpathtags.split(";").filter(function(tag) {return tag.length != 0});
-
-	var related_links = ZU.xpathText(doc, '//article//li/p/a/@href');
-	var note=""
-	if (related_links)
-		note = addNote(note, related_links.split(",").filter(function(tag) {return tag.length != 0}))
-	if (note.length != 0) {
-		newItem.notes.push( {note: note} );
-	}
-
-	newItem.attachments.push({
-		document: doc,
-		title: "The Globe and Mail Snapshot",
+	translator.setHandler('itemDone', function (obj, item) {
+		item.place = ZU.capitalizeTitle(text(doc, '.placeline'), true);
+		
+		if (!item.creators.length) {
+			for (let authorLink of doc.querySelectorAll('a.byline')) {
+				item.creators.push(ZU.cleanAuthor(authorLink.textContent, 'author'));
+			}
+		}
+		
+		item.complete();
 	});
-	newItem.complete();
+
+	translator.getTranslatorObject(function (trans) {
+		trans.itemType = "newspaperArticle";
+		// TODO map additional meta tags here, or delete completely
+		trans.addCustomFields({
+			'twitter:description': 'abstractNote'
+		});
+		trans.doWeb(doc, url);
+	});
 }
 
-function addNote(originalNote, newNote) {
-	if (originalNote.length == 0) {
-		originalNote = "Related URL: " + newNote;
-	}
-	else
-	{
-		originalNote += newNote;
-	}
-	return originalNote;
-}
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -159,38 +118,44 @@ var testCases = [
 						"firstName": "Ann",
 						"lastName": "Hui",
 						"creatorType": "author"
-					},
-					{
-						"lastName": "The Globe and Mail",
-						"creatorType": "contributor",
-						"fieldmode": 1
 					}
 				],
-				"date": "2014-11-03",
+				"date": "2014-11-03T16:16:12-0500",
 				"abstractNote": "He says he will decide soon about whether to run for Ontario Tory leadership and does not rule out another attempt at the Toronto mayoralty",
-				"language": "en-ca",
-				"libraryCatalog": "The Globe and Mail",
-				"section": "news",
+				"language": "en-CA",
+				"libraryCatalog": "www.theglobeandmail.com",
+				"publicationTitle": "The Globe and Mail",
 				"url": "https://www.theglobeandmail.com/news/toronto/doug-ford-says-hes-not-yet-sure-about-his-political-future/article21428180/",
 				"attachments": [
 					{
-						"title": "The Globe and Mail Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Christine Elliott",
-					"Doug Ford",
-					"Jim Flaherty",
-					"John Tory",
-					"Ontario Progressive Conservative",
-					"Rob Ford",
-					"leadership"
-				],
-				"notes": [
 					{
-						"note": "Related URL: https://www.theglobeandmail.com/news/toronto/doug-ford-says-ontario-pc-leadership-bid-is-on-the-table/article21358827/, https://www.theglobeandmail.com/news/toronto/uniting-a-divided-toronto-will-be-a-key-task-for-torys-transition-team/article21359883/, https://www.theglobeandmail.com/news/toronto/a-chuckling-ford-on-his-mayoralty-it-will-definitely-be-remembered/article21414526/"
+						"tag": "Christine Elliott"
+					},
+					{
+						"tag": "Doug Ford"
+					},
+					{
+						"tag": "Jim Flaherty"
+					},
+					{
+						"tag": "John Tory"
+					},
+					{
+						"tag": "Ontario Progressive Conservative"
+					},
+					{
+						"tag": "Rob Ford"
+					},
+					{
+						"tag": "leadership"
 					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
@@ -199,6 +164,78 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.theglobeandmail.com/search/?q=nuclear",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Liberals filibuster opposition call for inquiry into parliamentary funds paid to Trudeau’s close friend",
+				"creators": [
+					{
+						"firstName": "Robert",
+						"lastName": "Fife",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Steven",
+						"lastName": "Chase",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-07-12T19:52:05-0400",
+				"abstractNote": "Opposition wanted Tom Pitfield, the founder of Data Sciences, to appear before the ethics committee, but Liberal MPs prevented the motion from coming to a vote by talking out the clock",
+				"language": "en-CA",
+				"libraryCatalog": "www.theglobeandmail.com",
+				"place": "Ottawa",
+				"publicationTitle": "The Globe and Mail",
+				"url": "https://www.theglobeandmail.com/politics/article-liberals-filibuster-opposition-call-for-inquiry-into-parliamentary/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Liberal"
+					},
+					{
+						"tag": "Michael Barrett"
+					},
+					{
+						"tag": "NDP"
+					},
+					{
+						"tag": "committee"
+					},
+					{
+						"tag": "company"
+					},
+					{
+						"tag": "data"
+					},
+					{
+						"tag": "house"
+					},
+					{
+						"tag": "liberal"
+					},
+					{
+						"tag": "liberals"
+					},
+					{
+						"tag": "mps"
+					},
+					{
+						"tag": "party"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/

@@ -8,26 +8,27 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-05-10 20:30:25"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-06-24 16:06:30"
 }
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, _url) {
 	if (getSearchResults(doc, true)) {
 		return (Zotero.isBookmarklet ? "server" : "multiple");
 	}
-	else if (attr(doc, 'input[name*="ASIN"]', 'value')) {
+	if ((attr(doc, 'link[rel=canonical]', 'href') || '').match(/dp\/[A-Z0-9]+$/)) {
 		if (Zotero.isBookmarklet) return "server";
 		
 		var productClass = attr(doc, 'div[id="dp"]', 'class');
 		if (!productClass) {
-			Z.debug("No product class found, try store ID instead.");
+			Z.debug("No product class found; trying store ID");
 			productClass = attr(doc, 'input[name="storeID"]', 'value');
+		}
+		if (!productClass) {
+			Z.debug("No store ID found; looking for special stores");
+			if (doc.getElementById('dmusic_buybox_container')) {
+				productClass = 'music';
+			}
 		}
 		// delete language code
 		productClass = productClass.replace(/[a-z][a-z]_[A-Z][A-Z]/, "").trim();
@@ -130,16 +131,17 @@ var CREATOR = {
 };
 
 var DATE = [
-	"Original Release Date",
-	"DVD Release Date",
-	"Erscheinungstermin",
-	"Date de sortie du DVD"
+	"original release date",
+	"dvd Release Date",
+	"erscheinungstermin",
+	"date de sortie du dvd",
+	"release date"
 ];
 
 // localization
 var i15dFields = {
 	ISBN: ['ISBN-13', 'ISBN-10', 'ISBN', '条形码'],
-	Publisher: ['Publisher', 'Verlag', '出版社'],
+	Publisher: ['Publisher', 'Verlag', 'Herausgeber', '出版社'],
 	Hardcover: ['Hardcover', 'Gebundene Ausgabe', '精装', 'ハードカバー', 'Relié', 'Copertina rigida', 'Tapa dura'],
 	Paperback: ['Paperback', 'Taschenbuch', '平装', 'ペーパーバック', 'Broché', 'Copertina flessibile', 'Tapa blanda'],
 	'Print Length': ['Print Length', 'Seitenzahl der Print-Ausgabe', '紙の本の長さ', "Nombre de pages de l'édition imprimée", "Longueur d'impression", 'Poche', 'Broché', 'Lunghezza stampa', 'Longitud de impresión', 'Número de páginas'], // TODO: Chinese label
@@ -166,7 +168,10 @@ function getField(info, field) {
 	if (!i15dFields[field]) return false;
 	
 	for (var i = 0; i < i15dFields[field].length; i++) {
-		if (info[i15dFields[field][i]] !== undefined) return info[i15dFields[field][i]];
+		let possibleField = i15dFields[field][i].toLowerCase();
+		if (info[possibleField] !== undefined) {
+			return info[possibleField];
+		}
 	}
 	return false;
 }
@@ -317,21 +322,39 @@ function scrape(doc, url) {
 			let el = els[i],
 				key = ZU.xpathText(el, 'b[1]').trim();
 			if (key) {
-				info[key.replace(/\s*:$/, "")] = el.textContent.substr(key.length + 1).trim();
+				info[key.replace(/\s*:$/, "").toLowerCase()] = el.textContent.substr(key.length + 1).trim();
 			}
 		}
 	}
-	else {
+	if (!els.length) {
 		// New design encountered 06/30/2013
 		els = ZU.xpath(doc, '//tr[td[@class="a-span3"]][td[@class="a-span9"]]');
 		for (let i = 0; i < els.length; i++) {
 			let el = els[i],
 				key = ZU.xpathText(el, 'td[@class="a-span3"]'),
 				value = ZU.xpathText(el, 'td[@class="a-span9"]');
-			if (key && value) info[key.trim()] = value.trim();
+			if (key && value) {
+				info[key.trim().toLowerCase()] = value.trim();
+			}
 		}
 	}
-	
+	if (!els.length) {
+		// New design encountered 08/31/2020
+		els = doc.querySelectorAll('ul.detail-bullet-list li');
+		for (let el of els) {
+			let key = text(el, '.a-list-item span:first-child');
+			let value = text(el, '.a-list-item span:nth-child(2)');
+			if (key && value) {
+				key = key.replace(/\s*:\s*$/, "");
+				// Extra colon in Language field as of 9/4/2020
+				key = key.replace(/\s*:$/, '');
+				// The colon is surrounded by RTL/LTR marks as of 6/24/2021
+				key = key.replace(/[\s\u200e\u200f]*:[\s\u200e\u200f]*$/, '');
+				info[key.toLowerCase()] = value.trim();
+			}
+		}
+	}
+
 	item.ISBN = getField(info, 'ISBN');
 	if (item.ISBN) {
 		item.ISBN = ZU.cleanISBN(item.ISBN);
@@ -354,8 +377,14 @@ function scrape(doc, url) {
 	if (publisher) {
 		var m = /([^;(]+)(?:;? *([^(]*))?(?:\(([^)]*)\))?/.exec(publisher);
 		item.publisher = m[1].trim();
-		if (m[2]) item.edition = m[2].trim().replace(/^(Auflage|Édition)\s?:/, '');
-		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = m[3].trim(); // Looks like a date
+		if (m[2]) {
+			item.edition = m[2].trim()
+				.replace(/^(Auflage|Édition)\s?:/, '')
+				// "FISCHER Taschenbuch; 15. Auflage (1. Mai 1992)""
+				.replace(/\. (Auflage|[EÉ]dition)\s*/, '');
+		}
+		// Looks like a date
+		if (m[3] && m[3].search(/\b\d{4}\b/) != -1) item.date = ZU.strToISO(m[3].trim());
 	}
 	var pages = getField(info, 'Hardcover') || getField(info, 'Paperback') || getField(info, 'Print Length');
 	if (pages) item.numPages = parseInt(pages);
@@ -447,15 +476,15 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "April 1, 2010",
+				"date": "2010-04-01",
 				"ISBN": "9780810989894",
 				"abstractNote": "Now in paperback! Pass, and have it made. Fail, and suffer the consequences. A master of teen thrillers tests readers’ courage in an edge-of-your-seat novel that echoes the fears of exam-takers everywhere. Ann, a teenage girl living in the security-obsessed, elitist United States of the very near future, is threatened on her way home from school by a mysterious man on a black motorcycle. Soon she and a new friend are caught up in a vast conspiracy of greed involving the mega-wealthy owner of a school testing company. Students who pass his test have it made; those who don’t, disappear . . . or worse. Will Ann be next? For all those who suspect standardized tests are an evil conspiracy, here’s a thriller that really satisfies! Praise for Test “Fast-paced with short chapters that end in cliff-hangers . . . good read for moderately reluctant readers. Teens will be able to draw comparisons to contemporary society’s shift toward standardized testing and ecological concerns, and are sure to appreciate the spoofs on NCLB.” ―School Library Journal “Part mystery, part action thriller, part romance . . . environmental and political overtones . . . fast pace and unique blend of genres holds attraction for younger teen readers.” ―Booklist",
-				"edition": "Reprint",
+				"edition": "Reprint edition",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 320,
 				"place": "New York",
-				"publisher": "Amulet Paperbacks",
+				"publisher": "Harry N. Abrams",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -471,7 +500,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/s/ref=nb_sb_noss?url=search-alias%3Dstripbooks&field-keywords=foot&x=0&y=0",
+		"url": "https://www.amazon.com/s?k=foot&i=stripbooks&x=0&y=0&ref=nb_sb_noss",
 		"items": "multiple"
 	},
 	{
@@ -481,10 +510,16 @@ var testCases = [
 			{
 				"itemType": "audioRecording",
 				"title": "Loveless",
-				"creators": [],
-				"date": "November 5, 1991",
-				"audioRecordingFormat": "Audio CD",
+				"creators": [
+					{
+						"lastName": "My Bloody Valentine",
+						"creatorType": "performer",
+						"fieldMode": 1
+					}
+				],
+				"date": "1991",
 				"label": "Sire",
+				"language": "English",
 				"libraryCatalog": "Amazon",
 				"attachments": [
 					{
@@ -501,7 +536,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/s?ie=UTF8&keywords=The%20Harvard%20Concise%20Dictionary%20of%20Music%20and%20Musicians&index=blended&Go=o",
+		"url": "https://www.amazon.com/s?k=The+Harvard+Concise+Dictionary+of+Music+and+Musicians&Go=o",
 		"items": "multiple"
 	},
 	{
@@ -559,9 +594,9 @@ var testCases = [
 					}
 				],
 				"date": "May 20, 2003",
-				"language": "English (Dolby Digital 2.0 Surround), English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 5.1)",
+				"language": "English (Dolby Digital 2.0 Surround), English (Dolby Digital 5.1), English (DTS 5.1), French (Dolby Digital 5.1), Unqualified (DTS ES 6.1)",
 				"libraryCatalog": "Amazon",
-				"runningTime": "115 minutes",
+				"runningTime": "1 hour and 55 minutes",
 				"studio": "Sony Pictures Home Entertainment",
 				"attachments": [
 					{
@@ -578,7 +613,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/gp/registry/registry.html?ie=UTF8&id=1Q7ELHV59D7N&type=wishlist",
+		"url": "https://www.amazon.com/gp/registry/registry.html?ie=UTF8&id=1Q7ELHV59D7N&type=wishlist",
 		"items": "multiple"
 	},
 	{
@@ -595,10 +630,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "17 août 2011",
+				"date": "2011",
 				"ISBN": "9782035866011",
 				"abstractNote": "Que signifie ce nom \"Candide\" : innocence de celui qui ne connaît pas le mal ou illusion du naïf qui n'a pas fait l'expérience du monde ? Voltaire joue en 1759, après le tremblement de terre de Lisbonne, sur ce double sens. Il nous fait partager les épreuves fictives d'un jeune homme simple, confronté aux leurres de l'optimisme, mais qui n'entend pas désespérer et qui en vient à une sagesse finale, mesurée et mystérieuse. Candide n'en a pas fini de nous inviter au gai savoir et à la réflexion.",
-				"edition": "Larousse",
+				"edition": "Larousse édition",
 				"language": "Français",
 				"libraryCatalog": "Amazon",
 				"numPages": 176,
@@ -630,10 +665,10 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1. Mai 1992",
+				"date": "1992",
 				"ISBN": "9783596105816",
 				"abstractNote": "Gleich bei seinem Erscheinen in den 40er Jahren löste Jorge Luis Borges’ erster Erzählband »Fiktionen« eine literarische Revolution aus. Erfundene Biographien, fiktive Bücher, irreale Zeitläufe und künstliche Realitäten verflocht Borges zu einem geheimnisvollen Labyrinth, das den Leser mit seinen Rätseln stets auf neue herausfordert. Zugleich begründete er mit seinen berühmten Erzählungen wie»›Die Bibliothek zu Babel«, «Die kreisförmigen Ruinen« oder»›Der Süden« den modernen »Magischen Realismus«. »Obwohl sie sich im Stil derart unterscheiden, zeigen zwei Autoren uns ein Bild des nächsten Jahrtausends: Joyce und Borges.« Umberto Eco",
-				"edition": "15.",
+				"edition": "15",
 				"language": "Deutsch",
 				"libraryCatalog": "Amazon",
 				"numPages": 192,
@@ -667,11 +702,11 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1 Dec. 2010",
+				"date": "2010-12-01",
 				"abstractNote": "Novel by Charles Dickens, published both serially and in book form in 1859. The story is set in the late 18th century against the background of the French Revolution. Although Dickens borrowed from Thomas Carlyle's history, The French Revolution, for his sprawling tale of London and revolutionary Paris, the novel offers more drama than accuracy. The scenes of large-scale mob violence are especially vivid, if superficial in historical understanding. The complex plot involves Sydney Carton's sacrifice of his own life on behalf of his friends Charles Darnay and Lucie Manette. While political events drive the story, Dickens takes a decidedly antipolitical tone, lambasting both aristocratic tyranny and revolutionary excess--the latter memorably caricatured in Madame Defarge, who knits beside the guillotine. The book is perhaps best known for its opening lines, \"It was the best of times, it was the worst of times,\" and for Carton's last speech, in which he says of his replacing Darnay in a prison cell, \"It is a far, far better thing that I do, than I have ever done; it is a far, far better rest that I go to, than I have ever known.\" -- The Merriam-Webster Encyclopedia of Literature",
 				"language": "English",
 				"libraryCatalog": "Amazon",
-				"numPages": 264,
+				"numPages": 290,
 				"publisher": "Public Domain Books",
 				"attachments": [
 					{
@@ -700,20 +735,20 @@ var testCases = [
 						"creatorType": "author"
 					},
 					{
-						"firstName": "B.",
+						"firstName": "Björn",
 						"lastName": "Berg",
 						"creatorType": "contributor"
 					},
 					{
-						"firstName": "A. Palme Larussa",
+						"firstName": "Annuska Palme Larussa",
 						"lastName": "Sanavio",
 						"creatorType": "translator"
 					}
 				],
-				"date": "26 giugno 2008",
+				"date": "2008",
 				"ISBN": "9788882038670",
 				"abstractNote": "Si pensa che soprattutto in una casa moderna, con prese elettriche, gas, balconi altissimi un bambino possa mettersi in pericolo: Emil vive in una tranquilla casa di campagna, ma riesce a ficcare la testa in una zuppiera e a rimanervi incastrato, a issare la sorellina Ida in cima all'asta di una bandiera, e a fare una tale baldoria alla fiera del paese che i contadini decideranno di organizzare una colletta per spedirlo in America e liberare così la sua povera famiglia. Ma questo succederà nel prossimo libro di Emil, perché ce ne sarà un altro, anzi due, tante sono le sue monellerie. Età di lettura: da 7 anni.",
-				"edition": "3 edizione",
+				"edition": "3° edizione",
 				"language": "Italiano",
 				"libraryCatalog": "Amazon",
 				"numPages": 72,
@@ -734,7 +769,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.co.uk/Walt-Disney-Pixar-Up-DVD/dp/B0029Z9UQ4/ref=sr_1_1?s=dvd&ie=UTF8&qid=1395560537&sr=1-1&keywords=up",
+		"url": "https://www.amazon.co.uk/Walt-Disney-Pixar-Up-DVD/dp/B0029Z9UQ4/ref=sr_1_1?s=dvd&ie=UTF8&qid=1395560537&sr=1-1&keywords=up",
 		"items": [
 			{
 				"itemType": "videoRecording",
@@ -769,7 +804,7 @@ var testCases = [
 				"date": "15 Feb. 2010",
 				"language": "English, Hindi",
 				"libraryCatalog": "Amazon",
-				"runningTime": "93 minutes",
+				"runningTime": "1 hour and 33 minutes",
 				"studio": "Walt Disney Studios Home Entertainment",
 				"attachments": [
 					{
@@ -799,7 +834,7 @@ var testCases = [
 					}
 				],
 				"libraryCatalog": "Amazon",
-				"runningTime": "1:08:58",
+				"runningTime": "1:09:16",
 				"attachments": [
 					{
 						"title": "Amazon.com Link",
@@ -827,14 +862,13 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012/8/2",
+				"date": "2012-08-02",
 				"ISBN": "9780099578079",
 				"abstractNote": "The year is 1Q84.  This is the real world, there is no doubt about that.   But in this world, there are two moons in the sky.   In this world, the fates of two people, Tengo and Aomame, are closely intertwined. They are each, in their own way, doing something very dangerous. And in this world, there seems no way to save them both.   Something extraordinary is starting.",
-				"edition": "Combined volume版",
-				"language": "英語",
+				"edition": "Combined edition",
+				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 1328,
-				"place": "New York",
 				"publisher": "Vintage",
 				"shortTitle": "1Q84",
 				"attachments": [
@@ -852,7 +886,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.amazon.com/Mark-LeBar/e/B00BU8L2DK",
+		"url": "https://www.amazon.com/Mark-LeBar/e/B00BU8L2DK",
 		"items": "multiple"
 	},
 	{
@@ -874,10 +908,10 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "April 28, 1998",
+				"date": "1998-04-28",
 				"ISBN": "9780521418195",
 				"abstractNote": "The first printed text of Shakespeare's Hamlet is about half the length of the more familiar second quarto and Folio versions. It reorders and combines key plot elements to present its own workable alternatives. This is the only modernized critical edition of the 1603 quarto in print. Kathleen Irace explains its possible origins, special features and surprisingly rich performance history, and while describing textual differences between it and other versions, offers alternatives that actors or directors might choose for specific productions.",
-				"edition": "First Edition edition",
+				"edition": "First Edition",
 				"language": "English",
 				"libraryCatalog": "Amazon",
 				"numPages": 144,
@@ -910,9 +944,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1977/9/16",
+				"date": "1977-09-16",
 				"ISBN": "9784003314210",
-				"language": "日本語",
+				"language": "Japanese",
 				"libraryCatalog": "Amazon",
 				"publisher": "岩波書店",
 				"attachments": [
@@ -942,7 +976,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "April 24, 2018",
+				"date": "2018-04-24",
 				"ISBN": "9781333821388",
 				"abstractNote": "Excerpt from Studies in Saiva-SiddhantaEuropean Sanskritist, unaware perhaps of the bearings of the expression, rendered the collocation Parama-hamsa' into 'great goose'. The strictly pedagogic purist may endeavour to justify such puerile versions on etymological grounds, but they stand Self-condemned as mal-interpretations reﬂecting anything but the sense and soul of the original. Such lapses into unwitting ignorance, need never be expected in any of the essays contained in the present collection, as our author is not only a sturdy and indefatigable researcher in Tamil philosophic literature illuminative Of the Agamic religion, but has also, in his quest after Truth, freely utilised the services of those Indigenous savam's, who represent the highest water-mark of Hindu traditional learning and spiritual associations at the present-day.About the PublisherForgotten Books publishes hundreds of thousands of rare and classic books. Find more at www.forgottenbooks.comThis book is a reproduction of an important historical work. Forgotten Books uses state-of-the-art technology to digitally reconstruct the work, preserving the original format whilst repairing imperfections present in the aged copy. In rare cases, an imperfection in the original, such as a blemish or missing page, may be replicated in our edition. We do, however, repair the vast majority of imperfections successfully; any imperfections that remain are intentionally left to preserve the state of such historical works.",
 				"language": "English",
@@ -987,9 +1021,8 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015年5月1日",
-				"abstractNote": "《中国之翼》是一本书写了一段未被透露的航空编年史的篇章，它讲述了二战时期亚洲战场动荡的背景下的航空冒险的扣人心弦的故事。故事的主体是激动人心的真实的“空中兄弟连”的冒险事迹。正是这些人在二战期间帮助打开了被封锁的中国的天空，并勇敢的在各种冲突中勇敢守卫着它。这是一段值得被更多的中国人和美国人知晓并铭记的航空史和中美关系史。",
-				"edition": "1",
+				"date": "2015-05-01",
+				"edition": "第 1st 版",
 				"libraryCatalog": "Amazon",
 				"publisher": "社会科学文献出版社",
 				"attachments": [

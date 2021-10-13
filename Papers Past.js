@@ -1,21 +1,21 @@
 {
 	"translatorID": "1b052690-16dd-431d-9828-9dc675eb55f6",
 	"label": "Papers Past",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz",
+	"creator": "Philipp Zumstein and Abe Jellinek",
+	"target": "^https?://(www\\.)?paperspast\\.natlib\\.govt\\.nz/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-01-22 00:46:33"
+	"lastUpdated": "2021-07-12 17:17:15"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017 Philipp Zumstein
+	Copyright © 2017-2021 Philipp Zumstein and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -37,30 +37,32 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('?query')>-1 && getSearchResults(doc, true)) {
+	if (/[?&]query=/.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (ZU.xpathText(doc, '//h3[@itemprop="headline"]')) {
-		if (url.indexOf('/newspapers/')>-1) {
+	}
+	else if (ZU.xpathText(doc, '//h3[@itemprop="headline"]')) {
+		if (url.includes('/newspapers/')) {
 			return "newspaperArticle";
 		}
-		if (url.indexOf('/periodicals/')>-1) {
+		if (url.includes('/periodicals/')) {
 			return "journalArticle";
 		}
-		if (url.indexOf('/manuscripts/')>-1) {
+		if (url.includes('/manuscripts/')) {
 			return "letter";
 		}
-		if (url.indexOf('/parliamentary/')>-1) {
+		if (url.includes('/parliamentary/')) {
 			return "report";
 		}
 	}
+	return false;
 }
 
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//table[contains(@class, "search-results")]//td/a');
-	for (var i=0; i<rows.length; i++) {
+	var rows = doc.querySelectorAll('.search-results .article-preview__title a');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -76,7 +78,7 @@ function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (!items) {
-				return true;
+				return;
 			}
 			var articles = [];
 			for (var i in items) {
@@ -84,7 +86,8 @@ function doWeb(doc, url) {
 			}
 			ZU.processDocuments(articles, scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -97,14 +100,14 @@ function scrape(doc, url) {
 	item.title = ZU.capitalizeTitle(title.toLowerCase(), true);
 	
 	if (type == "journalArticle" || type == "newspaperArticle") {
-		var nav = ZU.xpath(doc, '//table[@id="breadcrumbs"]//td[not(contains(@class, "separator"))]');
-		if (nav.length>1) {
+		var nav = doc.querySelectorAll('#breadcrumbs .breadcrumbs__crumb');
+		if (nav.length > 1) {
 			item.publicationTitle = nav[1].textContent;
 		}
-		if (nav.length>2) {
+		if (nav.length > 2) {
 			item.date = ZU.strToISO(nav[2].textContent);
 		}
-		if (nav.length>3) {
+		if (nav.length > 3) {
 			item.pages = nav[3].textContent.match(/\d+/)[0];
 		}
 	}
@@ -122,38 +125,55 @@ function scrape(doc, url) {
 	}
 	
 	if (type == "letter") {
-		var author = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="author"]]/td[2]');
-		//e.g. 42319/Mackay, James, 1831-1912
-		if (author && author.indexOf("Unknown") == -1) {
-			author = author.replace(/^[0-9\/]*/, '').replace(/[0-9\-]*$/, '').replace('(Sir)', '');
+		var author = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Author"]]/td[2]');
+		// e.g. 42319/Mackay, James, 1831-1912
+		if (author && !author.includes("Unknown")) {
+			author = author.replace(/^[0-9/]*/, '').replace(/[0-9-]*$/, '').replace('(Sir)', '');
 			item.creators.push(ZU.cleanAuthor(author, "author"));
 		}
-		var recipient = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="recipient"]]/td[2]');
-		if (recipient && recipient.indexOf("Unknown") == -1) {
-			recipient = recipient.replace(/^[0-9\/]*/, '').replace(/[0-9\-]*$/, '').replace('(Sir)', '');
+		var recipient = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Recipient"]]/td[2]');
+		if (recipient && !recipient.includes("Unknown")) {
+			recipient = recipient.replace(/^[0-9/]*/, '').replace(/[0-9-]*$/, '').replace('(Sir)', '');
 			item.creators.push(ZU.cleanAuthor(recipient, "recipient"));
 		}
 		
-		item.date = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="date"]]/td[2]');
+		item.date = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Date"]]/td[2]');
 		
-		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="language"]]/td[2]');
-		
+		item.language = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]//tr[td[.="Language"]]/td[2]');
 	}
+	
+	item.abstractNote = text(doc, '#tab-english');
 
 	item.url = ZU.xpathText(doc, '//div[@id="researcher-tools-tab"]/input/@value');
+	if (!item.url) item.url = text('#researcher-tools-tab p');
+	if (!item.url || !item.url.startsWith('http')) item.url = url;
 	
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
 	});
 	
-	item.complete();
+	let imagePageURL = attr(doc, '.imagecontainer a', 'href');
+	if (imagePageURL) {
+		ZU.processDocuments(imagePageURL, function (imageDoc) {
+			item.attachments.push({
+				title: 'Image',
+				mimeType: 'image/jpeg',
+				url: attr(imageDoc, '.imagecontainer img', 'src')
+			});
+			item.complete();
+		});
+	}
+	else {
+		item.complete();
+	}
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://paperspast.natlib.govt.nz/cgi-bin/paperspast?a=q&hs=1&r=1&results=1&dafdq=&dafmq=&dafyq=&datdq=&datmq=&datyq=&pbq=&sf=&ssnip=&tyq=&t=0&txq=argentina&x=11&y=3&e=-------10--1----0--",
+		"url": "https://paperspast.natlib.govt.nz/newspapers?items_per_page=10&snippet=true&query=argentina",
 		"items": "multiple"
 	},
 	{
@@ -168,10 +188,11 @@ var testCases = [
 				"libraryCatalog": "Papers Past",
 				"pages": "5",
 				"publicationTitle": "Evening Post",
-				"url": "http://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
+				"url": "https://paperspast.natlib.govt.nz/newspapers/EP19440218.2.61",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -192,10 +213,11 @@ var testCases = [
 				"libraryCatalog": "Papers Past",
 				"pages": "9",
 				"publicationTitle": "New Zealand Herald",
-				"url": "http://paperspast.natlib.govt.nz/newspapers/NZH19360721.2.73.1",
+				"url": "https://paperspast.natlib.govt.nz/newspapers/NZH19360721.2.73.1",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -217,11 +239,12 @@ var testCases = [
 				"libraryCatalog": "Papers Past",
 				"pages": "3",
 				"publicationTitle": "Freethought Review",
-				"url": "http://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
+				"url": "https://paperspast.natlib.govt.nz/periodicals/FRERE18831101.2.2",
 				"volume": "I",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -250,12 +273,18 @@ var testCases = [
 					}
 				],
 				"date": "1873-06-19",
+				"abstractNote": "(For His Excellency's information)\n(Signed) Donald McLean\n19th. June 1873\n\n\nNEW ZEALAND TELEGRAPH.\nHamilton\nTo:- Hon. D. McLean \nWellington\n18th. June 1873\nNo news to-day from anywhere I am waiting arrival of Dr. Pollen here this evening. General feeling in Waikato is calming down. The establishments of the Outposts has given confidence against attack and the settlers are quietly attending to their usual business. I do not think many anticipate an agressive movement by the King Party. It, however, the almost unanimous opinion that the murderers of Sullivan should be taken at any cost, no one believes the murderers will be given up for reward.\n(Signed) \nJames Mackay Jnr.",
 				"language": "English",
 				"libraryCatalog": "Papers Past",
-				"url": "http://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
+				"url": "https://paperspast.natlib.govt.nz/manuscripts/MCLEAN-1024774.2.1",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],

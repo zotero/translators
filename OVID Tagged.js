@@ -8,8 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2017-06-03 11:41:00"
+	"lastUpdated": "2021-10-08 04:38:40"
 }
 
 /*
@@ -237,8 +236,8 @@ function finalizeItem(item) {
 		}
 		if (value.match(/:\s*\d+\-\d+/)) item.pages = value.match(/:\s*(\d+\-\d+)/)[1];
 		if (value.match(/pp\.\s*(\d+\-\d+)/)) item.pages = value.match(/pp\.\s*(\d+\-\d+)/)[1];
-		if (value.match(/[J|j]ournal[-\s\w]+/)) {
-			item.publicationTitle = value.match(/[J|j]ournal[-\s\w]+/)[0];
+		if (value.match(/^\s*[J|j]ournal[-\s\w&]+/)) {
+			item.publicationTitle = value.match(/^\s*[J|j]ournal[-\s\w&]+/)[0];
 		} else {
 			item.publicationTitle = Zotero.Utilities.trimInternal(value.split(/(\.|;|(,\s*vol\.))/)[0]);
 		}
@@ -579,7 +578,7 @@ var testCases = [
 				"issue": "1",
 				"language": "English.",
 				"libraryCatalog": "Journals@Ovid",
-				"publicationTitle": "Journal",
+				"publicationTitle": "ACSM'S Health & Fitness Journal",
 				"volume": "14",
 				"attachments": [],
 				"tags": [],
@@ -639,9 +638,15 @@ var testCases = [
 				"volume": "43",
 				"attachments": [],
 				"tags": [
-					"BCRP",
-					"PI3K/AKT/NF-[kappa]B",
-					"chemoresistance"
+					{
+						"tag": "BCRP"
+					},
+					{
+						"tag": "PI3K/AKT/NF-[kappa]B"
+					},
+					{
+						"tag": "chemoresistance"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -708,13 +713,19 @@ var testCases = [
 				"language": "English.",
 				"libraryCatalog": "Your Journals@Ovid",
 				"pages": "845-849",
-				"publicationTitle": "Journal of Dermatopathology",
+				"publicationTitle": "American Journal of Dermatopathology",
 				"volume": "33",
 				"attachments": [],
 				"tags": [
-					"lobular breast carcinoma",
-					"plexiform schwannoma",
-					"tumor to tumor metastasis"
+					{
+						"tag": "lobular breast carcinoma"
+					},
+					{
+						"tag": "plexiform schwannoma"
+					},
+					{
+						"tag": "tumor to tumor metastasis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1043,6 +1054,64 @@ var testCases = [
 				"publisher": "Routledge/Taylor & Francis Group; US",
 				"attachments": [],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "\n<6. >\nVN  - Ovid Technologies\nDB  - Journals@Ovid\nAN  - 01445365-201506000-00011.\nAU  - Lefkowitz, Rafael Y. MD, MPH 1\nAU  - Slade, Martin D. MPH 1\nAU  - Redlich, Carrie A. MD, MPH 1\nIN  - (1)Yale Occupational and Environmental Medicine, Yale School of Medicine, New Haven, Connecticut\nTI  - \"Injury, Illness, and Work Restriction in Merchant Seafarers\".  [Article]\nSO  - American Journal Of Industrial Medicine June 2015;58(6):688-696\nAB  - Background: Research on seafarer medical conditions at sea is limited. This study describes the frequency and distribution of seafarer injury and illness at sea, and explores potential risk factors for resultant lost work., Materials and Methods: The study analyzed a telemedicine database of 3,921 seafarer medical cases between 2008 and 2011 using descriptive statistics and logistic regression., Results: There were over twice as many illness cases (n = 2,764, 70.5%) as injury (n = 1,157, 29.5%) cases. Disability was more often secondary to illness (n = 646, 54.3%), predominantly from gastrointestinal, dermatologic, and respiratory conditions. Logistic regression revealed age, rank, and worksite as potential risk factors for lost work., Conclusions: This study emphasizes illness as a significant problem occurring in seafarers at sea. Future research should further elucidate risk factors for illness, as well as injury, to inform preventive measures and reduce seafarer disability. Am. J. Ind. Med. 58:688-696, 2015. (C) 2015 Wiley Periodicals, Inc., (C) 2015 John Wiley & Sons, Ltd\nKW  - seafarers;  disability;  telemedicine;  occupational injury;  epidemiology\nLG  - English.\nDT  - Research Articles.\nSB  - Clinical Medicine, Public Health.\nIS  - 0271-3586\nDI  - 10.1002/ajim.22459\nXL  - http://ovidsp.ovid.com/ovidweb.cgi?T=JS&CSC=Y&NEWS=N&PAGE=fulltext&D=ovftq&AN=01445365-201506000-00011",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "\"Injury, Illness, and Work Restriction in Merchant Seafarers\"",
+				"creators": [
+					{
+						"firstName": "Rafael Y. MD",
+						"lastName": "Lefkowitz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Martin D.",
+						"lastName": "Slade",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Carrie A. MD",
+						"lastName": "Redlich",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015 June",
+				"DOI": "10.1002/ajim.22459",
+				"ISSN": "0271-3586",
+				"abstractNote": "Background: Research on seafarer medical conditions at sea is limited. This study describes the frequency and distribution of seafarer injury and illness at sea, and explores potential risk factors for resultant lost work., Materials and Methods: The study analyzed a telemedicine database of 3,921 seafarer medical cases between 2008 and 2011 using descriptive statistics and logistic regression., Results: There were over twice as many illness cases (n = 2,764, 70.5%) as injury (n = 1,157, 29.5%) cases. Disability was more often secondary to illness (n = 646, 54.3%), predominantly from gastrointestinal, dermatologic, and respiratory conditions. Logistic regression revealed age, rank, and worksite as potential risk factors for lost work., Conclusions: This study emphasizes illness as a significant problem occurring in seafarers at sea. Future research should further elucidate risk factors for illness, as well as injury, to inform preventive measures and reduce seafarer disability. Am. J. Ind. Med. 58:688-696, 2015. (C) 2015 Wiley Periodicals, Inc., (C) 2015 John Wiley & Sons, Ltd",
+				"callNumber": "01445365-201506000-00011",
+				"issue": "6",
+				"language": "English.",
+				"libraryCatalog": "Journals@Ovid",
+				"pages": "688-696",
+				"publicationTitle": "American Journal Of Industrial Medicine",
+				"volume": "58",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "disability"
+					},
+					{
+						"tag": "epidemiology"
+					},
+					{
+						"tag": "occupational injury"
+					},
+					{
+						"tag": "seafarers"
+					},
+					{
+						"tag": "telemedicine"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}

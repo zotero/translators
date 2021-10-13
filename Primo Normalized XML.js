@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2019-06-10 08:28:21"
+	"lastUpdated": "2021-08-11 17:37:09"
 }
 
 /*
@@ -50,78 +50,79 @@ function doImport() {
 		p: 'http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib',
 		sear: 'http://www.exlibrisgroup.com/xsd/jaguar/search'
 	};
-	
+
 	var item = new Zotero.Item();
 	var itemType = ZU.xpathText(doc, '//p:display/p:type', ns) || ZU.xpathText(doc, '//p:facets/p:rsrctype', ns) || ZU.xpathText(doc, '//p:search/p:rsrctype', ns);
 	if (!itemType) {
 		throw new Error('Could not locate item type');
 	}
-	
+
 	switch (itemType.toLowerCase()) {
-	case 'book':
-	case 'ebook':
-	case 'pbook':
-	case 'books':
-	case 'score':
-	case 'journal':		// as long as we don't have a periodical item type;
-		item.itemType = "book";
-		break;
-	case 'audio':
-	case 'sound_recording':
-		item.itemType = "audioRecording";
-		break;
-	case 'video':
-	case 'dvd':
-		item.itemType = "videoRecording";
-		break;
-	case 'computer_file':
-		item.itemType = "computerProgram";
-		break;
-	case 'report':
-		item.itemType = "report";
-		break;
-	case 'webpage':
-		item.itemType = "webpage";
-		break;
-	case 'article':
-	case 'review':
-		item.itemType = "journalArticle";
-		break;
-	case 'thesis':
-	case 'dissertation':
-		item.itemType = "thesis";
-		break;
-	case 'archive_manuscript':
-	case 'object':
-		item.itemType = "manuscript";
-		break;
-	case 'map':
-		item.itemType = "map";
-		break;
-	case 'reference_entry':
-		item.itemType = "encyclopediaArticle";
-		break;
-	case 'image':
-		item.itemType = "artwork";
-		break;
-	case 'newspaper_article':
-		item.itemType = "newspaperArticle";
-		break;
-	case 'conference_proceeding':
-		item.itemType = "conferencePaper";
-		break;
-	default:
-		item.itemType = "document";
-		var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
-		if (risType) {
-			switch (risType.toUpperCase()) {
-			case 'THES':
-				item.itemType = "thesis";
-				break;
+		case 'book':
+		case 'ebook':
+		case 'pbook':
+		case 'print_book':
+		case 'books':
+		case 'score':
+		case 'journal':		// as long as we don't have a periodical item type;
+			item.itemType = "book";
+			break;
+		case 'audio':
+		case 'sound_recording':
+			item.itemType = "audioRecording";
+			break;
+		case 'video':
+		case 'dvd':
+			item.itemType = "videoRecording";
+			break;
+		case 'computer_file':
+			item.itemType = "computerProgram";
+			break;
+		case 'report':
+			item.itemType = "report";
+			break;
+		case 'webpage':
+			item.itemType = "webpage";
+			break;
+		case 'article':
+		case 'review':
+			item.itemType = "journalArticle";
+			break;
+		case 'thesis':
+		case 'dissertation':
+			item.itemType = "thesis";
+			break;
+		case 'archive_manuscript':
+		case 'object':
+			item.itemType = "manuscript";
+			break;
+		case 'map':
+			item.itemType = "map";
+			break;
+		case 'reference_entry':
+			item.itemType = "encyclopediaArticle";
+			break;
+		case 'image':
+			item.itemType = "artwork";
+			break;
+		case 'newspaper_article':
+			item.itemType = "newspaperArticle";
+			break;
+		case 'conference_proceeding':
+			item.itemType = "conferencePaper";
+			break;
+		default:
+			item.itemType = "document";
+			var risType = ZU.xpathText(doc, '//p:addata/p:ristype', ns);
+			if (risType) {
+				switch (risType.toUpperCase()) {
+					case 'THES':
+						item.itemType = "thesis";
+						break;
+				}
 			}
-		}
 	}
-	
+
 	item.title = ZU.xpathText(doc, '//p:display/p:title', ns);
 	if (item.title) {
 		item.title = ZU.unescapeHTML(item.title);
@@ -134,7 +135,7 @@ function doImport() {
 		creators = contributors;
 		contributors = [];
 	}
-	
+
 	// //addata/au is great because it lists authors in last, first format,
 	// but it can also have a bunch of junk. We'll use it to help split authors
 	var splitGuidance = {};
@@ -146,7 +147,7 @@ function doImport() {
 			if (splitAu.length > 2) continue;
 			var name = splitAu[1].trim().toLowerCase() + ' '
 				+ splitAu[0].trim().toLowerCase();
-			splitGuidance[name] = author;
+			splitGuidance[name.replace(/\./g, "")] = author;
 		}
 	}
 
@@ -192,15 +193,15 @@ function doImport() {
 			item.date = m[0];
 		}
 	}
-	
+
 	// the three letter ISO codes that should be in the language field work well:
 	item.language = ZU.xpathText(doc, '(//p:display/p:language|//p:facets/p:language)[1]', ns);
-	
+
 	var pages = ZU.xpathText(doc, '//p:display/p:format', ns);
 	if (item.itemType == 'book' && pages && pages.search(/\d/) != -1) {
 		item.numPages = extractNumPages(pages);
 	}
-	
+
 	item.series = ZU.xpathText(doc, '(//p:addata/p:seriestitle)[1]', ns);
 	if (item.series) {
 		let m = item.series.match(/^(.*);\s*(\d+)/);
@@ -215,11 +216,11 @@ function doImport() {
 	if (isbn) {
 		item.ISBN = ZU.cleanISBN(isbn);
 	}
-	
+
 	if (issn) {
 		item.ISSN = ZU.cleanISSN(issn);
 	}
-	
+
 	// Try this if we can't find an isbn/issn in addata
 	// The identifier field is supposed to have standardized format, but
 	// the super-tolerant idCheck should be better than a regex.
@@ -231,7 +232,7 @@ function doImport() {
 	}
 
 	item.edition = ZU.xpathText(doc, '//p:display/p:edition', ns);
-	
+
 	var subjects = ZU.xpath(doc, '//p:display/p:subject', ns);
 	if (!subjects.length) {
 		subjects = ZU.xpath(doc, '//p:search/p:subject', ns);
@@ -240,28 +241,35 @@ function doImport() {
 	for (let i = 0, n = subjects.length; i < n; i++) {
 		let tagChain = ZU.trimInternal(subjects[i].textContent);
 		// Split chain of tags, e.g. "Deutschland / Gerichtsverhandlung / Schallaufzeichnung / Bildaufzeichnung"
-		for (let tag of tagChain.split(/ (?:\/|--) /)) {
+		for (let tag of tagChain.split(/ (?:\/|--|;) /)) {
 			item.tags.push(tag);
 		}
 	}
-	
+
 	item.abstractNote = ZU.xpathText(doc, '//p:display/p:description', ns)
 		|| ZU.xpathText(doc, '//p:addata/p:abstract', ns);
 	if (item.abstractNote) item.abstractNote = ZU.unescapeHTML(item.abstractNote);
-	
+
 	item.DOI = ZU.xpathText(doc, '//p:addata/p:doi', ns);
 	item.issue = ZU.xpathText(doc, '//p:addata/p:issue', ns);
 	item.volume = ZU.xpathText(doc, '//p:addata/p:volume', ns);
 	item.publicationTitle = ZU.xpathText(doc, '//p:addata/p:jtitle', ns);
-	
+
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
 	var overallPages = ZU.xpathText(doc, '//p:addata/p:pages', ns);
+	
+	var pageRangeTypes = ["journalArticle", "magazineArticle", "newspaperArticle", "dictionaryEntry", "encyclopediaArticle", "conferencePaper"];
 	if (startPage && endPage) {
 		item.pages = startPage + '–' + endPage;
 	}
 	else if (overallPages) {
-		item.pages = overallPages;
+		if (pageRangeTypes.includes(item.itemType)) {
+			item.pages = overallPages;
+		}
+		else {
+			item.numPages = overallPages;
+		}
 	}
 	else if (startPage) {
 		item.pages = startPage;
@@ -269,7 +277,7 @@ function doImport() {
 	else if (endPage) {
 		item.pages = endPage;
 	}
-	
+
 	// these are actual local full text links (e.g. to google-scanned books)
 	// e.g http://solo.bodleian.ox.ac.uk/OXVU1:LSCOP_OX:oxfaleph013370702
 	var URL = ZU.xpathText(doc, '//p:links/p:linktorsrc', ns);
@@ -342,10 +350,10 @@ function stripAuthor(str) {
 	// e.g. Wheaton, Barbara Ketcham [former owner]$$QWheaton, Barbara Ketcham
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
-		// Remove year
-		.replace(/\s*,?\s*\(?\d{4}-?(\d{4})?\)?/g, '')
-		// Remove things like (illustrator). TODO: use this to assign creator type?
-		.replace(/\s*,?\s*[[(][^()]*[\])]$/, '')
+	// Remove year
+		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|\.{3})?\)?/g, '')
+		// Remove creator type like (illustrator)
+		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
 		.replace(/\s*:\s+/, " ");
@@ -355,18 +363,18 @@ function fetchCreators(item, creators, type, splitGuidance) {
 	for (let i = 0; i < creators.length; i++) {
 		var creator = ZU.unescapeHTML(creators[i].textContent).split(/\s*;\s*/);
 		for (var j = 0; j < creator.length; j++) {
-			var c = stripAuthor(creator[j]);
+			var c = stripAuthor(creator[j]).replace(/\./g, "");
 			c = ZU.cleanAuthor(
 				splitGuidance[c.toLowerCase()] || c,
 				type,
 				true
 			);
-			
+
 			if (!c.firstName) {
 				delete c.firstName;
 				c.fieldMode = 1;
 			}
-			
+
 			item.creators.push(c);
 		}
 	}
@@ -437,10 +445,10 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Chemistry"
+						"tag": "Water"
 					},
 					{
-						"tag": "Water"
+						"tag": "Chemistry"
 					}
 				],
 				"notes": [],
@@ -592,6 +600,38 @@ var testCases = [
 					},
 					{
 						"tag": "Öffentlichkeitsgrundsatz"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>21150834900003766</sourcerecordid>\n    <sourceid>01CTW_CC_ALMA</sourceid>\n    <recordid>01CTW_CC_ALMA21150834900003766</recordid>\n    <originalsourceid>01CTW_CC</originalsourceid>\n    <sourceformat>MARC21</sourceformat>\n    <sourcesystem>Alma</sourcesystem>\n    <almaid>01CTW_CC/21150834900003766</almaid>\n    <almaid>01CTW_CC:21150834900003766</almaid>\n  </control>\n  <display>\n    <type>print_book</type>\n    <title>The sea</title>\n    <creator>John Crompton 1893-1972</creator>\n    <publisher>New York, NY : Nick Lyons Books</publisher>\n    <creationdate>1988</creationdate>\n    <format>x, 233, [1] p. ; 21 cm..</format>\n    <identifier>$$CISBN$$V0941130835 (pbk.) :</identifier>\n    <subject>Marine biology</subject>\n    <language>eng</language>\n    <source>01CTW_CC_ALMA</source>\n    <availlibrary>$$I01CTW_CC$$L01CTW_CC_CCSHAIN$$1CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)$$2(QH91 C76 1988)$$Savailable$$X01CTW_CC$$YCCSHAIN$$ZCSTACKS$$P1</availlibrary>\n    <notes>Bibliography: p. [234].</notes>\n    <lds01>992232803503766</lds01>\n    <lds02>01CTW_CC_ALMA21150834900003766</lds02>\n    <lds03>Reprint. Originally published: New York : Doubleday, 1957. With new introd.</lds03>\n    <lds03>Includes index.</lds03>\n    <lds03>Armington Social Values Collection.</lds03>\n    <lds07>Committed to retain for Eastern Academic Scholars' Trust</lds07>\n    <availinstitution>$$I01CTW_CC$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n  </display>\n  <links>\n    <thumbnail>$$Tamazon_thumb</thumbnail>\n    <thumbnail>$$Tgoogle_thumb</thumbnail>\n    <linktouc>$$Tworldcat_isbn$$Eworldcat</linktouc>\n    <uri>$$Aisbn$$V0941130835$$U(uri) http://www.isbnsearch.org/isbn/0941130835</uri>\n    <uri>$$Aoclc_nr$$V(OCoLC)ocm17412356$$U(uri) http://www.worldcat.org/oclc/17412356</uri>\n    <uri>$$Acreatorcontrib$$VCrompton, John$$U(uri) http://id.loc.gov/authorities/names/n85809864$$U(uri) http://viaf.org/viaf/sourceID/LC|n85809864</uri>\n    <uri>$$Asubject$$VMarine biology$$U(uri) http://id.loc.gov/authorities/subjects/sh85081138</uri>\n  </links>\n  <search>\n    <creatorcontrib>John,  Crompton  1893-1972.</creatorcontrib>\n    <creatorcontrib>John Battersby Crompton,  Lamburn  1893-</creatorcontrib>\n    <creatorcontrib>Crompton, J</creatorcontrib>\n    <creatorcontrib>Lamburn, J</creatorcontrib>\n    <creatorcontrib>John Crompton ; with 24 drawings by Denys Ovenden ; [introduction by Robert F. Jones].</creatorcontrib>\n    <title>The sea /</title>\n    <subject>Marine biology.</subject>\n    <subject>Biological oceanography</subject>\n    <subject>Ocean biology</subject>\n    <subject>Oceanic biology</subject>\n    <subject>Sea biology</subject>\n    <general>Nick Lyons Books,</general>\n    <general>Reprint. Originally published: New York : Doubleday, 1957. With new introd.</general>\n    <general>Includes index.</general>\n    <general>Armington Social Values Collection.</general>\n    <sourceid>01CTW_CC_ALMA</sourceid>\n    <recordid>01CTW_CC_ALMA21150834900003766</recordid>\n    <isbn>0941130835</isbn>\n    <rsrctype>print_book</rsrctype>\n    <creationdate>1988</creationdate>\n    <creationdate>1957</creationdate>\n    <startdate>19880101</startdate>\n    <enddate>19881231</enddate>\n    <addsrcrecordid>992232803503766</addsrcrecordid>\n    <searchscope>01CTW_CC_ALMA</searchscope>\n    <searchscope>01CTW_CC</searchscope>\n    <searchscope>CC_CC_P</searchscope>\n    <searchscope>CC_WU_P</searchscope>\n    <searchscope>CC_TC_P</searchscope>\n    <scope>01CTW_CC_ALMA</scope>\n    <scope>01CTW_CC</scope>\n    <scope>CC_CC_P</scope>\n    <scope>CC_WU_P</scope>\n    <scope>CC_TC_P</scope>\n    <lsr02>(OCoLC)ocm17412356</lsr02>\n    <lsr02>(CtNlC)223280-conndb-Voyager</lsr02>\n  </search>\n  <sort>\n    <title>sea /</title>\n    <creationdate>1988</creationdate>\n    <author>Crompton, John, 1893-1972.</author>\n  </sort>\n  <facets>\n    <language>eng</language>\n    <creationdate>1988</creationdate>\n    <topic>Marine biology</topic>\n    <toplevel>available</toplevel>\n    <prefilter>print_books</prefilter>\n    <rsrctype>print_books</rsrctype>\n    <creatorcontrib>Crompton, John</creatorcontrib>\n    <library>01CTW_CC_CCSHAIN</library>\n    <atoz>S</atoz>\n    <lfc01>CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)</lfc01>\n    <lfc03>CC - Main Book Collection (call numbers A-G level 2; H-Z level 3)</lfc03>\n    <lfc02>01CTW_CC</lfc02>\n    <classificationlcc>Q - Science.–Natural history (General)–General Including nature conservation, geographical distribution</classificationlcc>\n    <newrecords>20170628_481</newrecords>\n    <frbrgroupid>1168449273</frbrgroupid>\n    <frbrtype>6</frbrtype>\n  </facets>\n  <dedup>\n    <t>99</t>\n    <c1>88000538</c1>\n    <c2>0941130835</c2>\n    <c3>sea</c3>\n    <c4>1988</c4>\n    <c5>992232803503766</c5>\n    <f1>88000538</f1>\n    <f3>0941130835</f3>\n    <f5>sea</f5>\n    <f6>1988</f6>\n    <f7>sea</f7>\n    <f8>nyu</f8>\n    <f9>x, 233, [1] p. ;</f9>\n    <f10>nick lyons books</f10>\n    <f11>crompton john 1893 1972</f11>\n    <f20>992232803503766</f20>\n  </dedup>\n  <frbr>\n    <t>99</t>\n    <k1>$$K01CTW_CC_ALMA21150834900003766$$AA</k1>\n    <k3>$$Ksea$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>01CTW_CC</institution>\n    <delcategory>Alma-P</delcategory>\n  </delivery>\n  <enrichment>\n    <classificationlcc>QH91</classificationlcc>\n  </enrichment>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Crompton</aulast>\n    <aufirst>John,</aufirst>\n    <au>Crompton, John</au>\n    <btitle>The sea</btitle>\n    <date>1988</date>\n    <risdate>1988</risdate>\n    <isbn>0941130835</isbn>\n    <format>book</format>\n    <genre>unknown</genre>\n    <ristype>BOOK</ristype>\n    <notes>Bibliography: p. [234].</notes>\n    <cop>New York, NY</cop>\n    <pub>Nick Lyons Books</pub>\n    <mis1>21150834900003766</mis1>\n    <oclcid>17412356</oclcid>\n    <lccn>88000538</lccn>\n  </addata>\n  <browse>\n    <author>$$DCrompton, John, 1893-1972$$ECrompton, John, 1893-1972$$I41-LIBRARY_OF_CONGRESS-n 85809864$$PY</author>\n    <author>$$Dnna Lamburn, John Battersby Crompton, 1893-$$Enna Lamburn, John Battersby Crompton, 1893-$$I41-LIBRARY_OF_CONGRESS-n 85809864$$PN</author>\n    <title>$$DThe sea$$Esea</title>\n    <subject>$$DMarine biology$$EMarine biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PY</subject>\n    <subject>$$DBiological oceanography$$EBiological oceanography$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DOcean biology$$EOcean biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DOceanic biology$$EOceanic biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <subject>$$DSea biology$$ESea biology$$TLCSH$$I41-LIBRARY_OF_CONGRESS-sh 85081138$$PN</subject>\n    <callnumber>$$I01CTW_CC$$DQH91 C76 1988$$E0qh   0009176000.   19880 $$T0</callnumber>\n    <institution>01CTW_CC</institution>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The sea",
+				"creators": [
+					{
+						"firstName": "John",
+						"lastName": "Crompton",
+						"creatorType": "author"
+					}
+				],
+				"date": "1988",
+				"ISBN": "0941130835",
+				"callNumber": "QH91 C76 1988",
+				"language": "eng",
+				"numPages": "1",
+				"place": "New York, NY",
+				"publisher": "Nick Lyons Books",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Marine biology"
 					}
 				],
 				"notes": [],
