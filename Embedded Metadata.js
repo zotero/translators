@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-13 18:27:50"
+	"lastUpdated": "2021-10-13 18:35:09"
 }
 
 /*
@@ -465,11 +465,18 @@ function addHighwireMetadata(doc, newItem, hwType) {
 
 	// sometimes RDF has more info, let's not drop it
 	var rdfPages = (newItem.pages) ? newItem.pages.split(/\s*-\s*/) : [];
-	var firstpage = getContentText(doc, 'citation_firstpage');
-	var lastpage = getContentText(doc, 'citation_lastpage');
+	
+	// matches hyphens and en-dashes
+	let dashRe = /[-\u2013]/g;
+	var firstpage = getContentText(doc, 'citation_firstpage').replace(dashRe, '-');
+	var lastpage = getContentText(doc, 'citation_lastpage').replace(dashRe, '-');
 	if (firstpage && firstpage.includes("-")) {
 		firstpage = firstpage.split(/\s*-\s*/)[0];
 		lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+	}
+	if (lastpage && lastpage.includes('-')) {
+		firstpage = firstpage || lastpage.split(/\s*-\s*/)[0];
+		lastpage = lastpage.split(/\s*-\s*/)[1];
 	}
 	firstpage = firstpage || rdfPages[0];
 	lastpage = lastpage || rdfPages[1];
@@ -1743,6 +1750,74 @@ var testCases = [
 				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
 				"websiteTitle": "Cambridge Core",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.linguisticsociety.org/proceedings/index.php/PLSA/article/view/4468",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Robin Hood approach to forced alignment: English-trained algorithms and their use on Australian languages",
+				"creators": [
+					{
+						"firstName": "Sarah",
+						"lastName": "Babinski",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rikker",
+						"lastName": "Dockum",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "J. Hunter",
+						"lastName": "Craft",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anelisa",
+						"lastName": "Fergus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dolly",
+						"lastName": "Goldenberg",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Claire",
+						"lastName": "Bowern",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019/03/15",
+				"DOI": "10.3765/plsa.v4i1.4468",
+				"ISSN": "2473-8689",
+				"abstractNote": "Forced alignment automatically aligns audio recordings of spoken language with transcripts at the segment level, greatly reducing the time required to prepare data for phonetic analysis. However, existing algorithms are mostly trained on a few well-documented languages. We test the performance of three algorithms against manually aligned data. For at least some tasks, unsupervised alignment (either based on English or trained from a small corpus) is sufficiently reliable for it to be used on legacy data for low-resource languages. Descriptive phonetic work on vowel inventories and prosody can be accurately captured by automatic alignment with minimal training data. Consonants provided significantly more challenges for forced alignment.",
+				"issue": "1",
+				"language": "en",
+				"libraryCatalog": "journals.linguisticsociety.org",
+				"pages": "3-12",
+				"publicationTitle": "Proceedings of the Linguistic Society of America",
+				"rights": "Copyright (c) 2019 Sarah Babinski, Rikker Dockum, J. Hunter Craft, Anelisa Fergus, Dolly Goldenberg, Claire Bowern",
+				"shortTitle": "A Robin Hood approach to forced alignment",
+				"url": "https://journals.linguisticsociety.org/proceedings/index.php/PLSA/article/view/4468",
+				"volume": "4",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
