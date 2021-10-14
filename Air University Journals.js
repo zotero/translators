@@ -134,11 +134,10 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 	}
 	
 	if (section.length) {
-
 		var authors = text(section[0], 'p>span>strong');
 		if (!authors) authors = text(section[0], 'p>strong>span');
 		
-		//Newer issues
+		// Newer issues
 		if (!authors) authors = text(section[0], 'strong');
 
 		if (authors) {
@@ -158,14 +157,13 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 				}
 				
 				else {
-					item.creators = reviewer || reviewedAuthor
+					item.creators = reviewer || reviewedAuthor;
 				}
-				
 			}
 			else {
-					authors = ZU.trimInternal(authors.trim());
-					// delete name suffixes
-					item.creators = parseAuthors(authors, "author");
+				authors = ZU.trimInternal(authors.trim());
+				// delete name suffixes
+				item.creators = parseAuthors(authors, "author");
 			}
 		}
 		// ASPJ
@@ -206,16 +204,16 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 }
 
 function parseAuthors(creators, type) {
-		creators = ZU.trimInternal(creators.trim());
-		// delete name suffixes
-		creators = creators.replace(/, (USAF|USN|Retired|PE|LMFT|USA|[^,]+Air Force)\b/g, "");
-		let creatorsList = creators.split(/\/|,?\sand\s|,\s/);
-		var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|LTC|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|CAPT|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
-		var creatorsArray = [];
-		for (let creator of creatorsList) {
-			creator = creator.trim().replace(rank, "");
-			creatorsArray.push(ZU.cleanAuthor(creator, type));
-		}
+	creators = ZU.trimInternal(creators.trim());
+	// delete name suffixes
+	creators = creators.replace(/, (USAF|USN|Retired|PE|LMFT|USA|[^,]+Air Force)\b/g, "");
+	let creatorsList = creators.split(/\/|,?\sand\s|,\s/);
+	var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|LTC|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|CAPT|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
+	var creatorsArray = [];
+	for (let creator of creatorsList) {
+		creator = creator.trim().replace(rank, "");
+		creatorsArray.push(ZU.cleanAuthor(creator, type));
+	}
 	return creatorsArray;
 }/** BEGIN TEST CASES **/
 var testCases = [
