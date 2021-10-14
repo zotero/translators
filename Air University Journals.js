@@ -154,7 +154,7 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 				}
 			
 				if (reviewedAuthor && reviewer) {
-					item.creators = reviewer.concat(reviewedAuthor);	
+					item.creators = reviewer.concat(reviewedAuthor);
 				}
 				
 				else {
@@ -175,7 +175,7 @@ function scrapeMultiples(doc, id, date, voliss, journal, abbr, ISSN) {
 		if (!abstract) abstract = ZU.xpathText(section[0], './/p/span[1]/text()');
 		
 		// Newer issues
-		if (!abstract) abstract = ZU.xpathText(section[0], './/p/text()');		
+		if (!abstract) abstract = ZU.xpathText(section[0], './/p/text()');
 		if (abstract) {
 			item.abstractNote = ZU.trimInternal(abstract.trim().replace(/^,\s/, ""));
 		}
@@ -211,7 +211,7 @@ function parseAuthors(creators, type) {
 		creators = creators.replace(/, (USAF|USN|Retired|PE|LMFT|USA|[^,]+Air Force)\b/g, "");
 		let creatorsList = creators.split(/\/|,?\sand\s|,\s/);
 		var rank = /^(By:|Adm|Rear Adm|Col|Lt Col|LTC|Brig Gen|Gen|Maj Gen \(sel\)|Maj|Capt|CAPT|Maj Gen|2nd Lt|W(in)?g Cdr|Mr?s\.|Mr\.|Dr\.)\s/;
-		var creatorsArray = [];		
+		var creatorsArray = [];
 		for (let creator of creatorsList) {
 			creator = creator.trim().replace(rank, "");
 			creatorsArray.push(ZU.cleanAuthor(creator, type));
