@@ -93,14 +93,13 @@ function scrape(doc, url) {
 		// Some authors aren't hyperlinked
 		if (authorString.includes(",")) {
 			// grab the text-only content of the author string
-				var moreAuthors = ZU.xpathText(doc, '//div[@class="purchase-item-detail-title-desktop"]//p[@class="author link-reverse-underline"]/text()');
-				// clean it.
-				moreAuthors = moreAuthors.replace(/^[^,]*[,\s]*/, "").replace(/^and/, "");
-				moreAuthors = moreAuthors.split(/,\s(?:and )?|\sand\s/);
-				for (let author of moreAuthors) {
-					item.creators.push(ZU.cleanAuthor(author, type));
-				}
-				
+			var moreAuthors = ZU.xpathText(doc, '//div[@class="purchase-item-detail-title-desktop"]//p[@class="author link-reverse-underline"]/text()');
+			// clean it.
+			moreAuthors = moreAuthors.replace(/^[^,]*[,\s]*/, "").replace(/^and/, "");
+			moreAuthors = moreAuthors.split(/,\s(?:and )?|\sand\s/);
+			for (let author of moreAuthors) {
+				item.creators.push(ZU.cleanAuthor(author, type));
+			}
 		}
 		var editors = text(doc, '.editor');
 		if (editors) {
@@ -111,10 +110,9 @@ function scrape(doc, url) {
 			}
 			editors = editors.replace(/.+?\sby\s/, "");
 			editors = editors.split(/,\s(?:and )?|\sand\s/);
-				for (let editor of editors) {
-					item.creators.push(ZU.cleanAuthor(editor, editorType));
-				}
-			
+			for (let editor of editors) {
+				item.creators.push(ZU.cleanAuthor(editor, editorType));
+			}
 		}
 
 		// title in metadata is without subtitle
@@ -154,6 +152,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
