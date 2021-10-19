@@ -1,16 +1,34 @@
 {
-	"translatorID": "d6c6210a-297c-4b2c-8c43-48cb503cc49e",
-	"label": "Springer Link",
+	"translatorID": "428c1011-fb8c-437f-8f08-5066cb589ff6",
+	"label": "ubtue_Springer Link",
 	"creator": "Aurimas Vinckevicius",
 	"target": "^https?://link\\.springer\\.com/(search(/page/\\d+)?\\?|(article|chapter|book|referenceworkentry|protocol|journal|referencework)/.+)",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-09-08 02:04:42"
+	"lastUpdated": "2021-10-19 08:34:52"
 }
+
+/*
+   SpringerLink Translator
+   Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
+
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU Affero General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 function detectWeb(doc, url) {
 	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
@@ -57,7 +75,6 @@ function getResultList(doc) {
 	if (!results.length) {
 		results = ZU.xpath(doc, '//div[@class="toc"]/ol//li[contains(@class,"toc-item")]/p[@class="title"]/a');
 	}
-	// https://link.springer.com/journal/10344/volumes-and-issues/66-5
 	if (!results.length) {
 		results = ZU.xpath(doc, '//li[@class="c-list-group__item"]//h3/a');
 	}
@@ -82,6 +99,11 @@ function doWeb(doc, url) {
 	else {
 		scrape(doc, url);
 	}
+}
+
+function undesirableAbstractPresent(doc, item) {
+	let textStart = ZU.xpathText(doc, '//div[@class="c-article-section__content"]/p[not(a | b)]');
+	return textStart.indexOf(item.abstractNote) != -1;
 }
 
 function complementItem(doc, item) {
@@ -121,7 +143,7 @@ function complementItem(doc, item) {
 			item.rights = '©' + year + ' ' + item.rights;
 		}
 	}
-	
+
 	if (itemType == "journalArticle") {
 		if (!item.ISSN) {
 			item.ISSN = ZU.xpathText(doc, '//dd[@id="abstract-about-issn" or @id="abstract-about-electronic-issn"]');
@@ -129,7 +151,11 @@ function complementItem(doc, item) {
 		if (!item.journalAbbreviation || item.publicationTitle == item.journalAbbreviation) {
 			item.journalAbbreviation = ZU.xpathText(doc, '//meta[@name="citation_journal_abbrev"]/@content');
 		}
+		let oa_desc = ZU.xpathText(doc, '//span[@data-test="open-access"]');
+		if (oa_desc && oa_desc.match(/open access/i))
+			item.notes.push({note: 'LF:'});
 	}
+	
 	if (itemType == 'bookSection' || itemType == "conferencePaper") {
 		// look for editors
 		var editors = ZU.xpath(doc, '//ul[@class="editors"]/li[@itemprop="editor"]/a[@class="person"]');
@@ -176,17 +202,80 @@ function complementItem(doc, item) {
 		item.volume = "";
 	}
 	// add abstract
-	var abs = ZU.xpathText(doc, '//div[contains(@class,"abstract-content")][1]');
-	if (!abs) {
-		abs = ZU.xpathText(doc, '//section[@class="Abstract" and @lang="en"]');
+	// in some cases we get the beginning of the article as abstract
+	if (undesirableAbstractPresent(doc, item))
+		item.abstractNote = '';
+	let abstractSections = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]');
+	if (abstractSections && abstractSections.length > 0) {
+		let sectionTitles = ZU.xpath(doc, '//section[@class="Abstract"]//div[@class="AbstractSection"]//h3[@class="Heading"]');
+		let abstract = "";
+		for (let i = 0; i < sectionTitles.length; ++i) {
+			let titleText = sectionTitles[i].textContent.trim();
+			let sectionBody = ZU.xpathText(abstractSections[i], './/p').trim();
+
+			abstract += titleText + ": " + sectionBody + "\n\n";
+		}
+
+		item.abstractNote = abstract.trim();
+	} else {
+		let otherAbstracts = doc.querySelectorAll('#Abs2-section');
+		let titleTextGerman = ZU.xpathText(doc, '//*[(@id = "Abs1-content")]');
+		item.abstractNote = titleTextGerman ? titleTextGerman : '';
+		for (let part of otherAbstracts) {
+			var otherAbstract = part.innerText.replace(/\b\n{2}/g, ': ');
+		}
+		if (otherAbstract) {
+			item.notes.push({
+				note: "abs:" + ZU.trimInternal(otherAbstract).replace(/^Abstract[:\s]*/, "")
+			});
+		}
 	}
-	if (abs) item.abstractNote = ZU.trimInternal(abs).replace(/^Abstract[:\s]*/, "");
-	// add tags
-	var tags = ZU.xpathText(doc, '//span[@class="Keyword"]');
+	if (!item.abstractNote)
+		item.abstractNote = '';
+
+	let tags = ZU.xpathText(doc, '//span[@class="Keyword"] | //*[contains(concat( " ", @class, " " ), concat( " ", "c-article-subject-list__subject", " " ))]//span | \
+			   //li[@class="c-article-subject-list__subject"]');
 	if (tags && (!item.tags || item.tags.length === 0)) {
 		item.tags = tags.split(',');
 	}
+	// Trim and deduplicate
+	item.tags = [...new Set(item.tags.map(keyword => keyword.trim()))];
+
+	let docType = ZU.xpathText(doc, '//meta[@name="citation_article_type"]/@content');
+	if (docType.match(/(Book R|reviews?)|(Review P|paper)/)) item.tags.push("Book Reviews");
+	// ORCID
+	getORCID(doc, item);
 	return item;
+}
+	// ORCID
+function getORCID(doc, item) {
+	let authorOrcidEntries = ZU.xpath(doc, '//*[@class="c-article-author-list__item"]');
+	for (let authorOrcidEntry of authorOrcidEntries) {
+		let authorEntry = authorOrcidEntry.innerText.split('\n')[0];
+		let orcidEntry = authorOrcidEntry.innerHTML;
+		if (authorEntry && orcidEntry && orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)) {
+			let author = ZU.trimInternal(authorEntry.replace(/&/g, ''));
+			let orcid = orcidEntry.match(/\d+-\d+-\d+-\d+x?/i)[0]
+			item.notes.push({note: "orcid:" + orcid + ' | ' + author + ' | ' + 'taken from website'});
+		}
+	}
+}
+
+function shouldPostprocessWithEmbeddedMetadata(item) {
+	if (!item.pages) return true;
+	return false;
+}
+
+function postprocessWithEmbeddedMetadataTranslator(doc, originalItem) {
+	var translator = Zotero.loadTranslator("web");
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler("itemDone", function (t, extractedMetadata) {
+		originalItem.pages = extractedMetadata.pages;
+
+		originalItem.complete();
+	});
+	translator.translate();
 }
 
 function scrape(doc, url) {
@@ -202,19 +291,19 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item = complementItem(doc, item);
-			
+
 			item.attachments.push({
 				url: pdfURL,
 				title: "Springer Full Text PDF",
 				mimeType: "application/pdf"
 			});
-			item.complete();
+
+			if (shouldPostprocessWithEmbeddedMetadata(item)) postprocessWithEmbeddedMetadataTranslator(doc, item);
+			else item.complete();
 		});
 		translator.translate();
 	});
 }
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -459,7 +548,7 @@ var testCases = [
 				"issue": "5",
 				"journalAbbreviation": "Hydrogeol J",
 				"language": "en",
-				"libraryCatalog": "Springer Link",
+				"libraryCatalog": "ubtue_Springer Link",
 				"pages": "1289-1296",
 				"publicationTitle": "Hydrogeology Journal",
 				"shortTitle": "Tide-induced head fluctuations in a coastal aquifer",
@@ -471,8 +560,28 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
-				"notes": [],
+				"tags": [
+					{
+						"tag": "Analytical solutions"
+					},
+					{
+						"tag": "Coastal aquifers"
+					},
+					{
+						"tag": "Elastic storage"
+					},
+					{
+						"tag": "Submarine outlet-capping"
+					},
+					{
+						"tag": "Tidal loading efficiency"
+					}
+				],
+				"notes": [
+					{
+						"note": "abs:Résumé Cet article considère les fluctuations piézométriques dues à la marée dans un aquifère côtier captif simple s’étendant à une certaine distance sous la mer. Son exutoire sous-marin est recouvert par un dépôt silteux de propriétés différentes de celles de l’aquifère. Récemment, Li et autres (2007) ont donné une représentation analytique d’un tel système tenant compte de l’effet d’emmagasinement élastique du réservoir sous le toit à l’exutoire. Cet article présente une solution analytique qui généralise le modèle en introduisant l’emmagasinement élastique à l’exutoire. Il démontre que si la couveture à l’exutoire est assez épaisse en direction, l’emmagasinement élastique a un effet amplificateur important sur la fluctuation piézométrique due à la marée. Ignorer cet emmagasinement élastique conduirait à des erreurs importantes sur le rapport entre la hauteur piézométrique réelle et la hauteur telle qu’elle ressort des caractéristiques de l’aquifère. Le modèle montre donc l’effet de l’emmagasinement élastique sur la fluctuation du niveau de l’aquifère. Il indique les seuils en dessous desquels l’effet de cet emmagasinement élastique sur la fluctuation de l’aquifère induite par la marée est négligeable. Li, H.L., Li, G.Y., Chen, J.M., Boufadel, M.C. (2007) Tide-induced head fluctuations in a confined aquifer with sediment covering its outlet at the sea floor. [Fluctuations du niveau piézométrique induites par la marée dans un aquifère captif à décharge sous-marine.] Water Resour. Res 43, doi:10.1029/2005WR004724"
+					}
+				],
 				"seeAlso": []
 			}
 		]
@@ -553,7 +662,235 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://link.springer.com/journal/10344/volumes-and-issues/66-5",
+		"url": "https://link.springer.com/article/10.1007/s11089-020-00907-4",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Metabolizing Death: Re-Thinking Recovery from Substance Use Disorder through the Creative Cartographies of William James and Ernest Becker",
+				"creators": [
+					{
+						"lastName": "Boeving",
+						"firstName": "Nicholas Grant",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-06-01",
+				"DOI": "10.1007/s11089-020-00907-4",
+				"ISSN": "1573-6679",
+				"abstractNote": "This study is designed to bring together the existential-psychoanalytic psychology of Ernest Becker and the pluralistic transpersonal psychology of William James to bear on how perceptions of death and transformations of death anxiety shape, in subtle and significant ways, the phenomenology of substance use disorder. Specifically, this study examines the ways in which these two divergent sympathies (read: ontologies) are actually two reciprocally-enforcing ends of a continuum of how to think about substance use disorder and, more importantly, how to overcome it. In yoking these oppositional cartographies of consciousness together, this article brings to light the integral role that unconscious death anxiety plays in the formation and sustainment of addictions and explores the mechanics of recovery through the lens of the transformation of death anxiety. In doing so, it demonstrates that recovery from substance use disorder is dependent upon the successful metabolization of death anxiety from both a Jamesian and Beckerian perspective.",
+				"issue": "3",
+				"journalAbbreviation": "Pastoral Psychol",
+				"language": "en",
+				"libraryCatalog": "ubtue_Springer Link",
+				"pages": "169-186",
+				"publicationTitle": "Pastoral Psychology",
+				"shortTitle": "Metabolizing Death",
+				"url": "https://doi.org/10.1007/s11089-020-00907-4",
+				"volume": "69",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "12-step movement"
+					},
+					{
+						"tag": "AA"
+					},
+					{
+						"tag": "Addiction"
+					},
+					{
+						"tag": "Ernest Becker"
+					},
+					{
+						"tag": "Existential psychology"
+					},
+					{
+						"tag": "Recovery"
+					},
+					{
+						"tag": "Substance use disorder"
+					},
+					{
+						"tag": "Transpersonal psychology"
+					},
+					{
+						"tag": "William James"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-8965-717X | Nicholas Grant Boeving | taken from website"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s40839-019-00082-6",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Orlando Nang Kwok Ho: Rethinking the curriculum: the Epistle to the Romans as a pedagogic text",
+				"creators": [
+					{
+						"lastName": "O’Shea",
+						"firstName": "Gerard",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-07-01",
+				"DOI": "10.1007/s40839-019-00082-6",
+				"ISSN": "2199-4625",
+				"issue": "2",
+				"journalAbbreviation": "j. relig. educ.",
+				"language": "en",
+				"libraryCatalog": "ubtue_Springer Link",
+				"pages": "165-166",
+				"publicationTitle": "Journal of Religious Education",
+				"shortTitle": "Orlando Nang Kwok Ho",
+				"url": "https://doi.org/10.1007/s40839-019-00082-6",
+				"volume": "67",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s40839-019-00082-6",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Orlando Nang Kwok Ho: Rethinking the curriculum: the Epistle to the Romans as a pedagogic text",
+				"creators": [
+					{
+						"lastName": "O’Shea",
+						"firstName": "Gerard",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-07-01",
+				"DOI": "10.1007/s40839-019-00082-6",
+				"ISSN": "2199-4625",
+				"issue": "2",
+				"journalAbbreviation": "j. relig. educ.",
+				"language": "en",
+				"libraryCatalog": "ubtue_Springer Link",
+				"pages": "165-166",
+				"publicationTitle": "Journal of Religious Education",
+				"shortTitle": "Orlando Nang Kwok Ho",
+				"url": "https://doi.org/10.1007/s40839-019-00082-6",
+				"volume": "67",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/article/10.1007/s10943-021-01246-1",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Role of Worldview in Moral Case Deliberation: Visions and Experiences of Group Facilitators",
+				"creators": [
+					{
+						"lastName": "Spronk",
+						"firstName": "Benita",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Widdershoven",
+						"firstName": "Guy",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alma",
+						"firstName": "Hans",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-10-01",
+				"DOI": "10.1007/s10943-021-01246-1",
+				"ISSN": "1573-6571",
+				"abstractNote": "This study investigates the role of worldview in moral case deliberation (MCD). MCD is a form of clinical ethics support which aims to assist caregivers in reflection on moral dilemmas, experienced in daily practice. Bioethicists acknowledge that existential and religious aspects must be taken into account in the analysis of ethical questions, but it remains unclear how these elements are addressed in clinical ethics support. We investigated how facilitators of MCD address worldview in MCD. MCD facilitation is often done by spiritual caregivers, but not in their role as spiritual caregiver. Discussing worldview is no standard part of the procedure in MCD. This study was qualitative, focusing on the views and experiences of the facilitators of MCD. Semi-structured interviews (N = 12) were conducted with facilitators of MCD. Grounded theory was used for analysis. The results show that worldview plays both an explicit and an implicit role in the MCD process. The explicit role concerns the religious beliefs of patients and professionals. This calls for avoiding stereotyping and devoting attention to different visions. The implicit role comes to the fore in addressing core values and spiritual fulfillment. In order to clarify the fundamental nature of values, more explicit attention for worldview might be useful during MCD. However, this should be done with caution as the term ‘worldview’ might be interpreted by participants in terms of religious and personal beliefs, rather than as an invitation to reflect on one’s view of the good life as a whole.",
+				"issue": "5",
+				"journalAbbreviation": "J Relig Health",
+				"language": "en",
+				"libraryCatalog": "ubtue_Springer Link",
+				"pages": "3143-3160",
+				"publicationTitle": "Journal of Religion and Health",
+				"shortTitle": "The Role of Worldview in Moral Case Deliberation",
+				"url": "https://doi.org/10.1007/s10943-021-01246-1",
+				"volume": "60",
+				"attachments": [
+					{
+						"title": "Springer Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Clinical ethics support"
+					},
+					{
+						"tag": "Moral case deliberation"
+					},
+					{
+						"tag": "Religion"
+					},
+					{
+						"tag": "Spirituality"
+					},
+					{
+						"tag": "Values"
+					},
+					{
+						"tag": "Worldview"
+					}
+				],
+				"notes": [
+					{
+						"note": "LF:"
+					},
+					{
+						"note": "orcid:0000-0003-1473-2483 | Benita Spronk, | taken from website"
+					},
+					{
+						"note": "orcid:0000-0001-7620-6812 | Guy Widdershoven | taken from website"
+					},
+					{
+						"note": "orcid:0000-0001-6795-4202 | Hans Alma | taken from website"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://link.springer.com/journal/10943/volumes-and-issues/60-5",
 		"items": "multiple"
 	}
 ]
