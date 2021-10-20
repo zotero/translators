@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-20 18:54:00"
+	"lastUpdated": "2021-10-20 19:02:00"
 }
 
 /*
@@ -581,17 +581,17 @@ function processHighwireCreators(creatorNodes, role, doc) {
 			if (authorsByComma.length > 1
 				&& authorsByComma[0].includes(" ")
 				&& authorsByComma[1].includes(" ")
-				&& !twoWordName) authors = authorsByComma;
+				&& !twoWordName) creators = authorsByComma;
 		}
 		
 		for (let creator of creators) {
 			creator = creator.trim();
 
 			// skip empty authors. Try to match something other than punctuation
-			if(!creator || !creator.match(/[^\s,-.;]/)) continue;
+			if (!creator || !creator.match(/[^\s,-.;]/)) continue;
 
 			creator = ZU.cleanAuthor(creator, role, creator.includes(","));
-			if(creator.firstName) {
+			if (creator.firstName) {
 				// fix case for personal names
 				creator.firstName = fixCase(creator.firstName);
 				creator.lastName = fixCase(creator.lastName);
