@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-20 21:32:41"
+	"lastUpdated": "2021-10-20 21:34:23"
 }
 
 /**
@@ -331,7 +331,7 @@ function scrapeEM(doc, url, next) {
 			item.abstractNote = abstract;
 		}
 
-		item.tags = getKeywords(doc) || [];
+		item.tags = getKeywords(doc) || item.tags;
 
 		if (item.notes) item.notes = [];
 		
@@ -1217,7 +1217,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Apoptosis"
+					},
+					{
+						"tag": "Cell Biology"
+					},
+					{
+						"tag": "Human Genetics"
+					},
+					{
+						"tag": "Internal Medicine"
+					},
+					{
+						"tag": "Medicine/Public Health"
+					},
+					{
+						"tag": "Oncology"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1284,7 +1306,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Cosmology"
+					},
+					{
+						"tag": "Galaxies and clusters"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1320,7 +1349,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Policy"
+					},
+					{
+						"tag": "Politics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1377,7 +1413,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Humanities and Social Sciences"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "multidisciplinary"
+					},
+					{
+						"tag": "multidisciplinary"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1505,7 +1557,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Agriculture"
+					},
+					{
+						"tag": "Animal Genetics and Genomics"
+					},
+					{
+						"tag": "Biomedicine"
+					},
+					{
+						"tag": "Cancer Research"
+					},
+					{
+						"tag": "Gene Function"
+					},
+					{
+						"tag": "Human Genetics"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1747,7 +1821,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Humanities and Social Sciences"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "multidisciplinary"
+					},
+					{
+						"tag": "multidisciplinary"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1759,7 +1849,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Structure of the SAM-II riboswitch bound to S -adenosylmethionine",
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
 				"creators": [
 					{
 						"firstName": "Sunny D.",
@@ -1805,7 +1895,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Biochemistry"
+					},
+					{
+						"tag": "Biological Microscopy"
+					},
+					{
+						"tag": "Life Sciences"
+					},
+					{
+						"tag": "Membrane Biology"
+					},
+					{
+						"tag": "Protein Structure"
+					},
+					{
+						"tag": "general"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1882,7 +1994,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Cosmology"
+					},
+					{
+						"tag": "Galaxies and clusters"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1974,7 +2093,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Epigenomics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1986,7 +2109,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg 2+ -bound E1 state",
+				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
 				"creators": [
 					{
 						"firstName": "Chikashi",
@@ -2041,7 +2164,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "X-ray crystallography"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2288,7 +2415,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Metagenomics"
+					},
+					{
+						"tag": "Microbiota"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2341,7 +2475,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Analytical Chemistry"
+					},
+					{
+						"tag": "Biological Techniques"
+					},
+					{
+						"tag": "Computational Biology/Bioinformatics"
+					},
+					{
+						"tag": "Life Sciences"
+					},
+					{
+						"tag": "Microarrays"
+					},
+					{
+						"tag": "Organic Chemistry"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2429,7 +2585,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Chromatin"
+					},
+					{
+						"tag": "Transcription factors"
+					},
+					{
+						"tag": "Transcriptional regulatory elements"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2737,7 +2903,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Publication characteristics"
+					},
+					{
+						"tag": "Research data"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2930,7 +3103,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Electronic properties and materials"
+					},
+					{
+						"tag": "Topological insulators"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
