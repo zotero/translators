@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-13 18:35:09"
+	"lastUpdated": "2021-10-20 18:54:00"
 }
 
 /*
@@ -665,12 +665,13 @@ function addLowQualityMetadata(doc, newItem) {
 
 	if (!newItem.creators.length) {
 		// the authors in the standard W3 author tag are safer than byline guessing
-		var w3authors = ZU.xpath(doc, '//meta[@name="author" or @property="author"]');
-		if (w3authors.length > 0) {
-			for (var i = 0; i < w3authors.length; i++) {
-				// skip empty authors. Try to match something other than punctuation
-				if (!w3authors[i].content || !w3authors[i].content.match(/[^\s,-.;]/)) continue;
-				newItem.creators.push(ZU.cleanAuthor(w3authors[i].content, "author"));
+		var w3authors = new Set(
+			Array.from(doc.querySelectorAll('meta[name="author"], meta[property="author"]'))
+				.map(authorNode => authorNode.content)
+				.filter(content => content && /[^\s,-.;]/.test(content)));
+		if (w3authors.size) {
+			for (let author of w3authors) {
+				newItem.creators.push(ZU.cleanAuthor(author, "author"));
 			}
 		}
 		else if (tryOgAuthors(doc)) {
@@ -1818,6 +1819,36 @@ var testCases = [
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Woher kommt \"über die Wupper gehen\"?",
+				"creators": [
+					{
+						"firstName": "",
+						"lastName": "SWRWissen",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "Es gibt eine Vergleichsredensart: &quot;Der ist über den Jordan gegangen.“ Das heißt, er ist gestorben. Das bezieht sich auf die alten Grenzen Israels. In Wuppertal jedoch liegt jenseits des Flusses das Gefängnis.",
+				"language": "de",
+				"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
+				"websiteTitle": "swr.online",
+				"attachments": [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
