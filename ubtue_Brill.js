@@ -1,7 +1,7 @@
 {
 	"translatorID": "b2fcf7d9-e023-412e-a2bc-f06d6275da24",
 	"label": "ubtue_Brill",
-	"creator": "Madeesh Kannan, Timotheus Kim",
+	"creator": "Madeesh Kannan",
 	"target": "^https?://brill.com/view/journals/",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-31 13:42:36"
+	"lastUpdated": "2021-10-19 13:23:31"
 }
 
 /*
@@ -68,6 +68,8 @@ function getSearchResults(doc) {
 }
 
 function postProcess(doc, item) {
+	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
+	if (title) item.title = title; 
 	if (!item.abstractNote) {
 	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');
 	  if (item.abstractNote && item.abstractNote.length > 0)
@@ -75,6 +77,9 @@ function postProcess(doc, item) {
 	  else
 		 item.abstractNote = '';
 	}
+	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
+	if (item.abstractNote.length < 100) delete item.abstractNote;
+
 	item.tags = ZU.xpath(doc, '//dd[contains(@class, "keywords")]//a');
 	if (item.tags) {
 		let allTags = item.tags.map(i => i.textContent.trim());
@@ -116,7 +121,7 @@ function postProcess(doc, item) {
 	item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
 	// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access	
 	let openAccessTag = text(doc, '.has-license span');
-	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push('LF:');
+	if (openAccessTag && openAccessTag.match(/open\s+access/gi)) item.notes.push({note: 'LF:'});
   // mark articles as "LF" (MARC=856 |z|kostenfrei), that are free accessible e.g. conference report 10.30965/25890433-04902001 
 	let freeAccess = text(doc, '.color-access-free');
 	if (freeAccess && freeAccess.match(/(free|freier)\s+(access|zugang)/gi)) item.notes.push('LF:');
@@ -133,7 +138,17 @@ function extractBerichtsjahr(dateEntry) {
 }
 
 function invokeEmbeddedMetadataTranslator(doc, url) {
+	if (doc.querySelector('body > meta')) {
+	// Brill's HTML is structured incorrectly, and it causes some parsers
+	// to interpret the <meta> tags as being in the body, which breaks EM.
+	// We'll fix it here.
+		for (let meta of doc.querySelectorAll('body > meta')) {
+			doc.head.appendChild(meta);
+		}
+	}
+	
 	var translator = Zotero.loadTranslator("web");
+	// Embedded Metadata
 	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
 	translator.setDocument(doc);
 	translator.setHandler("itemDone", function (t, i) {
@@ -158,34 +173,35 @@ function doWeb(doc, url) {
 	} else
 		invokeEmbeddedMetadataTranslator(doc, url);
 }
-/** BEGIN TEST CASES **/
+
+	/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://brill.com/view/journals/vt/71/3/article-p365_5.xml",
+		"url": "https://brill.com/view/journals/ormo/100/2/article-p147_2.xml",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "The Future of the Past: Literarische Prophetien, Prophetenspruchsammlungen und die Anfänge der Schriftprophetie",
+				"title": "‘Our Traditions Will Kill Us!’: Negotiating Marriage Celebrations in the Face of Legal Regulation of Tradition in Tajikistan",
 				"creators": [
 					{
-						"firstName": "Alexandra",
-						"lastName": "Grund-Wittenberg",
+						"firstName": "Elena",
+						"lastName": "Borisova",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021/02/18",
-				"DOI": "10.1163/15685330-12341069",
-				"ISSN": "0042-4935, 1568-5330",
-				"abstractNote": "Abstract The article is a contribution to the current discussion about the beginnings of prophetic books in ancient Israel. It investigates the significance of the so-called „Literary Predictive Texts“ (LPT) and the Neo-Assyrian prophecies for our understanding of the emergence of prophetic writings in Israel. TheLPTin particular had received only little attention so far. Tying in critically with some recent studies, this article compares the Marduk prophecy and the Neo-Assyrian tablet SAA9 3 with selected passages from the book of Amos (Amos 3–6* and Amos 6*). It concludes that in contrast to the Neo-Assyrian collective tablets the LPTcannot serve as appropriate analogies to early prophetic scrolls, but that they are helpful to understand the phenomenon of tradent prophecy.",
-				"issue": "3",
-				"language": "ger",
+				"date": "2020",
+				"DOI": "10.1163/22138617-12340248",
+				"ISSN": "2213-8617, 0030-5472",
+				"abstractNote": "Abstract Based on extensive ethnographic research in northern Tajikistan, this article examines the implications of the law ordering traditions and rituals (tanzim), including marriage celebrations, in Tajikistan. At the centre of my analysis is the figure of a state employed ‘worker of culture’, Farkhod, whose family was affected by recent, rather militant, attempts by the state to regulate tradition. By following the story of his daughter’s wedding, I analyse how Farkhod tries to reconcile his roles of a caring father, a respectful community member, and a law-abiding citizen. I argue that the tanzim exacerbates the mismatch between the government’s attempts to impose a rigid notion of tradition and promote the idea of a certain kind of modern citizen, and people’s own understandings of being a modern and moral person having a good wedding.",
+				"issue": "2",
+				"language": "eng",
 				"libraryCatalog": "brill.com",
-				"pages": "365-396",
-				"publicationTitle": "Vetus Testamentum",
-				"shortTitle": "The Future of the Past",
-				"url": "https://brill.com/view/journals/vt/71/3/article-p365_5.xml",
-				"volume": "71",
+				"pages": "147-171",
+				"publicationTitle": "Oriente Moderno",
+				"shortTitle": "‘Our Traditions Will Kill Us!’",
+				"url": "https://brill.com/view/journals/ormo/100/2/article-p147_2.xml",
+				"volume": "100",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -198,57 +214,61 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Amos"
+						"tag": "Tajikistan"
 					},
 					{
-						"tag": "Literary Prophetic Texts"
+						"tag": "law"
 					},
 					{
-						"tag": "Marduk prophecy"
+						"tag": "marriage"
 					},
 					{
-						"tag": "Neo-Assyrian prophecies"
+						"tag": "modernity"
 					},
 					{
-						"tag": "early stages of prophetic books"
+						"tag": "tradition"
 					}
 				],
-				"notes": [],
+				"notes": [
+					{
+						"note": "LF:"
+					}
+				],
 				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "https://brill.com/view/journals/rag/11/1/article-p1_1.xml",
+		"url": "https://brill.com/view/journals/ormo/100/2/article-p172_3.xml",
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Looking Back and Moving Forward: The 10th Anniversary of Religion and Gender",
+				"title": "Alignment and Alienation: The Ambivalent Modernisations of Uyghur Marriage in the 21st Century",
 				"creators": [
 					{
-						"firstName": "Anne-Marie",
-						"lastName": "Korte",
+						"firstName": "Rune",
+						"lastName": "Steenberg",
 						"creatorType": "author"
 					},
 					{
-						"firstName": "Nella van den",
-						"lastName": "Brandt",
+						"firstName": "",
+						"lastName": "Musapir",
 						"creatorType": "author"
 					}
 				],
-				"date": "2021/06/23",
-				"DOI": "10.1163/18785417-01101019",
-				"ISSN": "2589-8051, 1878-5417",
-				"abstractNote": "\"Looking Back and Moving Forward\" published on 23 Jun 2021 by Brill.",
-				"issue": "1",
+				"date": "2020",
+				"DOI": "10.1163/22138617-12340247",
+				"ISSN": "2213-8617, 0030-5472",
+				"abstractNote": "Abstract Uyghur marriages in Xinjiang in the 2010s have been characterised by various, sometimes seemingly contradictory trends of modernisation, such as monetisation, simplification, emphasis on ethnic symbolism, displays of piety and the active integration of both Turkish, Western and Chinese elements. This article views these trends as complex, inter-related reactions to the region’s socio-economic transformations and political campaigns. It analyses how these transformations and campaigns affect everyday decisions at the local level. The study of marriage provides a good insight into the effects of economic and political transformations on the ground. In such studies, we argue for a distinction between trends on the level of symbolic positioning and identity display from trends on a deeper structural level pertaining to social relations, economic integration and household strategies. In the case of Uyghurs in southern Xinjiang these two levels have shown opposite trends. On a surface level of symbolic display, the relatively open years of 2010-2014 allowed for the flourishing of trends that did not follow the Party-State line, such as Islamic piety and a strengthened Uyghur ethno-national identity. Yet, on a deeper structural level these trends signified improved integration into modern Chinese society. In contrast, the increased state violence of 2015-2020 enforced a strong symbolic alignment with Chinese Communist Party (CCP) ideology but at the same time alienated the Uyghur population from this society effectively necessitating the development of forms of organisation that the CCP deems backwards and undesirable.",
+				"issue": "2",
 				"language": "eng",
 				"libraryCatalog": "brill.com",
-				"pages": "1-14",
-				"publicationTitle": "Religion and Gender",
-				"shortTitle": "Looking Back and Moving Forward",
-				"url": "https://brill.com/view/journals/rag/11/1/article-p1_1.xml",
-				"volume": "11",
+				"pages": "172-199",
+				"publicationTitle": "Oriente Moderno",
+				"shortTitle": "Alignment and Alienation",
+				"url": "https://brill.com/view/journals/ormo/100/2/article-p172_3.xml",
+				"volume": "100",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
@@ -259,19 +279,32 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
-				"notes": [
+				"tags": [
 					{
-						"note": "orcid:0000-0002-1738-9994 | Anne-Marie Korte"
+						"tag": "Uyghur"
 					},
 					{
-						"note": "orcid:0000-0002-0934-5422 | Nella van den Brandt"
+						"tag": "Xinjiang"
 					},
-					"LF:"
+					{
+						"tag": "commercialisation"
+					},
+					{
+						"tag": "marriage"
+					},
+					{
+						"tag": "modernisation"
+					}
 				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://brill.com/view/journals/ormo/100/2/ormo.100.issue-2.xml",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
