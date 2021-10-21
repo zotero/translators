@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-12 18:54:35"
+	"lastUpdated": "2021-10-21 04:57:23"
 }
 
 /*
@@ -98,7 +98,7 @@ var typeMap = {
 };
 
 function pdfLink(URL) {
-	var id = URL.match(/id=(\d+)/);
+	var id = URL.match(/id=(\d+)/) || URL.match(/\/browse\/doc\/([^/?#]+)/);
 	if (id) return "/browse/pdf-download?articleid=" + id[1];
 	else return URL;
 }
@@ -108,7 +108,7 @@ function scrape(doc, url) {
 	var item = new Zotero.Item("newspaperArticle");
 	var publication = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/publication")]');
 	item.publicationTitle = publication;
-	var voliss = ZU.xpathText(doc, '//a[@class="path" and contains(@href, "browse/issue/")]');
+	var voliss = text(doc, 'a.path[href*="browse/issue/"]') || text(doc, 'h3 > a[href*="browse/issue/"]');
 	if (voliss) {
 		var issue = voliss.match(/No\. (\d+)/);
 		if (issue) item.issue = issue[1];
@@ -171,7 +171,7 @@ function scrape(doc, url) {
 	var itemType = typeMap[item.publicationTitle];
 	if (itemType) item.itemType = itemType;
 	// Attach real PDF for PDFs:
-	if (doc.querySelectorAll('#pdfjsContainer').length) {
+	if (doc.querySelectorAll('#pdfjsContainer, #document-viewer-app').length) {
 		item.attachments.push({
 			url: pdfLink(url),
 			title: "Full Text PDF",
@@ -290,6 +290,40 @@ var testCases = [
 					{
 						"title": "Full Text Snapshot",
 						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://dlib.eastview.com/browse/doc/70313490",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Динамика Взаимосвязи Уровня Тревожности И Адаптационных Способностей Студентов К Обучению В Вузе",
+				"creators": [
+					{
+						"firstName": "Т. В.",
+						"lastName": "Ледовская",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "А. В.",
+						"lastName": "Афанасов",
+						"creatorType": "author"
+					}
+				],
+				"libraryCatalog": "Russian Social Sciences and Humanities Periodicals (Eastview)",
+				"pages": "28-32",
+				"publicationTitle": "Alma Mater",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
 					}
 				],
 				"tags": [],
