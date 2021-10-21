@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 19:25:36"
+	"lastUpdated": "2021-10-21 19:33:58"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (getRISElement(doc)) return "newspaperArticle";
 	if (getSearchResults(doc, true)) return "multiple";
 	return false;
@@ -73,7 +73,7 @@ function getItem(doc, url) {
 		ZU.doGet(risElem.href, risText => itemFromRIS(doc, url, risText));
 	}
 	else {
-		itemFromRis(risElem.textContent.trim());
+		itemFromRIS(risElem.textContent.trim());
 	}
 }
 
