@@ -2,14 +2,14 @@
 	"translatorID": "7fc76bfc-3a1a-47e7-93cc-4deed69bee5f",
 	"label": "NewsBank",
 	"creator": "Reuben Peterkin",
-	"target": "^https?://infoweb\\.newsbank\\.com/apps/news/",
+	"target": "^https?://infoweb\\.newsbank\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-10 01:30:42"
+	"lastUpdated": "2021-10-21 19:25:36"
 }
 
 /*
@@ -37,22 +37,24 @@
 
 function detectWeb(doc, url) {
 	if (getRISElement(doc)) return "newspaperArticle";
-	if (url.includes("/results")) return "multiple";
+	if (getSearchResults(doc, true)) return "multiple";
 	return false;
 }
 
-function getSearchResults(doc) {
+function getSearchResults(doc, checkOnly) {
 	var items = {}, found = false;
-	var rows = doc.getElementsByTagName('article');
-	if (!rows) return false;
-	//	Zotero.debug(rows);
+	var rows = doc.querySelectorAll('article');
+	if (!rows.length) rows = doc.querySelectorAll('.hit');
+	if (!rows.length) return false;
 
 	for (let row of rows) {
-		var title = row.querySelector('.search-hits__hit__title');
+		var title = row.querySelector('.search-hits__hit__title')
+			|| row.querySelector('.article-title');
 		var link = row.querySelector('a');
 		var prefix = text(link, '.element-invisible');
 		if (!title || !link) continue;
 		found = true;
+		if (checkOnly) return true;
 
 		items[link.href] = ZU.trimInternal(title.textContent.replace(prefix, ''));
 	}
@@ -61,23 +63,53 @@ function getSearchResults(doc) {
 }
 
 function getRISElement(doc) {
-	return doc.getElementById('nbplatform-noodletools-export-risdatabyformpost');
+	return doc.getElementById('nbplatform-noodletools-export-risdatabyformpost')
+		|| doc.querySelector('.action-link--exportcitation');
 }
 
 function getItem(doc, url) {
-	var risText = getRISElement(doc).textContent.trim();
+	var risElem = getRISElement(doc);
+	if (risElem.href) {
+		ZU.doGet(risElem.href, risText => itemFromRIS(doc, url, risText));
+	}
+	else {
+		itemFromRis(risElem.textContent.trim());
+	}
+}
+
+function itemFromRIS(doc, url, risText) {
 	//	Z.debug(risText);
 	var trans = Zotero.loadTranslator('import');
 	// RIS
 	trans.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7');
 	trans.setString(risText);
 	trans.setHandler('itemDone', function (obj, item) {
-		item.url = text(doc, '.actions-bar__urltext') || url;
+		if (item.pages) {
+			item.pages = item.pages
+				.replace(/\bpage\b\s*/gi, '')
+				.replace(/,(\S)/g, ', $1');
+		}
 		
-		item.attachments.push({
-			title: 'Snapshot',
-			document: doc
-		});
+		let openURL = attr(doc, '.action-link--bookmark', 'onclick')
+			.match(/f_openurl=([^&'"]+)/);
+		item.url = text(doc, '.actions-bar__urltext')
+			|| (openURL && decodeURIComponent(openURL[1]))
+			|| url;
+		
+		let pdfURL = attr(doc, '.action-link--pdf', 'href');
+		if (pdfURL) {
+			item.attachments.push({
+				title: 'Full Text PDF',
+				mimeType: 'application/pdf',
+				url: pdfURL
+			});
+		}
+		else {
+			item.attachments.push({
+				title: 'Snapshot',
+				document: doc
+			});
+		}
 
 		item.complete();
 	});
@@ -99,7 +131,6 @@ function doWeb(doc, url) {
 	}
 }
 
-// Test cast modified from "The Times and Sunday Times.js"
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -132,6 +163,35 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>SQN: 127147919</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://docs.newsbank.com/openurl?ctx_ver=z39.88-2004&rft_id=info:sid/iw.newsbank.com:FBISX&rft_val_format=info:ofi/fmt:kev:mtx:ctx&rft_dat=11E3F3AD6E1A9CC0&svc_dat=HistArchive:fbisdoc&req_dat=0D0CB57AB53DF815",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Airport Closed to Night Traffic",
+				"creators": [],
+				"date": "May 29, 1975",
+				"libraryCatalog": "NewsBank",
+				"pages": "B1, B2",
+				"publicationTitle": "Djibouti Domestic Service",
+				"url": "https://docs.newsbank.com/openurl?ctx_ver=z39.88-2004&rft_id=info:sid/iw.newsbank.com:FBISX&rft_val_format=info:ofi/fmt:kev:mtx:ctx&rft_dat=11E3F3AD6E1A9CC0&svc_dat=HistArchive:fbisdoc&req_dat=0D0CB57AB53DF815",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Provider: NewsBank/Readex, Database: Foreign Broadcast Information Service (FBIS) Daily Reports, SQN: 11E3F3AC1DC571D8</p>"
 					}
 				],
 				"seeAlso": []
