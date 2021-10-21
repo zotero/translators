@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-03 02:00:37"
+	"lastUpdated": "2021-10-21 05:00:48"
 }
 
 /*
@@ -57,7 +57,12 @@ function detectWeb(doc, url) {
 function getTypeNew(doc) {
 	let type = text(doc, 'tr[data-field-name="Document Type"] td[data-field-role="value"]');
 	if (!type) {
-		return 'document';
+		if (doc.body.classList.contains('cinema')) {
+			return 'videoRecording';
+		}
+		else {
+			return 'document';
+		}
 	}
 	
 	type = ZU.trimInternal(type).toLowerCase();
@@ -127,14 +132,21 @@ function scrapeNew(doc, url) {
 	let item = new Zotero.Item(getTypeNew(doc));
 	
 	item.title = fromTable('Title');
-	item.abstractNote = fromTable('Abstract');
+	item.abstractNote = fromTable('Abstract') || fromTable('Additional Information');
 	item.date = ZU.strToISO(fromTable('Date'));
 	item.place = fromTable('Places');
-	item.copyrightNote = fromTable('Copyright');
+	item.rights = fromTable('Copyright');
 	item.publisher = fromTable('Publisher');
+	item.language = fromTable('Language');
+	
 	item.creators = fromTable('Names')
 		.split('; ')
 		.map(name => ZU.cleanAuthor(name, 'author', true));
+	
+	let director = fromTable('Director');
+	if (director) {
+		item.creators.push(ZU.cleanAuthor(director, 'director', true));
+	}
 	
 	let pageSelect = doc.querySelector('#DownloadPageFrom');
 	if (pageSelect) {
@@ -145,11 +157,18 @@ function scrapeNew(doc, url) {
 	item.libraryCatalog = extractCatalogName(doc.title);
 	item.url = url.replace('/SearchDetails/', '/Details/')
 		.replace('?SessionExpired=True', '');
-	item.attachments.push({
-		title: "Full Text PDF",
-		mimeType: 'application/pdf',
-		url: attr(doc, 'a[href*="/FullDownload"]', 'href')
-	});
+	
+	if (item.itemType != 'videoRecording') {
+		item.attachments.push({
+			title: "Full Text PDF",
+			mimeType: 'application/pdf',
+			url: attr(doc, 'a[href*="/FullDownload"]', 'href')
+		});
+	}
+	
+	item.tags = [...doc.querySelectorAll('tr[data-field-name="Subjects"] td[data-field-role="value"] a')]
+		.map(el => ({ tag: el.textContent }));
+	
 	item.complete();
 }
 
@@ -319,6 +338,64 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.socialismonfilm.amdigital.co.uk/Documents/Details/BFI_ETV_Advance_Democracy_25SD_Prores-4?SessionExpired=True#MediaSummary",
+		"items": [
+			{
+				"itemType": "videoRecording",
+				"title": "Advance Democracy",
+				"creators": [
+					{
+						"firstName": "Ralph",
+						"lastName": "Bond",
+						"creatorType": "director"
+					}
+				],
+				"abstractNote": "Starts with a discussion of inequality in London contrasting the rich with the lives of the poor. Features the hard lives of dock workers and a semi-dramatization of them complaining about taxes and their uses to fight wars. A wife talks to her husband about the merits of the Co-operative, and the husband later listens to a speech about democracy and the co-operative movement which mentions the sacrifices of the Tolpuddle Martyrs, the Chartists and the Rochdale Equitable Pioneers. Warns of the dangers of Nazis (with archive footage of Hitler and war). The protagonist of the film is won over and mobilises his colleagues to march on May Day. Features a medley of labour movement songs.",
+				"language": "English (Dialogue)",
+				"libraryCatalog": "Socialism on Film: The Cold War and International Propaganda - Adam Matthew Digital",
+				"place": "United Kingdom  London",
+				"rights": "The British Film Institute",
+				"url": "https://www.socialismonfilm.amdigital.co.uk/Documents/Details/BFI_ETV_Advance_Democracy_25SD_Prores-4#MediaSummary",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Co-operatives"
+					},
+					{
+						"tag": "Family"
+					},
+					{
+						"tag": "Industry"
+					},
+					{
+						"tag": "Music"
+					},
+					{
+						"tag": "Politics"
+					},
+					{
+						"tag": "Ships and shipping"
+					},
+					{
+						"tag": "Shopping"
+					},
+					{
+						"tag": "Social class"
+					},
+					{
+						"tag": "Trade unions"
+					},
+					{
+						"tag": "Women"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
