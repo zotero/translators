@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-16 20:31:45"
+	"lastUpdated": "2021-10-21 04:23:31"
 }
 
 /*
@@ -41,6 +41,7 @@ let POLISH_TYPE_MAPPINGS = {
 	rozdział: "bookSection",
 	artykuł: "journalArticle",
 	czasopismo: "journalArticle",
+	Article: "journalArticle", // not Polish, but also present sometimes
 	manuskrypt: "manuscript",
 	rękopis: "manuscript",
 	mapa: "map",
@@ -50,8 +51,7 @@ let POLISH_TYPE_MAPPINGS = {
 };
 
 function detectWeb(doc, url) {
-	let singleRe = /.*dlibra\/(doccontent|docmetadata|publication).*/;
-	let multipleRe = /.*dlibra\/(collectiondescription|results|planned).*|.*\/dlibra\/?/;
+	let singleRe = /dlibra\/(doccontent|docmetadata|publication)/;
 	if (singleRe.test(url)) {
 		let types = Array.from(doc.querySelectorAll('meta[name="DC.type"]')).map(meta => meta.content);
 		let type;
@@ -62,9 +62,9 @@ function detectWeb(doc, url) {
 			}
 			type = possibleType;
 		}
-		return type ? type : "document";
+		return (type && ZU.itemTypeExists(type)) ? type : "document";
 	}
-	if (multipleRe.test(url) && getSearchResults(doc, true)) {
+	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -104,11 +104,15 @@ function getSearchResults(doc, checkOnly) {
 	else {
 		// dLibra 6
 		rows = doc.querySelectorAll('.objectbox__text--title');
+		if (!rows.length) rows = doc.querySelectorAll('.item__link--title');
 		for (let row of rows) {
 			// skip 'Similar in FBC'
 			if (row.getAttribute('title')) {
-				let href = attr(row, 'a', 'href');
-				let title = ZU.trimInternal(row.getAttribute('title'));
+				let href = attr(row, 'a', 'href') || row.href;
+				let title = ZU.trimInternal(
+					row.classList.contains('item__link--title')
+						? row.textContent
+						: row.getAttribute('title'));
 				if (!href || !title) continue;
 				if (checkOnly) return true;
 				found = true;
@@ -299,6 +303,65 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.pan.pl/dlibra/publication/99314/edition/118913/content",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Test laboratoryjny dla oceny tunelowania metodą EPB: wyniki testów dla dwóch różnych gruntów ziarnistych",
+				"creators": [
+					{
+						"firstName": "Daniele",
+						"lastName": "Peila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Luca",
+						"lastName": "Borio",
+						"creatorType": "author"
+					}
+				],
+				"date": "2011",
+				"ISSN": "0860-0953",
+				"libraryCatalog": "dLibra",
+				"publicationTitle": "Gospodarka Surowcami Mineralnymi - Mineral Resources Management; 2011; No 1; 85-100",
+				"shortTitle": "Test laboratoryjny dla oceny tunelowania metodą EPB",
+				"url": "https://journals.pan.pl/dlibra/publication/99314/edition/118913",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "EPB tunnelling"
+					},
+					{
+						"tag": "Nauki Techniczne"
+					},
+					{
+						"tag": "risk management"
+					},
+					{
+						"tag": "soil conditioning"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.pan.pl/dlibra/results?q=test&action=SimpleSearchAction&mdirids=&type=-6&startstr=_all&p=0",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
