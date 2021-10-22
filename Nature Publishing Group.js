@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-26 01:23:31"
+	"lastUpdated": "2021-10-20 21:34:23"
 }
 
 /**
@@ -331,7 +331,7 @@ function scrapeEM(doc, url, next) {
 			item.abstractNote = abstract;
 		}
 
-		item.tags = getKeywords(doc) || [];
+		item.tags = getKeywords(doc) || item.tags;
 
 		if (item.notes) item.notes = [];
 		
@@ -639,6 +639,12 @@ function scrape(doc, url) {
 		if (!item) {
 			Z.debug('Could not retrieve metadata.');
 			return;	// both translators failed
+		}
+		
+		// small caps become lowercase in EM/RIS, so if the title contains a
+		// small-caps span, we'll use innerText.
+		if (doc.querySelector('h1.c-article-title .u-small-caps')) {
+			item.title = innerText('h1.c-article-title') || item.title;
 		}
 		
 		// We prefer the publication date to some online first date
@@ -1211,7 +1217,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Apoptosis"
+					},
+					{
+						"tag": "Cell Biology"
+					},
+					{
+						"tag": "Human Genetics"
+					},
+					{
+						"tag": "Internal Medicine"
+					},
+					{
+						"tag": "Medicine/Public Health"
+					},
+					{
+						"tag": "Oncology"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1278,7 +1306,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Cosmology"
+					},
+					{
+						"tag": "Galaxies and clusters"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1314,7 +1349,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Policy"
+					},
+					{
+						"tag": "Politics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1371,7 +1413,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Humanities and Social Sciences"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "multidisciplinary"
+					},
+					{
+						"tag": "multidisciplinary"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1499,7 +1557,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Agriculture"
+					},
+					{
+						"tag": "Animal Genetics and Genomics"
+					},
+					{
+						"tag": "Biomedicine"
+					},
+					{
+						"tag": "Cancer Research"
+					},
+					{
+						"tag": "Gene Function"
+					},
+					{
+						"tag": "Human Genetics"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1741,7 +1821,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Humanities and Social Sciences"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "multidisciplinary"
+					},
+					{
+						"tag": "multidisciplinary"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1753,7 +1849,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Structure of the SAM-II riboswitch bound to S -adenosylmethionine",
+				"title": "Structure of the SAM-II riboswitch bound to S-adenosylmethionine",
 				"creators": [
 					{
 						"firstName": "Sunny D.",
@@ -1799,7 +1895,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Biochemistry"
+					},
+					{
+						"tag": "Biological Microscopy"
+					},
+					{
+						"tag": "Life Sciences"
+					},
+					{
+						"tag": "Membrane Biology"
+					},
+					{
+						"tag": "Protein Structure"
+					},
+					{
+						"tag": "general"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1876,7 +1994,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Cosmology"
+					},
+					{
+						"tag": "Galaxies and clusters"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1968,7 +2093,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Epigenomics"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1980,7 +2109,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "journalArticle",
-				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg 2+ -bound E1 state",
+				"title": "Crystal structures of the calcium pump and sarcolipin in the Mg2+-bound E1 state",
 				"creators": [
 					{
 						"firstName": "Chikashi",
@@ -2035,7 +2164,11 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "X-ray crystallography"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2282,7 +2415,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Metagenomics"
+					},
+					{
+						"tag": "Microbiota"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2335,7 +2475,29 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Analytical Chemistry"
+					},
+					{
+						"tag": "Biological Techniques"
+					},
+					{
+						"tag": "Computational Biology/Bioinformatics"
+					},
+					{
+						"tag": "Life Sciences"
+					},
+					{
+						"tag": "Microarrays"
+					},
+					{
+						"tag": "Organic Chemistry"
+					},
+					{
+						"tag": "general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2423,7 +2585,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Chromatin"
+					},
+					{
+						"tag": "Transcription factors"
+					},
+					{
+						"tag": "Transcriptional regulatory elements"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2731,7 +2903,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Publication characteristics"
+					},
+					{
+						"tag": "Research data"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -2924,7 +3103,124 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Electronic properties and materials"
+					},
+					{
+						"tag": "Topological insulators"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.nature.com/articles/s41586-021-03972-8",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Evidence for European presence in the Americas in AD 1021",
+				"creators": [
+					{
+						"firstName": "Margot",
+						"lastName": "Kuitems",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Birgitta L.",
+						"lastName": "Wallace",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charles",
+						"lastName": "Lindsay",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrea",
+						"lastName": "Scifo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Petra",
+						"lastName": "Doeve",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kevin",
+						"lastName": "Jenkins",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Susanne",
+						"lastName": "Lindauer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pınar",
+						"lastName": "Erdil",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Paul M.",
+						"lastName": "Ledger",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Véronique",
+						"lastName": "Forbes",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Caroline",
+						"lastName": "Vermeeren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ronny",
+						"lastName": "Friedrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael W.",
+						"lastName": "Dee",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-10-20",
+				"DOI": "10.1038/s41586-021-03972-8",
+				"ISSN": "1476-4687",
+				"abstractNote": "Transatlantic exploration took place centuries before the crossing of Columbus. Physical evidence for early European presence in the Americas can be found in Newfoundland, Canada1,2. However, it has thus far not been possible to determine when this activity took place3–5. Here we provide evidence that the Vikings were present in Newfoundland in ad 1021. We overcome the imprecision of previous age estimates by making use of the cosmic-ray-induced upsurge in atmospheric radiocarbon concentrations in ad 993 (ref. 6). Our new date lays down a marker for European cognisance of the Americas, and represents the first known point at which humans encircled the globe. It also provides a definitive tie point for future research into the initial consequences of transatlantic activity, such as the transference of knowledge, and the potential exchange of genetic information, biota and pathologies7,8.",
+				"language": "en",
+				"libraryCatalog": "www.nature.com",
+				"pages": "1-4",
+				"publicationTitle": "Nature",
+				"rights": "2021 The Author(s)",
+				"url": "https://www.nature.com/articles/s41586-021-03972-8",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Archaeology"
+					},
+					{
+						"tag": "Mass spectrometry"
+					},
+					{
+						"tag": "Plant physiology"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
