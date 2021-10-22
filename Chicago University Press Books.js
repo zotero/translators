@@ -93,7 +93,7 @@ function scrape(doc, url) {
 		// Some authors aren't hyperlinked
 		if (authorString.includes(",")) {
 			// grab the text-only content of the author string
-			var moreAuthors = ZU.xpathText(doc, '//div[@class="purchase-item-detail-title-desktop"]//p[@class="author link-reverse-underline"]/text()');
+			var moreAuthors = text(doc, 'div.purchase-item-detail-title-desktop p.author');
 			// clean it.
 			moreAuthors = moreAuthors.replace(/^[^,]*[,\s]*/, "").replace(/^and/, "");
 			moreAuthors = moreAuthors.split(/,\s(?:and )?|\sand\s/);
