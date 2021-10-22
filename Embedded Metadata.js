@@ -683,13 +683,13 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	// fall back to "keywords"
 	if (!newItem.tags.length) {
-		newItem.tags = ZU.xpathText(doc, '//x:meta[@name="keywords" or @name="Keywords"]/@content', namespaces);
+		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
 	// We can try getting abstract from 'description'
 	if (!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
-			ZU.xpathText(doc, '//x:meta[@name="description" or @name="Description"]/@content', namespaces) || '');
+			attr(doc, 'meta[name="description" i]', 'content'));
 	}
 
 	if (!newItem.url) {
@@ -697,7 +697,7 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	
 	if (!newItem.language) {
-		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language" or @name="Language"]/@content', namespaces)
+		newItem.language = attr(doc, 'meta[name="language" i]', 'content')
 			|| ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//html/@lang')
