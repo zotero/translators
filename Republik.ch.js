@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-05 10:06:57"
+	"lastUpdated": "2021-10-22 04:00:59"
 }
 
 /*
@@ -30,10 +30,12 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	// TODO match different types of articles / debates / updates / blog-posts / newsletters etc.
-	
-	return "newspaperArticle";
+	if (doc.querySelector('article section.title-block h1')) {
+		return "newspaperArticle";
+	}
+	return false;
 }
 
 
@@ -45,55 +47,52 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-
 	var newItem = new Zotero.Item("newspaperArticle");
 
 	newItem.title = text(doc, "article section.title-block h1");
 	
-	var abstract = text(doc, "article section.title-block > p:nth-last-of-type(2)")
-	var meta = text(doc, "article section.title-block > p:nth-last-of-type(1)")
+	var abstract = text(doc, "article section.title-block > p:nth-last-of-type(2)");
+	var meta = text(doc, "article section.title-block > p:nth-last-of-type(1)");
 	
 	// Zotero.debug(abstract);
 	// Zotero.debug(meta);
 	
-	if(meta == "" || abstract.localeCompare(meta) == 0) {
+	if (meta == "" || abstract.localeCompare(meta) == 0) {
 		// Catch case without any description / abstract
-		meta = abstract
+		meta = abstract;
 		abstract = "";
 	}
 	newItem.abstractNote = abstract;
 	
 	
-	const reg_date = /(.*),?\s+([0-3][0-9]\.[0-1][0-9]\.[1-3][0-9][0-9][0-9])$/;
-	const reg_function = /(.*)\s+\((.*)\)/
+	const dateRe = /(.*),?\s+([0-3][0-9]\.[0-1][0-9]\.[1-3][0-9][0-9][0-9])$/;
+	const authorRe = /(.*)\s+\((.*)\)/;
 	
-	var date = meta.match(reg_date)
+	var date = meta.match(dateRe);
 	
-	if(!date) {
+	if (!date) {
 		newItem.date = ZU.strToISO(meta);
-	} else {
-		
-		newItem.date = ZU.strToISO(date[2]);
+	}
+	else {
+		newItem.date = date[2].replace(/([0-3][0-9])\.([0-1][0-9])\.([1-3][0-9][0-9][0-9])/, '$3-$2-$1');
 		
 		var rest = date[1];
 		
 		var authors = rest.match(/von\s+(.*)$/i);
-		if(authors){
-		
+		if (authors) {
 			authors = authors[1].split(/,\s|\sund\s/);
 			
 			// Zotero.debug(authors);
 		
-			for(var aa in authors){
-
-				var author = authors[aa].trim();
+			for (let author of authors) {
+				author = author.trim();
 				
 				var type = "author";
 				
-				var clean = author.match(reg_function);
-				if(clean) {
+				var clean = author.match(authorRe);
+				if (clean) {
 					author = clean[1];
-					if(clean[2] == "Bilder" || clean[2] == "Illustration" || clean[2] == "Übersetzung") {
+					if (clean[2] == "Bilder" || clean[2] == "Illustration" || clean[2] == "Übersetzung") {
 						type = "contributor";
 					}
 				}
@@ -105,15 +104,15 @@ function scrape(doc, url) {
 
 	newItem.url = attr(doc, 'meta[property="og:url"]', 'content') || url;
 
-
 	var pdfURL = attr(doc, 'article a[title="PDF-Optionen"]', 'href');
-	if(pdfURL) {
+	if (pdfURL) {
 		newItem.attachments.push({
 			url: pdfURL,
 			title: "Full Text PDF",
 			mimeType: "application/pdf"
 		});
-	} else {
+	}
+	else {
 		newItem.attachments.push({
 			document: doc,
 			title: "Snapshot",
@@ -124,8 +123,8 @@ function scrape(doc, url) {
 	newItem.publicationTitle = "Republik";
 	newItem.language = "de-CH";
 	newItem.complete();
-
 }
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -368,7 +367,8 @@ var testCases = [
 				"itemType": "newspaperArticle",
 				"title": "Interview mit der Regisseurin des ersten Spielfilms über Srebrenica. Dazu: eine Recherche zum E-Voting",
 				"creators": [],
-				"date": "2021-08-05",
+				"date": "2021-04-08",
+				"abstractNote": "7-Uhr-Newsletter",
 				"language": "de-CH",
 				"libraryCatalog": "Republik.ch",
 				"publicationTitle": "Republik",
