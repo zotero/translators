@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-20 19:02:00"
+	"lastUpdated": "2021-10-22 00:24:00"
 }
 
 /*
@@ -666,7 +666,7 @@ function addLowQualityMetadata(doc, newItem) {
 	if (!newItem.creators.length) {
 		// the authors in the standard W3 author tag are safer than byline guessing
 		var w3authors = new Set(
-			Array.from(doc.querySelectorAll('meta[name="author"], meta[property="author"]'))
+			Array.from(doc.querySelectorAll('meta[name="author" i], meta[property="author" i]'))
 				.map(authorNode => authorNode.content)
 				.filter(content => content && /[^\s,-.;]/.test(content)));
 		if (w3authors.size) {
@@ -683,13 +683,13 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	// fall back to "keywords"
 	if (!newItem.tags.length) {
-		newItem.tags = ZU.xpathText(doc, '//x:meta[@name="keywords"]/@content', namespaces);
+		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
 	// We can try getting abstract from 'description'
 	if (!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
-			ZU.xpathText(doc, '//x:meta[@name="description"]/@content', namespaces) || '');
+			attr(doc, 'meta[name="description" i]', 'content'));
 	}
 
 	if (!newItem.url) {
@@ -697,7 +697,7 @@ function addLowQualityMetadata(doc, newItem) {
 	}
 	
 	if (!newItem.language) {
-		newItem.language = ZU.xpathText(doc, '//x:meta[@name="language"]/@content', namespaces)
+		newItem.language = attr(doc, 'meta[name="language" i]', 'content')
 			|| ZU.xpathText(doc, '//x:meta[@name="lang"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//x:meta[@http-equiv="content-language"]/@content', namespaces)
 			|| ZU.xpathText(doc, '//html/@lang')
@@ -1848,6 +1848,36 @@ var testCases = [
 				"language": "de",
 				"url": "https://www.swr.de/wissen/1000-antworten/kultur/woher-kommt-redensart-ueber-die-wupper-gehen-100.html",
 				"websiteTitle": "swr.online",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.azatliq.org/a/24281041.html",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Татар яшьләре татарлыкны сакларга тырыша",
+				"creators": [
+					{
+						"firstName": "гүзәл",
+						"lastName": "мәхмүтова",
+						"creatorType": "author"
+					}
+				],
+				"abstractNote": "Бу көннәрдә “Идел” җәйләвендә XXI Татар яшьләре көннәре үтә. Яшьләр вакытларын төрле чараларда катнашып үткәрә.",
+				"language": "tt",
+				"url": "https://www.azatliq.org/a/24281041.html",
+				"websiteTitle": "Азатлык Радиосы",
 				"attachments": [
 					{
 						"title": "Snapshot",
