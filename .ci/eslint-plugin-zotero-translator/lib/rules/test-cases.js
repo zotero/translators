@@ -8,7 +8,7 @@ module.exports = {
 		type: 'problem',
 
 		docs: {
-			description: 'disallow invalid test input',
+			description: 'disallow invalid tests',
 			category: 'Possible Errors',
 		},
 	},
@@ -86,6 +86,58 @@ module.exports = {
 								message: `${prefix} of type "${testCase.type}" has invalid search term '${invalidKey}' - expected one of ${expected.join(', ')}`,
 								loc,
 							});
+						}
+					}
+
+					if (Array.isArray(testCase.items)) {
+						let itemsNode = testCases[caseNo].properties
+							.find(prop => prop.key.type == 'Literal' && prop.key.value == 'items')
+							.value;
+						for (let [itemIndex, item] of testCase.items.entries()) {
+							let itemNode = itemsNode.elements[itemIndex];
+							let itemLoc = itemNode.loc;
+							
+							if (!Array.isArray(item.creators)) {
+								context.report({
+									message: 'creators should be an array',
+									loc: itemLoc,
+								});
+								continue;
+							}
+
+							for (let [creatorIndex, creator] of item.creators.entries()) {
+								let creatorLoc = itemNode.properties
+									.find(prop => prop.key.type == 'Literal' && prop.key.value == 'creators')
+									.value
+									.elements[creatorIndex]
+									.loc;
+
+								if (creator.fieldMode !== undefined && creator.fieldMode !== 1) {
+									context.report({
+										message: 'creator.fieldMode should be omitted or 1',
+										loc: creatorLoc,
+									});
+								}
+								else if (creator.fieldMode === 1 && (creator.firstName || !creator.lastName)) {
+									context.report({
+										message: 'creator with fieldMode == 1 should have lastName and no firstName',
+										loc: creatorLoc,
+									});
+								}
+								else if (!creator.firstName && !creator.lastName) {
+									context.report({
+										message: 'creator has no name',
+										loc: creatorLoc,
+									});
+								}
+
+								if (!creator.creatorType) {
+									context.report({
+										message: 'creator has no creatorType',
+										loc: creatorLoc,
+									});
+								}
+							}
 						}
 					}
 				}
