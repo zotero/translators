@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-22 02:32:24"
+	"lastUpdated": "2021-10-29 00:35:04"
 }
 
 /*
@@ -117,6 +117,12 @@ function fillBookInfo(doc, url, item) {
 				item.creators.push(ZU.cleanAuthor(name, 'editor'));
 			}
 			break;
+		}
+	}
+	
+	for (let attachment of item.attachments) {
+		if (attachment.url && attachment.url.startsWith('www.')) {
+			attachment.url = 'https://' + attachment.url;
 		}
 	}
 }
