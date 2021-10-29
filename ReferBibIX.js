@@ -11,9 +11,8 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2019-08-07 11:11:24"
+	"lastUpdated": "2021-10-23 20:56:30"
 }
-
 
 function detectImport() {
 	var lineRe = /%[A-Z0-9*$] .+/;
@@ -148,8 +147,6 @@ function processTag(item, tag, value) {
 					break;
 				}
 			}
-			// fall back to generic
-			if (!item.itemType) item.itemType = inputTypeMap.Generic;
 		}
 	}
 	else if (tag == "A" || tag == "E" || tag == "Y") {
@@ -209,12 +206,13 @@ function doImport() {
 	var line = true;
 	var tag = data = false;
 	do {	// first valid line is type
-		Zotero.debug("ignoring " + line);
+		if (line !== true) Zotero.debug("ignoring " + line);
 		line = Zotero.read();
 		line = line.replace(/^\s+/, "");
 	} while (line !== false && line[0] != "%");
-	
-	var item = new Zotero.Item();
+
+	// default to creating a book if no %0 tag is eventually found
+	var item = new Zotero.Item(inputTypeMap.Generic);
 	
 	tag = line[1];
 	var data = line.substr(3);
@@ -227,7 +225,7 @@ function doImport() {
 				tag = data = false;
 				// new item
 				item.complete();
-				item = new Zotero.Item();
+				item = new Zotero.Item(inputTypeMap.Generic);
 			}
 		}
 		else if (line[0] == "%" && line[2] == " ") {
@@ -403,6 +401,39 @@ var testCases = [
 						"note": "Elektronisk reproduksjon [Norge] Nasjonalbiblioteket Digital 2016-11-03"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "%T Corn\n%A Newman, W. H.\n%I Uniontown, Ala. : Canebrake Agricultural Experiment Station\n%D 1891\n%K Corn -- Yields\n%K Corn -- Varieties\n%K Corn -- Field experiments\n\n",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Corn",
+				"creators": [
+					{
+						"firstName": "W. H.",
+						"lastName": "Newman",
+						"creatorType": "author"
+					}
+				],
+				"date": "1891",
+				"publisher": "Uniontown, Ala. : Canebrake Agricultural Experiment Station",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Corn -- Field experiments"
+					},
+					{
+						"tag": "Corn -- Varieties"
+					},
+					{
+						"tag": "Corn -- Yields"
+					}
+				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
