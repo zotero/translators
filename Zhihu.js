@@ -50,20 +50,22 @@ function getIDFromUrl(url) {
 
 function detectWeb(doc, url) {
 	let ZID = getIDFromUrl(url);
-	Z.debug(ZID);
+	// Z.debug(ZID);
 	if (ZID) {
 		return "webpage";
 	}
-	else if (url.includes("search?type=")
-		|| url.includes("/collection/")
-		|| url.includes("/people/")
-		|| getSearchResults(doc, true)) {
+	else if (getSearchResults(url, doc, true)) {
 		return "multiple";
 	}
 	return false;
 }
 
-function getSearchResults(doc, checkOnly, itemInfo) {
+function getSearchResults(url, doc, checkOnly, itemInfo) {
+	if (checkOnly
+		&& (url.includes("search?type=")
+			|| url.includes("/collection/")
+			|| url.includes("/people/"))
+	) return true;
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('.ArticleItem,.AnswerItem');
@@ -94,12 +96,12 @@ function getSearchResults(doc, checkOnly, itemInfo) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		var itemInfo = {};
-		Zotero.selectItems(getSearchResults(doc, false, itemInfo), function (selectedItems) {
+		Zotero.selectItems(getSearchResults(url, doc, false, itemInfo), function (selectedItems) {
 			var ZIDs = [];
 			for (let url in selectedItems) {
 				ZIDs.push(itemInfo[url]);
 			}
-			Z.debug(ZIDs);
+			// Z.debug(ZIDs);
 			scrape(ZIDs);
 		});
 	}
@@ -110,18 +112,18 @@ function doWeb(doc, url) {
 }
 
 function scrape(ZIDs) {
-	if (!ZIDs.length) return false;
+	if (!ZIDs.length) return;
 	var { ztype, zid, url } = ZIDs.shift();
 	let targetUrl = urlHash[ztype] + zid;
 	if (ztype === 'answer') targetUrl += "?include=data[*].content,voteup_count,share_text";
 	ZU.doGet(targetUrl, function (text) {
 		var textJson = JSON.parse(text);
 		// Z.debug(textJson);
-		var newItem = new Zotero.Item("webpage");
+		var newItem = new Zotero.Item("forumPost");
 		newItem.url = url;
-		newItem.title = textJson.title ? textJson.title : textJson.question.title;
+		newItem.title = textJson.title || textJson.question.title;
 		newItem.abstractNote = textJson.share_text.replace(/ [（(]想看更多.*$/, '');
-		let createdTime = textJson.created ? textJson.created : textJson.created_time;
+		let createdTime = textJson.created || textJson.created_time;
 		newItem.date = new Date(createdTime * 1000).toLocaleString();
 		newItem.websiteType = ztype === 'article' ? "知乎专栏文章" : "知乎回答";
 		newItem.websiteTitle = textJson.column ? textJson.column.title : '回答';
@@ -134,7 +136,11 @@ function scrape(ZIDs) {
 		}
 		newItem.language = 'zh-CN';
 		newItem.extra = `赞数:${textJson.voteup_count};`;
-		newItem.attachments.push({ url: url, title: "Snapshot" });
+		newItem.attachments.push({
+			url: url,
+			title: "Snapshot",
+			mimeType: "text/html"
+		});
 		newItem.complete();
 		if (ZIDs.length > 0) {
 			scrape(ZIDs);
