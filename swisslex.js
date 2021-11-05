@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-23 10:32:29"
+	"lastUpdated": "2021-11-04 20:54:04"
 }
 
 /*
@@ -35,216 +35,334 @@
 	***** END LICENSE BLOCK *****
 */
 
-base_url = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)/";
-base_index = {
-	"type": 2,
-	"id": 3
-};
+/**
+ * Data Class holding web document information
+ * @property {Element}           dom
+ * @property {String}            url
+ * @property {String}            lang
+ * @property {String}            id
+ * @property {Zotero.ItemType}   type
+ */
+class DocumentData {}
 
-detecttypes = {
-	"bookdoc": "bookSection",
-	"essay": "journalArticle",
-	"clawrev": "journalArticle",
-	"commentarydoc": "encyclopediaArticle",
-	"claw": "case"
-};
+/**
+ * Data Class representing collected metadata fields
+ *
+ * Internal/Temporary fields are named starting with '_'.
+ *
+ * @property {String} _magic
+ * @property {String} _author
+ * @property {String} _editor
+ * @property {Array}  creators
+ * @property {String} title
+ * @property {String} publicationTitle
+ * @property {String} series
+ * @property {String} date
+ * @property {String} pages
+ * @property {String} ISBN
+ * @property {String} publisher
+ * @property {String} ISSN
+ * @property {String} court
+ * @property {String} abstractNote
+ * @property {String} edition
+ * @property {String} _tags
+ * @property {Array}  tags
+ * @property {String} journalAbbreviation
+ * @property {String} issue
+ * @property {String} number
+ */
+class Metas {}
 
-doparams = {
-	"artikelkommentar": "_magic",
-	// "dokumenttitel": "_magic",
-	"dokument": "_magic",
-	"auflage": "edition",
-	"autor": "author",
-	"autoren": "author",
-	"titel": "title",
-	"buchtitel": "publicationTitle",
-	"serie/reihe": "series",
-	"reihe": "series",
-	"urteilsdatum": "date",
-	"jahr": "date",
-	"seiten": "pages",
-	"herausgeber": "editor",
-	"isbn": "ISBN",
-	"verlag": "publisher",
-	"publikation": "publicationTitle",
-	"issn": "ISSN",
-	"gericht": "court",
-	"betreff": "abstractNote",
-	"rechtsgebiete": "tags"
-};
+/**
+ * interpret a document URL and extract web document information
+ *
+ * @param   {Document} doc   Document as received from Zotero
+ * @param   {String}   url   URL string as received from Zotero
+ * @returns {DocumentData}
+ */
+function extractDocumentData(doc, url) {
+	const types = {
+		"bookdoc": "bookSection",
+		"essay": "journalArticle",
+		"clawrev": "journalArticle",
+		"commentarydoc": "encyclopediaArticle",
+		"claw": "case"
+	};
+	const url_regexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
 
-docantons = {
-	"Schweiz": "",
-	"Zürich": "ZH",
-	"Bern": "BE",
-	"Basel-Stadt": "BS",
-	"Basel-Land": "BL",
-	"Freiburg": "FR",
-	"Graubünden": "GR",
-	"Genf": "GE",
-	"St. Gallen": "SG",
-	"Tessin": "TI",
-	"Luzern": "LU"
-	
-};
+	var parts;
+	var result = new DocumentData();
 
-docourts = {
-	"Bundesstrafgericht": "BStrG",
-	"Bundesverwaltungsgericht": "BVerwG",
-	"Bundesgericht": "BGer",
-	"Eidgenössisches Versicherungsgericht": "EVGer",
-	"Eidgenössische Bankenkommission": "EBK",
-	"Bundesamt": "BJ",
-	"Bundesstaatsanwaltschaft": "BA",
-	"Steuerekurskommission": "StRK",
-	"Obergericht": "OGer",
-	"Handelsgericht": "HGer",
-	"Kantonsgericht": "KGer",
-	"Appellationsgericht": "AppG",
-	"Kassationsgericht": "KassG",
-	"Kreisgericht": "KrG",
-	"Bezirksgericht": "BezG",
-	"Zivilgericht": "ZG",
-	"Versicherungsgericht": "VG",
-	"Sozialversicherungsgericht": "SozVG",
-};
-
-function interpretURI(url) {
 	url = decodeURI(url);
-
-	var base_url = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
-	var parts = url.match(base_url);
-	var res = {};
+	parts = url.match(url_regexp);
 
 	if (parts !== null) {
-		res.url = parts[0];
-		res.lang = parts[1];
-		res.id = parts[3];
-		res.type = detecttypes[parts[2]];
+		result = {
+			dom: doc.documentElement,
+			url: parts[0],
+			lang: parts[1],
+			id: parts[3],
+			type: types[parts[2]]
+		}
 	}
-	return res;
+
+	return result;
+}
+
+/**
+ * extract and collect possible metadata fields
+ *
+ * Metadata is presented in LIs of class 'meta-entry', encompassing
+ * two SPANs: the first for a label, the second for the metadata value
+ *
+ * After extraction the fields are collected in 'raw' format. They will have to
+ * be parsed/patched for machine readability and transfer to Zotero.
+ *
+ * @param   {DocumentData}         doc_data
+ * @returns {Metas}
+ */
+function extractRawItemData(doc_data) {
+	const metadata_labels = {
+		"artikelkommentar": "_magic",
+		"dokument": "_magic",
+		"auflage": "edition",
+		"autor": "_author",
+		"autoren": "_author",
+		"titel": "title",
+		"buchtitel": "publicationTitle",
+		"serie/reihe": "series",
+		"reihe": "series",
+		"urteilsdatum": "date",
+		"jahr": "date",
+		"seiten": "pages",
+		"herausgeber": "_editor",
+		"isbn": "ISBN",
+		"verlag": "publisher",
+		"publikation": "publicationTitle",
+		"issn": "ISSN",
+		"gericht": "court",
+		"betreff": "abstractNote",
+		"rechtsgebiete": "_tags"
+	};
+
+	var dom_metas = ZU.xpath(doc_data.dom, '//div[@id="' + doc_data.id + '"]//li[contains(@class,"meta-entry")]');
+	var result = new Metas();
+
+	result.url = doc_data.url;
+	for (let i=0, l=dom_metas.length; i<l; i++) {
+		let label = dom_metas[i].children[0].innerText.toLowerCase();
+		if (metadata_labels[label] !== undefined) {
+			result[metadata_labels[label]] = dom_metas[i].children[1].innerText;
+		}
+		else {
+			Z.debug( "Unknown swisslex metadata label: " + label );
+		}
+	}
+
+	return result;
+}
+
+/**
+ * patchup common extracted metadata fields
+ *
+ * Common metadata fiels that have to be patched are:
+ *   * date     convert to ISO
+ *   * edition  extract numerical value
+ *   * tags     split string by comma
+ *   * _author  add to creators array - format: lastname firstname
+ *   * _editor  add to creators array - format: firstname lastname
+ *
+ * @param {DocumentData} doc_data
+ * @param {Metas}        metas
+ */
+function patchupMetaCommon(doc_data, metas) {
+	if (metas.date !== undefined) {
+		metas.date = ZU.strToISO(metas.date);
+	}
+	if (metas.edition !== undefined) {
+		metas.edition = metas.edition.split('.')[0];
+	}
+	if (metas._tags !== undefined) {
+		let tags = metas._tags.split(',');
+		delete metas._tags;
+		metas.tags = [];
+		for (let i = 0; i < tags.length; i++) {
+			metas.tags.push( ZU.trimInternal( tags[i] ) );
+		}
+	}
+	if (metas._editor !== undefined) {
+		let editors = metas._editor.split(',');
+		delete metas._editor;
+		metas.creators = metas.creators || [];
+		for (let i = 0; i < editors.length; i++) {
+			metas.creators.push( ZU.cleanAuthor( editors[i], "editor", false) );
+		}
+	}
+	if (metas._author !== undefined) {
+		let authors = metas._author.split(',');
+		delete metas._author;
+		metas.creators = metas.creators || [];
+		for (let i = 0; i < authors.length; i++) {
+			let one_author = ZU.cleanAuthor( authors[i], "author", false);
+			[ one_author.firstName, one_author.lastName ] = [ one_author.lastName, one_author.firstName ];
+			metas.creators.push( one_author );
+		}
+	}
+}
+
+/**
+ * patchup metas with information from field _magic
+ *
+ * depending on document type, _magic will hold different information.
+ *
+ * @TODO  the data extraction of _magic is rather brittle and not well tested
+ * @param {DocumentData} doc_data
+ * @param {Metas}        metas
+ */
+function patchupMetaMagic(doc_data, metas) {
+	let magic = metas._magic;
+	delete metas._magic;
+
+	if (magic === undefined) {
+		return;
+	}
+
+	if (doc_data.type === "journalArticle") {
+		let value = magic.split(' ');
+		metas.journalAbbreviation = value[0];
+		if (value[1].includes("/")) {
+			metas.issue = value[1].split("/")[0];
+		}
+	}
+	else if (doc_data.type === "bookSection") {
+		let value = magic.match( '([0-9]+)\.A.,' );
+		if (value) {
+			metas.edition = value[1];
+		}
+	}
+	else if (doc_data.type === "encyclopediaArticle") {
+		metas.title = magic;
+	}
+	else if (doc_data.type === "case") {
+		metas.number = magic;
+		metas.title = magic;
+	}
+	else {
+		Z.debug("don't know _magic for type " + doc_data.type);
+	}
+}
+
+/**
+ * patchup metas for document type 'case'
+ * @param {DocumentData}  doc_data
+ * @param {Metas}         metas
+ */
+function patchupForCase(doc_data, metas) {
+	const cantons = {
+		"Schweiz": "",
+		"Zürich": "ZH",
+		"Bern": "BE",
+		"Basel-Stadt": "BS",
+		"Basel-Land": "BL",
+		"Freiburg": "FR",
+		"Graubünden": "GR",
+		"Genf": "GE",
+		"St. Gallen": "SG",
+		"Tessin": "TI",
+		"Luzern": "LU"
+	};
+	const courts = {
+		"Bundesstrafgericht": "BStrG",
+		"Bundesverwaltungsgericht": "BVerwG",
+		"Bundesgericht": "BGer",
+		"Eidgenössisches Versicherungsgericht": "EVGer",
+		"Eidgenössische Bankenkommission": "EBK",
+		"Bundesamt": "BJ",
+		"Bundesstaatsanwaltschaft": "BA",
+		"Steuerekurskommission": "StRK",
+		"Obergericht": "OGer",
+		"Handelsgericht": "HGer",
+		"Kantonsgericht": "KGer",
+		"Appellationsgericht": "AppG",
+		"Kassationsgericht": "KassG",
+		"Kreisgericht": "KrG",
+		"Bezirksgericht": "BezG",
+		"Zivilgericht": "ZG",
+		"Versicherungsgericht": "VG",
+		"Sozialversicherungsgericht": "SozVG",
+	};
+
+	let court = metas.court.split(",");
+	let title = metas.title;
+
+	if (title.substring(0,4) !== "BGE ") {
+		let temp = court[0].trim();
+		if (cantons[temp] !== undefined) {
+			if (cantons[temp]) {
+				temp = cantons[temp] + " ";
+			}
+			else {
+				temp = "";
+			}
+		}
+		else {
+			Z.debug( "unknown canton: " + temp );
+			temp = temp + " ";
+		}
+		title = temp + title;
+
+		temp = court[1].trim();
+		if (courts[temp] !== undefined ) {
+			temp = courts[temp];
+		}
+		else {
+			Z.debug( "unknown court: " + temp );
+		}
+		title = temp + " " + title;
+
+		metas.title = title;
+	}
+}
+
+/**
+ * patchup metas for document type 'legalCommentary' - mapped to 'ecyclopediaArtice'
+ * @param {DocumentData}  doc_data
+ * @param {Metas}         metas
+ */
+function patchupForLegalCommentary(doc_data, metas) {
+	metas.publicationTitle = metas.title;
+	// @TODO
 }
 
 function detectWeb(doc, url) {
-	return interpretURI(url).type;
+	return extractDocumentData(doc, url).type;
 }
 
 function doWeb(doc, url) {
-	var urlparts = interpretURI(url);
-	var docmetas = ZU.xpath(doc, '//div[@id="' + urlparts.id + '"]//li[contains(@class,"meta-entry")]');
-	var metas = {};
-	var i, one, value, temp;
-	
-	metas.url = urlparts.url;
-	for (i=0, l=docmetas.length; i<l; i++) {
-		one = docmetas[i].children[0].innerText.toLowerCase();
-		if (doparams[one] != undefined) {
-			metas[doparams[one]] = docmetas[i].children[1].innerText;
-		}
+	let doc_data = extractDocumentData(doc, url);
+
+	let metas = extractRawItemData(doc_data);
+	patchupMetaCommon(doc_data, metas);
+	patchupMetaMagic(doc_data, metas);
+
+	if (doc_data.type === "encyclopediaArticle") {
+		patchupForLegalCommentary(doc_data, metas);
+	}
+	if (doc_data.type === "case") {
+		patchupForCase(doc_data, metas);
 	}
 
-	var item = new Zotero.Item(urlparts.type);
-	for (one in metas) {
-		value = metas[one];
-		switch (one) {
-			case "_magic":
-				if (urlparts.type == "journalArticle") {
-					value = value.split(' ');
-					item.journalAbbreviation = value[0];
-					if (value[1].includes("/")) {
-						item.issue = value[1].split("/")[0];
-					}
-				}
-				else if (urlparts.type == "bookSection") {
-					value = value.match( '([0-9]+)\.A.,' );
-					if (value) {
-						item.edition = value[1];
-					}
-				}
-				else if (urlparts.type == "encyclopediaArticle") {
-					item.title = value;
-				}
-				else if (urlparts.type == "case") {
-					item.number = value;
-					item.title = value;
-				}
-				break;
-			case "court":
-				item.court = value;
-				if (item.title.substring(0,3) != "BGE") {
-					value = value.split(",");
-					
-					temp = value[0].trim();
-					if (docantons[temp] != undefined) {
-						if (docantons[temp]) {
-							temp = docantons[temp] + " ";
-						}
-						else {
-							temp = "";
-						}
-					} 
-					else {
-						Z.debug( "unknown canton: " + temp );
-						temp = temp + " ";
-					}
-					item.title = temp + item.title;
-					
-					temp = value[1].trim();
-					if (docourts[temp] != undefined ) {
-						temp = docourts[temp];
-					}
-					else {
-						Z.debug( "unknown court: " + temp );
-					}
-					item.title = temp + " " + item.title;
-				}
-				break;
-			case "edition":
-				item.edition = value.split('.')[0];
-				break;
-			case "title":
-				if (urlparts.type == "encyclopediaArticle") {
-					item.publicationTitle = value;
-				}
-				else {
-					item.title = value;
-				}
-				break;
-			case "date":
-				item.date = ZU.strToISO(value);
-				break;
-			case "tags":
-				value = value.split(',');
-				for (i=0; i<value.length; i++) {
-					item.tags.push( ZU.trimInternal( value[i] ) );
-				}
-				break;
-			case "editor":
-				value = value.split(',');
-				for (i=0; i<value.length; i++) {
-					item.creators.push( ZU.cleanAuthor( value[i], one, false) );
-				}
-				break;
-			case "author":
-				value = value.split(',');
-				for (i=0; i<value.length; i++) {
-					value[i] = ZU.cleanAuthor( value[i], one, false);
-					temp = value[i].firstName;
-					value[i].firstName = value[i].lastName;
-					value[i].lastName = temp;
-					item.creators.push( value[i] );
-				}
-				break;
-			default:
-				if (one[0] != '_') {
-					item[one] = value;
-				}
+	let item = new Zotero.Item(doc_data.type);
+	for (let one in metas) {
+		if (one.substring(0, 1) !== "_") {
+			item[one] = metas[one];
+		}
+		else {
+			Z.debug("ignoring still existing internal metadata field + " + one);
 		}
 	}
-
 	item.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [
-]
+var testCases = []
 /** END TEST CASES **/
