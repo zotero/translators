@@ -9,12 +9,8 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-05-07 18:23:01"
+	"lastUpdated": "2021-11-05 18:35:52"
 }
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 /**
  * Gets Zotero item from a WorldCat icon src
@@ -117,8 +113,8 @@ function scrape(ids, data) {
 		+ "?client=worldcat.org-detailed_record&page=endnote";
 	var tryAgain = true;
 	ZU.doGet(risURL + 'alt' /* non-latin RIS first **/, function parseRIS(text) {
-		// Sometimes non-latin RIS is blank
-		if (tryAgain && !/^TY\s\s?-/m.test(text)) {
+		// Sometimes non-latin RIS is blank or corrupted
+		if (tryAgain && (!/^TY\s\s?-/m.test(text) || text.includes('\ufffd' /* REPLACEMENT CHARACTER */))) {
 			Z.debug("WorldCat did not return valid RIS. Trying Latin RIS.");
 			tryAgain = false;
 			ZU.doGet(risURL, parseRIS);
@@ -129,11 +125,16 @@ function scrape(ids, data) {
 		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan,
 		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function (m, tag, value) {
 			var authors = value.replace(/[.,\s]+$/, '')
-					.split(/[.,],/);
+				.split(/[.,],/);
+			// sometimes authors look like "Glick, Reuven, Hutchison, Michael",
+			// so we just have to split on every other comma.
+			if (authors.length == 1 && authors[0].replace(/[^,]/g, '').length > 1) {
+				authors = authors[0].split(/([^,]+,[^,]+),/);
+			}
 			var replStr = '';
 			var author;
 			for (let i = 0, n = authors.length; i < n; i++) {
-				author = authors[i].trim();
+				author = authors[i].trim().replace(/^,\s*/, '');
 				if (author) replStr += tag + author + '\n';
 			}
 			return replStr.trim();
@@ -678,7 +679,7 @@ var testCases = [
 				],
 				"date": "2009",
 				"ISSN": "1049-0078",
-				"abstractNote": "In recent years China has faced an increasing trilemma—how to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
 				"extra": "OCLC: 4933578953",
 				"issue": "3",
 				"language": "English",
@@ -720,6 +721,45 @@ var testCases = [
 				"libraryCatalog": "Open WorldCat",
 				"place": "北京",
 				"publisher": "中囯建筑工业出版社",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/title/medieval-science-technology-and-medicine-an-encyclopedia/oclc/994342191&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Medieval science, technology and medicine: an encyclopedia",
+				"creators": [
+					{
+						"lastName": "Glick",
+						"firstName": "Thomas F",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Livesey",
+						"firstName": "Steven John",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wallis",
+						"firstName": "Faith",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9781315165127 9781351676168 9781351676175 9781351676151",
+				"abstractNote": "\"First published in 2005, this encyclopedia demonstrates that the millennium from the fall of the Roman Empire to the Renaissance was a period of great intellectual and practical achievement and innovation. In Europe, the Islamic world, South and East Asia, and the Americas, individuals built on earlier achievements, introduced sometimes radical refinements and laid the foundations for modern development. Medieval Science, Technology, and Medicine details the whole scope of scientific knowledge in the medieval period in more than 300 A to Z entries. This comprehensive resource discusses the research, application of knowledge, cultural and technology exchanges, experimentation, and achievements in the many disciplines related to science and technology. It also looks at the relationship between medieval science and the traditions it supplanted. Written by a select group of international scholars, this reference work will be of great use to scholars, students, and general readers researching topics in many fields, including medieval studies, world history, history of science, history of technology, history of medicine, and cultural studies.\"--Provided by publisher.",
+				"extra": "OCLC: 994342191",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"shortTitle": "Medieval science, technology and medicine",
+				"url": "https://www.taylorfrancis.com/books/e/9781315165127",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
