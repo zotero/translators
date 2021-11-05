@@ -90,8 +90,8 @@ function extractDocumentData(doc, url) {
 	};
 	const url_regexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
 
-	var parts;
-	var result = new DocumentData();
+	let parts;
+	let result = new DocumentData();
 
 	url = decodeURI(url);
 	parts = url.match(url_regexp);
@@ -145,8 +145,8 @@ function extractRawItemData(doc_data) {
 		"rechtsgebiete": "_tags"
 	};
 
-	var dom_metas = ZU.xpath(doc_data.dom, '//div[@id="' + doc_data.id + '"]//li[contains(@class,"meta-entry")]');
-	var result = new Metas();
+	const dom_metas = ZU.xpath(doc_data.dom, '//div[@id="' + doc_data.id + '"]//li[contains(@class,"meta-entry")]');
+	let result = new Metas();
 
 	result.url = doc_data.url;
 	for (let i=0, l=dom_metas.length; i<l; i++) {
@@ -168,7 +168,7 @@ function extractRawItemData(doc_data) {
  * Common metadata fiels that have to be patched are:
  *   * date     convert to ISO
  *   * edition  extract numerical value
- *   * tags     split string by comma
+ *   * _tags    split string by comma
  *   * _author  add to creators array - format: lastname firstname
  *   * _editor  add to creators array - format: firstname lastname
  *
