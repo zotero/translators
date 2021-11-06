@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-06 12:14:14"
+	"lastUpdated": "2021-11-06 13:03:06"
 }
 
 /*
@@ -36,7 +36,78 @@
 */
 
 /**
- * Data Class holding web document information
+ * translation table from human readable metadata labels to fields
+ * @type {{}}
+ */
+const metadata_label_translation = {
+	"artikelkommentar": "_article",
+	"dokument": "_magic",
+	"dokumenttitel": "_subtitle",
+	"auflage": "edition",
+	"autor": "_author",
+	"autoren": "_author",
+	"titel": "title",
+	"buchtitel": "publicationTitle",
+	"serie/reihe": "series",
+	"reihe": "series",
+	"urteilsdatum": "date",
+	"jahr": "date",
+	"seiten": "pages",
+	"herausgeber": "_editor",
+	"isbn": "ISBN",
+	"verlag": "publisher",
+	"publikation": "publicationTitle",
+	"issn": "ISSN",
+	"gericht": "court",
+	"betreff": "abstractNote",
+	"rechtsgebiete": "_tags"
+};
+
+/**
+ * translation table from canton to its abbreviation
+ * @type {{}}
+ */
+const canton_translation = {
+	"Schweiz": "",
+	"Zürich": "ZH",
+	"Bern": "BE",
+	"Basel-Stadt": "BS",
+	"Basel-Land": "BL",
+	"Freiburg": "FR",
+	"Graubünden": "GR",
+	"Genf": "GE",
+	"St. Gallen": "SG",
+	"Tessin": "TI",
+	"Luzern": "LU"
+};
+
+/**
+ * translation table from court names to abbreviations
+ * @type {{}}
+ */
+const court_translation = {
+	"Bundesstrafgericht": "BStrG",
+	"Bundesverwaltungsgericht": "BVerwG",
+	"Bundesgericht": "BGer",
+	"Eidgenössisches Versicherungsgericht": "EVGer",
+	"Eidgenössische Bankenkommission": "EBK",
+	"Bundesamt": "BJ",
+	"Bundesstaatsanwaltschaft": "BA",
+	"Steuerekurskommission": "StRK",
+	"Obergericht": "OGer",
+	"Handelsgericht": "HGer",
+	"Kantonsgericht": "KGer",
+	"Appellationsgericht": "AppG",
+	"Kassationsgericht": "KassG",
+	"Kreisgericht": "KrG",
+	"Bezirksgericht": "BezG",
+	"Zivilgericht": "ZG",
+	"Versicherungsgericht": "VG",
+	"Sozialversicherungsgericht": "SozVG",
+};
+
+/**
+ * data class holding web document information
  * @property {Element}           dom
  * @property {String}            url
  * @property {String}            lang
@@ -46,7 +117,7 @@
 class DocumentData {}
 
 /**
- * Data Class representing collected metadata fields
+ * data class representing collected metadata fields
  *
  * Internal/Temporary fields are named starting with '_'.
  *
@@ -84,14 +155,14 @@ class Metas {}
  * @returns {DocumentData}
  */
 function extractDocumentData(doc, url) {
-	const document_types = {
+	const url_regexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
+	const type_translation = {
 		"bookdoc": "bookSection",
 		"essay": "journalArticle",
 		"clawrev": "journalArticle",
 		"commentarydoc": "encyclopediaArticle",
 		"claw": "case"
 	};
-	const url_regexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
 
 	let parts;
 	let result = new DocumentData();
@@ -105,7 +176,7 @@ function extractDocumentData(doc, url) {
 			url: parts[0],
 			lang: parts[1],
 			id: parts[3],
-			type: document_types[parts[2]]
+			type: type_translation[parts[2]]
 		}
 	}
 
@@ -125,38 +196,14 @@ function extractDocumentData(doc, url) {
  * @returns {Metas}
  */
 function extractRawItemData(doc_data) {
-	const metadata_labels = {
-		"artikelkommentar": "_article",
-		"dokument": "_magic",
-		"dokumenttitel": "_subtitle",
-		"auflage": "edition",
-		"autor": "_author",
-		"autoren": "_author",
-		"titel": "title",
-		"buchtitel": "publicationTitle",
-		"serie/reihe": "series",
-		"reihe": "series",
-		"urteilsdatum": "date",
-		"jahr": "date",
-		"seiten": "pages",
-		"herausgeber": "_editor",
-		"isbn": "ISBN",
-		"verlag": "publisher",
-		"publikation": "publicationTitle",
-		"issn": "ISSN",
-		"gericht": "court",
-		"betreff": "abstractNote",
-		"rechtsgebiete": "_tags"
-	};
-
 	const dom_metas = ZU.xpath(doc_data.dom, '//div[@id="' + doc_data.id + '"]//li[contains(@class,"meta-entry")]');
 	let result = new Metas();
 
 	result.url = doc_data.url;
 	for (let i=0, l=dom_metas.length; i<l; i++) {
 		let label = dom_metas[i].children[0].innerText.toLowerCase();
-		if (metadata_labels[label] !== undefined) {
-			result[metadata_labels[label]] = dom_metas[i].children[1].innerText;
+		if (metadata_label_translation[label] !== undefined) {
+			result[metadata_label_translation[label]] = dom_metas[i].children[1].innerText;
 		}
 		else {
 			Z.debug( "Unknown swisslex metadata label: " + label );
@@ -275,48 +322,14 @@ function patchupForBookSection(doc_data, metas) {
  * @param {Metas}         metas
  */
 function patchupForCase(doc_data, metas) {
-	const cantons = {
-		"Schweiz": "",
-		"Zürich": "ZH",
-		"Bern": "BE",
-		"Basel-Stadt": "BS",
-		"Basel-Land": "BL",
-		"Freiburg": "FR",
-		"Graubünden": "GR",
-		"Genf": "GE",
-		"St. Gallen": "SG",
-		"Tessin": "TI",
-		"Luzern": "LU"
-	};
-	const courts = {
-		"Bundesstrafgericht": "BStrG",
-		"Bundesverwaltungsgericht": "BVerwG",
-		"Bundesgericht": "BGer",
-		"Eidgenössisches Versicherungsgericht": "EVGer",
-		"Eidgenössische Bankenkommission": "EBK",
-		"Bundesamt": "BJ",
-		"Bundesstaatsanwaltschaft": "BA",
-		"Steuerekurskommission": "StRK",
-		"Obergericht": "OGer",
-		"Handelsgericht": "HGer",
-		"Kantonsgericht": "KGer",
-		"Appellationsgericht": "AppG",
-		"Kassationsgericht": "KassG",
-		"Kreisgericht": "KrG",
-		"Bezirksgericht": "BezG",
-		"Zivilgericht": "ZG",
-		"Versicherungsgericht": "VG",
-		"Sozialversicherungsgericht": "SozVG",
-	};
-
 	let court = metas.court.split(",");
 	let title = metas.title;
 
 	if (title.substring(0,4) !== "BGE ") {
 		let temp = court[0].trim();
-		if (cantons[temp] !== undefined) {
-			if (cantons[temp]) {
-				temp = cantons[temp] + " ";
+		if (canton_translation[temp] !== undefined) {
+			if (canton_translation[temp]) {
+				temp = canton_translation[temp] + " ";
 			}
 			else {
 				temp = "";
@@ -329,8 +342,8 @@ function patchupForCase(doc_data, metas) {
 		title = temp + title;
 
 		temp = court[1].trim();
-		if (courts[temp] !== undefined ) {
-			temp = courts[temp];
+		if (court_translation[temp] !== undefined ) {
+			temp = court_translation[temp];
 		}
 		else {
 			Z.debug( "unknown court: " + temp );
