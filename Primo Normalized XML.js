@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-11-06 20:04:13"
+	"lastUpdated": "2021-11-06 20:20:36"
 }
 
 /*
@@ -258,6 +258,8 @@ function doImport() {
 	item.issue = ZU.xpathText(doc, '//p:addata/p:issue', ns);
 	item.volume = ZU.xpathText(doc, '//p:addata/p:volume', ns);
 	item.publicationTitle = ZU.xpathText(doc, '//p:addata/p:jtitle', ns);
+
+	item.bookTitle = ZU.xpathText(doc, '//p:addata/p:btitle', ns);
 
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
@@ -675,6 +677,7 @@ var testCases = [
 				"date": "2020",
 				"ISBN": "3030633950",
 				"abstractNote": "The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.",
+				"bookTitle": "Information Systems",
 				"language": "eng",
 				"pages": "370–379",
 				"place": "Cham",
