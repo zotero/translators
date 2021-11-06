@@ -2,14 +2,14 @@
 	"translatorID": "0fc8deb5-fba2-4471-8d99-97698e2e4060",
 	"label": "swisslex",
 	"creator": "Hans-Peter Oeri",
-	"target": "^https://www\\.swisslex\\.ch/de/doc/",
+	"target": "^https://www\\.swisslex\\.ch/(de|fr)/doc/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-06 13:03:06"
+	"lastUpdated": "2021-11-06 17:53:27"
 }
 
 /*
@@ -41,26 +41,46 @@
  */
 const metadata_label_translation = {
 	"artikelkommentar": "_article",
+	"commentaire d'article": "_article",
 	"dokument": "_magic",
+	"document": "_magic",
 	"dokumenttitel": "_subtitle",
+	"titre du document": "_subtitle",
 	"auflage": "edition",
+	"édition": "edition",
 	"autor": "_author",
+	"auteur": "_author",
 	"autoren": "_author",
+	"auteurs": "_author",
 	"titel": "title",
+	"titre": "title",
 	"buchtitel": "publicationTitle",
+	"titre du livre": "publicationTitle",
 	"serie/reihe": "series",
+	"série / collection": "series",
 	"reihe": "series",
+	// "collection": "series",
+	"collection": "series",
 	"urteilsdatum": "date",
+	"date du jugement": "date",
 	"jahr": "date",
+	"année": "date",
 	"seiten": "pages",
+	"pages": "pages",
 	"herausgeber": "_editor",
+	"éditeur(s)": "_editor",
 	"isbn": "ISBN",
 	"verlag": "publisher",
+	"maison d’édition": "publisher",
 	"publikation": "publicationTitle",
+	"publication": "publicationTitle",
 	"issn": "ISSN",
 	"gericht": "court",
+	"tribunal": "court",
 	"betreff": "abstractNote",
-	"rechtsgebiete": "_tags"
+	"objet": "abstractNote",
+	"rechtsgebiete": "_tags",
+	"domaines du droit": "_tags"
 };
 
 /**
@@ -69,16 +89,57 @@ const metadata_label_translation = {
  */
 const canton_translation = {
 	"Schweiz": "",
+	"Suisse": "",
 	"Zürich": "ZH",
+	"Zurich": "ZH",
 	"Bern": "BE",
-	"Basel-Stadt": "BS",
-	"Basel-Land": "BL",
+	"Berne": "BE",
+	"Luzern": "LU",
+	"Lucerne": "LU",
+	"Uri": "UR",
+	"Schwyz": "SZ",
+	"Obwalden": "OW",  // FR
+	"Nidwalden": "NW",  // FR
+	"Glarus": "GL",
+	"Glaris": "GL",
+	"Zug": "ZG",
+	"Zoug": "ZG",
 	"Freiburg": "FR",
-	"Graubünden": "GR",
-	"Genf": "GE",
+	"Fribourg": "FR",
+	"Solothurn": "SO",
+	"Soleure": "SO",
+	"Basel-Stadt": "BS",
+	"Bâle-Ville": "BS",
+	"Basel-Land": "BL",
+	"Bâle-Campagne": "BL",
+	"Schaffhausen": "SH",
+	"Schaffhouse": "SH",
+	"Appenzell Ausserrhoden": "AR",
+	"Appenzell Rhodes-Extérieures": "AR",
+	"Appenzell Innerrhoden": "AR",
+	"Appenzell Rhodes-Intérieures": "AR",
 	"St. Gallen": "SG",
+	"St-Gall": "SG",
+	"Graubünden": "GR",
+	"Grisons": "GR",
+	"Aargau": "AG",
+	"Argovie": "AG",
+	"Thurgau": "TG",
+	"Thurgovie": "TG",
 	"Tessin": "TI",
-	"Luzern": "LU"
+	"Waadt": "VD",
+	"Vaud": "VD",
+	"Wallis": "VS",
+	"Valais": "VS",
+	"Neuenburg": "NE",
+	"Neuchâtel": "NE",
+	"Genf": "GE",
+	"Genève": "GE",
+	"Jura": "JU",
+	"Strassburg": "",
+	"Strasbourg": "",
+	"Luxemburg": "",
+	"Luxembourg": "",
 };
 
 /**
@@ -87,23 +148,47 @@ const canton_translation = {
  */
 const court_translation = {
 	"Bundesstrafgericht": "BStrG",
+	"Tribunal pénal fédéral": "TPF",
 	"Bundesverwaltungsgericht": "BVerwG",
+	"Tribunal administratif fédéral": "TAF",
 	"Bundesgericht": "BGer",
+	"Tribunal fédéral": "TF",
 	"Eidgenössisches Versicherungsgericht": "EVGer",
+	"Tribunal fédéral des assurances": "TFA",
 	"Eidgenössische Bankenkommission": "EBK",
+	"Commission fédérale des banques": "CFB",
 	"Bundesamt": "BJ",
+	// "Division de la justice": ""
 	"Bundesstaatsanwaltschaft": "BA",
+	// FR
 	"Steuerekurskommission": "StRK",
+	// "Commission de recours en matière fiscale": ""
 	"Obergericht": "OGer",
+	"Cour suprème": "CS",
 	"Handelsgericht": "HGer",
 	"Kantonsgericht": "KGer",
+	"Tribunal cantonal": "TC",
+	"Cour de justice": "CJ",
 	"Appellationsgericht": "AppG",
+	"Appellationshof": "AppH",
+	"Cour d'appel": "CA",
 	"Kassationsgericht": "KassG",
 	"Kreisgericht": "KrG",
+	// "Tribunal d'arrondissement": ""
 	"Bezirksgericht": "BezG",
+	"Tribunal de district": "TD",
+	"Tribunal régional": "TR",
 	"Zivilgericht": "ZG",
+	"Cour Civile": "CC",
 	"Versicherungsgericht": "VG",
 	"Sozialversicherungsgericht": "SozVG",
+	"Verwaltungsgericht": "VwG",
+	"Verwaltungsrekurskommission": "VRK",
+	"Tribunal administratif": "TA",
+	"Cour européenne des droits de l'homme": "CEDH",
+	"Europäischer Gerichtshof für Menschenrechte": "EGMR",
+	"Europäischer Gerichtshof": "ECJ",
+	// FR
 };
 
 /**
@@ -205,9 +290,10 @@ function extractRawItemData(doc_data) {
 		if (metadata_label_translation[label] !== undefined) {
 			result[metadata_label_translation[label]] = dom_metas[i].children[1].innerText;
 		}
-		else {
-			Z.debug( "Unknown swisslex metadata label: " + label );
+		else if (label.length > 0) {
+			Z.debug( "Unknown swisslex metadata label: '" + label + "'" );
 		}
+		// else empty label
 	}
 
 	return result;
@@ -219,7 +305,7 @@ function extractRawItemData(doc_data) {
  * Common metadata fiels that have to be patched are:
  *   * date     convert to ISO
  *   * edition  extract numerical value
- *   * _tags    split string by comma
+ *   * _tags    split string by comma for tags, by slash for subtags
  *   * _author  add to creators array - format: lastname firstname
  *   * _editor  add to creators array - format: firstname lastname
  *
