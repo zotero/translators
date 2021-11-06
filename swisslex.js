@@ -84,7 +84,7 @@ class Metas {}
  * @returns {DocumentData}
  */
 function extractDocumentData(doc, url) {
-	const types = {
+	const document_types = {
 		"bookdoc": "bookSection",
 		"essay": "journalArticle",
 		"clawrev": "journalArticle",
@@ -105,7 +105,7 @@ function extractDocumentData(doc, url) {
 			url: parts[0],
 			lang: parts[1],
 			id: parts[3],
-			type: types[parts[2]]
+			type: document_types[parts[2]]
 		}
 	}
 
@@ -191,7 +191,11 @@ function patchupMetaCommon(doc_data, metas) {
 		delete metas._tags;
 		metas.tags = [];
 		for (let i = 0; i < tags.length; i++) {
-			metas.tags.push( ZU.trimInternal( tags[i] ) );
+			let tag_parts = tags[i].split("/");
+			metas.tags.push( ZU.trimInternal( tag_parts[0] ) );
+			if ( tag_parts.length > 1 ) {
+				metas.tags.push( ZU.trimInternal( tags[i] ) );
+			}
 		}
 	}
 	if (metas._editor !== undefined) {
