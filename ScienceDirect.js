@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-20 00:44:51"
+	"lastUpdated": "2021-11-06 23:29:33"
 }
 
 function detectWeb(doc, url) {
@@ -394,8 +394,7 @@ function processRIS(doc, text) {
 				item.attachments.push({
 					title: 'ScienceDirect Full Text PDF',
 					url: pdfURL,
-					mimeType: 'application/pdf',
-					proxy: false
+					mimeType: 'application/pdf'
 				});
 			}
 			item.complete();
