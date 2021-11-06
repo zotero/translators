@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-08-11 17:37:09"
+	"lastUpdated": "2021-11-06 20:04:13"
 }
 
 /*
@@ -59,6 +59,7 @@ function doImport() {
 
 	switch (itemType.toLowerCase()) {
 		case 'book':
+		case 'buch':
 		case 'ebook':
 		case 'pbook':
 		case 'print_book':
@@ -66,6 +67,9 @@ function doImport() {
 		case 'score':
 		case 'journal':		// as long as we don't have a periodical item type;
 			item.itemType = "book";
+			break;
+		case 'book_chapter':
+			item.itemType = "bookSection";
 			break;
 		case 'audio':
 		case 'sound_recording':
@@ -632,6 +636,100 @@ var testCases = [
 				"tags": [
 					{
 						"tag": "Marine biology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\">\n  <control>\n    <sourceid>springer</sourceid>\n    <recordid>cdi_springer_books_10_1007_978_3_030_63396_7_25</recordid>\n    <sourceformat>XML</sourceformat>\n    <sourcesystem>Other</sourcesystem>\n    <sourcerecordid>springer_books_10_1007_978_3_030_63396_7_25</sourcerecordid>\n    <originalsourceid>FETCH-LOGICAL-s1418-315a6625e206432bee12b281c3f312135a36281cc7330c5908f38a100fa2a693</originalsourceid>\n    <addsrcrecordid>eNpFkM1OwzAQhM2fRCl9Aw5-AcPaGzsJtyripygIJHq3Nq6DAk1c2by_cAuC02hnpNHOx9iVhGsJUN7UZSVQAIIwiLURpVX6iF1gdg5GfcxmsjJaSNTm5D_QcPoXFNU5W6T0AQCqUKgLOWNPb8ENtOXPfjMQX407cl88THzpaOPHwfFXH_sQR5qcv-WtTylMKSvFyW94H8PIGxp9DGG6ZGc9bZNf_Oqcre_v1s2jaF8eVs2yFUkWMq-QmoxR2iswBarOe6k6VUmHPUqV3yc0-9OViOB0DVWPFWUIPSkyNc6Z-qlNuzhM7z7aLoTPZCXYPSmbSVm0eb49gLF7UvgNXsVVHQ</addsrcrecordid>\n    <sourcetype>Publisher</sourcetype>\n    <isCDI>true</isCDI>\n    <recordtype>book_chapter</recordtype>\n  </control>\n  <display>\n    <type>book_chapter</type>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <source>Springer Books</source>\n    <source>Springer Computer Science eBooks 2020 English/International</source>\n    <creator>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</creator>\n    <creatorcontrib>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</creatorcontrib>\n    <description>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</description>\n    <identifier>ISSN: 1865-1348</identifier>\n    <identifier>ISBN: 3030633950</identifier>\n    <identifier>ISBN: 9783030633950</identifier>\n    <identifier>EISSN: 1865-1356</identifier>\n    <identifier>EISBN: 3030633969</identifier>\n    <identifier>EISBN: 9783030633967</identifier>\n    <identifier>DOI: 10.1007/978-3-030-63396-7_25</identifier>\n    <language>eng</language>\n    <publisher>Cham: Springer International Publishing</publisher>\n    <subject>Academic performance ; Africa ; Relational commitment ; Social media ; TAM</subject>\n    <ispartof>Information Systems, 2020-11-21, p.370-379</ispartof>\n    <rights>Springer Nature Switzerland AG 2020</rights>\n    <orcidid>0000-0003-4673-3800 ; 0000-0001-6360-7641</orcidid>\n    <relation>Lecture Notes in Business Information Processing</relation>\n  </display>\n  <links>\n    <openurl>$$Topenurl_article</openurl>\n    <openurlfulltext>$$Topenurlfull_article</openurlfulltext>\n    <thumbnail>$$Usyndetics_thumb_exl</thumbnail>\n    <linktopdf>$$Uhttps://link.springer.com/content/pdf/10.1007/978-3-030-63396-7_25$$EPDF$$P50$$Gspringer$$H</linktopdf>\n    <linktohtml>$$Uhttps://link.springer.com/10.1007/978-3-030-63396-7_25$$EHTML$$P50$$Gspringer$$H</linktohtml>\n  </links>\n  <search>\n    <creatorcontrib>Kuika Watat, Josue</creatorcontrib>\n    <creatorcontrib>Jonathan, Gideon Mekonnen</creatorcontrib>\n    <creatorcontrib>Ntsafack Dongmo, Frank Wilson</creatorcontrib>\n    <creatorcontrib>Zine El Abidine, Nour El Houda</creatorcontrib>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <title>Information Systems</title>\n    <description>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</description>\n    <subject>Academic performance</subject>\n    <subject>Africa</subject>\n    <subject>Relational commitment</subject>\n    <subject>Social media</subject>\n    <subject>TAM</subject>\n    <issn>1865-1348</issn>\n    <issn>1865-1356</issn>\n    <isbn>3030633950</isbn>\n    <isbn>9783030633950</isbn>\n    <isbn>3030633969</isbn>\n    <isbn>9783030633967</isbn>\n    <fulltext>true</fulltext>\n    <rsrctype>book_chapter</rsrctype>\n    <creationdate>2020</creationdate>\n    <recordtype>book_chapter</recordtype>\n    <sourceid/>\n    <recordid>eNpFkM1OwzAQhM2fRCl9Aw5-AcPaGzsJtyripygIJHq3Nq6DAk1c2by_cAuC02hnpNHOx9iVhGsJUN7UZSVQAIIwiLURpVX6iF1gdg5GfcxmsjJaSNTm5D_QcPoXFNU5W6T0AQCqUKgLOWNPb8ENtOXPfjMQX407cl88THzpaOPHwfFXH_sQR5qcv-WtTylMKSvFyW94H8PIGxp9DGG6ZGc9bZNf_Oqcre_v1s2jaF8eVs2yFUkWMq-QmoxR2iswBarOe6k6VUmHPUqV3yc0-9OViOB0DVWPFWUIPSkyNc6Z-qlNuzhM7z7aLoTPZCXYPSmbSVm0eb49gLF7UvgNXsVVHQ</recordid>\n    <startdate>20201121</startdate>\n    <enddate>20201121</enddate>\n    <creator>Kuika Watat, Josue</creator>\n    <creator>Jonathan, Gideon Mekonnen</creator>\n    <creator>Ntsafack Dongmo, Frank Wilson</creator>\n    <creator>Zine El Abidine, Nour El Houda</creator>\n    <general>Springer International Publishing</general>\n    <scope/>\n    <orcidid>https://orcid.org/0000-0003-4673-3800</orcidid>\n    <orcidid>https://orcid.org/0000-0001-6360-7641</orcidid>\n  </search>\n  <sort>\n    <creationdate>20201121</creationdate>\n    <title>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</title>\n    <author>Kuika Watat, Josue ; Jonathan, Gideon Mekonnen ; Ntsafack Dongmo, Frank Wilson ; Zine El Abidine, Nour El Houda</author>\n  </sort>\n  <facets>\n    <frbrtype>5</frbrtype>\n    <frbrgroupid>cdi_FETCH-LOGICAL-s1418-315a6625e206432bee12b281c3f312135a36281cc7330c5908f38a100fa2a693</frbrgroupid>\n    <rsrctype>book_chapters</rsrctype>\n    <prefilter>book_chapters</prefilter>\n    <language>eng</language>\n    <creationdate>2020</creationdate>\n    <topic>Academic performance</topic>\n    <topic>Africa</topic>\n    <topic>Relational commitment</topic>\n    <topic>Social media</topic>\n    <topic>TAM</topic>\n    <toplevel>online_resources</toplevel>\n    <creatorcontrib>Kuika Watat, Josue</creatorcontrib>\n    <creatorcontrib>Jonathan, Gideon Mekonnen</creatorcontrib>\n    <creatorcontrib>Ntsafack Dongmo, Frank Wilson</creatorcontrib>\n    <creatorcontrib>Zine El Abidine, Nour El Houda</creatorcontrib>\n    <jtitle>Information Systems</jtitle>\n  </facets>\n  <delivery>\n    <delcategory>Remote Search Resource</delcategory>\n    <fulltext>fulltext</fulltext>\n  </delivery>\n  <addata>\n    <au>Kuika Watat, Josue</au>\n    <au>Jonathan, Gideon Mekonnen</au>\n    <au>Ntsafack Dongmo, Frank Wilson</au>\n    <au>Zine El Abidine, Nour El Houda</au>\n    <format>book</format>\n    <genre>bookitem</genre>\n    <ristype>GEN</ristype>\n    <atitle>Social Media Impact on Academic Performance: Lessons Learned from Cameroon</atitle>\n    <btitle>Information Systems</btitle>\n    <seriestitle>Lecture Notes in Business Information Processing</seriestitle>\n    <date>2020-11-21</date>\n    <risdate>2020</risdate>\n    <spage>370</spage>\n    <epage>379</epage>\n    <pages>370-379</pages>\n    <issn>1865-1348</issn>\n    <eissn>1865-1356</eissn>\n    <isbn>3030633950</isbn>\n    <isbn>9783030633950</isbn>\n    <eisbn>3030633969</eisbn>\n    <eisbn>9783030633967</eisbn>\n    <abstract>The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.</abstract>\n    <cop>Cham</cop>\n    <pub>Springer International Publishing</pub>\n    <doi>10.1007/978-3-030-63396-7_25</doi>\n    <orcidid>https://orcid.org/0000-0003-4673-3800</orcidid>\n    <orcidid>https://orcid.org/0000-0001-6360-7641</orcidid>\n  </addata>\n</record>",
+		"items": [
+			{
+				"itemType": "bookSection",
+				"title": "Social Media Impact on Academic Performance: Lessons Learned from Cameroon",
+				"creators": [
+					{
+						"firstName": "Josue",
+						"lastName": "Kuika Watat",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gideon Mekonnen",
+						"lastName": "Jonathan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frank Wilson",
+						"lastName": "Ntsafack Dongmo",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nour El Houda",
+						"lastName": "Zine El Abidine",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"ISBN": "3030633950",
+				"abstractNote": "The continuously improving Internet penetration in the continent, coupled with the increasing number of smartphone users in Africa has been considered as the reasons for the adoption of social media among students and other adolescents. Even though this development has been recognizing in the literature, only a few studies have investigated the acceptance, use, and retention of social media for academic purposes. However, findings of prior studies suggest that the use of social media has an influence on academic performance. To address the lack of knowledge on the adoption of social media among students, this study aims to explore the factors that are related to students’ acceptance and use of social media. We attempt to extend the Technology Acceptance Model by integrating relational engagement, Perceived Satisfaction, as well as the Perspective of the Use of Social Media in Education. The proposed theoretical model was evaluated using quantitative data collected from 460 students in Cameroon. We applied PLS-SEM technique to test the hypotheses and the theoretical model. Implications of the findings, as well as future research directions, are presented.",
+				"language": "eng",
+				"pages": "370–379",
+				"place": "Cham",
+				"publisher": "Springer International Publishing",
+				"series": "Lecture Notes in Business Information Processing",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Academic performance"
+					},
+					{
+						"tag": "Africa"
+					},
+					{
+						"tag": "Relational commitment"
+					},
+					{
+						"tag": "Social media"
+					},
+					{
+						"tag": "TAM"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\"><delivery><availabilityLinks>detailsgetit1</availabilityLinks><displayLocation>true</displayLocation><recordOwner>49KOBV_FUB</recordOwner><physicalServiceId>null</physicalServiceId><sharedDigitalCandidates>null</sharedDigitalCandidates><link><displayLabel>thumbnail</displayLabel><linkURL>https://proxy-eu.hosted.exlibrisgroup.com/exl_rewrite/books.google.com/books?bibkeys=ISBN:9781784744069,OCLC:,LCCN:&amp;jscmd=viewapi&amp;callback=updateGBSCover</linkURL><linkType>thumbnail</linkType><id>:_0</id></link><availability>unavailable</availability><additionalLocations>false</additionalLocations><digitalAuxiliaryMode>false</digitalAuxiliaryMode><holding><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>EB/1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9959861162102883</ilsApiId><callNumberType>8</callNumberType><libraryCode>920</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>http://infosystem.philbib.de?sig={call_number}</stackMapUrl><isValidUser>true</isValidUser><mainLocation>Philologische Bibliothek</mainLocation><callNumber/><adaptorid>ALMA_01</adaptorid><organization>49KOBV_FUB</organization><holdingURL>OVP</holdingURL><availabilityStatus>unavailable</availabilityStatus><id>_:0</id><subLocation>Ebene 1</subLocation><holdId>221106260200002883</holdId><holKey>HoldingResultKey [mid=221106260200002883, libraryId=398792270002883, locationCode=EB/1, callNumber=null]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></holding><bestlocation><matchForHoldings><holdingRecord>852##b</holdingRecord><matchOn>MainLocation</matchOn></matchForHoldings><subLocationCode>EB/1</subLocationCode><volumeFilter>null</volumeFilter><ilsApiId>9959861162102883</ilsApiId><callNumberType>8</callNumberType><libraryCode>920</libraryCode><yearFilter>null</yearFilter><boundWith>false</boundWith><stackMapUrl>http://infosystem.philbib.de?sig={call_number}</stackMapUrl><isValidUser>true</isValidUser><mainLocation>Philologische Bibliothek</mainLocation><callNumber/><adaptorid>ALMA_01</adaptorid><organization>49KOBV_FUB</organization><holdingURL>OVP</holdingURL><availabilityStatus>unavailable</availabilityStatus><id>_:0</id><subLocation>Ebene 1</subLocation><holdId>221106260200002883</holdId><holKey>HoldingResultKey [mid=221106260200002883, libraryId=398792270002883, locationCode=EB/1, callNumber=null]</holKey><singleUnavailableItemProcessType>null</singleUnavailableItemProcessType><relatedTitle>null</relatedTitle></bestlocation><electronicServices>null</electronicServices><feDisplayOtherLocations>false</feDisplayOtherLocations><hasD>null</hasD><hideResourceSharing>false</hideResourceSharing><hasFilteredServices>null</hasFilteredServices><physicalItemTextCodes>null</physicalItemTextCodes><quickAccessService>null</quickAccessService><recordInstitutionCode>null</recordInstitutionCode><displayedAvailability>null</displayedAvailability><deliveryCategory>Alma-P</deliveryCategory><serviceMode>ovp</serviceMode><filteredByGroupServices>null</filteredByGroupServices><GetIt1><links><isLinktoOnline>false</isLinktoOnline><displayText>null</displayText><inst4opac>49KOBV_FUB</inst4opac><getItTabText>service_getit</getItTabText><adaptorid>ALMA_01</adaptorid><ilsApiId>9959861162102883</ilsApiId><link>OVP</link><id>_:0</id></links><category>Alma-P</category></GetIt1></delivery><search><creationdate>2021</creationdate><creator>Galgut, Damon 1963-</creator><sort_journal_title>&lt;&lt;The&gt;&gt; promise /</sort_journal_title><sort_title>&lt;&lt;The&gt;&gt; promise / Damon Galgut.</sort_title><sort_creationdate_full>2021</sort_creationdate_full><subject>Fiktionale Darstellung</subject><subject>South Africa / Fiction</subject><isbn>9781473584464</isbn><isbn>1473584469</isbn><isbn>1784744077</isbn><isbn>9781784744076</isbn><isbn>1784744069</isbn><isbn>9781784744069</isbn><local_fields>969 BV047362611</local_fields><local_fields>942 05</local_fields><local_fields>940 RDA-Aufnahme</local_fields><description>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</description><language>eng</language><title>&lt;&lt;The&gt;&gt; promise /</title><startdate>2021</startdate><general>Chatto &amp; Windus,</general><rtype>books</rtype><contributor>Damon Galgut.</contributor><genre>Fiktionale Darstellung</genre><journal_title>&lt;&lt;The&gt;&gt; promise /</journal_title><facet_creatorcontrib>Galgut, Damon</facet_creatorcontrib><sort_author>Galgut, Damon 1963-</sort_author><sort_creationdate>2021</sort_creationdate></search><display><identifier>$$C&lt;b&gt;ISBN&lt;/b&gt;$$V978-1-784-74406-9;$$C&lt;b&gt;ISBN&lt;/b&gt;$$V978-1-784-74407-6</identifier><lds05>&lt;b&gt;DDC: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,823.92%2CAND&amp;tab=FUB&amp;search_scope=FUB&amp;vid=49KOBV_FUB%3AFUB&amp;mode=advanced&quot; class=&quot;arrow-link ddc_arrow-link&quot;&gt;823.92&lt;/a&gt;</lds05><lds05>&lt;b&gt;RVK: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,HP 9999%2CAND&amp;tab=FUB&amp;search_scope=FUB&amp;vid=49KOBV_FUB%3AFUB&amp;mode=advanced&quot; class=&quot;arrow-link rvk_arrow-link&quot;&gt;HP 9999&lt;/a&gt;</lds05><creationdate>2021.</creationdate><creator>Galgut, Damon [Verf.]$$QGalgut, Damon</creator><subject>South Africa / Fiction</subject><format>293 Seiten.</format><description>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</description><description>Cover: &quot;Shortlisted The 2021 Booker Prize&quot;</description><language>eng</language><source>Alma</source><type>Buch</type><title>The promise / Damon Galgut.</title><version>0</version><mms>9959861162102883</mms><publisher>London : Chatto &amp; Windus</publisher><place>London :</place><lds01>BV047362611</lds01><lds12>&lt;b&gt;DDC: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,823.92%2CAND&amp;tab=CHA&amp;search_scope=CHA&amp;vid=49KOBV_FUB%3ACHA&amp;mode=advanced&quot; class=&quot;arrow-link&quot;&gt;823.92&lt;/a&gt;</lds12><lds12>&lt;b&gt;RVK: &lt;/b&gt;&lt;a href=&quot;search?query=lds05,exact,HP 9999%2CAND&amp;tab=CHA&amp;search_scope=CHA&amp;vid=49KOBV_FUB%3ACHA&amp;mode=advanced&quot; class=&quot;arrow-link&quot;&gt;HP 9999&lt;/a&gt;</lds12><lds04>Fiktionale Darstellung</lds04></display><control><recordid>alma9959861162102883</recordid><sourceid>alma</sourceid><score>3.0</score><originalsourceid>BV047362611</originalsourceid><sourceformat>MARC21</sourceformat><sourcerecordid>9959861162102883</sourcerecordid><sourcesystem>BVB</sourcesystem><isDedup>false</isDedup></control><addata><date>2021</date><date>2021.</date><aulast>Galgut</aulast><cop>London</cop><isbn>978-1-784-74406-9</isbn><isbn>978-1-784-74407-6</isbn><isbn>9781473584464</isbn><format>book</format><ristype>BOOK</ristype><oclcid>bv47362611</oclcid><oclcid>(xx-xxund)kxp1762351226</oclcid><oclcid>(de-604)bv047362611</oclcid><abstract>&quot;The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma&apos;s funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.&quot; Klappentext</abstract><auinit>D</auinit><aufirst>Damon</aufirst><au>Galgut, Damon</au><genre>book</genre><btitle>The promise</btitle><pub>Chatto &amp; Windus</pub></addata><sort><creationdate>2021</creationdate><author>Galgut, Damon 1963-</author><title>&lt;&lt;The&gt;&gt; promise / Damon Galgut.</title></sort></record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "The promise / Damon Galgut.",
+				"creators": [
+					{
+						"firstName": "Damon",
+						"lastName": "Galgut",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021",
+				"ISBN": "9781784744069",
+				"abstractNote": "\"The Promise charts the crash and burn of a white South African family, living on a farm outside Pretoria. The Swarts are gathering for Ma's funeral. The younger generation, Anton and Amor, detest everything the family stand for - not least the failed promise to the Black woman who has worked for them her whole life. After years of service, Salome was promised her own house, her own land ... yet somehow, as each decade passes, that promise remains unfulfilled.\" Klappentext, Cover: \"Shortlisted The 2021 Booker Prize\"",
+				"language": "eng",
+				"place": "London",
+				"publisher": "Chatto & Windus",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Fiction"
+					},
+					{
+						"tag": "South Africa"
 					}
 				],
 				"notes": [],
