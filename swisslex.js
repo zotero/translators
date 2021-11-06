@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-04 20:54:04"
+	"lastUpdated": "2021-11-06 12:14:14"
 }
 
 /*
@@ -51,10 +51,12 @@ class DocumentData {}
  * Internal/Temporary fields are named starting with '_'.
  *
  * @property {String} _magic
+ * @property {String} _article
  * @property {String} _author
  * @property {String} _editor
  * @property {Array}  creators
  * @property {String} title
+ * @property {String} _subtitle
  * @property {String} publicationTitle
  * @property {String} series
  * @property {String} date
@@ -70,6 +72,7 @@ class DocumentData {}
  * @property {String} journalAbbreviation
  * @property {String} issue
  * @property {String} number
+ * @property {String} encyclopediaTitle
  */
 class Metas {}
 
@@ -123,8 +126,9 @@ function extractDocumentData(doc, url) {
  */
 function extractRawItemData(doc_data) {
 	const metadata_labels = {
-		"artikelkommentar": "_magic",
+		"artikelkommentar": "_article",
 		"dokument": "_magic",
+		"dokumenttitel": "_subtitle",
 		"auflage": "edition",
 		"autor": "_author",
 		"autoren": "_author",
@@ -240,9 +244,6 @@ function patchupMetaMagic(doc_data, metas) {
 			metas.edition = value[1];
 		}
 	}
-	else if (doc_data.type === "encyclopediaArticle") {
-		metas.title = magic;
-	}
 	else if (doc_data.type === "case") {
 		metas.number = magic;
 		metas.title = magic;
@@ -250,6 +251,18 @@ function patchupMetaMagic(doc_data, metas) {
 	else {
 		Z.debug("don't know _magic for type " + doc_data.type);
 	}
+}
+
+/**
+ * patchup metas for document type 'bookSection'
+ * @param {DocumentData}  doc_data
+ * @param {Metas}         metas
+ */
+function patchupForBookSection(doc_data, metas) {
+	if (metas.publicationTitle !== undefined) {
+		metas.title = metas.publicationTitle + " - " + metas.title;
+	}
+	// @TODO
 }
 
 /**
@@ -330,8 +343,19 @@ function patchupForCase(doc_data, metas) {
  * @param {Metas}         metas
  */
 function patchupForLegalCommentary(doc_data, metas) {
-	metas.publicationTitle = metas.title;
-	// @TODO
+	if (metas._article !== undefined) {
+		metas.encyclopediaTitle = metas.title;
+		metas.title = metas._article;
+		delete metas._article;
+		delete metas._subtitle;
+	}
+	if (metas._subtitle) {
+		metas.title = metas.title + " - " + metas._subtitle;
+		delete metas._subtitle;
+	}
+	if (metas.series !== undefined && metas.series.match( "^[A-Z]{2,5} - ")) {
+		metas.series = metas.series.split("-")[0];
+	}
 }
 
 function detectWeb(doc, url) {
@@ -350,6 +374,9 @@ function doWeb(doc, url) {
 	}
 	if (doc_data.type === "case") {
 		patchupForCase(doc_data, metas);
+	}
+	if (doc_data.type === "bookSection") {
+		patchupForBookSection(doc_data, metas);
 	}
 
 	let item = new Zotero.Item(doc_data.type);
