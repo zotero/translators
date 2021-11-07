@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-22 00:24:00"
+	"lastUpdated": "2021-11-07 07:42:50"
 }
 
 /*
@@ -468,15 +468,21 @@ function addHighwireMetadata(doc, newItem, hwType) {
 	
 	// matches hyphens and en-dashes
 	let dashRe = /[-\u2013]/g;
-	var firstpage = getContentText(doc, 'citation_firstpage').replace(dashRe, '-');
-	var lastpage = getContentText(doc, 'citation_lastpage').replace(dashRe, '-');
-	if (firstpage && firstpage.includes("-")) {
-		firstpage = firstpage.split(/\s*-\s*/)[0];
-		lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+	var firstpage = getContentText(doc, 'citation_firstpage');
+	var lastpage = getContentText(doc, 'citation_lastpage');
+	if (firstpage) {
+		firstpage = firstpage.replace(dashRe, '-');
+		if (firstpage.includes("-")) {
+			firstpage = firstpage.split(/\s*-\s*/)[0];
+			lastpage = lastpage || firstpage.split(/\s*-\s*/)[1];
+		}
 	}
-	if (lastpage && lastpage.includes('-')) {
-		firstpage = firstpage || lastpage.split(/\s*-\s*/)[0];
-		lastpage = lastpage.split(/\s*-\s*/)[1];
+	if (lastpage) {
+		lastpage = lastpage.replace(dashRe, '-');
+		if (lastpage.includes('-')) {
+			firstpage = firstpage || lastpage.split(/\s*-\s*/)[0];
+			lastpage = lastpage.split(/\s*-\s*/)[1];
+		}
 	}
 	firstpage = firstpage || rdfPages[0];
 	lastpage = lastpage || rdfPages[1];
