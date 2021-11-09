@@ -11,7 +11,6 @@
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2021-11-06 17:53:27"
 }
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -35,11 +34,13 @@
 	***** END LICENSE BLOCK *****
 */
 
+/* eslint quote-props: ["error", "consistent"] */
+
 /**
  * translation table from human readable metadata labels to fields
  * @type {{}}
  */
-const metadata_label_translation = {
+const translationMetaLabel = {
 	"artikelkommentar": "_article",
 	"commentaire d'article": "_article",
 	"dokument": "_magic",
@@ -87,7 +88,7 @@ const metadata_label_translation = {
  * translation table from canton to its abbreviation
  * @type {{}}
  */
-const canton_translation = {
+const translationCanton = {
 	"Schweiz": "",
 	"Suisse": "",
 	"Zürich": "ZH",
@@ -98,8 +99,10 @@ const canton_translation = {
 	"Lucerne": "LU",
 	"Uri": "UR",
 	"Schwyz": "SZ",
-	"Obwalden": "OW",  // FR
-	"Nidwalden": "NW",  // FR
+	"Obwalden": "OW",
+	"Obwald": "OW",
+	"Nidwalden": "NW",
+	"Nidwald": "NW",
 	"Glarus": "GL",
 	"Glaris": "GL",
 	"Zug": "ZG",
@@ -146,7 +149,7 @@ const canton_translation = {
  * translation table from court names to abbreviations
  * @type {{}}
  */
-const court_translation = {
+const translationCourt = {
 	"Bundesstrafgericht": "BStrG",
 	"Tribunal pénal fédéral": "TPF",
 	"Bundesverwaltungsgericht": "BVerwG",
@@ -240,8 +243,8 @@ class Metas {}
  * @returns {DocumentData}
  */
 function extractDocumentData(doc, url) {
-	const url_regexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
-	const type_translation = {
+	const urlRegexp = "^https://www.swisslex.ch/(de|fr|it|en)/doc/([a-z]+)/([-0-9a-f]+)";
+	const translationType = {
 		"bookdoc": "bookSection",
 		"essay": "journalArticle",
 		"clawrev": "journalArticle",
@@ -253,7 +256,7 @@ function extractDocumentData(doc, url) {
 	let result = new DocumentData();
 
 	url = decodeURI(url);
-	parts = url.match(url_regexp);
+	parts = url.match(urlRegexp);
 
 	if (parts !== null) {
 		result = {
@@ -261,8 +264,8 @@ function extractDocumentData(doc, url) {
 			url: parts[0],
 			lang: parts[1],
 			id: parts[3],
-			type: type_translation[parts[2]]
-		}
+			type: translationType[parts[2]]
+		};
 	}
 
 	return result;
@@ -277,21 +280,21 @@ function extractDocumentData(doc, url) {
  * After extraction the fields are collected in 'raw' format. They will have to
  * be parsed/patched for machine readability and transfer to Zotero.
  *
- * @param   {DocumentData}         doc_data
+ * @param   {DocumentData}         docData
  * @returns {Metas}
  */
-function extractRawItemData(doc_data) {
-	const dom_metas = ZU.xpath(doc_data.dom, '//div[@id="' + doc_data.id + '"]//li[contains(@class,"meta-entry")]');
+function extractRawItemData(docData) {
+	const domMetas = ZU.xpath(docData.dom, '//div[@id="' + docData.id + '"]//li[contains(@class,"meta-entry")]');
 	let result = new Metas();
 
-	result.url = doc_data.url;
-	for (let i=0, l=dom_metas.length; i<l; i++) {
-		let label = dom_metas[i].children[0].innerText.toLowerCase();
-		if (metadata_label_translation[label] !== undefined) {
-			result[metadata_label_translation[label]] = dom_metas[i].children[1].innerText;
+	result.url = docData.url;
+	for (let i = 0, l = domMetas.length; i < l; i++) {
+		let label = domMetas[i].children[0].innerText.toLowerCase();
+		if (translationMetaLabel[label] !== undefined) {
+			result[translationMetaLabel[label]] = domMetas[i].children[1].innerText;
 		}
 		else if (label.length > 0) {
-			Z.debug( "Unknown swisslex metadata label: '" + label + "'" );
+			Z.debug("Unknown swisslex metadata label: '" + label + "'");
 		}
 		// else empty label
 	}
@@ -309,10 +312,10 @@ function extractRawItemData(doc_data) {
  *   * _author  add to creators array - format: lastname firstname
  *   * _editor  add to creators array - format: firstname lastname
  *
- * @param {DocumentData} doc_data
+ * @param {DocumentData} docData
  * @param {Metas}        metas
  */
-function patchupMetaCommon(doc_data, metas) {
+function patchupMetaCommon(docData, metas) {
 	if (metas.date !== undefined) {
 		metas.date = ZU.strToISO(metas.date);
 	}
@@ -324,10 +327,10 @@ function patchupMetaCommon(doc_data, metas) {
 		delete metas._tags;
 		metas.tags = [];
 		for (let i = 0; i < tags.length; i++) {
-			let tag_parts = tags[i].split("/");
-			metas.tags.push( ZU.trimInternal( tag_parts[0] ) );
-			if ( tag_parts.length > 1 ) {
-				metas.tags.push( ZU.trimInternal( tags[i] ) );
+			let tagParts = tags[i].split("/");
+			metas.tags.push(ZU.trimInternal(tagParts[0]));
+			if (tagParts.length > 1) {
+				metas.tags.push(ZU.trimInternal(tags[i]));
 			}
 		}
 	}
@@ -336,7 +339,7 @@ function patchupMetaCommon(doc_data, metas) {
 		delete metas._editor;
 		metas.creators = metas.creators || [];
 		for (let i = 0; i < editors.length; i++) {
-			metas.creators.push( ZU.cleanAuthor( editors[i], "editor", false) );
+			metas.creators.push(ZU.cleanAuthor(editors[i], "editor", false));
 		}
 	}
 	if (metas._author !== undefined) {
@@ -344,9 +347,9 @@ function patchupMetaCommon(doc_data, metas) {
 		delete metas._author;
 		metas.creators = metas.creators || [];
 		for (let i = 0; i < authors.length; i++) {
-			let one_author = ZU.cleanAuthor( authors[i], "author", false);
-			[ one_author.firstName, one_author.lastName ] = [ one_author.lastName, one_author.firstName ];
-			metas.creators.push( one_author );
+			let oneAuthor = ZU.cleanAuthor(authors[i], "author", false);
+			[oneAuthor.firstName, oneAuthor.lastName] = [oneAuthor.lastName, oneAuthor.firstName];
+			metas.creators.push(oneAuthor);
 		}
 	}
 }
@@ -357,10 +360,10 @@ function patchupMetaCommon(doc_data, metas) {
  * depending on document type, _magic will hold different information.
  *
  * @TODO  the data extraction of _magic is rather brittle and not well tested
- * @param {DocumentData} doc_data
+ * @param {DocumentData} docData
  * @param {Metas}        metas
  */
-function patchupMetaMagic(doc_data, metas) {
+function patchupMetaMagic(docData, metas) {
 	let magic = metas._magic;
 	delete metas._magic;
 
@@ -368,34 +371,34 @@ function patchupMetaMagic(doc_data, metas) {
 		return;
 	}
 
-	if (doc_data.type === "journalArticle") {
+	if (docData.type === "journalArticle") {
 		let value = magic.split(' ');
 		metas.journalAbbreviation = value[0];
 		if (value[1].includes("/")) {
 			metas.issue = value[1].split("/")[0];
 		}
 	}
-	else if (doc_data.type === "bookSection") {
-		let value = magic.match( '([0-9]+)\.A.,' );
+	else if (docData.type === "bookSection") {
+		let value = magic.match('([0-9]+)\\.A.,');
 		if (value) {
 			metas.edition = value[1];
 		}
 	}
-	else if (doc_data.type === "case") {
+	else if (docData.type === "case") {
 		metas.number = magic;
 		metas.title = magic;
 	}
 	else {
-		Z.debug("don't know _magic for type " + doc_data.type);
+		Z.debug("don't know _magic for type " + docData.type);
 	}
 }
 
 /**
  * patchup metas for document type 'bookSection'
- * @param {DocumentData}  doc_data
+ * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
-function patchupForBookSection(doc_data, metas) {
+function patchupForBookSection(docData, metas) {
 	if (metas.publicationTitle !== undefined) {
 		metas.title = metas.publicationTitle + " - " + metas.title;
 	}
@@ -404,35 +407,35 @@ function patchupForBookSection(doc_data, metas) {
 
 /**
  * patchup metas for document type 'case'
- * @param {DocumentData}  doc_data
+ * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
-function patchupForCase(doc_data, metas) {
+function patchupForCase(docData, metas) {
 	let court = metas.court.split(",");
 	let title = metas.title;
 
-	if (title.substring(0,4) !== "BGE ") {
+	if (title.substring(0, 4) !== "BGE ") {
 		let temp = court[0].trim();
-		if (canton_translation[temp] !== undefined) {
-			if (canton_translation[temp]) {
-				temp = canton_translation[temp] + " ";
+		if (translationCanton[temp] !== undefined) {
+			if (translationCanton[temp]) {
+				temp = translationCanton[temp] + " ";
 			}
 			else {
 				temp = "";
 			}
 		}
 		else {
-			Z.debug( "unknown canton: " + temp );
-			temp = temp + " ";
+			Z.debug("unknown canton: " + temp);
+			temp += " ";
 		}
 		title = temp + title;
 
 		temp = court[1].trim();
-		if (court_translation[temp] !== undefined ) {
-			temp = court_translation[temp];
+		if (translationCourt[temp] !== undefined) {
+			temp = translationCourt[temp];
 		}
 		else {
-			Z.debug( "unknown court: " + temp );
+			Z.debug("unknown court: " + temp);
 		}
 		title = temp + " " + title;
 
@@ -442,10 +445,10 @@ function patchupForCase(doc_data, metas) {
 
 /**
  * patchup metas for document type 'legalCommentary' - mapped to 'ecyclopediaArtice'
- * @param {DocumentData}  doc_data
+ * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
-function patchupForLegalCommentary(doc_data, metas) {
+function patchupForLegalCommentary(docData, metas) {
 	if (metas._article !== undefined) {
 		metas.encyclopediaTitle = metas.title;
 		metas.title = metas._article;
@@ -456,7 +459,7 @@ function patchupForLegalCommentary(doc_data, metas) {
 		metas.title = metas.title + " - " + metas._subtitle;
 		delete metas._subtitle;
 	}
-	if (metas.series !== undefined && metas.series.match( "^[A-Z]{2,5} - ")) {
+	if (metas.series !== undefined && metas.series.match("^[A-Z]{2,5} - ")) {
 		metas.series = metas.series.split("-")[0];
 	}
 }
@@ -466,23 +469,23 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-	let doc_data = extractDocumentData(doc, url);
+	let docData = extractDocumentData(doc, url);
 
-	let metas = extractRawItemData(doc_data);
-	patchupMetaCommon(doc_data, metas);
-	patchupMetaMagic(doc_data, metas);
+	let metas = extractRawItemData(docData);
+	patchupMetaCommon(docData, metas);
+	patchupMetaMagic(docData, metas);
 
-	if (doc_data.type === "encyclopediaArticle") {
-		patchupForLegalCommentary(doc_data, metas);
+	if (docData.type === "encyclopediaArticle") {
+		patchupForLegalCommentary(docData, metas);
 	}
-	if (doc_data.type === "case") {
-		patchupForCase(doc_data, metas);
+	if (docData.type === "case") {
+		patchupForCase(docData, metas);
 	}
-	if (doc_data.type === "bookSection") {
-		patchupForBookSection(doc_data, metas);
+	if (docData.type === "bookSection") {
+		patchupForBookSection(docData, metas);
 	}
 
-	let item = new Zotero.Item(doc_data.type);
+	let item = new Zotero.Item(docData.type);
 	for (let one in metas) {
 		if (one.substring(0, 1) !== "_") {
 			item[one] = metas[one];
@@ -494,5 +497,5 @@ function doWeb(doc, url) {
 	item.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = []
+var testCases = [];
 /** END TEST CASES **/
