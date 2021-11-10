@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-09 16:54:17"
+	"lastUpdated": "2021-11-10 09:59:46"
 }
 
 /*
@@ -174,6 +174,8 @@ function scrape(doc, url) {
 	item.publicationTitle = ZU.xpathText(doc, '//b[contains(text(), "Journal:")]/following-sibling::a[1]');
 	item.volume = ZU.xpathText(doc, '//b[contains(text(), "Volume:")]/following-sibling::a[1]');
 	item.issue = ZU.xpathText(doc, '//b[contains(text(), "Issue:")]/following-sibling::text()[1]');
+	// numbering issues with slash due to cataloguing rule
+	if (item.issue) item.issue = item.issue.replace('-', '/');
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
@@ -742,6 +744,42 @@ var testCases = [
 				"shortTitle": "An Ethical Agenda for Europe",
 				"url": "https://poj.peeters-leuven.be/content.php?url=article&id=630100&journal_code=EP",
 				"volume": "1",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://poj.peeters-leuven.be/content.php?url=article&id=3289673",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "The Spirituality of De imitatione Christi:  A Historian's Reflection on Asceticism and Mysticism in the Devotio moderna",
+				"creators": [
+					{
+						"creatorType": "author",
+						"lastName": "Goudriaan",
+						"firstName": " Koen"
+					}
+				],
+				"date": "2021",
+				"DOI": "10.2143/OGE.91.3.3289673",
+				"abstractNote": "This contribution examines the claim made by Rudolf van Dijk († 2015) a dozen years ago, that the reading of Thomas’s Imitatio Christi in the order of the autograph brings to light the ultimately mystical character of the work. A case could be made, indeed, for interpreting not only the book ‘On Consolation Within’, but even the book ‘On the Sacrament of the Altar’, as mystagogical. Consequently, it hardly seems possible any longer to defend a position which denies the mystical elements in Thomas’s work. The lack of unanimity among students of the Imitatio on the relationship between its ascetical and mystical elements may be imputed to the fact that their definition of mysticism mostly remains implicit. Therefore, this contribution traces the roots of the various assessments of the Imitatio, suggesting that these have to be looked for in theology, particularly in the Roman Catholic theological tradition. With the exception of its Pietist branch, Protestant theologians have read the Imitatio not so much for its mystical character as for its edificatory value. In Catholic circles, a debate has taken place about ‘infused’ versus ‘acquired’ contemplation. With reference to this debate, it was the Jesuit Albert Deblaere who gave a very subtle and pertinent analysis of the spirituality of the Imitatio. In his view, far from being a textbook of asceticism, it focuses on the search for religious experience. Nevertheless, due to his strict definition of mysticism, which only recognizes ‘infused’ grace and excludes the possibility of methodical preparation, Deblaere does not admit the Imitatio to the canon of mystical works. As an alternative to Deblaere’s influential approach, the ideas of the Nijmegen school of spirituality studies have been presented. Here, spiritual ascent is analysed as a journey for which a whole array of tools and means is available — the domain customarily assigned to asceticism — , but during which man is gradually transformed under the direct impact of divine reality. These are also the assumptions underneath the plea for a mystical reading of the Imitatio by Van Dijk, who himself belonged to this Nijmegen school. In discussing the book on the Sacrament of the Altar, some clues are followed to the religious experience of the fifteenth-century contemporaries for whom the Imitatio was written in the first place. The final section investigates the implications of the reflections on the Imitatio for the concept of a ‘mystical culture’, which has been used to characterize fifteenth-century religion. This concept, too, appears to embody a Deblaerian view of mysticism. Instead, this contribution makes out a case for a broader concept of mysticism, enabling scholars to come to a fuller recognition of the role it played in late-medieval religious culture.",
+				"issue": "3/4",
+				"libraryCatalog": "ubtue_Peeters",
+				"pages": "293-326",
+				"publicationTitle": "Ons Geestelijk Erf",
+				"shortTitle": "The Spirituality of De imitatione Christi",
+				"url": "https://poj.peeters-leuven.be/content.php?url=article&id=3289673",
+				"volume": "91",
 				"attachments": [
 					{
 						"title": "Snapshot",
