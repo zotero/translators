@@ -14,24 +14,30 @@
 
 /*
 	***** BEGIN LICENSE BLOCK *****
+
 	Copyright © 2018 Timotheus Chang-Whae Kim, Johannes Ruscheinski, Philipp Zumstein
+	
 	This file is part of Zotero.
+
 	Zotero is free software: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as published by
 	the Free Software Foundation, either version 3 of the License, or
 	(at your option) any later version.
+
 	Zotero is distributed in the hope that it will be useful,
 	but WITHOUT ANY WARRANTY; without even the implied warranty of
 	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 	GNU Affero General Public License for more details.
+
 	You should have received a copy of the GNU Affero General Public License
 	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
 	***** END LICENSE BLOCK *****
 */
 
 
 // attr()/text() v2
-function attr(docOrElem, selector, attr, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.getAttribute(attr) : null; } function text(docOrElem, selector, index) { var elem = index ? docOrElem.querySelectorAll(selector).item(index) : docOrElem.querySelector(selector); return elem ? elem.textContent : null; }
+function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 function detectWeb(doc, url) {
@@ -47,7 +53,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = doc.querySelectorAll('tr');
-	for (let i = 0; i < rows.length; i++) {
+	for (let i=0; i<rows.length; i++) {
 		let href = attr(rows[i], 'td a', 'href');
 		let title = text(rows[i], 'td', 1);
 		if (!href || !title) continue;
@@ -86,7 +92,7 @@ function ALLCaps(name) {
 function getValue(nodes) {
 	var value = "";
 	for (let part of nodes) {
-		if (part.tagName == "BR" || part.tagName == "B") break;
+		if (part.tagName=="BR" || part.tagName=="B") break;
 		value += ' ';
 		if (part.tagName) {
 			value += part.outerHTML;
@@ -97,50 +103,18 @@ function getValue(nodes) {
 	return value;
 }
 
-function parseAbstract(doc, item) {
-	// the abstract text can be interspersed by inline <i> tags that break
-	// the flow of text. So, we need to iterate through the text nodes and
-	// <i> nodes in sequence
-	let textParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()');
-	let italicsParts = ZU.xpath(doc, '//b[contains(text(), "Abstract :")]/following-sibling::i');
-
-	if (textParts && textParts.length > 0) {
-		item.abstractNote = "";
-
-		let fullAbstract = "";
-		let i = 0, j = 0;
-		do {
-			let text = textParts[i].textContent;
-			if (text && text.length > 0)
-				fullAbstract += text;
-
-			if (j < italicsParts.length) {
-				let text = italicsParts[j].textContent;
-				if (text && text.length > 0)
-					fullAbstract += text;
-				++j;
-			}
-
-			++i;
-		} while (i < textParts.length);
-
-		item.abstractNote = fullAbstract.trim();
-	}
-}
 
 function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
-
+	
 	var titleNodes = ZU.xpath(doc, '//b[contains(text(), "Title:")]/following-sibling::node()');
-	item.title = getValue(titleNodes).replace(/<[^>]*>/g, "");
+	item.title = getValue(titleNodes);
 	var subtitleNodes = ZU.xpath(doc, '//b[contains(text(), "Subtitle:")]/following-sibling::node()');
 	var subtitle = getValue(subtitleNodes);
 	if (subtitle) {
 		item.title += ': ' + subtitle;
 	}
-
-	item.title = ZU.unescapeHTML(item.title.replace(/<(.|\n)*?>/g, ''));
-
+	
 	// e.g. Author(s): HANDAL, Boris , WATSON, Kevin , ..., VAN DER MERWE, W.L.
 	// but sometimes the space before the comma is also missing
 	var authors = ZU.xpathText(doc, '//b[contains(text(), "Author(s):")]/following-sibling::text()[1]');
@@ -148,17 +122,17 @@ function scrape(doc, url) {
 		authors = authors.split(',');
 	}
 	var creator;
-	for (let i = 0; i < authors.length; i++) {
+	for (let i=0; i<authors.length; i++) {
 		let name = authors[i];
 		if (ALLCaps(name)) name = ZU.capitalizeTitle(name, true);
-		if (i % 2 === 0) {// last name
+		if (i%2===0) {// last name
 			creator = {
 				creatorType: 'author',
 				lastName: ZU.capitalizeTitle(name, true)
 			};
 		} else {// first name
 			creator.firstName = name;
-			item.creators.push(creator);
+			item.creators.push(creator); 
 		}
 	}
 
@@ -168,17 +142,8 @@ function scrape(doc, url) {
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
-	item.url = url;
-
-	parseAbstract(doc, item);
-
-	// fixup date
-	if (item.date) {
-		var match = item.date.match(/^numéro [0-9]+, ([0-9]{4})/);
-		if (match)
-			item.date = match[1];
-	}
-
+	item.abstractNote = ZU.xpathText(doc, '//b[contains(text(), "Abstract :")]/following-sibling::text()[1]');
+	
 	item.attachments.push({
 		url: url,
 		title: "Snapshot",
@@ -619,5 +584,4 @@ var testCases = [
 		]
 	}
 ]
-
 /** END TEST CASES **/
