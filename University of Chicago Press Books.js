@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-22 01:06:22"
+	"lastUpdated": "2021-11-11 14:57:46"
 }
 
 /*
@@ -93,7 +93,7 @@ function scrape(doc, url) {
 		// Some authors aren't hyperlinked
 		if (authorString.includes(",")) {
 			// grab the text-only content of the author string
-			var moreAuthors = text(doc, 'div.purchase-item-detail-title-desktop p.author');
+			var moreAuthors =  ZU.xpathText(doc, '//div[@class="purchase-item-detail-title-desktop"]//p[contains(@class, "author")]/text()');
 			// clean it.
 			moreAuthors = moreAuthors.replace(/^[^,]*[,\s]*/, "").replace(/^and/, "");
 			moreAuthors = moreAuthors.split(/,\s(?:and )?|\sand\s/);
