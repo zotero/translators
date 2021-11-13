@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-13 20:55:11"
+	"lastUpdated": "2021-11-13 21:17:33"
 }
 
 /*
@@ -35,6 +35,24 @@
 	***** END LICENSE BLOCK *****
 */
 
+const abbrevPublished = {
+	de: "BGE ",
+	fr: "ATF ",
+	it: "ATF "
+};
+
+const abbrevUnpublished = {
+	de: "BGer ",
+	fr: "TF ",
+	it: "TF "
+};
+
+const courtName = {
+	de: "Schweizerisches Bundesgericht",
+	fr: "Tribunal Fédéral Suisse",
+	it: "Tribunale Federale Svizzero"
+}
+
 /**
  * read query parameters from url
  *
@@ -43,15 +61,19 @@
  */
 function parseURLParameters(url) {
 	let parts = require('url').parse(url, true);
-	if (parts.pathname === "/ext/eurospider/live/de/php/aza/http/index.php") {
+	parts.query._lang = parts.pathname.substring(21, 23);
+
+	let subpath = parts.pathname.substring(23);
+	if (subpath === "/php/aza/http/index.php") {
 		parts.query._collection = "BGer";
 	}
-	else if (parts.pathname === "/ext/eurospider/live/de/php/clir/http/index.php") {
+	else if (subpath === "/php/clir/http/index.php") {
 		parts.query._collection = "BGE";
 	}
-	else if (parts.pathname === "/ext/eurospider/live/de/php/aza/http/index_aza.php") {
+	else if (subpath === "/php/aza/http/index_aza.php") {
 		parts.query._collection = "news";
 	}
+	
 	return parts.query;
 }
 
@@ -147,7 +169,7 @@ function getSearchResultsBGE(doc, parameters) {
 
 	for (let i = 1; i < dom_rows.length; i++ ) {
 		let url = dom_rows[i].children[0].children[0];
-		let number = "BGE " + url.innerText;
+		let number = abbrevPublished[parameters._lang] + url.innerText;
 		let subject = dom_rows[i].children[2].children[1].innerText;
 		subject = subject.substring(subject.indexOf(']') + 2);
 		items[url] = number + " (" + subject + ")";
@@ -159,7 +181,7 @@ function _scrape(doc, url, parameters) {
 		let item = new Zotero.Item("case");
 
 		item.url = url;
-		item.court = "Schweizerisches Bundesgericht";
+		item.court = courtName[parameters._lang];
 		item.attachments.push({
 			title: "Snapshot",
 			document: doc
@@ -167,7 +189,7 @@ function _scrape(doc, url, parameters) {
 		if (parameters._collection === "BGE") {
 			let docket = parameters.highlight_docid;
 			docket = docket.substring(6, docket.length - 3).replace(/-/g, ' ');
-			item.title = "BGE " + docket;
+			item.title = abbrevPublished[parameters._lang] + docket;
 			item.number = item.title;
 			item.date = parseInt(docket.split(' ')[0]) + 1874;
 			item.abstractNote = ZU.trimInternal(doc.querySelector("div#regeste>div.paraatf").innerText);
@@ -175,7 +197,7 @@ function _scrape(doc, url, parameters) {
 		else if (parameters._collection === "BGer") {
 			item.date = parameters.highlight_docid.substring(12,22).replace(/-/g, '.');
 			item.number = parameters.highlight_docid.substring(23).replace('-', '/');
-			item.title = "BGer " + item.number;
+			item.title = abbrevUnpublished[parameters._lang] + item.number;
 		}
 		else {
 			Z.debug( "unknown collection '" + parameters._collection + "'");
