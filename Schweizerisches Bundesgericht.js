@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-13 20:19:13"
+	"lastUpdated": "2021-11-13 20:55:11"
 }
 
 /*
@@ -197,6 +197,11 @@ function getSearchResults(doc, parameters) {
 	}
 }
 
+function scrape(doc, url) {
+	let parameters = parseURLParameters(url);
+	_scrape(doc, url, parameters);
+}
+
 function detectWeb(doc, url) {
 	let parameters = parseURLParameters(url);
 	return _detectWeb(parameters);
@@ -207,9 +212,7 @@ function doWeb(doc, url) {
 
 	if (_detectWeb(parameters) === "multiple") {
 		Zotero.selectItems(getSearchResults(doc, parameters), function (items) {
-			if (items) ZU.processDocuments(Object.keys(items), function (doc, url) {
-				_scrape(doc, url, parameters);
-			});
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
 	else {
