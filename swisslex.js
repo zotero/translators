@@ -338,7 +338,6 @@ function patchupMetaCommon(docData, metas) {
 	}
 	if (metas._editor !== undefined) {
 		let editors = metas._editor.split(',');
-		delete metas._editor;
 		metas.creators = metas.creators || [];
 		for (let i = 0; i < editors.length; i++) {
 			metas.creators.push(ZU.cleanAuthor(editors[i], "editor", false));
@@ -346,7 +345,6 @@ function patchupMetaCommon(docData, metas) {
 	}
 	if (metas._author !== undefined) {
 		let authors = metas._author.split(',');
-		delete metas._author;
 		metas.creators = metas.creators || [];
 		for (let i = 0; i < authors.length; i++) {
 			let oneAuthor = ZU.cleanAuthor(authors[i], "author", false);
@@ -396,15 +394,33 @@ function patchupMetaMagic(docData, metas) {
 }
 
 /**
- * patchup metas for document type 'bookSection'
+ * patchup metas for document type 'bookSection' or 'book'
+ *
+ * Swisslex does not differentiate between actual bookSections (e.g. a collection of distinct texts)
+ * and book chapters - both are handled in the exactly same way... :(
+ * Therefore we try some heuristics to detect books:
+ *   * no editor
+ *   * 'chapter' title beginning with ordinals or '§'
+ *
  * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
 function patchupForBookSection(docData, metas) {
-	if (metas.publicationTitle !== undefined) {
-		metas.title = metas.publicationTitle + " - " + metas.title;
+	const bookRegex = "^(\\d+\\.|§\\s*\\d+)";
+	const collectionRegex = "^[IVX]+\\.?\\s+";
+
+	if (metas._editor === undefined || metas.title.match(bookRegex)) {
+		docData.type = "book";
+		metas.title = metas.publicationTitle;
+		delete metas.publicationTitle;
+		delete metas.pages;
+		return;
 	}
-	// @TODO
+
+	let collectionParts = metas.title.match(collectionRegex);
+	if (collectionParts) {
+		metas.title = metas.title.substring(collectionParts[0].length);
+	}
 }
 
 /**
@@ -495,6 +511,8 @@ function doWeb(doc, url) {
 	if (docData.type === "bookSection") {
 		patchupForBookSection(docData, metas);
 	}
+	delete metas._author; // late deletion - has been converted in MetaCommon
+	delete metas._editor;
 
 	let item = new Zotero.Item(docData.type);
 	for (let one in metas) {
