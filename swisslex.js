@@ -9,8 +9,9 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-06 17:53:27"
+	"lastUpdated": "2021-11-09 20:53:10"
 }
+
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -215,6 +216,7 @@ class DocumentData {}
  * @property {String} _editor
  * @property {Array}  creators
  * @property {String} title
+ * @property {String} shortTitle
  * @property {String} _subtitle
  * @property {String} publicationTitle
  * @property {String} series
@@ -444,23 +446,32 @@ function patchupForCase(docData, metas) {
 }
 
 /**
- * patchup metas for document type 'legalCommentary' - mapped to 'ecyclopediaArtice'
+ * patchup metas for document type 'legalCommentary' - mapped to 'encyclopediaArticle'
  * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
 function patchupForLegalCommentary(docData, metas) {
+	// set series to abbreviation ("BK - Berner Kommentar" => "BK")
+	if (metas.series !== undefined && metas.series.match("^[A-Z]{2,5} - ")) {
+		metas.series = ZU.trimInternal(metas.series.split("-")[0]);
+	}
+
+	// if its a commentary to a specific articles
 	if (metas._article !== undefined) {
+		let commentary = metas.series || metas.publisher.split(" ")[0];
+		let articleParts = metas._article.split(" ");
 		metas.encyclopediaTitle = metas.title;
-		metas.title = metas._article;
+		metas.title = metas._article + " (" + commentary + ")";
+		metas.shortTitle = (docData.lang === "fr" ? "art. " : "Art. ") + articleParts[1] + " " + articleParts[0];
 		delete metas._article;
 		delete metas._subtitle;
+		delete metas.pages;
 	}
+
+	// if its a non-article commentary, handle like a bookSection
 	if (metas._subtitle) {
 		metas.title = metas.title + " - " + metas._subtitle;
 		delete metas._subtitle;
-	}
-	if (metas.series !== undefined && metas.series.match("^[A-Z]{2,5} - ")) {
-		metas.series = metas.series.split("-")[0];
 	}
 }
 
