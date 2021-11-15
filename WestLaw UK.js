@@ -37,10 +37,10 @@
 
 
 function detectWeb(doc) {
-	if (doc.getElementsByClassName("kh_toc-list ukResearch_toc-list")[0].innerText.includes("Case")) {
+	if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Case")) {
 		return "case";
 	}
-	else if (doc.getElementsByClassName("kh_toc-list ukResearch_toc-list")[0].innerText.includes("Act")) {
+	else if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Act")) {
 		return "statute";
 	}
 	else if (doc.title.includes("s.")) {
