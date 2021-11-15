@@ -2,14 +2,14 @@
 	"translatorID": "3d0231ce-fd4b-478c-b1d3-840389e5b68c",
 	"label": "PubMed",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|myncbi|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)|^https?://pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d|\\?)",
+	"target": "^https?://([^/]+\\.)?(www|preview)\\.ncbi\\.nlm\\.nih\\.gov[^/]*/(m/)?(books|pubmed|labs/pubmed|myncbi|sites/pubmed|sites/entrez|entrez/query\\.fcgi\\?.*db=PubMed|myncbi/browse/collection/?|myncbi/collections/)|^https?://pubmed\\.ncbi\\.nlm\\.nih\\.gov/(\\d|\\?|searches/)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-12 21:09:32"
+	"lastUpdated": "2020-12-16 03:19:29"
 }
 
 /*
@@ -1008,7 +1008,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.ncbi.nlm.nih.gov/pubmed/14779137",
+		"url": "https://pubmed.ncbi.nlm.nih.gov/14779137/",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1020,7 +1020,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Oct 1950",
+				"date": "1950-10",
 				"ISSN": "0025-7044",
 				"extra": "PMID: 14779137",
 				"issue": "4",
@@ -1038,9 +1038,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Humans",
-					"PANCREATITIS",
-					"Pancreatitis"
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "PANCREATITIS"
+					},
+					{
+						"tag": "Pancreatitis"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -1143,7 +1149,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "Aug 2019",
+				"date": "2019-08",
 				"DOI": "10.1136/emermed-2019-208447",
 				"ISSN": "1472-0213",
 				"abstractNote": "Multiple pitfalls can occur with the conduct and analysis of a study of diagnostic tests, resulting in biased accuracy. Our conceptual model includes three stages: patient selection, interpretation of the index test and disease verification. In part 2, we focus on (1) Interpretation bias (or workup bias): where the classification of an indeterminate index test result can bias the accuracy of a test or how lack of blinding can bias a subjective test result, and (2) Disease verification bias: where the index test result is incorporated into the gold standard or when the gold standard is applied only to a select population as the gold standard is an invasive test. In an example with age-adjusted D-dimer for pulmonary embolism, differential verification bias was a limitation due to the use of two gold standards-CT for a high-risk population and follow-up for symptoms in a low-risk population. However, there are circumstances when certain choices in study design are unavoidable, and result in biased test characteristics. In this case, the informed reader will better judge the quality of a study by recognising the potential biases and limitations by being methodical in their approach to understanding the methods, and in turn, better apply studies of diagnostic tests into their clinical practice.",
@@ -1234,6 +1240,7 @@ var testCases = [
 				"journalAbbreviation": "Elife",
 				"language": "eng",
 				"libraryCatalog": "PubMed",
+				"pages": "e51710",
 				"publicationTitle": "eLife",
 				"volume": "9",
 				"attachments": [
@@ -1245,13 +1252,40 @@ var testCases = [
 				],
 				"tags": [
 					{
+						"tag": "Animals"
+					},
+					{
 						"tag": "D. melanogaster"
+					},
+					{
+						"tag": "Drosophila Proteins"
+					},
+					{
+						"tag": "Drosophila melanogaster"
+					},
+					{
+						"tag": "Imaginal Discs"
+					},
+					{
+						"tag": "Larva"
+					},
+					{
+						"tag": "Muscles"
 					},
 					{
 						"tag": "Myoglianin"
 					},
 					{
 						"tag": "Myostatin"
+					},
+					{
+						"tag": "Signal Transduction"
+					},
+					{
+						"tag": "Smad Proteins, Receptor-Regulated"
+					},
+					{
+						"tag": "Transforming Growth Factor beta"
 					},
 					{
 						"tag": "developmental biology"

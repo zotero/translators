@@ -9,41 +9,41 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-11-02 11:04:02"
+	"lastUpdated": "2021-08-09 22:56:38"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-    Twitter Translator
-    Copyright © 2020 Bo An, Dan Stillman
-    
-    This file is part of Zotero.
-    
-    Zotero is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Affero General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-    
-    Zotero is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    GNU Affero General Public License for more details.
-    
-    You should have received a copy of the GNU Affero General Public License
-    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
-    
+	Twitter Translator
+	Copyright © 2020-2021 Bo An, Dan Stillman
+	
+	This file is part of Zotero.
+	
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+	
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+	
    	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
+
+let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
 
 function detectWeb(doc, _url) {
-	if (_url.includes('/status/')) {
+	if (_url.includes('/status/') && titleRe.test(doc.title)) {
 		return "blogPost";
 	}
+	Z.monitorDOMChanges(doc.querySelector('title'));
 	return false;
 }
 
@@ -62,7 +62,7 @@ function unshortenURLs(doc, str) {
 
 function unshortenURL(doc, tCoURL) {
 	var a = doc.querySelector('a[href*="' + tCoURL + '"]');
-	return (a ? a.title : false) || tCoURL;
+	return (a ? a.textContent.replace(/…$/, '') : false) || tCoURL;
 }
 
 function extractURLs(doc, str) {
@@ -76,6 +76,12 @@ function extractURLs(doc, str) {
 	return urls;
 }
 
+// Find the link to the permalink (e.g., "8h")
+function findPermalinkLink(doc, canonicalURL) {
+	let path = canonicalURL.match(/https?:\/\/[^/]+(.+)/)[1];
+	return doc.querySelector(`a[href="${path}" i]`);
+}
+
 function doWeb(doc, url) {
 	scrape(doc, url);
 }
@@ -83,11 +89,17 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	var item = new Zotero.Item("blogPost");
 
-	var canonicalURL = url.match(/^([^?#]+)/)[1];
-	var originalTitle = text(doc, 'title');
+	var canonicalURL = doc.querySelector('link[rel="canonical"]').href;
+	// For unclear reasons, in some cases the URL doesn't have capitalization
+	// but rel="canonical" does, and in other cases it's the other way around,
+	// so if rel="canonical" doesn't have any caps, use the URL
+	if (!/[A-Z]/.test(canonicalURL)) {
+		canonicalURL = url.match(/^([^?#]+)/)[1];
+	}
+	var originalTitle = doc.title;
 	var unshortenedTitle = ZU.unescapeHTML(unshortenURLs(doc, originalTitle));
 	// Extract tweet from "[optional count] [Display Name] on Twitter: “[tweet]”"
-	var matches = unshortenedTitle.match(/^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/);
+	var matches = unshortenedTitle.match(titleRe);
 	var [, author, tweet] = matches;
 	
 	// Title is tweet with newlines removed
@@ -96,8 +108,22 @@ function scrape(doc, url) {
 	// Don't set short title when tweet contains colon
 	item.shortTitle = false;
 	
+	// Identify the tweet block by looking for the client link (e.g, "Tweetbot")
+	var articleEl;
 	var clientLink = doc.querySelector('a[href*="source-labels"]');
-	var articleEl = clientLink.closest('article');
+	if (clientLink) {
+		articleEl = clientLink.closest('article');
+	}
+	// If client link not found, use permalink
+	//
+	// This is the case on share URLs such as
+	// https://twitter.com/aerospacecorp/status/1391160460150382598?s=27,
+	// but that doesn't serve content to the test runner for some reason, so
+	// we don't have a test for it.
+	else {
+		let a = findPermalinkLink(doc, canonicalURL);
+		articleEl = a.closest('article');
+	}
 	var tweetSelector = 'article[role="article"]';
 	
 	// If the title is modified (e.g., because we stripped newlines), add the
@@ -136,6 +162,19 @@ function scrape(doc, url) {
 		let str = span.textContent;
 		if (!str.includes(dotSep)) {
 			// Z.debug("Date separator not found")
+			
+			// Share URLs don't show the date, so use the <time> in the
+			// permalink link
+			//
+			// E.g., https://twitter.com/aerospacecorp/status/1391160460150382598?s=27
+			let a = findPermalinkLink(doc, canonicalURL);
+			if (a) {
+				let time = a.querySelector('time');
+				if (time) {
+					let dt = time.getAttribute('datetime');
+					item.date = dt.replace(/:\d\d\.000/, '');
+				}
+			}
 			continue;
 		}
 		let [time, date] = str.split(dotSep);
@@ -148,7 +187,7 @@ function scrape(doc, url) {
 			let minute = matches[2];
 			let ampm = matches[3];
 			// If "PM", add 12 hours
-			if (ampm && ampm.toLowerCase() == 'pm') {
+			if (ampm && ampm.toLowerCase() == 'pm' && hour != "12") {
 				hour = parseInt(hour) + 12;
 			}
 			// Convert to UTC and add 'T' and 'Z'
@@ -232,7 +271,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "blogPost",
-				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/",
+				"title": "Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari! http://zotero.org/blog/announcing-zotero-3-0-beta-release/",
 				"creators": [
 					{
 						"lastName": "Zotero",
@@ -257,11 +296,7 @@ var testCases = [
 					}
 				],
 				"tags": [],
-				"notes": [
-					{
-						"note": "<p>“Zotero 3.0 beta is now available with duplicate detection and tons more. Runs outside Firefox with Chrome or Safari!&nbsp; http://www.zotero.org/blog/announcing-zotero-3-0-beta-release/”</p>"
-					}
-				],
+				"notes": [],
 				"seeAlso": []
 			}
 		]

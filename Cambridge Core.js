@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-17 15:09:25"
+	"lastUpdated": "2021-10-09 00:36:31"
 }
 
 /*
@@ -36,6 +36,10 @@
 */
 
 function detectWeb(doc, url) {
+	// if one of these strings is in the URL, we're almost definitely on a listing
+	// page and should immediately return "multiple" if the page contains any
+	// results. the checks below (particularly url.includes('/books/')) might
+	// falsely return true and lead to an incorrect detection if we continue.
 	let multiples = /\/search\?|\/listing\?|\/issue\//;
 	if (multiples.test(url) && getSearchResults(doc, true)) {
 		return "multiple";
@@ -49,6 +53,13 @@ function detectWeb(doc, url) {
 		}
 		else return "book";
 	}
+	
+	// now let's check for multiples again, just to be sure. this handles some
+	// rare listing page URLs that might not be included in the multiples
+	// regex above.
+	if (getSearchResults(doc, true)) {
+		return "multiple";
+	}
 
 	return false;
 }
@@ -56,12 +67,12 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc,
-		'//li[@class="title"]//a[contains(@href, "/article/") or contains(@href, "/product/") or contains(@href, "/books/")]'
+	var rows = doc.querySelectorAll(
+		'li.title a[href*="/article/"], li.title a[href*="/product/"], li.title a[href*="/books/"]'
 	);
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
+	for (let row of rows) {
+		var href = row.href;
+		var title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -142,6 +153,9 @@ function scrape(doc, url) {
 			}
 			item.title = ZU.unescapeHTML(item.title);
 			item.libraryCatalog = "Cambridge University Press";
+			if (item.date.includes("undefined")) {
+				item.date = attr('meta[name="citation_online_date"]', "content");
+			}
 			item.complete();
 		});
 
@@ -161,7 +175,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -183,7 +197,7 @@ var testCases = [
 				"pages": "227-243",
 				"publicationTitle": "Journal of American Studies",
 				"shortTitle": "“SAMO© as an Escape Clause”",
-				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 				"volume": "45",
 				"attachments": [
 					{
@@ -191,7 +205,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -202,7 +217,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -232,7 +247,7 @@ var testCases = [
 				"libraryCatalog": "Cambridge University Press",
 				"pages": "437-469",
 				"publicationTitle": "Journal of Fluid Mechanics",
-				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 				"volume": "590",
 				"attachments": [
 					{
@@ -240,7 +255,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
@@ -353,7 +369,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -412,7 +429,8 @@ var testCases = [
 				"url": "https://www.cambridge.org/core/books/conservation-research-policy-and-practice/22AB241C45F182E40FC7F13637485D7E",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -424,6 +442,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.cambridge.org/core/what-we-publish/books/listing?sort=canonical.date%3Adesc&aggs%5BonlyShowAvailable%5D%5Bfilters%5D=true&aggs%5BproductTypes%5D%5Bfilters%5D=BOOK%2CELEMENT&searchWithinIds=0C5182F27A492FDC81EDF8D3C53266B5",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/ajs-review/firstview",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/ajs-review/latest-issue",
 		"items": "multiple"
 	}
 ]

@@ -9,12 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-08 01:32:51"
+	"lastUpdated": "2021-10-12 18:02:11"
 }
 
 /*
    Wiley Online Translator
-   Copyright (C) 2011 CHNM, Avram Lyon and Aurimas Vinckevicius
+   Copyright (C) 2011-2021 CHNM, Avram Lyon and Aurimas Vinckevicius
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -29,10 +29,6 @@
    You should have received a copy of the GNU Affero General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null}
 
 
 function fixCase(authorName) {
@@ -103,7 +99,7 @@ function scrapeBook(doc, url) {
 				isbn.push(match[2]);
 				break;
 			case 'doi':
-				newItem.DOI = match[2];
+				newItem.DOI = ZU.cleanDOI(match[2]);
 				break;
 			case 'book series':
 				newItem.series = match[2];
@@ -174,7 +170,7 @@ function scrapeEM(doc, url) {
 
 		// set correct print publication date
 		if (date) item.date = date;
-
+		
 		// remove pdf attachments
 		for (let i = 0, n = item.attachments.length; i < n; i++) {
 			if (item.attachments[i].mimeType == 'application/pdf') {
@@ -218,15 +214,17 @@ function scrapeBibTeX(doc, url) {
 	// Use the current domain on Wiley subdomains (e.g., ascpt.) so that the
 	// download works even if third-party cookies are blocked. Otherwise, use
 	// the main domain.
-	var host = doc.location.host;
-	if (!host.endsWith('.onlinelibrary.wiley.com')) {
-		host = 'onlinelibrary.wiley.com';
+	let postUrl;
+	if (doc.location.host.endsWith('.onlinelibrary.wiley.com')) {
+		postUrl = 'https://onlinelibrary.wiley.com/action/downloadCitation';
 	}
-	var postUrl = `https://${host}/action/downloadCitation`;
+	else {
+		postUrl = '/action/downloadCitation';
+	}
 	var body = 'direct=direct'
 				+ '&doi=' + encodeURIComponent(doi)
 				+ '&downloadFileName=pericles_14619563AxA'
-				+ '&format=bibtex' // '&format=ris' +
+				+ '&format=bibtex'
 				+ '&include=abs'
 				+ '&submit=Download';
 
@@ -246,15 +244,6 @@ function scrapeBibTeX(doc, url) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function (obj, item) {
-			// BibTeX throws the last names and first names together
-			// Therefore, we prefer creators names from EM (if available)
-			var authors = doc.querySelectorAll('meta[name="citation_author"]');
-			if (authors && authors.length > 0) {
-				item.creators = [];
-				for (let i = 0; i < authors.length; i++) {
-					item.creators.push(ZU.cleanAuthor(authors[i].content, 'author'));
-				}
-			}
 			// fix author case
 			for (let i = 0, n = item.creators.length; i < n; i++) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
@@ -318,6 +307,14 @@ function scrapeBibTeX(doc, url) {
 				|| ZU.xpathText(doc,
 					'//meta[@name="citation_fulltext_html_url"][1]/@content')
 				|| url;
+			
+			if (item.DOI) {
+				item.DOI = ZU.cleanDOI(item.DOI);
+			}
+			
+			if (item.itemID) {
+				item.itemID = 'doi:' + ZU.cleanDOI(item.itemID);
+			}
 
 			// bookTitle
 			if (!item.bookTitle) {
@@ -335,6 +332,11 @@ function scrapeBibTeX(doc, url) {
 			// rights
 			item.rights = ZU.xpathText(doc,
 				'//p[@class="copyright" or @id="copyright"]');
+			
+			// try to detect invalid data in pages (e.g. "inside_front_cover")
+			if (item.pages && /[a-zA-Z]_[a-zA-Z]/.test(item.pages)) {
+				delete item.pages;
+			}
 
 			// attachments
 			item.attachments = [{
@@ -495,7 +497,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/action/doSearch?field1=AllField&text1=zotero&field2=AllField&text2=&field3=AllField&text3=&Ppub=&AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=",
+		"url": "https://onlinelibrary.wiley.com/action/doSearch?AfterMonth=&AfterYear=&BeforeMonth=&BeforeYear=&Ppub=&field1=AllField&field2=AllField&field3=AllField&text1=zotero&text2=&text3=",
 		"items": "multiple"
 	},
 	{
@@ -506,7 +508,6 @@ var testCases = [
 				"itemType": "bookSection",
 				"title": "Endnotes",
 				"creators": [],
-				"date": "2012",
 				"ISBN": "9781118269381",
 				"bookTitle": "The World is Open",
 				"extra": "DOI: 10.1002/9781118269381.notes",
@@ -514,7 +515,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "427-467",
-				"publisher": "Wiley-Blackwell",
+				"publisher": "John Wiley & Sons, Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781118269381.notes",
 				"attachments": [
 					{
@@ -539,7 +540,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9783527610853",
+		"url": "https://onlinelibrary.wiley.com/doi/book/10.1002/9783527610853",
 		"items": "multiple"
 	},
 	{
@@ -550,7 +551,7 @@ var testCases = [
 				"itemType": "bookSection",
 				"title": "Silent Cinema and its Pioneers (1906–1930)",
 				"creators": [],
-				"date": "2009",
+				"date": "2008",
 				"ISBN": "9781444304794",
 				"abstractNote": "This chapter contains sections titled: Historical and Political Overview of the Period Context11 Film Scenes: Close Readings Directors (Life and Works) Critical Commentary",
 				"bookTitle": "100 Years of Spanish Cinema",
@@ -559,7 +560,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "1-20",
-				"publisher": "Wiley-Blackwell",
+				"publisher": "John Wiley & Sons, Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/9781444304794.ch1",
 				"attachments": [
 					{
@@ -619,17 +620,17 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9781444390124",
+		"url": "https://onlinelibrary.wiley.com/doi/book/10.1002/9781444390124",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://onlinelibrary.wiley.com/book/10.1002/9780470320419",
+		"url": "https://ceramics.onlinelibrary.wiley.com/doi/book/10.1002/9780470320419",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
+		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/abs/10.1002/pmic.201100327",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -656,7 +657,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-01",
+				"date": "2012",
 				"DOI": "10.1002/pmic.201100327",
 				"ISSN": "1615-9861",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
@@ -699,7 +700,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327",
+		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -726,7 +727,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-01",
+				"date": "2012",
 				"DOI": "10.1002/pmic.201100327",
 				"ISSN": "1615-9861",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
@@ -769,7 +770,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327#references-section",
+		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327#references-section",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -796,7 +797,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-01",
+				"date": "2012",
 				"DOI": "10.1002/pmic.201100327",
 				"ISSN": "1615-9861",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
@@ -839,7 +840,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327#citedBy",
+		"url": "https://analyticalsciencejournals.onlinelibrary.wiley.com/doi/full/10.1002/pmic.201100327#citedBy",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -866,7 +867,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-01-01",
+				"date": "2012",
 				"DOI": "10.1002/pmic.201100327",
 				"ISSN": "1615-9861",
 				"abstractNote": "Amidation is a post-translational modification found at the C-terminus of ∼50% of all neuropeptide hormones. Cleavage of the Cα–N bond of a C-terminal glycine yields the α-amidated peptide in a reaction catalyzed by peptidylglycine α-amidating monooxygenase (PAM). The mass of an α-amidated peptide decreases by 58 Da relative to its precursor. The amino acid sequences of an α-amidated peptide and its precursor differ only by the C-terminal glycine meaning that the peptides exhibit similar RP-HPLC properties and tandem mass spectral (MS/MS) fragmentation patterns. Growth of cultured cells in the presence of a PAM inhibitor ensured the coexistence of α-amidated peptides and their precursors. A strategy was developed for precursor and α-amidated peptide pairing (PAPP): LC-MS/MS data of peptide extracts were scanned for peptide pairs that differed by 58 Da in mass, but had similar RP-HPLC retention times. The resulting peptide pairs were validated by checking for similar fragmentation patterns in their MS/MS data prior to identification by database searching or manual interpretation. This approach significantly reduced the number of spectra requiring interpretation, decreasing the computing time required for database searching and enabling manual interpretation of unidentified spectra. Reported here are the α-amidated peptides identified from AtT-20 cells using the PAPP method.",
@@ -916,8 +917,8 @@ var testCases = [
 				"title": "β-Rezeptorenblocker",
 				"creators": [
 					{
-						"firstName": "L. von",
-						"lastName": "Meyer",
+						"firstName": "L.",
+						"lastName": "von Meyer",
 						"creatorType": "author"
 					},
 					{
@@ -926,7 +927,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2005",
+				"date": "2002",
 				"ISBN": "9783527603015",
 				"abstractNote": "Immunoassay Hochleistungsflüssigkeitschromatographie (HPLC) Gaschromatographie Medizinische Beurteilung und klinische Interpretation Literatur",
 				"bookTitle": "Klinisch-toxikologische Analytik",
@@ -935,7 +936,7 @@ var testCases = [
 				"language": "de",
 				"libraryCatalog": "Wiley Online Library",
 				"pages": "365-370",
-				"publisher": "Wiley-Blackwell",
+				"publisher": "John Wiley & Sons, Ltd",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/3527603018.ch17",
 				"attachments": [
 					{
@@ -959,7 +960,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1468-5930.2011.00548.x",
+		"url": "https://onlinelibrary.wiley.com/doi/full/10.1111/j.1468-5930.2011.00548.x",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -976,7 +977,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2012-02-01",
+				"date": "2012",
 				"DOI": "10.1111/j.1468-5930.2011.00548.x",
 				"ISSN": "1468-5930",
 				"abstractNote": "The possibility of using private military and security companies to bolster the capacity to undertake intervention for human rights purposes (humanitarian intervention and peacekeeping) has been increasingly debated. The focus of such discussions has, however, largely been on practical issues and the contingent problems posed by private force. By contrast, this article considers the principled case for privatising humanitarian intervention. It focuses on two central issues. First, does outsourcing humanitarian intervention to private military and security companies pose some fundamental, deeper problems in this context, such as an abdication of a state's duties? Second, on the other hand, is there a case for preferring these firms to other, state-based agents of humanitarian intervention? For instance, given a state's duties to their own military personnel, should the use of private military and security contractors be preferred to regular soldiers for humanitarian intervention?",
@@ -1023,7 +1024,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1986-09-01",
+				"date": "1986",
 				"DOI": "10.1111/j.1540-6261.1986.tb04559.x",
 				"ISSN": "1540-6261",
 				"abstractNote": "Capital gains taxes create incentives to trade. Our major finding is that turnover is higher for winners (stocks, the prices of which have increased) than for losers, which is not consistent with the tax prediction. However, the turnover in December and January is evidence of tax-motivated trading; there is a relatively high turnover for losers in December and for winners in January. We conclude that taxes influence turnover, but other motives for trading are more important. We were unable to find evidence that changing the length of the holding period required to qualify for long-term capital gains treatment affected turnover.",
@@ -1054,7 +1055,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/%28SICI%291521-3773%2820000103%2939%3A1%3C165%3A%3AAID-ANIE165%3E3.0.CO%3B2-B",
+		"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/(SICI)1521-3773(20000103)39:1%3C165::AID-ANIE165%3E3.0.CO;2-B",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -1071,7 +1072,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2000-01-03",
+				"date": "2000",
 				"DOI": "10.1002/(SICI)1521-3773(20000103)39:1<165::AID-ANIE165>3.0.CO;2-B",
 				"ISSN": "1521-3773",
 				"abstractNote": "Nanosized palladium colloids, generated in situ by reduction of PdII to Pd0 [Eq. (a)], are involved in the catalysis of phosphane-free Heck and Suzuki reactions with simple palladium salts such as PdCl2 or Pd(OAc)2, as demonstrated by transmission electron microscopic investigations.",
@@ -1132,7 +1133,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "1983-07-01",
+				"date": "1983",
 				"DOI": "10.1002/jhet.5570200408",
 				"ISSN": "1943-5193",
 				"abstractNote": "The representative mono- and dialkyl-substituted derivatives of 4-carbamoylimidazolium-5-olate (1) were synthesized unequivocally. On the basis of their spectral data for ultraviolet absorption spectra in acidic, basic and neutral solutions, we have found some spectral characteristics which make it facile to clarify the position of substituents.",
@@ -1179,7 +1180,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2014-03-01",
+				"date": "2014",
 				"DOI": "10.1002/ev.20077",
 				"ISSN": "1534-875X",
 				"abstractNote": "Research on organizational evaluation capacity building (ECB) has focused very much on the capacity to do evaluation, neglecting organizational demand for evaluation and the capacity to use it. This qualitative multiple case study comprises a systematic examination of organizational capacity within eight distinct organizations guided by a common conceptual framework. Described in this chapter are the rationale and methods for the study and then the sequential presentation of findings for each of the eight case organizations. Data collection and analyses for these studies occurred six years ago; findings are cross-sectional and do not reflect changes in organizations or their capacity for evaluation since that time. The format for presenting the findings was standardized so as to foster cross-case analyses, the focus for the next and final chapter of this volume.",
@@ -1191,6 +1192,113 @@ var testCases = [
 				"publicationTitle": "New Directions for Evaluation",
 				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/ev.20077",
 				"volume": "2014",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://agupubs.onlinelibrary.wiley.com/doi/10.1029/2020JC016068",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Labrador Sea Water Transport Across the Charlie-Gibbs Fracture Zone",
+				"creators": [
+					{
+						"firstName": "Afonso",
+						"lastName": "Gonçalves Neto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jaime B.",
+						"lastName": "Palter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Amy",
+						"lastName": "Bower",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Heather",
+						"lastName": "Furey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Xiaobiao",
+						"lastName": "Xu",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1029/2020JC016068",
+				"ISSN": "2169-9291",
+				"abstractNote": "Labrador Sea Water (LSW) is a major component of the deep limb of the Atlantic Meridional Overturning Circulation, yet LSW transport pathways and their variability lack a complete description. A portion of the LSW exported from the subpolar gyre is advected eastward along the North Atlantic Current and must contend with the Mid-Atlantic Ridge before reaching the eastern basins of the North Atlantic. Here, we analyze observations from a mooring array and satellite altimetry, together with outputs from a hindcast ocean model simulation, to estimate the mean transport of LSW across the Charlie-Gibbs Fracture Zone (CGFZ), a primary gateway for the eastward transport of the water mass. The LSW transport estimated from the 25-year altimetry record is 5.3 ± 2.9 Sv, where the error represents the combination of observational variability and the uncertainty in the projection of the surface velocities to the LSW layer. Current velocities modulate the interannual to higher-frequency variability of the LSW transport at the CGFZ, while the LSW thickness becomes important on longer time scales. The modeled mean LSW transport for 1993–2012 is higher than the estimate from altimetry, at 8.2 ± 4.1 Sv. The modeled LSW thickness decreases substantially at the CGFZ between 1996 and 2009, consistent with an observed decline in LSW volume in the Labrador Sea after 1994. We suggest that satellite altimetry and continuous hydrographic measurements in the central Labrador Sea, supplemented by profiles from Argo floats, could be sufficient to quantify the LSW transport at the CGFZ.",
+				"issue": "8",
+				"itemID": "doi:10.1029/2020JC016068",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"pages": "e2020JC016068",
+				"publicationTitle": "Journal of Geophysical Research: Oceans",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1029/2020JC016068",
+				"volume": "125",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>e2020JC016068 10.1029/2020JC016068</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://onlinelibrary.wiley.com/doi/full/10.1002/hast.1072",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Precision (Mis)Education",
+				"creators": [
+					{
+						"firstName": "Lucas J.",
+						"lastName": "Matthews",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.1002/hast.1072",
+				"ISSN": "1552-146X",
+				"abstractNote": "In August of 2018, the results of the largest genomic investigation in human history were published. Scanning the DNA of over one million participants, a genome-wide association study was conducted to identify genetic variants associated with the number of years of education a person has completed. This measure, called “educational attainment,” is often treated as a proxy for intelligence and cognitive ability. The study raises a host of hard philosophical questions about study design and strength of evidence. It also sets the basis for something far more controversial. Using a new genomic method that generates “polygenic scores,” researchers are now able to use the results of the study to predict a person's educational potential from a blood or saliva sample. Going a step further, some researchers have begun to promote “precision education,” which would tailor students’ school plans to their genetic profiles. The idea of precision education provokes concerns about stigma and self-fulfilling prophecies.",
+				"issue": "1",
+				"itemID": "doi:10.1002/hast.1072",
+				"language": "en",
+				"libraryCatalog": "Wiley Online Library",
+				"publicationTitle": "Hastings Center Report",
+				"url": "https://onlinelibrary.wiley.com/doi/abs/10.1002/hast.1072",
+				"volume": "50",
 				"attachments": [
 					{
 						"title": "Snapshot",

@@ -1,7 +1,7 @@
 {
 	"translatorID": "625c6435-e235-4402-a48f-3095a9c1a09c",
 	"label": "DBLP Computer Science Bibliography",
-	"creator": "Sebastian Karcher, Philipp Zumstein",
+	"creator": "Sebastian Karcher, Philipp Zumstein, and Abe Jellinek",
 	"target": "^https?://(www\\.)?(dblp\\d?(\\.org|\\.uni-trier\\.de/|\\.dagstuhl\\.de/))",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,13 +9,13 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-05-03 20:02:38"
+	"lastUpdated": "2021-09-20 19:47:25"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2011-2019 Sebastian Karcher, Philipp Zumstein
+	Copyright © 2011-2021 Sebastian Karcher, Philipp Zumstein, and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -36,7 +36,7 @@
 */
 
 function detectWeb(doc, url) {
-	if (url.includes('rec/bibtex') || url.includes('rec/html')) {
+	if (doc.querySelector('#bibtex-section')) {
 		if (url.includes('journals')) {
 			return "journalArticle";
 		}
@@ -56,7 +56,7 @@ function detectWeb(doc, url) {
 			return "journalArticle";
 		}
 	}
-	else if ((url.match(/\/db\/(journals|conf|series|reference)/) || url.match(/\/pers\/(hd|ht|hy)/)) && !url.match(/index[\w-]*\.html/) || url.includes("/search?q=")) {
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
 	return false;
@@ -64,8 +64,8 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, _url) {
-	var xPathAllData = doc.evaluate('//pre', doc, null, XPathResult.ANY_TYPE, null);
-	var firstData = xPathAllData.iterateNext(); // only if exists
+	let allData = doc.querySelectorAll('#bibtex-section');
+	let firstData = allData[0];
 	var firstDataText = firstData.textContent.replace(/ ee\s*=/, " url ="); // e.g. ee = {http://dx.doi.org/10.1007/978-3-319-00035-0_37},
 
 	// conferencePapers and bookSections are linked in DBLP
@@ -73,7 +73,7 @@ function scrape(doc, _url) {
 	// for the proceeding or book. In these cases the following
 	// lines (if-part) are handling the second entry and extracting
 	// relevant fields and save it (later) to the main entry.
-	var secondData = xPathAllData.iterateNext();
+	var secondData = allData[1];
 	if (secondData) {
 		var secondDataText = secondData.textContent;
 
@@ -129,30 +129,26 @@ function scrapeMainPart(firstDataText, secondDataItem) {
 	trans.translate();
 }
 
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.entry');
+	for (let row of rows) {
+		let href = attr(row, 'a[href*="view=bibtex"]', 'href');
+		let title = text(row, '.title');
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var items = {};
-		var articles = [];
-		var rows = ZU.xpath(doc, '//body/ul/li|//li[contains(@class, "entry")]');
-		for (let i = 0; i < rows.length; i++) {
-			// Careful: If you get more than one node,
-			// ZU.xpathText will join the textContent of each with commas.
-			var title = ZU.xpathText(rows[i], './/span[@class="title"]');
-			var link = ZU.xpathText(rows[i], './a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href|./nav//div/a[contains(@href, "rec/bibtex") and not(contains(@href, ".xml"))]/@href');
-			items[link] = title;
-		}
-		Zotero.selectItems(items, function (items) {
-			if (!items) {
-				return;
-			}
-			for (let i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	}
-	else if (url.includes('rec/html')) {
-		ZU.processDocuments([url.replace('rec/html', 'rec/bibtex')], scrape);
 	}
 	else {
 		scrape(doc, url);
@@ -164,7 +160,7 @@ function doWeb(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://dblp.org/rec/bibtex/journals/cssc/XuY12",
+		"url": "https://dblp.org/rec/journals/cssc/XuY12.html?view=bibtex",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -187,7 +183,7 @@ var testCases = [
 				"itemID": "DBLP:journals/cssc/XuY12",
 				"libraryCatalog": "DBLP Computer Science Bibliography",
 				"pages": "327–341",
-				"publicationTitle": "Communications in Statistics - Simulation and Computation",
+				"publicationTitle": "Commun. Stat. Simul. Comput.",
 				"volume": "41",
 				"attachments": [],
 				"tags": [],
@@ -198,7 +194,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dblp.org/rec/bibtex/conf/ats/KochteZBIWHCP10",
+		"url": "https://dblp.org/rec/conf/ats/KochteZBIWHCP10.html?view=bibtex",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -271,12 +267,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dblp.dagstuhl.de/pers/hd/k/Knuth:Donald_E=.html",
+		"url": "https://dblp.dagstuhl.de/pid/k/DonaldEKnuth.html",
 		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "https://dblp.uni-trier.de/rec/bibtex/conf/approx/SchederT13",
+		"url": "https://dblp.uni-trier.de/rec/conf/approx/SchederT13.html?view=bibtex",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -321,6 +317,7 @@ var testCases = [
 				"proceedingsTitle": "Approximation, Randomization, and Combinatorial Optimization. Algorithms and Techniques - 16th International Workshop, APPROX 2013, and 17th International Workshop, RANDOM 2013, Berkeley, CA, USA, August 21-23, 2013. Proceedings",
 				"publisher": "Springer",
 				"series": "Lecture Notes in Computer Science",
+				"url": "https://doi.org/10.1007/978-3-642-40328-6\\_47",
 				"volume": "8096",
 				"attachments": [],
 				"tags": [],
@@ -331,7 +328,32 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://dblp.org/rec/html/conf/iclr/DasMYTM19",
+		"url": "https://dblp.org/rec/conf/iclr/DasMYTM19.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/search?q=zotero",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/db/series/ceurws/ceurws2600-2699.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/db/conf/ircdl/viperc2020.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/rec/conf/iclr/DasMYTM19.html",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://dblp.org/rec/conf/iclr/DasMYTM19.html?view=bibtex",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -375,11 +397,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://dblp.org/search?q=zotero",
-		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/

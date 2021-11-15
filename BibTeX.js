@@ -18,7 +18,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2020-03-13 03:07:49"
+	"lastUpdated": "2021-09-10 18:17:50"
 }
 
 /*
@@ -152,6 +152,28 @@ var eprintIds = {
 	'googlebooks': 'GoogleBooksID'
 };
 
+function dateFieldsToDate(year, month, day) {
+	// per the latest ISO 8601 standard, you can't have a month/day without a
+	// year (and it would be silly anyway)
+	if (year) {
+		let date = year;
+		if (month) {
+			if (month.includes(date)) {
+				date = month;
+			}
+			else {
+				date += `-${month}`;
+			}
+			
+			if (day) {
+				date += `-${day}`;
+			}
+		}
+		return ZU.strToISO(date);
+	}
+	return false;
+}
+
 function parseExtraFields(extra) {
 	var lines = extra.split(/[\r\n]+/);
 	var fields = [];
@@ -226,7 +248,7 @@ var bibtex2zoteroTypeMap = {
 	"booklet":"book",
 	"manual":"book",
 	"mastersthesis":"thesis",
-	"misc":"book",
+	"misc":"document",
 	"proceedings":"book",
 	"online":"webpage",
 	// alias for online from BibLaTeX:
@@ -304,6 +326,9 @@ function processField(item, field, value, rawValue) {
 		if (field == "doi" &&!ZU.fieldIsValidForType("DOI", item.itemType) && ZU.cleanDOI(value)) {
 			item._extraFields.push({field: "DOI", value: ZU.cleanDOI(value)});
 		}
+		if (field == "url") { // pass raw values for URL
+			item.url = rawValue;	
+		}
 		else {
 			item[fieldMap[field]] = value;
 		}
@@ -380,33 +405,20 @@ function processField(item, field, value, rawValue) {
 		} else {
 			item.issue = value;
 		}
+	} else if (field == "day") {
+		// this and the following two blocks assign to temporary fields that
+		// are cleared before the item is completed. "day" isn't an official
+		// field, but some sites use it.
+		item.day = value;
 	} else if (field == "month") {
 		var monthIndex = months.indexOf(value.toLowerCase());
 		if (monthIndex != -1) {
 			value = Zotero.Utilities.formatDate({month:monthIndex});
-		} else {
-			value += " ";
 		}
 		
-		if (item.date) {
-			if (value.includes(item.date)) {
-				// value contains year and more
-				item.date = value;
-			} else {
-				item.date = value+item.date;
-			}
-		} else {
-			item.date = value;
-		}
+		item.month = value;
 	} else if (field == "year") {
-		if (item.date) {
-			if (!item.date.includes(value)) {
-				// date does not already contain year
-				item.date += value;
-			}
-		} else {
-			item.date = value;
-		}
+		item.year = value;
 	} else if (field == "date") {
 	//We're going to assume that "date" and the date parts don't occur together. If they do, we pick date, which should hold all.
 		item.date = value;
@@ -858,6 +870,10 @@ function beginRecord(type, closeChar) {
 		}
 		var item = new Zotero.Item(zoteroType);
 		item._extraFields = [];
+	} 
+	else if (type == "preamble") { // Preamble (keeping separate in case we want to do something with these)
+		Zotero.debug("discarded preamble from BibTeX");
+		return;
 	}
 	
 	// For theses write the thesisType determined by the BibTeX type.
@@ -960,6 +976,13 @@ function beginRecord(type, closeChar) {
 					delete item.backupLocation;
 				}
 				
+				if (!item.date) {
+					item.date = dateFieldsToDate(item.year, item.month, item.day);
+				}
+				delete item.year;
+				delete item.month;
+				delete item.day;
+				
 				item.extra = extraFieldsToString(item._extraFields);
 				delete item._extraFields;
 				
@@ -1048,6 +1071,7 @@ function readString(resolve, reject) {
 function writeField(field, value, isMacro) {
 	if (!value && typeof value != "number") return;
 	value = value + ""; // convert integers to strings
+
 	Zotero.write(",\n\t" + field + " = ");
 	if (!isMacro) Zotero.write("{");
 	// url field is preserved, for use with \href and \url
@@ -2630,6 +2654,7 @@ var reversemappingTable = {
 	"{\\textunderscore}"              : "\u2017", // DOUBLE LOW LINE
 	"{\\textquoteleft}"               : "\u2018", // LEFT SINGLE QUOTATION MARK
 	"{\\textquoteright}"              : "\u2019", // RIGHT SINGLE QUOTATION MARK
+	"{\\textquotesingle}"              : "'", // APOSTROPHE / NEUTRAL SINGLE QUOTATION MARK
 	"{\\quotesinglbase}"              : "\u201A", // SINGLE LOW-9 QUOTATION MARK
 	"{\\textquotedblleft}"            : "\u201C", // LEFT DOUBLE QUOTATION MARK
 	"{\\textquotedblright}"           : "\u201D", // RIGHT DOUBLE QUOTATION MARK
@@ -2756,6 +2781,7 @@ var reversemappingTable = {
 	"{\\~A}"                          : "\u00C3", // LATIN CAPITAL LETTER A WITH TILDE
 	"{\\\"A}"                         : "\u00C4", // LATIN CAPITAL LETTER A WITH DIAERESIS
 	"{\\r A}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
+	"{\\AA}"                          : "\u00C5", // LATIN CAPITAL LETTER A WITH RING ABOVE
 	"{\\c C}"                          : "\u00C7", // LATIN CAPITAL LETTER C WITH CEDILLA
 	"{\\`E}"                          : "\u00C8", // LATIN CAPITAL LETTER E WITH GRAVE
 	"{\\'E}"                          : "\u00C9", // LATIN CAPITAL LETTER E WITH ACUTE
@@ -2782,6 +2808,7 @@ var reversemappingTable = {
 	"{\\~a}"                          : "\u00E3", // LATIN SMALL LETTER A WITH TILDE
 	"{\\\"a}"                         : "\u00E4", // LATIN SMALL LETTER A WITH DIAERESIS
 	"{\\r a}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
+	"{\\aa}"                          : "\u00E5", // LATIN SMALL LETTER A WITH RING ABOVE
 	"{\\c c}"                          : "\u00E7", // LATIN SMALL LETTER C WITH CEDILLA
 	"{\\`e}"                          : "\u00E8", // LATIN SMALL LETTER E WITH GRAVE
 	"{\\'e}"                          : "\u00E9", // LATIN SMALL LETTER E WITH ACUTE
@@ -3213,7 +3240,7 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
-				"date": "October 2006",
+				"date": "2006-10",
 				"itemID": "conference:06",
 				"attachments": [],
 				"tags": [],
@@ -3334,7 +3361,7 @@ var testCases = [
 		"input": "@misc{american_rights_at_work_public_2012,\n    title = {Public Service Research Foundation},\n\turl = {http://www.americanrightsatwork.org/blogcategory-275/},\n\turldate = {2012-07-27},\n\tauthor = {American Rights at Work},\n\tyear = {2012},\n\thowpublished = {http://www.americanrightsatwork.org/blogcategory-275/},\n}",
 		"items": [
 			{
-				"itemType": "book",
+				"itemType": "document",
 				"title": "Public Service Research Foundation",
 				"creators": [
 					{
@@ -3597,7 +3624,7 @@ var testCases = [
 						"fieldMode": 1
 					}
 				],
-				"date": "March 2013",
+				"date": "2013-03",
 				"DOI": "10.1161/CIR.0b013e318288b4dd",
 				"ISSN": "1524-4539",
 				"extra": "PMID: 23439512",
@@ -3610,16 +3637,36 @@ var testCases = [
 				"volume": "127",
 				"attachments": [],
 				"tags": [
-					"Administrative Personnel",
-					"American Heart Association",
-					"Cardiopulmonary Resuscitation",
-					"Community Health Services",
-					"Health Personnel",
-					"Heart Arrest",
-					"Humans",
-					"Leadership",
-					"Public Health",
-					"United States"
+					{
+						"tag": "Administrative Personnel"
+					},
+					{
+						"tag": "American Heart Association"
+					},
+					{
+						"tag": "Cardiopulmonary Resuscitation"
+					},
+					{
+						"tag": "Community Health Services"
+					},
+					{
+						"tag": "Health Personnel"
+					},
+					{
+						"tag": "Heart Arrest"
+					},
+					{
+						"tag": "Humans"
+					},
+					{
+						"tag": "Leadership"
+					},
+					{
+						"tag": "Public Health"
+					},
+					{
+						"tag": "United States"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -3913,9 +3960,198 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "März 1942",
+				"date": "1942-03",
 				"itemID": "sweig42",
 				"publisher": "D\\ëad Po<sub>eee</sub>t Society",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@preamble{BibTeX for papers by David Kotz; for complete/updated list see\nhttps://www.cs.dartmouth.edu/~kotz/research/papers.html}\n\n@Article{batsis:rural,\n  author =        {John A. Batsis and Curtis L. Petersen and Matthew M. Clark and Summer B. Cook and David Kotz and Tyler L. Gooding and Meredith N. Roderka and Rima I. Al-Nimr and Dawna M. Pidgeon and Ann Haedrich and KC Wright and Christina Aquila and Todd A. Mackenzie},\n  title =         {A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity},\n  journal =       {BMC Geriatrics},\n  year =          2020,\n  month =         {December},\n  copyright =     {the authors},\n  URL =           {https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html},\n  note =          {Accepted for publication},\n}\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "A Rural Mobile Health Obesity Wellness Intervention for Older Adults with Obesity",
+				"creators": [
+					{
+						"firstName": "John A.",
+						"lastName": "Batsis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Curtis L.",
+						"lastName": "Petersen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Matthew M.",
+						"lastName": "Clark",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Summer B.",
+						"lastName": "Cook",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "David",
+						"lastName": "Kotz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tyler L.",
+						"lastName": "Gooding",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Meredith N.",
+						"lastName": "Roderka",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rima I.",
+						"lastName": "Al-Nimr",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Dawna M.",
+						"lastName": "Pidgeon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ann",
+						"lastName": "Haedrich",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "K. C.",
+						"lastName": "Wright",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christina",
+						"lastName": "Aquila",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Todd A.",
+						"lastName": "Mackenzie",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020-12",
+				"itemID": "batsis:rural",
+				"publicationTitle": "BMC Geriatrics",
+				"rights": "the authors",
+				"url": "https://www.cs.dartmouth.edu/~kotz/research/batsis-rural/index.html",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Accepted for publication</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@techreport{ietf-bmwg-evpntest-09,\n\tnumber =\t{draft-ietf-bmwg-evpntest-09},\n\ttype =\t\t{Internet-Draft},\n\tinstitution =\t{Internet Engineering Task Force},\n\tpublisher =\t{Internet Engineering Task Force},\n\tnote =\t\t{Work in Progress},\n\turl =\t\t{https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09},\n        author =\t{sudhin jacob and Kishore Tiruveedhula},\n\ttitle =\t\t{{Benchmarking Methodology for EVPN and PBB-EVPN}},\n\tpagetotal =\t28,\n\tyear =\t\t2021,\n\tmonth =\t\tjun,\n\tday =\t\t18,\n\tabstract =\t{This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.},\n}\n",
+		"items": [
+			{
+				"itemType": "report",
+				"title": "Benchmarking Methodology for EVPN and PBB-EVPN",
+				"creators": [
+					{
+						"firstName": "sudhin",
+						"lastName": "jacob",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kishore",
+						"lastName": "Tiruveedhula",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-06-18",
+				"abstractNote": "This document defines methodologies for benchmarking EVPN and PBB- EVPN performance. EVPN is defined in RFC 7432, and is being deployed in Service Provider networks. Specifically, this document defines the methodologies for benchmarking EVPN/PBB-EVPN convergence, data plane performance, and control plane performance.",
+				"institution": "Internet Engineering Task Force",
+				"itemID": "ietf-bmwg-evpntest-09",
+				"reportNumber": "draft-ietf-bmwg-evpntest-09",
+				"reportType": "Internet-Draft",
+				"url": "https://datatracker.ietf.org/doc/html/draft-ietf-bmwg-evpntest-09",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Work in Progress</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "@inproceedings{NIPS2009_0188e8b8,\n author = {Cuturi, Marco and Vert, Jean-philippe and D\\textquotesingle aspremont, Alexandre},\n booktitle = {Advances in Neural Information Processing Systems},\n editor = {Y. Bengio and D. Schuurmans and J. Lafferty and C. Williams and A. Culotta},\n pages = {},\n publisher = {Curran Associates, Inc.},\n title = {White Functionals for Anomaly Detection in Dynamical Systems},\n url = {https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf},\n volume = {22},\n year = {2009}\n}",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "White Functionals for Anomaly Detection in Dynamical Systems",
+				"creators": [
+					{
+						"firstName": "Marco",
+						"lastName": "Cuturi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jean-philippe",
+						"lastName": "Vert",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alexandre",
+						"lastName": "D' aspremont",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Y.",
+						"lastName": "Bengio",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "D.",
+						"lastName": "Schuurmans",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "J.",
+						"lastName": "Lafferty",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "C.",
+						"lastName": "Williams",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "A.",
+						"lastName": "Culotta",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2009",
+				"itemID": "NIPS2009_0188e8b8",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://proceedings.neurips.cc/paper/2009/file/0188e8b8b014829e2fa0f430f0a95961-Paper.pdf",
+				"volume": "22",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

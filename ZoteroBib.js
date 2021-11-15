@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-05-14 08:38:18"
+	"lastUpdated": "2021-06-23 02:34:46"
 }
 
 /*
@@ -38,7 +38,7 @@
 var dataSelector = 'script[type="application/vnd.zotero.data+json"]';
 
 function detectWeb(doc, url) {
-	Zotero.monitorDOMChanges(doc.querySelector('.container'));
+	Zotero.monitorDOMChanges(doc.querySelector('#zotero-bib'));
 	return doc.querySelectorAll(dataSelector).length ? 'multiple' : false;
 }
 
