@@ -15,8 +15,8 @@
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 YOUR_NAME <- TODO
-	
+	Copyright © 2021 George Gebbett
+
 	This file is part of Zotero.
 
 	Zotero is free software: you can redistribute it and/or modify
@@ -37,7 +37,6 @@
 
 
 function detectWeb(doc) {
-	// TODO: adjust the logic here
 	if (doc.getElementsByClassName("kh_toc-list ukResearch_toc-list")[0].innerText.includes("Case")) {
 		return "case";
 	}
@@ -73,12 +72,12 @@ function scrapeCase(doc, url) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
-		
+
 		var citationArray = parseCitationList(doc.getElementsByClassName("co_docContentMetaField")[3].innerText);
-		
+
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
@@ -86,8 +85,8 @@ function scrapeCase(doc, url) {
 		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1];
 		item.abstractNote = "";
 		item.complete();
-		
-		
+
+
 	});
 
 	translator.getTranslatorObject(function (trans) {
@@ -103,7 +102,7 @@ function scrapeStatute(doc, url) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		var fullTitle = doc.getElementById("co_documentTitle").innerText;
@@ -126,7 +125,7 @@ function scrapeStatuteSection(doc, url) {
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	// translator.setDocument(doc);
-	
+
 	translator.setHandler('itemDone', function (obj, item) {
 		// TODO adjust if needed:
 		var fullTitle = /([^\n]+)/.exec(doc.getElementsByClassName("co_title noTOC")[0].innerText)[0];
