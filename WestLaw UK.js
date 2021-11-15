@@ -52,37 +52,35 @@ function detectWeb(doc) {
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "case") {
-		return scrapeCase(doc, url);
+
+	const detectedType = detectWeb(doc, url);
+
+	switch (detectedType) {
+		case "case":
+			return scrapeCase(doc, url);
+		case "statute":
+			return scrapeStatute(doc, url);
+		case "statuteSection":
+			return scrapeStatuteSection(doc, url);
+		default:
+			return false;
 	}
-	else if (detectWeb(doc, url) == "statute") {
-		return scrapeStatute(doc, url);
-	}
-	else if (detectWeb(doc, url) == "statuteSection") {
-		return scrapeStatuteSection(doc, url);
-	}
-	else {
-		return false;
-	}
+
 }
 
 
 function scrapeCase(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
+	const translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
-
 	translator.setHandler('itemDone', function (obj, item) {
-		// TODO adjust if needed:
 
-		var citationArray = parseCitationList(doc.getElementsByClassName("co_docContentMetaField")[3].innerText);
+		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported"));
 
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
 		item.dateDecided = citationArray[1];
-		item.court = /Court\n(.+)/.exec(doc.getElementById("co_docContentCourt").innerText)[1];
+		item.court = /Court\n(.+)/.exec(text(doc, "#co_docContentCourt"))[1];
 		item.abstractNote = "";
 		item.complete();
 
@@ -91,21 +89,16 @@ function scrapeCase(doc, url) {
 
 	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "case";
-		// TODO map additional meta tags here, or delete completely
-
 		trans.doWeb(doc, url);
 	});
 }
 
 function scrapeStatute(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
+	const translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		// TODO adjust if needed:
-		var fullTitle = doc.getElementById("co_documentTitle").innerText;
+		const fullTitle = text(doc, "#co_documentTitle");
 		item.date = /(\D+) (\d+)/.exec(fullTitle)[2];
 		item.title = /(\D+) (\d+)/.exec(fullTitle)[1];
 		item.abstractNote = "";
@@ -114,21 +107,16 @@ function scrapeStatute(doc, url) {
 
 	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "statute";
-		// TODO map additional meta tags here, or delete completely
-
 		trans.doWeb(doc, url);
 	});
 }
 
 function scrapeStatuteSection(doc, url) {
-	var translator = Zotero.loadTranslator('web');
-	// Embedded Metadata
+	const translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
-	// translator.setDocument(doc);
 
 	translator.setHandler('itemDone', function (obj, item) {
-		// TODO adjust if needed:
-		var fullTitle = /([^\n]+)/.exec(doc.getElementsByClassName("co_title noTOC")[0].innerText)[0];
+		const fullTitle = /([^\n]+)/.exec(text(doc, ".co_title, .noTOC"))[0];
 		item.date = /(\D+) (\d+)/.exec(fullTitle)[2];
 		item.title = /(\D+) (\d+)/.exec(fullTitle)[1];
 		item.abstractNote = "";
@@ -137,24 +125,19 @@ function scrapeStatuteSection(doc, url) {
 
 	translator.getTranslatorObject(function (trans) {
 		trans.itemType = "statute";
-		// TODO map additional meta tags here, or delete completely
-
 		trans.doWeb(doc, url);
 	});
 }
 
 
 function parseCitationList(citList){
-	var allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm); //annoyingly matchAll is not supported
+	const allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm); //annoyingly matchAll is not supported
 	if (allCitations.length === 1){ //if there is only one citation we'll have to use it
-		var onlyCitationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(allCitations[0]);
-		return onlyCitationAsArray;
+		return /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(allCitations[0]);
 	} else { //if there's more than one we will find the first one that isn't WLUK
-		for (var citation of allCitations) {
-			var citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(citation);
-			if (citationAsArray[3] === "WLUK"){
-				continue;
-			} else {
+		for (const citation of allCitations) {
+			const citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(citation);
+			if (citationAsArray[3] !== "WLUK"){
 				return citationAsArray;
 			}
 		}
