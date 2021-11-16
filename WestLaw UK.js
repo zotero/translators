@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-06 11:36:52"
+	"lastUpdated": "2021-11-16 14:33:02"
 }
 
 /*
@@ -37,10 +37,10 @@
 
 
 function detectWeb(doc) {
-	if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Case")) {
+	if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Case Analysis")) {
 		return "case";
 	}
-	else if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Act")) {
+	else if (text(doc, ".kh_toc-list.ukResearch_toc-list").includes("Arrangement of Act")) {
 		return "statute";
 	}
 	else if (doc.title.includes("s.")) {
@@ -52,7 +52,6 @@ function detectWeb(doc) {
 }
 
 function doWeb(doc, url) {
-
 	const detectedType = detectWeb(doc, url);
 
 	switch (detectedType) {
@@ -65,26 +64,21 @@ function doWeb(doc, url) {
 		default:
 			return false;
 	}
-
 }
-
 
 function scrapeCase(doc, url) {
 	const translator = Zotero.loadTranslator('web');
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
-
-		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported"));
+		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported", 0));
 
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
-		item.dateDecided = citationArray[1];
-		item.court = /Court\n(.+)/.exec(text(doc, "#co_docContentCourt"))[1];
+		item.dateDecided = citationArray[1]
+		item.court = /Court(.+)/.exec(text(doc, "#co_docContentCourt"))[1];
 		item.abstractNote = "";
 		item.complete();
-
-
 	});
 
 	translator.getTranslatorObject(function (trans) {
@@ -130,13 +124,13 @@ function scrapeStatuteSection(doc, url) {
 }
 
 
-function parseCitationList(citList){
-	const allCitations = citList.match(/^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm); //annoyingly matchAll is not supported
+function parseCitationList(citList) {
+	const allCitations = citList.match(/[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g); //annoyingly matchAll is not supported
 	if (allCitations.length === 1){ //if there is only one citation we'll have to use it
-		return /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(allCitations[0]);
+		return /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g.exec(allCitations[0]);
 	} else { //if there's more than one we will find the first one that isn't WLUK
 		for (const citation of allCitations) {
-			const citationAsArray = /^[\[|\(](\d+)[\]|\)] (\d*) ?([A-z\. ]+) ([\w]+)$/gm.exec(citation);
+			const citationAsArray = /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g.exec(citation);
 			if (citationAsArray[3] !== "WLUK"){
 				return citationAsArray;
 			}
