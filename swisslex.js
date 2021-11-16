@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-09 20:53:10"
+	"lastUpdated": "2021-11-15 20:49:43"
 }
 
 /*
@@ -523,6 +523,14 @@ function doWeb(doc, url) {
 			Z.debug("ignoring still existing internal metadata field + " + one);
 		}
 	}
+
+	// as long as we cannot get the PDF, save the website
+	// even as the website contains hidden documents and contains not-working app elements
+	item.attachments.push({
+		title: "Snapshot",
+		document: doc
+	});
+
 	item.complete();
 }
 /** BEGIN TEST CASES **/
