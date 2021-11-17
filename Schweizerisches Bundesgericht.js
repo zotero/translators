@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-13 21:17:33"
+	"lastUpdated": "2021-11-17 09:47:43"
 }
 
 /*
@@ -145,7 +145,7 @@ function getSearchResultsBGer(doc, parameters) {
 		let date = meta.substring(0, meta.indexOf(' '));
 		let number = meta.substring(date.length + 1);
 		number = number.substring(0, 2) + "_" + number.substring(3);
-		let url  = attr(row, ".rank_title > a", "href");
+		let url  = attr(row, ".rank_title a", "href");
 		let subject = text(row, ".rank_data > .subject", 0);
 		let subject2 = text(row, ".rank_data > .object", 0);
 		items[url] = number + " (" + date + "; " + subject + ": " + subject2 + ")";
@@ -164,13 +164,13 @@ function getSearchResultsBGer(doc, parameters) {
  * @returns {{}}
  */
 function getSearchResultsBGE(doc, parameters) {
-	let domRows = doc.querySelectorAll(".ranklist_content ol > li");
+	let dom_rows = doc.querySelectorAll("div.ranklist_content>ol>li");
 	let items = {};
 
-	for (row of domRows) {
-		let url = attr(row, ".rank_title > a", "href");
-		let number = abbrevPublished[parameters._lang] + text(row, ".rank_title", 0);
-		let subject = text(row, ".rank_data > .regeste", 0);
+	for (let i = 1; i < dom_rows.length; i++ ) {
+		let url = dom_rows[i].children[0].children[0];
+		let number = abbrevPublished[parameters._lang] + url.innerText;
+		let subject = dom_rows[i].children[2].children[1].innerText;
 		subject = subject.substring(subject.indexOf(']') + 2);
 		items[url] = number + " (" + subject + ")";
 	}
@@ -192,7 +192,7 @@ function _scrape(doc, url, parameters) {
 			item.title = abbrevPublished[parameters._lang] + docket;
 			item.number = item.title;
 			item.date = parseInt(docket.split(' ')[0]) + 1874;
-			item.abstractNote = ZU.trimInternal(text(doc, "#regeste > .paraatf", 0));
+			item.abstractNote = ZU.trimInternal(doc.querySelector("div#regeste>div.paraatf").innerText);
 		}
 		else if (parameters._collection === "BGer") {
 			item.date = parameters.highlight_docid.substring(12,22).replace(/-/g, '.');
@@ -241,3 +241,169 @@ function doWeb(doc, url) {
 		_scrape(doc, url, parameters);
 	}
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/de/php/clir/http/index.php?lang=de&type=simple_query&query_words=UNterhalt&lang=de&top_subcollection_clir=bge&from_year=1954&to_year=2021",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/de/php/clir/http/index.php?lang=de&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "BGE 81 I 63",
+				"creators": [],
+				"dateDecided": 1955,
+				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
+				"court": "Schweizerisches Bundesgericht",
+				"docketNumber": "BGE 81 I 63",
+				"url": "https://www.bger.ch/ext/eurospider/live/de/php/clir/http/index.php?lang=de&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index_aza.php?date=20211116&lang=de&mode=news",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=de&zoom=&type=show_document",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "BGer 8C_329/2021",
+				"creators": [],
+				"dateDecided": "27.10.2021",
+				"court": "Schweizerisches Bundesgericht",
+				"docketNumber": "8C_329/2021",
+				"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=de&zoom=&type=show_document",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?lang=de&type=simple_query&query_words=Unterhalt&lang=de&top_subcollection_aza=all&from_date=&to_date=",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/fr/php/clir/http/index.php?lang=fr&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "ATF 81 I 63",
+				"creators": [],
+				"dateDecided": 1955,
+				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
+				"court": "Tribunal Fédéral Suisse",
+				"docketNumber": "ATF 81 I 63",
+				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/clir/http/index.php?lang=fr&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/fr/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=fr&zoom=&type=show_document",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "TF 8C_329/2021",
+				"creators": [],
+				"dateDecided": "27.10.2021",
+				"court": "Tribunal Fédéral Suisse",
+				"docketNumber": "8C_329/2021",
+				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=fr&zoom=&type=show_document",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/it/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=it&zoom=&type=show_document",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "TF 8C_329/2021",
+				"creators": [],
+				"dateDecided": "27.10.2021",
+				"court": "Tribunale Federale Svizzero",
+				"docketNumber": "8C_329/2021",
+				"url": "https://www.bger.ch/ext/eurospider/live/it/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=it&zoom=&type=show_document",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bger.ch/ext/eurospider/live/it/php/clir/http/index.php?lang=it&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "ATF 81 I 63",
+				"creators": [],
+				"dateDecided": 1955,
+				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
+				"court": "Tribunale Federale Svizzero",
+				"docketNumber": "ATF 81 I 63",
+				"url": "https://www.bger.ch/ext/eurospider/live/it/php/clir/http/index.php?lang=it&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
