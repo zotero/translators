@@ -61,7 +61,7 @@ const courtName = {
  */
 function parseURLParameters(url) {
 	let parts = require('url').parse(url, true);
-	parts.query._lang = parts.pathname.substring(21, 23);
+	parts.query._lang = parts.pathname.split('/')[4];
 
 	let subpath = parts.pathname.substring(23);
 	if (subpath === "/php/aza/http/index.php") {
@@ -73,7 +73,7 @@ function parseURLParameters(url) {
 	else if (subpath === "/php/aza/http/index_aza.php") {
 		parts.query._collection = "news";
 	}
-	
+
 	return parts.query;
 }
 
@@ -112,7 +112,7 @@ function _detectWeb(parameters) {
  * @returns {{}}
  */
 function getSearchResultsNews(doc, parameters) {
-	let domRows = doc.querySelectorAll("div.eit>table:nth-of-type(2)>tbody>tr");
+	let domRows = doc.querySelectorAll(".eit > table:nth-of-type(2) tr");
 	let items = {};
 
 	for (let i = 1; i < domRows.length; i += 2) {
@@ -137,17 +137,17 @@ function getSearchResultsNews(doc, parameters) {
  * @returns {{}}
  */
 function getSearchResultsBGer(doc, parameters) {
-	let domRows = doc.querySelectorAll("div.ranklist_content>ol>li");
+	let domRows = doc.querySelectorAll(".ranklist_content ol > li");
 	let items = {};
 
-	for (let i = 1; i < domRows.length; i++ ) {
-		let meta = domRows[i].children[0].children[0].innerText;
+	for (row of domRows) {
+		let meta = text(row, ".rank_title", 0);
 		let date = meta.substring(0, meta.indexOf(' '));
 		let number = meta.substring(date.length + 1);
 		number = number.substring(0, 2) + "_" + number.substring(3);
-		let url  = domRows[i].children[0].children[0];
-		let subject = domRows[i].children[2].children[1].innerText;
-		let subject2 = domRows[i].children[2].children[2].innerText;
+		let url  = attr(row, ".rank_title > a", "href");
+		let subject = text(row, ".rank_data > .subject", 0);
+		let subject2 = text(row, ".rank_data > .object", 0);
 		items[url] = number + " (" + date + "; " + subject + ": " + subject2 + ")";
 	}
 	return items;
@@ -164,13 +164,13 @@ function getSearchResultsBGer(doc, parameters) {
  * @returns {{}}
  */
 function getSearchResultsBGE(doc, parameters) {
-	let dom_rows = doc.querySelectorAll("div.ranklist_content>ol>li");
+	let domRows = doc.querySelectorAll(".ranklist_content ol > li");
 	let items = {};
 
-	for (let i = 1; i < dom_rows.length; i++ ) {
-		let url = dom_rows[i].children[0].children[0];
-		let number = abbrevPublished[parameters._lang] + url.innerText;
-		let subject = dom_rows[i].children[2].children[1].innerText;
+	for (row of domRows) {
+		let url = attr(row, ".rank_title > a", "href");
+		let number = abbrevPublished[parameters._lang] + text(row, ".rank_title", 0);
+		let subject = text(row, ".rank_data > .regeste", 0);
 		subject = subject.substring(subject.indexOf(']') + 2);
 		items[url] = number + " (" + subject + ")";
 	}
@@ -192,7 +192,7 @@ function _scrape(doc, url, parameters) {
 			item.title = abbrevPublished[parameters._lang] + docket;
 			item.number = item.title;
 			item.date = parseInt(docket.split(' ')[0]) + 1874;
-			item.abstractNote = ZU.trimInternal(doc.querySelector("div#regeste>div.paraatf").innerText);
+			item.abstractNote = ZU.trimInternal(text(doc, "#regeste > .paraatf", 0));
 		}
 		else if (parameters._collection === "BGer") {
 			item.date = parameters.highlight_docid.substring(12,22).replace(/-/g, '.');
