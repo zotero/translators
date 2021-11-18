@@ -68,6 +68,7 @@ function doWeb(doc, url) {
 
 function scrapeCase(doc, url) {
 	const translator = Zotero.loadTranslator('web');
+	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported", 0));
