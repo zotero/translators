@@ -126,15 +126,12 @@ function scrapeStatuteSection(doc, url) {
 
 
 function parseCitationList(citList) {
-	const allCitations = citList.match(/[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g); //annoyingly matchAll is not supported
-	if (allCitations.length === 1){ //if there is only one citation we'll have to use it
-		return /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g.exec(allCitations[0]);
-	} else { //if there's more than one we will find the first one that isn't WLUK
-		for (const citation of allCitations) {
-			const citationAsArray = /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g.exec(citation);
-			if (citationAsArray[3] !== "WLUK"){
-				return citationAsArray;
-			}
+	let citationRe = /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g;
+	let citationAsArray;
+	while ((citationAsArray = citationRe.exec(citation))) {
+		if (citationAsArray[3] !== "WLUK") {
+			return citationAsArray;
 		}
 	}
+	return citationAsArray;
 }
