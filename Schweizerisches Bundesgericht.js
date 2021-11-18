@@ -60,21 +60,22 @@ const courtName = {
  * @returns {{}}
  */
 function parseURLParameters(url) {
-	let parts = require('url').parse(url, true);
-	parts.query._lang = parts.pathname.split('/')[4];
+	const collections = {
+		"/php/aza/http/index.php": "BGer",
+		"/php/clir/http/index.php": "BGE",
+		"/php/aza/http/index_aza.php": "news"
+	};
+	let res = {};
+	let parts = ZU.parseURL(url);
+	let query = new URLSearchParams(parts.search);
 
-	let subpath = parts.pathname.substring(23);
-	if (subpath === "/php/aza/http/index.php") {
-		parts.query._collection = "BGer";
+	for (let parameter of [ "type", "mode", "highlight_docid" ]) {
+		res[parameter] = query.get(parameter);
 	}
-	else if (subpath === "/php/clir/http/index.php") {
-		parts.query._collection = "BGE";
-	}
-	else if (subpath === "/php/aza/http/index_aza.php") {
-		parts.query._collection = "news";
-	}
+	res._lang = parts.pathname.split('/')[4];
+	res._collection = collections[parts.pathname.substring(23)];
 
-	return parts.query;
+	return res;
 }
 
 /**
