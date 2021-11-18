@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-09 22:56:38"
+	"lastUpdated": "2021-11-18 22:52:43"
 }
 
 /*
@@ -39,11 +39,10 @@
 
 let titleRe = /^(?:\(\d+\) )?(.+) .* Twitter: .([\S\s]+). \/ Twitter/;
 
-function detectWeb(doc, _url) {
-	if (_url.includes('/status/') && titleRe.test(doc.title)) {
+function detectWeb(doc, url) {
+	if (url.includes('/status/')) {
 		return "blogPost";
 	}
-	Z.monitorDOMChanges(doc.querySelector('title'));
 	return false;
 }
 
