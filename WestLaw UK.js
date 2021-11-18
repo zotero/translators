@@ -2,7 +2,7 @@
 	"translatorID": "e6d9cf77-53e4-47f5-98ae-a69eba6d985f",
 	"label": "WestLaw UK",
 	"creator": "George Gebbett",
-	"target": "^https://uk\\.westlaw\\.com/Document/.*",
+	"target": "^https://uk\\.westlaw\\.com/Document/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
