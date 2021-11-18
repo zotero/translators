@@ -121,7 +121,8 @@ function getSearchResultsNews(doc, parameters) {
 		let url  = domRows[i].children[2].children[0];
 		let number = domRows[i].children[2].children[0].innerText;
 		let subject = domRows[i].children[4].innerText;
-		items[url] = number + " (" + date + "; " + subject + ")";
+		let subject2 = domRows[i+1].children[4].innerText;
+		items[url] = number + " (" + date + "; " + subject + ": " + subject2 + ")";
 	}
 
 	return items;
@@ -165,13 +166,13 @@ function getSearchResultsBGer(doc, parameters) {
  * @returns {{}}
  */
 function getSearchResultsBGE(doc, parameters) {
-	let dom_rows = doc.querySelectorAll("div.ranklist_content>ol>li");
+	let domRows = doc.querySelectorAll(".ranklist_content ol > li");
 	let items = {};
 
-	for (let i = 1; i < dom_rows.length; i++ ) {
-		let url = dom_rows[i].children[0].children[0];
-		let number = abbrevPublished[parameters._lang] + url.innerText;
-		let subject = dom_rows[i].children[2].children[1].innerText;
+	for (let row of domRows) {
+		let number = abbrevPublished[parameters._lang] + text(row, ".rank_title", 0);
+		let url = attr(row, ".rank_title > a", "href");
+		let subject = text(row, ".regeste", 0);
 		subject = subject.substring(subject.indexOf(']') + 2);
 		items[url] = number + " (" + subject + ")";
 	}
@@ -193,7 +194,7 @@ function _scrape(doc, url, parameters) {
 			item.title = abbrevPublished[parameters._lang] + docket;
 			item.number = item.title;
 			item.date = parseInt(docket.split(' ')[0]) + 1874;
-			item.abstractNote = ZU.trimInternal(doc.querySelector("div#regeste>div.paraatf").innerText);
+			item.abstractNote = ZU.trimInternal(text(doc, "#regeste > .paraatf", 0));
 		}
 		else if (parameters._collection === "BGer") {
 			item.date = ZU.strToISO(parameters.highlight_docid.substring(12,22).replace(/-/g, '.'));
