@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-17 09:47:43"
+	"lastUpdated": "2021-11-18 11:22:42"
 }
 
 /*
@@ -196,7 +196,7 @@ function _scrape(doc, url, parameters) {
 			item.abstractNote = ZU.trimInternal(doc.querySelector("div#regeste>div.paraatf").innerText);
 		}
 		else if (parameters._collection === "BGer") {
-			item.date = parameters.highlight_docid.substring(12,22).replace(/-/g, '.');
+			item.date = ZU.strToISO(parameters.highlight_docid.substring(12,22).replace(/-/g, '.'));
 			item.number = parameters.highlight_docid.substring(23).replace('-', '/');
 			item.title = abbrevUnpublished[parameters._lang] + item.number;
 		}
@@ -287,7 +287,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "BGer 8C_329/2021",
 				"creators": [],
-				"dateDecided": "27.10.2021",
+				"dateDecided": "2021-10-27",
 				"court": "Schweizerisches Bundesgericht",
 				"docketNumber": "8C_329/2021",
 				"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=de&zoom=&type=show_document",
@@ -341,7 +341,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "TF 8C_329/2021",
 				"creators": [],
-				"dateDecided": "27.10.2021",
+				"dateDecided": "2021-10-27",
 				"court": "Tribunal Fédéral Suisse",
 				"docketNumber": "8C_329/2021",
 				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=fr&zoom=&type=show_document",
@@ -365,7 +365,7 @@ var testCases = [
 				"itemType": "case",
 				"caseName": "TF 8C_329/2021",
 				"creators": [],
-				"dateDecided": "27.10.2021",
+				"dateDecided": "2021-10-27",
 				"court": "Tribunale Federale Svizzero",
 				"docketNumber": "8C_329/2021",
 				"url": "https://www.bger.ch/ext/eurospider/live/it/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=it&zoom=&type=show_document",
