@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-19 11:11:47"
+	"lastUpdated": "2021-11-19 16:13:02"
 }
 
 /*
@@ -134,21 +134,23 @@ function scrape(doc, url) {
 				let regexName = /author=.*"/;
 				if(entryHTML.match(regexOrcid)) {
 					item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '').replace('author=', '')});
-				//scrape ORCID at the bottom of text if css selector ".author-section-div" is empty. E.g. most of cases by reviews https://journals.sagepub.com/doi/10.1177/15423050211028189
-				} 
-				else if (entryHTML.match(regexOrcid) !== null){
-					let ReviewAuthorSectionEntries = doc.querySelectorAll('.NLM_fn p');
-					for (let ReviewAuthorSectionEntry of ReviewAuthorSectionEntries) {
-						let entryInnerText = ReviewAuthorSectionEntry.innerText;
-						let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
-						if(entryInnerText.match(regexOrcid) && entryInnerText.split('\n')[1] != undefined) {
-							let authorEntry = entryInnerText.split('\n')[1].replace(/https:\/\/.*/, '');
-							item.notes.push({note: "orcid:" + entryInnerText.match(regexOrcid)[0] + ' | ' + entryInnerText.match(authorEntry)[0].replace('\"', '')});
-						}				
-					}	
 				}
 			}
-
+			
+			//scrape ORCID at the bottom of text and split firstName and lastName for deduplicate notes. E.g. most of cases by reviews https://journals.sagepub.com/doi/10.1177/15423050211028189
+			let ReviewAuthorSectionEntries = doc.querySelectorAll('.NLM_fn p');
+			for (let ReviewAuthorSectionEntry of ReviewAuthorSectionEntries) {
+				let entryInnerText = ReviewAuthorSectionEntry.innerText;
+				let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
+				if(entryInnerText.match(regexOrcid) && entryInnerText.split('\n')[1] != undefined) {
+					let authorEntry = entryInnerText.split('\n')[1].replace(/https:\/\/.*/, '');
+					let fullName = entryInnerText.match(authorEntry)[0].replace('\"', '').trim();Z.debug(fullName)
+					let	firstName = fullName.split(' ').slice(0, -1).join(' ');
+					let	lastName = fullName.split(' ').slice(-1).join(' ');
+					item.notes.push({note: "orcid:" + entryInnerText.match(regexOrcid)[0] + ' | ' + lastName + ', ' + firstName});
+				}				
+			}
+			 
 			// Workaround to address address weird incorrect multiple extraction by both querySelectorAll and xpath
 			// So, let's deduplicate...
 			item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
@@ -768,6 +770,9 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/15423050211028189</p>"
+					},
+					{
+						"note": "orcid:0000-0002-5423-3796 | Brand, Emi Alisa Johnson"
 					}
 				],
 				"seeAlso": []
