@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-19 11:00:40"
+	"lastUpdated": "2021-11-19 11:11:47"
 }
 
 /*
@@ -133,7 +133,7 @@ function scrape(doc, url) {
 				let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
 				let regexName = /author=.*"/;
 				if(entryHTML.match(regexOrcid)) {
-					item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '')});
+					item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '').replace('author=', '')});
 				//scrape ORCID at the bottom of text if css selector ".author-section-div" is empty. E.g. most of cases by reviews https://journals.sagepub.com/doi/10.1177/15423050211028189
 				} 
 				else if (entryHTML.match(regexOrcid) !== null){
@@ -428,7 +428,7 @@ var testCases = [
 						"note": "<p>doi: 10.1177/0969733020929062</p>"
 					},
 					{
-						"note": "orcid:0000-0002-0893-3054 | author=Glasdam, Stinne"
+						"note": "orcid:0000-0002-0893-3054 | Glasdam, Stinne"
 					},
 					{
 						"note": "LF:"
@@ -718,10 +718,10 @@ var testCases = [
 						"note": "<p>doi: 10.1177/0084672420926259</p>"
 					},
 					{
-						"note": "orcid:0000-0001-6906-3104 | author=Anczyk, Adam"
+						"note": "orcid:0000-0001-6906-3104 | Anczyk, Adam"
 					},
 					{
-						"note": "orcid:0000-0003-2751-3204 | author=Grzymała-Moszczyńska, Halina"
+						"note": "orcid:0000-0003-2751-3204 | Grzymała-Moszczyńska, Halina"
 					}
 				],
 				"seeAlso": []
