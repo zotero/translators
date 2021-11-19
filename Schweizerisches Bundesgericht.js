@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-18 11:22:42"
+	"lastUpdated": "2021-11-19 10:52:25"
 }
 
 /*
@@ -69,6 +69,7 @@ function parseURLParameters(url) {
 	let parts = ZU.parseURL(url);
 	let query = new URLSearchParams(parts.search);
 
+	res.parts = parts;
 	for (let parameter of [ "type", "mode", "highlight_docid" ]) {
 		res[parameter] = query.get(parameter);
 	}
@@ -182,7 +183,12 @@ function getSearchResultsBGE(doc, parameters) {
 function _scrape(doc, url, parameters) {
 		let item = new Zotero.Item("case");
 
-		item.url = url;
+		parameters.parts.search = "";
+		parameters.parts.query = {
+			type: parameters.type,
+			highlight_docid: parameters.highlight_docid
+		};
+		item.url = parameters.parts.format();
 		item.court = courtName[parameters._lang];
 		item.attachments.push({
 			title: "Snapshot",
@@ -262,7 +268,7 @@ var testCases = [
 				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
 				"court": "Schweizerisches Bundesgericht",
 				"docketNumber": "BGE 81 I 63",
-				"url": "https://www.bger.ch/ext/eurospider/live/de/php/clir/http/index.php?lang=de&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"url": "https://www.bger.ch/ext/eurospider/live/de/php/clir/http/index.php?type=highlight_simple_query&highlight_docid=atf%3A%2F%2F81-I-63%3Ade",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -291,7 +297,7 @@ var testCases = [
 				"dateDecided": "2021-10-27",
 				"court": "Schweizerisches Bundesgericht",
 				"docketNumber": "8C_329/2021",
-				"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=de&zoom=&type=show_document",
+				"url": "https://www.bger.ch/ext/eurospider/live/de/php/aza/http/index.php?type=show_document&highlight_docid=aza%3A%2F%2Faza%3A%2F%2F27-10-2021-8C_329-2021",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -321,7 +327,7 @@ var testCases = [
 				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
 				"court": "Tribunal Fédéral Suisse",
 				"docketNumber": "ATF 81 I 63",
-				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/clir/http/index.php?lang=fr&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/clir/http/index.php?type=highlight_simple_query&highlight_docid=atf%3A%2F%2F81-I-63%3Ade",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -345,7 +351,7 @@ var testCases = [
 				"dateDecided": "2021-10-27",
 				"court": "Tribunal Fédéral Suisse",
 				"docketNumber": "8C_329/2021",
-				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=fr&zoom=&type=show_document",
+				"url": "https://www.bger.ch/ext/eurospider/live/fr/php/aza/http/index.php?type=show_document&highlight_docid=aza%3A%2F%2Faza%3A%2F%2F27-10-2021-8C_329-2021",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -369,7 +375,7 @@ var testCases = [
 				"dateDecided": "2021-10-27",
 				"court": "Tribunale Federale Svizzero",
 				"docketNumber": "8C_329/2021",
-				"url": "https://www.bger.ch/ext/eurospider/live/it/php/aza/http/index.php?highlight_docid=aza%3A%2F%2Faza://27-10-2021-8C_329-2021&lang=it&zoom=&type=show_document",
+				"url": "https://www.bger.ch/ext/eurospider/live/it/php/aza/http/index.php?type=show_document&highlight_docid=aza%3A%2F%2Faza%3A%2F%2F27-10-2021-8C_329-2021",
 				"attachments": [
 					{
 						"title": "Snapshot",
@@ -394,7 +400,7 @@ var testCases = [
 				"abstractNote": "Militärpflichtersatz: Besteuerung eines Evangelisten, für dessen Unterhalt seine Glaubensfreunde sorgen.",
 				"court": "Tribunale Federale Svizzero",
 				"docketNumber": "ATF 81 I 63",
-				"url": "https://www.bger.ch/ext/eurospider/live/it/php/clir/http/index.php?lang=it&type=highlight_simple_query&page=1&from_date=&to_date=&from_year=1954&to_year=2021&sort=relevance&insertion_date=&from_date_push=&top_subcollection_clir=bge&query_words=UNterhalt&part=all&de_fr=&de_it=&fr_de=&fr_it=&it_de=&it_fr=&orig=&translation=&rank=1&highlight_docid=atf%3A%2F%2F81-I-63%3Ade&number_of_ranks=714&azaclir=clir",
+				"url": "https://www.bger.ch/ext/eurospider/live/it/php/clir/http/index.php?type=highlight_simple_query&highlight_docid=atf%3A%2F%2F81-I-63%3Ade",
 				"attachments": [
 					{
 						"title": "Snapshot",
