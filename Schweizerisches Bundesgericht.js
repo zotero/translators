@@ -203,7 +203,7 @@ function _scrape(doc, url, parameters) {
 			item.abstractNote = ZU.trimInternal(text(doc, "#regeste > .paraatf", 0));
 		}
 		else if (parameters._collection === "BGer") {
-			item.date = ZU.strToISO(parameters.highlight_docid.substring(12,22).replace(/-/g, '.'));
+			item.date = parameters.highlight_docid.substring(12,22).split('-').reverse().join('-');
 			item.number = parameters.highlight_docid.substring(23).replace('-', '/');
 			item.title = abbrevUnpublished[parameters._lang] + item.number;
 		}
