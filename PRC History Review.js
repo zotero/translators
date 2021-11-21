@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-09 12:23:22"
+	"lastUpdated": "2021-11-21 04:54:57"
 }
 
 /*
@@ -53,17 +53,19 @@ function doWeb(doc, url) {
 				return true;
 			}
 			for (const i in items) {
+				let isIssue = false;
+				let isSingleArticle = false;
+				let isHomePage = isHomePageUrl(url);
 				// if it's the homepage, treat links as individual journal articles without a dedicated child page, otherwise as issue articles.
-				if (checkHomePage(url)) {
-					scrape(doc, i, false, false);
-				}
-				else if (Object.keys(articles).length == 1) {
+				if (!isHomePage) {
+					// if it's not homepage, further check if it is single article issue, or multiple article issue.
+					isSingleArticle = Object.keys(articles).length === 1;
 					// when there is only one article on a child page. This usually is the case with a single research paper with its own page. Note this is NOT how many items are selected by the user to add to Zotero.
-					scrape(doc, i, false, true);
+					isIssue = !isSingleArticle;
 				}
-				else {
-					scrape(doc, i, true, false);
-				}
+				// pass issue information to scraper
+				scrape(doc, i, isIssue, isSingleArticle);
+
 			}
 			return true;
 		});
@@ -75,13 +77,11 @@ function getArticles(doc, url) {
 	let found = false;
 
 	// since PRC history review provides downlodable links on both the home page and its children issue pages, we need to:
-	const isHomePage = checkHomePage(url);
-
-	if (isHomePage) {
+	if (isHomePageUrl(url)) {
 		const pdfLinkEls = doc.querySelectorAll('a');
 		pdfLinkEls.forEach((link) => {
 			const href = link.href;
-			const hasPDF = checkIfLinkIsPdf(href);
+			const hasPDF = isPdfUrl(href);
 			if (hasPDF) {
 				items[href] = link.textContent;
 				if (found === false) {
@@ -96,7 +96,7 @@ function getArticles(doc, url) {
 			const link = bookLinkEl.querySelectorAll('a')[0];
 			if (link) {
 				const href = link.href;
-				const hasPDF = checkIfLinkIsPdf(href);
+				const hasPDF = isPdfUrl(href);
 				if (hasPDF) {
 					const title = link.textContent;
 
@@ -132,8 +132,8 @@ function scrape(doc, url, isIssue, isSingleArticle) {
 			return;
 		}
 		const href = linkEl.href;
-		if (href == url) {
-			const hasPDF = checkIfLinkIsPdf(href);
+		if (href === url) {
+			const hasPDF = isPdfUrl(href);
 			if (hasPDF) {
 				const newItem = new Zotero.Item('journalArticle');
 
@@ -216,6 +216,7 @@ function scrape(doc, url, isIssue, isSingleArticle) {
 				}
 
 				// add author
+				// for issue authors
 				if (isIssue) {
 					const authorEl = articleLinkEls[index + 1];
 					if (authorEl) {
@@ -229,7 +230,7 @@ function scrape(doc, url, isIssue, isSingleArticle) {
 						});
 					}
 				}
-
+				// for single article issue's author information
 				if (isSingleArticle) {
 					const rawAuthorText = linkEl.textContent.split(',')[0];
 					if (rawAuthorText) {
@@ -245,7 +246,7 @@ function scrape(doc, url, isIssue, isSingleArticle) {
 
 				// Download pdf
 				const pdfUrl = url;
-				if (pdfUrl && pdfUrl.toLowerCase().endsWith('.pdf')) {
+				if (pdfUrl && isPdfUrl) {
 					newItem.attachments.push({
 						url: pdfUrl,
 						mimeType: "application/pdf",
@@ -258,13 +259,14 @@ function scrape(doc, url, isIssue, isSingleArticle) {
 }
 
 // helper functions.
-function checkIfLinkIsPdf(url) {
+function isPdfUrl(url) {
 	return url.toLowerCase().endsWith('.pdf');
 }
 
-function checkHomePage(url) {
+function isHomePageUrl(url) {
 	return url.endsWith('the-prc-history-review/');
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
