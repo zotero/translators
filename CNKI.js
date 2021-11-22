@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2021-11-16 14:57:41"
+	"lastUpdated": "2021-11-22 01:10:16"
 }
 
 /*
@@ -143,7 +143,6 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 		fileXpath = "./ul/li/a";
 	}
 	else { // for search result page
-		var result = doc.querySelector('table.result-table-list');
 		links = doc.querySelectorAll("table.result-table-list tbody tr");
 		aXpath = './td/a[@class="fz14"]';
 		fileXpath = "./td[@class='operat']/a[contains(@class, 'downloadlink')]";
@@ -240,7 +239,7 @@ function scrape(ids, doc, itemInfo) {
 		translator.setString(text);
 		translator.setHandler('itemDone', function (obj, newItem) {
 			// add PDF/CAJ attachments
-			var cite, citeStr, pubType, pubTypeStr = "";
+			var cite, pubType = "";
 			var extraField = [];
 			// If you want CAJ instead of PDF, set keepPDF = false
 			// 如果你想将PDF文件替换为CAJ文件，将下面一行 keepPDF 设为 false
@@ -360,7 +359,8 @@ function getAttachments(pdfurl, cajurl, keepPDF) {
 			mimeType: "application/pdf",
 			url: url
 		});
-	} else if (cajurl) {
+	}
+	else if (cajurl) {
 		attachments.push({
 			title: "Full Text CAJ",
 			mimeType: "application/caj",
