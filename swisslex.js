@@ -197,19 +197,22 @@ const translationCourt = {
 
 /**
  * data class holding web document information
+ * @typedef DocumentData
+ * @type {Object}
  * @property {Element}           dom
  * @property {String}            url
  * @property {String}            lang
  * @property {String}            id
  * @property {Zotero.ItemType}   type
  */
-class DocumentData {}
 
 /**
  * data class representing collected metadata fields
  *
  * Internal/Temporary fields are named starting with '_'.
  *
+ * @typedef Metas
+ * @type {Object}
  * @property {String} _magic
  * @property {String} _article
  * @property {String} _author
@@ -235,7 +238,6 @@ class DocumentData {}
  * @property {String} number
  * @property {String} encyclopediaTitle
  */
-class Metas {}
 
 /**
  * interpret a document URL and extract web document information
@@ -255,7 +257,7 @@ function extractDocumentData(doc, url) {
 	};
 
 	let parts;
-	let result = new DocumentData();
+	let result = {};
 
 	url = decodeURI(url);
 	parts = url.match(urlRegexp);
@@ -322,17 +324,19 @@ function patchupMetaCommon(docData, metas) {
 		metas.date = ZU.strToISO(metas.date);
 	}
 	if (metas.edition !== undefined) {
-		metas.edition = metas.edition.split('.')[0];
+		// all editions start with the numeric - parseInt ignores everything thereafter ;)
+		metas.edition = parseInt(metas.edition).toString();
 	}
 	if (metas._tags !== undefined) {
+		// tags, if available are presented as "tag1, tag2, tag3/subtag3"
 		let tags = metas._tags.split(',');
 		delete metas._tags;
 		metas.tags = [];
-		for (let i = 0; i < tags.length; i++) {
-			let tagParts = tags[i].split("/");
+		for (let tag of tags) {
+			let tagParts = tag.split("/");
 			metas.tags.push(ZU.trimInternal(tagParts[0]));
 			if (tagParts.length > 1) {
-				metas.tags.push(ZU.trimInternal(tags[i]));
+				metas.tags.push(ZU.trimInternal(tag));
 			}
 		}
 	}
@@ -344,6 +348,8 @@ function patchupMetaCommon(docData, metas) {
 		}
 	}
 	if (metas._author !== undefined) {
+		// authors are presented in "lastname firstname" but without a comma
+		// (which doesn't split names but authors)
 		let authors = metas._author.split(',');
 		metas.creators = metas.creators || [];
 		for (let i = 0; i < authors.length; i++) {
@@ -372,21 +378,41 @@ function patchupMetaMagic(docData, metas) {
 	}
 
 	if (docData.type === "journalArticle") {
+		// the magic field should compare to "abbreviation (volume/)year page"
 		let value = magic.split(' ');
 		metas.journalAbbreviation = value[0];
 		if (value[1].includes("/")) {
 			metas.issue = value[1].split("/")[0];
 		}
 	}
+	else if (docData.type === "case") {
+		// court case collections and journals are both tagged with "publication"
+		// - we distinguish them by the presence of a logo banner for journals
+		// the magic field contains the docket for "real" case documents, but
+		// a journalArticle reference for cases in journals.
+		let publicationLogo = docData.dom.querySelector("img.ng-star-inserted");
+		if (publicationLogo) {
+			let value = magic.split(' ');
+			metas.reporter = value[0];
+			metas.reporterVolume = value[1];
+			// @TODO verify with other publications on site
+			magic = text(docData.dom, "p.documenttitle").split(" – ").splice(-1)[0];
+		}
+		else {
+			delete metas.publicationTitle;
+		}
+		metas.number = magic;
+		metas.title = magic;
+	}
 	else if (docData.type === "bookSection") {
+		// at least one bookSection I found did not give the book's edition in
+		// a separate field but included it in the magic field conundrum...
+		// @TODO deduce when edition is presented separately
+		// @TODO verify for french
 		let value = magic.match('([0-9]+)\\.A.,');
 		if (value) {
 			metas.edition = value[1];
 		}
-	}
-	else if (docData.type === "case") {
-		metas.number = magic;
-		metas.title = magic;
 	}
 	else {
 		Z.debug("don't know _magic for type " + docData.type);
@@ -401,6 +427,8 @@ function patchupMetaMagic(docData, metas) {
  * Therefore we try some heuristics to detect books:
  *   * no editor
  *   * 'chapter' title beginning with ordinals or '§'
+ *
+ * NB: we change the Zotero.ItemType for books - quite late in the process...
  *
  * @param {DocumentData}  docData
  * @param {Metas}         metas
@@ -425,13 +453,19 @@ function patchupForBookSection(docData, metas) {
 
 /**
  * patchup metas for document type 'case'
+ *
  * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
 function patchupForCase(docData, metas) {
+	// all courts are named "canton, court" - with options for canton including Switzerland,
+	// and Luxembourg/Strasbourg for the nationally relevant European Courts ;)
 	let court = metas.court.split(",");
 	let title = metas.title;
 
+	// cases are uniformly referenced by "court-abbreviation (canton) docket"
+	// except for federal and international courts that leave out the canton part
+	// @TODO BVGE, BSTGE
 	if (title.substring(0, 4) !== "BGE ") {
 		let temp = court[0].trim();
 		if (translationCanton[temp] !== undefined) {
@@ -463,20 +497,28 @@ function patchupForCase(docData, metas) {
 
 /**
  * patchup metas for document type 'legalCommentary' - mapped to 'encyclopediaArticle'
+ *
  * @param {DocumentData}  docData
  * @param {Metas}         metas
  */
 function patchupForLegalCommentary(docData, metas) {
-	// set series to abbreviation ("BK - Berner Kommentar" => "BK")
-	if (metas.series !== undefined && metas.series.match("^[A-Z]{2,5} - ")) {
-		metas.series = ZU.trimInternal(metas.series.split("-")[0]);
+	metas.encyclopediaTitle = metas.title;
+
+	// legal commentaries are referenced in two distinct ways in Switzerland
+	//   * certain 'big' series are quoted by their abbreviation and the author of the referenced part
+	//     (e.g. a commentary by Mr. Meier in the "Berner Kommentar" -> "BK-MEIER")
+	//   * smaller and individual commentaries are quote like books with statute articles as chapters
+	let seriesParts = metas.series ? metas.series.split(" - ", 2) : [];
+	if (seriesParts.length > 1) {
+		metas.series = ZU.trimInternal(seriesParts[0]);
+		metas.encyclopediaTitle = ZU.trimInternal(seriesParts[1]) + ", " + metas.title;
 	}
 
 	// if its a commentary to a specific articles
-	if (metas._article !== undefined) {
+	// swisslex designates it as '[statute-abbreviation] [article number]'
+	if (metas._article !== undefined) {x
 		let commentary = metas.series || metas.publisher.split(" ")[0];
 		let articleParts = metas._article.split(" ");
-		metas.encyclopediaTitle = metas.title;
 		metas.title = metas._article + " (" + commentary + ")";
 		metas.shortTitle = (docData.lang === "fr" ? "art. " : "Art. ") + articleParts[1] + " " + articleParts[0];
 		delete metas._article;
@@ -486,7 +528,7 @@ function patchupForLegalCommentary(docData, metas) {
 
 	// if its a non-article commentary, handle like a bookSection
 	if (metas._subtitle) {
-		metas.title = metas.title + " - " + metas._subtitle;
+		metas.title = metas._subtitle;
 		delete metas._subtitle;
 	}
 }
@@ -525,7 +567,7 @@ function doWeb(doc, url) {
 	}
 
 	// as long as we cannot get the PDF, save the website
-	// even as the website contains hidden documents and contains not-working app elements
+	// even as the website contains hidden documents and not-working app elements
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
