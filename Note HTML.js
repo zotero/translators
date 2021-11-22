@@ -16,26 +16,26 @@
 
 /*
     ***** BEGIN LICENSE BLOCK *****
-    
+
     Copyright © 2021 Corporation for Digital Scholarship
                      Vienna, Virginia, USA
                      http://digitalscholar.org/
-    
+
     This file is part of Zotero.
-    
+
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU Affero General Public License for more details.
-    
+
     You should have received a copy of the GNU Affero General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-    
+
     ***** END LICENSE BLOCK *****
 */
 
@@ -43,9 +43,9 @@
 function doExport() {
 	Zotero.setCharacterSet('utf-8');
 	let item;
-	let doc =  new DOMParser().parseFromString('<div class="zotero-notes"/>', 'text/html');
+	let doc = new DOMParser().parseFromString('<div class="zotero-notes"/>', 'text/html');
 	let container = doc.body.firstChild;
-	while (item = Zotero.nextItem()) {
+	while ((item = Zotero.nextItem())) {
 		if (item.itemType === 'note' || item.itemType === 'attachment') {
 			let div = doc.createElement('div');
 			div.className = 'zotero-note';
@@ -80,7 +80,7 @@ function doExport() {
 			p.style.paddingLeft = '';
 		}
 	});
-	
+
 	// Word and TextEdit don't indent blockquotes on their own and need this
 	// OO gets it right, so this results in an extra indent
 	ZU.xpath(doc, '//blockquote/p').forEach(p => p.style.marginLeft = '30px');
