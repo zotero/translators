@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2021-11-18 16:41:00"
+	"lastUpdated": "2021-11-22 17:15:00"
 }
 
 /*
@@ -54,9 +54,19 @@ function doExport() {
 			if (!div.textContent.trim()) {
 				continue;
 			}
+			// Unwrap ProseMirror note metadata container
+			let inner = div.firstElementChild;
+			if (inner && inner.getAttribute('data-schema-version')) {
+				inner.replaceWith(...inner.childNodes);
+			}
 			container.append(div);
 		}
 	}
+
+	// Remove annotation and citation data
+	ZU.xpath(doc, '//span[@data-citation]').forEach(span => span.removeAttribute('data-citation'));
+	ZU.xpath(doc, '//span[@data-annotation]').forEach(span => span.removeAttribute('data-annotation'));
+	ZU.xpath(doc, '//img[@data-annotation]').forEach(img => img.removeAttribute('data-annotation'));
 
 	// Add horizontal rules between notes
 	Array.from(container.children).slice(1).forEach((element) => {
