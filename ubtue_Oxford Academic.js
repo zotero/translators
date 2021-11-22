@@ -74,6 +74,25 @@ function invokeEmbeddedMetadataTranslator(doc, url) {
 		// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open access
 		let openAccessTag = ZU.xpathText(doc, '//*[@class="icon-availability_open"]//@title'); Z.debug(openAccessTag)
 		if (openAccessTag && openAccessTag.match(/open\s+access/gi)) i.notes.push('LF:');
+if (ZU.xpathText(doc, '//i[@class="icon-availability_open"]/@title') != null) {
+			if (ZU.xpathText(doc, '//i[@class="icon-availability_open"]/@title').match(/open access/i)) {
+				i.notes.push("LF:");
+			}
+		}
+		else if (ZU.xpathText(doc, '//i[@class="icon-availability_free"]/@title') != null) {
+			if (ZU.xpathText(doc, '//i[@class="icon-availability_free"]/@title').match(/free/i)) {
+				i.notes.push("LF:");
+			}
+		}
+		let author_information_tags = ZU.xpath(doc, '//div[@class="info-card-author authorInfo_OUP_ArticleTop_Info_Widget"]');
+		for (let a = 0; a < author_information_tags.length; a++) {
+			if (ZU.xpathText(author_information_tags[a], './/div[@class="info-card-location"]') != null) {
+				let orcid = ZU.xpathText(author_information_tags[a], './/div[@class="info-card-location"]').trim();
+				orcid = orcid.replace('https://orcid.org/', '');
+				let author = ZU.xpathText(author_information_tags[a], './/div[@class="info-card-name"]').trim();
+				i.notes.push({note: "orcid:" + orcid + ' | ' + author});
+			}
+		}
 		i.complete();
 	});
 	translator.translate();
