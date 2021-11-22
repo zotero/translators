@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-03-11 11:09:30"
+	"lastUpdated": "2021-11-19 16:13:02"
 }
 
 /*
@@ -129,13 +129,28 @@ function scrape(doc, url) {
 			//scrape ORCID from website e.g. https://journals.sagepub.com/doi/full/10.1177/0084672419883339
 			let authorSectionEntries = doc.querySelectorAll('.author-section-div');
 			for (let authorSectionEntry of authorSectionEntries) {
-				    let entryHTML = authorSectionEntry.innerHTML;
-					let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
-					let regexName = /author=.*"/;
-					if(entryHTML.match(regexOrcid)) {
-						item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '')});
-					}
+				let entryHTML = authorSectionEntry.innerHTML;
+				let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
+				let regexName = /author=.*"/;
+				if(entryHTML.match(regexOrcid)) {
+					item.notes.push({note: "orcid:" + entryHTML.match(regexOrcid)[0] + ' | ' + entryHTML.match(regexName)[0].replace('\"', '').replace('author=', '')});
+				}
 			}
+			
+			//scrape ORCID at the bottom of text and split firstName and lastName for deduplicate notes. E.g. most of cases by reviews https://journals.sagepub.com/doi/10.1177/15423050211028189
+			let ReviewAuthorSectionEntries = doc.querySelectorAll('.NLM_fn p');
+			for (let ReviewAuthorSectionEntry of ReviewAuthorSectionEntries) {
+				let entryInnerText = ReviewAuthorSectionEntry.innerText;
+				let regexOrcid = /\d+-\d+-\d+-\d+x?/i;
+				if(entryInnerText.match(regexOrcid) && entryInnerText.split('\n')[1] != undefined) {
+					let authorEntry = entryInnerText.split('\n')[1].replace(/https:\/\/.*/, '');
+					let fullName = entryInnerText.match(authorEntry)[0].replace('\"', '').trim();Z.debug(fullName)
+					let	firstName = fullName.split(' ').slice(0, -1).join(' ');
+					let	lastName = fullName.split(' ').slice(-1).join(' ');
+					item.notes.push({note: "orcid:" + entryInnerText.match(regexOrcid)[0] + ' | ' + lastName + ', ' + firstName});
+				}				
+			}
+			 
 			// Workaround to address address weird incorrect multiple extraction by both querySelectorAll and xpath
 			// So, let's deduplicate...
 			item.notes = Array.from(new Set(item.notes.map(JSON.stringify))).map(JSON.parse);
@@ -235,7 +250,7 @@ var testCases = [
 				"issue": "2",
 				"journalAbbreviation": "Theology Today",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "210-217",
 				"publicationTitle": "Theology Today",
 				"url": "https://doi.org/10.1177/0040573620918177",
@@ -280,7 +295,7 @@ var testCases = [
 				"issue": "3",
 				"journalAbbreviation": "Theology Today",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "261-265",
 				"publicationTitle": "Theology Today",
 				"url": "https://doi.org/10.1177/0040573619865711",
@@ -325,7 +340,7 @@ var testCases = [
 				"issue": "1",
 				"journalAbbreviation": "Theology Today",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "83-84",
 				"publicationTitle": "Theology Today",
 				"shortTitle": "The Myth of Rebellious Angels",
@@ -382,7 +397,7 @@ var testCases = [
 				"issue": "8",
 				"journalAbbreviation": "Nurs Ethics",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "1618-1630",
 				"publicationTitle": "Nursing Ethics",
 				"url": "https://doi.org/10.1177/0969733020929062",
@@ -413,6 +428,12 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>doi: 10.1177/0969733020929062</p>"
+					},
+					{
+						"note": "orcid:0000-0002-0893-3054 | Glasdam, Stinne"
+					},
+					{
+						"note": "LF:"
 					}
 				],
 				"seeAlso": []
@@ -445,7 +466,7 @@ var testCases = [
 				"issue": "3",
 				"journalAbbreviation": "Social Compass",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "428-443",
 				"publicationTitle": "Social Compass",
 				"shortTitle": "Bridging sociology of religion to transition to adulthood",
@@ -528,7 +549,7 @@ var testCases = [
 				"issue": "4",
 				"journalAbbreviation": "Biblical Theology Bulletin",
 				"language": "en",
-				"libraryCatalog": "ubtue_SAGE Journals",
+				"libraryCatalog": "SAGE Journals",
 				"pages": "180-190",
 				"publicationTitle": "Biblical Theology Bulletin",
 				"shortTitle": "“The Land Is Mine” (Leviticus 25",
@@ -699,10 +720,59 @@ var testCases = [
 						"note": "<p>doi: 10.1177/0084672420926259</p>"
 					},
 					{
-						"note": "orcid:0000-0001-6906-3104 | author=Anczyk, Adam"
+						"note": "orcid:0000-0001-6906-3104 | Anczyk, Adam"
 					},
 					{
-						"note": "orcid:0000-0003-2751-3204 | author=Grzymała-Moszczyńska, Halina"
+						"note": "orcid:0000-0003-2751-3204 | Grzymała-Moszczyńska, Halina"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://journals.sagepub.com/doi/10.1177/15423050211028189",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mitchell, Kenneth R., All Our Losses, All Our Griefs: Resources for Pastoral Care",
+				"creators": [
+					{
+						"lastName": "Johnson Brand",
+						"firstName": "Emi Alisa",
+						"creatorType": "author"
+					}
+				],
+				"date": "September 1, 2021",
+				"DOI": "10.1177/15423050211028189",
+				"ISSN": "1542-3050",
+				"issue": "3",
+				"journalAbbreviation": "J Pastoral Care Counsel",
+				"language": "en",
+				"libraryCatalog": "SAGE Journals",
+				"pages": "229-230",
+				"publicationTitle": "Journal of Pastoral Care & Counseling",
+				"shortTitle": "Mitchell, Kenneth R., All Our Losses, All Our Griefs",
+				"url": "https://doi.org/10.1177/15423050211028189",
+				"volume": "75",
+				"attachments": [
+					{
+						"title": "SAGE PDF Full Text",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "<p>doi: 10.1177/15423050211028189</p>"
+					},
+					{
+						"note": "orcid:0000-0002-5423-3796 | Brand, Emi Alisa Johnson"
 					}
 				],
 				"seeAlso": []
