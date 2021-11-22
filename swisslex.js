@@ -264,7 +264,7 @@ function extractDocumentData(doc, url) {
 
 	if (parts !== null) {
 		result = {
-			dom: doc.documentElement,
+			dom: doc.querySelector("div[id='" + parts[3] + "']"),
 			url: parts[0],
 			lang: parts[1],
 			id: parts[3],
@@ -288,8 +288,8 @@ function extractDocumentData(doc, url) {
  * @returns {Metas}
  */
 function extractRawItemData(docData) {
-	const domMetas = ZU.xpath(docData.dom, '//div[@id="' + docData.id + '"]//li[contains(@class,"meta-entry")]');
-	let result = new Metas();
+	const domMetas = docData.dom.querySelectorAll("li.meta-entry");
+	let result = {};
 
 	result.url = docData.url;
 	for (let i = 0, l = domMetas.length; i < l; i++) {
@@ -321,7 +321,8 @@ function extractRawItemData(docData) {
  */
 function patchupMetaCommon(docData, metas) {
 	if (metas.date !== undefined) {
-		metas.date = ZU.strToISO(metas.date);
+		// all dates are presented in both languages as "dd.mm.yyyy"
+		metas.date = metas.date.split('.').reverse().join('-');
 	}
 	if (metas.edition !== undefined) {
 		// all editions start with the numeric - parseInt ignores everything thereafter ;)
