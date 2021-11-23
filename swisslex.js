@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-15 20:49:43"
+	"lastUpdated": "2021-11-22 18:57:40"
 }
 
 /*
@@ -64,6 +64,8 @@ const translationMetaLabel = {
 	// "collection": "series",
 	"collection": "series",
 	"urteilsdatum": "date",
+	"urteilsbesprechung": "number",
+	"commentaire du jugement": "number",
 	"date du jugement": "date",
 	"jahr": "date",
 	"année": "date",
@@ -382,8 +384,12 @@ function patchupMetaMagic(docData, metas) {
 		// the magic field should compare to "abbreviation (volume/)year page"
 		let value = magic.split(' ');
 		metas.journalAbbreviation = value[0];
-		if (value[1].includes("/")) {
-			metas.issue = value[1].split("/")[0];
+		value[1] = value[1].split('/');
+		if (value[1].length > 1) {
+			metas.issue = value[1].shift();
+		}
+		if (metas.date === undefined) { // sometime year is not set in its own field
+			metas.date = value[1].shift();
 		}
 	}
 	else if (docData.type === "case") {
@@ -397,7 +403,9 @@ function patchupMetaMagic(docData, metas) {
 			metas.reporter = value[0];
 			metas.reporterVolume = value[1];
 			// @TODO verify with other publications on site
-			magic = text(docData.dom, "p.documenttitle").split(" – ").splice(-1)[0];
+			let docketRegex = /[-;]\s*([^-;)]+)\)?\.?$/;
+			let parts = text(docData.dom, "p.documenttitle").match(docketRegex);
+			magic = parts[1];
 		}
 		else {
 			delete metas.publicationTitle;
