@@ -585,6 +585,7 @@ function doWeb(doc, url) {
 	delete metas._editor;
 
 	let item = new Zotero.Item(docData.type);
+	item.abstractNote = text(docData.dom, "div.abstract", 0);
 	for (let one in metas) {
 		if (one.substring(0, 1) !== "_") {
 			item[one] = metas[one];
