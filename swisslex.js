@@ -197,6 +197,16 @@ const translationCourt = {
 	// FR
 };
 
+const topLevelCaseCompilations = [
+	"BGE ",
+	"ATF ",
+	"BVGE ",
+	"ATAF ",
+	"EVGE ",
+	"ATFA ",
+	"TPF "
+];
+
 /**
  * data class holding web document information
  * @typedef DocumentData
@@ -472,9 +482,13 @@ function patchupForCase(docData, metas) {
 	let court = metas.court.split(",");
 	let title = metas.title;
 
+	for (let compilation of topLevelCaseCompilations) {
+		if (title.startsWith(compilation)) {
+			return;
+		}
+	}
+
 	// cases are uniformly referenced by "court-abbreviation (canton) docket"
-	// except for federal and international courts that leave out the canton part
-	// @TODO BVGE, BSTGE
 	if (title.substring(0, 4) !== "BGE ") {
 		let temp = court[0].trim();
 		if (translationCanton[temp] !== undefined) {
