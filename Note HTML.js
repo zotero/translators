@@ -49,7 +49,7 @@ function doExport() {
 		if (item.itemType === 'note' || item.itemType === 'attachment') {
 			let div = doc.createElement('div');
 			div.className = 'zotero-note';
-			div.innerHTML = item.note;
+			div.innerHTML = item.note || '';
 			// Skip empty notes
 			if (!div.textContent.trim()) {
 				continue;
