@@ -50,6 +50,7 @@ function getRefWorksByID(ids, onDataAvailable) {
 				.replace(/(<br>)+/g, '\n')
 				.replace(/^RT\s+Conference Proceeding/gmi, 'RT Conference Proceedings')
 				.replace(/^RT\s+Dissertation\/Thesis/gmi, 'RT Dissertation')
+                .replace(/^LA 中文;/gmi, "LA zh-CN") // Replace language 中文; to zh-CN
 				.replace(/;;/g, ';') // 保留作者中一个英文分号
 				.replace(/^ AB/g, 'AB') // 去除AB前空格
 				.replace(/vo (\d+)\n/, "VO $1\n") // 修改vo 大小写
