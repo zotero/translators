@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 80,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-09-03 15:15:00"
+	"lastUpdated": "2021-11-24 10:24:32"
 }
 
 /*
@@ -80,7 +80,72 @@ function invokeEMTranslator(doc) {
 	translator.setHandler("itemDone", function (t, i) {
 		if (i.title.match(/ISBN/)) i.tags.push('Book Review') && delete i.abstractNote;
 		if (i.abstractNote) i.abstractNote += ZU.xpathText(doc, '//*[(@id = "transAbstract")]//p');
+		// mark articles as "LF" (MARC=856 |z|kostenfrei), that are published as open|free access
+		let openAccessTag = text(doc, '.accessOpenAccess');
+		if (openAccessTag && openAccessTag.match(/(free|freier)\s+(access|zugang)/gi)) i.notes.push('LF:');
 		i.complete();
 	});
 	translator.translate();
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://www.degruyter.com/document/doi/10.1515/zac-2020-0021/html",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Fighting in Verses: Behind the Scenes of Gregory of Nazianzus’Carmen 2,1,39",
+				"creators": [
+					{
+						"firstName": "Alessandro De",
+						"lastName": "Blasi",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/09/01",
+				"DOI": "10.1515/zac-2020-0021",
+				"ISSN": "1612-961X",
+				"abstractNote": "Gregory of Nazianzus’ Carmen 2,1,39 (εἰς τὰ ἔμμετρα) has generally been regarded as a sort of manifesto of Gregory’s poetry. Scholars have mostly concentrated on the programmatic core of the poem, but the iambic tirade of the closing part deserves attention as well. A thorough analysis of this text should start from a preliminary survey of its manuscript tradition, which points out the need of a critical edition, since the aged PG edition still relies on a few witnesses. Furthermore, this leads to the assumption that two different addressees are involved in the poem: the former is a fictitious one, whereas the second is Gregory’s sworn enemy, Maximus the Cynic. Thus, the iambic tirade which closes poem 2,1,39 should be set within the context of the Maximus affair. Such an identification affects the dating of the poem, too. Since the Maximus affair took place in summer 380, but on the other hand Gregory seems also to allude to the Council of Constantinople, which opened in 381, it may be concluded that the poem was composed in two phases and that the poetical program exposed is due to the re-working of an older satirical draft against Maximus.null",
+				"issue": "2",
+				"language": "en",
+				"libraryCatalog": "www.degruyter.com",
+				"pages": "246-269",
+				"publicationTitle": "Zeitschrift für Antikes Christentum / Journal of Ancient Christianity",
+				"shortTitle": "Fighting in Verses",
+				"url": "https://www.degruyter.com/document/doi/10.1515/zac-2020-0021/html",
+				"volume": "24",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Christian Poetry"
+					},
+					{
+						"tag": "First Council of Constantinople"
+					},
+					{
+						"tag": "Gregory of Nazianzus"
+					},
+					{
+						"tag": "Late Antique Iambics"
+					},
+					{
+						"tag": "Maximus the Cynic"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
