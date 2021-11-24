@@ -2,14 +2,14 @@
 	"translatorID": "b043e7ed-b921-4444-88af-2fcc39881ee2",
 	"label": "Elsevier Health Journals",
 	"creator": "Sebastian Karcher",
-	"target": "/action/doSearch\\?|/article/[^/]+/(abstract|fulltext|references|images)$",
+	"target": "/action/doSearch\\?|/article/[^/]+/(abstract|fulltext|references|images)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-08-31 18:06:34"
+	"lastUpdated": "2021-11-24 23:10:20"
 }
 
 /*
@@ -323,6 +323,209 @@ var testCases = [
 		"type": "web",
 		"url": "https://www.isct-cytotherapy.org/action/doSearch?text1=test&field1=AllField",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)01431-8/fulltext?hss_channel=tw-27013292",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Antibiotics for lower respiratory tract infection in children presenting in primary care in England (ARTIC PC): a double-blind, randomised, placebo-controlled trial",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Little",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nick A.",
+						"lastName": "Francis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Beth",
+						"lastName": "Stuart",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gilly",
+						"lastName": "O'Reilly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Natalie",
+						"lastName": "Thompson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Taeko",
+						"lastName": "Becque",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alastair D.",
+						"lastName": "Hay",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kay",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Sharland",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony",
+						"lastName": "Harnden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guiqing",
+						"lastName": "Yao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Raftery",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shihua",
+						"lastName": "Zhu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joseph",
+						"lastName": "Little",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charlotte",
+						"lastName": "Hookham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kate",
+						"lastName": "Rowley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joanne",
+						"lastName": "Euden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kim",
+						"lastName": "Harman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samuel",
+						"lastName": "Coenen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert C.",
+						"lastName": "Read",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Catherine",
+						"lastName": "Woods",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher C.",
+						"lastName": "Butler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saul N.",
+						"lastName": "Faust",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Geraldine",
+						"lastName": "Leydon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mandy",
+						"lastName": "Wan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kerenza",
+						"lastName": "Hood",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jane",
+						"lastName": "Whitehurst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samantha",
+						"lastName": "Richards-Hall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Thomas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Moore",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Theo",
+						"lastName": "Verheij",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-10-16",
+				"DOI": "10.1016/S0140-6736(21)01431-8",
+				"ISSN": "0140-6736, 1474-547X",
+				"extra": "PMID: 34562391",
+				"issue": "10309",
+				"journalAbbreviation": "The Lancet",
+				"language": "English",
+				"libraryCatalog": "www.thelancet.com",
+				"pages": "1417-1426",
+				"publicationTitle": "The Lancet",
+				"shortTitle": "Antibiotics for lower respiratory tract infection in children presenting in primary care in England (ARTIC PC)",
+				"url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)01431-8/fulltext?hss_channel=tw-27013292",
+				"volume": "398",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
