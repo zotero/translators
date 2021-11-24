@@ -346,8 +346,8 @@ function patchupMetaCommon(docData, metas) {
 	if (metas._editor !== undefined) {
 		let editors = metas._editor.split(',');
 		metas.creators = metas.creators || [];
-		for (let i = 0; i < editors.length; i++) {
-			metas.creators.push(ZU.cleanAuthor(editors[i], "editor", false));
+		for (let editor of editors) {
+			metas.creators.push(ZU.cleanAuthor(editor, "editor", false));
 		}
 	}
 	if (metas._author !== undefined) {
@@ -355,10 +355,10 @@ function patchupMetaCommon(docData, metas) {
 		// (which doesn't split names but authors)
 		let authors = metas._author.split(',');
 		metas.creators = metas.creators || [];
-		for (let i = 0; i < authors.length; i++) {
-			let oneAuthor = ZU.cleanAuthor(authors[i], "author", false);
-			[oneAuthor.firstName, oneAuthor.lastName] = [oneAuthor.lastName, oneAuthor.firstName];
-			metas.creators.push(oneAuthor);
+		for (let author of authors) {
+			let cleanAuthor = ZU.cleanAuthor(author, "author", false);
+			[cleanAuthor.firstName, cleanAuthor.lastName] = [cleanAuthor.lastName, cleanAuthor.firstName];
+			metas.creators.push(cleanAuthor);
 		}
 	}
 }
