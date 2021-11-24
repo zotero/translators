@@ -148,6 +148,10 @@ const translationCanton = {
 	"Luxembourg": "",
 };
 
+const institutionalEditors = [
+	"Neue Zürcher Zeitung"
+];
+
 /**
  * translation table from court names to abbreviations
  * @type {{}}
@@ -357,7 +361,9 @@ function patchupMetaCommon(docData, metas) {
 		let editors = metas._editor.split(',');
 		metas.creators = metas.creators || [];
 		for (let editor of editors) {
-			metas.creators.push(ZU.cleanAuthor(editor, "editor", false));
+			if (!institutionalEditors.includes(editor)) {
+				metas.creators.push(ZU.cleanAuthor(editor, "editor", false));
+			}
 		}
 	}
 	if (metas._author !== undefined) {
