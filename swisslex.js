@@ -168,11 +168,8 @@ const translationCourt = {
 	"Eidgenössische Bankenkommission": "EBK",
 	"Commission fédérale des banques": "CFB",
 	"Bundesamt": "BJ",
-	// "Division de la justice": ""
 	"Bundesstaatsanwaltschaft": "BA",
-	// FR
 	"Steuerekurskommission": "StRK",
-	// "Commission de recours en matière fiscale": ""
 	"Obergericht": "OGer",
 	"Cour suprème": "CS",
 	"Handelsgericht": "HGer",
@@ -184,7 +181,6 @@ const translationCourt = {
 	"Cour d'appel": "CA",
 	"Kassationsgericht": "KassG",
 	"Kreisgericht": "KrG",
-	// "Tribunal d'arrondissement": ""
 	"Bezirksgericht": "BezG",
 	"Tribunal de district": "TD",
 	"Tribunal régional": "TR",
@@ -198,7 +194,7 @@ const translationCourt = {
 	"Cour européenne des droits de l'homme": "CEDH",
 	"Europäischer Gerichtshof für Menschenrechte": "EGMR",
 	"Europäischer Gerichtshof": "ECJ",
-	// FR
+	"Cour de justice de l'Union européenne": "ECJ"
 };
 
 const topLevelCaseCompilations = [
@@ -316,7 +312,7 @@ function extractRawItemData(docData) {
 		else if (label.length > 0) {
 			Z.debug("Unknown swisslex metadata label: '" + label + "'");
 		}
-		// else empty label
+		// else empty label -e happens with two line values we ignor
 	}
 
 	return result;
@@ -409,7 +405,7 @@ function patchupMetaMagic(docData, metas) {
 		}
 	}
 	else if (docData.type === "case") {
-		// court case collections and journals are both tagged with "publication"
+		// court case compilations and journal case listings are both tagged with "publication"
 		// - we distinguish them by the presence of a logo banner for journals
 		// the magic field contains the docket for "real" case documents, but
 		// a journalArticle reference for cases in journals.
@@ -447,13 +443,13 @@ function patchupMetaMagic(docData, metas) {
 /**
  * patchup metas for document type 'bookSection' or 'book'
  *
- * Swisslex does not differentiate between actual bookSections (e.g. a collection of distinct texts)
- * and book chapters - both are handled in the exactly same way... :(
+ * We cannot differentiate between actual bookSections (e.g. a collection of distinct texts)
+ * and chapters of a book - both are presented in the same way... :(
  * Therefore we try some heuristics to detect books:
  *   * no editor
  *   * 'chapter' title beginning with ordinals or '§'
  *
- * NB: we change the Zotero.ItemType for books - quite late in the process...
+ * NB: we change the Zotero.ItemType for books - quite late in the process, but should work.
  *
  * @param {DocumentData}  docData
  * @param {Metas}         metas
@@ -488,13 +484,15 @@ function patchupForCase(docData, metas) {
 	let court = metas.court.split(",");
 	let title = metas.title;
 
+	// Certain federal dockets are well-known and already include a
+	// court designation.
 	for (let compilation of topLevelCaseCompilations) {
 		if (title.startsWith(compilation)) {
 			return;
 		}
 	}
 
-	// cases are uniformly referenced by "court-abbreviation (canton) docket"
+	// All other cases are uniformly referenced by "court-abbreviation (canton) docket"
 	if (title.substring(0, 4) !== "BGE ") {
 		let temp = court[0].trim();
 		if (translationCanton[temp] !== undefined) {
@@ -537,6 +535,7 @@ function patchupForLegalCommentary(docData, metas) {
 	//   * certain 'big' series are quoted by their abbreviation and the author of the referenced part
 	//     (e.g. a commentary by Mr. Meier in the "Berner Kommentar" -> "BK-MEIER")
 	//   * smaller and individual commentaries are quote like books with statute articles as chapters
+	//     (pages are omitted)
 	let seriesParts = metas.series ? metas.series.split(" - ", 2) : [];
 	if (seriesParts.length > 1) {
 		metas.series = ZU.trimInternal(seriesParts[0]);
