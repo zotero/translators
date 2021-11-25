@@ -375,6 +375,33 @@ function patchupMetaCommon(docData, metas) {
 	}
 }
 
+function interpretJournalMagic(docData, metas) {
+	let magic = metas._magic;
+
+	// the magic field should compare to "abbreviation (volume/)year page"
+	// except for online journals that may have 'Nr.' for pages or single-token ids
+	let tokens = magic.split(/,\s+|\s+|-/);
+
+	metas.journalAbbreviation = tokens[0];
+
+	if (tokens.length > 1) { // we have a second token: year or issue/year
+		tokens[1] = tokens[1].match(/^(?:(\d+)\/)?(\d{2,4})$/);
+		metas.issue = tokens[1][1];
+		if (metas.date === undefined) { // sometime year is not set in its own field
+			metas.date = tokens[1][2];
+		}
+	}
+
+	if (tokens.length > 2 && metas.pages === undefined) {
+		if (tokens[2] === "S." || tokens === "p.") {
+			metas.pages = tokens[3];
+		}
+		else {
+			metas.pages = tokens.slice(2).join(' ');
+		}
+	}
+}
+
 /**
  * patchup metas with information from field _magic
  *
@@ -386,23 +413,12 @@ function patchupMetaCommon(docData, metas) {
  */
 function patchupMetaMagic(docData, metas) {
 	let magic = metas._magic;
-	delete metas._magic;
-
 	if (magic === undefined) {
 		return;
 	}
 
 	if (docData.type === "journalArticle") {
-		// the magic field should compare to "abbreviation (volume/)year page"
-		let value = magic.split(' ');
-		metas.journalAbbreviation = value[0];
-		value[1] = value[1].split('/');
-		if (value[1].length > 1) {
-			metas.issue = value[1].shift();
-		}
-		if (metas.date === undefined) { // sometime year is not set in its own field
-			metas.date = value[1].shift();
-		}
+		interpretJournalMagic(docData, metas)
 	}
 	else if (docData.type === "case") {
 		// court case compilations and journal case listings are both tagged with "publication"
@@ -411,13 +427,16 @@ function patchupMetaMagic(docData, metas) {
 		// a journalArticle reference for cases in journals.
 		let publicationLogo = docData.dom.querySelector("img.ng-star-inserted");
 		if (publicationLogo) {
-			let value = magic.split(' ');
-			metas.reporter = value[0];
-			metas.reporterVolume = value[1];
-			// @TODO verify with other publications on site
-			let docketRegex = /[-;]\s*([^-;)]+)\)?\.?$/;
-			let parts = text(docData.dom, "p.documenttitle").match(docketRegex);
-			magic = parts[1];
+			interpretJournalMagic(docData, metas);
+			metas.reporter = metas.journalAbbreviation;
+			delete metas.journalAbbreviation;
+			metas.reporterVolume = (metas.issue ? metas.issue + "/": "") + metas.date.substring(0, 4);
+			delete metas.issue;
+			// @TODO verify title with other publications on site
+			const docketRegex = /(?:\s-\s+|\s\(|;\s+)((?:(?!\s-\s|\s\()[^;)])+)\)?\.?$/;
+			let title = text(docData.dom, "p.documenttitle");
+			let parts = title.match(docketRegex);
+			magic = parts ? parts[1] : title; // title is better than nothing
 		}
 		else {
 			delete metas.publicationTitle;
@@ -438,6 +457,8 @@ function patchupMetaMagic(docData, metas) {
 	else {
 		Z.debug("don't know _magic for type " + docData.type);
 	}
+
+	delete metas._magic;
 }
 
 /**
