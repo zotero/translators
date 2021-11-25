@@ -70,7 +70,9 @@ const translationMetaLabel = {
 	"jahr": "date",
 	"année": "date",
 	"seiten": "pages",
+	"seite": "pages",
 	"pages": "pages",
+	"page": "pages",
 	"herausgeber": "_editor",
 	"éditeur(s)": "_editor",
 	"isbn": "ISBN",
@@ -149,7 +151,9 @@ const translationCanton = {
 };
 
 const institutionalEditors = [
-	"Neue Zürcher Zeitung"
+	"Neue Zürcher Zeitung",
+	"Europa Institut an der Universität Zürich",
+	"Institut für deutsches und europäisches Gesellschafts- und Wirtschaftsrecht an der Universität Heidelberg"
 ];
 
 /**
@@ -357,6 +361,7 @@ function patchupMetaCommon(docData, metas) {
 		let editors = metas._editor.split(',');
 		metas.creators = metas.creators || [];
 		for (let editor of editors) {
+			editor = editor.trim();
 			if (!institutionalEditors.includes(editor)) {
 				metas.creators.push(ZU.cleanAuthor(editor, "editor", false));
 			}
@@ -379,27 +384,33 @@ function interpretJournalMagic(docData, metas) {
 	let magic = metas._magic;
 
 	// the magic field should compare to "abbreviation (volume/)year page"
-	// except for online journals that may have 'Nr.' for pages or single-token ids
+	// except for online journals that may have 'Nr.' for pages
+	// except for the newspaper NZZ that has 'Nr.' with issue numbers
 	let tokens = magic.split(/,\s+|\s+|-/);
 
 	metas.journalAbbreviation = tokens[0];
 
-	if (tokens.length > 1) { // we have a second token: year or issue/year
+	if (tokens[1] === "Nr." || tokens[1] === "n°") { // newspaper format
+		metas.issue = tokens[2];
+		metas.date = tokens[3].split('.').reverse().join('-');
+	}
+	else if (tokens.length > 1) { // journal format
 		tokens[1] = tokens[1].match(/^(?:(\d+)\/)?(\d{2,4})$/);
 		metas.issue = tokens[1][1];
 		if (metas.date === undefined) { // sometime year is not set in its own field
 			metas.date = tokens[1][2];
 		}
+
+		if (tokens.length > 2 && metas.pages === undefined) {
+			if (tokens[2] === "S." || tokens === "p.") {
+				metas.pages = tokens[3];
+			}
+			else {
+				metas.pages = tokens.slice(2).join(' ');
+			}
+		}
 	}
 
-	if (tokens.length > 2 && metas.pages === undefined) {
-		if (tokens[2] === "S." || tokens === "p.") {
-			metas.pages = tokens[3];
-		}
-		else {
-			metas.pages = tokens.slice(2).join(' ');
-		}
-	}
 }
 
 /**
