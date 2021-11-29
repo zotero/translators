@@ -423,29 +423,6 @@ function patchupMetaMagicJournal(docData, metas) {
 	}
 }
 
-function patchupMetaMagicCaseInJournal(docData, metas) {
-	const docketInTitleRegex = /(?:\s-\s+|\s\(|;\s+)((?:(?!\s-\s|\s\()[^;)])+)\)?\.?$/;
-	const docketInTextRegex = /Urteil (\S+) vom ([0-9.\s]+)/;
-
-	patchupMetaMagicJournal(docData, metas);
-	metas.reporter = metas.journalAbbreviation;
-	delete metas.journalAbbreviation;
-	metas.reporterVolume = (metas.issue ? metas.issue + "/" : "") + metas.date.substring(0, 4);
-	delete metas.issue;
-
-	// looking for decision date and docket in prose text
-	let parts;
-	if ((parts = (text(docData.dom, "p.documenttitle") || "").match(docketInTitleRegex))) {
-		metas.title = parts[1];
-		metas.number = parts[1];
-	}
-	else if ((parts = (text(docData.dom, ".doc-content-innerHTML p:last-of-type") || "").match(docketInTextRegex))) {
-		metas.title = parts[1];
-		metas.number = parts[1];
-		metas.date = swissStrToISO(parts[2]);
-	}
-}
-
 /**
  * patchup metas with information from field _magic
  *
@@ -471,7 +448,11 @@ function patchupMetaMagic(docData, metas) {
 		// a journalArticle reference for cases in journals.
 		let publicationLogo = docData.dom.querySelector("img.ng-star-inserted");
 		if (publicationLogo) {
-			patchupMetaMagicCaseInJournal(docData, metas);
+			patchupMetaMagicJournal(docData, metas);
+			metas.reporter = metas.journalAbbreviation;
+			delete metas.journalAbbreviation;
+			metas.reporterVolume = (metas.issue ? metas.issue + "/" : "") + metas.date.substring(0, 4);
+			delete metas.issue;
 		}
 		else {
 			delete metas.publicationTitle;
@@ -535,6 +516,22 @@ function patchupForBookSection(docData, metas) {
  * @param {Metas}         metas
  */
 function patchupForCase(docData, metas) {
+	const docketInTitleRegex = /(?:\s-\s+|\s\(|;\s+)((?:(?!\s-\s|\s\()[^;)])+)\)?\.?$/;
+	const docketInTextRegex = /Urteil (\S+) vom ([0-9.\s]+)/;
+
+	if (metas.number === undefined) { // case discussion in journal -- looking for docket in prose
+		let parts;
+		if ((parts = (text(docData.dom, "p.documenttitle") || "").match(docketInTitleRegex))) {
+			metas.title = parts[1];
+			metas.number = parts[1];
+		}
+		else if ((parts = (text(docData.dom, ".doc-content-innerHTML p:last-of-type") || "").match(docketInTextRegex))) {
+			metas.title = parts[1];
+			metas.number = parts[1];
+			metas.date = swissStrToISO(parts[2]);
+		}
+	}
+
 	// all courts are named "canton, court" - with options for canton including Switzerland,
 	// and Luxembourg/Strasbourg for the nationally relevant European Courts ;)
 	let court = metas.court.split(",");
