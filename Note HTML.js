@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2021-11-22 17:15:00"
+	"lastUpdated": "2021-11-29 17:00:00"
 }
 
 /*
@@ -95,5 +95,5 @@ function doExport() {
 	// OO gets it right, so this results in an extra indent
 	ZU.xpath(doc, '//blockquote/p').forEach(p => p.style.marginLeft = '30px');
 
-	Zotero.write(container.outerHTML);
+	Zotero.write('<!DOCTYPE html>' + doc.documentElement.outerHTML);
 }
