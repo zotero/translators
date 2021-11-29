@@ -35,10 +35,24 @@
 	***** END LICENSE BLOCK *****
 */
 
+/*
+	Translator for Swiss legal research site swisslex.ch
+
+	The site is accessible by paid accounts (and university access) only. The UI is
+	available in German and French - metadata is partly localized to language.
+
+	As each document access is billed, search and batch import is not supported by choice.
+
+	As a paid option, EU case law and legal documents are available on the site.
+	It is, however, only a half-reasonable import of EUR-lex/Celex.
+	I therefore do not support the EU documents in swisslex.
+ */
+
 /* eslint quote-props: ["error", "consistent"] */
 
 /**
  * translation table from human readable metadata labels to fields
+ *
  * @type {{}}
  */
 const translationMetaLabel = {
@@ -91,6 +105,7 @@ const translationMetaLabel = {
 
 /**
  * translation table from canton to its abbreviation
+ *
  * @type {{}}
  */
 const translationCanton = {
@@ -150,6 +165,11 @@ const translationCanton = {
 	"Luxembourg": "",
 };
 
+/**
+ * institutional editors that should not be included in metadata
+ *
+ * @type {string[]}
+ */
 const institutionalEditors = [
 	"Neue Zürcher Zeitung",
 	"Europa Institut an der Universität Zürich",
@@ -158,6 +178,7 @@ const institutionalEditors = [
 
 /**
  * translation table from court names to abbreviations
+ *
  * @type {{}}
  */
 const translationCourt = {
@@ -201,6 +222,11 @@ const translationCourt = {
 	"Cour de justice de l'Union européenne": "ECJ"
 };
 
+/**
+ * federal case compilations
+ *
+ * @type {string[]}
+ */
 const topLevelCaseCompilations = [
 	"BGE ",
 	"ATF ",
@@ -213,6 +239,7 @@ const topLevelCaseCompilations = [
 
 /**
  * data class holding web document information
+ *
  * @typedef DocumentData
  * @type {Object}
  * @property {Element}           dom
@@ -327,7 +354,7 @@ function extractRawItemData(docData) {
 		else if (label.length > 0) {
 			Z.debug("Unknown swisslex metadata label: '" + label + "'");
 		}
-		// else empty label -e happens with two line values we ignor
+		// else empty label - happens with two line values we ignore
 	}
 
 	return result;
@@ -379,7 +406,7 @@ function patchupMetaCommon(docData, metas) {
 		}
 	}
 	if (metas._author !== undefined) {
-		// authors are presented in "lastname firstname" but without a comma
+		// authors are presented in "lastname firstname" format but without a comma
 		// (which doesn't split names but authors)
 		let authors = metas._author.split(',');
 		metas.creators = metas.creators || [];
@@ -649,7 +676,7 @@ function doWeb(doc, url) {
 	}
 
 	// as long as we cannot get the PDF, save the website
-	// even as the website contains hidden documents and not-working app elements
+	// even as the snapshot will contain whole hidden documents and not-working app elements
 	item.attachments.push({
 		title: "Snapshot",
 		document: doc
