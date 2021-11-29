@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-22 18:57:40"
+	"lastUpdated": "2021-11-29 18:28:53"
 }
 
 /*
@@ -391,7 +391,7 @@ function patchupMetaCommon(docData, metas) {
 	}
 }
 
-function interpretJournalMagic(docData, metas) {
+function patchupMetaMagicJournal(docData, metas) {
 	let magic = metas._magic;
 
 	// the magic field should compare to "abbreviation (volume/)year page"
@@ -421,7 +421,29 @@ function interpretJournalMagic(docData, metas) {
 			}
 		}
 	}
+}
 
+function patchupMetaMagicCaseInJournal(docData, metas) {
+	const docketInTitleRegex = /(?:\s-\s+|\s\(|;\s+)((?:(?!\s-\s|\s\()[^;)])+)\)?\.?$/;
+	const docketInTextRegex = /Urteil (\S+) vom ([0-9.\s]+)/;
+
+	patchupMetaMagicJournal(docData, metas);
+	metas.reporter = metas.journalAbbreviation;
+	delete metas.journalAbbreviation;
+	metas.reporterVolume = (metas.issue ? metas.issue + "/": "") + metas.date.substring(0, 4);
+	delete metas.issue;
+
+	// looking for decision date and docket in prose text
+	let parts;
+	if ((parts = (text(docData.dom, "p.documenttitle") || "").match(docketInTitleRegex))) {
+		metas.title = parts[1];
+		metas.number = parts[1];
+	}
+	else if ((parts = (text(docData.dom, ".doc-content-innerHTML p:last-of-type") || "").match(docketInTextRegex))) {
+		metas.title = parts[1];
+		metas.number = parts[1];
+		metas.date = swissStrToISO(parts[2]);
+	}
 }
 
 /**
@@ -440,7 +462,7 @@ function patchupMetaMagic(docData, metas) {
 	}
 
 	if (docData.type === "journalArticle") {
-		interpretJournalMagic(docData, metas)
+		patchupMetaMagicJournal(docData, metas)
 	}
 	else if (docData.type === "case") {
 		// court case compilations and journal case listings are both tagged with "publication"
@@ -449,16 +471,7 @@ function patchupMetaMagic(docData, metas) {
 		// a journalArticle reference for cases in journals.
 		let publicationLogo = docData.dom.querySelector("img.ng-star-inserted");
 		if (publicationLogo) {
-			interpretJournalMagic(docData, metas);
-			metas.reporter = metas.journalAbbreviation;
-			delete metas.journalAbbreviation;
-			metas.reporterVolume = (metas.issue ? metas.issue + "/": "") + metas.date.substring(0, 4);
-			delete metas.issue;
-			// @TODO verify title with other publications on site
-			const docketRegex = /(?:\s-\s+|\s\(|;\s+)((?:(?!\s-\s|\s\()[^;)])+)\)?\.?$/;
-			let title = text(docData.dom, "p.documenttitle");
-			let parts = title.match(docketRegex);
-			magic = parts ? parts[1] : title; // title is better than nothing
+			patchupMetaMagicCaseInJournal(docData, metas);
 		}
 		else {
 			delete metas.publicationTitle;
