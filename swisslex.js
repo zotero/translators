@@ -256,6 +256,17 @@ const topLevelCaseCompilations = [
  */
 
 /**
+ * convert swiss date to ISO date (numerical only version)
+ *
+ * @param {string} date
+ */
+function swissStrToISO(date) {
+	let parts = date.split(/\.\s*|\s+/);
+	parts = parts.map( value => parseInt(value).toString().padStart(2, '0'));
+	return parts.reverse().join('-');
+}
+
+/**
  * interpret a document URL and extract web document information
  *
  * @param   {Document} doc   Document as received from Zotero
@@ -338,7 +349,7 @@ function extractRawItemData(docData) {
 function patchupMetaCommon(docData, metas) {
 	if (metas.date !== undefined) {
 		// all dates are presented in both languages as "dd.mm.yyyy"
-		metas.date = metas.date.split('.').reverse().join('-');
+		metas.date = swissStrToISO(metas.date);
 	}
 	if (metas.edition !== undefined) {
 		// all editions start with the numeric - parseInt ignores everything thereafter ;)
@@ -392,7 +403,7 @@ function interpretJournalMagic(docData, metas) {
 
 	if (tokens[1] === "Nr." || tokens[1] === "n°") { // newspaper format
 		metas.issue = tokens[2];
-		metas.date = tokens[3].split('.').reverse().join('-');
+		metas.date = swissStrToISO(tokens[3]);
 	}
 	else if (tokens.length > 1) { // journal format
 		tokens[1] = tokens[1].match(/^(?:(\d+)\/)?(\d{2,4})$/);
@@ -451,9 +462,9 @@ function patchupMetaMagic(docData, metas) {
 		}
 		else {
 			delete metas.publicationTitle;
+			metas.number = magic;
+			metas.title = magic;
 		}
-		metas.number = magic;
-		metas.title = magic;
 	}
 	else if (docData.type === "bookSection") {
 		// at least one bookSection I found did not give the book's edition in
@@ -637,5 +648,5 @@ function doWeb(doc, url) {
 	item.complete();
 }
 /** BEGIN TEST CASES **/
-var testCases = [];
+var testCases = []
 /** END TEST CASES **/
