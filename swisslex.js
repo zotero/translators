@@ -262,7 +262,7 @@ const topLevelCaseCompilations = [
  */
 function swissStrToISO(date) {
 	let parts = date.split(/\.\s*|\s+/);
-	parts = parts.map( value => parseInt(value).toString().padStart(2, '0'));
+	parts = parts.map(value => parseInt(value).toString().padStart(2, '0'));
 	return parts.reverse().join('-');
 }
 
@@ -413,7 +413,7 @@ function patchupMetaMagicJournal(docData, metas) {
 		}
 
 		if (tokens.length > 2 && metas.pages === undefined) {
-			if (tokens[2] === "S." || tokens === "p.") {
+			if (tokens[2] === "S." || tokens[2] === "p.") {
 				metas.pages = tokens[3];
 			}
 			else {
@@ -430,7 +430,7 @@ function patchupMetaMagicCaseInJournal(docData, metas) {
 	patchupMetaMagicJournal(docData, metas);
 	metas.reporter = metas.journalAbbreviation;
 	delete metas.journalAbbreviation;
-	metas.reporterVolume = (metas.issue ? metas.issue + "/": "") + metas.date.substring(0, 4);
+	metas.reporterVolume = (metas.issue ? metas.issue + "/" : "") + metas.date.substring(0, 4);
 	delete metas.issue;
 
 	// looking for decision date and docket in prose text
@@ -462,7 +462,7 @@ function patchupMetaMagic(docData, metas) {
 	}
 
 	if (docData.type === "journalArticle") {
-		patchupMetaMagicJournal(docData, metas)
+		patchupMetaMagicJournal(docData, metas);
 	}
 	else if (docData.type === "case") {
 		// court case compilations and journal case listings are both tagged with "publication"
@@ -600,7 +600,7 @@ function patchupForLegalCommentary(docData, metas) {
 
 	// if its a commentary to a specific articles
 	// swisslex designates it as '[statute-abbreviation] [article number]'
-	if (metas._article !== undefined) {x
+	if (metas._article !== undefined) {
 		let commentary = metas.series || metas.publisher.split(" ")[0];
 		let articleParts = metas._article.split(" ");
 		metas.title = metas._article + " (" + commentary + ")";
