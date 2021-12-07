@@ -2,14 +2,14 @@
 	"translatorID": "2f22b2a9-91c4-4555-8480-792b6551a381",
 	"label": "University of Chicago Press Books",
 	"creator": "Sebastian Karcher",
-	"target": "^https?://(www\\.)?press.\\uchicago\\.edu/(ucp/books/|press/search.html)",
+	"target": "^https?://(www\\.)?press\\.uchicago\\.edu/(ucp/books/|press/search.html)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-11 15:02:18"
+	"lastUpdated": "2021-12-07 08:14:56"
 }
 
 /*
