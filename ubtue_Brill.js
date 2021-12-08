@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-08 09:38:28"
+	"lastUpdated": "2021-12-08 11:36:20"
 }
 
 /*
@@ -70,17 +70,15 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title; 
-	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]/p');
 	//multiple abstracts
 	if (abstracts && abstracts.length > 0) {
 		item.abstractNote = abstracts[0].textContent.trim().replace(/^(Résumé\s?)/i, "");
-		if (abstracts.length ) {
-			for (let abs of abstracts) {
-	 			if (abs.textContent != item.abstractNote) {
-		 			item.notes.push({
-		 				note: "abs:" + ZU.trimInternal(abs.textContent),
-		 			});
-	 			}
+		for (let abs of abstracts) {
+ 			if (abs.textContent != item.abstractNote) {
+	 			item.notes.push({
+	 				note: "abs:" + ZU.trimInternal(abs.textContent),
+	 			});
  			}
 		}
 	}
