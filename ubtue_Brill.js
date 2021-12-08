@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-08 11:36:20"
+	"lastUpdated": "2021-12-08 13:39:18"
 }
 
 /*
@@ -70,18 +70,20 @@ function getSearchResults(doc) {
 function postProcess(doc, item) {
 	let title = ZU.xpathText(doc, '//meta[@name="citation_title"]//@content');
 	if (title) item.title = title; 
-	let abstracts = ZU.xpath(doc, '//section[@class="abstract"]/p');
-	//multiple abstracts
-	if (abstracts && abstracts.length > 0) {
-		item.abstractNote = abstracts[0].textContent.trim().replace(/^(Résumé\s?)/i, "");
-		for (let abs of abstracts) {
- 			if (abs.textContent != item.abstractNote) {
-	 			item.notes.push({
-	 				note: "abs:" + ZU.trimInternal(abs.textContent),
-	 			});
- 			}
+    let abstracts = ZU.xpath(doc, '//section[@class="abstract"]//p');
+    //multiple abstracts
+    if (abstracts && abstracts.length > 0) {
+	// Deduplicate original results
+	abstracts = [...new Set(abstracts.map(abstract => abstract.textContent))];
+	item.abstractNote = abstracts[0].trim().replace(/^(Résumé\s?)/i, "");
+		if (abstracts.length > 1) {
+		    for (let abs of abstracts.slice(1)) {
+		              item.notes.push({
+		 	         note: "abs:" + ZU.trimInternal(abs),
+		 	  });
+			}
 		}
-	}
+    }
 
 	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
 	if (item.abstractNote.length < 100) delete item.abstractNote;
