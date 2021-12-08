@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-08 09:36:36"
+	"lastUpdated": "2021-12-08 09:38:28"
 }
 
 /*
@@ -84,23 +84,7 @@ function postProcess(doc, item) {
  			}
 		}
 	}
-	
-	//if (multipleAbstract)
-	/*if (item.abstractNote) {
-	  item.abstractNote = ZU.xpath(doc, '//section[@class="abstract"]//p');//Z.debug(abstractNote)
-	  if (item.abstractNote && item.abstractNote.length > 0) {
-		 for (let abs of item.abstractNote) {Z.debug(abs)
- 			if (abs) {
-	 			item.notes.push({
-	 				note: "abs:" + ZU.trimInternal(abs.textContent),
-	 			});
- 			}
-		 }
-	  }
-	}
-   else {
-		 item.abstractNote = '';
-	}*/
+
 	// i set 100 as limit of string length, because usually a string of a pseudoabstract has less then 150 character e.g. "abstractNote": "\"Die Vernünftigkeit des jüdischen Dogmas\" published on 05 Sep 2020 by Brill."
 	if (item.abstractNote.length < 100) delete item.abstractNote;
 
