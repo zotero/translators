@@ -1,5 +1,5 @@
 {
-	"translatorID": "154c2785-ec83-4c27-8a8a-d27b3a2eded1",
+	"translatorID": "1412e9e2-51e1-42ec-aa35-e036a895534b",
 	"label": "Note Markdown",
 	"creator": "Martynas Bagdonas",
 	"target": "md",
@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2021-12-01 11:00:00"
+	"lastUpdated": "2021-12-15 10:26:46"
 }
 
 /*
