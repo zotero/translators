@@ -2,20 +2,20 @@
 	"translatorID": "bf053edc-a8c3-458c-93db-6d04ead2e636",
 	"label": "EUR-Lex",
 	"creator": "Philipp Zumstein, Pieter van der Wees",
-	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/(TXT|ALL)/|search.html\\?)",
+	"target": "^https?://(www\\.)?eur-lex\\.europa\\.eu/(legal-content/[A-Z][A-Z]/(TXT|ALL)/|search\\.html\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-01-13 13:04:33"
+	"lastUpdated": "2021-12-21 16:17:07"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2017-2020 Philipp Zumstein, Pieter van der Wees
+	Copyright © 2017-2021 Philipp Zumstein, Pieter van der Wees
 	
 	This file is part of Zotero.
 
@@ -35,15 +35,10 @@
 	***** END LICENSE BLOCK *****
 */
 
-
-// attr() v2
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}
-
-
 // the eli resource types are described at:
 // https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/resource-type
 // all types not mapped below are saved as bills
-var typeMapping = {
+const typeMapping = {
 	"DIR": "bill", // directive
 	"REG": "statute", // regulation
 	"DEC": "statute", // decision
@@ -73,7 +68,7 @@ function detectWeb(doc, url) {
 	} else if (docSector && docSector !== "other") { 
 			return "bill";
 	} else if (getSearchResults(doc, true)) {
-		return "multiple";
+			return "multiple";
 	}
 }
 
@@ -124,33 +119,39 @@ function doWeb(doc, url) {
 
 // this maps language codes from ISO 639-1 to 639-3 and adds court names
 // see https://op.europa.eu/en/web/eu-vocabularies/at-dataset/-/resource/dataset/court-type
-var languageMapping = {
-	"BG": ["BUL", "Съд", "Общ съд", "Съд на публичната служба"],
-	"CS": ["CES", "Soudní dvůr", "Tribunál", "Soud pro veřejnou službu"],
-	"DA": ["DAN", "EU-Domstolen", "EU-Retten", "EU-Personalretten"],
-	"DE": ["DEU", "EuGH", "Gerichtshof", "Gericht für den öffentlichen Dienst"],
-	"EL": ["ELL", "Δικαστήριο", "Γενικό Δικαστήριο", "Δικαστήριο Δημόσιας Διοίκησης"],
-	"EN": ["ENG", "ECJ", "GC", "CST"],
-	"ES": ["SPA", "TJUE", "Tribunal General", "Tribunal de la Función Pública"],
-	"ET": ["EST", "Euroopa Kohus", "Üldkohus", "Avaliku Teenistuse Kohus"],
-	"FI": ["FIN", "Unionin tuomioistuin", "Unionin yleinen tuomioistuin", "Virkamiestuomioistuin"],
-	"FR": ["FRA", "Cour de justice", "Tribunal", "Tribunal de la fonction publique"],
-	"GA": ["GLE", "An Chúirt Bhreithiúnais", "Cúirt Ghinearálta", "An Binse um Sheirbhís Shibhialta"],
-	"HR": ["HRV", "Europski sud", "Opći sud", "Službenički sud"],
-	"HU": ["HUN", "A Bíróság", "Törvényszék", "Közszolgálati Törvényszék"],
-	"IT": ["ITA", "Corte di giustizia", "Tribunale", "Tribunale della funzione pubblica"],
-	"LV": ["LAV", "Tiesa", "Vispārējā tiesa", "Civildienesta tiesa"],
-	"LT": ["LIT", "Teisingumo Teismas", "Bendrasis Teismas", "Tarnautojų teismas"],
-	"MT": ["MLT", "Il-Qorti tal-Ġustizzja", "Il-Qorti Ġenerali", "Il-Tribunal għas-Servizz Pubbliku"],
-	"NL": ["NLD", "HvJ EU", "Gerecht EU", "GvA EU"],
-	"PL": ["POL", "Trybunał Sprawiedliwości", "Sąd", "Sąd do spraw Służby Publicznej"],
-	"PT": ["POR", "Tribunal Europeu de Justiça", "Tribunal Geral", "Tribunal da Função Pública"],
-	"RO": ["RON", "Curtea Europeană de Justiție", "Tribunalul", "Tribunalul Funcţiei Publice"],
-	"SK": ["SLK", "Súdny dvor", "Všeobecný súd", "Súd pre verejnú službu"],
-	"SL": ["SLV", "Sodišče", "Splošno sodišče", "Sodišče za uslužbence"],
-	"SV": ["SWE", "Domstolen", "Tribunalen", "Personaldomstolen"]
-};
+function LMObj (iso, ECJ, GC, CST) {
+	this.iso = iso;
+	this.ECJ = ECJ;
+	this.GC = GC;
+	this.CST = CST;
+}
 
+const languageMapping = {
+	"BG": new LMObj("BUL", "Съд", "Общ съд", "Съд на публичната служба"),
+	"CS": new LMObj("CES", "Soudní dvůr", "Tribunál", "Soud pro veřejnou službu"),
+	"DA": new LMObj("DAN", "EU-Domstolen", "EU-Retten", "EU-Personalretten"),
+	"DE": new LMObj("DEU", "EuGH", "Gerichtshof", "Gericht für den öffentlichen Dienst"),
+	"EL": new LMObj("ELL", "Δικαστήριο", "Γενικό Δικαστήριο", "Δικαστήριο Δημόσιας Διοίκησης"),
+	"EN": new LMObj("ENG", "ECJ", "GC", "CST"),
+	"ES": new LMObj("SPA", "TJUE", "Tribunal General", "Tribunal de la Función Pública"),
+	"ET": new LMObj("EST", "Euroopa Kohus", "Üldkohus", "Avaliku Teenistuse Kohus"),
+	"FI": new LMObj("FIN", "Unionin tuomioistuin", "Unionin yleinen tuomioistuin", "Virkamiestuomioistuin"),
+	"FR": new LMObj("FRA", "Cour de justice", "Tribunal", "Tribunal de la fonction publique"),
+	"GA": new LMObj("GLE", "An Chúirt Bhreithiúnais", "Cúirt Ghinearálta", "An Binse um Sheirbhís Shibhialta"),
+	"HR": new LMObj("HRV", "Europski sud", "Opći sud", "Službenički sud"),
+	"HU": new LMObj("HUN", "A Bíróság", "Törvényszék", "Közszolgálati Törvényszék"),
+	"IT": new LMObj("ITA", "Corte di giustizia", "Tribunale", "Tribunale della funzione pubblica"),
+	"LV": new LMObj("LAV", "Tiesa", "Vispārējā tiesa", "Civildienesta tiesa"),
+	"LT": new LMObj("LIT", "Teisingumo Teismas", "Bendrasis Teismas", "Tarnautojų teismas"),
+	"MT": new LMObj("MLT", "Il-Qorti tal-Ġustizzja", "Il-Qorti Ġenerali", "Il-Tribunal għas-Servizz Pubbliku"),
+	"NL": new LMObj("NLD", "HvJ EU", "Gerecht EU", "GvA EU"),
+	"PL": new LMObj("POL", "Trybunał Sprawiedliwości", "Sąd", "Sąd do spraw Służby Publicznej"),
+	"PT": new LMObj("POR", "Tribunal Europeu de Justiça", "Tribunal Geral", "Tribunal da Função Pública"),
+	"RO": new LMObj("RON", "Curtea Europeană de Justiție", "Tribunalul", "Tribunalul Funcţiei Publice"),
+	"SK": new LMObj("SLK", "Súdny dvor", "Všeobecný súd", "Súd pre verejnú službu"),
+	"SL": new LMObj("SLV", "Sodišče", "Splošno sodišče", "Sodišče za uslužbence"),
+	"SV": new LMObj("SWE", "Domstolen", "Tribunalen", "Personaldomstolen")
+};
 
 function scrape(doc, url) {
 	// declare meta variables present for all sectors
@@ -162,12 +163,12 @@ function scrape(doc, url) {
 	
 	var type = detectWeb(doc, url);
 	var item = new Zotero.Item(type);
-	// determine the language we are currently looking the document at
+	// determine the language in which we are currently viewing the document
 	var languageUrl = url.split("/")[4].toUpperCase();
 	if (languageUrl == "AUTO") {
 		languageUrl = autoLanguage || "EN";
 	}
-	var language = languageMapping[languageUrl][0] || "eng";
+	var language = languageMapping[languageUrl].iso || "eng";
 	// Cases only return language; discard everything else
 	item.language = languageUrl.toLowerCase();
 	
@@ -188,15 +189,14 @@ function scrape(doc, url) {
 				else {
 					item.code = uriParts[0] + " " + uriParts[1];
 					item.codeNumber = uriParts[3];
+					}
 				}
+				// @todo
 				if (type == "bill") {
 					item.codeVolume = item.codeNumber;
 					item.codeNumber = null;
 				}
 			}
-		}
-
-		// item.number = attr(doc, 'meta[property="eli:id_local"]', 'content');
 
 		item.date = attr(doc, 'meta[property="eli:date_document"]', "content");
 		if (!item.date) {item.date = attr(doc, 'meta[property="eli:date_publication"]', "content")}
@@ -209,29 +209,31 @@ function scrape(doc, url) {
 		item.legislativeBody = passedByArray.join(", ");
 		
 		item.url = attr(doc, 'meta[typeOf="eli:LegalResource"]', "about") + "/" + language.toLowerCase();
-		// eli:is_about -> eurovoc -> tags
 	}
-	else if (docSector == "6") {
+		
+	else if (item.itemType == "case") {
 		// type: case
 		// pretty hacky stuff, as there's little metadata available
 		var docCourt = docType.substr(0, 1);
 		if (docCourt == "C") {
-			item.court = languageMapping[languageUrl][1] || languageMapping["EN"][1];
+			item.court = languageMapping[languageUrl].ECJ || languageMapping["EN"].ECJ;
 		}
 		else if (docCourt == "T") {
-			item.court = languageMapping[languageUrl][2] || languageMapping["EN"][2];
+			item.court = languageMapping[languageUrl].GC || languageMapping["EN"].GC;
 		}
 		else if (docCourt == "F") {
-			item.court = languageMapping[languageUrl][3] || languageMapping["EN"][3];
+			item.court = languageMapping[languageUrl].CST || languageMapping["EN"].CST;
 		}
 		item.url = url;
 
 		if (docType.substr(1) == "J") { // Judgments
 			var titleParts = attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/\./g,"").split("#");
-			item.caseName = titleParts[1];
-			item.abstractNote = titleParts[titleParts.length - 2];
-			item.docketNumber = titleParts.pop();
-			item.dateDecided = titleParts[0].substr(titleParts[0].search(/[0-9]/g));
+			if (titleParts.length > 1) {
+				item.caseName = titleParts[1];
+				item.abstractNote = titleParts[titleParts.length - 2];
+				item.docketNumber = titleParts.pop();
+				item.dateDecided = titleParts[0].substr(titleParts[0].search(/[0-9]/g));
+			}
 		}
 		else { // Orders, summaries, etc.
 			item.caseName = attr(doc, 'meta[name="WT.z_docTitle"]', "content").replace(/#/g," ");
@@ -255,10 +257,12 @@ function scrape(doc, url) {
 	var pdfurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/PDF/?uri=CELEX:" + celex;
 	var htmlurl = "https://eur-lex.europa.eu/legal-content/" + languageUrl + "/TXT/HTML/?uri=CELEX:" + celex;
 	item.attachments = [{ url: pdfurl, title: "EUR-Lex PDF (" + languageUrl + ")", mimeType: "application/pdf" }];
-	item.attachments.push({ url: htmlurl, title: "EUR-Lex HTML (" + languageUrl + ")", mimeType: "text/html" });
+	item.attachments.push({ url: htmlurl, title: "EUR-Lex HTML (" + languageUrl + ")", mimeType: "text/html", snapshot: true});
 	
 	item.complete();
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
