@@ -7,11 +7,11 @@ declare namespace Zotero {
 			options: { leading: boolean; trailing: boolean }
 		): Type;
 		function capitalizeName(s: string): string;
-		function cleanAuthor(
+		function cleanAuthor<T extends CreatorType>(
 			author: string,
-			creatorType: string,
-			useComma: boolean
-		): { firstName: string; lastName: string; creatorType: string };
+			creatorType: T,
+			useComma?: boolean
+		): Creator<T>;
 		function trim(s: string): string;
 		function trimInternal(s: string): string;
 		function superCleanString(s: string): string;
@@ -151,6 +151,100 @@ declare namespace Zotero {
 			co: string,
 			item: Zotero.Item[]
 		): Zotero.Item[] | false;
+
+		type HTTPRequestParameters = {
+			method?,
+			requestHeaders?: { [string]: string },
+			body?: string,
+			responseCharset?: string,
+			responseType?: HTTPResponseType
+		}
+
+		type HTTPResponseType =
+			| "text"
+			| "json"
+			| "document";
+
+		type HTTPResponse<T> = {
+			status: number,
+			headers: { [string]: string },
+			body: T
+		};
+
+		function request(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset,
+				responseType = "text"
+			}?: HTTPRequestParameters
+		): Promise<HTTPResponse<string>>;
+
+		function requestText(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset
+			}?: Omit<HTTPRequestParameters, "responseType">
+		): Promise<HTTPResponse<string>>;
+
+		function request(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset,
+				responseType = "json"
+			}?: {
+				method?,
+				requestHeaders?: { [string]: string },
+				body?: string,
+				responseCharset?: string,
+				responseType?: "json"
+			}
+		): Promise<HTTPResponse<any>>;
+
+		function requestJSON(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset
+			}?: Omit<HTTPRequestParameters, "responseType">
+		): Promise<HTTPResponse<any>>;
+
+		function request(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset,
+				responseType = "document"
+			}?: {
+				method?,
+				requestHeaders?: { [string]: string },
+				body?: string,
+				responseCharset?: string,
+				responseType?: "document"
+			}
+		): Promise<HTTPResponse<Document>>;
+
+		function requestDocument(
+			url: string,
+			{
+				method = "GET",
+				requestHeaders,
+				body,
+				responseCharset
+			}?: Omit<HTTPRequestParameters, "responseType">
+		): Promise<HTTPResponse<Document>>;
 	}
 
 	interface Attachment {
@@ -159,16 +253,49 @@ declare namespace Zotero {
 		mimeType?: string;
 		url?: string;
 		document?: Document;
+		proxy?: boolean;
 	}
 
-	interface Creator {
+	type CreatorType =
+		| "artist"
+		| "contributor"
+		| "performer"
+		| "composer"
+		| "wordsBy"
+		| "sponsor"
+		| "cosponsor"
+		| "author"
+		| "commenter"
+		| "editor"
+		| "translator"
+		| "seriesEditor"
+		| "bookAuthor"
+		| "counsel"
+		| "programmer"
+		| "reviewedAuthor"
+		| "recipient"
+		| "director"
+		| "scriptwriter"
+		| "producer"
+		| "interviewee"
+		| "interviewer"
+		| "cartographer"
+		| "inventor"
+		| "attorneyAgent"
+		| "podcaster"
+		| "guest"
+		| "presenter"
+		| "castMember";
+
+	interface Creator<T extends CreatorType> {
 		lastName: string?;
 		firstName: string?;
-		creatorType: string;
+		creatorType: T;
 		fieldMode: 1?;
 	}
 
 	type ItemType =
+		| "annotation"
 		| "artwork"
 		| "attachment"
 		| "audioRecording"
@@ -206,22 +333,449 @@ declare namespace Zotero {
 		| "videoRecording"
 		| "webpage";
 
-	class Item {
-		constructor(itemType?: ItemType);
+	interface Item<T extends ItemType, C extends CreatorType> {
 		itemType: ItemType;
-		creators: Creator[];
-		[field: string]: (string | false | 0)?; // support unknown fields
+		title: string;
+		abstractNote?: string;
+		date?: string;
+		shortTitle?: string;
+		language?: string;
+		url?: string;
+		accessDate?: string;
+		creators: Creator<C>[];
 		attachments: Attachment[];
 		notes: Note[];
+		seeAlso: string[];
 		complete(): void;
 	}
 
+	var Item: {
+		new(): Item<any, any>;
+		new(itemType: "artwork"): ArtworkItem;
+		new(itemType: "audioRecording"): AudioRecordingItem;
+		new(itemType: "bill"): BillItem;
+		new(itemType: "blogPost"): BlogPostItem;
+		new(itemType: "book"): BookItem;
+		new(itemType: "bookSection"): BookSectionItem;
+		new(itemType: "case"): CaseItem;
+		new(itemType: "computerProgram"): ComputerProgramItem;
+		new(itemType: "conferencePaper"): ConferencePaperItem;
+		new(itemType: "dictionaryEntry"): DictionaryEntryItem;
+		new(itemType: "document"): DocumentItem;
+		new(itemType: "email"): EmailItem;
+		new(itemType: "encyclopediaArticle"): EncyclopediaArticleItem;
+		new(itemType: "film"): FilmItem;
+		new(itemType: "forumPost"): ForumPostItem;
+		new(itemType: "hearing"): HearingItem;
+		new(itemType: "instantMessage"): InstantMessageItem;
+		new(itemType: "interview"): InterviewItem;
+		new(itemType: "journalArticle"): JournalArticleItem;
+		new(itemType: "letter"): LetterItem;
+		new(itemType: "magazineArticle"): MagazineArticleItem;
+		new(itemType: "manuscript"): ManuscriptItem;
+		new(itemType: "map"): MapItem;
+		new(itemType: "newspaperArticle"): NewspaperArticleItem;
+		new(itemType: "patent"): PatentItem;
+		new(itemType: "podcast"): PodcastItem;
+		new(itemType: "presentation"): PresentationItem;
+		new(itemType: "radioBroadcast"): RadioBroadcastItem;
+		new(itemType: "report"): ReportItem;
+		new(itemType: "statute"): StatuteItem;
+		new(itemType: "thesis"): ThesisItem;
+		new(itemType: "tvBroadcast"): TVBroadcastItem;
+		new(itemType: "videoRecording"): VideoRecordingItem;
+		new(itemType: "webpage"): WebpageItem;
+	}
+
+	interface ArtworkItem extends Item<"artwork", "artist" | "contributor"> {
+		artworkMedium?: string;
+		artworkSize?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface AudioRecordingItem extends Item<"audioRecording", "performer" | "composer" | "contributor" | "wordsBy"> {
+		audioRecordingFormat?: string;
+		seriesTitle?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		place?: string;
+		label?: string;
+		runningTime?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface BillItem extends Item<"bill", "sponsor" | "contributor" | "cosponsor"> {
+		billNumber?: string;
+		code?: string;
+		codeVolume?: string;
+		section?: string;
+		codePages?: string;
+		legislativeBody?: string;
+		session?: string;
+		history?: string;
+	}
+
+	interface BlogPostItem extends Item<"blogPost", "author" | "commenter" | "contributor"> {
+		blogTitle?: string;
+		websiteType?: string;
+	}
+
+	interface BookItem extends Item<"book", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+		series?: string;
+		seriesNumber?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		edition?: string;
+		place?: string;
+		publisher?: string;
+		numPages?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface BookSectionItem extends Item<"bookSection", "author" | "bookAuthor" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+		bookTitle?: string;
+		series?: string;
+		seriesNumber?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		edition?: string;
+		place?: string;
+		publisher?: string;
+		pages?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface CaseItem extends Omit<Item<"case", "author" | "contributor" | "counsel">, "title" | "date"> {
+		caseName: string;
+		court?: string;
+		dateDecided?: string;
+		docketNumber?: string;
+		reporter?: string;
+		reporterVolume?: string;
+		firstPage?: string;
+		history?: string;
+	}
+
+	interface ComputerProgramItem extends Omit<Item<"computerProgram", "programmer" | "contributor">, "language"> {
+		seriesTitle?: string;
+		versionNumber?: string;
+		system?: string;
+		place?: string;
+		company?: string;
+		programmingLanguage?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface ConferencePaperItem extends Item<"conferencePaper", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+		proceedingsTitle?: string;
+		conferenceName?: string;
+		place?: string;
+		publisher?: string;
+		volume?: string;
+		pages?: string;
+		series?: string;
+		DOI?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface DictionaryEntryItem extends Item<"dictionaryEntry", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+		dictionaryTitle?: string;
+		series?: string;
+		seriesNumber?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		edition?: string;
+		place?: string;
+		publisher?: string;
+		pages?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface DocumentItem extends Item<"document", "author" | "contributor" | "editor" | "reviewedAuthor" | "translator"> {
+		publisher?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface EmailItem extends Omit<Item<"email", "author" | "contributor" | "recipient">, "title"> {
+		subject: string;
+	}
+
+	interface EncyclopediaArticleItem extends Item<"encyclopediaArticle", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+		encyclopediaTitle?: string;
+		series?: string;
+		seriesNumber?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		edition?: string;
+		place?: string;
+		publisher?: string;
+		pages?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface FilmItem extends Item<"film", "director" | "contributor" | "producer" | "scriptwriter"> {
+		distributor?: string;
+		genre?: string;
+		videoRecordingFormat?: string;
+		runningTime?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface ForumPostItem extends Item<"forumPost", "author" | "contributor"> {
+		forumTitle?: string;
+		postType?: string;
+	}
+
+	interface HearingItem extends Item<"hearing", "contributor"> {
+		committee?: string;
+		place?: string;
+		publisher?: string;
+		numberOfVolumes?: string;
+		documentNumber?: string;
+		pages?: string;
+		legislativeBody?: string;
+		session?: string;
+		history?: string;
+	}
+
+	interface InstantMessageItem extends Item<"instantMessage", "author" | "contributor" | "recipient"> {
+	}
+
+	interface InterviewItem extends Item<"interview", "interviewee" | "contributor" | "interviewer" | "translator"> {
+		interviewMedium?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface JournalArticleItem extends Item<"journalArticle", "author" | "contributor" | "editor" | "reviewedAuthor" | "translator"> {
+		publicationTitle?: string;
+		volume?: string;
+		issue?: string;
+		pages?: string;
+		series?: string;
+		seriesTitle?: string;
+		seriesText?: string;
+		journalAbbreviation?: string;
+		DOI?: string;
+		ISSN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface LetterItem extends Item<"letter", "author" | "contributor" | "recipient"> {
+		letterType?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface MagazineArticleItem extends Item<"magazineArticle", "author" | "contributor" | "reviewedAuthor" | "translator"> {
+		publicationTitle?: string;
+		volume?: string;
+		issue?: string;
+		pages?: string;
+		ISSN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface ManuscriptItem extends Item<"manuscript", "author" | "contributor" | "translator"> {
+		manuscriptType?: string;
+		place?: string;
+		numPages?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface MapItem extends Item<"map", "cartographer" | "contributor" | "seriesEditor"> {
+		mapType?: string;
+		scale?: string;
+		seriesTitle?: string;
+		edition?: string;
+		place?: string;
+		publisher?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface NewspaperArticleItem extends Item<"newspaperArticle", "author" | "contributor" | "reviewedAuthor" | "translator"> {
+		publicationTitle?: string;
+		place?: string;
+		edition?: string;
+		section?: string;
+		pages?: string;
+		ISSN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface PatentItem extends Omit<Item<"patent", "inventor" | "attorneyAgent" | "contributor">, "date"> {
+		place?: string;
+		country?: string;
+		assignee?: string;
+		issuingAuthority?: string;
+		patentNumber?: string;
+		filingDate?: string;
+		pages?: string;
+		applicationNumber?: string;
+		priorityNumbers?: string;
+		issueDate?: string;
+		references?: string;
+		legalStatus?: string;
+	}
+
+	interface PodcastItem extends Omit<Item<"podcast", "podcaster" | "contributor" | "guest">, "date"> {
+		seriesTitle?: string;
+		episodeNumber?: string;
+		audioFileType?: string;
+		runningTime?: string;
+	}
+
+	interface PresentationItem extends Item<"presentation", "presenter" | "contributor"> {
+		presentationType?: string;
+		place?: string;
+		meetingName?: string;
+	}
+
+	interface RadioBroadcastItem extends Item<"radioBroadcast", "director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter"> {
+		programTitle?: string;
+		episodeNumber?: string;
+		audioRecordingFormat?: string;
+		place?: string;
+		network?: string;
+		runningTime?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface ReportItem extends Item<"report", "author" | "contributor" | "seriesEditor" | "translator"> {
+		reportNumber?: string;
+		reportType?: string;
+		seriesTitle?: string;
+		place?: string;
+		institution?: string;
+		pages?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface StatuteItem extends Omit<Item<"statute", "author" | "contributor">, "title" | "date"> {
+		nameOfAct: string;
+		code?: string;
+		codeNumber?: string;
+		publicLawNumber?: string;
+		dateEnacted?: string;
+		pages?: string;
+		section?: string;
+		session?: string;
+		history?: string;
+	}
+
+	interface ThesisItem extends Item<"thesis", "author" | "contributor"> {
+		thesisType?: string;
+		university?: string;
+		place?: string;
+		numPages?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface TVBroadcastItem extends Item<"tvBroadcast", "director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter"> {
+		programTitle?: string;
+		episodeNumber?: string;
+		videoRecordingFormat?: string;
+		place?: string;
+		network?: string;
+		runningTime?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface VideoRecordingItem extends Item<"videoRecording", "director" | "castMember" | "contributor" | "producer" | "scriptwriter"> {
+		videoRecordingFormat?: string;
+		seriesTitle?: string;
+		volume?: string;
+		numberOfVolumes?: string;
+		place?: string;
+		studio?: string;
+		runningTime?: string;
+		ISBN?: string;
+		archive?: string;
+		archiveLocation?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+	}
+
+	interface WebpageItem extends Item<"webpage", "author" | "contributor" | "translator"> {
+		websiteTitle?: string;
+		websiteType?: string;
+	}
+
 	interface Note {
-		title: string;
+		title?: string;
 		note: string;
 	}
 
-	interface Collection {}
+	interface Collection { }
 
 	interface Translator {
 		translatorID: string;
@@ -441,3 +995,8 @@ declare function innerText(
 	index?: number
 ): string;
 declare function innerText(selector: string, index?: number): string;
+
+declare var request = ZU.request;
+declare var requestText = ZU.requestText;
+declare var requestJSON = ZU.requestJSON;
+declare var requestDocument = ZU.requestDocument;
