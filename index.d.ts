@@ -72,7 +72,7 @@ declare namespace Zotero {
 		// processAsync
 		function deepCopy<Type>(obj: Type): Type;
 		function itemTypeExists(itemType: ItemType): boolean;
-		function getCreatorsForType(itemType: ItemType): string[];
+		function getCreatorsForType(itemType: ItemType): CreatorType[];
 		function fieldIsValidForType(field: string, itemType: ItemType): boolean;
 		function getLocalizedCreatorType(itemType: ItemType): string;
 		function quotemeta(literal: string): string;
@@ -1413,7 +1413,7 @@ declare namespace Zotero {
 		): void;
 		setHandler(
 			type: "itemDone",
-			handler: (translate: Zotero.Translate, item: Item) => void
+			handler: (translate: Zotero.Translate, item: GenericItem) => void
 		): void;
 		setHandler(
 			type: "collectionDone",
