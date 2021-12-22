@@ -333,24 +333,8 @@ declare namespace Zotero {
 		| "videoRecording"
 		| "webpage";
 
-	interface Item<T extends ItemType, C extends CreatorType> {
-		itemType: ItemType;
-		title: string;
-		abstractNote?: string;
-		date?: string;
-		shortTitle?: string;
-		language?: string;
-		url?: string;
-		accessDate?: string;
-		creators: Creator<C>[];
-		attachments: Attachment[];
-		notes: Note[];
-		seeAlso: string[];
-		complete(): void;
-	}
-
 	var Item: {
-		new(): Item<any, any>;
+		new(): GenericItem;
 		new(itemType: "artwork"): ArtworkItem;
 		new(itemType: "audioRecording"): AudioRecordingItem;
 		new(itemType: "bill"): BillItem;
@@ -387,31 +371,66 @@ declare namespace Zotero {
 		new(itemType: "webpage"): WebpageItem;
 	}
 
-	interface ArtworkItem extends Item<"artwork", "artist" | "contributor"> {
+	interface ArtworkItem {
+		itemType: "artwork";
+		title: string;
+		abstractNote?: string;
 		artworkMedium?: string;
 		artworkSize?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"artist" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface AudioRecordingItem extends Item<"audioRecording", "performer" | "composer" | "contributor" | "wordsBy"> {
+	interface AudioRecordingItem {
+		itemType: "audioRecording";
+		title: string;
+		abstractNote?: string;
 		audioRecordingFormat?: string;
 		seriesTitle?: string;
 		volume?: string;
 		numberOfVolumes?: string;
 		place?: string;
 		label?: string;
+		date?: string;
 		runningTime?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"performer" | "composer" | "contributor" | "wordsBy">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface BillItem extends Item<"bill", "sponsor" | "contributor" | "cosponsor"> {
+	interface BillItem {
+		itemType: "bill";
+		title: string;
+		abstractNote?: string;
 		billNumber?: string;
 		code?: string;
 		codeVolume?: string;
@@ -420,14 +439,46 @@ declare namespace Zotero {
 		legislativeBody?: string;
 		session?: string;
 		history?: string;
+		date?: string;
+		language?: string;
+		url?: string;
+		accessDate?: string;
+		shortTitle?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"sponsor" | "contributor" | "cosponsor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface BlogPostItem extends Item<"blogPost", "author" | "commenter" | "contributor"> {
+	interface BlogPostItem {
+		itemType: "blogPost";
+		title: string;
+		abstractNote?: string;
 		blogTitle?: string;
 		websiteType?: string;
+		date?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
+		shortTitle?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "commenter" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface BookItem extends Item<"book", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+	interface BookItem {
+		itemType: "book";
+		title: string;
+		abstractNote?: string;
 		series?: string;
 		seriesNumber?: string;
 		volume?: string;
@@ -435,15 +486,31 @@ declare namespace Zotero {
 		edition?: string;
 		place?: string;
 		publisher?: string;
+		date?: string;
 		numPages?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface BookSectionItem extends Item<"bookSection", "author" | "bookAuthor" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+	interface BookSectionItem {
+		itemType: "bookSection";
+		title: string;
+		abstractNote?: string;
 		bookTitle?: string;
 		series?: string;
 		seriesNumber?: string;
@@ -452,16 +519,31 @@ declare namespace Zotero {
 		edition?: string;
 		place?: string;
 		publisher?: string;
+		date?: string;
 		pages?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "bookAuthor" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface CaseItem extends Omit<Item<"case", "author" | "contributor" | "counsel">, "title" | "date"> {
+	interface CaseItem {
+		itemType: "case";
 		caseName: string;
+		abstractNote?: string;
 		court?: string;
 		dateDecided?: string;
 		docketNumber?: string;
@@ -469,23 +551,54 @@ declare namespace Zotero {
 		reporterVolume?: string;
 		firstPage?: string;
 		history?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "counsel">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ComputerProgramItem extends Omit<Item<"computerProgram", "programmer" | "contributor">, "language"> {
+	interface ComputerProgramItem {
+		itemType: "computerProgram";
+		title: string;
+		abstractNote?: string;
 		seriesTitle?: string;
 		versionNumber?: string;
+		date?: string;
 		system?: string;
 		place?: string;
 		company?: string;
 		programmingLanguage?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		rights?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		accessDate?: string;
+		extra?: string;
+
+		creators: Creator<"programmer" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ConferencePaperItem extends Item<"conferencePaper", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+	interface ConferencePaperItem {
+		itemType: "conferencePaper";
+		title: string;
+		abstractNote?: string;
+		date?: string;
 		proceedingsTitle?: string;
 		conferenceName?: string;
 		place?: string;
@@ -493,15 +606,30 @@ declare namespace Zotero {
 		volume?: string;
 		pages?: string;
 		series?: string;
+		language?: string;
 		DOI?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface DictionaryEntryItem extends Item<"dictionaryEntry", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+	interface DictionaryEntryItem {
+		itemType: "dictionaryEntry";
+		title: string;
+		abstractNote?: string;
 		dictionaryTitle?: string;
 		series?: string;
 		seriesNumber?: string;
@@ -510,27 +638,74 @@ declare namespace Zotero {
 		edition?: string;
 		place?: string;
 		publisher?: string;
+		date?: string;
 		pages?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface DocumentItem extends Item<"document", "author" | "contributor" | "editor" | "reviewedAuthor" | "translator"> {
+	interface DocumentItem {
+		itemType: "document";
+		title: string;
+		abstractNote?: string;
 		publisher?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface EmailItem extends Omit<Item<"email", "author" | "contributor" | "recipient">, "title"> {
+	interface EmailItem {
+		itemType: "email";
 		subject: string;
+		abstractNote?: string;
+		date?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "recipient">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface EncyclopediaArticleItem extends Item<"encyclopediaArticle", "author" | "contributor" | "editor" | "seriesEditor" | "translator"> {
+	interface EncyclopediaArticleItem {
+		itemType: "encyclopediaArticle";
+		title: string;
+		abstractNote?: string;
 		encyclopediaTitle?: string;
 		series?: string;
 		seriesNumber?: string;
@@ -539,31 +714,79 @@ declare namespace Zotero {
 		edition?: string;
 		place?: string;
 		publisher?: string;
+		date?: string;
 		pages?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface FilmItem extends Item<"film", "director" | "contributor" | "producer" | "scriptwriter"> {
+	interface FilmItem {
+		itemType: "film";
+		title: string;
+		abstractNote?: string;
 		distributor?: string;
+		date?: string;
 		genre?: string;
 		videoRecordingFormat?: string;
 		runningTime?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"director" | "contributor" | "producer" | "scriptwriter">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ForumPostItem extends Item<"forumPost", "author" | "contributor"> {
+	interface ForumPostItem {
+		itemType: "forumPost";
+		title: string;
+		abstractNote?: string;
 		forumTitle?: string;
 		postType?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface HearingItem extends Item<"hearing", "contributor"> {
+	interface HearingItem {
+		itemType: "hearing";
+		title: string;
+		abstractNote?: string;
 		committee?: string;
 		place?: string;
 		publisher?: string;
@@ -573,94 +796,238 @@ declare namespace Zotero {
 		legislativeBody?: string;
 		session?: string;
 		history?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface InstantMessageItem extends Item<"instantMessage", "author" | "contributor" | "recipient"> {
+	interface InstantMessageItem {
+		itemType: "instantMessage";
+		title: string;
+		abstractNote?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "recipient">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface InterviewItem extends Item<"interview", "interviewee" | "contributor" | "interviewer" | "translator"> {
+	interface InterviewItem {
+		itemType: "interview";
+		title: string;
+		abstractNote?: string;
+		date?: string;
 		interviewMedium?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"interviewee" | "contributor" | "interviewer" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface JournalArticleItem extends Item<"journalArticle", "author" | "contributor" | "editor" | "reviewedAuthor" | "translator"> {
+	interface JournalArticleItem {
+		itemType: "journalArticle";
+		title: string;
+		abstractNote?: string;
 		publicationTitle?: string;
 		volume?: string;
 		issue?: string;
 		pages?: string;
+		date?: string;
 		series?: string;
 		seriesTitle?: string;
 		seriesText?: string;
 		journalAbbreviation?: string;
+		language?: string;
 		DOI?: string;
 		ISSN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface LetterItem extends Item<"letter", "author" | "contributor" | "recipient"> {
+	interface LetterItem {
+		itemType: "letter";
+		title: string;
+		abstractNote?: string;
 		letterType?: string;
+		date?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "recipient">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface MagazineArticleItem extends Item<"magazineArticle", "author" | "contributor" | "reviewedAuthor" | "translator"> {
+	interface MagazineArticleItem {
+		itemType: "magazineArticle";
+		title: string;
+		abstractNote?: string;
 		publicationTitle?: string;
 		volume?: string;
 		issue?: string;
+		date?: string;
 		pages?: string;
+		language?: string;
 		ISSN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ManuscriptItem extends Item<"manuscript", "author" | "contributor" | "translator"> {
+	interface ManuscriptItem {
+		itemType: "manuscript";
+		title: string;
+		abstractNote?: string;
 		manuscriptType?: string;
 		place?: string;
+		date?: string;
 		numPages?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface MapItem extends Item<"map", "cartographer" | "contributor" | "seriesEditor"> {
+	interface MapItem {
+		itemType: "map";
+		title: string;
+		abstractNote?: string;
 		mapType?: string;
 		scale?: string;
 		seriesTitle?: string;
 		edition?: string;
 		place?: string;
 		publisher?: string;
+		date?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"cartographer" | "contributor" | "seriesEditor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface NewspaperArticleItem extends Item<"newspaperArticle", "author" | "contributor" | "reviewedAuthor" | "translator"> {
+	interface NewspaperArticleItem {
+		itemType: "newspaperArticle";
+		title: string;
+		abstractNote?: string;
 		publicationTitle?: string;
 		place?: string;
 		edition?: string;
+		date?: string;
 		section?: string;
 		pages?: string;
+		language?: string;
+		shortTitle?: string;
 		ISSN?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface PatentItem extends Omit<Item<"patent", "inventor" | "attorneyAgent" | "contributor">, "date"> {
+	interface PatentItem {
+		itemType: "patent";
+		title: string;
+		abstractNote?: string;
 		place?: string;
 		country?: string;
 		assignee?: string;
@@ -673,49 +1040,126 @@ declare namespace Zotero {
 		issueDate?: string;
 		references?: string;
 		legalStatus?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"inventor" | "attorneyAgent" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface PodcastItem extends Omit<Item<"podcast", "podcaster" | "contributor" | "guest">, "date"> {
+	interface PodcastItem {
+		itemType: "podcast";
+		title: string;
+		abstractNote?: string;
 		seriesTitle?: string;
 		episodeNumber?: string;
 		audioFileType?: string;
 		runningTime?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
+		shortTitle?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"podcaster" | "contributor" | "guest">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface PresentationItem extends Item<"presentation", "presenter" | "contributor"> {
+	interface PresentationItem {
+		itemType: "presentation";
+		title: string;
+		abstractNote?: string;
 		presentationType?: string;
+		date?: string;
 		place?: string;
 		meetingName?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
+		shortTitle?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"presenter" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface RadioBroadcastItem extends Item<"radioBroadcast", "director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter"> {
+	interface RadioBroadcastItem {
+		itemType: "radioBroadcast";
+		title: string;
+		abstractNote?: string;
 		programTitle?: string;
 		episodeNumber?: string;
 		audioRecordingFormat?: string;
 		place?: string;
 		network?: string;
+		date?: string;
 		runningTime?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ReportItem extends Item<"report", "author" | "contributor" | "seriesEditor" | "translator"> {
+	interface ReportItem {
+		itemType: "report";
+		title: string;
+		abstractNote?: string;
 		reportNumber?: string;
 		reportType?: string;
 		seriesTitle?: string;
 		place?: string;
 		institution?: string;
+		date?: string;
 		pages?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "seriesEditor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface StatuteItem extends Omit<Item<"statute", "author" | "contributor">, "title" | "date"> {
+	interface StatuteItem {
+		itemType: "statute";
 		nameOfAct: string;
+		abstractNote?: string;
 		code?: string;
 		codeNumber?: string;
 		publicLawNumber?: string;
@@ -724,51 +1168,184 @@ declare namespace Zotero {
 		section?: string;
 		session?: string;
 		history?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface ThesisItem extends Item<"thesis", "author" | "contributor"> {
+	interface ThesisItem {
+		itemType: "thesis";
+		title: string;
+		abstractNote?: string;
 		thesisType?: string;
 		university?: string;
 		place?: string;
+		date?: string;
 		numPages?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface TVBroadcastItem extends Item<"tvBroadcast", "director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter"> {
+	interface TVBroadcastItem {
+		itemType: "tvBroadcast";
+		title: string;
+		abstractNote?: string;
 		programTitle?: string;
 		episodeNumber?: string;
 		videoRecordingFormat?: string;
 		place?: string;
 		network?: string;
+		date?: string;
 		runningTime?: string;
+		language?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface VideoRecordingItem extends Item<"videoRecording", "director" | "castMember" | "contributor" | "producer" | "scriptwriter"> {
+	interface VideoRecordingItem {
+		itemType: "videoRecording";
+		title: string;
+		abstractNote?: string;
 		videoRecordingFormat?: string;
 		seriesTitle?: string;
 		volume?: string;
 		numberOfVolumes?: string;
 		place?: string;
 		studio?: string;
+		date?: string;
 		runningTime?: string;
+		language?: string;
 		ISBN?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
 		archive?: string;
 		archiveLocation?: string;
 		libraryCatalog?: string;
 		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"director" | "castMember" | "contributor" | "producer" | "scriptwriter">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
 
-	interface WebpageItem extends Item<"webpage", "author" | "contributor" | "translator"> {
+	interface WebpageItem {
+		itemType: "webpage";
+		title: string;
+		abstractNote?: string;
 		websiteTitle?: string;
 		websiteType?: string;
+		date?: string;
+		shortTitle?: string;
+		url?: string;
+		accessDate?: string;
+		language?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "translator">[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
 	}
+
+	interface GenericItem {
+		itemType: ItemType;
+		title: string;
+		abstractNote?: string;
+		date?: string;
+		shortTitle?: string;
+		url?: string;
+		language?: string;
+		rights?: string;
+		extra?: string;
+
+		[key: string]: string; // allow unknown fields
+
+		creators: Creator<CreatorType>[];
+		attachments: Attachment[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
+	}
+
+	type Item =
+		| ArtworkItem
+		| AudioRecordingItem
+		| BillItem
+		| BlogPostItem
+		| BookItem
+		| BookSectionItem
+		| CaseItem
+		| ComputerProgramItem
+		| ConferencePaperItem
+		| DictionaryEntryItem
+		| DocumentItem
+		| EmailItem
+		| EncyclopediaArticleItem
+		| FilmItem
+		| ForumPostItem
+		| HearingItem
+		| InstantMessageItem
+		| InterviewItem
+		| JournalArticleItem
+		| LetterItem
+		| MagazineArticleItem
+		| ManuscriptItem
+		| MapItem
+		| NewspaperArticleItem
+		| PatentItem
+		| PodcastItem
+		| PresentationItem
+		| RadioBroadcastItem
+		| ReportItem
+		| StatuteItem
+		| ThesisItem
+		| TVBroadcastItem
+		| VideoRecordingItem
+		| WebpageItem
+		| GenericItem;
 
 	interface Note {
 		title?: string;
@@ -836,7 +1413,7 @@ declare namespace Zotero {
 		): void;
 		setHandler(
 			type: "itemDone",
-			handler: (translate: Zotero.Translate, item: Zotero.Item) => void
+			handler: (translate: Zotero.Translate, item: Item) => void
 		): void;
 		setHandler(
 			type: "collectionDone",
