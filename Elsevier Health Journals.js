@@ -2,19 +2,18 @@
 	"translatorID": "b043e7ed-b921-4444-88af-2fcc39881ee2",
 	"label": "Elsevier Health Journals",
 	"creator": "Sebastian Karcher",
-	"target": "/search/(quick|results)$|/article/[^/]+/(abstract|fulltext|references|images)$",
+	"target": "/action/doSearch\\?|/article/[^/]+/(abstract|fulltext|references|images)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 250,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-06-07 07:00:39"
+	"lastUpdated": "2021-11-24 23:10:20"
 }
 
 /*
-	Translator
-   Copyright (C) 2013 Sebastian Karcher
+   Copyright (C) 2013-2021 Sebastian Karcher
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
@@ -30,93 +29,89 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-function detectWeb(doc,url) {
+
+function detectWeb(doc, _url) {
+	let copyright = text(doc, '.copy-right');
+	if (!copyright.includes('Elsevier')) {
+		return false;
+	}
 	
-	var footer = doc.getElementById('footer');
-	if (!footer) return;
-	var elsevierLink = footer.getElementsByTagName('a')[0];
-	if (!elsevierLink || elsevierLink.textContent.trim() != 'Elsevier') return;
-	var xpath='//meta[@name="citation_journal_title"]';
-		
-	if (ZU.xpath(doc, xpath).length > 0) {
+	if (doc.querySelector('meta[name="citation_journal_title"]')) {
 		return "journalArticle";
 	}
-			
-	if (url.match(/\/search\/(results|quick)/)) {
-		if (getMultiples(doc).length>0) return "multiple";
+	else if (getSearchResults(doc, true)) {
+		return "multiple";
 	}
 	return false;
 }
 
-function getMultiples(doc) {
-	var table = doc.getElementById('searchResult');
-	return ZU.xpath(table, './tbody/tr/td[.//a[@class="viewoption" and @onclick and (normalize-space(text()) = "Full Text"\
-					or normalize-space(text()) = "Abstract") and (contains(@onclick,"/fulltext") or contains(@onclick, "/abstract"))]]');
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('h4.meta__title > a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
 }
 
- 
-function doWeb(doc,url)
-{
+function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var hits = {};
-		var urls = [];
-		var results = getMultiples(doc)
-		var link;
-		for (var i in results) {
-			link = ZU.xpathText(results[i], './/a[@class="viewoption" and contains(text(), "Full Text")]/@onclick');
-			if (!link) link = ZU.xpathText(results[i], './/a[@class="viewoption" and contains(text(), "Abstract")]/@onclick');
-			link = link.match(/http:\/\/.+(fulltext|abstract)/)[0];
-			hits[link] = results[i].textContent.trim();
-		}
-		Z.selectItems(hits, function(items) {
-			if (items == null) return true;
-			for (var j in items) {
-				urls.push(j);
-			}
-		ZU.processDocuments(urls, doWeb);
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
-		var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/div[contains(@class, "content")]/section/*', null, '\n');
-		if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="tContent"]/div[contains(@class, "content")]/section/*', null, '\n');
-		//Z.debug(abstract)
-		var keywords = ZU.xpath(doc, '//div[@class="keywords"]/a');
-		if (keywords.length==0) keywords = ZU.xpath(doc, '//div[@class="tContent"]/p/span[contains(@class, "keyword")]');
-		// We call the Embedded Metadata translator to do the actual work
-		var translator = Zotero.loadTranslator('web');
-		//use Embedded Metadata
-		translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
-		translator.setDocument(doc);
-		translator.setHandler('itemDone', function(obj, item) {
-			var m;
-			if (item.publicationTitle && (m = item.publicationTitle.match(/^(.+), (the)$/i) )){
-				item.publicationTitle = m[2] + ' ' + m[1];
-			}
-			if (item.date) {
-				item.date = ZU.strToISO(item.date);
-			}
-			item.url = url;
-			
-			if (item.tags.length==0){
-				for (var i in keywords){
-					var kw = keywords[i].textContent.trim();
-					if (kw) item.tags.push(kw);		
-				}
-			}
-			//remove duplicate PMIDs
-			if (item.extra) {
-				item.extra = item.extra.replace(/(^PMID: \d+),.+/, "$1");
-			}
-			item.abstractNote = abstract;
-			item.complete();
-		});
-		translator.translate();
+	}
+	else {
+		scrape(doc, url);
 	}
 }
+
+function scrape(doc, url) {
+	var abstract = ZU.xpathText(doc, '//div[@class="abstract"]/div[contains(@class, "content")]/section/*', null, '\n');
+	if (!abstract) abstract = ZU.xpathText(doc, '//div[@class="tContent"]/div[contains(@class, "content")]/section/*', null, '\n');
+	var keywords = ZU.xpath(doc, '//div[@class="keywords"]/a');
+	if (!keywords.length) keywords = ZU.xpath(doc, '//div[@class="tContent"]/p/span[contains(@class, "keyword")]');
+	// We call the Embedded Metadata translator to do the actual work
+	var translator = Zotero.loadTranslator('web');
+	// use Embedded Metadata
+	translator.setTranslator("951c027d-74ac-47d4-a107-9c3069ab7b48");
+	translator.setDocument(doc);
+	translator.setHandler('itemDone', function (obj, item) {
+		var m;
+		if (item.publicationTitle && (m = item.publicationTitle.match(/^(.+), (the)$/i))) {
+			item.publicationTitle = m[2] + ' ' + m[1];
+		}
+		if (item.date) {
+			item.date = ZU.strToISO(item.date);
+		}
+		item.url = url;
+		
+		if (item.tags.length == 0) {
+			for (var i in keywords) {
+				var kw = keywords[i].textContent.trim();
+				if (kw) item.tags.push(kw);
+			}
+		}
+		// remove duplicate PMIDs
+		if (item.extra) {
+			item.extra = item.extra.replace(/(^PMID: \d+),.+/, "$1");
+		}
+		item.abstractNote = abstract;
+		item.complete();
+	});
+	translator.translate();
+}
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.amjmed.com/article/S0002-9343(12)00352-X/abstract",
+		"url": "https://www.amjmed.com/article/S0002-9343(12)00352-X/fulltext",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -161,14 +156,13 @@ var testCases = [
 				"date": "2012-08-01",
 				"DOI": "10.1016/j.amjmed.2012.01.033",
 				"ISSN": "0002-9343, 1555-7162",
-				"abstractNote": "Background\nThe risk of falls is the most commonly cited reason for not providing oral anticoagulation, although the risk of bleeding associated with falls on oral anticoagulants is still debated. We aimed to evaluate whether patients on oral anticoagulation with high falls risk have an increased risk of major bleeding.\nMethods\nWe prospectively studied consecutive adult medical patients who were discharged on oral anticoagulants. The outcome was the time to a first major bleed within a 12-month follow-up period adjusted for age, sex, alcohol abuse, number of drugs, concomitant treatment with antiplatelet agents, and history of stroke or transient ischemic attack.\nResults\nAmong the 515 enrolled patients, 35 patients had a first major bleed during follow-up (incidence rate: 7.5 per 100 patient-years). Overall, 308 patients (59.8%) were at high risk of falls, and these patients had a nonsignificantly higher crude incidence rate of major bleeding than patients at low risk of falls (8.0 vs 6.8 per 100 patient-years, P=.64). In multivariate analysis, a high falls risk was not statistically significantly associated with the risk of a major bleed (hazard ratio 1.09; 95% confidence interval, 0.54-2.21). Overall, only 3 major bleeds occurred directly after a fall (incidence rate: 0.6 per 100 patient-years).\nConclusions\nIn this prospective cohort, patients on oral anticoagulants at high risk of falls did not have a significantly increased risk of major bleeds. These findings suggest that being at risk of falls is not a valid reason to avoid oral anticoagulants in medical patients.",
 				"issue": "8",
 				"journalAbbreviation": "The American Journal of Medicine",
 				"language": "English",
 				"libraryCatalog": "www.amjmed.com",
 				"pages": "773-778",
 				"publicationTitle": "The American Journal of Medicine",
-				"url": "http://www.amjmed.com/article/S0002-9343(12)00352-X/abstract",
+				"url": "https://www.amjmed.com/article/S0002-9343(12)00352-X/fulltext",
 				"volume": "125",
 				"attachments": [
 					{
@@ -176,15 +170,26 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
-					"Accidental falls",
-					"Adverse drug events",
-					"Anticoagulants",
-					"Hemorrhage",
-					"Risk factor"
+					{
+						"tag": "Accidental falls"
+					},
+					{
+						"tag": "Adverse drug events"
+					},
+					{
+						"tag": "Anticoagulants"
+					},
+					{
+						"tag": "Hemorrhage"
+					},
+					{
+						"tag": "Risk factor"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -193,7 +198,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.celltherapyjournal.org/article/S1465-3249(12)70632-1/abstract",
+		"url": "https://www.isct-cytotherapy.org/article/S1465-3249(12)70632-1/fulltext",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -268,15 +273,14 @@ var testCases = [
 				"date": "2012-02-01",
 				"DOI": "10.3109/14653249.2011.634404",
 				"ISSN": "1465-3249",
-				"abstractNote": "Background aims\nUmbilical cord blood (UCB) is a source of hematopoietic stem cells that initially was used exclusively for the hematopoietic reconstitution of pediatric patients. It is now suggested for use for adults as well, a fact that increases the pressure to obtain units with high cellularity. Therefore, the optimization of UCB processing is a priority.\nMethods\nThe present study focused on parameters influencing total nucleated cell (TNC), mononucleated cell (MNC) and CD34 + cell (CD34C) recovery after routine volume reduction of 1553 UCB units using hydroxyethyl starch-induced sedimentation with an automated device, under routine laboratory conditions.\nResults\nWe show that the unit volume rather than the TNC count significantly affects TNC, MNC and CD34C processing efficiency (PEf), and this in a non-linear fashion: when units were sampled according to the collection volume, including pre-loaded anticoagulant (gross volume), PEf increased up to a unit volume of 110–150 mL and decreased thereafter. Thus units with initial gross volumes < 90 mL and > 170 mL similarly exhibited a poor PEf.\nConclusions\nThese data identify unit gross volume as a major parameter influencing PEf and suggest that fractionation of large units should be contemplated only when the resulting volume of split units is > 90 mL.",
 				"extra": "PMID: 22136296",
 				"issue": "2",
 				"journalAbbreviation": "Cytotherapy",
 				"language": "English",
-				"libraryCatalog": "www.celltherapyjournal.org",
+				"libraryCatalog": "www.isct-cytotherapy.org",
 				"pages": "215-222",
 				"publicationTitle": "Cytotherapy",
-				"url": "http://www.celltherapyjournal.org/article/S1465-3249(12)70632-1/abstract",
+				"url": "https://www.isct-cytotherapy.org/article/S1465-3249(12)70632-1/fulltext",
 				"volume": "14",
 				"attachments": [
 					{
@@ -284,7 +288,8 @@ var testCases = [
 						"mimeType": "application/pdf"
 					},
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					},
 					{
 						"title": "PubMed entry",
@@ -293,12 +298,230 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"cell banking",
-					"hematopoietic stem cell",
-					"hydroxyethyl starch",
-					"processing efficiency",
-					"umbilical cord blood"
+					{
+						"tag": "cell banking"
+					},
+					{
+						"tag": "hematopoietic stem cell"
+					},
+					{
+						"tag": "hydroxyethyl starch"
+					},
+					{
+						"tag": "processing efficiency"
+					},
+					{
+						"tag": "umbilical cord blood"
+					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.isct-cytotherapy.org/action/doSearch?text1=test&field1=AllField",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)01431-8/fulltext?hss_channel=tw-27013292",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Antibiotics for lower respiratory tract infection in children presenting in primary care in England (ARTIC PC): a double-blind, randomised, placebo-controlled trial",
+				"creators": [
+					{
+						"firstName": "Paul",
+						"lastName": "Little",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Nick A.",
+						"lastName": "Francis",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Beth",
+						"lastName": "Stuart",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gilly",
+						"lastName": "O'Reilly",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Natalie",
+						"lastName": "Thompson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Taeko",
+						"lastName": "Becque",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Alastair D.",
+						"lastName": "Hay",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kay",
+						"lastName": "Wang",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Sharland",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Anthony",
+						"lastName": "Harnden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Guiqing",
+						"lastName": "Yao",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "James",
+						"lastName": "Raftery",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shihua",
+						"lastName": "Zhu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joseph",
+						"lastName": "Little",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Charlotte",
+						"lastName": "Hookham",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kate",
+						"lastName": "Rowley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Joanne",
+						"lastName": "Euden",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kim",
+						"lastName": "Harman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samuel",
+						"lastName": "Coenen",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Robert C.",
+						"lastName": "Read",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Catherine",
+						"lastName": "Woods",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher C.",
+						"lastName": "Butler",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Saul N.",
+						"lastName": "Faust",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Geraldine",
+						"lastName": "Leydon",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Mandy",
+						"lastName": "Wan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Kerenza",
+						"lastName": "Hood",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jane",
+						"lastName": "Whitehurst",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Samantha",
+						"lastName": "Richards-Hall",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Smith",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Thomas",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Moore",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Theo",
+						"lastName": "Verheij",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-10-16",
+				"DOI": "10.1016/S0140-6736(21)01431-8",
+				"ISSN": "0140-6736, 1474-547X",
+				"extra": "PMID: 34562391",
+				"issue": "10309",
+				"journalAbbreviation": "The Lancet",
+				"language": "English",
+				"libraryCatalog": "www.thelancet.com",
+				"pages": "1417-1426",
+				"publicationTitle": "The Lancet",
+				"shortTitle": "Antibiotics for lower respiratory tract infection in children presenting in primary care in England (ARTIC PC)",
+				"url": "https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)01431-8/fulltext?hss_channel=tw-27013292",
+				"volume": "398",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "PubMed entry",
+						"mimeType": "text/html",
+						"snapshot": false
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}

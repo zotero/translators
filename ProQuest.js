@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-11 03:55:14"
+	"lastUpdated": "2021-10-10 02:27:10"
 }
 
 /*
@@ -33,10 +33,6 @@
  	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
 
  	***** END LICENSE BLOCK ******/
-
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 
 var language = "English";
@@ -77,7 +73,7 @@ function getTextValue(doc, fields) {
 function initLang(doc) {
 	var lang = ZU.xpathText(doc, '//a[span[contains(@class,"uxf-globe")]]');
 	if (lang && lang.trim() != "English") {
-		lang = lang.trim();
+		lang = lang.trim().split(',')[0];
 
 		// if already initialized, don't need to do anything else
 		if (lang == language) return;
@@ -289,6 +285,36 @@ function scrape(doc, url, type) {
 						ZU.cleanAuthor(value[j], creatorType, value[j].includes(',')));
 				}
 				break;
+			case 'Signator':
+				if (item.itemType == 'letter') {
+					for (let signator of rows[i].childNodes[1].querySelectorAll('a')) {
+						let name = signator.textContent;
+						item.creators.push(
+							ZU.cleanAuthor(name, 'author', name.includes(',')));
+					}
+				}
+				break;
+			case 'Recipient':
+				if (item.itemType == 'letter') {
+					for (let recipient of rows[i].childNodes[1].querySelectorAll('a')) {
+						let name = recipient.textContent;
+						if (/\b(department|bureau|office|director)\b/i.test(name)) {
+							// a general edge case that we handle specifically,
+							// but institutional recipients are common and we'd
+							// like not to split the name when we can
+							item.creators.push({
+								lastName: name,
+								creatorType: 'recipient',
+								fieldMode: 1
+							});
+						}
+						else {
+							item.creators.push(
+								ZU.cleanAuthor(name, 'recipient', name.includes(',')));
+						}
+					}
+				}
+				break;
 			case 'Publication title':
 				item.publicationTitle = value.replace(/;.+/, "");
 				break;
@@ -334,6 +360,7 @@ function scrape(doc, url, type) {
 				item.thesisType = value;
 				break;
 			case 'Publisher':
+			case 'Printer/Publisher':
 				item.publisher = value;
 				break;
 
@@ -362,6 +389,7 @@ function scrape(doc, url, type) {
 
 			// multiple dates are provided
 			// more complete dates are preferred
+			case 'Date':
 			case 'Publication date':
 				dates[2] = value;
 				break;
@@ -372,9 +400,17 @@ function scrape(doc, url, type) {
 				dates[0] = value;
 				break;
 
-			// we know about these, skip
+			// we already know about these; we can skip them unless we want to
+			// disambiguate a general item type
 			case 'Source type':
+				break;
 			case 'Document type':
+				if (item.itemType == 'letter') {
+					if (value.trim().toLowerCase() != 'letter') {
+						item.letterType = value;
+					}
+				}
+				break;
 			case 'Record type':
 			case 'Database':
 				break;
@@ -434,7 +470,8 @@ function scrape(doc, url, type) {
 
 	var date = ZU.xpathText(byline, './text()');
 	if (date) date = date.match(/]\s+(.+?):/);
-	if (date) date = date[1];
+	// Convert date to ISO to make sure we don't save random strings
+	if (date) date = ZU.strToISO(date[1]);
 	// add date if we only have a year and date is longer in the byline
 	if (date
 		&& (!item.date
@@ -534,6 +571,9 @@ function getItemType(types) {
 		else if (testString.includes("statute")) {
 			return "statute";
 		}
+		else if (testString.includes("letter") || testString.includes("cable")) {
+			guessType = "letter";
+		}
 	}
 
 	return guessType;
@@ -624,6 +664,7 @@ var fieldNames = {
 		School: 'المدرسة',
 		Degree: 'الدرجة',
 		Publisher: 'الناشر',
+		"Printer/Publisher": 'جهة الطباعة/الناشر',
 		"Place of publication": 'مكان النشر',
 		"School location": 'موقع المدرسة',
 		"Country of publication": 'بلد النشر',
@@ -657,6 +698,7 @@ var fieldNames = {
 		School: 'Sekolah',
 		Degree: 'Gelar',
 		Publisher: 'Penerbit',
+		"Printer/Publisher": 'Pencetak/Penerbit',
 		"Place of publication": 'Tempat publikasi',
 		"School location": 'Lokasi sekolah',
 		"Country of publication": 'Negara publikasi',
@@ -690,6 +732,7 @@ var fieldNames = {
 		School: 'Instituce',
 		Degree: 'Stupeň',
 		Publisher: 'Vydavatel',
+		"Printer/Publisher": 'Tiskař/vydavatel',
 		"Place of publication": 'Místo vydání',
 		"School location": 'Místo instituce',
 		"Country of publication": 'Země vydání',
@@ -723,6 +766,7 @@ var fieldNames = {
 		School: 'Bildungseinrichtung',
 		Degree: 'Studienabschluss',
 		Publisher: 'Herausgeber',
+		"Printer/Publisher": 'Drucker/Verleger',
 		"Place of publication": 'Verlagsort',
 		"School location": 'Standort der Bildungseinrichtung',
 		"Country of publication": 'Publikationsland',
@@ -756,6 +800,7 @@ var fieldNames = {
 		School: 'Institución',
 		Degree: 'Título universitario',
 		Publisher: 'Editorial',
+		"Printer/Publisher": 'Imprenta/publicista',
 		"Place of publication": 'Lugar de publicación',
 		"School location": 'Lugar de la institución',
 		"Country of publication": 'País de publicación',
@@ -786,9 +831,11 @@ var fieldNames = {
 		"Publication year": 'Année de publication',
 		Year: 'Année',
 		Pages: 'Pages',
+		"First page": 'Première page',
 		School: 'École',
 		Degree: 'Diplôme',
 		Publisher: 'Éditeur',
+		"Printer/Publisher": 'Imprimeur/Éditeur',
 		"Place of publication": 'Lieu de publication',
 		"School location": "Localisation de l'école",
 		"Country of publication": 'Pays de publication',
@@ -822,6 +869,7 @@ var fieldNames = {
 		School: '학교',
 		Degree: '학위',
 		Publisher: '출판사',
+		"Printer/Publisher": '인쇄소/출판사',
 		"Place of publication": '출판 지역',
 		"School location": '학교 지역',
 		"Country of publication": '출판 국가',
@@ -855,6 +903,7 @@ var fieldNames = {
 		School: 'Istituzione accademica',
 		Degree: 'Titolo accademico',
 		Publisher: 'Casa editrice',
+		"Printer/Publisher": 'Tipografo/Editore',
 		"Place of publication": 'Luogo di pubblicazione:',
 		"School location": 'Località istituzione accademica',
 		"Country of publication": 'Paese di pubblicazione',
@@ -888,6 +937,7 @@ var fieldNames = {
 		School: 'Iskola',
 		Degree: 'Diploma',
 		Publisher: 'Kiadó',
+		"Printer/Publisher": 'Nyomda/kiadó',
 		"Place of publication": 'Publikáció helye',
 		"School location": 'Iskola helyszíne:',
 		"Country of publication": 'Publikáció országa',
@@ -921,6 +971,7 @@ var fieldNames = {
 		School: '学校',
 		Degree: '学位称号',
 		Publisher: '出版社',
+		"Printer/Publisher": '印刷業者/出版社',
 		"Place of publication": '出版地',
 		"School location": '学校所在地',
 		"Country of publication": '出版国',
@@ -954,6 +1005,7 @@ var fieldNames = {
 		School: 'Skole',
 		Degree: 'Grad',
 		Publisher: 'Utgiver',
+		"Printer/Publisher": 'Trykkeri/utgiver',
 		"Place of publication": 'Utgivelsessted',
 		"School location": 'Skolested',
 		"Country of publication": 'Utgivelsesland',
@@ -987,6 +1039,7 @@ var fieldNames = {
 		School: 'Uczelnia',
 		Degree: 'Stopień',
 		Publisher: 'Wydawca',
+		"Printer/Publisher": 'Drukarnia/wydawnictwo',
 		"Place of publication": 'Miejsce publikacji',
 		"School location": 'Lokalizacja uczelni',
 		"Country of publication": 'Kraj publikacji',
@@ -1020,6 +1073,7 @@ var fieldNames = {
 		School: 'Escola',
 		Degree: 'Graduação',
 		Publisher: 'Editora',
+		"Printer/Publisher": 'Editora/selo',
 		"Place of publication": 'Local de publicação',
 		"School location": 'Localização da escola',
 		"Country of publication": 'País de publicação',
@@ -1053,6 +1107,7 @@ var fieldNames = {
 		School: 'Escola',
 		Degree: 'Licenciatura',
 		Publisher: 'Editora',
+		"Printer/Publisher": 'Editora/selo',
 		"Place of publication": 'Local de publicação',
 		"School location": 'Localização da escola',
 		"Country of publication": 'País de publicação',
@@ -1086,6 +1141,7 @@ var fieldNames = {
 		School: 'Учебное заведение',
 		Degree: 'Степень',
 		Publisher: 'Издательство',
+		"Printer/Publisher": 'Типография/издатель',
 		"Place of publication": 'Место публикации',
 		"School location": 'Местонахождение учебного заведения',
 		"Country of publication": 'Страна публикации',
@@ -1119,6 +1175,7 @@ var fieldNames = {
 		School: 'สถาบันการศึกษา',
 		Degree: 'ปริญญาบัตร',
 		Publisher: 'สำนักพิมพ์',
+		"Printer/Publisher": 'ผู้ตีพิมพ์/ผู้เผยแพร่',
 		"Place of publication": 'สถานที่พิมพ์',
 		"School location": 'สถานที่ตั้งของสถาบันการศึกษา',
 		"Country of publication": 'ประเทศที่พิมพ์',
@@ -1152,6 +1209,7 @@ var fieldNames = {
 		School: 'Okul',
 		Degree: 'Derece',
 		Publisher: 'Yayıncı',
+		"Printer/Publisher": 'Basımevi/Yayınc',
 		"Place of publication": 'Basım yeri',
 		"School location": 'Okul konumu',
 		"Country of publication": 'Yayınlanma ülkesi',
@@ -1185,6 +1243,7 @@ var fieldNames = {
 		School: '学校',
 		Degree: '学位',
 		Publisher: '出版商',
+		"Printer/Publisher": '印刷商/出版商',
 		"Place of publication": '出版物地点',
 		"School location": '学校地点',
 		"Country of publication": '出版物国家/地区',
@@ -1218,6 +1277,7 @@ var fieldNames = {
 		School: '學校',
 		Degree: '學位',
 		Publisher: '出版者',
+		"Printer/Publisher": '印刷者/出版者',
 		"Place of publication": '出版地',
 		"School location": '學校地點',
 		"Country of publication": '出版國家/地區',
@@ -1226,6 +1286,7 @@ var fieldNames = {
 		"Journal subject": '期刊主題'
 	}
 };
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -1709,6 +1770,114 @@ var testCases = [
 					},
 					{
 						"tag": "Sociology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/dnsa/docview/1679056926/fulltextPDF/8C1FDDD8E506429BPQ/1",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "Kidnapping of Ambassador Dubs: Sitrep No. 3",
+				"creators": [
+					{
+						"lastName": "United States. Department of State",
+						"creatorType": "recipient",
+						"fieldMode": 1
+					},
+					{
+						"firstName": "J. Bruce",
+						"lastName": "Amstutz",
+						"creatorType": "author"
+					}
+				],
+				"date": "February 14, 1979",
+				"language": "English",
+				"letterType": "Cable",
+				"libraryCatalog": "ProQuest",
+				"shortTitle": "Kidnapping of Ambassador Dubs",
+				"url": "https://www.proquest.com/dnsa/docview/1679056926/abstract/F71353DE52F74E3BPQ/1",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Adolph Kidnapping (14 February 1979)"
+					},
+					{
+						"tag": "Afghanistan. National Police"
+					},
+					{
+						"tag": "Dubs"
+					},
+					{
+						"tag": "Police officers"
+					},
+					{
+						"tag": "Soviet advisors"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+		"items": [
+			{
+				"itemType": "letter",
+				"title": "[Dear Colleague Letter regarding Prosecution of Yasir Arafat; Includes Letter to Edwin Meese, List of Senators Signing Letter, and Washington Times Article Dated February 7, 1986]",
+				"creators": [
+					{
+						"firstName": "Joseph R.",
+						"lastName": "Biden",
+						"creatorType": "recipient"
+					},
+					{
+						"firstName": "Charles E.",
+						"lastName": "Grassley",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Frank R.",
+						"lastName": "Lautenberg",
+						"creatorType": "author"
+					}
+				],
+				"date": "January 24, 1986",
+				"language": "English",
+				"libraryCatalog": "ProQuest",
+				"url": "https://www.proquest.com/dnsa/docview/1679145498/abstract/BA3C959768F54C93PQ/16",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf",
+						"proxy": false
+					}
+				],
+				"tags": [
+					{
+						"tag": "Indictments"
+					},
+					{
+						"tag": "Khartoum Embassy Takeover and Assassinations (1973)"
+					},
+					{
+						"tag": "Washington Post"
+					},
+					{
+						"tag": "Washington Times"
 					}
 				],
 				"notes": [],

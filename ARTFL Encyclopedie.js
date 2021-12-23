@@ -1,150 +1,186 @@
 {
 	"translatorID": "72cb2536-3211-41e0-ae8b-974c0385e085",
 	"label": "ARTFL Encyclopedie",
-	"creator": "Sean Takats, Sebastian Karcher",
-	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/cgi-bin/philologic/(getobject\\.pl\\?[cp]\\.[0-9]+:[0-9]+(:[0-9]+)?\\.encyclopedie|navigate\\.pl\\?encyclopedie|search3t\\?dbname=encyclopedie)",
+	"creator": "Sean Takats, Sebastian Karcher, and Abe Jellinek",
+	"target": "^https?://artflsrv\\d+\\.uchicago\\.edu/philologic4/encyclopedie\\d+/(navigate/|query)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
-	"browserSupport": "gcv",
-	"lastUpdated": "2017-01-01 16:50:31"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2021-06-30 19:55:06"
 }
+
+/*
+	***** BEGIN LICENSE BLOCK *****
+
+	Copyright © 2021 Abe Jellinek
+	
+	This file is part of Zotero.
+
+	Zotero is free software: you can redistribute it and/or modify
+	it under the terms of the GNU Affero General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Zotero is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+	GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License
+	along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+	***** END LICENSE BLOCK *****
+*/
+
 
 function detectWeb(doc, url) {
-	if (url.indexOf("getobject.pl") != -1){
+	if (url.includes('/navigate/')) {
 		return "encyclopediaArticle";
-	} else if (url.indexOf("navigate.pl")!=-1){//browsing
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
-	} else if (url.indexOf("search3t?")!=-1){//search results
-		return "multiple"
 	}
+	return false;
 }
 
-function reconcileAuthor(author){
-	var authorMap = {
-		"Venel":"Venel, Gabriel-François",
-		"d'Aumont":"d'Aumont, Arnulphe",
-		"de La Chapelle":"de La Chapelle, Jean-Baptiste",
-		"Bourgelat":"Bourgelat, Claude",
-		"Dumarsais":"Du Marsais, César Chesneau",
-		"Mallet":"Mallet, Edme-François",
-		"Toussaint":"Toussaint, François-Vincent",
-		"Daubenton":"Daubenton, Louis-Jean-Marie",
-		"d'Argenville": "d'Argenville, Antoine-Joseph Desallier",
-		"Tarin":"Tarin, Pierre",
-		"Vandenesse":"de Vandenesse, Urbain",
-		"Blondel": "Blondel, Jacques-François",
-		"Le Blond":"Le Blond, Guillaume",
-		"Rousseau":"Rousseau, Jean-Jacques",
-		"Eidous":"Eidous, Marc-Antoine",
-		"d'Alembert":"d'Alembert, Jean le Rond",
-		"Louis":"Louis, Antoine",
-		"Bellin":"Bellin, Jacques-Nicolas",
-		"Diderot":"Diderot, Denis",
-		"Diderot1":"Diderot, Denis",
-		"Diderot2":"Diderot, Denis",
-		"de Jaucourt":"de Jaucourt, Chevalier Louis",
-		"Jaucourt":"de Jaucourt, Chevalier Louis",
-		"d'Holbach":"d'Holbach, Baron"
-		/* not yet mapped
-		Yvon
-		Forbonnais
-		Douchet and Beauzée
-		Boucher d'Argis
-		Lenglet Du Fresnoy
-		Cahusac
-		Pestré
-		Daubenton, le Subdélégué
-		Goussier
-		de Villiers
-		Barthès
-		Morellet
-		Malouin
-		Ménuret de Chambaud
-		Landois
-		Le Roy
-		*/
+function getSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	var rows = doc.querySelectorAll('.philologic_cite .citation:first-child a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
 	}
-	if (authorMap[author]) {
-		author = authorMap[author];
-	}
-	// remove ARTFL's trailing 5 for odd contributors (e.g. Turgot5)
-		if (author.substr(author.length-1, 1)=="5"){
-		author = author.substr(0, author.length-1);
-	}
-	return author;
-}
-
-function scrape (doc, url){
-	var newItem = new Zotero.Item("encyclopediaArticle");
-	newItem.title = ZU.xpathText(doc, '(//index[@type="headword"])[1]/@value')
-	newItem.encyclopediaTitle = "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers";
-	newItem.shortTitle = "Encyclopédie";
-	newItem.date = "1751-1772";
-	newItem.publisher = "Briasson";
-	newItem.place = "Paris";
-	newItem.numberOfVolumes = "17";
-	newItem.creators.push({firstName:"Denis", lastName:"Diderot", creatorType:"editor"});
-	newItem.creators.push({firstName:"Jean le Rond", lastName:"d'Alembert", creatorType:"editor"});
-	newItem.url = url;
-	newItem.attachments.push({title:"ARTFL Snapshot", mimeType:"text/html", document:doc});
-	
-	var volpage = ZU.xpathText(doc, '(//index/a[contains(@href, "getobject.pl") and contains(text(), ":")])[1]');
-	if (!volpage){//pageview
-		var volpage = ZU.xpathText(doc, '//div[@id="content"]/center[contains(text(), ":")]/text()')
-	}
-	if (volpage){
-		volpage = volpage.match(/(\d+):([A-Z\d]+)/); //page number can have letters
-		newItem.volume = volpage[1];
-		newItem.pages = volpage[2];
-	}
-	var authors = ZU.xpathText(doc, '(//index[@type="author"])[1]/@value');
-	if (authors){
-		author = authors.split(/\s*\|\s*/);
-		for (var i =0; i<author.length; i++){
-			newItem.creators.push(ZU.cleanAuthor(reconcileAuthor(author[i]), "author", true))	
-		}
-	}
-	newItem.complete();
+	return found ? items : false;
 }
 
 function doWeb(doc, url) {
-
-	if (url.indexOf("getobject.pl") != -1){
-		// single article
-		scrape(doc, url);				
-	} else {
-		//search page
-		var items = {};
-		var urls = [];
-		var xpath = '//a[contains(@href, "getobject.pl")]';
-		var elmts = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
-		var elmt;		
-		while (elmt = elmts.iterateNext()){
-			var title = elmt.textContent;
-			var link = elmt.href;
-			if (title && link){
-				items[link] = title;
-			}			
-		}
-		Z.selectItems(items, function(items) {
-			if (items == null) return true;
-			for (var j in items) {
-				urls.push(j);
-			}
-			ZU.processDocuments(urls, scrape);
+	if (detectWeb(doc, url) == "multiple") {
+		Zotero.selectItems(getSearchResults(doc, false), function (items) {
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
-}/** BEGIN TEST CASES **/
+	else {
+		scrape(doc, url);
+	}
+}
+
+
+function scrape(doc, url) {
+	let path = url.match(/(\/philologic4\/[^/]+\/)navigate((?:\/\d+)+)/);
+	if (!path) {
+		throw new Error('Unknown entry path format');
+	}
+	
+	let [, base, id] = path;
+	id = id.replace(/\//g, ' ').trim();
+	
+	ZU.doGet(
+		`${base}reports/navigation.py?report=navigation&philo_id=${id}&byte=`,
+		function (respText) {
+			let json = JSON.parse(respText);
+			scrapeFromJSON(doc, url, json);
+		}
+	);
+}
+
+function scrapeFromJSON(doc, url, json) {
+	let item = new Zotero.Item('encyclopediaArticle');
+	let meta = json.metadata_fields;
+
+	item.title = meta.head;
+	item.encyclopediaTitle = meta.title.replace(/\.?\s*Tome \d+\.?/, '');
+	item.volume = meta.vol;
+	item.numberOfVolumes = '17';
+	item.place = meta.pub_place;
+	item.publisher = meta.publisher;
+	item.date = meta.pub_date;
+	
+	let firstPage;
+	let lastPage;
+	
+	let pageRe = /\[page \d+:([\da-zA-Z]+)\]/g;
+	let matchArray;
+	while ((matchArray = pageRe.exec(json.text)) !== null) {
+		// iterate through page heading matches. if we haven't set the first
+		// page yet, set it to the page in the heading we just found. always
+		// set the last page to the heading we just found. when we're done,
+		// the first page will correspond to the first heading and the last page
+		// to the last.
+		
+		if (!firstPage) {
+			firstPage = matchArray[1];
+		}
+		lastPage = matchArray[1];
+	}
+	
+	if (firstPage && lastPage) {
+		if (firstPage == lastPage) {
+			item.pages = firstPage;
+		}
+		else {
+			item.pages = `${firstPage}-${lastPage}`;
+		}
+	}
+	
+	item.url = url;
+	item.language = 'fr';
+	item.archive = 'ARTFL Encyclopédie Project (Spring 2021 Edition)';
+	item.libraryCatalog = '';
+
+	item.creators.push({
+		firstName: "Denis",
+		lastName: "Diderot",
+		creatorType: "editor"
+	});
+	
+	item.creators.push({
+		firstName: "Jean le Rond",
+		lastName: "d'Alembert",
+		creatorType: "editor"
+	});
+
+	item.creators.push(
+		ZU.cleanAuthor(
+			meta.kafauth.replace(/\s*\(.*\)/, ''), 'author', true
+		)
+	);
+	
+	if (doc) {
+		item.attachments.push({
+			title: 'Snapshot',
+			document: doc
+		});
+	}
+	
+	if (json.imgs.current_obj_img && json.imgs.current_obj_img.length) {
+		let url = json.imgs.current_obj_img[0];
+		item.attachments.push({
+			title: 'Page Scan',
+			mimeType: `image/${url.split('.').pop()}`,
+			url
+		});
+	}
+	
+	item.complete();
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?c.0:683:1.encyclopedie0513",
+		"url": "https://artflsrv03.uchicago.edu/philologic4/encyclopedie0521/navigate/1/929/",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "ADULTERE",
 				"creators": [
 					{
 						"firstName": "Denis",
@@ -157,50 +193,44 @@ var testCases = [
 						"creatorType": "editor"
 					},
 					{
-						"lastName": "Yvon",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "François-Vincent",
 						"lastName": "Toussaint",
 						"creatorType": "author"
-					},
-					{
-						"firstName": "Denis",
-						"lastName": "Diderot",
-						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1751",
+				"archive": "ARTFL Encyclopédie Project (Spring 2021 Edition)",
+				"encyclopediaTitle": "Encyclopédie, Dictionnaire raisonné des sciences, des arts et des métiers, par une Société de Gens de lettres",
+				"language": "fr",
+				"numberOfVolumes": "17",
+				"pages": "150",
+				"place": "Paris",
+				"publisher": "Le Breton",
+				"url": "https://artflsrv03.uchicago.edu/philologic4/encyclopedie0521/navigate/1/929/",
+				"volume": "1",
 				"attachments": [
 					{
-						"title": "ARTFL Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Page Scan",
+						"mimeType": "image/jpeg"
 					}
 				],
-				"title": "Adultere",
-				"encyclopediaTitle": "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers",
-				"shortTitle": "Encyclopédie",
-				"date": "1751-1772",
-				"publisher": "Briasson",
-				"place": "Paris",
-				"numberOfVolumes": "17",
-				"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?c.0:683:1.encyclopedie0513",
-				"volume": "1",
-				"pages": "150",
-				"libraryCatalog": "ARTFL Encyclopedie",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?p.0:203.encyclopedie0513",
+		"url": "https://artflsrv03.uchicago.edu/philologic4/encyclopedie0521/navigate/1/925/",
 		"items": [
 			{
 				"itemType": "encyclopediaArticle",
+				"title": "ADULTE",
 				"creators": [
 					{
 						"firstName": "Denis",
@@ -218,38 +248,35 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "1751",
+				"archive": "ARTFL Encyclopédie Project (Spring 2021 Edition)",
+				"encyclopediaTitle": "Encyclopédie, Dictionnaire raisonné des sciences, des arts et des métiers, par une Société de Gens de lettres",
+				"language": "fr",
+				"numberOfVolumes": "17",
+				"pages": "150",
+				"place": "Paris",
+				"publisher": "Le Breton",
+				"url": "https://artflsrv03.uchicago.edu/philologic4/encyclopedie0521/navigate/1/925/",
+				"volume": "1",
 				"attachments": [
 					{
-						"title": "ARTFL Snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Page Scan",
+						"mimeType": "image/jpeg"
 					}
 				],
-				"title": "ADULTE",
-				"encyclopediaTitle": "Encyclopédie, ou Dictionnaire raisonné des sciences, des arts et des métiers",
-				"shortTitle": "Encyclopédie",
-				"date": "1751-1772",
-				"publisher": "Briasson",
-				"place": "Paris",
-				"numberOfVolumes": "17",
-				"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/getobject.pl?p.0:203.encyclopedie0513",
-				"volume": "1",
-				"pages": "150",
-				"libraryCatalog": "ARTFL Encyclopedie",
-				"accessDate": "CURRENT_TIMESTAMP"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
 	{
 		"type": "web",
-		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/search3t?dbname=encyclopedie0513&word=amour&CONJUNCT=PHRASE&dgdivhead=&dgdivocauthor=&ExcludeDiderot3=on&dgdivocsalutation=&OUTPUT=conc&POLESPAN=5",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "http://artflsrv02.uchicago.edu/cgi-bin/philologic/search3t?dbname=encyclopedie0513&dgdivhead=EAU",
+		"url": "https://artflsrv03.uchicago.edu/philologic4/encyclopedie0521/query?report=concordance&method=proxy&attribution=&objecttype=&q=amour&start=0&end=0",
 		"items": "multiple"
 	}
 ]

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2017-03-19 23:26:57"
+	"lastUpdated": "2021-11-05 18:35:52"
 }
 
 /**
@@ -17,13 +17,13 @@
  */
 function getZoteroType(iconSrc) {
 	// only specify types not specified in COinS
-	if (iconSrc.indexOf("icon-rec") != -1) {
+	if (iconSrc.includes("icon-rec")) {
 		return "audioRecording";
 	}
-	if (iconSrc.indexOf("icon-com") != -1) {
+	if (iconSrc.includes("icon-com")) {
 		return "computerProgram";
 	}
-	if (iconSrc.indexOf("icon-map") != -1) {
+	if (iconSrc.includes("icon-map")) {
 		return "map";
 	}
 	return false;
@@ -49,7 +49,7 @@ function generateItem(doc, co) {
 
 function getSearchResults(doc) {
 	var results = doc.getElementsByClassName('result');
-	for (var i=0; i<results.length; i++) {
+	for (let i = 0; i < results.length; i++) {
 		if (!results[i].getElementsByClassName('name').length) {
 			delete results[i];
 			i--;
@@ -66,8 +66,8 @@ function getFirstContextObj(doc) {
 	return ZU.xpathText(doc, '//span[@class="Z3988"][1]/@title');
 }
 
-function detectWeb(doc, url) {
-	//distinguish from Worldcat Discovery
+function detectWeb(doc, _url) {
+	// distinguish from Worldcat Discovery
 	if (doc.body.id == "worldcat") {
 		if (getSearchResults(doc).length) {
 			return "multiple";
@@ -79,6 +79,8 @@ function detectWeb(doc, url) {
 		// generate item and return type
 		return generateItem(doc, co).itemType;
 	}
+	
+	return false;
 }
 
 /**
@@ -95,11 +97,12 @@ function cleanBrackets(field) {
 	field = field.replace(/^\[|\]\.?$/g, "");
 	return field;
 }
+
 /**
  * RIS Scraper Function
  *
  */
-var baseURL = ''; //we need to set this when calling from doSearch
+var baseURL = ''; // we need to set this when calling from doSearch
 function scrape(ids, data) {
 	var oclcID = ids.shift(),
 		itemData = (data || []).shift();
@@ -110,36 +113,41 @@ function scrape(ids, data) {
 		+ "?client=worldcat.org-detailed_record&page=endnote";
 	var tryAgain = true;
 	ZU.doGet(risURL + 'alt' /* non-latin RIS first **/, function parseRIS(text) {
-		// Sometimes non-latin RIS is blank
-		if (tryAgain && !/^TY\s\s?-/m.test(text)) {
+		// Sometimes non-latin RIS is blank or corrupted
+		if (tryAgain && (!/^TY\s\s?-/m.test(text) || text.includes('\ufffd' /* REPLACEMENT CHARACTER */))) {
 			Z.debug("WorldCat did not return valid RIS. Trying Latin RIS.");
 			tryAgain = false;
 			ZU.doGet(risURL, parseRIS);
 			return;
 		}
 		
-		//2013-05-28 RIS export currently has messed up authors
-		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan, 
-		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function(m, tag, value) {
+		// 2013-05-28 RIS export currently has messed up authors
+		// e.g. A1  - Gabbay, Dov M., Woods, John Hayden., Hartmann, Stephan,
+		text = text.replace(/^((?:A[123U]|ED)\s+-\s+)(.+)/mg, function (m, tag, value) {
 			var authors = value.replace(/[.,\s]+$/, '')
-					.split(/[.,],/);
+				.split(/[.,],/);
+			// sometimes authors look like "Glick, Reuven, Hutchison, Michael",
+			// so we just have to split on every other comma.
+			if (authors.length == 1 && authors[0].replace(/[^,]/g, '').length > 1) {
+				authors = authors[0].split(/([^,]+,[^,]+),/);
+			}
 			var replStr = '';
 			var author;
-			for (var i=0, n=authors.length; i<n; i++) {
-					author = authors[i].trim();
-					if (author) replStr += tag + author + '\n';
+			for (let i = 0, n = authors.length; i < n; i++) {
+				author = authors[i].trim().replace(/^,\s*/, '');
+				if (author) replStr += tag + author + '\n';
 			}
 			return replStr.trim();
 		});
 		
 		// Conference proceedings should be imported as book (below), but authors
 		// are actually editors
-		text = text.replace(/^TY\s+-\s+CONF\s[\s\S]*?^ER\s+-\s/mg, function(m) {
+		text = text.replace(/^TY\s+-\s+CONF\s[\s\S]*?^ER\s+-\s/mg, function (m) {
 			if (!/^ED\s+-/m.test(m)) {
 				m = m.replace(/^A[U1](\s+-)/mg, 'ED$1');
 			}
 			return m;
-		})
+		});
 		
 		Zotero.debug("Importing corrected RIS: \n" + text);
 		
@@ -153,23 +161,27 @@ function scrape(ids, data) {
 			if (item.libraryCatalog == "http://worldcat.org") {
 				item.libraryCatalog = "Open WorldCat";
 			}
-			//remove space before colon
-			item.title = item.title.replace(/\s+:/, ":")
+			// remove space before colon
+			item.title = item.title.replace(/\s+:/, ":");
 			
 			
-			//correct field mode for corporate authors
-			for (i in item.creators) {
-				if (!item.creators[i].firstName){
-					item.creators[i].fieldMode=1;
+			// correct field mode for corporate authors
+			for (let creator of item.creators) {
+				if (!creator.firstName) {
+					creator.fieldMode = 1;
 				}
 			}
 
 			item.title = cleanBrackets(item.title);
 			item.place = cleanBrackets(item.place);
 			item.publisher = cleanBrackets(item.publisher);
-			//attach notes
+			// Strip possible trailing period
+			if (item.language) {
+				item.language = item.language.replace(/\.$/, '');
+			}
+			// attach notes
 			if (itemData && itemData.notes) {
-				item.notes.push({note: itemData.notes});
+				item.notes.push({ note: itemData.notes });
 			}
 			if (oclcID) {
 				item.extra = "OCLC: " + oclcID;
@@ -178,11 +190,11 @@ function scrape(ids, data) {
 			item.complete();
 		});
 		
-		translator.getTranslatorObject(function(trans) {
-			trans.options.defaultItemType = 'book'; //if not supplied, default to book
+		translator.getTranslatorObject(function (trans) {
+			trans.options.defaultItemType = 'book'; // if not supplied, default to book
 			trans.options.typeMap = {
-				'ELEC': 'book', //ebooks should be imported as books
-				'CONF': 'book' // proceedings rather than papers
+				ELEC: 'book', // ebooks should be imported as books
+				CONF: 'book' // proceedings rather than papers
 			};
 			
 			trans.doImport();
@@ -196,10 +208,10 @@ function doWeb(doc, url) {
 	var results = getSearchResults(doc);
 	if (results.length) {
 		var items = {}, itemData = {};
-		for (var i=0, n=results.length; i<n; i++) {
+		for (let i = 0, n = results.length; i < n; i++) {
 			var title = getTitleNode(results[i]);
 			if (!title || !title.href) continue;
-			var url = title.href;
+			let url = title.href;
 			var oclcID = extractOCLCID(url);
 			if (!oclcID) {
 				Zotero.debug("WorldCat: Failed to extract OCLC ID from URL: " + url);
@@ -209,7 +221,7 @@ function doWeb(doc, url) {
 			
 			var notes = ZU.xpath(results[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
 			if (!notes.length) {
-				//maybe we're looking at our own list
+				// maybe we're looking at our own list
 				notes = ZU.xpath(results[i], './div/div[@class="description"]/div[contains(@id,"saved_comments_") and normalize-space(text())]');
 			}
 			if (notes.length) {
@@ -218,14 +230,14 @@ function doWeb(doc, url) {
 				
 				if (notes) {
 					itemData[oclcID] = {
-						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) //it's double-escaped on WorldCat
+						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) // it's double-escaped on WorldCat
 					};
 				}
 			}
 		}
 
-		Zotero.selectItems(items, function(items) {
-			if (!items) return true;
+		Zotero.selectItems(items, function (items) {
+			if (!items) return;
 			
 			var ids = [], data = [];
 			for (var i in items) {
@@ -235,15 +247,16 @@ function doWeb(doc, url) {
 			
 			scrape(ids, data);
 		});
-	} else {
-		var oclcID = extractOCLCID(url);
+	}
+	else {
+		let oclcID = extractOCLCID(url);
 		if (!oclcID) {
 			// Seems like some single search results redirect to the item page,
 			// but the URL is still a search URL. Grab cannonical URL from meta tag
 			// to extract the OCLC ID
-			var canonicalURL = ZU.xpath(doc, '/html/head/link[@rel="canonical"][1]')[0];
+			let canonicalURL = attr(doc, "link[rel='canonical']", "href");
 			if (canonicalURL) {
-				oclcID = extractOCLCID(canonicalURL.href);
+				oclcID = extractOCLCID(canonicalURL);
 			}
 		}
 		if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
@@ -257,14 +270,15 @@ function sanitizeInput(items, checkOnly) {
 	}
 	
 	var cleanItems = [];
-	for (var i=0; i<items.length; i++) {
+	for (let i = 0; i < items.length; i++) {
 		var item = ZU.deepCopy(items[i]),
 			valid = false;
 		if (item.ISBN && typeof item.ISBN == 'string'
 			&& (item.ISBN = ZU.cleanISBN(item.ISBN))
 		) {
 			valid = true;
-		} else {
+		}
+		else {
 			delete item.ISBN;
 		}
 		
@@ -273,7 +287,8 @@ function sanitizeInput(items, checkOnly) {
 		) {
 			valid = true;
 			item.identifiers.oclc = item.identifiers.oclc.trim();
-		} else if (item.identifiers) {
+		}
+		else if (item.identifiers) {
 			delete item.identifiers.oclc;
 		}
 		
@@ -294,13 +309,13 @@ function doSearch(items) {
 	items = sanitizeInput(items);
 	if (!items.length) {
 		Z.debug("Search query does not contain valid identifiers");
-		return false;
+		return;
 	}
 	
 	baseURL = "http://www.worldcat.org"; // Translator-global
 	
 	var ids = [], isbns = [];
-	for (var i=0; i<items.length; i++) {
+	for (let i = 0; i < items.length; i++) {
 		if (items[i].identifiers && items[i].identifiers.oclc) {
 			ids.push(items[i].identifiers.oclc);
 			continue;
@@ -309,7 +324,7 @@ function doSearch(items) {
 		isbns.push(items[i].ISBN);
 	}
 	
-	fetchIDs(isbns, ids, function(ids) {
+	fetchIDs(isbns, ids, function (ids) {
 		if (!ids.length) {
 			Z.debug("Could not retrieve any OCLC IDs");
 			Zotero.done(false);
@@ -330,35 +345,38 @@ function fetchIDs(isbns, ids, callback) {
 		+ encodeURIComponent(isbn);
 	ZU.processDocuments(url,
 		function (doc) {
-			//mostly these are search results; for those, we take the first search result
+			// mostly these are search results; for those, we take the first search result
 			var results = getSearchResults(doc);
 			if (results.length) {
 				var title = getTitleNode(results[0]);
 				if (title) {
 					var id = extractOCLCID(title.href);
 					if (id) ids.push(id);
-				} else {
+				}
+				else {
 					Z.debug("Could not extract OCLC ID for ISBN " + isbn);
 				}
 			}
-			//but sometimes we have single items
-			else  {
-				var canonicalURL = ZU.xpathText(doc, '/html/head/link[@rel="canonical"]/@href');
-   				if (canonicalURL) {
-      					oclcID = extractOCLCID(canonicalURL);
-      					if (!oclcID) throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
-         				scrape([oclcID]);
-   				} else {
-     					 Z.debug("No search results found for ISBN " + isbn);
-   				}
+			// but sometimes we have single items
+			else {
+				let canonicalURL = attr(doc, "link[rel='canonical']", "href");
+				if (canonicalURL) {
+					let oclcID = extractOCLCID(canonicalURL);
+					if (!oclcID) {
+						throw new Error("WorldCat: Failed to extract OCLC ID from URL: " + url);
+					}
+					scrape([oclcID]);
+				}
+				else {
+					Z.debug("No search results found for ISBN " + isbn);
+				}
 			}
 		},
-		function() {
-			fetchIDs(isbns, ids, callback)
+		function () {
+			fetchIDs(isbns, ids, callback);
 		}
 	);
 }
-
 
 
 /** BEGIN TEST CASES **/
@@ -370,7 +388,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
+		"url": "https://www.worldcat.org/title/argentina/oclc/489605&referer=brief_results",
 		"items": [
 			{
 				"itemType": "book",
@@ -383,6 +401,7 @@ var testCases = [
 					}
 				],
 				"date": "1964",
+				"abstractNote": "\"This book delves into the Argentine past seeking the origins of the political, social, and economic conflicts that have stunted Argentina's development after her spectacular progress during the late nineteenth and early twentieth centuries\"--From book jacket.",
 				"extra": "OCLC: 489605",
 				"language": "English",
 				"libraryCatalog": "Open WorldCat",
@@ -431,7 +450,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://melvyl.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
+		"url": "https://www.worldcat.org/title/cambridge-companion-to-adam-smith/oclc/60321422&referer=brief_results",
 		"items": [
 			{
 				"itemType": "book",
@@ -660,7 +679,7 @@ var testCases = [
 				],
 				"date": "2009",
 				"ISSN": "1049-0078",
-				"abstractNote": "In recent years China has faced an increasing trilemma—how to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
+				"abstractNote": "In recent years China has faced an increasing trilemmahow to pursue an independent domestic monetary policy and limit exchange rate flexibility, while at the same time facing large and growing international capital flows. This paper analyzes the impact of the trilemma on China's monetary policy as the country liberalizes its good and financial markets and integrates with the world economy. It shows how China has sought to insulate its reserve money from the effects of balance of payments inflows by sterilizing through the issuance of central bank liabilities. However, we report empirical results indicating that sterilization dropped precipitously in 2006 in the face of the ongoing massive buildup of international reserves, leading to a surge in reserve money growth. We also estimate a vector error correction model linking the surge in China's reserve money to broad money, real GDP, and the price level. We use this model to explore the inflationary implications of different policy scenarios. Under a scenario of continued rapid reserve money growth (consistent with limited sterilization of foreign exchange reserve accumulation) and strong economic growth, the model predicts a rapid increase in inflation. A model simulation using an extension of the framework that incorporates recent increases in bank reserve requirements also implies a rapid rise in inflation. By contrast, model simulations incorporating a sharp slowdown in economic growth such as that seen in late 2008 and 2009 lead to less inflation pressure even with a substantial buildup in international reserves.",
 				"extra": "OCLC: 4933578953",
 				"issue": "3",
 				"language": "English",
@@ -702,6 +721,45 @@ var testCases = [
 				"libraryCatalog": "Open WorldCat",
 				"place": "北京",
 				"publisher": "中囯建筑工业出版社",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.worldcat.org/title/medieval-science-technology-and-medicine-an-encyclopedia/oclc/994342191&referer=brief_results",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Medieval science, technology and medicine: an encyclopedia",
+				"creators": [
+					{
+						"lastName": "Glick",
+						"firstName": "Thomas F",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Livesey",
+						"firstName": "Steven John",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wallis",
+						"firstName": "Faith",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017",
+				"ISBN": "9781315165127 9781351676168 9781351676175 9781351676151",
+				"abstractNote": "\"First published in 2005, this encyclopedia demonstrates that the millennium from the fall of the Roman Empire to the Renaissance was a period of great intellectual and practical achievement and innovation. In Europe, the Islamic world, South and East Asia, and the Americas, individuals built on earlier achievements, introduced sometimes radical refinements and laid the foundations for modern development. Medieval Science, Technology, and Medicine details the whole scope of scientific knowledge in the medieval period in more than 300 A to Z entries. This comprehensive resource discusses the research, application of knowledge, cultural and technology exchanges, experimentation, and achievements in the many disciplines related to science and technology. It also looks at the relationship between medieval science and the traditions it supplanted. Written by a select group of international scholars, this reference work will be of great use to scholars, students, and general readers researching topics in many fields, including medieval studies, world history, history of science, history of technology, history of medicine, and cultural studies.\"--Provided by publisher.",
+				"extra": "OCLC: 994342191",
+				"language": "English",
+				"libraryCatalog": "Open WorldCat",
+				"shortTitle": "Medieval science, technology and medicine",
+				"url": "https://www.taylorfrancis.com/books/e/9781315165127",
 				"attachments": [],
 				"tags": [],
 				"notes": [],

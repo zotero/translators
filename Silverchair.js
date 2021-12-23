@@ -2,20 +2,20 @@
 	"translatorID": "3bae3a55-f021-4b59-8a14-43701f336adf",
 	"label": "Silverchair",
 	"creator": "Sebastian Karcher",
-	"target": "/(article|advance-article|advance-article-abstract|article-abstract)/|search-results?|\\/issue(/|$)",
+	"target": "/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)(/|\\.aspx)|search-results?|\\/issue(/|s\\.aspx|$)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 280,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-12-06 20:02:14"
+	"lastUpdated": "2021-09-07 20:12:08"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Sebastian Karcher
+	Copyright © 2020-2021 Sebastian Karcher and Abe Jellinek
 	
 	This file is part of Zotero.
 
@@ -35,13 +35,9 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
-
 
 function detectWeb(doc, url) {
-	let articleRegex = /\/(article|advance-article|advance-article-abstract|article-abstract)\//;
+	let articleRegex = /\/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)(\/|\.aspx)/;
 	if (articleRegex.test(url) && getArticleId(doc)) {
 		return "journalArticle";
 	}
@@ -55,7 +51,7 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	// First one is issue, 2nd one search results
-	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, #searchResultsPage .al-title a[href*="/article"]');
+	var rows = doc.querySelectorAll('#ArticleList h5.item-title>a, .al-title a[href*="article"], .al-article-items > .customLink > a[href*="article"]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -83,6 +79,12 @@ function getArticleId(doc) {
 	if (!id) {
 		id = attr(doc, 'a[data-article-id]', 'data-article-id');
 	}
+	if (!id) {
+		id = attr(doc, '[data-resource-id]', 'data-resource-id');
+	}
+	if (!id) {
+		throw new Error('ID not found in document');
+	}
 	return id;
 }
 
@@ -98,11 +100,21 @@ function scrape(doc) {
 	var pdfURL = attr(doc, 'a.article-pdfLink', 'href');
 	// Z.debug("pdfURL: " + pdfURL);
 	ZU.doGet(risURL, function (text) {
+		if (text.includes('We are sorry, but we are experiencing unusual traffic at this time.')) {
+			throw new Error('Rate-limited');
+		}
+		
 		// Z.debug(text);
 		var translator = Zotero.loadTranslator("import");
 		translator.setTranslator("32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7");
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
+			if (item.pages) {
+				// if item.pages only spans one page (4-4), replace the range
+				// with a single page number (4).
+				item.pages = item.pages.trim().replace(/^([^-]+)-\1$/, '$1');
+			}
+			
 			if (pdfURL) {
 				item.attachments.push({
 					url: pdfURL,
@@ -396,6 +408,230 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://ashpublications.org/hematology/issue/2019/1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jamanetwork.com/journals/jama/fullarticle/2645104",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Clinicopathological Evaluation of Chronic Traumatic Encephalopathy in Players of American Football",
+				"creators": [
+					{
+						"lastName": "Mez",
+						"firstName": "Jesse",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Daneshvar",
+						"firstName": "Daniel H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kiernan",
+						"firstName": "Patrick T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Abdolmohammadi",
+						"firstName": "Bobak",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alvarez",
+						"firstName": "Victor E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Huber",
+						"firstName": "Bertrand R.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Alosco",
+						"firstName": "Michael L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Solomon",
+						"firstName": "Todd M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Nowinski",
+						"firstName": "Christopher J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McHale",
+						"firstName": "Lisa",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cormier",
+						"firstName": "Kerry A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kubilus",
+						"firstName": "Caroline A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Martin",
+						"firstName": "Brett M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Murphy",
+						"firstName": "Lauren",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Baugh",
+						"firstName": "Christine M.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Montenigro",
+						"firstName": "Phillip H.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Chaisson",
+						"firstName": "Christine E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Tripodis",
+						"firstName": "Yorghos",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Kowall",
+						"firstName": "Neil W.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Weuve",
+						"firstName": "Jennifer",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McClean",
+						"firstName": "Michael D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Cantu",
+						"firstName": "Robert C.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Goldstein",
+						"firstName": "Lee E.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Katz",
+						"firstName": "Douglas I.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stern",
+						"firstName": "Robert A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Stein",
+						"firstName": "Thor D.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "McKee",
+						"firstName": "Ann C.",
+						"creatorType": "author"
+					}
+				],
+				"date": "July 25, 2017",
+				"DOI": "10.1001/jama.2017.8334",
+				"ISSN": "0098-7484",
+				"abstractNote": "Players of American football may be at increased risk of long-term neurological conditions, particularly chronic traumatic encephalopathy (CTE).To determine the neuropathological and clinical features of deceased football players with CTE.Case series of 202 football players whose brains were donated for research. Neuropathological evaluations and retrospective telephone clinical assessments (including head trauma history) with informants were performed blinded. Online questionnaires ascertained athletic and military history.Participation in American football at any level of play.Neuropathological diagnoses of neurodegenerative diseases, including CTE, based on defined diagnostic criteria; CTE neuropathological severity (stages I to IV or dichotomized into mild [stages I and II] and severe [stages III and IV]); informant-reported athletic history and, for players who died in 2014 or later, clinical presentation, including behavior, mood, and cognitive symptoms and dementia.Among 202 deceased former football players (median age at death, 66 years [interquartile range, 47-76 years]), CTE was neuropathologically diagnosed in 177 players (87%; median age at death, 67 years [interquartile range, 52-77 years]; mean years of football participation, 15.1 [SD, 5.2]), including 0 of 2 pre–high school, 3 of 14 high school (21%), 48 of 53 college (91%), 9 of 14 semiprofessional (64%), 7 of 8 Canadian Football League (88%), and 110 of 111 National Football League (99%) players. Neuropathological severity of CTE was distributed across the highest level of play, with all 3 former high school players having mild pathology and the majority of former college (27 [56%]), semiprofessional (5 [56%]), and professional (101 [86%]) players having severe pathology. Among 27 participants with mild CTE pathology, 26 (96%) had behavioral or mood symptoms or both, 23 (85%) had cognitive symptoms, and 9 (33%) had signs of dementia. Among 84 participants with severe CTE pathology, 75 (89%) had behavioral or mood symptoms or both, 80 (95%) had cognitive symptoms, and 71 (85%) had signs of dementia.In a convenience sample of deceased football players who donated their brains for research, a high proportion had neuropathological evidence of CTE, suggesting that CTE may be related to prior participation in football.",
+				"issue": "4",
+				"journalAbbreviation": "JAMA",
+				"libraryCatalog": "Silverchair",
+				"pages": "360-370",
+				"publicationTitle": "JAMA",
+				"url": "https://doi.org/10.1001/jama.2017.8334",
+				"volume": "318",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://pubs.geoscienceworld.org/georef/search-results?page=1&q=test&SearchSourceType=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/article.aspx?articleid=2503433",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Testing models of peripheral encoding using metamerism in an oddity paradigm",
+				"creators": [
+					{
+						"lastName": "Wallis",
+						"firstName": "Thomas S. A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bethge",
+						"firstName": "Matthias",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wichmann",
+						"firstName": "Felix A.",
+						"creatorType": "author"
+					}
+				],
+				"date": "March 11, 2016",
+				"DOI": "10.1167/16.2.4",
+				"ISSN": "1534-7362",
+				"abstractNote": "Most of the visual field is peripheral, and the periphery encodes visual input with less fidelity compared to the fovea. What information is encoded, and what is lost in the visual periphery? A systematic way to answer this question is to determine how sensitive the visual system is to different kinds of lossy image changes compared to the unmodified natural scene. If modified images are indiscriminable from the original scene, then the information discarded by the modification is not important for perception under the experimental conditions used. We measured the detectability of modifications of natural image structure using a temporal three-alternative oddity task, in which observers compared modified images to original natural scenes. We consider two lossy image transformations, Gaussian blur and Portilla and Simoncelli texture synthesis. Although our paradigm demonstrates metamerism (physically different images that appear the same) under some conditions, in general we find that humans can be capable of impressive sensitivity to deviations from natural appearance. The representations we examine here do not preserve all the information necessary to match the appearance of natural scenes in the periphery.",
+				"issue": "2",
+				"journalAbbreviation": "Journal of Vision",
+				"libraryCatalog": "Silverchair",
+				"pages": "4",
+				"publicationTitle": "Journal of Vision",
+				"url": "https://doi.org/10.1167/16.2.4",
+				"volume": "16",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jov.arvojournals.org/issues.aspx?issueid=934904&journalid=178#issueid=934904",
 		"items": "multiple"
 	}
 ]

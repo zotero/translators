@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-06-19 12:54:28"
+	"lastUpdated": "2021-06-29 09:01:54"
 }
 
 /*
@@ -46,6 +46,11 @@ var domain2translator = {
 	'oatao.univ-toulouse.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
 	'pub.orcid.org': 'bc03b4fe-436d-4a1f-ba59-de4d2d7a63f7',
 	'dumas.ccsd.cnrs.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'publications-prairial.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'univoak.eu': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'publications.ut-capitole.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'agritrop.cirad.fr': '951c027d-74ac-47d4-a107-9c3069ab7b48',
+	'explore.lib.uliege.be': 'cd669d1f-96b8-4040-aa36-48f843248399',
 };
 
 function getTranslatorFromDomain(domain) {
@@ -155,6 +160,19 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://www.idref.fr/199676100",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.idref.fr/236948326",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.idref.fr/056894546",
+		"defer": true,
 		"items": "multiple"
 	}
 ]
