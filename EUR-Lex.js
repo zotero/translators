@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-21 16:17:07"
+	"lastUpdated": "2021-12-23 09:12:51"
 }
 
 /*
@@ -191,7 +191,6 @@ function scrape(doc, url) {
 					item.codeNumber = uriParts[3];
 					}
 				}
-				// @todo
 				if (type == "bill") {
 					item.codeVolume = item.codeNumber;
 					item.codeNumber = null;
