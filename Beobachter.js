@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-07 21:24:35"
+	"lastUpdated": "2021-12-27 20:41:15"
 }
 
 /*
@@ -60,18 +60,13 @@ function doWeb(doc, url) {
 		if (!items || countObjectProperties(items) == 0) {
 			return true;
 		}
-		items = Z.selectItems(items);
-		if (!items) {
-			return true;
-		}
-
-		for (var i in items) {
-			urls.push(i);
-		}
+		items = Z.selectItems(items, function (items) {
+			if (!items) return;
+			ZU.processDocuments(Object.keys(items), scrape);
+		});
 	} else {
-		urls.push(doc.location.href);
+		scrape(doc);
 	}
-	ZU.processDocuments(urls, scrape);
 }
 
 /* Zotero API */
