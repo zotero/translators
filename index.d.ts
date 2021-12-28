@@ -4,7 +4,7 @@ declare namespace Zotero {
 		function throttle<Type>(
 			fn: Type,
 			wait: number,
-			options: { leading: boolean; trailing: boolean }
+			options?: { leading: boolean = true; trailing: boolean = true }
 		): Type;
 		function capitalizeName(s: string): string;
 		function cleanAuthor<T extends CreatorType>(
@@ -15,14 +15,14 @@ declare namespace Zotero {
 		function trim(s: string): string;
 		function trimInternal(s: string): string;
 		function superCleanString(s: string): string;
-		function isHTTPURL(url: string, allowNoScheme?: boolean): boolean;
-		function cleanURL(url: string, tryHttp?: boolean): string;
+		function isHTTPURL(url: string, allowNoScheme: boolean = false): boolean;
+		function cleanURL(url: string, tryHttp: boolean = false): string;
 		function cleanTags(s: string): string;
 		function cleanDOI(s: string): string;
-		function cleanISBN(s: string, dontValidate?: boolean): string | false;
+		function cleanISBN(s: string, dontValidate: boolean = false): string | false;
 		function toISBN13(isbnStr: string): string;
 		function cleanISSN(issnStr: string): string | false;
-		function text2html(s: string, singleNewlineIsParagraph?: boolean): string;
+		function text2html(s: string, singleNewlineIsParagraph: boolean = false): string;
 		function htmlSpecialChars(s: string): string;
 		function unescapeHTML(s: string): string;
 		// unimplemented: dom2text
@@ -86,7 +86,7 @@ declare namespace Zotero {
 			xpath: string,
 			namespaces?: { [prefix: string]: string },
 			delimiter?: string
-		): string | null;
+		): string?;
 		function randomString(len?: number, chars?: string): string;
 		// varDump
 		function itemToCSLJSON(item: Zotero.Item): any | Promise<any>;
@@ -152,13 +152,13 @@ declare namespace Zotero {
 			item: Zotero.Item[]
 		): Zotero.Item[] | false;
 
-		type HTTPRequestParameters = {
-			method?,
-			requestHeaders?: { [string]: string },
+		type HTTPRequestParameters<T extends HTTPResponseType> = {
+			method?: string = "GET",
+			requestHeaders?: Record<string, string>,
 			body?: string,
 			responseCharset?: string,
-			responseType?: HTTPResponseType
-		}
+			responseType?: T = "text"
+		};
 
 		type HTTPResponseType =
 			| "text"
@@ -167,83 +167,38 @@ declare namespace Zotero {
 
 		type HTTPResponse<T> = {
 			status: number,
-			headers: { [string]: string },
+			headers: Record<string, string>,
 			body: T
 		};
 
 		function request(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset,
-				responseType = "text"
-			}?: HTTPRequestParameters
+			params?: HTTPRequestParameters<"text">
 		): Promise<HTTPResponse<string>>;
 
 		function requestText(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset
-			}?: Omit<HTTPRequestParameters, "responseType">
+			params?: HTTPRequestParameters<"text">
 		): Promise<HTTPResponse<string>>;
 
 		function request(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset,
-				responseType = "json"
-			}?: {
-				method?,
-				requestHeaders?: { [string]: string },
-				body?: string,
-				responseCharset?: string,
-				responseType?: "json"
-			}
+			params?: HTTPRequestParameters<"json">
 		): Promise<HTTPResponse<any>>;
 
 		function requestJSON(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset
-			}?: Omit<HTTPRequestParameters, "responseType">
+			params?: HTTPRequestParameters<"json">
 		): Promise<HTTPResponse<any>>;
 
 		function request(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset,
-				responseType = "document"
-			}?: {
-				method?,
-				requestHeaders?: { [string]: string },
-				body?: string,
-				responseCharset?: string,
-				responseType?: "document"
-			}
+			params?: HTTPRequestParameters<"document">
 		): Promise<HTTPResponse<Document>>;
 
 		function requestDocument(
 			url: string,
-			{
-				method = "GET",
-				requestHeaders,
-				body,
-				responseCharset
-			}?: Omit<HTTPRequestParameters, "responseType">
+			params?: HTTPRequestParameters<"document">
 		): Promise<HTTPResponse<Document>>;
 	}
 
@@ -1428,7 +1383,6 @@ declare namespace Zotero {
 	}
 
 	interface Translate<T extends Translator> {
-		setLocation(location: String): void;
 		setTranslator(
 			translator: T[] | T | string
 		): boolean;
@@ -1526,9 +1480,6 @@ declare namespace Zotero {
 			type: "pageModified",
 			handler: (translate: Zotero.Translate<T>, doc: Document) => void
 		): void;
-		setTranslatorProvider(translatorProvider: object): void;
-		incrementAsyncProcesses(f: string): void;
-		decrementAsyncProcesses(f: string, by?: number): void;
 		getTranslators(
 			getAllTranslators?: boolean,
 			checkSetTranslator?: boolean
@@ -1538,21 +1489,10 @@ declare namespace Zotero {
 			saveAttachments?: boolean,
 			linkFiles?: boolean
 		): Promise<Zotero.Item[]>;
-		getProgress(): number | null;
-		resolveURL(url: string, dontUseProxy?: boolean): string;
 		setDocument(doc: Document): void;
-		setLocation(location: string, rootLocation?: string): void;
 		setString(s: string): void;
 		setItems(items: Zotero.Item[]): void;
-		setLibraryID(libraryID: string): void;
-		setCollection(collection: Zotero.Collection): void;
-		setDisplayOptions(displayOptions: object): void;
 		setSearch(item: Zotero.Item): void;
-		setIdentifier(identifier: {
-			DOI?: string;
-			ISBN?: string;
-			PMID?: string;
-		}): void;
 	}
 
 	// common
@@ -1581,7 +1521,7 @@ declare namespace Zotero {
 	// web
 	function selectItems(
 		items: { [id: string]: string },
-		callback: (items: { [id: string]: string }) => void
+		callback: (items: { [id: string]: string }?) => void
 	): void;
 	function monitorDOMChanges(target: Node, config: MutationObserverInit): void;
 
@@ -1589,8 +1529,8 @@ declare namespace Zotero {
 	function setProgress(value: number): void;
 
 	// export
-	function nextItem(): Zotero.Item;
-	function nextCollection(): any;
+	function nextItem(): Zotero.Item?;
+	function nextCollection(): Zotero.Collection;
 }
 
 import Z = Zotero;
