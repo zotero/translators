@@ -179,7 +179,7 @@ declare namespace Zotero {
 		function requestText(
 			url: string,
 			params?: HTTPRequestParameters<"text">
-		): Promise<HTTPResponse<string>>;
+		): Promise<string>;
 
 		function request(
 			url: string,
@@ -189,7 +189,7 @@ declare namespace Zotero {
 		function requestJSON(
 			url: string,
 			params?: HTTPRequestParameters<"json">
-		): Promise<HTTPResponse<any>>;
+		): Promise<any>;
 
 		function request(
 			url: string,
@@ -199,7 +199,7 @@ declare namespace Zotero {
 		function requestDocument(
 			url: string,
 			params?: HTTPRequestParameters<"document">
-		): Promise<HTTPResponse<Document>>;
+		): Promise<Document>;
 	}
 
 	interface Attachment {
@@ -1362,7 +1362,7 @@ declare namespace Zotero {
 
 	interface WebTranslator extends Translator {
 		detectWeb(doc: Document, url: string): ItemType | "multiple" | false;
-		doWeb(doc: Document, url: string): void;
+		doWeb(doc: Document, url: string): void | Promise<void>;
 
 		// strongly type commonly-used translator exports
 		itemType?: ItemType;
@@ -1386,6 +1386,7 @@ declare namespace Zotero {
 		setTranslator(
 			translator: T[] | T | string
 		): boolean;
+		getTranslatorObject(): Promise<T>;
 		getTranslatorObject(receiver: (obj: T) => void): void;
 		setHandler(
 			type: "select",
@@ -1519,9 +1520,10 @@ declare namespace Zotero {
 	const parentTranslator: string?;
 
 	// web
+	function selectItems(items: Record<string, string>): Promise<Record<string, string>?>;
 	function selectItems(
-		items: { [id: string]: string },
-		callback: (items: { [id: string]: string }?) => void
+		items: Record<string, string>,
+		callback: (items: Record<string, string>?) => void
 	): void;
 	function monitorDOMChanges(target: Node, config: MutationObserverInit): void;
 
@@ -1530,7 +1532,7 @@ declare namespace Zotero {
 
 	// export
 	function nextItem(): Zotero.Item?;
-	function nextCollection(): Zotero.Collection;
+	function nextCollection(): Zotero.Collection?;
 }
 
 import Z = Zotero;
