@@ -340,7 +340,7 @@ function doImport() {
 		item = new Zotero.Item("manuscript"); // is this the best category
 		item.date = parseDate(ZU.xpath(itemXML, "reviewed_date"));
 		if (ZU.xpath(itemXML, "/contributors/anonymous")) {
-			item.creators.push({ lastName: "Anonymous Reviewer", fieldMode: "1", creatorType: "author" });
+			item.creators.push({ lastName: "Anonymous Reviewer", fieldMode: 1, creatorType: "author" });
 		}
 		item.type = "peer review";
 		var reviewOf = ZU.xpathText(itemXML, "//related_item/inter_work_relation");
@@ -655,7 +655,7 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Anonymous Reviewer",
-						"fieldMode": "1",
+						"fieldMode": 1,
 						"creatorType": "author"
 					}
 				],
