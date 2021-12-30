@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-21 04:54:57"
+	"lastUpdated": "2021-12-30 18:33:59"
 }
 
 /*
@@ -65,7 +65,6 @@ function doWeb(doc, url) {
 				}
 				// pass issue information to scraper
 				scrape(doc, i, isIssue, isSingleArticle);
-
 			}
 			return true;
 		});
