@@ -62,7 +62,6 @@ function detectWeb(doc, url) {
 
 
 function scrape(doc, url) {
-
 	let item = new Zotero.Item('blogPost');
 	let json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	if (json) json = json["@graph"][1];
