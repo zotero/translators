@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 19:51:12"
+	"lastUpdated": "2021-12-31 20:04:11"
 }
 
 /*
@@ -682,7 +682,6 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
-	
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -956,6 +955,7 @@ function finalDataCleanup(doc, newItem) {
 		}
 	}
 	if (newItem.tags.length > 0) newItem.tags = scrubLowercaseTags(newItem.tags);
+	
 	/* what else is automatically adding tags? if it's bad data, don't import it, but resetting all tags (per below) kills good LD-JSON tags
 	else {
 		// Unless called from another translator, don't include automatic tags,
