@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 01:47:23"
+	"lastUpdated": "2021-12-31 02:00:49"
 }
 
 /*
@@ -284,7 +284,8 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (EN)",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
@@ -313,7 +314,8 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (FR)",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
@@ -348,7 +350,8 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (NL)",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
@@ -375,7 +378,8 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (CS)",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
@@ -405,7 +409,8 @@ var testCases = [
 					},
 					{
 						"title": "EUR-Lex HTML (MT)",
-						"mimeType": "text/html"
+						"mimeType": "text/html",
+						"snapshot": true
 					}
 				],
 				"tags": [],
