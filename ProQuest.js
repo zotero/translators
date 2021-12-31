@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-10 02:27:10"
+	"lastUpdated": "2021-12-31 09:03:40"
 }
 
 /*
@@ -219,23 +219,22 @@ function doWeb(doc, url, noFollow) {
 		});
 	}
 	else {
-		var abstractTab = doc.getElementById('tab-AbstractRecord-null') // Seems like that null is a bug and it might change at some point
-			|| doc.getElementById('tab-Record-null'); // Shown as Details
-		if (!(abstractTab && !abstractTab.classList.contains('active'))) {
-			Zotero.debug("On Abstract page, scraping");
+		var abstractTab = doc.getElementById('addFlashPageParameterformat_abstract');
+		if (abstractTab && abstractTab.classList.contains('active')) {
+			Zotero.debug("On Abstract tab and scraping");
 			scrape(doc, url, type);
 		}
-		else if (noFollow) {
+		else if (noFollow) { // when is this used? wouldn't it be better to throw an error instead of brute forcing?
 			Z.debug('Not following link again. Attempting to scrape');
 			scrape(doc, url, type);
 		}
 		else {
-			var link = abstractTab.getElementsByTagName('a')[0];
+			var link = abstractTab.href;
 			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
 			Zotero.debug("Going to the Abstract tab");
-			ZU.processDocuments(link.href, function (doc, url) {
+			ZU.processDocuments(link, function (doc, url) {
 				doWeb(doc, url, true);
 			});
 		}
@@ -244,17 +243,15 @@ function doWeb(doc, url, noFollow) {
 
 function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
-
 	// get all rows
 	var rows = doc.getElementsByClassName('display_record_indexing_row');
-
 	let label, value, enLabel;
 	var dates = [], place = {}, altKeywords = [];
 
 	for (let i = 0, n = rows.length; i < n; i++) {
 		label = rows[i].childNodes[0];
 		value = rows[i].childNodes[1];
-
+		Z.debug(label+": "+value);
 		if (!label || !value) continue;
 
 		label = label.textContent.trim();
