@@ -168,7 +168,7 @@ function detectWeb(doc, url) {
 
 	// there is not much information about the item type in the pdf/fulltext page
 	let titleRow = text(doc, '.open-access');
-	if (titleRow && !text(doc, '.ol-login-link')) {
+	if (titleRow) {
 		if (getItemType([titleRow])) {
 			return getItemType([titleRow]);
 		}
