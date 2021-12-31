@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 22:35:53"
+	"lastUpdated": "2021-12-31 23:49:37"
 }
 
 /*
@@ -656,12 +656,19 @@ function addOtherMetadata(doc, newItem) {
 		catch (e) {}
 
 		if (ldJSON) {
-			Z.debug("LD-JSON parsing; length: " + (ldJSON.length ? ldJSON.length : 1));
+			Z.debug("LD-JSON parsing; children: " + (ldJSON.length ? ldJSON.length : 1));
 			
-			// where there are multiple blocks, get the one where @type = Article or NewsArticle
+			// where there are multiple blocks, get the one where @type = Article (includes NewsArticle) or WebPage
+			if (ldJSON["@graph"]) ldJSON = ldJSON["@graph"];
 			if (ldJSON.length) {
 				for (let i of ldJSON) {
-					if (i["@type"] == "Article" || "NewsArticle") {
+					if (/Article|WebPage/.test(i["@type"])) {
+						for (let j of ldJSON) { // look within @graoh for @type = Person, if not in the Article block
+							if (/Person/.test(j["@type"])) {
+								var graphPerson = j;
+								break;
+							}
+						}
 						ldJSON = i;
 						break;
 					}
@@ -669,7 +676,7 @@ function addOtherMetadata(doc, newItem) {
 			}
 			Z.debug("LD-JSON type: "+ldJSON["@type"])
 
-			let authors = ldJSON.author; // || ldJSON["@graph"];
+			let authors = graphPerson || ldJSON.author;
 			if (newItem.creators.length == 0 && authors) {
 				Z.debug("LD-JSON: Adding author(s)");
 				
@@ -2446,6 +2453,50 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hardcoregamer.com/previews/pax-south-want-to-ruin-a-friendship-play-videoball/190827/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "PAX South: Want to Ruin a Friendship? Play VIDEOBALL - Hardcore Gamer",
+				"creators": [
+					{
+						"firstName": "Jason",
+						"lastName": "Bohn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-02-02T18:11:08-08:00",
+				"abstractNote": "Based purely on aesthetics, it doesn't get more simple in appearance than Action Button's VIDEOBALL. This Iron Galaxy published title consists of brightly",
+				"language": "en-US",
+				"shortTitle": "PAX South",
+				"url": "https://hardcoregamer.com/previews/pax-south-want-to-ruin-a-friendship-play-videoball/190827/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Action Button"
+					},
+					{
+						"tag": "Iron Galaxy"
+					},
+					{
+						"tag": "Tim Rogers"
+					},
+					{
+						"tag": "Videoball"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
