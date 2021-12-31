@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 19:46:53"
+	"lastUpdated": "2021-12-31 19:51:12"
 }
 
 /*
@@ -649,22 +649,18 @@ function addOtherMetadata(doc, newItem) {
 	
 	// try LD-JSON for basic fields
 	// looks like headline/title and url are already handled just fine elsewhere but can add here if we want to override
-	//Z.debug("about to evaluate LD-JSON");
 	let ldJSONpayload = text(doc, 'script[type="application/ld+json"]');
-	//Z.debug(JSON.parse(ldJSONpayload));
-	if (false) {//ldJSONpayload) {
-		Z.debug("Found LD-JSON");
+	if (ldJSONpayload) {
 		try {
 			var ldJSON = JSON.parse(ldJSONpayload);
 		}
-		catch (e) {Z.debug("No LD-JSON");}
-		//Z.debug("LD-JSON is valid");
-		//Z.debug(ldJSON);
+		catch (e) {}
+
 		if (ldJSON) {
 			Z.debug("Parsing LD-JSON");
 			
 			if (newItem.creators.length == 0 && ldJSON.author) {
-				if (ldJSON.author.length > 0) {									// for multiple authors
+				if (ldJSON.author.length > 0) {		// for multiple authors
 					for (let author of ldJSON.author) {
 						if (author.name != newItem.publicationTitle || author.name.toLowerCase().includes('editor')) { // skip author when written by the site itself
 							newItem.creators.push(ZU.cleanAuthor(author.name, "author"));
