@@ -243,15 +243,17 @@ function doWeb(doc, url, noFollow) {
 
 function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
+	
 	// get all rows
 	var rows = doc.getElementsByClassName('display_record_indexing_row');
+	
 	let label, value, enLabel;
 	var dates = [], place = {}, altKeywords = [];
 
 	for (let i = 0, n = rows.length; i < n; i++) {
 		label = rows[i].childNodes[0];
 		value = rows[i].childNodes[1];
-		Z.debug(label+": "+value);
+		
 		if (!label || !value) continue;
 
 		label = label.textContent.trim();
