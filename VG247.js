@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-07 21:15:54"
+	"lastUpdated": "2021-12-31 05:54:46"
 }
 
 /*
@@ -36,13 +36,18 @@
 	***** END LICENSE BLOCK *****
 */
 
-
 function detectWeb(doc, url) {
-	if (/\/\d{4}\/\d{2}\//.test(url)) {
+	var json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+	if (json && json["@type"] == "NewsArticle") {
 		return "blogPost";
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (url.includes('/search?') && getGoogleSearchResults(doc, true)) {
 		return "multiple";
 	}
+	else if (getTopicResults(doc, true)) {
+		return "multiple"
+	}
+	return false;
 }
 
 
@@ -53,11 +58,13 @@ function scrape(doc, url) {
 	
 	translator.setHandler('itemDone', function (obj, item) { // corrections to EM
 		item.itemType = "blogPost";
-		item.title = item.title.replace(' - VG247','');
-		var authorMetadata = doc.querySelectorAll('p.meta');
-		if (authorMetadata) {
-			item.creators.push(ZU.cleanAuthor(authorMetadata[0].textContent.split('\n')[1].trim().replace('By ','').replace(/,$/,''), "author"));
+		var json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
+		item.creators.push(ZU.cleanAuthor(json.author.name, 'author')); // no ready examples of multiple authors so single is fine
+		
+		for (let tag of json.keywords) {
+			item.tags.push(tag.text);
 		}
+		
 		item.complete();
 	});
 
@@ -67,14 +74,28 @@ function scrape(doc, url) {
 }
 
 
-function getSearchResults(doc, checkOnly) {
+function getTopicResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('div.top-story h2, div.headlines h2');
-	var links = doc.querySelectorAll('div.top-story h2 a, div.headlines h2 a');
-	for (let i=0; i<rows.length; i++) {
-		let href = links[i].href;
-		let title = ZU.trimInternal(rows[i].textContent);
+	let rows = doc.querySelectorAll('.summary_list article.summary>a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.title);
+		if (!href || !title) continue;
+		if (checkOnly) return true;
+		found = true;
+		items[href] = title;
+	}
+	return found ? items : false;
+}
+
+function getGoogleSearchResults(doc, checkOnly) {
+	var items = {};
+	var found = false;
+	let rows = doc.querySelectorAll('.gsc-thumbnail-inside .gs-title a');
+	for (let row of rows) {
+		let href = row.href;
+		let title = ZU.trimInternal(row.textContent);
 		if (!href || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -85,77 +106,26 @@ function getSearchResults(doc, checkOnly) {
 
 
 function doWeb(doc, url) {
-	switch (detectWeb(doc, url)) {
-		case "multiple":
-			Zotero.selectItems(getSearchResults(doc, false), function (items) {
-				if (!items) {
-					return true;
-				}
-				var articles = [];
-				for (var i in items) {
-					articles.push(i);
-				}
-				ZU.processDocuments(articles, scrape);
+	if (detectWeb(doc, url) == "multiple") {
+		if (url.includes('/search?')) {
+			Zotero.selectItems(getGoogleSearchResults(doc, false), function (items) {
+				if (items) ZU.processDocuments(Object.keys(items), scrape);
 			});
-			break;
-		case "blogPost":
-			scrape(doc, url);
-			break;
+		}
+		else
+			Zotero.selectItems(getTopicResults(doc, false), function (items) {
+				if (items) ZU.processDocuments(Object.keys(items), scrape);
+			});
+	}
+	else {
+		scrape(doc, url);
 	}
 }
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.vg247.com/2010/12/12/spike-vga-2010-winners-red-dead-redemption-scoops-goty/",
-		"items": [
-			{
-				"itemType": "blogPost",
-				"title": "Spike VGA 2010 winners - Red Dead Redemption scoops GOTY",
-				"creators": [
-					{
-						"firstName": "Joe",
-						"lastName": "Anderson",
-						"creatorType": "author"
-					}
-				],
-				"date": "2010-12-12T07:44:32+01:00",
-				"abstractNote": "Red Dead Redemption scooped the Game of the Year award at this year’s VGA’s, pipping Mass Effect 2, which still managed to scoop two awards of its own, including best RPG and best Xbox 360 game. Elsewhere in the awards, Kratos managed to scoop two awards for seperate games, with God of War III winning Best PS3 …",
-				"blogTitle": "VG247",
-				"url": "https://www.vg247.com/2010/12/12/spike-vga-2010-winners-red-dead-redemption-scoops-goty/",
-				"attachments": [
-					{
-						"title": "Snapshot"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Call of Duty: Black Ops"
-					},
-					{
-						"tag": "Halo: Reach"
-					},
-					{
-						"tag": "Red Dead Redemption"
-					},
-					{
-						"tag": "ghost of sparta"
-					},
-					{
-						"tag": "god of war III"
-					},
-					{
-						"tag": "mass effect 2"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.vg247.com/2010/10/26/standalone-rdr-undead-nightmare-disc-releasing-in-us-on-november-23-november-26-on-eu/",
+		"url": "https://www.vg247.com/standalone-rdr-undead-nightmare-disc-releasing-in-us-on-november-23-november-26-on-eu",
 		"items": [
 			{
 				"itemType": "blogPost",
@@ -167,22 +137,42 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2010-10-26T14:46:14+01:00",
-				"abstractNote": "Rockstar will release the disc version of Red Dead Redemption: Undead Nightmare in the US on November 23 and November 26 in EU for PS3 and 360. The title, playable on its own without a copy of the main RDR, will also feature all of the other DLC packs released so far for the western …",
+				"date": "2010-10-26T13:46:14+00:00",
+				"abstractNote": "Rockstar will release the disc version of Red Dead Redemption: Undead Nightmare in the US on November 23 and November 2…",
 				"blogTitle": "VG247",
+				"language": "en",
 				"shortTitle": "RDR",
-				"url": "https://www.vg247.com/2010/10/26/standalone-rdr-undead-nightmare-disc-releasing-in-us-on-november-23-november-26-on-eu/",
+				"url": "https://www.vg247.com/standalone-rdr-undead-nightmare-disc-releasing-in-us-on-november-23-november-26-on-eu",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [
 					{
+						"tag": "Action"
+					},
+					{
+						"tag": "Hot"
+					},
+					{
+						"tag": "PS3"
+					},
+					{
 						"tag": "Red Dead Redemption"
 					},
 					{
+						"tag": "Rockstar"
+					},
+					{
 						"tag": "Rockstar San Diego"
+					},
+					{
+						"tag": "Xbox 360"
+					},
+					{
+						"tag": "adventure"
 					},
 					{
 						"tag": "red dead redemption: undead nightmare"
@@ -208,10 +198,99 @@ var testCases = [
 		"url": "https://www.vg247.com/category/pc/",
 		"items": "multiple"
 	},
+    {
+		"type": "web",
+		"url": "https://www.vg247.com/search?q=earthbound",
+		"items": "multiple"
+	},
 	{
 		"type": "web",
-		"url": "https://www.vg247.com/?s=earthbound",
-		"items": "multiple"
+		"url": "https://www.vg247.com/nintendo-reveals-top-selling-indie-games-2021",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Nintendo reveals 2021's top-selling indie games",
+				"creators": [
+					{
+						"firstName": "Jeremy",
+						"lastName": "Signor",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-12-30T06:22:46.354519+00:00",
+				"abstractNote": "Nintendo reveals the top-selling indie games on Switch for 2021.",
+				"blogTitle": "VG247",
+				"language": "en",
+				"url": "https://www.vg247.com/nintendo-reveals-top-selling-indie-games-2021",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Axiom Verge 2"
+					},
+					{
+						"tag": "Curse Of The Dead Gods"
+					},
+					{
+						"tag": "Cyber Shadow"
+					},
+					{
+						"tag": "Doki Doki Literature Club Plus!"
+					},
+					{
+						"tag": "Eastward"
+					},
+					{
+						"tag": "Ender Lilies: Quietus of the Knights"
+					},
+					{
+						"tag": "Indie World"
+					},
+					{
+						"tag": "Islanders"
+					},
+					{
+						"tag": "Littlewood"
+					},
+					{
+						"tag": "Nintendo"
+					},
+					{
+						"tag": "Nintendo Switch"
+					},
+					{
+						"tag": "Road 96"
+					},
+					{
+						"tag": "Slime Rancher"
+					},
+					{
+						"tag": "Spelunky 2"
+					},
+					{
+						"tag": "Stick Fight: The Game"
+					},
+					{
+						"tag": "Subnautica"
+					},
+					{
+						"tag": "Subnautica: Below Zero"
+					},
+					{
+						"tag": "Tetris Effect"
+					},
+					{
+						"tag": "Unpacking"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
