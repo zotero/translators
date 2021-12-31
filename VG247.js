@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 05:54:46"
+	"lastUpdated": "2021-12-31 06:48:37"
 }
 
 /*
@@ -36,6 +36,17 @@
 	***** END LICENSE BLOCK *****
 */
 
+
+function scrubLowercaseTags(tags) {
+	for (let tag of tags) {
+		if (tag == tag.toLowerCase()) {
+			tags[tags.indexOf(tag)] = ZU.capitalizeTitle(tag, true);
+		}
+	}
+	return tags;
+}
+
+
 function detectWeb(doc, url) {
 	var json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 	if (json && json["@type"] == "NewsArticle") {
@@ -60,11 +71,8 @@ function scrape(doc, url) {
 		item.itemType = "blogPost";
 		var json = JSON.parse(text(doc, 'script[type="application/ld+json"]'));
 		item.creators.push(ZU.cleanAuthor(json.author.name, 'author')); // no ready examples of multiple authors so single is fine
-		
-		for (let tag of json.keywords) {
-			item.tags.push(tag.text);
-		}
-		
+		item.tags = scrubLowercaseTags(item.tags);
+
 		item.complete();
 	});
 
@@ -154,6 +162,9 @@ var testCases = [
 						"tag": "Action"
 					},
 					{
+						"tag": "Adventure"
+					},
+					{
 						"tag": "Hot"
 					},
 					{
@@ -163,6 +174,9 @@ var testCases = [
 						"tag": "Red Dead Redemption"
 					},
 					{
+						"tag": "Red Dead Redemption: Undead Nightmare"
+					},
+					{
 						"tag": "Rockstar"
 					},
 					{
@@ -170,12 +184,6 @@ var testCases = [
 					},
 					{
 						"tag": "Xbox 360"
-					},
-					{
-						"tag": "adventure"
-					},
-					{
-						"tag": "red dead redemption: undead nightmare"
 					}
 				],
 				"notes": [],
@@ -198,7 +206,7 @@ var testCases = [
 		"url": "https://www.vg247.com/category/pc/",
 		"items": "multiple"
 	},
-    {
+	{
 		"type": "web",
 		"url": "https://www.vg247.com/search?q=earthbound",
 		"items": "multiple"
