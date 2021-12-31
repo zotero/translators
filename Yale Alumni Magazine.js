@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-07-08 21:24:00"
+	"lastUpdated": "2021-12-31 10:55:05"
 }
 
 /*
@@ -58,13 +58,14 @@ function scrape(doc, url) {
 	item.publicationTitle = "Yale Alumni Magazine";
 	item.language = "en-US";
 	item.url = url;
+	item.abstractNote = attr(doc, 'meta[property="og:description"]', 'content');
 	
 	if (type == "magazineArticle") {
 		item.ISSN = "0044-0051";
 		item.title = text(doc,'#article_view h1');	// og:title has inaccurate info
 		var authorMetadata = doc.querySelectorAll('.author_names a');
 		for (let author of authorMetadata) {
-			item.creators.push(ZU.cleanAuthor(author.text, "author"));
+			item.creators.push(ZU.cleanAuthor(author.innerText.replace(/\s(\'|’)\d{2}.*$/,""), "author")); // strip class year
 		}
 		item.date = text(doc,'a.text_link');
 		var volno = text(doc,'.current_issue_container div');
@@ -76,9 +77,9 @@ function scrape(doc, url) {
 	if (type == "blogPost") {
 		item.title = text(doc,'h1#blog_post_title');
 		var blogAuthor = doc.querySelectorAll('.blog_post_author_unlinked');
-		Z.debug(blogAuthor[0].innerText);
+		//Z.debug(blogAuthor[0].innerText);
 		for (let author of blogAuthor) {
-			item.creators.push(ZU.cleanAuthor(author.innerText.replace(/\s’\d{2}$/,""), "author"));	// regex only for blog posts
+			item.creators.push(ZU.cleanAuthor(author.innerText.replace(/\s(\'|’)\d{2}.*$/,""), "author"));	// regex only for blog posts
 		}
 		item.date = text(doc,'.blog_post_authors').replace(/([\w\s\\n\s\|’]*)(\d{1,2}:\d{2}\w{2})\s(\w+\s\d+)\s(\d+)/,"$3, $4, $2 "); // regex for blog posts only
 	}
@@ -165,9 +166,15 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Arts & Culture",
-					"Campus",
-					"People & Profiles"
+					{
+						"tag": "Arts & Culture"
+					},
+					{
+						"tag": "Campus"
+					},
+					{
+						"tag": "People & Profiles"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -190,6 +197,7 @@ var testCases = [
 				],
 				"date": "Mar/Apr 2017",
 				"ISSN": "0044-0051",
+				"abstractNote": "After years of debate, Yale renames a residential college.",
 				"issue": "4",
 				"language": "en-US",
 				"libraryCatalog": "Yale Alumni Magazine",
@@ -203,8 +211,12 @@ var testCases = [
 					}
 				],
 				"tags": [
-					"Campus",
-					"Student Life"
+					{
+						"tag": "Campus"
+					},
+					{
+						"tag": "Student Life"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -236,6 +248,7 @@ var testCases = [
 					}
 				],
 				"date": "May 21, 2015, 2:54pm",
+				"abstractNote": "Back in the 1950s, smoking a pipe was as much the fashion at Yale as button-down Gant shirts and s",
 				"blogTitle": "Yale Alumni Magazine",
 				"language": "en-US",
 				"url": "https://yalealumnimagazine.com/blog_posts/2102-we-smoked-our-pipes-and-took-our-ease",
@@ -264,6 +277,45 @@ var testCases = [
 		"type": "web",
 		"url": "https://yalealumnimagazine.com/search?utf8=%E2%9C%93&site_search=zax&commit=Search",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://yalealumnimagazine.com/articles/5256-dizzying",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "Dizzying",
+				"creators": [
+					{
+						"firstName": "Jenny",
+						"lastName": "Blair",
+						"creatorType": "author"
+					}
+				],
+				"date": "Jan/Feb 2021",
+				"ISSN": "0044-0051",
+				"abstractNote": "How an optical illusion fools fruit fliesand us.",
+				"issue": "3",
+				"language": "en-US",
+				"libraryCatalog": "Yale Alumni Magazine",
+				"publicationTitle": "Yale Alumni Magazine",
+				"url": "https://yalealumnimagazine.com/articles/5256-dizzying",
+				"volume": "LXXXIV",
+				"attachments": [
+					{
+						"title": "Yale Alumni Magazine snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Science & Health"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
