@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2016-09-08 20:56:54"
+	"lastUpdated": "2021-12-31 07:57:35"
 }
 
 /*
@@ -85,8 +85,10 @@ function scrape(doc, url) {
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
 	translator.setHandler('itemDone', function (obj, item) {
 		//add date from microdata if not in header	
-			if (!item.date) item.date = ZU.xpathText(doc, '//main//time[@itemprop="datePublished"]/@datetime');
-			item.complete();
+		if (!item.date) item.date = ZU.xpathText(doc, '//main//time[@itemprop="datePublished"]/@datetime');
+		if (!item.date) item.date = attr(doc, '.pubdate time', 'datetime');
+		if (item.creators.length == 0) item.creators.push(ZU.cleanAuthor(attr(doc, 'meta[name="parsely-author"]', 'content'), 'author'));
+		item.complete();
 	});
 	translator.getTranslatorObject(function(trans) {
 		trans.itemType = type;
@@ -200,6 +202,137 @@ var testCases = [
 		"type": "web",
 		"url": "http://www.bloomberg.com/businessweek",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://www.bloomberg.com/graphics/2018-tesla-burns-cash/",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Tesla Doesn’t Burn Fuel, It Burns Cash",
+				"creators": [
+					{
+						"firstName": "Dana",
+						"lastName": "Hull",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannah",
+						"lastName": "Recht",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-30T04:00:00.000Z",
+				"abstractNote": "The company that Elon Musk built to usher in the electric-car future might not have enough cash to make it through the calendar year.",
+				"language": "en",
+				"libraryCatalog": "www.bloomberg.com",
+				"publicationTitle": "Bloomberg.com",
+				"url": "https://www.bloomberg.com/graphics/2018-tesla-burns-cash/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bloomberg"
+					},
+					{
+						"tag": "Bloomberg Graphics"
+					},
+					{
+						"tag": "Boring Company"
+					},
+					{
+						"tag": "Elon Musk"
+					},
+					{
+						"tag": "Hyperdrive"
+					},
+					{
+						"tag": "Tesla"
+					},
+					{
+						"tag": "data visualization"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bloomberg.com/news/articles/2019-09-12/peloton-founder-goes-from-kickstarter-to-a-450-million-fortune",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Peloton Founder Goes From Kickstarter to a $450 Million Fortune",
+				"creators": [
+					{
+						"firstName": "Tom",
+						"lastName": "Metcalf",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-09-12T13:48:02.166Z",
+				"abstractNote": "Peloton Interactive Inc. started making its indoor exercise bike after raising $307,332 in a 2013 crowd-funding campaign. It now aims to raise $1.1 billion in an initial public offering.",
+				"language": "en",
+				"libraryCatalog": "www.bloomberg.com",
+				"publicationTitle": "Bloomberg.com",
+				"url": "https://www.bloomberg.com/news/articles/2019-09-12/peloton-founder-goes-from-kickstarter-to-a-450-million-fortune",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Chip Wilson"
+					},
+					{
+						"tag": "Entrepreneurs"
+					},
+					{
+						"tag": "IPOs"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "John Foley"
+					},
+					{
+						"tag": "LULULEMON ATHLETICA INC"
+					},
+					{
+						"tag": "Nerio Alessandri"
+					},
+					{
+						"tag": "PELOTON INTERACTIVE INC-A"
+					},
+					{
+						"tag": "TECHNOGYM SPA"
+					},
+					{
+						"tag": "UNDER ARMOUR INC-CLASS A"
+					},
+					{
+						"tag": "business"
+					},
+					{
+						"tag": "technology"
+					},
+					{
+						"tag": "wealth"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
