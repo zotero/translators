@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 09:03:40"
+	"lastUpdated": "2021-12-31 09:11:56"
 }
 
 /*
@@ -168,7 +168,7 @@ function detectWeb(doc, url) {
 
 	// there is not much information about the item type in the pdf/fulltext page
 	let titleRow = text(doc, '.open-access');
-	if (titleRow) {
+	if (titleRow && doc.getElementById('docview-nav-stick')) { // do not continue if there is no nav to the Abstract, as the translation will fail
 		if (getItemType([titleRow])) {
 			return getItemType([titleRow]);
 		}
