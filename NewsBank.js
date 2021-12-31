@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-21 19:33:58"
+	"lastUpdated": "2021-12-12 02:50:32"
 }
 
 /*
@@ -73,7 +73,7 @@ function getItem(doc, url) {
 		ZU.doGet(risElem.href, risText => itemFromRIS(doc, url, risText));
 	}
 	else {
-		itemFromRIS(risElem.textContent.trim());
+		itemFromRIS(doc, url, risElem.textContent.trim());
 	}
 }
 
