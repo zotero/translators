@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-07 07:42:50"
+	"lastUpdated": "2021-12-31 19:46:53"
 }
 
 /*
@@ -646,6 +646,47 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+	
+	// try LD-JSON for basic fields
+	// looks like headline/title and url are already handled just fine elsewhere but can add here if we want to override
+	//Z.debug("about to evaluate LD-JSON");
+	let ldJSONpayload = text(doc, 'script[type="application/ld+json"]');
+	//Z.debug(JSON.parse(ldJSONpayload));
+	if (false) {//ldJSONpayload) {
+		Z.debug("Found LD-JSON");
+		try {
+			var ldJSON = JSON.parse(ldJSONpayload);
+		}
+		catch (e) {Z.debug("No LD-JSON");}
+		//Z.debug("LD-JSON is valid");
+		//Z.debug(ldJSON);
+		if (ldJSON) {
+			Z.debug("Parsing LD-JSON");
+			
+			if (newItem.creators.length == 0 && ldJSON.author) {
+				if (ldJSON.author.length > 0) {									// for multiple authors
+					for (let author of ldJSON.author) {
+						if (author.name != newItem.publicationTitle || author.name.toLowerCase().includes('editor')) { // skip author when written by the site itself
+							newItem.creators.push(ZU.cleanAuthor(author.name, "author"));
+						}
+					}
+				}
+				else newItem.creators.push(ZU.cleanAuthor(ldJSON.author.name, 'author')); // single author
+			}
+			
+			
+			if (!newItem.date && ldJSON.datePublished) {
+				newItem.date = ldJSON.datePublished;
+			}
+
+			if (newItem.tags.length == 0 && ldJSON.keywords) {
+				for (let tag of ldJSON.keywords) {
+					newItem.tags.push(tag);
+				}
+			}
+		}
+	}
+	
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -688,7 +729,7 @@ function addLowQualityMetadata(doc, newItem) {
 		}
 	}
 	// fall back to "keywords"
-	if (!newItem.tags.length) {
+	if (newItem.tags.length == 0) { // this needs to be tested; previously was !...length, which evaluated to true when zero
 		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
@@ -696,6 +737,10 @@ function addLowQualityMetadata(doc, newItem) {
 	if (!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
 			attr(doc, 'meta[name="description" i]', 'content'));
+	}
+
+	if (!newItem.date) {
+		newItem.date = ZU.xpathText(doc, '//meta[@name="parsely-pub-date"]/@content');
 	}
 
 	if (!newItem.url) {
@@ -722,7 +767,7 @@ In a worst case scenario, where real authors and social media profiles are mixed
 preferable to garbage */
 function tryOgAuthors(doc) {
 	var authors = [];
-	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
+	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician" or @name="parsely-author"]');
 	for (var i = 0; i < ogAuthors.length; i++) {
 		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/) < 0 && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"));
@@ -892,9 +937,10 @@ function getAuthorFromByline(doc, newItem) {
  */
 function finalDataCleanup(doc, newItem) {
 	if (typeof newItem.tags == 'string') {
+		Z.debug("newItem.tags is a string");
 		newItem.tags = [newItem.tags];
 	}
-	if (newItem.tags && newItem.tags.length && Zotero.parentTranslator) {
+	if (newItem.tags && newItem.tags.length == 1) {
 		if (exports.splitTags) {
 			var tags = [];
 			for (let i in newItem.tags) {
@@ -913,11 +959,13 @@ function finalDataCleanup(doc, newItem) {
 			newItem.tags = tags;
 		}
 	}
+	if (newItem.tags.length > 0) newItem.tags = scrubLowercaseTags(newItem.tags);
+	/* what else is automatically adding tags? if it's bad data, don't import it, but resetting all tags (per below) kills good LD-JSON tags
 	else {
 		// Unless called from another translator, don't include automatic tags,
 		// because most of the time they are not right
 		newItem.tags = [];
-	}
+	}*/
 
 	// Cleanup DOI
 	if (newItem.DOI) {
@@ -982,6 +1030,15 @@ function relativeToAbsolute(doc, url) {
 		location = location.slice(0, location.indexOf('?'));
 	}
 	return location.replace(/([^/]\/)[^/]+$/, '$1') + url;
+}
+
+function scrubLowercaseTags(tags) {
+	for (let tag of tags) {
+		if (tag == tag.toLowerCase()) {
+			tags[tags.indexOf(tag)] = ZU.capitalizeTitle(tag, true);
+		}
+	}
+	return tags;
 }
 
 var exports = {
