@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 23:49:37"
+	"lastUpdated": "2022-01-01 00:05:58"
 }
 
 /*
@@ -664,7 +664,7 @@ function addOtherMetadata(doc, newItem) {
 				for (let i of ldJSON) {
 					if (/Article|WebPage/.test(i["@type"])) {
 						for (let j of ldJSON) { // look within @graoh for @type = Person, if not in the Article block
-							if (/Person/.test(j["@type"])) {
+							if (j !== null && /Person/.test(j["@type"])) {
 								var graphPerson = j;
 								break;
 							}
