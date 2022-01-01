@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-07 07:42:50"
+	"lastUpdated": "2022-01-01 00:05:58"
 }
 
 /*
@@ -646,6 +646,71 @@ function addOtherMetadata(doc, newItem) {
 			}
 		}
 	}
+	
+	// try LD-JSON for basic fields
+	let ldJSONpayload = text(doc, 'script[type="application/ld+json"]');
+	if (ldJSONpayload) {
+		try {
+			var ldJSON = JSON.parse(ldJSONpayload);
+		}
+		catch (e) {}
+
+		if (ldJSON) {
+			Z.debug("LD-JSON parsing; children: " + (ldJSON.length ? ldJSON.length : 1));
+			
+			// where there are multiple blocks, get the one where @type = Article (includes NewsArticle) or WebPage
+			if (ldJSON["@graph"]) ldJSON = ldJSON["@graph"];
+			if (ldJSON.length) {
+				for (let i of ldJSON) {
+					if (/Article|WebPage/.test(i["@type"])) {
+						for (let j of ldJSON) { // look within @graoh for @type = Person, if not in the Article block
+							if (j !== null && /Person/.test(j["@type"])) {
+								var graphPerson = j;
+								break;
+							}
+						}
+						ldJSON = i;
+						break;
+					}
+				}
+			}
+			Z.debug("LD-JSON type: "+ldJSON["@type"])
+
+			let authors = graphPerson || ldJSON.author;
+			if (newItem.creators.length == 0 && authors) {
+				Z.debug("LD-JSON: Adding author(s)");
+				
+				if (authors.length > 0) {		// for multiple authors
+					for (let author of authors) {
+						if (author.name != newItem.publicationTitle || author.name.toLowerCase().includes('editor')) { // skip author when written by the site itself
+							newItem.creators.push(ZU.cleanAuthor(author.name, "author"));
+						}
+					}
+				}
+				else if (authors.name && authors.length == null) {	// split single authors with "&" or "and" in title
+					authorsSplit = authors.name.split(/\s\&\s|\sand\s/);
+					for (let author of authorsSplit) {
+						newItem.creators.push(ZU.cleanAuthor(author, "author"));
+					}
+				}								// single authors
+				else if (authors.name) newItem.creators.push(ZU.cleanAuthor(authors.name, 'author'));
+			}
+			
+			// looks like headline/title and url are already handled just fine elsewhere but can add here if we want to override
+			// prefer LD-JSON publicationTitle over prior metadata
+			if (ldJSON.publisher) newItem.publicationTitle = ldJSON.publisher.name;
+			
+			if (!newItem.date && ldJSON.datePublished) newItem.date = ldJSON.datePublished;
+			
+			if (!newItem.abstractNote && ldJSON.description) newItem.abstractNote = ldJSON.description;
+
+			if (newItem.tags.length == 0 && ldJSON.keywords) {
+				for (let tag of ldJSON.keywords) {
+					newItem.tags.push(tag);
+				}
+			}
+		}
+	}
 }
 
 function addLowQualityMetadata(doc, newItem) {
@@ -688,7 +753,7 @@ function addLowQualityMetadata(doc, newItem) {
 		}
 	}
 	// fall back to "keywords"
-	if (!newItem.tags.length) {
+	if (newItem.tags.length == 0) { // this needs to be tested; previously was !...length, which evaluated to true when zero
 		newItem.tags = attr(doc, 'meta[name="keywords" i]', 'content');
 	}
 
@@ -696,6 +761,10 @@ function addLowQualityMetadata(doc, newItem) {
 	if (!newItem.abstractNote) {
 		newItem.abstractNote = ZU.trimInternal(
 			attr(doc, 'meta[name="description" i]', 'content'));
+	}
+
+	if (!newItem.date) {
+		newItem.date = ZU.xpathText(doc, '//meta[@name="parsely-pub-date"]/@content');
 	}
 
 	if (!newItem.url) {
@@ -722,7 +791,7 @@ In a worst case scenario, where real authors and social media profiles are mixed
 preferable to garbage */
 function tryOgAuthors(doc) {
 	var authors = [];
-	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician"]');
+	var ogAuthors = ZU.xpath(doc, '//meta[@property="article:author" or @property="video:director" or @property="music:musician" or @name="parsely-author"]');
 	for (var i = 0; i < ogAuthors.length; i++) {
 		if (ogAuthors[i].content && ogAuthors[i].content.search(/(https?:\/\/)?[\da-z.-]+\.[a-z.]{2,6}/) < 0 && ogAuthors[i].content !== "false") {
 			authors.push(ZU.cleanAuthor(ogAuthors[i].content, "author"));
@@ -892,9 +961,10 @@ function getAuthorFromByline(doc, newItem) {
  */
 function finalDataCleanup(doc, newItem) {
 	if (typeof newItem.tags == 'string') {
+		Z.debug("newItem.tags is a string");
 		newItem.tags = [newItem.tags];
 	}
-	if (newItem.tags && newItem.tags.length && Zotero.parentTranslator) {
+	if (newItem.tags && newItem.tags.length == 1) {
 		if (exports.splitTags) {
 			var tags = [];
 			for (let i in newItem.tags) {
@@ -913,11 +983,14 @@ function finalDataCleanup(doc, newItem) {
 			newItem.tags = tags;
 		}
 	}
+	if (newItem.tags.length > 0) newItem.tags = scrubLowercaseTags(newItem.tags);
+	
+	/* what else is automatically adding tags? if it's bad data, don't import it, but resetting all tags (per below) kills good LD-JSON tags
 	else {
 		// Unless called from another translator, don't include automatic tags,
 		// because most of the time they are not right
 		newItem.tags = [];
-	}
+	}*/
 
 	// Cleanup DOI
 	if (newItem.DOI) {
@@ -982,6 +1055,15 @@ function relativeToAbsolute(doc, url) {
 		location = location.slice(0, location.indexOf('?'));
 	}
 	return location.replace(/([^/]\/)[^/]+$/, '$1') + url;
+}
+
+function scrubLowercaseTags(tags) {
+	for (let tag of tags) {
+		if (tag == tag.toLowerCase()) {
+			tags[tags.indexOf(tag)] = ZU.capitalizeTitle(tag, true);
+		}
+	}
+	return tags;
 }
 
 var exports = {
@@ -1062,7 +1144,26 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "HIV patients"
+					},
+					{
+						"tag": "Knowledge"
+					},
+					{
+						"tag": "Malaria"
+					},
+					{
+						"tag": "Nigeria"
+					},
+					{
+						"tag": "Prevention"
+					},
+					{
+						"tag": "Treatment"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1142,7 +1243,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Bounty Proclamations"
+					},
+					{
+						"tag": "Decolonization"
+					},
+					{
+						"tag": "Wabanaki"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1179,7 +1290,26 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Agents"
+					},
+					{
+						"tag": "Dec-POMDP"
+					},
+					{
+						"tag": "MDP"
+					},
+					{
+						"tag": "Meta-reasoning"
+					},
+					{
+						"tag": "Multiagent"
+					},
+					{
+						"tag": "Partial Observability"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1235,7 +1365,32 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "AIDS serodiagnosis"
+					},
+					{
+						"tag": "Acquired immunodeficiency syndrome"
+					},
+					{
+						"tag": "Brazil"
+					},
+					{
+						"tag": "Diagnostic services"
+					},
+					{
+						"tag": "Diagnostic techniques and procedures"
+					},
+					{
+						"tag": "Health vulnerability"
+					},
+					{
+						"tag": "Qualitative research"
+					},
+					{
+						"tag": "Substance abuse, intravenous"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1315,7 +1470,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Boycott"
+					},
+					{
+						"tag": "Israel"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1355,7 +1517,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Managing yourself"
+					},
+					{
+						"tag": "Meeting management"
+					},
+					{
+						"tag": "Workspaces design"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1380,8 +1552,9 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2015-09-28 00:00",
+				"date": "2015-09-28",
 				"DOI": "10.16995/olh.46",
+				"ISSN": "2056-6700",
 				"issue": "1",
 				"language": "en",
 				"libraryCatalog": "olh.openlibhums.org",
@@ -1429,7 +1602,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Culture"
+					},
+					{
+						"tag": "Front Page"
+					},
+					{
+						"tag": "Movies"
+					},
+					{
+						"tag": "Star Wars"
+					},
+					{
+						"tag": "The Latest"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1437,7 +1626,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=334",
+		"url": "http://www.diva-portal.org/smash/record.jsf?pid=diva2%3A766397&dswid=7752",
 		"items": [
 			{
 				"itemType": "conferencePaper",
@@ -1521,7 +1710,14 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Transport Systems and Logistics"
+					},
+					{
+						"tag": "Transportteknik och logistik"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1564,7 +1760,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Biological and Medical Physics, Biophysics"
+					},
+					{
+						"tag": "Classical Mechanics"
+					},
+					{
+						"tag": "Classical and Quantum Gravitation, Relativity Theory"
+					},
+					{
+						"tag": "Condensed Matter Physics"
+					},
+					{
+						"tag": "Physics, general"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1636,7 +1848,35 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "35c3"
+					},
+					{
+						"tag": "9386"
+					},
+					{
+						"tag": "Chaos Computer Club"
+					},
+					{
+						"tag": "Hacker"
+					},
+					{
+						"tag": "Media"
+					},
+					{
+						"tag": "Science"
+					},
+					{
+						"tag": "Streaming"
+					},
+					{
+						"tag": "TV"
+					},
+					{
+						"tag": "Video"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1676,7 +1916,17 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Architectural theory"
+					},
+					{
+						"tag": "Teoria arquitectònica"
+					},
+					{
+						"tag": "Àrees temàtiques de la UPC::Arquitectura"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1830,7 +2080,23 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Australian languages"
+					},
+					{
+						"tag": "Forced Alignment"
+					},
+					{
+						"tag": "Language Documentation"
+					},
+					{
+						"tag": "Phonetics"
+					},
+					{
+						"tag": "Yidiny"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1860,7 +2126,32 @@ var testCases = [
 						"mimeType": "text/html"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "Gefängnis"
+					},
+					{
+						"tag": "Jenseits"
+					},
+					{
+						"tag": "Jordan"
+					},
+					{
+						"tag": "Kultur"
+					},
+					{
+						"tag": "Redewendung"
+					},
+					{
+						"tag": "Sprache und Redewendungen"
+					},
+					{
+						"tag": "Tod"
+					},
+					{
+						"tag": "Wupper"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -1891,6 +2182,321 @@ var testCases = [
 					}
 				],
 				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bloomberg.com/news/articles/2019-09-12/peloton-founder-goes-from-kickstarter-to-a-450-million-fortune",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Peloton Founder Goes From Kickstarter to a $450 Million Fortune",
+				"creators": [
+					{
+						"firstName": "Tom",
+						"lastName": "Metcalf",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Julie",
+						"lastName": "Verhage",
+						"creatorType": "author"
+					}
+				],
+				"date": "2019-09-12T13:48:02.166Z",
+				"abstractNote": "Peloton Interactive Inc. started making its indoor exercise bike after raising $307,332 in a 2013 crowd-funding campaign. It now aims to raise $1.1 billion in an initial public offering.",
+				"language": "en",
+				"url": "https://www.bloomberg.com/news/articles/2019-09-12/peloton-founder-goes-from-kickstarter-to-a-450-million-fortune",
+				"websiteTitle": "Bloomberg",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Business"
+					},
+					{
+						"tag": "Chip Wilson"
+					},
+					{
+						"tag": "Entrepreneurs"
+					},
+					{
+						"tag": "IPOs"
+					},
+					{
+						"tag": "Italy"
+					},
+					{
+						"tag": "John Foley"
+					},
+					{
+						"tag": "LULULEMON ATHLETICA INC"
+					},
+					{
+						"tag": "Nerio Alessandri"
+					},
+					{
+						"tag": "PELOTON INTERACTIVE INC-A"
+					},
+					{
+						"tag": "TECHNOGYM SPA"
+					},
+					{
+						"tag": "Technology"
+					},
+					{
+						"tag": "UNDER ARMOUR INC-CLASS A"
+					},
+					{
+						"tag": "Wealth"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.bloomberg.com/graphics/2018-tesla-burns-cash/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Tesla Doesn’t Burn Fuel, It Burns Cash",
+				"creators": [
+					{
+						"firstName": "Dana",
+						"lastName": "Hull",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Hannah",
+						"lastName": "Recht",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-04-30T04:00:00.000Z",
+				"abstractNote": "The company that Elon Musk built to usher in the electric-car future might not have enough cash to make it through the calendar year.",
+				"language": "en",
+				"url": "https://www.bloomberg.com/graphics/2018-tesla-burns-cash/",
+				"websiteTitle": "Bloomberg.com",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Bloomberg"
+					},
+					{
+						"tag": "Bloomberg Graphics"
+					},
+					{
+						"tag": "Boring Company"
+					},
+					{
+						"tag": "Data Visualization"
+					},
+					{
+						"tag": "Elon Musk"
+					},
+					{
+						"tag": "Hyperdrive"
+					},
+					{
+						"tag": "Tesla"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pastemagazine.com/games/e3-2018/10-exciting-games-we-saw-at-e3-2018/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "10 Exciting Games We Saw at E3 2018",
+				"creators": [
+					{
+						"firstName": "Holly",
+						"lastName": "Green",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Garrett",
+						"lastName": "Martin",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-06-22T13:35:05-07:00",
+				"abstractNote": "E3 is about hype, and sometimes that hype is about games that nobody at E3 was even allowed to play.",
+				"language": "en",
+				"url": "https://www.pastemagazine.com/games/e3-2018/10-exciting-games-we-saw-at-e3-2018/",
+				"websiteTitle": "Paste Magazine",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Cyberpunk 2077"
+					},
+					{
+						"tag": "Death Stranding"
+					},
+					{
+						"tag": "E3"
+					},
+					{
+						"tag": "E3 2018"
+					},
+					{
+						"tag": "Fallout 76"
+					},
+					{
+						"tag": "Generation Zero"
+					},
+					{
+						"tag": "Ghost of Tsushima"
+					},
+					{
+						"tag": "Just Cause 4"
+					},
+					{
+						"tag": "Sea of Solitude"
+					},
+					{
+						"tag": "Sekiro: Shadows Die Twice"
+					},
+					{
+						"tag": "The Awesome Adventures of Captain Spirit"
+					},
+					{
+						"tag": "The Last of Us Part Ii"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.shacknews.com/article/89974/e3-2015-earthbound-beginnings-announced-for-wii-u-will-release-tonight",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "E3 2015: Earthbound Beginnings announced for Wii U; will release tonight",
+				"creators": [
+					{
+						"firstName": "Ozzie",
+						"lastName": "Mejia",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-06-14T15:00:00-07:00",
+				"abstractNote": "Even Earthbound/Mother fans couldn't have seen this one coming, as more Earthbound is on its way to Wii U.",
+				"language": "en",
+				"shortTitle": "E3 2015",
+				"url": "https://www.shacknews.com/article/89974/e3-2015-earthbound-beginnings-announced-for-wii-u-will-release-tonight",
+				"websiteTitle": "Shacknews",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.gamesradar.com/why-i-love-ordering-pizza-earthbound/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Why I Love: Ordering a pizza in EarthBound",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Roberts",
+						"creatorType": "author"
+					}
+				],
+				"date": "2015-05-15T18:00:00.134Z",
+				"abstractNote": "It's such a simple thing. You're hungry, and whether you've had a really long day at work or you're just feeling particularly lazy, you want to exert as",
+				"language": "en",
+				"shortTitle": "Why I Love",
+				"url": "https://www.gamesradar.com/why-i-love-ordering-pizza-earthbound/",
+				"websiteTitle": "GamesRadar+",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://hardcoregamer.com/previews/pax-south-want-to-ruin-a-friendship-play-videoball/190827/",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "PAX South: Want to Ruin a Friendship? Play VIDEOBALL - Hardcore Gamer",
+				"creators": [
+					{
+						"firstName": "Jason",
+						"lastName": "Bohn",
+						"creatorType": "author"
+					}
+				],
+				"date": "2016-02-02T18:11:08-08:00",
+				"abstractNote": "Based purely on aesthetics, it doesn't get more simple in appearance than Action Button's VIDEOBALL. This Iron Galaxy published title consists of brightly",
+				"language": "en-US",
+				"shortTitle": "PAX South",
+				"url": "https://hardcoregamer.com/previews/pax-south-want-to-ruin-a-friendship-play-videoball/190827/",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Action Button"
+					},
+					{
+						"tag": "Iron Galaxy"
+					},
+					{
+						"tag": "Tim Rogers"
+					},
+					{
+						"tag": "Videoball"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
