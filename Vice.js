@@ -2,14 +2,14 @@
 	"translatorID": "131310dc-854c-4629-acad-521319ab9f19",
 	"label": "Vice",
 	"creator": "czar",
-	"target": "^https?://(.+?\\.)?vice\\.com",
+	"target": "^https?://(.+?\\.)?vice\\.com/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 03:35:40"
+	"lastUpdated": "2022-01-03 23:13:44"
 }
 
 /*
@@ -93,7 +93,7 @@ function scrape(doc, url) {
 	
 	item.attachments.push({
 		document: doc,
-		title: 'Vice snapshot',
+		title: 'Snapshot',
 		mimeType: "text/html"
 	});
 	
@@ -149,7 +149,7 @@ var testCases = [
 				"url": "https://www.vice.com/en/article/padaqv/anti-g20-activists-told-us-what-they-brought-to-the-protest-in-hamburg",
 				"attachments": [
 					{
-						"title": "Vice snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -202,7 +202,7 @@ var testCases = [
 				"url": "https://www.vice.com/en/article/bjxjbw/nina-freemans-games-really-get-millennial-romance",
 				"attachments": [
 					{
-						"title": "Vice snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -261,7 +261,7 @@ var testCases = [
 				"url": "https://www.vice.com/de/article/59pdy5/wie-kaputte-handys-und-profite-die-g20-gegner-antreiben",
 				"attachments": [
 					{
-						"title": "Vice snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -308,7 +308,7 @@ var testCases = [
 				"url": "https://www.vice.com/en/article/434pxm/voters-may-soon-toughen-up-americas-weakest-police-shootings-law",
 				"attachments": [
 					{
-						"title": "Vice snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
@@ -368,16 +368,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://i-d.vice.com/en_uk/topic/music",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
-		"url": "https://amuse.vice.com/en_us/topic/adventure",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://www.vice.com/de",
 		"items": "multiple"
 	},
@@ -413,7 +403,7 @@ var testCases = [
 				"url": "https://www.vice.com/en/article/y3dpyw/inside-crime-app-citizen-vigilante",
 				"attachments": [
 					{
-						"title": "Vice snapshot",
+						"title": "Snapshot",
 						"mimeType": "text/html"
 					}
 				],
