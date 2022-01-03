@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-07 07:42:50"
+	"lastUpdated": "2022-01-03 16:51:36"
 }
 
 /*
@@ -851,7 +851,7 @@ function getAuthorFromByline(doc, newItem) {
 		else {
 			byline = byline.split(/\bby[:\s]+/i);
 			byline = byline[byline.length - 1].replace(/\s*[[(].+?[)\]]\s*/g, '');
-			var authors = byline.split(/\s*(?:(?:,\s*)?and|,|&)\s*/i);
+			var authors = byline.split(/\s*(?:(?:,\s*)?\band\b|,|&)\s*/i);
 			if (authors.length == 2 && authors[0].split(' ').length == 1) {
 				// this was probably last, first
 				newItem.creators.push(ZU.cleanAuthor(fixCase(byline), 'author', true));
@@ -1884,6 +1884,38 @@ var testCases = [
 				"language": "tt",
 				"url": "https://www.azatliq.org/a/24281041.html",
 				"websiteTitle": "Азатлык Радиосы",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.hackingarticles.in/windows-privilege-escalation-kernel-exploit/",
+		"items": [
+			{
+				"itemType": "blogPost",
+				"title": "Windows Privilege Escalation: Kernel Exploit",
+				"creators": [
+					{
+						"firstName": "Raj",
+						"lastName": "Chandel",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-12-30T17:41:33+00:00",
+				"abstractNote": "As this series was dedicated to Windows Privilege escalation thus I’m writing this Post to explain command practice for kernel-mode exploitation. Table of Content What",
+				"blogTitle": "Hacking Articles",
+				"language": "en-US",
+				"shortTitle": "Windows Privilege Escalation",
+				"url": "https://www.hackingarticles.in/windows-privilege-escalation-kernel-exploit/",
 				"attachments": [
 					{
 						"title": "Snapshot",
