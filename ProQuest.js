@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-12-31 09:11:56"
+	"lastUpdated": "2022-01-04 09:11:57"
 }
 
 /*
@@ -224,7 +224,7 @@ function doWeb(doc, url, noFollow) {
 			Zotero.debug("On Abstract tab and scraping");
 			scrape(doc, url, type);
 		}
-		else if (noFollow) { // when is this used? wouldn't it be better to throw an error instead of brute forcing?
+		else if (noFollow) {
 			Z.debug('Not following link again. Attempting to scrape');
 			scrape(doc, url, type);
 		}
