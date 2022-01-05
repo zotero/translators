@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-19 21:51:07"
+	"lastUpdated": "2022-01-04 06:23:47"
 }
 
 /*
@@ -45,14 +45,14 @@ var urlHash = {
 function getIDFromUrl(url) {
 	let m = url.match(/\/(answer|p)\/(\d+)/);
 	if (!m) return false;
-	return { ztype: m[1] === 'p' ? 'article' : 'answer', zid: m[2], url: url };
+	return `${m[1] === 'p' ? 'article' : 'answer'},${m[2]},${url}`;
 }
 
 function detectWeb(doc, url) {
 	let ZID = getIDFromUrl(url);
 	// Z.debug(ZID);
 	if (ZID) {
-		return "webpage";
+		return "forumPost";
 	}
 	else if (getSearchResults(url, doc, true)) {
 		return "multiple";
@@ -60,15 +60,15 @@ function detectWeb(doc, url) {
 	return false;
 }
 
-function getSearchResults(url, doc, checkOnly, itemInfo) {
+function getSearchResults(url, doc, checkOnly) {
 	if (checkOnly
 		&& (url.includes("search?type=")
-			|| url.includes("/collection/")
-			|| url.includes("/people/"))
+		|| url.includes("/collection/")
+		|| url.includes("/people/"))
 	) return true;
 	var items = {};
 	var found = false;
-	var rows = doc.querySelectorAll('.ArticleItem,.AnswerItem');
+	var rows = doc.querySelectorAll('.ArticleItem, .AnswerItem');
 	for (let i = 0; i < rows.length; i++) {
 		let data = rows[i].getAttribute('data-zop');
 		let url, ZID, title;
@@ -82,24 +82,22 @@ function getSearchResults(url, doc, checkOnly, itemInfo) {
 			data = JSON.parse(data);
 			url = rows[i].querySelectorAll("meta[itemprop='url']");
 			url = url[url.length - 1].getAttribute('content').replace(/^\/\//, 'https://');
-			ZID = { ztype: data.type, zid: data.itemId, url: url };
+			ZID = `${data.type},${data.itemId},${url}`;
 			title = i + ' ' + data.authorName + ' : ' + data.title;
 		}
 		if (checkOnly) return true;
 		found = true;
-		itemInfo[url] = ZID;
-		items[url] = title;
+		items[ZID] = title;
 	}
 	return found ? items : false;
 }
 
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
-		var itemInfo = {};
-		Zotero.selectItems(getSearchResults(url, doc, false, itemInfo), function (selectedItems) {
+		Zotero.selectItems(getSearchResults(url, doc, false), function (selectedItems) {
 			var ZIDs = [];
-			for (let url in selectedItems) {
-				ZIDs.push(itemInfo[url]);
+			for (let key in selectedItems) {
+				ZIDs.push(key);
 			}
 			// Z.debug(ZIDs);
 			scrape(ZIDs);
@@ -113,7 +111,7 @@ function doWeb(doc, url) {
 
 function scrape(ZIDs) {
 	if (!ZIDs.length) return;
-	var { ztype, zid, url } = ZIDs.shift();
+	var [ ztype, zid, url ] = ZIDs.shift().split(',');
 	let targetUrl = urlHash[ztype] + zid;
 	if (ztype === 'answer') targetUrl += "?include=data[*].content,voteup_count,share_text";
 	ZU.doGet(targetUrl, function (text) {
@@ -125,8 +123,8 @@ function scrape(ZIDs) {
 		newItem.abstractNote = textJson.share_text.replace(/ [（(]想看更多.*$/, '');
 		let createdTime = textJson.created || textJson.created_time;
 		newItem.date = new Date(createdTime * 1000).toLocaleString();
-		newItem.websiteType = ztype === 'article' ? "知乎专栏文章" : "知乎回答";
-		newItem.websiteTitle = textJson.column ? textJson.column.title : '回答';
+		newItem.postType = ztype === 'article' ? "知乎专栏文章" : "知乎回答";
+		newItem.forumTitle = textJson.column ? textJson.column.title : '回答';
 		let content = textJson.content.replace(/<figure.*?<img src="(.*?)".*?<\/figure>/g, "<img src='$1'/>");
 		content = "<p><h1>正文详情</h1></p>" + content;
 		newItem.creators.push({ lastName: textJson.author.name, creatorType: "author" });
@@ -155,7 +153,7 @@ var testCases = [
 		"url": "https://zhuanlan.zhihu.com/p/351547307",
 		"items": [
 			{
-				"itemType": "webpage",
+				"itemType": "forumPost",
 				"title": "Zotero CNKI翻译器更新(适合在家使用知网)-20210207",
 				"creators": [
 					{
@@ -164,12 +162,16 @@ var testCases = [
 					}
 				],
 				"date": "2021/2/19 下午11:04:50",
-				"abstractNote": "Zotero CNKI翻译器更新(适合在家使用知网)-20210207 - 来自知乎专栏「闲时弄斧」，作者: 林知 https://zhuanlan.zhihu.com/p/351547307 （想看更多？下载 @知乎 App：http://weibo.com/p/100404711598 ）",
+				"abstractNote": "Zotero CNKI翻译器更新(适合在家使用知网)-20210207 - 来自知乎专栏「闲时弄斧」，作者: 林知 https://zhuanlan.zhihu.com/p/351547307",
+				"extra": "赞数:14;",
 				"language": "zh-CN",
 				"url": "https://zhuanlan.zhihu.com/p/351547307",
-				"websiteTitle": "闲时弄斧",
-				"websiteType": "知乎专栏文章",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "Zotero"
@@ -180,7 +182,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "<p>在春节前上班的最后几天，我更新了知网翻译器的匹配格式，初衷是为了同学们更方便地在家使用 Zotero 抓取知网上的信息。在此之前我也尝试过一些方法</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://zhuanlan.zhihu.com/p/111857132\" class=\"internal\"><span class=\"invisible\">https://</span><span class=\"visible\">zhuanlan.zhihu.com/p/11</span><span class=\"invisible\">1857132</span><span class=\"ellipsis\"></span></a><p>比如用 Zotero 的代理设置对 URL 网址进行重定向或者利用 <a href=\"https://link.zhihu.com/?target=http%3A//fsso.cnki.net\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">http://</span><span class=\"visible\">fsso.cnki.net</span><span class=\"invisible\"></span></a> 达到在校园网使用知网的效果。后面也遇到一些同学的反馈，比如 Zotero 的代理对知网抓取的 API 造成影响，也有一些同学的学校没有在 <a href=\"https://link.zhihu.com/?target=http%3A//fsso.cnki.net\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">http://</span><span class=\"visible\">fsso.cnki.net</span><span class=\"invisible\"></span></a> 的列表上。</p><p>其实我也试过其他的一些方法，感觉还是直接修改翻译器的网址匹配是最简单的。只要把知网翻译器的网址匹配处理得当，在使用上是不需要做额外的设置的，当然前提是要登录学校的 VPN 代理。</p><p>在群里，大家也帮我收集了各自学校 VPN 代理的网址，我发现还是有一些共同之处。代理后的知网搜索页面和知网文献详情页面都会有一些固定的字符串。利用这些固定字符串，可以实现对知网 URL 的识别。同时我发现，一些像浙江省图书馆，杭州图书馆之类的新版知网代理也是可以实现识别的，可能也满足少部分朋友的需求。</p><h2>1. 翻译器的更新</h2><p>翻译器的更新，建议是使用 Jasminum 插件来更新</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://zhuanlan.zhihu.com/p/290730737\" class=\"internal\"><span class=\"invisible\">https://</span><span class=\"visible\">zhuanlan.zhihu.com/p/29</span><span class=\"invisible\">0730737</span><span class=\"ellipsis\"></span></a><p>当然你也可以到 Github 下载 CNKI.js 文件手动更新，文件和详细地更新过程在下面链接</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//github.com/l0o0/translators_CN\" data-image=\"https://pic4.zhimg.com/v2-46be882ea44e3e504e31572fcfc806d3_ipico.jpg\" data-image-width=\"163\" data-image-height=\"163\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow noreferrer\">l0o0/translators_CN</a><p><b>重要：替换了CNKI.js 文件后，需要更新浏览器的翻译器信息，如果一次不成功，请多更新几次。更新浏览器翻译器的操作步骤，可参考下面这个简陋的视频</b></p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//www.bilibili.com/video/BV1F54y1k73n/\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">https://www.</span><span class=\"visible\">bilibili.com/video/BV1F</span><span class=\"invisible\">54y1k73n/</span><span class=\"ellipsis\"></span></a><p class=\"ztext-empty-paragraph\"><br/></p><h2>2. 功能上的更新</h2><p>新的知网翻译器添加了文献引用次数的信息，在文献详情页面抓取时，还可以添加中文核心期刊的数据。信息会保存在其他栏目中，格式类似</p><div class=\"highlight\"><pre><code class=\"language-text\">3743 citations(CNKI)[2021-02-19]&lt;北大核心&gt;</code></pre></div><p class=\"ztext-empty-paragraph\"><br/></p><p>其他使用上的问题，可在下方留言或到 Github 上提 Issue。最近也整理了一个 <a href=\"https://zhuanlan.zhihu.com/p/349871853\" class=\"internal\">林知：Zotero Translator 开发文档</a> ，想一起完善中文翻译器的同学，可以联系我，东西不会可以慢慢学。</p><p>如果初识 Zotero 的同学可以看看 <a class=\"member_mention\" href=\"https://www.zhihu.com/people/268c1f41a479e6ee24a9c0969a06e188\" data-hash=\"268c1f41a479e6ee24a9c0969a06e188\" data-hovercard=\"p$b$268c1f41a479e6ee24a9c0969a06e188\">@johnmy</a> 整理的 Zotero 入门 </p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//github.com/redleafnew/Zotero_introduction\" data-image=\"https://pic3.zhimg.com/v2-7e831b9bb399b979306d739025b85e26_ipico.jpg\" data-image-width=\"420\" data-image-height=\"420\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow noreferrer\">redleafnew/Zotero_introduction</a><p>如果你觉得我们的工作对你有帮助，就请帮我们点赞或分享吧</p>"
+						"note": "<p><h1>正文详情</h1></p><p data-pid=\"ie_wjLoK\">在春节前上班的最后几天，我更新了知网翻译器的匹配格式，初衷是为了同学们更方便地在家使用 Zotero 抓取知网上的信息。在此之前我也尝试过一些方法</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://zhuanlan.zhihu.com/p/111857132\" class=\"internal\"><span class=\"invisible\">https://</span><span class=\"visible\">zhuanlan.zhihu.com/p/11</span><span class=\"invisible\">1857132</span><span class=\"ellipsis\"></span></a><p data-pid=\"CIraXM20\">比如用 Zotero 的代理设置对 URL 网址进行重定向或者利用 <a href=\"https://link.zhihu.com/?target=http%3A//fsso.cnki.net\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">http://</span><span class=\"visible\">fsso.cnki.net</span><span class=\"invisible\"></span></a> 达到在校园网使用知网的效果。后面也遇到一些同学的反馈，比如 Zotero 的代理对知网抓取的 API 造成影响，也有一些同学的学校没有在 <a href=\"https://link.zhihu.com/?target=http%3A//fsso.cnki.net\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">http://</span><span class=\"visible\">fsso.cnki.net</span><span class=\"invisible\"></span></a> 的列表上。</p><p data-pid=\"dhH3lqOQ\">其实我也试过其他的一些方法，感觉还是直接修改翻译器的网址匹配是最简单的。只要把知网翻译器的网址匹配处理得当，在使用上是不需要做额外的设置的，当然前提是要登录学校的 VPN 代理。</p><p data-pid=\"dDNionZq\">在群里，大家也帮我收集了各自学校 VPN 代理的网址，我发现还是有一些共同之处。代理后的知网搜索页面和知网文献详情页面都会有一些固定的字符串。利用这些固定字符串，可以实现对知网 URL 的识别。同时我发现，一些像浙江省图书馆，杭州图书馆之类的新版知网代理也是可以实现识别的，可能也满足少部分朋友的需求。</p><h2>1. 翻译器的更新</h2><p data-pid=\"-2vzvCH4\">翻译器的更新，建议是使用 Jasminum 插件来更新</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://zhuanlan.zhihu.com/p/290730737\" class=\"internal\"><span class=\"invisible\">https://</span><span class=\"visible\">zhuanlan.zhihu.com/p/29</span><span class=\"invisible\">0730737</span><span class=\"ellipsis\"></span></a><p data-pid=\"w_d3t0p-\">当然你也可以到 Github 下载 CNKI.js 文件手动更新，文件和详细地更新过程在下面链接</p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//github.com/l0o0/translators_CN\" data-image=\"https://pic4.zhimg.com/v2-46be882ea44e3e504e31572fcfc806d3_ipico.jpg\" data-image-width=\"163\" data-image-height=\"163\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow noreferrer\">l0o0/translators_CN</a><p data-pid=\"Df71-dgo\"><b>重要：替换了CNKI.js 文件后，需要更新浏览器的翻译器信息，如果一次不成功，请多更新几次。更新浏览器翻译器的操作步骤，可参考下面这个简陋的视频</b></p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//www.bilibili.com/video/BV1F54y1k73n/\" class=\" external\" target=\"_blank\" rel=\"nofollow noreferrer\"><span class=\"invisible\">https://www.</span><span class=\"visible\">bilibili.com/video/BV1F</span><span class=\"invisible\">54y1k73n/</span><span class=\"ellipsis\"></span></a><p class=\"ztext-empty-paragraph\"><br/></p><h2>2. 功能上的更新</h2><p data-pid=\"vwLlLdAc\">新的知网翻译器添加了文献引用次数的信息，在文献详情页面抓取时，还可以添加中文核心期刊的数据。信息会保存在其他栏目中，格式类似</p><div class=\"highlight\"><pre><code class=\"language-text\">3743 citations(CNKI)[2021-02-19]&lt;北大核心&gt;</code></pre></div><p class=\"ztext-empty-paragraph\"><br/></p><p data-pid=\"aV1qFg2z\">其他使用上的问题，可在下方留言或到 Github 上提 Issue。最近也整理了一个 <a href=\"https://zhuanlan.zhihu.com/p/349871853\" class=\"internal\">林知：Zotero Translator 开发文档</a> ，想一起完善中文翻译器的同学，可以联系我，东西不会可以慢慢学。</p><p data-pid=\"VPZ4rmIH\">如果初识 Zotero 的同学可以看看 <a class=\"member_mention\" href=\"https://www.zhihu.com/people/268c1f41a479e6ee24a9c0969a06e188\" data-hash=\"268c1f41a479e6ee24a9c0969a06e188\" data-hovercard=\"p$b$268c1f41a479e6ee24a9c0969a06e188\">@johnmy</a> 整理的 Zotero 入门 </p><a data-draft-node=\"block\" data-draft-type=\"link-card\" href=\"https://link.zhihu.com/?target=https%3A//github.com/redleafnew/Zotero_introduction\" data-image=\"https://pic3.zhimg.com/v2-7e831b9bb399b979306d739025b85e26_ipico.jpg\" data-image-width=\"420\" data-image-height=\"420\" class=\" wrap external\" target=\"_blank\" rel=\"nofollow noreferrer\">redleafnew/Zotero_introduction</a><p data-pid=\"4dVGtPWw\">如果你觉得我们的工作对你有帮助，就请帮我们点赞或分享吧</p>"
 					}
 				],
 				"seeAlso": []
