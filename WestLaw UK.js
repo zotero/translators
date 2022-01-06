@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-16 14:33:02"
+	"lastUpdated": "2022-01-06 14:41:39"
 }
 
 /*
@@ -128,10 +128,40 @@ function scrapeStatuteSection(doc, url) {
 function parseCitationList(citList) {
 	let citationRe = /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g;
 	let citationAsArray;
-	while ((citationAsArray = citationRe.exec(citation))) {
+	while ((citationAsArray = citationRe.exec(citList))) {
 		if (citationAsArray[3] !== "WLUK") {
 			return citationAsArray;
 		}
 	}
 	return citationAsArray;
 }
+/** BEGIN TEST CASES **/
+var testCases = [
+	{
+		"type": "web",
+		"url": "https://uk.westlaw.com/Document/I1A0179A0E42811DA8FC2A0F0355337E9/View/FullText.html?transitionType=Default&contextData=%28sc.Default%29",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Parker-Tweedale v Dunbar Bank Plc (No.1)",
+				"creators": [],
+				"dateDecided": "1991",
+				"court": "Court of Appeal (Civil Division)",
+				"firstPage": "12",
+				"language": "en-GB",
+				"reporter": "Ch.",
+				"url": "http://uk.practicallaw.thomsonreuters.com/Document/I1A0179A0E42811DA8FC2A0F0355337E9/View/FullText.html?transitionType=Default&contextData=%28sc.Default%29",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	}
+]
+/** END TEST CASES **/
