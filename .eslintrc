@@ -19,7 +19,11 @@
 		"attr": "readonly",
 		"innerText": "readonly",
 		"text": "readonly",
-		"atob": "readonly"
+		"atob": "readonly",
+		"request": "readonly",
+		"requestText": "readonly",
+		"requestJSON": "readonly",
+		"requestDocument": "readonly"
 	},
 	"rules": {
 		"no-unused-vars": [

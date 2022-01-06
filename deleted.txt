@@ -1,4 +1,4 @@
-72  # Increment number when modifying file
+74  # Increment number when modifying file
 
 96b9f483-c44d-5784-cdad-ce21b984 # Amazon
 add7c71c-21f3-ee14-d188-caf9da12 # SIRSI 2003+
@@ -119,3 +119,10 @@ bbf1617b-d836-4665-9aae-45f223264460 # A Contra Corriente is better handled by P
 c2f5f114-c255-4cf7-a7b8-d5c95e82291f # Hoovers.com is defunct
 097c963e-3866-4c6f-a6b4-f5e9d0d15530 # DTU Orbit now runs Elsevier Pure
 ba10b5bc-562f-11e1-b20d-a3084924019b # Nuclear Receptor Signaling no longer exists
+154c2785-ec83-4c27-8a8a-d27b3a2eded1 # Note Markdown translator pushed prematurely
+9499c586-d672-42d6-9ec4-ee9594dcc571 # The Hindu (old): Legacy layout targeted by this translator no longer exists
+8381bf68-11fa-418c-8530-2e00284d3efd # IRIS: Only covered a Rutgers catalog that no longer exists
+330f283f-12e9-4421-aa59-e17ec5f4aa37 # Glenbow Library: Incorporated into UCalgary library catalog
+fe39e97d-7397-4f3f-a5f3-396a1a79213c # OpenJudis: New site just lists PDFs without metadata
+fc410e64-0252-4cd3-acb1-25e584775fa2 # National Library of Australia: Old site defunct as of 2019
+c0e6fda6-0ecd-e4f4-39ca-37a4de436e15 # Library Catalog (GEAC): No instances of this catalog system are still online as of 2021

@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-29 22:40:29"
+	"lastUpdated": "2021-12-21 04:18:59"
 }
 
 /*
@@ -96,6 +96,8 @@ function doWeb(doc, url) {
 function scrape(doc, url) {
 	let citeData = doc.querySelector('input.citationToolsData');
 	let documentUrl = citeData.getAttribute('data-url');
+	// Value is URL-encoded when loaded via processDocuments()
+	documentUrl = decodeURIComponent(documentUrl);
 	let mcode = citeData.getAttribute('data-mcode');
 	let productName = citeData.getAttribute('data-productname');
 	let docId = mcode ? undefined : citeData.getAttribute('data-docid');
