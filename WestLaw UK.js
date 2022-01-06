@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-06 14:41:39"
+	"lastUpdated": "2022-01-06 14:45:19"
 }
 
 /*
@@ -151,6 +151,29 @@ var testCases = [
 				"language": "en-GB",
 				"reporter": "Ch.",
 				"url": "http://uk.practicallaw.thomsonreuters.com/Document/I1A0179A0E42811DA8FC2A0F0355337E9/View/FullText.html?transitionType=Default&contextData=%28sc.Default%29",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://uk.westlaw.com/Document/I67088A508B0211DBB4C6A18EEE1C8BDD/View/FullText.html?transitionType=SearchItem&contextData=(sc.Search)",
+		"items": [
+			{
+				"itemType": "statute",
+				"nameOfAct": "Companies Act",
+				"creators": [],
+				"dateEnacted": "2006",
+				"language": "en-GB",
+				"url": "http://uk.practicallaw.thomsonreuters.com/Document/I67088A508B0211DBB4C6A18EEE1C8BDD/View/FullText.html?transitionType=SearchItem&contextData=(sc.Search)",
 				"attachments": [
 					{
 						"title": "Snapshot",
