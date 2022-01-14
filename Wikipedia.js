@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-15 00:36:59"
+	"lastUpdated": "2022-01-14 11:56:51"
 }
 
 /**
@@ -137,7 +137,7 @@ function scrape(doc, url) {
 	}
 
 	item.attachments.push({
-		url: item.url,
+		url: url,
 		title: 'Snapshot',
 		mimeType: 'text/html',
 		snapshot: true
