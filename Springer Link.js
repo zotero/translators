@@ -267,22 +267,21 @@ function scrape(doc, url) {
 	});
 }
 
+/*
+Test several xpaths where the ISBN might show up. At this point, I don't have an
+example where the first xpath does not work. The other two fail if the
+website displays no options to buy the book (e.g. you have access to the pdf
+and physical copies are no longer sold). Example: book/10.1007/BFb0032916
+
+Another option would be to visit an entry of getResultList() and get the
+ISBN from there, either from the html or from the RIS data. This has the
+disadantage	that yet another http request is needed, costing additional
+time.
+
+There are often several different ISBNs for the same book (e.g. eBook,
+Hardcover, Softcover), and we pick the first to appear in the html code.
+*/
 function scrapeISBN(doc, _url) {
-
-	/*
-	Several xpaths where the ISBN might show up. At this point, I don't have an
-	example where the first xpath does not work. The other two fail if the
-	website displays no options to buy the book (e.g. you have access to the pdf
-	and physical copies are no longer sold). Example: book/10.1007/BFb0032916
-
-	Another option would be to visit an entry of getResultList() and get the
-	ISBN from there, either from the html or from the RIS data. This has the
-	disadantage	that yet another http request is needed, costing additional
-	time.
-
-	There are often several different ISBNs for the same book (e.g. eBook,
-	Hardcover, Softcover), and we pick the first to appear in the html code.
-	*/
 	var isbnList = ZU.xpath(doc, '//span[@itemprop="isbn"]');
 	if (isbnList.length) {
 		return isbnList[0].innerText;
