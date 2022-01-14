@@ -15,6 +15,7 @@
 /*
    SpringerLink Translator
    Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -113,7 +114,7 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return;
-			for (var i in selectedItems) {
+			for (let i in selectedItems) {
 				if (i == 0) {
 					searchByISBN(doc, url);
 					// ZU.processDocuments(url, searchByISBN); // does not appear to make a difference
