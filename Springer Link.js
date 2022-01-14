@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2022-01-14 09:11:59"
+	"lastUpdated": "2022-01-14 09:45:39"
 }
 
 /*
@@ -30,6 +30,7 @@
  */
 
 function getAction(url) {
+	//eslint-disable-next-line no-useless-escape
 	return url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
 }
 
@@ -90,6 +91,7 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var list = getResultList(doc);
 		var items = {};
+		
 		/*
 		For the types book, journal, or referencework, Springer Link does
 		not provide any bibliography information about the whole work, only
@@ -100,7 +102,7 @@ function doWeb(doc, url) {
 		*/
 		var actualType = getAction(url)[1];
 		if (["journal", "book", "referencework"].includes(actualType)) {
-			isbn = scrapeISBN(doc, url);
+			var isbn = scrapeISBN(doc, url);
 			if (isbn) {
 				Z.debug("Found ISBN: " + isbn);
 				items[0] = "Full book (by ISBN)";
@@ -111,11 +113,12 @@ function doWeb(doc, url) {
 		}
 		Zotero.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return;
-			for(var i in selectedItems) {
+			for (var i in selectedItems) {
 				if (i == 0) {
 					searchByISBN(doc, url);
-						// ZU.processDocuments(url, searchByISBN); // does not make a difference
-				} else {
+					// ZU.processDocuments(url, searchByISBN); // does not appear to make a difference
+				}
+				else {
 					ZU.processDocuments(i, scrape);
 				}
 			}
@@ -264,21 +267,23 @@ function scrape(doc, url) {
 	});
 }
 
-function scrapeISBN(doc, url) {
-/*
-Several xpaths where the ISBN might show up. At this point, I don't have
-an example where the first xpath does not work. The other two fail if
-the website displays no options to buy the book (e.g. you have access to the pdf
-and physical copies are no longer sold). Example: book/10.1007/BFb0032916
+function scrapeISBN(doc, _url) {
+	
+	/*
+	Several xpaths where the ISBN might show up. At this point, I don't have an
+	example where the first xpath does not work. The other two fail if the
+	website displays no options to buy the book (e.g. you have access to the pdf
+	and physical copies are no longer sold). Example: book/10.1007/BFb0032916
 
-Another option would be to visit an entry of getResultList() and get the ISBN
-from there, either from the html or from the RIS data. This has the disadantage
-that yet another http request is needed, costing additional time.
+	Another option would be to visit an entry of getResultList() and get the
+	ISBN from there, either from the html or from the RIS data. This has the
+	disadantage	that yet another http request is needed, costing additional
+	time.
 
-There are often several different ISBNs for the same book (e.g. eBook,
-Hardcover, Softcover), and we pick the first to appear in the html code.
-*/
-	isbnList = ZU.xpath(doc, '//span[@itemprop="isbn"]');
+	There are often several different ISBNs for the same book (e.g. eBook,
+	Hardcover, Softcover), and we pick the first to appear in the html code.
+	*/
+	var isbnList = ZU.xpath(doc, '//span[@itemprop="isbn"]');
 	if (isbnList.length) {
 		return isbnList[0].innerText;
 	}
@@ -297,30 +302,30 @@ function searchByISBN(doc, url) {
 	var isbn = scrapeISBN(doc, url);
 	if (!isbn) return;
 	Z.debug("Found ISBN: " + isbn);
-	var query = {"ISBN": isbn};
+	var query = { ISBN: isbn };
 	// Load all search translators and find the ones appropriate for ISBNs
 	// FIXME: If url is proxied, then the requests in the ISBN search
 	// translators will be proxied as well, which often fails for me.
 	var search = Zotero.loadTranslator("search");
-	search.setHandler("translators", function(obj, translators) {
-		 search.setTranslator(translators);
-		 search.translate();
+	search.setHandler("translators", function (obj, translators) {
+		search.setTranslator(translators);
+		search.translate();
 	});
 	var pdfURL = getpdfURL(url);
-	search.setHandler("itemDone", function(obj, item) {
-		Z.debug("Found entry via ISBN")
+	search.setHandler("itemDone", function (obj, item) {
+		Z.debug("Found entry via ISBN");
 		item.attachments.push({
 			url: pdfURL,
 			title: "Springer Full Text PDF",
 			mimeType: "application/pdf"
-		})
+		});
 		Z.debug(item);
 		item.complete();
 	});
-	search.setHandler("done", function(obj, success) {
+	search.setHandler("done", function (obj, success) {
 		if (!success) {
-			Z.debug("Could not find ISBN '" + isbn +"' in any database, or " +
-					"an error occured in accessing the databases.")
+			Z.debug("Could not find ISBN '" + isbn + "' in any database, "
+					+ "or an error occured in accessing the databases.");
 		}
 	});
 	search.setSearch(query);
