@@ -9,13 +9,12 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2020-09-08 02:04:42"
+	"lastUpdated": "2022-01-14 09:11:59"
 }
 
 /*
    SpringerLink Translator
    Copyright (C) 2020 Aurimas Vinckevicius and Sebastian Karcher
-
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU Affero General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
@@ -30,8 +29,12 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+function getAction(url) {
+	return url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
+}
+
 function detectWeb(doc, url) {
-	var action = url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
+	var action = getAction(url);
 	if (!action) return false;
 	if (!doc.head || !doc.head.getElementsByTagName('meta').length) {
 		Z.debug("Springer Link: No head or meta tags");
@@ -87,13 +90,34 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		var list = getResultList(doc);
 		var items = {};
+		/*
+		For the types book, journal, or referencework, Springer Link does
+		not provide any bibliography information about the whole work, only
+		about the chapters. See
+		https://support.springer.com/de/support/solutions/articles/6000081276-quellen-exportieren
+		For the whole book we scrape the ISBN and search for bibliography
+		data based on that.
+		*/
+		var actualType = getAction(url)[1];
+		if (["journal", "book", "referencework"].includes(actualType)) {
+			isbn = scrapeISBN(doc, url);
+			if (isbn) {
+				Z.debug("Found ISBN: " + isbn);
+				items[0] = "Full book (by ISBN)";
+			}
+		}
 		for (var i = 0, n = list.length; i < n; i++) {
 			items[list[i].href] = list[i].textContent;
 		}
 		Zotero.selectItems(items, function (selectedItems) {
 			if (!selectedItems) return;
-			for (let i in selectedItems) {
-				ZU.processDocuments(i, scrape);
+			for(var i in selectedItems) {
+				if (i == 0) {
+					searchByISBN(doc, url);
+						// ZU.processDocuments(url, searchByISBN); // does not make a difference
+				} else {
+					ZU.processDocuments(i, scrape);
+				}
 			}
 		});
 	}
@@ -207,12 +231,20 @@ function complementItem(doc, item) {
 	return item;
 }
 
-function scrape(doc, url) {
-	var DOI = url.match(/\/(10\.[^#?]+)/)[1];
-	var risURL = "https://citation-needed.springer.com/v2/references/" + DOI + "?format=refman&flavour=citation";
-	// Z.debug("risURL" + risURL);
-	var pdfURL = "/content/pdf/" + encodeURIComponent(DOI) + ".pdf";
+function getDOI(url) {
+	return url.match(/\/(10\.[^#?]+)/)[1];
+}
+
+function getpdfURL(url) {
+	var pdfURL = "/content/pdf/" + encodeURIComponent(getDOI(url)) + ".pdf";
 	// Z.debug("pdfURL: " + pdfURL);
+	return pdfURL;
+}
+
+function scrape(doc, url) {
+	var risURL = "https://citation-needed.springer.com/v2/references/" + getDOI(url) + "?format=refman&flavour=citation";
+	// Z.debug("risURL" + risURL);
+	var pdfURL = getpdfURL(url);
 	ZU.doGet(risURL, function (text) {
 		// Z.debug(text)
 		var translator = Zotero.loadTranslator("import");
@@ -230,6 +262,69 @@ function scrape(doc, url) {
 		});
 		translator.translate();
 	});
+}
+
+function scrapeISBN(doc, url) {
+/*
+Several xpaths where the ISBN might show up. At this point, I don't have
+an example where the first xpath does not work. The other two fail if
+the website displays no options to buy the book (e.g. you have access to the pdf
+and physical copies are no longer sold). Example: book/10.1007/BFb0032916
+
+Another option would be to visit an entry of getResultList() and get the ISBN
+from there, either from the html or from the RIS data. This has the disadantage
+that yet another http request is needed, costing additional time.
+
+There are often several different ISBNs for the same book (e.g. eBook,
+Hardcover, Softcover), and we pick the first to appear in the html code.
+*/
+	isbnList = ZU.xpath(doc, '//span[@itemprop="isbn"]');
+	if (isbnList.length) {
+		return isbnList[0].innerText;
+	}
+	isbnList = ZU.xpath(doc, '//input[@name="isxn"]');
+	if (isbnList.length) {
+		return isbnList[0].value;
+	}
+	isbnList = ZU.xpath(doc, '//input[@name="facet-eisbn"]');
+	if (isbnList.length) {
+		return isbnList[0].value;
+	}
+	return false;
+}
+
+function searchByISBN(doc, url) {
+	var isbn = scrapeISBN(doc, url);
+	if (!isbn) return;
+	Z.debug("Found ISBN: " + isbn);
+	var query = {"ISBN": isbn};
+	// Load all search translators and find the ones appropriate for ISBNs
+	// FIXME: If url is proxied, then the requests in the ISBN search
+	// translators will be proxied as well, which often fails for me.
+	var search = Zotero.loadTranslator("search");
+	search.setHandler("translators", function(obj, translators) {
+		 search.setTranslator(translators);
+		 search.translate();
+	});
+	var pdfURL = getpdfURL(url);
+	search.setHandler("itemDone", function(obj, item) {
+		Z.debug("Found entry via ISBN")
+		item.attachments.push({
+			url: pdfURL,
+			title: "Springer Full Text PDF",
+			mimeType: "application/pdf"
+		})
+		Z.debug(item);
+		item.complete();
+	});
+	search.setHandler("done", function(obj, success) {
+		if (!success) {
+			Z.debug("Could not find ISBN '" + isbn +"' in any database, or " +
+					"an error occured in accessing the databases.")
+		}
+	});
+	search.setSearch(query);
+	search.getTranslators();
 }
 
 
