@@ -30,7 +30,7 @@
  */
 
 function getAction(url) {
-	//eslint-disable-next-line no-useless-escape
+	// eslint-disable-next-line no-useless-escape
 	return url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
 }
 
@@ -268,7 +268,7 @@ function scrape(doc, url) {
 }
 
 function scrapeISBN(doc, _url) {
-	
+
 	/*
 	Several xpaths where the ISBN might show up. At this point, I don't have an
 	example where the first xpath does not work. The other two fail if the
