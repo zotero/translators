@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2022-01-14 09:45:39"
+	"lastUpdated": "2022-01-15 13:09:14"
 }
 
 /*
@@ -31,8 +31,7 @@
  */
 
 function getAction(url) {
-	// eslint-disable-next-line no-useless-escape
-	return url.match(/^https?:\/\/[^\/]+\/([^\/?#]+)/);
+	return url.match(/^https?:\/\/[^/]+\/([^/?#]+)/);
 }
 
 function detectWeb(doc, url) {
@@ -106,7 +105,20 @@ function doWeb(doc, url) {
 			var isbn = scrapeISBN(doc, url);
 			if (isbn) {
 				Z.debug("Found ISBN: " + isbn);
-				items[0] = "Full book (by ISBN)";
+				// scrape title from the page title
+				var title = ZU.xpathText(doc, '//div[@class="page-title"]/x1');
+				if (!title) {
+					// if that fails, scrape from <head><title>
+					// (no counterexamples known so far)
+					title = ZU.xpathText(doc, '/html/head/title');
+					title = title ? title.replace(" | SpringerLink", "") : null;
+				}
+				if (title) {
+					title = `${title} (ISBN: ${isbn})`;
+					Z.debug(title);
+					// add the title to the top of the item list
+					items[0] = title;
+				}
 			}
 		}
 		for (var i = 0, n = list.length; i < n; i++) {
@@ -117,7 +129,6 @@ function doWeb(doc, url) {
 			for (let i in selectedItems) {
 				if (i == 0) {
 					searchByISBN(doc, url);
-					// ZU.processDocuments(url, searchByISBN); // does not appear to make a difference
 				}
 				else {
 					ZU.processDocuments(i, scrape);
@@ -246,7 +257,8 @@ function getpdfURL(url) {
 }
 
 function scrape(doc, url) {
-	var risURL = "https://citation-needed.springer.com/v2/references/" + getDOI(url) + "?format=refman&flavour=citation";
+	var risURL = "https://citation-needed.springer.com/v2/references/"
+					+ getDOI(url) + "?format=refman&flavour=citation";
 	// Z.debug("risURL" + risURL);
 	var pdfURL = getpdfURL(url);
 	ZU.doGet(risURL, function (text) {
@@ -256,7 +268,6 @@ function scrape(doc, url) {
 		translator.setString(text);
 		translator.setHandler("itemDone", function (obj, item) {
 			item = complementItem(doc, item);
-
 			item.attachments.push({
 				url: pdfURL,
 				title: "Springer Full Text PDF",
@@ -304,8 +315,6 @@ function searchByISBN(doc, url) {
 	Z.debug("Found ISBN: " + isbn);
 	var query = { ISBN: isbn };
 	// Load all search translators and find the ones appropriate for ISBNs
-	// FIXME: If url is proxied, then the requests in the ISBN search
-	// translators will be proxied as well, which often fails for me.
 	var search = Zotero.loadTranslator("search");
 	search.setHandler("translators", function (obj, translators) {
 		search.setTranslator(translators);
@@ -319,7 +328,6 @@ function searchByISBN(doc, url) {
 			title: "Springer Full Text PDF",
 			mimeType: "application/pdf"
 		});
-		Z.debug(item);
 		item.complete();
 	});
 	search.setHandler("done", function (obj, success) {
