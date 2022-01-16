@@ -219,7 +219,7 @@ function doWeb(doc, url, noFollow) {
 		});
 	}
 	else {
-		var abstractTab = doc.getElementById('addFlashPageParameterformat_abstract');
+		var abstractTab = doc.getElementById('addFlashPageParameterformat_abstract') || doc.getElementById('addFlashPageParameterformat_citation');
 		if (abstractTab && abstractTab.classList.contains('active')) {
 			Zotero.debug("On Abstract tab and scraping");
 			scrape(doc, url, type);
