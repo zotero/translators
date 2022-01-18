@@ -9,11 +9,11 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2020-03-25 18:03:44"
+	"lastUpdated": "2022-01-18 08:20:23"
 }
 
 function detectWeb(doc, url) {
-	if (doc.defaultView !== doc.defaultView.top) return false;
+	if (doc.defaultView !== null && doc.defaultView !== doc.defaultView.top) return false;
 	
 	if (/[?&]arnumber=(\d+)/i.test(url) || /\/document\/\d+/i.test(url)) {
 		var firstBreadcrumb = ZU.xpathText(doc, '(//div[contains(@class, "breadcrumbs")]//a)[1]');
