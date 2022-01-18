@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-02 22:02:48"
+	"lastUpdated": "2022-01-14 12:11:37"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 
-const slugRe = /\/(?:rfc|pdf|id|doc|info(?:\/html)?)\/([^/.]+)/;
+const slugRe = /\/(?:rfc|pdf|id|doc|info)(?:\/html)?\/([^/.]+)/;
 
 function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
@@ -86,7 +86,8 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, url, originalURL) {
-	let bibURL = attr(doc, '.meta-info a[href$="/bibtex"], .meta a[href$="/bibtex"]', 'href');
+	let bibURL = attr(doc, '.meta-info a[href*="/bibtex"], .meta a[href*="/bibtex"]',
+		'href');
 	if (!bibURL) {
 		// this is probably a draft with a weird versioned URL that doesn't
 		// resolve right. so we'll reformat the version and try again.
@@ -135,7 +136,7 @@ function scrape(doc, url, originalURL) {
 			
 			item.url = url.replace(/[?#].*/, '');
 
-			let pdfURL = attr(doc, '.meta a[href$=".pdf"]', 'href');
+			let pdfURL = attr(doc, '.meta a[href$=".pdf"], .meta a[href*="/doc/pdf"]', 'href');
 			if (pdfURL) {
 				item.attachments.push({
 					title: 'Full Text PDF',
@@ -390,7 +391,6 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2021-07-12",
 				"abstractNote": "This document defines a specialized, dynamic routing protocol for Clos and fat-tree network topologies optimized towards minimization of control plane state as well as configuration and operational complexity.",
 				"institution": "Internet Engineering Task Force",
 				"itemID": "ietf-rift-rift-13",

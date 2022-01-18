@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-10-10 02:27:10"
+	"lastUpdated": "2022-01-04 09:11:57"
 }
 
 /*
@@ -168,7 +168,7 @@ function detectWeb(doc, url) {
 
 	// there is not much information about the item type in the pdf/fulltext page
 	let titleRow = text(doc, '.open-access');
-	if (titleRow && !text(doc, '.ol-login-link')) {
+	if (titleRow && doc.getElementById('docview-nav-stick')) { // do not continue if there is no nav to the Abstract, as the translation will fail
 		if (getItemType([titleRow])) {
 			return getItemType([titleRow]);
 		}
@@ -219,10 +219,9 @@ function doWeb(doc, url, noFollow) {
 		});
 	}
 	else {
-		var abstractTab = doc.getElementById('tab-AbstractRecord-null') // Seems like that null is a bug and it might change at some point
-			|| doc.getElementById('tab-Record-null'); // Shown as Details
-		if (!(abstractTab && !abstractTab.classList.contains('active'))) {
-			Zotero.debug("On Abstract page, scraping");
+		var abstractTab = doc.getElementById('addFlashPageParameterformat_abstract') || doc.getElementById('addFlashPageParameterformat_citation');
+		if (abstractTab && abstractTab.classList.contains('active')) {
+			Zotero.debug("On Abstract tab and scraping");
 			scrape(doc, url, type);
 		}
 		else if (noFollow) {
@@ -230,12 +229,12 @@ function doWeb(doc, url, noFollow) {
 			scrape(doc, url, type);
 		}
 		else {
-			var link = abstractTab.getElementsByTagName('a')[0];
+			var link = abstractTab.href;
 			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
 			Zotero.debug("Going to the Abstract tab");
-			ZU.processDocuments(link.href, function (doc, url) {
+			ZU.processDocuments(link, function (doc, url) {
 				doWeb(doc, url, true);
 			});
 		}
@@ -244,17 +243,17 @@ function doWeb(doc, url, noFollow) {
 
 function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
-
+	
 	// get all rows
 	var rows = doc.getElementsByClassName('display_record_indexing_row');
-
+	
 	let label, value, enLabel;
 	var dates = [], place = {}, altKeywords = [];
 
 	for (let i = 0, n = rows.length; i < n; i++) {
 		label = rows[i].childNodes[0];
 		value = rows[i].childNodes[1];
-
+		
 		if (!label || !value) continue;
 
 		label = label.textContent.trim();
