@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-07 11:47:23"
+	"lastUpdated": "2022-01-20 14:21:26"
 }
 
 /*
@@ -37,30 +37,31 @@
 
 
 function detectWeb(doc, url) {
-	if (url.indexOf('view')>-1) {
-		if (url.indexOf('boeken')>-1) {
+	if (url.includes('view')) {
+		if (url.includes('boeken')) {
 			return "book";
 		}
-		if (url.indexOf('tijdschriften')>-1) {
+		if (url.includes('tijdschriften')) {
 			return "journalArticle";
 		}
-		if (url.indexOf('kranten')>-1) {
+		if (url.includes('kranten')) {
 			return "newspaperArticle";
 		}
-		if (url.indexOf('radiobulletins')>-1) {
+		if (url.includes('radiobulletins')) {
 			return "radioBroadcast";
 		}
-	} else if (getSearchResults(doc, true)) {
+	}
+	else if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
+	return false;
 }
 
 function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
-	//var rows = ZU.xpath(doc, '//main[contains(@class, "searchresults")]/article//a[h2[contains(@cl"title")] and starts-with(@href, "/")]');
-	var rows=ZU.xpath(doc, '//article//a[contains(@class, "search-result__link") and starts-with(@href, "/")]')
-	for (var i=0; i<rows.length; i++) {
+	var rows = ZU.xpath(doc, '//article//a[contains(@class, "search-result__link") and starts-with(@href, "/")]');
+	for (var i = 0; i < rows.length; i++) {
 		var href = rows[i].href;
 		var title = ZU.trimInternal(rows[i].textContent);
 		if (!href || !title) continue;
@@ -75,16 +76,10 @@ function getSearchResults(doc, checkOnly) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
+			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
-	} else {
+	}
+	else {
 		scrape(doc, url);
 	}
 }
@@ -93,24 +88,21 @@ function scrape(doc, url) {
 	var item = new Zotero.Item(detectWeb(doc, url));
 	var details = ZU.xpath(doc, '(//dl[contains(@class, "metadata__details-description-list")])[1]');
 
-	var title= ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Titel" or normalize-space(text())="Kop")]/following-sibling::dd[1]');
+	var title = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Titel" or normalize-space(text())="Kop")]/following-sibling::dd[1]');
 	
 	if (!title) {
-		title= ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Krantentitel")]/following-sibling::dd[1]');
-
+		title = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Krantentitel")]/following-sibling::dd[1]');
 	}
-	item.title=title
+	item.title = title;
 	item.numPages = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and normalize-space(text())="Omvang"]/following-sibling::dd[1]');
 
 	var date = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Publicatiedatum" or normalize-space(text())="Datum")]/following-sibling::dd[1]');
 	if (!date) {
-		
-	   date = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Jaar van uitgave")]/following-sibling::dd[1]');
-
+		date = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Jaar van uitgave")]/following-sibling::dd[1]');
 	}
 
 	if (date && date.length > 4) {
-		item.date = date.replace(/(\d{2})\-(\d{2})-(\d{4})/, "$3-$2-$1");
+		item.date = date.replace(/(\d{2})-(\d{2})-(\d{4})/, "$3-$2-$1");
 	}
 	else item.date = date;
 
@@ -122,7 +114,7 @@ function scrape(doc, url) {
 	item.callNumber = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="PPN")]/following-sibling::dd[1]/a');
 	var language = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Taal")]/following-sibling::dd[1]/a');
 	if (language) item.language = ZU.trimInternal(language);
-	//item.volume = ZU.xpathText(details, './/dd[@data-testing-id="search-result__volume"]');
+	// item.volume = ZU.xpathText(details, './/dd[@data-testing-id="search-result__volume"]');
 	item.issue = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Aflevering")]/following-sibling::dd[1]/a');
 	item.edition = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Editie")]/following-sibling::dd[1]/a');
 	item.place = ZU.xpathText(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Plaats van uitgave")]/following-sibling::dd[1]/a');
@@ -130,12 +122,12 @@ function scrape(doc, url) {
 
 	var tags = ZU.xpath(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Onderwerp")]/following-sibling::dd/a');
 
-	for (var i = 0; i<tags.length; i++) {
+	for (var i = 0; i < tags.length; i++) {
 		item.tags.push(tags[i].textContent);
 	}
 
 	var authors = ZU.xpath(details, './/ancestor::dt[contains(@class,"metadata__details-text") and (normalize-space(text())="Auteur" or normalize-space(text())="Coauteur") ]/following-sibling::dd[1]');
-	for (var j = 0; j<authors.length; j++) {
+	for (var j = 0; j < authors.length; j++) {
 		item.creators.push(ZU.cleanAuthor(authors[j].textContent, "author", true));
 	}
 
@@ -146,23 +138,23 @@ function scrape(doc, url) {
 	});
 	
 	var pdflink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="pdf")]/@href');
-    if (pdflink)	{
-    	item.attachments.push({
-		title: "PDF",
-		mimeType: "application/pdf",
-		url: pdflink
-  	    });
-    }
-    
+	if (pdflink) {
+		item.attachments.push({
+			title: "PDF",
+			mimeType: "application/pdf",
+			url: pdflink
+		});
+	}
+	
   
-    var jpglink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="jpg")]/@href');
-    if (jpglink)	{
-    	item.attachments.push({
-		title: "JPG",
-		mimeType: "image/jpeg",
-		url: jpglink
-  	    });
-    }
+	var jpglink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="jpg")]/@href');
+	if (jpglink) {
+		item.attachments.push({
+			title: "JPG",
+			mimeType: "image/jpeg",
+			url: jpglink
+		});
+	}
 
 	item.complete();
 }
@@ -313,10 +305,6 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
-	},
-	{
-		"type": "web",
-		"url": "https://www.delpher.nl/nl/kranten/view?query=candide&coll=ddd&identifier=MMKB23:001714037:mpeg21:a00022&resultsidentifier=MMKB23:001714037:mpeg21:a00022&rowid=1"
 	},
 	{
 		"type": "web",
