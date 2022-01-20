@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-17 15:23:53"
+	"lastUpdated": "2022-01-20 11:53:09"
 }
 
 /*
@@ -78,8 +78,8 @@ function doWeb(doc, url) {
 
 
 function scrape(doc, url) {
-	var data = ZU.xpathText(doc, '//script[@type="application/ld+json"]');
-	var json = JSON.parse(data)[0];
+	var data = text(doc, 'script[type="application/ld+json"]');
+	var json = JSON.parse(data);
 	var translator = Zotero.loadTranslator('web');
 	// Embedded Metadata
 	translator.setTranslator('951c027d-74ac-47d4-a107-9c3069ab7b48');
@@ -300,6 +300,55 @@ var testCases = [
 					},
 					{
 						"tag": "psychology"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.newyorker.com/culture/culture-desk/what-happens-when-a-bad-tempered-distractible-doofus-runs-an-empire",
+		"items": [
+			{
+				"itemType": "magazineArticle",
+				"title": "What Happens When a Bad-Tempered, Distractible Doofus Runs an Empire?",
+				"creators": [
+					{
+						"firstName": "Miranda",
+						"lastName": "Carter",
+						"creatorType": "author"
+					}
+				],
+				"date": "2018-06-06",
+				"ISSN": "0028-792X",
+				"abstractNote": "Donald Trump is reminiscent of Kaiser Wilhelm II, during whose reign the upper echelons of the German government began to unravel into a free-for-all.",
+				"language": "en-US",
+				"libraryCatalog": "www.newyorker.com",
+				"publicationTitle": "The New Yorker",
+				"url": "https://www.newyorker.com/culture/culture-desk/what-happens-when-a-bad-tempered-distractible-doofus-runs-an-empire",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "donald trump"
+					},
+					{
+						"tag": "first world war"
+					},
+					{
+						"tag": "germany"
+					},
+					{
+						"tag": "leadership"
+					},
+					{
+						"tag": "narcissism"
 					}
 				],
 				"notes": [],
