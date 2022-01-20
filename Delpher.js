@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-20 14:21:26"
+	"lastUpdated": "2022-01-20 14:35:30"
 }
 
 /*
@@ -37,17 +37,17 @@
 
 
 function detectWeb(doc, url) {
-	if (url.includes('view')) {
-		if (url.includes('boeken')) {
+	if (url.includes('/view')) {
+		if (url.includes('/boeken/')) {
 			return "book";
 		}
-		if (url.includes('tijdschriften')) {
+		if (url.includes('/tijdschriften/')) {
 			return "journalArticle";
 		}
-		if (url.includes('kranten')) {
+		if (url.includes('/kranten/')) {
 			return "newspaperArticle";
 		}
-		if (url.includes('radiobulletins')) {
+		if (url.includes('/radiobulletins/')) {
 			return "radioBroadcast";
 		}
 	}
@@ -140,7 +140,7 @@ function scrape(doc, url) {
 	var pdflink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="pdf")]/@href');
 	if (pdflink) {
 		item.attachments.push({
-			title: "PDF",
+			title: "Full Text PDF",
 			mimeType: "application/pdf",
 			url: pdflink
 		});
@@ -150,7 +150,7 @@ function scrape(doc, url) {
 	var jpglink = ZU.xpathText(doc, './/a[contains(@class,"object-view-menu__downloads-link") and (normalize-space(text())="jpg")]/@href');
 	if (jpglink) {
 		item.attachments.push({
-			title: "JPG",
+			title: "Image",
 			mimeType: "image/jpeg",
 			url: jpglink
 		});
