@@ -159,7 +159,6 @@ function scrape(doc, url) {
 	item.complete();
 }
 
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -196,6 +195,14 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [
@@ -246,6 +253,14 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -274,6 +289,10 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -284,20 +303,28 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://www.delpher.nl/nl/tijdschriften/view/index?query=buurman&coll=dts&identifier=dts%3A2738036%3Ampeg21%3A0012&page=1&maxperpage=10#info",
+		"url": "https://www.delpher.nl/nl/tijdschriften/view/index?query=buurman&coll=dts&identifier=dts%3A2738036%3Ampeg21%3A0012&page=1&maxperpage=10#info",
 		"items": [
 			{
 				"itemType": "journalArticle",
 				"title": "Nieuwsblad voor den boekhandel jrg 91, 1924, no 35, 02-05-1924",
 				"creators": [],
 				"date": "1924-05-02",
-				"issue": "35",
-				"language": "Nederlands",
-				"libraryCatalog": "Koninklijke Bibliotheek: LHO AW.A 06b NIE",
-				"url": "http://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21",
+				"callNumber": "830637982",
+				"libraryCatalog": "Koninklijke Bibliotheek",
+				"url": "https://resolver.kb.nl/resolve?urn=dts:2738036:mpeg21:0012",
 				"attachments": [
 					{
-						"title": "Snapshot"
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [],
@@ -335,6 +362,14 @@ var testCases = [
 					{
 						"title": "Snapshot",
 						"mimeType": "text/html"
+					},
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Image",
+						"mimeType": "image/jpeg"
 					}
 				],
 				"tags": [
