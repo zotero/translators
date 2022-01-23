@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 21:42:11"
+	"lastUpdated": "2022-01-23 21:55:40"
 }
 
 /*
@@ -88,7 +88,9 @@ function scrape(doc, url) {
 		var author = ZU.xpathText(doc, '//div[contains(@class, "group-byline-info")]//div[contains(@class, "field-byline")]');
 		if (author !== null && author.length) {
 			var authorArr = author.trim().replace(' For The Straits Times', '').split(' and '); //https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health
-			insertCreator(author, newItem);
+			for (var i2 = 0; i2 < authorArr.length; i2++) {
+				insertCreator(authorArr[i2], newItem);
+			}
 		}
 	}
 	
@@ -256,6 +258,7 @@ function insertCreator(authorName, newItem) {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
+
 
 
 
@@ -432,6 +435,86 @@ var testCases = [
 				"place": "Singapore",
 				"publicationTitle": "The Straits Times",
 				"url": "https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/world/science-talk-hope-and-concern-for-two-novel-covid-19-antivirals",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Science Talk: Hope and concern for two novel Covid-19 antivirals",
+				"creators": [
+					{
+						"firstName": "William A.",
+						"lastName": "Haseltine",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Roberto",
+						"lastName": "Patarca",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-11-22T05:00:00+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "Public health measures, vaccines and antimicrobials – which kill micro-organisms or stop their growth – are the hallmarks to keeping plague-causing microbes at bay and, in exceedingly rare instances, even to eradicating them.",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"shortTitle": "Science Talk",
+				"url": "https://www.straitstimes.com/world/science-talk-hope-and-concern-for-two-novel-covid-19-antivirals",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Science Talk: When climate change impacts human health",
+				"creators": [
+					{
+						"firstName": "Ching Ann",
+						"lastName": "Hui",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Woo",
+						"lastName": "Qiyun",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021-11-08T20:22:34+08:00",
+				"ISSN": "0585-3923",
+				"abstractNote": "SINGAPORE - The climate crisis is often treated as an environmental problem, but the planetary heating could also have severe repercussions on human health.",
+				"language": "en",
+				"libraryCatalog": "The Straits Times",
+				"place": "Singapore",
+				"publicationTitle": "The Straits Times",
+				"shortTitle": "Science Talk",
+				"url": "https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health",
 				"attachments": [
 					{
 						"title": "Snapshot",
