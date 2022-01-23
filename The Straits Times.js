@@ -74,7 +74,7 @@ function scrape(doc, url) {
 		authors = authors.trim();
 		insertCreator(authors, newItem);	
 	} else {
-		authors = Zotero.Utilities.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); //multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
+		authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); //multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
 		if (authors !== null && authors.length) {
 			var authorsArr = authors.split(',');
 			for (var i = 0; i < authorsArr.length; i++) {
