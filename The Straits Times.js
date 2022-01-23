@@ -258,7 +258,9 @@ function insertCreator(authorName, newItem) {
 	else {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
-}/** BEGIN TEST CASES **/
+}
+
+/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
