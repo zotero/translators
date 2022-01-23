@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 21:59:07"
+	"lastUpdated": "2022-01-23 22:06:21"
 }
 
 /*
@@ -72,9 +72,10 @@ function scrape(doc, url) {
 	var authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//div[contains(@itemprop, "author")]'); // single author article. https://www.straitstimes.com/singapore/more-employees-eligible-for-covid-19-support-grant-application-start-date-pushed-back-msf
 	if (authors !== null && authors.length) {
 		authors = authors.trim();
-		insertCreator(authors, newItem);	
-	} else {
-		authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); //multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
+		insertCreator(authors, newItem);
+	} 
+	else {
+		authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); // multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
 		if (authors !== null && authors.length) {
 			var authorsArr = authors.split(',');
 			for (var i = 0; i < authorsArr.length; i++) {
@@ -87,7 +88,7 @@ function scrape(doc, url) {
 	if (authors === null || !authors.length) {
 		var author = ZU.xpathText(doc, '//div[contains(@class, "group-byline-info")]//div[contains(@class, "field-byline")]');
 		if (author !== null && author.length) {
-			var authorArr = author.trim().replace(' For The Straits Times', '').split(' and '); //https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health
+			var authorArr = author.trim().replace(' For The Straits Times', '').split(' and '); // https://www.straitstimes.com/singapore/environment/science-talk-when-climate-change-impacts-human-health
 			for (var i2 = 0; i2 < authorArr.length; i2++) {
 				insertCreator(authorArr[i2], newItem);
 			}
@@ -150,16 +151,16 @@ function insertCreator(authorName, newItem) {
 		'Benjamin Lim Kang': { first: 'Benjamin, Kang', last: 'Lim' },
 		'Chang Ai-Lien': { first: 'Ai-Lien', last: 'Chang' },
 		'Chang May Choon': { first: 'May Choon', last: 'Chang' },
-		'Chang Tou Liang': { first: 'Tou Liang', last: 'Chang'},
+		'Chang Tou Liang': { first: 'Tou Liang', last: 'Chang' },
 		'Cheong Suk-Wai': { first: 'Suk-Wai', last: 'Cheong' },
-		'Cheow Sue-Ann' : { first: 'Sue-Ann', last: 'Cheow' },
-		'Cheryl Teh TL' : { first: 'Cheryl, TL', last: 'Teh' },
+		'Cheow Sue-Ann': { first: 'Sue-Ann', last: 'Cheow' },
+		'Cheryl Teh TL': { first: 'Cheryl, TL', last: 'Teh' },
 		'Chew Hui Min': { first: 'Hui Min', last: 'Chew' },
 		'Chin Hui Shan': { first: 'Hui Shan', last: 'Chin' },
 		'Chng Choon Hiong': { first: 'Choon Hion', last: 'Chng' },
 		'Chong Jun Liang': { first: 'Jun Liang', last: 'Chong' },
 		'Choo Yun Ting': { first: 'Yun Ting', last: 'Choo' },
-		'Christian de Boisredon' : { first: 'Christian', last: 'de Boisredon' },
+		'Christian de Boisredon': { first: 'Christian', last: 'de Boisredon' },
 		'Chua Mui Hoong': { first: 'Mui Hoong', last: 'Chua' },
 		'Chua Siang Yee': { first: 'Siang Yee', last: 'Chua' },
 		'Feng Zengkun': { first: 'Zengkun', last: 'Feng' },
@@ -173,20 +174,20 @@ function insertCreator(authorName, newItem) {
 		'Joy Pang Minle': { first: 'Joy, Minle', last: 'Pang' },
 		'Kang Wan Chern': { first: 'Wan Chern', last: 'Kang' },
 		'Khoe Wei Jun': { first: 'Wei Jun', last: 'Khoe' },
-		'Kok Xing Hui' : { first: 'Xing Hui', last: 'Kok' },
+		'Kok Xing Hui': { first: 'Xing Hui', last: 'Kok' },
 		'Kua Chee Siong': { first: 'Chee Siong', last: 'Kua' },
 		'Lai Shueh Yuan': { first: 'Shueh Yuan', last: 'Lai' },
 		'Lee Chee Chew': { first: 'Chee Chew', last: 'Lee' },
 		'Lee Choo Kiong': { first: 'Choo Kiong', last: 'Lee' },
 		'Lee Jian Xuan': { first: 'Jian Xuan', last: 'Lee' },
 		'Lee Min Kok': { first: 'Min Kok', last: 'Lee' },
-		'Lee Nian Tjoe': { first: 'Nian Tjoe', last: 'Lee'},
+		'Lee Nian Tjoe': { first: 'Nian Tjoe', last: 'Lee' },
 		'Lee Qing Ping': { first: 'Qing Ping', last: 'Lee' },
 		'Lee Seok Hwai': { first: 'Seok Hwai', last: 'Lee' },
 		'Lee Si Xuan': { first: 'Si Xuan', last: 'Lee' },
 		'Lee Siew Hua': { first: 'Siew Hua', last: 'Lee' },
-		'Lee Xin En' : { first: 'Xin En', last: 'Lee' },
 		'Lee Wei Ling': { first: 'Wei Ling', last: 'Lee' },
+		'Lee Xin En': { first: 'Xin En', last: 'Lee' },
 		'Li Xueying': { first: 'Xueying', last: 'Li' },
 		'Lian Szu Jin': { first: 'Szu Jin', last: 'Lian' },
 		'Liew Ai Xin': { first: 'Ai Xin', last: 'Liew' },
@@ -207,7 +208,7 @@ function insertCreator(authorName, newItem) {
 		'Nicholas De Silva': { first: 'Nicholas', last: 'De Silva' },
 		'Ng Kane Gene': { first: 'Kane Gene', last: 'Ng' },
 		'Ng Huiwen': { first: 'Huiwen', last: 'Ng' },
-		'Ng Wei Kai': {first: 'Wei Kai', last: 'Ng'},
+		'Ng Wei Kai': { first: 'Wei Kai', last: 'Ng' },
 		'Nur Asyiqin Mohamad Salleh': { first: 'Nur Asyiqin', last: 'Mohamad Salleh' },
 		'Ong Sor Fern': { first: 'Sor Fern', last: 'Ong' },
 		'Poon Chian Hui': { first: 'Chain Hui', last: 'Poon' },
@@ -237,7 +238,7 @@ function insertCreator(authorName, newItem) {
 		'Toh Ting Wei': { first: 'Ting Wei', last: 'Toh' },
 		'Toh Yong Chuan': { first: 'Yong Chuan', last: 'Toh' },
 		'Tong Ming Chien': { first: 'Ming Chien', last: 'Tong' },
-		'Wang Gungwu': { first: 'Gungwu', last: 'Wang'},
+		'Wang Gungwu': { first: 'Gungwu', last: 'Wang' },
 		'Wong Ah Yoke': { first: 'Ah Yoke', last: 'Wong' },
 		'Wong Kim Hoh': { first: 'Kim Hoh', last: 'Wong' },
 		'Wong Shiying': { first: 'Shiying', last: 'Wong' },
