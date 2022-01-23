@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsbv",
-	"lastUpdated": "2022-01-15 13:09:14"
+	"lastUpdated": "2022-01-23 09:09:07"
 }
 
 /*
@@ -106,7 +106,7 @@ function doWeb(doc, url) {
 			if (isbn) {
 				Z.debug("Found ISBN: " + isbn);
 				// scrape title from the page title
-				var title = ZU.xpathText(doc, '//div[@class="page-title"]/x1');
+				var title = ZU.xpathText(doc, '//div[@class="page-title"]/h1');
 				if (!title) {
 					// if that fails, scrape from <head><title>
 					// (no counterexamples known so far)
