@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 21:55:40"
+	"lastUpdated": "2022-01-23 21:59:07"
 }
 
 /*
@@ -258,11 +258,6 @@ function insertCreator(authorName, newItem) {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
 }
-
-
-
-
-
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
