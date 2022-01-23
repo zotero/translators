@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-23 22:06:21"
+	"lastUpdated": "2022-01-23 22:08:18"
 }
 
 /*
@@ -73,7 +73,7 @@ function scrape(doc, url) {
 	if (authors !== null && authors.length) {
 		authors = authors.trim();
 		insertCreator(authors, newItem);
-	} 
+	}
 	else {
 		authors = ZU.xpathText(doc, '//div[contains(@class, "field-byline")]//span[contains(@itemprop, "author")]'); // multiple authors article. https://www.straitstimes.com/singapore/community/sporeans-going-ahead-with-cny-plans-amid-surge-in-covid-19-cases-as-businesses-see-boost-in-sales
 		if (authors !== null && authors.length) {
@@ -258,8 +258,7 @@ function insertCreator(authorName, newItem) {
 	else {
 		newItem.creators.push(ZU.cleanAuthor(authorName, "author"));
 	}
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
