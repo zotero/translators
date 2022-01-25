@@ -30,8 +30,7 @@
 	along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-// eslint-disable-next-line no-unused-vars
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	var xpath = '//meta[@name="citation_journal_title"]';
 	if (ZU.xpath(doc, xpath).length > 0) {
 		return "journalArticle";
