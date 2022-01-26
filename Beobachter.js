@@ -36,8 +36,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-// eslint-disable-next-line no-unused-vars
-function detectWeb(doc, url) {
+function detectWeb(doc, _url) {
 	if (doc.getElementsByClassName('article-header').length > 0) {
 		return "magazineArticle";
 	}
