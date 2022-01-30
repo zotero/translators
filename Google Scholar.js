@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-07 05:56:18"
+	"lastUpdated": "2022-01-30 19:53:00"
 }
 
 // attr()/text() v2
@@ -31,7 +31,7 @@ function detectWeb(doc, url) {
 		}
 		
 		//individual saved citation
-		var link = ZU.xpathText(doc, '//a[@class="gsc_vcd_title_link"]/@href');
+		var link = ZU.xpathText(doc, '//a[@class="gsc_oci_title_link"]/@href');
 		if (!link) return;
 		if (link.indexOf('/scholar_case?') != -1) {
 			return 'case';
@@ -67,7 +67,7 @@ function getProfileResults(doc, checkOnly) {
 	var found = false;
 	var rows = doc.querySelectorAll('a.gsc_a_at');
 	for (var i=0; i<rows.length; i++) {
-		var href = rows[i].dataset.href;
+		var href = rows[i].href;
 		var title = rows[i].textContent;
 		if (!href || !title) continue;
 		if (checkOnly) return true;
@@ -961,6 +961,11 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://scholar.google.be/scholar?hl=en&as_sdt=1,5&as_vis=1&q=%22transformative+works+and+cultures%22&scisbd=1",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/citations?user=Cz6X6UYAAAAJ&hl=en",
 		"items": "multiple"
 	}
 ]
