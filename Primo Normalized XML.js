@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-11-06 20:20:36"
+	"lastUpdated": "2022-02-02 19:34:22"
 }
 
 /*
@@ -162,7 +162,7 @@ function doImport() {
 	var publisher = ZU.xpathText(doc, '//p:addata/p:pub', ns);
 	if (!publisher) publisher = ZU.xpathText(doc, '//p:display/p:publisher', ns);
 	if (publisher) {
-		publisher = publisher.replace(/,\s*c?\d+|[()[\]]|(\.\s*)?/g, "");
+		publisher = publisher.replace(/,\s*c?\d+|[()[\]]/g, "");
 		item.publisher = publisher.replace(/^\s*"|,?"\s*$/g, '');
 		var pubplace = ZU.unescapeHTML(publisher).split(" : ");
 
@@ -259,7 +259,9 @@ function doImport() {
 	item.volume = ZU.xpathText(doc, '//p:addata/p:volume', ns);
 	item.publicationTitle = ZU.xpathText(doc, '//p:addata/p:jtitle', ns);
 
-	item.bookTitle = ZU.xpathText(doc, '//p:addata/p:btitle', ns);
+	if (item.itemType != 'book') {
+		item.bookTitle = ZU.xpathText(doc, '//p:addata/p:btitle', ns);
+	}
 
 	var startPage = ZU.xpathText(doc, '//p:addata/p:spage', ns);
 	var endPage = ZU.xpathText(doc, '//p:addata/p:epage', ns);
@@ -356,13 +358,16 @@ function stripAuthor(str) {
 	// e.g. Wheaton, Barbara Ketcham [former owner]$$QWheaton, Barbara Ketcham
 	str = str.replace(/^(.*)\$\$Q(.*)$/, "$2");
 	return str
-	// Remove year
+		// Remove year
 		.replace(/\s*,?\s*\(?\d{4}-?(\d{4}|\.{3})?\)?/g, '')
 		// Remove creator type like (illustrator)
 		.replace(/(\s*,?\s*[[(][^()]*[\])])+$/, '')
 		// The full "continuous" name uses no separators, which need be removed
 		// cf. "Luc, Jean André : de (1727-1817)"
-		.replace(/\s*:\s+/, " ");
+		.replace(/\s*:\s+/, " ")
+		// National Library of Russia adds metadata at the end of the author name,
+		// prefixed by 'NLR10::'. Remove it.
+		.replace(/\bNLR10::.*/, '');
 }
 
 function fetchCreators(item, creators, type, splitGuidance) {
@@ -735,6 +740,32 @@ var testCases = [
 						"tag": "South Africa"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<record xmlns=\"http://www.exlibrisgroup.com/xsd/primo/primo_nm_bib\" xmlns:sear=\"http://www.exlibrisgroup.com/xsd/jaguar/search\">\n  <control>\n    <sourcerecordid>005204170</sourcerecordid>\n    <sourceid>07NLR_LMS</sourceid>\n    <recordid>07NLR_LMS005204170</recordid>\n    <originalsourceid>NLR01</originalsourceid>\n    <ilsapiid>NLR01005204170</ilsapiid>\n    <sourceformat>UNIMARC</sourceformat>\n    <sourcesystem>Aleph</sourcesystem>\n  </control>\n  <display>\n    <type>book</type>\n    <title>Плавающий город : С рис.</title>\n    <creator>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</creator>\n    <publisher>Санкт-Петербург : С.В. Звонарев, 1872</publisher>\n    <creationdate>1872</creationdate>\n    <format>[2], 212, [2], 42 с., [14] л. ил. : ил. ; 22 см.</format>\n    <language>rus</language>\n    <source>07NLR_LMS</source>\n    <availlibrary>$$I07NLR$$L07NLR_RFS$$2(18.104.6.29 )$$Savailable$$31$$40$$5N$$60$$XNLR50$$YRFS</availlibrary>\n    <unititle>Восхождение на Монблан</unititle>\n    <lds02>18.104.6.29</lds02>\n    <lds05>Санкт-Петербург</lds05>\n    <lds06>[2], 212, [2], 42 с., [14] л. ил.</lds06>\n    <lds07>Верн Ж. Плавающий город : С рис / [Соч.] Жюля Верна ; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]. - Санкт-Петербург : С.В. Звонарев, 1872. - [2], 212, [2], 42 с., [14] л. ил. : ил. ; 22 см.</lds07>\n    <lds08>[Соч.] Жюля Верна ; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lds08>\n    <lds15>NLR01 005204170</lds15>\n    <lds30>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lds30>\n    <availinstitution>$$I07NLR$$Savailable</availinstitution>\n    <availpnx>available</availpnx>\n  </display>\n  <links>\n    <openurl>$$Topenurl_journal</openurl>\n    <backlink>$$Taleph_backlink$$DOPAC</backlink>\n    <linktoholdings>$$Taleph_holdings</linktoholdings>\n    <lln03>$$Tcatalogue_error$$Ecatalogueerror</lln03>\n    <lln05>$$Trecord_view_format$$Erecordviewformat</lln05>\n    <lln06>$$Tdownload_iso2709$$Edownloadiso2709</lln06>\n    <lln04>$$Tscan_request$$Escanrequest</lln04>\n  </links>\n  <search>\n    <creatorcontrib>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</creatorcontrib>\n    <creatorcontrib>Верн Ж. Г. 1828-1905 Жюль Габриэль</creatorcontrib>\n    <creatorcontrib>Вовчок М. 1834-1907 Марк</creatorcontrib>\n    <creatorcontrib>Вовчек М. 1834-1907 Марко</creatorcontrib>\n    <creatorcontrib>Маркович М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Вилинская М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Марко Вовчок 1834-1907</creatorcontrib>\n    <creatorcontrib>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</creatorcontrib>\n    <creatorcontrib>Верн Ж. 1828-1905 Жюль</creatorcontrib>\n    <title>Плавающий город С рис.</title>\n    <general>rus</general>\n    <general>С.В. Звонарев</general>\n    <sourceid>07NLR_LMS</sourceid>\n    <recordid>07NLR_LMS005204170</recordid>\n    <rsrctype>book</rsrctype>\n    <creationdate>1872</creationdate>\n    <startdate>18720101</startdate>\n    <enddate>18721231</enddate>\n    <addtitle>Плавающий город С рис.</addtitle>\n    <addtitle>Восхождение на Монблан</addtitle>\n    <searchscope>07NLR_LMS</searchscope>\n    <searchscope>MAIN_07NLR</searchscope>\n    <searchscope>07NLR</searchscope>\n    <scope>07NLR_LMS</scope>\n    <scope>MAIN_07NLR</scope>\n    <scope>07NLR</scope>\n    <lsr01>Санкт-Петербург</lsr01>\n    <lsr02>С.В. Звонарев</lsr02>\n    <lsr06>18.104.6.29</lsr06>\n    <lsr07>1872</lsr07>\n    <lsr13>[Соч.] Жюля Верна; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lsr13>\n    <lsr19>Вовчок М. 1834-1907 Марко</lsr19>\n    <lsr19>Верн П. Поль</lsr19>\n    <lsr20>rus</lsr20>\n    <lsr20>русский</lsr20>\n    <lsr23>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</lsr23>\n    <lsr23>Верн Ж. Г. 1828-1905 Жюль Габриэль</lsr23>\n    <lsr23>Вовчок М. 1834-1907 Марк</lsr23>\n    <lsr23>Вовчек М. 1834-1907 Марко</lsr23>\n    <lsr23>Маркович М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Вилинская М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Марко Вовчок 1834-1907</lsr23>\n    <lsr23>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</lsr23>\n    <lsr23>Верн Ж. 1828-1905 Жюль</lsr23>\n    <lsr23>Вовчок М. 1834-1907 Марко</lsr23>\n    <lsr23>Верн П. Поль</lsr23>\n    <lsr24>Верн, Жюль (1828-1905) NLR10::RU\\NLR\\AUTH\\773453</lsr24>\n    <lsr24>Верн Ж. Г. 1828-1905 Жюль Габриэль</lsr24>\n    <lsr24>Вовчок М. 1834-1907 Марк</lsr24>\n    <lsr24>Вовчек М. 1834-1907 Марко</lsr24>\n    <lsr24>Маркович М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Вилинская М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Марко Вовчок 1834-1907</lsr24>\n    <lsr24>Вилинская-Маркович М. А. 1834-1907 Мария Александровна</lsr24>\n    <lsr24>Верн Ж. 1828-1905 Жюль</lsr24>\n    <lsr24>Вовчок М. 1834-1907 Марко</lsr24>\n    <lsr24>Верн П. Поль</lsr24>\n    <lsr24>Плавающий город С рис.</lsr24>\n    <lsr24>Восхождение на Монблан</lsr24>\n    <lsr24>book</lsr24>\n    <lsr24>1872</lsr24>\n    <lsr24>07NLR_LMS005204170</lsr24>\n    <lsr24>Санкт-Петербург</lsr24>\n    <lsr24>С.В. Звонарев</lsr24>\n    <lsr24>18.104.6.29</lsr24>\n    <lsr24>[Соч.] Жюля Верна; Пер. под ред. Марка Вовчка [псевд.] С прил. Восхождение на Монблан Поля Верна Пер. Марка Вовчка [псевд.]</lsr24>\n    <lsr24>07NLR_LMS</lsr24>\n    <lsr24>MAIN_07NLR</lsr24>\n    <lsr24>07NLR</lsr24>\n    <lsr24>rus</lsr24>\n    <lsr24>русский</lsr24>\n    <lsr24>французский</lsr24>\n    <lsr24>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lsr24>\n    <lsr26>французский</lsr26>\n    <lsr30>Вовчок, Марко (1834-1907) -- Редактор NLR10::RU\\NLR\\AUTH\\7716710</lsr30>\n    <lsr30>Вовчок М. 1834-1907 Марко</lsr30>\n    <lsr30>Верн П. Поль</lsr30>\n  </search>\n  <sort>\n    <title>Плавающий город : С рис.</title>\n    <creationdate>1872</creationdate>\n    <author>Верн Ж. 1828-1905 Жюль</author>\n    <lso02>aafcaebha</lso02>\n    <lso04>18720000</lso04>\n    <lso06>18720000</lso06>\n  </sort>\n  <facets>\n    <language>rus</language>\n    <creationdate>1872</creationdate>\n    <collection>07NLR_RFS</collection>\n    <toplevel>available</toplevel>\n    <toplevel>physical_item</toplevel>\n    <prefilter>books</prefilter>\n    <rsrctype>books</rsrctype>\n    <creatorcontrib>Верн, Ж (1828-1905)</creatorcontrib>\n    <lfc03>С.В. Звонарев</lfc03>\n    <newrecords>20150408_190</newrecords>\n    <frbrgroupid>7542839</frbrgroupid>\n    <frbrtype>6</frbrtype>\n  </facets>\n  <frbr>\n    <t>99</t>\n    <k1>$$Kверн ж 1828 1905$$AA</k1>\n    <k3>$$Kплавающий город с рис$$AT</k3>\n  </frbr>\n  <delivery>\n    <institution>07NLR</institution>\n    <delcategory>Physical Item</delcategory>\n  </delivery>\n  <ranking>\n    <booster1>1</booster1>\n    <booster2>1</booster2>\n  </ranking>\n  <addata>\n    <aulast>Верн</aulast>\n    <aulast>Вовчок</aulast>\n    <aufirst>Ж.</aufirst>\n    <au>Верн Ж. 1828-1905</au>\n    <addau>Вовчок М. 1834-1907</addau>\n    <addau>Верн П</addau>\n    <btitle>Плавающий город С рис.</btitle>\n    <addtitle>Восхождение на Монблан</addtitle>\n    <date>1872</date>\n    <risdate>1872</risdate>\n    <format>book</format>\n    <genre>book</genre>\n    <ristype>BOOK</ristype>\n    <cop>Санкт-Петербург</cop>\n    <pub>С.В. Звонарев</pub>\n  </addata>\n  <browse>\n    <author>$$DВерн, Ж.  (Жюль )  (1828-1905 )$$EВерн Ж. 1828-1905 Жюль</author>\n    <author>$$DВовчок, М.  (Марко )  (1834-1907 )$$EВовчок М. 1834-1907 Марко</author>\n    <author>$$DВерн, П.  (Поль )$$EВерн П. Поль</author>\n    <title>$$DПлавающий город : С рис.$$EПлавающий город С рис.</title>\n    <title>$$DВосхождение на Монблан$$EВосхождение на Монблан</title>\n    <callnumber>$$I07NLR$$D18.104.6.29$$E18.104.6.29</callnumber>\n    <institution>07NLR</institution>\n  </browse>\n</record>",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Плавающий город: С рис.",
+				"creators": [
+					{
+						"firstName": "Жюль",
+						"lastName": "Верн",
+						"creatorType": "author"
+					}
+				],
+				"date": "1872",
+				"callNumber": "18.104.6.29",
+				"language": "rus",
+				"place": "Санкт-Петербург",
+				"publisher": "С.В. Звонарев",
+				"attachments": [],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
