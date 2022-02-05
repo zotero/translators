@@ -1,7 +1,7 @@
 {
 	"translatorID": "a571680e-6338-46c2-a740-3cd9eb80fc7f",
 	"label": "Beobachter",
-	"creator": "ibex",
+	"creator": "Sebastian Karcher",
 	"target": "^https?://((www\\.)?beobachter\\.ch/.)",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
@@ -9,9 +9,8 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-24 01:30:03"
+	"lastUpdated": "2022-02-05 20:11:36"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
@@ -87,6 +86,7 @@ function scrape(doc, url) {
 		for (let author of authors) {
 			item.creators.push(ZU.cleanAuthor(author.content, "author"));
 		}
+		item.title = item.title.replace(/\s*\|\s*Beobachter/, "");
 		item.date = date;
 		item.ISSN = "1661-7444";
 		item.complete();
@@ -111,7 +111,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Blitze: Suche nicht die Buche! | Beobachter",
+				"title": "Blitze: Suche nicht die Buche!",
 				"creators": [
 					{
 						"firstName": "Tanja",
@@ -144,7 +144,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "magazineArticle",
-				"title": "Immer schlapp: Wieso fühlen wir uns ständig müde? | Beobachter",
+				"title": "Immer schlapp: Wieso fühlen wir uns ständig müde?",
 				"creators": [
 					{
 						"firstName": "Andreas",
