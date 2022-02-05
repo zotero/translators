@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-07 17:32:12"
+	"lastUpdated": "2022-02-05 20:00:12"
 }
 
 /*
@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"], .actions-block-container__export-citation');
+	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"], .actions-block-container__export-citation, div.pill__item, section.pill__item div.citation-download');
 	if (citLink) {
 		if (url.includes('/doi/book/')) {
 			return 'book';
@@ -338,13 +338,13 @@ function scrape(doc, url, extras) {
 		});
 	}
 	
-	if (doc.querySelector('a[href*="#pill-citations')) { // newer Atypon installs
+	if (doc.querySelector('a[href*="#pill-citations"], div.pill__item, section.pill__item div.citation-download')) { // newer Atypon installs; 2nd one is Science, 3rd one ASM
 		let filename = attr(doc, 'input[name="downloadFileName"]', 'value');
 		finalize(filename);
 	}
 	else {
 		ZU.processDocuments(citationurl, function (citationDoc) {
-			let filename = citationDoc.evaluate('//form//input[@name="downloadFileName"]', citationDoc, null, XPathResult.ANY_TYPE, null).iterateNext().value;
+			let filename = attr(citationDoc, 'input[name="downloadFileName"]', 'value');
 			finalize(filename);
 		});
 	}
@@ -721,441 +721,6 @@ var testCases = [
 						"fieldMode": 1
 					},
 					{
-						"firstName": "John P.",
-						"lastName": "Barton",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Simina M.",
-						"lastName": "Boca",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Christian",
-						"lastName": "Brueffer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "James Brian",
-						"lastName": "Byrd",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stephen",
-						"lastName": "Capone",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shikta",
-						"lastName": "Das",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anna Ada",
-						"lastName": "Dattoli",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John J.",
-						"lastName": "Dziak",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jeffrey M.",
-						"lastName": "Field",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Soumita",
-						"lastName": "Ghosh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anthony",
-						"lastName": "Gitter",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Rishi Raj",
-						"lastName": "Goel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Casey S.",
-						"lastName": "Greene",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marouen Ben",
-						"lastName": "Guebila",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Fengling",
-						"lastName": "Hu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nafisa M.",
-						"lastName": "Jadavji",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sergey",
-						"lastName": "Knyazev",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Likhitha",
-						"lastName": "Kolla",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Alexandra J.",
-						"lastName": "Lee",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ronan",
-						"lastName": "Lordan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tiago",
-						"lastName": "Lubiana",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Temitayo",
-						"lastName": "Lukan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Adam L.",
-						"lastName": "MacLean",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Mai",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Serghei",
-						"lastName": "Mangul",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Manheim",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lucy",
-						"lastName": "D'Agostino McGowan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "YoSon",
-						"lastName": "Park",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Dimitri",
-						"lastName": "Perrin",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yanjun",
-						"lastName": "Qi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Diane N.",
-						"lastName": "Rafizadeh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Bharath",
-						"lastName": "Ramsundar",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Halie M.",
-						"lastName": "Rando",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sandipan",
-						"lastName": "Ray",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael P.",
-						"lastName": "Robson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Elizabeth",
-						"lastName": "Sell",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lamonica",
-						"lastName": "Shinholster",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ashwin N.",
-						"lastName": "Skelly",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yuchen",
-						"lastName": "Sun",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gregory L.",
-						"lastName": "Szeto",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ryan",
-						"lastName": "Velazquez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jinhui",
-						"lastName": "Wang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nils",
-						"lastName": "Wellhausen",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Vikas",
-						"lastName": "Bansal",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John P.",
-						"lastName": "Barton",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Simina M.",
-						"lastName": "Boca",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Christian",
-						"lastName": "Brueffer",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "James Brian",
-						"lastName": "Byrd",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Stephen",
-						"lastName": "Capone",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Shikta",
-						"lastName": "Das",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anna Ada",
-						"lastName": "Dattoli",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "John J.",
-						"lastName": "Dziak",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jeffrey M.",
-						"lastName": "Field",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Soumita",
-						"lastName": "Ghosh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Anthony",
-						"lastName": "Gitter",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Rishi Raj",
-						"lastName": "Goel",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Casey S.",
-						"lastName": "Greene",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Marouen Ben",
-						"lastName": "Guebila",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Fengling",
-						"lastName": "Hu",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nafisa M.",
-						"lastName": "Jadavji",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sergey",
-						"lastName": "Knyazev",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Likhitha",
-						"lastName": "Kolla",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Alexandra J.",
-						"lastName": "Lee",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ronan",
-						"lastName": "Lordan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Tiago",
-						"lastName": "Lubiana",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Temitayo",
-						"lastName": "Lukan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Adam L.",
-						"lastName": "MacLean",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Mai",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Serghei",
-						"lastName": "Mangul",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "David",
-						"lastName": "Manheim",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lucy",
-						"lastName": "D'Agostino McGowan",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "YoSon",
-						"lastName": "Park",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Dimitri",
-						"lastName": "Perrin",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yanjun",
-						"lastName": "Qi",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Diane N.",
-						"lastName": "Rafizadeh",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Bharath",
-						"lastName": "Ramsundar",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Halie M.",
-						"lastName": "Rando",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Sandipan",
-						"lastName": "Ray",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Michael P.",
-						"lastName": "Robson",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Elizabeth",
-						"lastName": "Sell",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Lamonica",
-						"lastName": "Shinholster",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ashwin N.",
-						"lastName": "Skelly",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Yuchen",
-						"lastName": "Sun",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Gregory L.",
-						"lastName": "Szeto",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Ryan",
-						"lastName": "Velazquez",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Jinhui",
-						"lastName": "Wang",
-						"creatorType": "author"
-					},
-					{
-						"firstName": "Nils",
-						"lastName": "Wellhausen",
-						"creatorType": "author"
-					},
-					{
 						"firstName": "Casey S.",
 						"lastName": "Greene",
 						"creatorType": "author"
@@ -1279,6 +844,85 @@ var testCases = [
 						"tag": "United States"
 					}
 				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/doi/10.1126/science.aag1582",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Transient compartmentalization of RNA replicators prevents extinction due to parasites",
+				"creators": [
+					{
+						"firstName": "Shigeyoshi",
+						"lastName": "Matsumura",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ádám",
+						"lastName": "Kun",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Ryckelynck",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Faith",
+						"lastName": "Coldren",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "András",
+						"lastName": "Szilágyi",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fabrice",
+						"lastName": "Jossinet",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christian",
+						"lastName": "Rick",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Philippe",
+						"lastName": "Nghe",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Eörs",
+						"lastName": "Szathmáry",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew D.",
+						"lastName": "Griffiths",
+						"creatorType": "author"
+					}
+				],
+				"date": "December 9, 2016",
+				"DOI": "10.1126/science.aag1582",
+				"issue": "6317",
+				"libraryCatalog": "science.org (Atypon)",
+				"pages": "1293-1296",
+				"publicationTitle": "Science",
+				"url": "https://www.science.org/doi/10.1126/science.aag1582",
+				"volume": "354",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
 				"notes": [],
 				"seeAlso": []
 			}
