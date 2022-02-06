@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 8,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-30 21:23:00"
+	"lastUpdated": "2022-02-06 11:45:08"
 }
 
 
@@ -23,6 +23,12 @@ function detectSearch(item) {
 
 
 function doSearch(item) {
+	// Temporarily disable in Zotero Connector to prevent hang
+	if (typeof navigator != 'undefined') {
+		Zotero.debug("lx2.loc.gov is unavailable -- skipping");
+		return;
+	}
+	
 	//Sends an SRU formatted as CQL to the library of Congress asking for marcXML back
 	//http://www.loc.gov/standards/sru/
 	
