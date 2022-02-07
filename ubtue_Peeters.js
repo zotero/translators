@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-11-15 09:17:41"
+	"lastUpdated": "2022-02-07 08:56:00"
 }
 
 /*
@@ -124,12 +124,17 @@ function parseAbstract(doc, item) {
 			++i;
 		} while (i < textParts.length);
 		//split abstracts
-		let multipleAbstractList = fullAbstract.split(/\.(\n\n)/g).filter(arrayItem => arrayItem !== "\n\n");
-		item.abstractNote = ZU.trimInternal(multipleAbstractList[0]);
+		let multipleAbstractList = fullAbstract.split(/\.(\n\n)/g)
+		                           .filter(arrayItem => arrayItem !== "\n\n")
+		                           .map(arrayItem => ZU.trimInternal(arrayItem))
+		                           .filter(arrayItem => arrayItem !== "");
+		if (!multipleAbstractList.length)
+		    return;
+		item.abstractNote = multipleAbstractList[0];
 		let absIndex = 0;
 		for (let abs of multipleAbstractList.splice(1)) {
 				item.notes.push({
-					note: "abs"+ (absIndex !== 0 ? absIndex : '') + ":" + ZU.trimInternal(abs),
+					note: "abs"+ (absIndex !== 0 ? absIndex : '') + ":" + abs,
 				});
 				++absIndex;
 		}
