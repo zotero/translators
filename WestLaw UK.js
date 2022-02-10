@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-06 14:45:19"
+	"lastUpdated": "2022-02-10 22:37:23"
 }
 
 /*
@@ -73,6 +73,7 @@ function scrapeCase(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported", 0));
 
+		item.title = text(doc, "#co_docHeaderContainer");
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
@@ -126,7 +127,7 @@ function scrapeStatuteSection(doc, url) {
 
 
 function parseCitationList(citList) {
-	let citationRe = /[\[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g;
+	let citationRe = /[[|(](\d+)[\]|)] (\d*) ?([A-z. ]+) (\w[^Judgment])+/g;
 	let citationAsArray;
 	while ((citationAsArray = citationRe.exec(citList))) {
 		if (citationAsArray[3] !== "WLUK") {
@@ -134,8 +135,7 @@ function parseCitationList(citList) {
 		}
 	}
 	return citationAsArray;
-}
-/** BEGIN TEST CASES **/
+}/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
