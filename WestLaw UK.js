@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-10 22:37:23"
+	"lastUpdated": "2022-02-10 22:42:40"
 }
 
 /*
@@ -77,7 +77,7 @@ function scrapeCase(doc, url) {
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
-		item.dateDecided = citationArray[1]
+		item.dateDecided = citationArray[1];
 		item.court = /Court(.+)/.exec(text(doc, "#co_docContentCourt"))[1];
 		item.abstractNote = "";
 		item.complete();
