@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-10 22:42:40"
+	"lastUpdated": "2022-02-13 15:15:03"
 }
 
 /*
@@ -73,7 +73,7 @@ function scrapeCase(doc, url) {
 	translator.setHandler('itemDone', function (obj, item) {
 		const citationArray = parseCitationList(text(doc, "#co_docContentWhereReported", 0));
 
-		item.title = text(doc, "#co_docHeaderContainer");
+		item.title = text(doc, "#co_docHeaderContainer") ? text(doc, "#co_docHeaderContainer") : /(.+)\|/.exec(doc.title)[1];
 		item.reporter = citationArray[3];
 		item.reporterVolume = citationArray[2];
 		item.firstPage = citationArray[4];
