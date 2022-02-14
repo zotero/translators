@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2021-06-19 00:00:44"
+	"lastUpdated": "2022-02-14 13:07:48"
 }
 
 /*
@@ -151,7 +151,8 @@ function processTag(item, tag, value) {
 		// Pubmed adds all sorts of different IDs in here, so make sure these are URLs
 		if (value.startsWith("http")) {
 			item.attachments.push({ url: value, title: "Catalog Link", snapshot: false });
-		}
+		// If the value is tagged as a PII, we can use this as a page number if we have not previously managed to extract one
+		} else if (value.includes("[pii]")) item.pagesBackup = value.replace(/\s*\[pii\]/, "");
 	}
 	else if (tag == "MH" || tag == "OT") {
 		item.tags.push(value);
@@ -237,7 +238,8 @@ function finalizeItem(item) {
 		if (fullPageRange) {
 			item.pages = fullPageRange;
 		}
-	}
+	// If there is not an explicitly defined page range, try and use the value extracted from the LID field
+	} else if (item.pagesBackup) item.pages = item.pagesBackup;
 	// check for and remove duplicate ISSNs
 	if (item.ISSN && item.ISSN.includes(" ")) {
 		let ISSN = item.ISSN.split(/\s/);
