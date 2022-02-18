@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-18 14:58:31"
+	"lastUpdated": "2022-02-18 15:41:55"
 }
 
 /*
@@ -170,7 +170,7 @@ function invokeEMTranslator(doc) {
   		let orcidAuthorEntryCaseC = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
   		let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
   		// e.g. https://aabner.org/ojs/index.php/beabs/article/view/781
-  		if (orcidAuthorEntryCaseA && ['2748-6419'].includes(i.ISSN)) {
+  		if (orcidAuthorEntryCaseA && ['2748-6419', "1804-6444"].includes(i.ISSN)) {
   			for (let a of orcidAuthorEntryCaseA) {
   				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
   					let author = a.innerText;//Z.debug(author + '   AAA1')
@@ -526,6 +526,73 @@ var testCases = [
 				"notes": [
 					{
 						"note": "Nélida Naveros Córdova | orcid:0000-0003-3280-5914 | taken from website"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jebs.eu/ojs/index.php/jebs/article/view/921",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Rooting Our Systematic Theologies: The Moral Dimension of a Theology of Retrieval",
+				"creators": [
+					{
+						"firstName": "Jan Martijn",
+						"lastName": "Abrahamse",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/19",
+				"DOI": "10.25782/jebs.v21i2.921",
+				"ISSN": "1804-6444",
+				"abstractNote": "In the last decades ‘theologies of retrieval’ have become a popular way of doing systematic theology and reconnecting pre-modern authors with contemporary theological issues. This ‘retrieval’ of history within systematic theology is, however, not without its moral challenges. Certainly, today we have become more conscious of our presumptions and one-sidedness in our interpretations of historical events (e.g. the Dutch ‘golden’ age). A theology of retrieval can hence quickly be used to serve particular contemporary theological ends that fail to do justice to the complexity of the actual sources and run the risk of ‘overemplotting’ the past. Based on an exploration of James McClendon’s retrieval of the Radical Reformation in his baptist vision, an argument is made for a more conscious ‘art of historical conversation’ within present-day systematic theology, especially theologies of retrieval.",
+				"issue": "2",
+				"journalAbbreviation": "1",
+				"language": "en",
+				"libraryCatalog": "jebs.eu",
+				"pages": "77-100",
+				"publicationTitle": "Journal of European Baptist Studies",
+				"rights": "Copyright (c) 2021 Journal of European Baptist Studies",
+				"shortTitle": "Rooting Our Systematic Theologies",
+				"url": "https://jebs.eu/ojs/index.php/jebs/article/view/921",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "James McClendon"
+					},
+					{
+						"tag": "Radical Reformation"
+					},
+					{
+						"tag": "Theology of retrieval"
+					},
+					{
+						"tag": "church history"
+					},
+					{
+						"tag": "ethics"
+					},
+					{
+						"tag": "systematic theology"
+					}
+				],
+				"notes": [
+					{
+						"note": "Jan Martijn Abrahamse  | orcid:0000-0003-3726-271X | taken from website"
 					}
 				],
 				"seeAlso": []
