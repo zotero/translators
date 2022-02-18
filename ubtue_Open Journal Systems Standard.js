@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-18 14:40:33"
+	"lastUpdated": "2022-02-18 14:58:31"
 }
 
 /*
@@ -147,7 +147,23 @@ function invokeEMTranslator(doc) {
 			} else i.date = '';
 		}
 		
-		if (i.notes.length == 0) {
+		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '1804-6444', '2627-6062'].includes(i.ISSN)) {
+			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
+				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)/i)) {
+					i.tags.push("Book Review");
+				}
+			}
+		}
+		
+		let orcidNotesNr = 0;
+		
+		for (let n of i.notes) {
+			if (n['note'].match(/orcid:/) != null) {
+				orcidNotesNr += 1;
+			}
+		}
+		
+		if (orcidNotesNr == 0) {
 			//orcid for pica-field 8910
    		let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');//Z.debug(orcidAuthorEntryCaseA)
   		let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors li');//Z.debug(orcidAuthorEntryCaseB)
@@ -299,7 +315,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "ojs.reformedjournals.co.za",
 				"pages": "13-40",
-				"publicationTitle": "STJ | Stellenbosch Theological Journal",
+				"publicationTitle": "STJ – Stellenbosch Theological Journal",
 				"rights": "Copyright (c) 2020 Pieter de Waal Neethling Trust, Stellenbosch",
 				"shortTitle": "“The message to the people of South Africa” in contemporary context",
 				"url": "https://ojs.reformedjournals.co.za/stj/article/view/1969",
@@ -351,6 +367,167 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Editorial: Ethik der Nächsten und Fremdenliebe",
+				"creators": [
+					{
+						"firstName": "Dorothea",
+						"lastName": "Erbele-Küster",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Roth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raphaela Meyer zu",
+						"lastName": "Hörste-Bührer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Esther",
+						"lastName": "Kobel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulrich",
+						"lastName": "Volp",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben",
+						"lastName": "Zimmermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/11",
+				"DOI": "10.25784/jeac.v3i0.850",
+				"ISSN": "2627-6062",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "jeac.de",
+				"pages": "3-4",
+				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
+				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
+				"shortTitle": "Editorial",
+				"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ethik in Antike und Christentum"
+					},
+					{
+						"tag": "Fremdenliebe"
+					},
+					{
+						"tag": "Imigration"
+					},
+					{
+						"tag": "Nächstenliebe"
+					}
+				],
+				"notes": [
+					{
+						"note": "Raphaela Meyer zu Hörste-Bührer | orcid:0000-0002-7458-9466 | taken from website"
+					},
+					{
+						"note": "Ulrich Volp | orcid:0000-0003-2510-0879 | taken from website"
+					},
+					{
+						"note": "Ruben Zimmermann | orcid:0000-0002-1620-4396 | taken from website"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jeac.de/ojs/index.php/jeac/article/view/846",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Review of: Marcus Mescher, The Ethics of Encounter. Christian Neighbor Love as A Practice of Solidarity",
+				"creators": [
+					{
+						"firstName": "Nélida Naveros",
+						"lastName": "Córdova",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/20",
+				"DOI": "10.25784/jeac.v3i0.846",
+				"ISSN": "2627-6062",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "jeac.de",
+				"pages": "127-129",
+				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
+				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
+				"shortTitle": "Review of",
+				"url": "https://jeac.de/ojs/index.php/jeac/article/view/846",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					},
+					{
+						"tag": "Ethik"
+					},
+					{
+						"tag": "Ethik der Begnung"
+					},
+					{
+						"tag": "Ethik in Antike und Christentum"
+					},
+					{
+						"tag": "Liebesgebot"
+					},
+					{
+						"tag": "Marcus Mescher"
+					},
+					{
+						"tag": "Nächstenliebe"
+					},
+					{
+						"tag": "Theologische Ethik"
+					}
+				],
+				"notes": [
+					{
+						"note": "Nélida Naveros Córdova | orcid:0000-0003-3280-5914 | taken from website"
+					}
+				],
 				"seeAlso": []
 			}
 		]
