@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-18 15:49:26"
+	"lastUpdated": "2022-02-21 14:16:50"
 }
 
 /*
@@ -63,7 +63,7 @@ function splitDotSeparatedKeywords(item) {
 }
 
 
-function getOrcids(doc) {
+function getOrcids(doc, ISSN) {
 	let authorSections = ZU.xpath(doc, '//ul[@class="authors-string"]/li');
 	let notes = [];
 	for (let authorSection of authorSections) {
@@ -77,8 +77,7 @@ function getOrcids(doc) {
 			notes.push({note: "orcid:" + orcid + '|' + author});
 		}
 	}
-	if (notes.length)
-		return notes;
+	if (notes.length) return notes;
 
 	authorSections = ZU.xpath(doc, '//ul[@class="item authors"]/li');
 	for (let authorSection of authorSections) {
@@ -98,7 +97,106 @@ function getOrcids(doc) {
 		   notes.push( {note: "orcid:" + orcid + '|' + author});
 		}
 	}
-
+	if (notes.length) return notes;
+	
+	//orcid for pica-field 8910
+   		let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
+  		let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors li');//Z.debug(orcidAuthorEntryCaseB)
+  		let orcidAuthorEntryCaseC = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
+  		let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
+  		// e.g. https://aabner.org/ojs/index.php/beabs/article/view/781
+  		if (orcidAuthorEntryCaseA && ['2748-6419', "1804-6444"].includes(ISSN)) {
+  			for (let a of orcidAuthorEntryCaseA) {
+  				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  					let author = a.innerText;//Z.debug(author + '   AAA1')
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		 }
+  		 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/846
+  		 if (orcidAuthorEntryCaseA && ['2627-6062'].includes(ISSN)) {
+  			for (let a of orcidAuthorEntryCaseA) {
+  				let name_to_orcid = {};
+  				let tgs = ZU.xpath(a, './/*[self::strong or self::a]');
+  				let tg_nr = 0;
+  				for (let t of tgs) {
+  					if (t.textContent.match(/orcid/) != null) {
+  						name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
+  						let author = name_to_orcid[tgs[tg_nr -1].textContent];
+  						notes.push({note: tgs[tg_nr -1].textContent + ZU.unescapeHTML(ZU.trimInternal(t.textContent)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  					}
+  					tg_nr += 1;
+  				}
+  			}
+  		 }
+  		 //e.g. https://aabner.org/ojs/index.php/beabs/article/view/781
+  		 if (orcidAuthorEntryCaseA && ['2748-6419'].includes(ISSN)) {
+  		 	for (let a of orcidAuthorEntryCaseA) {
+  				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
+  					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		}
+  		//e.g.  https://ojs3.uni-tuebingen.de/ojs/index.php/beabs/article/view/785
+  		if (orcidAuthorEntryCaseA && !orcidAuthorEntryCaseB && ISSN !== "2660-7743") {
+  			for (let a of orcidAuthorEntryCaseA) {
+  				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  					let author = a.innerText;//Z.debug(author + '   AAA1')
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		 }
+  		 //e.g. https://journal.equinoxpub.com/JSRNC/article/view/19606
+  		 if (orcidAuthorEntryCaseA && !orcidAuthorEntryCaseB && ISSN !== "2660-7743") {
+  		 	for (let a of orcidAuthorEntryCaseA) {
+  				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
+  					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		}
+  		//e.g. https://periodicos.uem.br/ojs/index.php/RbhrAnpuh/article/view/52641
+  		if (orcidAuthorEntryCaseB) {
+			for (let b of orcidAuthorEntryCaseB) {
+  				if (b && b.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  					let orcid = b.innerHTML.match(/<a href="https?:\/\/orcid\.org\/([^"]+)/);
+  					if (orcid != null){
+  					let name = b.innerHTML.match(/<span class="name">([^<]+)<\/span>/)[1];
+  					notes.push({note: ZU.trimInternal(name) + ' | orcid:' + orcid[1] + ' | ' + 'taken from website'});
+  				}
+  				}
+  			}
+  		}
+  		
+  		if (orcidAuthorEntryCaseC) {
+  			for (let c of orcidAuthorEntryCaseC) {
+  				if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  					let author = c.innerText;//Z.debug(author  + '   CCC')
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		}
+  		
+  		//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
+  		if (orcidAuthorEntryCaseC) {
+  		 	for (let c of orcidAuthorEntryCaseC) {
+  				if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  					let author = c.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   CCC2')
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:').replace('+−', '') + ' | ' + 'taken from website'});
+  				}
+  			}
+  		}
+		
+		if (orcidAuthorEntryCaseD.length != 0) {
+			for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
+				if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
+					let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
+					let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
+					notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '') + ' | taken from website'});
+				}
+			}
+		}
 	return notes;
 }
 
@@ -129,9 +227,6 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
-		let orcids = getOrcids(doc);
-		if (orcids.length)
-			i.notes.push(...orcids);
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
@@ -155,113 +250,9 @@ function invokeEMTranslator(doc) {
 			}
 		}
 		
-		let orcidNotesNr = 0;
-		
-		for (let n of i.notes) {
-			if (n['note'].match(/orcid:/) != null) {
-				orcidNotesNr += 1;
-			}
-		}
-		
-		if (orcidNotesNr == 0) {
-			//orcid for pica-field 8910
-   		let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');//Z.debug(orcidAuthorEntryCaseA)
-  		let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors li');//Z.debug(orcidAuthorEntryCaseB)
-  		let orcidAuthorEntryCaseC = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
-  		let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
-  		// e.g. https://aabner.org/ojs/index.php/beabs/article/view/781
-  		if (orcidAuthorEntryCaseA && ['2748-6419', "1804-6444"].includes(i.ISSN)) {
-  			for (let a of orcidAuthorEntryCaseA) {
-  				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let author = a.innerText;//Z.debug(author + '   AAA1')
-  					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		 }
-  		 if (orcidAuthorEntryCaseA && ['2627-6062'].includes(i.ISSN)) {
-  			for (let a of orcidAuthorEntryCaseA) {
-  				let name_to_orcid = {};
-  				let tgs = ZU.xpath(a, './/*[self::strong or self::a]');
-  				let tg_nr = 0;
-  				for (let t of tgs) {
-  					if (t.textContent.match(/orcid/) != null) {
-  						name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
-  						let author = name_to_orcid[tgs[tg_nr -1].textContent];
-  						i.notes.push({note: tgs[tg_nr -1].textContent + ZU.unescapeHTML(ZU.trimInternal(t.textContent)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  					}
-  					tg_nr += 1;
-  				}
-  			}
-  		 }
-  		 //e.g. https://aabner.org/ojs/index.php/beabs/article/view/781
-  		 if (orcidAuthorEntryCaseA && ['2748-6419'].includes(i.ISSN)) {
-  		 	for (let a of orcidAuthorEntryCaseA) {
-  				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
-  					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
- 					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		}
-  		//e.g.  https://ojs3.uni-tuebingen.de/ojs/index.php/beabs/article/view/785
-  		if (orcidAuthorEntryCaseA && !orcidAuthorEntryCaseB && i.ISSN !== "2660-7743") {
-  			for (let a of orcidAuthorEntryCaseA) {
-  				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let author = a.innerText;//Z.debug(author + '   AAA1')
-  					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		 }
-  		 //e.g. https://journal.equinoxpub.com/JSRNC/article/view/19606
-  		 if (orcidAuthorEntryCaseA && !orcidAuthorEntryCaseB && i.ISSN !== "2660-7743") {
-  		 	for (let a of orcidAuthorEntryCaseA) {
-  				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
-  					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
- 					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		}
-  		//e.g. https://periodicos.uem.br/ojs/index.php/RbhrAnpuh/article/view/52641
-  		if (orcidAuthorEntryCaseB) {
-			for (let b of orcidAuthorEntryCaseB) {
-  				if (b && b.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let orcid = b.innerHTML.match(/<a href="https?:\/\/orcid\.org\/([^"]+)/);
-  					if (orcid != null){
-  					let name = b.innerHTML.match(/<span class="name">([^<]+)<\/span>/)[1];
-  					i.notes.push({note: ZU.trimInternal(name) + ' | orcid:' + orcid[1] + ' | ' + 'taken from website'});
-  				}
-  				}
-  			}
-  		}
-  		
-  		if (orcidAuthorEntryCaseC) {
-  			for (let c of orcidAuthorEntryCaseC) {
-  				if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let author = c.innerText;//Z.debug(author  + '   CCC')
-  					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		}
-  		
-  		//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
-  		if (orcidAuthorEntryCaseC) {
-  		 	for (let c of orcidAuthorEntryCaseC) {
-  				if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let author = c.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   CCC2')
- 					i.notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:').replace('+−', '') + ' | ' + 'taken from website'});
-  				}
-  			}
-  		}
-		
-		if (orcidAuthorEntryCaseD.length != 0) {
-			for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
-				if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
-					let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
-					let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
-					i.notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '') + ' | taken from website'});
-				}
-			}
-		}
-		}
+		let orcids = getOrcids(doc, i.ISSN);
+		if (orcids.length)
+			i.notes.push(...orcids);
 		i.complete();
 	});
 	translator.translate();
