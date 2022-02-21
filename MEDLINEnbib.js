@@ -8,7 +8,7 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2022-02-14 13:09:41"
+	"lastUpdated": "2022-02-21 17:06:30"
 }
 
 /*
@@ -240,6 +240,7 @@ function finalizeItem(item) {
 		}
 	// If there is not an explicitly defined page range, try and use the value extracted from the LID field
 	} else if (item.pagesBackup) item.pages = item.pagesBackup;
+	delete item.pagesBackup;
 	// check for and remove duplicate ISSNs
 	if (item.ISSN && item.ISSN.includes(" ")) {
 		let ISSN = item.ISSN.split(/\s/);
