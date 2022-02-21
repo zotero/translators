@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-21 14:16:50"
+	"lastUpdated": "2022-02-21 14:29:37"
 }
 
 /*
@@ -109,7 +109,7 @@ function getOrcids(doc, ISSN) {
   			for (let a of orcidAuthorEntryCaseA) {
   				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
   					let author = a.innerText;//Z.debug(author + '   AAA1')
-  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid.org\//g, ' | orcid:')});
   				}
   			}
   		 }
@@ -123,7 +123,7 @@ function getOrcids(doc, ISSN) {
   					if (t.textContent.match(/orcid/) != null) {
   						name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
   						let author = name_to_orcid[tgs[tg_nr -1].textContent];
-  						notes.push({note: tgs[tg_nr -1].textContent + ZU.unescapeHTML(ZU.trimInternal(t.textContent)).replace(/https?:\/\/orcid.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  						notes.push({note: tgs[tg_nr -1].textContent + ZU.unescapeHTML(ZU.trimInternal(t.textContent)).replace(/https?:\/\/orcid.org\//g, ' | orcid:')});
   					}
   					tg_nr += 1;
   				}
@@ -134,7 +134,7 @@ function getOrcids(doc, ISSN) {
   		 	for (let a of orcidAuthorEntryCaseA) {
   				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
   					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
- 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
   				}
   			}
   		}
@@ -143,7 +143,7 @@ function getOrcids(doc, ISSN) {
   			for (let a of orcidAuthorEntryCaseA) {
   				if (a && a.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
   					let author = a.innerText;//Z.debug(author + '   AAA1')
-  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
   				}
   			}
   		 }
@@ -152,7 +152,7 @@ function getOrcids(doc, ISSN) {
   		 	for (let a of orcidAuthorEntryCaseA) {
   				if (a && a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi)) {
   					let author = a.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   AAA2')
- 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
   				}
   			}
   		}
@@ -163,7 +163,7 @@ function getOrcids(doc, ISSN) {
   					let orcid = b.innerHTML.match(/<a href="https?:\/\/orcid\.org\/([^"]+)/);
   					if (orcid != null){
   					let name = b.innerHTML.match(/<span class="name">([^<]+)<\/span>/)[1];
-  					notes.push({note: ZU.trimInternal(name) + ' | orcid:' + orcid[1] + ' | ' + 'taken from website'});
+  					notes.push({note: ZU.trimInternal(name) + ' | orcid:' + orcid[1]});
   				}
   				}
   			}
@@ -173,7 +173,7 @@ function getOrcids(doc, ISSN) {
   			for (let c of orcidAuthorEntryCaseC) {
   				if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
   					let author = c.innerText;//Z.debug(author  + '   CCC')
-  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:') + ' | ' + 'taken from website'});
+  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
   				}
   			}
   		}
@@ -183,7 +183,7 @@ function getOrcids(doc, ISSN) {
   		 	for (let c of orcidAuthorEntryCaseC) {
   				if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
   					let author = c.innerHTML.match(/(<span>.*<\/span>.*https?:\/\/orcid\.org\/\d+-\d+-\d+-\d+x?)/gi).toString().replace('<a class="orcidImage" href="', '');//Z.debug(author + '   CCC2')
- 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:').replace('+−', '') + ' | ' + 'taken from website'});
+ 					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:').replace('+−', '')});
   				}
   			}
   		}
@@ -193,7 +193,7 @@ function getOrcids(doc, ISSN) {
 				if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
 					let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
 					let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
-					notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '') + ' | taken from website'});
+					notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
 				}
 			}
 		}
