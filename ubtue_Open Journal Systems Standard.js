@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-22 09:15:22"
+	"lastUpdated": "2022-02-22 11:34:34"
 }
 
 /*
@@ -71,7 +71,7 @@ function getOrcids(doc, ISSN) {
 	for (let authorSection of authorSections) {
 		let authorLink = authorSection.querySelector('a.author-string-href span');
 		let orcidLink = authorSection.querySelector('[href*="https://orcid.org"]');
-		if (authorLink && orcidLink != undefined) {
+		if (authorLink && orcidLink) {
 			let author = authorLink.innerText;
 			let orcid = orcidLink.textContent.match(/\d+-\d+-\d+-\d+x?/i);
 			if (!orcid)
@@ -102,66 +102,69 @@ function getOrcids(doc, ISSN) {
 		}
 	}
 	if (notes.length) return notes;
-	
-		//orcid for pica-field 8910
-   		let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
-  		let orcidAuthorEntryCaseC = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
-  		let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
-  		
-  		 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
-  		 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
-  		 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
-  		 if (orcidAuthorEntryCaseA && ['2627-6062', "1804-6444", '2748-6419'].includes(ISSN)) {
-  			for (let a of orcidAuthorEntryCaseA) {
-  				let name_to_orcid = {};
-  				let tgs = ZU.xpath(a, './/*[self::strong or self::a]');
-  				let tg_nr = 0;
-  				for (let t of tgs) {
-  					if (t.textContent.match(/orcid/) != null) {
-  						name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
-  						let author = ZU.unescapeHTML(ZU.trimInternal(tgs[tg_nr -1].textContent)).trim();
-  						let orcid = ZU.unescapeHTML(ZU.trimInternal(t.textContent)).trim();
-  						notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
-  					}
-  					tg_nr += 1;
+  	
+  	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
+  	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
+  	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
+  	 if (['2627-6062', "1804-6444", '2748-6419'].includes(ISSN)) {
+  	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
+  	 	if (orcidAuthorEntryCaseA) {
+  		for (let a of orcidAuthorEntryCaseA) {
+  			let name_to_orcid = {};
+  			let tgs = ZU.xpath(a, './/*[self::strong or self::a]');
+  			let tg_nr = 0;
+  			for (let t of tgs) {
+  				if (t.textContent.match(/orcid/) != null) {
+  					name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
+  					let author = ZU.unescapeHTML(ZU.trimInternal(tgs[tg_nr -1].textContent)).trim();
+  					let orcid = ZU.unescapeHTML(ZU.trimInternal(t.textContent)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
   				}
+  				tg_nr += 1;
   			}
-  		 }
-
-  		//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
-  		if (orcidAuthorEntryCaseC) {
-  		 	for (let c of orcidAuthorEntryCaseC) {
-  				if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
-  					let author = ZU.xpathText(c, './/span', '');
-  					if (orcid != null && author != null) {
-  						author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
-  						orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
-  						notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
-  					}
+  		}
+  	 }
+  	 }
+  		 
+	if (notes.length) return notes;
+	
+	//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
+  	let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
+  	if (orcidAuthorEntryCaseB) {
+  	 	for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
+  				let author = ZU.xpathText(c, './/span', '');
+  				if (orcid != null && author != null) {
+  					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
+  					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
   				}
   			}
   		}
-  		
-  		/*if (orcidAuthorEntryCaseC) {
-  			for (let c of orcidAuthorEntryCaseC) {
-  				if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
-  					let author = c.innerText;//Z.debug(author  + '   CCC')
-  					notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
-  				}
+  	}
+	
+	// kein Beispiel gefunden
+  	/*if (orcidAuthorEntryCaseC) {
+  		for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let author = c.innerText;//Z.debug(author  + '   CCC')
+  				notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
   			}
-  		}*/
-  		
-		
-		/*if (orcidAuthorEntryCaseD.length != 0) {
-			for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
-				if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
-					let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
-					let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
-					notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
-				}
+  		}
+  	}*/
+  	
+  	// kein Beispiel gefunden
+	/*let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
+	if (orcidAuthorEntryCaseD.length != 0) {
+		for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
+			if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
+				let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
+				let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
+				notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
 			}
-		}*/
+		}
+	}*/
 	return notes;
 }
 
@@ -405,13 +408,13 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Raphaela Meyer zu Hörste-Bührer | orcid:0000-0002-7458-9466 | taken from website"
+						"note": "orcid:0000-0002-7458-9466 | Raphaela Meyer zu Hörste-Bührer"
 					},
 					{
-						"note": "Ulrich Volp | orcid:0000-0003-2510-0879 | taken from website"
+						"note": "orcid:0000-0003-2510-0879 | Ulrich Volp"
 					},
 					{
-						"note": "Ruben Zimmermann | orcid:0000-0002-1620-4396 | taken from website"
+						"note": "orcid:0000-0002-1620-4396 | Ruben Zimmermann"
 					}
 				],
 				"seeAlso": []
@@ -482,7 +485,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Nélida Naveros Córdova | orcid:0000-0003-3280-5914 | taken from website"
+						"note": "orcid:0000-0003-3280-5914 | Nélida Naveros Córdova"
 					}
 				],
 				"seeAlso": []
@@ -549,7 +552,7 @@ var testCases = [
 				],
 				"notes": [
 					{
-						"note": "Jan Martijn Abrahamse  | orcid:0000-0003-3726-271X | taken from website"
+						"note": "orcid:0000-0003-3726-271X | Jan Martijn Abrahamse"
 					}
 				],
 				"seeAlso": []
