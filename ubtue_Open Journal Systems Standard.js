@@ -6,10 +6,10 @@
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
-	"inRepository": false,
+	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-13 14:50:46"
+	"lastUpdated": "2022-02-22 11:34:34"
 }
 
 /*
@@ -63,24 +63,27 @@ function splitDotSeparatedKeywords(item) {
 }
 
 
-function getOrcids(doc) {
+function getOrcids(doc, ISSN) {
 	let authorSections = ZU.xpath(doc, '//ul[@class="authors-string"]/li');
 	let notes = [];
+	
+	// e.g. https://www.koersjournal.org.za/index.php/koers/article/view/2472
 	for (let authorSection of authorSections) {
 		let authorLink = authorSection.querySelector('a.author-string-href span');
 		let orcidLink = authorSection.querySelector('[href*="https://orcid.org"]');
 		if (authorLink && orcidLink) {
 			let author = authorLink.innerText;
-			let orcid = orcidLink.value.match(/\d+-\d+-\d+-\d+x?/i);
+			let orcid = orcidLink.textContent.match(/\d+-\d+-\d+-\d+x?/i);
 			if (!orcid)
-			    continue;
-			notes.push({note: "orcid:" + orcid + '|' + author});
+				continue;
+			notes.push({note: "orcid:" + orcid + ' | ' + author});
 		}
 	}
-	if (notes.length)
-		return notes;
-
-	authorSections = ZU.xpath(doc, '//ul[@class="item authors"]/li');
+	if (notes.length) return notes;
+	
+	
+	// e.g. https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147
+	authorSections = ZU.xpath(doc, '//ul[contains(@class, "authors")]/li');
 	for (let authorSection of authorSections) {
 		let authorSpans = authorSection.querySelector('span[class="name"]');
 		let orcidSpans = authorSection.querySelector('span[class="orcid"]');
@@ -94,11 +97,74 @@ function getOrcids(doc) {
 			   continue;
 		   let orcid = orcidUrl.match(/\d+-\d+-\d+-\d+x?/i);
 		   if (!orcid)
-		       continue;
-		   notes.push( {note: "orcid:" + orcid + '|' + author});
+			   continue;
+		   notes.push( {note: "orcid:" + orcid + ' | ' + author});
 		}
 	}
-
+	if (notes.length) return notes;
+  	
+  	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
+  	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
+  	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
+  	 if (['2627-6062', "1804-6444", '2748-6419'].includes(ISSN)) {
+  	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
+  	 	if (orcidAuthorEntryCaseA) {
+  		for (let a of orcidAuthorEntryCaseA) {
+  			let name_to_orcid = {};
+  			let tgs = ZU.xpath(a, './/*[self::strong or self::a]');
+  			let tg_nr = 0;
+  			for (let t of tgs) {
+  				if (t.textContent.match(/orcid/) != null) {
+  					name_to_orcid[tgs[tg_nr -1].textContent] = t.textContent.trim();
+  					let author = ZU.unescapeHTML(ZU.trimInternal(tgs[tg_nr -1].textContent)).trim();
+  					let orcid = ZU.unescapeHTML(ZU.trimInternal(t.textContent)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
+  				}
+  				tg_nr += 1;
+  			}
+  		}
+  	 }
+  	 }
+  		 
+	if (notes.length) return notes;
+	
+	//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
+  	let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
+  	if (orcidAuthorEntryCaseB) {
+  	 	for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
+  				let author = ZU.xpathText(c, './/span', '');
+  				if (orcid != null && author != null) {
+  					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
+  					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
+  				}
+  			}
+  		}
+  	}
+	
+	// kein Beispiel gefunden
+  	/*if (orcidAuthorEntryCaseC) {
+  		for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerText.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let author = c.innerText;//Z.debug(author  + '   CCC')
+  				notes.push({note: ZU.unescapeHTML(ZU.trimInternal(author)).replace(/https?:\/\/orcid\.org\//g, ' | orcid:')});
+  			}
+  		}
+  	}*/
+  	
+  	// kein Beispiel gefunden
+	/*let orcidAuthorEntryCaseD = ZU.xpath(doc, '//div[@id="authors"]');
+	if (orcidAuthorEntryCaseD.length != 0) {
+		for (let o of ZU.xpath(orcidAuthorEntryCaseD[0], './/div[@class="card-body"]')) {
+			if (ZU.xpathText(o, './/a[contains(@href, "orcid")]') != null) {
+				let orcid = ZU.trimInternal(ZU.xpathText(o, './/a[contains(@href, "orcid")]'));
+				let author = ZU.trimInternal(o.innerHTML.split('&nbsp;')[0]);
+				notes.push({note: author + ' | orcid:' + orcid.replace(/https?:\/\/orcid\.org\//g, '')});
+			}
+		}
+	}*/
 	return notes;
 }
 
@@ -129,23 +195,33 @@ function invokeEMTranslator(doc) {
 		}
 		if (i.issue === "0") delete i.issue;
 		if (i.abstractNote && i.abstractNote.match(/No abstract available/)) delete i.abstractNote;
-		let orcids = getOrcids(doc);
-		if (orcids.length)
-			i.notes.push(...orcids);
 		i.tags = splitDotSeparatedKeywords(i);
 		i.title = joinTitleAndSubtitle(doc, i);
 		// some journal assigns the volume to the date
 		if (i.ISSN == '1983-2850') {
 			if (i.date == i.volume) {
 				let datePath = doc.querySelector('.item.published');
-			}
-			if (datePath) {
+			
+			if (datePath != "") {
 				let itemDate = datePath.innerHTML.match(/.*(\d{4}).*/);
 				if (itemDate.length >= 2) {
 					i.date = itemDate[1];
 				}
 			} else i.date = '';
 		}
+		}
+		
+		if (['2617-3697', '2660-4418', '2748-6419', '1988-3269', '1804-6444', '2627-6062', '2504-5156'].includes(i.ISSN)) {
+			if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')) {
+				if (ZU.xpath(doc, '//meta[@name="DC.Type.articleType"]')[0].content.match(/(Media reviews)|(Rezensionen)|(Reseñas)|(Book Reviews?)/i)) {
+					i.tags.push("Book Review");
+				}
+			}
+		}
+		
+		let orcids = getOrcids(doc, i.ISSN);
+		if (orcids.length)
+			i.notes.push(...orcids);
 		i.complete();
 	});
 	translator.translate();
@@ -167,6 +243,7 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -198,7 +275,7 @@ var testCases = [
 				"language": "en",
 				"libraryCatalog": "ojs.reformedjournals.co.za",
 				"pages": "13-40",
-				"publicationTitle": "STJ | Stellenbosch Theological Journal",
+				"publicationTitle": "STJ – Stellenbosch Theological Journal",
 				"rights": "Copyright (c) 2020 Pieter de Waal Neethling Trust, Stellenbosch",
 				"shortTitle": "“The message to the people of South Africa” in contemporary context",
 				"url": "https://ojs.reformedjournals.co.za/stj/article/view/1969",
@@ -250,6 +327,485 @@ var testCases = [
 				],
 				"tags": [],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Editorial: Ethik der Nächsten und Fremdenliebe",
+				"creators": [
+					{
+						"firstName": "Dorothea",
+						"lastName": "Erbele-Küster",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Michael",
+						"lastName": "Roth",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Raphaela Meyer zu",
+						"lastName": "Hörste-Bührer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Esther",
+						"lastName": "Kobel",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ulrich",
+						"lastName": "Volp",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ruben",
+						"lastName": "Zimmermann",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/11",
+				"DOI": "10.25784/jeac.v3i0.850",
+				"ISSN": "2627-6062",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "jeac.de",
+				"pages": "3-4",
+				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
+				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
+				"shortTitle": "Editorial",
+				"url": "https://jeac.de/ojs/index.php/jeac/article/view/850",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ethik in Antike und Christentum"
+					},
+					{
+						"tag": "Fremdenliebe"
+					},
+					{
+						"tag": "Imigration"
+					},
+					{
+						"tag": "Nächstenliebe"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0002-7458-9466 | Raphaela Meyer zu Hörste-Bührer"
+					},
+					{
+						"note": "orcid:0000-0003-2510-0879 | Ulrich Volp"
+					},
+					{
+						"note": "orcid:0000-0002-1620-4396 | Ruben Zimmermann"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jeac.de/ojs/index.php/jeac/article/view/846",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Review of: Marcus Mescher, The Ethics of Encounter. Christian Neighbor Love as A Practice of Solidarity",
+				"creators": [
+					{
+						"firstName": "Nélida Naveros",
+						"lastName": "Córdova",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/20",
+				"DOI": "10.25784/jeac.v3i0.846",
+				"ISSN": "2627-6062",
+				"journalAbbreviation": "1",
+				"language": "de",
+				"libraryCatalog": "jeac.de",
+				"pages": "127-129",
+				"publicationTitle": "Journal of Ethics in Antiquity and Christianity",
+				"rights": "Copyright (c) 2021 Journal of Ethics in Antiquity and Christianity",
+				"shortTitle": "Review of",
+				"url": "https://jeac.de/ojs/index.php/jeac/article/view/846",
+				"volume": "3",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Book Review"
+					},
+					{
+						"tag": "Ethik"
+					},
+					{
+						"tag": "Ethik der Begnung"
+					},
+					{
+						"tag": "Ethik in Antike und Christentum"
+					},
+					{
+						"tag": "Liebesgebot"
+					},
+					{
+						"tag": "Marcus Mescher"
+					},
+					{
+						"tag": "Nächstenliebe"
+					},
+					{
+						"tag": "Theologische Ethik"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0003-3280-5914 | Nélida Naveros Córdova"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://jebs.eu/ojs/index.php/jebs/article/view/921",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Rooting Our Systematic Theologies: The Moral Dimension of a Theology of Retrieval",
+				"creators": [
+					{
+						"firstName": "Jan Martijn",
+						"lastName": "Abrahamse",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/19",
+				"DOI": "10.25782/jebs.v21i2.921",
+				"ISSN": "1804-6444",
+				"abstractNote": "In the last decades ‘theologies of retrieval’ have become a popular way of doing systematic theology and reconnecting pre-modern authors with contemporary theological issues. This ‘retrieval’ of history within systematic theology is, however, not without its moral challenges. Certainly, today we have become more conscious of our presumptions and one-sidedness in our interpretations of historical events (e.g. the Dutch ‘golden’ age). A theology of retrieval can hence quickly be used to serve particular contemporary theological ends that fail to do justice to the complexity of the actual sources and run the risk of ‘overemplotting’ the past. Based on an exploration of James McClendon’s retrieval of the Radical Reformation in his baptist vision, an argument is made for a more conscious ‘art of historical conversation’ within present-day systematic theology, especially theologies of retrieval.",
+				"issue": "2",
+				"journalAbbreviation": "1",
+				"language": "en",
+				"libraryCatalog": "jebs.eu",
+				"pages": "77-100",
+				"publicationTitle": "Journal of European Baptist Studies",
+				"rights": "Copyright (c) 2021 Journal of European Baptist Studies",
+				"shortTitle": "Rooting Our Systematic Theologies",
+				"url": "https://jebs.eu/ojs/index.php/jebs/article/view/921",
+				"volume": "21",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "James McClendon"
+					},
+					{
+						"tag": "Radical Reformation"
+					},
+					{
+						"tag": "Theology of retrieval"
+					},
+					{
+						"tag": "church history"
+					},
+					{
+						"tag": "ethics"
+					},
+					{
+						"tag": "systematic theology"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0003-3726-271X | Jan Martijn Abrahamse"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://periodicos.uem.br/ojs/index.php/RbhrAnpuh/article/view/54840",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Razões para peregrinar:",
+				"creators": [
+					{
+						"firstName": "Edilece Souza",
+						"lastName": "Couto",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Tânia Maria Meira",
+						"lastName": "Mota",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"DOI": "10.4025/rbhranpuh.v13i38.54840",
+				"ISSN": "1983-2850",
+				"abstractNote": "O artigo trata da vivência religiosa em Ituaçu – BA, cidade da Chapada Diamantina, na primeira metade do século XX. Por meio dos relatos orais, da documentação eclesiástica e das crônicas, apresentamos as narrativas, sobre a origem e o desenvolvimento das devoções, elaboradas pelos agentes religiosos: devotos, romeiros, peregrinos, promesseiros e clérigos, que fazem do ato de peregrinar a própria vida como viagem. Anualmente, entre os meses de agosto e setembro, os devotos e romeiros ocupam a Gruta da Mangabeira com seus cantos, benditos, rezas, ladainhas, novenas e procissões. A pesquisa demonstrou que, naquele espaço sacralizado, os fiéis rendem graça, renovam seus votos e promessas e re-atualizam seus mitos, sua fé e suas crenças.",
+				"issue": "38",
+				"journalAbbreviation": "1",
+				"language": "pt",
+				"libraryCatalog": "periodicos.uem.br",
+				"publicationTitle": "Revista Brasileira de História das Religiões",
+				"rights": "Copyright (c) 2020 Edilece Souza Couto, Tânia Maria Meira Mota (Autor)",
+				"shortTitle": "Razões para peregrinar",
+				"url": "https://periodicos.uem.br/ojs/index.php/RbhrAnpuh/article/view/54840",
+				"volume": "13",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Catolicismo"
+					},
+					{
+						"tag": "Peregrinação"
+					},
+					{
+						"tag": "Romaria"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0003-3618-7455 | Tânia Maria Meira Mota"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://revistasfranciscanas.org/index.php/ArchivoIberoAmericano/article/view/117",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "La Orden Tercera Franciscana en la península ibérica",
+				"creators": [
+					{
+						"firstName": "Alfredo Martín",
+						"lastName": "García",
+						"creatorType": "author"
+					}
+				],
+				"date": "2017",
+				"ISSN": "2660-4418",
+				"abstractNote": "After examining the state of the question regarding the Third Order of Saint Francis in Spain and Portugal, the present study analyses the medieval origins of this secular Franciscan order in the Iberian Peninsula. Subsequently, it examines the reasons for its decline in the late Middle Ages and beginning of the Early Modern Period, relating this to questions of a political nature, including pressure from the crown, ideology, the influence of heretical movements, and the internal organization of the Franciscans. This is followed by an analysis of the Order’s subsequent recovery in the early 17th century, which was closely linked to the reforms of the Council of Trent, in which secular religious associations played a major role. Lastly, the main reasons for the success of a secular order among various sectors of Old Regime society are explored, underlining the need to move away from earlier accusations that in the Early Modern Period, the Third Order had lost its original religious purity.\nReferences\nAlves, Marieta. História da Venerável Ordem 3ª da Penitência do Seráfico Pe. São Francisco da Congregação da Bahia. Bahia: Imprensa Nacional, 1948.\nAmberes, Fredegando de. La Tercera Orden Secular de San Francisco, 1221-1921. Barcelona: Casa Editorial de Arte Católico, 1925.\nBarcelona, Martín de. «Ensayo de bibliografía hispano-americana referente a la V.O.T.». Estudios franciscanos, 27 (1921): 502-521.\nBarrico, Joaquim Simões. Noticia historica da Veneravel Ordem Terceira da Penitencia de S. Francisco da cidade de Coímbra e do seu Hospital e Asylo. Coímbra: Tipografía de J.J. Reis Leitão, 1895.\nCabot Roselló, Salvador. «Evolución de la regla de la Tercera Orden Franciscana». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 653-678. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nCarrillo, Juan de. Primera parte de la Historia de la Tercera Orden de Nuestro Seraphico P. S. Francisco. Zaragoza: por Lucas Sánchez, 1610.\nDelgado Pavón, María Dolores. Reyes, nobles y burgueses en auxilio de la pobreza (la Venerable Orden Tercera Seglar de San Francisco de Madrid en el siglo xvii). Alcalá de Henares: Universidad de Alcalá, 2009.\nGonzález Lopo, «Balance y perspectivas de los estudios de la VOT franciscana en Galicia (siglos xvii-xix)». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid, 567-583. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nGraña Cid, María del Mar. «Las órdenes mendicantes en el obispado de Mondoñedo. El convento de San Martín de Villaoriente (1374-1500)». Estudios mindonienses 6 (1990):13-464.\nMartín García, Alfredo. «Los franciscanos seglares en la Corona de Castilla durante el Antiguo Régimen». Hispania Sacra 57, nº 116 (2005): 441-466.\nMartín García, Alfredo. Religión y sociedad en Ferrolterra durante el Antiguo Régimen: La V.O.T. seglar franciscana. Ferrol: Concello de Ferrol, 2005.\nMartín García, Alfredo. «Franciscanismo seglar y propaganda en la Península Ibérica y Ultramar durante la Edad Moderna». Semata: Ciencias sociais e humanidades 26 (2014): 271-293.\nMartín García, Alfredo. «Franciscanismo y religiosidad popular en el Norte de Portugal durante la Edad Moderna. La fraternidad de Ponte de Lima». Archivo Ibero-Americano 74, nº 279 (2014): 517-556.\nMartínez Vega, Elisa. «Los congresos de la VOT en Madrid». En El franciscanismo en la Península Ibérica. Balances y perspectivas: I Congreso Internacional, ed. por María del Mar Graña Cid. Barcelona: Asociación Hispánica de Estudios Franciscanos, 2005.\nMeesserman, Giles Gérard. Dossier de l'Ordre de la pénitence au 13e siècle. Friburgo: Éditions Universitaires, 1961.\nMeesserman, Giles Gérard. Ordo fraternitatis. Confraternite e pietà dei laici nel Medioevo. Roma: Herder, 1977.\nOrtmann, Adalberto. História da Antiga Capela da Ordem Terceira da Penitência de São Francisco em São Paulo. (Rio de Janeiro: Ministério da Educação e Saúde, 1951.\nPompei, Alfonso. «Il movimento penitenziale nei secoli xii-xiii», Collectanea franciscana 41 (1973): 9-40.\nPou y Martí, José María. Visionarios, beguinos y fraticelos catalanes (siglos xiii-xv). Alicante: Instituto de Cultura Juan Gil-Albert, 1996.\nRey Castelao, Ofelia. «La Orden Tercera Franciscana en el contexto del asociacionismo religioso gallego en el Antiguo Régimen: La V.O.T. de la villa de Padrón». Archivo Ibero-Americano 59, nº 232 (1999): 3-47.\nRibeiro, Bartolomeu. Os terceiros franciscanos portugueses. Sete séculos da súa história. Braga: Tipografia «Missões Franciscanas», 1952.\nSánchez Herrero, José. «Beguinos y Tercera Orden Regular de San Francisco en Castilla». Historia. Instituciones. Documentos 19 (1992): 433-448.\nSerra de Manresa, Valentí. «Els Terciaris franciscans a l´epoca moderna (segles xvii i xviii)». Pedralbes 14 (1994): 93-105.\nVillapadierna, Isidoro de. «Observaciones críticas sobre la Tercera Orden de penitencia en España». Collectanea franciscana 41 (1973): 219-227.\nVillapadierna, Isidoro de. «Vida comunitaria de los terciarios franciscanos de España en el siglo xiv». Analecta T.O.R. 6 (1982): 91-113.\nZaremba, Anthony. Franciscan Social Reform. A Study of the Third Order Secular of St. Francis as an Agency of Social Reform, According to Certain Papal Documents. Pulaski, Wisconsin: Catholic University of America, 1947.",
+				"issue": "284",
+				"journalAbbreviation": "1",
+				"language": "es",
+				"libraryCatalog": "revistasfranciscanas.org",
+				"pages": "69-97",
+				"publicationTitle": "Archivo Ibero-Americano",
+				"rights": "Derechos de autor 2017 Archivo Ibero-Americano",
+				"url": "https://revistasfranciscanas.org/index.php/ArchivoIberoAmericano/article/view/117",
+				"volume": "77",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Edad Media"
+					},
+					{
+						"tag": "Edad Moderna"
+					},
+					{
+						"tag": "Orden Tercera Franciscana"
+					},
+					{
+						"tag": "asociacionismo religioso secular"
+					},
+					{
+						"tag": "península ibérica"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6906-0210 | Alfredo Martín García"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "“Battle is over, raise we the cry of victory”. Study of Revelation 19:11-21",
+				"creators": [
+					{
+						"firstName": "Francisco Javier",
+						"lastName": "Ruiz-Ortiz",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020/11/20",
+				"DOI": "10.46543/ISID.2029.1054",
+				"ISSN": "2660-7743",
+				"issue": "2",
+				"journalAbbreviation": "1",
+				"language": "es-ES",
+				"libraryCatalog": "www.sanisidoro.net",
+				"pages": "37-60",
+				"publicationTitle": "Isidorianum",
+				"shortTitle": "“Battle is over, raise we the cry of victory”. Study of Revelation 19",
+				"url": "https://www.sanisidoro.net/publicaciones/index.php/isidorianum/article/view/147",
+				"volume": "29",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Ap 19"
+					},
+					{
+						"tag": "Apocalipsis"
+					},
+					{
+						"tag": "cristología"
+					},
+					{
+						"tag": "juicio final"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0001-6251-0506 | Francisco Javier Ruiz-Ortiz"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://vulgata-dialog.ch/ojs/index.php/vidbor/article/view/821",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Les enjeux de la Transfiguration",
+				"creators": [
+					{
+						"firstName": "Tarciziu Hristofor",
+						"lastName": "Șerban",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/11/04",
+				"DOI": "10.25788/vidbor.v5i1.821",
+				"ISSN": "2504-5156",
+				"abstractNote": "Im Vergleich der griechischen und lateinischen Texte der Verklärung Jesu auf dem Berg Tabor (Mk 9,2-10; Mt 17,1-9; Lk 9,28-36) wird gezeigt, wie die Vulgata NT diese zentrale, sehr spezielle Thematik beleuchtet. In diesem Ansatz werden auch theologisch äusserst relevante Fragen aufgeworfen, wie nach der Gattung des Verklärungstexts, aber auch nach dem Zusammenhang der Verklärung mit der Episode des Bundesschlusses in Ex 24 auf dem Berg Sinai. Handelt es sich hier um die literarische Vorlage?",
+				"journalAbbreviation": "1",
+				"language": "en",
+				"libraryCatalog": "vulgata-dialog.ch",
+				"pages": "29-40",
+				"publicationTitle": "Vulgata in Dialogue. A Biblical On-Line Review",
+				"rights": "Copyright (c) 2021 Vulgata in Dialogue. A Biblical On-Line Review",
+				"url": "https://vulgata-dialog.ch/ojs/index.php/vidbor/article/view/821",
+				"volume": "5",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Apostel"
+					},
+					{
+						"tag": "Bund"
+					},
+					{
+						"tag": "Elija"
+					},
+					{
+						"tag": "Eucharistie"
+					},
+					{
+						"tag": "Mose"
+					},
+					{
+						"tag": "Synoptische Evangelien"
+					},
+					{
+						"tag": "Verklärung"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0003-4838-4368 | Tarciziu Hristofor Șerban, Lect. univ. dr."
+					}
+				],
 				"seeAlso": []
 			}
 		]

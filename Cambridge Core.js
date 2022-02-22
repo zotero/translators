@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-02 13:37:43"
+	"lastUpdated": "2022-02-18 16:00:30"
 }
 
 /*
@@ -102,7 +102,7 @@ function scrape(doc, url) {
 			// clear the abstract field, since it will contain a URL
 			item.abstractNote = "";
 		}
-		
+		if (item.abstractNote.match(/resource\/name\/.+\.jpg$/) != null) item.abstractNote = "";
 		item.title = ZU.unescapeHTML(item.title);
 		item.libraryCatalog = "Cambridge Core";
 		addOpenAccessTag(doc, item);
@@ -114,6 +114,7 @@ function scrape(doc, url) {
 		trans.doWeb(doc, url);
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
