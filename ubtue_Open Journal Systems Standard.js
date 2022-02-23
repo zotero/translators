@@ -5,11 +5,11 @@
 	"target": "article|issue/view/",
 	"minVersion": "3.0",
 	"maxVersion": "",
-	"priority": 100,
+	"priority": 99,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-22 11:34:34"
+	"lastUpdated": "2022-02-23 14:33:15"
 }
 
 /*
@@ -131,7 +131,7 @@ function getOrcids(doc, ISSN) {
 	//e.g. https://ote-journal.otwsa-otssa.org.za/index.php/journal/article/view/433
   	let orcidAuthorEntryCaseB = doc.querySelectorAll('.authors-string');//Z.debug(orcidAuthorEntryCaseC)
   	if (orcidAuthorEntryCaseB) {
-  	 	for (let c of orcidAuthorEntryCaseC) {
+  	 	for (let c of orcidAuthorEntryCaseB) {
   			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
   				let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
   				let author = ZU.xpathText(c, './/span', '');
