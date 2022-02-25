@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-01-30 19:53:00"
+	"lastUpdated": "2022-02-25 01:19:36"
 }
 
 /*
@@ -41,7 +41,7 @@
  */
 function detectWeb(doc, url) {
 	if (url.includes('/scholar_case?')
-		&& url.includes('about=')
+		&& url.includes('case=')
 	) {
 		return "case";
 	}
@@ -997,6 +997,32 @@ var testCases = [
 		"type": "web",
 		"url": "https://scholar.google.com/citations?user=Cz6X6UYAAAAJ&hl=en",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://scholar.google.com/scholar_case?case=16585781351150334057",
+		"items": [
+			{
+				"itemType": "case",
+				"caseName": "Strickland v. Washington",
+				"creators": [],
+				"dateDecided": "May 14, 1984",
+				"court": "Supreme Court",
+				"firstPage": "668",
+				"itemID": "1",
+				"reporter": "US",
+				"reporterVolume": "466",
+				"attachments": [
+					{
+						"title": "Google Scholar Judgement",
+						"type": "text/html"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
