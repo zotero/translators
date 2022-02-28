@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-23 14:33:15"
+	"lastUpdated": "2022-02-28 09:50:17"
 }
 
 /*
@@ -29,18 +29,19 @@
 */
 
 function detectWeb(doc, url) {
-	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
-	if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
+	if (url.match(/\/issue\//) && getSearchResults(doc)) return "multiple";
+	else if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
 		  pkpLibraries.length >= 1))
 		return false;
-	else if (url.match(/article/)) return "journalArticle";
+	else if (url.match(/\/article\//)) return "journalArticle";
 	else return false;
 }
 
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a | //a[contains(@href, "/article/view/") and not(contains(@href, "/pdf"))]');
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a | //a[contains(@href, "/article/view/") and not(contains(@href, "/pdf")) and not(contains(., "PDF"))]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -88,7 +89,7 @@ function getOrcids(doc, ISSN) {
 		let authorSpans = authorSection.querySelector('span[class="name"]');
 		let orcidSpans = authorSection.querySelector('span[class="orcid"]');
 		if (authorSpans && orcidSpans) {
-		   let author = authorSpans.innerText;
+		   let author = authorSpans.innerText.trim();
 		   let orcidAnchor =  orcidSpans.querySelector('a');
 		   if (!orcidAnchor)
 			   continue;
@@ -243,6 +244,7 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
 
 
 /** BEGIN TEST CASES **/
