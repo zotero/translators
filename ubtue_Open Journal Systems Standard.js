@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-28 09:50:17"
+	"lastUpdated": "2022-02-28 11:15:30"
 }
 
 /*
@@ -107,7 +107,7 @@ function getOrcids(doc, ISSN) {
   	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
   	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
   	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
-  	 if (['2627-6062', "1804-6444", '2748-6419'].includes(ISSN)) {
+  	 if (['2627-6062', "1804-6444", "2748-6419"].includes(ISSN)) {
   	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
   	 	if (orcidAuthorEntryCaseA) {
   		for (let a of orcidAuthorEntryCaseA) {
@@ -136,6 +136,24 @@ function getOrcids(doc, ISSN) {
   			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
   				let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
   				let author = ZU.xpathText(c, './/span', '');
+  				if (orcid != null && author != null) {
+  					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
+  					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
+  				}
+  			}
+  		}
+  	}
+  	
+  	if (notes.length) return notes;
+  	
+	//e.g. https://missionalia.journals.ac.za/pub/article/view/422
+	let orcidAuthorEntryCaseC = doc.querySelectorAll('.authorBio');//Z.debug(orcidAuthorEntryCaseC)
+  	if (orcidAuthorEntryCaseC) {
+  	 	for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let orcid = ZU.xpathText(c, './/a[@class="orcid"]/@href', '');
+  				let author = ZU.xpathText(c, './/em', '');
   				if (orcid != null && author != null) {
   					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
   					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
@@ -806,6 +824,94 @@ var testCases = [
 				"notes": [
 					{
 						"note": "orcid:0000-0003-4838-4368 | Tarciziu Hristofor Șerban, Lect. univ. dr."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://missionalia.journals.ac.za/pub/article/view/422",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Erlo Hartwig Stegen: Pioneer, missionary and revival preacher in an apartheid South Africa",
+				"creators": [
+					{
+						"firstName": "Elfrieda Marie-Louise",
+						"lastName": "Fleischmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ignatius W.",
+						"lastName": "Ferreira",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Claudia",
+						"lastName": "Gouws",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francois",
+						"lastName": "Muller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/30",
+				"DOI": "10.7832/49-0-422",
+				"ISSN": "2312-878X",
+				"abstractNote": "As not much academic attention has been paid to the life and ministry of Erlo Hartwig Stegen (1935-present), his paper seeks to provide more insight into Erlo Stegen’s pioneering journey towards a self-sustainable protestant rural Zulu mission station, KwaSizabantu Mission, in an apartheid South Africa. Data was gleaned from interviews, documents, newsletters, reports and sermons. Thematic content analysis provided more insight into Stegen’s pioneering, missionary endeavours as well his journey towards an awakening among the Zulus. We argue that the missiological impact of Stegen’s ministry had benefitted the Zulu nation greatly.",
+				"language": "en",
+				"libraryCatalog": "missionalia.journals.ac.za",
+				"publicationTitle": "Missionalia: Southern African Journal of Missiology",
+				"rights": "Copyright (c) 2021 Missionalia: Southern African Journal of Missiology",
+				"shortTitle": "Erlo Hartwig Stegen",
+				"url": "https://missionalia.journals.ac.za/pub/article/view/422",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Apartheid"
+					},
+					{
+						"tag": "Erlo Stegen"
+					},
+					{
+						"tag": "KwaSizabantu Mission"
+					},
+					{
+						"tag": "Pioneer"
+					},
+					{
+						"tag": "South Africa."
+					},
+					{
+						"tag": "missionary"
+					},
+					{
+						"tag": "pioneer"
+					},
+					{
+						"tag": "revival"
+					},
+					{
+						"tag": "self-sustainable mission"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0002-0918-0226 | Elfrieda Marie-Louise Fleischmann"
 					}
 				],
 				"seeAlso": []
