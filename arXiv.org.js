@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 12,
 	"browserSupport": "gcsv",
-	"lastUpdated": "2022-02-27 19:01:17"
+	"lastUpdated": "2022-02-28 16:59:35"
 }
 
 /*
@@ -211,11 +211,6 @@ function parseXML(text) {
 		newItem.extra = "arXiv:" + articleID + " " + articleField;
 	}
 	
-	newItem.publisher = "arXiv";
-	newItem.number = 'arXiv: ' + articleID;
-	if (version) {
-		newItem.extra += '\nversion: ' + version;
-	}
 
 	var pdfUrl = "https://arxiv.org/pdf/" + articleID + (version ? "v" + version : "") + ".pdf";
 	newItem.attachments.push({
@@ -257,12 +252,13 @@ function parseXML(text) {
 		translate.setHandler("error", function () {});
 		translate.translate();
 	}
-	else if (arxivDOI) {
-		newItem.DOI = ZU.cleanDOI(arxivDOI);
-		newItem.extra += '\ntype: article';
-		newItem.complete();
-	}
 	else {
+		newItem.publisher = "arXiv";
+		newItem.number = "arXiv:" + articleID;
+		if (version) {
+			newItem.extra += '\nversion: ' + version;
+		}
+		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
 		newItem.extra += '\ntype: article';
 		newItem.complete();
 	}
@@ -666,7 +662,7 @@ var testCases = [
 				"extra": "arXiv:1810.04805 [cs]\nversion: 1\ntype: article",
 				"institution": "arXiv",
 				"libraryCatalog": "arXiv.org",
-				"reportNumber": "arXiv: 1810.04805",
+				"reportNumber": "arXiv:1810.04805",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
@@ -723,7 +719,7 @@ var testCases = [
 				"extra": "arXiv:1810.04805 [cs]\nversion: 2\ntype: article",
 				"institution": "arXiv",
 				"libraryCatalog": "arXiv.org",
-				"reportNumber": "arXiv: 1810.04805",
+				"reportNumber": "arXiv:1810.04805",
 				"shortTitle": "BERT",
 				"url": "http://arxiv.org/abs/1810.04805",
 				"attachments": [
@@ -795,7 +791,7 @@ var testCases = [
 				"extra": "arXiv:2201.00738 [cond-mat, physics:hep-ex, physics:quant-ph]\ntype: article",
 				"institution": "arXiv",
 				"libraryCatalog": "arXiv.org",
-				"reportNumber": "arXiv: 2201.00738",
+				"reportNumber": "arXiv:2201.00738",
 				"url": "http://arxiv.org/abs/2201.00738",
 				"attachments": [
 					{
