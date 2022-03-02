@@ -12,6 +12,7 @@ const translators = require('../lib/translators');
 
 argv
 	.version(CLIEngine.version)
+	.option('-o, --output-json [file]', 'Write report to file as JSON')
 	.option('-f, --fix', 'Automatically fix problems')
 	.option('--no-ignore', 'Disable use of ignore files and patterns')
 	.option('--quiet', 'Report errors only - default: false')
@@ -30,6 +31,9 @@ const sources = {
 	translators: [],
 	errors: 0,
 };
+
+let allResults = [];
+
 function findIgnore(file, stats) {
 	if (stats.isDirectory()) return (path.basename(file) == "node_modules");
 	return !file.endsWith('.js');
@@ -86,7 +90,12 @@ if (sources.javascripts.length) {
 		}
 		CLIEngine.outputFixes(report);
 	}
-	showResults(sources.javascripts, report.results);
+	if (argv.outputJson) {
+		allResults.push(...report.results);
+	}
+	else {
+		showResults(sources.javascripts, report.results);
+	}
 }
 
 for (const translator of sources.translators) {
@@ -105,7 +114,16 @@ for (const translator of sources.translators) {
 			}
 		}
 	}
-	showResults(translator.filename, report.results);
+	if (argv.outputJson) {
+		allResults.push(...report.results);
+	}
+	else {
+		showResults(translator.filename, report.results);
+	}
+}
+
+if (argv.outputJson) {
+	fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8')
 }
 
 process.exit(sources.errors); // eslint-disable-line no-process-exit
