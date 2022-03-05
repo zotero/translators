@@ -208,6 +208,7 @@ declare namespace Zotero {
 		mimeType?: string;
 		url?: string;
 		document?: Document;
+		path?: string;
 		proxy?: boolean;
 	}
 
@@ -247,6 +248,10 @@ declare namespace Zotero {
 		firstName: string?;
 		creatorType: T;
 		fieldMode: 1?;
+	}
+
+	interface Tag {
+		tag: string;
 	}
 
 	type ItemType =
@@ -346,6 +351,7 @@ declare namespace Zotero {
 
 		creators: Creator<"artist" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -379,6 +385,7 @@ declare namespace Zotero {
 
 		creators: Creator<"performer" | "composer" | "contributor" | "wordsBy">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -408,6 +415,7 @@ declare namespace Zotero {
 
 		creators: Creator<"sponsor" | "contributor" | "cosponsor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -431,6 +439,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "commenter" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -465,6 +474,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -500,6 +510,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "bookAuthor" | "contributor" | "editor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -527,6 +538,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "counsel">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -558,6 +570,7 @@ declare namespace Zotero {
 
 		creators: Creator<"programmer" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -592,6 +605,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -627,6 +641,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -653,6 +668,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -674,6 +690,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "recipient">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -709,6 +726,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -738,6 +756,7 @@ declare namespace Zotero {
 
 		creators: Creator<"director" | "contributor" | "producer" | "scriptwriter">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -761,6 +780,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -791,6 +811,7 @@ declare namespace Zotero {
 
 		creators: Creator<"contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -812,6 +833,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "recipient">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -838,6 +860,7 @@ declare namespace Zotero {
 
 		creators: Creator<"interviewee" | "contributor" | "interviewer" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -873,6 +896,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -899,6 +923,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "recipient">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -929,6 +954,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -957,6 +983,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -989,6 +1016,7 @@ declare namespace Zotero {
 
 		creators: Creator<"cartographer" | "contributor" | "seriesEditor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1020,6 +1048,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "reviewedAuthor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1052,6 +1081,7 @@ declare namespace Zotero {
 
 		creators: Creator<"inventor" | "attorneyAgent" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1076,6 +1106,7 @@ declare namespace Zotero {
 
 		creators: Creator<"podcaster" | "contributor" | "guest">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1100,6 +1131,7 @@ declare namespace Zotero {
 
 		creators: Creator<"presenter" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1131,6 +1163,7 @@ declare namespace Zotero {
 
 		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1162,6 +1195,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "seriesEditor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1190,6 +1224,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1219,6 +1254,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1250,6 +1286,7 @@ declare namespace Zotero {
 
 		creators: Creator<"director" | "castMember" | "contributor" | "guest" | "producer" | "scriptwriter">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1283,6 +1320,7 @@ declare namespace Zotero {
 
 		creators: Creator<"director" | "castMember" | "contributor" | "producer" | "scriptwriter">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
@@ -1306,6 +1344,7 @@ declare namespace Zotero {
 
 		creators: Creator<"author" | "contributor" | "translator">[];
 		attachments: Attachment[];
+		tags: Tag[];
 		notes: Note[];
 		seeAlso: string[];
 		complete(): void;
