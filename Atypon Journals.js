@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-08 20:10:00"
+	"lastUpdated": "2022-03-05 02:26:23"
 }
 
 /*
@@ -42,7 +42,7 @@ function detectWeb(doc, url) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
-	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"], .actions-block-container__export-citation, div.pill__item, section.pill__item div.citation-download');
+	var citLink = doc.querySelector('a[href*="/action/showCitFormats"], a[href*="#pill-citations"], .actions-block-container__export-citation, div.pill__item, section.pill__item div.citation-download, a[href*="#tab-citations"]');
 	if (citLink) {
 		if (url.includes('/doi/book/')) {
 			return 'book';
@@ -143,6 +143,28 @@ function getSearchResults(doc, checkOnly, extras) {
 			articles[url] = title;
 		}
 	}
+
+	if (!found) {
+		Z.debug("Trying alternate multiple format #3");
+		rows = container.querySelectorAll('.items-results .card');
+		for (let row of rows) {
+			let title = text(row, 'a');
+			if (!title) continue;
+			title = ZU.trimInternal(title);
+			
+			let url = attr(row, 'a', 'href');
+			if (!url) continue;
+			
+			if (checkOnly) return true;
+			found = true;
+			
+			if (extras) {
+				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
+			}
+			
+			articles[url] = title;
+		}
+	}
 	
 	return found ? articles : false;
 }
@@ -153,7 +175,7 @@ var replURLRegExp = /\/doi\/((?:abs|abstract|full|figure|ref|citedby|book)\/)?/;
 function buildPdfUrl(url, root) {
 	if (!replURLRegExp.test(url)) return false; // The whole thing is probably going to fail anyway
 	
-	var pdfPaths = ['/doi/pdf/', '/doi/pdfplus/'];
+	var pdfPaths = ['/doi/pdf/', '/doi/epdf', '/doi/pdfplus/'];
 	for (let i = 0; i < pdfPaths.length; i++) {
 		if (ZU.xpath(root, './/a[contains(@href, "' + pdfPaths[i] + '")]').length) {
 			return url.replace(replURLRegExp, pdfPaths[i]);
@@ -924,6 +946,55 @@ var testCases = [
 				"publicationTitle": "Science",
 				"url": "https://www.science.org/doi/10.1126/science.aag1582",
 				"volume": "354",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.pnas.org/doi/10.1073/pnas.2117831119",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Inequality in science and the case for a new agenda",
+				"creators": [
+					{
+						"firstName": "Joseph L.",
+						"lastName": "Graves",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Maureen",
+						"lastName": "Kearney",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gilda",
+						"lastName": "Barabino",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shirley",
+						"lastName": "Malcom",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-03-08",
+				"DOI": "10.1073/pnas.2117831119",
+				"issue": "10",
+				"libraryCatalog": "pnas.org (Atypon)",
+				"pages": "e2117831119",
+				"publicationTitle": "Proceedings of the National Academy of Sciences",
+				"url": "https://www.pnas.org/doi/10.1073/pnas.2117831119",
+				"volume": "119",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
