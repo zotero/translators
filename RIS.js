@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-02-01 18:16:51"
+	"lastUpdated": "2022-03-08 02:14:43"
 }
 
 function detectImport() {
@@ -1627,11 +1627,11 @@ function dateRIStoZotero(risDate, zField) {
 					: '');
 	} else {
 		let [year, month, day] = date;
-		let dateString = Zotero.Utilities.lpad(year, '0', 4);
+		let dateString = year.padStart(4, '0');
 		if (month) {
-			dateString += "-" + Zotero.Utilities.lpad(month, '0', 2);
+			dateString += "-" + month.padStart(2, '0');
 			if (day) {
-				dateString += "-" + Zotero.Utilities.lpad(day, '0', 2);
+				dateString += "-" + day.padStart(2, '0');
 			}
 		}
 		return dateString;
