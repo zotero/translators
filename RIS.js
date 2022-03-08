@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2021-07-09 05:32:22"
+	"lastUpdated": "2022-03-08 02:14:43"
 }
 
 function detectImport() {
@@ -1626,17 +1626,15 @@ function dateRIStoZotero(risDate, zField) {
 							+ pad(d.getUTCSeconds(), 2)
 					: '');
 	} else {
-		//adjust month (it's 0 based)
-		if (date[1]) {
-			date[1] = parseInt(date[1], 10);
-			if (date[1]) date[1]--;
+		let [year, month, day] = date;
+		let dateString = year.padStart(4, '0');
+		if (month) {
+			dateString += "-" + month.padStart(2, '0');
+			if (day) {
+				dateString += "-" + day.padStart(2, '0');
+			}
 		}
-
-		return ZU.formatDate({
-				'year': date[0],
-				'month': date[1],
-				'day': date[2]
-			});
+		return dateString;
 	}
 }
 
@@ -2110,7 +2108,7 @@ var testCases = [
 						"creatorType": "inventor"
 					}
 				],
-				"issueDate": "February 27, 1990",
+				"issueDate": "1990-02-27",
 				"abstractNote": "A method is disclosed for detecting the presence of HTLV III infected cells in a medium. The method comprises contacting the medium with monoclonal antibodies against an antigen produced as a result of the infection and detecting the binding of the antibodies to the antigen. The antigen may be a gene product of the HTLV III virus or may be bound to such gene product. On the other hand the antigen may not be a viral gene product but may be produced as a result of the infection and may further be bound to a lymphocyte. The medium may be a human body fluid or a culture medium. A particular embodiment of the present method involves a method for determining the presence of a AIDS virus in a person. The method comprises combining a sample of a body fluid from the person with a monoclonal antibody that binds to an antigen produced as a result of the infection and detecting the binding of the monoclonal antibody to the antigen. The presence of the binding indicates the presence of a AIDS virus infection. Also disclosed are novel monoclonal antibodies, noval compositions of matter, and novel diagnostic kits",
 				"applicationNumber": "G01N 33/569 G01N 33/577",
 				"assignee": "4,629,783",
@@ -2119,10 +2117,18 @@ var testCases = [
 				"place": "OR",
 				"attachments": [],
 				"tags": [
-					"AIDS",
-					"antigens",
-					"infection",
-					"virus"
+					{
+						"tag": "AIDS"
+					},
+					{
+						"tag": "antigens"
+					},
+					{
+						"tag": "infection"
+					},
+					{
+						"tag": "virus"
+					}
 				],
 				"notes": [],
 				"seeAlso": []
@@ -2160,9 +2166,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2212,9 +2224,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2250,9 +2268,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2298,9 +2322,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2337,9 +2367,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2375,9 +2411,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2439,9 +2481,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2504,9 +2552,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2537,13 +2591,18 @@ var testCases = [
 				"language": "Language",
 				"reporter": "Reporter",
 				"reporterVolume": "Reporter Volume",
-				"shortTitle": "Abbreviated Case Name",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2591,9 +2650,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2627,9 +2692,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2681,9 +2752,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2718,12 +2795,17 @@ var testCases = [
 				"seriesTitle": "Series Title",
 				"shortTitle": "Short Title",
 				"url": "URL",
-				"version": "Version",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2770,9 +2852,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2834,9 +2922,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2880,9 +2974,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2939,9 +3039,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -2993,9 +3099,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3039,9 +3151,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3096,9 +3214,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3160,9 +3284,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3218,9 +3348,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3259,9 +3395,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3295,9 +3437,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3344,9 +3492,15 @@ var testCases = [
 				"videoRecordingFormat": "Format",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3401,9 +3555,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3449,9 +3609,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3494,9 +3660,15 @@ var testCases = [
 				"volume": "Amount Requested",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3528,9 +3700,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3608,9 +3786,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3653,9 +3837,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3697,9 +3887,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3739,9 +3935,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3796,9 +3998,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3838,9 +4046,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3877,9 +4091,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3918,9 +4138,15 @@ var testCases = [
 				"videoRecordingFormat": "Format/Length",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -3967,9 +4193,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4013,9 +4245,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4060,9 +4298,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4117,9 +4361,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4181,9 +4431,15 @@ var testCases = [
 				"volume": "Volume",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4222,9 +4478,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4250,13 +4512,18 @@ var testCases = [
 				"publicLawNumber": "Public Law Number",
 				"section": "Sections",
 				"session": "Session",
-				"shortTitle": "Short Title",
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4299,9 +4566,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4347,9 +4620,15 @@ var testCases = [
 				"url": "URL",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4385,9 +4664,15 @@ var testCases = [
 				"websiteType": "Type of Medium",
 				"attachments": [],
 				"tags": [
-					"Keyword1, Keyword2, Keyword3",
-					"Keyword4",
-					"Keyword5"
+					{
+						"tag": "Keyword1, Keyword2, Keyword3"
+					},
+					{
+						"tag": "Keyword4"
+					},
+					{
+						"tag": "Keyword5"
+					}
 				],
 				"notes": [
 					{
@@ -4450,7 +4735,6 @@ var testCases = [
 				"abstractNote": "Optimal integration of next-generation sequencing into mainstream research requires re-evaluation of how problems can be reasonably overcome and what questions can be asked. .... The random sequencing-based approach to identify microsatellites was rapid, cost-effective and identified thousands of useful microsatellite loci in a previously unstudied species.",
 				"issue": "9999",
 				"publicationTitle": "Molecular Ecology Resources",
-				"shortTitle": "Rapid identification of thousands of copperhead snake (Agkistrodon contortrix) microsatellite loci from modest amounts of 454 shotgun genome sequence",
 				"url": "http://dx.doi.org/10.1111/j.1755-0998.2009.02750.x",
 				"volume": "9999",
 				"attachments": [
@@ -6378,7 +6662,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "June 1, 2014",
+				"date": "2014-06-01",
 				"DOI": "10.3109/07434618.2014.906498",
 				"ISSN": "0743-4618",
 				"issue": "2",
@@ -6448,7 +6732,7 @@ var testCases = [
 				"itemType": "journalArticle",
 				"title": "Deprecated tag test",
 				"creators": [],
-				"date": "January 1, 1950",
+				"date": "1950-01-01",
 				"attachments": [],
 				"tags": [],
 				"notes": [
