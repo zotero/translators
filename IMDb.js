@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-22 20:36:51"
+	"lastUpdated": "2022-03-08 00:59:08"
 }
 
 /*
@@ -106,7 +106,9 @@ function scrape(doc, _url) {
 	var creatorsMapping = {
 		director: "director",
 		creator: "scriptwriter",
-		actor: "castMember"
+		actor: ZU.fieldIsValidForType("castMember", item.itemType)
+			? "castMember"
+			: "contributor"
 	};
 	for (var role in creatorsMapping) {
 		if (!json[role]) continue;
