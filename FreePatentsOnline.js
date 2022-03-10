@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2018-03-05 18:54:31"
+	"lastUpdated": "2022-03-08 14:32:54"
 }
 
 /*
@@ -128,7 +128,7 @@ function scrape(doc, url) {
 						newItem.creators.push(ZU.cleanAuthor(name, "attorneyAgent", true));
 					} else {
 						newItem.creators.push({
-							firstName: name, 
+							lastName: name, 
 							creatorType: "attorneyAgent",
 							fieldMode: 1
 						});
