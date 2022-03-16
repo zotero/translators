@@ -11,7 +11,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2021-11-29 17:00:00"
+	"lastUpdated": "2022-03-16 12:00:00"
 }
 
 /*
@@ -94,6 +94,10 @@ function doExport() {
 	// Word and TextEdit don't indent blockquotes on their own and need this
 	// OO gets it right, so this results in an extra indent
 	ZU.xpath(doc, '//blockquote/p').forEach(p => p.style.marginLeft = '30px');
+
+	let charsetMeta = doc.createElement('meta');
+	charsetMeta.setAttribute('charset', 'utf-8');
+	doc.head.append(charsetMeta);
 
 	Zotero.write('<!DOCTYPE html>' + doc.documentElement.outerHTML);
 }
