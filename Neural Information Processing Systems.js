@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-02 17:19:02"
+	"lastUpdated": "2022-03-23 00:51:45"
 }
 
 /*
@@ -40,7 +40,8 @@ function detectWeb(doc, url) {
 	if (getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (url.includes('/paper/') && /-Paper\.pdf$|-Abstract\.html$/.test(url)) {
+	else if (url.includes('/paper/') && /-Paper\.pdf$|-Abstract\.html$/.test(url)
+		&& attr(doc, 'a[href$="-Bibtex.bib"], a[href$="/bibtex"]', 'href')) {
 		return "conferencePaper";
 	}
 	return false;
@@ -48,7 +49,8 @@ function detectWeb(doc, url) {
 
 function scrape(doc, url) {
 	let pdfURL = attr(doc, 'a[href$="-Paper.pdf"]', 'href');
-	let bibURL = attr(doc, 'a[href$="-Bibtex.bib"]', 'href');
+	let bibURL = attr(doc, 'a[href$="-Bibtex.bib"], a[href$="/bibtex"]', 'href');
+	// Z.debug(bibURL)
 	ZU.doGet(bibURL, function (text) {
 		let translator = Zotero.loadTranslator("import");
 		// BibTeX
@@ -166,11 +168,6 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://proceedings.neurips.cc/papers/search?q=richard+zemel",
-		"items": "multiple"
-	},
-	{
-		"type": "web",
 		"url": "https://proceedings.neurips.cc/paper/2019/hash/d0921d442ee91b896ad95059d13df618-Abstract.html",
 		"items": [
 			{
@@ -236,6 +233,85 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://proceedings.neurips.cc/paper/2020/hash/0060ef47b12160b9198302ebdb144dcf-Abstract.html",
+		"items": [
+			{
+				"itemType": "conferencePaper",
+				"title": "Self-Supervised MultiModal Versatile Networks",
+				"creators": [
+					{
+						"firstName": "Jean-Baptiste",
+						"lastName": "Alayrac",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Adria",
+						"lastName": "Recasens",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Rosalia",
+						"lastName": "Schneider",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Relja",
+						"lastName": "Arandjelović",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jason",
+						"lastName": "Ramapuram",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Jeffrey",
+						"lastName": "De Fauw",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lucas",
+						"lastName": "Smaira",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sander",
+						"lastName": "Dieleman",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Andrew",
+						"lastName": "Zisserman",
+						"creatorType": "author"
+					}
+				],
+				"date": "2020",
+				"itemID": "NEURIPS2020_0060ef47",
+				"libraryCatalog": "Neural Information Processing Systems",
+				"pages": "25–37",
+				"proceedingsTitle": "Advances in Neural Information Processing Systems",
+				"publisher": "Curran Associates, Inc.",
+				"url": "https://proceedings.neurips.cc/paper/2020/hash/0060ef47b12160b9198302ebdb144dcf-Abstract.html",
+				"volume": "33",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://proceedings.neurips.cc/papers/search?q=Lehrach",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
