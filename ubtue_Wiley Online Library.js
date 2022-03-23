@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-18 15:35:48"
+	"lastUpdated": "2022-03-23 10:24:14"
 }
 
 /*
@@ -87,6 +87,10 @@ function addArticleNumber (doc, item) {
 		item.pages = 'article ' + item.pages;	
 	}
 }
+//ubtue: replace '-' with '/' according to guidelines
+function normalizeIssue(doc, item) {
+	if (item.issue != undefined) item.issue = item.issue.replace(/-/g, "/");
+}
 
 function scrapeBook(doc, url) {
 	var title = doc.getElementById('productTitle');
@@ -139,7 +143,7 @@ function scrapeBook(doc, url) {
 			'/h6[normalize-space(text())="About The Product"]',
 			'/following-sibling::p'].join(''), null, "\n") || "");
 	newItem.accessDate = 'CURRENT_TIMESTAMP';
-
+	normalizeIssue(doc, item);
 	newItem.complete();
 }
 
@@ -204,6 +208,7 @@ function scrapeEM(doc, url) {
 				n--;
 			}
 		}
+		normalizeIssue(doc, item);
 		item.complete();
 	});
 
@@ -211,6 +216,7 @@ function scrapeEM(doc, url) {
 	addArticleNumber(doc, item);
 	addFreeAccessTag(doc, item);
 	getORCID(doc, item);
+	normalizeIssue(doc, item);
 	item.complete();
 
 	translator.getTranslatorObject(function(em) {
@@ -378,6 +384,7 @@ function scrapeBibTeX(doc, url) {
 				item.DOI = item.DOI.replace(/^https:\/\/doi.org\/(.*)/, "$1");
 			addFreeAccessTag(doc, item);
 			getORCID(doc, item);
+			normalizeIssue(doc, item);
 			item.complete();
 		});
 
@@ -454,6 +461,7 @@ function scrapeCochraneTrial(doc, url){
 
 	addBookReviewTag(doc, item);
 	addArticleNumber(doc, item);
+	normalizeIssue(doc, item);
 	item.complete();
 }
 
@@ -549,6 +557,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [

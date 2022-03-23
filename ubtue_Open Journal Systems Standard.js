@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-02-23 14:33:15"
+	"lastUpdated": "2022-03-23 10:10:43"
 }
 
 /*
@@ -29,18 +29,19 @@
 */
 
 function detectWeb(doc, url) {
-	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]')
-	if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
+	let pkpLibraries = ZU.xpath(doc, '//script[contains(@src, "/lib/pkp/js/")]');
+	if (url.match(/\/issue\//) && getSearchResults(doc)) return "multiple";
+	else if (!(ZU.xpathText(doc, '//a[@id="developedBy"]/@href') == 'http://pkp.sfu.ca/ojs/' ||
 		  pkpLibraries.length >= 1))
 		return false;
-	else if (url.match(/article/)) return "journalArticle";
+	else if (url.match(/\/article\//)) return "journalArticle";
 	else return false;
 }
 
 function getSearchResults(doc) {
 	var items = {};
 	var found = false;
-	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a | //a[contains(@href, "/article/view/") and not(contains(@href, "/pdf"))]');
+	var rows = ZU.xpath(doc, '//*[contains(concat( " ", @class, " " ), concat( " ", "media-heading", " " ))]//a | //*[contains(concat( " ", @class, " " ), concat( " ", "title", " " ))]//a | //a[contains(@href, "/article/view/") and not(contains(@href, "/pdf")) and not(contains(., "PDF"))]');
 	for (let row of rows) {
 		let href = row.href;
 		let title = ZU.trimInternal(row.textContent);
@@ -53,7 +54,7 @@ function getSearchResults(doc) {
 
 
 function splitDotSeparatedKeywords(item) {
-	if (item.ISSN === "2340-0080" && item.tags.length) {
+	if (item.ISSN === '2340-0080' && item.tags.length) {
 		let split_tags = [];
 		for (const tags of item.tags)
 			split_tags.push(...tags.split('.'));
@@ -88,7 +89,7 @@ function getOrcids(doc, ISSN) {
 		let authorSpans = authorSection.querySelector('span[class="name"]');
 		let orcidSpans = authorSection.querySelector('span[class="orcid"]');
 		if (authorSpans && orcidSpans) {
-		   let author = authorSpans.innerText;
+		   let author = authorSpans.innerText.trim();
 		   let orcidAnchor =  orcidSpans.querySelector('a');
 		   if (!orcidAnchor)
 			   continue;
@@ -106,7 +107,7 @@ function getOrcids(doc, ISSN) {
   	 // e.g. https://jeac.de/ojs/index.php/jeac/article/view/844
   	 // e.g. https://jebs.eu/ojs/index.php/jebs/article/view/336
   	 // e.g. https://bildungsforschung.org/ojs/index.php/beabs/article/view/783
-  	 if (['2627-6062', "1804-6444", '2748-6419'].includes(ISSN)) {
+  	 if (['2627-6062', '1804-6444', '2748-6419'].includes(ISSN)) {
   	 	let orcidAuthorEntryCaseA = doc.querySelectorAll('.authors');
   	 	if (orcidAuthorEntryCaseA) {
   		for (let a of orcidAuthorEntryCaseA) {
@@ -135,6 +136,24 @@ function getOrcids(doc, ISSN) {
   			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
   				let orcid = ZU.xpathText(c, './/a[@class="orcidImage"]/@href', '');
   				let author = ZU.xpathText(c, './/span', '');
+  				if (orcid != null && author != null) {
+  					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
+  					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
+  					notes.push({note: orcid.replace(/https?:\/\/orcid.org\//g, 'orcid:') + ' | ' + author});
+  				}
+  			}
+  		}
+  	}
+  	
+  	if (notes.length) return notes;
+  	
+	//e.g. https://missionalia.journals.ac.za/pub/article/view/422
+	let orcidAuthorEntryCaseC = doc.querySelectorAll('.authorBio');//Z.debug(orcidAuthorEntryCaseC)
+  	if (orcidAuthorEntryCaseC) {
+  	 	for (let c of orcidAuthorEntryCaseC) {
+  			if (c && c.innerHTML.match(/\d+-\d+-\d+-\d+x?/gi)) {
+  				let orcid = ZU.xpathText(c, './/a[@class="orcid"]/@href', '');
+  				let author = ZU.xpathText(c, './/em', '');
   				if (orcid != null && author != null) {
   					author = ZU.unescapeHTML(ZU.trimInternal(author)).trim();
   					orcid = ZU.unescapeHTML(ZU.trimInternal(orcid)).trim();
@@ -243,6 +262,7 @@ function doWeb(doc, url) {
 		invokeEMTranslator(doc, url);
 	}
 }
+
 
 
 /** BEGIN TEST CASES **/
@@ -804,6 +824,94 @@ var testCases = [
 				"notes": [
 					{
 						"note": "orcid:0000-0003-4838-4368 | Tarciziu Hristofor Șerban, Lect. univ. dr."
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://missionalia.journals.ac.za/pub/article/view/422",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Erlo Hartwig Stegen: Pioneer, missionary and revival preacher in an apartheid South Africa",
+				"creators": [
+					{
+						"firstName": "Elfrieda Marie-Louise",
+						"lastName": "Fleischmann",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ignatius W.",
+						"lastName": "Ferreira",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Claudia",
+						"lastName": "Gouws",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Francois",
+						"lastName": "Muller",
+						"creatorType": "author"
+					}
+				],
+				"date": "2021/12/30",
+				"DOI": "10.7832/49-0-422",
+				"ISSN": "2312-878X",
+				"abstractNote": "As not much academic attention has been paid to the life and ministry of Erlo Hartwig Stegen (1935-present), his paper seeks to provide more insight into Erlo Stegen’s pioneering journey towards a self-sustainable protestant rural Zulu mission station, KwaSizabantu Mission, in an apartheid South Africa. Data was gleaned from interviews, documents, newsletters, reports and sermons. Thematic content analysis provided more insight into Stegen’s pioneering, missionary endeavours as well his journey towards an awakening among the Zulus. We argue that the missiological impact of Stegen’s ministry had benefitted the Zulu nation greatly.",
+				"language": "en",
+				"libraryCatalog": "missionalia.journals.ac.za",
+				"publicationTitle": "Missionalia: Southern African Journal of Missiology",
+				"rights": "Copyright (c) 2021 Missionalia: Southern African Journal of Missiology",
+				"shortTitle": "Erlo Hartwig Stegen",
+				"url": "https://missionalia.journals.ac.za/pub/article/view/422",
+				"volume": "49",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "Apartheid"
+					},
+					{
+						"tag": "Erlo Stegen"
+					},
+					{
+						"tag": "KwaSizabantu Mission"
+					},
+					{
+						"tag": "Pioneer"
+					},
+					{
+						"tag": "South Africa."
+					},
+					{
+						"tag": "missionary"
+					},
+					{
+						"tag": "pioneer"
+					},
+					{
+						"tag": "revival"
+					},
+					{
+						"tag": "self-sustainable mission"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid:0000-0002-0918-0226 | Elfrieda Marie-Louise Fleischmann"
 					}
 				],
 				"seeAlso": []
