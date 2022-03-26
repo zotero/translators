@@ -47,7 +47,6 @@ function detectWeb(doc, url) {
 }
 
 function scrape(doc, url) {
-
 	// Unfortunately, the abstract isn't semantically marked at all; this is the best we can do
 	let abstract = ZU.xpathText(doc, '//h4[text()="Abstract"]/following-sibling::p[2]');
 	let pdfURL = attr(doc, 'a[href$="-Paper.pdf"]', 'href');
@@ -84,12 +83,12 @@ function scrape(doc, url) {
 		translator.setDocument(doc);
 		
 		translator.setHandler('itemDone', (_obj, item) => {
-			item.publisher = "Curran Associates, Inc."
+			item.publisher = "Curran Associates, Inc.";
 			item.abstractNote = abstract;
 			item.complete();
 		});
 
-		translator.getTranslatorObject(function(trans) {
+		translator.getTranslatorObject(function (trans) {
 			trans.itemType = "conferencePaper";
 			trans.doWeb(doc, url);
 		});
