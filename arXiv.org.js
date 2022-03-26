@@ -157,12 +157,13 @@ function parseXML(text) {
 	if (ZU.fieldIsValidForType('title', 'preprint')) {
 		hasPreprint = true;
 	}
+	var newItem;
 	if (hasPreprint) {
-			var newItem = new Zotero.Item("preprint");		
+		newItem = new Zotero.Item("preprint");
 	}
 	else {
-		var newItem = new Zotero.Item("report");
-	}	
+		newItem = new Zotero.Item("report");
+	}
 	var xml = (new DOMParser()).parseFromString(text, "text/xml");
 	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
 
