@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
-	"browserSupport": "gcsv",
-	"lastUpdated": "2022-02-28 16:59:35"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-03-26 18:57:23"
 }
 
 /*
@@ -60,6 +60,9 @@ function detectWeb(doc, url) {
 	}
 	else if (relatedDOI) {
 		return "journalArticle";
+	}
+	else if (ZU.fieldIsValidForType('title', 'preprint')) {
+		return "preprint";
 	}
 	else {
 		return "report";
@@ -150,8 +153,16 @@ function parseXML(text) {
 		xsi: 'http://www.w3.org/2001/XMLSchema-instance',
 		n: 'http://www.openarchives.org/OAI/2.0/' // Default
 	};
-	var newItem = new Zotero.Item("report");
-	
+	var hasPreprint;
+	if (ZU.fieldIsValidForType('title', 'preprint')) {
+		hasPreprint = true;
+	}
+	if (hasPreprint) {
+			var newItem = new Zotero.Item("preprint");		
+	}
+	else {
+		var newItem = new Zotero.Item("report");
+	}	
 	var xml = (new DOMParser()).parseFromString(text, "text/xml");
 	var dcMeta = ZU.xpath(xml, '//n:GetRecord/n:record/n:metadata/oai_dc:dc', ns)[0];
 
@@ -259,7 +270,11 @@ function parseXML(text) {
 			newItem.extra += '\nversion: ' + version;
 		}
 		if (arxivDOI) newItem.DOI = ZU.cleanDOI(arxivDOI);
-		newItem.extra += '\ntype: article';
+		// only for Zotero versions without preprint
+		if (!hasPreprint) {
+			newItem.extra += '\ntype: article';
+		}
+		else newItem.archiveID = "arXiv:" + articleID;
 		newItem.complete();
 	}
 }
