@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-26 18:20:28"
+	"lastUpdated": "2022-03-28 18:01:24"
 }
 
 /*
@@ -85,6 +85,7 @@ function scrape(doc, url) {
 		translator.setHandler('itemDone', (_obj, item) => {
 			item.publisher = "Curran Associates, Inc.";
 			item.abstractNote = abstract;
+			item.attachments = item.attachments.filter(a => a.title != 'Snapshot');
 			item.complete();
 		});
 
@@ -372,10 +373,6 @@ var testCases = [
 					{
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
