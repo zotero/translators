@@ -284,6 +284,7 @@ declare namespace Zotero {
 		| "note"
 		| "patent"
 		| "podcast"
+		| "preprint"
 		| "presentation"
 		| "radioBroadcast"
 		| "report"
@@ -321,6 +322,7 @@ declare namespace Zotero {
 		new(itemType: "newspaperArticle"): NewspaperArticleItem;
 		new(itemType: "patent"): PatentItem;
 		new(itemType: "podcast"): PodcastItem;
+		new(itemType: "preprint"): PreprintItem;
 		new(itemType: "presentation"): PresentationItem;
 		new(itemType: "radioBroadcast"): RadioBroadcastItem;
 		new(itemType: "report"): ReportItem;
@@ -1114,6 +1116,40 @@ declare namespace Zotero {
 		[key: string]: string;
 	};
 
+	type PreprintItem = {
+		itemType: "preprint";
+		title?: string;
+		abstractNote?: string;
+		genre?: string;
+		repository?: string;
+		archiveID?: string;
+		place?: string;
+		date?: string;
+		series?: string;
+		seriesNumber?: string;
+		DOI?: string;
+		citationKey?: string;
+		url?: string;
+		accessDate?: string;
+		archive?: string;
+		archiveLocation?: string;
+		shortTitle?: string;
+		language?: string;
+		libraryCatalog?: string;
+		callNumber?: string;
+		rights?: string;
+		extra?: string;
+
+		creators: Creator<"author" | "contributor" | "editor" | "reviewedAuthor" | "translator">[];
+		attachments: Attachment[];
+		tags: Tag[];
+		notes: Note[];
+		seeAlso: string[];
+		complete(): void;
+
+		[key: string]: string;
+	};
+
 	type PresentationItem = {
 		itemType: "presentation";
 		title?: string;
@@ -1379,6 +1415,7 @@ declare namespace Zotero {
 		| NewspaperArticleItem
 		| PatentItem
 		| PodcastItem
+		| PreprintItem
 		| PresentationItem
 		| RadioBroadcastItem
 		| ReportItem
