@@ -2,14 +2,14 @@
 	"translatorID": "26ecfee6-535d-4044-89a8-fbda31883642",
 	"label": "Stack Exchange",
 	"creator": "Abe Jellinek",
-	"target": "^https://([^/]+\\.)?(((stack(overflow|exchange)|serverfault|askubuntu)\\.com)|mathoverflow\\.net)/",
+	"target": "^https://([^/]+\\.)?(((stack(overflow|exchange)|serverfault|askubuntu)\\.com)|mathoverflow\\.net|superuser\\.com|stackapps\\.com)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-28 19:01:35"
+	"lastUpdated": "2022-04-03 13:21:00"
 }
 
 /*
@@ -118,6 +118,16 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://stackoverflow.com/questions/178325/how-do-i-check-if-an-element-is-hidden-in-jquery",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://stackapps.com/questions/9281/whats-the-next-the-script-app-library-of-the-month",
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://superuser.com/questions/1714304/ram-no-longer-working-after-adding-a-second-stick",
 		"items": "multiple"
 	}
 ]
