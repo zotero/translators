@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-07-06 17:08:46"
+	"lastUpdated": "2022-04-04 18:13:34"
 }
 
 /*
@@ -37,12 +37,15 @@
 
 
 const pdfSlugRe = /\/files(\/[^/]+\/[^/]+)/;
+const preprintType = ZU.fieldIsValidForType('title', 'preprint')
+	? 'preprint'
+	: 'report';
 
 function detectWeb(doc, url) {
 	if (doc.querySelector('meta[name="citation_title"]')
 		|| (pdfSlugRe.test(url) && url.endsWith('.pdf'))) {
 		if (url.includes('/papers/')) {
-			return "report";
+			return preprintType;
 		}
 		else if (url.includes('/books-and-chapters/')) {
 			if (url.match(/\/books-and-chapters\/[^/]+\/[^/]+/)) {
@@ -139,9 +142,24 @@ function scrapeWithBib(doc, url, bibURL) {
 			// we don't want to blindly skip when itemType != detected, because
 			// detectWeb might make mistakes.
 			let detected = detectWeb(doc, url);
+
 			if ((item.itemType == 'book' && detected == 'bookSection')
 				|| (item.itemType == 'bookSection' && detected == 'book')) {
 				return;
+			}
+
+			if (item.itemType == 'report' && detected == 'preprint') {
+				item.itemType = 'preprint';
+				item.archiveID = item.reportNumber;
+				delete item.reportNumber;
+			}
+
+			if (item.itemType == 'book' && item.publisher.includes(', volume ')) {
+				let [series, vol, issue] = item.publisher.split(', ');
+				delete item.publisher;
+				item.series = series;
+				item.volume = vol.replace(/^volume\b/, '');
+				item.seriesNumber = issue.replace(/^issue\b/, '');
 			}
 			
 			var pdfURL = attr(doc, 'meta[name="citation_pdf_url"]', 'content');
@@ -182,7 +200,7 @@ var testCases = [
 		"url": "https://www.nber.org/papers/w17577",
 		"items": [
 			{
-				"itemType": "report",
+				"itemType": "preprint",
 				"title": "The Dynamics of Firm Lobbying",
 				"creators": [
 					{
@@ -202,13 +220,15 @@ var testCases = [
 					}
 				],
 				"date": "2011-11",
+				"DOI": "10.3386/w17577",
 				"abstractNote": "We study the determinants of the dynamics of firm lobbying behavior using a panel data set covering 1998-2006. Our data exhibit three striking facts: (i) few firms lobby, (ii) lobbying status is strongly associated with firm size, and (iii) lobbying status is highly persistent over time. Estimating a model of a firm's decision to engage in lobbying, we find significant evidence that up-front costs associated with entering the political process help explain all three facts. We then exploit a natural experiment in the expiration in legislation surrounding the H-1B visa cap for high-skilled immigrant workers to study how these costs affect firms' responses to policy changes. We find that companies primarily adjusted on the intensive margin: the firms that began to lobby for immigration were those who were sensitive to H-1B policy changes and who were already advocating for other issues, rather than firms that became involved in lobbying anew. For a firm already lobbying, the response is determined by the importance of the issue to the firm's business rather than the scale of the firm's prior lobbying efforts. These results support the existence of significant barriers to entry in the lobbying process.",
+				"archiveID": "17577",
 				"extra": "DOI: 10.3386/w17577",
-				"institution": "National Bureau of Economic Research",
+				"genre": "Working Paper",
 				"itemID": "NBERw17577",
 				"libraryCatalog": "National Bureau of Economic Research",
-				"reportNumber": "17577",
-				"reportType": "Working Paper",
+				"repository": "National Bureau of Economic Research",
+				"series": "Working Paper Series",
 				"url": "https://www.nber.org/papers/w17577",
 				"attachments": [
 					{
@@ -250,6 +270,7 @@ var testCases = [
 				"bookTitle": "Economics of Research and Innovation in Agriculture",
 				"itemID": "NBERc14291",
 				"libraryCatalog": "National Bureau of Economic Research",
+				"pages": "1-19",
 				"publisher": "University of Chicago Press",
 				"url": "https://www.nber.org/books-and-chapters/economics-research-and-innovation-agriculture/introduction-economics-research-and-innovation-agriculture",
 				"attachments": [
@@ -283,12 +304,14 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "2020",
+				"date": "2021",
 				"itemID": "NBERclar-12",
 				"libraryCatalog": "National Bureau of Economic Research",
-				"publisher": "Journal of Pension Economics and Finance (Cambridge University Press)",
+				"series": "Journal of Pension Economics and Finance",
+				"seriesNumber": "special issue 3",
 				"shortTitle": "Incentives and Limitations of Employment Policies on Retirement Transitions",
 				"url": "https://www.nber.org/books-and-chapters/incentives-and-limitations-employment-policies-retirement-transitions-comparisons-public-and-private",
+				"volume": "20",
 				"attachments": [
 					{
 						"url": "",
@@ -304,7 +327,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www2.nber.org/chapters/c14291",
+		"url": "https://www.nber.org/books-and-chapters/economics-research-and-innovation-agriculture/introduction-economics-research-and-innovation-agriculture",
 		"items": [
 			{
 				"itemType": "bookSection",
@@ -320,10 +343,12 @@ var testCases = [
 				"bookTitle": "Economics of Research and Innovation in Agriculture",
 				"itemID": "NBERc14291",
 				"libraryCatalog": "National Bureau of Economic Research",
+				"pages": "1-19",
 				"publisher": "University of Chicago Press",
-				"url": "http://www.nber.org/chapters/c14291",
+				"url": "https://www.nber.org/books-and-chapters/economics-research-and-innovation-agriculture/introduction-economics-research-and-innovation-agriculture",
 				"attachments": [
 					{
+						"url": "",
 						"title": "Full Text PDF",
 						"mimeType": "application/pdf"
 					}
