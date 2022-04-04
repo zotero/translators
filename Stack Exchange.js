@@ -2,7 +2,7 @@
 	"translatorID": "26ecfee6-535d-4044-89a8-fbda31883642",
 	"label": "Stack Exchange",
 	"creator": "Abe Jellinek",
-	"target": "^https://([^/]+\\.)?(((stack(overflow|exchange)|serverfault|askubuntu)\\.com)|mathoverflow\\.net|superuser\\.com|stackapps\\.com)/",
+	"target": "^https://([^/]+\\.)?(((stack(overflow|exchange)|serverfault|askubuntu|superuser|stackapps)\\.com)|mathoverflow\\.net)/",
 	"minVersion": "5.0",
 	"maxVersion": "",
 	"priority": 100,
