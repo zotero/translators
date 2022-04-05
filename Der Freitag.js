@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-05 19:08:57"
+	"lastUpdated": "2022-04-05 19:45:28"
 }
 
 /*
@@ -38,9 +38,10 @@
 
 let articleDataTagSelector = 'script.qa-structured-data[type="application/ld+json"]';
 
-function detectWeb(doc, url) {
-	if (doc.querySelector(articleDataTagSelector) &&
-		JSON.parse(text(doc, articleDataTagSelector))['@type'] == 'NewsArticle') {
+function detectWeb(doc) {
+	if (doc.querySelector(articleDataTagSelector)
+		&& JSON.parse(text(doc, articleDataTagSelector))['@type'] == 'NewsArticle'
+	) {
 		return "newspaperArticle";
 	}
 	else if (getSearchResults(doc, true)) {
@@ -50,7 +51,7 @@ function detectWeb(doc, url) {
 }
 
 function doWeb(doc, url) {
-   if (detectWeb(doc, url) == "multiple") {
+	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
 			if (items) ZU.processDocuments(Object.keys(items), scrape);
 		});
@@ -88,7 +89,7 @@ function scrape(doc, url) {
 		item.publicationTitle = 'Der Freitag';
 		
 		if (!Array.isArray(json.author)) {
-			json.author = [json.author]
+			json.author = [json.author];
 		}
 		item.creators = [];
 		item.creators.push(...cleanAuthorObjects(json.author));
@@ -101,7 +102,7 @@ function scrape(doc, url) {
 		
 		let tags = doc.querySelectorAll(".qa-tags-container .qa-tags-item");
 		
-		tags.forEach(function(node) {
+		tags.forEach(function (node) {
 			item.tags.push(node.textContent.trim());
 		});
 
@@ -123,7 +124,8 @@ function cleanAuthorObjects(authors) {
 			for (let oneAuthor of author.name.split(',')) {
 				creators.push(ZU.cleanAuthor(oneAuthor, 'author'));
 			}
-		} else {
+		}
+		else {
 			creators.push(ZU.cleanAuthor(author.name, 'author'));
 		}
 	}
