@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-03-21 12:00:00"
+	"lastUpdated": "2022-04-07 10:00:00"
 }
 
 /*
@@ -1410,6 +1410,27 @@ let turndownService = new TurndownService({
 
 turndownService.use(turndownPluginGfm.gfm);
 
+// https://github.com/mixmark-io/turndown/issues/291
+turndownService.addRule('listItem', {
+	filter: 'li',
+	replacement: function (content, node, options) {
+		content = content
+		.replace(/^\n+/, '') // remove leading newlines
+		 .replace(/\n+$/, '\n') // replace trailing newlines with just a single one
+		 .replace(/\n/gm, '\n    '); // indent
+		var prefix = options.bulletListMarker + ' ';
+		var parent = node.parentNode;
+		if (parent.nodeName === 'OL') {
+			var start = parent.getAttribute('start');
+			var index = Array.prototype.indexOf.call(parent.children, node);
+			prefix = (start ? Number(start) + index : index + 1) + '. ';
+		}
+		return (
+			prefix + content + (node.nextSibling && !/\n$/.test(content) ? '\n' : '')
+		);
+	}
+});
+
 function convert(doc) {
 	// Transform `style="text-decoration: line-through"` nodes to <s> (TinyMCE doesn't support <s>)
 	doc.querySelectorAll('span').forEach(function (span) {
@@ -1522,7 +1543,11 @@ function convert(doc) {
 		}
 	});
 
-	return turndownService.turndown(doc.body);
+	let text = turndownService.turndown(doc.body);
+
+	// Remove lines with just two spaces which happens for `<p><br>test</p>`
+	text = text.split('\n').filter((line) => line !== '  ').join('\n');
+	return text;
 }
 
 bundle = { convert };
