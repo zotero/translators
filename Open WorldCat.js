@@ -8,8 +8,8 @@
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 12,
-	"browserSupport": "gcsbv",
-	"lastUpdated": "2021-11-05 18:35:52"
+	"browserSupport": "gcsibv",
+	"lastUpdated": "2022-04-08 16:37:11"
 }
 
 /**
@@ -207,7 +207,7 @@ function scrape(ids, data) {
 function doWeb(doc, url) {
 	var results = getSearchResults(doc);
 	if (results.length) {
-		var items = {}, itemData = {};
+		var items = [], itemData = [];
 		for (let i = 0, n = results.length; i < n; i++) {
 			var title = getTitleNode(results[i]);
 			if (!title || !title.href) continue;
@@ -217,7 +217,8 @@ function doWeb(doc, url) {
 				Zotero.debug("WorldCat: Failed to extract OCLC ID from URL: " + url);
 				continue;
 			}
-			items[oclcID] = title.textContent;
+
+			items.push(title.textContent);
 			
 			var notes = ZU.xpath(results[i], './div[@class="description" and ./strong[contains(text(), "Notes")]]');
 			if (!notes.length) {
@@ -229,19 +230,23 @@ function doWeb(doc, url) {
 					.replace(/^<strong>\s*Notes:\s*<\/strong>\s*<br>\s*/i, '');
 				
 				if (notes) {
-					itemData[oclcID] = {
+					itemData.push({
+						oclcID,
 						notes: ZU.unescapeHTML(ZU.unescapeHTML(notes)) // it's double-escaped on WorldCat
-					};
+					});
+					continue;
 				}
 			}
+
+			itemData.push({ oclcID });
 		}
 
-		Zotero.selectItems(items, function (items) {
+		Zotero.selectItems({ ...items }, function (items) {
 			if (!items) return;
 			
 			var ids = [], data = [];
 			for (var i in items) {
-				ids.push(i);
+				ids.push(itemData[i].oclcID);
 				data.push(itemData[i]);
 			}
 			
