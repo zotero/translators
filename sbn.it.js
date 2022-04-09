@@ -1,15 +1,15 @@
 {
 	"translatorID": "4c272290-7ac4-433e-862d-244884ed285a",
 	"label": "sbn.it",
-	"creator": "Philipp Zumstein",
-	"target": "^https?://(www|opac)\\.sbn\\.it/opacsbn/opaclib",
+	"creator": "Philipp Zumstein, Dorian Soru",
+	"target": "^https?:\\/\\/(www|opac)\\.sbn\\.it\\/(web\\/)?(opacsbn\\/)?risultati-ricerca-avanzata",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2019-12-27 16:51:43"
+	"lastUpdated": "2022-03-25 05:46:32"
 }
 
 /*
@@ -35,8 +35,13 @@
 	***** END LICENSE BLOCK *****
 */
 
+// A regex to get the id of the single resource
+var regexId = /detail[/]([^?]*)/;
+// The first part of the url for a single resource
+var detailUrl = "/risultati-ricerca-avanzata/-/opac-adv/detail/";
+
 var typeMapping = {
-	"testo a stampa": "book",
+	testo: "book",
 	// "musica a stampa" ,
 	"documento da proiettare o video": "videoRecording",
 	"registrazione sonora": "audioRecording",
@@ -51,67 +56,130 @@ var typeMapping = {
 	// "documento cartografico manoscritto"
 };
 
-function detectWeb(doc, url) {
-	if (url.includes("full.jsp")) {
-		var type = ZU.xpathText(doc, '//tr[ td[contains(text(), "Tipo documento")] ]/td[contains(@class,"detail_value")]');
-		// Z.debug(type.trim());
-		return typeMapping[type.trim().toLowerCase()] || "book";
+// Used when "Visualizza tutti" or "Visualizza selezionati" button is pressed:
+// A single item per page but pages change dynamically with scrolling
+function getDetailedResults(doc, url, checkOnly) {
+	// Detailed results
+	var parser = new DOMParser();
+	var innerdoc = parser.parseFromString(doc.documentElement.outerHTML, "text/html");
+	var results = ZU.xpath(innerdoc, '//div[@data-to-post-item]/@data-to-post-item');
+	if (checkOnly) {
+		return results.length > 0;
 	}
-	else if (getSearchResults(doc, true)) {
-		return "multiple";
-	}
-	return false;
-}
-
-function getSearchResults(doc, checkOnly) {
 	var items = {};
-	var found = false;
-	var rows = ZU.xpath(doc, '//li[contains(@class, "element")]//div[contains(@class, "content")]/strong/a');
-	for (var i = 0; i < rows.length; i++) {
-		var href = rows[i].href;
-		var title = ZU.trimInternal(rows[i].textContent);
-		if (!href || !title) continue;
-		if (checkOnly) return true;
-		found = true;
+	for (var i = 0; i < results.length; i++) {
+		var href = detailUrl + JSON.parse(results[i].value).id;
+		var title = JSON.parse(results[i].value).title;
 		items[href] = title;
 	}
-	return found ? items : false;
+	return items;
 }
 
+// Get multiple results. The page is updated dynamically
+function getSearchResults(doc, checkOnly) {
+	var parser = new DOMParser();
+	var innerdoc = parser.parseFromString(doc.documentElement.outerHTML, "text/html");
+	var results = ZU.xpath(innerdoc, "//input[@data-to-post-item]/@data-to-post-item");
+	
+	if (checkOnly) {
+		return results.length > 0;
+	}
+	var items = {};
+	for (var i = 0; i < results.length; i++) {
+		var href = detailUrl + JSON.parse(results[i].value).id;
+		var title = JSON.parse(results[i].value).title.info;
+		items[href] = title;
+	}
+	return items;
+}
+
+// See the commments on detectWeb
+// Get the type for a single item
+/*function getType(url) {
+	return new Promise((resolve) => {
+		var id = url.match(regexId)[1];
+		var jsonURL = '/o/opac-api/title?id=' + id + '&core=sbn&page=1';
+		ZU.doGet(jsonURL, function (text) {
+			var json = JSON.parse(text);
+			var type = json.data.contents[0].body[1][1].value;
+			resolve(typeMapping[type.trim().toLowerCase()] || "book");
+		});
+	});
+}*/
+
+/*async */function detectWeb(doc, url) {
+	if (url.includes("detail")) {
+		// Doesn't wait for getType, so it returns a generic single type
+		/*var type = await getType(url);
+		return type;*/
+		return typeMapping.testo;
+	} else {
+		return "multiple";
+	}
+}
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
-		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return;
+	var type = detectWeb(doc, url);
+	var results;
+	if (type == "multiple") {
+		//Detailed view
+		if (url.includes("opac-adv/all")) {
+			var result = getDetailedResults(doc, url, true);
+			if (result) {
+				results = getDetailedResults(doc, url, false);
+				Zotero.selectItems(results, function (items) {
+					if (!items) {
+						return;
+					}
+					var ids = [];
+					for (var i in items) {
+						ids.push(i);
+					}
+					ZU.processDocuments(ids, scrape);
+				});
 			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
+		} else {
+			result = getSearchResults(doc, true);
+			if (result) {
+				results = getSearchResults(doc, false);
+				Zotero.selectItems(results, function (items) {
+					if (!items) {
+						return;
+					}
+					var ids = [];
+					for (var i in items) {
+						ids.push(i);
+					}
+					ZU.processDocuments(ids, scrape);
+				});
 			}
-			ZU.processDocuments(articles, scrape);
-		});
-	}
-	else {
+		}
+	} else {
 		scrape(doc, url);
 	}
 }
 
 function scrape(doc, _url) {
-	var urlMarc = ZU.xpathText(doc, '(//a[contains(@title, "Scarico Marc21 del record") or contains(@title, "Download Marc21 record")]/@href)[1]');
-	// Z.debug(urlMarc);
-	ZU.doGet(urlMarc, function (text) {
-		// call MARC translator
-		var translator = Zotero.loadTranslator("import");
-		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-		translator.setString(text);
-		translator.translate();
+	var id = _url.match(regexId)[1];
+	var jsonURL = '/o/opac-api/title?id=' + id + '&core=sbn&page=1';
+	ZU.doGet(jsonURL, function (text) {
+		var json = JSON.parse(text);
+		var idMarc = json.data.links.top[0].id;
+		var urlMarc = "/c/opac/marc21/export?id=" + idMarc;
+
+		ZU.doGet(urlMarc, function (text) {
+			// call MARC translator
+			var translator = Zotero.loadTranslator("import");
+			translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+			translator.setString(text);
+			translator.translate();
+		});
 	});
 }/** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
-		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&saveparams=false&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ffree.jsp&y=0&do_cmd=search_show_cmd&x=0&nentries=1&rpnlabel=+Tutti+i+campi+%3D+zotero+%28parole+in+AND%29+&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1016%2B%2540attr%2B4%253D6%2B%2522zotero%2522&&fname=none&from=1",
+		"url": "https://opac.sbn.it/risultati-ricerca-avanzata/-/opac-adv/detail/ITICCUMOD1595512",
 		"items": [
 			{
 				"itemType": "book",
@@ -140,46 +208,12 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "http://opac.sbn.it/opacsbn/opaclib?db=solr_iccu&rpnquery=%2540attrset%2Bbib-1%2B%2B%2540attr%2B1%253D1032%2B%2540attr%2B4%253D2%2B%2522VEA0102960%2522&totalResult=1&select_db=solr_iccu&nentries=1&rpnlabel=BID%3DVEA0102960&resultForward=opac%2Ficcu%2Ffull.jsp&searchForm=opac%2Ficcu%2Ferror.jsp&do_cmd=show_cmd&saveparams=false&&fname=none&from=1",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "La qualità: un impegno per le biblioteche: atti delle quarte giornate di studio del Cnba, Torino 22-24 maggio 1997",
-				"creators": [
-					{
-						"lastName": "Coordinamento nazionale delle biblioteche di architettura",
-						"creatorType": "author",
-						"fieldMode": true
-					},
-					{
-						"firstName": "Ezio",
-						"lastName": "Tarantino",
-						"creatorType": "editor"
-					},
-					{
-						"firstName": "Giovanna",
-						"lastName": "Terranova",
-						"creatorType": "editor"
-					}
-				],
-				"date": "1998",
-				"callNumber": "026.72",
-				"language": "ita",
-				"libraryCatalog": "sbn.it",
-				"numPages": "158",
-				"place": "Roma",
-				"publisher": "CNBA Coordinamento nazionale biblioteche di architettura",
-				"shortTitle": "La qualità",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"url": "https://opac.sbn.it/risultati-ricerca-avanzata/-/opac-adv/all?fieldstruct%5B1%5D=ricerca.parole_tutte%3A4%3D6&fieldvalue%5B1%5D=sant%27agostino&fieldaccess%5B1%5D=Any%3A1016%3Anocheck&struct%3A1001=ricerca.parole_almeno_una%3A%40or%40",
+		"items": "multiple"
 	},
 	{
 		"type": "web",
-		"url": "http://www.sbn.it/opacsbn/opaclib?db=solr_iccu&select_db=solr_iccu&nentries=10&from=1&searchForm=opac/iccu/error.jsp&resultForward=opac/iccu/brief.jsp&do_cmd=show_cmd&rpnlabel=+Any+%3D+google+%28words+in+AND%29+&rpnquery=%40attrset+bib-1++%40attr+1%3D1016+%40attr+4%3D6+%22google%22&totalResult=186",
+		"url": "https://opac.sbn.it/risultati-ricerca-avanzata?fieldstruct%5B1%5D=ricerca.parole_tutte%3A4%3D6&struct%3A1001=ricerca.parole_almeno_una%3A%40or%40&fieldvalue%5B1%5D=sant%27agostino&fieldaccess%5B1%5D=Any%3A1016%3Anocheck",
 		"items": "multiple"
 	}
 ]
