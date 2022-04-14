@@ -142,6 +142,15 @@ function parseAbstract(doc, item) {
 }
 
 
+function fixMonthRangeDate(datestring) {
+    // Remove months for cases like juillet-décembre 2021
+    monthRange = /\b[^\d]+\b-\b[^\d]+\b\s+(\d{4})/;
+    if (datestring && datestring.match(monthRange))
+        return datestring.replace(monthRange, '$1');
+    return datestring;
+}
+
+
 function scrape(doc, url) {
 	var item = new Z.Item('journalArticle');
 
@@ -182,6 +191,7 @@ function scrape(doc, url) {
 	// numbering issues with slash due to cataloguing rule
 	if (item.issue) item.issue = item.issue.replace('-', '/');
 	item.date = ZU.xpathText(doc, '//b[contains(text(), "Date:")]/following-sibling::text()[1]');
+	if (item.date) item.date = fixMonthRangeDate(item.date);
 	item.pages = ZU.xpathText(doc, '//b[contains(text(), "Pages:")]/following-sibling::text()[1]');
 	item.DOI = ZU.xpathText(doc, '//b[contains(text(), "DOI:")]/following-sibling::text()[1]');
 	item.url = url;
