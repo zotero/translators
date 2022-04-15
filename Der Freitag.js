@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-10 21:04:56"
+	"lastUpdated": "2022-04-15 16:29:59"
 }
 
 /*
@@ -39,11 +39,10 @@
 let articleDataTagSelector = 'script.qa-structured-data[type="application/ld+json"]';
 
 function detectWeb(doc) {
-	if (doc.querySelector(articleDataTagSelector))
-	{
+	if (doc.querySelector(articleDataTagSelector)) {
 		let type = JSON.parse(text(doc, articleDataTagSelector))['@type'];
 		if (type == 'NewsArticle'
-			|| (Array.isArray(type) && type.indexOf('NewsArticle') > -1)
+			|| (Array.isArray(type) && type.includes('NewsArticle'))
 		) {
 			return "newspaperArticle";
 		}
@@ -105,8 +104,7 @@ function scrape(doc, url) {
 		 * since dateModified can sometimes be behind datePublished.
 		 */
 		let date = json.dateModified;
-		if (date == null || (json.datePublished && json.datePublished > date))
-		{
+		if (date === null || (json.datePublished && json.datePublished > date)) {
 			date = json.datePublished;
 		}
 		item.date = date;
