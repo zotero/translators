@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-05 19:45:28"
+	"lastUpdated": "2022-04-10 21:04:56"
 }
 
 /*
@@ -39,10 +39,14 @@
 let articleDataTagSelector = 'script.qa-structured-data[type="application/ld+json"]';
 
 function detectWeb(doc) {
-	if (doc.querySelector(articleDataTagSelector)
-		&& JSON.parse(text(doc, articleDataTagSelector))['@type'] == 'NewsArticle'
-	) {
-		return "newspaperArticle";
+	if (doc.querySelector(articleDataTagSelector))
+	{
+		let type = JSON.parse(text(doc, articleDataTagSelector))['@type'];
+		if (type == 'NewsArticle'
+			|| (Array.isArray(type) && type.indexOf('NewsArticle') > -1)
+		) {
+			return "newspaperArticle";
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -96,7 +100,16 @@ function scrape(doc, url) {
 
 		// First li is the home page, second the divider, third the section.
 		item.section = text(doc, 'section ul li:nth-child(3) a span');
-		item.date = json.dateModified || json.datePublished;
+		
+		/* Identify the latest date manually
+		 * since dateModified can sometimes be behind datePublished.
+		 */
+		let date = json.dateModified;
+		if (date == null || (json.datePublished && json.datePublished > date))
+		{
+			date = json.datePublished;
+		}
+		item.date = date;
 		
 		item.tags = [];
 		
@@ -175,6 +188,46 @@ var testCases = [
 					"piraten",
 					"sigmar gabriel",
 					"spd"
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.freitag.de/autoren/der-freitag/corona-klima-kriege-lauterbach-will-den-nostand-fuer-immer",
+		"items": [
+			{
+				"itemType": "newspaperArticle",
+				"title": "Lauterbachs Fantasien vom permanenten Ausnahmezustand",
+				"creators": [
+					{
+						"firstName": "Velten",
+						"lastName": "Schäfer",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-04-09T04:00:00+02:00",
+				"ISSN": "0945-2095",
+				"abstractNote": "Wir werden ab jetzt für immer mit Freiheitsbeschneidungen à la Corona leben, sagt Karl Lauterbach. Auch die Linke hat Sehnsucht nach einer starken Hand. Ein dringlicher Weckruf",
+				"language": "de",
+				"libraryCatalog": "Der Freitag",
+				"publicationTitle": "Der Freitag",
+				"section": "Debatte",
+				"url": "https://www.freitag.de/autoren/der-freitag/corona-klima-kriege-lauterbach-will-den-nostand-fuer-immer",
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					"klimawandel",
+					"lauterbach",
+					"ausnahmezustand",
+					"corona",
+					"freiheitsrechte"
 				],
 				"notes": [],
 				"seeAlso": []
