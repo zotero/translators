@@ -1,7 +1,7 @@
 {
 	"translatorID": "5c95b67b-41c5-4f55-b71a-48d5d7183063",
 	"label": "CNKI",
-	"creator": "Aurimas Vinckevicius, Xingzhong Lin",
+	"creator": "Aurimas Vinckevicius, Xingzhong Lin, 018",
 	"target": "^https?://([^/]+\\.)?cnki\\.net",
 	"minVersion": "3.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcs",
-	"lastUpdated": "2019-12-05 08:10:19"
+	"lastUpdated": "2021-06-24 03:23:17"
 }
 
 /*
@@ -40,7 +40,7 @@
 // ids should be in the form [{dbname: "CDFDLAST2013", filename: "1013102302.nh"}]
 function getRefWorksByID(ids, onDataAvailable) {
 	if (!ids.length) return;
-	var { dbname, filename } = ids.shift();
+	var { dbname, filename, queryID, curRec } = ids.shift();
 	var postData = "formfilenames=" + encodeURIComponent(dbname + "!" + filename + "!1!0,")
 		+ '&hid_kLogin_headerUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
 		+ '&hid_KLogin_FooterUrl=/KLogin/Request/GetKHeader.ashx%3Fcallback%3D%3F'
@@ -60,7 +60,7 @@ function getRefWorksByID(ids, onDataAvailable) {
 						return tag + ' ' + authors.join('\n' + tag + ' ');
 					}
 				);
-			onDataAvailable(data);
+			onDataAvailable({dbname, filename, queryID, curRec}, data);
 			// If more results, keep going
 			if (ids.length) {
 				getRefWorksByID(ids, onDataAvailable);
@@ -71,12 +71,13 @@ function getRefWorksByID(ids, onDataAvailable) {
 
 function getIDFromURL(url) {
 	if (!url) return false;
-	
 	var dbname = url.match(/[?&]dbname=([^&#]*)/i);
 	var filename = url.match(/[?&]filename=([^&#]*)/i);
+	var queryID = url.match(/[?&]queryid=([^&#]*)/i);
+	var curRec = url.match(/[?&]currec=([^&#]*)/i);
 	if (!dbname || !dbname[1] || !filename || !filename[1]) return false;
 	
-	return { dbname: dbname[1], filename: filename[1], url: url };
+	return { dbname: dbname[1], filename: filename[1], curRec: curRec ? curRec[1] : '', queryID: queryID ? queryID[1] : '', url: url };
 }
 
 
@@ -136,6 +137,10 @@ function getItemsFromSearchResults(doc, url, itemInfo) {
 	}
 
 	if (!links.length) {
+		if (url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
+			return { '': '【提醒：不存在条目。】' };
+		}
+		
 		return false;
 	}
 	var items = {};
@@ -164,10 +169,11 @@ function detectWeb(doc, url) {
 	// Z.debug(doc);
 	var id = getIDFromPage(doc, url);
 	var items = getItemsFromSearchResults(doc, url);
+	
 	if (id) {
 		return getTypeFromDBName(id.dbname);
 	}
-	else if (items) {
+	else if (items || url.match(/(kns8|KNS8)\/(defaultresult|AdvSearch)/i)) {
 		return "multiple";
 	}
 	else {
@@ -185,9 +191,11 @@ function doWeb(doc, url) {
 			var itemInfoByTitle = {};
 			var ids = [];
 			for (var url in selectedItems) {
-				ids.push(itemInfo[url].id);
-				itemInfoByTitle[selectedItems[url]] = itemInfo[url];
-				itemInfoByTitle[selectedItems[url]].url = url;
+				if (url && url.length > 0) {
+					ids.push(itemInfo[url].id);
+					itemInfoByTitle[selectedItems[url]] = itemInfo[url];
+					itemInfoByTitle[selectedItems[url]].url = url;
+				}
 			}
 			scrape(ids, doc, url, itemInfoByTitle);
 		});
@@ -198,7 +206,7 @@ function doWeb(doc, url) {
 }
 
 function scrape(ids, doc, url, itemInfo) {
-	getRefWorksByID(ids, function (text) {
+	getRefWorksByID(ids, function ({dbname, filename, queryID, curRec}, text) {
 		var translator = Z.loadTranslator('import');
 		translator.setTranslator('1a3506da-a303-4b0a-a1cd-f216e6138d86'); // RefWorks Tagged
 		text = text.replace(/IS (\d+)\nvo/, "IS $1\nVO");
@@ -217,7 +225,8 @@ function scrape(ids, doc, url, itemInfo) {
 					creator.lastName = creator.lastName.substr(lastSpace + 1);
 				}
 				else {
-					// Chinese name. first character is last name, the rest are first name
+					creator.firstName = '';
+					// Chinese name: first character is last name, the rest are first name (ignoring compound last names which are rare)
 					creator.firstName = creator.lastName.substr(1);
 					creator.lastName = creator.lastName.charAt(0);
 				}
@@ -245,12 +254,10 @@ function scrape(ids, doc, url, itemInfo) {
 			else {
 				newItem.url = url;
 			}
-
 			// CN 中国刊物编号，非refworks中的callNumber
 			// CN in CNKI refworks format explains Chinese version of ISSN
 			if (newItem.callNumber) {
-			//	newItem.extra = 'CN ' + newItem.callNumber;
-				newItem.callNumber = "";
+				newItem.extra = 'CN ' + newItem.callNumber;
 			}
 			// don't download PDF/CAJ on searchResult(multiple)
 			var webType = detectWeb(doc, url);
@@ -451,59 +458,6 @@ var testCases = [
 					},
 					{
 						"tag": "黄瓜"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
-		"items": [
-			{
-				"itemType": "thesis",
-				"title": "商业银行个人住房不良资产证券化多元回归定价方法研究",
-				"creators": [
-					{
-						"lastName": "张",
-						"firstName": "雪",
-						"creatorType": "author"
-					}
-				],
-				"date": "2019",
-				"abstractNote": "不良资产证券化是一种新型的不良资产处置方式,其拓宽了商业银行处理不良资产的手段,特别适用于单户金额小、户数多的个人不良资产批量处置,而且这种市场化处置方式将银行不良资产处置和资本市场证券产品发行两个不同领域联接在一起,提高了不良资产的价值。本文以个人住房不良资产证券化为研究对象,确定资产池内不良资产未来回收价值。综合对比市场常用的定价方法,在此基础上提出建立多元回归定价模型的思路。利用YN银行个人住房不良贷款历史数据,分析得出影响不良资产定价的因素,建立定价方程,并对拟证券化的虚拟资产池计算整体回收价值,证明多元回归定价模型的有效性。本文提出的定价模型规避了传统资产定价方法效率低、评估结果不严...",
-				"language": "中文;",
-				"libraryCatalog": "CNKI",
-				"thesisType": "硕士",
-				"university": "浙江大学",
-				"url": "http://new.gb.oversea.cnki.net/KCMS/detail/detail.aspx?dbcode=CMFD&dbname=CMFDTEMP&filename=1019926131.nh&v=MTA5MjM2RjdxNkdORFBycEViUElSOGVYMUx1eFlTN0RoMVQzcVRyV00xRnJDVVJMT2VadVJxRnkzblY3dkJWRjI=",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Asset pool pricing"
-					},
-					{
-						"tag": "Multiple regression pricing model"
-					},
-					{
-						"tag": "Non-performing asset securitization"
-					},
-					{
-						"tag": "Personal housing loan"
-					},
-					{
-						"tag": "不良资产证券化"
-					},
-					{
-						"tag": "个人住房贷款"
-					},
-					{
-						"tag": "多元回归定价模型"
-					},
-					{
-						"tag": "资产池定价"
 					}
 				],
 				"notes": [],
