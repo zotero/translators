@@ -16,7 +16,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-04-21 00:23:36"
+	"lastUpdated": "2022-04-21 18:48:27"
 }
 
 var addedCollections = new Set();
@@ -130,12 +130,61 @@ function getDisplayTitle(item) {
 }
 
 function replaceURIsInNote(note) {
-	// We could use a DOMParser here, but this works fine
-	return note.replace(/http%3A%2F%2Fzotero\.org%2F(?:users%2Flocal|users|groups)%2F(?:[^%]+)%2Fitems%2F([^%]+)/g, (key) => {
-		key = decodeURIComponent(key);
-		if (!itemResources[key]) return '';
-		return `{_z_itemURI:${itemResources[key]}}`;
+	const re = /http:\/\/zotero\.org\/(?:users\/local|users|groups)\/(?:[^/]+)\/items\/(?:[^/]+)/g;
+	let replace = s => s.replace(re, (uri) => {
+		uri = decodeURIComponent(uri);
+		if (itemResources[uri]) {
+			return `{_z_itemURI:${itemResources[uri]}}`;
+		}
+		else {
+			return uri;
+		}
 	});
+
+	let process = (json) => {
+		if (json.uris) {
+			json.uris = json.uris.map(replace);
+		}
+		if (json.itemData && json.itemData.id) {
+			json.itemData.id = replace(json.itemData.id);
+		}
+		if (json.citationItem && json.citationItem.uris) {
+			json.citationItem.uris = json.citationItem.uris.map(replace);
+		}
+		if (json.citationItems) {
+			for (let item of json.citationItems) {
+				item.uris = item.uris.map(replace);
+			}
+		}
+		if (json.attachmentURI) {
+			json.attachmentURI = replace(json.attachmentURI);
+		}
+		delete json.annotationKey;
+	};
+
+	let noteDoc = new DOMParser().parseFromString('<div id="note-body">' + note + '</div>', 'text/html');
+	let attributes = ['data-citation', 'data-citation-items', 'data-annotation'];
+	for (let elem of noteDoc.querySelectorAll(attributes.map(a => `[${a}]`).join(', '))) {
+		for (let attr of attributes) {
+			if (!elem.hasAttribute(attr)) continue;
+			let value = decodeURIComponent(elem.getAttribute(attr));
+			try {
+				let json = JSON.parse(value);
+				if (Array.isArray(json)) {
+					json.forEach(process);
+				}
+				else {
+					process(json);
+				}
+				elem.setAttribute(attr, JSON.stringify(json));
+			}
+			catch (e) {
+				Zotero.debug('Skipping invalid JSON: ' + value);
+			}
+		}
+	}
+
+	return noteDoc.getElementById('note-body').innerHTML;
 }
 
 function generateItem(item, zoteroType, resource) {
