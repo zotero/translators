@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-27 05:14:40"
+	"lastUpdated": "2022-04-22 19:56:07"
 }
 
 /*
@@ -111,7 +111,7 @@ function scrape(doc, url) {
 	}
 	
 	var productCode;
-	var db = doc.getElementById('database');
+	var db = doc.getElementById('database') || doc.querySelector('doi-landing .meta span');
 	if (db) {
 		db = db.parentNode.textContent.toLowerCase();
 		if (db.includes('psycarticles')) {
@@ -218,6 +218,14 @@ function getIds(doc, url) {
 	// try to extract uid from the url
 	if (url.includes('/record/')) {
 		let m = url.match(/\/record\/([\d-]*)/);
+		if (m && m[1]) {
+			return m[1];
+		}
+	}
+
+	// DOI landing pages include a link to the /record/ page
+	if (url.includes('/doiLanding') && doc.querySelector('.title > a')) {
+		let m = attr(doc, '.title > a', 'href').match(/\/record\/([\d-]*)/);
 		if (m && m[1]) {
 			return m[1];
 		}
