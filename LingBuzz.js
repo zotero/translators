@@ -2,14 +2,14 @@
 	"translatorID": "e048e70e-8fea-43e9-ac8e-940bc3d71b0b",
 	"label": "LingBuzz",
 	"creator": "Göktuğ Kayaalp and Abe Jellinek",
-	"target": "^https://ling\\.auf\\.net/lingbuzz/(repo/semanticsArchive/article/)?(\\d+|_search)",
+	"target": "^https://(ling\\.auf|lingbuzz)\\.net/lingbuzz/(repo/semanticsArchive/article/)?(\\d+|_search)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-22 20:05:48"
+	"lastUpdated": "2022-04-22 20:09:48"
 }
 
 /*
@@ -43,7 +43,7 @@ function detectWeb(doc, url) {
 	if (url.includes("/_search") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	return "report";
+	return preprintType;
 }
 
 function getSearchResults(doc, checkOnly) {
@@ -307,6 +307,48 @@ var testCases = [
 		"type": "web",
 		"url": "https://ling.auf.net/lingbuzz/_search?q=semanticsarchive",
 		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://lingbuzz.net/lingbuzz/006559",
+		"items": [
+			{
+				"itemType": "preprint",
+				"title": "Object drop in Spanish is not island-sensitive",
+				"creators": [
+					{
+						"firstName": "Matías",
+						"lastName": "Verdecchia",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-04",
+				"abstractNote": "Campos (1986) argues that object drop in Spanish exhibits island effects. This claim has remained unchallenged up to date and is largely assumed in the literature. In this squib, I show that this characterization is not empirically correct: given a proper discourse context, null objects can easily appear within a syntactic island in Spanish. This observation constitutes a non-trivial problem for object drop analyses based on movement.",
+				"libraryCatalog": "LingBuzz",
+				"repository": "LingBuzz",
+				"url": "https://lingbuzz.net/lingbuzz/006559",
+				"attachments": [
+					{
+						"title": "LingBuzz Full Text PDF",
+						"mimeType": "application/pdf"
+					},
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
+				"tags": [
+					{
+						"tag": "object drop - islands - spanish - movement"
+					},
+					{
+						"tag": "syntax"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
 	}
 ]
 /** END TEST CASES **/
