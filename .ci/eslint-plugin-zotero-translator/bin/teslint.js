@@ -39,7 +39,10 @@ function findIgnore(file, stats) {
 	return !file.endsWith('.js');
 }
 for (const target of argv.args) {
-	if (!fs.existsSync(target)) continue;
+	if (!fs.existsSync(target)) {
+		console.error(`Target file '${target}' does not exist; skipping`); // eslint-disable-line no-console
+		continue;
+	}
 	const files = fs.lstatSync(target).isDirectory() ? find(target, [findIgnore]) : [target];
 	for (const file of files) {
 		if (path.dirname(path.resolve(file)) === translators.cache.repo) {
