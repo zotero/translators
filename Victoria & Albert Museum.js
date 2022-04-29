@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-03 16:45:24"
+	"lastUpdated": "2022-04-29 19:15:08"
 }
 
 /*
@@ -49,8 +49,8 @@ function scrape(doc, url) {
 	var id = url.match(/item\/(O[0-9]+)/i)[1];
 
 	var apiUrl = "https://api.vam.ac.uk/v2/museumobject/" + id;
-	Zotero.Utilities.doGet(apiUrl, function (text) {
-		var museumobject = JSON.parse(text);
+	Zotero.Utilities.doGet(apiUrl, function (respText) {
+		var museumobject = JSON.parse(respText);
 		var data = museumobject.record;
 		var item = new Zotero.Item("artwork");
 		if (data.titles.length > 0) {
@@ -72,7 +72,9 @@ function scrape(doc, url) {
 			item.date = data.productionDates[0].date.text;
 		}
 
-		item.archive = data.collectionCode.text;
+		let collection = text(doc, 'a[href*="/search/?id_collection="]')
+			|| data.collectionCode.text;
+		item.archive = `Victoria & Albert Museum ${collection}`;
 		item.libraryCatalog = 'Victoria & Albert Museum';
 		item.callNumber = data.accessionNumber;
 		item.rights = data.creditLine;
@@ -94,6 +96,10 @@ function scrape(doc, url) {
 			else {
 				firstName = fullName;
 			}
+
+			firstName = firstName
+				.replace('(Senior)', 'Sr.')
+				.replace('(Junior)', 'Jr.');
 
 			item.creators.push({
 				lastName: lastName,
@@ -145,17 +151,8 @@ function doWeb(doc, url) {
 			artworks[href] = title;
 		}
 		Zotero.selectItems(artworks, function (artworks) {
-			var articles = [];
-
-			if (!artworks) {
-				return true;
-			}
-			for (var i in artworks) {
-				articles.push(i);
-			}
-			Zotero.Utilities.processDocuments(articles, scrape);
-			return false;
-	    });
+			if (artworks) ZU.processDocuments(Object.keys(artworks), scrape);
+		});
 	}
 	else {
 		scrape(doc, url);
@@ -172,23 +169,26 @@ var testCases = [
 			{
 				"itemType": "artwork",
 				"title": "'Ripple' pattern",
-				"creators": [,
+				"creators": [
 					{
-						"lastName": "",
-						"creatorType": "manufacturer",
-						"firstName": "Imperial Glass Co."
-					}],
-				"date": "ca. 1914 and further dates",
-				"abstract": "Vase of glass, made by Imperial Glass Company, Ohio, c. 1914-25",
+						"lastName": "Imperial Glass Co.",
+						"fieldMode": 1,
+						"creatorType": "author"
+					}
+				],
+				"date": "ca. 1914",
+				"abstractNote": "Vase of glass, made by Imperial Glass Company, Ohio, c. 1914-25",
+				"archive": "Victoria & Albert Museum Ceramics Collection",
 				"artworkMedium": "Press moulded glass, heated",
-				"artworkSize": "",
 				"callNumber": "C.32-1992",
 				"libraryCatalog": "Victoria & Albert Museum",
+				"rights": "Given by Raymond and Michel Lerpiniere",
 				"shortTitle": "Vase",
-				"url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co",
+				"url": "https://collections.vam.ac.uk/item/O4293/ripple-pattern-vase-imperial-glass-co/",
 				"attachments": [
 					{
-						"title": "Explore the Collections (snapshot)"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -207,20 +207,22 @@ var testCases = [
 				"creators": [
 					{
 						"lastName": "Barton",
-						"creatorType": "maker",
-						"firstName": "Glenys"
-					}],
+						"firstName": " Glenys",
+						"creatorType": "author"
+					}
+				],
 				"date": "1971",
-				"abstract": "E, SP, BARTON GLENYS, 20",
+				"abstractNote": "E, SP, BARTON GLENYS, 20",
+				"archive": "Victoria & Albert Museum Ceramics Collection",
 				"artworkMedium": "Bone china, slip-cast, with silk-screened decoration",
-				"artworkSize": "",
 				"callNumber": "CIRC.277 to C-1973",
 				"libraryCatalog": "Victoria & Albert Museum",
-				"shortTitle": "Four Cubes",
+				"shortTitle": "Four cubes",
 				"url": "https://collections.vam.ac.uk/item/O19135/graphic-permutations-four-cubes-barton-glenys/",
 				"attachments": [
 					{
-						"title": "Explore the Collections (snapshot)"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -238,21 +240,25 @@ var testCases = [
 				"title": "The Garrick Bed",
 				"creators": [
 					{
-						"lastName": "Chippendale (senior)",
-						"creatorType": "maker",
-						"firstName": "Thomas"
-					}],
+						"lastName": "Chippendale",
+						"firstName": " Thomas Sr.",
+						"creatorType": "author"
+					}
+				],
 				"date": "ca. 1775",
-				"abstract": "A bed of softwood, with fluted foot columns, painted white and green. The tester is edged with carved lappets painted in green and white. The current hangings of screen printed cotton date from 2001.",
+				"abstractNote": "A bed of softwood, with fluted foot columns, painted white and green.  The tester is edged with carved lappets painted in green and white.  The current hangings of screen printed cotton date from 2001.",
+				"archive": "Victoria & Albert Museum Furniture and Woodwork Collection",
 				"artworkMedium": "Japanned (painted) beech and pine, with 20th century reproduction hangings.",
 				"artworkSize": "The bed has been reduced in width.",
 				"callNumber": "W.70-1916",
 				"libraryCatalog": "Victoria & Albert Museum",
-				"shortTitle": "The Garrick Bed",
-				"url": "https://collections.vam.ac.uk/item/O11451/the-garrick-bed-bed-chippendale-thomas-senior/"
+				"rights": "Given by H. E. Trevor, a direct descendant of David Garrick's brother, George",
+				"shortTitle": "Bed",
+				"url": "https://collections.vam.ac.uk/item/O11451/the-garrick-bed-bed-chippendale-thomas-senior/",
 				"attachments": [
 					{
-						"title": "Explore the Collections (snapshot)"
+						"title": "Snapshot",
+						"mimeType": "text/html"
 					}
 				],
 				"tags": [],
@@ -260,15 +266,12 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://collections.vam.ac.uk/search/?q=beach&year_made_from=&year_made_to=",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
-
-
-]
-
-
-]
-
-
-]
-
+/** END TEST CASES **/
