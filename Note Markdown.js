@@ -14,7 +14,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2022-04-07 10:00:00"
+	"lastUpdated": "2022-04-29 11:00:00"
 }
 
 /*
@@ -1409,6 +1409,33 @@ let turndownService = new TurndownService({
 });
 
 turndownService.use(turndownPluginGfm.gfm);
+
+// https://github.com/mixmark-io/turndown#overriding-turndownserviceprototypeescape
+let escapes = [
+	[/\\/g, '\\\\'],
+	[/\*/g, '\\*'],
+	[/^-/g, '\\-'],
+	[/^\+ /g, '\\+ '],
+	[/^(=+)/g, '\\$1'],
+	[/^(#{1,6}) /g, '\\$1 '],
+	[/`/g, '\\`'],
+	[/^~~~/g, '\\~~~'],
+	[/\[/g, '\\['],
+	[/\]/g, '\\]'],
+	[/^>/g, '\\>'],
+	// [/_/g, '\\_'],
+	[/^(\d+)\. /g, '$1\\. '],
+	// Custom corrections for the previous escapes
+	[/\\\[\\\[/g, '[['],
+	[/\\\]\\\]/g, ']]'],
+	[/\\`\\`\\`/g, '```']
+];
+
+TurndownService.prototype.escape = function (string) {
+	return escapes.reduce(function (accumulator, escape) {
+		return accumulator.replace(escape[0], escape[1])
+	}, string);
+};
 
 // https://github.com/mixmark-io/turndown/issues/291
 turndownService.addRule('listItem', {
