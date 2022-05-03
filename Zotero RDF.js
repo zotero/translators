@@ -131,60 +131,24 @@ function getDisplayTitle(item) {
 
 function replaceURIsInNote(note) {
 	const re = /http:\/\/zotero\.org\/(?:users\/local|users|groups)\/(?:[^/]+)\/items\/(?:[^/]+)/g;
-	let replace = s => s.replace(re, (uri) => {
-		uri = decodeURIComponent(uri);
-		if (itemResources[uri]) {
-			return `{_z_itemURI:${itemResources[uri]}}`;
-		}
-		else {
-			return uri;
-		}
-	});
 
-	let process = (json) => {
-		if (json.uris) {
-			json.uris = json.uris.map(replace);
-		}
-		if (json.itemData && json.itemData.id) {
-			json.itemData.id = replace(json.itemData.id);
-		}
-		if (json.citationItem && json.citationItem.uris) {
-			json.citationItem.uris = json.citationItem.uris.map(replace);
-		}
-		if (json.citationItems) {
-			for (let item of json.citationItems) {
-				item.uris = item.uris.map(replace);
-			}
-		}
-		if (json.attachmentURI) {
-			json.attachmentURI = replace(json.attachmentURI);
-		}
-		delete json.annotationKey;
-	};
-
-	let noteDoc = new DOMParser().parseFromString('<div id="note-body">' + note + '</div>', 'text/html');
-	let attributes = ['data-citation', 'data-citation-items', 'data-annotation'];
-	for (let elem of noteDoc.querySelectorAll(attributes.map(a => `[${a}]`).join(', '))) {
-		for (let attr of attributes) {
-			if (!elem.hasAttribute(attr)) continue;
-			let value = decodeURIComponent(elem.getAttribute(attr));
-			try {
-				let json = JSON.parse(value);
-				if (Array.isArray(json)) {
-					json.forEach(process);
+	return Zotero.Utilities.walkNoteDOM(note, {
+		visitURI(s) {
+			return s.replace(re, (uri) => {
+				uri = decodeURIComponent(uri);
+				if (itemResources[uri]) {
+					return `{_z_itemURI:${itemResources[uri]}}`;
 				}
 				else {
-					process(json);
+					return uri;
 				}
-				elem.setAttribute(attr, JSON.stringify(json));
-			}
-			catch (e) {
-				Zotero.debug('Skipping invalid JSON: ' + value);
-			}
-		}
-	}
+			});
+		},
 
-	return noteDoc.getElementById('note-body').innerHTML;
+		visitDataAttribute(_, json) {
+			delete json.annotationKey;
+		}
+	});
 }
 
 function generateItem(item, zoteroType, resource) {
