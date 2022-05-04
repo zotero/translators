@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-22 20:09:48"
+	"lastUpdated": "2022-05-04 00:58:07"
 }
 
 /*
@@ -105,6 +105,9 @@ function scrape(doc, url) {
 		}
 		else if (fieldName.includes("keywords")) {
 			newItem.tags.push(...right.innerText.split(/[;,] /));
+		}
+		else if (fieldName.includes("published in")) {
+			newItem.extra = (newItem.extra || '') + 'LingBuzz Published In: ' + right.innerText + '\n';
 		}
 	}
 
