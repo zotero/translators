@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-04 00:58:07"
+	"lastUpdated": "2022-05-04 01:00:37"
 }
 
 /*
@@ -189,6 +189,7 @@ var testCases = [
 				],
 				"date": "2021-05",
 				"abstractNote": "We provide novel evidence in favor of the proposal by Hamlaoui and Szendrői (2015, 2017), who argue for a flexible mapping between an Intonational Phrase (ɩ) and syntactic constituents. According to them, ɩ corresponds to the highest projection that hosts verbal material, together with its specifier. The prediction is that the size of ɩ co-varies with the height of the verb, if the latter is variable. Our evidence comes from Iron Ossetic (East Iranian), a language with multiple projections available for verb raising, depending on context. The flexible ɩ-mapping approach – but not more rigid approaches to ɩ-formation – can account for the properties of ɩ-formation in Iron Ossetic. This applies to the prosody of utterances that contain negative indefinites, narrow foci, and single wh-phrases. More complex wh-questions (those with multiple wh-phrases and/or negative indefinites) provide evidence that syntax-based flexible ɩ-mapping approach interacts with language-specific eurhythmic constraints. The Iron Ossetic facts, therefore, provide support for the flexible ɩ-mapping approach, which has not been tested until now on languages of this type.",
+				"extra": "LingBuzz Published In: Proceedings of NELS 51",
 				"libraryCatalog": "LingBuzz",
 				"repository": "LingBuzz",
 				"shortTitle": "Verb height indeed determines prosodic phrasing",
@@ -327,6 +328,7 @@ var testCases = [
 				],
 				"date": "2022-04",
 				"abstractNote": "Campos (1986) argues that object drop in Spanish exhibits island effects. This claim has remained unchallenged up to date and is largely assumed in the literature. In this squib, I show that this characterization is not empirically correct: given a proper discourse context, null objects can easily appear within a syntactic island in Spanish. This observation constitutes a non-trivial problem for object drop analyses based on movement.",
+				"extra": "LingBuzz Published In: To appear in Journal of Linguistics",
 				"libraryCatalog": "LingBuzz",
 				"repository": "LingBuzz",
 				"url": "https://lingbuzz.net/lingbuzz/006559",
