@@ -254,84 +254,55 @@ declare namespace Zotero {
 		tag: string;
 	}
 
-	type ItemType =
-		| "annotation"
-		| "artwork"
-		| "attachment"
-		| "audioRecording"
-		| "bill"
-		| "blogPost"
-		| "book"
-		| "bookSection"
-		| "case"
-		| "computerProgram"
-		| "conferencePaper"
-		| "dictionaryEntry"
-		| "document"
-		| "email"
-		| "encyclopediaArticle"
-		| "film"
-		| "forumPost"
-		| "hearing"
-		| "instantMessage"
-		| "interview"
-		| "journalArticle"
-		| "letter"
-		| "magazineArticle"
-		| "manuscript"
-		| "map"
-		| "newspaperArticle"
-		| "note"
-		| "patent"
-		| "podcast"
-		| "preprint"
-		| "presentation"
-		| "radioBroadcast"
-		| "report"
-		| "statute"
-		| "thesis"
-		| "tvBroadcast"
-		| "videoRecording"
-		| "webpage";
+	type ItemTypes = {
+		"artwork": ArtworkItem,
+		"audioRecording": AudioRecordingItem,
+		"bill": BillItem,
+		"blogPost": BlogPostItem,
+		"book": BookItem,
+		"bookSection": BookSectionItem,
+		"case": CaseItem,
+		"computerProgram": ComputerProgramItem,
+		"conferencePaper": ConferencePaperItem,
+		"dictionaryEntry": DictionaryEntryItem,
+		"document": DocumentItem,
+		"email": EmailItem,
+		"encyclopediaArticle": EncyclopediaArticleItem,
+		"film": FilmItem,
+		"forumPost": ForumPostItem,
+		"hearing": HearingItem,
+		"instantMessage": InstantMessageItem,
+		"interview": InterviewItem,
+		"journalArticle": JournalArticleItem,
+		"letter": LetterItem,
+		"magazineArticle": MagazineArticleItem,
+		"manuscript": ManuscriptItem,
+		"map": MapItem,
+		"newspaperArticle": NewspaperArticleItem,
+		"patent": PatentItem,
+		"podcast": PodcastItem,
+		"preprint": PreprintItem,
+		"presentation": PresentationItem,
+		"radioBroadcast": RadioBroadcastItem,
+		"report": ReportItem,
+		"statute": StatuteItem,
+		"thesis": ThesisItem,
+		"tvBroadcast": TVBroadcastItem,
+		"videoRecording": VideoRecordingItem,
+		"webpage": WebpageItem,
+	}
+
+	type ItemType = keyof ItemTypes;
 
 	var Item: {
-		new(): Item;
-		new(itemType: "artwork"): ArtworkItem;
-		new(itemType: "audioRecording"): AudioRecordingItem;
-		new(itemType: "bill"): BillItem;
-		new(itemType: "blogPost"): BlogPostItem;
-		new(itemType: "book"): BookItem;
-		new(itemType: "bookSection"): BookSectionItem;
-		new(itemType: "case"): CaseItem;
-		new(itemType: "computerProgram"): ComputerProgramItem;
-		new(itemType: "conferencePaper"): ConferencePaperItem;
-		new(itemType: "dictionaryEntry"): DictionaryEntryItem;
-		new(itemType: "document"): DocumentItem;
-		new(itemType: "email"): EmailItem;
-		new(itemType: "encyclopediaArticle"): EncyclopediaArticleItem;
-		new(itemType: "film"): FilmItem;
-		new(itemType: "forumPost"): ForumPostItem;
-		new(itemType: "hearing"): HearingItem;
-		new(itemType: "instantMessage"): InstantMessageItem;
-		new(itemType: "interview"): InterviewItem;
-		new(itemType: "journalArticle"): JournalArticleItem;
-		new(itemType: "letter"): LetterItem;
-		new(itemType: "magazineArticle"): MagazineArticleItem;
-		new(itemType: "manuscript"): ManuscriptItem;
-		new(itemType: "map"): MapItem;
-		new(itemType: "newspaperArticle"): NewspaperArticleItem;
-		new(itemType: "patent"): PatentItem;
-		new(itemType: "podcast"): PodcastItem;
-		new(itemType: "preprint"): PreprintItem;
-		new(itemType: "presentation"): PresentationItem;
-		new(itemType: "radioBroadcast"): RadioBroadcastItem;
-		new(itemType: "report"): ReportItem;
-		new(itemType: "statute"): StatuteItem;
-		new(itemType: "thesis"): ThesisItem;
-		new(itemType: "tvBroadcast"): TVBroadcastItem;
-		new(itemType: "videoRecording"): VideoRecordingItem;
-		new(itemType: "webpage"): WebpageItem;
+		new <T extends ItemType>(itemType: T): ItemTypes[T];
+		new(itemType: string): Item;
 	}
+
+	/**
+	 * Generic item with unknown type.
+	 */
+	type Item = ItemTypes[ItemType];
 
 	type ArtworkItem = {
 		itemType: "artwork";
@@ -1387,43 +1358,6 @@ declare namespace Zotero {
 
 		[key: string]: string;
 	};
-
-	type Item =
-		| ArtworkItem
-		| AudioRecordingItem
-		| BillItem
-		| BlogPostItem
-		| BookItem
-		| BookSectionItem
-		| CaseItem
-		| ComputerProgramItem
-		| ConferencePaperItem
-		| DictionaryEntryItem
-		| DocumentItem
-		| EmailItem
-		| EncyclopediaArticleItem
-		| FilmItem
-		| ForumPostItem
-		| HearingItem
-		| InstantMessageItem
-		| InterviewItem
-		| JournalArticleItem
-		| LetterItem
-		| MagazineArticleItem
-		| ManuscriptItem
-		| MapItem
-		| NewspaperArticleItem
-		| PatentItem
-		| PodcastItem
-		| PreprintItem
-		| PresentationItem
-		| RadioBroadcastItem
-		| ReportItem
-		| StatuteItem
-		| ThesisItem
-		| TVBroadcastItem
-		| VideoRecordingItem
-		| WebpageItem;
 
 	interface Note {
 		title?: string;
