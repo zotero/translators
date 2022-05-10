@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-05 02:26:23"
+	"lastUpdated": "2022-05-10 17:25:13"
 }
 
 /*
@@ -271,6 +271,9 @@ function scrape(doc, url, extras) {
 				// Sometimes we get titles and authors in all caps
 				item.title = fixCase(item.title);
 
+				if (!item.date) {
+					item.date = text(doc, 'span[property="datePublished"]');
+				}
 				if (item.date) {
 					item.date = ZU.strToISO(item.date);
 					let parts = item.date.split('-');
@@ -995,6 +998,145 @@ var testCases = [
 				"publicationTitle": "Proceedings of the National Academy of Sciences",
 				"url": "https://www.pnas.org/doi/10.1073/pnas.2117831119",
 				"volume": "119",
+				"attachments": [
+					{
+						"title": "Full Text PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.science.org/doi/10.1126/sciadv.abj8030",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Electric field control of chirality",
+				"creators": [
+					{
+						"firstName": "Piush",
+						"lastName": "Behera",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Molly A.",
+						"lastName": "May",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fernando",
+						"lastName": "Gómez-Ortiz",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sandhya",
+						"lastName": "Susarla",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sujit",
+						"lastName": "Das",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Christopher T.",
+						"lastName": "Nelson",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lucas",
+						"lastName": "Caretta",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Shang-Lin",
+						"lastName": "Hsu",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Margaret R.",
+						"lastName": "McCarter",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Benjamin H.",
+						"lastName": "Savitzky",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Edward S.",
+						"lastName": "Barnard",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Archana",
+						"lastName": "Raja",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Zijian",
+						"lastName": "Hong",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Pablo",
+						"lastName": "García-Fernandez",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Stephen W.",
+						"lastName": "Lovesey",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Gerrit",
+						"lastName": "van der Laan",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Peter",
+						"lastName": "Ercius",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Colin",
+						"lastName": "Ophus",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lane W.",
+						"lastName": "Martin",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Javier",
+						"lastName": "Junquera",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Markus B.",
+						"lastName": "Raschke",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Ramamoorthy",
+						"lastName": "Ramesh",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022-01-05",
+				"DOI": "10.1126/sciadv.abj8030",
+				"issue": "1",
+				"libraryCatalog": "science.org (Atypon)",
+				"pages": "eabj8030",
+				"publicationTitle": "Science Advances",
+				"url": "https://www.science.org/doi/10.1126/sciadv.abj8030",
+				"volume": "8",
 				"attachments": [
 					{
 						"title": "Full Text PDF",
