@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-10 17:25:13"
+	"lastUpdated": "2022-05-10 18:26:02"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Atypon Journals Translator
-	Copyright © 2011-2021 Sebastian Karcher and Abe Jellinek
+	Copyright © 2011-2022 Sebastian Karcher and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -38,7 +38,7 @@
 
 
 function detectWeb(doc, url) {
-	if (url.search(/^https?:\/\/[^/]+\/toc\/|\/action\/doSearch\?/) != -1) {
+	if (url.search(/^https?:\/\/[^/]+\/toc\/|\/action\/doSearch\?|\/doi\/book\//) != -1) {
 		return getSearchResults(doc, true) ? "multiple" : false;
 	}
 	
@@ -68,6 +68,22 @@ function getSearchResults(doc, checkOnly, extras) {
 		Z.debug('Atypon: multiples container not found.');
 		return false;
 	}
+
+	// Add whole book entry for book ToCs, but require chapter entries
+	// before returning true if checkOnly
+	if (doc.querySelector('.book-toc')) {
+		let title = attr(doc, 'meta[property="og:title"]', 'content')
+			|| doc.title;
+		title = title.split('|')[0];
+		let url = doc.location.href;
+		if (title) {
+			articles[url] = title;
+			if (extras) {
+				extras[url] = {};
+			}
+		}
+	}
+
 	var rows = container.getElementsByClassName('articleEntry'),
 		found = false,
 		doiLink = 'a[contains(@href, "/doi/abs/") or contains(@href, "/doi/abstract/") or '
@@ -125,19 +141,19 @@ function getSearchResults(doc, checkOnly, extras) {
 	if (!found) {
 		Z.debug("Trying alternate multiple format #2");
 		rows = container.querySelectorAll('.issue-item, .item__body');
-		for (let i = 0; i < rows.length; i++) {
-			let title = text(rows[i], 'a');
+		for (let row of rows) {
+			let title = text(row, 'a');
 			if (!title) continue;
 			title = ZU.trimInternal(title);
 			
-			let url = attr(rows[i], 'a', 'href');
+			let url = attr(row, 'a', 'href');
 			if (!url) continue;
 			
 			if (checkOnly) return true;
 			found = true;
 			
 			if (extras) {
-				extras[url] = { pdf: buildPdfUrl(url, rows[i]) };
+				extras[url] = { pdf: buildPdfUrl(url, row) };
 			}
 			
 			articles[url] = title;
@@ -253,7 +269,8 @@ function scrape(doc, url, extras) {
 	url = url.replace(/[?#].*/, "");
 	var doi = url.match(/10\.[^?#]+/)[0];
 	var citationurl = url.replace(replURLRegExp, "/action/showCitFormats?doi=");
-	var abstract = doc.getElementsByClassName('abstractSection')[0];
+	var abstract = doc.getElementsByClassName('abstractSection')[0]
+		|| doc.querySelector('#bookExcerpt');
 	var tags = ZU.xpath(doc, '//a[contains(@href, "keyword") or contains(@href, "Keyword=")]');
 	Z.debug("Citation URL: " + citationurl);
 	
@@ -270,6 +287,11 @@ function scrape(doc, url, extras) {
 			translator.setHandler("itemDone", function (obj, item) {
 				// Sometimes we get titles and authors in all caps
 				item.title = fixCase(item.title);
+
+				// Some special characters get corrupted in the RIS we get
+				if (/\b\?s/.test(item.title) && text(doc, 'h1.citation__title')) {
+					item.title = text(doc, 'h1.citation__title');
+				}
 
 				if (!item.date) {
 					item.date = text(doc, 'span[property="datePublished"]');
@@ -370,8 +392,9 @@ function scrape(doc, url, extras) {
 			translator.translate();
 		});
 	}
-	
-	if (doc.querySelector('a[href*="#pill-citations"], div.pill__item, section.pill__item div.citation-download')) { // newer Atypon installs; 2nd one is Science, 3rd one ASM
+
+	// newer Atypon installs; 2nd one is Science, 3rd one ASM
+	if (doc.querySelector('a[href*="#pill-citations"], div.pill__item, section.pill__item div.citation-download')) {
 		let filename = attr(doc, 'input[name="downloadFileName"]', 'value');
 		finalize(filename);
 	}
@@ -460,60 +483,7 @@ var testCases = [
 	{
 		"type": "web",
 		"url": "https://epubs.siam.org/doi/book/10.1137/1.9780898718553",
-		"items": [
-			{
-				"itemType": "book",
-				"title": "Combinatorial Data Analysis",
-				"creators": [
-					{
-						"lastName": "Hubert",
-						"firstName": "Lawrence",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Arabie",
-						"firstName": "Phipps",
-						"creatorType": "author"
-					},
-					{
-						"lastName": "Meulman",
-						"firstName": "Jacqueline",
-						"creatorType": "author"
-					}
-				],
-				"date": "2001-01",
-				"ISBN": "9780898714784",
-				"abstractNote": "The first part of this monograph's title, Combinatorial Data Analysis (CDA), refers to a wide class of methods for the study of relevant data sets in which the arrangement of a collection of objects is absolutely central. Characteristically, CDA is involved either with the identification of arrangements that are optimal for a specific representation of a given data set (usually operationalized with some specific loss or merit function that guides a combinatorial search defined over a domain constructed from the constraints imposed by the particular representation selected), or with the determination in a confirmatory manner of whether a specific object arrangement given a priori reflects the observed data. As the second part of the title, Optimization by Dynamic Programming, suggests, the sole focus of this monograph is on the identification of arrangements; it is then restricted further, to where the combinatorial search is carried out by a recursive optimization process based on the general principles of dynamic programming. For an introduction to confirmatory CDA without any type of optimization component, the reader is referred to the monograph by Hubert (1987). For the use of combinatorial optimization strategies other than dynamic programming for some (clustering) problems in CDA, the recent comprehensive review by Hansen and Jaumard (1997) provides a particularly good introduction.",
-				"extra": "DOI: 10.1137/1.9780898718553",
-				"libraryCatalog": "epubs.siam.org (Atypon)",
-				"numPages": "172",
-				"publisher": "Society for Industrial and Applied Mathematics",
-				"series": "Discrete Mathematics and Applications",
-				"url": "https://epubs.siam.org/doi/book/10.1137/1.9780898718553",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"tags": [
-					{
-						"tag": "combinatorial optimization"
-					},
-					{
-						"tag": "least-squares optimization"
-					},
-					{
-						"tag": "ultrametric and additive tree representations"
-					},
-					{
-						"tag": "unidimensional and multidimensional scaling"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
+		"items": "multiple"
 	},
 	{
 		"type": "web",
@@ -539,7 +509,20 @@ var testCases = [
 						"mimeType": "application/pdf"
 					}
 				],
-				"tags": [],
+				"tags": [
+					{
+						"tag": "combinatorial optimization"
+					},
+					{
+						"tag": "least-squares optimization"
+					},
+					{
+						"tag": "ultrametric and additive tree representations"
+					},
+					{
+						"tag": "unidimensional and multidimensional scaling"
+					}
+				],
 				"notes": [],
 				"seeAlso": []
 			}
@@ -759,6 +742,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2021-06-29",
 				"DOI": "10.1128/mSystems.00122-21",
 				"issue": "3",
 				"libraryCatalog": "journals.asm.org (Atypon)",
@@ -844,7 +828,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "conferencePaper",
-				"title": "The Defense Test and Evaluation Professional Institute's Role in Supporting the Department of Defense Test and Evaluation Community",
+				"title": "The Defense Test and Evaluation Professional Institute’s Role in Supporting the Department of Defense Test and Evaluation Community",
 				"creators": [
 					{
 						"lastName": "Engel",
@@ -865,16 +849,7 @@ var testCases = [
 				],
 				"tags": [
 					{
-						"tag": "Armed Forces--Equipment--Testing"
-					},
-					{
 						"tag": "Defense Test and Evaluation Professional Institute (DTEPI)"
-					},
-					{
-						"tag": "Military weapons--Testing"
-					},
-					{
-						"tag": "United States"
 					}
 				],
 				"notes": [],
@@ -941,7 +916,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
-				"date": "December 9, 2016",
+				"date": "2016-12-09",
 				"DOI": "10.1126/science.aag1582",
 				"issue": "6317",
 				"libraryCatalog": "science.org (Atypon)",
