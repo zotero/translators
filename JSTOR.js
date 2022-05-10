@@ -9,13 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-08 21:10:17"
+	"lastUpdated": "2022-05-10 22:26:12"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2019 Simon Kornblith, Sean Takats, Michael Berkowitz, Eli Osherovich, czar
+	Copyright © 2019-2022 Simon Kornblith, Sean Takats, Michael Berkowitz,
+	                      Eli Osherovich, czar
 
 	This file is part of Zotero.
 
@@ -35,18 +36,18 @@
 	***** END LICENSE BLOCK *****
 */
 
-// attr()/text() v2
-// eslint-disable-next-line
-function attr(docOrElem,selector,attr,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.getAttribute(attr):null;}function text(docOrElem,selector,index){var elem=index?docOrElem.querySelectorAll(selector).item(index):docOrElem.querySelector(selector);return elem?elem.textContent:null;}
 
 function detectWeb(doc, url) {
 	// See if this is a search results page or Issue content
-	if (doc.title == "JSTOR: Search Results") {
-		return getSearchResults(doc, true) ? "multiple" : false;
-	}
-	else if (/stable|pss/.test(url) // Issues with DOIs can't be identified by URL
-		&& getSearchResults(doc, true)) {
-		return "multiple";
+	// Issues with DOIs can't be identified by URL
+	if (doc.title == "JSTOR: Search Results" || /stable|pss/.test(url)) {
+		if (getSearchResults(doc, true)) {
+			return "multiple";
+		}
+		else {
+			Z.monitorDOMChanges(doc.body,
+				{ attributeFilter: ['style'] });
+		}
 	}
 	
 	// If this is a view page, find the link to the citation
@@ -70,13 +71,13 @@ function detectWeb(doc, url) {
 function getSearchResults(doc, checkOnly) {
 	var resultsBlock = doc.querySelectorAll('.media-body.media-object-section');
 	if (!resultsBlock.length) {
-		resultsBlock = doc.querySelectorAll('.search-result-item-grid');
+		resultsBlock = doc.querySelectorAll('.result');
 	}
 	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
-	for (let i = 0; i < resultsBlock.length; i++) {
-		let title = text(resultsBlock[i], '.title, .small-heading').trim();
-		let jid = getJID(attr(resultsBlock[i], 'a', 'href'));
+	for (let row of resultsBlock) {
+		let title = text(row, '.title, .small-heading');
+		let jid = getJID(attr(row, 'a', 'href'));
 		if (!jid || !title) continue;
 		if (checkOnly) return true;
 		found = true;
