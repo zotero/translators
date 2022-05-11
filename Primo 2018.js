@@ -2,14 +2,14 @@
 	"translatorID": "cd669d1f-96b8-4040-aa36-48f843248399",
 	"label": "Primo 2018",
 	"creator": "Philipp Zumstein",
-	"target": "(/primo-explore/|/discovery/(search|fulldisplay|jsearch|dbsearch|npsearch|openurl|jfulldisplay|dbfulldisplay|npfulldisplay)\\?)",
+	"target": "(/primo-explore/|/discovery/(search|fulldisplay|jsearch|dbsearch|npsearch|openurl|jfulldisplay|dbfulldisplay|npfulldisplay|collectionDiscovery)\\?)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-08-11 17:27:19"
+	"lastUpdated": "2022-05-11 21:32:37"
 }
 
 /*
@@ -40,6 +40,10 @@ function detectWeb(doc, _url) {
 	var rows = getPnxElems(doc);
 	if (rows.length == 1) return "book";
 	if (rows.length > 1) return "multiple";
+	let exploreElem = doc.querySelector('primo-explore');
+	if (exploreElem) {
+		Z.monitorDOMChanges(exploreElem, { childList: true, subtree: true });
+	}
 	return false;
 }
 
@@ -48,10 +52,12 @@ function getSearchResults(doc, checkOnly) {
 	var items = {};
 	var found = false;
 	var rows = getPnxElems(doc);
-	for (let i = 0; i < rows.length; i++) {
-		let href = rows[i].dataset.url;
-		let title = rows[i].parentNode.textContent;
+	for (let row of rows) {
+		let href = row.dataset.url;
+		let title = text(row.parentNode, '.item-title')
+			|| row.parentNode.textContent;
 		if (!href || !title) continue;
+		title = title.replace(/^;/, '');
 		if (checkOnly) return true;
 		found = true;
 		items[href] = title;
@@ -199,6 +205,18 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://explore.lib.uliege.be/discovery/collectionDiscovery?vid=32ULG_INST:ULIEGE&collectionId=81129164700002321&lang=fr",
+		"defer": true,
+		"items": "multiple"
+	},
+	{
+		"type": "web",
+		"url": "https://search.library.berkeley.edu/discovery/search?vid=01UCS_BER:UCB&tab=Default_UCLibrarySearch&search_scope=DN_and_CI&offset=0&query=any,contains,test",
+		"defer": true,
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
