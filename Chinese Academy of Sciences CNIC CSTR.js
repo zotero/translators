@@ -3,7 +3,6 @@
 	"label": "Chinese Academy of Sciences CNIC CSTR",
 	"creator": "cheney",
 	"target": "^https?://www\\.cstr\\.cn/",
-
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 97,
@@ -12,13 +11,10 @@
 	"browserSupport": "gcsibv",
 	"lastUpdated": "2022-05-11 08:00:39"
 }
-
 function detectSearch(item) {
 	return !!item.CSTR;
 }
-
 function doSearch(item) {
-	
 	let url;
 	if (item.CSTR) {
 		url = "https://www.cstr.cn/openapi/v2/pid-cstr-service/detail?identifier=" + item.CSTR;
@@ -29,7 +25,6 @@ function doSearch(item) {
 	Z.debug(url);
 	ZU.doGet(url, parseJSON);
 }
-
 function detectWeb(doc, url) {
 	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:cstr\.cn)\/(?:search\/cstrDetail\/).*/;
 	if (searchRe.test(url)) {
@@ -66,11 +61,8 @@ function doWeb(doc, url) {
 		}
 	}
 }
-
 function parseJSON(text) {
 	var obj = JSON.parse(text);
-	Z.debug(obj.code);
-
 	var code = obj.code;
 	if(code == 200){
 		var newItem = new Zotero.Item("journalArticle");
@@ -86,54 +78,50 @@ function parseJSON(text) {
 					ZU.cleanAuthor(creators[i].creatorNameCN, "author", true)
 				);
 			}
-			
 		}
 		newItem.date = content.publicationDate;
 		var description = content.descriptionCN;
 		newItem.abstractNote = ZU.trimInternal(description);
 		newItem.notes.push({ note: identifier });
-		
 		newItem.extra = identifier;
 		newItem.url = "https://cstr.cn/"+identifier;
 		newItem.publicationTitle = identifier+ " " + content.submitOrgName;
-
 		var subjects = content.subjectClassifications;
 		for (let j = 0; j < subjects.length; j++) {
 			var subject = subjects.keyWordsCN;
 			newItem.tags.push({ tag: subject });
 		}
 	}	
-
 	// retrieve and supplement publication data for published articles via DOI
-	if (newItem.DOI) {
-		var translate = Zotero.loadTranslator("search");
-		// CrossRef
-		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
+// 	if (newItem.DOI) {
+// 		var translate = Zotero.loadTranslator("search");
+// 		// CrossRef
+// 		translate.setTranslator("b28d0d42-8549-4c6d-83fc-8382874a5cb9");
 		
-		var item = { itemType: "journalArticle", DOI: newItem.DOI };
-		translate.setSearch(item);
-		translate.setHandler("itemDone", function (obj, item) {
-			// Z.debug(item)
-			newItem.volume = item.volume;
-			newItem.issue = item.issue;
-			newItem.pages = item.pages;
-			newItem.date = item.date;
-			newItem.ISSN = item.ISSN;
-			if (item.publicationTitle) {
-				newItem.publicationTitle = item.publicationTitle;
-				newItem.journalAbbreviation = item.journalAbbreviation;
-			}
-			newItem.date = item.date;
-		});
-		translate.setHandler("done", function () {
-			newItem.complete();
-		});
-		translate.setHandler("error", function () {});
-		translate.translate();
-	}
-	else {
+// 		var item = { itemType: "journalArticle", DOI: newItem.DOI };
+// 		translate.setSearch(item);
+// 		translate.setHandler("itemDone", function (obj, item) {
+// 			// Z.debug(item)
+// 			newItem.volume = item.volume;
+// 			newItem.issue = item.issue;
+// 			newItem.pages = item.pages;
+// 			newItem.date = item.date;
+// 			newItem.ISSN = item.ISSN;
+// 			if (item.publicationTitle) {
+// 				newItem.publicationTitle = item.publicationTitle;
+// 				newItem.journalAbbreviation = item.journalAbbreviation;
+// 			}
+// 			newItem.date = item.date;
+// 		});
+// 		translate.setHandler("done", function () {
+// 			newItem.complete();
+// 		});
+// 		translate.setHandler("error", function () {});
+// 		translate.translate();
+// 	}
+// 	else {
 		newItem.complete();
-	}
+// 	}
 }
 
 /** BEGIN TEST CASES **/
