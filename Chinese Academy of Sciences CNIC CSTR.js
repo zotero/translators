@@ -100,7 +100,7 @@ function parseJSON(text) {
 		var subjects = content.subjectClassifications;
 		for (let j = 0; j < subjects.length; j++) {
 			var subject = subjects.keyWordsCN;
-			newItem.tags.push(subject);
+			newItem.tags.push({ tag: subject });
 		}
 	}	
 
