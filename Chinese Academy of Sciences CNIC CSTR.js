@@ -2,7 +2,8 @@
 	"translatorID": "c070e5a2-4bfd-44bb-9b3c-4be20c50d0d9",
 	"label": "Chinese Academy of Sciences CNIC CSTR",
 	"creator": "cheney",
-	"target": "^https?://www\\.cstr\\.cn",
+	"target": "^https?://www\\.cstr\\.cn/",
+
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 97,
