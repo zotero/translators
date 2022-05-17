@@ -26,8 +26,7 @@ function doSearch(item) {
 	ZU.doGet(url, parseJSON);
 }
 function detectWeb(doc, url) {
-	var searchRe = /^https?:\/\/(?:([^.]+\.))?(?:cstr\.cn)\/(?:search\/cstrDetail\/).*/;
-	if (searchRe.test(url)) {
+	if (searchRe.includes('/search/cstrDetail/') {
 		return "journalArticle";	
 	}
 	else {
