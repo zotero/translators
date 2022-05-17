@@ -72,12 +72,12 @@ function parseJSON(text) {
 		var creators = content.creators;
 		if (creators && creators.length) {
 			// arXiv.org format
-			for(var i =0 ; i<creators.length; i++){
-				// var creator_name = ZU.xpathText(creator, './/creator_name_cn').trim();
+			for (let creator of creators) {
 				newItem.creators.push(
-					ZU.cleanAuthor(creators[i].creatorNameCN, "author", true)
+					ZU.cleanAuthor(creator.creatorNameCN, "author", true)
 				);
 			}
+
 		}
 		newItem.date = content.publicationDate;
 		var description = content.descriptionCN;
