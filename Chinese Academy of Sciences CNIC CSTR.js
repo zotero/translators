@@ -22,7 +22,6 @@ function doSearch(item) {
 	else if (item.query) {
 		url = "https://www.cstr.cn/openapi/v2/pid-common-service/statistics/metadata.search.aggregation?page=1&size=10&query=" + encodeURIComponent(item.query);
 	}
-	Z.debug(url);
 	ZU.doGet(url, parseJSON);
 }
 function detectWeb(doc, url) {
