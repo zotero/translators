@@ -83,7 +83,7 @@ function parseJSON(text) {
 		var description = content.descriptionCN;
 		newItem.abstractNote = ZU.trimInternal(description);
 		newItem.notes.push({ note: identifier });
-		newItem.extra = identifier;
+		newItem.extra = (newItem.extra || '') + '\nCSTR: ' + identifier;
 		newItem.url = "https://cstr.cn/"+identifier;
 		newItem.publicationTitle = identifier+ " " + content.submitOrgName;
 		var subjects = content.subjectClassifications;
