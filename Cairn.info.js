@@ -98,9 +98,9 @@ async function scrape(doc) {
 
 	let pdfLink = attr('[name="citation_pdf_url"]', 'content');
 	let keywords = attr('[name="article-mot_cle"]', 'content');
-	let issn = attr('[name="citation_issn"]', 'content');	
+	let issn = attr('[name="citation_issn"]', 'content');
 	let risText = await requestText(risURL);
-	 Z.debug(risText);
+	// Z.debug(risText);
 	let translator = Zotero.loadTranslator('import');
 	translator.setTranslator('32d59d2d-b65a-4da4-b0a3-bdd3cfb979e7'); // RIS
 	translator.setString(risText);
