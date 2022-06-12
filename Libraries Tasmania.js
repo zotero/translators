@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-12 07:08:34"
+	"lastUpdated": "2022-06-12 07:28:01"
 }
 
 /*
@@ -561,6 +561,7 @@ var testCases = [
 				"itemType": "artwork",
 				"title": "The whaling bark - Chas. W. Morgan lying on bottom Fairhaven Wharf [picture]",
 				"creators": [],
+				"callNumber": "SD_ILS:640276",
 				"libraryCatalog": "Libraries Tasmania",
 				"url": "https://stors.tas.gov.au/ILS/SD_ILS-640276",
 				"attachments": [
@@ -600,6 +601,191 @@ var testCases = [
 						"note": "Exact measurements: 209 x 400 mm Photographic print is mounted on acid free board in the course of conservation work Inscribed in pencil by D. Jones on verso of board: [Verso of] Photograph inscribed in green ink - \"The Whaling Bark lying on bottom Fairhaven Wharf\" Accompanied by: 1 envelope bearing on its recto a map of Tasmania mounted on the Australian flag in blue, red and white. Believed to be the original storage receptacle for the photographic print Condition at Feb. 2002: Overall condition is good. Repaired by D. Jones July 1983 and mounted on acid free boad"
 					}
 				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fSD_ILS$002f0$002fSD_ILS:1073225/one",
+		"items": [
+			{
+				"itemType": "webpage",
+				"title": "Narryna Heritage Museum [electronic resource]",
+				"creators": [],
+				"abstractNote": "\"Narryna is a handsome Georgian house set in a picturesque, old-world setting... The museum houses many unique and rare items from Tasmania's colonial past. Each room contains items that represent life for a wealthy merchant in Hobart, as well as showcasing many items complementing the domestic duties that were carried out by servants. Narryna Heritage Museum also has one of the largest costume collections in the Southern Hemisphere.\"",
+				"url": "https://stors.tas.gov.au/ILS/SD_ILS-1073225",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Historic house museums--Tasmania--Hobart"
+					},
+					{
+						"tag": "Historic sites--Tasmania--Hobart"
+					},
+					{
+						"tag": "Narryna Heritage Museum (Tas.)"
+					},
+					{
+						"tag": "Women's clothing--Tasmania--History--19th century--Pictorial works"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_DIGITISED$002f0$002fARCHIVES_DIG_DIX:LPIC33-1-254/one?qu=SD_ILS",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Photograph - Corn Mill - Hobart",
+				"creators": [
+					{
+						"lastName": "Lloyd George Webb (NG2692)",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1828-01-01/1828-01-01",
+				"abstractNote": "Lithograph by Louis Leborne https://stors.tas.gov.au/ILS/SD_ILS-608938 and in Voyage de l'Astrolabe parite historique. Tome II Plate 169 https://stors.tas.gov.au/ILS/SD_ILS-543988)",
+				"archiveLocation": "Launceston 34 2 3",
+				"callNumber": "LPIC33/1/254",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Item",
+				"attachments": [
+					{
+						"title": "Libraries Tasmania digital item: LPIC33-1-254",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_SERIES$002f0$002fARCHIVES_SER_DIX:AE424/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Minutes of & Agenda for Meetings of Library Review Committee",
+				"creators": [
+					{
+						"lastName": "University of Tasmania (TA92)",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1993-10-14/1994-04-28",
+				"abstractNote": "Committee to review University Library - again. Indication in minutes that there was a meeting on 19 May 1994, but no record has been found | These records are part of the holdings of the Tasmanian Archives",
+				"callNumber": "AE424",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Series",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_AGENCIES$002f0$002fARCHIVES_AGE_DIX:TA92/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "University of Tasmania",
+				"creators": [],
+				"date": "1890-01-01",
+				"abstractNote": "The university was established to provide a regular and liberal course of education according to the preamble of the 1889 Act.;;;;According to the University of Tasmania Act 1992, the University has the following functions:;;(a) to advance, transmit and preserve knowledge and learning;;(b) to encourage and undertake research;;(c) to promote and sustain teaching and research to international standards of excellence;;(d) to encourage and provide opportunities for students and staff to develop and apply their knowledge and skills;;(e) to provide educational and research facilities appropriate to its other functions;;(f) to promote access to higher education having regard to principles of merit and equity;;(fa) to foster or promote the commercialisation of any intellectual property;;(g) to engage in activities which promote the social, cultural and economic welfare of the community and to make available for those purposes the resources of the University.",
+				"callNumber": "TA92",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Agency",
+				"url": "https://stors.tas.gov.au/AI/TA92",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:1470635/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Mitchell, John",
+				"creators": [],
+				"date": "1905",
+				"callNumber": "NAME_INDEXES:1470635",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Prisoners",
+				"url": "https://stors.tas.gov.au/NI/1470635",
+				"attachments": [
+					{
+						"title": "Libraries Tasmania digital item: POL708-1-1",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:1384365/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Crimey, Mary",
+				"creators": [],
+				"date": "10 Apr 1842",
+				"callNumber": "NAME_INDEXES:1384365",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Convicts",
+				"url": "https://stors.tas.gov.au/NI/1384365",
+				"attachments": [
+					{
+						"title": "Libraries Tasmania digital item: CON40/1/2",
+						"mimeType": "image/jpeg"
+					},
+					{
+						"title": "Libraries Tasmania digital item: CON19/1/3",
+						"mimeType": "image/jpeg"
+					},
+					{
+						"title": "Libraries Tasmania digital item: CON15/1/1 Pages 48-49",
+						"mimeType": "image/jpeg"
+					}
+				],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:448150/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "Huxley, Annie - Respondent | Huxley, Ernest - Petitioner",
+				"creators": [],
+				"date": "1920",
+				"callNumber": "NAME_INDEXES:448150",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Divorces",
+				"url": "https://stors.tas.gov.au/NI/448150",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
 				"seeAlso": []
 			}
 		]
