@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-04 18:38:42"
+	"lastUpdated": "2022-06-13 22:14:27"
 }
 
 /*
@@ -409,7 +409,7 @@ function detectWeb(doc, url) {
 			&& !url.includes('/suppl/')
 		) {
 			if (url.includes('medrxiv.org') || url.includes('biorxiv.org')) {
-				return "report";
+				return "preprint";
 			}
 			else {
 				return "journalArticle";
