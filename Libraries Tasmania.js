@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-13 03:44:03"
+	"lastUpdated": "2022-06-13 05:35:10"
 }
 
 /*
@@ -129,6 +129,9 @@ function addPermalink(doc, item) {
 	if (permalink) {
 		item.url = permalink.getAttribute("onclick").match(/(https.+)'\);$/)[1];
 	}
+	else {
+		item.url = doc.location.href;
+	}
 	return item;
 }
 
@@ -146,21 +149,24 @@ function addDigitalFiles(doc, item) {
 			// Link labels
 			let labelParts = [];
 			// Record type
-			labelParts.push(embeddedLinks[i].querySelector("subfield_x").textContent);
+			if (embeddedLinks[i].querySelector("subfield_x")) {
+				labelParts.push(embeddedLinks[i].querySelector("subfield_x").textContent);
+			}
 			// Record ID
-			labelParts.push(embeddedLinks[i].querySelector("subfield_z").textContent);
-
+			if (embeddedLinks[i].querySelector("subfield_z")) {
+				labelParts.push(embeddedLinks[i].querySelector("subfield_z").textContent);
+			}
 			// Convict records
 			if (url.includes("image_viewer.htm")) {
 				let urlParts = url.match(/image_viewer\.htm\?([A-Z0-9]+-\d+-\d+),\d+,(\d+)/);
-				Z.debug(urlParts);
+				// Z.debug(urlParts);
 				url = "https://stors.tas.gov.au/" + urlParts[1] + "p" + urlParts[2];
 				digitalUrls.push(url);
 				digitalLabels[url] = labelParts.join(", ") + ", page " + urlParts[2];
 			}
 			// Other records
 			else if (url.includes("stors.tas.gov.au")) {
-				Z.debug(url);
+				// Z.debug(url);
 				let initPath = url.match(/\$init=(.+)/);
 				if (initPath) {
 					url = "https://stors.tas.gov.au/" + initPath[1];
@@ -540,18 +546,55 @@ function scrapeNames(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_SERIES$002f0$002fARCHIVES_SER_DIX:AD940/one",
 		"items": [
 			{
-				"itemType": "audioRecording",
-				"title": "SCALERO, R.: Violin and Piano Works (M. Tortorelli, Meluso)",
-				"creators": [],
-				"abstractNote": "I. Allegro (08 min. 26 sec.) / Scalero -- II. Adagio (06 min. 21 sec.) / Scalero -- III. Vivace, ma appassionato (08 min. 13 sec.) / Scalero -- No. 1. Lento, poi tempo di walzer (04 min. 31 sec.) / Scalero -- No. 2. Andante malinconico (03 min. 48 sec.) / Scalero -- No. 3. Allegro con brio (05 min. 39 sec.) / Scalero -- No. 1. Allegro (04 min. 50 sec.) / Scalero -- No. 2. Allegro, alla Scarlatti (03 min. 31 sec.) / Scalero -- No. 3. Allegro giusto (05 min. 30 sec.) / Scalero -- 12 Variazioni nach den Barucaba von Paganini, Op. 15 (16 min. 44 sec.) / Scalero",
-				"callNumber": "LT_NAXOS_DIX:TC871901",
-				"label": "Hong Kong : Naxos Digital Services US Inc. 3014",
+				"itemType": "manuscript",
+				"title": "Minutes of Meetings of Council",
+				"creators": [
+					{
+						"lastName": "University of Tasmania (TA92)",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "1890-01-19/1992-07-10",
+				"abstractNote": "Official minutes of meetings. | These records are part of the holdings of the Tasmanian Archives",
+				"callNumber": "AD940",
 				"libraryCatalog": "Libraries Tasmania",
-				"shortTitle": "SCALERO, R.",
+				"manuscriptType": "Series",
+				"url": "https://stors.tas.gov.au/AI/AD940",
 				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_DIGITISED$002f0$002fARCHIVES_DIG_DIX:NS6985-1-1/one",
+		"items": [
+			{
+				"itemType": "manuscript",
+				"title": "COVID-19 Story / Elizabeth Kelly (Beth)",
+				"creators": [
+					{
+						"lastName": "Covid-19 Stories Project (TA2205)",
+						"creatorType": "contributor"
+					}
+				],
+				"date": "2021-01-20/2021-01-20",
+				"archiveLocation": "Hobart X 1 1",
+				"callNumber": "NS6985/1/1",
+				"libraryCatalog": "Libraries Tasmania",
+				"manuscriptType": "Item",
+				"url": "https://stors.tas.gov.au/AI/NS6985-1-1",
+				"attachments": [
+					{
+						"title": "Libraries Tasmania digital item: NS6985-1-1",
+						"mimeType": "application/pdf"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -597,182 +640,29 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fSD_ILS$002f0$002fSD_ILS:640276/one",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
 		"items": [
 			{
-				"itemType": "artwork",
-				"title": "The whaling bark - Chas. W. Morgan lying on bottom Fairhaven Wharf [picture]",
-				"creators": [],
-				"callNumber": "SD_ILS:640276",
-				"libraryCatalog": "Libraries Tasmania",
-				"url": "https://stors.tas.gov.au/ILS/SD_ILS-640276",
-				"attachments": [
-					{
-						"title": "Libraries Tasmania digital item: https://stors.tas.gov.au/AUTAS001126070242w800",
-						"mimeType": "image/jpeg"
-					}
-				],
-				"tags": [
-					{
-						"tag": "Barks (Sailing ships)--Tasmania--Hobart--Photographs"
-					},
-					{
-						"tag": "Charles W. Morgan (Ship)--Photographs"
-					},
-					{
-						"tag": "Fairhaven Wharf (Mass.)--History--Photographs"
-					},
-					{
-						"tag": "Sailing ships--Tasmania--History--Photographs"
-					},
-					{
-						"tag": "Ships, Wooden--Tasmania--History--Photographs"
-					},
-					{
-						"tag": "Whaling ships--United States--History--Photographs"
-					},
-					{
-						"tag": "Whaling--United States--History--Photographs"
-					},
-					{
-						"tag": "Windjammers (Sailing ships)--History--Photographs"
-					}
-				],
-				"notes": [
-					{
-						"note": "Exact measurements: 209 x 400 mm Photographic print is mounted on acid free board in the course of conservation work Inscribed in pencil by D. Jones on verso of board: [Verso of] Photograph inscribed in green ink - \"The Whaling Bark lying on bottom Fairhaven Wharf\" Accompanied by: 1 envelope bearing on its recto a map of Tasmania mounted on the Australian flag in blue, red and white. Believed to be the original storage receptacle for the photographic print Condition at Feb. 2002: Overall condition is good. Repaired by D. Jones July 1983 and mounted on acid free boad"
-					}
-				],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fSD_ILS$002f0$002fSD_ILS:1073225/one",
-		"items": [
-			{
-				"itemType": "webpage",
-				"title": "Narryna Heritage Museum [electronic resource]",
-				"creators": [],
-				"abstractNote": "\"Narryna is a handsome Georgian house set in a picturesque, old-world setting... The museum houses many unique and rare items from Tasmania's colonial past. Each room contains items that represent life for a wealthy merchant in Hobart, as well as showcasing many items complementing the domestic duties that were carried out by servants. Narryna Heritage Museum also has one of the largest costume collections in the Southern Hemisphere.\"",
-				"url": "https://stors.tas.gov.au/ILS/SD_ILS-1073225",
-				"attachments": [],
-				"tags": [
-					{
-						"tag": "Historic house museums--Tasmania--Hobart"
-					},
-					{
-						"tag": "Historic sites--Tasmania--Hobart"
-					},
-					{
-						"tag": "Narryna Heritage Museum (Tas.)"
-					},
-					{
-						"tag": "Women's clothing--Tasmania--History--19th century--Pictorial works"
-					}
-				],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_DIGITISED$002f0$002fARCHIVES_DIG_DIX:LPIC33-1-254/one?qu=SD_ILS",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"title": "Photograph - Corn Mill - Hobart",
+				"itemType": "audioRecording",
+				"title": "SCALERO, R.: Violin and Piano Works (M. Tortorelli, Meluso)",
 				"creators": [
 					{
-						"lastName": "Lloyd George Webb (NG2692)",
+						"firstName": "Rosario",
+						"lastName": "Scalero",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Naxos Digital Services US",
 						"creatorType": "contributor"
 					}
 				],
-				"date": "1828-01-01/1828-01-01",
-				"abstractNote": "Lithograph by Louis Leborne https://stors.tas.gov.au/ILS/SD_ILS-608938 and in Voyage de l'Astrolabe parite historique. Tome II Plate 169 https://stors.tas.gov.au/ILS/SD_ILS-543988)",
-				"archiveLocation": "Launceston 34 2 3",
-				"callNumber": "LPIC33/1/254",
+				"abstractNote": "I. Allegro (08 min. 26 sec.) / Scalero -- II. Adagio (06 min. 21 sec.) / Scalero -- III. Vivace, ma appassionato (08 min. 13 sec.) / Scalero -- No. 1. Lento, poi tempo di walzer (04 min. 31 sec.) / Scalero -- No. 2. Andante malinconico (03 min. 48 sec.) / Scalero -- No. 3. Allegro con brio (05 min. 39 sec.) / Scalero -- No. 1. Allegro (04 min. 50 sec.) / Scalero -- No. 2. Allegro, alla Scarlatti (03 min. 31 sec.) / Scalero -- No. 3. Allegro giusto (05 min. 30 sec.) / Scalero -- 12 Variazioni nach den Barucaba von Paganini, Op. 15 (16 min. 44 sec.) / Scalero",
+				"callNumber": "LT_NAXOS_DIX:TC871901",
+				"label": "Hong Kong : Naxos Digital Services US Inc. 3014",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Item",
-				"attachments": [
-					{
-						"title": "Libraries Tasmania digital item: LPIC33-1-254",
-						"mimeType": "image/jpeg"
-					}
-				],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_SERIES$002f0$002fARCHIVES_SER_DIX:AE424/one",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"title": "Minutes of & Agenda for Meetings of Library Review Committee",
-				"creators": [
-					{
-						"lastName": "University of Tasmania (TA92)",
-						"creatorType": "contributor"
-					}
-				],
-				"date": "1993-10-14/1994-04-28",
-				"abstractNote": "Committee to review University Library - again. Indication in minutes that there was a meeting on 19 May 1994, but no record has been found | These records are part of the holdings of the Tasmanian Archives",
-				"callNumber": "AE424",
-				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Series",
+				"shortTitle": "SCALERO, R.",
+				"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
 				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_AGENCIES$002f0$002fARCHIVES_AGE_DIX:TA92/one",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"title": "University of Tasmania",
-				"creators": [],
-				"date": "1890-01-01",
-				"abstractNote": "The university was established to provide a regular and liberal course of education according to the preamble of the 1889 Act.;;;;According to the University of Tasmania Act 1992, the University has the following functions:;;(a) to advance, transmit and preserve knowledge and learning;;(b) to encourage and undertake research;;(c) to promote and sustain teaching and research to international standards of excellence;;(d) to encourage and provide opportunities for students and staff to develop and apply their knowledge and skills;;(e) to provide educational and research facilities appropriate to its other functions;;(f) to promote access to higher education having regard to principles of merit and equity;;(fa) to foster or promote the commercialisation of any intellectual property;;(g) to engage in activities which promote the social, cultural and economic welfare of the community and to make available for those purposes the resources of the University.",
-				"callNumber": "TA92",
-				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Agency",
-				"url": "https://stors.tas.gov.au/AI/TA92",
-				"attachments": [],
-				"tags": [],
-				"notes": [],
-				"seeAlso": []
-			}
-		]
-	},
-	{
-		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:1470635/one",
-		"items": [
-			{
-				"itemType": "manuscript",
-				"title": "Mitchell, John",
-				"creators": [],
-				"date": "1905",
-				"callNumber": "NAME_INDEXES:1470635",
-				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Prisoners",
-				"url": "https://stors.tas.gov.au/NI/1470635",
-				"attachments": [
-					{
-						"title": "Libraries Tasmania digital item: POL708-1-1",
-						"mimeType": "image/jpeg"
-					}
-				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -794,15 +684,15 @@ var testCases = [
 				"url": "https://stors.tas.gov.au/NI/1384365",
 				"attachments": [
 					{
-						"title": "Libraries Tasmania digital item: CON40/1/2",
+						"title": "Libraries Tasmania digital item: Conduct Record, CON40/1/2, page 224",
 						"mimeType": "image/jpeg"
 					},
 					{
-						"title": "Libraries Tasmania digital item: CON19/1/3",
+						"title": "Libraries Tasmania digital item: Description List, CON19/1/3, page 139",
 						"mimeType": "image/jpeg"
 					},
 					{
-						"title": "Libraries Tasmania digital item: CON15/1/1 Pages 48-49",
+						"title": "Libraries Tasmania digital item: Indent, CON15/1/1 Pages 48-49",
 						"mimeType": "image/jpeg"
 					}
 				],
@@ -814,18 +704,23 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:448150/one",
+		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:974802/one",
 		"items": [
 			{
 				"itemType": "manuscript",
-				"title": "Huxley, Annie - Respondent | Huxley, Ernest - Petitioner",
+				"title": "Crothers, Louisa",
 				"creators": [],
-				"date": "1920",
-				"callNumber": "NAME_INDEXES:448150",
+				"date": "10 Sep 1872",
+				"callNumber": "NAME_INDEXES:974802",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Divorces",
-				"url": "https://stors.tas.gov.au/NI/448150",
-				"attachments": [],
+				"manuscriptType": "Births",
+				"url": "https://stors.tas.gov.au/NI/974802",
+				"attachments": [
+					{
+						"title": "Libraries Tasmania digital item: RGD33/1/10/ no 2801",
+						"mimeType": "image/jpeg"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
