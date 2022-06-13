@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-13 05:35:10"
+	"lastUpdated": "2022-06-13 07:08:36"
 }
 
 /*
@@ -124,11 +124,27 @@ function getLinkLists(doc, label, idx) {
 	return values;
 }
 
-function addPermalink(doc, item) {
+function addPermalink(doc, item, idType) {
+	// The permalink is rendered via Javascript so not always available when you save mutiple items.
+	// The logic to create the permalinks is quite complicated for library items,
+	// so best to fallback to the system url for now.
+
+	// Try permalink first
 	let permalink = doc.querySelector("a[onclick^='return permalink']");
+	let archivesId = getFieldText(doc, "ARCHIVE_915");
+	let namesId = getFieldText(doc, "DOC_ID");
 	if (permalink) {
 		item.url = permalink.getAttribute("onclick").match(/(https.+)'\);$/)[1];
 	}
+	// Archives and Names indexes seem to have a consistent permalink pattern
+	else if (idType == "AI" && archivesId) {
+		item.url = "https://stors.tas.gov.au/" + idType + "/" + archivesId.replace(/\//g, "-");
+	}
+	else if (idType == "NI" && namesId) {
+		namesId = ZU.trim(namesId.split(":")[1]);
+		item.url = "https://stors.tas.gov.au/" + idType + "/" + namesId;
+	}
+	// Fall back to system url
 	else {
 		item.url = doc.location.href;
 	}
@@ -301,7 +317,7 @@ function scrapeLibrary(doc, url) {
 			// Add reference number
 			item.callNumber = getFieldText(doc, "DOC_ID");
 			// Add permalink
-			item = addPermalink(doc, item);
+			item = addPermalink(doc, item, null);
 			// Add digitised files as attachments
 			addDigitalFiles(doc, item);
 		});
@@ -360,7 +376,7 @@ function scrapeLibrary(doc, url) {
 			item["physical desription"] = cleanText(physDesc);
 		}
 
-		item = addPermalink(doc, item);
+		item = addPermalink(doc, item, null);
 		addDigitalFiles(doc, item);
 	}
 }
@@ -432,7 +448,7 @@ function scrapeArchives(doc) {
 		}
 	}
 	
-	item = addPermalink(doc, item);
+	item = addPermalink(doc, item, "AI");
 	addDigitalFiles(doc, item);
 }
 
@@ -536,7 +552,7 @@ function scrapeNames(doc) {
 			item[ZU.trim(label.textContent).replace(/:$/, "")] = getFieldText(doc, fields[i]);
 		}
 	}
-	item = addPermalink(doc, item);
+	item = addPermalink(doc, item, "NI");
 	addDigitalFiles(doc, item);
 }
 
