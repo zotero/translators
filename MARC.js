@@ -1,21 +1,20 @@
 {
 	"translatorID": "a6ee60df-1ddc-4aae-bb25-45e0537be973",
 	"label": "MARC",
-	"creator": "Simon Kornblith, Sylvain Machefert",
+	"creator": "Simon Kornblith, Sylvain Machefert, and Abe Jellinek",
 	"target": "marc",
 	"minVersion": "2.1.9",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 1,
-	"lastUpdated": "2020-10-14 14:41:53"
+	"lastUpdated": "2021-08-18 17:54:54"
 }
-
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
-	Copyright © 2020 Simon Kornblith, Sylvain Machefert
+	Copyright © 2021 Simon Kornblith, Sylvain Machefert, and Abe Jellinek
 
 	This file is part of Zotero.
 
@@ -43,36 +42,48 @@ function detectImport() {
 	}
 	return false;
 }
-// test
-var fieldTerminator = "\x1E";
-var recordTerminator = "\x1D";
-var subfieldDelimiter = "\x1F";
+
+const fieldTerminator = "\x1E";
+const recordTerminator = "\x1D";
+const subfieldDelimiter = "\x1F";
 
 /*
  * CLEANING FUNCTIONS
  */
 
 
-// general purpose cleaning
+/**
+ * Strip punctuation, parens, and brackets from the beginning and end of a
+ * string and coalesce adjacent spaces.
+ * @param {string} value The string to clean.
+ * @returns {string|null}
+ */
 function clean(value) {
-	if (value === undefined) {
+	if (value === undefined || value === null) {
 		return null;
 	}
 	value = value.replace(/^[\s.,/:;]+/, '');
 	value = value.replace(/[\s.,/:;]+$/, '');
 	value = value.replace(/ +/g, ' ');
+	
+	// strip 'START OF STRING' and 'STRING TERMINATOR' control characters
+	value = value.replace(/[\u0098\u009c]/g, '');
 
-	var char1 = value.substr(0, 1);
-	var char2 = value.substr(value.length - 1);
-	if ((char1 == "[" && char2 == "]") || (char1 == "(" && char2 == ")")) {
-		// chop of extraneous characters
+	var first = value[0];
+	var last = value[value.length - 1];
+	if ((first == "[" && last == "]") || (first == "(" && last == ")")) {
+		// chop off extraneous characters
 		return value.substr(1, value.length - 2);
 	}
 
 	return value;
 }
 
-// number extraction
+/**
+ * Extract the first sequence of one or more digits from a string.
+ * @param {string} text
+ * @returns {string}
+ */
 function pullNumber(text) {
 	var pullRe = /[0-9]+/;
 	var m = pullRe.exec(text);
@@ -82,23 +93,23 @@ function pullNumber(text) {
 	return "";
 }
 
-// ISBN extraction
-function pullISBN(text) {
-	var pullRe = /[0-9X-]+/;
-	var m = pullRe.exec(text);
-	if (m) {
-		return m[0];
-	}
-	return "";
+/**
+ * Try to extract a date from a string using ZU.strToISO, falling back to
+ * pullNumber if nothing can be found.
+ * @param {string} text
+ * @returns {string}
+ */
+function pullDate(text) {
+	return ZU.strToISO(text) || pullNumber(text);
 }
 
-
-// regular author extraction
-function author(author, type, useComma) {
-	return Zotero.Utilities.cleanAuthor(author, type, useComma);
-}
-
-
+/**
+ * Concatenate two strings, adding the provided delimiter if the first does not
+ * end with punctuation.
+ * @param {string} part1
+ * @param {string} part2
+ * @param {string} delimiter
+ */
 function glueTogether(part1, part2, delimiter) {
 	if (!part1 && !part2) {
 		return null;
@@ -112,7 +123,7 @@ function glueTogether(part1, part2, delimiter) {
 	if (!delimiter) {
 		return part1 + ' ' + part2;
 	}
-	// we only add the delimiter, if part1 is not ending with a punctation
+	// we only add the delimiter if part1 does not end with punctuation
 	if (part1.search(/[?:,.!;]\s*$/) > -1) {
 		return part1 + ' ' + part2;
 	}
@@ -123,276 +134,241 @@ function glueTogether(part1, part2, delimiter) {
  * END CLEANING FUNCTIONS
  */
 
-var record = function () {
-	this.directory = {};
-	this.leader = "";
-	this.content = "";
-
-	// defaults
-	this.indicatorLength = 2;
-	this.subfieldCodeLength = 2;
-};
-
-// import a binary MARC record into this record
-record.prototype.importBinary = function (record) {
-	// get directory and leader
-	var directory = record.substr(0, record.indexOf(fieldTerminator));
-	this.leader = directory.substr(0, 24);
-	directory = directory.substr(24);
-
-	// get various data
-	this.indicatorLength = parseInt(this.leader.substr(10, 1));
-	this.subfieldCodeLength = parseInt(this.leader.substr(11, 1));
-	var baseAddress = parseInt(this.leader.substr(12, 5));
-
-	// get record data
-	var contentTmp = record.substr(baseAddress);
-
-	// MARC wants one-byte characters, so when we have multi-byte UTF-8
-	// sequences, add null characters so that the directory shows up right. we
-	// can strip the nulls later.
-	this.content = "";
-	for (i = 0; i < contentTmp.length; i++) {
-		this.content += contentTmp.substr(i, 1);
-		if (contentTmp.charCodeAt(i) > 0x00FFFF) {
-			this.content += "\x00\x00\x00";
+class Record {
+	constructor() {
+		this.directory = {};
+		this.leader = "";
+		this.content = "";
+	
+		// defaults
+		this.indicatorLength = 2;
+		this.subfieldCodeLength = 2;
+	}
+	
+	importBinary(record) {
+		// get directory and leader
+		var directory = record.substr(0, record.indexOf(fieldTerminator));
+		this.leader = directory.substr(0, 24);
+		directory = directory.substr(24);
+	
+		// get various data
+		this.indicatorLength = parseInt(this.leader.substr(10, 1));
+		this.subfieldCodeLength = parseInt(this.leader.substr(11, 1));
+		var baseAddress = parseInt(this.leader.substr(12, 5));
+	
+		// get record data
+		var contentTmp = record.substr(baseAddress);
+	
+		// MARC wants one-byte characters, so when we have multi-byte UTF-8
+		// sequences, add null characters so that the directory shows up right. we
+		// can strip the nulls later.
+		this.content = "";
+		for (i = 0; i < contentTmp.length; i++) {
+			this.content += contentTmp.substr(i, 1);
+			if (contentTmp.charCodeAt(i) > 0x00FFFF) {
+				this.content += "\x00\x00\x00";
+			}
+			else if (contentTmp.charCodeAt(i) > 0x0007FF) {
+				this.content += "\x00\x00";
+			}
+			else if (contentTmp.charCodeAt(i) > 0x00007F) {
+				this.content += "\x00";
+			}
 		}
-		else if (contentTmp.charCodeAt(i) > 0x0007FF) {
-			this.content += "\x00\x00";
+	
+		// read directory
+		for (var i = 0; i < directory.length; i += 12) {
+			var tag = parseInt(directory.substr(i, 3));
+			var fieldLength = parseInt(directory.substr(i + 3, 4));
+			var fieldPosition = parseInt(directory.substr(i + 7, 5));
+	
+			if (!this.directory[tag]) {
+				this.directory[tag] = [];
+			}
+			this.directory[tag].push([fieldPosition, fieldLength]);
 		}
-		else if (contentTmp.charCodeAt(i) > 0x00007F) {
-			this.content += "\x00";
+	}
+	
+	addField(field, indicator, value) {
+		field = parseInt(field);
+		// make sure indicator is the right length
+		if (indicator.length > this.indicatorLength) {
+			indicator = indicator.substr(0, this.indicatorLength);
 		}
-	}
-
-	// read directory
-	for (var i = 0; i < directory.length; i += 12) {
-		var tag = parseInt(directory.substr(i, 3));
-		var fieldLength = parseInt(directory.substr(i + 3, 4));
-		var fieldPosition = parseInt(directory.substr(i + 7, 5));
-
-		if (!this.directory[tag]) {
-			this.directory[tag] = [];
+		else if (indicator.length != this.indicatorLength) {
+			indicator = ZU.lpad(indicator, " ", this.indicatorLength);
 		}
-		this.directory[tag].push([fieldPosition, fieldLength]);
+	
+		// add terminator
+		value = indicator + value + fieldTerminator;
+	
+		// add field to directory
+		if (!this.directory[field]) {
+			this.directory[field] = [];
+		}
+		this.directory[field].push([this.content.length, value.length]);
+	
+		// add field to record
+		this.content += value;
 	}
-};
-
-// add a field to this record
-record.prototype.addField = function (field, indicator, value) {
-	field = parseInt(field);
-	// make sure indicator is the right length
-	if (indicator.length > this.indicatorLength) {
-		indicator = indicator.substr(0, this.indicatorLength);
-	}
-	else if (indicator.length != this.indicatorLength) {
-		indicator = Zotero.Utilities.lpad(indicator, " ", this.indicatorLength);
-	}
-
-	// add terminator
-	value = indicator + value + fieldTerminator;
-
-	// add field to directory
-	if (!this.directory[field]) {
-		this.directory[field] = [];
-	}
-	this.directory[field].push([this.content.length, value.length]);
-
-	// add field to record
-	this.content += value;
-};
-
-// get all fields with a certain field number
-record.prototype.getField = function (field) {
-	field = parseInt(field);
-	var fields = [];
-
-	// make sure fields exist
-	if (!this.directory[field]) {
+	
+	// get all fields with a certain field number
+	getField(field) {
+		field = parseInt(field);
+		var fields = [];
+	
+		// make sure fields exist
+		if (!this.directory[field]) {
+			return fields;
+		}
+	
+		// get fields
+		for (let location of this.directory[field]) {
+			// add to array, replacing null characters
+			fields.push([this.content.substr(location[0], this.indicatorLength),
+				this.content.substr(location[0] + this.indicatorLength,
+					location[1] - this.indicatorLength - 1).replace(/\x00/g, "")]);
+		}
+	
 		return fields;
 	}
-
-	// get fields
-	for (var i in this.directory[field]) {
-		var location = this.directory[field][i];
-
-		// add to array, replacing null characters
-		fields.push([this.content.substr(location[0], this.indicatorLength),
-			this.content.substr(location[0] + this.indicatorLength,
-				location[1] - this.indicatorLength - 1).replace(/\x00/g, "")]);
-	}
-
-	return fields;
-};
-
-// given a field string, split it into subfields
-record.prototype.extractSubfields = function (fieldStr, tag /* for error message only*/) {
-	if (!tag) tag = '<no tag>';
-
-	var returnSubfields = {};
-
-	var subfields = fieldStr.split(subfieldDelimiter);
-	if (subfields.length == 1) {
-		returnSubfields["?"] = fieldStr;
-	}
-	else {
-		for (var j in subfields) {
-			if (subfields[j]) {
-				var subfieldIndex = subfields[j].substr(0, this.subfieldCodeLength - 1);
-				if (!returnSubfields[subfieldIndex]) {
-					returnSubfields[subfieldIndex] = subfields[j].substr(this.subfieldCodeLength - 1);
+	
+	// given a field string, split it into subfields
+	extractSubfields(fieldStr, tag /* for error message only*/) {
+		if (!tag) tag = '<no tag>';
+	
+		var returnSubfields = {};
+	
+		var subfields = fieldStr.split(subfieldDelimiter);
+		if (subfields.length == 1) {
+			returnSubfields["?"] = fieldStr;
+		}
+		else {
+			for (let subfield of subfields) {
+				if (subfield) {
+					var subfieldIndex = subfield.substr(0, this.subfieldCodeLength - 1);
+					if (!returnSubfields[subfieldIndex]) {
+						returnSubfields[subfieldIndex] = subfield.substr(this.subfieldCodeLength - 1);
+					}
+					else {
+						// Duplicate subfield
+						Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfield);
+						returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + "  " + subfield.substr(this.subfieldCodeLength - 1);
+					}
 				}
-				else {
-					// Duplicate subfield
-					Zotero.debug("Duplicate subfield '" + tag + " " + subfieldIndex + "=" + subfields[j]);
-					returnSubfields[subfieldIndex] = returnSubfields[subfieldIndex] + " " + subfields[j].substr(this.subfieldCodeLength - 1);
+			}
+		}
+	
+		return returnSubfields;
+	}
+	
+	// get subfields from a field
+	getFieldSubfields(tag) { // returns a two-dimensional array of values
+		var fields = this.getField(tag);
+		var returnFields = [];
+	
+		for (let field of fields) {
+			returnFields.push(this.extractSubfields(field[1], tag));
+		}
+	
+		return returnFields;
+	}
+	
+	// add field to DB
+	_associateDBField(item, fieldNo, part, fieldName, valueMapper) {
+		var field = this.getFieldSubfields(fieldNo);
+	
+		Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
+		if (field) {
+			for (var i in field) {
+				var value = false;
+				for (var j = 0; j < part.length; j++) {
+					var myPart = part.substr(j, 1);
+					if (field[i][myPart]) {
+						if (value) {
+							value += " " + field[i][myPart];
+						}
+						else {
+							value = field[i][myPart];
+						}
+					}
+				}
+				if (value) {
+					value = clean(value);
+	
+					if (valueMapper) {
+						value = valueMapper(value);
+					}
+	
+					if (fieldName == "creator") {
+						item.creators.push(value);
+					}
+					else if (fieldName == "ISBN") {
+						if (!item[fieldName]) {
+							item[fieldName] = value;
+						}
+						else {
+							item[fieldName] += ' ' + value;
+						}
+					}
+					else {
+						item[fieldName] = value;
+						return;
+					}
 				}
 			}
 		}
 	}
-
-	return returnSubfields;
-};
-
-// get subfields from a field
-record.prototype.getFieldSubfields = function (tag) { // returns a two-dimensional array of values
-	var fields = this.getField(tag);
-	var returnFields = [];
-
-	for (var i = 0, n = fields.length; i < n; i++) {
-		returnFields[i] = this.extractSubfields(fields[i][1], tag);
-	}
-
-	return returnFields;
-};
-
-// add field to DB
-record.prototype._associateDBField = function (item, fieldNo, part, fieldName, execMe, arg1, arg2) {
-	var field = this.getFieldSubfields(fieldNo);
-
-	Zotero.debug('MARC: found ' + field.length + ' matches for ' + fieldNo + part);
-	if (field) {
+	
+	// add field to DB as note
+	_associateNotes(item, fieldNo, part) {
+		var field = this.getFieldSubfields(fieldNo);
+		var texts = [];
+	
 		for (var i in field) {
-			var value = false;
 			for (var j = 0; j < part.length; j++) {
 				var myPart = part.substr(j, 1);
 				if (field[i][myPart]) {
-					if (value) {
-						value += " " + field[i][myPart];
-					}
-					else {
-						value = field[i][myPart];
-					}
+					texts.push(clean(field[i][myPart]));
 				}
 			}
-			if (value) {
-				value = clean(value);
-
-				if (execMe) {
-					value = execMe(value, arg1, arg2);
-				}
-
-				if (fieldName == "creator") {
-					item.creators.push(value);
-				}
-				else if (fieldName == "ISBN") {
-					if (!item[fieldName]) {
-						item[fieldName] = value;
+		}
+		var text = texts.join(' ');
+		if (text.trim() != "") item.notes.push({ note: text });
+	}
+	
+	// add field to DB as tags
+	_associateTags(item, fieldNo, part) {
+		var field = this.getFieldSubfields(fieldNo);
+	
+		for (let subfield of field) {
+			for (let myPart of part) {
+				if (subfield[myPart]) {
+					for (let tag of subfield[myPart].split('  ')) {
+						item.tags.push(clean(tag));
 					}
-					else {
-						item[fieldName] += ' ' + value;
-					}
-				}
-				else {
-					item[fieldName] = value;
-					return;
 				}
 			}
 		}
 	}
-};
-
-// add field to DB as note
-record.prototype._associateNotes = function (item, fieldNo, part) {
-	var field = this.getFieldSubfields(fieldNo);
-	var texts = [];
-
-	for (var i in field) {
-		for (var j = 0; j < part.length; j++) {
-			var myPart = part.substr(j, 1);
-			if (field[i][myPart]) {
-				texts.push(clean(field[i][myPart]));
-			}
-		}
-	}
-	var text = texts.join(' ');
-	if (text.trim() != "") item.notes.push({ note: text });
-};
-
-// add field to DB as tags
-record.prototype._associateTags = function (item, fieldNo, part) {
-	var field = this.getFieldSubfields(fieldNo);
-
-	for (var i in field) {
-		for (var j = 0; j < part.length; j++) {
-			var myPart = part.substr(j, 1);
-			if (field[i][myPart]) {
-				item.tags.push(clean(field[i][myPart]));
-			}
-		}
-	}
-};
-
-// this function loads a MARC record into our database
-record.prototype.translate = function (item) {
-	// get item type
-	if (this.leader) {
-		var marcType = this.leader.substr(6, 1);
-		if (marcType == "g") {
-			item.itemType = "film";
-		}
-		else if (marcType == "j" || marcType == "i") {
-			item.itemType = "audioRecording";
-		}
-		else if (marcType == "e" || marcType == "f") {
-			item.itemType = "map";
-		}
-		else if (marcType == "k") {
-			item.itemType = "artwork";
-		}
-		else if (marcType == "t" || marcType == "b") {
-			// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
-			item.itemType = "manuscript";
-		}
-		else {
-			item.itemType = "book";
-		}
-	}
-	else {
-		item.itemType = "book";
-	}
-
-	// Starting from there, we try to distinguish between unimarc and other marc flavours.
-	// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
-	// In marc-21, the title is in the 245 field and this field isn't used in unimarc
-	// So if we have a 200 and no 245, we can think we are with an unimarc record.
-	// Otherwise, we use the original association.
-	if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
+	
+	_processUNIMARC(item) {
+		Z.debug('Processing as UNIMARC record');
+		
 		// If we've got a 328 field, we're on a thesis
 		if (this.getFieldSubfields("328")[0]) {
 			item.itemType = "thesis";
 		}
 
 		// Extract ISBNs
-		this._associateDBField(item, "010", "a", "ISBN", pullISBN);
+		this._associateDBField(item, "010", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "011", "a", "ISSN", pullISBN);
+		this._associateDBField(item, "011", "a", "ISSN", ZU.cleanISSN);
 
 		// Extract creators (700, 701 & 702)
-		for (let i = 700; i < 703; i++) {
+		for (let i = 700; i <= 702; i++) {
 			let authorTab = this.getFieldSubfields(i);
-			for (let j in authorTab) {
-				var aut = authorTab[j];
+			for (let aut of authorTab) {
 				var authorText = "";
 				if ((aut.b) && (aut.a)) {
 					authorText = aut.a.replace(/,\s*$/, '') + ", " + aut.b;
@@ -401,16 +377,16 @@ record.prototype.translate = function (item) {
 					authorText = aut.a;
 				}
 				// prevent this from crashing with empty author tags
-				if (authorText) item.creators.push(Zotero.Utilities.cleanAuthor(authorText, "author", true));
+				if (authorText) item.creators.push(ZU.cleanAuthor(authorText, "author", true));
 			}
 		}
 
 		// Extract corporate creators (710, 711 & 712)
-		for (let i = 710; i < 713; i++) {
+		for (let i = 710; i <= 712; i++) {
 			let authorTab = this.getFieldSubfields(i);
-			for (let j in authorTab) {
-				if (authorTab[j].a) {
-					item.creators.push({ lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true });
+			for (let subfield of authorTab) {
+				if (subfield.a) {
+					item.creators.push({ lastName: subfield.a, creatorType: "contributor", fieldMode: true });
 				}
 			}
 		}
@@ -433,7 +409,7 @@ record.prototype.translate = function (item) {
 
 		// Extract title
 		var title = this.getField("200")[0][1]	// non-repeatable
-						.replace(	// chop off any translations, since they may have repeated $e fields
+						.replace( // chop off any translations, since they may have repeated $e fields
 							new RegExp('\\' + subfieldDelimiter + 'd.+'), '');
 		title = this.extractSubfields(title, '200');
 		item.title = glueTogether(clean(title.a), clean(title.e), ': ');
@@ -455,7 +431,7 @@ record.prototype.translate = function (item) {
 				this._associateDBField(item, "214", "c", "publisher");
 			}
 			// Extract year
-			this._associateDBField(item, "214", "d", "date", pullNumber);
+			this._associateDBField(item, "214", "d", "date", pullDate);
 		}
 		else {
 			// Extract place info
@@ -469,7 +445,7 @@ record.prototype.translate = function (item) {
 				this._associateDBField(item, "210", "c", "publisher");
 			}
 			// Extract year
-			this._associateDBField(item, "210", "d", "date", pullNumber);
+			this._associateDBField(item, "210", "d", "date", pullDate);
 		}
 
 
@@ -487,7 +463,10 @@ record.prototype.translate = function (item) {
 		this._associateDBField(item, "675", "a", "callNumber");
 		this._associateDBField(item, "680", "ab", "callNumber");
 	}
-	else {
+	
+	_processMARC21(item) {
+		Z.debug('Processing as MARC21 record');
+		
 		// If we've got a 502 field, we're on a thesis, either published on its own (thesis)
 		// or by a publisher and therefore with an ISBN number (book).
 		if (this.getFieldSubfields("502")[0] && !this.getFieldSubfields("020")[0]) {
@@ -495,9 +474,9 @@ record.prototype.translate = function (item) {
 		}
 
 		// Extract ISBNs
-		this._associateDBField(item, "020", "a", "ISBN", pullISBN);
+		this._associateDBField(item, "020", "a", "ISBN", ZU.cleanISBN);
 		// Extract ISSNs
-		this._associateDBField(item, "022", "a", "ISSN", pullISBN);
+		this._associateDBField(item, "022", "a", "ISSN", ZU.cleanISSN);
 		// Extract language
 		this._associateDBField(item, "041", "a", "language");
 		// Extract creators
@@ -518,32 +497,32 @@ record.prototype.translate = function (item) {
 		};
 
 		var creatorFields = ["100", "110", "700", "710"];// "111", "711" are meeting name
-		for (let i = 0; i < creatorFields.length; i++) {
-			var authorTab = this.getFieldSubfields(creatorFields[i]);
-			for (let j in authorTab) {
-				if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']] && RELATERM[authorTab[j]['4']] == "SKIP") {
+		for (let creatorField of creatorFields) {
+			var authorTab = this.getFieldSubfields(creatorField);
+			for (let author of authorTab) {
+				if (author['4'] && RELATERM[author['4']] && RELATERM[author['4']] == "SKIP") {
 					continue;
 				}
 				var creatorObject = {};
-				if (authorTab[j].a) {
-					if (creatorFields[i] == "100" || creatorFields[i] == "700") {
-						creatorObject = ZU.cleanAuthor(authorTab[j].a, "author", true);
+				if (author.a) {
+					if (creatorField == "100" || creatorField == "700") {
+						creatorObject = ZU.cleanAuthor(author.a, "author", true);
 					}
 					else {
 						// same replacements as in the function ZU.cleanAuthor for institutional authors:
-						authorTab[j].a = authorTab[j].a.replace(/^[\s\u00A0.,/[\]:]+/, '')
+						author.a = author.a.replace(/^[\s\u00A0.,/[\]:]+/, '')
 							.replace(/[\s\u00A0.,/[\]:]+$/, '')
 							.replace(/[\s\u00A0]+/, ' ');
-						creatorObject = { lastName: authorTab[j].a, creatorType: "contributor", fieldMode: true };
+						creatorObject = { lastName: author.a, creatorType: "contributor", fieldMode: true };
 					}
 					// some heuristic for the default values:
 					// in a book without any person as a main entry (no 100 field)
 					// it is likely that all persons (in 700 fields) are editors
-					if (creatorFields[i] == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
+					if (creatorField == "700" && !this.getFieldSubfields("100")[0] && item.itemType == "book") {
 						creatorObject.creatorType = "editor";
 					}
-					if (authorTab[j]['4'] && RELATERM[authorTab[j]['4']]) {
-						creatorObject.creatorType = RELATERM[authorTab[j]['4']];
+					if (author['4'] && RELATERM[author['4']]) {
+						creatorObject.creatorType = RELATERM[author['4']];
 					}
 					item.creators.push(creatorObject);
 				}
@@ -557,7 +536,7 @@ record.prototype.translate = function (item) {
 			// some LOC entries have no listed author, but have the author in the person subject field as the first entry
 			var field = this.getFieldSubfields("600");
 			if (field[0]) {
-				item.creators.push(Zotero.Utilities.cleanAuthor(field[0].a, "author", true));
+				item.creators.push(ZU.cleanAuthor(field[0].a, "author", true));
 			}
 		}
 
@@ -615,10 +594,14 @@ record.prototype.translate = function (item) {
 		//  b = subtitle
 		//  n = Number of part/section of a work
 		//  p = Name of part/section of a work
-		var titlesubfields = this.getFieldSubfields("245")[0];
+		var titleSubfields = this.getFieldSubfields("245")[0];
+		if (!titleSubfields) {
+			throw new Error('MARC record has no title field (245). This probably indicates that the record data is corrupt.');
+		}
+		
 		item.title = glueTogether(
-			glueTogether(clean(titlesubfields.a), clean(titlesubfields.b), ": "),
-			glueTogether(clean(titlesubfields.n), clean(titlesubfields.p), ": "),
+			glueTogether(clean(titleSubfields.a), clean(titleSubfields.b), ": "),
+			glueTogether(clean(titleSubfields.n), clean(titleSubfields.p), ": "),
 			". "
 		);
 
@@ -636,7 +619,7 @@ record.prototype.translate = function (item) {
 		}
 
 		// Extract year
-		this._associateDBField(item, "260", "c", "date", pullNumber);
+		this._associateDBField(item, "260", "c", "date", pullDate);
 		// Extract pages
 		this._associateDBField(item, "300", "a", "numPages", pullNumber);
 		// Extract series and series number
@@ -663,7 +646,9 @@ record.prototype.translate = function (item) {
 		}
 		// Extract URL for electronic resources
 		this._associateDBField(item, "245", "h", "medium");
-		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") this._associateDBField(item, "856", "u", "url");
+		if (item.medium == "electronic resource" || item.medium == "Elektronische Ressource") {
+			this._associateDBField(item, "856", "u", "url");
+		}
 
 		// Field 264 instead of 260
 		if (!item.place) this._associateDBField(item, "264", "a", "place");
@@ -677,8 +662,8 @@ record.prototype.translate = function (item) {
 		if (!item.title) this._associateDBField(item, "1300", "a", "title");
 		if (!item.date) this._associateDBField(item, "425", "a", "date", pullNumber);
 		if (!item.date) this._associateDBField(item, "595", "a", "date", pullNumber);
-		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", author, "author", true);
-		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", author, "author", true);
+		if (this.getFieldSubfields("104")[0]) this._associateDBField(item, "104", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
+		if (this.getFieldSubfields("800")[0]) this._associateDBField(item, "800", "a", "creator", text => ZU.cleanAuthor(text, "author", true));
 
 		// Spanish
 		if (!item.title) this._associateDBField(item, "200", "a", "title");
@@ -686,7 +671,7 @@ record.prototype.translate = function (item) {
 		if (!item.publisher) this._associateDBField(item, "210", "c", "publisher");
 		if (!item.date) this._associateDBField(item, "210", "d", "date");
 		if (!item.creators) {
-			for (let i = 700; i < 703; i++) {
+			for (let i = 700; i <= 703; i++) {
 				if (this.getFieldSubfields(i)[0]) {
 					Zotero.debug(i + " is AOK");
 					Zotero.debug(this.getFieldSubfields(i.toString()));
@@ -697,12 +682,12 @@ record.prototype.translate = function (item) {
 					else {
 						aut = aut.a.split(", ").join(" ");
 					}
-					item.creators.push(Zotero.Utilities.cleanAuthor(aut, "author"));
+					item.creators.push(ZU.cleanAuthor(aut, "author"));
 				}
 			}
 		}
 		if (item.title) {
-			item.title = Zotero.Utilities.capitalizeTitle(item.title);
+			item.title = ZU.capitalizeTitle(item.title);
 		}
 		if (this.getFieldSubfields("335")[0]) {
 			item.title = item.title + ": " + this.getFieldSubfields("335")[0].a;
@@ -730,11 +715,15 @@ record.prototype.translate = function (item) {
 					if (container.t && container.z) { // if there is an ISBN assume book section
 						item.itemType = "bookSection";
 					}
-					else if (container.t) { // else default to journal article
+					else if ((container.t || container.s) && item.itemType != 'artwork') {
+						// else default to journal article, unless it's artwork, in which
+						// case this is probably a collection name
 						item.itemType = "journalArticle";
 					}
 			}
-			var publication = container.t;
+			// some catalogs put the journal title in 773$s
+			// https://vufind.org/jira/si/jira.issueviews:issue-html/VUFIND-258/VUFIND-258.html#comment-header-10385
+			var publication = container.t || container.s;
 			if (item.itemType == "bookSection" || item.itemType == "conferencePaper") {
 				var pubinfo = container.d;
 				if (pubinfo) {
@@ -777,7 +766,9 @@ record.prototype.translate = function (item) {
 				if (publication) {
 					item.publicationTitle = publication.replace(/[.,\s]+$/, "");
 				}
+
 				item.journalAbbreviation = container.p;
+
 				var locators = container.g;
 				if (locators) {
 					// unfortunately there is no standardization whatsoever here
@@ -799,48 +790,98 @@ record.prototype.translate = function (item) {
 						item.volume = locators.match(/(\d+):\d+/)[1];
 						item.issue = locators.match(/\d+:(\d+)/)[1];
 					}
-					item.ISSN = container.x;
+				}
+
+				if (!item.volume) {
+					// LoC discussion paper suggested this in 2002 and it seems to be used (rarely)
+					// https://www.loc.gov/marc/marbi/2003/2003-dp01.html, see section 4.1
+					item.volume = container.v;
+				}
+				
+				if (container.x) {
+					item.ISSN = ZU.cleanISSN(container.x);
 				}
 			}
 		}
 	}
-	// editors get mapped as contributors - but so do many others who should be
-	// --> for books that don't have an author, turn contributors into editors.
-	if (item.itemType == "book") {
-		var hasAuthor = false;
-		for (let i = 0; i < item.creators.length; i++) {
-			if (item.creators[i].creatorType == "author") {
-				hasAuthor = true;
+	
+	// this function loads a MARC record into our database
+	translate(item) {
+		// get item type
+		if (this.leader) {
+			var marcType = this.leader.substr(6, 1);
+			if (marcType == "g") {
+				item.itemType = "film";
+			}
+			else if (marcType == "j" || marcType == "i") {
+				item.itemType = "audioRecording";
+			}
+			else if (marcType == "e" || marcType == "f") {
+				item.itemType = "map";
+			}
+			else if (marcType == "k") {
+				item.itemType = "artwork";
+			}
+			else if (marcType == "t" || marcType == "b") {
+				// 20091210: in unimarc, the code for manuscript is b, unused in marc21.
+				item.itemType = "manuscript";
+			}
+			else {
+				item.itemType = "book";
 			}
 		}
-		if (!hasAuthor) {
+		else {
+			item.itemType = "book";
+		}
+	
+		// Starting from there, we try to distinguish between unimarc and other marc flavours.
+		// In unimarc, the title is in the 200 field and this field isn't used in marc-21 (at least)
+		// In marc-21, the title is in the 245 field and this field isn't used in unimarc
+		// So if we have a 200 and no 245, we can think we are with an unimarc record.
+		// Otherwise, we use the original association.
+		if ((this.getFieldSubfields("200")[0]) && (!(this.getFieldSubfields("245")[0]))) {
+			this._processUNIMARC(item);
+		}
+		else {
+			this._processMARC21(item);
+		}
+		// editors get mapped as contributors - but so do many others who should be
+		// --> for books that don't have an author, turn contributors into editors.
+		if (item.itemType == "book") {
+			var hasAuthor = false;
 			for (let i = 0; i < item.creators.length; i++) {
-				if (item.creators[i].creatorType == "contributor") {
-					item.creators[i].creatorType = "editor";
+				if (item.creators[i].creatorType == "author") {
+					hasAuthor = true;
+				}
+			}
+			if (!hasAuthor) {
+				for (let i = 0; i < item.creators.length; i++) {
+					if (item.creators[i].creatorType == "contributor") {
+						item.creators[i].creatorType = "editor";
+					}
 				}
 			}
 		}
 	}
-};
+}
 
 function doImport() {
 	var text;
-	var holdOver = "";	// part of the text held over from the last loop
+	var holdOver = ""; // part of the text held over from the last loop
 
-	// eslint-disable-next-line no-cond-assign
-	while (text = Zotero.read(4096)) {	// read in 4096 byte increments
+	while ((text = Zotero.read(4096))) { // read in 4096 byte increments
 		var records = text.split("\x1D");
 
 		if (records.length > 1) {
 			records[0] = holdOver + records[0];
 			holdOver = records.pop(); // skip last record, since it's not done
 
-			for (var i in records) {
+			for (let binaryRecord of records) {
 				var newItem = new Zotero.Item();
 
 				// create new record
-				var rec = new record();
-				rec.importBinary(records[i]);
+				var rec = new Record();
+				rec.importBinary(binaryRecord);
 				rec.translate(newItem);
 
 				newItem.complete();
@@ -853,7 +894,8 @@ function doImport() {
 }
 
 var exports = {
-	record: record,
+	Record: Record,
+	record: Record, // for backwards compatibility
 	fieldTerminator: fieldTerminator,
 	recordTerminator: recordTerminator,
 	subfieldDelimiter: subfieldDelimiter
@@ -884,10 +926,13 @@ var testCases = [
 				"attachments": [],
 				"tags": [
 					{
-						"tag": "Biography Early works to 1800"
+						"tag": "Biography"
 					},
 					{
 						"tag": "Cuellar y Mosquera, Gabriel de"
+					},
+					{
+						"tag": "Early works to 1800"
 					},
 					{
 						"tag": "Early works to 1800"
@@ -1014,13 +1059,208 @@ var testCases = [
 				"publisher": "Springer Vieweg",
 				"attachments": [],
 				"tags": [
-					"(VLB-FS)Diskrete Mathematik",
-					"(VLB-FS)Lineare Algebra",
-					"(VLB-FS)Mathematik für Informatiker",
-					"(VLB-PF)BC: Paperback",
-					"(VLB-WN)1632: HC/Informatik, EDV/Informatik"
+					{
+						"tag": "(VLB-FS)Diskrete Mathematik"
+					},
+					{
+						"tag": "(VLB-FS)Lineare Algebra"
+					},
+					{
+						"tag": "(VLB-FS)Mathematik für Informatiker"
+					},
+					{
+						"tag": "(VLB-PF)BC: Paperback"
+					},
+					{
+						"tag": "(VLB-WN)1632: HC/Informatik, EDV/Informatik"
+					}
 				],
 				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "02250cam  2200385   450 001002100000003004700021039001900068100004100087101000800128102000700136105001800143106000600161181001900167181002400186182001000210182002000220200022800240210007800468215002000546300038300566321001600949423005200965532005301017620001001070700007101080702007501151801007001226930002401296423017801320701007901498423007001577701007801647423006401725701007501789\u001eFRBNF301683260000007\u001ehttp://catalogue.bnf.fr/ark:/12148/cb301683267\u001e  \u001foOPL\u001fa013994700\u001e  \u001fa19910922d1667    m  y0frey50      ba\u001e0 \u001falat\u001e  \u001faFR\u001e  \u001fa||||z   00|||\u001e  \u001far\u001e 0\u001f601\u001fai \u001fbxxxe  \u001e  \u001f602\u001fctxt\u001f2rdacontent\u001e 0\u001f601\u001fan\u001e  \u001f602\u001fcn\u001f2rdamedia\u001e1 \u001faAenigmati Patavino Oedipus e Germania, hoc est : Marmoris Patavini inscripti obscuri interpretatio , triplici commentariolo confecta, e museo Reinesii. Cum Mantissa pro viris clarissimis philologis Patavinis\u001fbTexte imprimé\u001e  \u001frParisiis, apud Sebastianum Cramoisy, via Jacobaea, sub signo Famae [1667]\u001e  \u001fa[2]-32 p.\u001fdin-4\u001e  \u001faRéunit une épître dédicatoire de Friedrich Brummer, datée de février 1667, et 4 textes dont le dernier est aussi de Brummer : \"Antiquariis examinandum saxum suspendam...\", signé Reinesius ; \"Fortunii Liceti... de saxo Patavino Maguriano divinatio\" ; \"Lucae Holstenii de monumento Maguriano, ad Joannem Rhodium epistola\" ; \"Mantissa pro antiquariis & philologis Patavinis\"\u001e1 \u001faCG, XX, 481\u001e 0\u001ftMantissa pro antiquariis & philologis Patavinis\u001e13\u001faMantissa pro antiquariis et philologis Patavinis\u001e  \u001fdParis\u001e |\u001f311997125\u001foISNI0000000061250290\u001faBrummer\u001fbFriedrich\u001ff1642-1668\u001f4070\u001e |\u001f316745582\u001foISNI0000000427722038\u001faCramoisy\u001fbSébastien\u001ff163.?-1708?\u001f4160\u001e 0\u001faFR\u001fbFR-751131015\u001fc19910922\u001fgAFNOR\u001fhFRBNF301683260000007\u001f2intermrc\u001e  \u001f5FR-751131007:J-4124\u001e 1\u001f9a001000\u001ftAntiquariis examinandum saxum suspendam XII. uncias altum, XXII. longum in hortis Sertorii Ursati, Patavini nobilis et medici ad thermas Aponi non ita pridem erutum\u001e |\u001f9a001000\u001f310450301\u001foISNI0000000122807081\u001faReinesius\u001fbThomas\u001ff1587-1667\u001f4070\u001e 1\u001f9a002000\u001ftFortunii Liceti,... de Saxo patavino maguriano divinatio\u001e |\u001f9a002000\u001f312221958\u001foISNI0000000121017678\u001faLiceti\u001fbFortunio\u001ff1577-1657\u001f4070\u001e 1\u001f9a003000\u001ftLucae Holstenii de Monumento maguriano... epistola\u001e |\u001f9a003000\u001f312071587\u001foISNI0000000080885873\u001faHolste\u001fbLukas\u001ff1596-1661\u001f4070\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Aenigmati Patavino Oedipus e Germania, hoc est : Marmoris Patavini inscripti obscuri interpretatio , triplici commentariolo confecta, e museo Reinesii. Cum Mantissa pro viris clarissimis philologis Patavinis",
+				"creators": [
+					{
+						"firstName": "Friedrich",
+						"lastName": "Brummer",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Thomas",
+						"lastName": "Reinesius",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Fortunio",
+						"lastName": "Liceti",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Lukas",
+						"lastName": "Holste",
+						"creatorType": "author"
+					},
+					{
+						"firstName": "Sébastien",
+						"lastName": "Cramoisy",
+						"creatorType": "author"
+					}
+				],
+				"language": "lat",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01387cam  2200337   450 001002100000003004700021010003300068020001700101021002000118039001900138100004100157101000800198102000700206105001800213106000600231181003100237181002900268182001000297182002000307200009800327210005500425215005300480225008000533410005600613608010900669686007000778700006700848801007000915930003200985930003201017\u001eFRBNF345506170000002\u001ehttp://catalogue.bnf.fr/ark:/12148/cb345506176\u001e  \u001fa2-01-002402-8\u001fbRel.\u001fd19,50 F\u001e  \u001faFR\u001fb07602058\u001e  \u001faFR\u001fbDL 75-23560\u001e  \u001foOPL\u001fa000025466\u001e  \u001fa19760121d1975    a  y0frey50      ba\u001e0 \u001fafre\u001e  \u001faFR\u001e  \u001faa   t   00|y|\u001e  \u001far\u001e 0\u001f601\u001fai \u001fbxxxe  \u001fab \u001fbxb2e  \u001e  \u001f602\u001fctxt\u001fcsti\u001f2rdacontent\u001e 0\u001f601\u001fan\u001e  \u001f602\u001fcn\u001f2rdamedia\u001e1 \u001faLa Résistance\u001fbTexte imprimé\u001feles armées de l'ombre\u001fftexte et dessins de Pierre Dupuis\u001e  \u001faParis\u001fcHachette\u001fd1975\u001fe95-Argenteuil\u001fgImpr. A.I.P.\u001e  \u001fa46 p.\u001fcill. en coul., couv. ill. en coul.\u001fd30 cm\u001e| \u001faB.D. Hachette\u001fiBande mauve\u001fiLa Seconde guerre mondiale en bandes dessinées\u001e 0\u001f034231103\u001ftB.D. Hachette. Bande mauve.\u001fx0337-0739\u001fv4\u001e  \u001faBandes dessinées\u001f2CNLJ\u001fkAvis critique donné par le Centre national de la littérature pour la jeunesse\u001e  \u001fa92 \u001f2Cadre de classement de la Bibliographie nationale française\u001e |\u001f311901257\u001foISNI000000010796314X\u001faDupuis\u001fbPierre\u001ff1931-....\u001f4440\u001e 0\u001faFR\u001fbFR-751131015\u001fc19760121\u001fgAFNOR\u001fhFRBNF345506170000002\u001f2intermrc\u001e  \u001f5FR-751131010:EL 4-Y-736 (4)\u001e  \u001f5FR-751131010:FOL-CNLJB-5348\u001e\u001d",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "La Résistance: les armées de l'ombre",
+				"creators": [
+					{
+						"firstName": "Pierre",
+						"lastName": "Dupuis",
+						"creatorType": "author"
+					}
+				],
+				"date": "1975",
+				"ISBN": "2010024028",
+				"callNumber": "92",
+				"language": "fre",
+				"place": "Paris",
+				"publisher": "Hachette",
+				"series": "B.D. Hachette",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01371nam a22002297a 4500001000800000044002100008100007300029245007400102260004300176300001200219336002800231653035600259773038700615856004401002930000901046999001701055995001401072995001201086995001601098995001501114995001201129\u001e0324653\u001e  \u001fbالسعودية\u001e  \u001f9271543\u001faابن عبيد، محمد بن عبدالكريم\u001feمؤلف\u001e  \u001faالتلقين وأثره في الرواية عند المحدثين\u001e  \u001fbجامعة أم القرى\u001fc1998\u001fm1419\u001e  \u001fa16 - 82\u001e  \u001faبحوث ومقالات\u001e  \u001faالناسخ والمنسوخ\u001faالاحاديث النبوية\u001faرواة الحديث\u001faالصحابة والتابعون\u001faاسناد الحديث\u001faالتلقين\u001faالحديث\u001faضبط الحديث\u001faالاحاديث الصحيحة\u001faالاحاديث المتواترة\u001faتدوين الحديث\u001faالمذاهب الفقهية\u001faالفقه الاسلامي\u001e  \u001f4العلوم الإنسانية ، متعددة التخصصات\u001f4العلوم الاجتماعية ، متعددة التخصصات\u001f6Humanities, Multidisciplinary\u001f6Social Sciences, Interdisciplinary\u001fc001\u001feUmm Al-Qura Uiversity Journal\u001ffMiğalaẗ Ǧamiʼaẗ Umm al-Quraẗ\u001fl018\u001fm س  11, ع 18\u001fo0007\u001fsمجلة جامعة أم القرى للبحوث العلمية\u001fv011\u001fx1319-4216\u001e  \u001fuhttp://search.mandumah.com/Record/58382\u001e  \u001fdy\u001fpy\u001e  \u001fc58382\u001fd58382\u001e  \u001faEduSearch\u001e  \u001faEcoLink\u001e  \u001faIslamicInfo\u001e  \u001faHumanIndex\u001e  \u001faAraBase\u001e\u001d",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "التلقين وأثره في الرواية عند المحدثين",
+				"creators": [
+					{
+						"lastName": "ابن عبيد، محمد بن عبدالكريم",
+						"creatorType": "author"
+					}
+				],
+				"date": "1998",
+				"ISSN": "1319-4216",
+				"publicationTitle": "مجلة جامعة أم القرى للبحوث العلمية",
+				"volume": "011",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "اسناد الحديث"
+					},
+					{
+						"tag": "الاحاديث الصحيحة"
+					},
+					{
+						"tag": "الاحاديث المتواترة"
+					},
+					{
+						"tag": "الاحاديث النبوية"
+					},
+					{
+						"tag": "التلقين"
+					},
+					{
+						"tag": "الحديث"
+					},
+					{
+						"tag": "الصحابة والتابعون"
+					},
+					{
+						"tag": "الفقه الاسلامي"
+					},
+					{
+						"tag": "المذاهب الفقهية"
+					},
+					{
+						"tag": "الناسخ والمنسوخ"
+					},
+					{
+						"tag": "تدوين الحديث"
+					},
+					{
+						"tag": "رواة الحديث"
+					},
+					{
+						"tag": "ضبط الحديث"
+					}
+				],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "01945ckd a22003857a 4500001000900000005001700009007000700026007001500033008004100048906004500089955002100134010001700155037006600172040001900238050004800257245003100305260001900336300002600355520019600381540013400577500002100711500001500732500016600747500004400913580011000957600002401067650005101091650002601142655003801168773011201206852012701318856009301445985001101538991001001549\u001e17673423\u001e20130326113625.0\u001ekh|bo|\u001ecr |||||||||||\u001e130326s1950    |||nnn       ||   kneng  \u001e  \u001fa0\u001fbibc\u001fcorignew\u001fdu\u001fencip\u001ff20\u001fgy-printpho\u001e  \u001faqw30, 2013-03-26\u001e  \u001fa  2013646400\u001e  \u001faLC-DIG-ds-03716\u001fbDLC\u001fc(digital file from original photograph)\u001e  \u001faDLC\u001fcDLC\u001fegihc\u001e00\u001faNYWTS - SUBJ/GEOG--Football Helmets\u001fb[item]\u001e00\u001faTesting helmet\u001fh[graphic].\u001e  \u001fc1950 Sept. 13.\u001e  \u001fa1 photographic print.\u001e0 \u001faPhotograph shows a pendulum after it pounded into a plastic helmet worn for testing by Dr. Charles F. Lombard, Director of the University of Southern California, Dept. of Aviation Physiology.\u001e  \u001faPublication may be restricted. For information see \"New York World-Telegram & ...,\"\u001fuhttp://www.loc.gov/rr/print/res/076_nyw.html\u001e  \u001faACME Photograph.\u001e  \u001faNo. LA333.\u001e  \u001faTesting is part of a program being worked out to improve equipment, especially headgear for football players, to cut down fatalities and injuries among gridders.\u001e  \u001faTitle from news agency caption on item.\u001e  \u001faForms part of: New York World-Telegram and the Sun Newspaper Photograph Collection (Library of Congress).\u001e10\u001faLombard, Charles F.\u001e 7\u001faTesting\u001fzCalifornia\u001fzLos Angeles\u001fy1950.\u001f2lctgm\u001e 7\u001faHelmets\u001fy1950.\u001f2lctgm\u001e 7\u001faPhotographic prints\u001fy1950.\u001f2gmgpc\u001e0 \u001ftNew York World-Telegram and the Sun Newspaper Photograph Collection (Library of Congress)\u001fw(DLC)   94505083\u001e  \u001faLibrary of Congress\u001fbPrints and Photographs Division\u001feWashington, D.C. 20540 USA\u001fndcu\u001fuhttp://hdl.loc.gov/loc.pnp/pp.print\u001e41\u001f3digital file from original photograph\u001fdds\u001ff03716\u001fqp\u001fuhttp://hdl.loc.gov/loc.pnp/ds.03716\u001e  \u001fapp/cph\u001e  \u001fbc-P&P\u001e\u001d",
+		"items": [
+			{
+				"itemType": "artwork",
+				"title": "Testing helmet",
+				"creators": [],
+				"date": "1950-09-13",
+				"abstractNote": "Photograph shows a pendulum after it pounded into a plastic helmet worn for testing by Dr. Charles F. Lombard, Director of the University of Southern California, Dept. of Aviation Physiology",
+				"artworkMedium": "graphic",
+				"callNumber": "NYWTS - SUBJ/GEOG--Football Helmets [item]",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "1950"
+					},
+					{
+						"tag": "California"
+					},
+					{
+						"tag": "Helmets"
+					},
+					{
+						"tag": "Lombard, Charles F"
+					},
+					{
+						"tag": "Los Angeles"
+					},
+					{
+						"tag": "Photographic prints"
+					},
+					{
+						"tag": "Testing"
+					}
+				],
+				"notes": [
+					{
+						"note": "ACME Photograph No. LA333 Testing is part of a program being worked out to improve equipment, especially headgear for football players, to cut down fatalities and injuries among gridders Title from news agency caption on item"
+					}
+				],
 				"seeAlso": []
 			}
 		]
