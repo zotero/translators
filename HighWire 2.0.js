@@ -409,7 +409,7 @@ function detectWeb(doc, url) {
 			&& !url.includes('/suppl/')
 		) {
 			if (url.includes('medrxiv.org') || url.includes('biorxiv.org')) {
-				return "preprint";
+				return preprintType;
 			}
 			else {
 				return "journalArticle";
