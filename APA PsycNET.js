@@ -2,14 +2,14 @@
 	"translatorID": "1e1e35be-6264-45a0-ad2e-7212040eb984",
 	"label": "APA PsycNet",
 	"creator": "Philipp Zumstein",
-	"target": "^https?://psycnet\\.apa\\.org/",
+	"target": "^https?://(psycnet|doi)\\.apa\\.org/",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-04-22 19:56:07"
+	"lastUpdated": "2022-06-16 23:23:51"
 }
 
 /*
