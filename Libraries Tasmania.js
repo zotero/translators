@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-13 07:08:36"
+	"lastUpdated": "2022-06-18 04:45:03"
 }
 
 /*
@@ -152,6 +152,13 @@ function addPermalink(doc, item, idType) {
 }
 
 function addDigitalFiles(doc, item) {
+	// Add snapshots
+	item.attachments.push({
+		title: "Snapshot",
+		mimeType: "text/html",
+		document: doc
+	});
+
 	var digitalUrls = [];
 	var digitalLabels = {};
 
@@ -579,7 +586,12 @@ var testCases = [
 				"libraryCatalog": "Libraries Tasmania",
 				"manuscriptType": "Series",
 				"url": "https://stors.tas.gov.au/AI/AD940",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -606,6 +618,10 @@ var testCases = [
 				"manuscriptType": "Item",
 				"url": "https://stors.tas.gov.au/AI/NS6985-1-1",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
 					{
 						"title": "Libraries Tasmania digital item: NS6985-1-1",
 						"mimeType": "application/pdf"
@@ -637,7 +653,12 @@ var testCases = [
 				"place": "London : Warne, [187- ]",
 				"shortTitle": "Lives of the most eminent English poets, with critical observations on their works",
 				"url": "https://stors.tas.gov.au/ILS/SD_ILS-491298",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [
 					{
 						"tag": "English poetry--18th century--History and criticism"
@@ -678,7 +699,12 @@ var testCases = [
 				"libraryCatalog": "Libraries Tasmania",
 				"shortTitle": "SCALERO, R.",
 				"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
-				"attachments": [],
+				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					}
+				],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -699,6 +725,10 @@ var testCases = [
 				"manuscriptType": "Convicts",
 				"url": "https://stors.tas.gov.au/NI/1384365",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
 					{
 						"title": "Libraries Tasmania digital item: Conduct Record, CON40/1/2, page 224",
 						"mimeType": "image/jpeg"
@@ -732,6 +762,10 @@ var testCases = [
 				"manuscriptType": "Births",
 				"url": "https://stors.tas.gov.au/NI/974802",
 				"attachments": [
+					{
+						"title": "Snapshot",
+						"mimeType": "text/html"
+					},
 					{
 						"title": "Libraries Tasmania digital item: RGD33/1/10/ no 2801",
 						"mimeType": "image/jpeg"
