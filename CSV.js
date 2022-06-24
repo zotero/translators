@@ -3,7 +3,7 @@
 	"label": "CSV",
 	"creator": "Philipp Zumstein and Aurimas Vinckevicius",
 	"target": "csv",
-	"minVersion": "3.0",
+	"minVersion": "4.0.27",
 	"maxVersion": "",
 	"priority": 100,
 	"displayOptions": {
@@ -12,7 +12,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 2,
-	"lastUpdated": "2018-08-10 06:37:30"
+	"lastUpdated": "2022-06-24 10:22:23"
 }
 
 /*
@@ -150,6 +150,10 @@ function writeColumnHeaders() {
 function getValue(item, field) {
 	var split = field.split('/'), value = fieldWrapperCharacter;
 	switch (split[0]) {
+		// Get key from URI (which on translation-server might just be the key)
+		case 'key':
+			value += item.uri.match(/([A-Z0-9]+)$/)[1];
+			break;
 		case 'publicationYear':
 			if (item.date) {
 				var date = ZU.strToDate(item.date);
