@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-30 00:54:13"
+	"lastUpdated": "2022-06-30 13:32:56"
 }
 
 /*
@@ -160,6 +160,7 @@ function wg1Chapter(slug, itemTemplate) {
 function wg2Chapter(slug, itemTemplate) {
 	return Object.assign(new Zotero.Item('bookSection'), itemTemplate, {
 		bookTitle: 'Climate Change 2022: Impacts, Adaptation and Vulnerability. Contribution of Working Group II to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
+		publisher: 'Cambridge University Press',
 		date: '2022',
 		creators: [...(itemTemplate.creators || []), ...report6Wg2Editors],
 		attachments: [
