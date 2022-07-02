@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-13 14:37:34"
+	"lastUpdated": "2022-07-02 05:38:57"
 }
 
 /*
@@ -86,7 +86,7 @@ function scrapeAndParse(doc, url) {
 		pattern = /<h1>([\s\S]*?)<\/h1>/;
 		if (pattern.test(page)) {
 			var shortTitle = pattern.exec(page)[1];
-			newItem.shortTitle = ZU.trim(trimTags(shortTitle));
+			newItem.shortTitle = (trimTags(shortTitle)).trim();
 			// Zotero.debug("shortTitle: "+shortTitle);
 		}
 		
@@ -97,8 +97,8 @@ function scrapeAndParse(doc, url) {
 		pattern = /<span [^>]*?>副标题:<\/span>(.*?)<br/;
 		if (pattern.test(page)) {
 			var subTitle = pattern.exec(page)[1];
-			Zotero.debug("subTitle: "+subTitle);
-			newItem.title = newItem.shortTitle + ": " + ZU.trim(subTitle);
+			// Zotero.debug("subTitle: "+subTitle);
+			newItem.title = newItem.shortTitle + ": " + subTitle.trim();
 		} 
 		else {
 			newItem.title = newItem.shortTitle;
@@ -127,7 +127,7 @@ function scrapeAndParse(doc, url) {
 					}
 				}
 				newItem.creators.push(ZU.cleanAuthor(
-					ZU.trim(authorNames[i]),
+					(authorNames[i]).trim(),
 					"author", useComma));
 			}
 		}
@@ -275,6 +275,7 @@ function doWeb(doc, url) {
 }
 
 
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
@@ -294,7 +295,7 @@ var testCases = [
 						"creatorType": "translator"
 					}
 				],
-				"date": "2021-3",
+				"date": "2021-03",
 				"ISBN": "9787532786831",
 				"abstractNote": "“太阳总有办法照到我们，不管我们在哪里。”    ~    克拉拉是一个专为陪伴儿童而设计的太阳能人工智能机器人（AF），具有极高的观察、推理与共情能力。她坐在商店展示橱窗里，注视着街头路人以及前来浏览橱窗的孩子们的一举一动。她始终期待着很快就会有人挑中她，不过，当这种永久改变境遇的可能性出现时，克拉拉却被提醒不要过分相信人类的诺言。    在《克拉拉与太阳》这部作品中，石黑一雄通过一位令人难忘的叙述者的视角，观察千变万化的现代社会，探索了一个根本性的问题：究竟什么是爱？    ~    “你相信有‘人心’这回事吗？    我不仅仅是指那个器官，当然喽。    我说的是这个词的文学意义。    人心。你相信有这样东西吗？    某种让我们每个人成为独特个体的东西？”",
 				"extra": "Original Title: Klara and the Sun",
