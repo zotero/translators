@@ -8,8 +8,7 @@
 	"priority": 99,
 	"inRepository": true,
 	"translatorType": 8,
-	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-06-23 09:20:00"
+	"lastUpdated": "2022-06-10 06:34:45"
 }
 
 /*
@@ -76,8 +75,15 @@ function doSearch(item) {
 			var tocURL = ZU.xpath(xml, '//marc:datafield[@tag="856"][ marc:subfield[text()="Inhaltsverzeichnis"] ]/marc:subfield[@code="u"]', ns);
 			if (tocURL.length) {
 				//Z.debug(tocURL[0].textContent);
+				let url = tocURL[0].textContent;
+				// Force all PDF URLs to HTTPS -- any domains specified in MARC records likely
+				// support HTTPS (e.g., www.gbv.de and d-nb.info)
+				if (url.startsWith("http://")) {
+					Z.debug(`Forcing HTTPS for ${url}`);
+					url = url.replace(/^http:\/\//, "https://");
+				}
 				item.attachments = [{
-					url: tocURL[0].textContent,
+					url,
 					title: "Table of Contents PDF",
 					mimeType: "application/pdf"
 				}];
@@ -113,6 +119,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
 				"creators": [
 					{
 						"lastName": "Böttcher",
@@ -125,29 +132,28 @@ var testCases = [
 						"fieldMode": true
 					}
 				],
-				"notes": [ 
-					{ 
-						"note": "Literaturangaben" 
-					}
-				],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2014",
+				"ISBN": "9783830931492",
+				"extra": "OCLC: 885612607",
+				"language": "ger",
+				"libraryCatalog": "K10plus ISBN",
+				"numPages": "219",
+				"place": "Münster",
+				"publisher": "Waxmann",
+				"shortTitle": "Evaluation in Deutschland und Österreich",
 				"attachments": [
 					{
 						"title": "Table of Contents PDF",
 						"mimeType": "application/pdf"
-						}
+					}
 				],
-				"libraryCatalog": "K10plus ISBN",
-				"place": "Münster",
-				"ISBN": "9783830931492",
-				"title": "Evaluation in Deutschland und Österreich: Stand und Entwicklungsperspektiven in den Arbeitsfeldern der DeGEval - Gesellschaft für Evaluation",
-				"publisher": "Waxmann",
-				"date": "2014",
-				"numPages": "219",
-				"language": "ger",
-				"shortTitle": "Evaluation in Deutschland und Österreich",
-				"extra": "OCLC: 885612607"
+				"tags": [],
+				"notes": [
+					{
+						"note": "Literaturangaben"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	},
@@ -159,6 +165,7 @@ var testCases = [
 		"items": [
 			{
 				"itemType": "book",
+				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
 				"creators": [
 					{
 						"firstName": "Katrin Bente",
@@ -166,6 +173,24 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"date": "2012",
+				"ISBN": "9783866882409 9783866882416",
+				"extra": "OCLC: 795769702",
+				"language": "ger",
+				"libraryCatalog": "K10plus ISBN",
+				"numPages": "387",
+				"place": "München",
+				"publisher": "Sagner",
+				"series": "Slavolinguistica",
+				"seriesNumber": "15",
+				"shortTitle": "Bilinguale Lexik",
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
 				"notes": [
 					{
 						"note": "Literaturverz. S. [373] - 387 Die CD-ROM enth. einen Anh. mit Dokumenten zur Sprachproduktion und Sprachbewertung"
@@ -174,26 +199,7 @@ var testCases = [
 						"note": "Teilw. zugl.: Hamburg, Univ., FB SLM, Diss., 2011 u.d.T.: Karl, Katrin Bente: Nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [
-					{
-						"title": "Table of Contents PDF",
-						"mimeType": "application/pdf"
-					}
-				],
-				"ISBN": "9783866882409 9783866882416",
-				"language": "ger",
-				"place": "München",
-				"numPages": "387",
-				"series": "Slavolinguistica",
-				"seriesNumber": "15",
-				"libraryCatalog": "K10plus ISBN",
-				"shortTitle": "Bilinguale Lexik",
-				"title": "Bilinguale Lexik: nicht materieller lexikalischer Transfer als Folge der aktuellen russisch-deutschen Zweisprachigkeit",
-				"publisher": "Sagner",
-				"date": "2012",
-				"extra": "OCLC: 795769702"
+				"seeAlso": []
 			}
 		]
 	},
@@ -207,7 +213,7 @@ var testCases = [
 				"itemType": "book",
 				"title": "The harbour of Sebastos (Caesarea Maritima) in its Roman Mediterranean context",
 				"creators": [
-					 {
+					{
 						"firstName": "Avnēr",
 						"lastName": "Rabbān",
 						"creatorType": "author"
@@ -215,28 +221,28 @@ var testCases = [
 					{
 						"firstName": "Michal",
 						"lastName": "Artzy",
-						"creatorType": "author" 
+						"creatorType": "author"
 					}
 				],
-				"notes": [],
-				"tags": [],
-				"seeAlso": [],
+				"date": "2009",
+				"ISBN": "9781407304120",
+				"extra": "OCLC: 320755805",
+				"language": "eng",
+				"libraryCatalog": "K10plus ISBN",
+				"numPages": "222",
+				"place": "Oxford",
+				"publisher": "Archaeopress",
+				"series": "BAR International series",
+				"seriesNumber": "1930",
 				"attachments": [
 					{
 						"title": "Table of Contents PDF",
 						"mimeType": "application/pdf"
-					} 
+					}
 				],
-				"ISBN": "9781407304120",
-				"language": "eng",
-				"place": "Oxford",
-				"numPages": "222",
-				"series": "BAR International series",
-				"seriesNumber": "1930",
-				"libraryCatalog": "K10plus ISBN",
-				"publisher": "Archaeopress" ,
-				"date": "2009",
-				"extra": "OCLC: 320755805"
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
 			}
 		]
 	},
@@ -256,24 +262,76 @@ var testCases = [
 						"creatorType": "editor"
 					}
 				],
+				"date": "2013",
+				"ISBN": "9781491253168",
+				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
+				"extra": "OCLC: 860902984",
+				"language": "eng",
+				"libraryCatalog": "K10plus ISBN",
+				"numPages": "93",
+				"place": "Lexington, KY",
+				"publisher": "CreateSpace",
+				"shortTitle": "Classroom activities for the busy teacher",
+				"attachments": [],
+				"tags": [],
 				"notes": [
 					{
 						"note": "Place of publication information from back of book. Publisher information provided by Amazon"
 					}
 				],
-				"tags": [],
-				"seeAlso": [],
-				"attachments": [],
-				"ISBN": "9781491253168",
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "search",
+		"input": {
+			"ISBN": "9780754671275"
+		},
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Remaining sensitive to the possibility of failure: second Resilience Engineering Symposium that was held November 8 - 10, 2007 in Juan-les-Pins",
+				"creators": [
+					{
+						"firstName": "Erik",
+						"lastName": "Hollnagel",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Christopher P.",
+						"lastName": "Nemeth",
+						"creatorType": "editor"
+					},
+					{
+						"firstName": "Sidney",
+						"lastName": "Dekker",
+						"creatorType": "editor"
+					}
+				],
+				"date": "2008",
+				"ISBN": "9780754671275",
 				"language": "eng",
-				"abstractNote": "Introduction -- RileyRover basics -- Keeping track -- What is a robot? -- Flowcharting -- How far? -- How fast? -- That bot has personality! -- How many sides? -- Help, I'm stuck! -- Let's go prospecting! -- Stay away from the edge -- Prospecting and staying safe -- Going up and going down -- Cargo delivery -- Prepare the landing zone -- Meet your adoring public! -- As seen on TV! -- Mini-golf -- Dancing robots -- Robot wave -- Robot butler -- Student worksheets -- Building instructions. - \"A guide for teachers implementing a robotics unit in the classroom ... aimed at middle years schooling (ages 9-15) ... [and] based around a single robot, the RileyRover\"--page 1",
-				"place": "Lexington, KY",
-				"numPages": "93",
 				"libraryCatalog": "K10plus ISBN",
-				"publisher": "CreateSpace" ,
-				"date": "2013",
-				"extra": "OCLC: 860902984",
-				"shortTitle": "Classroom activities for the busy teacher"
+				"numPages": "332",
+				"place": "Aldershot, Hampshire",
+				"publisher": "Ashgate",
+				"series": "Resilience engineering perspectives",
+				"seriesNumber": "1",
+				"shortTitle": "Remaining sensitive to the possibility of failure",
+				"attachments": [
+					{
+						"title": "Table of Contents PDF",
+						"mimeType": "application/pdf"
+					}
+				],
+				"tags": [],
+				"notes": [
+					{
+						"note": "Many of the papers are based on presentations made at the Second Resilience Engineering Symposium that was held November 8 - 10 2007 in Juan-les-Pins, France. - Complete proceedings from this symposium are availabe for download at http://www.resilience-engineering.org Includes bibliographical references and index"
+					}
+				],
+				"seeAlso": []
 			}
 		]
 	}

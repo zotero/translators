@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-09-07 20:12:08"
+	"lastUpdated": "2022-06-24 23:09:01"
 }
 
 /*
@@ -38,8 +38,10 @@
 
 function detectWeb(doc, url) {
 	let articleRegex = /\/(article|fullarticle|advance-article|advance-article-abstract|article-abstract)(\/|\.aspx)/;
-	if (articleRegex.test(url) && getArticleId(doc)) {
-		return "journalArticle";
+	if (articleRegex.test(url)) {
+		if (getArticleId(doc)) {
+			return "journalArticle";
+		}
 	}
 	else if (getSearchResults(doc, true)) {
 		return "multiple";
@@ -81,9 +83,6 @@ function getArticleId(doc) {
 	}
 	if (!id) {
 		id = attr(doc, '[data-resource-id]', 'data-resource-id');
-	}
-	if (!id) {
-		throw new Error('ID not found in document');
 	}
 	return id;
 }
