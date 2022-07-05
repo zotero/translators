@@ -151,7 +151,7 @@ function doExport() {
 			span.innerHTML = '(' + items.map((item, i) => {
 				return Zotero.getOption('includeAppLinks')
 					? `<a href="${uris[i]}">${item}</a>`
-					: item
+					: item;
 			}).join('; ') + ')';
 		}
 	});
