@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-18 04:45:03"
+	"lastUpdated": "2022-07-05 02:34:44"
 }
 
 /*
@@ -40,9 +40,15 @@ const formatMapping = {
 	"image (online)": "artwork",
 	eMusic: "audioRecording",
 	cd: "audioRecording",
+	"audiobook cd": "audioRecording",
 	eAudiobook: "audioRecording",
 	dvd: "videoRecording",
-	"archived website": "webpage"
+	"archived website": "webpage",
+	manuscript: "manuscript",
+	map: "map",
+	picture: "artwork",
+	print: "artwork",
+	postcard: "artwork"
 };
 
 function detectWeb(doc, url) {
@@ -50,14 +56,14 @@ function detectWeb(doc, url) {
 	if (url.includes("results") && getSearchResults(doc, true)) {
 		return "multiple";
 	}
-	else if (catType == "tas" || url.includes("ARCHIVES_")) {
+	else if ((catType && catType[1] == "tas") || url.includes("ARCHIVES_")) {
 		return "manuscript";
 	}
-	else if (catType == "names" || url.includes("NAME_INDEXES")) {
+	else if ((catType && catType[1] == "names") || url.includes("NAME_INDEXES")) {
 		return "manuscript";
 	}
 	else {
-		var formats = doc.querySelectorAll("div.displayElementText.text-p.LOCAL_FORMAT");
+		var formats = doc.querySelectorAll(".displayElementText.LOCAL_FORMAT");
 		for (let i = 0; i < formats.length; i++) {
 			if (formats[i].textContent in formatMapping) {
 				return formatMapping[formats[i].textContent];
@@ -70,15 +76,8 @@ function detectWeb(doc, url) {
 function doWeb(doc, url) {
 	if (detectWeb(doc, url) == "multiple") {
 		Zotero.selectItems(getSearchResults(doc, false), function (items) {
-			if (!items) {
-				return true;
-			}
-			var articles = [];
-			for (var i in items) {
-				articles.push(i);
-			}
-			ZU.processDocuments(articles, scrape);
-			return false;
+			if (!items) return;
+			ZU.processDocuments(Object.keys(items), scrape);
 		});
 	}
 	else {
@@ -102,7 +101,7 @@ function getSearchResults(doc, checkOnly) {
 }
 
 function getFieldText(doc, label) {
-	let fields = doc.querySelectorAll("div.displayElementText.text-p." + label);
+	let fields = doc.querySelectorAll(".displayElementText." + label);
 	if (fields) {
 		let fieldTexts = [];
 		for (let i = 0; i < fields.length; ++i) {
@@ -115,7 +114,7 @@ function getFieldText(doc, label) {
 
 function getLinkLists(doc, label, idx) {
 	var values = [];
-	let links = doc.querySelectorAll("div." + label + " a[href*='" + idx + "']");
+	let links = doc.querySelectorAll("." + label + " a[href*='" + idx + "']");
 	if (links) {
 		for (let i = 0; i < links.length; ++i) {
 			values.push(links[i].textContent);
@@ -168,7 +167,7 @@ function addDigitalFiles(doc, item) {
 	var embeddedLinks = doc.querySelectorAll('.NI_URL_value');
 	if (embeddedLinks.length > 0) {
 		for (let i = 0; i < embeddedLinks.length; ++i) {
-			var url = embeddedLinks[i].querySelector("subfield_u").textContent;
+			var url = text(embeddedLinks[i], "subfield_u");
 			// Link labels
 			let labelParts = [];
 			// Record type
@@ -377,10 +376,10 @@ function scrapeLibrary(doc, url) {
 		let physParts = physDesc.split(";");
 		if (physParts.length == 2 && format == "book") {
 			item.numPages = cleanText(physParts[0]);
-			item["physical desription"] = cleanText(physParts[1]);
+			item["physical description"] = cleanText(physParts[1]);
 		}
 		else {
-			item["physical desription"] = cleanText(physDesc);
+			item["physical description"] = cleanText(physDesc);
 		}
 
 		item = addPermalink(doc, item, null);
@@ -392,7 +391,7 @@ function scrapeArchives(doc) {
 	var item = new Zotero.Item("manuscript");
 
 	// Types should be Agency, Series, or Item
-	let typeLabel = ZU.trim(doc.querySelector(".T245_DISPLAY_label").textContent).replace(/:$/, "");
+	let typeLabel = ZU.trim(text(doc, ".T245_DISPLAY_label")).replace(/:$/, "");
 	if (typeLabel == "Description") {
 		item.manuscriptType = "Item";
 	}
@@ -432,8 +431,7 @@ function scrapeArchives(doc) {
 
 	// Save additional information to Extra
 	// Series
-	let series = doc.querySelector("a[href*='ARCHIVES_SERIES']");
-	item.series = series ? series.textContent : "";
+	item.series = text(doc, "a[href*='ARCHIVES_SERIES']");
 
 	// Functions
 	let functions = getLinkLists(doc, "ARCHIVES_FUN_DIX");
@@ -449,7 +447,7 @@ function scrapeArchives(doc) {
 		"ARCHIVES_SERIES_ARRANGEMENT"
 	];
 	for (let i = 0; i < tasFields.length; ++i) {
-		let label = doc.querySelector("div." + tasFields[i] + "_label");
+		let label = doc.querySelector("." + tasFields[i] + "_label");
 		if (label) {
 			item[ZU.trim(label.textContent).replace(/:$/, "")] = getFieldText(doc, tasFields[i]);
 		}
@@ -554,7 +552,7 @@ function scrapeNames(doc) {
 	];
 	// Add field values to Extras
 	for (let i = 0; i < fields.length; ++i) {
-		let label = doc.querySelector("div." + fields[i] + "_label");
+		let label = doc.querySelector("." + fields[i] + "_label");
 		if (label) {
 			item[ZU.trim(label.textContent).replace(/:$/, "")] = getFieldText(doc, fields[i]);
 		}
@@ -562,13 +560,12 @@ function scrapeNames(doc) {
 	item = addPermalink(doc, item, "NI");
 	addDigitalFiles(doc, item);
 }
-
-// Zotero.debug(item);
 	
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_SERIES$002f0$002fARCHIVES_SER_DIX:AD940/one",
 		"items": [
 			{
@@ -600,6 +597,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_DIGITISED$002f0$002fARCHIVES_DIG_DIX:NS6985-1-1/one",
 		"items": [
 			{
@@ -635,6 +633,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fSD_ILS$002f0$002fSD_ILS:491298/one",
 		"items": [
 			{
@@ -647,6 +646,7 @@ var testCases = [
 						"creatorType": "author"
 					}
 				],
+				"callNumber": "SD_ILS:491298",
 				"extra": "OCLC: 614762888",
 				"libraryCatalog": "Libraries Tasmania",
 				"numPages": "588",
@@ -677,6 +677,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
 		"items": [
 			{
@@ -713,6 +714,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:1384365/one",
 		"items": [
 			{
@@ -750,6 +752,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
+		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:974802/one",
 		"items": [
 			{
