@@ -1,7 +1,7 @@
 {
 	"translatorID": "f9052879-ab4c-4056-84b4-e963dd98cb5d",
 	"label": "UChicago VuFind",
-	"creator": "",
+	"creator": "Matt Teichman",
 	"target": "^https?://([^/]+\\.)?lib\\.uchicago\\.edu/",
 	"minVersion": "5.0",
 	"maxVersion": "",
@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-06 16:06:44"
+	"lastUpdated": "2022-07-06 17:32:33"
 }
 
 // MARC retrieval code: run the MARC import translator, then perform a
