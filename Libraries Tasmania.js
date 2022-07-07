@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-05 02:34:44"
+	"lastUpdated": "2022-07-07 00:58:32"
 }
 
 /*
@@ -391,9 +391,9 @@ function scrapeArchives(doc) {
 	var item = new Zotero.Item("manuscript");
 
 	// Types should be Agency, Series, or Item
-	let typeLabel = ZU.trim(text(doc, ".T245_DISPLAY_label")).replace(/:$/, "");
-	if (typeLabel == "Description") {
-		item.manuscriptType = "Item";
+	let typeLabel = ZU.trim(text(doc, ".T245_DISPLAY_label")).replace(/:$/, "").toLowerCase();
+	if (typeLabel == "description") {
+		item.manuscriptType = "item";
 	}
 	else {
 		item.manuscriptType = typeLabel;
@@ -463,7 +463,8 @@ function scrapeNames(doc) {
 	// getFieldText() will join multiple values with | delimiters
 	item.title = getFieldText(doc, "NI_NAME_FULL_DISPLAY");
 	item.callNumber = getFieldText(doc, "DOC_ID");
-	item.manuscriptType = getFieldText(doc, "NI_INDEX");
+	item.manuscriptType = "item";
+	item.index = getFieldText(doc, "NI_INDEX");
 
 	// Dates have many different labels, loop through this list until one is found
 	// then save to item.date
@@ -565,8 +566,8 @@ function scrapeNames(doc) {
 var testCases = [
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_SERIES$002f0$002fARCHIVES_SER_DIX:AD940/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -581,7 +582,7 @@ var testCases = [
 				"abstractNote": "Official minutes of meetings. | These records are part of the holdings of the Tasmanian Archives",
 				"callNumber": "AD940",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Series",
+				"manuscriptType": "series",
 				"url": "https://stors.tas.gov.au/AI/AD940",
 				"attachments": [
 					{
@@ -597,8 +598,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/tas/search/detailnonmodal/ent:$002f$002fARCHIVES_DIGITISED$002f0$002fARCHIVES_DIG_DIX:NS6985-1-1/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -613,7 +614,7 @@ var testCases = [
 				"archiveLocation": "Hobart X 1 1",
 				"callNumber": "NS6985/1/1",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Item",
+				"manuscriptType": "item",
 				"url": "https://stors.tas.gov.au/AI/NS6985-1-1",
 				"attachments": [
 					{
@@ -633,8 +634,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fSD_ILS$002f0$002fSD_ILS:491298/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "book",
@@ -677,8 +678,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/library/search/detailnonmodal/ent:$002f$002fLT_NAXOS_DIX$002f0$002fLT_NAXOS_DIX:TC871901/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "audioRecording",
@@ -714,8 +715,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:1384365/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -724,7 +725,7 @@ var testCases = [
 				"date": "10 Apr 1842",
 				"callNumber": "NAME_INDEXES:1384365",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Convicts",
+				"manuscriptType": "item",
 				"url": "https://stors.tas.gov.au/NI/1384365",
 				"attachments": [
 					{
@@ -752,8 +753,8 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"defer": true,
 		"url": "https://librariestas.ent.sirsidynix.net.au/client/en_AU/names/search/detailnonmodal/ent:$002f$002fNAME_INDEXES$002f0$002fNAME_INDEXES:974802/one",
+		"defer": true,
 		"items": [
 			{
 				"itemType": "manuscript",
@@ -762,7 +763,7 @@ var testCases = [
 				"date": "10 Sep 1872",
 				"callNumber": "NAME_INDEXES:974802",
 				"libraryCatalog": "Libraries Tasmania",
-				"manuscriptType": "Births",
+				"manuscriptType": "item",
 				"url": "https://stors.tas.gov.au/NI/974802",
 				"attachments": [
 					{
