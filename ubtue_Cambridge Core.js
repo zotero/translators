@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-08 16:05:51"
+	"lastUpdated": "2022-07-08 16:22:40"
 }
 
 /*
@@ -105,6 +105,17 @@ function scrape(doc, url) {
 		if (item.abstractNote.match(/resource\/name\/.+\.jpg$/) != null) item.abstractNote = "";
 		item.title = ZU.unescapeHTML(item.title);
 		item.libraryCatalog = "Cambridge Core";
+		if (ZU.xpathText(doc, '//dd[@Class="col content" and contains(., "Book Review")]') != null) {item.tags.push("Book Review");}
+		let orcid_tags = ZU.xpath(doc, '//a[@class="app-link contributor-type__contributor__orcid app-link__icon app-link--"]');
+		for (let o in orcid_tags) {
+			let orcid = orcid_tags[o].href;
+			if (orcid != null) {
+				let author = ZU.xpathText(orcid_tags[o], './/@data-test-orcid');
+				orcid = orcid.replace("https://orcid.org/", "");
+				item.notes.push({note: "orcid: " + orcid + " | " + author + " | taken from website"});
+			}
+		}
+		item.attachments = [];
 		addOpenAccessTag(doc, item);
 		item.complete();
 	});
@@ -121,7 +132,7 @@ function scrape(doc, url) {
 var testCases = [
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+		"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -143,18 +154,9 @@ var testCases = [
 				"pages": "227-243",
 				"publicationTitle": "Journal of American Studies",
 				"shortTitle": "“SAMO© as an Escape Clause”",
-				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/abs/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
+				"url": "https://www.cambridge.org/core/journals/journal-of-american-studies/article/samo-as-an-escape-clause-jean-michel-basquiats-engagement-with-a-commodified-american-africanism/1E4368D610A957B84F6DA3A58B8BF164",
 				"volume": "45",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -163,7 +165,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+		"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -193,18 +195,9 @@ var testCases = [
 				"libraryCatalog": "Cambridge Core",
 				"pages": "437-469",
 				"publicationTitle": "Journal of Fluid Mechanics",
-				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/abs/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
+				"url": "https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/high-resolution-simulations-of-cylindrical-density-currents/30D62864BDED84A6CC81F5823950767B",
 				"volume": "590",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Gravity currents"
@@ -249,7 +242,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/abs/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
+		"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
 		"items": [
 			{
 				"itemType": "journalArticle",
@@ -270,18 +263,9 @@ var testCases = [
 				"pages": "612-613",
 				"publicationTitle": "The Journal of Ecclesiastical History",
 				"shortTitle": "A history of Christian conversion. By David W. Kling. Pp. xvi + 836 incl. 14 maps. Oxford–New York",
-				"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/abs/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
+				"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/history-of-christian-conversion-by-david-w-kling-pp-xvi-836-incl-14-maps-oxfordnew-york-oxford-university-press-2020-97-978-0-19-532092-3/5FD53AEBA7196F39CDD81DBE84DA4A5C",
 				"volume": "72",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [],
 				"notes": [],
 				"seeAlso": []
@@ -314,16 +298,7 @@ var testCases = [
 				"shortTitle": "Charity as Social Justice",
 				"url": "https://www.cambridge.org/core/journals/journal-of-ecclesiastical-history/article/charity-as-social-justice-antonio-rosmini-and-the-great-irish-famine/7D177F707EA3722731C61AE58DB601F6",
 				"volume": "72",
-				"attachments": [
-					{
-						"title": "Full Text PDF",
-						"mimeType": "application/pdf"
-					},
-					{
-						"title": "Snapshot",
-						"mimeType": "text/html"
-					}
-				],
+				"attachments": [],
 				"tags": [
 					{
 						"tag": "Archive of the Institute of Charity"
@@ -352,6 +327,46 @@ var testCases = [
 				],
 				"notes": [
 					"LF:"
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://www.cambridge.org/core/journals/religious-studies/article/mark-r-wynn-spiritual-traditions-and-the-virtues-living-between-heaven-and-earth-oxford-oxford-university-press-2020-pp-272-6500-hbk-isbn-9780198862949/B88496DF2A80365A7B40063086B357E8",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Mark R. Wynn Spiritual Traditions and the Virtues: Living Between Heaven and Earth. (Oxford: Oxford University Press, 2020). Pp. 272. £65.00 (Hbk). ISBN: 9780198862949.",
+				"creators": [
+					{
+						"firstName": "David",
+						"lastName": "Mcpherson",
+						"creatorType": "author"
+					}
+				],
+				"date": "2022/06",
+				"DOI": "10.1017/S0034412520000487",
+				"ISSN": "0034-4125, 1469-901X",
+				"issue": "2",
+				"language": "en",
+				"libraryCatalog": "Cambridge Core",
+				"pages": "482-485",
+				"publicationTitle": "Religious Studies",
+				"shortTitle": "Mark R. Wynn Spiritual Traditions and the Virtues",
+				"url": "https://www.cambridge.org/core/journals/religious-studies/article/mark-r-wynn-spiritual-traditions-and-the-virtues-living-between-heaven-and-earth-oxford-oxford-university-press-2020-pp-272-6500-hbk-isbn-9780198862949/B88496DF2A80365A7B40063086B357E8",
+				"volume": "58",
+				"attachments": [],
+				"tags": [
+					{
+						"tag": "Book Review"
+					}
+				],
+				"notes": [
+					{
+						"note": "orcid: 0000-0002-4077-441X | David Mcpherson | taken from website"
+					}
 				],
 				"seeAlso": []
 			}
