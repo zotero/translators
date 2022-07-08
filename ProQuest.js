@@ -168,7 +168,7 @@ function detectWeb(doc, url) {
 
 	// there is not much information about the item type in the pdf/fulltext page
 	let titleRow = text(doc, '.open-access');
-	if (titleRow && doc.getElementById('docview-nav-stick')) { // do not continue ;if there is no nav to the Abstract, as the translation will fail
+	if (titleRow && doc.getElementById('docview-nav-stick')) { // do not continue if there is no nav to the Abstract, as the translation will fail
 		if (getItemType([titleRow])) {
 			return getItemType([titleRow]);
 		}
@@ -236,7 +236,8 @@ function doWeb(doc, url, noFollow) {
 			scrape(doc, url, type);
 		}
 		else {
-			var ink = abstractTab.href; 		if (!link) {
+			var ink = abstractTab.href; 		
+			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
 			Zotero.debug("Going to the Abstract tab");
@@ -247,7 +248,7 @@ function doWeb(doc, url, noFollow) {
 	}
 }
 
-function scrape(doc, url, type) ;{
+function scrape(doc, url, type) {
 	var item = new Zotero.Item(type);
 	
 	// get all rows
@@ -1892,7 +1893,7 @@ var testCases = [
 	},
 	{
 		"type": "web",
-		"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1?accountid=14214",
+		"url": "https://www.proquest.com/docview/2240944639/citation/DC389F101A924D14PQ/1",
 		"items": [
 			{
 				"itemType": "book",
