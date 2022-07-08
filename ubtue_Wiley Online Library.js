@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-23 10:24:14"
+	"lastUpdated": "2022-07-08 16:31:28"
 }
 
 /*
@@ -268,7 +268,7 @@ function scrapeBibTeX(doc, url) {
 		translator.setString(text);
 
 		translator.setHandler('itemDone', function(obj, item) {
-			
+		
 			//fix author case
 			for (var i=0, n=item.creators.length; i<n; i++) {
 				item.creators[i].firstName = fixCase(item.creators[i].firstName);
@@ -360,11 +360,7 @@ function scrapeBibTeX(doc, url) {
 			addArticleNumber(doc, item);
 			addPages(doc, item);
 			//attachments
-			item.attachments = [{
-				title: 'Snapshot',
-				document: doc,
-				mimeType: 'text/html'
-			}];
+			item.attachments = [];
 
 			addBookReviewTag(doc, item);
 			// adding author(s) for Short Reviews
@@ -385,6 +381,7 @@ function scrapeBibTeX(doc, url) {
 			addFreeAccessTag(doc, item);
 			getORCID(doc, item);
 			normalizeIssue(doc, item);
+			item.title = item.title.replace(/☆+$/, '');
 			item.complete();
 		});
 
@@ -557,6 +554,7 @@ function doWeb(doc, url) {
 		}
 	}
 }
+
 
 
 /** BEGIN TEST CASES **/
