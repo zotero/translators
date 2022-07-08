@@ -236,7 +236,7 @@ function doWeb(doc, url, noFollow) {
 			scrape(doc, url, type);
 		}
 		else {
-			var ink = abstractTab.href; 		
+			var link = abstractTab.href; 		
 			if (!link) {
 				throw new Error("Could not find the abstract/metadata link");
 			}
