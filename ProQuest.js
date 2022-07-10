@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-08 14:27:35"
+	"lastUpdated": "2022-07-10 13:59:19"
 }
 
 /*
@@ -227,8 +227,15 @@ function doWeb(doc, url, noFollow) {
 			Zotero.debug("On Abstract tab and scraping");
 			scrape(doc, url, type);
 		}
+		else if (abstractTab && abstractTab.href) {
+			var link = abstractTab.href;
+			Zotero.debug("Going to the Abstract tab");
+			ZU.processDocuments(link, function (doc, url) {
+				doWeb(doc, url, true);
+			});
+		}
 		else if (abstractView.length) {
-			Z.debug("New abstract view");
+			Zotero.debug("new Abstract view");
 			scrape(doc, url, type);
 		}
 		else if (noFollow) {
@@ -236,14 +243,7 @@ function doWeb(doc, url, noFollow) {
 			scrape(doc, url, type);
 		}
 		else {
-			var link = abstractTab.href;
-			if (!link) {
-				throw new Error("Could not find the abstract/metadata link");
-			}
-			Zotero.debug("Going to the Abstract tab");
-			ZU.processDocuments(link, function (doc, url) {
-				doWeb(doc, url, true);
-			});
+			throw new Error("Could not find the abstract/metadata link");
 		}
 	}
 }
