@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-28 02:42:40"
+	"lastUpdated": "2022-07-13 18:40:48"
 }
 
 /*
@@ -110,7 +110,7 @@ function scrape(doc, url, itemType) {
 		item.creators.push(ZU.cleanAuthor(creator, creatorType, false));
 	}
 	
-	for (let row of doc.querySelectorAll('product-more-details .display-row')) {
+	for (let row of doc.querySelectorAll('product-more-details .display-row, shared-lib-product-more-details .display-row')) {
 		let label = text(row, 'span:first-child');
 		let value = text(row, 'span:last-child');
 
@@ -134,11 +134,11 @@ function scrape(doc, url, itemType) {
 		}
 	}
 	
-	item.abstractNote = text(doc, '#collapseContent');
+	item.abstractNote = text(doc, '#collapseContent') || attr(doc, 'meta[name="description"]', 'content');
 
-	if (doc.cookie) {
+	if (doc.cookie && text(doc, '#product-detail-page-state')) {
 		let apiId = JSON.parse(
-			doc.getElementById('pyramid-website-ssr-state').textContent
+			doc.getElementById('product-detail-page-state').textContent
 				.replace(/&q;/g, '"')
 		).product._id;
 		
