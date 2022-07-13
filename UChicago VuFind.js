@@ -1,4 +1,4 @@
-{
+[{
 	"translatorID": "f9052879-ab4c-4056-84b4-e963dd98cb5d",
 	"label": "UChicago VuFind",
 	"creator": "Matt Teichman",
@@ -149,7 +149,6 @@ const scrapeMARC = doc => (url) => {
 		addUrl(item);
 		fixItemType(item);
 		updateCN(item);
-		item.publisher = "McDonalds";
 	};
     
 	// this part is based on the Finna translator code
