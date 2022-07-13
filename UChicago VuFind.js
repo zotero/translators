@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-06 17:32:33"
+	"lastUpdated": "2022-07-13 18:22:52"
 }
 
 // MARC retrieval code: run the MARC import translator, then perform a
@@ -17,208 +17,235 @@
 // record
 
 // scrapeMARC function, overall design based on Finna translator
-const scrapeMARC = doc => url => {
 
+
+/*
+    ***** BEGIN LICENSE BLOCK *****
+
+    Copyright © 2022 Matt Teichman
+
+    This file is part of Zotero.
+
+    Zotero is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Zotero is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with Zotero. If not, see <http://www.gnu.org/licenses/>.
+
+    ***** END LICENSE BLOCK *****
+*/
+
+const scrapeMARC = doc => (url) => {
 	// look up all hits for a MARC field in a MARC record
-	const lookup_values = key => table => {
-	// MARC leader substring
-	const leader = table => table.substring(0,24);
-	// starting position of the content of a record
-	const base_pos = table => parseInt(table.substring(12,17));
-	// directory substring of a MARC record
-	const raw_directory = table => table.substring(24, base_pos(table));
-	// the MARC directory as an association list
-	const directory = table => {
-		const raw = raw_directory(table);
-		const twelves = raw.match(/.{12}/g);
-		const process_entry = str => {
-		const field = str.substring(0,3);
-		const value_length = parseInt(str.substring(3,7));
-		const value_pos = parseInt(str.substring(7,12));
-		return [field, value_length, value_pos];
-		}
-		return twelves.map(process_entry);
-	}
-	// for any MARC field, return the length and starting position of
-	// the value
-	const lookup_in_directory = key => threes => {
-		const assocs = threes.filter(three => three[0] == key);
-		return assocs.map(x => x.slice(1, x.length));
-	}
-	// the data portion of a MARC record
-	const data_portion =
-		  table.substring(base_pos(table), table.length);
-	// the information needed to retrieve all values for a given field
-	const fields =
-		  lookup_in_directory(key)(directory(table));
-	// retrieve the value for a single length and position
-	const lookup_value =
-		  ([l,s]) => data_portion.substring(s, l + s - 1).trim();
-	return fields.map(lookup_value);
-	}
+	const lookupValues = key => (table) => {
+		// starting position of the content of a record
+		const basePos = table => parseInt(table.substring(12, 17));
+		// directory substring of a MARC record
+		const rawDirectory = table => table.substring(24, basePos(table));
+		// the MARC directory as an association list
+		const directory = (table) => {
+			const raw = rawDirectory(table);
+			const twelves = raw.match(/.{12}/g);
+			const processEntry = (str) => {
+				const field = str.substring(0, 3);
+				const valueLength = parseInt(str.substring(3, 7));
+				const valuePos = parseInt(str.substring(7, 12));
+				return [field, valueLength, valuePos];
+			};
+			return twelves.map(processEntry);
+		};
+		// for any MARC field, return the length and starting position of
+		// the value
+		const lookupInDirectory = key => (threes) => {
+			const assocs = threes.filter(three => three[0] == key);
+			return assocs.map(x => x.slice(1, x.length));
+		};
+		// the data portion of a MARC record
+		const dataPortion = table.substring(basePos(table), table.length);
+		// the information needed to retrieve all values for a given field
+		const fields = lookupInDirectory(key)(directory(table));
+		// retrieve the value for a single length and position
+		const lookupValue = ([l, s]) => dataPortion.substring(s, l + s - 1).trim();
+		return fields.map(lookupValue);
+	};
 
 	// look up the subfields under all the values associated with a
 	// given field
-	const lookup_subfields = key => subfield => table => {
-	// look up subfield values for each field, length, and start index
-	const subfields = subfield => value => {
-		const startswith = chr => str => str[0] === chr;
-		const values = value.split('\x1F');
-		const correct_values = values.filter(startswith(subfield));
-		return correct_values.map(v => v.substring(1, v.length));
-	}
-	// all the values associated with the input MARC field
-	const values = lookup_values(key)(table);
-	// flatten a list of lists
-	const flatten = arr => arr.reduce((acc, elm) => acc.concat(elm), []);
-	// return a simple list of all field/subfield values
-	return flatten(values.map(subfields(subfield)));
-	}
+	const lookupSubfields = key => subfield => (table) => {
+		// look up subfield values for each field, length, and start index
+		const subfields = subfield => (value) => {
+			const startswith = chr => str => str[0] === chr;
+			const values = value.split('\x1F');
+			const correctValues = values.filter(startswith(subfield));
+			return correctValues.map(v => v.substring(1, v.length));
+		};
+		// all the values associated with the input MARC field
+		const values = lookupValues(key)(table);
+		// flatten a list of lists
+		const flatten = arr => arr.reduce((acc, elm) => acc.concat(elm), []);
+		// return a simple list of all field/subfield values
+		return flatten(values.map(subfields(subfield)));
+	};
 
 	// predicate saying whether input field is present in a MARC record
-	const field_exists = key => table => {
-	const values = lookup_values(key)(table);
-	return values.length !== 0;
-	}
+	const fieldExists = key => (table) => {
+		const values = lookupValues(key)(table);
+		return values.length !== 0;
+	};
 
-	
+    
 	// custom UChicago tweaks to the return of the Zotero MARC translator
-	const customizeMARC = doc => item => marc => {
+	const customizeMARC = doc => item => (marc) => {
+		// put catalog URL in the entry
+		const addUrl = item => item.url = doc.defaultView.location.href;
 
-	// put catalog URL in the entry
-	const addUrl = item => item.url = doc.defaultView.location.href;
+		// replace general call number with UChicago-internal call number
+		const updateCN = (item) => {
+			const callNumbers = lookupSubfields('928')('a')(marc);
+			if (callNumbers.length === 1) {
+				item.callNumber = callNumbers[0];
+			}
+		};
 
-	// replace general call number with UChicago-internal call number
-	const updateCN = item => {
-		const callNumbers = lookup_subfields('928')('a')(marc);
-		if (callNumbers.length === 1) {
-		item.callNumber = callNumbers[0];
-		}
-	}
+		// correct errors in identifying dissertations, maps,
+		// manuscripts, and films
+		const fixItemType = (item) => {
+			// if there's a 502 field, it should be a thesis
+			const isDissertation = marc => fieldExists('502')(marc);
+			// if the record type is 'p', it's a manuscript
+			const isManuscript = marc => marc.substring(6, 7) == 'p';
+			// if the item type is film, it's a film
+			const isFilm = item => item.itemType === 'film';
+			// if the record type is 'e', it's a map
+			const isMap = marc => marc.substring(6, 7) == 'e';
 
-	// correct errors in identifying dissertations, maps,
-	// manuscripts, and films
-	const fixItemType = item => {
-		// if there's a 502 field, it should be a thesis
-		const isDissertation = marc => field_exists('502')(marc);
-		// if the record type is 'p', it's a manuscript
-		const isManuscript = marc => marc.substring(6,7) == 'p';
-		// if the item type is film, it's a film
-		const isFilm = item => item.itemType === 'film';
-		// if the record type is 'e', it's a map
-		const isMap = marc => marc.substring(6,7) == 'e';
+			if (isDissertation(marc)) {
+				// a dissertation is a 'thesis'
+				item.itemType = "thesis";
+			}
+			else if (isManuscript(marc)) {
+				// a manuscript is a 'manuscript';
+				item.itemType = "manuscript";
+			}
+			else if (isFilm(item)) {
+				// a film is a 'videoRecording' since we don't have
+				// any film prints
+				item.itemType = "videoRecording";
+			}
+			else if (isMap(marc)) {
+				// a map is a 'map';
+				item.itemType = "map";
+			}
+		};
 
-		if (isDissertation(marc)) {
-		// a dissertation is a 'thesis'
-		item.itemType = "thesis";
-		} else if (isManuscript(marc)) {
-		// a manuscript is a 'manuscript';
-		item.itemType = "manuscript";
-		} else if (isFilm(item)) {
-		// a film is a 'videoRecording' since we don't have
-		// any film prints
-		item.itemType = "videoRecording";
-		} else if (isMap(marc)) {
-		// a map is a 'map';
-		item.itemType = "map";
-		}
-	}
-
-	// perform the fixes
-	addUrl(item);
-	fixItemType(item);
-	updateCN(item);
-	
-	}
-	
+		// perform the fixes
+		addUrl(item);
+		fixItemType(item);
+		updateCN(item);
+		item.publisher = "McDonalds";
+	};
+    
 	// this part is based on the Finna translator code
 	let cleanURL = url.replace(/[#?].*$/, '').replace(/\/$/, '');
 	let marcURL = cleanURL + '/Export?style=MARC';
-	
+    
 	// use MARC import translator to ingest binary MARC records
 	ZU.doGet(marcURL, function (marcData) {
-	var success = false;
-	var translator = Zotero.loadTranslator("import");
-	translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-	translator.setString(marcData);
-	translator.setHandler('itemDone', function (_, item) {
-		if (item.place) {
-		item.place = item.place.replace(/\[[^[]+\]/, '');
-		}
-		
-		if (item.publisher) {
-		item.publisher = item.publisher.replace(/&amp;/g, '&');
-		}
-		success = true;
+		var success = false;
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.setString(marcData);
+		translator.setHandler('itemDone', function (_, item) {
+			if (item.place) {
+				item.place = item.place.replace(/\[[^[]+\]/, '');
+			}
+        
+			if (item.publisher) {
+				item.publisher = item.publisher.replace(/&amp;/g, '&');
+			}
+			success = true;
 
-		// apply the above UChicago customizations
-		customizeMARC(doc)(item)(marcData);
-		item.complete();
+			// apply the above UChicago customizations
+			customizeMARC(doc)(item)(marcData);
+			item.complete();
+		});
 
+		translator.setHandler('done', () => {});
+		translator.translate();
 	});
+};
 
-	translator.setHandler('done', () => {});
-	translator.translate();
-	});
-}
-
-const getSearchResults = doc => {
+const getSearchResults = (doc) => {
 	// get every search result DOM element
 	const rowNodes = doc.querySelectorAll('li[id^=result]');
 	// make the node list into an array
 	const a = Array.from(rowNodes);
 	let obj = {};
 	// extract information from each li element for output
-	const buildOutput = r => {
-	const linkElement = r.querySelector('.title.getFull');
-	const entry_url = linkElement.href;
-	const title = ZU.trimInternal(linkElement.textContent);
-	if (entry_url && title) { 
-		obj[entry_url] = title;
-	}
-	}
+	const buildOutput = (r) => {
+		const linkElement = r.querySelector('.title.getFull');
+		const entryUrl = linkElement.href;
+		const title = ZU.trimInternal(linkElement.textContent);
+		if (entryUrl && title) {
+			obj[entryUrl] = title;
+		}
+	};
 	a.map(buildOutput);
 	return obj;
-}
+};
 
 const detectWeb = (doc, url) => {
 	// VuFind URL patterns starting with 'Record' are for single items
 	if (url.includes('Record')) {
-	if (doc.querySelector('.format.video')) {
-		return 'videoRecording';
-	} else if (doc.querySelector('.format.dissertations')) {
-		return 'thesis';
-	} else if (doc.querySelector('.format.audio')) {
-		return 'audioRecording';
-	} else if (doc.querySelector('.format.map')) {
-		return 'map';
-	} else {
-		return 'book';
+		if (doc.querySelector('.format.video')) {
+			return 'videoRecording';
+		}
+		else if (doc.querySelector('.format.dissertations')) {
+			return 'thesis';
+		}
+		else if (doc.querySelector('.format.audio')) {
+			return 'audioRecording';
+		}
+		else if (doc.querySelector('.format.map')) {
+			return 'map';
+		}
+		else {
+			return 'book';
+		}
+		// VuFind URL patterns starting with 'Search' are for search results
 	}
-	// VuFind URL patterns starting with 'Search' are for search results
-	} else if (url.includes('Search')) {
-	return 'multiple';
-	// the translator should do nothing on every other URL pattern
-	} else {
-	return false;
+	else if (url.includes('Search')) {
+		return 'multiple';
+		// the translator should do nothing on every other URL pattern
 	}
-}
+	else {
+		return false;
+	}
+};
 
 const doWeb = (doc, url) => {
 	if (detectWeb(doc, url) == 'multiple') {
-	// ingest multiple MARC records
-	Zotero.selectItems(getSearchResults(doc), items => {
-		if (items) {
-		itemURLs = Object.keys(items);
-		itemURLs.map(scrapeMARC(doc));
-		}
-	});
-
-	} else {
-	// ingest single MARC record
-	scrapeMARC(doc)(url);
+		// ingest multiple MARC records
+		Zotero.selectItems(getSearchResults(doc), (items) => {
+			if (items) {
+				let itemURLs = Object.keys(items);
+				itemURLs.map(scrapeMARC(doc));
+			}
+		});
 	}
-}
+	else {
+		// ingest single MARC record
+		scrapeMARC(doc)(url);
+	}
+};
+
 /** BEGIN TEST CASES **/
 var testCases = [
 	{
