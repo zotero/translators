@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-13 06:53:14"
+	"lastUpdated": "2022-07-13 07:09:38"
 }
 
 /*
@@ -115,8 +115,10 @@ function scrape(doc) {
 			if (dcType && dcType.match(/Review/i)) {
 				item.tags.push("Book Review");
 			}
-			if (item.pages.match(/([ivx]+)-\1/i))
-    			item.pages = item.pages.split('-')[0];
+			if (item.pages) {
+				if (item.pages.match(/([ivx]+)-\1/i))
+					item.pages = item.pages.split('-')[0];
+			}
 			item.notes = [];
 			item.complete();
 		});
