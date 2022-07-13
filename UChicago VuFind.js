@@ -65,10 +65,10 @@ const scrapeMARC = doc => (url) => {
 		// the value
 		const lookupInDirectory = key => (threes) => {
 			const assocs = threes.filter(three => three[0] == key);
-			return assocs.map(x => x.slice(1, x.length));
+			return assocs.map(x => x.slice(1));
 		};
 		// the data portion of a MARC record
-		const dataPortion = table.substring(basePos(table), table.length);
+		const dataPortion = table.substring(basePos(table));
 		// the information needed to retrieve all values for a given field
 		const fields = lookupInDirectory(key)(directory(table));
 		// retrieve the value for a single length and position
@@ -84,7 +84,7 @@ const scrapeMARC = doc => (url) => {
 			const startswith = chr => str => str[0] === chr;
 			const values = value.split('\x1F');
 			const correctValues = values.filter(startswith(subfield));
-			return correctValues.map(v => v.substring(1, v.length));
+			return correctValues.map(v => v.substring(1));
 		};
 		// all the values associated with the input MARC field
 		const values = lookupValues(key)(table);
@@ -104,7 +104,7 @@ const scrapeMARC = doc => (url) => {
 	// custom UChicago tweaks to the return of the Zotero MARC translator
 	const customizeMARC = doc => item => (marc) => {
 		// put catalog URL in the entry
-		const addUrl = item => item.url = doc.defaultView.location.href;
+		const addUrl = item => item.url = document.location.href;
 
 		// replace general call number with UChicago-internal call number
 		const updateCN = (item) => {
@@ -191,6 +191,7 @@ const getSearchResults = (doc) => {
 	const buildOutput = (r) => {
 		const linkElement = r.querySelector('.title.getFull');
 		const entryUrl = linkElement.href;
+		if (!linkElement) return;
 		const title = ZU.trimInternal(linkElement.textContent);
 		if (entryUrl && title) {
 			obj[entryUrl] = title;
@@ -202,7 +203,7 @@ const getSearchResults = (doc) => {
 
 const detectWeb = (doc, url) => {
 	// VuFind URL patterns starting with 'Record' are for single items
-	if (url.includes('Record')) {
+	if (url.includes('vufind/Record')) {
 		if (doc.querySelector('.format.video')) {
 			return 'videoRecording';
 		}
@@ -220,7 +221,7 @@ const detectWeb = (doc, url) => {
 		}
 		// VuFind URL patterns starting with 'Search' are for search results
 	}
-	else if (url.includes('Search')) {
+	else if (url.includes('vufind/Search/Results')) {
 		return 'multiple';
 		// the translator should do nothing on every other URL pattern
 	}
