@@ -1,4 +1,4 @@
-[{
+{
 	"translatorID": "f9052879-ab4c-4056-84b4-e963dd98cb5d",
 	"label": "UChicago VuFind",
 	"creator": "Matt Teichman",
@@ -104,7 +104,7 @@ const scrapeMARC = doc => (url) => {
 	// custom UChicago tweaks to the return of the Zotero MARC translator
 	const customizeMARC = doc => item => (marc) => {
 		// put catalog URL in the entry
-		const addUrl = item => item.url = document.location.href;
+		const addUrl = item => item.url = doc.location.href;
 
 		// replace general call number with UChicago-internal call number
 		const updateCN = (item) => {
