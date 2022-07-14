@@ -2,14 +2,14 @@
 	"translatorID": "4c272290-7ac4-433e-862d-244884ed285a",
 	"label": "sbn.it",
 	"creator": "Philipp Zumstein, Dorian Soru",
-	"target": "^https?:\\/\\/(www|opac)\\.sbn\\.it\\/(web\\/)?(opacsbn\\/)?risultati-ricerca-avanzata",
+	"target": "^https?://(www|opac)\\.sbn\\.it/(web/)?(opacsbn/)?risultati-ricerca-avanzata",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-03-25 05:46:32"
+	"lastUpdated": "2022-07-14 16:57:36"
 }
 
 /*
@@ -36,7 +36,7 @@
 */
 
 // A regex to get the id of the single resource
-var regexId = /detail[/]([^?]*)/;
+var regexId = /(detail|index)[/](([0-9]*[/])?([^?]*))/;
 // The first part of the url for a single resource
 var detailUrl = "/risultati-ricerca-avanzata/-/opac-adv/detail/";
 
@@ -58,60 +58,40 @@ var typeMapping = {
 
 // Used when "Visualizza tutti" or "Visualizza selezionati" button is pressed:
 // A single item per page but pages change dynamically with scrolling
-function getDetailedResults(doc, url, checkOnly) {
-	// Detailed results
-	var parser = new DOMParser();
-	var innerdoc = parser.parseFromString(doc.documentElement.outerHTML, "text/html");
-	var results = ZU.xpath(innerdoc, '//div[@data-to-post-item]/@data-to-post-item');
-	if (checkOnly) {
-		return results.length > 0;
-	}
-	var items = {};
-	for (var i = 0; i < results.length; i++) {
-		var href = detailUrl + JSON.parse(results[i].value).id;
-		var title = JSON.parse(results[i].value).title;
-		items[href] = title;
-	}
-	return items;
-}
-
-// Get multiple results. The page is updated dynamically
-function getSearchResults(doc, checkOnly) {
-	var parser = new DOMParser();
-	var innerdoc = parser.parseFromString(doc.documentElement.outerHTML, "text/html");
-	var results = ZU.xpath(innerdoc, "//input[@data-to-post-item]/@data-to-post-item");
-	
-	if (checkOnly) {
-		return results.length > 0;
-	}
-	var items = {};
-	for (var i = 0; i < results.length; i++) {
-		var href = detailUrl + JSON.parse(results[i].value).id;
-		var title = JSON.parse(results[i].value).title.info;
-		items[href] = title;
+function getResults(doc, checkOnly, detailed = false) {
+	if (detailed) {
+		// Detailed results
+		var results = doc.querySelectorAll('[data-to-post-item]');
+		if (checkOnly) {
+			return results.length > 0;
+		}
+		var items = {};
+		for (var i = 0; i < results.length; i++) {
+			var href = detailUrl + JSON.parse(results[i].getAttribute('data-to-post-item')).id;
+			var title = JSON.parse(results[i].getAttribute('data-to-post-item')	).title;
+			items[href] = title;
+		}
+	} else {
+		var parser = new DOMParser();
+		var innerdoc = parser.parseFromString(doc.documentElement.outerHTML, "text/html");
+		var results = ZU.xpath(innerdoc, "//input[@data-to-post-item]/@data-to-post-item");
+		
+		if (checkOnly) {
+			return results.length > 0;
+		}
+		var items = {};
+		for (var i = 0; i < results.length; i++) {
+			var href = detailUrl + JSON.parse(results[i].value).id;
+			var title = JSON.parse(results[i].value).title.info;
+			items[href] = title;
+		}
 	}
 	return items;
 }
 
-// See the commments on detectWeb
-// Get the type for a single item
-/*function getType(url) {
-	return new Promise((resolve) => {
-		var id = url.match(regexId)[1];
-		var jsonURL = '/o/opac-api/title?id=' + id + '&core=sbn&page=1';
-		ZU.doGet(jsonURL, function (text) {
-			var json = JSON.parse(text);
-			var type = json.data.contents[0].body[1][1].value;
-			resolve(typeMapping[type.trim().toLowerCase()] || "book");
-		});
-	});
-}*/
-
-/*async */function detectWeb(doc, url) {
-	if (url.includes("detail")) {
+function detectWeb(doc, url) {
+	if (url.includes("detail") || url.includes("index")) {
 		// Doesn't wait for getType, so it returns a generic single type
-		/*var type = await getType(url);
-		return type;*/
 		return typeMapping.testo;
 	} else {
 		return "multiple";
@@ -124,24 +104,20 @@ function doWeb(doc, url) {
 	if (type == "multiple") {
 		//Detailed view
 		if (url.includes("opac-adv/all")) {
-			var result = getDetailedResults(doc, url, true);
+			var result = getResults(doc, true, true);
 			if (result) {
-				results = getDetailedResults(doc, url, false);
+				results = getResults(doc, false, true);
 				Zotero.selectItems(results, function (items) {
-					if (!items) {
-						return;
+					if (items) {
+						ZU.processDocuments(Object.keys(items), scrape);
 					}
-					var ids = [];
-					for (var i in items) {
-						ids.push(i);
-					}
-					ZU.processDocuments(ids, scrape);
 				});
 			}
 		} else {
-			result = getSearchResults(doc, true);
+			//Multiple view
+			result = getResults(doc, true, false);
 			if (result) {
-				results = getSearchResults(doc, false);
+				results = getResults(doc, false, false);
 				Zotero.selectItems(results, function (items) {
 					if (!items) {
 						return;
@@ -160,20 +136,14 @@ function doWeb(doc, url) {
 }
 
 function scrape(doc, _url) {
-	var id = _url.match(regexId)[1];
-	var jsonURL = '/o/opac-api/title?id=' + id + '&core=sbn&page=1';
-	ZU.doGet(jsonURL, function (text) {
-		var json = JSON.parse(text);
-		var idMarc = json.data.links.top[0].id;
-		var urlMarc = "/c/opac/marc21/export?id=" + idMarc;
-
-		ZU.doGet(urlMarc, function (text) {
-			// call MARC translator
-			var translator = Zotero.loadTranslator("import");
-			translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
-			translator.setString(text);
-			translator.translate();
-		});
+	var id = _url.match(regexId)[4];
+	var urlMarc = '/c/opac/marc21/export?id=' + id;
+	ZU.doGet(urlMarc, function (text) {
+		// call MARC translator
+		var translator = Zotero.loadTranslator("import");
+		translator.setTranslator("a6ee60df-1ddc-4aae-bb25-45e0537be973");
+		translator.setString(text);
+		translator.translate();
 	});
 }/** BEGIN TEST CASES **/
 var testCases = [
@@ -199,6 +169,35 @@ var testCases = [
 				"place": "Chicago (Ill.)",
 				"publisher": "Association of college and research libraries",
 				"shortTitle": "Zotero",
+				"attachments": [],
+				"tags": [],
+				"notes": [],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "web",
+		"url": "https://opac.sbn.it/risultati-ricerca-avanzata/-/opac-adv/index/1/ITICCUCFI1061212?fieldstruct%5B1%5D=ricerca.parole_tutte%3A4%3D6&fieldvalue%5B1%5D=galileo&fieldaccess%5B1%5D=Any%3A1016%3Anocheck&struct%3A1001=ricerca.parole_almeno_una%3A%40or%40",
+		"items": [
+			{
+				"itemType": "book",
+				"title": "Galileo: 30 anni",
+				"creators": [
+					{
+						"lastName": "Galileo (periodico)",
+						"creatorType": "author",
+						"fieldMode": true
+					}
+				],
+				"date": "2019",
+				"ISBN": "9788833591896",
+				"language": "ita",
+				"libraryCatalog": "sbn.it",
+				"numPages": "224",
+				"place": "Padova",
+				"publisher": "Libreriauniversitaria.it",
+				"shortTitle": "Galileo",
 				"attachments": [],
 				"tags": [],
 				"notes": [],
