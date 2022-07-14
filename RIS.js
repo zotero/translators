@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-06-13 09:10:55"
+	"lastUpdated": "2022-07-14 15:44:17"
 }
 
 function detectImport() {
@@ -255,8 +255,8 @@ var fieldMap = {
 		reporter:["case"],
 		issuingAuthority:["patent"]
 	},
-        A3: {
-	        "creators/contributor":["thesis"],
+		A3: {
+			"creators/contributor":["thesis"],
 		"creators/cosponsor":["bill"],
 		"creators/producer":["film", "tvBroadcast", "videoRecording", "radioBroadcast"],
 		"creators/editor":["book"],
@@ -1628,14 +1628,20 @@ function dateRIStoZotero(risDate, zField) {
 					: '');
 	} else {
 		let [year, month, day] = date;
-		let dateString = year.padStart(4, '0');
-		if (month) {
-			dateString += "-" + month.padStart(2, '0');
-			if (day) {
-				dateString += "-" + day.padStart(2, '0');
-			}
+		let dateString = "";
+		if (date.length === 0) {
+			return dateString;
 		}
-		return dateString;
+		else {
+			dateString = year.padStart(4, '0');
+			if (month) {
+				dateString += "-" + month.padStart(2, '0');
+				if (day) {
+					dateString += "-" + day.padStart(2, '0');
+				}
+			}
+			return dateString;
+		}
 	}
 }
 
@@ -2033,6 +2039,7 @@ var exports = {
 	"doImport": doImport,
 	"options": exportedOptions
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -4552,12 +4559,11 @@ var testCases = [
 				"itemType": "thesis",
 				"title": "Title",
 				"creators": [
-				        {
+					{
 						"lastName": "Advisor",
-					        "creatorType": "contributor",
-					        "fieldMode" : 1
+						"creatorType": "contributor",
+						"fieldMode": 1
 					},
-
 					{
 						"lastName": "Name1",
 						"firstName": "Author",
@@ -6963,6 +6969,81 @@ var testCases = [
 				"notes": [
 					{
 						"note": "<p>A1 should not be treated as deprecated or authors will appear out of order.</p>"
+					}
+				],
+				"seeAlso": []
+			}
+		]
+	},
+	{
+		"type": "import",
+		"input": "TY  - JOUR\r\nTI  - Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk\r\nT2  - Journal of the National Medical Association\r\nVL  - 100\r\nIS  - 6\r\nSP  - 674\r\nEP  - 682\r\nPY  - 2008\r\nDO  - 10.1016/S0027-9684(15)31340-7\r\nAU  - Bryan, C.J.\r\nAU  - Wetmore-Arkader, L.\r\nAU  - Calvano, T.\r\nAU  - Deatrick, J.A.\r\nAU  - Giri, V.N.\r\nAU  - Bruner, D.W.\r\nN1  - Cited By :10\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\nTY  - JOUR\r\nT2  - Prostate Cancer Mortality Statistics 2015\r\nPY  - 0000\r\nN1  - Cited By :1\r\nN1  - Export Date: 13 July 2022\r\nER  - \r\n\r\n",
+		"items": [
+			{
+				"itemType": "journalArticle",
+				"title": "Using focus groups to adapt ethnically appropriate, information-seeking and recruitment messages for a prostate cancer screening program for men at high risk",
+				"creators": [
+					{
+						"lastName": "Bryan",
+						"firstName": "C.J.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Wetmore-Arkader",
+						"firstName": "L.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Calvano",
+						"firstName": "T.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Deatrick",
+						"firstName": "J.A.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Giri",
+						"firstName": "V.N.",
+						"creatorType": "author"
+					},
+					{
+						"lastName": "Bruner",
+						"firstName": "D.W.",
+						"creatorType": "author"
+					}
+				],
+				"date": "2008",
+				"DOI": "10.1016/S0027-9684(15)31340-7",
+				"issue": "6",
+				"pages": "674-682",
+				"publicationTitle": "Journal of the National Medical Association",
+				"volume": "100",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :10</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
+					}
+				],
+				"seeAlso": []
+			},
+			{
+				"itemType": "journalArticle",
+				"creators": [],
+				"publicationTitle": "Prostate Cancer Mortality Statistics 2015",
+				"attachments": [],
+				"tags": [],
+				"notes": [
+					{
+						"note": "<p>Cited By :1</p>"
+					},
+					{
+						"note": "<p>Export Date: 13 July 2022</p>"
 					}
 				],
 				"seeAlso": []
