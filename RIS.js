@@ -17,7 +17,7 @@
 	},
 	"inRepository": true,
 	"translatorType": 3,
-	"lastUpdated": "2022-07-14 08:59:07"
+	"lastUpdated": "2022-07-14 15:44:17"
 }
 
 function detectImport() {
@@ -255,8 +255,8 @@ var fieldMap = {
 		reporter:["case"],
 		issuingAuthority:["patent"]
 	},
-        A3: {
-	        "creators/contributor":["thesis"],
+		A3: {
+			"creators/contributor":["thesis"],
 		"creators/cosponsor":["bill"],
 		"creators/producer":["film", "tvBroadcast", "videoRecording", "radioBroadcast"],
 		"creators/editor":["book"],
@@ -1555,7 +1555,7 @@ function dateRIStoZotero(risDate, zField) {
 
 	//sometimes unknown parts of date are given as 0. Drop these and anything that follows
 	for (var i=0; i<3; i++) {
-		if (date[i] !== undefined) date[i] = date[i].replace(/^0+([1-9])/,'$1');	//drop leading 0s, but leave just zero strings (0000)in place
+		if (date[i] !== undefined) date[i] = date[i].replace(/^0+/,'');	//drop leading 0s
 
 		if (!date[i]) {
 			date.splice(i);
@@ -1628,14 +1628,20 @@ function dateRIStoZotero(risDate, zField) {
 					: '');
 	} else {
 		let [year, month, day] = date;
-		let dateString = year.padStart(4, '0');
-		if (month) {
-			dateString += "-" + month.padStart(2, '0');
-			if (day) {
-				dateString += "-" + day.padStart(2, '0');
-			}
+		let dateString = "";
+		if (date.length === 0) {
+			return dateString;
 		}
-		return dateString;
+		else {
+			dateString = year.padStart(4, '0');
+			if (month) {
+				dateString += "-" + month.padStart(2, '0');
+				if (day) {
+					dateString += "-" + day.padStart(2, '0');
+				}
+			}
+			return dateString;
+		}
 	}
 }
 
@@ -2033,6 +2039,7 @@ var exports = {
 	"doImport": doImport,
 	"options": exportedOptions
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
@@ -4552,9 +4559,9 @@ var testCases = [
 				"itemType": "thesis",
 				"title": "Title",
 				"creators": [
-				        {
+					{
 						"lastName": "Advisor",
-					        "creatorType": "contributor",
+						"creatorType": "contributor",
 						"fieldMode": 1
 					},
 					{
@@ -7028,7 +7035,6 @@ var testCases = [
 			{
 				"itemType": "journalArticle",
 				"creators": [],
-				"date": "0000",
 				"publicationTitle": "Prostate Cancer Mortality Statistics 2015",
 				"attachments": [],
 				"tags": [],
