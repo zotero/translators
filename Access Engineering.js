@@ -2,7 +2,7 @@
 	"translatorID": "d120a8a7-9d45-446e-8c18-ad9ef0a6bf47",
 	"label": "Access Engineering",
 	"creator": "Vinoth K - highwirepress.com",
-	"target": "^https?://www.accessengineeringlibrary.com/content/(book|chapter|case-study|video|calculator|tutorial)",
+	"target": "^https?://www\\.accessengineeringlibrary\\.com/content/(book|chapter|case-study|video|calculator|tutorial)",
 	"minVersion": "3.0",
 	"maxVersion": "",
 	"priority": 100,
