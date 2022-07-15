@@ -9,14 +9,14 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-05-10 22:26:12"
+	"lastUpdated": "2022-07-15 14:04:13"
 }
 
 /*
 	***** BEGIN LICENSE BLOCK *****
 
 	Copyright © 2019-2022 Simon Kornblith, Sean Takats, Michael Berkowitz,
-	                      Eli Osherovich, czar
+						  Eli Osherovich, czar
 
 	This file is part of Zotero.
 
@@ -39,8 +39,11 @@
 
 function detectWeb(doc, url) {
 	// See if this is a search results page or Issue content
+	if (doc.title == "JSTOR: Search Results") {
+		return "multiple";
+	}
 	// Issues with DOIs can't be identified by URL
-	if (doc.title == "JSTOR: Search Results" || /stable|pss/.test(url)) {
+	else if (/stable|pss/.test(url)) {
 		if (getSearchResults(doc, true)) {
 			return "multiple";
 		}
@@ -73,11 +76,17 @@ function getSearchResults(doc, checkOnly) {
 	if (!resultsBlock.length) {
 		resultsBlock = doc.querySelectorAll('.result');
 	}
+	if (!resultsBlock.length) {
+		resultsBlock = doc.querySelectorAll('.toc-item');
+	}
 	if (!resultsBlock.length) return false;
 	var items = {}, found = false;
 	for (let row of resultsBlock) {
-		let title = text(row, '.title, .small-heading');
+		let title = text(row, '.title, .small-heading, toc-view-pharos-link');
 		let jid = getJID(attr(row, 'a', 'href'));
+		if (!jid) {
+			jid = getJID(attr(row, '[href]', 'href'));
+		}
 		if (!jid || !title) continue;
 		if (checkOnly) return true;
 		found = true;
@@ -94,6 +103,7 @@ function getFavLink(doc) {
 }
 
 function getJID(url) {
+	if (!url) return false;
 	var m = url.match(/(?:discover|pss|stable(?:\/info|\/pdf)?)\/(10\.\d+(?:%2F|\/)[^?]+|[a-z0-9.]*)/);
 	if (m) {
 		var jid = decodeURIComponent(m[1]);
