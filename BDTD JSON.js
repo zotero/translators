@@ -159,7 +159,7 @@ function importItem(r) {
 	}
 
 	if(Array.isArray(r.publicationDates)) {
-		item.date = r.publicationDates=[0]
+		item.date = r.publicationDates[0]
 	}
 
 	if(Array.isArray(r.institutions)) {
