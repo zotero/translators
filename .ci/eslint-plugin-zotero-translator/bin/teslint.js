@@ -127,11 +127,12 @@ for (const translator of sources.translators) {
 
 if (argv.outputJson) {
 	if (argv.outputJson === '-') {
-		process.stdout.write(JSON.stringify(allResults));
+		process.stdout.write(JSON.stringify(allResults) + '\n');
 	}
 	else {
 		fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8');
 	}
 }
-
-process.exit(sources.errors); // eslint-disable-line no-process-exit
+else {
+	process.exit(sources.errors); // eslint-disable-line no-process-exit
+}
