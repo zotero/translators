@@ -12,7 +12,7 @@ const translators = require('../lib/translators');
 
 argv
 	.version(CLIEngine.version)
-	.option('-o, --output-json [file]', 'Write report to file as JSON')
+	.option('-o, --output-json [file | -]', 'Write report to file or stdout as JSON')
 	.option('-f, --fix', 'Automatically fix problems')
 	.option('--no-ignore', 'Disable use of ignore files and patterns')
 	.option('--quiet', 'Report errors only - default: false')
@@ -126,7 +126,12 @@ for (const translator of sources.translators) {
 }
 
 if (argv.outputJson) {
-	fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8')
+	if (argv.outputJson === '-') {
+		process.stdout.write(JSON.stringify(allResults));
+	}
+	else {
+		fs.writeFileSync(argv.outputJson, JSON.stringify(allResults), 'utf-8');
+	}
 }
 
 process.exit(sources.errors); // eslint-disable-line no-process-exit
