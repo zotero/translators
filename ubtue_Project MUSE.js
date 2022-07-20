@@ -115,10 +115,8 @@ function scrape(doc) {
 			if (dcType && dcType.match(/Review/i)) {
 				item.tags.push("Book Review");
 			}
-			if (item.pages) {
-				if (item.pages.match(/([ivx]+)-\1/i))
+			if (item.pages && item.pages.match(/([ivx]+)-\1/i))
 					item.pages = item.pages.split('-')[0];
-			}
 			item.notes = [];
 			item.complete();
 		});
