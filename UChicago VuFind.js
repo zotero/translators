@@ -12,13 +12,6 @@
 	"lastUpdated": "2022-07-26 15:28:09"
 }
 
-// MARC retrieval code: run the MARC import translator, then perform a
-// few adjustments to the output by looking things up in the MARC
-// record
-
-// scrapeMARC function, overall design based on Finna translator
-
-
 /*
 	***** BEGIN LICENSE BLOCK *****
 
@@ -42,9 +35,14 @@
 	***** END LICENSE BLOCK *****
 */
 
+// MARC retrieval code: run the MARC import translator, then perform a
+// few adjustments to the output by looking things up in the MARC
+// record
+
+// scrapeMARC function, overall design based on Finna translator
 const scrapeMARC = (doc, url) => {
 	// look up all hits for a MARC field in a MARC record
-    const lookupValues = (key, table) => {
+	const lookupValues = (key, table) => {
 		// starting position of the content of a record
 		const basePos = table => parseInt(table.substring(12, 17));
 		// directory substring of a MARC record
@@ -63,14 +61,14 @@ const scrapeMARC = (doc, url) => {
 		};
 		// for any MARC field, return the length and starting position of
 		// the value
-	const lookupInDirectory = (key, threes) => {
+		const lookupInDirectory = (key, threes) => {
 			const assocs = threes.filter(three => three[0] == key);
 			return assocs.map(x => x.slice(1));
 		};
 		// the data portion of a MARC record
 		const dataPortion = table.substring(basePos(table));
 		// the information needed to retrieve all values for a given field
-	const fields = lookupInDirectory(key, directory(table));
+		const fields = lookupInDirectory(key, directory(table));
 		// retrieve the value for a single length and position
 		const lookupValue = ([l, s]) => dataPortion.substring(s, l + s - 1).trim();
 		return fields.map(lookupValue);
@@ -78,7 +76,7 @@ const scrapeMARC = (doc, url) => {
 
 	// look up the subfields under all the values associated with a
 	// given field
-    const lookupSubfields = (key, subfield, table) => {
+	const lookupSubfields = (key, subfield, table) => {
 		// look up subfield values for each field, length, and start index
 		const subfields = subfield => (value) => {
 			const startswith = chr => str => str[0] === chr;
@@ -87,7 +85,7 @@ const scrapeMARC = (doc, url) => {
 			return correctValues.map(v => v.substring(1));
 		};
 		// all the values associated with the input MARC field
-	    const values = lookupValues(key, table);
+		const values = lookupValues(key, table);
 		// flatten a list of lists
 		const flatten = arr => arr.reduce((acc, elm) => acc.concat(elm), []);
 		// return a simple list of all field/subfield values
@@ -95,20 +93,20 @@ const scrapeMARC = (doc, url) => {
 	};
 
 	// predicate saying whether input field is present in a MARC record
-    const fieldExists = (key, table) => {
-	    const values = lookupValues(key, table);
+	const fieldExists = (key, table) => {
+		const values = lookupValues(key, table);
 		return values.length !== 0;
 	};
 
 	
 	// custom UChicago tweaks to the return of the Zotero MARC translator
-    const customizeMARC = (doc, item, marc) => {
+	const customizeMARC = (doc, item, marc) => {
 		// put catalog URL in the entry
 		const addUrl = item => item.url = doc.location.href;
 
 		// replace general call number with UChicago-internal call number
 		const updateCN = (item) => {
-		    const callNumbers = lookupSubfields('928', 'a', marc);
+			const callNumbers = lookupSubfields('928', 'a', marc);
 			if (callNumbers.length === 1) {
 				item.callNumber = callNumbers[0];
 			}
@@ -118,7 +116,7 @@ const scrapeMARC = (doc, url) => {
 		// manuscripts, and films
 		const fixItemType = (item) => {
 			// if there's a 502 field, it should be a thesis
-		    const isDissertation = marc => fieldExists('502', marc);
+			const isDissertation = marc => fieldExists('502', marc);
 			// if the record type is 'p', it's a manuscript
 			const isManuscript = marc => marc.substring(6, 7) == 'p';
 			// if the item type is film, it's a film
@@ -172,7 +170,7 @@ const scrapeMARC = (doc, url) => {
 			success = true;
 
 			// apply the above UChicago customizations
-		    customizeMARC(doc, item, marcData);
+			customizeMARC(doc, item, marcData);
 			item.complete();
 		});
 
@@ -236,13 +234,13 @@ const doWeb = (doc, url) => {
 		Zotero.selectItems(getSearchResults(doc), (items) => {
 			if (items) {
 				let itemURLs = Object.keys(items);
-			    itemURLs.map(url => scrapeMARC(doc, url));
+				itemURLs.map(url => scrapeMARC(doc, url));
 			}
 		});
 	}
 	else {
 		// ingest single MARC record
-	    scrapeMARC(doc, url);
+		scrapeMARC(doc, url);
 	}
 };
 
