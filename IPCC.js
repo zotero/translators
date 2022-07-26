@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-06-30 13:32:56"
+	"lastUpdated": "2022-07-26 17:10:46"
 }
 
 /*
@@ -35,7 +35,7 @@
 	***** END LICENSE BLOCK *****
 */
 
-let report6Wg1Editors = 'Valérie Masson-Delmotte; Panmao Zhai; Anna Pirani; Sarah L. Connors; C. Péan; Sophie Berger; Nada Caud; Y. Chen; Leah Goldfarb; Melissa I. Gomis; Mengtian Huang; Katherine Leitzell; Elisabeth Lonnoy; J. B. Robin Matthews; Thomas K. Maycock; Tim Waterfield; Özge Yelekçi; R. Yu; Botao Zhou'
+let report6Wg1Editors = 'Valérie Masson-Delmotte; Panmao Zhai; Anna Pirani; Sarah L. Connors; Clotilde Péan; Sophie Berger; Nada Caud; Yang Chen; Leah Goldfarb; Melissa I. Gomis; Mengtian Huang; Katherine Leitzell; Elisabeth Lonnoy; J. B. Robin Matthews; Thomas K. Maycock; Tim Waterfield; Özge Yelekçi; Rong Yu; Botao Zhou'
 	.split('; ').map(name => ZU.cleanAuthor(name, 'editor', name.includes(', ')));
 
 let report6Wg1TechSummaryAuthors = 'Paola A. Arias; Nicolas Bellouin; Erika Coppola; Richard G. Jones; Gerhard Krinner; Jochem Marotzke; Vaishali Naik; Matthew D. Palmer; Gian-Kasper Plattner; Joeri Rogelj; Maisa Rojas; Jana Sillmann; Trude Storelvmo; Peter W. Thorne; Blair Trewin; Krishna M. Achutarao; Bhupesh Adhikary; Richard P. Allan; Kyle Armour; Govindasamy Bala; Rondrotiana Barimalala; Sophie Berger; Josep G. Canadell; Christophe Cassou; Annalisa Cherchi; William Collins; William D. Collins; Sarah L. Connors; Susanna Corti; Faye A. Cruz; Frank J. Dentener; Claudine Dereczynski; Di Luca, Alejandro; Aïda Diongue-Niang; Francisco J. Doblas-Reyes; Alessandro Dosio; Hervé Douville; François Engelbrecht; Veronika Eyring; Erich Fischer; Piers Forster; Baylor Fox-Kemper; Jan S. Fuglestvedt; John C. Fyfe; Nathan P. Gillett; Leah Goldfarb; Irina V. Gorodetskaya; José Manuel Gutiérrez; Rafiq Hamdi; Ed Hawkins; Helene T. Hewitt; Pandora Hope; Akm Saiful Islam; Christopher Jones; Darrell S. Kaufman; Robert E. Kopp; Yu Kosaka; James Kossin; Svitlana Krakovska; June-Yi Lee; Jian Li; Thorsten Mauritsen; Thomas K. Maycock; Malte Meinshausen; Seung-Ki Min; Scheel Monteiro, Pedro; Thanh Ngo-Duc; Friederike Otto; Izidine Pinto; Anna Pirani; Krishnan Raghavan; Roshanka Ranasinghe; Alex C. Ruane; Lucas Ruiz; Jean-Baptiste Sallée; Bjørn H. Samset; Shubha Sathyendranath; Sonia I. Seneviratne; Anna A. Sörensson; Sophie Szopa; Izuru Takayabu; Anne-Marie Treguier; Bart van den Hurk; Robert Vautard; von Schuckmann, Karina; Sönke Zaehle; Xuebin Zhang; Kirsten Zickfeld'
@@ -145,7 +145,9 @@ function wg1Chapter(slug, itemTemplate) {
 	return Object.assign(new Zotero.Item('bookSection'), itemTemplate, {
 		bookTitle: 'Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
 		publisher: 'Cambridge University Press',
+		place: 'Cambridge, United Kingdom and New York, NY, USA',
 		date: '2021',
+		DOI: '10.1017/9781009157896.001',
 		creators: [...(itemTemplate.creators || []), ...report6Wg1Editors],
 		attachments: [
 			{
@@ -184,7 +186,8 @@ function addSupplementaryMaterial(chapters) {
 			title: item.title + ' - Supplementary Material',
 			attachments: item.attachments.map(a => Object.assign({}, a, {
 				url: a.url.replace('.pdf', '_Supplementary_Material.pdf')
-			}))
+			})),
+			url: 'https://www.ipcc.ch/'
 		});
 	}
 	
@@ -198,7 +201,9 @@ let citations = {
 			title: 'Climate Change 2021: The Physical Science Basis. Contribution of Working Group I to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change',
 			abstractNote: 'The Working Group I contribution to the Sixth Assessment Report addresses the most up-to-date physical understanding of the climate system and climate change, bringing together the latest advances in climate science, and combining multiple lines of evidence from paleoclimate, observations, process understanding, and global and regional climate simulations.',
 			publisher: 'Cambridge University Press',
+			place: 'Cambridge, United Kingdom and New York, NY, USA',
 			date: '2021',
+			DOI: '10.1017/9781009157896',
 			creators: report6Wg1Editors,
 			attachments: [
 				{
@@ -210,68 +215,84 @@ let citations = {
 		}),
 		'Summary for Policymakers': wg1Chapter('SPM', {
 			title: 'Summary for policymakers',
+			pages: '3-32',
 			abstractNote: 'The Summary for Policymakers (SPM) provides a high-level summary of the understanding of the current state of the climate, including how it is changing and the role of human influence, and the state of knowledge about possible climate futures, climate information relevant to regions and sectors, and limiting human-induced climate change.'
 		}),
 		'Technical Summary': wg1Chapter('TS', {
 			title: 'Technical summary',
+			pages: '33-144',
 			abstractNote: 'The Technical Summary (TS) is designed to bridge between the comprehensive assessment of the Working Group I Chapters and its Summary for Policymakers (SPM). It is primarily built from the Executive Summaries of the individual chapters and atlas and provides a synthesis of key findings based on multiple lines of evidence.',
 			creators: report6Wg1TechSummaryAuthors
 		}),
 		'Chapter 1: Framing, context, methods': wg1Chapter('Chapter_01', {
 			title: 'Framing, context, and methods',
+			pages: '147-286',
 			creators: report6Wg1Ch1Authors
 		}),
 		'Chapter 2: Changing state of the climate system': wg1Chapter('Chapter_02', {
 			title: 'Changing state of the climate system',
+			pages: '287-422',
 			creators: report6Wg1Ch2Authors
 		}),
 		'Chapter 3: Human influence on the climate system': wg1Chapter('Chapter_03', {
 			title: 'Human influence on the climate system',
+			pages: '423-552',
 			creators: report6Wg1Ch3Authors
 		}),
 		'Chapter 4: Future global climate: scenario-based projections and near-term information': wg1Chapter('Chapter_04', {
 			title: 'Future global climate: scenario-based projections and near-term information',
+			pages: '553-672',
 			creators: report6Wg1Ch4Authors
 		}),
 		'Chapter 5: Global carbon and other biogeochemical cycles and feedbacks': wg1Chapter('Chapter_05', {
 			title: 'Global carbon and other biogeochemical cycles and feedbacks',
+			pages: '673-816',
 			creators: report6Wg1Ch5Authors
 		}),
 		'Chapter 6: Short-lived climate forcers': wg1Chapter('Chapter_06', {
 			title: 'Short-lived climate forcers',
+			pages: '817-922',
 			creators: report6Wg1Ch6Authors
 		}),
 		'Chapter 7: The Earth\'s energy budget, climate feedbacks, and climate sensitivity': wg1Chapter('Chapter_07', {
 			title: 'The Earth\'s energy budget, climate feedbacks, and climate sensitivity',
+			pages: '923-1054',
 			creators: report6Wg1Ch7Authors
 		}),
 		'Chapter 8: Water cycle changes': wg1Chapter('Chapter_08', {
 			title: 'Water cycle changes',
+			pages: '1055-1210',
 			creators: report6Wg1Ch8Authors
 		}),
 		'Chapter 9: Ocean, cryosphere, and sea level change': wg1Chapter('Chapter_09', {
 			title: 'Ocean, cryosphere, and sea level change',
+			pages: '1211-1362',
 			creators: report6Wg1Ch9Authors
 		}),
 		'Chapter 10: Linking global to regional climate change': wg1Chapter('Chapter_10', {
 			title: 'Linking global to regional climate change',
+			pages: '1363-1512',
 			creators: report6Wg1Ch10Authors
 		}),
 		'Chapter 11: Weather and climate extreme events in a changing climate': wg1Chapter('Chapter_11', {
 			title: 'Weather and climate extreme events in a changing climate',
+			pages: '1513-1766',
 			creators: report6Wg1Ch11Authors
 		}),
 		'Chapter 12: Climate change information for regional impact and for risk assessment': wg1Chapter('Chapter_12', {
 			title: 'Climate change information for regional impact and for risk assessment',
+			pages: '1767-1926',
 			creators: report6Wg1Ch12Authors
 		}),
 		Atlas: wg1Chapter('Atlas', {
 			title: 'Atlas',
+			pages: '1927-2058',
 			creators: report6Wg1AtlasAuthors,
 			url: 'https://interactive-atlas.ipcc.ch/'
 		}),
 		'Annex I Observational Products': wg1Chapter('Annex_I', {
 			title: 'Annex I: Observational products',
+			pages: '2061-2086',
 			// the IPCC's recommended citations call annex authors "editors,"
 			// but we'll call them authors so they show up before the section
 			// in the citation, separately from the book editors
@@ -279,6 +300,7 @@ let citations = {
 		}),
 		'Annex II Models': wg1Chapter('Annex_II', {
 			title: 'Annex II: Models',
+			pages: '2087-2138',
 			creators: [
 				ZU.cleanAuthor('José Manuel Gutiérrez', 'author'),
 				ZU.cleanAuthor('Anne-Marie Treguier', 'author')
@@ -286,6 +308,7 @@ let citations = {
 		}),
 		'Annex III Radiative Forcing': wg1Chapter('Annex_III', {
 			title: 'Annex III: Tables of historical and projected well-mixed greenhouse gas mixing ratios and effective radiative forcing of all climate forcers',
+			pages: '2139-2152',
 			creators: [
 				ZU.cleanAuthor('Frank J. Dentener', 'author'),
 				ZU.cleanAuthor('B. Hall', 'author'),
@@ -294,6 +317,7 @@ let citations = {
 		}),
 		'Annex IV Modes of Variability': wg1Chapter('Annex_IV', {
 			title: 'Annex IV: Modes of variability',
+			pages: '2153-2192',
 			creators: [
 				ZU.cleanAuthor('Christophe Cassou', 'author'),
 				ZU.cleanAuthor('Annalisa Cherchi', 'author'),
@@ -302,6 +326,7 @@ let citations = {
 		}),
 		'Annex V Monsoons': wg1Chapter('Annex_V', {
 			title: 'Annex V: Monsoons',
+			pages: '2193-2204',
 			creators: [
 				ZU.cleanAuthor('Annalisa Cherchi', 'author'),
 				ZU.cleanAuthor('Andrew Turner', 'author')
@@ -309,6 +334,7 @@ let citations = {
 		}),
 		'Annex VI Climatic Impact-Driver and Extreme Indices': wg1Chapter('Annex_VI', {
 			title: 'Annex VI: Climatic impact-driver and extreme indices',
+			pages: '2205-2214',
 			creators: [
 				ZU.cleanAuthor('José Manuel Gutiérrez', 'author'),
 				ZU.cleanAuthor('Roshanka Ranasinghe', 'author'),
@@ -318,6 +344,7 @@ let citations = {
 		}),
 		'Annex VII Glossary': wg1Chapter('Annex_VII', {
 			title: 'Annex VII: Glossary',
+			pages: '2215-2256',
 			creators: [
 				ZU.cleanAuthor('J. B. Robin Matthews', 'author'),
 				ZU.cleanAuthor('Jan S. Fuglestvedt', 'author'),
@@ -328,9 +355,21 @@ let citations = {
 				ZU.cleanAuthor('Andy Reisinger', 'author'),
 				ZU.cleanAuthor('Sergey Semenov', 'author')
 			]
-		})
+		}),
+		'Annex VIII Acronyms': wg1Chapter('Annex_VIII', {
+			title: 'Annex VIII: Acronyms',
+			pages: '2257-2266'
+		}),
+		'Annex IX': wg1Chapter('Annex_IX', {
+			title: 'Annex IX: Contributors to the IPCC Working Group I Sixth Assessment Report',
+			pages: '2267-2286',
+		}),
+		'Annex X': wg1Chapter('Annex_X', {
+			title: 'Annex X: Expert Reviewers of the IPCC Working Group I Sixth Assessment Report',
+			pages: '2287-2338',
+		}),
 	}),
-	'/report/ar6/wg2/': addSupplementaryMaterial({
+	'/report/ar6/wg2/': {
 		'Full Report': Object.assign(new Zotero.Item('book'), {
 			title: 'Climate Change 2022: Impacts, Adaptation and Vulnerability. Contribution of Working Group II to the Sixth Assessment Report of the Intergovernmental Panel on Climate Change.',
 			date: '2022',
@@ -424,7 +463,7 @@ let citations = {
 			title: 'Climate resilient development pathways',
 			creators: report6Wg2Ch18Authors
 		})
-	})
+	}
 };
 
 function getCitations(doc) {
