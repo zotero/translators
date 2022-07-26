@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-26 15:28:09"
+	"lastUpdated": "2022-07-26 20:06:21"
 }
 
 /*
@@ -817,6 +817,11 @@ var testCases = [
 				"seeAlso": []
 			}
 		]
+	},
+	{
+		"type": "web",
+		"url": "https://catalog.lib.uchicago.edu/vufind/Search/Results?lookfor=andre+gide&type=AllFields",
+		"items": "multiple"
 	}
 ]
 /** END TEST CASES **/
