@@ -208,6 +208,9 @@ const detectWeb = (doc, url) => {
 		else if (doc.querySelector('.format.dissertations')) {
 			return 'thesis';
 		}
+		else if (doc.querySelector('.format.archivesmanuscripts')) {
+			return 'manuscript';
+		}
 		else if (doc.querySelector('.format.audio')) {
 			return 'audioRecording';
 		}
