@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2021-05-18 20:04:42"
+	"lastUpdated": "2022-07-27 00:49:29"
 }
 
 /*
@@ -111,21 +111,12 @@ function scrape(doc) {
 			}
 			item.notes = [];
 			
-			let cards = doc.querySelectorAll('.card');
-			for (let card of cards) {
-				let url = attr(card, 'a[href*="/pdf"]', 'href');
-				if (!url) continue;
-				item.attachments.push({
-					url,
-					title: text(card, '.title') || "Full Text PDF",
-					mimeType: 'application/pdf'
-				});
-			}
 			item.complete();
 		});
 		translator.translate();
 	});
 }
+
 
 /** BEGIN TEST CASES **/
 var testCases = [
