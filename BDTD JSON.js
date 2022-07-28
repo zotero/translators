@@ -9,7 +9,7 @@
 	"inRepository": true,
 	"translatorType": 4,
 	"browserSupport": "gcsibv",
-	"lastUpdated": "2022-07-28 01:10:10"
+	"lastUpdated": "2022-07-28 04:03:59"
 }
 
 /*
@@ -182,17 +182,38 @@ function importItem(r) {
 }
 
 function detectWeb(doc, url) {
-	if (url.substr(url.indexOf('://')+3).startsWith("bdtd.ibict.br/vufind/Search/Results?")) {
+
+	let urlWithoutProtocol = url.substr(url.indexOf('://')+3);//it can be http:// or https://
+	if (urlWithoutProtocol.startsWith("bdtd.ibict.br/vufind/Search/Results?")) {
 		return 'multiple';
+	} else if (urlWithoutProtocol.startsWith("bdtd.ibict.br/vufind/Record/")) {
+		return "thesis";
 	}
 }
 
 function doWeb(doc, url) {
-	if (detectWeb(doc, url) == "multiple") {
+	switch (detectWeb(doc, url)) {
+	case "multiple": 
 		let urlJson = Array.from(doc.getElementById("Export").getElementsByTagName("a")).filter(tag => tag.text = "Export JSON")[0].href.replace('limit=1000','limit=20');
 		ZU.doGet(urlJson, importWeb);
+		break;
+	case "thesis":
+		let referBibixUrl = url + "/Export?style=EndNote";
+		const translator = Zotero.loadTranslator('import');
+		ZU.doGet(referBibixUrl, data => {
+			const translator = Zotero.loadTranslator('import');
+			translator.setTranslator("881f60f2-0802-411a-9228-ce5f47b64c7d");//ReferBibix
+			translator.setString(data);
+			translator.translate();
+		});
+		break;
 	}
 }/** BEGIN TEST CASES **/
 var testCases = [
+	{
+		"type": "web",
+		"url": "http://bdtd.ibict.br/vufind/Search/Results?lookfor=quantum+cryptography&type=AllFields",
+		"items": "multiple"
+	}
 ]
 /** END TEST CASES **/
